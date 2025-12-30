@@ -62,9 +62,6 @@ public class ExpressionNameHelper
         return call.Method.Name;
     }
 
-    /// <summary>
-    /// If the expression is (or contains) a lambda, return it.
-    /// </summary>
     private static LambdaExpression? GetLambda(Expression expr)
     {
         if (expr is LambdaExpression lambda)
@@ -78,9 +75,6 @@ public class ExpressionNameHelper
         return null;
     }
 
-    /// <summary>
-    /// If the expression represents a member access (or a converted member access), return the member name.
-    /// </summary>
     private static string? GetMemberName(Expression expr)
     {
         expr = RemoveConversion(expr);

@@ -7,7 +7,7 @@ namespace Ivy.Test
 {
     public class AppHelperTests
     {
-        [Fact] void Test1() => Test(typeof(MyApp), "foo-baz/bar/my-app");
+        [Fact] void Test1() => Test(typeof(MyApp), "foo-baz/bar/my");
         [Fact] void Test2() => Test(typeof(_Index), "foo-baz/bar/_index");
 
         private void Test(Type type, string expectedId)

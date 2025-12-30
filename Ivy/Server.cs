@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Ivy.Shared;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -46,16 +48,20 @@ public record ServerArgs
 
 public class Server
 {
-    private IContentBuilder? _contentBuilder;
-    private bool _useHotReload;
-    private bool _useHttpRedirection;
-    private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
+    public IReadOnlyList<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
     public IServiceCollection Services { get; } = new ServiceCollection();
     public IConfiguration Configuration { get; private set; } = ServerUtils.GetConfiguration();
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
+
+    private IContentBuilder? _contentBuilder;
+    private bool _useHotReload;
+    private bool _useHttpRedirection;
+    internal IServiceProvider? ServiceProvider;
+    private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
+    private List<string> _reservedPaths = new();
     private ServerArgs _args;
 
     public Server(ServerArgs? args = null)
@@ -77,6 +83,14 @@ public class Server
         };
 
         Services.AddSingleton(_args);
+        Services.AddSingleton(Configuration);
+
+        AddDefaultApps();
+    }
+
+    private void AddDefaultApps()
+    {
+        this.UseErrorNotFound<NotFoundApp>();
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
@@ -90,6 +104,11 @@ public class Server
             IsVisible = true
         });
         DefaultAppId = AppIds.Default;
+    }
+
+    public void AddApp<T>(bool isDefault = false)
+    {
+        AddApp(typeof(T), isDefault);
     }
 
     public void AddApp(Type appType, bool isDefault = false)
@@ -157,6 +176,11 @@ public class Server
         return UseChrome(() => new DefaultSidebarChrome(settings));
     }
 
+    public Server UseChrome<T>() where T : ViewBase
+    {
+        return UseChrome((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+    }
+
     public Server UseChrome(Func<ViewBase>? viewFactory = null)
     {
         AddApp(new AppDescriptor
@@ -199,9 +223,33 @@ public class Server
         return this;
     }
 
+    public Server UseErrorNotFound<T>() where T : ViewBase
+    {
+        return UseErrorNotFound((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+    }
+
+    public Server UseErrorNotFound(Func<ViewBase>? viewFactory = null)
+    {
+        AddApp(new AppDescriptor
+        {
+            Id = AppIds.ErrorNotFound,
+            Title = "App Not Found",
+            ViewFactory = viewFactory,
+            Path = [],
+            IsVisible = false
+        });
+        return this;
+    }
+
     public Server UseBuilder(Action<WebApplicationBuilder> modify)
     {
         _builderMods.Add(modify);
+        return this;
+    }
+
+    public Server ReservePaths(params string[] paths)
+    {
+        _reservedPaths.AddRange(paths);
         return this;
     }
 
@@ -217,11 +265,6 @@ public class Server
         return this;
     }
 
-    /// <summary>
-    /// Configures the server to use a custom theme configuration.
-    /// This will register a theme service with the specified theme and make it available throughout the application.
-    /// </summary>
-    /// <param name="theme">The theme configuration to use for the application.</param>
     public Server UseTheme(Theme theme)
     {
         var themeService = new ThemeService();
@@ -230,10 +273,6 @@ public class Server
         return this;
     }
 
-    /// <summary>
-    /// Configures the server to use a custom theme configuration with a builder pattern.
-    /// </summary>
-    /// <param name="configureTheme">An action delegate to configure the theme properties.</param>
     public Server UseTheme(Action<Theme> configureTheme)
     {
         var theme = new Theme();
@@ -360,6 +399,9 @@ public class Server
         builder.Services.AddSignalR(options =>
         {
             options.EnableDetailedErrors = _args.Verbose;
+        }).AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
@@ -410,6 +452,7 @@ public class Server
         builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
 
         var app = builder.Build();
+        ServiceProvider = app.Services;
 
         app.UseExceptionHandler(error =>
         {
@@ -429,7 +472,7 @@ public class Server
                     {
                         error = ex.Message,
                         detail = ex.StackTrace
-                    });
+                    }, Ivy.Core.Helpers.JsonHelper.DefaultOptions);
                     await context.Response.WriteAsync(result);
                 }
             });
@@ -450,8 +493,8 @@ public class Server
         app.UseGrpcWeb();
 
         app.MapControllers();
-        app.MapHub<AppHub>("/messages");
-        app.MapHealthChecks("/health");
+        app.MapHub<AppHub>("/ivy/messages");
+        app.MapHealthChecks("/ivy/health");
         app.MapGrpcService<DataTableService>().EnableGrpcWeb();
 
         if (_useHotReload)
@@ -465,7 +508,7 @@ public class Server
         }
 
         app.UseFrontend(_args, logger);
-        app.UseAssets(_args, logger, "Assets");
+        app.UseAssets(_args, logger, "Assets", "ivy/assets");
 
         app.Lifetime.ApplicationStarted.Register(() =>
         {
@@ -474,7 +517,7 @@ public class Server
             var localUrl = $"http://localhost:{port}";
             if (!_args.Silent)
             {
-                Console.WriteLine($@"Ivy is running on {localUrl}. Press Ctrl+C to stop.");
+                Console.WriteLine($@"Ivy is running on {localUrl} [{Process.GetCurrentProcess().Id}]. Press Ctrl+C to stop.");
             }
             if (_args.Browse)
             {
@@ -491,12 +534,63 @@ public class Server
 
         try
         {
+            CheckForAppIdCollisions(app);
             await app.StartAsync(cts.Token);
             await app.WaitForShutdownAsync(cts.Token);
         }
         catch (IOException)
         {
             Console.WriteLine($@"Failed to start Ivy server. Is the port already in use?");
+        }
+    }
+
+    private void CheckForAppIdCollisions(WebApplication app)
+    {
+        var actionDescriptorCollectionProvider = app.Services.GetRequiredService<Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider>();
+
+        // Use a local HashSet to collect paths (handles duplicates automatically)
+        var reservedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // 1. Add existing reserved paths (from fluent API)
+        foreach (var path in _reservedPaths)
+        {
+            reservedPaths.Add(path);
+        }
+
+        // 2. Add auto-discovered controller routes
+        foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)
+        {
+            if (actionDescriptor.AttributeRouteInfo?.Template is { } template)
+            {
+                var segments = template.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                var firstSegment = segments.FirstOrDefault();
+
+                // Ignore dynamic segments (e.g. "{id}" or "user-{id}")
+                if (!string.IsNullOrEmpty(firstSegment) && !firstSegment.Contains('{'))
+                {
+                    reservedPaths.Add("/" + firstSegment);
+                }
+            }
+        }
+
+        // 3. Add system excluded paths
+        foreach (var path in PathToAppIdMiddleware.ExcludedPaths)
+        {
+            reservedPaths.Add(path.StartsWith("/") ? path : "/" + path);
+        }
+
+        // Atomically update the shared list (thread safety for startup)
+        _reservedPaths = reservedPaths.ToList();
+
+        // 4. Check for collisions
+        foreach (var appDescriptor in AppRepository.All())
+        {
+            var appIdPath = "/" + appDescriptor.Id;
+
+            if (reservedPaths.Contains(appIdPath))
+            {
+                throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
+            }
         }
     }
 }
@@ -518,6 +612,10 @@ public static class WebApplicationExtensions
             {
                 context.Response.Headers["ivy-version"] = version;
             }
+
+            // Determine HTTP status code based on app routing
+            var server = app.Services.GetRequiredService<Server>();
+            var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
 
             await using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
@@ -566,7 +664,7 @@ public static class WebApplicationExtensions
                 }
 
                 context.Response.ContentType = "text/html";
-                context.Response.StatusCode = 200;
+                context.Response.StatusCode = httpStatusCode;
                 var bytes = Encoding.UTF8.GetBytes(html);
                 await context.Response.Body.WriteAsync(bytes);
             }
@@ -584,7 +682,7 @@ public static class WebApplicationExtensions
     }
 
     public static WebApplication UseAssets(this WebApplication app, ServerArgs args, ILogger<Server> logger,
-        string folder)
+        string folder, string? requestPath = null)
     {
         var assembly = args.AssetAssembly ?? Assembly.GetEntryAssembly()!;
 
@@ -595,7 +693,11 @@ public static class WebApplicationExtensions
             assembly.GetName().Name + "." + folder
         );
 
-        app.UseStaticFiles(GetStaticFileOptions("/" + folder, embeddedProvider, assembly));
+        var path = requestPath != null
+            ? (requestPath.StartsWith("/") ? requestPath : "/" + requestPath)
+            : "/" + folder;
+
+        app.UseStaticFiles(GetStaticFileOptions(path, embeddedProvider, assembly));
         return app;
     }
 
@@ -627,5 +729,12 @@ public static class WebApplicationExtensions
 #endif
             }
         };
+    }
+
+    private static int GetHttpStatusCodeForRequest(Server server, HttpContext context)
+    {
+        var appRouter = new AppRouter(server);
+        var routeResult = appRouter.Resolve(context);
+        return routeResult.HttpStatusCode ?? 200;
     }
 }

@@ -68,7 +68,7 @@ public static partial class MarkdownConverter
             .UseYamlFrontMatter()
             .Build();
 
-        var document = Markdown.Parse(markdownContent, pipeline);
+        var document = Markdig.Markdown.Parse(markdownContent, pipeline);
 
         var documentSource = Utils.GetGitFileUrl(absolutePath);
 
@@ -97,6 +97,8 @@ public static partial class MarkdownConverter
         codeBuilder.AppendLine("using Ivy.Apps;");
         codeBuilder.AppendLine("using Ivy.Shared;");
         codeBuilder.AppendLine("using Ivy.Core;");
+        codeBuilder.AppendLine("using Ivy.Views.Tables;");
+        codeBuilder.AppendLine("using Ivy.Views.Kanban;");
         codeBuilder.AppendLine("using static Ivy.Views.Layout;");
         codeBuilder.AppendLine("using static Ivy.Views.Text;");
         if (appMeta.Imports != null)
@@ -140,9 +142,23 @@ public static partial class MarkdownConverter
         {
             codeBuilder.AppendTab(2).AppendLine("var appDescriptor = this.UseService<AppDescriptor>();");
             codeBuilder.AppendTab(2).AppendLine("var onLinkClick = this.UseLinks();");
-            codeBuilder.AppendTab(2).AppendLine("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).HandleLinkClick(onLinkClick)");
 
-            HandleBlocks(document, codeBuilder, markdownContent, viewBuilder, usedClassNames, referencedApps, linkConverter);
+            var headings = new List<(string Id, string Text, int Level)>();
+            var contentBuilder = new StringBuilder();
+            HandleBlocks(document, contentBuilder, markdownContent, viewBuilder, usedClassNames, referencedApps, linkConverter, headings: headings);
+
+            // Generate Headings list code
+            var headingsCode = new StringBuilder();
+            headingsCode.Append("new List<ArticleHeading> { ");
+            foreach (var h in headings)
+            {
+                headingsCode.Append($"new ArticleHeading({FormatLiteral(h.Id)}, {FormatLiteral(h.Text)}, {h.Level}), ");
+            }
+            headingsCode.Append("}");
+
+            codeBuilder.AppendTab(2).Append("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).HandleLinkClick(onLinkClick)");
+            codeBuilder.AppendLine($".Headings({headingsCode})");
+            codeBuilder.Append(contentBuilder);
 
             codeBuilder.AppendTab(3).AppendLine(";");
 
@@ -174,7 +190,7 @@ public static partial class MarkdownConverter
     }
 
     private static void HandleBlocks(MarkdownDocument document, StringBuilder codeBuilder, string markdownContent,
-        StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps, LinkConverter linkConverter, bool isNestedContent = false, int baseIndentLevel = 3)
+        StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps, LinkConverter linkConverter, bool isNestedContent = false, int baseIndentLevel = 3, List<(string Id, string Text, int Level)>? headings = null)
     {
         var sectionBuilder = new StringBuilder();
 
@@ -232,7 +248,7 @@ public static partial class MarkdownConverter
                     continue;
                 }
 
-                HandleHtmlBlock(markdownContent, htmlBlock, codeBuilder, viewBuilder, usedClassNames);
+                HandleHtmlBlock(markdownContent, htmlBlock, codeBuilder, viewBuilder, usedClassNames, linkConverter, referencedApps);
             }
 
             else if (child is FencedCodeBlock codeBlock)
@@ -267,6 +283,24 @@ public static partial class MarkdownConverter
 
                     sectionBuilder.AppendLine();
                     sectionBuilder.AppendLine($"{new string('#', hBlock.Level)} {headingText.ToString().Trim()}");
+
+                    // Extract heading for TOC if not inside details/demo block (which are handled recursively or separately and shouldn't appear in main TOC usually unless properly implemented)
+                    // Note: We are currently inside HandleBlocks which iterates over top-level blocks or nested blocks.
+                    // If isNestedContent is true, it means we are inside a custom block (like Details), so we might NOT want to add to main headings list?
+                    // The requirement is to avoid "leaked headings from demo-below elements".
+                    // Demo-below elements are handled in HandleDemoCodeBlock which generates a Box with content.
+                    // Regular headings are HeadingBlock.
+
+                    // IF we are processing the main document (headings != null), we add the heading.
+                    // If we are inside a nested block (like Details body), headings might be passed or null depending on intent.
+                    // For now, let's assume we only collect top level headings or headings where 'headings' list is provided.
+
+                    if (headings != null)
+                    {
+                        var text = headingText.ToString().Trim();
+                        var id = GenerateHeadingId(text);
+                        headings.Add((id, text, hBlock.Level));
+                    }
                 }
             }
 
@@ -291,7 +325,7 @@ public static partial class MarkdownConverter
         }
     }
 
-    private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder, StringBuilder viewBuilder, HashSet<string> usedClassNames)
+    private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder, StringBuilder viewBuilder, HashSet<string> usedClassNames, LinkConverter linkConverter, HashSet<string> referencedApps)
     {
         string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length).Trim();
 
@@ -325,7 +359,7 @@ public static partial class MarkdownConverter
 
         if (xml.Name.LocalName == "Callout")
         {
-            HandleCalloutBlock(codeBuilder, xml);
+            HandleCalloutBlock(codeBuilder, xml, linkConverter, referencedApps);
         }
         else if (xml.Name.LocalName == "Embed")
         {
@@ -341,7 +375,7 @@ public static partial class MarkdownConverter
         }
         else if (xml.Name.LocalName == "Ingress")
         {
-            HandleIngressBlock(codeBuilder, xml);
+            HandleIngressBlock(codeBuilder, xml, linkConverter, referencedApps);
         }
         else
         {
@@ -390,7 +424,7 @@ public static partial class MarkdownConverter
             .UsePreciseSourceLocation()
             .Build();
 
-        var bodyDocument = Markdown.Parse(bodyContent, pipeline);
+        var bodyDocument = Markdig.Markdown.Parse(bodyContent, pipeline);
 
         // Create a temporary builder for the body content
         var bodyCodeBuilder = new StringBuilder();
@@ -398,7 +432,7 @@ public static partial class MarkdownConverter
         var bodyLinkConverter = new LinkConverter("");
 
         // Process the body through HandleBlocks
-        HandleBlocks(bodyDocument, bodyCodeBuilder, bodyContent, viewBuilder, usedClassNames, bodyReferencedApps, bodyLinkConverter, false, 4);
+        HandleBlocks(bodyDocument, bodyCodeBuilder, bodyContent, viewBuilder, usedClassNames, bodyReferencedApps, bodyLinkConverter, false, 4, headings: null);
 
         // Get the generated body content
         var bodyOutput = bodyCodeBuilder.ToString().TrimEnd();
@@ -446,11 +480,26 @@ public static partial class MarkdownConverter
         codeBuilder.AppendTab(3).AppendLine($"""| new WidgetDocsView("{typeName}", {(!string.IsNullOrEmpty(extensionTypes) ? FormatLiteral(extensionTypes) : "null")}, {(!string.IsNullOrEmpty(sourceUrl) ? FormatLiteral(sourceUrl) : "null")})""");
     }
 
-    private static void HandleCalloutBlock(StringBuilder codeBuilder, XElement xml)
+    private static void HandleCalloutBlock(StringBuilder codeBuilder, XElement xml, LinkConverter linkConverter, HashSet<string> referencedApps)
     {
-        string icon = xml.Attribute("Icon")?.Value ?? "Info";
+        // Handle Type attribute (tip, info, warning, error) - map to icon
+        string? type = xml.Attribute("Type")?.Value;
+        string icon = xml.Attribute("Icon")?.Value ??
+            (type?.ToLowerInvariant() switch
+            {
+                "tip" or "info" => "Info",
+                "warning" => "CircleAlert",
+                "error" => "CircleAlert",
+                "success" => "CircleCheck",
+                _ => "Info"
+            });
         string content = xml.Value.Trim();
-        AppendAsMultiLineStringIfNecessary(3, content, codeBuilder, "| new Callout(", $", icon:Icons.{icon})");
+
+        // Convert links in the Callout content to app:// format
+        var (types, convertedContent) = linkConverter.Convert(content);
+        referencedApps.UnionWith(types);
+
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).HandleLinkClick(onLinkClick)");
     }
 
     private static void HandleEmbedBlock(StringBuilder codeBuilder, XElement xml)
@@ -459,14 +508,18 @@ public static partial class MarkdownConverter
         codeBuilder.AppendTab(3).AppendLine($"""| new Embed("{url}")""");
     }
 
-    private static void HandleIngressBlock(StringBuilder codeBuilder, XElement xml)
+    private static void HandleIngressBlock(StringBuilder codeBuilder, XElement xml, LinkConverter linkConverter, HashSet<string> referencedApps)
     {
         string content = xml.Value.Trim();
         if (string.IsNullOrEmpty(content))
         {
             throw new Exception("Ingress block must have content.");
         }
-        AppendAsMultiLineStringIfNecessary(3, content, codeBuilder, "| Lead(", ")");
+
+        var (types, convertedContent) = linkConverter.Convert(content);
+        referencedApps.UnionWith(types);
+
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| Lead(", ")");
     }
 
     private static string MapLanguageToEnum(string lang)
@@ -482,6 +535,7 @@ public static partial class MarkdownConverter
             "css" => "Languages.Css",
             "json" => "Languages.Json",
             "dbml" => "Languages.Dbml",
+            "xml" => "Languages.Xml",
             "text" => "Languages.Text",
             _ => "Languages.Text"
         };
@@ -542,13 +596,13 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
 
         void AppendDemoContent(StringBuilder cb, int tabs, string insert)
         {
-            cb.AppendTab(tabs).AppendLine($"{(isNestedContent ? ", " : "| ")}new DemoBox().Content({insert})");
+            cb.AppendTab(tabs).AppendLine($"{(isNestedContent ? ", " : "| ")}new Box().Padding(4).Content({insert})");
         }
 
         void AppendTabbedDemo(StringBuilder cb, string code, string insert, string lang)
         {
             cb.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "Tabs( ");
-            cb.AppendTab(baseIndentLevel + 1).AppendLine($"new Tab(\"Demo\", new DemoBox().Content({insert})),");
+            cb.AppendTab(baseIndentLevel + 1).AppendLine($"new Tab(\"Demo\", new Box().Content({insert})),");
             AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "new Tab(\"Code\", new Code(", $",{MapLanguageToEnum(lang)}))")
                 ;
             cb.AppendTab(baseIndentLevel).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0).Variant(TabsVariant.Content)");
@@ -660,6 +714,18 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
 
     private static string RemoveFirstAndLastLine(string input) => string.Join(Environment.NewLine,
         input.Split('\n').Skip(1).SkipLast(1).Select(e => e.TrimEnd('\r')));
+
+    private static string GenerateHeadingId(string text)
+    {
+        // Match the frontend ID generation logic:
+        // element.textContent?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\u00C0-\u024F\u1E00-\u1EFF-]/g, '')
+
+        var id = text.ToLowerInvariant().Trim();
+        id = Regex.Replace(id, @"\s+", "-");
+        id = Regex.Replace(id, @"[^\w\u00C0-\u024F\u1E00-\u1EFF-]", "");
+        return id;
+    }
+
     [GeneratedRegex(@"<Details>[\s\S]*?</Details>", RegexOptions.Compiled)]
     private static partial Regex DetailsRegex();
     [GeneratedRegex(@"<Summary[^>]*>", RegexOptions.Compiled)]

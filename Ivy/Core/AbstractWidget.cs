@@ -1,43 +1,29 @@
-﻿using System.Reflection;
-using System.Text.Json;
+using System.Reflection;
 using System.Text.Json.Nodes;
 using Ivy.Core.Helpers;
 
 namespace Ivy.Core;
 
-/// <summary>Abstract base class for all widgets providing core functionality for serialization, event handling, attached properties, and child management.</summary>
 public abstract record AbstractWidget : IWidget
 {
     private string? _id;
     private readonly Dictionary<(Type, string), object?> _attachedProps = new();
 
-    /// <summary>Initializes AbstractWidget with specified child widgets.</summary>
-    /// <param name="children">Child widgets to be contained within this widget.</param>
     protected AbstractWidget(params object[] children)
     {
         Children = children;
     }
 
-    /// <summary>Sets attached property value for this widget used by parent widgets to store layout or behavior information.</summary>
-    /// <param name="parentType">Type of parent widget defining attached property.</param>
-    /// <param name="name">Name of attached property.</param>
-    /// <param name="value">Value to set for attached property.</param>
     public void SetAttachedValue(Type parentType, string name, object? value)
     {
         _attachedProps[(parentType, name)] = value;
     }
 
-    /// <summary>Gets attached property value for this widget. Returns null if not set.</summary>
-    /// <param name="t">Type of parent widget defining attached property.</param>
-    /// <param name="name">Name of attached property to retrieve.</param>
-    /// <returns>Value of attached property, or null if not set.</returns>
     public object? GetAttachedValue(Type t, string name)
     {
         return _attachedProps.GetValueOrDefault((t, name));
     }
 
-    /// <summary>Unique identifier for widget instance required for serialization. Must be set before accessing.</summary>
-    /// <exception cref="InvalidOperationException">Thrown when trying to access uninitialized Id.</exception>
     public string? Id
     {
         get
@@ -51,106 +37,12 @@ public abstract record AbstractWidget : IWidget
         set => _id = value;
     }
 
-    /// <summary>Optional key for widget identification and optimization during rendering and updates.</summary>
     public string? Key { get; set; }
 
-    /// <summary>Child widgets contained within this widget.</summary>
     public object[] Children { get; set; }
 
-    /// <summary>Serializes widget and children to JSON processing properties marked with <see cref="PropAttribute"/> and events marked with <see cref="EventAttribute"/>.</summary>
-    /// <returns>JSON node representing serialized widget.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when children contain non-widget objects.</exception>
-    public JsonNode Serialize()
-    {
-        if (Children.Any(e => e is not IWidget))
-        {
-            throw new InvalidOperationException("Only widgets can be serialized.");
-        }
+    public JsonNode Serialize() => WidgetSerializer.Serialize(this);
 
-        var type = GetType();
-
-        var json = new JsonObject
-        {
-            ["id"] = Id,
-            ["type"] = type.Namespace + "." + Utils.CleanGenericNotation(type.Name),
-            ["children"] = new JsonArray(Children.Cast<IWidget>().Select(c => c.Serialize()).ToArray())
-        };
-
-        var propProperties = GetType().GetProperties().Where(p => p.GetCustomAttribute<PropAttribute>() != null);
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-            Converters =
-            {
-                new JsonEnumConverter(),
-                new ValueTupleConverterFactory()
-            }
-        };
-
-        var props = new JsonObject();
-        foreach (var property in propProperties)
-        {
-            var value = GetPropertyValue(property);
-            if (value == null) //small optimization to avoid serializing null values 
-                continue;
-            props[Utils.PascalCaseToCamelCase(property.Name)] = JsonNode.Parse(JsonSerializer.Serialize(value, options));
-        }
-        json["props"] = props;
-
-        List<string> events = [];
-        var eventProperties = GetType().GetProperties().Where(p => p.GetCustomAttribute<EventAttribute>() != null);
-
-        foreach (var property in eventProperties)
-        {
-            //check if the property is not null 
-            if (property.GetValue(this) == null)
-                continue;
-            events.Add(property.Name);
-        }
-
-        json["events"] = JsonNode.Parse(JsonSerializer.Serialize(events));
-
-        return json;
-    }
-
-    /// <summary>Gets property value for serialization handling regular and attached properties.</summary>
-    /// <param name="property">Property to get value for.</param>
-    /// <returns>Property value, or array of values for attached properties.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when attached properties are not arrays of nullable types.</exception>
-    private object? GetPropertyValue(PropertyInfo property)
-    {
-        var attribute = property.GetCustomAttribute<PropAttribute>()!;
-        if (attribute.IsAttached)
-        {
-            if (!property.PropertyType.IsArray || !property.PropertyType.GetElementType()!.IsGenericType)
-                throw new InvalidOperationException("Attached properties must be arrays of nullable types.");
-
-            List<object?> attachedValues = new();
-            foreach (var child in Children)
-            {
-                if (child is not IWidget widget)
-                {
-                    attachedValues.Add(null);
-                }
-                else
-                {
-                    var attachedValue = widget.GetAttachedValue(this.GetType(), attribute.AttachedName!);
-                    attachedValues.Add(attachedValue);
-                }
-            }
-            return attachedValues.ToArray();
-        }
-
-        var value = property.GetValue(this);
-        return value;
-    }
-
-    /// <summary>Invokes event handler on widget with specified arguments supporting Event&lt;T&gt; and Event&lt;T, TValue&gt; patterns.</summary>
-    /// <param name="eventName">Name of event to invoke.</param>
-    /// <param name="args">Arguments to pass to event handler.</param>
-    /// <returns>true if event was successfully invoked; otherwise, false.</returns>
     public async Task<bool> InvokeEventAsync(string eventName, JsonArray args)
     {
         var type = GetType();
@@ -194,16 +86,17 @@ public abstract record AbstractWidget : IWidget
     {
         var valueType = eventType.GetGenericArguments()[1];
         var value = ConvertToValue(valueType, args);
-        return value != null ? Activator.CreateInstance(eventType, eventName, sender, value) : null;
+        // Create the event even if value is null - null is a valid value for nullable types
+        return Activator.CreateInstance(eventType, eventName, sender, value);
     }
 
     private static object? ConvertToValue(Type valueType, JsonArray args)
     {
         // Handle tuples with multiple arguments
-        if (IsValueTuple(valueType) && args.Count() > 1)
+        if (IsValueTuple(valueType) && args.Count > 1)
         {
             var tupleTypes = valueType.GetGenericArguments();
-            if (args.Count() == tupleTypes.Length)
+            if (args.Count == tupleTypes.Length)
             {
                 var tupleArgs = new object[tupleTypes.Length];
                 for (int i = 0; i < tupleTypes.Length; i++)
@@ -226,6 +119,7 @@ public abstract record AbstractWidget : IWidget
 
     private static bool IsValueTuple(Type t) =>
         t is { IsValueType: true, IsGenericType: true } && t.FullName?.StartsWith("System.ValueTuple") == true;
+
     private static bool IsFunc(object eventDelegate, out Type? eventType, out Type? returnType)
     {
         eventType = null;
@@ -248,10 +142,6 @@ public abstract record AbstractWidget : IWidget
         return true;
     }
 
-    /// <summary>Overloads | operator for convenient syntax to add children supporting single objects, arrays, or enumerables.</summary>
-    /// <param name="widget">Widget to add children to.</param>
-    /// <param name="child">Child object, array, or enumerable to add.</param>
-    /// <returns>New widget instance with additional children.</returns>
     public static AbstractWidget operator |(AbstractWidget widget, object child)
     {
         if (child is object[] array)

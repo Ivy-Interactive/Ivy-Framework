@@ -111,8 +111,9 @@ export const widgetMap = {
   'Ivy.Spacer': SpacerWidget,
   'Ivy.Loading': LoadingWidget,
   'Ivy.AppHost': AppHostWidget,
-  'Ivy.Audio': AudioPlayerWidget,
+  'Ivy.AudioPlayer': AudioPlayerWidget,
   'Ivy.VideoPlayer': VideoPlayerWidget,
+  'Ivy.Stepper': React.lazy(() => import('@/widgets/primitives/StepperWidget')),
 
   // Widgets
   'Ivy.Article': ArticleWidget,
@@ -133,11 +134,6 @@ export const widgetMap = {
   'Ivy.Kanban': React.lazy(() =>
     import('@/widgets/kanban/KanbanWidget').then(m => ({
       default: m.KanbanWidget,
-    }))
-  ),
-  'Ivy.KanbanColumn': React.lazy(() =>
-    import('@/widgets/kanban/KanbanColumnWidget').then(m => ({
-      default: m.KanbanColumnWidget,
     }))
   ),
   'Ivy.KanbanCard': React.lazy(() =>
@@ -222,7 +218,7 @@ export const widgetMap = {
   ),
 
   // Internal
-  'Ivy.DemoBox': React.lazy(() => import('@/widgets/internal/DemoBoxWidget')),
+
   'Ivy.Widgets.Internal.DbmlCanvas': React.lazy(
     () => import('@/widgets/internal/DbmlCanvasWidget')
   ),

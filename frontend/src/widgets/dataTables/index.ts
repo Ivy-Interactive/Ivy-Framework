@@ -1,1 +1,1 @@
-export { DataTable } from './DataTableWidget';
+export { DataTable } from './dataTableWidget';

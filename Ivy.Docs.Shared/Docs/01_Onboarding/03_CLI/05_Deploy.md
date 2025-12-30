@@ -144,12 +144,12 @@ When you run `ivy deploy` without specifying options, Ivy will guide you through
 
 ```dockerfile
 # Base runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 80
 
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
@@ -201,7 +201,7 @@ ASPNETCORE_ENVIRONMENT="Production"
 
 ### Monitoring and Logging
 
-**Application Monitoring** - Ivy sets up monitoring for your deployed application: health checks, performance and resource metrics, centralized log collection, and automated alerting for issues.
+**Application Monitoring** - Ivy sets up monitoring for your deployed application: health checks (available at `/ivy/health`), performance and resource metrics, centralized log collection, and automated alerting for issues.
 
 **Cloud Provider Monitoring** - Each cloud provider offers specific monitoring tools: AWS CloudWatch, Azure Application Insights, and GCP Cloud Monitoring.
 

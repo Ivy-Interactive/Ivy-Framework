@@ -64,7 +64,7 @@ public record WebhookEndpoint(string Id, string BaseUrl)
     {
     }
 
-    public static string BuildBaseUrl(string scheme, string host) => $"{scheme}://{host}/webhook";
+    public static string BuildBaseUrl(string scheme, string host) => $"{scheme}://{host}/ivy/webhook";
 
     public Uri GetUri(bool includeIdInPath = true) => includeIdInPath
         ? new Uri($"{BaseUrl}/{Id}")
@@ -80,7 +80,7 @@ public class WebhookController : Controller, IWebhookRegistry
 {
     private static readonly ConcurrentDictionary<string, Func<HttpRequest, Task<IActionResult>>> Handlers = new();
 
-    [Route("webhook/{id}")]
+    [Route("ivy/webhook/{id}")]
     [HttpGet, HttpPost]
     public Task<IActionResult> HandleWebhookWithIdInPath(string id)
     {
@@ -91,7 +91,7 @@ public class WebhookController : Controller, IWebhookRegistry
         return Task.FromResult<IActionResult>(NotFound());
     }
 
-    [Route("webhook")]
+    [Route("ivy/webhook")]
     [HttpGet, HttpPost]
     public Task<IActionResult> HandleWebhookWithIdInStateQueryParameter([FromQuery(Name = "state")] string? id)
     {

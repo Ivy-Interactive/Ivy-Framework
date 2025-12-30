@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import { isValidUrl } from './embeds/shared';
+import { validateEmbedUrl } from '../../lib/urlValidation';
 import EmbedErrorFallback from './embeds/EmbedErrorFallback';
 import EmbedLoadingFallback from './embeds/EmbedLoadingFallback';
 import EmbedErrorBoundary from './embeds/EmbedErrorBoundary';
@@ -20,13 +20,15 @@ interface EmbedWidgetProps {
 }
 
 const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
-  // Validate URL at the entry point
-  if (!isValidUrl(url)) {
+  // Validate URL and get platform at the entry point
+  const platform = validateEmbedUrl(url);
+
+  if (!platform) {
     return <EmbedErrorFallback url={url} platform="Unsupported" />;
   }
 
   // YouTube embed doesn't need lazy loading as it's lightweight
-  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+  if (platform === 'youtube') {
     return (
       <EmbedErrorBoundary
         fallback={<EmbedErrorFallback url={url} platform="YouTube" />}
@@ -41,7 +43,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
   }
 
   // Lazy load other embed components with error boundaries
-  if (url.includes('facebook.com')) {
+  if (platform === 'facebook') {
     return (
       <EmbedErrorBoundary
         fallback={<EmbedErrorFallback url={url} platform="Facebook" />}
@@ -53,7 +55,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
     );
   }
 
-  if (url.includes('instagram.com')) {
+  if (platform === 'instagram') {
     return (
       <EmbedErrorBoundary
         fallback={<EmbedErrorFallback url={url} platform="Instagram" />}
@@ -65,7 +67,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
     );
   }
 
-  if (url.includes('tiktok.com')) {
+  if (platform === 'tiktok') {
     return (
       <EmbedErrorBoundary
         fallback={<EmbedErrorFallback url={url} platform="TikTok" />}
@@ -77,7 +79,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
     );
   }
 
-  if (url.includes('twitter.com') || url.includes('x.com')) {
+  if (platform === 'twitter') {
     return (
       <EmbedErrorBoundary
         fallback={<EmbedErrorFallback url={url} platform="Twitter" />}
@@ -89,7 +91,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
     );
   }
 
-  if (url.includes('linkedin.com')) {
+  if (platform === 'linkedin') {
     return (
       <EmbedErrorBoundary
         fallback={<EmbedErrorFallback url={url} platform="LinkedIn" />}
@@ -101,7 +103,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
     );
   }
 
-  if (url.includes('pinterest.com') || url.includes('pin.it')) {
+  if (platform === 'pinterest') {
     return (
       <EmbedErrorBoundary
         fallback={<EmbedErrorFallback url={url} platform="Pinterest" />}
@@ -113,7 +115,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
     );
   }
 
-  if (url.includes('github.com') || url.includes('gist.github.com')) {
+  if (platform === 'github') {
     return (
       <EmbedErrorBoundary
         fallback={<EmbedErrorFallback url={url} platform="GitHub" />}
@@ -125,7 +127,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
     );
   }
 
-  if (url.includes('reddit.com')) {
+  if (platform === 'reddit') {
     return (
       <EmbedErrorBoundary
         fallback={<EmbedErrorFallback url={url} platform="Reddit" />}

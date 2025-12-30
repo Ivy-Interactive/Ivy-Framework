@@ -11,7 +11,7 @@ searchHints:
 # Authentication Overview
 
 <Ingress>
-Secure your Ivy application with integrated authentication providers including Auth0, Supabase, Authelia, and Microsoft Entra ID.
+Secure your Ivy application with integrated authentication providers including Auth0, Clerk, Supabase, Authelia, and Microsoft Entra ID.
 </Ingress>
 
 The `ivy auth add` command lets you add and configure authentication in your Ivy project. Ivy supports multiple providers and automatically updates your project setup to integrate them.
@@ -38,7 +38,7 @@ If you run this command without additional options, Ivy will guide you through a
 >ivy auth add --provider Auth0
 ```
 
-Available providers: `Auth0`, `Supabase`, `MicrosoftEntra`, `Authelia`, `Basic`
+Available providers: `Auth0`, `Clerk`, `Supabase`, `MicrosoftEntra`, `Authelia`, `Basic`
 
 `--connection-string <CONNECTION_STRING>` - Provide provider-specific configuration using connection string syntax. When used with `--provider`, this option allows you pass all required configuration inline, rather than being prompted interactively during setup:
 
@@ -146,6 +146,7 @@ await auth.LogoutAsync();
 Ivy supports the following authentication providers. Click on any provider for detailed setup instructions:
 
 - **[Auth0](Auth0.md)** - Universal authentication with social logins and enterprise integrations
+- **[Clerk](Clerk.md)** - Modern authentication platform with passwordless login, social connections, and comprehensive user management
 - **[Supabase](Supabase.md)** - Email/password, magic links, social auth, and Row Level Security integration
 - **[Microsoft Entra](MicrosoftEntra.md)** - Enterprise SSO, conditional access, and Microsoft Graph integration
 - **[Authelia](Authelia.md)** - Self-hosted identity provider with LDAP and forward auth
@@ -157,6 +158,12 @@ Ivy supports the following authentication providers. Click on any provider for d
 
 ```terminal
 >ivy auth add --provider Auth0 --connection-string YourConnectionString
+```
+
+**Clerk Setup**
+
+```terminal
+>ivy auth add --provider Clerk --connection-string YourConnectionString
 ```
 
 **Supabase Auth Setup**

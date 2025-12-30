@@ -15,25 +15,13 @@ Ivy lets you build modern web UIs using pure C# on the server, combining the fam
 
 Ivy is a **server-side web framework** that brings React-like patterns to C#. Instead of wrestling with JavaScript, HTML, and CSS, you write everything in C# using a reactive, component-based architecture.
 
+**In production, you only work with the backend** - the React frontend is pre-built and embedded in the Ivy framework, so you don't need to manage frontend code, build processes, or deployment configurations. You write C# code, and Ivy handles the rest.
+
 ## Architecture Overview
 
-```mermaid
-graph LR
-    A["C# Views<br/>(ViewBase)"] --> B["Widget Tree<br/>(JSON)"]
-    B --> C["WebSocket<br/>Communication"]
-    C --> D["React Frontend<br/>(Shadcn/TailwindCSS)"]
-    D --> E["Browser<br/>(HTML/CSS)"]
-    
-    E --> F["User Events<br/>(clicks, input)"]
-    F --> C
-    C --> G["Event Handlers<br/>(C# methods)"]
-    G --> H["State Updates<br/>(UseState, etc.)"]
-    H --> A
-```
+### Views & Components
 
-### 1. Views & Components
-
-Every Ivy app is built from **Views** - C# classes that inherit from `ViewBase`. Each view implements a single `Build()` method that returns widgets or other views:
+Every Ivy app is built from **[Views](../02_Concepts/Views.md)** - C# classes that inherit from [ViewBase](../02_Concepts/Views.md). Each view implements a single `Build()` method that returns widgets or other views:
 
 ```csharp
 [App(icon: Icons.Calendar)]
@@ -43,7 +31,7 @@ public class TodoApp : ViewBase
     {
         var newTitle = UseState("");
         var todos = UseState(ImmutableArray.Create<Todo>());
-        
+
         return new Card()
             .Title("My Todos")
             .Description("What needs to be done?")
@@ -63,48 +51,59 @@ public class TodoApp : ViewBase
 }
 ```
 
-### 2. Reactive State Management
+### Reactive State Management
 
-Ivy provides React-inspired hooks for state management:
+Ivy provides React-inspired hooks for [state management](../02_Concepts/State.md):
 
 **Available Hooks:**
 
-- `UseState<T>()` - Local component state that triggers re-renders
-- `UseEffect()` - Side effects with dependency tracking  
-- `UseService<T>()` - Dependency injection integration
-- `UseSignal()`, `UseDownload()`, `UseWebhook()` - And many more...
+- [UseState<T>()](../02_Concepts/State.md) - Local component state that triggers re-renders
+- [UseEffect()](../02_Concepts/Effects.md) - Side effects with dependency tracking
+- [UseService<T>()](../02_Concepts/Services.md) - Dependency injection integration
+- [UseSignal()](../02_Concepts/Signals.md), [UseDownload()](../02_Concepts/Downloads.md), `UseWebhook()` - And many more...
 
 ```csharp
 public override object? Build()
 {
     // State hook - triggers re-render when changed
     var count = UseState(0);
-    
+
     // Effect hook - runs when count changes
     UseEffect(() => {
         Console.WriteLine($"Count changed to: {count.Value}");
     }, count);
-    
-    return new Button($"Count: {count.Value}", 
+
+    return new Button($"Count: {count.Value}",
         onClick: _ => count.Set(count.Value + 1));
 }
 ```
 
-### 3. Widget Library
+### Hook Guidelines
 
-Ivy ships with a comprehensive set of strongly-typed widgets:
+Hooks rely on a strict call order to function correctly. Following these rules ensures that Ivy can properly track state between renders:
 
-| Category | Examples |
-|----------|----------|
-| Common | `Button`, `Badge`, `Progress`, `Table`, `Card`, `Tooltip`, `Expandable`... |
-| Inputs | `TextInput`, `NumberInput`, `BoolInput`, `DateTimeInput`, `FileInput`... |
-| Primitives | `Text`, `Icon`, `Image`, `Markdown`, `Json`, `Code`, `Avatar`... |
-| Layouts | `Layout.Vertical()`, `GridLayout`, `TabsLayout`, `SidebarLayout`... |
-| Effects | `Animation`, `Confetti`... |
-| Charts | `LineChart`, `BarChart`, `PieChart`, `AreaChart`... |
-| Advanced | `Sheet`, `Chat`... |
+1. **Call hooks at the top level** - Don't call hooks inside loops, conditions, or nested functions
+2. **Call hooks from Views only** - Hooks must be used inside the `Build()` method
 
-### 4. Real-time Communication
+The **Ivy.Analyser** package automatically enforces these rules at compile time, catching violations before your code runs.
+
+For detailed examples and troubleshooting, see [Rules of Hooks](../02_Concepts/RulesOfHooks.md).
+
+### Widget Library
+
+Ivy ships with a comprehensive set of strongly-typed [widgets](../02_Concepts/Widgets.md):
+
+| Category   | Examples                                                                   |
+| ---------- | -------------------------------------------------------------------------- |
+| Common     | `Button`, `Badge`, `Progress`, `Table`, `Card`, `Tooltip`, `Expandable`... |
+| Inputs     | `TextInput`, `NumberInput`, `BoolInput`, `DateTimeInput`, `FileInput`...   |
+| Primitives | `Text`, `Icon`, `Image`, `Markdown`, `Json`, `Code`, `Avatar`...           |
+| Layouts    | `Layout.Vertical()`, `GridLayout`, `TabsLayout`, `SidebarLayout`...        |
+| Effects    | `Animation`, `Confetti`...                                                 |
+| Charts     | `LineChart`, `BarChart`, `PieChart`, `AreaChart`...                        |
+| Advanced   | `Sheet`, `Chat`...                                                         |
+
+### Real-time Communication
 
 The magic happens through WebSocket communication:
 
@@ -119,6 +118,18 @@ The magic happens through WebSocket communication:
 <Callout Type="tip">
 When working with search results in the sidebar (both in Ivy Samples and Docs), you can **Ctrl + right click** on any item to open it as a separate app in a new window. This is handy for multitasking or developing multiple features simultaneously.
 </Callout>
+
+## Detailed Architecture
+
+<Callout Type="info">
+The following technical documentation is intended primarily for internal developers of the Ivy-Framework.
+</Callout>
+
+For a comprehensive technical overview of Ivy's architecture, see:
+
+- **[Framework Design](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/Framework-Design)** - Design system, theming, and UI framework choices
+- **[Backend Architecture](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/Backend-Architecture)** - C# server configuration, application system, and deployment
+- **[Communication](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/BE%E2%80%90FE-communication)** - SignalR protocol, message types, and state synchronization
 
 ## Development Experience
 
@@ -155,10 +166,10 @@ public override object? Build()
     // Use any .NET library
     var db = UseService<MyDbContext>();
     var logger = UseService<ILogger<MyApp>>();
-    
+
     // Async operations work naturally
     var data = await db.Users.ToListAsync();
-    
+
     return new Table(data)
         .Columns(
             col => col.Name,
@@ -167,29 +178,3 @@ public override object? Build()
         );
 }
 ```
-
-## Why This Approach Works
-
-### For C# Developers
-
-- Leverage existing C# skills and ecosystem
-- Full IntelliSense and debugging support
-- Type safety prevents runtime UI errors
-- Seamless integration with existing .NET code
-
-### For Teams
-
-- Single language across the entire stack
-- Shared models between frontend and backend
-- Easier code reviews and maintenance
-- Faster development cycles
-
-### For Applications
-
-- Real-time updates without complex JavaScript
-- Built-in security (business logic stays on server)
-- Easy deployment (single .NET project)
-
----
-
-**Next:** Ready to build something? Check out the [Todo Tutorial](05_TodoTutorial.md) to see Ivy in action!

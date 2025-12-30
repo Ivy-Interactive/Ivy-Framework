@@ -41,7 +41,6 @@ public class BarChart0 : ViewBase
                 .Tooltip()
                 .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                 .Legend()
-                .Toolbox()
         ;
     }
 }
@@ -69,7 +68,6 @@ public class BarChart1 : ViewBase
                 .Tooltip()
                 .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                 .Legend()
-                .Toolbox()
         ;
     }
 }
@@ -97,7 +95,6 @@ public class BarChart2 : ViewBase
                 .Tooltip()
                 .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                 .Legend()
-                .Toolbox()
         ;
     }
 }
@@ -128,6 +125,7 @@ public class BarChart3 : ViewBase
                 .Tooltip()
                 .YAxis(new YAxis("Month").TickLine(false).AxisLine(false).Type(AxisTypes.Category).Hide())
                 .XAxis(new XAxis("Desktop").Type(AxisTypes.Number).Hide())
+                .Toolbox()
         ;
     }
 }
@@ -154,7 +152,7 @@ public class BarChart4 : ViewBase
                 .Tooltip()
                 .XAxis(new XAxis("Quarter").TickLine(false).AxisLine(false))
                 .Legend()
-                 .Toolbox()
+                .Toolbox()
         ;
     }
 }

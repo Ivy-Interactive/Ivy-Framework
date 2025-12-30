@@ -16,17 +16,33 @@ function transferMeta(htmlServer: string, htmlLocal: string): string {
     );
   }
 
+  // Transfer ivy-* meta tags
   const ivyMetaMatches = htmlServer.match(
     /<meta[^>]*name\s*=\s*["']ivy-[^"']*["'][^>]*>/gi
   );
 
-  if (ivyMetaMatches) {
+  // Transfer ivy-custom-theme style tag
+  const themeStyleMatch = htmlServer.match(
+    /<style id="ivy-custom-theme">[\s\S]*?<\/style>/i
+  );
+
+  if (ivyMetaMatches || themeStyleMatch) {
     const headEndIndex = result.indexOf('</head>');
     if (headEndIndex !== -1) {
-      const metasToInsert = ivyMetaMatches.map(meta => ` ${meta}`).join('\n');
+      let toInsert = '';
+
+      if (ivyMetaMatches) {
+        toInsert += ivyMetaMatches.map(meta => ` ${meta}`).join('\n');
+      }
+
+      if (themeStyleMatch) {
+        if (toInsert) toInsert += '\n';
+        toInsert += ` ${themeStyleMatch[0]}`;
+      }
+
       result =
         result.slice(0, headEndIndex) +
-        metasToInsert +
+        toInsert +
         '\n ' +
         result.slice(headEndIndex);
     }
@@ -60,7 +76,6 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      lodash: 'lodash-es',
     },
   },
   build: {
@@ -98,7 +113,6 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('reactflow')) return 'vendor-reactflow';
             if (id.includes('framer-motion')) return 'vendor-motion';
             if (id.includes('katex')) return 'vendor-katex';
-            if (id.includes('axios')) return 'vendor-axios';
             if (id.includes('lodash')) return 'vendor-lodash';
           }
           return undefined;
@@ -109,5 +123,6 @@ export default defineConfig(({ mode }) => ({
   test: {
     include: ['**/*.test.ts'],
     exclude: ['**/e2e/**', '**/node_modules/**', '**/dist/**'],
+    environment: 'happy-dom',
   },
 }));

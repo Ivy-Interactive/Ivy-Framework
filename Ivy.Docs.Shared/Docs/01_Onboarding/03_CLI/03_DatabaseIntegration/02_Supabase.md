@@ -79,6 +79,7 @@ See [Supabase Row Level Security documentation](https://supabase.com/docs/guides
 ### Common Issues
 
 **Connection Problems**
+
 - Verify your Supabase project is active
 - Use correct host URL and credentials
 

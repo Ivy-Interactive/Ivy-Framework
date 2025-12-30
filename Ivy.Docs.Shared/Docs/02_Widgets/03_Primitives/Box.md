@@ -11,10 +11,10 @@ searchHints:
 # Box
 
 <Ingress>
-Create versatile container elements with customizable borders, colors, and padding for grouping content and structuring layouts.
+Create versatile container elements with customizable borders, colors, and padding for grouping content and structuring [layouts](../../../01_Onboarding/02_Concepts/Views.md).
 </Ingress>
 
-The `Box` widget is a versatile container element that provides customizable borders, colors, padding, margins, and content alignment. It's perfect for visually grouping related content, creating distinct sections in your UI, and building card-based layouts.
+The `Box` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) is a versatile container element that provides customizable borders, colors, padding, margins, and content alignment. It's perfect for visually grouping related content, creating distinct sections in your [UI](../../../01_Onboarding/02_Concepts/Views.md), and building [card](../01_Common/Card.md)-based layouts.
 
 ## Basic Usage
 
@@ -145,74 +145,6 @@ public class AdvancedSpacingView : ViewBase
                 | new Box("Asymmetric (24,12,6,18)")
                     .Padding(new Thickness(24, 12, 6, 18))
                     .Width(Size.Fraction(1/2f));
-    }
-}
-```
-
-### Content Alignment
-
-Control how content is positioned within the box using the `ContentAlign` property.
-
-```csharp demo-tabs
-public class ContentAlignmentView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Vertical().Gap(8)
-            | new Box("Top Left Alignment")
-                .ContentAlign(Align.TopLeft)
-                .Height(Size.Units(30))
-                .Width(Size.Full())
-                .Padding(8)
-                .Content(
-                    new Box("Small").Color(Colors.White),
-                    new Box("Medium").Width(Size.Units(20)).Height(Size.Units(8)).Color(Colors.White)
-                )
-            | new Box("Center Alignment")
-                .ContentAlign(Align.Center)
-                .Height(Size.Units(30))
-                .Width(Size.Full())
-                .Padding(8)
-                .Content(
-                    new Box("Small").Color(Colors.White),
-                    new Box("Medium").Width(Size.Units(20)).Height(Size.Units(8)).Color(Colors.White)
-                )
-            | new Box("Bottom Right Alignment")
-                .ContentAlign(Align.BottomRight)
-                .Height(Size.Units(30))
-                .Width(Size.Full())
-                .Padding(8)
-                .Content(
-                    new Box("Small").Color(Colors.White),
-                    new Box("Medium").Width(Size.Units(20)).Height(Size.Units(8)).Color(Colors.White)
-                );
-    }
-}
-```
-
-### Sizing
-
-Control the dimensions of your boxes.
-
-```csharp demo-tabs
-public class SizingExamplesView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Vertical().Gap(4)
-            | new Box("Auto Width")
-                .Width(Size.Auto())
-                .Padding(8)
-            | new Box("Fixed Width")
-                .Width(Size.Units(45))
-                .Padding(8)
-            | new Box("Full Width")
-                .Width(Size.Full())
-                .Padding(8)
-            | new Box("Fixed Size")
-                .Width(Size.Units(60))
-                .Height(Size.Units(10))
-                .Padding(8);
     }
 }
 ```

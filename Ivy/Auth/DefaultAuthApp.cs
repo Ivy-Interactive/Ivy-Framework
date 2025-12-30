@@ -1,30 +1,25 @@
-﻿using Ivy.Apps;
+using System.Reflection;
+using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Ivy.Views.Forms;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
-/// <summary>
-/// Default authentication application that provides login UI for various auth flows.
-/// </summary>
 [App()]
 public class DefaultAuthApp : ViewBase
 {
-    /// <summary>
-    /// Builds the authentication UI based on available auth options.
-    /// </summary>
-    /// <returns>The authentication UI layout</returns>
     public override object Build()
     {
-        var auth = this.UseService<IAuthService>();
-        var errorMessage = this.UseState<string?>();
+        var auth = UseService<IAuthService>();
+        var errorMessage = UseState<string?>();
+        var serverArgs = UseService<ServerArgs>();
+        var appName = serverArgs.MetaTitle.NullIfEmpty() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
         var options = auth.GetAuthOptions();
 
@@ -41,51 +36,81 @@ public class DefaultAuthApp : ViewBase
             renderedOptions.Add(Layout.Vertical() | oAuthOptions.Select(e => new OAuthFlowView(e, errorMessage)));
         }
 
+        var flows = renderedOptions
+            .SelectMany(x => new[] { x, new Separator("OR") })
+            .Take(Math.Max(renderedOptions.Count * 2 - 1, 0))
+            .ToArray();
+
+        var flowsLayout = renderedOptions.Count > 0
+            ? Layout.Vertical().Gap(6)
+                | flows
+            : null;
+
         return
             Layout.Horizontal().Align(Align.Center).Height(Size.Screen())
-            | (new Card().Width(100).Title("Login")
-               | (Layout.Vertical()
-                  | new Spacer().Height(2)
-                  | (errorMessage.Value.NullIfEmpty() != null ? new Callout(errorMessage.Value).Variant(CalloutVariant.Error) : null)
-                  | renderedOptions.SelectMany(x => new[] { x, new Separator("OR") }).Take(renderedOptions.Count * 2 - 1)
-                   .ToArray())
-               );
+            | (new Card(
+                Layout.Vertical().Gap(6).Padding(2)
+                | new IvyLogo()
+                | Text.H2($"Welcome to {appName}!")
+                | (errorMessage.Value.NullIfEmpty() == null
+                    ? Text.Markdown("Enter user credentials for authentication.")
+                    : null)
+                | (errorMessage.Value.NullIfEmpty() != null ? new Callout(errorMessage.Value).Variant(CalloutVariant.Error) : null)
+                | flowsLayout
+              )
+              .Width(Size.Units(120).Max(500))
+            );
     }
 }
 
-/// <summary>
-/// View component for email/password authentication flow.
-/// </summary>
-/// <param name="errorMessage">State for displaying error messages</param>
 public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 {
-    /// <summary>
-    /// Builds the email/password login form.
-    /// </summary>
-    /// <returns>The login form UI</returns>
+    private record LoginFormModel(string User, string Password);
+
     public override object Build()
     {
-        var user = this.UseState<string>("");
-        var password = this.UseState<string>("");
-        var result = this.UseState<string?>();
+        var credentials = this.UseState(() => new LoginFormModel("", ""));
         var loading = this.UseState<bool>();
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
 
-        async ValueTask Login()
+        var formBuilder = credentials.ToForm("Login")
+            .Required(m => m.User, m => m.Password)
+            .Label(m => m.User, "User")
+            .Label(m => m.Password, "Password")
+            .Builder(m => m.User, state => state.ToTextInput())
+            .Builder(m => m.Password, state => state.ToPasswordInput());
+
+        var (submitForm, formView, _, submitting) = formBuilder.UseForm(this.Context);
+
+        var isBusy = loading.Value || submitting;
+
+        async ValueTask HandleSubmit()
+        {
+            if (isBusy)
+            {
+                return;
+            }
+
+            var isValid = await submitForm(); // FormBuilder runs validation and updates field errors
+            if (!isValid)
+            {
+                return;
+            }
+
+            await HandleLoginAsync();
+        }
+
+        async ValueTask HandleLoginAsync()
         {
             try
             {
                 loading.Set(true);
+                errorMessage.Set((string?)null);
 
-                var token = await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.LoginAsync(user.Value, password.Value, ct));
+                await auth.LoginAsync(credentials.Value.User, credentials.Value.Password);
 
-                if (token != null)
-                {
-                    client.SetAuthToken(token);
-                }
-                else
+                if (auth.GetCurrentToken() == null)
                 {
                     errorMessage.Set("Login failed. Please check your credentials.");
                 }
@@ -100,38 +125,28 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             }
         }
 
-        return Layout.Vertical()
-         | Text.Label("User:")
-         | user.ToTextInput().Disabled(loading.Value)
-         | Text.Label("Password:")
-         | password.ToPasswordInput().Disabled(loading.Value)
-         | new Button("Login").Width(Size.Full()).HandleClick(Login).Loading(loading.Value).Disabled(loading.Value)
-         | result
-         ;
+        return Layout.Vertical().Gap(12)
+               | formView
+               | new Button("Login")
+                   .HandleClick(HandleSubmit)
+                   .Loading(isBusy)
+                   .Disabled(isBusy)
+                   .Scale(formBuilder._scale)
+                   .Width(Size.Full());
     }
 }
 
 
-/// <summary>
-/// View component for OAuth authentication flow.
-/// </summary>
-/// <param name="option">The OAuth authentication option</param>
-/// <param name="errorMessage">State for displaying error messages</param>
 public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : ViewBase
 {
-    /// <summary>
-    /// Builds the OAuth authentication button.
-    /// </summary>
-    /// <returns>The OAuth login button UI</returns>
     public override object? Build()
     {
         var client = this.UseService<IClientProvider>();
         var auth = this.UseService<IAuthService>();
         var callback = this.UseWebhook(async (request) =>
         {
-            var token = await TimeoutHelper.WithTimeoutAsync(
-                ct => auth.HandleOAuthCallbackAsync(request, ct));
-            client.SetAuthToken(token);
+            var authSession = auth.GetAuthSession();
+            var token = await auth.HandleOAuthCallbackAsync(request);
             return new RedirectResult("/");
         });
 
@@ -139,8 +154,8 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             try
             {
-                var uri = await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.GetOAuthUriAsync(option, callback, ct));
+                var authSession = auth.GetAuthSession();
+                var uri = await auth.GetOAuthUriAsync(option, callback);
                 client.OpenUrl(uri);
             }
             catch (Exception e)

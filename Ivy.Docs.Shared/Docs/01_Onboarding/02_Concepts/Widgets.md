@@ -11,18 +11,18 @@ searchHints:
 # Widgets
 
 <Ingress>
-Discover the fundamental building blocks of Ivy applications - Widgets provide declarative UI components inspired by React's component model.
+Discover the fundamental [building blocks](./Views.md) of Ivy [applications](./Apps.md) - Widgets provide declarative UI components inspired by React's component mode;.
 </Ingress>
 
-Widgets are the fundamental building blocks of the Ivy framework. They represent the smallest unit of UI and are used to construct Views. Inspired by React's component model, Widgets provide a declarative way to build user interfaces.
+Widgets are the fundamental building blocks of the Ivy framework. They represent the smallest unit of UI and are used to construct [Views](./Views.md).
 
 ## Basic usage
 
-Ivy provides a comprehensive set of widgets organized into several categories:
+Ivy provides a comprehensive set of widgets organized into several [categories](../../02_Widgets/_Index.md):
 
 The most frequently used widgets for building user interfaces:
 
-```csharp demo-below
+```csharp demo-tabs
 Layout.Vertical().Gap(2)
     | new Badge("Primary")
     | new Badge("New")
@@ -153,8 +153,8 @@ public class InputWidgetsDemo : ViewBase
         var dateRangeState = UseState<(DateOnly?, DateOnly?)>((null, null));
         var colorState = UseState("#00cc92");
         var codeState = UseState("var x = 10;");
-        var fileState = UseState((FileUpload?)null);
-        var fileUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
+        var fileState = UseState<FileUpload<byte[]>?>();
+        var fileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState));
         var feedbackState = UseState(4);
         var selectState = UseState("");
         var asyncSelectState = UseState((string?)null);
@@ -193,10 +193,11 @@ public class InputWidgetsDemo : ViewBase
                 Layout.Vertical().Gap(2)
                     | new BoolInput(boolState).Label("Accept terms and conditions")
                     | boolState.ToSwitchInput().Label("Enable notifications")
-            ).Title("BoolInput").Description("Checkbox input").Height(Size.Units(60))
+            ).Title("BoolInput").Description("Checkbox input").Height(Size.Units(65))
             | new Card(
-                fileState.ToFileInput(fileUpload).Placeholder("Upload file")
-            ).Title("FileInput").Description("File upload").Height(Size.Units(60))
+                Layout.Vertical().Gap(2)
+                    | fileState.ToFileInput(fileUpload).Placeholder("Upload file")
+            ).Title("FileInput").Description("File upload").Height(Size.Units(65))
             | new Card(
                 dateRangeState.ToDateRangeInput().Placeholder("Select date range")
             ).Title("DateRange").Description("Date range picker").Height(Size.Units(40))
@@ -349,7 +350,7 @@ public class LayoutWidgetsDemo : ViewBase
     public override object? Build()
     {
         var showPanel = UseState(false);
-        var gridLayouts = Layout.Vertical().Gap(4).Width(Size.Full())
+        var singleColumnExamples = Layout.Vertical().Gap(4).Width(Size.Full())
             | new Card(
                 Layout.Grid().Columns(2).Width(Size.Full()).Gap(2)
                     | new Box("1").Width(Size.Full())
@@ -374,7 +375,7 @@ public class LayoutWidgetsDemo : ViewBase
                 )
             ).Title("Footer").Description("Fixed footer").Height(Size.Units(60));
         
-        var verticalLayouts = Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+        var twoColumnExamples = Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
             | new Card(
                 Layout.Horizontal().Gap(2)
                     | new Box("Item 1").Width(Size.Fraction(1/3f))
@@ -427,8 +428,8 @@ public class LayoutWidgetsDemo : ViewBase
             ).Title("ResizeablePanelGroup").Description("Resizable panels").Height(Size.Units(60));
         
         return Layout.Vertical().Gap(4)
-            | verticalLayouts
-            | gridLayouts;
+            | twoColumnExamples
+            | singleColumnExamples;
     }
 }
 ```
@@ -486,7 +487,7 @@ public class ChartWidgetsDemo : ViewBase
 
 ### Effects
 
-Ivy provides a rich collection of built-in effects and animations to enhance your user interfaces. Working with effects in Ivy is incredibly simple and intuitive. For detailed information about specific effects, refer to the animation and confetti documentation pages.
+Ivy provides a rich collection of built-in effects and animations to enhance your user interfaces. Working with effects in Ivy is incredibly simple and intuitive. For detailed information about specific effects, refer to the [animation](./Effects.md) and [confetti](./Effects.md) documentation pages.
 
 ```csharp demo-tabs ivy-bg
 public class EffectWidgetsDemo : ViewBase
@@ -516,7 +517,7 @@ public class EffectWidgetsDemo : ViewBase
 
 ### Advanced
 
-In the Advanced section, we introduce our specialized implementations for working with sheets and chat functionality. These advanced widgets provide sophisticated features for complex user interface requirements.
+In the Advanced section, we introduce our specialized implementations for working with [sheets](../../02_Widgets/07_Advanced/Sheet.md) and [chat functionality](../../02_Widgets/07_Advanced/Chat.md). These advanced widgets provide sophisticated features for complex user interface requirements.
 
 ```csharp demo-tabs
 public class AdvancedWidgetsDemo : ViewBase

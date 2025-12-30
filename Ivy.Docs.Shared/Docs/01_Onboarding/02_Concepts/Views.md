@@ -12,11 +12,9 @@ searchHints:
 
 # Views
 
-<Ingress>
-Understand how Views work as the core building blocks of Ivy apps, similar to React components but written entirely in C#.
-</Ingress>
+Understand how Views work as the core building blocks of Ivy [apps](./Apps.md), similar to React components but written entirely in C#.
 
-Views are the fundamental building blocks of Ivy apps. They are similar to React components, providing a way to encapsulate UI logic and state management in a reusable way. Every view inherits from `ViewBase` and implements a `Build()` method that returns the UI structure.
+Views are the fundamental building blocks of Ivy apps. They are similar to React components, providing a way to encapsulate UI logic and [state management](./State.md) in a reusable way. Every view inherits from `ViewBase` and implements a `Build()` method that returns the UI structure.
 
 ## Basic Usage
 
@@ -32,15 +30,15 @@ All views inherit from the abstract `ViewBase` class, which provides:
 
 - **Build() method**: The core method that returns the UI structure
 - **Lifecycle management**: Automatic disposal and cleanup
-- **Hook access**: Built-in state management and effect hooks
-- **Service injection**: Access to application services
+- **Hook access**: Built-in state management and effect [hooks](./RulesOfHooks.md)
+- **Service injection**: Access to [application services](./Services.md)
 - **Context management**: Shared data between parent and child views
 
 ### Build Method
 
 The `Build()` method is the heart of every view. It can return:
 
-- Widgets (Button, Card, Text, etc.)
+- [Widgets](./Widgets.md) (Button, Card, Text, etc.)
 - Other Views (for composition)
 - Layouts (to arrange multiple elements)
 - Primitive types (strings, numbers)
@@ -85,6 +83,11 @@ public class CounterView : ViewBase
 }
 ```
 
+### Rules of Hooks
+
+To ensure correct state management, Ivy hooks must follow specific rules.
+Read the full guide on **[Rules of Hooks](RulesOfHooks.md)** to learn more and troubleshoot common errors.
+
 ### State Initialization
 
 You can initialize state in multiple ways:
@@ -111,7 +114,7 @@ new Button("Show Toast",
 
 ## Effects and Side Effects
 
-Use `UseEffect()` for side effects like API calls, timers, or subscriptions:
+Use `UseEffect()` for [side effects](./Effects.md) like API calls, timers, or [subscriptions](./Signals.md):
 
 ```csharp demo-below
 public class TimerView : ViewBase
@@ -179,9 +182,9 @@ public class MyApp : ViewBase
 
 The `[App]` attribute supports several properties:
 
-- `icon`: Icon to display in navigation
+- `icon`: [Icon](./Apps.md) to display in [navigation](./Navigation.md)
 - `title`: Display name (defaults to class name)
-- `path`: Navigation path array for hierarchical organization
+- `path`: [Navigation](./Navigation.md) path array for hierarchical organization
 - `isVisible`: Whether to show in navigation
 - `searchHints`: Alternative keywords for search discoverability
 - `order`: Sort order within group

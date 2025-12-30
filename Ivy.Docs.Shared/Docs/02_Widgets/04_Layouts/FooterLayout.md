@@ -11,10 +11,10 @@ searchHints:
 # FooterLayout
 
 <Ingress>
-FooterLayout creates a layout with a fixed footer at the bottom and scrollable content above it. It's perfect for forms, sheets, and any interface where you need persistent action buttons or information while allowing the main content to scroll independently.
+FooterLayout creates a layout with a fixed footer at the bottom and scrollable content above it. It's perfect for [forms](../../../01_Onboarding/02_Concepts/Forms.md), sheets, and any [interface](../../../01_Onboarding/02_Concepts/Views.md) where you need persistent action buttons or information while allowing the main content to scroll independently.
 </Ingress>
 
-The `FooterLayout` widget is designed to keep important actions or information visible at the bottom of the view while allowing the main content to scroll freely above it. This pattern is commonly used in forms, modal dialogs, and sheet interfaces where users need constant access to primary actions.
+The `FooterLayout` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) is designed to keep important actions or information visible at the bottom of the view while allowing the main content to scroll freely above it. This pattern is commonly used in forms, modal dialogs, and sheet [interfaces](../../../01_Onboarding/02_Concepts/Views.md) where users need constant access to primary actions.
 
 ## Basic Usage
 

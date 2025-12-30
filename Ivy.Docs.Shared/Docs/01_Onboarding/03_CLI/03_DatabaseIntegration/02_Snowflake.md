@@ -55,6 +55,7 @@ Ivy automatically configures the **EFCore.Snowflake** package for Snowflake conn
 ## Snowflake-Specific Features
 
 Key features Ivy can leverage:
+
 - **Semi-structured data types** (JSON, Avro, Parquet)
 - **Time Travel** for historical data access
 - **Zero-copy cloning** and **Automatic clustering**
@@ -73,14 +74,17 @@ Learn more in the [Snowflake Documentation](https://docs.snowflake.com/en/user-g
 ### Common Issues
 
 **Authentication Failed**
+
 - Verify username and password are correct (if using password-based authentication)
 - Check that your account identifier is correctly formatted
 
 **Connection Timeouts**
+
 - Verify warehouse is running
 - Check network connectivity to Snowflake
 
 **Schema Access Issues**
+
 - Ensure the user has appropriate permissions
 - Verify the schema exists in the specified database
 

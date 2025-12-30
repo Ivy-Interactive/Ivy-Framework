@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { selectIconContainerVariants } from '@/components/ui/select/variants';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -22,29 +23,29 @@ import {
   TooltipContent,
 } from '@/components/ui/tooltip';
 import { X } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
 import {
   MultipleSelector,
   Option as MultiSelectOption,
 } from '@/components/ui/multiselect';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
-
+import { xIconVariants } from '@/components/ui/input/text-input-variants';
 // variants for SelectInputWidget container
 const selectContainerVariants = cva(
   'relative border border-input bg-transparent rounded-md shadow-sm focus-within:ring-1 focus-within:ring-ring',
   {
     variants: {
-      size: {
+      scale: {
         Small: 'px-2 py-1',
         Medium: 'px-3 py-2',
         Large: 'px-4 py-3',
       },
     },
     defaultVariants: {
-      size: 'Medium',
+      scale: 'Medium',
     },
   }
 );
@@ -88,7 +89,7 @@ interface SelectInputWidgetProps {
   selectMany: boolean;
   separator: string;
   'data-testid'?: string;
-  size?: Sizes;
+  scale?: Scales;
   width?: string;
 }
 
@@ -215,8 +216,8 @@ const ToggleOptionItem: React.FC<{
   option: Option;
   isSelected: boolean;
   invalid?: string;
-  size?: Sizes;
-}> = ({ option, isSelected, invalid, size = Sizes.Medium }) => {
+  scale?: Scales;
+}> = ({ option, isSelected, invalid, scale = Scales.Medium }) => {
   const isInvalid = !!invalid && isSelected;
 
   const sizeClasses = {
@@ -232,7 +233,7 @@ const ToggleOptionItem: React.FC<{
       aria-label={option.label}
       className={cn(
         'hover:text-foreground',
-        sizeClasses[size],
+        sizeClasses[scale],
         isInvalid
           ? cn(
               inputStyles.invalidInput,
@@ -273,7 +274,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   selectMany = false,
   separator = ',',
   nullable = false,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -324,7 +325,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        selectContainerVariants({ size }),
+        selectContainerVariants({ scale }),
         invalid && 'border-destructive focus-within:ring-destructive'
       )}
       style={styles}
@@ -348,7 +349,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     option={option}
                     isSelected={isSelected}
                     invalid={invalid}
-                    size={size}
+                    scale={scale}
                   />
                 );
               })}
@@ -356,7 +357,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
           ) : (
             <ToggleGroup
               type="single"
-              value={selectedValues[0]?.toString()}
+              value={selectedValues[0]?.toString() ?? ''}
               onValueChange={handleValueChange}
               disabled={disabled}
               className="flex flex-wrap gap-2"
@@ -370,7 +371,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     option={option}
                     isSelected={isSelected}
                     invalid={invalid}
-                    size={size}
+                    scale={scale}
                   />
                 );
               })}
@@ -385,25 +386,27 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 tabIndex={-1}
                 aria-label={selectMany ? 'Clear All' : 'Clear'}
                 onClick={() => {
+                  // For nullable inputs, send null; for non-nullable, send empty array for multi-select or null for single
+                  const clearedValue = nullable ? null : selectMany ? [] : null;
                   logger.debug(
                     'Select input clear button clicked (ToggleVariant)',
                     {
                       id,
                       selectMany,
-                      clearValue: selectMany ? [] : null,
+                      nullable,
+                      clearValue: clearedValue,
                     }
                   );
-                  eventHandler('OnChange', id, [selectMany ? [] : null]);
+                  eventHandler('OnChange', id, [clearedValue]);
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
+            {/* Invalid icon - rightmost */}
             {invalid && (
-              <div className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </div>
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
           </div>
         )}
@@ -422,7 +425,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   options = [],
   eventHandler,
   nullable = false,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -430,11 +433,9 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
     option => option.value != null && option.value.toString().trim() !== ''
   );
   const stringValue =
-    value != null && value.toString().trim() !== ''
-      ? value.toString()
-      : undefined;
+    value != null && value.toString().trim() !== '' ? value.toString() : '';
 
-  const hasValue = stringValue !== undefined;
+  const hasValue = stringValue !== '';
 
   const handleValueChange = useSelectValueHandler(
     id,
@@ -450,7 +451,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        selectContainerVariants({ size }),
+        selectContainerVariants({ scale }),
         invalid && 'border-destructive focus-within:ring-destructive'
       )}
       style={styles}
@@ -472,7 +473,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                     id={`${id}-${option.value}`}
                     className={cn(
                       'border-input text-input',
-                      circleSizeVariants[size],
+                      circleSizeVariants[scale],
                       stringValue === option.value.toString() && !invalid
                         ? 'border-primary text-primary'
                         : undefined,
@@ -485,7 +486,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                     htmlFor={`${id}-${option.value}`}
                     className={cn(
                       'cursor-pointer leading-none',
-                      selectTextVariants[size],
+                      selectTextVariants[scale],
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput
                         : undefined
@@ -511,13 +512,12 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
+            {/* Invalid icon - rightmost */}
             {invalid && (
-              <div className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </div>
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
           </div>
         )}
@@ -537,7 +537,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   eventHandler,
   separator = ',',
   nullable = false,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -653,7 +653,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                             className={cn(
                               inputStyles.invalidInput,
                               'bg-destructive/10 border-destructive text-destructive',
-                              selectTextVariants[size]
+                              selectTextVariants[scale]
                             )}
                           />
                         </TooltipTrigger>
@@ -672,7 +672,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                       disabled={disabled}
                       className={cn(
                         'data-[state=unchecked]:bg-transparent data-[state=unchecked]:border-border',
-                        selectTextVariants[size],
+                        selectTextVariants[scale],
                         isSelected
                           ? 'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground'
                           : undefined
@@ -683,7 +683,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                     htmlFor={`${id}-${option.value}`}
                     className={cn(
                       'flex-1 cursor-pointer',
-                      selectTextVariants[size],
+                      selectTextVariants[scale],
                       isInvalid ? inputStyles.invalidInput : undefined
                     )}
                   >
@@ -702,21 +702,22 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 tabIndex={-1}
                 aria-label="Clear All"
                 onClick={() => {
+                  // For nullable inputs, send null; for non-nullable, send empty array
+                  const clearedValue = nullable ? null : [];
                   logger.debug(
                     'Select input clear button clicked (CheckboxVariant)',
-                    { id }
+                    { id, nullable, clearValue: clearedValue }
                   );
-                  eventHandler('OnChange', id, [[]]);
+                  eventHandler('OnChange', id, [clearedValue]);
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
+            {/* Invalid icon - rightmost */}
             {invalid && (
-              <div className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </div>
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
           </div>
         )}
@@ -736,7 +737,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   eventHandler,
   nullable = false,
   selectMany = false,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -806,6 +807,67 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
     ...getWidth(width),
   };
 
+  // Get string value for both single and multi-select
+  const stringValue =
+    value != null && value.toString().trim() !== ''
+      ? value.toString()
+      : undefined;
+
+  // Get the selected option's label for tooltip (only for single select)
+  const selectedOption = useMemo(() => {
+    if (selectMany || !stringValue) return undefined;
+    return validOptions.find(opt => opt.value.toString() === stringValue);
+  }, [stringValue, validOptions, selectMany]);
+
+  const selectedLabel = selectedOption?.label;
+
+  // Create ref for SelectTrigger (needs to be before early returns)
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Detect ellipsis on the SelectValue span (needs to be before early returns)
+  const [isEllipsed, setIsEllipsed] = useState(false);
+  // Track if select dropdown is open to disable tooltip (needs to be before early returns)
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    // Skip ellipsis check for multiselect or when no label
+    if (selectMany || !selectedLabel) {
+      requestAnimationFrame(() => setIsEllipsed(false));
+      return;
+    }
+
+    const checkEllipsis = () => {
+      if (!triggerRef?.current) {
+        return;
+      }
+      // SelectValue renders as the first span child of SelectTrigger
+      const firstSpan = triggerRef.current.querySelector(
+        'span:first-child'
+      ) as HTMLSpanElement;
+      if (firstSpan) {
+        setIsEllipsed(firstSpan.scrollWidth > firstSpan.clientWidth);
+      } else {
+        setIsEllipsed(false);
+      }
+    };
+
+    // Check after render
+    requestAnimationFrame(checkEllipsis);
+
+    // Debounced resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(checkEllipsis, 150);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [selectedLabel, stringValue, selectMany]);
+
   // Handle multiselect case
   if (selectMany) {
     const handleMultiSelectChange = (
@@ -832,19 +894,53 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             disabled={disabled}
             className="w-full"
             invalid={!!invalid}
-            hideClearAllButton={!nullable}
             hidePlaceholderWhenSelected
-            size={size}
+            scale={scale}
             data-testid={dataTestId}
-            emptyIndicator={
-              <p className="text-center text-large-body">No results found</p>
-            }
           />
-          {invalid && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2">
-              <InvalidIcon message={invalid} />
+          {(nullable && selectedMultiSelectOptions.length > 0 && !disabled) ||
+          invalid ? (
+            <div
+              className={selectIconContainerVariants({ scale })}
+              style={{ zIndex: 2 }}
+            >
+              {/* Clear (X) button */}
+              {nullable &&
+                selectedMultiSelectOptions.length > 0 &&
+                !disabled && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Clear All"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      logger.debug(
+                        'Select input clear button clicked (MultiSelect)',
+                        { id }
+                      );
+                      eventHandler('OnChange', id, [null]);
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        eventHandler('OnChange', id, [null]);
+                      }
+                    }}
+                    className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+                  >
+                    <X className={xIconVariants({ scale })} />
+                  </button>
+                )}
+              {/* Invalid icon - rightmost */}
+              {invalid && (
+                <div className="pointer-events-auto flex items-center h-6 p-1">
+                  <InvalidIcon message={invalid} />
+                </div>
+              )}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     );
@@ -863,12 +959,36 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
     {}
   );
 
-  const stringValue =
-    value != null && value.toString().trim() !== ''
-      ? value.toString()
-      : undefined;
-
   const hasValue = stringValue !== undefined;
+
+  const selectTriggerElement = (
+    <SelectTrigger
+      ref={triggerRef}
+      className={cn(
+        'relative',
+        invalid && inputStyles.invalidInput,
+        !hasValue && 'text-muted-foreground'
+      )}
+      scale={scale}
+    >
+      <SelectValue placeholder={placeholder} />
+    </SelectTrigger>
+  );
+
+  // Wrap trigger with tooltip if ellipsed (tooltip hidden when dropdown is open)
+  const shouldShowTooltip = isEllipsed && selectedLabel;
+  const selectTrigger = shouldShowTooltip ? (
+    <TooltipProvider>
+      <Tooltip delayDuration={300} open={!isOpen ? undefined : false}>
+        <TooltipTrigger asChild>{selectTriggerElement}</TooltipTrigger>
+        <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+          <div className="whitespace-pre-wrap break-words">{selectedLabel}</div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : (
+    selectTriggerElement
+  );
 
   return (
     <div className="flex items-center gap-2 w-full" style={styles}>
@@ -878,56 +998,12 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           disabled={disabled}
           value={stringValue}
           onValueChange={handleValueChange}
+          open={isOpen}
+          onOpenChange={setIsOpen}
           data-testid={dataTestId}
         >
-          <SelectTrigger
-            className={cn('relative', invalid && inputStyles.invalidInput)}
-            size={size}
-          >
-            <SelectValue placeholder={placeholder} />
-          </SelectTrigger>
-          {/* Right-side icon container */}
-          {(nullable && hasValue && !disabled) || invalid ? (
-            <div
-              className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-8"
-              style={{ zIndex: 2 }}
-            >
-              {/* Clear (X) button */}
-              {nullable && hasValue && !disabled && (
-                <span
-                  role="button"
-                  tabIndex={-1}
-                  aria-label="Clear"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    logger.debug(
-                      'Select input clear button clicked (SelectVariant)',
-                      { id }
-                    );
-                    eventHandler('OnChange', id, [null]);
-                  }}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      eventHandler('OnChange', id, [null]);
-                    }
-                  }}
-                  className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-                >
-                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                </span>
-              )}
-              {/* Invalid icon */}
-              {invalid && (
-                <span className="flex items-center">
-                  <InvalidIcon message={invalid} />
-                </span>
-              )}
-            </div>
-          ) : null}
-          <SelectContent size={size}>
+          {selectTrigger}
+          <SelectContent scale={scale}>
             {Object.entries(groupedOptions).map(([group, options]) => (
               <SelectGroup key={group}>
                 {group !== 'default' && <SelectLabel>{group}</SelectLabel>}
@@ -935,7 +1011,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                   <SelectItem
                     key={option.value}
                     value={option.value.toString()}
-                    size={size}
+                    scale={scale}
                   >
                     {option.label}
                   </SelectItem>
@@ -944,6 +1020,47 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             ))}
           </SelectContent>
         </Select>
+        {/* Right-side icon container */}
+        {(nullable && hasValue && !disabled) || invalid ? (
+          <div
+            className={selectIconContainerVariants({ scale })}
+            style={{ zIndex: 2 }}
+          >
+            {/* Clear (X) button */}
+            {nullable && hasValue && !disabled && (
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label="Clear"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  logger.debug(
+                    'Select input clear button clicked (SelectVariant)',
+                    { id }
+                  );
+                  eventHandler('OnChange', id, [null]);
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    eventHandler('OnChange', id, [null]);
+                  }
+                }}
+                className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+              >
+                <X className={xIconVariants({ scale })} />
+              </button>
+            )}
+            {/* Invalid icon - rightmost */}
+            {invalid && (
+              <div className="pointer-events-auto flex items-center h-6 p-1">
+                <InvalidIcon message={invalid} />
+              </div>
+            )}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -956,6 +1073,9 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
   const normalizedProps = {
     ...props,
     value: props.nullable && props.value === undefined ? null : props.value,
+    scale: props.scale ?? Scales.Medium,
+    variant: props.variant ?? 'Select',
+    separator: props.separator ?? ';',
   };
 
   switch (normalizedProps.variant) {

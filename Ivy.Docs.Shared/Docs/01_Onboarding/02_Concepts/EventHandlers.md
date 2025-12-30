@@ -12,10 +12,10 @@ searchHints:
 # Event Handlers
 
 <Ingress>
-Handle user interactions and input events in Ivy with event handlers like OnBlur, enabling validation, data persistence, and reactive user experiences.
+Handle user interactions and input events in Ivy with event handlers like OnBlur, enabling [validation](./Forms.md), [data persistence](./Clients.md), and reactive user experiences.
 </Ingress>
 
-Event handlers allow you to respond to user interactions with widgets in your Ivy applications. They enable you to execute custom logic when users interact with UI elements, such as clicking buttons, changing input values, or moving focus between fields.
+Event handlers allow you to respond to user interactions with [widgets](./Widgets.md) in your Ivy [applications](./Apps.md). They enable you to execute custom logic when users interact with UI elements, such as clicking buttons, changing input values, or moving focus between fields.
 
 ## Basic Usage
 
@@ -73,7 +73,7 @@ The `OnBlur` event handler is available on all input widgets that implement the 
 
 ### Validation Pattern
 
-Validate fields when the user finishes editing:
+Validate fields when the user finishes editing using validation patterns:
 
 ```csharp demo-tabs
 public class ValidationBlurExample : ViewBase

@@ -11,10 +11,10 @@ searchHints:
 # WrapLayout
 
 <Ingress>
-Create flexible, responsive layouts that automatically wrap content to new lines when horizontal space runs out, perfect for tags, buttons, and card grids.
+Create flexible, responsive [layouts](../../../01_Onboarding/02_Concepts/Views.md) that automatically wrap content to new lines when horizontal space runs out, perfect for tags, buttons, and card grids.
 </Ingress>
 
-The `WrapLayout` widget arranges child elements in rows that automatically wrap to the next line when they reach the end of the available horizontal space. It's perfect for creating responsive layouts like tag lists, button groups, or card grids that adapt to different screen sizes.
+The `WrapLayout` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) arranges child elements in rows that automatically wrap to the next line when they reach the end of the available horizontal space. It's perfect for creating responsive layouts like tag lists, button groups, or card grids that adapt to different screen sizes.
 
 ## Basic Usage
 
@@ -29,7 +29,7 @@ new WrapLayout([
 ])
 ```
 
-`WrapLayout` also works effectively with badge components:
+The `WrapLayout` also works effectively with [badge components](../../../02_Widgets/01_Common/Badge.md):
 
 ```csharp demo-tabs ivy-bg
 new WrapLayout([
@@ -166,12 +166,12 @@ public class SelectSliderControlDemo : ViewBase
         var mixedSizes = UseState(false);
 
         // Convert size selection to badge size
-        Sizes GetBadgeSize(string size) => size switch
+        Scale GetBadgeSize(string size) => size switch
         {
-            "Small" => Sizes.Small,
-            "Medium" => Sizes.Medium,
-            "Large" => Sizes.Large,
-            _ => Sizes.Medium
+            "Small" => Scale.Small,
+            "Medium" => Scale.Medium,
+            "Large" => Scale.Large,
+            _ => Scale.Medium
         };
 
         // Create badges
@@ -199,12 +199,12 @@ public class SelectSliderControlDemo : ViewBase
                     var sizeIndex = index % 3;
                     var size = sizeIndex switch
                     {
-                        0 => Sizes.Small,
-                        1 => Sizes.Medium,
-                        _ => Sizes.Large
+                        0 => Scale.Small,
+                        1 => Scale.Medium,
+                        _ => Scale.Large
                     };
                     return new Badge(tech.Item1)
-                        .Size(size)
+                        .Scale(size)
                         .Variant(tech.Item2);
                 }).Cast<object>().ToArray();
             }
@@ -214,7 +214,7 @@ public class SelectSliderControlDemo : ViewBase
                 var uniformSize = GetBadgeSize(selectedSize.Value);
                 return technologies.Select(tech => 
                     new Badge(tech.Item1)
-                        .Size(uniformSize)
+                        .Scale(uniformSize)
                         .Variant(tech.Item2)
                 ).Cast<object>().ToArray();
             }

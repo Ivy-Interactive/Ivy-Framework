@@ -84,6 +84,7 @@ describe('tableDataFetcher', () => {
         columns: mockColumns,
         rows: mockRows,
         hasMore: true,
+        arrowTable: mockArrowTable,
       });
     });
 
@@ -210,6 +211,7 @@ describe('tableDataFetcher', () => {
         columns: [],
         rows: [],
         hasMore: false,
+        arrowTable: null,
       });
 
       expect(mockArrow.tableFromIPC).not.toHaveBeenCalled();

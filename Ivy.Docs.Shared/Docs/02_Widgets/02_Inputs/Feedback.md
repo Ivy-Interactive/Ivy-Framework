@@ -13,10 +13,10 @@ searchHints:
 # FeedbackInput
 
 <Ingress>
-Collect user feedback with combined rating and comment inputs, perfect for surveys, reviews, and feedback forms.
+Collect user feedback with combined rating and comment inputs, perfect for surveys, reviews, and [feedback forms](../../01_Onboarding/02_Concepts/Forms.md).
 </Ingress>
 
-The `FeedbackInput` widget provides a specialized input for collecting user feedback. It typically includes rating options and a text field for comments, making it ideal for surveys, reviews, and feedback forms.
+The `FeedbackInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provides a specialized input for collecting user feedback. It typically includes rating options and a text field for comments, making it ideal for surveys, reviews, and feedback forms.
 
 ## Basic Usage
 
@@ -79,7 +79,7 @@ public class FeedbackDemo : ViewBase
 }    
 ```
 
-## Event Handling
+## [Event Handling](../../01_Onboarding/02_Concepts/EventHandlers.md)
 
 The following example shows how change events can be handled for `FeedbackInput`s.
 

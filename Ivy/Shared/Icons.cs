@@ -1,15 +1,7 @@
 namespace Ivy.Shared;
 
-/// <summary>
-/// Utility methods for working with Icons enum values.
-/// </summary>
 public static class IconsHelper
 {
-    /// <summary>
-    /// Converts a string representation to an Icons enum value.
-    /// </summary>
-    /// <param name="iconName">The string name of the icon (case-insensitive).</param>
-    /// <returns>The corresponding Icons enum value, or null if not found.</returns>
     public static Icons? FromString(string? iconName)
     {
         if (string.IsNullOrEmpty(iconName)) return null;
@@ -21,35 +13,21 @@ public static class IconsHelper
     }
 }
 
-/// <summary>
-/// Comprehensive icon library based on Lucide icons with additional brand icons.
-/// Provides 1000+ scalable vector icons for UI elements, navigation, and visual communication.
-/// Frequently used icons are: Search, Menu, Home, Settings, User, Lock, Eye, Bell, Trash, Upload, Download, ChevronRight, ChevronDown, Mail, Calendar
-/// </summary>
 public enum Icons
 {
-    /// <summary>No icon - used when no icon should be displayed.</summary>
     None,
 
     // Brand Icons:
-    /// <summary>Google brand icon.</summary>
     Google, //<FaGoogle />
-    /// <summary>Microsoft Azure brand icon.</summary>
     Azure,  //<VscAzure />
-    /// <summary>Amazon brand icon.</summary>
     Amazon, //<FaAmazon />
-    /// <summary>Microsoft brand icon.</summary>
     Microsoft, //<FaMicrosoft />
-    /// <summary>Bitbucket brand icon.</summary>
     Bitbucket, //<FaBitbucket />
-    /// <summary>Discord brand icon.</summary>
     Discord, //<FaDiscord />
-    /// <summary>Vimeo brand icon.</summary>
     Vimeo, //<FaVimeo />
-    /// <summary>Spotify brand icon.</summary>
     Spotify, //<FaSpotify />
-    /// <summary>Notion brand icon.</summary>
     Notion, //<FaNotion />
+    XTwitter, //<FaXTwitter />
 
     // Lucide Icons (1000+ scalable vector icons):
     AArrowDown,
@@ -66,7 +44,7 @@ public enum Icons
     AlarmClockPlus,
     AlarmSmoke,
     Album,
-    AlignCenter,
+    TextAlignCenter,
     AlignCenterHorizontal,
     AlignCenterVertical,
     AlignEndHorizontal,
@@ -79,9 +57,9 @@ public enum Icons
     AlignHorizontalJustifyStart,
     AlignHorizontalSpaceAround,
     AlignHorizontalSpaceBetween,
-    AlignJustify,
-    AlignLeft,
-    AlignRight,
+    TextAlignJustify,
+    TextAlignStart,
+    TextAlignEnd,
     AlignStartHorizontal,
     AlignStartVertical,
     AlignVerticalDistributeCenter,
@@ -374,7 +352,7 @@ public enum Icons
     ChevronsRightLeft,
     ChevronsUp,
     ChevronsUpDown,
-    Chrome,
+    Chromium,
     Church,
     Cigarette,
     CigaretteOff,
@@ -596,21 +574,18 @@ public enum Icons
     Figma,
     File,
     FileArchive,
-    FileAudio,
-    FileAudio2,
+    FileMusic,
     FileAxis3d,
     FileBadge,
-    FileBadge2,
     FileBox,
+    FileBraces,
     FileChartColumn,
     FileChartColumnIncreasing,
     FileChartLine,
     FileChartPie,
     FileCheck,
-    FileCheck2,
     FileClock,
     FileCode,
-    FileCode2,
     FileCog,
     FileDiff,
     FileDigit,
@@ -618,24 +593,16 @@ public enum Icons
     FileHeart,
     FileImage,
     FileInput,
-    FileJson,
-    FileJson2,
     FileKey,
-    FileKey2,
     FileLock,
-    FileLock2,
     FileMinus,
-    FileMinus2,
-    FileMusic,
     FileOutput,
     FilePen,
     FilePenLine,
     FilePlus,
-    FilePlus2,
     FileQuestionMark,
     FileScan,
     FileSearch,
-    FileSearch2,
     FileSliders,
     FileSpreadsheet,
     FileStack,
@@ -643,19 +610,16 @@ public enum Icons
     FileTerminal,
     FileText,
     FileType,
-    FileType2,
     FileUp,
     FileUser,
     FileVideoCamera,
     FileVolume,
-    FileVolume2,
-    FileWarning,
+    FileExclamationPoint,
     FileX,
-    FileX2,
     Files,
     Film,
     ListFilterPlus,
-    Fingerprint,
+    FingerprintPattern,
     FireExtinguisher,
     Fish,
     FishOff,
@@ -822,8 +786,8 @@ public enum Icons
     Images,
     Import,
     Inbox,
-    IndentDecrease,
-    IndentIncrease,
+    ListIndentDecrease,
+    ListIndentIncrease,
     IndianRupee,
     Infinity,
     Info,
@@ -867,7 +831,6 @@ public enum Icons
     Leaf,
     LeafyGreen,
     Lectern,
-    LetterText,
     Library,
     LibraryBig,
     LifeBuoy,
@@ -1435,7 +1398,6 @@ public enum Icons
     TestTube,
     TestTubeDiagonal,
     TestTubes,
-    Text,
     TextCursor,
     TextCursorInput,
     TextQuote,
@@ -1580,7 +1542,7 @@ public enum Icons
     WineOff,
     Workflow,
     Worm,
-    WrapText,
+    TextWrap,
     Wrench,
     X,
     Youtube,

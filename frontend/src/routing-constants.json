@@ -1,9 +1,6 @@
 {
   "excludedPaths": [
-    "/messages",
-    "/webhook",
-    "/auth",
-    "/upload",
+    "/ivy",
     "/assets",
     "/fonts",
     "/_framework",

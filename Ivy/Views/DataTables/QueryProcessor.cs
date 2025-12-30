@@ -3,6 +3,8 @@ using System.Security.Cryptography;
 using System.Text;
 using Apache.Arrow;
 using Apache.Arrow.Ipc;
+using Apache.Arrow.Types;
+using Ivy.Core.Helpers;
 using Ivy.Protos.DataTable;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -25,22 +27,9 @@ public class ValuesResult
     public int TotalValues { get; set; }
 }
 
-/// <summary>
-/// Processes table queries by applying sorting and pagination to IQueryable data sources,
-/// then converts the results to Apache Arrow format for efficient data transfer.
-/// </summary>
-/// <remarks>
-/// The QueryProcessor handles the following operations:
-/// - Sorting: Supports multi-column sorting with ascending/descending directions
-/// - Pagination: Implements offset and limit for result set pagination
-/// - Data conversion: Converts .NET objects to Apache Arrow table format for optimal performance
-/// 
-/// The processor works with any IQueryable&lt;T&gt; data source and returns serialized Arrow data
-/// that can be efficiently transmitted and processed by client applications.
-/// </remarks>
 public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributedCache? cache = null)
 {
-    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query)
+    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query, Func<object, object?>? idSelector = null)
     {
         try
         {
@@ -113,7 +102,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
             // Convert to Arrow table
             logger?.LogDebug("Converting to Arrow table");
-            var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType);
+            var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType, idSelector);
             logger?.LogInformation("Arrow conversion complete, {ByteCount} bytes", arrowData.Length);
 
             var result = new QueryResult
@@ -170,8 +159,53 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             if (propertyInfo == null)
                 continue;
 
-            var property = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
-            var lambda = System.Linq.Expressions.Expression.Lambda(property, parameter);
+            System.Linq.Expressions.Expression sortExpression;
+            SystemType sortType;
+
+            // Special handling for string arrays - sort by first element
+            if (propertyInfo.PropertyType.IsArray && propertyInfo.PropertyType.GetElementType() == typeof(string))
+            {
+                logger?.LogDebug("Sorting string array column by first element: {Column}", sortOrder.Column);
+
+                var property = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
+
+                // Create expression: array != null && array.Length > 0 ? array[0] : null
+                // This gets the first element or null if empty
+                var nullCheck = System.Linq.Expressions.Expression.NotEqual(
+                    property,
+                    System.Linq.Expressions.Expression.Constant(null, propertyInfo.PropertyType)
+                );
+
+                var lengthProperty = System.Linq.Expressions.Expression.Property(property, "Length");
+                var lengthCheck = System.Linq.Expressions.Expression.GreaterThan(
+                    lengthProperty,
+                    System.Linq.Expressions.Expression.Constant(0)
+                );
+
+                var hasElements = System.Linq.Expressions.Expression.AndAlso(nullCheck, lengthCheck);
+
+                // array[0]
+                var firstElement = System.Linq.Expressions.Expression.ArrayIndex(
+                    property,
+                    System.Linq.Expressions.Expression.Constant(0)
+                );
+
+                // hasElements ? array[0] : null
+                sortExpression = System.Linq.Expressions.Expression.Condition(
+                    hasElements,
+                    firstElement,
+                    System.Linq.Expressions.Expression.Constant(null, typeof(string))
+                );
+
+                sortType = typeof(string);
+            }
+            else
+            {
+                sortExpression = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
+                sortType = propertyInfo.PropertyType;
+            }
+
+            var lambda = System.Linq.Expressions.Expression.Lambda(sortExpression, parameter);
 
             // For the first sort, use OrderBy/OrderByDescending
             // For subsequent sorts, use ThenBy/ThenByDescending
@@ -187,7 +221,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
             var method = typeof(Queryable).GetMethods()
                 .FirstOrDefault(m => m.Name == methodName && m.GetParameters().Length == 2)?
-                .MakeGenericMethod(elementType, propertyInfo.PropertyType);
+                .MakeGenericMethod(elementType, sortType);
 
             if (method != null)
             {
@@ -421,6 +455,29 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         var arg = args.FirstOrDefault();
         if (arg == null) return null;
 
+        // Special handling for string arrays - "equals" means "contains"
+        if (property.Type.IsArray && property.Type.GetElementType() == typeof(string))
+        {
+            var searchValue = ExtractStringValue(arg);
+            if (searchValue == null) return null;
+
+            // Use Array.Contains to check if the array contains the value
+            var containsMethod = typeof(Enumerable).GetMethods()
+                .FirstOrDefault(m => m.Name == "Contains" && m.GetParameters().Length == 2)?
+                .MakeGenericMethod(typeof(string));
+
+            if (containsMethod == null) return null;
+
+            var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
+
+            // Enumerable.Contains(array, value)
+            return System.Linq.Expressions.Expression.Call(
+                containsMethod,
+                property,
+                searchValueExpression
+            );
+        }
+
         var value = ExtractTypedValue(arg, property.Type);
 
         // Handle null comparison
@@ -525,6 +582,31 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
     {
         var arg = args.FirstOrDefault();
         if (arg == null) return null;
+
+        // Special handling for string arrays - "not equals" means "does not contain"
+        if (property.Type.IsArray && property.Type.GetElementType() == typeof(string))
+        {
+            var searchValue = ExtractStringValue(arg);
+            if (searchValue == null) return null;
+
+            // Use !Array.Contains to check if the array does not contain the value
+            var containsMethod = typeof(Enumerable).GetMethods()
+                .FirstOrDefault(m => m.Name == "Contains" && m.GetParameters().Length == 2)?
+                .MakeGenericMethod(typeof(string));
+
+            if (containsMethod == null) return null;
+
+            var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
+
+            // !Enumerable.Contains(array, value)
+            var containsCall = System.Linq.Expressions.Expression.Call(
+                containsMethod,
+                property,
+                searchValueExpression
+            );
+
+            return System.Linq.Expressions.Expression.Not(containsCall);
+        }
 
         var value = ExtractTypedValue(arg, property.Type);
 
@@ -684,7 +766,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             var jsonValue = arg.Value.ToStringUtf8();
             logger?.LogDebug("Raw value: '{JsonValue}'", jsonValue);
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue);
+            var result = System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue, JsonHelper.DefaultOptions);
             logger?.LogDebug("Deserialized value: '{Result}'", result);
 
             return result;
@@ -757,15 +839,15 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             var jsonValue = arg.Value.ToStringUtf8();
             return underlyingType switch
             {
-                SystemType t when t == typeof(string) => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue),
-                SystemType t when t == typeof(int) => System.Text.Json.JsonSerializer.Deserialize<int>(jsonValue),
-                SystemType t when t == typeof(long) => System.Text.Json.JsonSerializer.Deserialize<long>(jsonValue),
-                SystemType t when t == typeof(double) => System.Text.Json.JsonSerializer.Deserialize<double>(jsonValue),
-                SystemType t when t == typeof(float) => System.Text.Json.JsonSerializer.Deserialize<float>(jsonValue),
-                SystemType t when t == typeof(bool) => System.Text.Json.JsonSerializer.Deserialize<bool>(jsonValue),
-                SystemType t when t == typeof(DateTime) => System.Text.Json.JsonSerializer.Deserialize<DateTime>(jsonValue),
-                SystemType t when t == typeof(decimal) => System.Text.Json.JsonSerializer.Deserialize<decimal>(jsonValue),
-                _ => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue)
+                SystemType t when t == typeof(string) => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(int) => System.Text.Json.JsonSerializer.Deserialize<int>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(long) => System.Text.Json.JsonSerializer.Deserialize<long>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(double) => System.Text.Json.JsonSerializer.Deserialize<double>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(float) => System.Text.Json.JsonSerializer.Deserialize<float>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(bool) => System.Text.Json.JsonSerializer.Deserialize<bool>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(DateTime) => System.Text.Json.JsonSerializer.Deserialize<DateTime>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(decimal) => System.Text.Json.JsonSerializer.Deserialize<decimal>(jsonValue, JsonHelper.DefaultOptions),
+                _ => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue, JsonHelper.DefaultOptions)
             };
         }
         catch (Exception ex)
@@ -775,7 +857,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         }
     }
 
-    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType)
+    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType, Func<object, object?>? idSelector = null)
     {
         logger?.LogDebug("Converting {DataCount} items to Arrow table", data.Count);
 
@@ -804,6 +886,28 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             else
             {
                 arrays.Add(QueryHelpers.CreateArrowArray(prop, data, arrowType));
+            }
+        }
+
+        // Add _hiddenKey column if idSelector is provided
+        const string HiddenKeyColumnName = "_hiddenKey";
+        if (idSelector != null)
+        {
+            var hiddenKeyType = StringType.Default;
+            fields.Add(new ArrowField(HiddenKeyColumnName, hiddenKeyType, nullable: true));
+
+            if (!data.Any())
+            {
+                arrays.Add(QueryHelpers.CreateEmptyArrowArray(hiddenKeyType));
+            }
+            else
+            {
+                var hiddenKeyValues = data.Select(row =>
+                {
+                    var id = idSelector(row);
+                    return id?.ToString() ?? null;
+                }).ToList();
+                arrays.Add(QueryHelpers.CreateStringArray(hiddenKeyValues.Cast<object?>().ToList()));
             }
         }
 
@@ -942,27 +1046,56 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
                 projectedQuery = (IQueryable)orderByMethod.Invoke(null, new object[] { projectedQuery, orderLambda })!;
             }
 
-            // Get total count before limiting
-            var totalValues = projectedQuery.Cast<object>().Count();
+            // Execute query and convert to strings
+            var rawValues = projectedQuery.Cast<object>()
+                .Where(v => v != null)
+                .ToList();
 
-            // Apply limit
-            if (query.Limit > 0)
+            // Handle string arrays - explode them into individual values
+            List<string> values;
+            int totalValues;
+            if (propertyInfo.PropertyType.IsArray && propertyInfo.PropertyType.GetElementType() == typeof(string))
             {
-                var takeMethod = typeof(Queryable).GetMethods()
-                    .FirstOrDefault(m => m.Name == "Take" && m.GetParameters().Length == 2)?
-                    .MakeGenericMethod(propertyInfo.PropertyType);
+                // Flatten arrays: each array element becomes a distinct value
+                var allValues = rawValues
+                    .SelectMany(v => v as string[] ?? System.Array.Empty<string>())
+                    .Distinct()
+                    .OrderBy(v => v)
+                    .ToList();
 
-                if (takeMethod != null)
+                // Apply search filter on exploded values if provided
+                if (!string.IsNullOrEmpty(query.Search))
                 {
-                    projectedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { projectedQuery, query.Limit })!;
+                    allValues = allValues
+                        .Where(v => v.Contains(query.Search, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
+                totalValues = allValues.Count;
+
+                // Apply limit if specified
+                if (query.Limit > 0)
+                {
+                    values = allValues.Take(query.Limit).ToList();
+                }
+                else
+                {
+                    values = allValues;
                 }
             }
+            else
+            {
+                totalValues = rawValues.Count;
 
-            // Execute query and convert to strings
-            var values = projectedQuery.Cast<object>()
-                .Where(v => v != null)
-                .Select(v => v.ToString()!)
-                .ToList();
+                // Apply limit if specified
+                var limitedValues = query.Limit > 0
+                    ? rawValues.Take(query.Limit)
+                    : rawValues;
+
+                values = limitedValues
+                    .Select(v => v.ToString()!)
+                    .ToList();
+            }
 
             logger?.LogInformation("Values query executed, got {ValueCount} values out of {TotalValues} total", values.Count, totalValues);
 
@@ -1016,7 +1149,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             sourceId = valQuery.SourceId ?? "";
         }
 
-        var jsonQuery = System.Text.Json.JsonSerializer.Serialize(query);
+        var jsonQuery = System.Text.Json.JsonSerializer.Serialize(query, JsonHelper.DefaultOptions);
         var input = $"{prefix}:{sourceId}:{typeName}:{jsonQuery}";
         var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
         return $"DataTable:{prefix}:{sourceId}:{Convert.ToBase64String(hashBytes)}";
@@ -1051,13 +1184,13 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
     private byte[] SerializeValuesResult(ValuesResult result)
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(result);
+        var json = System.Text.Json.JsonSerializer.Serialize(result, JsonHelper.DefaultOptions);
         return Encoding.UTF8.GetBytes(json);
     }
 
     private ValuesResult DeserializeValuesResult(byte[] data)
     {
         var json = Encoding.UTF8.GetString(data);
-        return System.Text.Json.JsonSerializer.Deserialize<ValuesResult>(json) ?? new ValuesResult();
+        return System.Text.Json.JsonSerializer.Deserialize<ValuesResult>(json, JsonHelper.DefaultOptions) ?? new ValuesResult();
     }
 }

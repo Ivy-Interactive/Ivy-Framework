@@ -19,6 +19,7 @@ import { useFocusable } from '@/hooks/use-focus-management';
 import { sidebarMenuRef } from './sidebar-refs';
 import { useEventHandler } from '@/components/event-handler';
 import { cn } from '@/lib/utils';
+import { getWidth } from '@/lib/styles';
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -31,6 +32,7 @@ interface SidebarLayoutWidgetProps {
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
   mainContentPadding?: number; // Padding for main content area (default: 2)
+  width?: string; // Width of the sidebar (default: 256px)
 }
 
 // Helper function to check if a slot has meaningful content by checking props.children
@@ -59,7 +61,10 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   autoCollapseThreshold = 768,
   mainAppSidebar = false,
   mainContentPadding,
+  width,
 }) => {
+  // Get sidebar width from the width prop (default set in backend)
+  const sidebarWidth = getWidth(width).width as string;
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
     if (!mainAppSidebar) return true;
@@ -75,7 +80,6 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(getInitialSidebarState);
   const [isManuallyToggled, setIsManuallyToggled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
@@ -85,76 +89,37 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
   // Auto-collapse/expand based on width (only for main app sidebar)
   useEffect(() => {
-    if (!containerRef.current || !mainAppSidebar) return;
+    if (!mainAppSidebar) return;
 
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      const entry = entries[0];
-      if (!entry) return;
+    const mql = window.matchMedia(`(min-width: ${autoCollapseThreshold}px)`);
 
-      const containerWidth = entry.contentRect.width;
-
-      // Only auto-collapse/expand if user hasn't manually toggled
+    const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
       if (!isManuallyToggled) {
-        if (containerWidth < autoCollapseThreshold) {
-          setIsSidebarOpen(false);
-        } else {
-          setIsSidebarOpen(true);
-        }
+        setIsSidebarOpen(e.matches);
       }
     };
 
-    resizeObserverRef.current = new ResizeObserver(handleResize);
-    resizeObserverRef.current.observe(containerRef.current);
+    handleMediaChange(mql);
 
-    return () => {
-      if (resizeObserverRef.current) {
-        resizeObserverRef.current.disconnect();
-      }
-    };
+    mql.addEventListener('change', handleMediaChange);
+    return () => mql.removeEventListener('change', handleMediaChange);
   }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar]);
-
-  // Reset manual toggle flag when width changes significantly (only for main app sidebar)
-  useEffect(() => {
-    if (!containerRef.current || !mainAppSidebar) return;
-
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      const entry = entries[0];
-      if (!entry) return;
-
-      const containerWidth = entry.contentRect.width;
-
-      // Reset manual toggle flag when width changes significantly
-      // This allows auto-behavior to resume after significant size changes
-      if (
-        containerWidth < autoCollapseThreshold * 0.8 ||
-        containerWidth > autoCollapseThreshold * 1.2
-      ) {
-        setIsManuallyToggled(false);
-      }
-    };
-
-    const observer = new ResizeObserver(handleResize);
-    observer.observe(containerRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [autoCollapseThreshold, mainAppSidebar]);
 
   return (
     <div
       ref={containerRef}
       className="grid h-full w-full remove-parent-padding"
       style={{
-        gridTemplateColumns: isSidebarOpen ? '16rem 1fr' : '0 1fr',
+        gridTemplateColumns: isSidebarOpen ? `${sidebarWidth} 1fr` : '0 1fr',
         transition: 'grid-template-columns 300ms ease-in-out',
       }}
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full w-[256px] flex-col bg-sidebar text-sidebar-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
+        className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{ width: sidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
           <div className="flex flex-col shrink-0 p-2 space-y-4">
@@ -170,34 +135,12 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
         {hasContent(slots?.SidebarFooter) && (
           <div className="flex flex-col shrink-0">
-            <div className="flex flex-col px-4 py-3 gap-4 min-h-0">
+            <div className="flex flex-col p-2 gap-4 min-h-0">
               {slots?.SidebarFooter}
             </div>
           </div>
         )}
       </div>
-
-      {/* Toggle Button - Only show for main app sidebar */}
-      {showToggleButton && mainAppSidebar && (
-        <button
-          onClick={handleManualToggle}
-          className="absolute top-2 z-50 p-2 rounded-md bg-background hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer transition-all duration-200"
-          style={{
-            left: isSidebarOpen ? 'calc(16rem + 8px)' : '8px',
-            transition: 'left 300ms ease-in-out',
-            transform: 'translateX(0)', // Ensure button moves with its parent sidebar
-          }}
-          aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-        >
-          <div className="transition-transform duration-300 ease-in-out">
-            {isSidebarOpen ? (
-              <PanelLeftClose className="h-4 w-4" />
-            ) : (
-              <PanelLeftOpen className="h-4 w-4" />
-            )}
-          </div>
-        </button>
-      )}
 
       {/* Main Content - Always takes full remaining width */}
       <div
@@ -206,6 +149,21 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           !mainAppSidebar ? `p-${mainContentPadding}` : ''
         )}
       >
+        {/* Toggle Button - Only show for main app sidebar */}
+        {showToggleButton && mainAppSidebar && (
+          <button
+            onClick={handleManualToggle}
+            className="absolute top-0 left-1 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
+            style={{ marginTop: '3px' }}
+            aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          >
+            {isSidebarOpen ? (
+              <PanelLeftClose className="h-4 w-4" />
+            ) : (
+              <PanelLeftOpen className="h-4 w-4" />
+            )}
+          </button>
+        )}
         {slots?.MainContent}
       </div>
     </div>
@@ -270,7 +228,7 @@ const CollapsibleMenuItem: React.FC<{
         <li className="relative">
           <CollapsibleTrigger asChild>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
               onClick={() => {
                 // For items with children, toggle the collapsible state
                 // Only try to navigate if the item has a tag
@@ -303,7 +261,7 @@ const CollapsibleMenuItem: React.FC<{
     return (
       <li key={item.label}>
         <button
-          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
+          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
           onClick={() => onItemClick(item)}
           onMouseDown={e => onCtrlRightMouseClick(e, item)}
         >
@@ -338,7 +296,7 @@ const renderMenuItems = (
       if (level === 0) {
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="sticky top-0 z-10 bg-sidebar px-3 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-background px-3 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">
@@ -366,7 +324,7 @@ const renderMenuItems = (
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -379,7 +337,7 @@ const renderMenuItems = (
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -448,7 +406,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       if (item.children && item.children.length > 0) {
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="sticky top-0 z-10 bg-sidebar px-3 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-background px-3 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">
@@ -464,13 +422,18 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         return (
           <li key={item.tag}>
             <button
-              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8 ${
+              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left ${
                 isActive ? 'bg-accent text-accent-foreground' : ''
               }`}
               tabIndex={-1} // Not focusable
-              onClick={() =>
-                item.tag && eventHandler('OnSelect', id, [item.tag])
-              }
+              onClick={() => {
+                if (item.tag) {
+                  if (searchActive && flatIdx !== -1) {
+                    setSelectedIndex(flatIdx);
+                  }
+                  eventHandler('OnSelect', id, [item.tag]);
+                }
+              }}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
               onMouseEnter={() => {
                 if (searchActive) {

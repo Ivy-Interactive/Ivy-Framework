@@ -114,6 +114,11 @@ export function formatDateValue(dateValue: Date, columnType: string): string {
  * Parses a date from various input formats
  */
 export function parseDateValue(cellValue: unknown): Date | null {
+  // Handle Date objects directly (from Arrow Timestamp vectors)
+  if (cellValue instanceof Date) {
+    return !isNaN(cellValue.getTime()) ? cellValue : null;
+  }
+
   if (typeof cellValue === 'number') {
     const date = new Date(cellValue);
     return !isNaN(date.getTime()) ? date : null;
@@ -219,6 +224,70 @@ export function createTextCell(
 }
 
 /**
+ * Creates a labels/bubble cell for displaying multiple labels as chips
+ */
+export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
+  // Handle different input formats
+  let labels: readonly string[];
+
+  if (Array.isArray(cellValue)) {
+    labels = cellValue.filter(item => item != null).map(String);
+  } else if (typeof cellValue === 'string') {
+    // Try to parse as JSON first (from backend serialization)
+    try {
+      const parsed = JSON.parse(cellValue);
+      if (Array.isArray(parsed)) {
+        labels = parsed.filter(item => item != null).map(String);
+      } else {
+        // Fallback to comma-separated if JSON parsing doesn't yield an array
+        labels = cellValue
+          .split(',')
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+      }
+    } catch {
+      // Not JSON, treat as comma-separated string
+      labels = cellValue
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    }
+  } else if (cellValue != null) {
+    labels = [String(cellValue)];
+  } else {
+    labels = [];
+  }
+
+  return {
+    kind: GridCellKind.Bubble,
+    data: labels as string[],
+    allowOverlay: false,
+    contentAlign: align ? getContentAlign(align) : undefined,
+  };
+}
+
+/**
+ * Creates a link cell with custom renderer (blue text + underline)
+ */
+export function createLinkCell(
+  url: string,
+  _editable: boolean, // Intentionally unused - links are always readonly
+  align?: Align
+): GridCell {
+  return {
+    kind: GridCellKind.Custom,
+    data: {
+      kind: 'link-cell',
+      url: url,
+      align: align?.toLowerCase() as 'left' | 'center' | 'right' | undefined,
+    },
+    copyData: url,
+    allowOverlay: false,
+    readonly: true,
+  };
+}
+
+/**
  * Gets the ordered columns based on columnOrder array
  */
 export function getOrderedColumns(
@@ -233,13 +302,14 @@ export function getOrderedColumns(
 /**
  * Main function to get cell content for a grid cell
  * Filters out hidden columns and applies column ordering
+ * Uses Arrow table via getRowData for efficient access to gRPC data
  */
 export function getCellContent(
   cell: Item,
-  data: DataRow[],
   columns: DataColumn[],
   columnOrder: number[],
-  editable: boolean
+  editable: boolean,
+  getRowData: (rowIndex: number) => DataRow | null
 ): GridCell {
   const [col, row] = cell;
 
@@ -255,12 +325,13 @@ export function getCellContent(
     orderedCols = columns.filter(col => !col.hidden);
   }
 
+  // Get row data from Arrow table via getRowData
+  const rowData = getRowData(row);
+
   // Safety check
-  if (row >= data.length || col >= orderedCols.length) {
+  if (!rowData || col >= orderedCols.length) {
     return createEmptyCell();
   }
-
-  const rowData = data[row];
   const column = orderedCols[col];
   const originalColumnIndex = columns.indexOf(column);
   const cellValue = rowData.values[originalColumnIndex];
@@ -275,6 +346,16 @@ export function getCellContent(
   // Handle explicit icon type from backend metadata
   if (column.type === 'Icon' && typeof cellValue === 'string') {
     return createIconCell(cellValue, align);
+  }
+
+  // Handle Labels type - supports arrays or comma-separated strings
+  if (column.type === 'Labels') {
+    return createLabelsCell(cellValue, align);
+  }
+
+  // Handle explicit link type from backend metadata
+  if (column.type === 'Link' && typeof cellValue === 'string') {
+    return createLinkCell(cellValue, editable, align);
   }
 
   // Handle Date and DateTime types

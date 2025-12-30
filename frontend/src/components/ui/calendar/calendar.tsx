@@ -15,7 +15,7 @@ import {
   calendarWeekdayVariants,
   calendarDayVariants,
 } from './calendar-variants';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 
 export function Calendar({
   className,
@@ -25,11 +25,11 @@ export function Calendar({
   buttonVariant = 'ghost',
   formatters,
   components,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant'];
-  size?: Sizes;
+  scale?: Scales;
 }) {
   const defaultClassNames = getDefaultClassNames();
 
@@ -37,7 +37,7 @@ export function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        calendarVariants({ size }),
+        calendarVariants({ scale }),
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -61,16 +61,16 @@ export function Calendar({
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          calendarButtonVariants({ size }),
+          calendarButtonVariants({ scale }),
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          calendarButtonVariants({ size }),
+          calendarButtonVariants({ scale }),
           defaultClassNames.button_next
         ),
         month_caption: cn(
-          calendarCaptionVariants({ size }),
+          calendarCaptionVariants({ scale }),
           defaultClassNames.month_caption
         ),
         dropdowns: cn(
@@ -92,7 +92,7 @@ export function Calendar({
         table: 'w-full border-collapse',
         weekdays: cn('flex', defaultClassNames.weekdays),
         weekday: cn(
-          calendarWeekdayVariants({ size }),
+          calendarWeekdayVariants({ scale }),
           defaultClassNames.weekday
         ),
         week: cn('flex w-full mt-2', defaultClassNames.week),
@@ -160,7 +160,7 @@ export function Calendar({
             <ChevronDownIcon className={cn('size-4', className)} {...props} />
           );
         },
-        DayButton: props => <CalendarDayButton {...props} size={size} />,
+        DayButton: props => <CalendarDayButton {...props} scale={scale} />,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -181,10 +181,10 @@ function CalendarDayButton({
   className,
   day,
   modifiers,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   ...props
 }: React.ComponentProps<typeof DayButton> & {
-  size?: Sizes;
+  scale?: Scales;
 }) {
   const defaultClassNames = getDefaultClassNames();
 
@@ -209,7 +209,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        calendarDayVariants({ size }),
+        calendarDayVariants({ scale }),
         defaultClassNames.day,
         className
       )}

@@ -11,15 +11,15 @@ searchHints:
 # Table
 
 <Ingress>
-Display structured data in a clean, organized format with powerful table widgets that support sorting, filtering, and custom formatting.
+Display structured data in a clean, organized format with powerful table [widgets](../../01_Onboarding/02_Concepts/Widgets.md) that support sorting, filtering, and custom formatting.
 </Ingress>
 
-The `Table` widget is a layout container designed to render data in a tabular format. It accepts rows composed of `TableRow` elements, making it suitable for structured display of content like data listings, reports, or grids.
+The `Table` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is a layout container designed to render data in a tabular format. It accepts rows composed of `TableRow` elements, making it suitable for structured display of content like data listings, reports, or grids.
 
 ## Basic Usage
 
 There is a recommended way to create tables from data arrays.
-The `ToTable()` extension method automatically converts collections into formatted tables.
+The [ToTable()](../../01_Onboarding/02_Concepts/ContentBuilders.md) extension method automatically converts collections into formatted tables.
 
 ```csharp demo-tabs
 public class BasicRowTable : ViewBase
@@ -50,41 +50,42 @@ public class BasicRowTable : ViewBase
 
 **Width(Size.Full())** - sets the overall table width
 
-**Width(p => p.ColumnName, Size.Units())** – sets the column width
+**ColumnWidth(p => p.ColumnName, Size.Units())** – sets the column width
 
-**Width(p => p.ColumnName, Size.Fraction())** – sets the column width as a fraction (percentage) of available space
+**ColumnWidth(p => p.ColumnName, Size.Fraction())** – sets the column width as a fraction (percentage) of available space
 
 Long text in cells automatically gets truncated with ellipsis (...) and shows full content in tooltips on hover
 
 **Header(p => p.ColumnName)** is used to show custom header text of the table
 
-**Align(p => p.ColumnName)** - right alignment for selected column
+**Align(p => p.ColumnName, Align.Left|Center|Right)** - sets the alignment for both the header and data cells in the selected column. The alignment applies to the content within cells, not the entire column structure.
 
 **Order(p => p.ColumnNameFirst, p.ColumnNameSecond, p.ColumnNameThird, ...)** - is used to order columns in a specific way
 
-**Remove(p => p.ColumnName)** - makes possible not to show column in the table
+**Remove(p => p.ColumnName)** - makes possible not to show column in the table.
 
 **Totals(p => p.ColumnName)** calculates the sum of the column if it contains numbers
 
-**Empty(new Card(""))** shows content when the table is empty.
+**Empty(new [Card](Card.md)(""))** shows content when the table is empty.
 
 ```csharp demo-tabs
-public class CustomBuilderTable : ViewBase
+public class TableConfigurationExample : ViewBase
 {
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "http://example.com/tshirt"},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "http://example.com/jeans"}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "http://example.com/tshirt", _hiddenNotes = "archived"},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "http://example.com/jeans", _hiddenNotes = "best-seller"}
         };
 
         return products.ToTable()
             .Width(Size.Full())
-            .Width(p => p.Price, Size.Units(100))
-            .Width(p => p.Sku, Size.Fraction(0.15f))
-            .Width(p => p.Name, Size.Fraction(0.3f))
-            .Width(p => p.Url, Size.Fraction(0.55f))
+            .ColumnWidth(p => p.Price, Size.Units(100))
+            .ColumnWidth(p => p.Sku, Size.Fraction(0.15f))
+            .ColumnWidth(p => p.Name, Size.Fraction(0.3f))
+            .ColumnWidth(p => p.Url, Size.Fraction(0.55f))
             .Header(p => p.Price, "Unit Price")
+            .Header(p => p._hiddenNotes, "Internal Notes") // underscore + letter hidden automatically
             .Align(p => p.Price, Align.Right)
             .Order(p => p.Name, p => p.Price, p => p.Sku)
             .Remove(p => p.Url)
@@ -93,6 +94,10 @@ public class CustomBuilderTable : ViewBase
     }
 }
 ```
+
+<Callout Type="tip">
+Columns whose names start with an underscore followed by a letter (for example `_hidden`, `_internalId`) are automatically removed by default. Properties that use an underscore followed by a digit or symbol (such as `_1` or `_$special`) now stay visible unless you explicitly hide them.
+</Callout>
 
 ### Column Management Examples
 
@@ -105,9 +110,9 @@ public class ColumnManagementTable : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing", Stock = 50},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing", Stock = 30},
-            new {Sku = "1236", Name = "Sneakers", Price = 30, Category = "Footwear", Stock = 25}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing", Stock = 50, _hiddenInternal = "archived"},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing", Stock = 30, _hiddenInternal = "featured"},
+            new {Sku = "1236", Name = "Sneakers", Price = 30, Category = "Footwear", Stock = 25, _hiddenInternal = "featured"}
         };
 
         return products.ToTable()
@@ -116,6 +121,7 @@ public class ColumnManagementTable : ViewBase
             .Add(p => p.Name)                          // Show only Name column
             .Add(p => p.Price)                         // Add Price column
             .Add(p => p.Stock)                         // Add Stock column
+            .Header(p => p._hiddenInternal, "Internal Flag") // hidden by default due to underscore
             .Header(p => p.Price, "Unit Price")
             .Align(p => p.Price, Align.Right)
             .Align(p => p.Stock, Align.Center);
@@ -163,14 +169,14 @@ public class EmptyColumnsTable : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Description = "", Notes = ""},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Description = "Blue jeans", Notes = ""},
-            new {Sku = "1236", Name = "Sneakers", Price = 30, Description = "", Notes = "Limited edition"}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing", Notes = ""},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing", Notes = ""},
+            new {Sku = "1236", Name = "Sneakers", Price = 30, Category = "Footwear", Notes = ""}
         };
 
         return products.ToTable()
             .Width(Size.Full())
-            .RemoveEmptyColumns()                      // Hide columns with no data
+            .RemoveEmptyColumns()                      // Automatically hides "Notes" because it's empty in all rows
             .Header(p => p.Price, "Unit Price")
             .Align(p => p.Price, Align.Right);
     }
@@ -187,8 +193,8 @@ public class ResetTableExample : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing"},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing"}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing", _hiddenMetadata = "legacy"},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing", _hiddenMetadata = "seasonal"}
         };
 
         return products.ToTable()
@@ -196,6 +202,7 @@ public class ResetTableExample : ViewBase
             .Remove(p => p.Category)                   // Hide Category column
             .Align(p => p.Price, Align.Right)          // Set alignment
             .Header(p => p.Price, "Unit Price")        // Custom header
+            .Header(p => p._hiddenMetadata, "Metadata") // underscore + letter hidden automatically
             .Reset()                                   // Reset all settings to defaults
             .Order(p => p.Name, p => p.Price)          // Apply new order
             .Totals(p => p.Price);                     // Add totals
@@ -223,7 +230,7 @@ public class ManualTableDemo : ViewBase
                 new TableCell("30").Align(Align.Center),
                 new TableCell("alice@example.com")
             )
-        );
+        ).Width(Size.Full());
     }
 }
 ```
@@ -233,7 +240,7 @@ public class ManualTableDemo : ViewBase
 The `Builder()` method allows you to specify how different data types should be rendered. Use the builder factory methods to create appropriate renderers for your data.
 
 ```csharp demo-tabs
-public class CustomBuildersTable : ViewBase
+public class CellBuildersExample : ViewBase
 {
     public override object? Build()
     {
@@ -244,11 +251,11 @@ public class CustomBuildersTable : ViewBase
 
         return products.ToTable()
             .Width(Size.Full())
-            .Width(p => p.Sku, Size.Fraction(0.15f))          // 15% for SKU
-            .Width(p => p.Name, Size.Fraction(0.25f))         // 25% for Name
-            .Width(p => p.Price, Size.Fraction(0.15f))        // 15% for Price
-            .Width(p => p.Url, Size.Fraction(0.2f))           // 20% for URL
-            .Width(p => p.Description, Size.Fraction(0.25f))  // 25% for Description
+            .ColumnWidth(p => p.Sku, Size.Fraction(0.15f))          // 15% for SKU
+            .ColumnWidth(p => p.Name, Size.Fraction(0.25f))         // 25% for Name
+            .ColumnWidth(p => p.Price, Size.Fraction(0.15f))        // 15% for Price
+            .ColumnWidth(p => p.Url, Size.Fraction(0.2f))           // 20% for URL
+            .ColumnWidth(p => p.Description, Size.Fraction(0.25f))  // 25% for Description
             .MultiLine(p => p.Description)                    // Enable multiline for the Description column
             .Builder(p => p.Url, f => f.Link())               // Link builder
             .Builder(p => p.Description, f => f.Text())       // Text builder
@@ -262,7 +269,7 @@ public class CustomBuildersTable : ViewBase
 
 ### Automatic Table Conversion
 
-Any `IEnumerable` is automatically converted to a table when returned from a view. This works through the `DefaultContentBuilder` which detects collections and converts them to tables.
+Any `IEnumerable` is automatically converted to a table when returned from a view. This works through the [DefaultContentBuilder](../../01_Onboarding/02_Concepts/ContentBuilders.md) which detects collections and converts them to tables.
 
 ```csharp demo-tabs
 public class AutomaticTableConversion : ViewBase
@@ -286,7 +293,7 @@ public class AutomaticTableConversion : ViewBase
 
 ### Integration with Other Widgets
 
-Tables integrate seamlessly with other Ivy widgets, allowing you to create rich, interactive interfaces.
+Tables integrate seamlessly with other Ivy widgets, allowing you to create rich, interactive [interfaces](../../01_Onboarding/02_Concepts/Views.md).
 
 ```csharp demo-tabs
 public class TableIntegrationExample : ViewBase
@@ -335,13 +342,5 @@ public class TableIntegrationExample : ViewBase
     }
 }
 ```
-
-### Missing Context and Examples
-
-- `Empty(object)` - Sets content to display when the table has no data
-
-  ```csharp
-  .Empty(new Card("No products found").Width(Size.Full()))
-  ```
 
 <WidgetDocs Type="Ivy.Table" ExtensionTypes="Ivy.Views.Tables.TableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Tables/Table.cs"/>

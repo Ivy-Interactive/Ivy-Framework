@@ -1,82 +1,74 @@
-﻿using Ivy.Hooks;
-using Ivy.Shared;
+using Ivy.Client;
+using Ivy.Core;
+using Ivy.Helpers;
+using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
-/// <summary>
-/// Default implementation of the authentication service that delegates to an auth provider.
-/// </summary>
-/// <param name="authProvider">The underlying authentication provider</param>
-/// <param name="token">The current authentication token</param>
-public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : IAuthService
+public class AuthService(IAuthProvider authProvider, IAuthSession authSession, IClientProvider client, AppSessionStore sessionStore) : IAuthService
 {
-    private volatile AuthToken? _token = token;
-
-    /// <summary>
-    /// Authenticates a user with email and password.
-    /// </summary>
-    /// <param name="email">The user's email address</param>
-    /// <param name="password">The user's password</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>An authentication token if successful, null otherwise</returns>
     public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
-        var token = await authProvider.LoginAsync(email, password, cancellationToken);
-        _token = token;
-        return token;
-    }
+        var oldSession = authSession.TakeSnapshot();
 
-    /// <summary>
-    /// Generates an OAuth authorization URI for the specified option.
-    /// </summary>
-    /// <param name="option">The OAuth authentication option</param>
-    /// <param name="callback">The webhook endpoint for handling the OAuth callback</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The OAuth authorization URI</returns>
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
-    {
-        return authProvider.GetOAuthUriAsync(option, callback, cancellationToken);
-    }
+        var token = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.LoginAsync(authSession, email, password, ct), cancellationToken);
+        authSession.AuthToken = token;
 
-    /// <summary>
-    /// Handles the OAuth callback request and extracts the authentication token.
-    /// </summary>
-    /// <param name="request">The HTTP request containing OAuth callback data</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>An authentication token if successful, null otherwise</returns>
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
-    {
-        var token = await authProvider.HandleOAuthCallbackAsync(request, cancellationToken);
-        _token = token;
-        return token;
-    }
-
-    /// <summary>
-    /// Logs out the current user.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    public async Task LogoutAsync(CancellationToken cancellationToken)
-    {
-        var token = Interlocked.Exchange(ref _token, null);
-
-        if (string.IsNullOrWhiteSpace(token?.AccessToken))
+        if (authSession.HasChangedSince(oldSession))
         {
-            return;
+            SetAuthCookies(reloadPage: authSession.AuthToken != oldSession.AuthToken);
+        }
+        return token;
+    }
+
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    {
+        var oldSession = authSession.TakeSnapshot();
+
+        var uri = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.GetOAuthUriAsync(authSession, option, callback, ct), cancellationToken);
+
+        if (authSession.AuthSessionData != oldSession.AuthSessionData)
+        {
+            SetAuthSessionDataCookies();
         }
 
-        await authProvider.LogoutAsync(token.AccessToken, cancellationToken);
+        return uri;
     }
 
-    /// <summary>
-    /// Retrieves information about the current authenticated user.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>User information if authenticated, null otherwise</returns>
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
+    {
+        var oldSession = authSession.TakeSnapshot();
+
+        var token = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.HandleOAuthCallbackAsync(authSession, request, ct), cancellationToken);
+        authSession.AuthToken = token;
+
+        if (authSession.HasChangedSince(oldSession))
+        {
+            SetAuthCookies();
+        }
+
+        return token;
+    }
+
+    public async Task LogoutAsync(CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(authSession.AuthToken?.AccessToken))
+        {
+            await TimeoutHelper.WithTimeoutAsync(ct =>
+                authProvider.LogoutAsync(authSession, ct), cancellationToken);
+        }
+
+        authSession.AuthToken = null;
+        SetAuthCookies();
+    }
+
     public async Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken)
     {
-        var token = _token;
+        var token = authSession.AuthToken;
 
         if (string.IsNullOrWhiteSpace(token?.AccessToken))
         {
@@ -85,59 +77,56 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
 
         //todo: cache this!
 
-        return await authProvider.GetUserInfoAsync(token.AccessToken, cancellationToken);
+        return await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.GetUserInfoAsync(authSession, ct), cancellationToken);
     }
 
-    /// <summary>
-    /// Gets the available authentication options.
-    /// </summary>
-    /// <returns>Array of supported authentication options</returns>
     public AuthOption[] GetAuthOptions()
     {
         return authProvider.GetAuthOptions();
     }
 
-    /// <summary>
-    /// Refreshes the current authentication token.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>
-    /// The refreshed authentication token if successful; otherwise, null.
-    /// </returns>
     public async Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken)
     {
-        var token = _token;
-        if (token is null)
+        var oldSession = authSession.TakeSnapshot();
+        if (oldSession.AuthToken is null)
         {
             return null;
         }
 
-        var refreshedToken = await authProvider.RefreshAccessTokenAsync(token, cancellationToken);
+        var refreshedToken = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.RefreshAccessTokenAsync(authSession, ct), cancellationToken);
+        authSession.AuthToken = refreshedToken;
 
-        // Update _token only if it's still the same object we read earlier.
-        var seen = Interlocked.CompareExchange(ref _token, refreshedToken, token);
-        if (!ReferenceEquals(seen, token))
+        if (authSession.HasChangedSince(oldSession))
         {
-            // Another thread updated the token in the meantime; return it if valid.
-            if (seen is not null && await authProvider.ValidateAccessTokenAsync(seen.AccessToken, cancellationToken))
-            {
-                return seen;
-            }
-
-            // Otherwise, set and return null.
-            _token = null;
-            return null;
+            SetAuthCookies(reloadPage: authSession.AuthToken == null);
         }
 
         return refreshedToken;
     }
 
-    /// <summary>
-    /// Gets the current authentication token.
-    /// </summary>
-    /// <returns>The current authentication token if available, null otherwise</returns>
-    public AuthToken? GetCurrentToken()
+    public AuthToken? GetCurrentToken() => authSession.AuthToken;
+
+    public string? GetCurrentSessionData() => authSession.AuthSessionData;
+
+    public IAuthSession GetAuthSession() => authSession;
+
+    public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        return _token;
+        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
+    }
+
+    public void SetAuthTokenCookies(bool reloadPage = true, bool? triggerMachineReload = null)
+    {
+        var cookieJarId = sessionStore.RegisterAuthTokenCookies(authSession.AuthToken);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
+    }
+
+    public void SetAuthSessionDataCookies(bool reloadPage = false, bool? triggerMachineReload = null)
+    {
+        var cookieJarId = sessionStore.RegisterAuthSessionDataCookies(authSession.AuthSessionData);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 }

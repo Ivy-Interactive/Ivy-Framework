@@ -410,3 +410,8 @@ test-results/
 /Ivy/.claude/settings.local.json
 /Ivy.Samples/.claude/settings.local.json
 /.releases/Commits/*
+
+# Claude - ignore personal settings and commands, but keep skills and project config
+.claude/settings.local.json
+.claude/commands/
+.claude/hooks/

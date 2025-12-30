@@ -47,6 +47,17 @@ export const tableStyles = {
       borderRadius: 'var(--radius)',
       overflow: 'hidden',
     },
+    footer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      zIndex: 1,
+      backgroundColor: 'var(--background)',
+      borderTop: '1px solid var(--border)',
+      padding: '8px 12px',
+      pointerEvents: 'auto',
+    } as React.CSSProperties,
   },
 
   // LoadingDisplay component
@@ -81,7 +92,7 @@ export const tableStyles = {
         box-shadow: var(--shadow-md) !important;
         padding: 4px !important;
         font-family: var(--font-mono) !important;
-        font-size: 14px !important;
+        font-size: 12px !important;
         max-height: 300px !important;
         overflow-y: auto !important;
       }
@@ -99,6 +110,9 @@ export const tableStyles = {
         cursor: pointer !important;
         color: var(--foreground) !important;
         transition: background-color 0.15s ease-in-out !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
       }
 
       .cm-tooltip-autocomplete > ul > li[aria-selected="true"] {
@@ -118,7 +132,7 @@ export const tableStyles = {
 
       .cm-completionDetail {
         font-family: var(--font-mono) !important;
-        font-size: 12px !important;
+        font-size: 11px !important;
         color: var(--muted-foreground) !important;
         font-style: normal !important;
         margin-left: 8px !important;
@@ -149,6 +163,12 @@ export const tableStyles = {
 
       .cm-tooltip-autocomplete::-webkit-scrollbar-thumb:hover {
         background: var(--muted-foreground);
+      }
+
+      /* Disable syntax highlighting when query is invalid */
+      .query-editor-wrapper[data-query-valid="false"] [class^="cm-query-"] {
+        color: currentColor !important;
+        font-weight: normal !important;
       }
     `,
   },

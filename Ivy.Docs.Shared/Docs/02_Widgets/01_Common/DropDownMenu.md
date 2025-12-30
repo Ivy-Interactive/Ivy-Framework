@@ -13,12 +13,12 @@ searchHints:
 # DropDownMenu
 
 <Ingress>
-Create interactive dropdown menus with customizable options, actions, and styling for navigation and user choices. DropDownMenu provides a flexible way to display hierarchical menus with various item types including checkboxes, radio buttons, separators, and nested submenus.
+Create interactive dropdown menus with customizable options, actions, and styling for [navigation](../../01_Onboarding/02_Concepts/Navigation.md) and user choices. DropDownMenu provides a flexible way to display hierarchical menus with various item types including checkboxes, radio buttons, separators, and nested submenus.
 </Ingress>
 
 ## Basic Usage
 
-Here's a simple example of a `DropDownMenu` that shows a toast message when an item is selected:
+Here's a simple example of a `DropDownMenu` that shows a [toast message](../../01_Onboarding/02_Concepts/Clients.md) when an item is selected:
 
 ```csharp demo-below
 new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
@@ -30,7 +30,7 @@ new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value),
 
 ### Default Menu Items
 
-Default menu items are the most common type, providing simple clickable options. The second example shows how to add custom tags for more advanced event handling.
+Default menu items are the most common type, providing simple clickable options. The second example shows how to add custom tags for more advanced [event handling](../../01_Onboarding/02_Concepts/EventHandlers.md).
 
 ```csharp demo-tabs
 Layout.Horizontal().Gap(2).Center()
@@ -51,7 +51,7 @@ Default menu items are the most common type, providing simple clickable options.
 
 ### Checkbox Menu Items
 
-Checkbox menu items allow users to toggle options on/off. The second example demonstrates mixing different menu item types for more complex interfaces.
+Checkbox menu items allow users to toggle options on/off. The second example demonstrates mixing different menu item types for more complex [interfaces](../../01_Onboarding/02_Concepts/Views.md).
 
 ```csharp demo-tabs
 Layout.Horizontal().Gap(2).Center()
@@ -72,7 +72,7 @@ Layout.Horizontal().Gap(2).Center()
 
 ### Separators
 
-Separators help organize menu items into logical groups, making the interface more readable and user-friendly.
+Separators help organize menu items into logical groups, making the [interface](../../01_Onboarding/02_Concepts/Views.md) more readable and user-friendly.
 
 ```csharp demo-tabs
 new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
@@ -108,34 +108,29 @@ new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value),
         )
 ```
 
-## Positioning Options
-
-### Side Positioning
+## Positioning
 
 Control which side of the trigger the menu appears on:
 
 ```csharp demo-tabs
-Layout.Vertical().Gap(2)
-    | Text.H4("Side Positioning")
-    | Text.P("Control which side of the trigger button the menu appears on:")
-    | (Layout.Horizontal().Gap(2).Center()
-        | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-            new Button("Top"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
-            .Top()
-        | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-            new Button("Right"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
-            .Right()
-        | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-            new Button("Bottom"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
-            .Bottom()
-        | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-            new Button("Left"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
-            .Left())
+Layout.Horizontal().Gap(2).Center()
+    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+        new Button("Top"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
+        .Top()
+    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+        new Button("Right"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
+        .Right()
+    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+        new Button("Bottom"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
+        .Bottom()
+    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+        new Button("Left"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
+        .Left()
 ```
 
 ## Advanced Features
 
-### Headers
+### Menu Headers
 
 Headers provide context and user information, making menus more informative and professional-looking.
 
@@ -156,7 +151,7 @@ Layout.Horizontal().Gap(2).Center()
         .Header(Text.Label("John Doe - Administrator"))
 ```
 
-### Button Integration
+### Fluent Syntax
 
 The `WithDropDown` extension method provides a clean, fluent API for quickly adding dropdown functionality to existing buttons.
 
@@ -179,7 +174,7 @@ Layout.Horizontal().Gap(2).Center()
 
 ### Custom Event Handling
 
-Custom event handling allows you to implement complex business logic based on menu selections, making your dropdowns more interactive and useful.
+Custom event handling allows you to implement complex [business logic](../../01_Onboarding/02_Concepts/Services.md) based on menu selections, making your dropdowns more interactive and useful.
 
 ```csharp demo-tabs
 new DropDownMenu(@evt => {

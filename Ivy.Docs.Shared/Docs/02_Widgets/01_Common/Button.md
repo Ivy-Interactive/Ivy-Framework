@@ -13,14 +13,14 @@ searchHints:
 # Button
 
 <Ingress>
-Create interactive buttons with multiple variants, states, sizes, and styling options for triggering actions in your Ivy applications.
+Create interactive buttons with multiple variants, states, sizes, and styling options for triggering actions in your Ivy [applications](../../01_Onboarding/02_Concepts/Apps.md).
 </Ingress>
 
-The `Button` widget is one of the most fundamental interactive elements in Ivy. It allows users to trigger actions and navigate through your project.
+The `Button` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is one of the most fundamental interactive elements in Ivy. It allows users to [trigger actions](../../01_Onboarding/02_Concepts/EventHandlers.md) and [navigate](../../01_Onboarding/02_Concepts/Navigation.md) through your project.
 
 ## Basic Usage
 
-Here's a simple example of a button that shows a toast message when clicked:
+Here's a simple example of a button that shows a [toast message](../../01_Onboarding/02_Concepts/Clients.md) when clicked:
 
 ```csharp
 var client = this.UseService<IClientProvider>();
@@ -31,27 +31,9 @@ new Button("Click Me", onClick: _ => client.Toast("Hello!"));
 new Button("Click Me", onClick: _ => client.Toast("Hello!"))
 ```
 
-### Variants
+## Semantic Variants
 
-`Button`s come in several variants to suit different use cases.
-
-<Callout Type="tip">
-Primary is the default variant applied to all buttons. You don't need to explicitly call `.Primary()` unless you want to be explicit in your code for clarity.
-</Callout>
-
-```csharp demo-tabs
-Layout.Horizontal()
-    | new Button("Primary")
-    | new Button("Destructive").Destructive()
-    | new Button("Secondary").Secondary()
-    | new Button("Outline").Outline()
-    | new Button("Ghost").Ghost()
-    | new Button("Link").Link()
-```
-
-### Semantic Button Variants
-
-The Button widget now includes three new contextual variants to help communicate different types of actions to users: Success, Warning, and Info. These variants complement the existing Primary, Secondary, Destructive, Outline, Ghost, and Link options.
+The Button widget includes three new contextual variants to help communicate different types of actions to users: [Success, Warning, and Info](../../01_Onboarding/02_Concepts/Theming.md). These variants complement the existing Primary, Secondary, Destructive, Outline, Ghost, and Link options.
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -60,74 +42,43 @@ Layout.Horizontal()
     | new Button("Info", variant: ButtonVariant.Info)
 ```
 
-## Styling Options
+## Styling & Configuration
 
-### Button States
-
-```csharp demo-tabs
-Layout.Vertical().Gap(4)
-    | Text.Large("Disabled State")
-    | (Layout.Horizontal().Gap(4)
-    | new Button("Primary").Disabled()
-    | new Button("Secondary").Secondary().Disabled()
-    | new Button("Destructive").Destructive().Disabled())
-    | Text.Large("Loading State")
-    | (Layout.Horizontal().Gap(4)
-    | new Button("Primary").Loading()
-    | new Button("Secondary").Secondary().Loading()
-    | new Button("Destructive").Destructive().Loading())
-```
-
-### Border Radius
-
-```csharp demo-tabs
-Layout.Grid().Columns(3)
-    | new Button("None").BorderRadius(BorderRadius.None)
-    | new Button("Rounded").BorderRadius(BorderRadius.Rounded)
-    | new Button("Full").BorderRadius(BorderRadius.Full)
-    | new Button("None").Secondary().BorderRadius(BorderRadius.None)
-    | new Button("Rounded").Secondary().BorderRadius(BorderRadius.Rounded)
-    | new Button("Full").Secondary().BorderRadius(BorderRadius.Full)
-    | new Button("None").Destructive().BorderRadius(BorderRadius.None)
-    | new Button("Rounded").Destructive().BorderRadius(BorderRadius.Rounded)
-    | new Button("Full").Destructive().BorderRadius(BorderRadius.Full)
-```
-
-### Icons
+Buttons offer extensive styling options including standard variants, states, border radius, and icon integration.
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
-    | Text.Large("Icons on the Left")
+    | Text.Large("Standard Variants")
     | (Layout.Horizontal().Gap(4)
-    | new Button("Save").Icon(Icons.Save)
-    | new Button("Download").Icon(Icons.Download)
-    | new Button("Upload").Icon(Icons.Upload)
-    | new Button("Settings").Icon(Icons.Settings))
-    | Text.Large("Icons on the Right")
+        | new Button("Primary")
+        | new Button("Destructive").Destructive()
+        | new Button("Secondary").Secondary()
+        | new Button("Outline").Outline()
+        | new Button("Ghost").Ghost()
+        | new Button("Link").Link())
+    | Text.Large("States")
     | (Layout.Horizontal().Gap(4)
-    | new Button("Next").Icon(Icons.ArrowRight, Align.Right)
-    | new Button("Continue").Icon(Icons.ChevronRight, Align.Right)
-    | new Button("Submit").Icon(Icons.Send, Align.Right)
-    | new Button("Export").Icon(Icons.ExternalLink, Align.Right))
-    | Text.Large("Icon-Only Buttons")
+        | new Button("Disabled").Disabled()
+        | new Button("Loading").Loading()
+        | new Button("Secondary Disabled").Secondary().Disabled())
+    | Text.Large("Border Radius")
     | (Layout.Horizontal().Gap(4)
-    | new Button(null, icon: Icons.Plus)
-    | new Button(null, icon: Icons.Pen, variant: ButtonVariant.Outline)
-    | new Button(null, icon: Icons.Trash, variant: ButtonVariant.Destructive)
-    | new Button(null, icon: Icons.Settings, variant: ButtonVariant.Ghost))
-    | Text.Large("Combined styling")
-    | new Button("Combined Styling Button")
-        .Icon(Icons.ArrowRight, Align.Right)
-        .BorderRadius(BorderRadius.Full)
-        .Large()
+        | new Button("None").BorderRadius(BorderRadius.None)
+        | new Button("Rounded").BorderRadius(BorderRadius.Rounded)
+        | new Button("Full").BorderRadius(BorderRadius.Full))
+    | Text.Large("Icons")
+    | (Layout.Horizontal().Gap(4)
+        | new Button("Save").Icon(Icons.Save)
+        | new Button("Next").Icon(Icons.ArrowRight, Align.Right)
+        | new Button(null, icon: Icons.Settings, variant: ButtonVariant.Ghost))
 ```
 
 ## Buttons with URLs
 
-Buttons can act as links by providing a URL. When a button has a URL, clicking it will navigate to that URL in a new tab instead of triggering an `onClick` event.
+Buttons can act as links by providing a [URL](../../01_Onboarding/02_Concepts/Navigation.md). When a button has a URL, clicking it will navigate to that URL in a new tab instead of triggering an `onClick` event.
 
 <Callout Type="tip">
-Buttons with URLs support right-click actions like "Copy Link" and "Open in New Tab", providing a better user experience than programmatic navigation.
+Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/Navigation.md) like "Copy Link" and "Open in New Tab", providing a better user experience than programmatic navigation.
 </Callout>
 
 ```csharp demo-tabs

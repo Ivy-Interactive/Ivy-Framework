@@ -11,7 +11,7 @@ searchHints:
 # Effects
 
 <Ingress>
-Perform side effects in your Ivy views with the UseEffect hook, similar to React's useEffect but optimized for server-side architecture.
+Perform side effects in your Ivy [views](./Views.md) with the UseEffect hook, similar to React's useEffect but optimized for server-side architecture.
 </Ingress>
 
 The `UseEffect` hook is a powerful feature in Ivy that allows you to perform side effects in your views. It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
@@ -106,7 +106,7 @@ Effects can be triggered by different events using trigger parameters:
 
 ### State Dependencies
 
-Effects can depend on state changes:
+Effects can depend on [state changes](./State.md):
 
 ```csharp demo-below
 public class DependentEffectView : ViewBase
@@ -122,6 +122,7 @@ public class DependentEffectView : ViewBase
             var currentLog = log.Value;
             var newLog = currentLog.ToList();
             newLog.Add($"Count changed to: {count.Value}");
+            if (newLog.Count > 3) newLog = newLog.TakeLast(3).ToList();
             log.Set(newLog);
         }, count); // Dependency on count state
         
@@ -156,7 +157,7 @@ graph LR
     
     B --> B1["Runs once during initialization"]
     C --> C1["Runs after virtual DOM updates"]
-    D --> D1["Runs when state changes"]
+    D --> D1["Runs when [state changes](./State.md)"]
 ```
 
 ```csharp
@@ -375,7 +376,7 @@ UseEffect(() =>
 }, count);
 ```
 
-### 5. Use Memoized Callbacks for Complex Dependencies
+### 5. Use [Memoized](./Memoization.md) Callbacks for Complex Dependencies
 
 ```csharp
 public class ComplexEffectView : ViewBase

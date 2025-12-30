@@ -75,3 +75,18 @@
 .dvn-scroller [class*='gdg-header'] {
   padding-left: 8px !important;
 }
+
+/* Ensure scrollbars appear above the footer overlay */
+.dvn-scroller,
+.dvn-scroller > * {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure horizontal scrollbar specifically appears above footer */
+.dvn-scroller::-webkit-scrollbar,
+.dvn-scroller::-webkit-scrollbar-thumb,
+.dvn-scroller::-webkit-scrollbar-track {
+  z-index: 20;
+  position: relative;
+}

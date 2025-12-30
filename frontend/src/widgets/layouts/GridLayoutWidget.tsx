@@ -1,14 +1,22 @@
-import { getGap, getHeight, getPadding, getWidth } from '@/lib/styles';
 import React from 'react';
+import {
+  getGap,
+  getPadding,
+  getWidth,
+  getHeight,
+  convertSizeToGridValue,
+} from '../../lib/styles';
 
 interface GridLayoutWidgetProps {
   columns?: number;
   rows?: number;
-  gap?: number;
-  padding?: string;
+  gap: number;
+  padding: string;
   autoFlow?: 'Row' | 'Column' | 'RowDense' | 'ColumnDense';
   width?: string;
   height?: string;
+  columnWidths?: string[];
+  rowHeights?: string[];
   children: React.ReactNode[];
   childColumn?: (number | undefined)[];
   childColumnSpan?: (number | undefined)[];
@@ -57,11 +65,13 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   children,
   columns = 1,
   rows = 1,
-  autoFlow = 'Row',
+  autoFlow,
   width,
   height,
-  gap = 16,
-  padding,
+  gap = 4,
+  padding = '0,0,0,0',
+  columnWidths,
+  rowHeights,
   childColumn = [],
   childColumnSpan = [],
   childRow = [],
@@ -70,8 +80,12 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
 }) => {
   const styles: React.CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-    gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+    gridTemplateColumns: columnWidths
+      ? columnWidths.map(convertSizeToGridValue).join(' ')
+      : `repeat(${columns}, minmax(0, 1fr))`,
+    gridTemplateRows: rowHeights
+      ? rowHeights.map(convertSizeToGridValue).join(' ')
+      : `repeat(${rows}, minmax(0, 1fr))`,
     gridAutoFlow: autoFlow?.toLowerCase() || 'row',
     ...getPadding(padding),
     ...getGap(gap),

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Security.Cryptography;
@@ -11,207 +12,47 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Core;
 
-/// <summary>
-/// Represents a node in the widget tree hierarchy, containing either a widget or view with its associated context and children.
-/// Manages the hierarchical structure and provides methods for tree traversal and widget extraction.
-/// </summary>
-/// <param name="id">The unique identifier for this node.</param>
-/// <param name="index">The index position of this node among its siblings.</param>
-/// <param name="parentPath">The path from the root to this node's parent.</param>
-/// <param name="children">The child nodes of this node.</param>
-/// <param name="memoizedHashCode">The hash code for memoization optimization, if applicable.</param>
-/// <param name="widget">The widget instance if this node represents a widget.</param>
-/// <param name="view">The view instance if this node represents a view.</param>
-/// <param name="context">The view context associated with this node.</param>
-/// <param name="ancestorContext">The ancestor view context for context hierarchy.</param>
-public class TreeNode(string id, int index, Path parentPath, TreeNode[] children, int? memoizedHashCode, IWidget? widget, IView? view, IViewContext? context, IViewContext? ancestorContext) : IDisposable
+public class WidgetTreeChanged(string viewId, int[] indices, JsonNode patch, int iteration, string? treeHash)
 {
-    /// <summary>
-    /// Creates a TreeNode from a widget instance.
-    /// </summary>
-    /// <param name="widget">The widget to create the node from.</param>
-    /// <param name="index">The index position among siblings.</param>
-    /// <param name="path">The path to this node.</param>
-    /// <param name="children">The child nodes.</param>
-    /// <param name="ancestorContext">The ancestor view context.</param>
-    /// <returns>A new TreeNode representing the widget.</returns>
-    public static TreeNode FromWidget(IWidget widget, int index, Path path, TreeNode[] children, IViewContext? ancestorContext)
-    {
-        return new TreeNode(widget.Id!, index, path, children, null, widget, null, null, ancestorContext);
-    }
-
-    /// <summary>
-    /// Creates a TreeNode from a view instance.
-    /// </summary>
-    /// <param name="view">The view to create the node from.</param>
-    /// <param name="index">The index position among siblings.</param>
-    /// <param name="path">The path to this node.</param>
-    /// <param name="child">The single child node (views can only have one child).</param>
-    /// <param name="context">The view context for this node.</param>
-    /// <param name="memoizedHashCode">The hash code for memoization.</param>
-    /// <param name="ancestorContext">The ancestor view context.</param>
-    /// <returns>A new TreeNode representing the view.</returns>
-    public static TreeNode FromView(IView view, int index, Path path, TreeNode? child, IViewContext? context, int? memoizedHashCode, IViewContext? ancestorContext)
-    {
-        var children = child == null ? Array.Empty<TreeNode>() : [child];
-        return new TreeNode(view.Id!, index, path, children, memoizedHashCode, null, view, context, ancestorContext);
-    }
-
-    // public bool ShouldRebuild { get; set; }
-
-    /// <summary>Gets the unique identifier for this node.</summary>
-    public string Id { get; } = id;
-    /// <summary>Gets the index position of this node among its siblings.</summary>
-    public int Index { get; } = index;
-    /// <summary>Gets the path from the root to this node's parent.</summary>
-    public Path ParentPath { get; } = parentPath;
-    /// <summary>Gets the child nodes of this node.</summary>
-    public TreeNode[] Children { get; } = children;
-    /// <summary>Gets the hash code for memoization optimization, if applicable.</summary>
-    public int? MemoizedHashCode { get; } = memoizedHashCode;
-    /// <summary>Gets the widget instance if this node represents a widget.</summary>
-    public IWidget? Widget { get; } = widget;
-    /// <summary>Gets the view instance if this node represents a view.</summary>
-    public IView? View { get; } = view;
-    /// <summary>Gets the view context associated with this node.</summary>
-    public IViewContext? Context { get; } = context;
-    /// <summary>Gets the ancestor view context for context hierarchy.</summary>
-    public IViewContext? AncestorContext { get; } = ancestorContext;
-
-    /// <summary>
-    /// Recursively builds the widget tree by extracting widgets from the node hierarchy.
-    /// Views are collapsed and only widgets are included in the final tree structure.
-    /// </summary>
-    /// <returns>The widget tree rooted at this node, or null if no widgets exist.</returns>
-    public IWidget? GetWidgetTree()
-    {
-        if (IsWidget)
-        {
-            var children = Children
-                .Select(child => child.GetWidgetTree()).Cast<object>().ToArray();
-
-            if (Widget is AbstractWidget widget)
-            {
-                return widget with
-                {
-                    Children = children
-                };
-            }
-
-            throw new NotSupportedException("Widgets must be of type WidgetBase.");
-        }
-
-        if (IsView)
-        {
-            //views always have none or one child
-            return Children.SingleOrDefault()?.GetWidgetTree();
-        }
-
-        throw new NotSupportedException("Node must be either an IWidget or an IView.");
-    }
-
-    /// <summary>Gets whether this node represents a widget.</summary>
-    public bool IsWidget => Widget != null;
-    /// <summary>Gets whether this node represents a view.</summary>
-    public bool IsView => View != null;
-
-    /// <summary>
-    /// Disposes the node and its associated resources including view and context.
-    /// </summary>
-    public void Dispose()
-    {
-        View?.Dispose();
-        Context?.Dispose();
-    }
-
-    /// <summary>
-    /// Calculates the widget tree indices by traversing the parent path and extracting widget positions.
-    /// Used for efficient client-side updates by providing the path to specific widgets in the flattened tree.
-    /// </summary>
-    /// <returns>An array of indices representing the path to this node in the widget-only tree.</returns>
-    public int[] GetWidgetTreeIndices()
-    {
-        //The top of the tree is always a view
-        //A view can only have one child which is either a view or a widget
-        //We want get the indices as if the views has been removed and only the widgets remain
-
-        var indices = new List<int>() { };
-        var path = this.ParentPath.Clone();
-
-        var previousSegment = new PathSegment("", null, this.Index, this.IsWidget);
-
-        while (path.Count > 0)
-        {
-            var segment = path.Pop();
-            if (segment.IsWidget)
-            {
-                indices.Add(previousSegment.Index);
-            }
-            previousSegment = segment;
-        }
-
-        indices.Reverse();
-        return indices.ToArray();
-    }
-
-    // public void CancelRebuild()
-    // {
-    //     this.ShouldRebuild = false;
-    //     foreach (var child in Children)
-    //     {
-    //         child.CancelRebuild();
-    //     }
-    // }
-}
-
-/// <summary>
-/// Represents a change notification for widget tree updates, containing the view ID, target indices, and JSON patch data.
-/// Used to efficiently communicate incremental changes to the client-side React components.
-/// </summary>
-/// <param name="viewId">The ID of the view that changed.</param>
-/// <param name="indices">The indices path to the changed widget in the flattened tree.</param>
-/// <param name="patch">The JSON patch describing the changes to apply.</param>
-public class WidgetTreeChanged(string viewId, int[] indices, JsonNode? patch)
-{
-    /// <summary>Gets the ID of the view that changed.</summary>
     public string ViewId { get; } = viewId;
-    /// <summary>Gets the indices path to the changed widget in the flattened tree.</summary>
     public int[] Indices { get; } = indices;
-    /// <summary>Gets the JSON patch describing the changes to apply.</summary>
-    public JsonNode? Patch { get; } = patch;
+    public JsonNode Patch { get; } = patch;
+    public int Iteration { get; set; } = iteration;
+    public string? TreeHash { get; } = treeHash;
 }
 
-/// <summary>
-/// Manages the hierarchical widget tree structure, handling building, updating, and change notifications for efficient client-side rendering.
-/// Implements reactive patterns with memoization, batched updates, and JSON patch-based change detection.
-/// </summary>
 public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 {
-    private readonly Dictionary<string, TreeNode> _nodes = new();
+    private readonly Dictionary<string, WidgetTreeNode> _nodes = new();
     private readonly Dictionary<string, string> _parents = new();
+    private int _iteration;
 
-    /// <summary>Gets the root view that serves as the entry point for the entire widget hierarchy.</summary>
     public IView RootView { get; }
-    /// <summary>Gets the root node of the built tree structure.</summary>
-    public TreeNode? NodeTree { get; private set; }
+    public WidgetTreeNode? NodeTree { get; private set; }
+
+    public static readonly JsonPatchDeltaFormatter JsonPatchDeltaFormatter = new();
+    public static readonly JsonDiffOptions JsonDiffOptions = new()
+    {
+        ArrayObjectItemKeyFinder = (node, _) =>
+        {
+            if (node is JsonObject obj && obj.TryGetPropertyValue("id", out var id))
+            {
+                return id?.GetValue<string>();
+            }
+            return null;
+        }
+    };
 
     private readonly Subject<WidgetTreeChanged[]> _treeChangedSubject = new();
     private readonly Subject<string> _buildRequestedSubject = new();
     private readonly SemaphoreSlim _buildRequestedSemaphore = new(1, 1);
     private readonly Disposables _disposables = new();
-    private readonly IContentBuilder _builder;
+    private readonly IContentBuilder _contentBuilder;
     private readonly IServiceProvider _appServices;
 
-    /// <summary>
-    /// Initializes a new WidgetTree with the specified root view, content builder, and services.
-    /// Sets up reactive subscriptions for batched view refresh requests.
-    /// </summary>
-    /// <param name="rootView">The root view that serves as the entry point.</param>
-    /// <param name="builder">The content builder for formatting objects into widgets/views.</param>
-    /// <param name="appServices">The application service provider.</param>
-    public WidgetTree(IView rootView, IContentBuilder builder, IServiceProvider appServices)
+    public WidgetTree(IView rootView, IContentBuilder contentBuilder, IServiceProvider appServices)
     {
-        _builder = builder;
+        _contentBuilder = contentBuilder;
         _appServices = appServices;
         RootView = rootView;
 
@@ -227,18 +68,13 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         _disposables.Add(subscription);
     }
 
-    /// <summary>
-    /// Builds the complete widget tree from the root view, creating the initial tree structure.
-    /// This method is thread-safe and handles exceptions during the build process.
-    /// </summary>
-    /// <returns>A task representing the asynchronous build operation.</returns>
     public async Task BuildAsync()
     {
         await _buildRequestedSemaphore.WaitAsync();
         try
         {
-            Path path = new();
-            var tree = BuildView(RootView, path, 0, null, null, false, false);
+            TreePath treePath = new();
+            var tree = BuildView(RootView, treePath, 0, null, null, false, false);
             NodeTree = tree ?? throw new NotSupportedException("Build must return an TreeNode.");
             PrintDebug();
         }
@@ -259,12 +95,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         }
     }
 
-    /// <summary>
-    /// Extracts the widget tree structure, collapsing views and returning only the widget hierarchy.
-    /// Used to generate the final widget structure for client-side rendering.
-    /// </summary>
-    /// <returns>The root widget of the collapsed widget tree.</returns>
-    /// <exception cref="NotSupportedException">Thrown if the tree hasn't been built or is null.</exception>
     public IWidget GetWidgets()
     {
         if (NodeTree == null) throw new NotSupportedException("Tree must be built before getting widgets.");
@@ -273,11 +103,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         return widgets;
     }
 
-    /// <summary>
-    /// Requests a refresh of the specified view, queuing it for batched processing.
-    /// The actual refresh is handled asynchronously with other pending requests.
-    /// </summary>
-    /// <param name="viewId">The ID of the view to refresh.</param>
     public void RefreshView(string viewId)
     {
         // if(!_nodes.TryGetValue(viewId, out var node))
@@ -290,9 +115,9 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         _buildRequestedSubject.OnNext(viewId);
     }
 
-    private async Task RefreshRequested(string[] requestedViewIds)
+    private async Task RefreshRequested(string[] requestedViewIds) //are ensure to be unique
     {
-        await _buildRequestedSemaphore.WaitAsync();
+        await _buildRequestedSemaphore.WaitAsync(); //ensure only one refresh operation at a time
         try
         {
             //todo: if the node A is a child of node B, both are request but there's a memoized node 
@@ -327,7 +152,13 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             var nodesToRebuild = requestedViewIds;
 
             List<WidgetTreeChanged> changes = new();
-            //todo: we should be able to be done in parallel?
+
+            if (nodesToRebuild.Length > 1)
+            {
+                //Building more than one node
+                //What happens if A is parent of B? What about the order they are built in? If A is built first, B might be invalidated
+            }
+
             foreach (var nodeId in nodesToRebuild)
             {
                 if (_nodes.TryGetValue(nodeId, out var node))
@@ -365,6 +196,10 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     private WidgetTreeChanged? _RefreshView(string viewId, bool isHotReload)
     {
+#if DEBUG
+        var stopWatch = Stopwatch.StartNew();
+#endif
+
         if (!_nodes.TryGetValue(viewId, out var node))
             throw new NotSupportedException($"Node '{viewId}' not found.");
 
@@ -375,9 +210,9 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
         var indices = node.GetWidgetTreeIndices();
 
-        var previous = node.GetWidgetTree()?.Serialize();
+        var previous = node.GetSerializedWidgetTree();
 
-        var partial = BuildView(node.View!, node.ParentPath.Clone(), node.Index, parentId, node.AncestorContext, isRefreshingView: true, isHotReload);
+        var partial = BuildView(node.View!, node.ParentTreePath.Clone(), node.Index, parentId, node.AncestorContext, isRefreshingView: true, isHotReload);
 
         if (partial == null) throw new NotSupportedException("View must return an IWidget.");
 
@@ -391,19 +226,60 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             {
                 if (parent.Children.Length <= node.Index)
                 {
-                    //Console.WriteLine("Parent children length is less than node index that we are trying to update.");    
+                    Console.WriteLine($"WARN:Parent children length {parent.Children.Length} of {parentId} is less than node index {node.Index} that we are trying to update.");
                 }
                 else
                 {
                     parent.Children[node.Index] = partial;
                 }
             }
+            else
+            {
+                Console.WriteLine($"WARN:Parent {parentId} not found. Shoudn't happen.");
+            }
         }
+
         try
         {
-            var update = partial.GetWidgetTree()?.Serialize();
-            var patch = previous.Diff(update, new JsonPatchDeltaFormatter());
-            return new WidgetTreeChanged(viewId, indices, patch);
+            var update = partial.GetSerializedWidgetTree();
+
+            var previousId = previous?["id"]?.GetValue<string>();
+            var updateId = update?["id"]?.GetValue<string>();
+
+            JsonNode? patch;
+
+            if (previousId != null && updateId != null && previousId != updateId)
+            {
+                patch = new JsonArray(new JsonObject
+                {
+                    ["op"] = "replace",
+                    ["path"] = "",
+                    ["value"] = update?.DeepClone()
+                });
+            }
+            else
+            {
+                patch = previous.Diff(update, JsonPatchDeltaFormatter, JsonDiffOptions);
+            }
+
+            if (patch == null || patch.IsEmptyArray())
+            {
+                return null!;
+            }
+
+            _iteration += 1;
+            string? hash = null;
+
+#if DEBUG
+            //DebugHelpers.CheckIfIdUsedMultipleTimes(NodeTree);
+            hash = DebugHelpers.CalculateTreeHash(NodeTree?.GetWidgetTree()?.Serialize());
+            if (Environment.GetEnvironmentVariable("IVY_DUMP_WIDGET_TREES") == "1")
+            {
+                stopWatch.Start();
+                DebugHelpers.LogUpdatedTree(previous, update, patch, stopWatch.ElapsedMilliseconds, _iteration, hash);
+            }
+#endif
+            return new WidgetTreeChanged(viewId, indices, patch, _iteration, hash);
         }
         catch (ObjectDisposedException)
         {
@@ -412,8 +288,8 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         return null!;
     }
 
-    private TreeNode? BuildView(IView view,
-        Path path,
+    private WidgetTreeNode? BuildView(IView view,
+        TreePath treePath,
         int index,
         string? parentId,
         IViewContext? ancestorContext,
@@ -421,9 +297,9 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         bool isHotReload
     )
     {
-        path.Push(view, index);
+        treePath.Push(view, index);
 
-        view.Id = GenerateId(path);
+        view.Id = treePath.GenerateId();
 
         int? memoizedHashCode = null;
         bool memoized = false;
@@ -436,7 +312,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
         var previousNode = _nodes.GetValueOrDefault(view.Id);
 
-        TreeNode? node;
+        WidgetTreeNode? node;
         IViewContext? context = previousNode?.Context;
         if (!memoized || isHotReload || isRefreshingView || previousNode == null || previousNode.MemoizedHashCode != memoizedHashCode)
         {
@@ -450,8 +326,8 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
             if (view is IStateless)
             {
-                //small optimization for stateless views to skip context creation - not sure this really matters
-                node = BuildObject(view.Build(), path.Clone(), index, view.Id, ancestorContext, isHotReload);
+                //Small optimization for stateless views to skip context creation - not sure this really matters
+                node = BuildObject(view.Build(), treePath.Clone(), 0, view.Id, ancestorContext, isHotReload);
             }
             else
             {
@@ -482,7 +358,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                     buildResult = e;
                 }
 
-                node = BuildObject(buildResult, path.Clone(), index, view.Id, context, isHotReload);
+                node = BuildObject(buildResult, treePath.Clone(), 0, view.Id, context, isHotReload);
                 view.AfterBuild();
                 context.Reset();
             }
@@ -493,9 +369,9 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             node = previousNode.Children.SingleOrDefault();
         }
 
-        path.Pop();
+        treePath.Pop();
 
-        _nodes[view.Id] = TreeNode.FromView(view, index, path.Clone(), node, context, memoizedHashCode, ancestorContext);
+        _nodes[view.Id] = WidgetTreeNode.FromView(view, index, treePath.Clone(), node, context, memoizedHashCode, ancestorContext);
 
         if (parentId != null)
             _parents[view.Id] = parentId;
@@ -515,13 +391,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         return _nodes[view.Id];
     }
 
-    /// <summary>
-    /// Calculates a stable hash code for memoization based on view ID and property values.
-    /// Used to determine if a memoized view needs to be rebuilt when its dependencies change.
-    /// </summary>
-    /// <param name="viewId">The unique identifier of the view.</param>
-    /// <param name="props">The property values to include in the hash calculation.</param>
-    /// <returns>A hash code representing the current state of the view's memoized values.</returns>
     internal static int CalculateMemoizedHashCode(string viewId, object?[] props)
     {
         var hash = new HashCode();
@@ -539,7 +408,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             }
             else
             {
-                var json = JsonSerializer.Serialize(prop);
+                var json = JsonSerializer.Serialize(prop, JsonHelper.DefaultOptions);
                 hash.Add(Utils.StableHash(json));
             }
 
@@ -547,47 +416,47 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         return hash.ToHashCode();
     }
 
-    private TreeNode? BuildObject(object? anything, Path path, int index, string parentId, IViewContext? ancestorContext, bool isHotReload)
+    private WidgetTreeNode? BuildObject(object? anything, TreePath treePath, int index, string parentId, IViewContext? ancestorContext, bool isHotReload)
     {
-        var formatted = _builder.Format(anything);
+        var formatted = _contentBuilder.Format(anything);
         if (formatted == null) return null;
 
         if (formatted is not IView && formatted is not IWidget)
             throw new NotSupportedException("IContentFormatter must return either an IView or an IWidget.");
 
-        TreeNode? node = null;
+        WidgetTreeNode? node = null;
         if (formatted is IView newView)
         {
-            node = BuildView(newView, path.Clone(), index, parentId, ancestorContext, false, isHotReload);
+            node = BuildView(newView, treePath.Clone(), index, parentId, ancestorContext, false, isHotReload);
         }
 
         if (formatted is IWidget newWidget)
         {
-            node = BuildWidget(newWidget, path.Clone(), index, parentId, ancestorContext, isHotReload);
+            node = BuildWidget(newWidget, treePath.Clone(), index, parentId, ancestorContext, isHotReload);
         }
 
         return node;
     }
 
-    private TreeNode BuildWidget(IWidget widget, Path path, int index, string parentId, IViewContext? ancestorContext, bool isHotReload)
+    private WidgetTreeNode BuildWidget(IWidget widget, TreePath treePath, int index, string parentId, IViewContext? ancestorContext, bool isHotReload)
     {
-        path.Push(widget, index);
+        treePath.Push(widget, index);
 
-        widget.Id = GenerateId(path);
+        widget.Id = treePath.GenerateId();
 
-        var children = new List<TreeNode>();
+        var children = new List<WidgetTreeNode>();
         if (widget.Children == null!) widget.Children = [];
         for (var i = 0; i < widget.Children.Length; i++)
         {
             var child = widget.Children[i];
-            var newWidget = BuildObject(child, path.Clone(), i, widget.Id, ancestorContext, isHotReload);
+            var newWidget = BuildObject(child, treePath.Clone(), i, widget.Id, ancestorContext, isHotReload);
             if (newWidget == null) continue;
             children.Add(newWidget);
         }
 
-        path.Pop();
+        treePath.Pop();
 
-        var node = TreeNode.FromWidget(widget, index, path.Clone(), children.ToArray(), ancestorContext);
+        var node = WidgetTreeNode.FromWidget(widget, index, treePath.Clone(), children.ToArray(), ancestorContext);
 
         _nodes[widget.Id] = node;
         _parents[widget.Id] = parentId;
@@ -595,29 +464,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         return node;
     }
 
-    private static string GenerateId(Path path)
-    {
-        var input = path.ToString();
-        using SHA256 sha256 = SHA256.Create();
-        byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
-        string hash = Convert.ToBase64String(hashBytes)
-            .Replace("+", "")
-            .Replace("/", "")
-            .Replace("=", "")
-            .ToLower();
-        string alphanumericHash = new string(hash.Where(char.IsLetterOrDigit).ToArray());
-        return alphanumericHash[..10]; //With 1 million widgets, the collision probability is extremely low (0.0000596%)
-    }
-
-    /// <summary>
-    /// Triggers an event on the specified widget, invoking its event handler with the provided arguments.
-    /// Used to handle client-side events like clicks, input changes, etc.
-    /// </summary>
-    /// <param name="widgetId">The ID of the widget to trigger the event on.</param>
-    /// <param name="eventName">The name of the event to trigger.</param>
-    /// <param name="args">The arguments to pass to the event handler.</param>
-    /// <returns>True if the event was successfully invoked; false otherwise.</returns>
-    /// <exception cref="NotSupportedException">Thrown if the widget is not found or the node is not a widget.</exception>
     public async Task<bool> TriggerEventAsync(string widgetId, string eventName, JsonArray args)
     {
         if (!_nodes.TryGetValue(widgetId, out var node))
@@ -633,10 +479,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         return result;
     }
 
-    /// <summary>
-    /// Performs a hot reload by refreshing the entire tree from the root view.
-    /// Used during development to apply code changes without restarting the application.
-    /// </summary>
     public void HotReload()
     {
         var change = _RefreshView(NodeTree!.Id, true);
@@ -652,7 +494,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         //PrintTree(NodeTree, 0);
     }
 
-    private void PrintTree(TreeNode? node, int i)
+    private void PrintTree(WidgetTreeNode? node, int i)
     {
         if (node == null) return;
         Console.Write(new string(' ', i));
@@ -684,7 +526,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         }
     }
 
-    private void DestroyRemovedNodes(TreeNode previousNode, TreeNode node, string? skipViewId)
+    private void DestroyRemovedNodes(WidgetTreeNode previousNode, WidgetTreeNode node, string? skipViewId)
     {
         if (previousNode.Id != node.Id)
         {
@@ -716,17 +558,8 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         }
     }
 
-    /// <summary>
-    /// Subscribes to widget tree change notifications, receiving batched updates when views are refreshed.
-    /// </summary>
-    /// <param name="observer">The observer to receive change notifications.</param>
-    /// <returns>A disposable subscription that can be used to unsubscribe.</returns>
     public IDisposable Subscribe(IObserver<WidgetTreeChanged[]> observer) => _treeChangedSubject.Subscribe(observer);
 
-    /// <summary>
-    /// Disposes the widget tree and all associated resources, including nodes, subscriptions, and semaphores.
-    /// Ensures proper cleanup of the entire tree hierarchy.
-    /// </summary>
     public void Dispose()
     {
         _buildRequestedSemaphore.Wait();

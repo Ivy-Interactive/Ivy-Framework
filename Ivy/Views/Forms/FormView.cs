@@ -9,10 +9,8 @@ using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
 
-/// <summary>Internal helpers for form field state management.</summary>
 internal static class FormFieldViewHelpers
 {
-    /// <summary>Creates a cloned state for form field data binding.</summary>
     public static IAnyState UseClonedAnyState(this IViewContext context, IAnyState state, bool renderOnChange = true)
     {
         var type = state.GetStateType();
@@ -31,68 +29,34 @@ internal static class FormFieldViewHelpers
     }
 }
 
-/// <summary>Signal for coordinating form validation across all fields.</summary>
 public class FormValidateSignal : AbstractSignal<Unit, bool>;
 
-/// <summary>Signal for notifying form field updates.</summary>
 public class FormUpdateSignal : AbstractSignal<Unit, Unit>;
 
-/// <summary>Validation timing strategy for form fields.</summary>
 public enum FormValidationStrategy
 {
-    /// <summary>Validate when field loses focus.</summary>
     OnBlur,
-    /// <summary>Validate when form is submitted.</summary>
     OnSubmit
 }
 
-/// <summary>Form field view with validation, data binding, and visibility control.</summary>
-public class FormFieldView : ViewBase, IFormFieldView
+public class FormFieldView(
+    IAnyState bindingState,
+    Func<IAnyState, IViewContext, IAnyInput> inputFactory,
+    Func<bool> visible,
+    ISignalSender<Unit, Unit> updateSender,
+    string? label = null,
+    string? description = null,
+    string? help = null,
+    string? placeholder = null,
+    bool required = false,
+    FormFieldLayoutOptions? layoutOptions = null,
+    Func<object?, (bool, string)>[]? validators = null,
+    FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
+    Scale scale = Scale.Medium)
+    : ViewBase, IFormFieldView
 {
-    private readonly IAnyState bindingState;
-    private readonly Func<IAnyState, IViewContext, IAnyInput> inputFactory;
-    private readonly Func<bool> visible;
-    private readonly ISignalSender<Unit, Unit> updateSender;
-    private readonly string? label;
-    private readonly string? description;
-    private readonly bool required;
-    private readonly Func<object?, (bool, string)>[]? validators;
-    private readonly FormValidationStrategy validationStrategy;
-    private readonly Sizes size;
-    private readonly string? help;
+    public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
 
-    /// <summary>Layout configuration for positioning this field in the form.</summary>
-    public FormFieldLayoutOptions Layout { get; }
-
-    public FormFieldView(
-        IAnyState bindingState,
-        Func<IAnyState, IViewContext, IAnyInput> inputFactory,
-        Func<bool> visible,
-        ISignalSender<Unit, Unit> updateSender,
-        string? label = null,
-        string? description = null,
-        bool required = false,
-        FormFieldLayoutOptions? layoutOptions = null,
-        Func<object?, (bool, string)>[]? validators = null,
-        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-        Sizes size = Sizes.Medium,
-        string? help = null)
-    {
-        this.bindingState = bindingState;
-        this.inputFactory = inputFactory;
-        this.visible = visible;
-        this.updateSender = updateSender;
-        this.label = label;
-        this.description = description;
-        this.required = required;
-        this.Layout = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
-        this.validators = validators;
-        this.validationStrategy = validationStrategy;
-        this.size = size;
-        this.help = help;
-    }
-
-    /// <summary>Validates the field value using configured validators.</summary>
     private bool Validate<T>(T value, IState<string> invalid)
     {
         if (!visible()) return true;
@@ -116,7 +80,6 @@ public class FormFieldView : ViewBase, IFormFieldView
         return true;
     }
 
-    /// <summary>Builds the form field with input control, validation, and data binding.</summary>
     public override object? Build()
     {
         IAnyState inputState = Context.UseClonedAnyState(bindingState);
@@ -164,18 +127,23 @@ public class FormFieldView : ViewBase, IFormFieldView
             input.HandleBlur(OnBlur);
         }
 
-        return visibleState.Value ? new Field(input, label, description, required, help) { Size = size } : null;
+        // Set placeholder if the input supports it
+        if (!string.IsNullOrEmpty(placeholder))
+        {
+            input.Placeholder = placeholder;
+        }
+
+        if (scale != Scale.Medium)
+        {
+            WidgetBaseExtensions.SetScaleViaReflection(input, scale);
+        }
+
+        return visibleState.Value ? new Field(input, label, description, required, help, scale) : null;
     }
 }
 
-/// <summary>Layout configuration for form field positioning and grouping.</summary>
-/// <param name="RowKey">Unique identifier for grouping fields in the same row.</param>
-/// <param name="Column">Column index for multi-column layouts.</param>
-/// <param name="Order">Sort order within the column/group.</param>
-/// <param name="Group">Optional group name for sectioning fields.</param>
 public record FormFieldLayoutOptions(Guid RowKey, int Column = 0, int Order = 0, string? Group = null);
 
-/// <summary>Binds a form field to a model property with validation and layout configuration.</summary>
 public class FormFieldBinding<TModel>(
     Expression<Func<TModel, object>> selector,
     Func<IAnyState, IViewContext, IAnyInput> factory,
@@ -187,37 +155,31 @@ public class FormFieldBinding<TModel>(
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-    Sizes size = Sizes.Medium,
-    string? help = null
+    Scale scale = Scale.Medium,
+    string? help = null,
+    string? placeholder = null
     ) : IFormFieldBinding<TModel>
 {
-    /// <summary>Creates a bound field view connected to the model state.</summary>
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, validationStrategy, size, help);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, scale);
         return (fieldView, disposable);
     }
 }
 
-/// <summary>Interface for form field views with layout information.</summary>
 public interface IFormFieldView : IView
 {
-    /// <summary>Layout configuration for this field.</summary>
     public FormFieldLayoutOptions Layout { get; }
 }
 
-/// <summary>Interface for binding form fields to model properties.</summary>
 public interface IFormFieldBinding<TModel>
 {
-    /// <summary>Binds the field to a model state and returns the view and disposable.</summary>
     (IFormFieldView fieldView, IDisposable disposable) Bind(IState<TModel> model);
 }
 
-/// <summary>Renders form fields in a structured layout with columns, rows, and groups.</summary>
-public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Sizes size = Sizes.Medium) : ViewBase
+public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Scale scale = Scale.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
 {
-    /// <summary>Builds the complete form layout with multi-column support and field grouping.</summary>
     public override object? Build()
     {
         object RenderRow(IFormFieldView[] fs)
@@ -229,11 +191,10 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
 
         object RenderRows(IFormFieldView[] fs)
         {
-            var gap = size switch
+            var gap = scale switch
             {
-                Sizes.Small => 4,
-                Sizes.Medium => 6,
-                Sizes.Large => 8,
+                Scale.Small => 4,
+                Scale.Medium => 6,
                 _ => 8
             };
 
@@ -254,8 +215,9 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
                             f.Key == null
                                 ? RenderRows(f.Select(g => g).ToArray())
                                 : new Expandable(f.Key, RenderRows(f.ToArray()))
-                        )).Cast<object>().ToArray()
-                    .ToArray()));
+                                    .Open(groupOpenStates?.GetValueOrDefault(f.Key, false) ?? false)
+                                    .Scale(scale)
+                        )).Cast<object>().ToArray()));
 
         var form = new Form(Layout.Horizontal(columns));
         if (handleSubmit != null)

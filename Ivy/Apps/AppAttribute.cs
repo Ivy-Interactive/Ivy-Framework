@@ -1,8 +1,9 @@
 using Ivy.Shared;
 
-namespace Ivy.Apps;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
-[System.AttributeUsage(System.AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class)]
 public class AppAttribute(
     string? id = null,
     string? title = null,
@@ -15,7 +16,7 @@ public class AppAttribute(
     string? documentSource = null,
     string[]? searchHints = null
 )
-    : System.Attribute
+    : Attribute
 {
     public string? Id { get; set; } = id;
 

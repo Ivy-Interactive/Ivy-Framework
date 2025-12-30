@@ -1,5 +1,7 @@
+import { MenuItem } from '@/types/widgets';
+
 export interface DataRow {
-  values: (string | number | boolean | null)[];
+  values: (string | number | boolean | Date | string[] | null)[];
 }
 
 export enum ColType {
@@ -9,6 +11,8 @@ export enum ColType {
   Date = 'Date',
   DateTime = 'DateTime',
   Icon = 'Icon',
+  Labels = 'Labels',
+  Link = 'Link',
 }
 
 export enum SortDirection {
@@ -47,7 +51,7 @@ export interface DataTableConnection {
   sourceId: string;
 }
 
-export interface DataTableConfiguration {
+export interface DataTableConfig {
   filterType?: FilterTypes;
   freezeColumns?: number | null;
   allowSorting?: boolean;
@@ -66,17 +70,20 @@ export interface DataTableConfiguration {
   enableCellClickEvents?: boolean;
   showSearch?: boolean;
   enableRowHover?: boolean;
+  idColumnName?: string | null;
 }
 
 export interface TableProps {
   id: string;
   columns: DataColumn[];
   connection: DataTableConnection;
-  configuration?: DataTableConfiguration;
+  config?: DataTableConfig;
   editable?: boolean;
   width?: string;
   height?: string;
+  rowActions?: MenuItem[];
   onCellUpdate?: (row: number, col: number, value: unknown) => void;
+  'data-testid'?: string;
 }
 
 export enum FilterTypes {
@@ -88,4 +95,18 @@ export enum SelectionModes {
   Cells = 'Cells',
   Rows = 'Rows',
   Columns = 'Columns',
+}
+
+/**
+ * Event args for row action click events
+ */
+export interface RowActionClickEventArgs {
+  /**
+   * The ID of the row (extracted from _hiddenKey column if available)
+   */
+  id: string | number | null;
+  /**
+   * The tag of the menu item that was clicked
+   */
+  tag?: string | null;
 }

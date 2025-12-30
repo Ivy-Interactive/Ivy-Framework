@@ -170,7 +170,7 @@ public class SheetWidthExamples : ViewBase
 
 ### Sheet with Navigation
 
-This example shows a sheet with internal navigation between multiple pages using state management.
+This example shows a sheet with internal navigation between multiple pages using [state management](../../../01_Onboarding/02_Concepts/State.md).
 
 ```csharp demo-tabs
 public class NavigationSheet : ViewBase
@@ -202,6 +202,138 @@ public class NavigationSheetContent : ViewBase
             | new Card(
                 $"This is the {pages[currentPage.Value]} page content"
             ).Title("Page Content");
+    }
+}
+```
+
+### Complex Layout Structure
+
+This pattern demonstrates how to integrate sheets with stateful [widgets](../../../01_Onboarding/02_Concepts/Widgets.md) using triggers. Click on any card to edit it in a sheet.
+
+```csharp demo-tabs
+public record TaskItem(string Id, string Title, string Status, int Priority, string Description);
+
+public class KanbanWithSheetExample : ViewBase
+{
+    public override object? Build()
+    {
+        var tasks = UseState(new[]
+        {
+            new TaskItem("1", "Design Homepage", "Todo", 1, "Create wireframes and mockups"),
+            new TaskItem("2", "Setup Database", "Todo", 2, "Configure PostgreSQL instance"),
+            new TaskItem("3", "Code Review", "In Progress", 1, "Review pull requests"),
+            new TaskItem("4", "Performance Optimization", "In Progress", 2, "Optimize database queries"),
+            new TaskItem("5", "Unit Tests", "Done", 1, "Write comprehensive test suite"),
+        });
+        
+        var client = UseService<IClientProvider>();
+        
+        var (sheetView, showEdit) = this.UseTrigger((IState<bool> isOpen, string taskId) =>
+            new TaskFormSheet(isOpen, taskId, tasks, client));
+        
+        var kanban = tasks.Value
+            .ToKanban(
+                groupBySelector: t => t.Status,
+                idSelector: t => t.Id,
+                orderSelector: t => t.Priority)
+            .CardBuilder(task => new Card(task.Title, task.Description)
+                .HandleClick(() => showEdit(task.Id)))
+            .HandleMove(moveData =>
+            {
+                var taskId = moveData.CardId?.ToString();
+                if (string.IsNullOrEmpty(taskId)) return;
+
+                var updatedTasks = tasks.Value.ToList();
+                var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                if (taskToMove == null) return;
+
+                var updated = taskToMove with { Status = moveData.ToColumn };
+                updatedTasks.RemoveAll(t => t.Id == taskId);
+
+                int insertIndex = updatedTasks.Count;
+
+                var taskAtTargetIndex = updatedTasks
+                    .Where(t => t.Status == moveData.ToColumn)
+                    .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+                if (taskAtTargetIndex != null)
+                {
+                    insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
+                }
+                else
+                {
+                    var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+                    if (lastTaskInColumn != null)
+                    {
+                        insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+                    }
+                }
+
+                updatedTasks.Insert(insertIndex, updated);
+                tasks.Set(updatedTasks.ToArray());
+            });
+        
+        return new Fragment()
+            | kanban
+            | sheetView;
+    }
+}
+
+public class TaskFormSheet : ViewBase
+{
+    private readonly IState<bool> _isOpen;
+    private readonly string _taskId;
+    private readonly IState<TaskItem[]> _tasks;
+    private readonly IClientProvider _client;
+    
+    public TaskFormSheet(IState<bool> isOpen, string taskId, IState<TaskItem[]> tasks, IClientProvider client)
+    {
+        _isOpen = isOpen;
+        _taskId = taskId;
+        _tasks = tasks;
+        _client = client;
+    }
+    
+    public override object? Build()
+    {
+        var task = UseState(() => _tasks.Value.FirstOrDefault(t => t.Id == _taskId) ?? 
+            new TaskItem(_taskId, "", "Todo", 1, ""));
+        
+        var (onSubmit, formView, validationView, loading) = Context.UseForm(() => task.ToForm()
+            .Required(m => m.Title, m => m.Description)
+            .Builder(m => m.Status, s => s.ToSelectInput(new[] { "Todo", "In Progress", "Done" }.ToOptions()))
+            .Builder(m => m.Description, s => s.ToTextAreaInput())
+            .Remove(m => m.Id));
+        
+        async ValueTask HandleSubmit()
+        {
+            if (await onSubmit())
+            {
+                var updatedTasks = _tasks.Value.ToList();
+                var index = updatedTasks.FindIndex(t => t.Id == _taskId);
+                if (index >= 0)
+                {
+                    updatedTasks[index] = task.Value;
+                }
+                _tasks.Set(updatedTasks.ToArray());
+                _client.Toast($"Updated: {task.Value.Title}");
+                _isOpen.Set(false);
+            }
+        }
+        
+        var layout = new FooterLayout(
+            Layout.Horizontal().Gap(2)
+                | new Button("Save").HandleClick(_ => HandleSubmit())
+                    .Loading(loading).Disabled(loading)
+                | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => _isOpen.Set(false))
+                | validationView,
+            formView
+        );
+        
+        return new Sheet(_ => _isOpen.Set(false), layout, 
+            title: "Edit Task",
+            description: "Update task details")
+            .Width(Size.Fraction(1/3f));
     }
 }
 ```

@@ -27,6 +27,7 @@ interface BoxWidgetProps {
   width?: string;
   height?: string;
   contentAlign: Align;
+  opacity?: number;
   className?: string;
 }
 
@@ -34,13 +35,14 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   children,
   width,
   height,
-  borderStyle,
-  borderRadius,
-  borderThickness,
+  borderStyle = 'Solid',
+  borderRadius = 'Rounded',
+  borderThickness = '1',
   color,
-  padding,
-  margin,
-  contentAlign,
+  padding = '2',
+  margin = '0',
+  contentAlign = 'TopLeft',
+  opacity,
   className,
 }) => {
   const styles: React.CSSProperties = {
@@ -53,7 +55,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
     ...getBorderStyle(borderStyle),
     ...getBorderThickness(borderThickness),
     ...getBorderRadius(borderRadius),
-    ...getColor(color, 'backgroundColor', 'background'),
+    ...getColor(color, 'backgroundColor', 'background', opacity),
     ...getColor(color, 'borderColor', 'background'),
     ...getColor(color, 'color', 'foreground'),
   };

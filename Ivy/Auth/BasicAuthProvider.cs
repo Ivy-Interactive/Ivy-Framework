@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
@@ -10,9 +10,6 @@ using Isopoh.Cryptography.Argon2;
 
 namespace Ivy.Auth;
 
-/// <summary>
-/// Basic authentication provider that uses JWT tokens and in-memory user storage.
-/// </summary>
 public class BasicAuthProvider : IAuthProvider
 {
     private readonly List<(string user, string hash)> _users = [];
@@ -23,9 +20,6 @@ public class BasicAuthProvider : IAuthProvider
 
     private static string TokenUseClaim => "https://ivy.app/claims/token_use";
 
-    /// <summary>
-    /// Initializes a new instance of the BasicAuthProvider with configuration from environment variables and user secrets.
-    /// </summary>
     public BasicAuthProvider()
     {
         var configuration = new ConfigurationBuilder()
@@ -65,14 +59,7 @@ public class BasicAuthProvider : IAuthProvider
         }
     }
 
-    /// <summary>
-    /// Authenticates a user with username and password.
-    /// </summary>
-    /// <param name="user">The user's username</param>
-    /// <param name="password">The user's password</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>An authentication token if successful, null otherwise</returns>
-    public Task<AuthToken?> LoginAsync(string user, string password, CancellationToken cancellationToken)
+    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string user, string password, CancellationToken cancellationToken)
     {
         var found = _users.Any(u => u.user == user && PasswordMatches(user, password, u.hash));
         if (!found) return Task.FromResult<AuthToken?>(null);
@@ -132,33 +119,22 @@ public class BasicAuthProvider : IAuthProvider
         return new AuthToken(accessToken, refreshToken);
     }
 
-    /// <summary>
-    /// Logs out a user by invalidating their access token.
-    /// </summary>
-    /// <param name="token">The access token to invalidate</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    public Task LogoutAsync(string token, CancellationToken cancellationToken)
+    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         // No server-side state to invalidate
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Refreshes an expired or expiring access token.
-    /// </summary>
-    /// <param name="token">The current authentication token</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>A new authentication token if successful, null otherwise</returns>
-    public Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
+    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         // Check that refresh token is provided
-        if (string.IsNullOrEmpty(token.RefreshToken))
+        if (string.IsNullOrEmpty(authSession.AuthToken?.RefreshToken))
         {
             return Task.FromResult<AuthToken?>(null);
         }
 
         // Validate refresh token
-        if (ValidateToken(token.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
+        if (ValidateToken(authSession.AuthToken.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
         {
             return Task.FromResult<AuthToken?>(null);
         }
@@ -184,57 +160,27 @@ public class BasicAuthProvider : IAuthProvider
         return Task.FromResult<AuthToken?>(newToken);
     }
 
-    /// <summary>
-    /// Generates an OAuth authorization URI for the specified option.
-    /// </summary>
-    /// <param name="option">The OAuth authentication option</param>
-    /// <param name="callback">The webhook endpoint for handling the OAuth callback</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The OAuth authorization URI</returns>
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>
-    /// Handles the OAuth callback request and extracts the authentication token.
-    /// </summary>
-    /// <param name="request">The HTTP request containing OAuth callback data</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>An authentication token if successful, null otherwise</returns>
-    public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>
-    /// Checks whether an access token is valid.
-    /// </summary>
-    /// <param name="token">The access token to validate</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>True if the token is valid, false otherwise</returns>
-    public Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken)
-        => Task.FromResult(ValidateAccessToken(token));
+    public Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    => Task.FromResult(ValidateAccessToken(authSession.AuthToken?.AccessToken));
 
-    /// <summary>
-    /// Checks whether an access token is valid.
-    /// </summary>
-    /// <param name="token">The access token to validate</param>
-    /// <returns>True if the token is valid, false otherwise</returns>
-    private bool ValidateAccessToken(string token)
+    private bool ValidateAccessToken(string? token)
     {
         return ValidateToken(token, _audience, "access") != null;
     }
 
-    /// <summary>
-    /// Retrieves user information using a valid access token.
-    /// </summary>
-    /// <param name="token">The access token</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>User information if successful, null otherwise</returns>
-    public Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
+    public Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (ValidateToken(token, _audience, "access") is not var (principal, _) ||
+        if (ValidateToken(authSession.AuthToken?.AccessToken, _audience, "access") is not var (principal, _) ||
             principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
         {
             return Task.FromResult<UserInfo?>(null);
@@ -243,35 +189,30 @@ public class BasicAuthProvider : IAuthProvider
         return Task.FromResult<UserInfo?>(new UserInfo(user, user, null, null));
     }
 
-    /// <summary>
-    /// Gets the available authentication options for this provider.
-    /// </summary>
-    /// <returns>Array of supported authentication options</returns>
     public AuthOption[] GetAuthOptions()
     {
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
 
-    /// <summary>
-    /// Retrieves the expiration time of the given authentication token.
-    /// </summary>
-    /// <param name="token">The authentication token</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The expiration time if available, null otherwise</returns>
-    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (ValidateToken(token.AccessToken, _audience, "access") is var (_, expiration))
+        if (ValidateToken(authSession.AuthToken?.AccessToken, _audience, "access") is var (_, expiration))
         {
-            return Task.FromResult<DateTimeOffset?>(expiration);
+            return Task.FromResult<TokenLifetime?>(new TokenLifetime(expiration));
         }
         else
         {
-            return Task.FromResult<DateTimeOffset?>(null);
+            return Task.FromResult<TokenLifetime?>(null);
         }
     }
 
-    private (ClaimsPrincipal, DateTimeOffset)? ValidateToken(string jwt, string audience, string tokenUse)
+    private (ClaimsPrincipal, DateTimeOffset)? ValidateToken(string? jwt, string audience, string tokenUse)
     {
+        if (string.IsNullOrEmpty(jwt))
+        {
+            return null;
+        }
+
         var handler = new JwtSecurityTokenHandler();
         try
         {

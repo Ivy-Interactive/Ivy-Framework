@@ -2,7 +2,8 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Code, searchHints: ["analyzer", "validation", "error", "debugging", "testing", "hooks"])]
+#pragma warning disable IVYHOOK001
+[App(icon: Icons.Code, isVisible: false, searchHints: ["analyzer", "validation", "error", "debugging", "testing", "hooks"])]
 public class ShouldFailWithAnalyser : ViewBase
 {
     public override object? Build()
@@ -26,3 +27,4 @@ public class ShouldFailWithAnalyser : ViewBase
     }
 
 }
+#pragma warning restore IVYHOOK001

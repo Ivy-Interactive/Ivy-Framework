@@ -44,6 +44,7 @@ You will be asked to name your connection, then prompted to choose a Spanner dat
 - **By component**: If an API necessary for enumerating databases is not enabled for your project, then you must manually enter the components that identify the database.
 
 A Spanner database is uniquely identified by three components:
+
 - **Project ID**
 - **Instance ID**
 - **Database ID**
@@ -67,12 +68,14 @@ Ivy automatically configures the **Google.Cloud.EntityFrameworkCore.Spanner** pa
 Ivy works with the Spanner emulator for development. Set up the emulator with:
 
 **Windows:**
+
 ```terminal
 >gcloud emulators spanner start
 >gcloud emulators spanner env-init > set_vars.cmd && set_vars.cmd
 ```
 
 **macOS/Linux:**
+
 ```terminal
 >gcloud emulators spanner start
 >$(gcloud emulators spanner env-init)
@@ -89,6 +92,7 @@ For more details on emulator setup, see the [Spanner Emulator documentation](htt
 ## Spanner-Specific Features
 
 Key features that Ivy can leverage:
+
 - **Interleaved tables** for parent-child relationships
 - **Strong consistency** across regions
 - **Secondary indexes** for query optimization
@@ -107,10 +111,12 @@ For more information, visit the [Spanner documentation](https://cloud.google.com
 ### Common Issues
 
 **Authentication Failed**
+
 - Ensure Google application credentials are properly configured
 - Verify service account has appropriate permissions
 
 **Connection Timeouts**
+
 - Check network connectivity to Google Cloud
 - Ensure your Spanner instance is running and healthy
 

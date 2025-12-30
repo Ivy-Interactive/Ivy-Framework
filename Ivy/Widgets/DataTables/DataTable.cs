@@ -4,20 +4,20 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Event arguments for cell click events in a DataTable.</summary>
 public class CellClickEventArgs
 {
-    /// <summary>The row index of the clicked cell.</summary>
     public int RowIndex { get; set; }
-
-    /// <summary>The column index of the clicked cell.</summary>
     public int ColumnIndex { get; set; }
-
-    /// <summary>The name of the column for the clicked cell.</summary>
     public string ColumnName { get; set; } = "";
-
-    /// <summary>The value of the clicked cell.</summary>
     public object? CellValue { get; set; }
+}
+
+public class RowActionClickEventArgs
+{
+    /// <summary> Id of the row where the event was fired. </summary>
+    public object? Id { get; set; }
+    /// <summary> Tag of the menu item that was clicked. </summary>
+    public object? Tag { get; set; }
 }
 
 public record DataTable : WidgetBase<DataTable>
@@ -27,27 +27,35 @@ public record DataTable : WidgetBase<DataTable>
         Size? width,
         Size? height,
         DataTableColumn[] columns,
-        DataTableConfiguration configuration
+        DataTableConfig config
     )
     {
         Width = width ?? Size.Full();
         Height = height ?? Size.Full();
         Connection = connection;
         Columns = columns;
-        Configuration = configuration;
+        Config = config;
     }
 
-    [Prop] public DataTableColumn[] Columns { get; set; }
+    internal DataTable()
+    {
+        Width = Size.Full();
+        Height = Size.Full();
+    }
 
-    [Prop] public DataTableConnection Connection { get; set; }
+    [Prop] public DataTableColumn[] Columns { get; set; } = [];
 
-    [Prop] public DataTableConfiguration Configuration { get; set; }
+    [Prop] public DataTableConnection? Connection { get; set; }
 
-    /// <summary>Event handler called when a cell is clicked (single-click).</summary>
+    [Prop] public DataTableConfig? Config { get; set; }
+
+    [Prop] public MenuItem[]? RowActions { get; set; }
+
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellClick { get; set; }
 
-    /// <summary>Event handler called when a cell is activated (double-clicked for editing).</summary>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellActivated { get; set; }
+
+    [Event] public Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? OnRowAction { get; set; }
 
     public static Detail operator |(DataTable widget, object child)
     {

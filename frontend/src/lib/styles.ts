@@ -1,8 +1,8 @@
 export const inputStyles = {
   invalid:
-    'bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus:ring-destructive focus:border-destructive',
+    'bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive',
   invalidInput:
-    'border-destructive text-destructive-foreground placeholder-destructive-foreground focus:ring-destructive focus:border-destructive',
+    'border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive',
 };
 
 export const getWidth = (width?: string): React.CSSProperties => {
@@ -20,9 +20,10 @@ export const getWidth = (width?: string): React.CSSProperties => {
 const _getWantedWidth = (width?: string): React.CSSProperties => {
   if (!width) return {};
   const [sizeType, value] = width.split(':');
+  const remValue = parseFloat(value) * 0.25;
   switch (sizeType.toLowerCase()) {
     case 'units':
-      return { width: `${parseFloat(value) * 0.25}rem` };
+      return { width: `${remValue}rem`, maxWidth: `${remValue}rem` };
     case 'px':
       return { width: `${value}px` };
     case 'rem':
@@ -513,10 +514,53 @@ export const getColor = (
     color.toLowerCase() + (role === 'background' ? '' : '-foreground');
   if (percentage && percentage > -100 && percentage < 100) {
     return {
-      [cssProperty]: `color-mix(in srgb, var(--${varName}),${percentage > 0 ? 'white' : 'black'} ${Math.abs(percentage)}%)`,
+      [cssProperty]: `color-mix(in srgb, var(--${varName}), var(--background) ${Math.abs(percentage)}%)`,
     };
   }
   return {
     [cssProperty]: 'var(--' + varName + ')',
   };
+};
+
+/**
+ * Converts Ivy Size format to CSS Grid column/row value
+ * Example: "Px:100" -> "100px", "Fraction:1" -> "1fr"
+ */
+export const convertSizeToGridValue = (size?: string): string => {
+  if (!size) return 'minmax(0, 1fr)';
+
+  const [sizeType, value] = size.split(':');
+
+  switch (sizeType.toLowerCase()) {
+    case 'px':
+      return `${value}px`;
+
+    case 'rem':
+      return `${value}rem`;
+
+    case 'units':
+      return `${parseFloat(value) * 0.25}rem`;
+
+    case 'fraction':
+      return `${value}fr`;
+
+    case 'full':
+      return '100%';
+
+    case 'fit':
+      return 'fit-content';
+
+    case 'mincontent':
+      return 'min-content';
+
+    case 'maxcontent':
+      return 'max-content';
+
+    case 'auto':
+      return 'auto';
+
+    default:
+      console.warn(`Unknown size type for grid: ${sizeType}`);
+      return 'minmax(0, 1fr)';
+  }
 };

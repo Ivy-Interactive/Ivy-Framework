@@ -11,10 +11,10 @@ searchHints:
 # NumberInput
 
 <Ingress>
-Capture numeric input with built-in validation, minimum/maximum constraints, step increments, and custom formatting options.
+Capture [numeric input](../../01_Onboarding/02_Concepts/Widgets.md) with built-in validation, minimum/maximum constraints, step increments, and custom formatting options.
 </Ingress>
 
-The `NumberInput` widget provides an input field specifically for numeric values. It includes validation for numeric entries and options for
+The `NumberInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provides an input field specifically for numeric values. It includes validation for numeric entries and options for
 setting minimum/maximum values, step increments, and formatting.
 
 <Callout Type="tip">
@@ -219,7 +219,7 @@ public class FormatStyleDemos : ViewBase
 
 ```
 
-## Event Handling
+## [Event Handling](../../01_Onboarding/02_Concepts/EventHandlers.md)
 
 `NumberInput`s can handle change and blur events:
 

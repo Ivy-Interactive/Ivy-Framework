@@ -12,7 +12,11 @@ export interface TerminalWidgetProps {
   showHeader?: boolean;
 }
 
-const TerminalWidget = ({ lines, title, showHeader }: TerminalWidgetProps) => {
+const TerminalWidget = ({
+  lines,
+  title,
+  showHeader = true,
+}: TerminalWidgetProps) => {
   const commandColor = 'text-white';
   const outputColor = 'text-muted-foreground';
 

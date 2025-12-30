@@ -1,7 +1,13 @@
-﻿// ReSharper disable once CheckNamespace
+using Ivy.Core;
+
+// ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Ivy loading animation.</summary>
 public record Loading : WidgetBase<Loading>
 {
+}
+
+public static class LoadingExtensions
+{
+
 }

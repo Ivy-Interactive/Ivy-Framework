@@ -19,7 +19,7 @@ Memoization helps Ivy applications run faster by caching results of expensive co
 Memoization in Ivy provides several powerful tools to optimize performance:
 
 - **`UseMemo`** - Caches the result of expensive computations
-- **`UseCallback`** - Memoizes callback functions to prevent unnecessary re-renders
+- **`UseCallback`** - Memoizes callback functions to prevent unnecessary re-renders.
 - **`IMemoized`** - Interface for component-level memoization
 
 These hooks work similarly to their React counterparts (`useMemo`, `useCallback`) but are designed specifically for Ivy's architecture.
@@ -116,7 +116,7 @@ public class ExpensiveCalculationView : ViewBase
 Use memoization when:
 
 - You have expensive computations that don't need to be redone on every render
-- You want to prevent unnecessary re-renders of child components
+- You want to prevent unnecessary re-renders of [child components](./Widgets.md)
 - You're dealing with complex data transformations
 
 ### Best Practices
@@ -303,7 +303,7 @@ public class TodoListView : ViewBase
 }
 ```
 
-#### Stable Dependencies for Effects
+#### Stable Dependencies for [Effects](./Effects.md)
 
 ```csharp
 public class DataFetcherView : ViewBase

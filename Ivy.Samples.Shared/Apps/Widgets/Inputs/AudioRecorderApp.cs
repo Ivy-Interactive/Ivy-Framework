@@ -20,24 +20,12 @@ public class AudioRecorderApp() : SampleBase
                | Text.H1("Audio Recorder Widget Examples")
                | Text.P("Demonstrates the AudioRecorder widget for capturing audio input. This widget is for recording audio, not playing it. The recorder interface is theme-aware and adapts to light/dark themes.")
                | Text.H2("Upload Examples")
-               | new Card(new AudioRecorderChunkedUpload()).Title("Chunked Upload")
-               | new Card(new AudioRecorderSingleUpload()).Title("Single Upload")
+               | (Layout.Horizontal().Gap(4)
+                    | new Card(new AudioRecorderBasic()).Title("Basic")
+                    | new Card(new AudioRecorderChunkedUpload()).Title("Chunked Upload")
+                    | new Card(new AudioRecorderDisabledState()).Title("Disabled State"))
                | Text.H2("Sizes")
-               | CreateSizesSection(dummyUpload.Value)
-               | Text.H2("Basic Examples")
-               | Layout.Vertical().Gap(6)
-                   | (new Card(
-                       Layout.Vertical().Gap(4)
-                       | Text.H4("Basic Audio Recorder")
-                       | Text.Small("Default audio recorder with microphone access.")
-                       | new AudioRecorder(dummyUpload.Value, "Start recording", "Recording audio...")
-                   ).Title("Basic Usage"))
-                   | (new Card(
-                       Layout.Vertical().Gap(4)
-                       | Text.H4("Disabled Audio Recorder")
-                       | Text.Small("Audio recorder in disabled state.")
-                       | new AudioRecorder(dummyUpload.Value, "Start recording", "Recording audio...", disabled: true)
-                   ).Title("Disabled State"));
+               | CreateSizesSection(dummyUpload.Value);
     }
 
     private object CreateSizesSection(UploadContext upload)
@@ -57,6 +45,37 @@ public class AudioRecorderApp() : SampleBase
                | new AudioRecorder(upload, "Start recording", "Recording audio...", disabled: true).Small()
                | new AudioRecorder(upload, "Start recording", "Recording audio...", disabled: true)
                | new AudioRecorder(upload, "Start recording", "Recording audio...", disabled: true).Large();
+    }
+}
+
+public class AudioRecorderBasic : ViewBase
+{
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        var audioFile = UseState<FileUpload<byte[]>?>();
+
+        // Use MemoryStreamUploadHandler for basic upload
+        var upload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(audioFile),
+            defaultContentType: "audio/webm"
+        );
+
+        // Show toast when upload completes
+        UseEffect(() =>
+        {
+            if (audioFile.Value?.Status == FileUploadStatus.Finished)
+            {
+                client.Toast($"Recording uploaded: {Utils.FormatBytes(audioFile.Value.Length)}", "Upload Complete");
+            }
+        }, audioFile);
+
+        return Layout.Vertical().Gap(4)
+               | Text.P("Basic AudioRecorder example. Records audio and uploads the complete recording when you stop.")
+               | new AudioRecorder(upload.Value, "Start recording", "Recording audio...")
+               | (audioFile.Value != null
+                   ? Text.Small($"Last upload: {Utils.FormatBytes(audioFile.Value.Length)}")
+                   : Text.Small("No recordings uploaded yet"));
     }
 }
 
@@ -96,33 +115,18 @@ public class AudioRecorderChunkedUpload : ViewBase
     }
 }
 
-public class AudioRecorderSingleUpload : ViewBase
+public class AudioRecorderDisabledState : ViewBase
 {
     public override object? Build()
     {
-        var client = UseService<IClientProvider>();
-        var audioFile = UseState<FileUpload<byte[]>?>();
-
-        // Use MemoryStreamUploadHandler for single complete upload
-        var upload = this.UseUpload(
-            MemoryStreamUploadHandler.Create(audioFile),
+        // Create a dummy upload for display-only example
+        var dummyUpload = this.UseUpload(
+            (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
             defaultContentType: "audio/webm"
         );
 
-        // Show toast when upload completes
-        UseEffect(() =>
-        {
-            if (audioFile.Value?.Status == FileUploadStatus.Finished)
-            {
-                client.Toast($"Recording uploaded: {Utils.FormatBytes(audioFile.Value.Length)}", "Upload Complete");
-            }
-        }, audioFile);
-
         return Layout.Vertical().Gap(4)
-               | Text.P("Records audio and uploads the complete recording when you stop. No chunks during recording.")
-               | new AudioRecorder(upload.Value, "Start single recording", "Recording (will upload when stopped)...")
-               | (audioFile.Value != null
-                   ? Text.Small($"Last upload: {Utils.FormatBytes(audioFile.Value.Length)}")
-                   : Text.Small("No recordings uploaded yet"));
+               | Text.P("Demonstrates the AudioRecorder widget in a disabled state. The recorder is non-interactive and cannot be used for recording.")
+               | new AudioRecorder(dummyUpload.Value, "Start recording", "Recording audio...", disabled: true);
     }
 }

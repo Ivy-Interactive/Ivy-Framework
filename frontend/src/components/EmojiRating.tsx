@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 
 interface EmojiRatingProps {
   value: number;
   onRate?: (rating: number) => void;
-  size?: Sizes;
+  scale?: Scales;
   className?: string;
   disabled?: boolean;
   invalid?: string;
@@ -19,7 +19,7 @@ const emojis = ['😢', '😕', '😐', '🙂', '😊'];
 export function EmojiRating({
   value = 0,
   onRate,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   className,
   disabled = false,
   invalid,
@@ -56,7 +56,7 @@ export function EmojiRating({
               'transition-transform duration-200',
               'hover:scale-125 active:scale-90 cursor-pointer',
               disabled && 'cursor-not-allowed hover:scale-100',
-              emojiSizes[size]
+              emojiSizes[scale]
             )}
             onClick={() => handleRating(index + 1)}
             onMouseEnter={() => !disabled && setHover(index + 1)}

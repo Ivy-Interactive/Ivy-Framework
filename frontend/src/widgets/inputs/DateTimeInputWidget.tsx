@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 import {
   dateTimeInputVariants,
   dateTimeInputIconVariants,
@@ -32,7 +32,7 @@ interface DateTimeInputWidgetProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
-  size?: Sizes;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -44,7 +44,7 @@ interface BaseVariantProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
-  size?: Sizes;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -69,7 +69,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
   invalid,
   onDateChange,
   format: formatProp,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -91,60 +91,42 @@ const DateVariant: React.FC<DateVariantProps> = ({
   );
 
   return (
-    <div className="relative flex items-center gap-2">
+    <div className="relative w-full select-none">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             disabled={disabled}
             variant="outline"
             className={cn(
-              dateTimeInputVariants({ size }),
+              dateTimeInputVariants({ scale }),
+              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
-              disabled && 'cursor-not-allowed'
+              disabled && 'cursor-not-allowed',
+              showClear && invalid
+                ? 'pr-16'
+                : showClear || invalid
+                  ? 'pr-8'
+                  : ''
             )}
             data-testid={dataTestId}
           >
             <CalendarIcon
               className={cn(
-                'mr-3 flex-shrink-0',
-                dateTimeInputIconVariants({ size })
+                'mr-2 shrink-0',
+                dateTimeInputIconVariants({ scale })
               )}
             />
-            <span className={cn('truncate', (showClear || invalid) && 'pr-10')}>
+            <span
+              className={cn(
+                'truncate',
+                dateTimeInputTextVariants({ scale }),
+                !date && 'text-muted-foreground'
+              )}
+            >
               {date
                 ? format(date, formatProp || 'yyyy-MM-dd')
                 : placeholder || 'Pick a date'}
             </span>
-            {/* Icons absolutely positioned inside the button */}
-            {(showClear || invalid) && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
-                {showClear && (
-                  <span
-                    role="button"
-                    tabIndex={-1}
-                    aria-label="Clear"
-                    onClick={e => handleClear(e)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleClear();
-                      }
-                    }}
-                    className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-                    style={{ pointerEvents: 'auto' }}
-                  >
-                    <X
-                      className={cn(
-                        dateTimeInputIconVariants({ size }),
-                        'text-muted-foreground hover:text-foreground'
-                      )}
-                    />
-                  </span>
-                )}
-                {invalid && <InvalidIcon message={invalid} />}
-              </span>
-            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -153,10 +135,35 @@ const DateVariant: React.FC<DateVariantProps> = ({
             selected={date}
             onSelect={handleSelect}
             initialFocus
-            size={size}
+            scale={scale}
           />
         </PopoverContent>
       </Popover>
+      {/* Icons absolutely positioned */}
+      {(showClear || invalid) && (
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <X
+                className={cn(
+                  dateTimeInputIconVariants({ scale }),
+                  'text-muted-foreground hover:text-foreground'
+                )}
+              />
+            </button>
+          )}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -170,7 +177,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onDateChange,
   onTimeChange,
   format: formatProp,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -200,11 +207,14 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
       if (date) {
         const newTimeValue = format(date, formatProp || 'HH:mm:ss');
         setLocalTimeValue(newTimeValue);
+      } else if (nullable) {
+        // When nullable and no date, keep input empty instead of defaulting to '00:00:00'
+        setLocalTimeValue('');
       } else {
         setLocalTimeValue('00:00:00');
       }
     }
-  }, [date, formatProp, isEditingTime]);
+  }, [date, formatProp, isEditingTime, nullable]);
 
   const handleDateSelect = useCallback(
     (selectedDate: Date | undefined) => {
@@ -285,53 +295,48 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   }, []);
 
   return (
-    <div className="relative flex items-center gap-2">
+    <div className="relative w-full select-none">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             disabled={disabled}
             variant="outline"
             className={cn(
-              dateTimeInputVariants({ size }),
+              dateTimeInputVariants({ scale }),
+              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
-              disabled && 'cursor-not-allowed'
+              disabled && 'cursor-not-allowed',
+              showClear && invalid
+                ? 'pr-16'
+                : showClear || invalid
+                  ? 'pr-8'
+                  : ''
             )}
             data-testid={dataTestId}
           >
             <CalendarIcon
               className={cn(
-                'mr-3 flex-shrink-0',
-                dateTimeInputIconVariants({ size })
+                'mr-2 shrink-0',
+                dateTimeInputIconVariants({ scale })
               )}
             />
-            <span className={cn('truncate', (showClear || invalid) && 'pr-10')}>
+            <Clock
+              className={cn(
+                'mr-2 shrink-0',
+                dateTimeInputIconVariants({ scale })
+              )}
+            />
+            <span
+              className={cn(
+                'truncate',
+                dateTimeInputTextVariants({ scale }),
+                !date && 'text-muted-foreground'
+              )}
+            >
               {date
                 ? format(date, formatProp || 'yyyy-MM-dd')
                 : placeholder || 'Pick a date & time'}
             </span>
-            {/* Icons absolutely positioned inside the button */}
-            {(showClear || invalid) && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
-                {showClear && (
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Clear"
-                    onClick={handleClear}
-                    className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-                    style={{ pointerEvents: 'auto' }}
-                  >
-                    <X
-                      className={cn(
-                        dateTimeInputIconVariants({ size }),
-                        'text-muted-foreground hover:text-foreground'
-                      )}
-                    />
-                  </button>
-                )}
-                {invalid && <InvalidIcon message={invalid} />}
-              </span>
-            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -341,12 +346,12 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               selected={date}
               onSelect={handleDateSelect}
               initialFocus
-              size={size}
+              scale={scale}
             />
             <div className="flex items-center gap-2">
               <Clock
                 className={cn(
-                  dateTimeInputIconVariants({ size }),
+                  dateTimeInputIconVariants({ scale }),
                   'text-muted-foreground'
                 )}
               />
@@ -360,8 +365,8 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                 onKeyDown={handleTimeKeyDown}
                 disabled={disabled}
                 className={cn(
-                  'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden',
-                  dateTimeInputTextVariants({ size }),
+                  'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden',
+                  dateTimeInputTextVariants({ scale }),
                   invalid && inputStyles.invalidInput
                 )}
                 data-testid={dataTestId ? `${dataTestId}-time` : undefined}
@@ -370,6 +375,31 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
           </div>
         </PopoverContent>
       </Popover>
+      {/* Icons absolutely positioned */}
+      {(showClear || invalid) && (
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <X
+                className={cn(
+                  dateTimeInputIconVariants({ scale }),
+                  'text-muted-foreground hover:text-foreground'
+                )}
+              />
+            </button>
+          )}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -381,7 +411,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
   nullable,
   invalid,
   onTimeChange,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   // Use local state for the input value to make it uncontrolled
@@ -403,7 +433,8 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
         }
       }
     }
-    return '00:00:00';
+    // When nullable and no value, return empty string to show placeholder
+    return nullable ? '' : '00:00:00';
   });
 
   // Update local state when value prop changes (from parent)
@@ -426,9 +457,10 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
         }
       }
     } else {
-      setLocalTimeValue('00:00:00');
+      // When nullable and no value, keep input empty instead of defaulting to '00:00:00'
+      setLocalTimeValue(nullable ? '' : '00:00:00');
     }
-  }, [value]);
+  }, [value, nullable]);
 
   const showClear = nullable && !disabled && value != null && value !== '';
 
@@ -462,18 +494,24 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
   );
 
   return (
-    <div className="relative flex items-center" data-testid={dataTestId}>
-      <Clock
+    <div className="relative w-full select-none" data-testid={dataTestId}>
+      <div
         className={cn(
-          'mr-3 flex-shrink-0',
-          dateTimeInputIconVariants({ size }),
-          'text-muted-foreground'
+          'relative flex items-center rounded-md border border-input shadow-sm focus-within:ring-1 focus-within:ring-ring',
+          invalid && inputStyles.invalidInput
         )}
-      />
-      <div className="relative flex-1">
+      >
+        <Clock
+          className={cn(
+            'ml-3 shrink-0',
+            dateTimeInputIconVariants({ scale }),
+            disabled && 'opacity-50'
+          )}
+        />
         <Input
           type="time"
           step="1"
+          scale={scale}
           value={localTimeValue}
           onChange={handleTimeChange}
           onBlur={handleTimeBlur}
@@ -481,36 +519,39 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
           disabled={disabled}
           placeholder={placeholder || 'Select time'}
           className={cn(
-            'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full',
-            dateTimeInputTextVariants({ size }),
-            (showClear || invalid) && 'pr-20',
+            'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0',
+            dateTimeInputTextVariants({ scale }),
             invalid && inputStyles.invalidInput,
-            disabled && 'cursor-not-allowed'
+            disabled && 'cursor-not-allowed',
+            showClear && invalid ? 'pr-16' : showClear || invalid ? 'pr-8' : ''
           )}
         />
-        {(showClear || invalid) && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
-            {showClear && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={handleClear}
-                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <X
-                  className={cn(
-                    dateTimeInputIconVariants({ size }),
-                    'text-muted-foreground hover:text-foreground'
-                  )}
-                />
-              </button>
-            )}
-            {invalid && <InvalidIcon message={invalid} />}
-          </span>
-        )}
       </div>
+      {/* Icons absolutely positioned */}
+      {(showClear || invalid) && (
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <X
+                className={cn(
+                  dateTimeInputIconVariants({ scale }),
+                  'text-muted-foreground hover:text-foreground'
+                )}
+              />
+            </button>
+          )}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -530,7 +571,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   nullable = false,
   invalid,
   format: formatProp,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -577,7 +618,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       nullable={nullable}
       invalid={invalid}
       format={formatProp}
-      size={size}
+      scale={scale}
       onDateChange={handleDateChange}
       onTimeChange={handleTimeChange}
       data-testid={dataTestId}

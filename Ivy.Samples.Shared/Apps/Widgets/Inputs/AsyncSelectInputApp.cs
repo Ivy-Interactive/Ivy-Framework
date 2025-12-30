@@ -16,9 +16,13 @@ public class AsyncSelectInputApp : SampleBase
         async Task<Option<Guid?>[]> QueryCategories(string query)
         {
             await using var db = factory.CreateDbContext();
+            var lowerQuery = query.ToLowerInvariant();
             return [.. (await db.Categories
-                    .Where(e => e.Name.Contains(query))
+                    .Where(e => EF.Functions.Like(e.Name.ToLower(), $"%{lowerQuery}%"))
+                    .OrderBy(e => e.Name)
+                    .ThenBy(e => e.Id)
                     .Select(e => new { e.Id, e.Name })
+                    .Distinct()
                     .Take(50)
                     .ToArrayAsync())
                 .Select(e => new Option<Guid?>(e.Name, e.Id))];

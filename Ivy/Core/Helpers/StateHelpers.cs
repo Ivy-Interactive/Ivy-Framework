@@ -109,4 +109,12 @@ public static class StateHelpers
         var disposable = derivedState.SubscribeAny(e => model.SetValue(selector, e));
         return (derivedState, disposable);
     }
+
+    public static void Incr(this IState<int> state) => state.Set(state.Value + 1);
+
+    public static void Decr(this IState<int> state) => state.Set(state.Value - 1);
+
+    public static object? True(this IState<bool> state, Func<object?> func) => state.Value ? func() : null!;
+
+    public static object? False(this IState<bool> state, Func<object?> func) => !state.Value ? func() : null!;
 }

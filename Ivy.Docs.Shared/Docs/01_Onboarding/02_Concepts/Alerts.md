@@ -19,15 +19,15 @@ Communicate with users effectively using modal dialog alerts for important confi
 Ivy provides two main types of alerts:
 
 1. **Dialog Alerts** - Modal dialogs for important confirmations and decisions
-2. **Toast Notifications** - Non-blocking notifications for feedback and status updates
+2. **Toast Notifications** - Non-blocking notifications for [feedback](../../02_Widgets/02_Inputs/Feedback.md) and status updates
 
 ## Dialog Alerts
 
-Dialog alerts are modal windows that require user interaction. They're perfect for confirmations, important messages, or collecting user decisions.
+Dialog alerts are modal windows that require [user interaction](./EventHandlers.md). They're perfect for confirmations, important messages, or collecting user decisions.
 
 ### Basic Dialog Alert
 
-```csharp demo-below 
+```csharp demo-below
 public class BasicDialogAlertDemo : ViewBase
 {
     public override object? Build()
@@ -51,7 +51,7 @@ public class BasicDialogAlertDemo : ViewBase
 
 Dialog alerts support different button combinations:
 
-```csharp demo-below 
+```csharp demo-below
 public class AlertButtonSetsDemo : ViewBase
 {
     public override object? Build()
@@ -59,7 +59,7 @@ public class AlertButtonSetsDemo : ViewBase
         var (alertView, showAlert) = this.UseAlert();
         var client = UseService<IClientProvider>();
 
-        return Layout.Vertical(
+        return Layout.Horizontal(
             new Button("Ok Only", _ => 
                 showAlert("This is an info message", _ => {}, "Information", AlertButtonSet.Ok)
             ),
@@ -90,14 +90,14 @@ Toast notifications are lightweight, non-blocking messages that appear temporari
 
 ### Basic Toast Notifications
 
-```csharp demo-below 
+```csharp demo-below
 public class BasicToastDemo : ViewBase
 {
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
 
-        return Layout.Vertical(
+        return Layout.Horizontal(
             new Button("Success Toast", _ => 
                 client.Toast("Operation completed successfully!", "Success")
             ),
@@ -114,14 +114,14 @@ public class BasicToastDemo : ViewBase
 
 ### Toast with Exception Handling
 
-```csharp demo-below 
+```csharp demo-below
 public class ToastExceptionDemo : ViewBase
 {
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
 
-        return Layout.Vertical(
+        return Layout.Horizontal(
             new Button("Simulate Error", _ => {
                 try {
                     throw new InvalidOperationException("Something went wrong!");
@@ -141,7 +141,7 @@ public class ToastExceptionDemo : ViewBase
 
 ### Form Submission with Feedback
 
-```csharp demo-below 
+```csharp demo-below
 public class FormSubmissionDemo : ViewBase
 {
     public override object? Build()
@@ -172,33 +172,3 @@ public class FormSubmissionDemo : ViewBase
     }
 }
 ```
-
-## Best Practices
-
-### When to Use Dialog Alerts
-
-- Confirming destructive actions (delete, reset, etc.)
-- Important decisions that affect data
-- Critical error messages that require acknowledgment
-- Multi-step processes requiring user choice
-
-### When to Use Toast Notifications
-
-- Success confirmations after actions
-- Non-critical error messages
-- Status updates and progress notifications
-- Quick feedback that doesn't require user action
-
-### Writing Good Alert Messages
-
-1. **Be Clear**: Use simple, direct language
-2. **Be Specific**: Explain exactly what will happen
-3. **Be Actionable**: Make it clear what the user needs to do
-4. **Be Concise**: Keep messages as short as possible while staying informative
-
-### Accessibility Considerations
-
-- Alert dialogs automatically focus and trap keyboard navigation
-- Toast messages are announced by screen readers
-- Button labels should be descriptive (avoid just "OK" when possible)
-- Important alerts should be modal to ensure they're not missed

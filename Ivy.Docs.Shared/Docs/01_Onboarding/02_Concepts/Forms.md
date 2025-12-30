@@ -13,7 +13,7 @@ searchHints:
 # Forms
 
 <Ingress>
-Build robust forms with built-in state management, validation, and submission handling for collecting and processing user input.
+Build robust forms with built-in [state management](./State.md), validation, and submission handling for collecting and processing user input.
 </Ingress>
 
 <Callout Type="important">
@@ -22,7 +22,7 @@ Do not manually create form layouts. Always use `.ToForm()` on your state object
 
 ## Basic Usage
 
-The simplest way to create a form is to call `.ToForm()` on a state object. The FormBuilder automatically scaffolds appropriate input fields based on your model's property types.
+The simplest way to create a form is to call `.ToForm()` on a state object. The FormBuilder automatically scaffolds appropriate input fields based on your model's property types, providing automatic state management and validation.
 
 ```csharp demo-tabs
 public class BasicFormExample : ViewBase
@@ -38,9 +38,13 @@ public class BasicFormExample : ViewBase
 }
 ```
 
+<Callout Type="tip">
+**Automatic Email Validation**: Fields ending with "Email" (like `UserEmail`, `ContactEmail`) automatically get email validation, even without the `[EmailAddress]` attribute.
+</Callout>
+
 ### Automatic Field Generation
 
-The FormBuilder automatically maps C# types to appropriate input widgets:
+The FormBuilder automatically maps C# types to appropriate [input widgets](./Widgets.md):
 
 | C# Type | Generated Input | Notes |
 |---------|----------------|-------|
@@ -163,7 +167,7 @@ public class RequiredFieldsExample : ViewBase
 
 ### Field Placement
 
-Control field placement using `.Place()` methods for custom layouts.
+Control field placement using `.Place()` and `.PlaceHorizontal()` methods for custom layouts.
 
 ```csharp demo-tabs
 public class LayoutControlExample : ViewBase
@@ -182,8 +186,8 @@ public class LayoutControlExample : ViewBase
         
         return address.ToForm()
             .Place(m => m.Street)                    // Single field spans full width
-            .Place(true, m => m.City, m => m.State)  // Two fields side-by-side, sharing row width
-            .Place(true, m => m.ZipCode, m => m.Country) // Two fields side-by-side, sharing row width
+            .PlaceHorizontal(m => m.City, m => m.State)  // Two fields side-by-side, sharing row width
+            .PlaceHorizontal(m => m.ZipCode, m => m.Country) // Two fields side-by-side, sharing row width
             .Label(m => m.Street, "Street Address")
             .Label(m => m.City, "City")
             .Label(m => m.State, "State/Province")
@@ -301,17 +305,38 @@ public class ValidationExample : ViewBase
 {
     public class UserModel
     {
-        [Required, MinLength(3)]
+        [Required(ErrorMessage = "Username is required")]
+        [Length(3, 50, ErrorMessage = "Username must be between 3 and 50 characters")]
         public string Username { get; set; } = "";
         
-        [Required, EmailAddress]
+        [Required]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
+        [MaxLength(100)]
         public string Email { get; set; } = "";
         
-        [Required, MinLength(8)]
+        [Required]
+        [Length(8, 100, ErrorMessage = "Password must be between 8 and 100 characters")]
+        [DataType(DataType.Password)]
         public string Password { get; set; } = "";
         
-        [Range(13, 120)]
+        [Range(13, 120, ErrorMessage = "Age must be between 13 and 120")]
         public int Age { get; set; } = 18;
+        
+        [Phone(ErrorMessage = "Please enter a valid phone number")]
+        public string? PhoneNumber { get; set; }
+        
+        [Url(ErrorMessage = "Please enter a valid URL")]
+        public string? Website { get; set; }
+        
+        [AllowedValues("USA", "Canada", "UK", ErrorMessage = "Please select a valid country")]
+        public string Country { get; set; } = "USA";
+        
+        [RegularExpression(@"^\d{5}(-\d{4})?$", ErrorMessage = "ZIP code must be in format 12345 or 12345-6789")]
+        public string? ZipCode { get; set; }
+        
+        [CreditCard(ErrorMessage = "Please enter a valid credit card number")]
+        [Length(13, 19, ErrorMessage = "Credit card number must be between 13 and 19 digits")]
+        public string? CreditCardNumber { get; set; }
         
         public DateTime BirthDate { get; set; } = DateTime.Now;
     }
@@ -330,7 +355,10 @@ public class ValidationExample : ViewBase
             }
         }, user);
         
+        var countryOptions = new[] { "USA", "Canada", "UK" }.ToOptions();
+        
         return user.ToForm("Create Account")
+            .Builder(m => m.Country, s => s.ToSelectInput(countryOptions))
             // Custom validation: birth date cannot be in the future
             .Validate<DateTime>(m => m.BirthDate, birthDate => 
                 (birthDate <= DateTime.Now, "Birth date cannot be in the future"))
@@ -341,24 +369,195 @@ public class ValidationExample : ViewBase
 }
 ```
 
-This example demonstrates:
-- **DataAnnotations** for standard validation (Required, MinLength, EmailAddress, Range)
-- **Custom `.Validate()`** for business logic that operates on individual field values
-
-<Callout Type="tip">
-**Automatic Email Validation**: Fields ending with "Email" (like `UserEmail`, `ContactEmail`) automatically get email validation, even without the `[EmailAddress]` attribute.
+<Callout Type="info">
+**Supported DataAnnotations**: Forms support all standard .NET DataAnnotations including `[Required]`, `[Length]`, `[MinLength]`, `[MaxLength]`, `[Range]`, `[EmailAddress]`, `[Phone]`, `[Url]`, `[CreditCard]`, `[RegularExpression]`, `[AllowedValues]`, and `[DataType]`. All attributes support custom error messages via the `ErrorMessage` parameter.
 </Callout>
 
-**Supported DataAnnotations:**
+### Display Attributes
 
-- `[Required]` - Field must have a value
-- `[MinLength(n)]` - Minimum string length
-- `[MaxLength(n)]` - Maximum string length
-- `[Range(min, max)]` - Value must be within range
-- `[EmailAddress]` - Valid email format
-- `[Phone]` - Valid phone number format
-- `[Url]` - Valid URL format
-- `[RegularExpression(pattern)]` - Match a regex pattern
+The `[Display]` attribute provides powerful control over how fields appear in your forms without requiring additional configuration code.
+
+```csharp demo-tabs
+public class DisplayAttributeExample : ViewBase
+{
+    public class UserRegistrationModel
+    {
+        [Display(Name = "Full Name", Description = "Enter your complete legal name", Order = 1)]
+        [Required(ErrorMessage = "Full name is required")]
+        [Length(2, 100)]
+        public string Name { get; set; } = "";
+
+        [Display(Name = "Email Address", Description = "We'll use this for account verification", Order = 2)]
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Display(Name = "Phone Number", Description = "For account security purposes", Prompt = "+1-234-567-8900", Order = 3)]
+        [Phone]
+        public string? PhoneNumber { get; set; }
+
+        [Display(GroupName = "Account Security", Name = "Password", Order = 4)]
+        [Required]
+        [Length(8, 100)]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(GroupName = "Account Security", Name = "Confirm Password", Order = 5)]
+        [Required]
+        [DataType(DataType.Password)]
+        public string ConfirmPassword { get; set; } = "";
+
+        [Display(GroupName = "Preferences", Name = "Newsletter Subscription", Description = "Receive weekly updates", Order = 6)]
+        public bool SubscribeToNewsletter { get; set; } = false;
+
+        [Display(GroupName = "Preferences", Name = "Preferred Theme", Order = 7)]
+        [AllowedValues("Light", "Dark", "Auto")]
+        public string Theme { get; set; } = "Auto";
+    }
+
+    public override object? Build()
+    {
+        var user = UseState(() => new UserRegistrationModel());
+        var client = UseService<IClientProvider>();
+        
+        UseEffect(() =>
+        {
+            if (!string.IsNullOrEmpty(user.Value.Name))
+            {
+                client.Toast($"Registration completed for {user.Value.Name}!");
+            }
+        }, user);
+
+        var themeOptions = new[] { "Light", "Dark", "Auto" }.ToOptions();
+        
+        return user.ToForm("Create Account")
+            .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions))
+            .Builder(m => m.Password, s => s.ToPasswordInput())
+            .Builder(m => m.ConfirmPassword, s => s.ToPasswordInput())
+            .Validate<string>(m => m.ConfirmPassword, confirmPassword =>
+                (confirmPassword == user.Value.Password, "Passwords must match"));
+    }
+}
+```
+
+The `[Display]` attribute supports these properties:
+
+- **Name**: Custom field label (overrides automatic label generation)
+- **Description**: Help text shown below the field
+- **Order**: Field ordering (lower numbers appear first)
+- **GroupName**: Groups related fields together
+- **Prompt**: Placeholder text for input fields
+
+### Programmatic Validation
+
+In addition to DataAnnotations, you can add validation programmatically using FormBuilder methods:
+
+```csharp demo-tabs
+public class ProgrammaticValidationExample : ViewBase
+{
+    public record ProductModel(
+        string Name,
+        string? Description,
+        decimal Price,
+        int Stock
+    );
+
+    public override object? Build()
+    {
+        var product = UseState(() => new ProductModel("", null, 0.0m, 0));
+        
+        return product.ToForm()
+            // Mark fields as required programmatically
+            .Required(m => m.Name, m => m.Price)
+            // Add custom validation logic
+            .Validate<string>(m => m.Name, name =>
+                (name.Length >= 3, "Product name must be at least 3 characters"))
+            .Validate<decimal>(m => m.Price, price =>
+                (price > 0, "Price must be greater than zero"))
+            .Validate<int>(m => m.Stock, stock =>
+                (stock >= 0, "Stock cannot be negative"))
+            .Label(m => m.Name, "Product Name")
+            .Label(m => m.Description, "Description")
+            .Label(m => m.Price, "Price")
+            .Label(m => m.Stock, "Stock Quantity");
+    }
+}
+```
+
+**Programmatic Validation Methods:**
+
+- `.Required(params Expression<Func<TModel, object>>[] fields)` - Mark fields as required
+- `.Validate<T>(Expression<Func<TModel, object>> field, Func<T, (bool, string)> validator)` - Add custom validation with custom error message
+
+### Validation Examples
+
+#### Collections and Arrays
+
+```csharp demo-tabs
+public class CollectionValidationExample : ViewBase
+{
+    public class SurveyModel
+    {
+        [Display(Name = "Interests", Description = "Select at least one interest")]
+        [Required(ErrorMessage = "Please select at least one interest")]
+        [MinLength(1, ErrorMessage = "You must select at least one interest")]
+        [AllowedValues("Technology", "Sports", "Music", "Art", "Travel")]
+        public string[] Interests { get; set; } = Array.Empty<string>();
+        
+        [Display(Name = "Tags")]
+        [Length(1, 5, ErrorMessage = "Select between 1 and 5 tags")]
+        public List<string> Tags { get; set; } = new();
+    }
+
+    public override object? Build()
+    {
+        var survey = UseState(() => new SurveyModel());
+        var interestOptions = new[] { "Technology", "Sports", "Music", "Art", "Travel" }.ToOptions();
+        var tagOptions = new[] { "New", "Popular", "Featured", "Sale", "Limited" }.ToOptions();
+        
+        return survey.ToForm()
+            .Builder(m => m.Interests, s => s.ToSelectInput(interestOptions).List())
+            .Builder(m => m.Tags, s => s.ToSelectInput(tagOptions).List());
+    }
+}
+```
+
+#### Combining Multiple Validators
+
+```csharp demo-tabs
+public class MultipleValidatorsExample : ViewBase
+{
+    public class AccountModel
+    {
+        [Display(Name = "Username")]
+        [Required(ErrorMessage = "Username is required")]
+        [Length(3, 20, ErrorMessage = "Username must be between 3 and 20 characters")]
+        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Username can only contain letters, numbers, and underscores")]
+        public string Username { get; set; } = "";
+        
+        [Display(Name = "Email")]
+        [Required]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [MaxLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
+        public string Email { get; set; } = "";
+        
+        [Display(Name = "Password")]
+        [Required]
+        [Length(8, 128, ErrorMessage = "Password must be between 8 and 128 characters")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)", ErrorMessage = "Password must contain uppercase, lowercase, and a number")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+    }
+
+    public override object? Build()
+    {
+        var account = UseState(() => new AccountModel());
+        
+        return account.ToForm("Create Account")
+            .Builder(m => m.Password, s => s.ToPasswordInput());
+    }
+}
+```
 
 ## Form Submission
 
@@ -392,7 +591,7 @@ public class FormSubmissionExample : ViewBase
 
 ### Form Submission with State Updates
 
-React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully.
+React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully, triggering [state changes](./State.md) and UI updates.
 
 ```csharp demo-tabs
 public class FormStatesExample : ViewBase
@@ -556,7 +755,7 @@ public class DynamicConfigurationExample : ViewBase
 
 ### Sheet Forms
 
-Open forms in slide-out sheets using `.ToSheet()`.
+Open forms in slide-out [sheets](../../02_Widgets/07_Advanced/Sheet.md) using `.ToSheet()`.
 
 ```csharp demo-tabs
 public class SheetFormExample : ViewBase
@@ -584,7 +783,7 @@ public class SheetFormExample : ViewBase
 
 ### Dialog Forms
 
-Open forms in modal dialogs using `.ToDialog()`.
+Open forms in modal [dialogs](./Alerts.md) using `.ToDialog()`.
 
 ```csharp demo-tabs
 public class DialogFormExample : ViewBase
@@ -606,7 +805,7 @@ public class DialogFormExample : ViewBase
             | user.ToForm()
                 .Required(m => m.FirstName, m => m.LastName, m => m.Email)
                 .ToDialog(isDialogOpen, "Create New User", "Please provide user information", 
-                         width: Size.Units(500));
+                         width: Size.Units(125));
     }
 }
 ```
@@ -709,7 +908,7 @@ public class CrudFormExample : ViewBase
                         }
                     })
                 )
-            ).Width(Size.Units(500))
+            ).Width(Size.Units(125))
             : null;
         
         // Create dialog content for editing product
@@ -736,7 +935,7 @@ public class CrudFormExample : ViewBase
                         }
                     })
                 )
-            ).Width(Size.Units(500))
+            ).Width(Size.Units(125))
             : null;
         
         return Layout.Vertical()

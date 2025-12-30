@@ -10,7 +10,7 @@ public record MillionRowData(
     DateTime CreatedAt
 );
 
-[App(icon: Icons.Database, path: ["Tests"], isVisible: true, searchHints: ["datatable", "million", "performance", "large", "data"])]
+[App(icon: Icons.Database, path: ["Tests"], isVisible: false, searchHints: ["datatable", "million", "performance", "large", "data"])]
 public class DataTablesMillionRowsApp : SampleBase
 {
     protected override object? BuildSample()
@@ -37,7 +37,7 @@ public class DataTablesMillionRowsApp : SampleBase
             .Align(row => row.CreatedAt, Align.Left)
             // Add icons to headers
             .Icon(row => row.Id, Icons.Hash.ToString())
-            .Icon(row => row.Value, Icons.Text.ToString())
+            .Icon(row => row.Value, Icons.FileText.ToString())
             .Icon(row => row.CreatedAt, Icons.Calendar.ToString())
             // Configure for performance with large datasets
             .Config(config => config.AllowLlmFiltering = true)

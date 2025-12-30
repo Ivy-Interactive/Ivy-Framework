@@ -3,11 +3,12 @@ import { useEventHandler, EventHandler } from '@/components/event-handler';
 import NumberInput from '@/components/NumberInput';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
-import { inputStyles } from '@/lib/styles';
+import { inputStyles, getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { X } from 'lucide-react';
 import React from 'react';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
+import { xIconVariants } from '@/components/ui/input/text-input-variants';
 
 const formatStyleMap = {
   Decimal: 'decimal',
@@ -49,13 +50,14 @@ interface NumberInputBaseProps {
   'data-testid'?: string;
   // Add type information for validation
   targetType?: string;
-  size?: Sizes;
+  scale?: Scales;
 }
 
 interface NumberInputWidgetProps
   extends Omit<NumberInputBaseProps, 'onValueChange'> {
-  variant?: 'Default' | 'Slider';
+  variant?: 'Number' | 'Slider';
   targetType?: string;
+  width?: string;
 }
 
 // Function to validate and cap values based on target type
@@ -113,7 +115,7 @@ const SliderVariant = memo(
     disabled = false,
     invalid,
     currency,
-    size = Sizes.Medium,
+    scale = Scales.Medium,
     onValueChange,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
@@ -155,7 +157,7 @@ const SliderVariant = memo(
           value={[sliderValue]}
           disabled={disabled}
           currency={currency}
-          size={size}
+          scale={scale}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
           className={cn(invalid && inputStyles.invalidInput)}
@@ -164,7 +166,7 @@ const SliderVariant = memo(
         <span
           className={cn(
             'flex w-full items-center justify-between gap-1',
-            sizeVariants[String(size)].text
+            sizeVariants[String(scale)].text
           )}
           aria-hidden="true"
         >
@@ -201,7 +203,7 @@ const NumberVariant = memo(
     nullable = false,
     onValueChange,
     currency,
-    size = Sizes.Medium,
+    scale = Scales.Medium,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
     const formatConfig = useMemo(
@@ -238,12 +240,14 @@ const NumberVariant = memo(
           placeholder={placeholder}
           value={value}
           disabled={disabled}
-          size={size}
+          scale={scale}
           onChange={handleNumberChange}
           className={cn(
             invalid && inputStyles.invalidInput,
-            // Add padding for icon container
-            ((nullable && value !== null && !disabled) || invalid) && 'pr-12'
+            // Add padding for icon container - match TextInput behavior
+            // pr-8 for single icon (either clear or invalid), pr-16 for both
+            (invalid || (nullable && value !== null && !disabled)) && 'pr-8',
+            nullable && value !== null && !disabled && invalid && 'pr-16'
           )}
           data-testid={dataTestId}
         />
@@ -259,11 +263,13 @@ const NumberVariant = memo(
                 onClick={() => onValueChange(null)}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}
-            {invalid && <InvalidIcon message={invalid} />}
+            {invalid && (
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
+            )}
           </div>
         )}
       </div>
@@ -276,8 +282,10 @@ NumberVariant.displayName = 'NumberVariant';
 export const NumberInputWidget = memo(
   ({
     id,
-    variant = 'Default',
+    variant = 'Number',
+    formatStyle = 'Decimal',
     nullable = false,
+    width,
     ...props
   }: NumberInputWidgetProps) => {
     const eventHandler = useEventHandler() as EventHandler;
@@ -314,21 +322,26 @@ export const NumberInputWidget = memo(
       [eventHandler, id, props.min, props.max, props.targetType]
     );
 
-    return variant === 'Slider' ? (
-      <SliderVariant
-        id={id}
-        {...props}
-        value={normalizedValue}
-        onValueChange={handleChange}
-      />
-    ) : (
-      <NumberVariant
-        id={id}
-        {...props}
-        value={normalizedValue}
-        nullable={nullable}
-        onValueChange={handleChange}
-      />
+    return (
+      <div style={{ ...getWidth(width) }}>
+        {variant === 'Slider' ? (
+          <SliderVariant
+            id={id}
+            {...props}
+            value={normalizedValue}
+            onValueChange={handleChange}
+          />
+        ) : (
+          <NumberVariant
+            id={id}
+            {...props}
+            formatStyle={formatStyle}
+            value={normalizedValue}
+            nullable={nullable}
+            onValueChange={handleChange}
+          />
+        )}
+      </div>
     );
   }
 );

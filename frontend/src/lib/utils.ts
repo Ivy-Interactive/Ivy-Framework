@@ -1,3 +1,4 @@
+import React from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { textBlockClassMap } from './textBlockClassMap';
@@ -64,6 +65,59 @@ export function getChromeParam(): boolean {
   return urlParams.get('chrome')?.toLowerCase() !== 'false';
 }
 
+export function wrapAppContent(content: React.ReactNode): React.ReactNode {
+  return React.createElement(
+    'div',
+    { className: 'w-full h-full p-4 overflow-y-auto' },
+    content
+  );
+}
+
+/**
+ * Converts an app:// URL to a regular browser path.
+ * Preserves query parameters from the current URL (especially chrome=false) when in chrome=false mode.
+ *
+ * @param appUrl - The app:// URL to convert (e.g., "app://MyApp" or "app://MyApp?param=value")
+ * @returns The converted path (e.g., "/MyApp" or "/MyApp?param=value&chrome=false")
+ */
+/**
+ * Extracts the content after the app:// protocol prefix using regex.
+ */
+function extractAppProtocolContent(url: string): string {
+  const match = url.match(/^app:\/\/(.+)$/);
+  return match ? match[1] : '';
+}
+
+export function convertAppUrlToPath(appUrl: string): string {
+  // Use inline regex pattern matching
+  if (!/^app:\/\//.test(appUrl)) {
+    return appUrl;
+  }
+
+  // Extract app ID and any existing query string using regex
+  const appId = extractAppProtocolContent(appUrl);
+  const [appPath, existingQueryString] = appId.split('?');
+
+  // Build the path
+  let path = `/${appPath}`;
+
+  // Preserve chrome=false if we're currently in chrome=false mode
+  const isChromeFalse = !getChromeParam();
+  const queryParams = new URLSearchParams(existingQueryString || '');
+
+  if (isChromeFalse && !queryParams.has('chrome')) {
+    queryParams.set('chrome', 'false');
+  }
+
+  // Combine existing query params with chrome param
+  const finalQueryString = queryParams.toString();
+  if (finalQueryString) {
+    path += `?${finalQueryString}`;
+  }
+
+  return path;
+}
+
 function generateUUID(): string {
   if (typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -85,15 +139,104 @@ export function getMachineId(): string {
   return id;
 }
 
-export function getIvyHost(): string {
-  const urlParams = new URLSearchParams(window.location.search);
-  const ivyHost = urlParams.get('ivyHost');
-  if (ivyHost) return ivyHost;
+// Allowlist for trusted hosts; update as needed for trusted deployments
+const ALLOWED_IVY_HOSTS = [
+  window.location.origin,
+  // 'https://your-cdn.com', // add extra trusted hostnames here if relevant
+];
 
+function isAllowedIvyHost(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    const normalizedOrigin = url.origin.replace(/\/+$/, '').toLowerCase();
+    const currentUrl = new URL(window.location.origin);
+
+    // Only allow http and https protocols
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return false;
+    }
+
+    // Allow if it matches the current origin exactly (protocol, hostname, and port)
+    if (url.origin === currentUrl.origin) {
+      return true;
+    }
+
+    // For development: allow same hostname with different port, but require same protocol
+    // This enables development workflows where frontend and backend run on different ports
+    // SECURITY: We require protocol matching to prevent protocol downgrade attacks
+    // (e.g., preventing http://localhost:3000 from being accepted when current origin is https://localhost:5000)
+    // Only allow this for localhost/127.0.0.1 to prevent security issues in production
+    const localhostVariants = ['localhost', '127.0.0.1', '[::1]', '::1'];
+    const isCurrentLocalhost = localhostVariants.includes(
+      currentUrl.hostname.toLowerCase()
+    );
+    const isUrlLocalhost = localhostVariants.includes(
+      url.hostname.toLowerCase()
+    );
+
+    // Allow if both are localhost variants AND protocols match
+    // This allows different ports during development but prevents protocol downgrade attacks
+    if (isCurrentLocalhost && isUrlLocalhost) {
+      // Require protocol matching to prevent security vulnerabilities
+      // An attacker controlling a different localhost port should not be able to
+      // downgrade from HTTPS to HTTP or vice versa
+      if (url.protocol === currentUrl.protocol) {
+        return true;
+      }
+      // Reject if protocols don't match (security: prevent protocol downgrade)
+      return false;
+    }
+
+    // Check against the allowlist
+    // Normalize each allowed origin and compare (avoid creating URL objects in loop)
+    return ALLOWED_IVY_HOSTS.some(allowed => {
+      try {
+        const allowedUrl = new URL(allowed);
+        const normalizedAllowed = allowedUrl.origin
+          .replace(/\/+$/, '')
+          .toLowerCase();
+        return normalizedAllowed === normalizedOrigin;
+      } catch {
+        // Skip invalid URLs in allowlist
+        return false;
+      }
+    });
+  } catch {
+    return false;
+  }
+}
+
+export function getIvyHost(): string {
+  // Never trust user-supplied ivyHost from URL parameters.
+  // Only use meta tag or real origin.
+  // Query parameters are user-controllable and should never be trusted for security-sensitive operations.
   const metaHost = document
     .querySelector('meta[name="ivy-host"]')
     ?.getAttribute('content');
-  if (metaHost) return metaHost;
+
+  if (metaHost) {
+    try {
+      // Parse the metaHost - it might be a full URL or just a hostname
+      let url: URL;
+      if (metaHost.includes('://')) {
+        // It's a full URL
+        url = new URL(metaHost);
+      } else {
+        // It's just a hostname, construct a URL with https protocol
+        url = new URL(`https://${metaHost}`);
+      }
+
+      // Must be http(s) and must be in the allowlist
+      if (url.protocol === 'https:' || url.protocol === 'http:') {
+        const metaOrigin = url.origin;
+        if (isAllowedIvyHost(metaOrigin)) {
+          return metaOrigin;
+        }
+      }
+    } catch {
+      // Ignore parse errors and fall back
+    }
+  }
 
   return window.location.origin;
 }
@@ -107,3 +250,45 @@ export function camelCase(titleCase: unknown): unknown {
 
 // Shared Ivy tag-to-class map for headings, paragraphs, lists, tables, etc.
 export const ivyTagClassMap = textBlockClassMap;
+
+/**
+ * Apply defaults to an object, only setting values that are undefined.
+ * Used to apply C# backend defaults to frontend objects when values
+ * are not serialized because they equal the default.
+ */
+export function applyDefaults<T extends object>(
+  obj: Partial<T> | undefined,
+  defaults: Partial<T>
+): Partial<T> {
+  if (!obj) return { ...defaults };
+  const result = { ...defaults };
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      (result as Record<string, unknown>)[key] = obj[key];
+    }
+  }
+  return result;
+}
+
+// Re-export URL validation functions from dedicated module
+export {
+  getCurrentOrigin,
+  _getCurrentOriginRef,
+  validateRedirectUrl,
+  validateLinkUrl,
+  validateMediaUrl,
+  validateImageUrl,
+  validateAudioUrl,
+  validateVideoUrl,
+  type ValidateMediaUrlOptions,
+  // URL type detection helpers
+  isExternalUrl,
+  isAnchorLink,
+  isAppProtocol,
+  isRelativePath,
+  isDataUrl,
+  isBlobUrl,
+  isStandardUrl,
+  isFullUrl,
+  normalizeRelativePath,
+} from './urlValidation';

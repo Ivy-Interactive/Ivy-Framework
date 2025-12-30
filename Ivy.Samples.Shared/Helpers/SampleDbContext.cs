@@ -71,6 +71,9 @@ public class SampleDbContext(DbContextOptions<SampleDbContext> options) : DbCont
 
 public class SampleDbContextFactory : IDbContextFactory<SampleDbContext>
 {
+    private static bool _seeded;
+    private static readonly object _seedLock = new();
+
     public SampleDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<SampleDbContext>()
@@ -79,59 +82,67 @@ public class SampleDbContextFactory : IDbContextFactory<SampleDbContext>
 
         var context = new SampleDbContext(options);
 
-        SeedDatabase(context);
+        if (!_seeded)
+        {
+            SeedDatabase(context);
+        }
 
         return context;
     }
 
     static void SeedDatabase(SampleDbContext context)
     {
-        if (context.Products.Any() || context.Customers.Any() || context.Orders.Any())
+        lock (_seedLock)
         {
-            return; // Database has already been seeded
+            if (_seeded)
+            {
+                return;
+            }
+
+            var categories = new Faker<Category>()
+                .RuleFor(c => c.Name, f => f.Commerce.Categories(1).First())
+                .Generate(10);
+
+            context.Categories.AddRange(categories);
+            context.SaveChanges();
+
+            var products = new Faker<Product>()
+                .RuleFor(p => p.Name, f => f.Commerce.ProductName())
+                .RuleFor(p => p.Department, f => f.Commerce.Department())
+                .RuleFor(p => p.Rating, f => f.Random.Int(0, 5))
+                .RuleFor(p => p.Price, f => f.Random.Int(1, 100))
+                .RuleFor(p => p.Width, f => f.Random.Int(1, 100))
+                .RuleFor(p => p.Height, f => f.Random.Int(1, 100))
+                .RuleFor(p => p.Description, f => f.Lorem.Sentence())
+                .RuleFor(p => p.Meta, f => f.Lorem.Sentence())
+                .RuleFor(p => p.CreatedAt, f => f.Date.Past(1))
+                .RuleFor(p => p.UpdatedAt, f => f.Date.Past(1))
+                .RuleFor(p => p.CategoryId, f => f.PickRandom(categories).Id)
+                .Generate(50);
+
+            var customers = new Faker<Customer>()
+                .RuleFor(c => c.Name, f => f.Name.FullName())
+                .RuleFor(c => c.Email, f => f.Internet.Email())
+                .RuleFor(c => c.CreatedAt, f => f.Date.Past(1))
+                .RuleFor(c => c.UpdatedAt, f => f.Date.Past(1))
+                .Generate(20);
+
+            context.Products.AddRange(products);
+            context.Customers.AddRange(customers);
+            context.SaveChanges();
+
+            var orders = new Faker<Order>()
+                .RuleFor(o => o.CustomerId, f => f.PickRandom(customers).Id)
+                .RuleFor(o => o.ProductId, f => f.PickRandom(products).Id)
+                .RuleFor(o => o.OrderDate, f => f.Date.Past(1))
+                .RuleFor(o => o.CreatedAt, f => f.Date.Past(1))
+                .RuleFor(o => o.UpdatedAt, f => f.Date.Past(1))
+                .Generate(100);
+
+            context.Orders.AddRange(orders);
+            context.SaveChanges();
+
+            _seeded = true;
         }
-
-        var categories = new Faker<Category>()
-            .RuleFor(c => c.Name, f => f.Commerce.Categories(1).First())
-            .Generate(10);
-
-        context.Categories.AddRange(categories);
-        context.SaveChanges();
-
-        var products = new Faker<Product>()
-            .RuleFor(p => p.Name, f => f.Commerce.ProductName())
-            .RuleFor(p => p.Department, f => f.Commerce.Department())
-            .RuleFor(p => p.Rating, f => f.Random.Int(0, 5))
-            .RuleFor(p => p.Price, f => f.Random.Int(1, 100))
-            .RuleFor(p => p.Width, f => f.Random.Int(1, 100))
-            .RuleFor(p => p.Height, f => f.Random.Int(1, 100))
-            .RuleFor(p => p.Description, f => f.Lorem.Sentence())
-            .RuleFor(p => p.Meta, f => f.Lorem.Sentence())
-            .RuleFor(p => p.CreatedAt, f => f.Date.Past(1))
-            .RuleFor(p => p.UpdatedAt, f => f.Date.Past(1))
-            .RuleFor(p => p.CategoryId, f => f.PickRandom(categories).Id)
-            .Generate(50);
-
-        var customers = new Faker<Customer>()
-            .RuleFor(c => c.Name, f => f.Name.FullName())
-            .RuleFor(c => c.Email, f => f.Internet.Email())
-            .RuleFor(c => c.CreatedAt, f => f.Date.Past(1))
-            .RuleFor(c => c.UpdatedAt, f => f.Date.Past(1))
-            .Generate(20);
-
-        context.Products.AddRange(products);
-        context.Customers.AddRange(customers);
-        context.SaveChanges();
-
-        var orders = new Faker<Order>()
-            .RuleFor(o => o.CustomerId, f => f.PickRandom(customers).Id)
-            .RuleFor(o => o.ProductId, f => f.PickRandom(products).Id)
-            .RuleFor(o => o.OrderDate, f => f.Date.Past(1))
-            .RuleFor(o => o.CreatedAt, f => f.Date.Past(1))
-            .RuleFor(o => o.UpdatedAt, f => f.Date.Past(1))
-            .Generate(100);
-
-        context.Orders.AddRange(orders);
-        context.SaveChanges();
     }
 }
