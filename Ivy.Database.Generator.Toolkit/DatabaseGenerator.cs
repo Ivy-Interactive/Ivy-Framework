@@ -100,12 +100,22 @@ public class DatabaseGenerator
 
             // Delete migration from __EFMigrationsHistory table, because it won't exist outside of the database generator project
             var historyRepository = dbContext.GetService<IHistoryRepository>();
-            var migrationId = await historyRepository.GetAppliedMigrationsAsync()
-                .ContinueWith(t => t.Result.LastOrDefault()?.MigrationId);
-            if (migrationId != null)
+            var appliedMigrations = await historyRepository.GetAppliedMigrationsAsync();
+            var initialMigration = appliedMigrations.FirstOrDefault(m => m.MigrationId.Contains("InitialCreate"));
+            if (initialMigration != null)
             {
-                var deleteScript = historyRepository.GetDeleteScript(migrationId);
-                await dbContext.Database.ExecuteSqlRawAsync(deleteScript);
+                try
+                {
+                    var deleteScript = historyRepository.GetDeleteScript(initialMigration.MigrationId);
+                    await dbContext.Database.ExecuteSqlRawAsync(deleteScript);
+                }
+                catch (Exception ex)
+                {
+                    if (verbose)
+                    {
+                        AnsiConsole.MarkupLine($"[yellow]Warning: Could not clean up migration history: {ex.Message}[/]");
+                    }
+                }
             }
         }, "Creating Tables", verbose);
 
