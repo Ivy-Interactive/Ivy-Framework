@@ -26,7 +26,7 @@ public class SignalExample : ViewBase
 {
     public override object? Build()
     {
-        var signal = Context.CreateSignal<CounterSignal, int, string>();
+        var signal = CreateSignal<CounterSignal, int, string>();
         var output = UseState("");
 
         async ValueTask OnClick(Event<Button> _)
@@ -47,7 +47,7 @@ public class ChildReceiver : ViewBase
 {
     public override object? Build()
     {
-        var signal = Context.UseSignal<CounterSignal, int, string>();
+        var signal = UseSignal<CounterSignal, int, string>();
         var counter = UseState(0);
 
         UseEffect(() => signal.Receive(input =>
@@ -74,7 +74,7 @@ public class OneToManyDemo : ViewBase
 {
     public override object? Build()
     {
-        var signal = Context.CreateSignal<BroadcastSignal, string, Unit>();
+        var signal = CreateSignal<BroadcastSignal, string, Unit>();
         var message = UseState("");
         var receiver1Message = UseState("");
         var receiver2Message = UseState("");
@@ -90,7 +90,7 @@ public class OneToManyDemo : ViewBase
         }
         
         // Set up signal receiver
-        var receiver = Context.UseSignal<BroadcastSignal, string, Unit>();
+        var receiver = UseSignal<BroadcastSignal, string, Unit>();
         
         // Process incoming messages
         UseEffect(() => receiver.Receive(message =>
@@ -128,7 +128,7 @@ public class RequestResponseDemo : ViewBase
 {
     public override object? Build()
     {
-        var signal = Context.CreateSignal<DataRequestSignal, string, string[]>();
+        var signal = CreateSignal<DataRequestSignal, string, string[]>();
         var query = UseState<string>("");
         var results = UseState<string[]>(() => Array.Empty<string>());
         var isSearching = UseState<bool>(false);
@@ -178,7 +178,7 @@ public class DataProvider : ViewBase
     
     public override object? Build()
     {
-        var signal = Context.UseSignal<DataRequestSignal, string, string[]>();
+        var signal = UseSignal<DataRequestSignal, string, string[]>();
         var processedQueries = UseState<int>(0);
         var lastQuery = UseState<string>("");
         
@@ -222,22 +222,22 @@ using Ivy.Hooks;
 
 - **`AbstractSignal<TInput, TOutput>`** - Base class for signals
 - **`Unit`** - Void return type for notifications without responses
-- **`Context.CreateSignal<TSignal, TInput, TOutput>()`** - Creates signal sender
-- **`Context.UseSignal<TSignal, TInput, TOutput>()`** - Creates signal receiver
+- **`CreateSignal<TSignal, TInput, TOutput>()`** - Creates signal sender
+- **`UseSignal<TSignal, TInput, TOutput>()`** - Creates signal receiver
 
 ### Signal Operations
 
 **Creating a sender** (to broadcast messages):
 
 ```csharp
-var signal = Context.CreateSignal<CounterSignal, int, string>();
+var signal = CreateSignal<CounterSignal, int, string>();
 await signal.Send(42); // Returns TOutput[] from all subscribers
 ```
 
 **Creating a receiver** (to listen to messages):
 
 ```csharp
-var signal = Context.UseSignal<CounterSignal, int, string>();
+var signal = UseSignal<CounterSignal, int, string>();
 UseEffect(() => signal.Receive(input => {
     // Handle message and return response
     return $"Processed: {input}";

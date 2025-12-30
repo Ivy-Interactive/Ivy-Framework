@@ -24,8 +24,8 @@ public class JobsDashboard : ViewBase
 {
     public override object? Build()
     {
-        var scheduler = this.UseStatic(BuildScheduler);
-        var refresh = this.UseRefreshToken();
+        var scheduler = UseRef(BuildScheduler).Value;
+        var refresh = UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
 
@@ -98,8 +98,8 @@ public class DependencyGraphDemo : ViewBase
 {
     public override object? Build()
     {
-        var scheduler = this.UseStatic(BuildScheduler);
-        var refresh = this.UseRefreshToken();
+        var scheduler = UseRef(BuildScheduler).Value;
+        var refresh = UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
 
@@ -154,8 +154,8 @@ public class DynamicChildrenDemo : ViewBase
 {
     public override object? Build()
     {
-        var scheduler = this.UseStatic(BuildScheduler);
-        var refresh = this.UseRefreshToken();
+        var scheduler = UseRef(BuildScheduler).Value;
+        var refresh = UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
 
@@ -202,8 +202,8 @@ public class FluentChainingDemo : ViewBase
 {
     public override object? Build()
     {
-        var scheduler = this.UseStatic(BuildScheduler);
-        var refresh = this.UseRefreshToken();
+        var scheduler = UseRef(BuildScheduler).Value;
+        var refresh = UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
 
@@ -248,8 +248,8 @@ public class MultipleChildrenDemo : ViewBase
 {
     public override object? Build()
     {
-        var scheduler = this.UseStatic(BuildScheduler);
-        var refresh = this.UseRefreshToken();
+        var scheduler = UseRef(BuildScheduler).Value;
+        var refresh = UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
 

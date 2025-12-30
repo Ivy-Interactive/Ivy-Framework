@@ -59,37 +59,40 @@ public class SignalReceiver<TInput, TOutput>(Guid receiverId, AbstractSignal<TIn
 
 public static class UseSignalExtensions
 {
-    public static ISignalSender<TInput, TOutput> CreateSignal<T, TInput, TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
+    extension(IViewContext context)
     {
-        var signalType = typeof(T);
-        if (signalType.GetBroadcastType() is { } broadcastType)
+        public ISignalSender<TInput, TOutput> CreateSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput>
         {
-            var signalHub = context.UseService<SignalRouter>();
-            var appArgs = context.UseService<AppArgs>();
-            return signalHub.CreateSignal<T, TInput, TOutput>(signalType, broadcastType, appArgs.ConnectionId);
+            var signalType = typeof(T);
+            if (signalType.GetBroadcastType() is { } broadcastType)
+            {
+                var signalHub = context.UseService<SignalRouter>();
+                var appArgs = context.UseService<AppArgs>();
+                return signalHub.CreateSignal<T, TInput, TOutput>(signalType, broadcastType, appArgs.ConnectionId);
+            }
+            return context.CreateContext(Activator.CreateInstance<T>);
         }
-        return context.CreateContext(Activator.CreateInstance<T>);
-    }
 
-    public static ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>(this IViewContext view) where T : AbstractSignal<TInput, TOutput>
-    {
-        var receiverId = view.UseState(Guid.NewGuid, buildOnChange: false);
-        var signalType = typeof(T);
-        if (signalType.GetBroadcastType() is not null)
+        public ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput>
         {
-            var signalHub = view.UseService<SignalRouter>();
-            var appArgs = view.UseService<AppArgs>();
-            return signalHub.UseSignal<T, TInput, TOutput>(signalType, receiverId.Value, appArgs.ConnectionId);
+            var receiverId = context.UseRef(Guid.NewGuid);
+            var signalType = typeof(T);
+            if (signalType.GetBroadcastType() is not null)
+            {
+                var signalHub = context.UseService<SignalRouter>();
+                var appArgs = context.UseService<AppArgs>();
+                return signalHub.UseSignal<T, TInput, TOutput>(signalType, receiverId.Value, appArgs.ConnectionId);
+            }
+            var signal = context.UseContext<T>();
+            return new SignalReceiver<TInput, TOutput>(receiverId.Value, signal);
         }
-        var signal = view.UseContext<T>();
-        return new SignalReceiver<TInput, TOutput>(receiverId.Value, signal);
     }
 }
 
 public enum BroadcastType
 {
     Server,
-    Machine,
+    User,
     App,
     Chrome
 }
@@ -162,7 +165,7 @@ public class SignalRouter(AppSessionStore sessionStore)
             {
                 BroadcastType.Server =>
                     store.Sessions.Values.Where(s => !s.IsDisposed()).ToList(),
-                BroadcastType.Machine =>
+                BroadcastType.User =>
                     store.Sessions.Values.Where(s => !s.IsDisposed() && s.MachineId == store.Sessions[session.ConnectionId].MachineId).ToList(),
                 BroadcastType.App =>
                     store.Sessions.Values.Where(s => !s.IsDisposed() && s.AppId == store.Sessions[session.ConnectionId].AppId).ToList(),

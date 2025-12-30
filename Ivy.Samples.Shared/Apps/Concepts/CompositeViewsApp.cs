@@ -8,9 +8,9 @@ public class LoginForm(IState<LoginData> login) : SampleBase
 {
     protected override object? BuildSample()
     {
-        var username = this.UseState(login.Value.Username);
-        var password = this.UseState(login.Value.Password);
-        var rememberMe = this.UseState(login.Value.RememberMe);
+        var username = UseState(login.Value.Username);
+        var password = UseState(login.Value.Password);
+        var rememberMe = UseState(login.Value.RememberMe);
 
         return Layout.Vertical(
             username.ToTextInput(),
@@ -29,7 +29,7 @@ public class CompositeViewsApp : ViewBase
 {
     public override object? Build()
     {
-        var loginData = this.UseState(() => new LoginData());
+        var loginData = UseState(() => new LoginData());
 
         return new Card(
             Layout.Vertical(

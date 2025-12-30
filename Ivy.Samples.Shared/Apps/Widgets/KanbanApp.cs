@@ -34,7 +34,7 @@ public class BasicKanbanExample : ViewBase
 {
     public override object? Build()
     {
-        var selectedTaskId = this.UseState((string?)null);
+        var selectedTaskId = UseState((string?)null);
         var tasks = UseState(new[]
         {
             new KanbanTask { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
@@ -155,7 +155,7 @@ public class KanbanBuilderExample : ViewBase
 {
     public override object? Build()
     {
-        var selectedTaskId = this.UseState((string?)null);
+        var selectedTaskId = UseState((string?)null);
         var tasks = UseState(new[]
         {
             new KanbanTask { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
@@ -277,7 +277,7 @@ public class KanbanBuilderWithClickExample : ViewBase
             new KanbanTask { Id = "6", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
         });
 
-        var (taskSheetView, showTaskSheet) = this.UseTrigger((IState<bool> isOpen, string taskId)
+        var (taskSheetView, showTaskSheet) = UseTrigger((IState<bool> isOpen, string taskId)
             => BuildTaskSheet(isOpen, taskId, tasks));
 
         var kanban = tasks.Value

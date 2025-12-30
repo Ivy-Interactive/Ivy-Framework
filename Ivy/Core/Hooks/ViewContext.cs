@@ -165,12 +165,6 @@ public class ViewContext : IViewContext
         throw new InvalidOperationException("Context not found.");
     }
 
-    public T? UseArgs<T>() where T : class
-    {
-        var args = UseService<AppArgs>();
-        return args.GetArgs<T>();
-    }
-
     public T UseContext<T>()
     {
         if (_services.GetService(typeof(T)) is T existingService)

@@ -1,7 +1,9 @@
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Helpers;
+using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views.Blades;
 
@@ -12,35 +14,41 @@ public class FilteredListView<T>(
     Func<T, ListItem> createItem,
     object? toolButtons = null,
     TimeSpan? throttle = null,
-    Action<string>? onFilterChanged = null
+    Action<string>? onFilterChanged = null,
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0
 ) : ViewBase
 {
     public override object? Build()
     {
-        var records = UseState(Array.Empty<T>);
-
         var filter = UseState("");
-        var loading = UseState(true);
+        var throttledFilter = UseState("");
 
         UseEffect(() =>
         {
             onFilterChanged?.Invoke(filter.Value);
-            loading.Set(true);
-        }, [filter]);
+        }, [throttledFilter]);
 
-        UseEffect(async () =>
+        // Update throttled value after debounce
+        UseEffect(() =>
         {
-            records.Set(await fetchRecords(filter.Value));
-            loading.Set(false);
+            throttledFilter.Set(filter.Value);
         }, [filter.Throttle(throttle ?? TimeSpan.FromMilliseconds(250)).ToTrigger()]);
 
-        var items = records.Value.Select(createItem);
+        var query = UseQuery(
+            key: (callerFile, callerLine, filter: throttledFilter.Value),
+            fetcher: (key, _) => fetchRecords(key.filter),
+            options: QueryScope.View);
+
+        var items = (query.Value ?? []).Select(createItem);
 
         return BladeHelper.WithHeader(
             (Layout.Horizontal().Gap(1)
              | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
              | toolButtons!),
-            loading.Value ? Text.Muted("Loading...") : new List(items)
+            query.IsLoading
+                ? Text.Muted("Loading...")
+                : new List(items)
         );
     }
 }

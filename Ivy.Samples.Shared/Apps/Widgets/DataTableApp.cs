@@ -39,7 +39,7 @@ public class DataTableApp : SampleBase
         var client = UseService<IClientProvider>();
 
         // Create the employee data once at app level (like Kanban caches its tasks)
-        var employees = this.UseState(() =>
+        var employees = UseState(() =>
         {
             var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
 

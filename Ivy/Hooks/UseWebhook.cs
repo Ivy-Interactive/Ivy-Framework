@@ -11,12 +11,6 @@ public static class UseWebhookExtensions
 {
     // Synchronous
 
-    public static WebhookEndpoint UseWebhook<TView>(this TView view, Func<HttpRequest, IActionResult> handler) where TView : ViewBase =>
-        view.Context.UseWebhook(handler);
-
-    public static WebhookEndpoint UseWebhook<TView>(this TView view, Action<HttpRequest> handler) where TView : ViewBase =>
-        view.Context.UseWebhook(handler);
-
     public static WebhookEndpoint UseWebhook(this IViewContext context, Action<HttpRequest> handler) =>
         context.UseWebhook(e =>
         {
@@ -28,16 +22,6 @@ public static class UseWebhookExtensions
         context.UseWebhook(e => Task.FromResult(handler(e)));
 
     // Asynchronous
-
-    public static WebhookEndpoint UseWebhook<TView>(this TView view, Func<HttpRequest, Task<IActionResult>> handler) where TView : ViewBase =>
-        view.Context.UseWebhook(handler);
-
-    public static WebhookEndpoint UseWebhook<TView>(this TView view, Func<HttpRequest, Task> handler) where TView : ViewBase =>
-        view.Context.UseWebhook(async e =>
-        {
-            await handler(e);
-            return new OkResult();
-        });
 
     public static WebhookEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, Task> handler) =>
         context.UseWebhook(async e =>

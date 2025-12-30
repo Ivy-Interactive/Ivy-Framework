@@ -7,7 +7,7 @@ public class PaginationApp() : SampleBase
 {
     protected override object? BuildSample()
     {
-        var page = this.UseState(10);
+        var page = UseState(10);
 
         var eventHandler = (Event<Pagination, int> e) =>
         {

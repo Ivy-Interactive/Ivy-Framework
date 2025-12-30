@@ -24,78 +24,58 @@ public abstract record WidgetBase<T> : AbstractWidget where T : WidgetBase<T>
 
 public static class WidgetBaseExtensions
 {
-    public static T Width<T>(this T widget, Size? width) where T : WidgetBase<T> => widget with { Width = width };
-
-    public static T Width<T>(this T widget, int units) where T : WidgetBase<T> => widget with { Width = Shared.Size.Units(units) };
-
-    public static T Width<T>(this T widget, float units) where T : WidgetBase<T> => widget with { Width = Shared.Size.Fraction(units) };
-
-    public static T Width<T>(this T widget, double units) where T : WidgetBase<T> => widget with { Width = Shared.Size.Fraction(Convert.ToSingle(units)) };
-
-    public static T Width<T>(this T widget, string percent) where T : WidgetBase<T>
+    extension<T>(T widget) where T : WidgetBase<T>
     {
-        if (percent.EndsWith("%"))
+        public T Width(Size? width) => widget with { Width = width };
+        public T Width(int units) => widget with { Width = Shared.Size.Units(units) };
+        public T Width(float units) => widget with { Width = Shared.Size.Fraction(units) };
+        public T Width(double units) => widget with { Width = Shared.Size.Fraction(Convert.ToSingle(units)) };
+
+        public T Width(string percent)
         {
-            if (float.TryParse(percent[..^1], out var value))
-                return widget with { Width = Shared.Size.Fraction(value / 100) };
+            if (percent.EndsWith("%"))
+            {
+                if (float.TryParse(percent[..^1], out var value))
+                    return widget with { Width = Shared.Size.Fraction(value / 100) };
+            }
+            throw new ArgumentException("Invalid percentage value.");
         }
-        throw new ArgumentException("Invalid percentage value.");
-    }
 
-    public static T Height<T>(this T widget, Size? height) where T : WidgetBase<T> => widget with { Height = height };
+        public T Height(Size? height) => widget with { Height = height };
+        public T Height(int units) => widget with { Height = Shared.Size.Units(units) };
+        public T Height(float units) => widget with { Height = Shared.Size.Fraction(units) };
+        public T Height(double units) => widget with { Height = Shared.Size.Fraction(Convert.ToSingle(units)) };
 
-    public static T Height<T>(this T widget, int units) where T : WidgetBase<T> => widget with { Height = Shared.Size.Units(units) };
-
-    public static T Height<T>(this T widget, float units) where T : WidgetBase<T> => widget with { Height = Shared.Size.Fraction(units) };
-
-    public static T Height<T>(this T widget, double units) where T : WidgetBase<T> => widget with { Height = Shared.Size.Fraction(Convert.ToSingle(units)) };
-
-    public static T Height<T>(this T widget, string percent) where T : WidgetBase<T>
-    {
-        if (percent.EndsWith("%"))
+        public T Height(string percent)
         {
+            if (!percent.EndsWith("%")) throw new ArgumentException("Invalid percentage value.");
             if (float.TryParse(percent[..^1], out var value))
                 return widget with { Height = Shared.Size.Fraction(value / 100) };
+            throw new ArgumentException("Invalid percentage value.");
         }
-        throw new ArgumentException("Invalid percentage value.");
-    }
 
-    public static T Size<T>(this T widget, Size? size) where T : WidgetBase<T> => widget.Width(size).Height(size);
+        public T Size(Size? size) => widget.Width(size).Height(size);
+        public T Size(int units) => widget.Width(units).Height(units);
+        public T Size(float units) => widget.Width(units).Height(units);
+        public T Size(double units) => widget.Width(units).Height(units);
 
-    public static T Size<T>(this T widget, int units) where T : WidgetBase<T> => widget.Width(units).Height(units);
-
-    public static T Size<T>(this T widget, float units) where T : WidgetBase<T> => widget.Width(units).Height(units);
-
-    public static T Size<T>(this T widget, double units) where T : WidgetBase<T> => widget.Width(units).Height(units);
-
-    public static T Size<T>(this T widget, string percent) where T : WidgetBase<T>
-    {
-        if (percent.EndsWith("%"))
+        public T Size(string percent)
         {
-            if (float.TryParse(percent.Substring(0, percent.Length - 1), out var value))
-            {
-                var val = Shared.Size.Fraction(value / 100);
-                return widget with { Width = val, Height = val };
-            }
+            if (!percent.EndsWith("%")) throw new ArgumentException("Invalid percentage value.");
+            if (!float.TryParse(percent[..^1], out var value)) throw new ArgumentException("Invalid percentage value.");
+            var val = Shared.Size.Fraction(value / 100);
+            return widget with { Width = val, Height = val };
         }
-        throw new ArgumentException("Invalid percentage value.");
+
+        public T Scale(Scale scale) => widget with { Scale = scale };
+        public T Small() => widget with { Scale = Shared.Scale.Small };
+        public T Medium() => widget with { Scale = Shared.Scale.Medium };
+        public T Large() => widget with { Scale = Shared.Scale.Large };
+        public T Visible(bool visible = true) => widget with { Visible = visible };
+        public T Show() => widget with { Visible = true };
+        public T Hide() => widget with { Visible = false };
+        public T TestId(string testId) => widget with { TestId = testId };
     }
-
-    public static T Scale<T>(this T widget, Scale scale) where T : WidgetBase<T> => widget with { Scale = scale };
-
-    public static T Small<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Shared.Scale.Small };
-
-    public static T Medium<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Shared.Scale.Medium };
-
-    public static T Large<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Shared.Scale.Large };
-
-    public static T Visible<T>(this T widget, bool visible = true) where T : WidgetBase<T> => widget with { Visible = visible };
-
-    public static T Show<T>(this T widget) where T : WidgetBase<T> => widget with { Visible = true };
-
-    public static T Hide<T>(this T widget) where T : WidgetBase<T> => widget with { Visible = false };
-
-    public static T TestId<T>(this T widget, string testId) where T : WidgetBase<T> => widget with { TestId = testId };
 
     internal static void SetScaleViaReflection(object input, Scale? scale)
     {

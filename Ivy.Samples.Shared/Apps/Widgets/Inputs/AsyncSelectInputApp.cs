@@ -9,7 +9,7 @@ public class AsyncSelectInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var guidState = this.UseState(default(Guid?));
+        var guidState = UseState(default(Guid?));
 
         var factory = UseService<SampleDbContextFactory>();
 

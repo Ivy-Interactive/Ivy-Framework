@@ -11,7 +11,7 @@ public class LinksApp : SampleBase
     protected override object? BuildSample()
     {
         LinksAppArgs? args = UseArgs<LinksAppArgs>();
-        var navigator = this.UseNavigation();
+        var navigator = UseNavigation();
 
         if (args != null)
         {

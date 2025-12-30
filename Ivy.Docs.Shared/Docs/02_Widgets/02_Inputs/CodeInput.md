@@ -1,6 +1,6 @@
 ---
 prepare: |
-  var client = this.UseService<IClientProvider>();
+  var client = UseService<IClientProvider>();
 searchHints:
   - editor
   - syntax
@@ -198,7 +198,7 @@ public class DBMLEditorDemo : ViewBase
                             role varchar
                             created_at timestamp
                     }";
-        var dbml = this.UseState(sampleDbml);
+        var dbml = UseState(sampleDbml);
         return Layout.Horizontal().RemoveParentPadding().Height(Size.Screen())
                 | dbml.ToCodeInput()
                     .Width(Size.Units(50))

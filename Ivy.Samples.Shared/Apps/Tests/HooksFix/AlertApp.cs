@@ -8,7 +8,7 @@ public class AlertApp : ViewBase
 {
     public override object? Build()
     {
-        var (alertView, showAlert) = this.UseAlert();
+        var (alertView, showAlert) = UseAlert();
 
         var body = Layout.Vertical()
                    | DateTime.Now.Ticks

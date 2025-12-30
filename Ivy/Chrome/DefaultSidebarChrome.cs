@@ -32,8 +32,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var search = UseState("");
         var menuItems = UseState(() => appRepository.GetMenuItems());
         var args = UseService<AppArgs>();
-        var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
-        var navigator = this.UseNavigation();
+        var navigate = UseSignal<NavigateSignal, NavigateArgs, Unit>();
+        var navigator = UseNavigation();
 
         UseEffect(() =>
         {

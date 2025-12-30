@@ -24,9 +24,9 @@ public class RefreshToken(IState<(Guid, object?, bool)> state) : IEffectTriggerC
 
 public static class UseRefreshTokenExtensions
 {
-    public static RefreshToken UseRefreshToken<TView>(this TView view) where TView : ViewBase
+    public static RefreshToken UseRefreshToken(this IViewContext context)
     {
-        var state = view.Context.UseState(() => (Guid.NewGuid(), (object?)null, false));
+        var state = context.UseState(() => (Guid.NewGuid(), (object?)null, false));
         return new RefreshToken(state);
     }
 }

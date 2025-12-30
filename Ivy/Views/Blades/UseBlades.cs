@@ -85,9 +85,6 @@ public class BladeItem(IView view, int index, string? title, Size? width = null)
 
 public static class UseBladesExtensions
 {
-    public static IView UseBlades<TView>(this TView view, Func<IView> rootBlade, string? title = null, Size? width = null) where TView : ViewBase =>
-    view.Context.UseBlades(rootBlade, title, width);
-
     public static IView UseBlades(this IViewContext context, Func<IView> rootBlade, string? title = null, Size? width = null)
     {
         var blades = context.UseState<ImmutableArray<BladeItem>>(() => [new BladeItem(rootBlade(), 0, title, width)]);

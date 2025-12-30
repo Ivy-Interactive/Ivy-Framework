@@ -134,7 +134,7 @@ If configuration is present in both .NET user secrets and environment variables,
 ## Using IAuthService in Views
 
 ```csharp
-var auth = this.UseService<IAuthService>();
+var auth = UseService<IAuthService>();
 
 await auth.LoginAsync(email, password);
 var user = await auth.GetUserInfoAsync();

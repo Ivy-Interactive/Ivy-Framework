@@ -62,7 +62,7 @@ public class CommonWidgetsDemo : ViewBase
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
+        var client = UseService<IClientProvider>();
         return Layout.Grid().Columns(2).Gap(4)
             | new Card(
                 Layout.Horizontal().Gap(2)
@@ -154,12 +154,12 @@ public class InputWidgetsDemo : ViewBase
         var colorState = UseState("#00cc92");
         var codeState = UseState("var x = 10;");
         var fileState = UseState<FileUpload<byte[]>?>();
-        var fileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState));
+        var fileUpload = UseUpload(MemoryStreamUploadHandler.Create(fileState));
         var feedbackState = UseState(4);
         var selectState = UseState("");
         var asyncSelectState = UseState((string?)null);
         
-        var selectedCategory = this.UseState<string?>(default(string?));
+        var selectedCategory = UseState<string?>(default(string?));
 
         Task<Option<string>[]> QueryCategories(string query)
         {

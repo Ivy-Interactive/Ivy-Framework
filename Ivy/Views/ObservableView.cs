@@ -8,9 +8,9 @@ public class ObservableView<T>(IObservable<T> observable) : ViewBase
 {
     public override object? Build()
     {
-        var lastObserved = this.UseState((object?)null);
+        var lastObserved = UseState((object?)null);
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             return observable.Subscribe(e => lastObserved.Set(e!));
         });

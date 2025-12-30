@@ -27,7 +27,7 @@ public class AsyncSelectBasicDemo : ViewBase
 
     public override object? Build()
     {
-        var selectedCategory = this.UseState<string?>(default(string?));
+        var selectedCategory = UseState<string?>(default(string?));
 
         Task<Option<string>[]> QueryCategories(string query)
         {
@@ -85,9 +85,9 @@ public class DataTypesDemo : ViewBase
 
     public override object? Build()
     {
-        var selectedCountry = this.UseState<string?>(default(string));
-        var selectedYear = this.UseState<int?>(default(int));
-        var selectedLanguage = this.UseState(ProgrammingLanguage.CSharp);
+        var selectedCountry = UseState<string?>(default(string));
+        var selectedYear = UseState<int?>(default(int));
+        var selectedLanguage = UseState(ProgrammingLanguage.CSharp);
 
         Task<Option<string>[]> QueryCountries(string query)
         {
@@ -218,11 +218,11 @@ public class AdvancedQueryDemo : ViewBase
 
     public override object? Build()
     {
-        var selectedUser = this.UseState<Guid>(default(Guid));
-        var selectedUserInfo = this.UseState<string>("No user selected");
+        var selectedUser = UseState<Guid>(default(Guid));
+        var selectedUserInfo = UseState<string>("No user selected");
 
         // Update display when selection changes
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             var user = Users.FirstOrDefault(u => u.Id == selectedUser.Value);
             selectedUserInfo.Set(user != null ? $"{user.Name} - {user.Email} ({user.Department})" : "No user selected");
@@ -283,9 +283,9 @@ public class StylingDemo : ViewBase
 {
     public override object? Build()
     {
-        var normalSelect = this.UseState<string?>(default(string));
-        var invalidSelect = this.UseState<string?>(default(string));
-        var disabledSelect = this.UseState<string?>(default(string));
+        var normalSelect = UseState<string?>(default(string));
+        var invalidSelect = UseState<string?>(default(string));
+        var disabledSelect = UseState<string?>(default(string));
 
         Task<Option<string>[]> QueryOptions(string query)
         {

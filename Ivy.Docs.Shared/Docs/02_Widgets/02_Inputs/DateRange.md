@@ -25,7 +25,7 @@ public class BasicDateRangeDemo : ViewBase
 {
     public override object? Build()
     {    
-        var dateRangeState = this.UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
+        var dateRangeState = UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
         var start = dateRangeState.Value.Item1;
         var end = dateRangeState.Value.Item2;
         var span = $"That's {(end-start).Days} days";
@@ -60,7 +60,7 @@ public class DisabledDateRange : ViewBase
 {   
     public override object? Build()
     {    
-        var dateRangeState = this.UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
+        var dateRangeState = UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
         return Layout.Vertical()
                 | dateRangeState.ToDateRangeInput().Disabled();
     }
@@ -77,7 +77,7 @@ public class InvalidDateRangeDemo : ViewBase
 {    
     public override object? Build()
     {    
-        var dateRangeState = this.UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
+        var dateRangeState = UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
         return Layout.Vertical()
                 | dateRangeState.ToDateRangeInput().Invalid("Invalid date range");
     }
@@ -94,7 +94,7 @@ public class NullableDateRangeDemo : ViewBase
 {
     public override object? Build()
     {    
-        var nullableRange = this.UseState<(DateOnly?, DateOnly?)>(() => 
+        var nullableRange = UseState<(DateOnly?, DateOnly?)>(() => 
             (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), 
              DateOnly.FromDateTime(DateTime.Today)));
         return Layout.Vertical()
@@ -116,7 +116,7 @@ public class DateRangePlaceHolderDemo : ViewBase
 {   
     public override object? Build()
     {    
-        var dateRangeState = this.UseState(() => 
+        var dateRangeState = UseState(() => 
             (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
         return Layout.Vertical()
                 | dateRangeState.ToDateRangeInput().Placeholder("Select a date range");
@@ -133,7 +133,7 @@ public class FormatDateRangeDemo : ViewBase
 {
     public override object? Build()
     {   
-         var dateRangeState = this.UseState(() => 
+         var dateRangeState = UseState(() => 
             (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
          return Layout.Vertical()
                  | dateRangeState.ToDateRangeInput()
@@ -157,7 +157,7 @@ public class DateRangeRealisticDemo : ViewBase
 {
     public override object? Build()
     {
-      var leaveRangeState = this.UseState(() =>
+      var leaveRangeState = UseState(() =>
             (from: DateOnly.FromDateTime(DateTime.Today.AddDays(-7)),
             to: DateOnly.FromDateTime(DateTime.Today)));
 

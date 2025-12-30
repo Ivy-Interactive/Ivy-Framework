@@ -11,7 +11,7 @@ public class DownloadsApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        IState<string?> url = this.UseDownload(GenerateImage, "image/png", "file.png");
+        IState<string?> url = UseDownload(GenerateImage, "image/png", "file.png");
         if (url.Value is null) return null;
         return Layout.Vertical()
             | new Image(url.Value)

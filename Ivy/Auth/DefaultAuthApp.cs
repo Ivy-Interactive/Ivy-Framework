@@ -69,10 +69,10 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
     public override object Build()
     {
-        var credentials = this.UseState(() => new LoginFormModel("", ""));
-        var loading = this.UseState<bool>();
-        var auth = this.UseService<IAuthService>();
-        var client = this.UseService<IClientProvider>();
+        var credentials = UseState(() => new LoginFormModel("", ""));
+        var loading = UseState<bool>();
+        var auth = UseService<IAuthService>();
+        var client = UseService<IClientProvider>();
 
         var formBuilder = credentials.ToForm("Login")
             .Required(m => m.User, m => m.Password)
@@ -141,9 +141,9 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
-        var auth = this.UseService<IAuthService>();
-        var callback = this.UseWebhook(async (request) =>
+        var client = UseService<IClientProvider>();
+        var auth = UseService<IAuthService>();
+        var callback = UseWebhook(async (request) =>
         {
             var authSession = auth.GetAuthSession();
             var token = await auth.HandleOAuthCallbackAsync(request);

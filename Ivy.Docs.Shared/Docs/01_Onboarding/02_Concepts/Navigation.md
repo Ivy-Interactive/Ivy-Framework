@@ -54,7 +54,7 @@ public class MyNavigationApp : ViewBase
     public override object? Build()
     {
         // Get the navigator instance
-        var navigator = this.UseNavigation();
+        var navigator = UseNavigation();
         
         return new Button("Navigate to Another App")
             .HandleClick(() => navigator.Navigate(typeof(AnotherApp)));
@@ -88,7 +88,7 @@ public class DashboardApp : ViewBase
 {
     public override object? Build()
     {
-        var navigator = this.UseNavigation();
+        var navigator = UseNavigation();
         
         return Layout.Vertical(
             new Button("Go to User Profile")
@@ -172,8 +172,8 @@ public static class NavigationHelpers
 }
 
 // Usage
-var navigateToLink = this.UseLinks();
-var goBack = this.UseBackNavigation();
+var navigateToLink = UseLinks();
+var goBack = UseBackNavigation();
 ```
 
 ### Integration with Chrome Settings

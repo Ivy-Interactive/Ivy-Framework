@@ -81,7 +81,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         IState<string?> displayValue = UseState<string?>();
         var open = UseState(false);
         var loading = UseState(false);
-        var refreshToken = this.UseRefreshToken();
+        var refreshToken = UseRefreshToken();
 
         UseEffect(async () =>
         {

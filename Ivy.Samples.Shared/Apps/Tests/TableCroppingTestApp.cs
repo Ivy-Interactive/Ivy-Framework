@@ -11,7 +11,7 @@ public class TableCroppingTestApp : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new TableTestBlade(), "Search");
+        return UseBlades(() => new TableTestBlade(), "Search");
     }
 }
 

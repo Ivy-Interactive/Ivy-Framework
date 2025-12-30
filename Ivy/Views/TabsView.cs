@@ -138,7 +138,7 @@ public class TabView : ViewBase
 
     public override object? Build()
     {
-        var selectedIndex = this.UseState(0);
+        var selectedIndex = UseState(0);
 
         void OnTabSelect(Event<TabsLayout, int> @event)
         {

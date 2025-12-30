@@ -11,7 +11,7 @@ public class SignalApp : SampleBase
     protected override object? BuildSample()
     {
         var output = UseState<string>("");
-        var signal = Context.CreateSignal<MySignal, int, string>();
+        var signal = CreateSignal<MySignal, int, string>();
 
         async void OnClick(Event<Button> _)
         {
@@ -34,7 +34,7 @@ public class ChildView : ViewBase
 {
     public override object? Build()
     {
-        var signal = Context.UseSignal<MySignal, int, string>();
+        var signal = UseSignal<MySignal, int, string>();
         var counter = UseState(0);
 
         UseEffect(() => signal.Receive((input) =>

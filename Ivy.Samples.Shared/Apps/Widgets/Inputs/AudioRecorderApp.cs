@@ -11,7 +11,7 @@ public class AudioRecorderApp() : SampleBase
     protected override object? BuildSample()
     {
         // Create a dummy upload for display-only examples
-        var dummyUpload = this.UseUpload(
+        var dummyUpload = UseUpload(
             (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
             defaultContentType: "audio/webm"
         );
@@ -56,7 +56,7 @@ public class AudioRecorderBasic : ViewBase
         var audioFile = UseState<FileUpload<byte[]>?>();
 
         // Use MemoryStreamUploadHandler for basic upload
-        var upload = this.UseUpload(
+        var upload = UseUpload(
             MemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );
@@ -88,7 +88,7 @@ public class AudioRecorderChunkedUpload : ViewBase
         var chunkCount = UseState(0);
 
         // Use ChunkedMemoryStreamUploadHandler to accumulate chunks into a single file
-        var upload = this.UseUpload(
+        var upload = UseUpload(
             ChunkedMemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );
@@ -120,7 +120,7 @@ public class AudioRecorderDisabledState : ViewBase
     public override object? Build()
     {
         // Create a dummy upload for display-only example
-        var dummyUpload = this.UseUpload(
+        var dummyUpload = UseUpload(
             (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
             defaultContentType: "audio/webm"
         );

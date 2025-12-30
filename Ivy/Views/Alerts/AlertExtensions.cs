@@ -31,9 +31,9 @@ public class WithPromptView<T>(Button button, Action<T> handleResult, T? default
             throw new NotSupportedException();
         }
 
-        var record = this.UseState(() => new PromptValueTypeWrapper<T>(defaultValue));
+        var record = UseState(() => new PromptValueTypeWrapper<T>(defaultValue));
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             if (record.Value.Value != null)
             {
@@ -51,7 +51,7 @@ public class WithConfirmView(Button button, string message, string? title = null
 {
     public override object? Build()
     {
-        var isOpen = this.UseState(false);
+        var isOpen = UseState(false);
 
         var clonedButton = button with
         {

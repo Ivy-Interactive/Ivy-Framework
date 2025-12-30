@@ -25,7 +25,7 @@ public class BladeNavigationDemo : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new NavigationRootView(), "Home");
+        return UseBlades(() => new NavigationRootView(), "Home");
     }
 }
 
@@ -33,7 +33,7 @@ public class NavigationRootView : ViewBase
 {
     public override object? Build()
     {
-        var blades = this.UseContext<IBladeController>();
+        var blades = UseContext<IBladeController>();
         var index = blades.GetIndex(this);
 
         return Layout.Horizontal().Height(Size.Units(50))
@@ -57,7 +57,7 @@ public class BladeHeaderDemo : ViewBase
 {
     public override object? Build()
     {
-        return Context.UseBlades(() => new SearchableListView(), "Search Products");
+        return UseBlades(() => new SearchableListView(), "Search Products");
     }
 }
 
@@ -65,8 +65,8 @@ public class SearchableListView : ViewBase
 {
     public override object? Build()
     {
-        var blades = this.UseContext<IBladeController>();
-        var searchTerm = this.UseState("");
+        var blades = UseContext<IBladeController>();
+        var searchTerm = UseState("");
         var products = new[] { "iPhone 15", "MacBook Pro", "iPad Air", "Apple Watch", "AirPods Pro" };
 
         var filteredProducts = products
@@ -115,7 +115,7 @@ public class BladeRefreshDemo : ViewBase
     public override object? Build()
     {
         return Layout.Horizontal().Height(Size.Units(100))
-            | this.UseBlades(() => new RefreshRootView(), "Items List");
+            | UseBlades(() => new RefreshRootView(), "Items List");
     }
 }
 
@@ -123,12 +123,12 @@ public class RefreshRootView : ViewBase
 {
     public override object? Build()
     {
-        var blades = this.UseContext<IBladeController>();
-        var items = this.UseState(new List<string> { "Item 1", "Item 2" });
-        var refreshToken = this.UseRefreshToken();
+        var blades = UseContext<IBladeController>();
+        var items = UseState(new List<string> { "Item 1", "Item 2" });
+        var refreshToken = UseRefreshToken();
 
         // React to the refresh token
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             if (refreshToken.IsRefreshed && refreshToken.ReturnValue is string newItem)
             {
@@ -150,8 +150,8 @@ public class AddItemView(RefreshToken token) : ViewBase
 {
     public override object? Build()
     {
-        var blades = this.UseContext<IBladeController>();
-        var name = this.UseState("New Item");
+        var blades = UseContext<IBladeController>();
+        var name = UseState("New Item");
 
         return Layout.Vertical().Gap(2)
             | new Field(name.ToTextInput(), "Item Name")
@@ -174,7 +174,7 @@ public class BladeErrorDemo : ViewBase
     public override object? Build()
     {
         return Layout.Horizontal().Height(Size.Units(100))
-        | (this.UseBlades(() => new ErrorRootView(), "Error Demo"));
+        | (UseBlades(() => new ErrorRootView(), "Error Demo"));
     }
 }
 
@@ -182,7 +182,7 @@ public class ErrorRootView : ViewBase
 {
     public override object? Build()
     {
-        var blades = this.UseContext<IBladeController>();
+        var blades = UseContext<IBladeController>();
 
         return Layout.Vertical()
             | Text.Block("Click to push a blade that throws an exception")

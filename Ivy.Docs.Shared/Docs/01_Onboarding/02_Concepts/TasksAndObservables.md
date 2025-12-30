@@ -45,13 +45,13 @@ public class TimeBasedObservableExample : ViewBase
 {
     public override object? Build()
     {
-        var isActive = this.UseState<bool>(false);
+        var isActive = UseState<bool>(false);
 
-        var timeObservable = this.UseStatic(() =>
+        var timeObservable = UseRef(() =>
             Observable.Interval(TimeSpan.FromMilliseconds(500))
                 .Where(_ => isActive.Value)
                 .Select(_ => DateTime.Now.ToString("HH:mm:ss.fff"))
-        );
+        ).Value;
 
         return Layout.Vertical(
             Layout.Horizontal(
@@ -74,14 +74,14 @@ public class StateManagementExample : ViewBase
 {
     public override object? Build()
     {
-        var counter = this.UseState<int>(0);
-        var isRunning = this.UseState<bool>(false);
+        var counter = UseState<int>(0);
+        var isRunning = UseState<bool>(false);
         
-        var timerObservable = this.UseStatic(() => 
+        var timerObservable = UseRef(() =>
             Observable.Interval(TimeSpan.FromSeconds(1))
-        );
+        ).Value;
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             var subscription = timerObservable.Subscribe(_ =>
             {
@@ -115,21 +115,21 @@ public class ObservableSearchExample : ViewBase
 {
     public override object? Build()
     {
-        var inputText = this.UseState<string>("");
-        var originalItems = this.UseState<string[]>(new[] { "Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape", "Honeydew" });
-        var filteredItems = this.UseState<string[]>(Array.Empty<string>());
+        var inputText = UseState<string>("");
+        var originalItems = UseState<string[]>(new[] { "Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape", "Honeydew" });
+        var filteredItems = UseState<string[]>(Array.Empty<string>());
         
-        this.UseEffect(() => {
+        UseEffect(() => {
             filteredItems.Set(originalItems.Value);
         }, []); 
         
-        var searchObservable = this.UseStatic(() => 
+        var searchObservable = UseRef(() =>
             Observable.Interval(TimeSpan.FromMilliseconds(300))
                 .Select(_ => inputText.Value)
                 .DistinctUntilChanged()
-        );
+        ).Value;
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             return searchObservable.Subscribe(searchTerm =>
             {   
@@ -173,8 +173,8 @@ public class TransformationExample : ViewBase
 {
     public override object? Build()
     {
-        var generatedData = this.UseState<int[]>(Array.Empty<int>());
-        var lastTransformed = this.UseState<int[]>(Array.Empty<int>());
+        var generatedData = UseState<int[]>(Array.Empty<int>());
+        var lastTransformed = UseState<int[]>(Array.Empty<int>());
 
         void GenerateNewData(Event<Button> _)
         {

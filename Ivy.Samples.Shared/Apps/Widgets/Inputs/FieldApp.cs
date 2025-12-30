@@ -13,11 +13,11 @@ public class FieldApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var nameState = this.UseState<string>();
-        var emailState = this.UseState<string>();
-        var passwordState = this.UseState<string>();
-        var acceptedTerms = this.UseState(false);
-        var addressState = this.UseState<string>();
+        var nameState = UseState<string>();
+        var emailState = UseState<string>();
+        var passwordState = UseState<string>();
+        var acceptedTerms = UseState(false);
+        var addressState = UseState<string>();
         var options = new List<string>() { "I read the terms and conditions and I agree" };
 
         return Layout.Vertical().Center()

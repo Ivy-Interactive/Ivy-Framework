@@ -31,7 +31,7 @@ public class ButtonApp() : SampleBase
 
     protected override object? BuildSample()
     {
-        var label = this.UseState("Click a button");
+        var label = UseState("Click a button");
 
         var eventHandler = (Event<Button> e) =>
         {

@@ -10,7 +10,7 @@ public class HiddenArgsApp : SampleBase
     protected override object? BuildSample()
     {
         HiddenArgsAppArgs? args = UseArgs<HiddenArgsAppArgs>();
-        var navigator = this.UseNavigation();
+        var navigator = UseNavigation();
 
         if (args != null)
         {

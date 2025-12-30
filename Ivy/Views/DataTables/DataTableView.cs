@@ -18,7 +18,7 @@ public class DataTableView(
 {
     public override object? Build()
     {
-        var connection = this.UseDataTable(queryable, idSelector);
+        var connection = UseDataTable(queryable, idSelector);
         if (connection == null)
         {
             return null;

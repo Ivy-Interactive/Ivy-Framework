@@ -86,7 +86,7 @@ public class DateTimeVariantsDemo : ViewBase
 `DateTimeInput` can handle change and blur events:
 
 ```csharp
-var dateState = this.UseState(DateTime.Now);
+var dateState = UseState(DateTime.Now);
 var onChangeHandler = (Event<IInput<DateTime>, DateTime> e) =>
 {
     dateState.Set(e.Value);

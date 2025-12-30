@@ -1,5 +1,4 @@
 using Ivy.Hooks;
-using Ivy.Samples.Shared.Helpers;
 using Ivy.Shared;
 using Ivy.Views.Alerts;
 using Ivy.Views.Blades;
@@ -14,7 +13,7 @@ public class ProductsApp : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new ProductsListBlade(), "Search", Size.Units(75));
+        return UseBlades(() => new ProductsListBlade(), "Search", Size.Units(75));
     }
 }
 
@@ -28,7 +27,7 @@ public class ProductsListBlade : ViewBase
 
         var blades = UseContext<IBladeController>();
         var factory = UseService<SampleDbContextFactory>();
-        var refreshToken = this.UseRefreshToken();
+        var refreshToken = UseRefreshToken();
 
         UseEffect(() =>
         {
@@ -51,7 +50,7 @@ public class ProductsListBlade : ViewBase
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this); // make sure only the current blade is visible
-        }).ToTrigger((isOpen) => new ProductCreateDialog(isOpen, refreshToken));
+        }).Ghost().ToTrigger((isOpen) => new ProductCreateDialog(isOpen, refreshToken));
 
         return new FilteredListView<ProductListRecord>(
             fetchRecords: (filter) => FetchProducts(factory, filter),
@@ -87,43 +86,53 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
 {
     public override object? Build()
     {
-        var product = UseState<Product?>(() => null!);
         var factory = UseService<SampleDbContextFactory>();
         var blades = UseContext<IBladeController>();
-        var refreshToken = this.UseRefreshToken();
 
-        UseEffect(async () =>
+        var productQuery = UseQuery(
+            key: (nameof(Product), productId),
+            fetcher: async (_, ct) =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.Products
+                    .Include(e => e.Category)
+                    .SingleOrDefaultAsync(e => e.Id == productId, ct);
+            });
+
+        if (productQuery.IsLoading) return null;
+
+        if (productQuery.Value == null)
         {
-            product.Set((await factory.CreateDbContext().Products.Include(e => e.Category).SingleOrDefaultAsync(e => e.Id == productId))!);
-        }, [EffectTrigger.AfterInit(), refreshToken]);
+            return new Callout($"Product '{productId}' not found. It may have been deleted.")
+                .Variant(CalloutVariant.Warning);
+        }
 
-        if (product.Value == null) return null;
-
-        var _product = product.Value;
+        var product = productQuery.Value;
 
         var deleteBtn = new Button("Delete", onClick: e =>
             {
                 Delete(factory);
+                productQuery.Mutator.Mutate(null, false);
                 blades.Pop(refresh: true);
             })
             .Variant(ButtonVariant.Destructive)
             .Icon(Icons.Trash)
             .Width(Size.Grow())
-            .WithConfirm($"Are you sure you want to delete product '{_product.Name}'?", "Delete Product");
+            .WithConfirm($"Are you sure you want to delete product '{product.Name}'?", "Delete Product");
 
         var editBtn = new Button("Edit")
             .Variant(ButtonVariant.Outline)
             .Icon(Icons.Pencil)
             .Width(Size.Grow())
-            .ToTrigger((isOpen) => new ProductEditSheet(isOpen, productId, refreshToken));
+            .ToTrigger((isOpen) => new ProductEditSheet(isOpen, productId));
 
         var productCard = new Card(
             content: new
             {
                 // We include some of the interesting fields of the entity here
-                _product.Id,
-                _product.Name,
-                Category = _product.Category?.Name
+                product.Id,
+                product.Name,
+                Category = product.Category?.Name
             }.ToDetails()
             .RemoveEmpty() // Removes "empty" fields from the details
             .Builder(e => e.Id, e => e.CopyToClipboard()),
@@ -203,12 +212,13 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
     }
 }
 
-public class ProductEditSheet(IState<bool> isOpen, Guid id, RefreshToken refreshToken) : ViewBase
+public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
 {
     public override object? Build()
     {
         var factory = UseService<SampleDbContextFactory>();
         var product = UseState(() => factory.CreateDbContext().Products.Find(id)!);
+        var queryMutator = UseMutation((nameof(Product), id));
 
         UseEffect(() =>
         {
@@ -216,13 +226,13 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id, RefreshToken refresh
             product.Value.UpdatedAt = DateTime.UtcNow;
             db.Products.Update(product.Value);
             db.SaveChanges();
-            refreshToken.Refresh();
+            queryMutator.Revalidate();
         }, [product]);
 
         return product
             .ToForm()
             // ToForm() will scaffold the form based on the properties of the record and create the appropriate builder for input controls
-            // .Build(<expression>, e => To...) will allow us to customize the input control for the field 
+            // .Build(<expression>, e => To...) will allow us to customize the input control for the field
             // NOTE! Only use this if you're sure about the syntax, otherwise leave it and let the inputs be scaffolded
             .Builder(e => e.Rating, e => e.ToFeedbackInput())
             .Builder(e => e.Description, e => e.ToTextAreaInput())

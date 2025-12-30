@@ -51,7 +51,7 @@ class HelloApp : ViewBase
 {
     public override object? Build()
     {
-        var nameState = this.UseState<string>();
+        var nameState = UseState<string>();
 
         return Layout.Center()
                | new Card(

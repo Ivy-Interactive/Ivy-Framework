@@ -122,7 +122,7 @@ public class DataManagementView : ViewBase
 {
     public override object? Build()
     {
-        var volume = this.UseService<IVolume>();
+        var volume = UseService<IVolume>();
         
         return new Column
         {

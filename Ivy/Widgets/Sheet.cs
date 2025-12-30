@@ -69,7 +69,7 @@ public class WithSheetView(Button trigger, Func<object> contentFactory, string? 
 {
     public override object? Build()
     {
-        var isOpen = this.UseState(false);
+        var isOpen = UseState(false);
         var clonedTrigger = trigger with
         {
             OnClick = _ =>

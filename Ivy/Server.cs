@@ -8,6 +8,7 @@ using Ivy.Auth;
 using Ivy.Chrome;
 using Ivy.Connections;
 using Ivy.Core;
+using Ivy.Hooks;
 using Ivy.Themes;
 using Ivy.Middleware;
 using Ivy.Views;
@@ -414,6 +415,7 @@ public class Server
         builder.Services.AddSingleton(sessionStore);
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
         builder.Services.AddHealthChecks();
+        builder.Services.AddQueryManager();
 
         // Register theme service if not already registered
         if (Services.All(s => s.ServiceType != typeof(IThemeService)))

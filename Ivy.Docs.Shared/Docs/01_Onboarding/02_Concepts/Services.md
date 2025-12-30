@@ -34,7 +34,7 @@ public class MyView : ViewBase
 {
     public override object? Build()
     {
-        var myService = this.UseService<IMyService>();
+        var myService = UseService<IMyService>();
         return myService.GetData();
     }
 }
