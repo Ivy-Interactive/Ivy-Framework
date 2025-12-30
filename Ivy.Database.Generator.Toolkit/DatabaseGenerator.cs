@@ -1,12 +1,14 @@
 ﻿using Ivy.Database.Generator.Toolkit.Databases;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Spectre.Console;
 
 namespace Ivy.Database.Generator.Toolkit;
 
 public class DatabaseGenerator
 {
-    public async Task<int> GenerateAsync(Type dataContextType, Type dataSeederType, bool verbose, bool yesToAll, bool deleteDatabase, bool seedDatabase, string? projectDirectory, 
+    public async Task<int> GenerateAsync(Type dataContextType, Type dataSeederType, bool verbose, bool yesToAll, bool deleteDatabase, bool seedDatabase, string? projectDirectory,
         string? connectionString, DatabaseProvider? providerChoice)
     {
         providerChoice ??= AnsiConsole.Prompt(
@@ -40,7 +42,7 @@ public class DatabaseGenerator
                     DefaultValue = false
                 }
             );
-            
+
             if (!continuePrompt)
             {
                 AnsiConsole.MarkupLine("[red]Aborted![/]");
@@ -48,10 +50,10 @@ public class DatabaseGenerator
             }
             deleteDatabase = true;
         }
-        
+
         var dbContext = (DbContext)databaseProvider.GetType().GetMethod("GetDbContext")!.MakeGenericMethod(dataContextType).Invoke(databaseProvider,
             [connectionString])!;
-        
+
         await Utils.WithSpinner(async () =>
         {
             if (deleteDatabase)
@@ -87,7 +89,7 @@ public class DatabaseGenerator
                             }
                         }
                     }
-                    
+
                     if (hasData)
                     {
                         throw new InvalidOperationException("Database is not empty.");
@@ -95,6 +97,16 @@ public class DatabaseGenerator
                 }
             }
             await dbContext.Database.MigrateAsync();
+
+            // Delete migration from __EFMigrationsHistory table, because it won't exist outside of the database generator project
+            var historyRepository = dbContext.GetService<IHistoryRepository>();
+            var migrationId = await historyRepository.GetAppliedMigrationsAsync()
+                .ContinueWith(t => t.Result.LastOrDefault()?.MigrationId);
+            if (migrationId != null)
+            {
+                var deleteScript = historyRepository.GetDeleteScript(migrationId);
+                await dbContext.Database.ExecuteSqlRawAsync(deleteScript);
+            }
         }, "Creating Tables", verbose);
 
         if (!seedDatabase && !yesToAll)
@@ -105,7 +117,7 @@ public class DatabaseGenerator
                     DefaultValue = false
                 }
             );
-        
+
             if (!seedPrompt)
             {
                 return 0;
@@ -116,13 +128,13 @@ public class DatabaseGenerator
         if (seedDatabase)
         {
             var seeder = (IDataSeeder)Activator.CreateInstance(dataSeederType, dbContext)!;
-        
+
             await Utils.WithSpinner(async () =>
             {
                 await seeder.SeedAsync();
             }, "Seeding", verbose);
         }
-        
+
         AnsiConsole.MarkupLine($"[green]Done![/]");
 
         return 0;
