@@ -4,11 +4,6 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Hooks;
 
-public enum QueryStrategy
-{
-    StaleWhileRevalidate
-}
-
 public enum QueryScope
 {
     Server,
@@ -17,7 +12,6 @@ public enum QueryScope
 
 public record QueryOptions
 {
-    public QueryStrategy Strategy { get; init; } = QueryStrategy.StaleWhileRevalidate;
     public TimeSpan? Expiration { get; init; } = null;
     public QueryScope Scope { get; init; } = QueryScope.Server;
     public IReadOnlyList<string> Tags { get; init; } = [];
@@ -30,7 +24,6 @@ public record QueryOptions
     public bool RevalidateOnInit { get; init; } = true;
 
     public static implicit operator QueryOptions(QueryScope scope) => new() { Scope = scope };
-    public static implicit operator QueryOptions(QueryStrategy strategy) => new() { Strategy = strategy };
 }
 
 public record QueryManagerOptions

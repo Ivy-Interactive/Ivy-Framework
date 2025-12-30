@@ -199,9 +199,8 @@ public class QueryManager : IDisposable, IAsyncDisposable
             var now = _timeProvider.GetUtcNow();
             entry.LastAccessedAt = now;
 
-            // Check staleness only for StaleWhileRevalidate strategy
-            if (options.Strategy == QueryStrategy.StaleWhileRevalidate &&
-                entry.State == QueryEntryState.Fresh &&
+            // Check staleness
+            if (entry.State == QueryEntryState.Fresh &&
                 entry.ExpiresAt.HasValue &&
                 now > entry.ExpiresAt.Value)
             {
@@ -222,13 +221,9 @@ public class QueryManager : IDisposable, IAsyncDisposable
                     NotifySubscribers(entry);
                     break;
 
-                case QueryEntryState.Stale when options.Strategy == QueryStrategy.StaleWhileRevalidate:
+                case QueryEntryState.Stale:
                     NotifySubscribers(entry); // Deliver stale immediately
                     await StartRevalidationAsync(entry);
-                    break;
-
-                case QueryEntryState.Stale:
-                    NotifySubscribers(entry);
                     break;
 
                 case QueryEntryState.Fetching:
