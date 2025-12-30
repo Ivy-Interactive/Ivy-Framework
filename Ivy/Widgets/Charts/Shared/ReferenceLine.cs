@@ -12,6 +12,10 @@ public record ReferenceLine
         Label = label;
     }
 
+    internal ReferenceLine()
+    {
+    }
+
     public double? X { get; set; }
 
     public double? Y { get; set; }

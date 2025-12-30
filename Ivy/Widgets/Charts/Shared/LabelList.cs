@@ -10,7 +10,11 @@ public record LabelList
         DataKey = dataKey;
     }
 
-    public string DataKey { get; set; }
+    internal LabelList()
+    {
+    }
+
+    public string? DataKey { get; set; }
 
     public double Offset { get; set; } = 5;
 

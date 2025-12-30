@@ -13,6 +13,10 @@ public record Article : WidgetBase<Article>
     {
     }
 
+    internal Article()
+    {
+    }
+
     [Prop] public bool ShowToc { get; set; } = true;
 
     [Prop] public bool ShowFooter { get; set; } = true;
@@ -23,8 +27,12 @@ public record Article : WidgetBase<Article>
 
     [Prop] public string? DocumentSource { get; set; }
 
+    [Prop] public List<ArticleHeading> Headings { get; set; } = [];
+
     [Event] public Func<Event<Article, string>, ValueTask>? OnLinkClick { get; set; }
 }
+
+public record ArticleHeading(string Id, string Text, int Level);
 
 public static class ArticleExtensions
 {
@@ -37,6 +45,8 @@ public static class ArticleExtensions
     public static Article Next(this Article article, InternalLink? navigateForward) => article with { Next = navigateForward };
 
     public static Article DocumentSource(this Article article, string? documentSource) => article with { DocumentSource = documentSource };
+
+    public static Article Headings(this Article article, List<ArticleHeading> headings) => article with { Headings = headings };
 
     [OverloadResolutionPriority(1)]
     public static Article HandleLinkClick(this Article article, Func<Event<Article, string>, ValueTask> onLinkClick) => article with { OnLinkClick = onLinkClick };

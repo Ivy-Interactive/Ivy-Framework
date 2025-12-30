@@ -7,21 +7,25 @@ namespace Ivy;
 
 public record BarChart : WidgetBase<BarChart>
 {
-    public BarChart(object data, params Bar[] bars)
+    public BarChart(object data, params Bar[] bars) : this()
     {
         Data = data;
         Bars = bars;
+    }
+
+    internal BarChart()
+    {
         Width = Size.Full();
         Height = Size.Full();
     }
 
-    [Prop] public object Data { get; init; }
+    [Prop] public object? Data { get; init; }
 
     [Prop] public Layouts Layout { get; init; } = Layouts.Horizontal;
 
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
-    [Prop] public Bar[] Bars { get; init; }
+    [Prop] public Bar[] Bars { get; init; } = [];
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 

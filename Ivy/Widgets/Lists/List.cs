@@ -12,4 +12,8 @@ public record List : WidgetBase<List>
     public List(IEnumerable<object> items) : base(items.ToArray())
     {
     }
+
+    internal List()
+    {
+    }
 }

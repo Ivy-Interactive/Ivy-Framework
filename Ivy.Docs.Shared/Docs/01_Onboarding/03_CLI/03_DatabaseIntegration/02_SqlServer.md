@@ -32,11 +32,13 @@ You will be asked to name your connection, then prompted for a connection string
 > For details on authentication modes, see Microsoft's [Choose an authentication mode](https://learn.microsoft.com/en-us/sql/relational-databases/security/choose-an-authentication-mode).
 
 **Windows Authentication (Recommended)**
+
 ```text
 Server=localhost; Database=my_db; Trusted_Connection=True;
 ```
 
 **SQL Server Authentication**
+
 ```text
 Server=localhost; Database=my_db; User Id=user; Password=password;
 ```
@@ -88,6 +90,7 @@ See Microsoft's [Create a database schema](https://learn.microsoft.com/en-us/sql
 ### Common Issues
 
 **Connection Problems**
+
 - Verify server is running and network connectivity
 - Check credentials and permissions
 - Ensure firewall allows port 1433

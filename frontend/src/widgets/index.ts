@@ -1,7 +1,7 @@
 export { ArticleWidget } from './article';
 export { BadgeWidget } from './badgeWidget';
 export { ButtonWidget } from './buttonWidget';
-export { CardWidget } from './cardWidget';
+export { CardWidget } from './card';
 export {
   ChatLoadingWidget,
   ChatMessageWidget,

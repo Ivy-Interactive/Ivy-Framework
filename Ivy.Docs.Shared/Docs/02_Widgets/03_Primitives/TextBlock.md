@@ -10,7 +10,7 @@ searchHints:
 
 # TextBlock
 
-The `TextBlock` widget displays text content with customizable styling. It's a fundamental building block for creating user interfaces with text, supporting various formatting options and layout properties.
+The `TextBlock` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) displays text content with customizable styling. It's a fundamental building block for creating [user interfaces](../../../01_Onboarding/02_Concepts/Views.md) with text, supporting various formatting options and layout properties.
 
 This widget is rarely used directly. Instead, we use the helper class `Ivy.Views.Text` which provides a more user-friendly API for creating text elements.
 
@@ -18,7 +18,7 @@ This widget is rarely used directly. Instead, we use the helper class `Ivy.Views
 
 The Text helper provides various methods for different text styles and purposes:
 
-```csharp demo-below 
+```csharp demo-below
 public class TextVariantsDemo : ViewBase
 {   
     public override object? Build()
@@ -50,7 +50,7 @@ public class TextVariantsDemo : ViewBase
 
 For displaying code and markup content:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class CodeVariantsDemo : ViewBase
 {   
     public override object? Build()
@@ -70,7 +70,7 @@ public class CodeVariantsDemo : ViewBase
 
 Text elements can be customized with various modifiers:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class TextModifiersDemo : ViewBase
 {   
     public override object? Build()
@@ -96,7 +96,7 @@ public class TextModifiersDemo : ViewBase
 
 ### Article Layout
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ArticleDemo : ViewBase
 {   
     public override object? Build()
@@ -140,7 +140,7 @@ public class FormDemo : ViewBase
 
 ### Code Documentation
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class CodeDocDemo : ViewBase
 {   
     public override object? Build()
@@ -166,7 +166,7 @@ public class CodeDocDemo : ViewBase
 
 ### Status Messages
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class StatusDemo : ViewBase
 {   
     public override object? Build()
@@ -209,7 +209,7 @@ The TextBuilder class provides several modifiers for customizing text appearance
 
 ## Related Components
 
-- **Markdown** - For rendering markdown content
-- **Code** - For syntax-highlighted code blocks
-- **Json** - For JSON data display
-- **Html** - For HTML content rendering
+- **[Markdown](Markdown.md)** - For rendering markdown content
+- **[Code](Code.md)** - For syntax-highlighted code blocks
+- **[Json](Json.md)** - For JSON data display
+- **[Html](Html.md)** - For HTML content rendering

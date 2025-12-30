@@ -80,7 +80,6 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(getInitialSidebarState);
   const [isManuallyToggled, setIsManuallyToggled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
@@ -90,61 +89,21 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
   // Auto-collapse/expand based on width (only for main app sidebar)
   useEffect(() => {
-    if (!containerRef.current || !mainAppSidebar) return;
+    if (!mainAppSidebar) return;
 
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      const entry = entries[0];
-      if (!entry) return;
+    const mql = window.matchMedia(`(min-width: ${autoCollapseThreshold}px)`);
 
-      const containerWidth = entry.contentRect.width;
-
-      // Only auto-collapse/expand if user hasn't manually toggled
+    const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
       if (!isManuallyToggled) {
-        if (containerWidth < autoCollapseThreshold) {
-          setIsSidebarOpen(false);
-        } else {
-          setIsSidebarOpen(true);
-        }
+        setIsSidebarOpen(e.matches);
       }
     };
 
-    resizeObserverRef.current = new ResizeObserver(handleResize);
-    resizeObserverRef.current.observe(containerRef.current);
+    handleMediaChange(mql);
 
-    return () => {
-      if (resizeObserverRef.current) {
-        resizeObserverRef.current.disconnect();
-      }
-    };
+    mql.addEventListener('change', handleMediaChange);
+    return () => mql.removeEventListener('change', handleMediaChange);
   }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar]);
-
-  // Reset manual toggle flag when width changes significantly (only for main app sidebar)
-  useEffect(() => {
-    if (!containerRef.current || !mainAppSidebar) return;
-
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      const entry = entries[0];
-      if (!entry) return;
-
-      const containerWidth = entry.contentRect.width;
-
-      // Reset manual toggle flag when width changes significantly
-      // This allows auto-behavior to resume after significant size changes
-      if (
-        containerWidth < autoCollapseThreshold * 0.8 ||
-        containerWidth > autoCollapseThreshold * 1.2
-      ) {
-        setIsManuallyToggled(false);
-      }
-    };
-
-    const observer = new ResizeObserver(handleResize);
-    observer.observe(containerRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [autoCollapseThreshold, mainAppSidebar]);
 
   return (
     <div

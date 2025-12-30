@@ -30,7 +30,9 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public FeedbackInputs Variant { get; set; }
+    [Prop] public bool Nullable { get; set; }
+
+    [Prop] public FeedbackInputs Variant { get; set; } = FeedbackInputs.Stars;
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -73,9 +75,11 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
         Variant = variant;
     }
 
+    internal FeedbackInput() { }
+
     [Prop] public TNumber Value { get; } = default!;
 
-    [Prop] public bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
+    [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
     [Event] public Func<Event<IInput<TNumber>, TNumber>, ValueTask>? OnChange { get; }
 }
@@ -100,6 +104,7 @@ public static class FeedbackInputExtensions
     public static FeedbackInputBase Variant(this FeedbackInputBase widget, FeedbackInputs variant) => widget with { Variant = variant };
 
     public static FeedbackInputBase Invalid(this FeedbackInputBase widget, string invalid) => widget with { Invalid = invalid };
+    public static FeedbackInputBase Nullable(this FeedbackInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]
     public static FeedbackInputBase HandleBlur(this FeedbackInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

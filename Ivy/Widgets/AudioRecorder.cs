@@ -17,13 +17,15 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
         Disabled = disabled;
     }
 
+    internal AudioRecorder() { }
+
     [Prop] public bool Disabled { get; set; }
 
     [Prop] public string? Label { get; set; }
 
     [Prop] public string? RecordingLabel { get; set; }
 
-    [Prop] public string MimeType { get; set; }
+    [Prop] public string MimeType { get; set; } = "audio/webm";
 
     [Prop] public int? ChunkInterval { get; set; }
 

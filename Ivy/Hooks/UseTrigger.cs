@@ -43,7 +43,7 @@ public static class UseTriggerExtensions
 
     public static (object? triggerView, Action triggerCallback) UseTrigger(this IViewContext context, Func<IState<bool>, object?> factory)
     {
-        var open = context.UseState(false, buildOnChange: false);
+        var open = context.UseRef(false);
 
         var view = new FuncView(context2 =>
         {

@@ -9,7 +9,14 @@ interface BadgeWidgetProps {
   title: string;
   icon?: string;
   iconPosition?: 'Left' | 'Right';
-  variant?: string;
+  variant?:
+    | 'Primary'
+    | 'Destructive'
+    | 'Outline'
+    | 'Secondary'
+    | 'Success'
+    | 'Warning'
+    | 'Info';
   scale?: Scales;
 }
 
@@ -17,7 +24,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   title,
   icon = undefined,
   iconPosition = 'Left',
-  variant = 'primary',
+  variant = 'Primary',
   scale = Scales.Medium,
 }) => {
   let badgeClasses = 'badge-text-primary';

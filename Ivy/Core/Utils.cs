@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -24,7 +25,7 @@ public static class Utils
             return ValueTask.CompletedTask;
         };
 
-    public static object? ConvertJsonNode(JsonNode? jsonNode, Type valueType)
+    public static object? ConvertJsonNode(JsonNode? jsonNode, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type valueType)
     {
         if (jsonNode is null) return null;
         // Get underlying type to handle nullable types properly with Convert.ChangeType
@@ -115,7 +116,8 @@ public static class Utils
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+            TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver()
         };
 
         return jsonNode.Deserialize(valueType, options);
@@ -149,7 +151,7 @@ public static class Utils
         return t == typeof(decimal);
     }
 
-    private static object? SafeConvert(object value, Type targetType)
+    private static object? SafeConvert(object value, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type targetType)
     {
         try
         {
@@ -167,7 +169,7 @@ public static class Utils
         }
     }
 
-    private static object? CapValueToTypeLimits(object value, Type targetType)
+    private static object? CapValueToTypeLimits(object value, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type targetType)
     {
         if (value is IConvertible convertible)
         {
@@ -210,7 +212,7 @@ public static class Utils
         return (args[0], args[1]);
     }
 
-    public static object? BestGuessConvert(object? input, Type targetType)
+    public static object? BestGuessConvert(object? input, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type targetType)
     {
         if (input == null) return null;
         if (targetType.IsInstanceOfType(input)) return input;

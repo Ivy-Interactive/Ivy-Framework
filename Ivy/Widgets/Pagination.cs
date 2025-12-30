@@ -21,13 +21,15 @@ public record Pagination : WidgetBase<Pagination>
         Disabled = disabled;
     }
 
+    internal Pagination() { }
+
     [Prop] public int? Page { get; set; }
 
-    [Prop] public int? NumPages { get; set; }
+    [Prop] public int? NumPages { get; set; } = 0;
 
-    [Prop] public int? Siblings { get; set; }
+    [Prop] public int? Siblings { get; set; } = 1;
 
-    [Prop] public int? Boundaries { get; set; }
+    [Prop] public int? Boundaries { get; set; } = 1;
 
     [Prop] public bool Disabled { get; set; } = false;
 

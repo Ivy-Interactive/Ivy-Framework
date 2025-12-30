@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Ivy.Core.Helpers;
 
@@ -13,7 +14,10 @@ public static class WidgetSerializer
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver
+        {
+            Modifiers = { AddDefaultValueComparison }
+        },
         Converters =
         {
             new JsonEnumConverter(),
@@ -21,7 +25,66 @@ public static class WidgetSerializer
         }
     };
 
-    // Cached metadata per widget type to avoid repeated reflection
+    // Cache for default instances used by JSON serialization
+    private static readonly ConcurrentDictionary<Type, object?> DefaultInstanceCache = new();
+
+    private static bool ValuesAreEqual(object? a, object? b)
+    {
+        if (Equals(a, b)) return true;
+
+        if (a is Array arrA && b is Array arrB)
+        {
+            if (arrA.Length != arrB.Length) return false;
+            for (int i = 0; i < arrA.Length; i++)
+            {
+                if (!ValuesAreEqual(arrA.GetValue(i), arrB.GetValue(i)))
+                    return false;
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void AddDefaultValueComparison(JsonTypeInfo typeInfo)
+    {
+        if (typeInfo.Kind != JsonTypeInfoKind.Object)
+            return;
+
+        var defaultInstance = DefaultInstanceCache.GetOrAdd(typeInfo.Type, static t =>
+        {
+            var ctor = t.GetConstructor(
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                Type.EmptyTypes,
+                null);
+
+            if (ctor == null)
+                return null;
+
+            try
+            {
+                return ctor.Invoke(null);
+            }
+            catch
+            {
+                return null;
+            }
+        });
+
+        if (defaultInstance == null)
+            return;
+
+        foreach (var property in typeInfo.Properties)
+        {
+            if (property.Get == null)
+                continue;
+
+            var defaultValue = property.Get(defaultInstance);
+            property.ShouldSerialize = (_, currentValue) => !ValuesAreEqual(currentValue, defaultValue);
+        }
+    }
+
     private static readonly ConcurrentDictionary<Type, SerializationTypeMetadata> MetadataCache = new();
 
     private sealed record PropInfo(PropertyInfo Property, PropAttribute Attribute, string CamelCaseName);
@@ -31,7 +94,8 @@ public static class WidgetSerializer
     private sealed record SerializationTypeMetadata(
         string TypeName,
         PropInfo[] PropProperties,
-        EventInfo[] EventProperties
+        EventInfo[] EventProperties,
+        IWidget? DefaultInstance
     );
 
     private static SerializationTypeMetadata GetMetadata(Type type)
@@ -51,10 +115,34 @@ public static class WidgetSerializer
                 .Select(p => new EventInfo(p))
                 .ToArray();
 
-            var typeName = t.Namespace + "." + Utils.CleanGenericNotation(t.Name);
+            IWidget? defaultInstance = null;
+            var defaultCtor = t.GetConstructor(
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                Type.EmptyTypes,
+                null);
 
-            return new SerializationTypeMetadata(typeName, propProperties, eventProperties);
+            if (defaultCtor != null)
+            {
+                try
+                {
+                    defaultInstance = defaultCtor.Invoke(null) as IWidget;
+                }
+                catch
+                {
+                    // Ignore construction failures - we'll just not have default values
+                }
+            }
+
+            var typeName = CleanTypeName(t);
+
+            return new SerializationTypeMetadata(typeName, propProperties, eventProperties, defaultInstance);
         });
+    }
+
+    public static string CleanTypeName(Type t)
+    {
+        return t.Namespace + "." + Utils.CleanGenericNotation(t.Name);
     }
 
     public static JsonNode Serialize(IWidget widget)
@@ -89,8 +177,19 @@ public static class WidgetSerializer
         foreach (var propInfo in metadata.PropProperties)
         {
             var value = GetPropertyValue(widget, propInfo.Property, propInfo.Attribute);
-            if (value == null)
+
+            // Skip properties that match their default values
+            if (metadata.DefaultInstance != null)
+            {
+                var defaultValue = GetPropertyValue(metadata.DefaultInstance, propInfo.Property, propInfo.Attribute);
+                if (ValuesAreEqual(value, defaultValue))
+                    continue;
+            }
+            else if (value == null)
+            {
                 continue;
+            }
+
             props[propInfo.CamelCaseName] = JsonSerializer.SerializeToNode(value, SerializerOptions);
         }
         json["props"] = props;
@@ -101,7 +200,7 @@ public static class WidgetSerializer
             foreach (var eventInfo in metadata.EventProperties)
             {
                 if (eventInfo.Property.GetValue(widget) != null)
-                    eventsArray.Add(eventInfo.Property.Name);
+                    eventsArray.Add(JsonValue.Create(eventInfo.Property.Name));
             }
             json["events"] = eventsArray;
         }

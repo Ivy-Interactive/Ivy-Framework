@@ -18,10 +18,24 @@ public interface IAnyOption
     public Icons? Icon { get; set; }
 }
 
-public class Option<TValue>(string? label, TValue value, string? group = null, string? description = null, Icons? icon = null) : IAnyOption
+public class Option<TValue> : IAnyOption
 {
     public Option(TValue value) : this(value?.ToString() ?? "?", value, null)
     {
+    }
+
+    internal Option()
+    {
+        Value = null!;
+    }
+
+    public Option(string? label, TValue value, string? group = null, string? description = null, Icons? icon = null)
+    {
+        Label = label;
+        Description = description;
+        Value = value!;
+        Group = group;
+        Icon = icon;
     }
 
     public Type GetOptionType()
@@ -29,17 +43,17 @@ public class Option<TValue>(string? label, TValue value, string? group = null, s
         return typeof(TValue);
     }
 
-    public string? Label { get; set; } = label;
+    public string? Label { get; set; }
 
-    public string? Description { get; set; } = description;
+    public string? Description { get; set; }
 
-    public object Value { get; set; } = value!;
+    public object Value { get; set; }
 
     public TValue TypedValue => (TValue)Value;
 
-    public string? Group { get; set; } = group;
+    public string? Group { get; set; }
 
-    public Icons? Icon { get; set; } = icon;
+    public Icons? Icon { get; set; }
 }
 
 public static class OptionExtensions

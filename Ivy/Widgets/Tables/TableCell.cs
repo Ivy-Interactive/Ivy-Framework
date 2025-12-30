@@ -10,11 +10,15 @@ public record TableCell : WidgetBase<TableCell>
     {
     }
 
+    internal TableCell()
+    {
+    }
+
     [Prop] public bool IsHeader { get; set; }
 
     [Prop] public bool IsFooter { get; set; }
 
-    [Prop] public Align Align { get; set; }
+    [Prop] public Align Align { get; set; } = Align.Left;
 
     [Prop] public bool MultiLine { get; set; }
 }

@@ -14,7 +14,7 @@ searchHints:
 Embed external content from social media platforms, code repositories, and other web resources with automatic responsive containers and platform-specific optimizations.
 </Ingress>
 
-The `Embed` widget allows you to incorporate external content such as videos, social media posts, code repositories, and other web resources into your app. It automatically detects the content type and creates an appropriate responsive container.
+The `Embed` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) allows you to incorporate external content such as videos, social media posts, code repositories, and other web resources into your [app](../../../01_Onboarding/02_Concepts/Apps.md). It automatically detects the content type and creates an appropriate responsive container.
 
 ## Basic Usage
 

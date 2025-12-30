@@ -12,14 +12,14 @@ searchHints:
 # Chat Tutorial
 
 <Ingress>
-Create an AI-powered chat application that suggests Lucide icons based on application descriptions using modern chat patterns.
+Create an AI-powered chat application that suggests [Lucide icons](../../03_ApiReference/IvyShared/Icons.md) based on application descriptions using modern chat patterns.
 </Ingress>
 
 ## Prerequisites
 
 Before starting this tutorial, make sure you have:
 
-1. [Installed](Installation.md) Ivy on your development machine
+1. [Installed](02_Installation.md) Ivy on your development machine
 2. An OpenAI API key set in your environment variables as `OPENAI_API_KEY`
 
 ## Create the Chat Application
@@ -134,8 +134,8 @@ public class LucideIconAgent
 1. The app starts with a welcome message asking users to describe their application
 2. When a user sends a message, it's added to the chat history
 3. The `LucideIconAgent` uses OpenAI's GPT-4 to analyze the description and suggest relevant Lucide icons
-4. The suggested icons are displayed as clickable buttons
-5. Clicking an icon copies its name to the clipboard and shows a toast notification
+4. The suggested icons are displayed as [clickable buttons](../../02_Widgets/01_Common/Button.md)
+5. Clicking an icon copies its name to the clipboard and shows a [toast notification](../02_Concepts/Alerts.md)
 
 ## Try It Out
 

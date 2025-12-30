@@ -2,8 +2,8 @@ import React from 'react';
 import { motion, AnimatePresence, Variants, Transition } from 'framer-motion';
 
 interface AnimationWidgetProps {
-  children: React.ReactNode;
-  animation:
+  children?: React.ReactNode;
+  type:
     | 'Rotate'
     | 'SlideIn'
     | 'FadeIn'
@@ -47,7 +47,6 @@ interface AnimationWidgetProps {
   visible?: boolean;
   intensity?: number;
   trigger?: 'Auto' | 'Click' | 'Hover';
-  type?: string;
 }
 
 const getEasing = (easing?: string) => {
@@ -117,7 +116,7 @@ const getDirectionOffset = (direction?: string, distance: number = 100) => {
 
 const getAnimationVariants = (props: AnimationWidgetProps): Variants => {
   const {
-    animation,
+    type,
     duration = 0.5,
     delay = 0,
     direction,
@@ -144,7 +143,7 @@ const getAnimationVariants = (props: AnimationWidgetProps): Variants => {
     exit: {},
   };
 
-  switch (animation) {
+  switch (type) {
     case 'Rotate':
       variants.initial = { rotate: 0 };
       variants.animate = { rotate: 360, transition: baseTransition };
@@ -314,14 +313,23 @@ const getAnimationVariants = (props: AnimationWidgetProps): Variants => {
 };
 
 const AnimationWidget: React.FC<AnimationWidgetProps> = props => {
-  const { children, visible = true, trigger = 'Auto', type, ...rest } = props;
+  const defaults: AnimationWidgetProps = {
+    trigger: 'Auto',
+    visible: true,
+    duration: 0.5,
+    delay: 0,
+    distance: 100,
+    intensity: 1,
+    easing: 'Linear',
+    type: 'Rotate',
+  };
+
+  const merged = { ...defaults, ...props };
+
+  const { children, visible, trigger } = merged;
 
   const [isAnimating, setIsAnimating] = React.useState(trigger === 'Auto');
-  const variants = getAnimationVariants({
-    ...rest,
-    animation: type as AnimationWidgetProps['animation'],
-    children,
-  });
+  const variants = getAnimationVariants(merged);
 
   const handleClick = () => {
     if (trigger === 'Click') {

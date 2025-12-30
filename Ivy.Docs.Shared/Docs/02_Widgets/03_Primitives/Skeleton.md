@@ -14,7 +14,7 @@ searchHints:
 Create elegant loading placeholders that mimic your content structure to improve perceived performance during data loading.
 </Ingress>
 
-The `Skeleton` widget creates placeholder loading indicators that mimic the shape of your content. It improves perceived performance by showing users the layout of the page while data is loading.
+The `Skeleton` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) creates placeholder loading indicators that mimic the shape of your content. It improves perceived performance by showing users the layout of the page while data is loading.
 
 ```csharp demo-tabs
 public class ProductCardView : ViewBase

@@ -16,9 +16,11 @@ import { ToastAction } from '@/components/ui/toast';
 import { setThemeGlobal } from '@/components/theme-provider';
 
 type UpdateMessage = Array<{
+  iteration: number;
   viewId: string;
   indices: number[];
   patch: Operation[];
+  treeHash?: string;
 }>;
 
 type RefreshMessage = {
@@ -84,6 +86,26 @@ const widgetTreeToXml = (node: WidgetNode) => {
   }
 };
 
+const calculateTreeSignature = (node: WidgetNode): string => {
+  const children =
+    node.children?.map(c => calculateTreeSignature(c)).join(',') ?? '';
+  return `${node.id}:${node.type}[${children}]`;
+};
+
+const hashString = (str: string): string => {
+  // djb2 hash - simple and fast
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 33) ^ str.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0');
+};
+
+const calculateTreeHash = (node: WidgetNode): string => {
+  const signature = calculateTreeSignature(node);
+  return hashString(signature);
+};
+
 const escapeXml = (str: string) => {
   return str
     .replace(/&/g, '&amp;')
@@ -93,18 +115,19 @@ const escapeXml = (str: string) => {
     .replace(/'/g, '&apos;');
 };
 
+// Pure function - no side effects, safe for React Strict Mode double-invocation
 function applyUpdateMessage(
   tree: WidgetNode,
-  message: UpdateMessage
-): WidgetNode {
+  updates: UpdateMessage
+): WidgetNode | null {
   const newTree = cloneDeep(tree);
 
-  message.forEach(update => {
+  for (const update of updates) {
     let parent = newTree;
 
     if (!parent) {
-      logger.error('No parent found in applyUpdateMessage', { message });
-      return;
+      logger.error('No parent found in applyUpdateMessage', { update });
+      continue;
     }
 
     if (update.indices.length === 0) {
@@ -116,10 +139,20 @@ function applyUpdateMessage(
             logger.error('No children found in parent', { parent });
             return;
           }
-          applyPatch(parent.children[index], update.patch);
+          const target = parent.children[index];
+          if (
+            update.patch.length === 1 &&
+            update.patch[0].op === 'replace' &&
+            update.patch[0].path === ''
+          ) {
+            // Special case: full replacement of the target node
+            parent.children[index] = update.patch[0].value as WidgetNode;
+          } else {
+            applyPatch(target, update.patch);
+          }
         } else {
           if (!parent) {
-            logger.error('No parent found in applyUpdateMessage', { message });
+            logger.error('No parent found in applyUpdateMessage', { update });
             return;
           }
           if (!parent.children) {
@@ -148,7 +181,20 @@ function applyUpdateMessage(
         }
       });
     }
-  });
+
+    if (update.treeHash) {
+      //if we have the treeHash then we're in DEBUG
+      const frontendHash = calculateTreeHash(newTree);
+      if (frontendHash !== update.treeHash) {
+        logger.error('Tree hash mismatch after update', {
+          iteration: update.iteration,
+          viewId: update.viewId,
+          backendHash: update.treeHash,
+          frontendHash,
+        });
+      }
+    }
+  }
 
   return newTree;
 }
@@ -168,6 +214,7 @@ export const useBackend = (
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
+  const lastIterationRef = useRef<number>(-1);
 
   // Use a ref that gets updated with the latest connection so we always have it in the callback
   const latestConnectionRef = useRef(connection);
@@ -239,16 +286,37 @@ export const useBackend = (
   }, [widgetTree, connectionId]);
 
   const handleRefreshMessage = useCallback((message: RefreshMessage) => {
+    // Reset iteration tracking on full refresh
+    lastIterationRef.current = -1;
     setWidgetTree(message.widgets);
   }, []);
 
   const handleUpdateMessage = useCallback((message: UpdateMessage) => {
+    const lastSeen = lastIterationRef.current;
+    const newUpdates = message.filter(u => u.iteration > lastSeen);
+
+    if (newUpdates.length === 0) {
+      return;
+    }
+
+    // Check for lost iterations
+    const expectedNext = lastSeen + 1;
+    const firstNew = Math.min(...newUpdates.map(u => u.iteration));
+    if (lastSeen >= 0 && firstNew > expectedNext) {
+      logger.error('Lost iteration(s) detected', {
+        lastIteration: lastSeen,
+        receivedIteration: firstNew,
+      });
+    }
+    const maxIteration = Math.max(...newUpdates.map(u => u.iteration));
+    lastIterationRef.current = maxIteration;
+
     setWidgetTree(currentTree => {
       if (!currentTree) {
         logger.warn('No current widget tree available for update');
         return null;
       }
-      return applyUpdateMessage(currentTree, message);
+      return applyUpdateMessage(currentTree, newUpdates);
     });
   }, []);
 
@@ -262,10 +330,10 @@ export const useBackend = (
   const handleSetAuthCookies = useCallback(
     async (message: SetAuthCookiesMessage) => {
       const currentConnectionId = latestConnectionRef.current?.connectionId;
-      logger.debug('Processing SetAuthCookies request', {
-        hasAuthToken: !!message.cookieJarId,
-        connectionId: currentConnectionId,
-      });
+      // logger.debug('Processing SetAuthCookies request', {
+      //   hasAuthToken: !!message.cookieJarId,
+      //   connectionId: currentConnectionId,
+      // });
       const response = await fetch(
         `${getIvyHost()}/ivy/auth/set-auth-cookies`,
         {
@@ -297,7 +365,7 @@ export const useBackend = (
   );
 
   const handleRedirect = useCallback((message: RedirectMessage) => {
-    logger.debug('Processing Redirect request', message);
+    //logger.debug('Processing Redirect request', message);
     const { url, replaceHistory } = message;
 
     // Validate URL to prevent open redirect vulnerabilities
@@ -322,7 +390,7 @@ export const useBackend = (
   }, []);
 
   const handleSetTheme = useCallback((theme: string) => {
-    logger.debug('Processing SetTheme request', { theme });
+    // logger.debug('Processing SetTheme request', { theme });
     const normalizedTheme = theme.toLowerCase();
     if (['dark', 'light', 'system'].includes(normalizedTheme)) {
       logger.info('Setting theme globally', { theme: normalizedTheme });
@@ -334,11 +402,11 @@ export const useBackend = (
 
   const handleHttpRequest = useCallback(
     async (request: HttpTunnelRequestMessage) => {
-      logger.debug('Processing HttpRequest', {
-        requestId: request.requestId,
-        method: request.method,
-        url: request.url,
-      });
+      // logger.debug('Processing HttpRequest', {
+      //   requestId: request.requestId,
+      //   method: request.method,
+      //   url: request.url,
+      // });
 
       try {
         const headers = new Headers();

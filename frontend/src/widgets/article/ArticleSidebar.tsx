@@ -8,6 +8,7 @@ interface ArticleSidebarProps {
   showToc?: boolean;
   documentSource?: string;
   title?: string;
+  headings?: { id: string; text: string; level: number }[];
 }
 
 export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
@@ -15,12 +16,15 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
   showToc,
   documentSource,
   title,
+  headings,
 }) => {
   const [tocLoading, setTocLoading] = useState(true);
   const [contributorsLoading, setContributorsLoading] = useState(true);
   // Only show contributors when TOC is ready too
   const showContributors = !tocLoading && !contributorsLoading;
   // Only show sidebar if TOC should be displayed
+  // If headings are provided, we don't need to block on loading state for TOC to check emptiness
+  // But TableOfContents component handles loading state
   if (!showToc) return null;
 
   return (
@@ -36,6 +40,7 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
             articleRef={articleRef}
             show={showToc}
             onLoadingChange={setTocLoading}
+            headings={headings}
           />
           <GitHubContributors
             documentSource={documentSource}

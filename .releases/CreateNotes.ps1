@@ -28,14 +28,16 @@ if (Test-Path $filePath) {
     $response = Read-Host "File '$fileName' already exists. Do you want to recreate it? (y/n)"
     if ($response -ne 'y') {
         Write-Host "Keeping existing file." -ForegroundColor Yellow
-    } else {
+    }
+    else {
         $content = @"
 # Ivy Framework Weekly Notes - Week of $currentDate
 "@
         $content | Out-File -FilePath $filePath -Encoding UTF8
         Write-Host "File '$fileName' has been recreated." -ForegroundColor Green
     }
-} else {
+}
+else {
     $content = @"
 # Ivy Framework Weekly Notes - Week of $currentDate
 "@
@@ -45,8 +47,8 @@ if (Test-Path $filePath) {
 
 if (-not $SkipDownloads) {
     $downloadScript = Join-Path $scriptDir "DownloadCommits.ps1"
-    & $downloadScript -Repo https://github.com/Ivy-Interactive/Ivy -OutputFolder $commitsFolder -LastDays 14 -Prefix ivy
-    & $downloadScript -Repo https://github.com/Ivy-Interactive/Ivy-Framework -OutputFolder $commitsFolder -LastDays 14 -Prefix ivy-framework
+    & $downloadScript -Repo https://github.com/Ivy-Interactive/Ivy -OutputFolder $commitsFolder -LastDays 7 -Prefix ivy
+    & $downloadScript -Repo https://github.com/Ivy-Interactive/Ivy-Framework -OutputFolder $commitsFolder -LastDays 7 -Prefix ivy-framework
 }
 
 $promptFile = Join-Path $scriptDir "prompt.md"

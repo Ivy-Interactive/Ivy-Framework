@@ -11,10 +11,10 @@ searchHints:
 # Stepper
 
 <Ingress>
-Display a step-by-step progress indicator with visual feedback. Perfect for wizards, multi-step forms, and sequential workflows.
+Display a step-by-step progress indicator with visual feedback. Perfect for wizards, multi-step [forms](../../../01_Onboarding/02_Concepts/Forms.md), and sequential workflows.
 </Ingress>
 
-The `Stepper` widget displays a horizontal sequence of steps with visual indicators showing the current position, completed steps, and upcoming steps. Each step can have a symbol, icon, label, and description.
+The `Stepper` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) displays a horizontal sequence of steps with visual indicators showing the current position, completed steps, and upcoming steps. Each step can have a symbol, icon, label, and description.
 
 ## Basic Usage
 

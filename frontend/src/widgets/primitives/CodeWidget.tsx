@@ -52,13 +52,13 @@ const MemoizedCopyButton = memo(({ textToCopy }: { textToCopy: string }) => (
 const CodeWidget: React.FC<CodeWidgetProps> = memo(
   ({
     id,
-    content,
-    language,
-    showCopyButton = false,
+    content = '',
+    language = 'Csharp',
+    showCopyButton = true,
     showLineNumbers = false,
     showBorder = true,
-    width,
-    height,
+    width = 'Full',
+    height = 'MaxContent,,Px:800',
   }) => {
     const styles = useMemo<CSSProperties>(() => {
       const baseStyles: CSSProperties = {

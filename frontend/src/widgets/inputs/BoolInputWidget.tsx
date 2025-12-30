@@ -243,7 +243,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   disabled = false,
   invalid,
   nullable = false,
-  variant,
+  variant = 'Checkbox',
   icon,
   scale = Scales.Medium,
   'data-testid': dataTestId,

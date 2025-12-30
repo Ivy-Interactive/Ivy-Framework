@@ -38,6 +38,8 @@ public record Sheet : WidgetBase<Sheet>
         Width = DefaultWidth;
     }
 
+    internal Sheet() { }
+
     [Prop] public string? Title { get; }
 
     [Prop] public string? Description { get; }

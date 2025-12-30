@@ -11,10 +11,10 @@ searchHints:
 # Callout
 
 <Ingress>
-Create attention-grabbing components to highlight important information, warnings, tips, and success messages. Callouts come in different variants including info, warning, error, and success, with customizable icons and styling.
+Create attention-grabbing [components](../../../01_Onboarding/02_Concepts/Widgets.md) to highlight important information, warnings, tips, and success messages. Callouts come in different [variants](../../../01_Onboarding/02_Concepts/Theming.md) including info, warning, error, and success, with customizable icons and styling.
 </Ingress>
 
-The `Callout` widget displays prominent, styled information boxes that draw attention to important content. They're perfect for user guidance, system messages, warnings, and success confirmations. Each variant has distinct visual styling and appropriate icons to help users quickly understand the message type.
+The `Callout` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) displays prominent, styled information boxes that draw attention to important content. They're perfect for user guidance, system messages, warnings, and success confirmations. Each variant has distinct visual styling and appropriate icons to help users quickly understand the message type.
 
 ## Basic Usage
 
@@ -180,7 +180,7 @@ public class ComplexContentCalloutView : ViewBase
 
 ### Form Integration
 
-Use callouts to contain forms and provide context:
+Use callouts to contain [forms](../../../01_Onboarding/02_Concepts/Forms.md) and provide context:
 
 ```csharp demo-tabs
 public record LoginModel(string Email = "", string Password = "");

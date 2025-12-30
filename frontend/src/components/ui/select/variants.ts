@@ -47,3 +47,19 @@ export const selectItemVariants = cva(
     },
   }
 );
+
+export const selectIconContainerVariants = cva(
+  'absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 p-1 pointer-events-none h-6',
+  {
+    variants: {
+      scale: {
+        Small: 'right-5',
+        Medium: 'right-6',
+        Large: 'right-8',
+      },
+    },
+    defaultVariants: {
+      scale: 'Medium',
+    },
+  }
+);

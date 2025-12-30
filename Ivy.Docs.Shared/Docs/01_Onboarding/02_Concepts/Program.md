@@ -11,10 +11,10 @@ searchHints:
 # Program
 
 <Ingress>
-Configure and bootstrap your Ivy application with dependency injection, services, and middleware for production-ready deployment.
+Configure and bootstrap your Ivy [application](./Apps.md) with [dependency injection](./Services.md), [services](./Services.md), and middleware for production-ready deployment.
 </Ingress>
 
-The `Program.cs` file is the entry point for your Ivy application. It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other services.
+The `Program.cs` file is the entry point for your Ivy application. It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other sevices..
 
 ## Basic Structure
 
@@ -112,7 +112,7 @@ For more information about configuring the application chrome (sidebar, header, 
 ## Authentication
 
 <Callout Type="tip">
-Use the `ivy auth add` command to automatically configure authentication providers in your project. This CLI command will update your `Program.cs` and manage secrets for you. See the [Authentication CLI documentation](../03_CLI/04_Authentication/01_AuthenticationOverview.md) for details.
+Use the `ivy auth add` command to automatically configure authentication providers in your project. This [CLI](../../01_Onboarding/03_CLI/_Index.md) command will update your `Program.cs` and manage [secrets](./Secrets.md) for you. See the [Authentication CLI documentation](../03_CLI/04_Authentication/01_AuthenticationOverview.md) for details.
 </Callout>
 
 Ivy supports various authentication providers:
@@ -291,7 +291,7 @@ await server.RunAsync();
 
 ## Advanced Configuration
 
-### Custom Content Builder
+### Custom [Content Builder](./ContentBuilders.md)
 
 Configure a custom content builder to handle specialized content rendering and processing.
 

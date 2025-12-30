@@ -27,7 +27,7 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public FileInputs Variant { get; set; }
+    [Prop] public FileInputs Variant { get; set; } = FileInputs.Drop;
 
     [Prop] public string? Accept { get; set; }
 
@@ -38,6 +38,8 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     [Prop] public int? MaxFiles { get; set; }
 
     [Prop] public string? UploadUrl { get; set; }
+
+    [Prop] public bool Nullable { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -109,16 +111,22 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
         Value = value;
     }
 
-    public FileInput(string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
+    public FileInput(string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop) : this()
     {
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
-        Width = Ivy.Shared.Size.Full();
-        Height = Ivy.Shared.Size.Units(50);
+    }
+
+    internal FileInput()
+    {
+        Width = Size.Full();
+        Height = Size.Units(50);
     }
 
     [Prop] public TValue Value { get; } = default!;
+
+    [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
     [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange => null;
 }
@@ -270,6 +278,11 @@ public static class FileInputExtensions
     public static FileInputBase Invalid(this FileInputBase widget, string? invalid)
     {
         return widget with { Invalid = invalid };
+    }
+
+    public static FileInputBase Nullable(this FileInputBase widget, bool? nullable = true)
+    {
+        return widget with { Nullable = nullable ?? true };
     }
 
     public static FileInputBase Accept(this FileInputBase widget, string accept)

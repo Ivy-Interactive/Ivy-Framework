@@ -16,7 +16,7 @@ public record Dialog : WidgetBase<Dialog>
         OnClose = onClose;
     }
 
-    [Event] public Func<Event<Dialog>, ValueTask> OnClose { get; set; }
+    [Event] public Func<Event<Dialog>, ValueTask>? OnClose { get; set; }
 
     public static Dialog operator |(Dialog dialog, object child)
     {
@@ -27,4 +27,6 @@ public record Dialog : WidgetBase<Dialog>
     : this(e => { onClose(e); return ValueTask.CompletedTask; }, header, body, footer)
     {
     }
+
+    internal Dialog() { }
 }

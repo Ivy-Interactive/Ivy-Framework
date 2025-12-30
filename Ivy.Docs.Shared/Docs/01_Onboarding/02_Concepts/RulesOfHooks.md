@@ -1,6 +1,6 @@
 # Rules of Hooks
 
-Ivy hooks (functions starting with `Use...`) are a powerful feature that lets you use state and other Ivy features without writing a class. However, hooks rely on a strict call order to function correctly. This page explains the rules you must follow and how to troubleshoot common errors.
+Ivy hooks (functions starting with `Use...`) are a powerful feature that lets you use [state](./State.md) and other Ivy features without writing a class. However, hooks rely on a strict call order to function correctly. This page explains the rules you must follow and how to troubleshoot common errors.
 
 ## The Rules
 
@@ -11,7 +11,8 @@ Ivy hooks (functions starting with `Use...`) are a powerful feature that lets yo
 ### 2. Only Call Hooks from Ivy Views
 
 **Don't call hooks from regular C# functions.** Instead, you can:
-- Call hooks from Ivy Views (inside `Build` method).
+
+- Call hooks from Ivy [Views](./Views.md) (inside `Build` method).
 - Call hooks from custom hooks (functions starting with `Use...`).
 
 ## Troubleshooting
@@ -23,6 +24,7 @@ The **Ivy.Analyser** package automatically enforces these rules at compile time.
 This error occurs when you try to use a hook outside of a View's `Build` method or another hook.
 
 **❌ Bad:**
+
 ```csharp
 public class MyService
 {
@@ -34,6 +36,7 @@ public class MyService
 ```
 
 **✅ Good:**
+
 ```csharp
 public class MyView : ViewBase
 {
@@ -50,6 +53,7 @@ public class MyView : ViewBase
 This error occurs if a hook call is wrapped in an `if` statement. Hook calls must be unconditional.
 
 **❌ Bad:**
+
 ```csharp
 if (condition) {
     var state = UseState(0); // Error!
@@ -57,6 +61,7 @@ if (condition) {
 ```
 
 **✅ Good:**
+
 ```csharp
 // Always call the hook, handle logic afterwards
 var state = UseState(0);
@@ -70,6 +75,7 @@ if (condition) {
 Hooks cannot be called inside `for`, `foreach`, `while` loops.
 
 **❌ Bad:**
+
 ```csharp
 foreach (var item in items) {
     var state = UseState(item); // Error!
@@ -91,6 +97,7 @@ foreach (var item in items) {
 Hooks must be called before any other statements (like `return`, `throw`, etc) and mostly before other logic to ensure consistency. Use hooks at the very beginning of your method.
 
 **❌ Bad:**
+
 ```csharp
 public override object Build()
 {
@@ -102,6 +109,7 @@ public override object Build()
 ```
 
 **✅ Good:**
+
 ```csharp
 public override object Build()
 {
@@ -120,6 +128,7 @@ The analyzer automatically detects hooks by their naming convention:
 - The fourth character must be an uppercase letter
 
 **Examples:**
+
 - ✅ `UseState`, `UseEffect`, `UseCustomHook`, `UseMyFeature`
 - ❌ `Use`, `Useless`, `useState`, `useEffect`
 

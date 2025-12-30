@@ -170,7 +170,7 @@ public class SheetWidthExamples : ViewBase
 
 ### Sheet with Navigation
 
-This example shows a sheet with internal navigation between multiple pages using state management.
+This example shows a sheet with internal navigation between multiple pages using [state management](../../../01_Onboarding/02_Concepts/State.md).
 
 ```csharp demo-tabs
 public class NavigationSheet : ViewBase
@@ -208,7 +208,7 @@ public class NavigationSheetContent : ViewBase
 
 ### Complex Layout Structure
 
-This pattern demonstrates how to integrate sheets with stateful widgets using triggers. Click on any card to edit it in a sheet.
+This pattern demonstrates how to integrate sheets with stateful [widgets](../../../01_Onboarding/02_Concepts/Widgets.md) using triggers. Click on any card to edit it in a sheet.
 
 ```csharp demo-tabs
 public record TaskItem(string Id, string Title, string Status, int Priority, string Description);
@@ -241,14 +241,36 @@ public class KanbanWithSheetExample : ViewBase
             .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
-                var task = tasks.Value.FirstOrDefault(t => t.Id == taskId);
-                if (task != null)
+                if (string.IsNullOrEmpty(taskId)) return;
+
+                var updatedTasks = tasks.Value.ToList();
+                var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                if (taskToMove == null) return;
+
+                var updated = taskToMove with { Status = moveData.ToColumn };
+                updatedTasks.RemoveAll(t => t.Id == taskId);
+
+                int insertIndex = updatedTasks.Count;
+
+                var taskAtTargetIndex = updatedTasks
+                    .Where(t => t.Status == moveData.ToColumn)
+                    .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+                if (taskAtTargetIndex != null)
                 {
-                    tasks.Set(tasks.Value
-                        .Where(t => t.Id != taskId)
-                        .Append(task with { Status = moveData.ToColumn })
-                        .ToArray());
+                    insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
                 }
+                else
+                {
+                    var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+                    if (lastTaskInColumn != null)
+                    {
+                        insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+                    }
+                }
+
+                updatedTasks.Insert(insertIndex, updated);
+                tasks.Set(updatedTasks.ToArray());
             });
         
         return new Fragment()

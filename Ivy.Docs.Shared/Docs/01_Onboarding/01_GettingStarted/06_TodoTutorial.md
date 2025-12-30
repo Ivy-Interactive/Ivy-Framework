@@ -11,7 +11,7 @@ searchHints:
 # Todo Tutorial
 
 <Ingress>
-Build a complete todo application from scratch to learn essential Ivy concepts including state management, components, and event handling.
+Build a complete todo application from scratch to learn essential Ivy concepts including [state management](../02_Concepts/State.md), [components](../02_Concepts/Widgets.md), and [event handling](../02_Concepts/EventHandlers.md).
 </Ingress>
 
 ## Prerequisites
@@ -24,7 +24,7 @@ Let's create a new todo app step by step.
 
 ### 1. Create a new project
 
-Using the Ivy CLI we can create a new project.
+Using the Ivy [CLI](../../03_CLI/01_CLIOverview.md) we can create a new project.
 
 ```terminal
 >ivy init --namespace Todos
@@ -41,7 +41,7 @@ public record Todo(string Title, bool Done);
 
 ### 3. Create the Main App Class
 
-Create a new class `TodosApp` in the file that inherits from `ViewBase`:
+Create a new class `TodosApp` in the file that inherits from [ViewBase](../02_Concepts/Views.md):
 
 ```csharp
 [App(icon: Icons.Calendar)]
@@ -70,7 +70,7 @@ var client = this.UseService<IClientProvider>();
 
 ### 5. Build the UI
 
-Now let's create the user interface. We'll use Ivy's layout system and components:
+Now let's create the user interface. We'll use Ivy's [layout system](../../02_Widgets/04_Layouts/_Index.md) and components:
 
 ```csharp
 return new Card().Title("Todos").Description("What do you want to get done today?")
@@ -140,37 +140,6 @@ Now let's run the project.
 
 ```terminal
 >dotnet watch
-```
-
-Get your application's complete server description
-
-```terminal
-
->dotnet run --describe
-
-Output (YAML format):
-apps:
-   - name: Dashboard
-     id: dashboard
-     isVisible: true
-   - name: Settings
-     id: settings
-     isVisible: true
-connections:
-   - name: MainDatabase
-     connectionType: EntityFramework.SqlServer
-     namespace: MyApp.Data
-   - name: ExternalApi
-     connectionType: OpenAPI
-     namespace: MyApp.Services
-secrets:
-   - ConnectionStrings:Database
-   - Auth0:ClientId
-   - Stripe:ApiKey
-services:
-   - serviceType: IUserService
-     implementationType: UserService
-     lifetime: Scoped
 ```
 
 You can find the source code for the app at [GitHub](https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy.Samples.Shared/Apps/Demos/TodosApp.cs).

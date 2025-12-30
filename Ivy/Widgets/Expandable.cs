@@ -10,6 +10,8 @@ public record Expandable : WidgetBase<Expandable>
 
     }
 
+    internal Expandable() { }
+
     [Prop] public bool Disabled { get; set; } = false;
 
     [Prop] public bool Open { get; set; } = false;

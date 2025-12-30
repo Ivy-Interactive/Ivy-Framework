@@ -18,6 +18,10 @@ public record Blade : WidgetBase<Blade>
         Width = width ?? Size.Fit().Min(Size.Units(90)).Max(Size.Units(300));
     }
 
+    internal Blade()
+    {
+    }
+
     [Prop] public int Index { get; set; }
 
     [Prop] public string? Title { get; set; }

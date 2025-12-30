@@ -11,10 +11,10 @@ searchHints:
 # SidebarLayout
 
 <Ingress>
-SidebarLayout provides a flexible sidebar navigation layout with a main content area and collapsible sidebar. It supports header and footer sections, responsive behavior, and can be configured as the main application sidebar with toggle functionality.
+SidebarLayout provides a flexible sidebar [navigation](../../../01_Onboarding/02_Concepts/Navigation.md) layout with a main content area and collapsible sidebar. It supports header and footer sections, responsive behavior, and can be configured as the main application sidebar with toggle functionality.
 </Ingress>
 
-Sidebars are essential navigation components in modern applications, providing users with quick access to different sections while keeping the main content area uncluttered. They can be used for primary navigation, contextual tools, or supplementary information display.
+Sidebars are essential navigation [components](../../../01_Onboarding/02_Concepts/Widgets.md) in modern applications, providing users with quick access to different sections while keeping the main content area uncluttered. They can be used for primary navigation, contextual tools, or supplementary information display.
 
 ## Basic Usage
 
@@ -72,7 +72,7 @@ public class SidebarWithHeaderFooterExample : ViewBase
 
 ### SidebarMenu Integration
 
-The `SidebarMenu` widget is designed to work seamlessly with `SidebarLayout` for navigation:
+The `SidebarMenu` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) is designed to work seamlessly with `SidebarLayout` for navigation:
 
 ```csharp demo-tabs
 public class SidebarMenuExample : ViewBase

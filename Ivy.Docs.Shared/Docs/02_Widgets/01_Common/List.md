@@ -11,10 +11,10 @@ searchHints:
 # List
 
 <Ingress>
-Display collections of items in organized, styled lists with customizable formatting and interactive elements.
+Display collections of items in organized, styled lists with customizable formatting and interactive [elements](../../01_Onboarding/02_Concepts/Widgets.md).
 </Ingress>
 
-The `List` widget is a container designed to render collections of items in a vertical layout. It works seamlessly with `ListItem` components to create interactive, searchable, and customizable lists that are perfect for navigation menus, data displays, and user interfaces.
+The `List` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is a container designed to render collections of items in a vertical layout. It works seamlessly with `ListItem` components to create interactive, searchable, and customizable lists that are perfect for [navigation menus](../../01_Onboarding/02_Concepts/Navigation.md), data displays, and [user interfaces](../../01_Onboarding/02_Concepts/Views.md).
 
 ## Basic Usage
 
@@ -39,7 +39,7 @@ public class BasicListDemo : ViewBase
 
 ## ListItem Configuration
 
-`ListItem`s are highly customizable, supporting titles, subtitles, icons, and badges.
+`ListItem`s are highly customizable, supporting titles, subtitles, [icons](../03_Primitives/Icon.md), and [badges](Badge.md).
 
 ```csharp demo-tabs
 public class ListConfigDemo : ViewBase
@@ -101,7 +101,7 @@ public class InteractiveListDemo : ViewBase
 
 ### Dynamic Content
 
-Create lists from dynamic data sources using `UseState`.
+Create lists from dynamic data sources using [UseState](../../01_Onboarding/02_Concepts/State.md).
 
 ```csharp demo-tabs
 public class DynamicListDemo : ViewBase
@@ -134,9 +134,7 @@ public class DynamicListDemo : ViewBase
 }
 ```
 
-<Callout type="info">
-Lists in Ivy are highly customizable. You can combine them with other widgets like Cards, Badges, and Buttons to create rich, interactive interfaces. The `onClick` event on ListItems makes it easy to build navigation and user interactions.
-</Callout>
+Lists in Ivy are highly customizable. You can combine them with other widgets like Cards, Badges, and Buttons to create rich, interactive [interfaces](../../01_Onboarding/02_Concepts/Views.md). The `onClick` event on ListItems makes it easy to build [navigation](../../01_Onboarding/02_Concepts/Navigation.md) and user interactions.
 
 ### Search and Filter
 

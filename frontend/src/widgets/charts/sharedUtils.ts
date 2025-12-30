@@ -18,6 +18,15 @@ import {
   generateAxisLabelStyle,
   type ChartThemeColors,
 } from './styles/theme';
+import {
+  CARTESIAN_GRID_DEFAULTS,
+  LEGEND_DEFAULTS,
+  TOOLTIP_DEFAULTS,
+  TOOLBOX_DEFAULTS,
+  LINE_DEFAULTS,
+  REFERENCE_LINE_DEFAULTS,
+  applyDefaults,
+} from './chartDefaults';
 
 // Re-export from styles
 export type { ColorScheme } from './styles/colors';
@@ -78,13 +87,16 @@ export function generateEChartGrid(
 
   if (!cartesianGrid) return defaultGrid;
 
+  // Apply defaults for cartesianGrid
+  const grid = applyDefaults(cartesianGrid, CARTESIAN_GRID_DEFAULTS);
+
   return {
     ...defaultGrid,
-    show: cartesianGrid.vertical || cartesianGrid.horizontal,
-    ...(cartesianGrid.width != null && { width: cartesianGrid.width }),
-    ...(cartesianGrid.height != null && { height: cartesianGrid.height }),
-    ...(cartesianGrid.x != null && { x: cartesianGrid.x }),
-    ...(cartesianGrid.y != null && { y: cartesianGrid.y }),
+    show: grid.vertical || grid.horizontal,
+    ...(grid.width != null && { width: grid.width }),
+    ...(grid.height != null && { height: grid.height }),
+    ...(grid.x != null && { x: grid.x }),
+    ...(grid.y != null && { y: grid.y }),
   };
 }
 
@@ -103,13 +115,16 @@ export function generateEChartLegend(
   };
   if (!legend) return defaultLegends;
 
+  // Apply defaults for legend
+  const leg = applyDefaults(legend, LEGEND_DEFAULTS);
+
   return {
     ...defaultLegends,
-    icon: legend.iconType ? legend.iconType : 'rect',
-    itemWidth: legend.iconSize ?? 14,
-    itemHeight: legend.iconSize ?? 14,
-    orient: legend.layout?.toLowerCase(),
-    top: legend.verticalAlign === 'Bottom' ? 'bottom' : 'top',
+    icon: leg.iconType ? leg.iconType : 'rect',
+    itemWidth: leg.iconSize ?? LEGEND_DEFAULTS.iconSize,
+    itemHeight: leg.iconSize ?? LEGEND_DEFAULTS.iconSize,
+    orient: leg.layout?.toLowerCase(),
+    top: leg.verticalAlign === 'Bottom' ? 'bottom' : 'top',
   };
 }
 
@@ -138,12 +153,51 @@ export const generateSeries = (
   valueKeys: string[],
   lines?: LinesProps[],
   transform?: (v: number) => number,
-  referenceDots?: ReferenceDot,
-  referenceLines?: MarkLine,
-  referenceAreas?: MarkArea
+  referenceDots?: ReferenceDot[],
+  referenceLines?: MarkLine[],
+  referenceAreas?: MarkArea[]
 ) => {
+  // Convert ReferenceDot[] to ECharts markPoint format
+  const markPoint =
+    referenceDots && referenceDots.length > 0
+      ? {
+          data: referenceDots.map(d => ({
+            coord: [d.x, d.y],
+            name: d.label,
+          })),
+        }
+      : {};
+
+  // Merge MarkLine[] into single markLine config with defaults
+  const markLine =
+    referenceLines && referenceLines.length > 0
+      ? {
+          ...referenceLines[0],
+          lineStyle: {
+            width:
+              referenceLines[0]?.lineStyle?.width ??
+              REFERENCE_LINE_DEFAULTS.strokeWidth,
+            ...referenceLines[0]?.lineStyle,
+          },
+          data: referenceLines.flatMap(ml => ml.data),
+        }
+      : {};
+
+  // Merge MarkArea[] into single markArea config
+  const markArea =
+    referenceAreas && referenceAreas.length > 0
+      ? {
+          ...referenceAreas[0],
+          data: referenceAreas.flatMap(ma => ma.data),
+        }
+      : {};
+
   return valueKeys.map((key, i) => {
-    const lineConfig = lines?.[i];
+    const rawLineConfig = lines?.[i];
+    // Apply defaults for line config
+    const lineConfig = rawLineConfig
+      ? applyDefaults(rawLineConfig, LINE_DEFAULTS)
+      : LINE_DEFAULTS;
 
     return {
       name: key,
@@ -151,11 +205,16 @@ export const generateSeries = (
       data: data.map(d =>
         transform ? transform(Number(d[key] ?? 0)) : Number(d[key] ?? 0)
       ),
-      step: lineConfig?.curveType === 'Step' ? 'middle' : false,
-      smooth: lineConfig?.curveType === 'Natural' ? true : false,
+      step: lineConfig.curveType === 'Step' ? 'middle' : false,
+      smooth: lineConfig.curveType === 'Natural' ? true : false,
       showSymbol: true,
       symbolSize: 6,
-      lineStyle: { width: 2, opacity: 0.9 },
+      lineStyle: {
+        width: lineConfig.strokeWidth ?? LINE_DEFAULTS.strokeWidth,
+        opacity: 0.9,
+        type: lineConfig.strokeDashArray ? 'dashed' : 'solid',
+        color: lineConfig.stroke ?? undefined,
+      },
       emphasis: {
         focus: 'series',
         disabled: true,
@@ -165,9 +224,10 @@ export const generateSeries = (
       blur: { lineStyle: { opacity: 0.6 } },
       animation: true,
       animationDuration: 800,
-      markPoint: referenceDots ?? {},
-      markLine: referenceLines ?? {},
-      markArea: referenceAreas ?? {},
+      connectNulls: lineConfig.connectNulls ?? LINE_DEFAULTS.connectNulls,
+      markPoint,
+      markLine,
+      markArea,
     };
   });
 };
@@ -289,43 +349,85 @@ export const generateYAxis = (
 export const generateTooltip = (
   tooltip?: ToolTipProps,
   type?: string,
-  themeColors?: { foreground: string; fontSans: string; background: string }
-) => ({
-  trigger: 'axis',
-  appendToBody: true,
-  axisPointer: {
-    type: type ?? 'cross',
-    animated: tooltip?.animated ?? true,
-    shadowStyle: { opacity: 0.5 },
-  },
-  textStyle: generateTextStyle(themeColors?.foreground, themeColors?.fontSans),
-  backgroundColor: themeColors?.background || 'rgba(255, 255, 255, 0.9)',
-  borderColor: themeColors?.foreground || '#000',
-  borderWidth: 1,
-});
+  themeColors?: {
+    foreground: string;
+    fontSans: string;
+    background: string;
+    mutedForeground?: string;
+  }
+) => {
+  // Apply defaults for tooltip
+  const tip = tooltip
+    ? applyDefaults(tooltip, TOOLTIP_DEFAULTS)
+    : TOOLTIP_DEFAULTS;
+
+  return {
+    trigger: 'axis',
+    appendToBody: true,
+    axisPointer: {
+      type: type ?? 'cross',
+      animated: tip.animated ?? TOOLTIP_DEFAULTS.animated,
+      shadowStyle: { opacity: 0.5 },
+      lineStyle: {
+        color: themeColors?.mutedForeground,
+      },
+      crossStyle: {
+        color: themeColors?.mutedForeground,
+      },
+      label: {
+        backgroundColor: themeColors?.mutedForeground,
+        color: 'rgba(255, 255, 255, 0.9)',
+      },
+    },
+    textStyle: generateTextStyle(
+      themeColors?.foreground,
+      themeColors?.fontSans
+    ),
+    backgroundColor: themeColors?.background || 'rgba(255, 255, 255, 0.9)',
+    borderColor: themeColors?.foreground || '#000',
+    borderWidth: 1,
+  };
+};
 
 export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
   if (!toolbox || toolbox.enabled === false) {
     return { show: false };
   }
 
+  const box = applyDefaults(toolbox, TOOLBOX_DEFAULTS);
+
   const features: ToolboxFeatures = {};
 
-  if (toolbox.dataView !== false) {
+  if (box.dataView !== false) {
+    const cardBg = getComputedStyle(document.documentElement)
+      .getPropertyValue('--card')
+      .trim();
+    const foreground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--foreground')
+      .trim();
+    const mutedForeground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--muted-foreground')
+      .trim();
+
     features.dataView = {
       show: true,
       readOnly: false,
+      backgroundColor: cardBg,
+      textareaColor: cardBg,
+      textColor: foreground,
+      buttonColor: mutedForeground,
+      buttonTextColor: 'rgba(255, 255, 255, 0.9)',
     };
   }
 
-  if (toolbox.magicType !== false) {
+  if (box.magicType !== false) {
     features.magicType = {
       show: true,
       type: ['line', 'bar'],
     };
   }
 
-  if (toolbox.saveAsImage !== false) {
+  if (box.saveAsImage !== false) {
     features.saveAsImage = {
       show: true,
     };
@@ -334,22 +436,25 @@ export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
   return {
     show: true,
     orient:
-      toolbox.orientation?.toLowerCase() === 'vertical'
-        ? 'vertical'
-        : 'horizontal',
+      box.orientation?.toLowerCase() === 'vertical' ? 'vertical' : 'horizontal',
     left:
-      toolbox.align?.toLowerCase() === 'left'
+      box.align?.toLowerCase() === 'left'
         ? 'left'
-        : toolbox.align?.toLowerCase() === 'center'
+        : box.align?.toLowerCase() === 'center'
           ? 'center'
           : 'right',
     top:
-      toolbox.verticalAlign?.toLowerCase() === 'top'
+      box.verticalAlign?.toLowerCase() === 'top'
         ? 'top'
-        : toolbox.verticalAlign?.toLowerCase() === 'middle'
+        : box.verticalAlign?.toLowerCase() === 'middle'
           ? 'middle'
           : 'bottom',
     feature: features,
+    iconStyle: {
+      borderColor: getComputedStyle(document.documentElement)
+        .getPropertyValue('--muted-foreground')
+        .trim(),
+    },
     emphasis: {
       iconStyle: {
         color: null,

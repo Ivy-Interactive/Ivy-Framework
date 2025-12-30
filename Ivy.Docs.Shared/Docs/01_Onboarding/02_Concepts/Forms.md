@@ -13,7 +13,7 @@ searchHints:
 # Forms
 
 <Ingress>
-Build robust forms with built-in state management, validation, and submission handling for collecting and processing user input.
+Build robust forms with built-in [state management](./State.md), validation, and submission handling for collecting and processing user input.
 </Ingress>
 
 <Callout Type="important">
@@ -22,7 +22,7 @@ Do not manually create form layouts. Always use `.ToForm()` on your state object
 
 ## Basic Usage
 
-The simplest way to create a form is to call `.ToForm()` on a state object. The FormBuilder automatically scaffolds appropriate input fields based on your model's property types.
+The simplest way to create a form is to call `.ToForm()` on a state object. The FormBuilder automatically scaffolds appropriate input fields based on your model's property types, providing automatic state management and validation.
 
 ```csharp demo-tabs
 public class BasicFormExample : ViewBase
@@ -44,7 +44,7 @@ public class BasicFormExample : ViewBase
 
 ### Automatic Field Generation
 
-The FormBuilder automatically maps C# types to appropriate input widgets:
+The FormBuilder automatically maps C# types to appropriate [input widgets](./Widgets.md):
 
 | C# Type | Generated Input | Notes |
 |---------|----------------|-------|
@@ -591,7 +591,7 @@ public class FormSubmissionExample : ViewBase
 
 ### Form Submission with State Updates
 
-React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully.
+React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully, triggering [state changes](./State.md) and UI updates.
 
 ```csharp demo-tabs
 public class FormStatesExample : ViewBase
@@ -755,7 +755,7 @@ public class DynamicConfigurationExample : ViewBase
 
 ### Sheet Forms
 
-Open forms in slide-out sheets using `.ToSheet()`.
+Open forms in slide-out [sheets](../../02_Widgets/07_Advanced/Sheet.md) using `.ToSheet()`.
 
 ```csharp demo-tabs
 public class SheetFormExample : ViewBase
@@ -783,7 +783,7 @@ public class SheetFormExample : ViewBase
 
 ### Dialog Forms
 
-Open forms in modal dialogs using `.ToDialog()`.
+Open forms in modal [dialogs](./Alerts.md) using `.ToDialog()`.
 
 ```csharp demo-tabs
 public class DialogFormExample : ViewBase

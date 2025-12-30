@@ -10,26 +10,26 @@ public class AudioApp : SampleBase
         var client = UseService<IClientProvider>();
 
         // Basic audio player with default settings
-        var basicAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3");
+        var basicAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3");
 
         // Audio player with custom settings
-        var customAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var customAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Loop(true)
             .Preload(AudioPreload.Auto);
 
         // Muted audio player (useful for autoplay scenarios)
-        var mutedAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var mutedAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Muted(true)
             .Autoplay(true)
             .Loop(true);
 
         // Audio without controls (programmatic control only)
-        var noControlsAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var noControlsAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Controls(false)
             .Muted(true);
 
         // Custom sized audio player
-        var customSizedAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var customSizedAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Width(Size.Fraction(0.5f))
             .Height(Size.Units(12));
 

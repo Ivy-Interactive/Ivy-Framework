@@ -36,7 +36,7 @@ public class GridView : ViewBase, IStateless
 
     public GridView Padding(int padding)
     {
-        _definition.Padding = padding;
+        _definition.Padding = new(padding);
         return this;
     }
 
@@ -49,6 +49,12 @@ public class GridView : ViewBase, IStateless
     public GridView Width(Size width)
     {
         _definition.Width = width;
+        return this;
+    }
+
+    public GridView Height(Size height)
+    {
+        _definition.Height = height;
         return this;
     }
 

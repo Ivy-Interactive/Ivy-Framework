@@ -11,7 +11,9 @@ public record FloatingPanel : WidgetBase<FloatingPanel>
         Align = align;
     }
 
-    [Prop] public Align Align { get; set; }
+    internal FloatingPanel() { }
+
+    [Prop] public Align Align { get; set; } = Align.BottomRight;
 
     [Prop] public Thickness? Offset { get; set; }
 

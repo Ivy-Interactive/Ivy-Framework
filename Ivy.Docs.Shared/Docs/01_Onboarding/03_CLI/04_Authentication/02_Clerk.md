@@ -142,6 +142,7 @@ When you first create a Clerk application, it starts in development mode. To dep
 9. **Update your deployed application** with the new `pk_live_*` and `sk_live_*` keys
 
 Your development and production instances are completely separate, with different:
+
 - User databases
 - Authentication settings
 - API keys
@@ -184,7 +185,7 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Clerk auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Clerk auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 

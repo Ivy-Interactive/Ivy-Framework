@@ -11,10 +11,10 @@ searchHints:
 # StackLayout
 
 <Ingress>
-StackLayout arranges child elements in either a vertical or horizontal stack with configurable spacing, alignment, and styling options. It's the foundation for creating linear layouts where elements are arranged sequentially in a single direction.
+StackLayout arranges child elements in either a vertical or horizontal stack with configurable spacing, alignment, and styling options. It's the foundation for creating linear [layouts](../../../01_Onboarding/02_Concepts/Views.md) where elements are arranged sequentially in a single direction.
 </Ingress>
 
-The `StackLayout` widget is the core building block for most layout compositions, offering flexible configuration for orientation, gaps between elements, padding, margins, background colors, and content alignment. It can be used to create simple stacks or as the foundation for more complex layout systems.
+The `StackLayout` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) is the core building block for most layout compositions, offering flexible configuration for orientation, gaps between elements, padding, margins, background colors, and content alignment. It can be used to create simple stacks or as the foundation for more complex layout systems.
 
 ## Basic Usage
 
@@ -88,7 +88,7 @@ StackLayout is the foundation for most other layout widgets. Understanding its p
 
 <Details>
 <Summary>
-Navigation Bar
+[Navigation](../../../01_Onboarding/02_Concepts/Navigation.md) Bar
 </Summary>
 <Body>
 Create a horizontal navigation bar with proper alignment:
@@ -128,4 +128,3 @@ public class NavigationExample : ViewBase
 
 </Body>
 </Details>
-

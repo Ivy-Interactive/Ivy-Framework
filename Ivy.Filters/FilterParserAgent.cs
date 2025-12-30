@@ -207,10 +207,10 @@ public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
 
     private string SerializeFieldsAsYaml(FieldMeta[] fields)
     {
-        var fieldsList = fields.Select(f => new
+        var fieldsList = fields.Select(f => new FieldMetaYaml
         {
-            f.DisplayName,
-            f.ColId,
+            DisplayName = f.DisplayName,
+            ColId = f.ColId,
             Type = f.Type.ToString()
         }).ToList();
 

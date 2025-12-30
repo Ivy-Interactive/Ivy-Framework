@@ -136,6 +136,7 @@ export const useDataLoading = ({
     };
     loadInitialData();
   }, [
+    connection,
     connectionKey,
     activeFilter,
     activeSort,
@@ -196,7 +197,7 @@ export const useDataLoading = ({
       loadingRef.current = false;
     }
   }, [
-    connectionKey,
+    connection,
     hasMore,
     activeFilter,
     activeSort,

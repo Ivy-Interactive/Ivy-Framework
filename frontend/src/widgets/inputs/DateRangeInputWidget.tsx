@@ -32,10 +32,10 @@ import {
 
 interface DateRangeInputWidgetProps {
   id: string;
-  value: {
-    item1: string;
-    item2: string;
-  };
+  value?: {
+    item1: string | null;
+    item2: string | null;
+  } | null;
   disabled?: boolean;
   placeholder?: string;
   format?: string;
@@ -129,8 +129,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   };
 
   const date: DateRange = {
-    from: parseDate(value.item1),
-    to: parseDate(value.item2),
+    from: parseDate(value?.item1),
+    to: parseDate(value?.item2),
   };
 
   const [month, setMonth] = useState(today);

@@ -19,23 +19,9 @@ Ivy is a **server-side web framework** that brings React-like patterns to C#. In
 
 ## Architecture Overview
 
-```mermaid
-graph LR
-    A["C# Views<br/>(ViewBase)"] --> B["Widget Tree<br/>(JSON)"]
-    B --> C["WebSocket<br/>Communication"]
-    C --> D["React Frontend<br/>(Shadcn/TailwindCSS)"]
-    D --> E["Browser<br/>(HTML/CSS)"]
-
-    E --> F["User Events<br/>(clicks, input)"]
-    F --> C
-    C --> G["Event Handlers<br/>(C# methods)"]
-    G --> H["State Updates<br/>(UseState, etc.)"]
-    H --> A
-```
-
 ### Views & Components
 
-Every Ivy app is built from **Views** - C# classes that inherit from `ViewBase`. Each view implements a single `Build()` method that returns widgets or other views:
+Every Ivy app is built from **[Views](../02_Concepts/Views.md)** - C# classes that inherit from [ViewBase](../02_Concepts/Views.md). Each view implements a single `Build()` method that returns widgets or other views:
 
 ```csharp
 [App(icon: Icons.Calendar)]
@@ -67,14 +53,14 @@ public class TodoApp : ViewBase
 
 ### Reactive State Management
 
-Ivy provides React-inspired hooks for state management:
+Ivy provides React-inspired hooks for [state management](../02_Concepts/State.md):
 
 **Available Hooks:**
 
-- `UseState<T>()` - Local component state that triggers re-renders
-- `UseEffect()` - Side effects with dependency tracking
-- `UseService<T>()` - Dependency injection integration
-- `UseSignal()`, `UseDownload()`, `UseWebhook()` - And many more...
+- [UseState<T>()](../02_Concepts/State.md) - Local component state that triggers re-renders
+- [UseEffect()](../02_Concepts/Effects.md) - Side effects with dependency tracking
+- [UseService<T>()](../02_Concepts/Services.md) - Dependency injection integration
+- [UseSignal()](../02_Concepts/Signals.md), [UseDownload()](../02_Concepts/Downloads.md), `UseWebhook()` - And many more...
 
 ```csharp
 public override object? Build()
@@ -105,7 +91,7 @@ For detailed examples and troubleshooting, see [Rules of Hooks](../02_Concepts/R
 
 ### Widget Library
 
-Ivy ships with a comprehensive set of strongly-typed widgets:
+Ivy ships with a comprehensive set of strongly-typed [widgets](../02_Concepts/Widgets.md):
 
 | Category   | Examples                                                                   |
 | ---------- | -------------------------------------------------------------------------- |
@@ -135,11 +121,15 @@ When working with search results in the sidebar (both in Ivy Samples and Docs), 
 
 ## Detailed Architecture
 
+<Callout Type="info">
+The following technical documentation is intended primarily for internal developers of the Ivy-Framework.
+</Callout>
+
 For a comprehensive technical overview of Ivy's architecture, see:
 
-- **[Framework Design](./05_Architecture/01_FrameworkDesign.md)** - Design system, theming, and UI framework choices
-- **[Backend Architecture](./05_Architecture/02_BackendArchitecture.md)** - C# server configuration, application system, and deployment
-- **[Communication](./05_Architecture/03_Communication.md)** - SignalR protocol, message types, and state synchronization
+- **[Framework Design](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/Framework-Design)** - Design system, theming, and UI framework choices
+- **[Backend Architecture](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/Backend-Architecture)** - C# server configuration, application system, and deployment
+- **[Communication](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/BE%E2%80%90FE-communication)** - SignalR protocol, message types, and state synchronization
 
 ## Development Experience
 

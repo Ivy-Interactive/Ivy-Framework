@@ -9,6 +9,8 @@ public record KanbanCard : WidgetBase<KanbanCard>
     {
     }
 
+    internal KanbanCard() { }
+
     [Prop] public object? CardId { get; set; }
 
     [Prop] public object? Priority { get; set; }

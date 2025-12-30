@@ -9,14 +9,18 @@ public record PieChartTotal(string FormattedValue, string Label);
 
 public record PieChart : WidgetBase<PieChart>
 {
-    public PieChart(object data)
+    public PieChart(object data) : this()
     {
-        Width = Size.Full();
-        Height = Size.Full();
         Data = data;
     }
 
-    [Prop] public object Data { get; init; }
+    internal PieChart()
+    {
+        Width = Size.Full();
+        Height = Size.Full();
+    }
+
+    [Prop] public object? Data { get; init; }
 
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 

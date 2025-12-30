@@ -26,13 +26,14 @@ public interface IAnyDateTimeInput : IAnyInput
 
 public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDateTimeInput
 {
-    [Prop] public DateTimeInputs Variant { get; set; }
+    [Prop] public DateTimeInputs Variant { get; set; } = DateTimeInputs.Date;
 
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public string? Format { get; set; }
 
     [Prop] public bool Disabled { get; set; }
+    [Prop] public bool Nullable { get; set; }
 
     [Prop] public string? Invalid { get; set; }
 
@@ -77,9 +78,11 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
         Disabled = disabled;
     }
 
+    internal DateTimeInput() { }
+
     [Prop] public TDate Value { get; set; } = default!;
 
-    [Prop] public bool Nullable { get; set; } = typeof(TDate) == typeof(DateTime?) || typeof(TDate) == typeof(DateTimeOffset?) || typeof(TDate) == typeof(DateOnly?) || typeof(TDate) == typeof(TimeOnly?);
+    [Prop] public new bool Nullable { get; set; } = typeof(TDate) == typeof(DateTime?) || typeof(TDate) == typeof(DateTimeOffset?) || typeof(TDate) == typeof(DateOnly?) || typeof(TDate) == typeof(TimeOnly?);
 
     [Event] public Func<Event<IInput<TDate>, TDate>, ValueTask>? OnChange { get; set; }
 }
@@ -228,6 +231,7 @@ public static class DateTimeInputExtensions
     public static DateTimeInputBase Format(this DateTimeInputBase widget, string format) => widget with { Format = format };
 
     public static DateTimeInputBase Invalid(this DateTimeInputBase widget, string? invalid) => widget with { Invalid = invalid };
+    public static DateTimeInputBase Nullable(this DateTimeInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]
     public static DateTimeInputBase HandleBlur(this DateTimeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
