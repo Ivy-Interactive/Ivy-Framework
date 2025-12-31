@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Threading;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
@@ -8,7 +7,6 @@ using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.Forms;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
@@ -145,22 +143,10 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
     {
         var args = this.UseService<AppArgs>();
         var auth = this.UseService<IAuthService>();
-        var authProvider = this.UseService<IAuthProvider>();
-        var sessionStore = this.UseService<AppSessionStore>();
-        var client = this.UseService<IClientProvider>();
-
-        AuthSession GetCallbackAuthSession(HttpContext httpContext, HttpMessageHandler handler) =>
-            Ivy.Helpers.AuthHelper.GetAuthSession(httpContext, handler);
 
         var callback = this.UseWebhook(async (request) =>
         {
-            // Read auth session data from the callback request's cookies, not from WebSocket session
-            var httpMessageHandler = auth.GetAuthSession().HttpMessageHandler;
-            var callbackAuthSession = GetCallbackAuthSession(request.HttpContext, httpMessageHandler);
-
-            // Create temporary AuthService with callback auth session to get PKCE verifier from cookies
-            var callbackAuthService = new AuthService(authProvider, callbackAuthSession, client, sessionStore);
-            var token = await callbackAuthService.HandleOAuthCallbackAsync(request, CancellationToken.None);
+            var token = await auth.HandleOAuthCallbackAsync(request);
             return new RedirectResult("/");
         });
 

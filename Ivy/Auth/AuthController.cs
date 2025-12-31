@@ -53,19 +53,8 @@ public class AuthController() : Controller
 
         try
         {
-            var authSession = authService.GetAuthSession();
-            var oldSessionData = authSession.AuthSessionData;
-
-            // Get the OAuth URI
+            // Get the OAuth URI and redirect to it
             var uri = await authService.GetOAuthUriAsync(option, callback, HttpContext.RequestAborted);
-
-            // Write auth session data cookies directly to HTTP response before redirecting
-            if (authSession.AuthSessionData != oldSessionData)
-            {
-                var cookieJarId = sessionStore.RegisterAuthSessionDataCookies(authSession.AuthSessionData);
-                this.WriteCookiesToResponse(sessionStore, cookieJarId, CookieJarIntents.SetAuthCookies, out _);
-            }
-
             return Redirect(uri.ToString());
         }
         catch (Exception ex)
