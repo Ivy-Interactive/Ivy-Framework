@@ -22,6 +22,11 @@ public class AuthController() : Controller
         [FromQuery] string connectionId,
         [FromServices] AppSessionStore sessionStore)
     {
+        if (string.IsNullOrWhiteSpace(optionId) || string.IsNullOrWhiteSpace(callbackId) || string.IsNullOrWhiteSpace(connectionId))
+        {
+            return BadRequest("Missing required parameters");
+        }
+
         if (!sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
         {
             return BadRequest("Session not found");
