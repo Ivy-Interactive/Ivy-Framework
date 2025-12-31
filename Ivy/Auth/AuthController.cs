@@ -20,22 +20,26 @@ public class AuthController() : Controller
         [FromQuery] string optionId,
         [FromQuery] string callbackId,
         [FromQuery] string connectionId,
-        [FromServices] AppSessionStore sessionStore)
+        [FromServices] AppSessionStore sessionStore,
+        [FromServices] ILogger<AuthController> logger)
     {
         if (string.IsNullOrWhiteSpace(optionId) || string.IsNullOrWhiteSpace(callbackId) || string.IsNullOrWhiteSpace(connectionId))
         {
-            return BadRequest("Missing required parameters");
+            logger.LogWarning("OAuth login failed: Missing required parameters");
+            return BadRequest("Authentication error");
         }
 
         if (!sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
         {
-            return BadRequest("Session not found");
+            logger.LogWarning("OAuth login failed: Session not found for connection {ConnectionId}", connectionId);
+            return BadRequest("Authentication error");
         }
 
         var authService = appSession.AppServices.GetService<IAuthService>();
         if (authService == null)
         {
-            return BadRequest("Auth service not configured");
+            logger.LogWarning("OAuth login failed: Auth service not configured for connection {ConnectionId}", connectionId);
+            return BadRequest("Authentication error");
         }
 
         // Find the auth option by ID
@@ -43,7 +47,8 @@ public class AuthController() : Controller
         var option = options.FirstOrDefault(o => o.Id == optionId);
         if (option == null)
         {
-            return BadRequest($"Auth option '{optionId}' not found");
+            logger.LogWarning("OAuth login failed: Auth option '{OptionId}' not found for connection {ConnectionId}", optionId, connectionId);
+            return BadRequest("Authentication error");
         }
 
         // Construct the webhook endpoint
@@ -63,7 +68,8 @@ public class AuthController() : Controller
         }
         catch (Exception ex)
         {
-            return BadRequest($"Failed to initiate OAuth: {ex.Message}");
+            logger.LogError(ex, "OAuth login failed: Error initiating OAuth for option '{OptionId}' on connection {ConnectionId}", optionId, connectionId);
+            return BadRequest("Authentication error");
         }
     }
 
