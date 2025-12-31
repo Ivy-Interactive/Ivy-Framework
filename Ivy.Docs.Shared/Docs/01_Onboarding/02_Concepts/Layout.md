@@ -14,10 +14,10 @@ searchHints:
 # Layout
 
 <Ingress>
-The Layout static class provides a fluent API for creating common layout compositions with minimal code, serving as the primary entry point for building [UI structures](../../../01_Onboarding/02_Concepts/Views.md) in Ivy.
+The Layout static class provides a fluent API for creating common layout compositions with minimal code, serving as the primary entry point for building [UI structures](./Views.md) in Ivy.
 </Ingress>
 
-The Layout class offers convenient factory methods that return pre-configured layout [views](../../../01_Onboarding/02_Concepts/Views.md). Instead of manually instantiating layout widgets, you can use Layout.Vertical(), Layout.Horizontal(), and other methods to quickly compose your UI with a clean, fluent syntax.
+The Layout class offers convenient factory methods that return pre-configured layout views. Instead of manually instantiating layout widgets, you can use Layout.Vertical(), Layout.Horizontal(), and other methods to quickly compose your UI with a clean, fluent syntax.
 
 ## Basic Usage
 
@@ -43,7 +43,7 @@ Layout.Horizontal()
 
 ## Pipe Operator Syntax
 
-The Layout class supports the pipe operator (|) for adding children, enabling a clean and readable composition syntax:
+The Layout class supports the pipe operator `|` for adding children, enabling a clean and readable composition syntax:
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
@@ -51,7 +51,7 @@ Layout.Vertical().Gap(4)
     | (Layout.Horizontal().Gap(2)
         | new Badge("Active").Primary()
         | new Badge("Premium").Secondary())
-    | Text.Small("Welcome to your dashboard")
+    | Text.Small("Choose your plan")
 ```
 
 ## Configuration Methods
@@ -67,7 +67,7 @@ Layout.Vertical()
     | Text.Label("No Gap:")
     | (Layout.Horizontal().Gap(0)
         | new Badge("A") | new Badge("B") | new Badge("C"))
-    | Text.Label("Large Gap (8):")
+    | Text.Label("With Gap:")
     | (Layout.Horizontal().Gap(8)
         | new Badge("A") | new Badge("B") | new Badge("C"))
 ```
@@ -130,6 +130,7 @@ The LayoutExtensions class provides additional helper methods:
 |-----------|-------------|
 | .WithMargin(int) | Wraps any object in a layout with margin |
 | .WithMargin(int, int) | Wraps with horizontal and vertical margin |
+| .WithMargin(int, int, int, int) | Wraps with left, top, right, bottom margin |
 | .WithLayout() | Wraps any object in a vertical layout |
 
 ## Available Methods
@@ -150,14 +151,13 @@ The Layout class provides the following factory methods:
 
 | Layout | Description |
 |--------|-------------|
-| [StackLayout](./StackLayout.md) | Arranges elements vertically or horizontally in a linear sequence |
-| [GridLayout](./GridLayout.md) | Two-dimensional grid system with precise control over positioning and spanning |
-| [WrapLayout](./WrapLayout.md) | Automatically wraps items to new lines when space is limited |
-| [TabsLayout](./TabsLayout.md) | Organizes content into tabbed sections for easy navigation |
-| [SidebarLayout](./SidebarLayout.md) | Main content area with a collapsible sidebar for navigation |
-| [HeaderLayout](./HeaderLayout.md) | Page layout with a fixed header section |
-| [FooterLayout](./FooterLayout.md) | Page layout with a fixed footer section |
-| [FloatingPanel](./FloatingPanel.md) | Overlay panels that float above the main content |
-| [ResizeablePanelGroup](./ResizeablePanelGroup.md) | Split panels that users can resize by dragging |
+| [StackLayout](../../02_Widgets/04_Layouts/StackLayout.md) | Arranges elements vertically or horizontally in a linear sequence |
+| [GridLayout](../../02_Widgets/04_Layouts/GridLayout.md) | Two-dimensional grid system with precise control over positioning and spanning |
+| [WrapLayout](../../02_Widgets/04_Layouts/WrapLayout.md) | Automatically wraps items to new lines when space is limited |
+| [TabsLayout](../../02_Widgets/04_Layouts/TabsLayout.md) | Organizes content into tabbed sections for easy navigation |
+| [SidebarLayout](../../02_Widgets/04_Layouts/SidebarLayout.md) | Main content area with a collapsible sidebar for navigation |
+| [HeaderLayout](../../02_Widgets/04_Layouts/HeaderLayout.md) | Page layout with a fixed header section |
+| [FooterLayout](../../02_Widgets/04_Layouts/FooterLayout.md) | Page layout with a fixed footer section |
+| [FloatingPanel](../../02_Widgets/04_Layouts/FloatingPanel.md) | Overlay panels that float above the main content |
+| [ResizeablePanelGroup](../../02_Widgets/04_Layouts/ResizeablePanelGroup.md) | Split panels that users can resize by dragging |
 
-<WidgetDocs Type="Ivy.StackLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Views/Layout.cs"/>
