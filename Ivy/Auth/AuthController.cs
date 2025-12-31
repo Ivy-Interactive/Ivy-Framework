@@ -22,7 +22,6 @@ public class AuthController() : Controller
         [FromQuery] string connectionId,
         [FromServices] AppSessionStore sessionStore)
     {
-        // Find the auth session for this connection
         if (!sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
         {
             return BadRequest("Session not found");
@@ -62,6 +61,7 @@ public class AuthController() : Controller
             return BadRequest($"Failed to initiate OAuth: {ex.Message}");
         }
     }
+
     [Route("ivy/auth/set-auth-cookies")]
     [HttpPatch]
     public async Task<IActionResult> SetAuthCookies(
