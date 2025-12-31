@@ -149,11 +149,7 @@ public class AppHub(
 
             if (routeResult.AppDescriptor.Title is { } title && routeResult.AppId != AppIds.Chrome && parentId == null)
             {
-                if (!string.IsNullOrWhiteSpace(server.Args.MetaTitle))
-                {
-                    title = $"{title} - {server.Args.MetaTitle}";
-                }
-                clientProvider.SetTitle(title);
+                clientProvider.SetTitle(title, server.Args.MetaTitle);
             }
 
             appServices.AddSingleton(routeResult.AppRepository);

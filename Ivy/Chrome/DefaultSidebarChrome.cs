@@ -41,11 +41,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             var app = appRepository.GetAppOrDefault(appId);
             if (app.Title is { } title)
             {
-                if (!string.IsNullOrWhiteSpace(serverArgs.MetaTitle))
-                {
-                    title = $"{title} - {serverArgs.MetaTitle}";
-                }
-                client.SetTitle(title);
+                client.SetTitle(title, serverArgs.MetaTitle);
             }
         }
 
