@@ -652,6 +652,11 @@ export const useBackend = (
             handleSetTheme(theme);
           });
 
+          connection.on('SetTitle', (title: string) => {
+            logger.debug(`[${connection.connectionId}] SetTitle`, { title });
+            document.title = title;
+          });
+
           connection.on('CopyToClipboard', (text: string) => {
             logger.debug(`[${connection.connectionId}] CopyToClipboard`);
             navigator.clipboard.writeText(text);
@@ -741,6 +746,7 @@ export const useBackend = (
         connection.off('SetAuthCookies');
         connection.off('SetRootAppId');
         connection.off('SetTheme');
+        connection.off('SetTitle');
         connection.off('OpenUrl');
         connection.off('Redirect');
         connection.off('ApplyTheme');

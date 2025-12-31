@@ -88,6 +88,11 @@ public static class ClientExtensions
             });
     }
 
+    public static void SetTitle(this IClientProvider client, string title)
+    {
+        client.Sender.Send("SetTitle", title);
+    }
+
     public static void SetAuthCookies(this IClientProvider client, CookieJarId cookieJarId, bool reloadPage, bool? triggerMachineReload = null)
     {
         client.Sender.Send(
