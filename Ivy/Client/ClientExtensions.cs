@@ -88,11 +88,21 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetTitle(this IClientProvider client, string title, string? metaTitle = null)
+    public static void SetTitle(this IClientProvider client, string? title, string? metaTitle = null)
     {
-        if (!string.IsNullOrWhiteSpace(metaTitle))
+        var hasTitle = !string.IsNullOrWhiteSpace(title);
+        var hasMetaTitle = !string.IsNullOrWhiteSpace(metaTitle);
+        if (hasTitle && hasMetaTitle)
         {
             title = $"{title} - {metaTitle}";
+        }
+        else if (hasMetaTitle)
+        {
+            title = metaTitle;
+        }
+        else if (!hasTitle)
+        {
+            title = "Ivy";
         }
         client.Sender.Send("SetTitle", title);
     }

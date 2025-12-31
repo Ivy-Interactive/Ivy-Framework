@@ -303,8 +303,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 else
                 {
                     // Reset to default title when all tabs are closed
-                    var defaultTitle = serverArgs.MetaTitle.NullIfEmpty() ?? "Ivy";
-                    client.SetTitle(defaultTitle);
+                    client.SetTitle(serverArgs.MetaTitle);
 
                     client.Redirect("/");
                 }
