@@ -33,7 +33,7 @@ public class DefaultAuthApp : ViewBase
         if (options.Any(e => e.Flow == AuthFlow.OAuth))
         {
             var oAuthOptions = options.Where(e => e.Flow == AuthFlow.OAuth).ToList();
-            renderedOptions.Add(Layout.Vertical() | oAuthOptions.Select(e => new OAuthFlowView(e, errorMessage)));
+            renderedOptions.Add(Layout.Vertical() | oAuthOptions.Select(e => new OAuthFlowView(e)));
         }
 
         var flows = renderedOptions
@@ -137,7 +137,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 }
 
 
-public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : ViewBase
+public class OAuthFlowView(AuthOption option) : ViewBase
 {
     public override object? Build()
     {
