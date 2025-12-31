@@ -542,7 +542,7 @@ public class AppHub(
                 _ => new NavigateSignal()
             );
 
-            await navigateSignal.Send(new NavigateArgs(appId, TabId: state?.TabId, Purpose: NavigationPurpose.HistoryTraversal));
+            await navigateSignal.Send(new NavigateArgs(appId, TabId: state?.TabId, HistoryOp: HistoryOp.Pop));
 
             logger.LogInformation("Navigate signal sent: {ConnectionId} to [{AppId}]", Context.ConnectionId, appId);
         }
