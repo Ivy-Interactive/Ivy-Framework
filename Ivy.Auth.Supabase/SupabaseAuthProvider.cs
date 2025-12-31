@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using Ivy.Hooks;
@@ -29,8 +29,6 @@ public class SupabaseAuthProvider : IAuthProvider
     private readonly SymmetricSecurityKey? _legacyJwtKey = null;
 
     private readonly List<AuthOption> _authOptions = new();
-
-    private string? _pkceCodeVerifier = null;
 
     private JsonWebKeySet? _cachedJwks = null;
     private DateTime _jwksCacheExpiry = DateTime.MinValue;
@@ -120,7 +118,8 @@ public class SupabaseAuthProvider : IAuthProvider
 
         var providerAuthState = await _client.Auth.SignIn(provider, signInOptions)
             .WaitAsync(cancellationToken);
-        _pkceCodeVerifier = providerAuthState.PKCEVerifier;
+
+        authSession.AuthSessionData = providerAuthState.PKCEVerifier;
 
         return providerAuthState.Uri;
     }
@@ -141,7 +140,14 @@ public class SupabaseAuthProvider : IAuthProvider
             throw new Exception("Received no recognized query parameters from Supabase.");
         }
 
-        var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString())
+        // Retrieve PKCE verifier from session data
+        var pkceVerifier = authSession.AuthSessionData;
+        if (string.IsNullOrEmpty(pkceVerifier))
+        {
+            throw new Exception("PKCE verifier not found in session.");
+        }
+
+        var session = await _client.Auth.ExchangeCodeForSession(pkceVerifier, code.ToString())
             .WaitAsync(cancellationToken);
         var authToken = MakeAuthToken(session);
         return authToken;

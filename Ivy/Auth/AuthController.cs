@@ -1,6 +1,7 @@
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,65 @@ public record SetAuthCookiesRequest(string CookieJarId, string? ConnectionId, bo
 
 public class AuthController() : Controller
 {
+    [Route("ivy/auth/oauth-login")]
+    [HttpGet]
+    public async Task<IActionResult> OAuthLogin(
+        [FromQuery] string optionId,
+        [FromQuery] string callbackId,
+        [FromQuery] string connectionId,
+        [FromServices] AppSessionStore sessionStore)
+    {
+        // Find the auth session for this connection
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
+        {
+            return BadRequest("Session not found");
+        }
+
+        var authService = appSession.AppServices.GetService<IAuthService>();
+        if (authService == null)
+        {
+            return BadRequest("Auth service not configured");
+        }
+
+        // Find the auth option by ID
+        var options = authService.GetAuthOptions();
+        var option = options.FirstOrDefault(o => o.Id == optionId);
+        if (option == null)
+        {
+            return BadRequest($"Auth option '{optionId}' not found");
+        }
+
+        // Construct the webhook endpoint
+        var scheme = HttpContext.Request.Scheme;
+        if (HttpContext.Request.Headers.TryGetValue("X-Forwarded-Proto", out var forwardedProto))
+        {
+            scheme = forwardedProto.ToString();
+        }
+        var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
+        var callback = new WebhookEndpoint(callbackId, scheme, host);
+
+        try
+        {
+            var authSession = authService.GetAuthSession();
+            var oldSessionData = authSession.AuthSessionData;
+
+            // Get the OAuth URI
+            var uri = await authService.GetOAuthUriAsync(option, callback, HttpContext.RequestAborted);
+
+            // Write auth session data cookies directly to HTTP response before redirecting
+            if (authSession.AuthSessionData != oldSessionData)
+            {
+                var cookieJarId = sessionStore.RegisterAuthSessionDataCookies(authSession.AuthSessionData);
+                this.WriteCookiesToResponse(sessionStore, cookieJarId, CookieJarIntents.SetAuthCookies, out _);
+            }
+
+            return Redirect(uri.ToString());
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to initiate OAuth: {ex.Message}");
+        }
+    }
     [Route("ivy/auth/set-auth-cookies")]
     [HttpPatch]
     public async Task<IActionResult> SetAuthCookies(
