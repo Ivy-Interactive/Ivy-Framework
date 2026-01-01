@@ -20,7 +20,6 @@ public class AuthFormSettings
     internal Size? CardHeight { get; private set; }
     internal int? CardPadding { get; private set; }
     internal int? Gap { get; private set; }
-    internal object? Background { get; private set; }
     internal object? Footer { get; private set; }
 
     // Fluent API: Branding
@@ -92,12 +91,6 @@ public class AuthFormSettings
     public AuthFormSettings WithGap(int gap)
     {
         Gap = gap;
-        return this;
-    }
-
-    public AuthFormSettings WithBackground(object background)
-    {
-        Background = background;
         return this;
     }
 
