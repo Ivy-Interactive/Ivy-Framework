@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy.Hooks;
 
@@ -34,7 +35,7 @@ public static class UseWebhookExtensions
     {
         var webhookId = context.UseState(() => Guid.NewGuid().ToString(), false);
         var webhookController = context.UseService<IWebhookRegistry>();
-        var args = context.UseService<AppArgs>();
+        var args = context.UseService<AppContext>();
 
         context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.AfterInit()]);
 

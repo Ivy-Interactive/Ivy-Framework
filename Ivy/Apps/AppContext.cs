@@ -3,9 +3,9 @@ using Ivy.Core.Helpers;
 
 namespace Ivy.Apps;
 
-public class AppArgs
+public class AppContext
 {
-    internal AppArgs(string connectionId, string appId, string? navigationAppId, string? argsJson, string scheme, string host)
+    internal AppContext(string connectionId, string appId, string? navigationAppId, string? argsJson, string scheme, string host)
     {
         AppId = appId;
         NavigationAppId = navigationAppId;

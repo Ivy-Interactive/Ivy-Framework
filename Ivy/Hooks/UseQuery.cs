@@ -114,6 +114,10 @@ public static class UseQueryExtensions
     {
         var opts = options ?? new QueryOptions();
 
+        var scopeRef = context.UseRef(() => opts.Scope);
+        if (scopeRef.Value != opts.Scope)
+            throw new InvalidOperationException("QueryScope cannot change between renders");
+
         // Scope determines which hooks path - must be checked first for consistent hook ordering
         if (opts.Scope == QueryScope.View)
         {

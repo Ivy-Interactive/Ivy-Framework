@@ -17,6 +17,7 @@ public class QueryApp : SampleBase
                    new Tab("Conditional", new ConditionalTab()),
                    new Tab("Mutations", new MutationsTab()),
                    new Tab("Tags", new TagsTab()),
+                   new Tab("Cache", new CacheTab()),
                    new Tab("Pagination", new PaginationTab()),
                    new Tab("Pre-Populated Details", new PrePopulatedDetailsTab()),
                    new Tab("Errors", new ErrorsTab()),
@@ -776,5 +777,113 @@ public class ComparisonPanelWithoutKeepPrevious(int page) : ViewBase
                    ? new Skeleton().Height(Size.Units(8))
                    : Layout.Vertical() | content)
             ;
+    }
+}
+
+public class CacheTab : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical()
+               | Text.H2("Cache Management")
+               | Text.P("Use QueryManager to clear cache entries - either all at once or selectively by tag.")
+               | new Card(new CacheClearExample()).Title("Clear Cache")
+            ;
+    }
+}
+
+public class CacheClearExample : ViewBase
+{
+    public override object? Build()
+    {
+        var queryManager = UseService<QueryManager>();
+
+        // Multiple queries with different tags
+        var usersQuery = UseQuery(
+            key: "cache-demo/users",
+            fetcher: async ct =>
+            {
+                await Task.Delay(600, ct);
+                return $"Users loaded at {DateTime.Now:HH:mm:ss}";
+            },
+            options: new QueryOptions { Tags = ["cache-demo", "users"] });
+
+        var ordersQuery = UseQuery(
+            key: "cache-demo/orders",
+            fetcher: async ct =>
+            {
+                await Task.Delay(600, ct);
+                return $"Orders loaded at {DateTime.Now:HH:mm:ss}";
+            },
+            options: new QueryOptions { Tags = ["cache-demo", "orders"] });
+
+        var settingsQuery = UseQuery(
+            key: "cache-demo/settings",
+            fetcher: async ct =>
+            {
+                await Task.Delay(600, ct);
+                return $"Settings loaded at {DateTime.Now:HH:mm:ss}";
+            },
+            options: new QueryOptions { Tags = ["cache-demo", "settings"] });
+
+        return Layout.Vertical().Gap(4)
+               | Text.H3("Cached Queries")
+               | (Layout.Grid(3).Gap(4)
+                  | QueryStatusCard("Users", usersQuery, "users")
+                  | QueryStatusCard("Orders", ordersQuery, "orders")
+                  | QueryStatusCard("Settings", settingsQuery, "settings"))
+
+               | new Separator()
+
+               | Text.H3("Clear by Tag")
+               | Text.Muted("Invalidate specific queries by their tag. Queries with active subscribers will re-fetch.")
+               | (Layout.Horizontal().Gap(2)
+                  | new Button("Clear Users", _ => queryManager.InvalidateByTag("users"))
+                        .Variant(ButtonVariant.Outline).Icon(Icons.Users)
+                  | new Button("Clear Orders", _ => queryManager.InvalidateByTag("orders"))
+                        .Variant(ButtonVariant.Outline).Icon(Icons.ShoppingCart)
+                  | new Button("Clear Settings", _ => queryManager.InvalidateByTag("settings"))
+                        .Variant(ButtonVariant.Outline).Icon(Icons.Settings))
+
+               | new Separator()
+
+               | Text.H3("Clear Everything")
+               | Text.Muted("Invalidate all queries in the cache. Use with caution in production.")
+               | (Layout.Horizontal().Gap(2)
+                  | new Button("Clear All (by tag)", _ => queryManager.InvalidateByTag("cache-demo"))
+                        .Variant(ButtonVariant.Destructive).Icon(Icons.Trash2)
+                  | new Button("Clear Entire Cache", _ => queryManager.Clear())
+                        .Variant(ButtonVariant.Destructive).Icon(Icons.Trash))
+
+               | new Separator()
+
+               | Text.H3("Revalidate (Background Refresh)")
+               | Text.Muted("Revalidate keeps current data visible while fetching fresh data in the background.")
+               | (Layout.Horizontal().Gap(2)
+                  | new Button("Revalidate All", _ => queryManager.RevalidateByTag("cache-demo"))
+                        .Variant(ButtonVariant.Primary).Icon(Icons.RefreshCw))
+            ;
+    }
+
+    private static object QueryStatusCard(string title, QueryResult<string> query, string tag)
+    {
+        var status = query.IsLoading ? "Loading..."
+            : query.IsValidating ? "Revalidating..."
+            : "Ready";
+
+        var badge = query.IsLoading
+            ? new Badge(status).Secondary()
+            : query.IsValidating
+                ? new Badge(status).Warning()
+                : new Badge(status).Success();
+
+        return new Card(
+            Layout.Vertical().Gap(2)
+            | badge
+            | (query.IsLoading
+                ? new Skeleton().Height(Size.Units(4))
+                : Text.Literal(query.Value ?? ""))
+            | Text.Muted($"Tag: {tag}")
+        ).Title(title);
     }
 }

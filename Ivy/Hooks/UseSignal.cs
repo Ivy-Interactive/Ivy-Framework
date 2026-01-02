@@ -3,6 +3,7 @@ using System.Reactive.Disposables;
 using System.Reflection;
 using Ivy.Apps;
 using Ivy.Core.Hooks;
+using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy.Hooks;
 
@@ -67,7 +68,7 @@ public static class UseSignalExtensions
             if (signalType.GetBroadcastType() is { } broadcastType)
             {
                 var signalHub = context.UseService<SignalRouter>();
-                var appArgs = context.UseService<AppArgs>();
+                var appArgs = context.UseService<AppContext>();
                 return signalHub.CreateSignal<T, TInput, TOutput>(signalType, broadcastType, appArgs.ConnectionId);
             }
             return context.CreateContext(Activator.CreateInstance<T>);
@@ -80,7 +81,7 @@ public static class UseSignalExtensions
             if (signalType.GetBroadcastType() is not null)
             {
                 var signalHub = context.UseService<SignalRouter>();
-                var appArgs = context.UseService<AppArgs>();
+                var appArgs = context.UseService<AppContext>();
                 return signalHub.UseSignal<T, TInput, TOutput>(signalType, receiverId.Value, appArgs.ConnectionId);
             }
             var signal = context.UseContext<T>();

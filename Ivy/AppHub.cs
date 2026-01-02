@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy;
 
@@ -28,7 +29,7 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    private AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
+    private AppContext GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
     {
         string? appArgs = null;
         if (httpContext.Request.Query.TryGetValue("appArgs", out var appArgsParam))
@@ -36,7 +37,7 @@ public class AppHub(
             appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
-        return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!);
+        return new AppContext(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!);
     }
 
     public override async Task OnConnectedAsync()
