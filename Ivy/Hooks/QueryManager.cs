@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 
 namespace Ivy.Hooks;
 
-
 internal enum QueryEntryState
 {
     Empty,        // No value, no fetch in progress
@@ -91,7 +90,6 @@ public static class QueryManagerServiceExtensions
         return services;
     }
 }
-
 
 public class QueryManager : IDisposable, IAsyncDisposable
 {
