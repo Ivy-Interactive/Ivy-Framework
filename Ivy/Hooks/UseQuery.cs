@@ -7,7 +7,10 @@ namespace Ivy.Hooks;
 public enum QueryScope
 {
     Server,
-    View
+    View,
+    App,
+    Device,
+    User
 }
 
 public record QueryOptions
@@ -27,7 +30,7 @@ public record QueryOptions
     /// When true, keeps showing previous data while fetching with a new key.
     /// Ideal for pagination to avoid loading flicker. Default: false.
     /// </summary>
-    public bool KeepPreviousData { get; init; } = false;
+    public bool KeepPrevious { get; init; } = false;
 
     public static implicit operator QueryOptions(QueryScope scope) => new() { Scope = scope };
 }
@@ -159,7 +162,7 @@ public static class UseQueryExtensions
                 // Set loading state - keep previous data if configured
                 if (!shouldSkipInitialFetch)
                 {
-                    if (opts.KeepPreviousData && resultState.Value.Value is not null)
+                    if (opts.KeepPrevious && resultState.Value.Value is not null)
                     {
                         // Keep showing previous data while loading new data
                         resultState.Set(resultState.Value with
@@ -278,7 +281,7 @@ public static class UseQueryExtensions
             hasFetchedRef.Value = true;
 
             // Set loading state - keep previous data if configured
-            if (keyChanged && opts.KeepPreviousData && resultState.Value.Value is not null)
+            if (keyChanged && opts.KeepPrevious && resultState.Value.Value is not null)
             {
                 // Keep showing previous data while loading new data
                 resultState.Set(resultState.Value with
@@ -288,7 +291,7 @@ public static class UseQueryExtensions
                     IsPrevious = true
                 });
             }
-            else if (!resultState.Value.IsLoading && resultState.Value.Value is null)
+            else if (resultState.Value is { IsLoading: false, Value: null })
             {
                 resultState.Set(resultState.Value with { Mutator = mutator, IsLoading = true });
             }
@@ -328,11 +331,8 @@ public static class UseQueryExtensions
             });
         }
 
-        // Cleanup on unmount
-        context.UseEffect(() =>
-        {
-            return new ViewQueryDisposable(ctsRef.Value ?? new CancellationTokenSource());
-        });
+        // Cleanup on destroy
+        context.UseEffect(() => new ViewQueryDisposable(ctsRef.Value ?? new CancellationTokenSource()));
 
         // Return idle state when key is null
         if (key is null)
@@ -368,7 +368,7 @@ public static class UseQueryExtensions
     {
         if (key is null) throw new ArgumentNullException(nameof(key));
         var opts = options ?? new QueryOptions();
-        if (opts.Scope == QueryScope.View) throw new ArgumentException("UseMutation does not support View scope.", nameof(options));
+        if (opts.Scope == QueryScope.View) throw new ArgumentException("UseMutation does not support 'View' QueryScope.", nameof(options));
         var queryManager = context.UseService<QueryManager>();
         var queryKey = context.UseQueryKey(key, opts);
 

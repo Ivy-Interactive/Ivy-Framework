@@ -17,6 +17,7 @@ public class QueryApp : SampleBase
                    new Tab("Conditional", new ConditionalTab()),
                    new Tab("Mutations", new MutationsTab()),
                    new Tab("Tags", new TagsTab()),
+                   new Tab("Pagination", new PaginationTab()),
                    new Tab("Pre-Populated Details", new PrePopulatedDetailsTab()),
                    new Tab("Errors", new ErrorsTab()),
                    new Tab("Auto-Key", new AutoKeyTab())
@@ -620,6 +621,160 @@ public class ProductDetailView(Product initialProduct) : ViewBase
                     }).Variant(ButtonVariant.Destructive)
                   | new Button("Revalidate", _ => product.Mutator.Revalidate()).Variant(ButtonVariant.Outline))
                | new Separator()
+            ;
+    }
+}
+
+public class PaginationTab : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical()
+               | Text.H2("Pagination with KeepPreviousData")
+               | Text.P("When KeepPreviousData is enabled, the previous page's data remains visible while the next page loads. This prevents UI flicker during pagination.")
+               | new Card(new PaginationExample()).Title("Paginated List")
+               | new Card(new PaginationComparisonExample()).Title("Comparison: With vs Without KeepPreviousData")
+            ;
+    }
+}
+
+public class PaginationExample : ViewBase
+{
+    private const int PageSize = 5;
+    private const int TotalItems = 23;
+
+    public override object? Build()
+    {
+        var page = UseState(1);
+        var totalPages = (int)Math.Ceiling((double)TotalItems / PageSize);
+
+        var items = UseQuery(
+            key: $"paginated-items?page={page.Value}",
+            fetcher: async ct =>
+            {
+                // Simulate API delay
+                await Task.Delay(800, ct);
+
+                var start = (page.Value - 1) * PageSize;
+                return Enumerable.Range(start + 1, Math.Min(PageSize, TotalItems - start))
+                    .Select(i => $"Item {i}")
+                    .ToList();
+            },
+            options: new QueryOptions { KeepPrevious = true });
+
+        var itemList = items.Value?.Select(item =>
+            Layout.Horizontal().Gap(2)
+            | new Icon(Icons.FileText)
+            | Text.Literal(item)
+        ).ToArray() ?? [];
+
+        return Layout.Vertical().Gap(4)
+               // Header with status
+               | (Layout.Horizontal().Gap(2)
+                  | Text.H4($"Page {page.Value} of {totalPages}")
+                  | (items.IsPrevious
+                      ? new Badge("Loading new page...").Warning()
+                      : items.IsLoading
+                          ? new Badge("Loading...").Secondary()
+                          : new Badge("Ready").Outline()))
+
+               // Item list - always visible thanks to KeepPrevious
+               | (items.IsLoading && !items.IsPrevious
+                   ? Layout.Vertical().Gap(2)
+                     | new Skeleton().Height(Size.Units(4))
+                     | new Skeleton().Height(Size.Units(4))
+                     | new Skeleton().Height(Size.Units(4))
+                   : Layout.Vertical().Gap(2) | itemList)
+
+               // Pagination controls
+               | (Layout.Horizontal().Gap(2)
+                  | new Button("← Previous", _ => page.Set(p => p - 1))
+                        .Disabled(page.Value <= 1 || items.IsLoading)
+                        .Variant(ButtonVariant.Outline)
+                  | Text.Literal($"{page.Value} / {totalPages}")
+                  | new Button("Next →", _ => page.Set(p => p + 1))
+                        .Disabled(page.Value >= totalPages || items.IsLoading)
+                        .Variant(ButtonVariant.Outline))
+
+               | Text.Muted("Notice how the previous page's items remain visible while the next page loads.")
+            ;
+    }
+}
+
+public class PaginationComparisonExample : ViewBase
+{
+    public override object? Build()
+    {
+        var page = UseState(1);
+
+        return Layout.Vertical().Gap(4)
+               | (Layout.Horizontal().Gap(2)
+                  | new Button("← Prev", _ => page.Set(p => Math.Max(1, p - 1)))
+                        .Variant(ButtonVariant.Outline)
+                  | Text.Literal($"Page {page.Value}")
+                  | new Button("Next →", _ => page.Set(p => Math.Min(5, p + 1)))
+                        .Variant(ButtonVariant.Outline))
+               | (Layout.Grid(2).Gap(4)
+                  | new Card(new ComparisonPanelWithKeepPrevious(page.Value)).Title("With KeepPrevious")
+                  | new Card(new ComparisonPanelWithoutKeepPrevious(page.Value)).Title("Without KeepPrevious"))
+            ;
+    }
+}
+
+public class ComparisonPanelWithKeepPrevious(int page) : ViewBase
+{
+    public override object? Build()
+    {
+        var items = UseQuery(
+            key: $"comparison-keep-{page}",
+            fetcher: async ct =>
+            {
+                await Task.Delay(1000, ct);
+                return Enumerable.Range((page - 1) * 3 + 1, 3)
+                    .Select(i => $"Item {i}")
+                    .ToList();
+            },
+            options: new QueryOptions { KeepPrevious = true });
+
+        var content = items.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
+
+        return Layout.Vertical().Gap(2)
+               | (items.IsPrevious
+                   ? new Badge("Loading... (showing previous)").Warning()
+                   : items.IsLoading
+                       ? new Badge("Loading...").Secondary()
+                       : new Badge("Ready").Success())
+               | (items.IsLoading && !items.IsPrevious
+                   ? new Skeleton().Height(Size.Units(8))
+                   : Layout.Vertical() | content)
+            ;
+    }
+}
+
+public class ComparisonPanelWithoutKeepPrevious(int page) : ViewBase
+{
+    public override object? Build()
+    {
+        var items = UseQuery(
+            key: $"comparison-no-keep-{page}",
+            fetcher: async ct =>
+            {
+                await Task.Delay(1000, ct);
+                return Enumerable.Range((page - 1) * 3 + 1, 3)
+                    .Select(i => $"Item {i}")
+                    .ToList();
+            },
+            options: new QueryOptions { KeepPrevious = false });
+
+        var content = items.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
+
+        return Layout.Vertical().Gap(2)
+               | (items.IsLoading
+                   ? new Badge("Loading...").Secondary()
+                   : new Badge("Ready").Success())
+               | (items.IsLoading
+                   ? new Skeleton().Height(Size.Units(8))
+                   : Layout.Vertical() | content)
             ;
     }
 }
