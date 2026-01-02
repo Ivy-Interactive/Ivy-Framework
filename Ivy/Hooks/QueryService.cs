@@ -40,7 +40,7 @@ internal class QueryEntry
     public bool IsOrphaned => !HasSubscribers;
 }
 
-internal class QuerySubscription(QueryManager manager, string queryKey, Guid subscriberId) : IDisposable
+internal class QuerySubscription(QueryService service, string queryKey, Guid subscriberId) : IDisposable
 {
     private bool _disposed;
 
@@ -49,7 +49,7 @@ internal class QuerySubscription(QueryManager manager, string queryKey, Guid sub
         if (_disposed) return;
         _disposed = true;
 
-        manager.Unsubscribe(queryKey, subscriberId);
+        service.Unsubscribe(queryKey, subscriberId);
     }
 }
 
@@ -69,7 +69,7 @@ internal class ViewQueryDisposable(CancellationTokenSource cts) : IDisposable
         }
         catch (ObjectDisposedException)
         {
-            // CTS was already disposed by a subsequent effect run
+            // ignore
         }
     }
 }
@@ -78,45 +78,56 @@ public static class QueryManagerServiceExtensions
 {
     public static IServiceCollection AddQueryManager(
         this IServiceCollection services,
-        Action<QueryManagerOptions>? configure = null)
+        Action<QueryServiceOptions>? configure = null)
     {
         if (configure is not null)
         {
             services.Configure(configure);
         }
 
-        services.AddSingleton<QueryManager>();
+        services.AddSingleton<QueryService>();
 
         return services;
     }
 }
 
-public class QueryManager : IDisposable, IAsyncDisposable
+public class QueryService : IDisposable, IAsyncDisposable
 {
     private readonly ConcurrentDictionary<string, QueryEntry> _cache = new();
     private readonly ConcurrentDictionary<string, Task<object?>> _inflightRequests = new();
 
-    private readonly ILogger<QueryManager> _logger;
+    private readonly ILogger<QueryService> _logger;
     private readonly TimeProvider _timeProvider;
     private readonly Timer _evictionTimer;
-    private readonly QueryManagerOptions _options;
+    private readonly QueryServiceOptions _options;
 
     private bool _disposed;
 
-    public QueryManager(
-        ILogger<QueryManager> logger,
+    public QueryService(
+        ILogger<QueryService> logger,
         TimeProvider? timeProvider = null,
-        IOptions<QueryManagerOptions>? options = null)
+        IOptions<QueryServiceOptions>? options = null)
     {
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
-        _options = options?.Value ?? new QueryManagerOptions();
+        _options = options?.Value ?? new QueryServiceOptions();
 
         _evictionTimer = new Timer(
             callback: _ => EvictExpiredEntries(),
             state: null,
             dueTime: _options.EvictionInterval,
             period: _options.EvictionInterval);
+    }
+
+    public static string SerializeKey(object part)
+    {
+        return part switch
+        {
+            string s => s,
+            Type t => t.FullName ?? t.Name,
+            IFormattable f => f.ToString(null, System.Globalization.CultureInfo.InvariantCulture),
+            _ => System.Text.Json.JsonSerializer.Serialize(part)
+        };
     }
 
     /// <summary>
@@ -148,7 +159,7 @@ public class QueryManager : IDisposable, IAsyncDisposable
             ValueType = typeof(TValue),
             CreatedAt = now,
             LastAccessedAt = now,
-            Tags = options.Tags,
+            Tags = options.Tags.Select(SerializeKey).ToList(),
             Options = options,
             Fetcher = wrappedFetcher
         });
@@ -466,7 +477,7 @@ public class QueryManager : IDisposable, IAsyncDisposable
             entry.Error = null;
 
             // If there are subscribers, start a fresh fetch
-            if (entry.HasSubscribers && entry.Fetcher is not null)
+            if (entry is { HasSubscribers: true, Fetcher: not null })
             {
                 cts = new CancellationTokenSource();
                 entry.FetchCts = cts;
@@ -494,10 +505,11 @@ public class QueryManager : IDisposable, IAsyncDisposable
     /// <summary>
     /// Invalidate all query entries with the specified tag.
     /// </summary>
-    public void InvalidateByTag(string tag)
+    public void InvalidateByTag(object tag)
     {
+        var serializedTag = SerializeKey(tag);
         var keysToInvalidate = _cache
-            .Where(kvp => kvp.Value.Tags.Contains(tag))
+            .Where(kvp => kvp.Value.Tags.Contains(serializedTag))
             .Select(kvp => kvp.Key)
             .ToList();
 
@@ -510,10 +522,11 @@ public class QueryManager : IDisposable, IAsyncDisposable
     /// <summary>
     /// Revalidate all query entries with the specified tag.
     /// </summary>
-    public void RevalidateByTag(string tag)
+    public void RevalidateByTag(object tag)
     {
+        var serializedTag = SerializeKey(tag);
         var keysToInvalidate = _cache
-            .Where(kvp => kvp.Value.Tags.Contains(tag))
+            .Where(kvp => kvp.Value.Tags.Contains(serializedTag))
             .Select(kvp => kvp.Key)
             .ToList();
 

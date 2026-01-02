@@ -19,7 +19,7 @@ public class QueryApp : SampleBase
                    new Tab("Tags", new TagsTab()),
                    new Tab("Cache", new CacheTab()),
                    new Tab("Pagination", new PaginationTab()),
-                   new Tab("Pre-Populated Details", new PrePopulatedDetailsTab()),
+                   new Tab("Pre-Populated", new PrePopulatedTab()),
                    new Tab("Errors", new ErrorsTab()),
                    new Tab("Auto-Key", new AutoKeyTab())
                ).Variant(TabsVariant.Content);
@@ -117,7 +117,7 @@ public class TagInvalidationExample : ViewBase
 {
     public override object? Build()
     {
-        var queryManager = UseService<QueryManager>();
+        var queryManager = UseService<QueryService>();
 
         // Three separate queries, all tagged with "dashboard"
         var usersQuery = UseQuery(
@@ -501,12 +501,12 @@ public class AutoKeyedQueryExample : ViewBase
     }
 }
 
-public class PrePopulatedDetailsTab : ViewBase
+public class PrePopulatedTab : ViewBase
 {
     public override object? Build()
     {
         return Layout.Vertical()
-               | Text.H2("Pre-Populated Details")
+               | Text.H2("Pre-Populated")
                | new Card(new ProductListExample()).Title("Product List")
             ;
     }
@@ -775,7 +775,7 @@ public class CacheClearExample : ViewBase
 {
     public override object? Build()
     {
-        var queryManager = UseService<QueryManager>();
+        var queryManager = UseService<QueryService>();
 
         // Multiple queries with different tags
         var usersQuery = UseQuery(

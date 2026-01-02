@@ -19,7 +19,7 @@ public record QueryOptions
 {
     public TimeSpan? Expiration { get; init; } = null;
     public QueryScope Scope { get; init; } = QueryScope.Server;
-    public IReadOnlyList<string> Tags { get; init; } = [];
+    public IReadOnlyList<object> Tags { get; init; } = [];
 
     /// <summary>
     /// Whether to fetch data on initial render. Default: true.
@@ -37,7 +37,7 @@ public record QueryOptions
     public static implicit operator QueryOptions(QueryScope scope) => new() { Scope = scope };
 }
 
-public record QueryManagerOptions
+public record QueryServiceOptions
 {
     /// <summary>
     /// How often to scan for expired entries. Default: 60 seconds.
@@ -135,17 +135,14 @@ public static class UseQueryExtensions
         if (options.Scope == QueryScope.User)
         {
             throw new NotImplementedException("User scope is not implemented yet. We need to implement GetUserId() in IAuthService.");
-            //var userId = auth?.GetUserId()
-            //if (userId is not null)
-            //key = (userId, key);
+            // var userId = auth?.GetUserId()
+            // if (userId is not null)
+            // {
+            //     key = (userId, key);
+            // }
         }
 
-        return key switch
-        {
-            string s => s,
-            IFormattable f => f.ToString(null, System.Globalization.CultureInfo.InvariantCulture),
-            _ => System.Text.Json.JsonSerializer.Serialize(key)
-        };
+        return QueryService.SerializeKey(key);
     }
 
     /// <summary>
@@ -171,7 +168,7 @@ public static class UseQueryExtensions
 
         // Server-scoped: always call hooks in the same order (rules of hooks)
         var subscriberId = context.UseRef(Guid.NewGuid);
-        var queryManager = context.UseService<QueryManager>();
+        var queryManager = context.UseService<QueryService>();
         var queryKey = key is not null ? context.UseQueryKey(key, opts) : "";
 
         // Track subscription and previous key to manage subscription lifecycle
@@ -410,7 +407,7 @@ public static class UseQueryExtensions
         if (opts.Scope == QueryScope.View)
             throw new ArgumentException("UseMutation does not support View scope.", nameof(options));
 
-        var queryManager = context.UseService<QueryManager>();
+        var queryManager = context.UseService<QueryService>();
         var queryKey = context.UseQueryKey(key, opts);
 
         return new QueryMutator(
@@ -430,7 +427,7 @@ public static class UseQueryExtensions
         if (opts.Scope == QueryScope.View)
             throw new ArgumentException("UseMutation does not support 'View' QueryScope.", nameof(options));
 
-        var queryManager = context.UseService<QueryManager>();
+        var queryManager = context.UseService<QueryService>();
         var queryKey = context.UseQueryKey(key, opts);
 
         return new QueryMutator<TValue>(
