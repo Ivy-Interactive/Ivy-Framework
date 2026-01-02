@@ -649,7 +649,7 @@ public class PaginationExample : ViewBase
         var page = UseState(1);
         var totalPages = (int)Math.Ceiling((double)TotalItems / PageSize);
 
-        var items = UseQuery(
+        var itemsQuery = UseQuery(
             key: $"paginated-items?page={page.Value}",
             fetcher: async ct =>
             {
@@ -663,7 +663,7 @@ public class PaginationExample : ViewBase
             },
             options: new QueryOptions { KeepPrevious = true });
 
-        var itemList = items.Value?.Select(item =>
+        var itemList = itemsQuery.Value?.Select(item =>
             Layout.Horizontal().Gap(2)
             | new Icon(Icons.FileText)
             | Text.Literal(item)
@@ -671,30 +671,20 @@ public class PaginationExample : ViewBase
 
         return Layout.Vertical().Gap(4)
                // Header with status
-               | (Layout.Horizontal().Gap(2)
+               | (Layout.Vertical()
                   | Text.H4($"Page {page.Value} of {totalPages}")
-                  | (items.IsPrevious
-                      ? new Badge("Loading new page...").Warning()
-                      : items.IsLoading
-                          ? new Badge("Loading...").Secondary()
-                          : new Badge("Ready").Outline()))
+                  | itemsQuery)
 
-               // Item list - always visible thanks to KeepPrevious
-               | (items.IsLoading && !items.IsPrevious
-                   ? Layout.Vertical().Gap(2)
-                     | new Skeleton().Height(Size.Units(4))
-                     | new Skeleton().Height(Size.Units(4))
-                     | new Skeleton().Height(Size.Units(4))
-                   : Layout.Vertical().Gap(2) | itemList)
+               | itemList
 
                // Pagination controls
                | (Layout.Horizontal().Gap(2)
                   | new Button("← Previous", _ => page.Set(p => p - 1))
-                        .Disabled(page.Value <= 1 || items.IsLoading)
+                        .Disabled(page.Value <= 1 || itemsQuery.IsLoading)
                         .Variant(ButtonVariant.Outline)
                   | Text.Literal($"{page.Value} / {totalPages}")
                   | new Button("Next →", _ => page.Set(p => p + 1))
-                        .Disabled(page.Value >= totalPages || items.IsLoading)
+                        .Disabled(page.Value >= totalPages || itemsQuery.IsLoading)
                         .Variant(ButtonVariant.Outline))
 
                | Text.Muted("Notice how the previous page's items remain visible while the next page loads.")
@@ -726,8 +716,7 @@ public class ComparisonPanelWithKeepPrevious(int page) : ViewBase
 {
     public override object? Build()
     {
-        // Short expiration so revisiting a page shows stale-while-revalidate
-        var items = UseQuery(
+        var itemsQuery = UseQuery(
             key: $"comparison-keep-{page}",
             fetcher: async ct =>
             {
@@ -736,21 +725,13 @@ public class ComparisonPanelWithKeepPrevious(int page) : ViewBase
                     .Select(i => $"Item {i}")
                     .ToList();
             },
-            options: new QueryOptions { KeepPrevious = true, Expiration = TimeSpan.FromSeconds(2) });
+            options: new QueryOptions { KeepPrevious = true });
 
-        var content = items.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
+        var content = itemsQuery.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
 
         return Layout.Vertical().Gap(2)
-               | (items.IsPrevious
-                   ? new Badge("Loading... (showing previous)").Warning()
-                   : items.IsLoading
-                       ? new Badge("Loading...").Secondary()
-                       : items.IsValidating
-                           ? new Badge("Revalidating...").Info()
-                           : new Badge("Ready").Success())
-               | (items is { IsLoading: true, IsPrevious: false }
-                   ? new Skeleton().Height(Size.Units(8))
-                   : Layout.Vertical() | content)
+               | itemsQuery
+               | content
             ;
     }
 }
@@ -759,8 +740,7 @@ public class ComparisonPanelWithoutKeepPrevious(int page) : ViewBase
 {
     public override object? Build()
     {
-        // Short expiration so revisiting a page shows stale-while-revalidate
-        var items = UseQuery(
+        var itemsQuery = UseQuery(
             key: $"comparison-no-keep-{page}",
             fetcher: async ct =>
             {
@@ -769,20 +749,13 @@ public class ComparisonPanelWithoutKeepPrevious(int page) : ViewBase
                     .Select(i => $"Item {i}")
                     .ToList();
             },
-            options: new QueryOptions { KeepPrevious = false, Expiration = TimeSpan.FromSeconds(2) });
+            options: new QueryOptions { KeepPrevious = false });
 
-        var content = items.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
+        var content = itemsQuery.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
 
         return Layout.Vertical().Gap(2)
-               | (items.IsLoading
-                   ? new Badge("Loading...").Secondary()
-                   : items.IsValidating
-                       ? new Badge("Revalidating...").Info()
-                       : new Badge("Ready").Success())
-               | (items.IsLoading
-                   ? new Skeleton().Height(Size.Units(8))
-                   : Layout.Vertical() | content)
-            ;
+               | itemsQuery
+               | content;
     }
 }
 

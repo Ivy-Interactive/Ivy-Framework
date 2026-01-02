@@ -76,6 +76,11 @@ public class WidgetTreeNode(string id, int index, TreePath parentTreePath, Widge
         return _previousSerialization = this.GetWidgetTree()?.Serialize();
     }
 
+    public void InvalidateSerializationCache()
+    {
+        _previousSerialization = null;
+    }
+
     public int[] GetWidgetTreeIndices()
     {
         //The top of the tree is always a view

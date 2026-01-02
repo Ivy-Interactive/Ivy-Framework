@@ -230,6 +230,9 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                 else
                 {
                     parent.Children[node.Index] = partial;
+
+                    // Invalidate serialization cache for all ancestors since their child changed
+                    InvalidateAncestorCaches(parentId);
                 }
             }
             else
@@ -534,6 +537,20 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             {
                 DestroyRemovedNodes(previousChild, newChild, skipViewId);
             }
+        }
+    }
+
+    private void InvalidateAncestorCaches(string nodeId)
+    {
+        // Walk up the tree and invalidate serialization cache for all ancestors
+        var currentId = nodeId;
+        while (currentId != null)
+        {
+            if (_nodes.TryGetValue(currentId, out var node))
+            {
+                node.InvalidateSerializationCache();
+            }
+            _parents.TryGetValue(currentId, out currentId);
         }
     }
 

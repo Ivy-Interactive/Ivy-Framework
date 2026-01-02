@@ -1,6 +1,7 @@
 using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
 using Ivy.Core.Hooks;
+using Ivy.Views;
 
 namespace Ivy.Hooks;
 
@@ -89,6 +90,24 @@ public record QueryResult<TValue>(
     bool IsPrevious,
     QueryMutator<TValue> Mutator,
     Exception? Error = null);
+
+public static class QueryResultExtensions
+{
+    //Debug helper to visualize QueryResult state
+    public static object? Build<TValue>(this QueryResult<TValue> qr, IViewContext _)
+    {
+        var states = Layout.Horizontal()
+               | new Badge("IsLoading").Variant(qr.IsLoading ? BadgeVariant.Primary : BadgeVariant.Outline)
+               | new Badge("IsValidating").Variant(qr.IsValidating ? BadgeVariant.Primary : BadgeVariant.Outline)
+               | new Badge("IsPrevious").Variant(qr.IsPrevious ? BadgeVariant.Primary : BadgeVariant.Outline)
+            ;
+        return Layout.Vertical()
+               | states
+               | qr.Error
+            ;
+    }
+}
+
 
 public static class UseQueryExtensions
 {

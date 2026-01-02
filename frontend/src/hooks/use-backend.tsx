@@ -115,71 +115,81 @@ const escapeXml = (str: string) => {
     .replace(/'/g, '&apos;');
 };
 
+function findTargetByIndices(
+  root: WidgetNode,
+  indices: number[]
+): { parent: WidgetNode; index: number } | null {
+  let parent = root;
+
+  for (let i = 0; i < indices.length - 1; i++) {
+    const index = indices[i];
+
+    if (!parent.children) {
+      logger.error('No children found in parent', { parent });
+      return null;
+    }
+    if (index >= parent.children.length) {
+      logger.error('Index out of bounds', {
+        index,
+        childrenLength: parent.children.length,
+        parent,
+      });
+      return null;
+    }
+    const nextParent = parent.children[index];
+    if (!nextParent) {
+      logger.error('Child at index is null/undefined', {
+        index,
+        childrenLength: parent.children.length,
+        parentType: parent.type,
+        parentId: parent.id,
+      });
+      return null;
+    }
+    parent = nextParent;
+  }
+
+  const finalIndex = indices[indices.length - 1];
+  if (!parent.children) {
+    logger.error('No children found in parent', { parent });
+    return null;
+  }
+
+  return { parent, index: finalIndex };
+}
+
 // Pure function - no side effects, safe for React Strict Mode double-invocation
 function applyUpdateMessage(
   tree: WidgetNode,
   updates: UpdateMessage
 ): WidgetNode | null {
-  const newTree = cloneDeep(tree);
+  let newTree = cloneDeep(tree);
 
   for (const update of updates) {
-    let parent = newTree;
+    const firstPatch = update.patch[0];
+    const isFullReplacement =
+      update.patch.length === 1 &&
+      firstPatch.op === 'replace' &&
+      firstPatch.path === '';
 
-    if (!parent) {
-      logger.error('No parent found in applyUpdateMessage', { update });
-      continue;
-    }
+    if (isFullReplacement) {
+      const newValue = (firstPatch as { value: unknown }).value as WidgetNode;
 
-    if (update.indices.length === 0) {
-      applyPatch(parent, update.patch);
+      if (update.indices.length === 0) {
+        newTree = newValue;
+      } else {
+        const result = findTargetByIndices(newTree, update.indices);
+        if (!result) continue;
+        result.parent.children![result.index] = newValue;
+      }
     } else {
-      update.indices.forEach((index, i) => {
-        if (i === update.indices.length - 1) {
-          if (!parent.children) {
-            logger.error('No children found in parent', { parent });
-            return;
-          }
-          const target = parent.children[index];
-          if (
-            update.patch.length === 1 &&
-            update.patch[0].op === 'replace' &&
-            update.patch[0].path === ''
-          ) {
-            // Special case: full replacement of the target node
-            parent.children[index] = update.patch[0].value as WidgetNode;
-          } else {
-            applyPatch(target, update.patch);
-          }
-        } else {
-          if (!parent) {
-            logger.error('No parent found in applyUpdateMessage', { update });
-            return;
-          }
-          if (!parent.children) {
-            logger.error('No children found in parent', { parent });
-            return;
-          }
-          if (index >= parent.children.length) {
-            logger.error('Index out of bounds', {
-              index,
-              childrenLength: parent.children.length,
-              parent,
-            });
-            return;
-          }
-          const nextParent = parent.children[index];
-          if (!nextParent) {
-            logger.error('Child at index is null/undefined', {
-              index,
-              childrenLength: parent.children.length,
-              parentType: parent.type,
-              parentId: parent.id,
-            });
-            return;
-          }
-          parent = nextParent;
-        }
-      });
+      if (update.indices.length === 0) {
+        applyPatch(newTree, update.patch);
+      } else {
+        const result = findTargetByIndices(newTree, update.indices);
+        if (!result) continue;
+        applyPatch(result.parent.children![result.index], update.patch);
+      }
     }
 
     if (update.treeHash) {
