@@ -726,6 +726,7 @@ public class ComparisonPanelWithKeepPrevious(int page) : ViewBase
 {
     public override object? Build()
     {
+        // Short expiration so revisiting a page shows stale-while-revalidate
         var items = UseQuery(
             key: $"comparison-keep-{page}",
             fetcher: async ct =>
@@ -735,7 +736,7 @@ public class ComparisonPanelWithKeepPrevious(int page) : ViewBase
                     .Select(i => $"Item {i}")
                     .ToList();
             },
-            options: new QueryOptions { KeepPrevious = true });
+            options: new QueryOptions { KeepPrevious = true, Expiration = TimeSpan.FromSeconds(2) });
 
         var content = items.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
 
@@ -744,8 +745,10 @@ public class ComparisonPanelWithKeepPrevious(int page) : ViewBase
                    ? new Badge("Loading... (showing previous)").Warning()
                    : items.IsLoading
                        ? new Badge("Loading...").Secondary()
-                       : new Badge("Ready").Success())
-               | (items.IsLoading && !items.IsPrevious
+                       : items.IsValidating
+                           ? new Badge("Revalidating...").Info()
+                           : new Badge("Ready").Success())
+               | (items is { IsLoading: true, IsPrevious: false }
                    ? new Skeleton().Height(Size.Units(8))
                    : Layout.Vertical() | content)
             ;
@@ -756,6 +759,7 @@ public class ComparisonPanelWithoutKeepPrevious(int page) : ViewBase
 {
     public override object? Build()
     {
+        // Short expiration so revisiting a page shows stale-while-revalidate
         var items = UseQuery(
             key: $"comparison-no-keep-{page}",
             fetcher: async ct =>
@@ -765,14 +769,16 @@ public class ComparisonPanelWithoutKeepPrevious(int page) : ViewBase
                     .Select(i => $"Item {i}")
                     .ToList();
             },
-            options: new QueryOptions { KeepPrevious = false });
+            options: new QueryOptions { KeepPrevious = false, Expiration = TimeSpan.FromSeconds(2) });
 
         var content = items.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
 
         return Layout.Vertical().Gap(2)
                | (items.IsLoading
                    ? new Badge("Loading...").Secondary()
-                   : new Badge("Ready").Success())
+                   : items.IsValidating
+                       ? new Badge("Revalidating...").Info()
+                       : new Badge("Ready").Success())
                | (items.IsLoading
                    ? new Skeleton().Height(Size.Units(8))
                    : Layout.Vertical() | content)
