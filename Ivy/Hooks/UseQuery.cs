@@ -23,6 +23,12 @@ public record QueryOptions
     /// </summary>
     public bool RevalidateOnInit { get; init; } = true;
 
+    /// <summary>
+    /// When true, keeps showing previous data while fetching with a new key.
+    /// Ideal for pagination to avoid loading flicker. Default: false.
+    /// </summary>
+    public bool KeepPreviousData { get; init; } = false;
+
     public static implicit operator QueryOptions(QueryScope scope) => new() { Scope = scope };
 }
 
@@ -78,7 +84,8 @@ public record QueryResult<TValue>(
     bool IsLoading,
     bool IsValidating,
     QueryMutator<TValue> Mutator,
-    Exception? Error = null);
+    Exception? Error = null,
+    bool IsPreviousData = false);
 
 public static class UseQueryExtensions
 {
@@ -149,10 +156,23 @@ public static class UseQueryExtensions
             // Subscribe if key is now non-null
             if (key is not null)
             {
-                // Set loading state
-                if (!resultState.Value.IsLoading && !shouldSkipInitialFetch)
+                // Set loading state - keep previous data if configured
+                if (!shouldSkipInitialFetch)
                 {
-                    resultState.Set(resultState.Value with { Mutator = mutator, IsLoading = true });
+                    if (opts.KeepPreviousData && resultState.Value.Value is not null)
+                    {
+                        // Keep showing previous data while loading new data
+                        resultState.Set(resultState.Value with
+                        {
+                            Mutator = mutator,
+                            IsLoading = true,
+                            IsPreviousData = true
+                        });
+                    }
+                    else if (!resultState.Value.IsLoading)
+                    {
+                        resultState.Set(resultState.Value with { Mutator = mutator, IsLoading = true });
+                    }
                 }
                 subscriptionRef.Value = queryManager.Subscribe(resultState, subscriberId.Value, key, queryKey, fetcher, opts, initialValue);
             }
@@ -257,8 +277,18 @@ public static class UseQueryExtensions
         {
             hasFetchedRef.Value = true;
 
-            // Set loading state if not already
-            if (!resultState.Value.IsLoading && resultState.Value.Value is null)
+            // Set loading state - keep previous data if configured
+            if (keyChanged && opts.KeepPreviousData && resultState.Value.Value is not null)
+            {
+                // Keep showing previous data while loading new data
+                resultState.Set(resultState.Value with
+                {
+                    Mutator = mutator,
+                    IsLoading = true,
+                    IsPreviousData = true
+                });
+            }
+            else if (!resultState.Value.IsLoading && resultState.Value.Value is null)
             {
                 resultState.Set(resultState.Value with { Mutator = mutator, IsLoading = true });
             }
@@ -277,7 +307,7 @@ public static class UseQueryExtensions
 
                     if (!token.IsCancellationRequested && fetchVersionRef.Value == myVersion)
                     {
-                        resultState.Set(new QueryResult<TValue>(value, false, false, mutator));
+                        resultState.Set(new QueryResult<TValue>(value, false, false, mutator, Error: null, IsPreviousData: false));
                     }
                 }
                 catch (OperationCanceledException)
@@ -292,7 +322,7 @@ public static class UseQueryExtensions
                 {
                     if (!token.IsCancellationRequested && fetchVersionRef.Value == myVersion)
                     {
-                        resultState.Set(new QueryResult<TValue>(resultState.Value.Value, false, false, mutator, ex));
+                        resultState.Set(new QueryResult<TValue>(resultState.Value.Value, false, false, mutator, ex, IsPreviousData: false));
                     }
                 }
             });

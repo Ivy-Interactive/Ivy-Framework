@@ -171,13 +171,16 @@ public class QueryManager : IDisposable, IAsyncDisposable
             // Only loading if fetching, or empty with no error (initial state)
             var isLoading = state is QueryEntryState.Fetching || (state is QueryEntryState.Empty && error is null);
             var isValidating = state == QueryEntryState.Revalidating;
+            // Clear IsPreviousData when we have fresh data
+            var isPreviousData = state != QueryEntryState.Fresh && resultState.Value.IsPreviousData;
 
             resultState.Set(new QueryResult<TValue>(
                 value is TValue typed ? typed : default,
                 isLoading,
                 isValidating,
                 mutator,
-                error));
+                error,
+                isPreviousData));
         });
 
         // Register subscriber
