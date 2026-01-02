@@ -104,14 +104,14 @@ public static class QueryResultExtensions
 
 public static class UseQueryExtensions
 {
-    private static string UseQueryKey(this IViewContext context, object key, QueryOptions options)
+    private static object UseScopedQueryKey(this IViewContext context, object key, QueryOptions options)
     {
         var appContext = context.UseService<Ivy.Apps.AppContext>();
         //var auth = context.UseService<IAuthService?>();
 
         if (options.Scope == QueryScope.View)
         {
-            throw new InvalidOperationException("UseQueryKey cannot be used with View scope.");
+            throw new InvalidOperationException("UseScopedQueryKey cannot be used with View scope.");
         }
 
         if (options.Scope == QueryScope.App)
@@ -134,7 +134,7 @@ public static class UseQueryExtensions
             // }
         }
 
-        return QueryService.SerializeKey(key);
+        return key;
     }
 
     /// <summary>
@@ -161,11 +161,12 @@ public static class UseQueryExtensions
         // Server-scoped: always call hooks in the same order (rules of hooks)
         var subscriberId = context.UseRef(Guid.NewGuid);
         var queryManager = context.UseService<QueryService>();
-        var queryKey = key is not null ? context.UseQueryKey(key, opts) : "";
+        var scopedKey = key is not null ? context.UseScopedQueryKey(key, opts) : null;
+        var serializedScopedKey = scopedKey is not null ? QueryService.SerializeKey(scopedKey) : "";
 
         // Track subscription and previous key to manage subscription lifecycle
         var subscriptionRef = context.UseRef<IDisposable?>(() => null);
-        var prevQueryKeyRef = context.UseRef(() => key is not null ? queryKey : (string?)null);
+        var prevQueryKeyRef = context.UseRef(() => key is not null ? serializedScopedKey : (string?)null);
         var hasInitialValueRef = context.UseRef(() => initialValue is not null);
 
         var emptyMutator = new QueryMutator<TValue, TKey>(
@@ -177,9 +178,9 @@ public static class UseQueryExtensions
         var mutator = key is not null
             ? new QueryMutator<TValue, TKey>(
                 key,
-                (newValue, revalidate) => queryManager.Mutate<TValue>(queryKey, newValue, revalidate),
-                () => queryManager.Revalidate(queryKey),
-                () => queryManager.Invalidate(queryKey))
+                (newValue, revalidate) => queryManager.Mutate<TValue>(serializedScopedKey, newValue, revalidate),
+                () => queryManager.Revalidate(serializedScopedKey),
+                () => queryManager.Invalidate(serializedScopedKey))
             : emptyMutator;
 
         // Determine initial loading state based on RevalidateOnInit
@@ -191,7 +192,7 @@ public static class UseQueryExtensions
         );
 
         // Manage subscription based on key changes
-        var currentQueryKey = key is not null ? queryKey : (string?)null;
+        var currentQueryKey = key is not null ? serializedScopedKey : (string?)null;
         var keyChanged = prevQueryKeyRef.Value != currentQueryKey;
 
         if (keyChanged)
@@ -221,7 +222,7 @@ public static class UseQueryExtensions
                         resultState.Set(resultState.Value with { Mutator = mutator, IsLoading = true });
                     }
                 }
-                subscriptionRef.Value = queryManager.Subscribe(resultState, subscriberId.Value, key, queryKey, fetcher, opts, initialValue);
+                subscriptionRef.Value = queryManager.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, initialValue);
             }
 
             prevQueryKeyRef.Value = currentQueryKey;
@@ -229,7 +230,7 @@ public static class UseQueryExtensions
         else if (key is not null && subscriptionRef.Value is null)
         {
             // First render with non-null key - always subscribe so entry exists for mutations
-            subscriptionRef.Value = queryManager.Subscribe(resultState, subscriberId.Value, key, queryKey, fetcher, opts, initialValue);
+            subscriptionRef.Value = queryManager.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, initialValue);
         }
 
         // Cleanup on unmount
@@ -412,11 +413,12 @@ public static class UseQueryExtensions
             throw new ArgumentException("UseMutation does not support View scope.", nameof(options));
 
         var queryManager = context.UseService<QueryService>();
-        var queryKey = context.UseQueryKey(key, opts);
+        var scopedKey = context.UseScopedQueryKey(key, opts);
+        var serializedScopedKey = QueryService.SerializeKey(scopedKey);
 
         return new QueryMutator(
-            () => queryManager.Revalidate(queryKey),
-            () => queryManager.Invalidate(queryKey));
+            () => queryManager.Revalidate(serializedScopedKey),
+            () => queryManager.Invalidate(serializedScopedKey));
     }
 
     public static QueryMutator<TValue, TKey> UseMutation<TValue, TKey>(this IViewContext context, TKey key, QueryOptions? options = null)
@@ -432,13 +434,14 @@ public static class UseQueryExtensions
             throw new ArgumentException("UseMutation does not support 'View' QueryScope.", nameof(options));
 
         var queryManager = context.UseService<QueryService>();
-        var queryKey = context.UseQueryKey(key, opts);
+        var scopedKey = context.UseScopedQueryKey(key, opts);
+        var serializedScopedKey = QueryService.SerializeKey(scopedKey);
 
         return new QueryMutator<TValue, TKey>(
             key,
-            (newValue, revalidate) => queryManager.Mutate<TValue>(queryKey, newValue, revalidate),
-            () => queryManager.Revalidate(queryKey),
-            () => queryManager.Invalidate(queryKey));
+            (newValue, revalidate) => queryManager.Mutate<TValue>(serializedScopedKey, newValue, revalidate),
+            () => queryManager.Revalidate(serializedScopedKey),
+            () => queryManager.Invalidate(serializedScopedKey));
     }
 
     public static QueryResult<TValue, TKey> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,

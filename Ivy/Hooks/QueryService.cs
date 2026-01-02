@@ -21,7 +21,9 @@ internal record QuerySubscriber(
 
 internal class QueryEntry
 {
-    public required string Key { get; init; }
+    public required object Key { get; init; }
+    public required object ScopedKey { get; init; }
+    public required string SerializedScopedKey { get; init; }
     public required Type ValueType { get; init; }
     public object? Value { get; set; }
     public Exception? Error { get; set; }
@@ -137,8 +139,9 @@ public class QueryService : IDisposable, IAsyncDisposable
     public IDisposable Subscribe<TValue, TKey>(
         IState<QueryResult<TValue, TKey>> resultState,
         Guid subscriberId,
-        TKey fetcherKey,
-        string queryKey,
+        TKey key,
+        object scopedKey,
+        string serializedScopedKey,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
         QueryOptions options,
         TValue? initialValue = default)
@@ -148,14 +151,16 @@ public class QueryService : IDisposable, IAsyncDisposable
         // Wrap the typed fetcher to store in entry
         Func<CancellationToken, Task<object?>> wrappedFetcher = async ct =>
         {
-            var result = await fetcher(fetcherKey, ct);
+            var result = await fetcher(key, ct);
             return result;
         };
 
         // Get or create entry
-        var entry = _cache.GetOrAdd(queryKey, _ => new QueryEntry
+        var entry = _cache.GetOrAdd(serializedScopedKey, _ => new QueryEntry
         {
-            Key = queryKey,
+            Key = key!,
+            ScopedKey = scopedKey,
+            SerializedScopedKey = serializedScopedKey,
             ValueType = typeof(TValue),
             CreatedAt = now,
             LastAccessedAt = now,
@@ -205,7 +210,7 @@ public class QueryService : IDisposable, IAsyncDisposable
         // Handle subscription based on current state
         _ = HandleSubscriptionAsync(entry, options);
 
-        return new QuerySubscription(this, queryKey, subscriberId);
+        return new QuerySubscription(this, serializedScopedKey, subscriberId);
     }
 
     private async Task HandleSubscriptionAsync(QueryEntry entry, QueryOptions options)
@@ -293,7 +298,7 @@ public class QueryService : IDisposable, IAsyncDisposable
         try
         {
             // Deduplicate: if already in flight, await existing
-            var fetchTask = _inflightRequests.GetOrAdd(entry.Key, _ => entry.Fetcher(cancellationToken));
+            var fetchTask = _inflightRequests.GetOrAdd(entry.SerializedScopedKey, _ => entry.Fetcher(cancellationToken));
 
             var value = await fetchTask;
 
@@ -313,12 +318,12 @@ public class QueryService : IDisposable, IAsyncDisposable
             finally
             {
                 entry.Lock.Release();
-                _inflightRequests.TryRemove(entry.Key, out _);
+                _inflightRequests.TryRemove(entry.SerializedScopedKey, out _);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            _logger.LogDebug("Fetch cancelled for query key {Key}: no subscribers", entry.Key);
+            _logger.LogDebug("Fetch cancelled for query key {Key}: no subscribers", entry.SerializedScopedKey);
 
             await entry.Lock.WaitAsync(CancellationToken.None);
             try
@@ -333,12 +338,12 @@ public class QueryService : IDisposable, IAsyncDisposable
             finally
             {
                 entry.Lock.Release();
-                _inflightRequests.TryRemove(entry.Key, out _);
+                _inflightRequests.TryRemove(entry.SerializedScopedKey, out _);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Fetch failed for query key {Key}", entry.Key);
+            _logger.LogDebug(ex, "Fetch failed for query key {Key}", entry.SerializedScopedKey);
 
             await entry.Lock.WaitAsync(CancellationToken.None);
             try
@@ -353,7 +358,7 @@ public class QueryService : IDisposable, IAsyncDisposable
             finally
             {
                 entry.Lock.Release();
-                _inflightRequests.TryRemove(entry.Key, out _);
+                _inflightRequests.TryRemove(entry.SerializedScopedKey, out _);
             }
         }
     }
@@ -425,7 +430,7 @@ public class QueryService : IDisposable, IAsyncDisposable
     /// <summary>
     /// Force revalidation of a query entry.
     /// </summary>
-    public void Revalidate(string queryKey)
+    internal void Revalidate(string queryKey)
     {
         if (!_cache.TryGetValue(queryKey, out var entry))
             return;
@@ -460,7 +465,7 @@ public class QueryService : IDisposable, IAsyncDisposable
     /// <summary>
     /// Invalidate a specific query entry. Clears the cached value and triggers a re-fetch if there are subscribers.
     /// </summary>
-    public void Invalidate(string queryKey)
+    internal void Invalidate(string queryKey)
     {
         if (!_cache.TryGetValue(queryKey, out var entry))
             return;
