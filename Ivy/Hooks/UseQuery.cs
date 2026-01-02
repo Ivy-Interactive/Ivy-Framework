@@ -1,5 +1,6 @@
 using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
+using Ivy.Auth;
 using Ivy.Core.Hooks;
 using Ivy.Views;
 
@@ -113,7 +114,32 @@ public static class UseQueryExtensions
 {
     private static string UseQueryKey(this IViewContext context, object key, QueryOptions options)
     {
-        //todo: when we have more scopes we'll need to factor them in here
+        var appContext = context.UseService<Ivy.Apps.AppContext>();
+        //var auth = context.UseService<IAuthService?>();
+
+        if (options.Scope == QueryScope.View)
+        {
+            throw new InvalidOperationException("UseQueryKey cannot be used with View scope.");
+        }
+
+        if (options.Scope == QueryScope.App)
+        {
+            key = (appContext.ConnectionId, key);
+        }
+
+        if (options.Scope == QueryScope.Device)
+        {
+            key = (appContext.MachineId, key);
+        }
+
+        if (options.Scope == QueryScope.User)
+        {
+            throw new NotImplementedException("User scope is not implemented yet. We need to implement GetUserId() in IAuthService.");
+            //var userId = auth?.GetUserId()
+            //if (userId is not null)
+            //key = (userId, key);
+        }
+
         return key switch
         {
             string s => s,
@@ -338,11 +364,11 @@ public static class UseQueryExtensions
                 }
                 catch (OperationCanceledException)
                 {
-                    // Cancelled - ignore
+                    // ignore
                 }
                 catch (ObjectDisposedException)
                 {
-                    // CTS was disposed - ignore
+                    // ignore
                 }
                 catch (Exception ex)
                 {
@@ -377,7 +403,13 @@ public static class UseQueryExtensions
     {
         if (key is null) throw new ArgumentNullException(nameof(key));
         var opts = options ?? new QueryOptions();
-        if (opts.Scope == QueryScope.View) throw new ArgumentException("UseMutation does not support View scope.", nameof(options));
+
+        var scopeRef = context.UseRef(() => opts.Scope);
+        if (scopeRef.Value != opts.Scope)
+            throw new InvalidOperationException("QueryScope cannot change between renders.");
+        if (opts.Scope == QueryScope.View)
+            throw new ArgumentException("UseMutation does not support View scope.", nameof(options));
+
         var queryManager = context.UseService<QueryManager>();
         var queryKey = context.UseQueryKey(key, opts);
 
@@ -391,7 +423,13 @@ public static class UseQueryExtensions
     {
         if (key is null) throw new ArgumentNullException(nameof(key));
         var opts = options ?? new QueryOptions();
-        if (opts.Scope == QueryScope.View) throw new ArgumentException("UseMutation does not support 'View' QueryScope.", nameof(options));
+
+        var scopeRef = context.UseRef(() => opts.Scope);
+        if (scopeRef.Value != opts.Scope)
+            throw new InvalidOperationException("QueryScope cannot change between renders.");
+        if (opts.Scope == QueryScope.View)
+            throw new ArgumentException("UseMutation does not support 'View' QueryScope.", nameof(options));
+
         var queryManager = context.UseService<QueryManager>();
         var queryKey = context.UseQueryKey(key, opts);
 
