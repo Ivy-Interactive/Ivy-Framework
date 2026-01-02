@@ -237,8 +237,8 @@ public class GridLineDemo : ViewBase
             new { Month = "April", Desktop = 186, Mobile = 100},
             new { Month = "May", Desktop = 325, Mobile = 200}
         };
-        var height = UseState(20);
-        var width  = UseState(100);
+        var height = UseState(50);
+        var width  = UseState(50);
         
         return Layout.Vertical()
                  | new LineChart(data, "Desktop", "Month")
@@ -246,25 +246,27 @@ public class GridLineDemo : ViewBase
                         .Height(height.Value)
                         .Width(width.Value)
                        .Legend()
-                 | (Layout.Horizontal()
-                     | Text.Large("Height")
-                     | new NumberInput<int>(
+                 | new NumberInput<int>(
                            height.Value,
                             e => {
                                  height.Set(e); 
                             })
-                     .Min(20)
-                     .Variant(NumberInputs.Slider)) 
-                 | (Layout.Horizontal()
-                     | Text.Large("Width")
-                     | new NumberInput<int>(
+                     .Min(50)
+                     .Max(100)
+                     .Variant(NumberInputs.Slider)
+                     .WithField()
+                     .Label("Height")
+                 | new NumberInput<int>(
                            width.Value,
                             e => {
                                  width.Set(e); 
                             })
-                       .Step(1)
-                     .Max(400)
-                     .Variant(NumberInputs.Slider));
+                     .Step(1)
+                     .Min(0)
+                     .Max(190)
+                     .Variant(NumberInputs.Slider)
+                     .WithField()
+                     .Label("Width");
     }
 }
 ```
