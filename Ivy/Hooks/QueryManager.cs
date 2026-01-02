@@ -174,8 +174,13 @@ public class QueryManager : IDisposable, IAsyncDisposable
             // Clear IsPrevious when we have fresh data
             var isPrevious = state != QueryEntryState.Fresh && resultState.Value.IsPrevious;
 
+            // When IsPrevious is set and we're still loading, preserve the previous value
+            var resultValue = value is TValue typed
+                ? typed
+                : isPrevious ? resultState.Value.Value : default;
+
             resultState.Set(new QueryResult<TValue>(
-                value is TValue typed ? typed : default,
+                resultValue,
                 isLoading,
                 isValidating,
                 isPrevious,
