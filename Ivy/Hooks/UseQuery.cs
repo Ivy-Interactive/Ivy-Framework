@@ -12,7 +12,7 @@ public enum QueryScope
     View,
     App,
     Device,
-    User
+    //User
 }
 
 public record QueryOptions
@@ -34,6 +34,12 @@ public record QueryOptions
     /// </summary>
     public bool KeepPrevious { get; init; } = false;
 
+    /// <summary>
+    /// Automatically revalidate data at this interval while there are active subscribers.
+    /// Null disables polling. Example: TimeSpan.FromSeconds(30) for 30s polling.
+    /// </summary>
+    public TimeSpan? RefreshInterval { get; init; } = null;
+
     public static implicit operator QueryOptions(QueryScope scope) => new() { Scope = scope };
 }
 
@@ -53,6 +59,12 @@ public record QueryServiceOptions
     /// Maximum entries before LRU eviction kicks in. Default: 10,000. Null = unlimited.
     /// </summary>
     public int? MaxEntries { get; init; } = 10_000;
+
+    /// <summary>
+    /// How often to check for entries needing refresh. Default: 1 second.
+    /// Lower values = more precise refresh timing but higher CPU usage.
+    /// </summary>
+    public TimeSpan RefreshTickInterval { get; init; } = TimeSpan.FromSeconds(1);
 }
 
 public record QueryMutator(
@@ -124,15 +136,15 @@ public static class UseQueryExtensions
             key = (appContext.MachineId, key);
         }
 
-        if (options.Scope == QueryScope.User)
-        {
-            throw new NotImplementedException("User scope is not implemented yet. We need to implement GetUserId() in IAuthService.");
-            // var userId = auth?.GetUserId()
-            // if (userId is not null)
-            // {
-            //     key = (userId, key);
-            // }
-        }
+        // if (options.Scope == QueryScope.User)
+        // {
+        //     throw new NotImplementedException("User scope is not implemented yet. We need to implement GetUserId() in IAuthService.");
+        //     var userId = auth?.GetUserId()
+        //     if (userId is not null)
+        //     {
+        //         key = (userId, key);
+        //     }
+        // }
 
         return key;
     }

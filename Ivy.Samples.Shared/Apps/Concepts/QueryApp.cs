@@ -18,6 +18,7 @@ public class QueryApp : SampleBase
                    new Tab("Mutations", new MutationsTab()),
                    new Tab("Tags", new TagsTab()),
                    new Tab("Cache", new CacheTab()),
+                   new Tab("Polling", new PollingTab()),
                    new Tab("Pagination", new PaginationTab()),
                    new Tab("Pre-Populated", new PrePopulatedTab()),
                    new Tab("Errors", new ErrorsTab()),
@@ -767,6 +768,19 @@ public class CacheTab : ViewBase
                | Text.H2("Cache Management")
                | Text.P("Use QueryManager to clear cache entries - either all at once or selectively by tag.")
                | new Card(new CacheClearExample()).Title("Clear Cache")
+               | new Card(new PredicateInvalidationExample()).Title("Predicate-Based Invalidation")
+            ;
+    }
+}
+
+public class PollingTab : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical()
+               | Text.H2("Polling (Auto-Refresh)")
+               | Text.P("Use RefreshInterval to automatically revalidate queries at a specified interval while there are active subscribers.")
+               | new Card(new RefreshIntervalExample()).Title("Auto-Refresh Query")
             ;
     }
 }
@@ -864,5 +878,160 @@ public class CacheClearExample : ViewBase
                 : Text.Literal(query.Value ?? ""))
             | Text.Muted($"Tag: {tag}")
         ).Title(title);
+    }
+}
+
+public record ProductKey(string Category, int Id);
+
+public class PredicateInvalidationExample : ViewBase
+{
+    public override object? Build()
+    {
+        var queryManager = UseService<QueryService>();
+
+        // Queries with structured keys
+        var electronics1 = UseQuery(
+            key: new ProductKey("electronics", 1),
+            fetcher: async (key, ct) =>
+            {
+                await Task.Delay(500, ct);
+                return $"{key.Category}/{key.Id}: Laptop - ${Random.Shared.Next(500, 1500)}";
+            });
+
+        var electronics2 = UseQuery(
+            key: new ProductKey("electronics", 2),
+            fetcher: async (key, ct) =>
+            {
+                await Task.Delay(500, ct);
+                return $"{key.Category}/{key.Id}: Phone - ${Random.Shared.Next(200, 800)}";
+            });
+
+        var clothing1 = UseQuery(
+            key: new ProductKey("clothing", 1),
+            fetcher: async (key, ct) =>
+            {
+                await Task.Delay(500, ct);
+                return $"{key.Category}/{key.Id}: Shirt - ${Random.Shared.Next(20, 80)}";
+            });
+
+        var clothing2 = UseQuery(
+            key: new ProductKey("clothing", 2),
+            fetcher: async (key, ct) =>
+            {
+                await Task.Delay(500, ct);
+                return $"{key.Category}/{key.Id}: Pants - ${Random.Shared.Next(30, 100)}";
+            });
+
+        return Layout.Vertical().Gap(4)
+               | Text.H3("Queries with Structured Keys")
+               | Text.Muted("Each query uses a ProductKey(Category, Id) as its key.")
+               | (Layout.Grid(2).Gap(4)
+                  | ProductCard("Electronics #1", electronics1)
+                  | ProductCard("Electronics #2", electronics2)
+                  | ProductCard("Clothing #1", clothing1)
+                  | ProductCard("Clothing #2", clothing2))
+
+               | new Separator()
+
+               | Text.H3("Invalidate by Predicate")
+               | Text.Muted("Use a predicate function to match keys and invalidate matching queries.")
+               | (Layout.Horizontal().Gap(2)
+                  | new Button("Invalidate Electronics", _ =>
+                        queryManager.Invalidate(key => key is ProductKey { Category: "electronics" }))
+                        .Variant(ButtonVariant.Destructive).Icon(Icons.Laptop)
+                  | new Button("Invalidate Clothing", _ =>
+                        queryManager.Invalidate(key => key is ProductKey { Category: "clothing" }))
+                        .Variant(ButtonVariant.Destructive).Icon(Icons.Shirt)
+                  | new Button("Invalidate Id=1", _ =>
+                        queryManager.Invalidate(key => key is ProductKey { Id: 1 }))
+                        .Variant(ButtonVariant.Destructive).Icon(Icons.Hash))
+
+               | new Separator()
+
+               | Text.H3("Revalidate by Predicate")
+               | Text.Muted("Revalidate keeps current data visible while fetching fresh data in the background.")
+               | (Layout.Horizontal().Gap(2)
+                  | new Button("Revalidate Electronics", _ =>
+                        queryManager.Revalidate(key => key is ProductKey { Category: "electronics" }))
+                        .Variant(ButtonVariant.Primary).Icon(Icons.RefreshCw)
+                  | new Button("Revalidate All Products", _ =>
+                        queryManager.Revalidate(key => key is ProductKey))
+                        .Variant(ButtonVariant.Primary).Icon(Icons.RefreshCw))
+            ;
+    }
+
+    private static object ProductCard<TKey>(string title, QueryResult<string, TKey> query)
+    {
+        var status = query.IsLoading ? "Loading..."
+            : query.IsValidating ? "Refreshing..."
+            : "Ready";
+
+        var badge = query.IsLoading
+            ? new Badge(status).Secondary()
+            : query.IsValidating
+                ? new Badge(status).Warning()
+                : new Badge(status).Success();
+
+        return new Card(
+            Layout.Vertical().Gap(2)
+            | badge
+            | (query.IsLoading
+                ? new Skeleton().Height(Size.Units(4))
+                : Text.Literal(query.Value ?? ""))
+        ).Title(title);
+    }
+}
+
+public class RefreshIntervalExample : ViewBase
+{
+    public override object? Build()
+    {
+        var fetchCount = UseRef(() => 0);
+
+        // Query that auto-refreshes every 5 seconds while this component is mounted
+        var liveData = UseQuery(
+            key: "live-data",
+            fetcher: async ct =>
+            {
+                await Task.Delay(300, ct);
+                fetchCount.Value++;
+
+                return new
+                {
+                    Value = Random.Shared.Next(100, 999),
+                    FetchCount = fetchCount.Value,
+                    Timestamp = DateTime.Now
+                };
+            },
+            options: new QueryOptions
+            {
+                RefreshInterval = TimeSpan.FromSeconds(5)
+            });
+
+        var statusBadge = liveData.IsLoading
+            ? new Badge("Loading...").Secondary()
+            : liveData.IsValidating
+                ? new Badge("Refreshing...").Warning()
+                : new Badge("Live").Success();
+
+        return Layout.Vertical().Gap(4)
+               | Text.H3("Auto-Refreshing Query")
+               | Text.Muted("This query automatically revalidates every 5 seconds while there are active subscribers.")
+
+               | (Layout.Horizontal().Gap(4)
+                  | (Layout.Vertical().Gap(2)
+                     | statusBadge
+                     | (liveData.IsLoading
+                         ? new Skeleton().Height(Size.Units(8)).Width(Size.Units(32))
+                         : (Layout.Vertical()
+                            | Text.Literal($"Value: {liveData.Value?.Value}")
+                            | Text.Literal($"Fetch count: {liveData.Value?.FetchCount}")
+                            | Text.Muted($"Last updated: {liveData.Value?.Timestamp:HH:mm:ss}"))))
+                  | (Layout.Vertical().Gap(2)
+                     | new Button("Force Refresh", _ => liveData.Mutator.Revalidate())
+                           .Variant(ButtonVariant.Outline).Icon(Icons.RefreshCw)))
+
+               | Text.Muted("The refresh timer only runs while there are active subscribers. Navigate away to stop polling.")
+            ;
     }
 }

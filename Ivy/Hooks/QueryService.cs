@@ -101,6 +101,7 @@ public class QueryService : IDisposable, IAsyncDisposable
     private readonly ILogger<QueryService> _logger;
     private readonly TimeProvider _timeProvider;
     private readonly Timer _evictionTimer;
+    private readonly Timer _refreshTimer;
     private readonly QueryServiceOptions _options;
 
     private bool _disposed;
@@ -119,6 +120,36 @@ public class QueryService : IDisposable, IAsyncDisposable
             state: null,
             dueTime: _options.EvictionInterval,
             period: _options.EvictionInterval);
+
+        _refreshTimer = new Timer(
+            callback: _ => RefreshDueEntries(),
+            state: null,
+            dueTime: _options.RefreshTickInterval,
+            period: _options.RefreshTickInterval);
+    }
+
+    private void RefreshDueEntries()
+    {
+        if (_disposed) return;
+
+        var now = _timeProvider.GetUtcNow();
+
+        foreach (var entry in _cache.Values)
+        {
+            // Skip entries without active subscribers
+            if (entry.IsOrphaned) continue;
+
+            // Skip entries without refresh interval configured
+            if (entry.Options.RefreshInterval is not { } interval) continue;
+
+            // Skip entries currently fetching/revalidating
+            if (entry.State is QueryEntryState.Fetching or QueryEntryState.Revalidating) continue;
+
+            // Skip entries not yet due for refresh
+            if (now < entry.LastFetchedAt + interval) continue;
+
+            Revalidate(entry.SerializedScopedKey);
+        }
     }
 
     public static string SerializeKey(object part)
@@ -542,6 +573,34 @@ public class QueryService : IDisposable, IAsyncDisposable
     }
 
     /// <summary>
+    /// Invalidate all query entries where the predicate returns true for the key.
+    /// </summary>
+    public void Invalidate(Func<object, bool> predicate)
+    {
+        foreach (var kvp in _cache)
+        {
+            if (predicate(kvp.Value.Key))
+            {
+                Invalidate(kvp.Key);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Revalidate all query entries where the predicate returns true for the key.
+    /// </summary>
+    public void Revalidate(Func<object, bool> predicate)
+    {
+        foreach (var kvp in _cache)
+        {
+            if (predicate(kvp.Value.Key))
+            {
+                Revalidate(kvp.Key);
+            }
+        }
+    }
+
+    /// <summary>
     /// Clear all query entries.
     /// </summary>
     public void Clear()
@@ -653,6 +712,7 @@ public class QueryService : IDisposable, IAsyncDisposable
         _disposed = true;
 
         _evictionTimer.Dispose();
+        _refreshTimer.Dispose();
 
         foreach (var entry in _cache.Values)
         {
@@ -669,6 +729,7 @@ public class QueryService : IDisposable, IAsyncDisposable
         _disposed = true;
 
         await _evictionTimer.DisposeAsync();
+        await _refreshTimer.DisposeAsync();
 
         foreach (var entry in _cache.Values)
         {
