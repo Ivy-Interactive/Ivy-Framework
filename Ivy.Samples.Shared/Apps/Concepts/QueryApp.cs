@@ -180,7 +180,7 @@ public class TagInvalidationExample : ViewBase
             ;
     }
 
-    private static object QueryCard(string title, QueryResult<string> query)
+    private static object QueryCard<TKey>(string title, QueryResult<string, TKey> query)
     {
         var status = query.IsLoading ? " (Loading...)"
             : query.IsValidating ? " (Revalidating...)"
@@ -844,7 +844,7 @@ public class CacheClearExample : ViewBase
             ;
     }
 
-    private static object QueryStatusCard(string title, QueryResult<string> query, string tag)
+    private static object QueryStatusCard<TKey>(string title, QueryResult<string, TKey> query, string tag)
     {
         var status = query.IsLoading ? "Loading..."
             : query.IsValidating ? "Revalidating..."
