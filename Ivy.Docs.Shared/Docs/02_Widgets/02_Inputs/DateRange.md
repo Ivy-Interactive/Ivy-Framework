@@ -84,26 +84,6 @@ public class InvalidDateRangeDemo : ViewBase
 }    
 ```
 
-### Nullable
-
-When using nullable state types, you can enable the `.Nullable()` option to show a clear button when the input has a value:
-
-```csharp demo-below
-public class NullableDateRangeDemo : ViewBase 
-{    
-    public override object? Build()
-    {    
-        var nullableWithValue = this.UseState<(DateOnly?, DateOnly?)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
-        
-        return Layout.Vertical()
-            | nullableWithValue.ToDateRangeInput()
-                  .Nullable()
-                  .WithField()
-                  .Label("Nullable with Initial Value");
-    }
-}    
-```
-
 ### Nullable State
 
 Sometimes it is necessary to render a date time with possible nullable from and to dates.

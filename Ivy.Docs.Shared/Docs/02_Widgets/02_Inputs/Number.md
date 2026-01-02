@@ -154,27 +154,6 @@ public class InvalidDemo : ViewBase
 }
 ```
 
-### Nullable
-
-When using nullable state types, you can enable the `.Nullable()` option to show a clear button when the input has a value:
-
-```csharp demo-below
-public class NullableNumberDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var nullableWithValue = UseState((double?)123.45);
-        
-        return Layout.Vertical()
-            | nullableWithValue.ToNumberInput()
-                  .Placeholder("Has initial value...")
-                  .Nullable()
-                  .WithField()
-                  .Label("Nullable with Initial Value");
-    }
-}
-```
-
 ### Disabled
 
 To disable a `NumberInput` this style should be used. This can be used via the extension function `Disabled`.

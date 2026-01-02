@@ -158,27 +158,6 @@ public class InvalidStyleDemo : ViewBase
 }
 ```
 
-### Nullable
-
-When using nullable state types, you can enable the `.Nullable()` option to show a clear button when the input has a value:
-
-```csharp demo-below
-public class NullableColorDemo : ViewBase
-{ 
-    public override object? Build()
-    {    
-        var nullableWithValue = UseState((string?)"#ff0000");
-        
-        return Layout.Vertical()
-            | nullableWithValue.ToColorInput()
-                  .Nullable()
-                  .WithField()
-                  .Label("Nullable with Initial Value");
-    }
-}
-
-```
-
 <WidgetDocs Type="Ivy.ColorInput" ExtensionTypes="Ivy.ColorInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/ColorInput.cs"/>
 
 ## Examples
