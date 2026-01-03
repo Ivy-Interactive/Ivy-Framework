@@ -1,4 +1,7 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Ivy.Core.Hooks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -152,15 +155,45 @@ public class QueryService : IDisposable, IAsyncDisposable
         }
     }
 
-    public static string SerializeKey(object part)
+    private static readonly JsonSerializerOptions KeySerializerOptions = new()
+    {
+        Converters = { new TypeJsonConverterFactory() }
+    };
+
+    internal static string SerializeKey(object part)
     {
         return part switch
         {
             string s => s,
             Type t => t.FullName ?? t.Name,
             IFormattable f => f.ToString(null, System.Globalization.CultureInfo.InvariantCulture),
-            _ => System.Text.Json.JsonSerializer.Serialize(part)
+            ITuple tup => JsonSerializer.Serialize(TupleToArray(tup), KeySerializerOptions),
+            _ => JsonSerializer.Serialize(part, KeySerializerOptions)
         };
+    }
+
+    private static object?[] TupleToArray(ITuple t)
+    {
+        var arr = new object?[t.Length];
+        for (int i = 0; i < t.Length; i++) arr[i] = t[i];
+        return arr;
+    }
+
+    private sealed class TypeJsonConverterFactory : JsonConverterFactory
+    {
+        public override bool CanConvert(Type typeToConvert) => typeof(Type).IsAssignableFrom(typeToConvert);
+
+        public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+            => new TypeJsonConverter();
+
+        private sealed class TypeJsonConverter : JsonConverter<Type>
+        {
+            public override Type? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+                => throw new NotSupportedException();
+
+            public override void Write(Utf8JsonWriter writer, Type value, JsonSerializerOptions options)
+                => writer.WriteStringValue(value.FullName ?? value.Name);
+        }
     }
 
     /// <summary>

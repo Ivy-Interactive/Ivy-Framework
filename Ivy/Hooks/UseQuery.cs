@@ -163,19 +163,17 @@ public static class UseQueryExtensions
         if (scopeRef.Value != opts.Scope)
             throw new InvalidOperationException("QueryScope cannot change between renders");
 
-        // Scope determines which hooks path - must be checked first for consistent hook ordering
         if (opts.Scope == QueryScope.View)
         {
             return context.UseViewScopedQuery(key, fetcher, opts, initialValue);
         }
 
-        // Server-scoped: always call hooks in the same order (rules of hooks)
+        // Server-scoped: 
         var subscriberId = context.UseRef(Guid.NewGuid);
-        var queryManager = context.UseService<QueryService>();
+        var queryService = context.UseService<QueryService>();
         var scopedKey = key is not null ? context.UseScopedQueryKey(key, opts) : null;
         var serializedScopedKey = scopedKey is not null ? QueryService.SerializeKey(scopedKey) : "";
 
-        // Track subscription and previous key to manage subscription lifecycle
         var subscriptionRef = context.UseRef<IDisposable?>(() => null);
         var prevQueryKeyRef = context.UseRef(() => key is not null ? serializedScopedKey : (string?)null);
         var hasInitialValueRef = context.UseRef(() => initialValue is not null);
@@ -187,12 +185,11 @@ public static class UseQueryExtensions
 
         var mutator = key is not null
             ? new QueryMutator<TValue>(
-                (newValue, revalidate) => queryManager.Mutate<TValue>(serializedScopedKey, newValue, revalidate),
-                () => queryManager.Revalidate(serializedScopedKey),
-                () => queryManager.Invalidate(serializedScopedKey))
+                (newValue, revalidate) => queryService.Mutate<TValue>(serializedScopedKey, newValue, revalidate),
+                () => queryService.Revalidate(serializedScopedKey),
+                () => queryService.Invalidate(serializedScopedKey))
             : emptyMutator;
 
-        // Determine initial loading state based on RevalidateOnInit
         var shouldSkipInitialFetch = !opts.RevalidateOnInit && hasInitialValueRef.Value;
         var initialIsLoading = key is not null && !shouldSkipInitialFetch;
 
@@ -200,7 +197,6 @@ public static class UseQueryExtensions
             () => new QueryResult<TValue>(initialValue, initialIsLoading, IsValidating: false, IsPrevious: false, mutator)
         );
 
-        // Manage subscription based on key changes
         var currentQueryKey = key is not null ? serializedScopedKey : (string?)null;
         var keyChanged = prevQueryKeyRef.Value != currentQueryKey;
 
@@ -231,7 +227,7 @@ public static class UseQueryExtensions
                         resultState.Set(resultState.Value with { Mutator = mutator, IsLoading = true });
                     }
                 }
-                subscriptionRef.Value = queryManager.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, initialValue);
+                subscriptionRef.Value = queryService.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, initialValue);
             }
 
             prevQueryKeyRef.Value = currentQueryKey;
@@ -239,10 +235,9 @@ public static class UseQueryExtensions
         else if (key is not null && subscriptionRef.Value is null)
         {
             // First render with non-null key - always subscribe so entry exists for mutations
-            subscriptionRef.Value = queryManager.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, initialValue);
+            subscriptionRef.Value = queryService.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, initialValue);
         }
 
-        // Cleanup on unmount
         context.UseEffect(() => subscriptionRef.Value ?? Disposable.Empty);
 
         // Return idle state when key is null

@@ -67,17 +67,17 @@ public class ProductsListBlade : ViewBase
     {
         await using var db = factory.CreateDbContext();
 
-        var linq = db.Products.AsQueryable();
+        var linq = db.Products.Include(e => e.Department).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter))
         {
-            linq = linq.Where(e => e.Name.Contains(filter) || e.Department.Contains(filter));
+            linq = linq.Where(e => e.Name.Contains(filter) || (e.Department != null && e.Department.Name.Contains(filter)));
         }
 
         return await linq
             .OrderByDescending(e => e.CreatedAt)
             .Take(50)
-            .Select(e => new ProductListRecord(e.Id, e.Name, e.Category != null ? e.Category.Name : null))
+            .Select(e => new ProductListRecord(e.Id, e.Name, e.Department != null ? e.Department.Name : null))
             .ToArrayAsync();
     }
 }
@@ -96,10 +96,11 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
                 await using var db = factory.CreateDbContext();
                 return await db.Products
                     .Include(e => e.Category)
+                    .Include(e => e.Department)
                     .SingleOrDefaultAsync(e => e.Id == productId, ct);
             });
 
-        if (productQuery.IsLoading) return null;
+        if (productQuery.IsLoading) return new Skeleton();
 
         if (productQuery.Value == null)
         {
@@ -132,7 +133,8 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
                 // We include some of the interesting fields of the entity here
                 product.Id,
                 product.Name,
-                Category = product.Category?.Name
+                Category = product.Category?.Name,
+                Department = product.Department?.Name
             }.ToDetails()
             .RemoveEmpty() // Removes "empty" fields from the details
             .Builder(e => e.Id, e => e.CopyToClipboard()),
@@ -164,7 +166,7 @@ public record ProductCreateRequest
     public string Name { get; init; } = "";
 
     [Required]
-    public string Department { get; init; } = "";
+    public Guid? DepartmentId { get; init; } = null;
 
     [Required]
     public Guid? CategoryId { get; init; } = null;
@@ -181,6 +183,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
             .ToForm()
             //We only specify Builder if we want to customize the input control for the field - ToForm() will scaffold the form based on the properties of the record
             //ToAsyncSelectInput allows us to select foreign keys
+            .Builder(e => e.DepartmentId, e => e.ToAsyncSelectInput(ProductHelpers.QueryDepartments(factory), ProductHelpers.LookupDepartment(factory), placeholder: "Select Department"))
             .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.QueryCategories(factory), ProductHelpers.LookupCategory(factory), placeholder: "Select Category"))
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "Create Product", submitTitle: "Create");
@@ -203,7 +206,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
             Id = id,
             Name = request.Name,
             CategoryId = request.CategoryId!.Value,
-            Department = request.Department,
+            DepartmentId = request.DepartmentId!.Value,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         });
@@ -228,8 +231,9 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
             });
 
         var categoriesQuery = Context.UseCategories();
+        var departmentsQuery = Context.UseDepartments();
 
-        if (productQuery.IsLoading || categoriesQuery.IsLoading || productQuery.Value == null) return new Skeleton();
+        if (productQuery.IsLoading || categoriesQuery.IsLoading || departmentsQuery.IsLoading || productQuery.Value == null) return new Skeleton();
 
         return productQuery.Value!
             .ToForm()
@@ -238,11 +242,11 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
             // NOTE! Only use this if you're sure about the syntax, otherwise leave it and let the inputs be scaffolded
             .Builder(e => e.Rating, e => e.ToFeedbackInput())
             .Builder(e => e.Description, e => e.ToTextAreaInput())
-            .Place(e => e.Name, e => e.Department) // Place will specify the order of the fields
+            .Place(e => e.Name, e => e.DepartmentId) // Place will specify the order of the fields
             .PlaceHorizontal(e => e.Width, e => e.Height) // This will place the fields side by side - useful for related fields
             .Group("Details", open: true, e => e.Description, e => e.Meta) // This will group the fields in a collapsible group that is open by default - useful for related fields that are less common
-            .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt) // We remove these fields from the form as users should not be able to edit them
-                                                                   //.Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.QueryCategories(factory), ProductHelpers.LookupCategory(factory), placeholder: "Select Category"))
+            .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.Department, e => e.Category) // We remove these fields from the form as users should not be able to edit them
+            .Builder(e => e.DepartmentId, e => e.ToSelectInput(departmentsQuery.Value!, placeholder: "Select Department"))
             .Builder(e => e.CategoryId, e => e.ToSelectInput(categoriesQuery.Value!, placeholder: "Select Category"))
             .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Product");
@@ -276,6 +280,19 @@ public static class ProductHelpers
             });
     }
 
+    public static QueryResult<Option<Guid?>[]> UseDepartments(this IViewContext context)
+    {
+        var factory = context.UseService<SampleDbContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseDepartments)),
+            fetcher: async (_, ct) =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.Departments
+                    .Select(e => new Option<Guid?>(e.Name, e.Id))
+                    .ToArrayAsync(ct);
+            });
+    }
 
     public static AsyncSelectQueryDelegate<Guid?> QueryCategories(SampleDbContextFactory factory)
     {
@@ -301,6 +318,33 @@ public static class ProductHelpers
             var category = await db.Categories.FindAsync(id);
             if (category == null) return null;
             return new Option<Guid?>(category.Name, category.Id);
+        };
+    }
+
+    public static AsyncSelectQueryDelegate<Guid?> QueryDepartments(SampleDbContextFactory factory)
+    {
+        return async query =>
+        {
+            await using var db = factory.CreateDbContext();
+            return (await db.Departments
+                    .Where(e => e.Name.Contains(query))
+                    .Select(e => new { e.Id, e.Name })
+                    .Take(50)
+                    .ToArrayAsync())
+                .Select(e => new Option<Guid?>(e.Name, e.Id))
+                .ToArray();
+        };
+    }
+
+    public static AsyncSelectLookupDelegate<Guid?> LookupDepartment(SampleDbContextFactory factory)
+    {
+        return async id =>
+        {
+            if (id == null) return null;
+            await using var db = factory.CreateDbContext();
+            var department = await db.Departments.FindAsync(id);
+            if (department == null) return null;
+            return new Option<Guid?>(department.Name, department.Id);
         };
     }
 }

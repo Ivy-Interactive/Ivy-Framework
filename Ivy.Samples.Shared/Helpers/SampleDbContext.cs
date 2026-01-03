@@ -16,7 +16,8 @@ public class Product
     public string? Description { get; set; }
     public string? Meta { get; set; }
     [Required]
-    public string Department { get; set; }
+    public Guid DepartmentId { get; set; }
+    public virtual Department? Department { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     [Required]
@@ -25,6 +26,14 @@ public class Product
 }
 
 public class Category
+{
+    [Key]
+    public Guid Id { get; set; }
+    [Required]
+    public string Name { get; set; }
+}
+
+public class Department
 {
     [Key]
     public Guid Id { get; set; }
@@ -67,6 +76,7 @@ public class SampleDbContext(DbContextOptions<SampleDbContext> options) : DbCont
     public DbSet<Order> Orders { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<Department> Departments { get; set; }
 }
 
 public class SampleDbContextFactory : IDbContextFactory<SampleDbContext>
@@ -104,11 +114,17 @@ public class SampleDbContextFactory : IDbContextFactory<SampleDbContext>
                 .Generate(10);
 
             context.Categories.AddRange(categories);
+
+            var departments = new Faker<Department>()
+                .RuleFor(d => d.Name, f => f.Commerce.Department())
+                .Generate(10);
+
+            context.Departments.AddRange(departments);
             context.SaveChanges();
 
             var products = new Faker<Product>()
                 .RuleFor(p => p.Name, f => f.Commerce.ProductName())
-                .RuleFor(p => p.Department, f => f.Commerce.Department())
+                .RuleFor(p => p.DepartmentId, f => f.PickRandom(departments).Id)
                 .RuleFor(p => p.Rating, f => f.Random.Int(0, 5))
                 .RuleFor(p => p.Price, f => f.Random.Int(1, 100))
                 .RuleFor(p => p.Width, f => f.Random.Int(1, 100))
