@@ -145,15 +145,16 @@ public class DisabledColorInput : ViewBase
 
 ### Invalid
 
-To represent that there is something wrong with a `ColorInput` the `Invalid` function
-should be used.
+`ColorInput` automatically validates color values. If an invalid color format is entered,
+the input will display an error state.
 
 ```csharp demo-below
 public class InvalidStyleDemo : ViewBase
 { 
     public override object? Build()
     {    
-        return new ColorInput<string>("#ff0000").Invalid("This is not used now");
+        var colorState = UseState("#invalid-color");
+        return colorState.ToColorInput();
     }
 }
 
