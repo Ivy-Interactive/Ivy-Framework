@@ -195,12 +195,8 @@ public class Server
         return this;
     }
 
-    public Server UseAuth<T>(Action<T>? config = null, Action<AuthFormSettings>? formConfig = null, Func<ViewBase>? viewFactory = null) where T : class, IAuthProvider
+    public Server UseAuth<T>(Action<T>? config = null, Func<ViewBase>? viewFactory = null) where T : class, IAuthProvider
     {
-        var formSettings = new AuthFormSettings();
-        formConfig?.Invoke(formSettings);
-        Services.AddSingleton(formSettings);
-
         Services.AddSingleton<T>();
         Services.AddSingleton<IAuthProvider, T>(s =>
         {

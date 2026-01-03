@@ -178,43 +178,7 @@ Ivy supports the following authentication providers. Click on any provider for d
 >ivy auth add --provider Basic --connection-string YourConnectionString
 ```
 
-## Customizing the Login Form
-
-You can customize the default login form appearance using the `formConfig` parameter:
-
-```csharp
-server.UseAuth<BasicAuthProvider>(formConfig: form => form
-    .WithLogo(new Image("/ivy/assets/my-logo.png").Width(Size.Units(16)))
-    .WithTitle("Welcome to My App!")
-    .WithSubtitle("Please enter your credentials")
-    .WithUserLabel("Email")
-    .WithPasswordLabel("Secret Key")
-    .WithButtonText("Sign In")
-    .WithCardWidth(Size.Units(140))
-    .WithCardPadding(4)
-    .WithGap(8)
-    .WithFooter(Text.Small("© 2026 My Company"))
-);
-```
-
-### Available Customization Options
-
-| Method | Description |
-|--------|-------------|
-| `WithLogo(object)` | Custom logo widget |
-| `HideLogo()` | Hide the logo |
-| `WithTitle(string)` | Main title text |
-| `WithSubtitle(string)` | Subtitle text |
-| `WithUserLabel(string)` | Label for username field |
-| `WithPasswordLabel(string)` | Label for password field |
-| `WithButtonText(string)` | Login button text |
-| `WithCardWidth(Size)` | Card width |
-| `WithCardHeight(Size)` | Card height |
-| `WithCardPadding(int)` | Padding inside card |
-| `WithGap(int)` | Gap between elements |
-| `WithFooter(object)` | Footer widget |
-
-### Complete Custom Login View
+## Complete Custom Login View
 
 For complete control over the login experience, you can replace the entire login view:
 

@@ -19,18 +19,7 @@ public class DefaultAuthApp : ViewBase
         var auth = UseService<IAuthService>();
         var errorMessage = UseState<string?>();
         var serverArgs = UseService<ServerArgs>();
-        var formSettings = UseService<AuthFormSettings>();
-
-        var title = formSettings.Title
-            ?? (serverArgs.MetaTitle.NullIfEmpty() != null
-                ? $"Welcome to {serverArgs.MetaTitle}!"
-                : "Welcome");
-
-        var subtitle = formSettings.Subtitle ?? "Enter user credentials for authentication.";
-        var logo = formSettings.ShowLogo ? (formSettings.Logo ?? new IvyLogo()) : null;
-        var cardWidth = formSettings.CardWidth ?? Size.Units(120).Max(500);
-        var cardPadding = formSettings.CardPadding ?? 2;
-        var gap = formSettings.Gap ?? 6;
+        var appName = serverArgs.MetaTitle.NullIfEmpty() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
         var options = auth.GetAuthOptions();
 
@@ -38,7 +27,7 @@ public class DefaultAuthApp : ViewBase
 
         if (options.Any(e => e.Flow == AuthFlow.EmailPassword))
         {
-            renderedOptions.Add(new PasswordEmailFlowView(errorMessage, formSettings));
+            renderedOptions.Add(new PasswordEmailFlowView(errorMessage));
         }
 
         if (options.Any(e => e.Flow == AuthFlow.OAuth))
@@ -53,31 +42,28 @@ public class DefaultAuthApp : ViewBase
             .ToArray();
 
         var flowsLayout = renderedOptions.Count > 0
-            ? Layout.Vertical().Gap(gap)
+            ? Layout.Vertical().Gap(6)
                 | flows
             : null;
 
-        var cardContent = Layout.Vertical().Gap(gap).Padding(cardPadding)
-            | logo
-            | Text.H2(title)
-            | (errorMessage.Value.NullIfEmpty() == null ? Text.Markdown(subtitle) : null)
-            | (errorMessage.Value.NullIfEmpty() != null ? new Callout(errorMessage.Value).Variant(CalloutVariant.Error) : null)
-            | flowsLayout
-            | formSettings.Footer;
-
-        var card = new Card(cardContent).Width(cardWidth);
-        if (formSettings.CardHeight != null)
-        {
-            card = card.Height(formSettings.CardHeight);
-        }
-
-        object pageContent = Layout.Horizontal().Align(Align.Center).Height(Size.Screen()) | card;
-
-        return pageContent;
+        return
+            Layout.Horizontal().Align(Align.Center).Height(Size.Screen())
+            | (new Card(
+                Layout.Vertical().Gap(6).Padding(2)
+                | new IvyLogo()
+                | Text.H2($"Welcome to {appName}!")
+                | (errorMessage.Value.NullIfEmpty() == null
+                    ? Text.Markdown("Enter user credentials for authentication.")
+                    : null)
+                | (errorMessage.Value.NullIfEmpty() != null ? new Callout(errorMessage.Value).Variant(CalloutVariant.Error) : null)
+                | flowsLayout
+              )
+              .Width(Size.Units(120).Max(500))
+            );
     }
 }
 
-public class PasswordEmailFlowView(IState<string?> errorMessage, AuthFormSettings formSettings) : ViewBase
+public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 {
     private record LoginFormModel(string User, string Password);
 
@@ -88,14 +74,10 @@ public class PasswordEmailFlowView(IState<string?> errorMessage, AuthFormSetting
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
 
-        var userLabel = formSettings.UserLabel ?? "User";
-        var passwordLabel = formSettings.PasswordLabel ?? "Password";
-        var buttonText = formSettings.ButtonText ?? "Login";
-
-        var formBuilder = credentials.ToForm(buttonText)
+        var formBuilder = credentials.ToForm("Login")
             .Required(m => m.User, m => m.Password)
-            .Label(m => m.User, userLabel)
-            .Label(m => m.Password, passwordLabel)
+            .Label(m => m.User, "User")
+            .Label(m => m.Password, "Password")
             .Builder(m => m.User, state => state.ToTextInput())
             .Builder(m => m.Password, state => state.ToPasswordInput());
 
@@ -110,7 +92,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage, AuthFormSetting
                 return;
             }
 
-            var isValid = await submitForm();
+            var isValid = await submitForm(); // FormBuilder runs validation and updates field errors
             if (!isValid)
             {
                 return;
@@ -145,7 +127,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage, AuthFormSetting
 
         return Layout.Vertical().Gap(12)
                | formView
-               | new Button(buttonText)
+               | new Button("Login")
                    .HandleClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
