@@ -94,21 +94,21 @@ Instead of .NET user secrets, you can also use environment variables to store au
 
 **Windows (PowerShell):**
 
-```powershell
-$env:Auth0__Domain="your-domain.auth0.com"
-$env:Auth0__ClientId="your-client-id"
-$env:Auth0__ClientSecret="your-client-secret"
-$env:Auth0__Audience="https://your-domain.auth0.com/api/v2"
-$env:Auth0__Namespace="https://ivy.app/"
+```terminal
+>$env:Auth0__Domain="your-domain.auth0.com"
+>$env:Auth0__ClientId="your-client-id"
+>$env:Auth0__ClientSecret="your-client-secret"
+>$env:Auth0__Audience="https://your-domain.auth0.com/api/v2"
+>$env:Auth0__Namespace="https://ivy.app/"
 ```
 
 **Mac/Linux (Bash):**
-```bash
-export Auth0__Domain="your-domain.auth0.com"
-export Auth0__ClientId="your-client-id"
-export Auth0__ClientSecret="your-client-secret"
-export Auth0__Audience="https://your-domain.auth0.com/api/v2"
-export Auth0__Namespace="https://ivy.app/"
+```terminal
+>export Auth0__Domain="your-domain.auth0.com"
+>export Auth0__ClientId="your-client-id"
+>export Auth0__ClientSecret="your-client-secret"
+>export Auth0__Audience="https://your-domain.auth0.com/api/v2"
+>export Auth0__Namespace="https://ivy.app/"
 ```
 
 If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets.
