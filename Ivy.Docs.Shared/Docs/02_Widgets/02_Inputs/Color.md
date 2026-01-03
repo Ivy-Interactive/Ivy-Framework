@@ -63,32 +63,15 @@ should be used.
 The following code shows all these three variants in action.
 
 ```csharp demo-below
-public class ColorDemo : ViewBase
+public class ColorVariantsDemo : ViewBase
 {
     public override object? Build()
     {    
-        var textColorState = UseState("#ff0000");
-        var pickerColorState = UseState("#ff0000");
-        var textAndPickerColorState = UseState("#ff0000");
-        return Layout.Vertical()
-                | (Layout.Horizontal()
-                    | Text.Small("Just Text")
-                          .Width(25)
-                    | textColorState
-                          .ToColorInput()
-                          .Variant(ColorInputs.Text))
-                | (Layout.Horizontal()
-                    | Text.Small("Just Picker")
-                          .Width(25)
-                    | pickerColorState
-                          .ToColorInput()
-                          .Variant(ColorInputs.Picker))
-                | (Layout.Horizontal()
-                    | Text.Small("Text and Picker")
-                          .Width(25)
-                    | textAndPickerColorState
-                          .ToColorInput()
-                          .Variant(ColorInputs.TextAndPicker));
+        var colorState = UseState("#ff0000");
+        return Layout.Grid().Columns(2).ColumnWidths(Size.Units(30), null)
+            | Text.Small("Just Text") | colorState.ToColorInput().Variant(ColorInputs.Text)
+            | Text.Small("Just Picker") | colorState.ToColorInput().Variant(ColorInputs.Picker)
+            | Text.Small("Text and Picker") | colorState.ToColorInput().Variant(ColorInputs.TextAndPicker);
     }   
 }
 ```
@@ -129,31 +112,15 @@ public class ColorChangedDemo : ViewBase
 
 `ColorInput` can be customized with various styling options, such as setting a placeholder or disabling the input.
 
-### Disabled
-
-To render a disabled `ColorInput` the function `Disabled` should be used.  
-
 ```csharp demo-below
-public class DisabledColorInput : ViewBase
+public class ColorStylingDemo : ViewBase
 {
     public override object? Build()
-    {    
-        return new ColorInput<string>("#ff0000").Disabled();
-    }
-}    
-```
-
-### Invalid
-
-To represent that there is something wrong with a `ColorInput` the `Invalid` function
-should be used.
-
-```csharp demo-below
-public class InvalidStyleDemo : ViewBase
-{ 
-    public override object? Build()
-    {    
-        return new ColorInput<string>("#ff0000").Invalid("This is not used now");
+    {
+        var colorState = UseState("#ff0000");
+        return Layout.Grid().Columns(2).ColumnWidths(Size.Units(30), null)
+            | Text.Small("Disabled") | colorState.ToColorInput().Disabled()
+            | Text.Small("Invalid") | colorState.ToColorInput().Invalid("Invalid color value");
     }
 }
 ```
