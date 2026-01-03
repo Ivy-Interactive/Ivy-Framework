@@ -58,6 +58,11 @@ var input = state.ToBoolInput(); // Creates BoolInput from state
 
 The non-generic `BoolInput` constructor is the most convenient when you need a simple boolean input without nullable types or other boolean-like representations.
 
+
+<Callout variant="info" title="Extension Methods">
+Use extension methods `ToBoolInput()`, `ToSwitchInput()`, and `ToToggleInput()` to quickly create BoolInput from state. See examples in the Variants section below.
+</Callout>
+
 ## Nullable Bool Inputs
 
 Null values are supported for boolean values. The following example shows it in action.
@@ -94,29 +99,19 @@ There are three variants of `BoolInput`s. The following blocks show how to creat
 To make the bool input appear like a checkbox, this variant should be used.
 
 ```csharp demo-below
-public class BoolInputDemo : ViewBase
+public class CheckBoxDemo : ViewBase
 {
     public override object? Build()
     {
-        var state = UseState(false);
-        var agreed = UseState(""); 
+        var agreed = UseState(false);
+        
         return Layout.Horizontal()
-               | new BoolInput(state.Value, e => 
-                     {
-                          if(e.Value)
-                          {
-                              agreed.Set("You are all set!");                
-                          }
-                          else
-                          {
-                              agreed.Set("");
-                          }
-                          state.Set(e.Value);
-                     },variant: BoolInputs.Checkbox).Label("Agree to terms and conditions")
-               | Text.InlineCode(agreed);
+            | agreed.ToBoolInput()
+                .Variant(BoolInputs.Checkbox)
+                .Label("Agree to terms and conditions")
+            | (agreed.Value ? Text.InlineCode("You are all set!") : null);
     }
 }
-
 ```
 
 ### Switch
@@ -185,57 +180,10 @@ public class SingleToggleDemo : ViewBase
 }
 ```
 
-## Extension Functions
 
-There are several extension functions that can be used to generate these boolean inputs. `ToBoolInput` creates a
-`BoolInputs.CheckBox` variant. `ToSwitchInput` creates a `BoolInputs.Switch` variant, and `ToToggleInput` creates
-a `BoolInputs.Toggle` variant.
-
-```csharp demo-below
-public class BoolInputVariants : ViewBase
-{
-    public override object? Build()
-    {
-        var agree = UseState(false);
-        var dark = UseState(false);
-        var boolVal3 = UseState(false);
-        return Layout.Vertical()
-                | agree.ToBoolInput().Label("Agree to terms") 
-                | dark.ToSwitchInput().Label("Dark Theme");
-    }
-}
-```
-
-## Bool represented by integers
-
-`BoolInput`s have been historically attempted to represent with integers. `0` indicates `false` and `1` indicates `true`.
-The following example shows how integers can be used to represent bool inputs.
-
-```csharp demo-below
-public class BoolInputVariants2 : ViewBase
-{
-    public override object? Build()
-    {
-        // Initial state is false because 0 means false 
-        var boolVal1 = UseState(0);
-        // Initial state is true because 1 means true
-        var boolVal2 = UseState(1);
-        var boolVal3 = UseState(0);
-        return Layout.Vertical()
-                | (Layout.Horizontal()
-                   | boolVal1.ToBoolInput().Label("Legacy")
-                   | Text.Block($"value of Legacy is set to {boolVal1.Value.ToString()}"))
-                | (Layout.Horizontal()
-                   | boolVal2.ToSwitchInput().Label("Legacy2")
-                   | Text.Block($"value of Legacy2 is set to {boolVal2.Value.ToString()}")) 
-                | (Layout.Horizontal()
-                   | boolVal3.ToToggleInput(Icons.MoonStar).Label("Dark")
-                   | Text.Block($"value of Dark is set to {boolVal3.Value.ToString()}"));
-    }
-}
-```
-
-All values captured are integers; either 1 or 0.
+<Callout variant="info" title="Legacy Integer Support">
+BoolInput also supports integer-based boolean values (0 = false, 1 = true) for compatibility with legacy systems. Simply use `UseState(0)` or `UseState(1)` with standard extension methods like `ToBoolInput()`, `ToSwitchInput()`, or `ToToggleInput()`.
+</Callout>
 
 <WidgetDocs Type="Ivy.BoolInput" ExtensionTypes="Ivy.BoolInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/BoolInput.cs"/>
 
