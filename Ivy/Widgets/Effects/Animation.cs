@@ -66,7 +66,7 @@ public record Animation : WidgetBase<Animation>
         Type = animation;
     }
 
-    public Animation() { }
+    internal Animation() { }
 
     [Prop] public AnimationType Type { get; set; } = AnimationType.Rotate;
 

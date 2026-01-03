@@ -108,15 +108,15 @@ public class FormatDemo : ViewBase
          var yearMonthDate = UseState(DateTime.Today.Date);
          
          return Layout.Vertical()
-                 | monthDateYear.ToDateInput()
+                | monthDateYear.ToDateInput()
                                 .Format("MM/dd/yyyy")
                                 .WithField()
                                 .Label("MM/dd/yyyy")
                 | yearMonthDate.ToDateInput()
-                               .Placeholder("yyyy/MMM/dd")
-                               .Format("yyyy/MMM/dd")
-                               .WithField()
-                               .Label("yyyy/MMM/dd");
+                                .Placeholder("yyyy/MMM/dd")
+                                .Format("yyyy/MMM/dd")
+                                .WithField()
+                                .Label("yyyy/MMM/dd");
     }
 }    
 ```

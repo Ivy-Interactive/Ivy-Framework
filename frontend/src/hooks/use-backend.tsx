@@ -115,12 +115,19 @@ const escapeXml = (str: string) => {
     .replace(/'/g, '&apos;');
 };
 
+const getFullReplacementNode = (patch: Operation[]): WidgetNode | null => {
+  if (patch.length === 1 && patch[0].op === 'replace' && patch[0].path === '') {
+    return (patch[0] as { value: WidgetNode }).value;
+  }
+  return null;
+};
+
 // Pure function - no side effects, safe for React Strict Mode double-invocation
 function applyUpdateMessage(
   tree: WidgetNode,
   updates: UpdateMessage
 ): WidgetNode | null {
-  const newTree = cloneDeep(tree);
+  let newTree = cloneDeep(tree);
 
   for (const update of updates) {
     let parent = newTree;
@@ -131,7 +138,13 @@ function applyUpdateMessage(
     }
 
     if (update.indices.length === 0) {
-      applyPatch(parent, update.patch);
+      const replacement = getFullReplacementNode(update.patch);
+      if (replacement) {
+        // Special case: full replacement of the root node
+        newTree = replacement;
+      } else {
+        applyPatch(parent, update.patch);
+      }
     } else {
       update.indices.forEach((index, i) => {
         if (i === update.indices.length - 1) {
@@ -140,13 +153,10 @@ function applyUpdateMessage(
             return;
           }
           const target = parent.children[index];
-          if (
-            update.patch.length === 1 &&
-            update.patch[0].op === 'replace' &&
-            update.patch[0].path === ''
-          ) {
+          const replacement = getFullReplacementNode(update.patch);
+          if (replacement) {
             // Special case: full replacement of the target node
-            parent.children[index] = update.patch[0].value as WidgetNode;
+            parent.children[index] = replacement;
           } else {
             applyPatch(target, update.patch);
           }

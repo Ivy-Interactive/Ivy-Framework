@@ -159,6 +159,77 @@ public class AdvancedAggregationsTable : ViewBase
 }
 ```
 
+### Pivot Tables
+
+Pivot tables allow you to aggregate and summarize data by grouping on dimensions and calculating measures. Use the `ToPivotTable()` extension method to transform data into aggregated results that can be displayed as tables.
+
+**Dimension** - A field to group by (e.g., Category, Region, Date)
+
+**Measure** - An aggregated calculation (e.g., Sum, Count, Average, Max, Min)
+
+```csharp demo-tabs
+public class PivotTableExample : ViewBase
+{
+    record SalesData(string Browser, string Region, int Sessions, decimal Revenue);
+    record BrowserSummary(string Browser, int TotalSessions, decimal TotalRevenue, decimal AverageRevenue);
+
+    public override async Task<object?> Build()
+    {
+        var rawData = new[]
+        {
+            new SalesData("Chrome", "North", 150, 4500m),
+            new SalesData("Chrome", "South", 120, 3600m),
+            new SalesData("Firefox", "North", 80, 2400m),
+            new SalesData("Firefox", "South", 60, 1800m),
+            new SalesData("Safari", "North", 50, 1500m),
+            new SalesData("Safari", "South", 40, 1200m)
+        };
+
+        var pivotByBrowser = await rawData.ToPivotTable()
+            .Dimension("Browser", d => d.Browser)
+            .Measure("Total Sessions", g => g.Sum(s => s.Sessions))
+            .Measure("Total Revenue", g => g.Sum(s => s.Revenue))
+            .Measure("Average Revenue", g => g.Average(s => s.Revenue))
+            .ExecuteAsync();
+
+        var pivotByBrowserAndRegion = await rawData.ToPivotTable()
+            .Dimension("Browser", d => d.Browser)
+            .Dimension("Region", d => d.Region)
+            .Measure("Sessions", g => g.Sum(s => s.Sessions))
+            .Measure("Revenue", g => g.Sum(s => s.Revenue))
+            .ExecuteAsync();
+
+        var typedResults = new List<BrowserSummary>();
+        await foreach (var item in rawData.ToPivotTable()
+            .Dimension("Browser", d => d.Browser)
+            .Measure("TotalSessions", g => g.Sum(s => s.Sessions))
+            .Measure("TotalRevenue", g => g.Sum(s => s.Revenue))
+            .Measure("AverageRevenue", g => g.Average(s => s.Revenue))
+            .Produces<BrowserSummary>()
+            .ExecuteAsync())
+        {
+            typedResults.Add(item);
+        }
+
+        return Layout.Vertical().Gap(4)
+            | Text.H3("Raw Data")
+            | rawData.ToTable().Width(Size.Full())
+            | pivotByBrowser.ToExpando().ToTable().Width(Size.Full())
+            | pivotByBrowserAndRegion.ToExpando().ToTable().Width(Size.Full())
+            | Text.H3("Pivot Table - Strongly Typed Result")
+            | typedResults.ToTable()
+                .Width(Size.Full())
+                .Header(r => r.Browser, "Browser")
+                .Header(r => r.TotalSessions, "Total Sessions")
+                .Header(r => r.TotalRevenue, "Revenue")
+                .Header(r => r.AverageRevenue, "Avg Revenue")
+                .Align(r => r.TotalSessions, Align.Right)
+                .Align(r => r.TotalRevenue, Align.Right)
+                .Align(r => r.AverageRevenue, Align.Right);
+    }
+}
+```
+
 ### Empty Columns Handling
 
 The `RemoveEmptyColumns()` method automatically hides columns that contain no data (empty strings, null values, or zero values). This is useful for dynamic data where some columns might be empty across all rows.

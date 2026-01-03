@@ -189,6 +189,6 @@ Key features of the Supabase provider:
 
 ## Related Documentation
 
-- Authentication Overview
+- [Authentication Overview](AuthenticationOverview.md)
 - [Auth0 Provider](Auth0.md)
 - [Microsoft Entra Provider](MicrosoftEntra.md)
