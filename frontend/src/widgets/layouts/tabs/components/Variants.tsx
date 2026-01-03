@@ -107,13 +107,13 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col h-full',
+        'flex flex-col h-full w-full',
         removeParentPadding && 'remove-parent-padding'
       )}
     >
       <div
         ref={containerRef}
-        className="relative pb-[6px]"
+        className="relative pb-[6px] w-full"
         style={getWidth(width)}
       >
         {/* Hover Highlight */}

@@ -143,6 +143,15 @@ public static class TypeUtils
         {
             return constructor.Invoke([]);
         }
+        var nonPublicConstructor = type.GetConstructor(
+            BindingFlags.Instance | BindingFlags.NonPublic,
+            null,
+            Type.EmptyTypes,
+            null);
+        if (nonPublicConstructor != null)
+        {
+            return nonPublicConstructor.Invoke([]);
+        }
         var primaryConstructor = type.GetConstructors().FirstOrDefault(c => c.GetParameters().All(p => p.HasDefaultValue));
         if (primaryConstructor != null)
         {

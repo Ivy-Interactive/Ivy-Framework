@@ -106,7 +106,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 }
 
                 // Update browser URL for page navigation
-                if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousApp != navigateArgs.AppId)
+                if (navigateArgs.HistoryOp is HistoryOp.Push && previousApp != navigateArgs.AppId)
                 {
                     client.Redirect(navigateArgs.GetUrl(), replaceHistory);
                 }
@@ -126,14 +126,14 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                         SetAppTitle(tab.AppId);
 
                         // Update browser URL when switching to existing tab
-                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination)
+                        if (navigateArgs.HistoryOp is HistoryOp.Push)
                         {
                             client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tab.Id);
                         }
                         return;
                     }
 
-                    if (navigateArgs.Purpose is NavigationPurpose.HistoryTraversal)
+                    if (navigateArgs.HistoryOp is HistoryOp.Pop)
                     {
                         client.Error(new InvalidOperationException("Tab no longer exists."));
                         return;
@@ -172,7 +172,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                         SetAppTitle(appId);
 
                         // Update browser URL when switching to existing tab
-                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousSelectedIndex != existingTabIndex)
+                        if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
                         {
                             client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
                         }
@@ -180,7 +180,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     }
                 }
 
-                if (navigateArgs.Purpose is NavigationPurpose.NewDestination)
+                if (navigateArgs.HistoryOp is HistoryOp.Push)
                 {
                     var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
                     var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));

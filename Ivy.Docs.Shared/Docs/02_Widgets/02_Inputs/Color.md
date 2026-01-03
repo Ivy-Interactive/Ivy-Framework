@@ -156,7 +156,6 @@ public class InvalidStyleDemo : ViewBase
         return new ColorInput<string>("#ff0000").Invalid("This is not used now");
     }
 }
-
 ```
 
 <WidgetDocs Type="Ivy.ColorInput" ExtensionTypes="Ivy.ColorInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/ColorInput.cs"/>

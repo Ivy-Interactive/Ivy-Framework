@@ -46,7 +46,7 @@ public class ProductCardView : ViewBase
                         "Premium Wireless Headphones",
                         "Experience crystal-clear sound with our premium noise-cancelling wireless headphones. Features 30-hour battery life and memory foam ear cushions for all-day comfort.",
                         149.99m,
-                        "https://example.com/headphones.jpg",
+                        "https://png.pngtree.com/png-vector/20250703/ourmid/pngtree-black-headphones-sleek-3d-render-png-image_16600605.webp",
                         4.7,
                         12
                     ));
@@ -81,9 +81,8 @@ public class ProductCardView : ViewBase
                             | new Skeleton().Height(Size.Units(24)).Width(Size.Units(40))
                             | new Skeleton().Height(Size.Units(36)).Width(Size.Units(40)))
                     : Layout.Vertical().Gap(3)
-                        | new Image("https://example.com/headphones.jpg")
+                        | new Image("https://png.pngtree.com/png-vector/20250703/ourmid/pngtree-black-headphones-sleek-3d-render-png-image_16600605.webp")
                             .Height(Size.Units(40))
-                            .Width(Size.Full())
                         | Text.H3(product.Value?.Name)
                         | Text.P(product.Value?.Description)
                         | Text.Strong($"Rating: {product.Value?.Rating}/5")
