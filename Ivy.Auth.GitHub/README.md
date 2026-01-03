@@ -38,26 +38,28 @@ Add the following configuration to your `appsettings.json` or environment variab
 1. Register the HttpClient factory in your DI container:
 
 ```csharp
-builder.Services.AddHttpClient("GitHubAuth", client =>
+var server = new Server();
+
+server.Services.AddHttpClient("GitHubAuth", client =>
 {
     client.DefaultRequestHeaders.Add("User-Agent", "Ivy-Framework");
     client.DefaultRequestHeaders.Add("Accept", "application/vnd.github+json");
     client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
 });
+
+// Ensure IConfiguration is registered
+server.Services.AddSingleton(server.Configuration);
 ```
 
-2. Create and configure the GitHub auth provider:
+2. Configure the GitHub Auth Provider using dependency injection:
 
 ```csharp
 using Ivy.Auth.GitHub;
 
-// Create and configure the GitHub auth provider
-var authProvider = new GitHubAuthProvider(httpClientFactory, configuration)
-    .UseGitHub();
+// Configure GitHub Auth Provider - UseAuth will create the provider via DI
+server.UseAuth<GitHubAuthProvider>(c => c.UseGitHub());
 
-// Use with Ivy server
-var server = new Server()
-    .UseAuth(authProvider);
+await server.RunAsync();
 ```
 
 ## Required Scopes
