@@ -183,8 +183,8 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
             .ToForm()
             //We only specify Builder if we want to customize the input control for the field - ToForm() will scaffold the form based on the properties of the record
             //ToAsyncSelectInput allows us to select foreign keys
-            .Builder(e => e.DepartmentId, e => e.ToAsyncSelectInput(ProductHelpers.QueryDepartments(factory), ProductHelpers.LookupDepartment(factory), placeholder: "Select Department"))
-            .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.QueryCategories(factory), ProductHelpers.LookupCategory(factory), placeholder: "Select Category"))
+            .Builder(e => e.DepartmentId, e => e.ToAsyncSelectInput(ProductHelpers.UseDepartmentSearch, ProductHelpers.UseDepartmentLookup, placeholder: "Select Department"))
+            .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.UseCategorySearch, ProductHelpers.UseCategoryLookup, placeholder: "Select Category"))
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "Create Product", submitTitle: "Create");
 
@@ -295,57 +295,69 @@ public static class ProductHelpers
             });
     }
 
-    public static AsyncSelectQueryDelegate<Guid?> QueryCategories(SampleDbContextFactory factory)
+    public static QueryResult<Option<Guid?>[]> UseCategorySearch(IViewContext context, string query)
     {
-        return async query =>
-        {
-            await using var db = factory.CreateDbContext();
-            return (await db.Categories
-                    .Where(e => e.Name.Contains(query))
-                    .Select(e => new { e.Id, e.Name })
-                    .Take(50)
-                    .ToArrayAsync())
-                .Select(e => new Option<Guid?>(e.Name, e.Id))
-                .ToArray();
-        };
+        var factory = context.UseService<SampleDbContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseCategorySearch), query),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return (await db.Categories
+                        .Where(e => e.Name.Contains(query))
+                        .Select(e => new { e.Id, e.Name })
+                        .Take(50)
+                        .ToArrayAsync(ct))
+                    .Select(e => new Option<Guid?>(e.Name, e.Id))
+                    .ToArray();
+            });
     }
 
-    public static AsyncSelectLookupDelegate<Guid?> LookupCategory(SampleDbContextFactory factory)
+    public static QueryResult<Option<Guid?>?> UseCategoryLookup(IViewContext context, Guid? id)
     {
-        return async id =>
-        {
-            if (id == null) return null;
-            await using var db = factory.CreateDbContext();
-            var category = await db.Categories.FindAsync(id);
-            if (category == null) return null;
-            return new Option<Guid?>(category.Name, category.Id);
-        };
+        var factory = context.UseService<SampleDbContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseCategoryLookup), id),
+            fetcher: async ct =>
+            {
+                if (id == null) return null;
+                await using var db = factory.CreateDbContext();
+                var category = await db.Categories.FindAsync([id], ct);
+                if (category == null) return null;
+                return new Option<Guid?>(category.Name, category.Id);
+            });
     }
 
-    public static AsyncSelectQueryDelegate<Guid?> QueryDepartments(SampleDbContextFactory factory)
+    public static QueryResult<Option<Guid?>[]> UseDepartmentSearch(IViewContext context, string query)
     {
-        return async query =>
-        {
-            await using var db = factory.CreateDbContext();
-            return (await db.Departments
-                    .Where(e => e.Name.Contains(query))
-                    .Select(e => new { e.Id, e.Name })
-                    .Take(50)
-                    .ToArrayAsync())
-                .Select(e => new Option<Guid?>(e.Name, e.Id))
-                .ToArray();
-        };
+        var factory = context.UseService<SampleDbContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseDepartmentSearch), query),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return (await db.Departments
+                        .Where(e => e.Name.Contains(query))
+                        .Select(e => new { e.Id, e.Name })
+                        .Take(50)
+                        .ToArrayAsync(ct))
+                    .Select(e => new Option<Guid?>(e.Name, e.Id))
+                    .ToArray();
+            });
     }
 
-    public static AsyncSelectLookupDelegate<Guid?> LookupDepartment(SampleDbContextFactory factory)
+    public static QueryResult<Option<Guid?>?> UseDepartmentLookup(IViewContext context, Guid? id)
     {
-        return async id =>
-        {
-            if (id == null) return null;
-            await using var db = factory.CreateDbContext();
-            var department = await db.Departments.FindAsync(id);
-            if (department == null) return null;
-            return new Option<Guid?>(department.Name, department.Id);
-        };
+        var factory = context.UseService<SampleDbContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseDepartmentLookup), id),
+            fetcher: async ct =>
+            {
+                if (id == null) return null;
+                await using var db = factory.CreateDbContext();
+                var department = await db.Departments.FindAsync([id], ct);
+                if (department == null) return null;
+                return new Option<Guid?>(department.Name, department.Id);
+            });
     }
 }

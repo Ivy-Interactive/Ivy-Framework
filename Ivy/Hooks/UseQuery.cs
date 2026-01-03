@@ -1,6 +1,5 @@
 using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
-using Ivy.Auth;
 using Ivy.Core.Hooks;
 using Ivy.Views;
 

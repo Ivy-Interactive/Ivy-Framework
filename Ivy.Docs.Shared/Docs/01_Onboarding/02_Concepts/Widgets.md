@@ -161,19 +161,23 @@ public class InputWidgetsDemo : ViewBase
         
         var selectedCategory = UseState<string?>(default(string?));
 
-        Task<Option<string>[]> QueryCategories(string query)
+        QueryResult<Option<string>[]> QueryCategories(IViewContext context, string query)
         {
-            return Task.FromResult(Categories
-                .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
-                .Select(c => new Option<string>(c))
-                .ToArray());
+            return context.UseQuery<Option<string>[], (string, string)>(
+                key: (nameof(QueryCategories), query),
+                fetcher: ct => Task.FromResult(Categories
+                    .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Select(c => new Option<string>(c))
+                    .ToArray()));
         }
 
-        Task<Option<string>?> LookupCategory(string? category)
+        QueryResult<Option<string>?> LookupCategory(IViewContext context, string? category)
         {
-            return Task.FromResult(category != null ? new Option<string>(category) : null);
+            return context.UseQuery<Option<string>?, (string, string?)>(
+                key: (nameof(LookupCategory), category),
+                fetcher: ct => Task.FromResult(category != null ? new Option<string>(category) : null));
         }
-        
+
         return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
             | new Card(
                 Layout.Vertical().Gap(2)
