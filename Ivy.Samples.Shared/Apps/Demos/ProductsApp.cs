@@ -90,7 +90,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
         var blades = UseContext<IBladeController>();
 
         var productQuery = UseQuery(
-            key: (nameof(Product), productId),
+            key: (nameof(ProductDetailsBlade), productId),
             fetcher: async (_, ct) =>
             {
                 await using var db = factory.CreateDbContext();
@@ -100,7 +100,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
                     .SingleOrDefaultAsync(e => e.Id == productId, ct);
             });
 
-        if (productQuery.IsLoading) return new Skeleton();
+        if (productQuery.IsLoading) return new Skeleton().Height(100);
 
         if (productQuery.Value == null)
         {
@@ -144,10 +144,10 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
                 | editBtn
             ).Title("Product Details");
 
-        return Layout.Vertical().Gap(4) | new object[]
-        {
-            productCard
-        };
+        return BladeHelper.WithHeader( //todo: Make this new BladeHeader()?
+            header: Text.Literal(product.Name),
+            content: productCard
+        );
     }
 
     private void Delete(SampleDbContextFactory dbFactory)
@@ -232,6 +232,7 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
 
         var categoriesQuery = Context.UseCategories();
         var departmentsQuery = Context.UseDepartments();
+        var detailsMutation = UseMutation((nameof(ProductDetailsBlade), id));
 
         if (productQuery.IsLoading || categoriesQuery.IsLoading || departmentsQuery.IsLoading || productQuery.Value == null) return new Skeleton();
 
@@ -254,19 +255,19 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
         async Task OnSubmit(Product? request)
         {
             if (request == null) return;
-            productQuery.Mutator.Mutate(request, false); // Optimistic update
             var db = factory.CreateDbContext();
             request.UpdatedAt = DateTime.UtcNow;
             db.Products.Update(request);
             await db.SaveChangesAsync();
-            productQuery.Mutator.Revalidate();
+            productQuery.Mutator.Mutate(request, false);
+            detailsMutation.Revalidate();
         }
     }
 }
 
 public static class ProductHelpers
 {
-    public static QueryResult<Option<Guid?>[]> UseCategories(this IViewContext context)
+    public static QueryResult<Option<Guid>[]> UseCategories(this IViewContext context)
     {
         var factory = context.UseService<SampleDbContextFactory>();
         return context.UseQuery(
@@ -275,12 +276,12 @@ public static class ProductHelpers
             {
                 await using var db = factory.CreateDbContext();
                 return await db.Categories
-                    .Select(e => new Option<Guid?>(e.Name, e.Id))
+                    .Select(e => new Option<Guid>(e.Name, e.Id))
                     .ToArrayAsync(ct);
             });
     }
 
-    public static QueryResult<Option<Guid?>[]> UseDepartments(this IViewContext context)
+    public static QueryResult<Option<Guid>[]> UseDepartments(this IViewContext context)
     {
         var factory = context.UseService<SampleDbContextFactory>();
         return context.UseQuery(
@@ -289,7 +290,7 @@ public static class ProductHelpers
             {
                 await using var db = factory.CreateDbContext();
                 return await db.Departments
-                    .Select(e => new Option<Guid?>(e.Name, e.Id))
+                    .Select(e => new Option<Guid>(e.Name, e.Id))
                     .ToArrayAsync(ct);
             });
     }
