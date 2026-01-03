@@ -3,5 +3,5 @@ namespace Ivy;
 
 public record Spacer : WidgetBase<Spacer>
 {
-    internal Spacer() { }
+    public Spacer() { }
 }
