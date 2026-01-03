@@ -9,4 +9,9 @@ public static class FormExtensions
     {
         return new FormBuilder<T>(obj, submitTitle);
     }
+
+    public static FormBuilder<T> ToForm<T>(this T obj, string submitTitle = "Save")
+    {
+        return new FormBuilder<T>(new State<T>(obj), submitTitle);
+    }
 }

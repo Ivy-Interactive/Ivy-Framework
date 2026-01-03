@@ -78,28 +78,27 @@ public record QueryMutator(
 
 public delegate void MutateDelegate<TValue>(TValue? newValue, bool revalidate);
 
-public record QueryMutator<TValue, TKey>(
-    TKey QueryKey,
+public record QueryMutator<TValue>(
     MutateDelegate<TValue> Mutate,
     Action Revalidate,
     Action Invalidate)
 {
-    public static implicit operator QueryMutator(QueryMutator<TValue, TKey> typed) =>
+    public static implicit operator QueryMutator(QueryMutator<TValue> typed) =>
         new(typed.Revalidate, typed.Invalidate);
 }
 
-public record QueryResult<TValue, TKey>(
+public record QueryResult<TValue>(
     TValue? Value,
     bool IsLoading,
     bool IsValidating,
     bool IsPrevious,
-    QueryMutator<TValue, TKey> Mutator,
+    QueryMutator<TValue> Mutator,
     Exception? Error = null);
 
 public static class QueryResultExtensions
 {
     //Debug helper to visualize QueryResult state
-    public static object? Build<TValue, TKey>(this QueryResult<TValue, TKey> qr, IViewContext _)
+    public static object? Build<TValue>(this QueryResult<TValue> qr, IViewContext _)
     {
         var states = Layout.Horizontal()
                | new Badge("IsLoading").Variant(qr.IsLoading ? BadgeVariant.Primary : BadgeVariant.Outline)
@@ -153,7 +152,7 @@ public static class UseQueryExtensions
     /// Fetches and caches data with SWR-style revalidation.
     /// When key is null, returns an idle result without fetching (conditional fetching).
     /// </summary>
-    public static QueryResult<TValue, TKey> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,
+    public static QueryResult<TValue> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
         TValue? initialValue = default) where TKey : notnull
@@ -181,15 +180,13 @@ public static class UseQueryExtensions
         var prevQueryKeyRef = context.UseRef(() => key is not null ? serializedScopedKey : (string?)null);
         var hasInitialValueRef = context.UseRef(() => initialValue is not null);
 
-        var emptyMutator = new QueryMutator<TValue, TKey>(
-            default!,
+        var emptyMutator = new QueryMutator<TValue>(
             static (_, _) => { },
             static () => { },
             static () => { });
 
         var mutator = key is not null
-            ? new QueryMutator<TValue, TKey>(
-                key,
+            ? new QueryMutator<TValue>(
                 (newValue, revalidate) => queryManager.Mutate<TValue>(serializedScopedKey, newValue, revalidate),
                 () => queryManager.Revalidate(serializedScopedKey),
                 () => queryManager.Invalidate(serializedScopedKey))
@@ -200,7 +197,7 @@ public static class UseQueryExtensions
         var initialIsLoading = key is not null && !shouldSkipInitialFetch;
 
         var resultState = context.UseState(
-            () => new QueryResult<TValue, TKey>(initialValue, initialIsLoading, IsValidating: false, IsPrevious: false, mutator)
+            () => new QueryResult<TValue>(initialValue, initialIsLoading, IsValidating: false, IsPrevious: false, mutator)
         );
 
         // Manage subscription based on key changes
@@ -251,14 +248,14 @@ public static class UseQueryExtensions
         // Return idle state when key is null
         if (key is null)
         {
-            return new QueryResult<TValue, TKey>(initialValue, IsLoading: false, IsValidating: false,
+            return new QueryResult<TValue>(initialValue, IsLoading: false, IsValidating: false,
                 IsPrevious: false, emptyMutator);
         }
 
         return resultState.Value;
     }
 
-    private static QueryResult<TValue, TKey> UseViewScopedQuery<TValue, TKey>(this IViewContext context, TKey? key,
+    private static QueryResult<TValue> UseViewScopedQuery<TValue, TKey>(this IViewContext context, TKey? key,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
         QueryOptions opts,
         TValue? initialValue) where TKey : notnull
@@ -273,18 +270,16 @@ public static class UseQueryExtensions
         var shouldSkipInitialFetch = !opts.RevalidateOnInit && hasInitialValueRef.Value;
         var initialIsLoading = key is not null && !shouldSkipInitialFetch;
 
-        var emptyMutator = new QueryMutator<TValue, TKey>(
-            default!,
+        var emptyMutator = new QueryMutator<TValue>(
             static (_, _) => { },
             static () => { },
             static () => { });
 
         var resultState = context.UseState(() =>
-            new QueryResult<TValue, TKey>(initialValue, initialIsLoading, IsValidating: false, IsPrevious: false, emptyMutator));
+            new QueryResult<TValue>(initialValue, initialIsLoading, IsValidating: false, IsPrevious: false, emptyMutator));
 
         var mutator = key is not null
-            ? new QueryMutator<TValue, TKey>(
-                key,
+            ? new QueryMutator<TValue>(
                 (newValue, revalidate) =>
                 {
                     if (revalidate)
@@ -312,7 +307,7 @@ public static class UseQueryExtensions
                 {
                     ctsRef.Value?.Cancel();
                     fetchVersionRef.Value++;
-                    resultState.Set(new QueryResult<TValue, TKey>(default, true, false, false, resultState.Value.Mutator));
+                    resultState.Set(new QueryResult<TValue>(default, true, false, false, resultState.Value.Mutator));
                 })
             : emptyMutator;
 
@@ -373,7 +368,7 @@ public static class UseQueryExtensions
 
                     if (!token.IsCancellationRequested && fetchVersionRef.Value == myVersion)
                     {
-                        resultState.Set(new QueryResult<TValue, TKey>(value, false, false, IsPrevious: false, mutator));
+                        resultState.Set(new QueryResult<TValue>(value, false, false, IsPrevious: false, mutator));
                     }
                 }
                 catch (OperationCanceledException)
@@ -388,7 +383,7 @@ public static class UseQueryExtensions
                 {
                     if (!token.IsCancellationRequested && fetchVersionRef.Value == myVersion)
                     {
-                        resultState.Set(new QueryResult<TValue, TKey>(resultState.Value.Value, false, false, IsPrevious: false, mutator, ex));
+                        resultState.Set(new QueryResult<TValue>(resultState.Value.Value, false, false, IsPrevious: false, mutator, ex));
                     }
                 }
             });
@@ -400,14 +395,14 @@ public static class UseQueryExtensions
         // Return idle state when key is null
         if (key is null)
         {
-            return new QueryResult<TValue, TKey>(initialValue, IsLoading: false, IsValidating: false,
+            return new QueryResult<TValue>(initialValue, IsLoading: false, IsValidating: false,
                 IsPrevious: false, emptyMutator);
         }
 
         // If skipping initial fetch with initialValue, return non-loading state
         if (shouldSkipInitialFetch && !hasFetchedRef.Value)
         {
-            return new QueryResult<TValue, TKey>(initialValue, IsLoading: false, IsValidating: false, IsPrevious: false, mutator);
+            return new QueryResult<TValue>(initialValue, IsLoading: false, IsValidating: false, IsPrevious: false, mutator);
         }
 
         return resultState.Value;
@@ -433,7 +428,7 @@ public static class UseQueryExtensions
             () => queryManager.Invalidate(serializedScopedKey));
     }
 
-    public static QueryMutator<TValue, TKey> UseMutation<TValue, TKey>(this IViewContext context, TKey key, QueryOptions? options = null)
+    public static QueryMutator<TValue> UseMutation<TValue, TKey>(this IViewContext context, TKey key, QueryOptions? options = null)
         where TKey : notnull
     {
         if (key is null) throw new ArgumentNullException(nameof(key));
@@ -449,14 +444,13 @@ public static class UseQueryExtensions
         var scopedKey = context.UseScopedQueryKey(key, opts);
         var serializedScopedKey = QueryService.SerializeKey(scopedKey);
 
-        return new QueryMutator<TValue, TKey>(
-            key,
+        return new QueryMutator<TValue>(
             (newValue, revalidate) => queryManager.Mutate<TValue>(serializedScopedKey, newValue, revalidate),
             () => queryManager.Revalidate(serializedScopedKey),
             () => queryManager.Invalidate(serializedScopedKey));
     }
 
-    public static QueryResult<TValue, TKey> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,
+    public static QueryResult<TValue> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,
         Func<CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
         TValue? initialValue = default) where TKey : notnull
@@ -468,7 +462,7 @@ public static class UseQueryExtensions
             initialValue);
     }
 
-    public static QueryResult<TValue, TKey> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,
+    public static QueryResult<TValue> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,
         Func<Task<TValue>> fetcher,
         QueryOptions? options = null,
         TValue? initialValue = default) where TKey : notnull
@@ -480,7 +474,7 @@ public static class UseQueryExtensions
             initialValue);
     }
 
-    public static QueryResult<TValue, string> UseQuery<TValue>(
+    public static QueryResult<TValue> UseQuery<TValue>(
         this IViewContext context,
         Func<CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
@@ -508,7 +502,7 @@ public static class UseQueryExtensions
     ///     () => user.Value?.Id,
     ///     async (userId, ct) => await FetchProjects(userId, ct));
     /// </example>
-    public static QueryResult<TValue, TKey> UseQuery<TValue, TKey>(
+    public static QueryResult<TValue> UseQuery<TValue, TKey>(
         this IViewContext context,
         Func<TKey?> keyFactory,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
@@ -523,7 +517,7 @@ public static class UseQueryExtensions
     /// Fetches and caches data with a computed key for dependent fetching.
     /// When keyFactory returns null, returns an idle result without fetching.
     /// </summary>
-    public static QueryResult<TValue, TKey> UseQuery<TValue, TKey>(
+    public static QueryResult<TValue> UseQuery<TValue, TKey>(
         this IViewContext context,
         Func<TKey?> keyFactory,
         Func<CancellationToken, Task<TValue>> fetcher,
@@ -538,7 +532,7 @@ public static class UseQueryExtensions
     /// Fetches and caches data with a computed key for dependent fetching.
     /// When keyFactory returns null, returns an idle result without fetching.
     /// </summary>
-    public static QueryResult<TValue, TKey> UseQuery<TValue, TKey>(
+    public static QueryResult<TValue> UseQuery<TValue, TKey>(
         this IViewContext context,
         Func<TKey?> keyFactory,
         Func<Task<TValue>> fetcher,

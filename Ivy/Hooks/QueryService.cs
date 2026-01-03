@@ -168,7 +168,7 @@ public class QueryService : IDisposable, IAsyncDisposable
     /// Fetch is automatically cancelled when all subscribers dispose.
     /// </summary>
     public IDisposable Subscribe<TValue, TKey>(
-        IState<QueryResult<TValue, TKey>> resultState,
+        IState<QueryResult<TValue>> resultState,
         Guid subscriberId,
         TKey key,
         object scopedKey,
@@ -226,7 +226,7 @@ public class QueryService : IDisposable, IAsyncDisposable
                 ? typed
                 : isPrevious ? resultState.Value.Value : default;
 
-            resultState.Set(new QueryResult<TValue, TKey>(
+            resultState.Set(new QueryResult<TValue>(
                 resultValue,
                 isLoading,
                 isValidating,

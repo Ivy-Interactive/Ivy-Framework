@@ -177,23 +177,24 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
         var factory = UseService<SampleDbContextFactory>();
         var customer = UseState(() => new ProductCreateRequest());
 
-        UseEffect(() =>
-        {
-            var productId = CreateProduct(factory, customer.Value);
-            refreshToken.Refresh(productId);
-        }, [customer]);
-
         return customer
             .ToForm()
             //We only specify Builder if we want to customize the input control for the field - ToForm() will scaffold the form based on the properties of the record
             //ToAsyncSelectInput allows us to select foreign keys
             .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.QueryCategories(factory), ProductHelpers.LookupCategory(factory), placeholder: "Select Category"))
+            .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "Create Product", submitTitle: "Create");
+
+        async Task OnSubmit(ProductCreateRequest request)
+        {
+            var productId = await CreateProduct(factory, request);
+            refreshToken.Refresh(productId);
+        }
     }
 
-    private Guid CreateProduct(SampleDbContextFactory factory, ProductCreateRequest request)
+    private async Task<Guid> CreateProduct(SampleDbContextFactory factory, ProductCreateRequest request)
     {
-        using var db = factory.CreateDbContext();
+        await using var db = factory.CreateDbContext();
 
         var id = Guid.NewGuid();
 
@@ -206,7 +207,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         });
-        db.SaveChanges();
+        await db.SaveChangesAsync();
 
         return id;
     }
@@ -217,19 +218,20 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
     public override object? Build()
     {
         var factory = UseService<SampleDbContextFactory>();
-        var product = UseState(() => factory.CreateDbContext().Products.Find(id)!);
-        var queryMutator = UseMutation((nameof(Product), id));
 
-        UseEffect(() =>
-        {
-            var db = factory.CreateDbContext();
-            product.Value.UpdatedAt = DateTime.UtcNow;
-            db.Products.Update(product.Value);
-            db.SaveChanges();
-            queryMutator.Revalidate();
-        }, [product]);
+        var productQuery = UseQuery(
+            key: (typeof(Product), id),
+            fetcher: async (_, ct) =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.Products.FirstAsync(e => e.Id == id, ct);
+            });
 
-        return product
+        var categoriesQuery = Context.UseCategories();
+
+        if (productQuery.IsLoading || categoriesQuery.IsLoading || productQuery.Value == null) return new Skeleton();
+
+        return productQuery.Value!
             .ToForm()
             // ToForm() will scaffold the form based on the properties of the record and create the appropriate builder for input controls
             // .Build(<expression>, e => To...) will allow us to customize the input control for the field
@@ -240,13 +242,41 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
             .PlaceHorizontal(e => e.Width, e => e.Height) // This will place the fields side by side - useful for related fields
             .Group("Details", open: true, e => e.Description, e => e.Meta) // This will group the fields in a collapsible group that is open by default - useful for related fields that are less common
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt) // We remove these fields from the form as users should not be able to edit them
-            .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.QueryCategories(factory), ProductHelpers.LookupCategory(factory), placeholder: "Select Category"))
+                                                                   //.Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.QueryCategories(factory), ProductHelpers.LookupCategory(factory), placeholder: "Select Category"))
+            .Builder(e => e.CategoryId, e => e.ToSelectInput(categoriesQuery.Value!, placeholder: "Select Category"))
+            .HandleSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Product");
+
+        async Task OnSubmit(Product? request)
+        {
+            if (request == null) return;
+            productQuery.Mutator.Mutate(request, false); // Optimistic update
+            var db = factory.CreateDbContext();
+            request.UpdatedAt = DateTime.UtcNow;
+            db.Products.Update(request);
+            await db.SaveChangesAsync();
+            productQuery.Mutator.Revalidate();
+        }
     }
 }
 
 public static class ProductHelpers
 {
+    public static QueryResult<Option<Guid?>[]> UseCategories(this IViewContext context)
+    {
+        var factory = context.UseService<SampleDbContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseCategories)),
+            fetcher: async (_, ct) =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.Categories
+                    .Select(e => new Option<Guid?>(e.Name, e.Id))
+                    .ToArrayAsync(ct);
+            });
+    }
+
+
     public static AsyncSelectQueryDelegate<Guid?> QueryCategories(SampleDbContextFactory factory)
     {
         return async query =>
