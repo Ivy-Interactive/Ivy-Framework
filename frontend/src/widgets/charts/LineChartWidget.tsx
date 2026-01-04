@@ -19,7 +19,7 @@ import { getChartThemeColors } from './styles';
 import { LineChartWidgetProps, ChartType } from './chartTypes';
 
 const LineChartWidget: React.FC<LineChartWidgetProps> = ({
-  data,
+  data = [],
   width = 'Full',
   height = 'Full',
   lines = [],

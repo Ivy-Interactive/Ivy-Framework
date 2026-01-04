@@ -55,7 +55,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   invalid,
   nullable = false,
   scale = Scales.Medium,
-  events,
+  events = [],
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
