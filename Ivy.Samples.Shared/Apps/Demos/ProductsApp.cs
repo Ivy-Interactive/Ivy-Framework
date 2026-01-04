@@ -82,7 +82,9 @@ public class ProductsListBlade : ViewBase
                      | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
                      | createBtn;
 
-        return BladeHelper.WithHeader(header, new List(items));
+        return new Fragment()
+               | new BladeHeader(header)
+               | new List(items);
     }
 }
 
@@ -150,10 +152,9 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
                 | editBtn
             ).Title("Product Details");
 
-        return BladeHelper.WithHeader( //todo: Make this new BladeHeader()?
-            header: Text.Literal(product.Name),
-            content: productCard
-        );
+        return new Fragment()
+               | new BladeHeader(Text.Literal(product.Name))
+               | productCard;
     }
 
     private void Delete(SampleDbContextFactory dbFactory)

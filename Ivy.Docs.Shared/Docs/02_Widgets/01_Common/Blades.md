@@ -50,7 +50,7 @@ public class NavigationRootView : ViewBase
 
 ### Blade Headers
 
-Use `BladeHelper.WithHeader()` to add custom toolbars or headers to your blades.
+Use `BladeHeader` to add custom toolbars or headers to your blades.
 
 ```csharp demo-tabs
 public class BladeHeaderDemo : ViewBase
@@ -79,15 +79,18 @@ public class SearchableListView : ViewBase
                 blades.Push(this, new ProductDetailView(product), product))
         );
 
-        return BladeHelper.WithHeader(
-            Layout.Horizontal(
-                searchTerm.ToTextInput().Placeholder("Search products..."),
-                new Button(icon: Icons.Search, variant: ButtonVariant.Outline)
-            ).Gap(1),
-            filteredProducts.Any()
-                ? new List(items)
-                : Text.Block("No products found")
-        );
+        var header = Layout.Horizontal(
+            searchTerm.ToTextInput().Placeholder("Search products..."),
+            new Button(icon: Icons.Search, variant: ButtonVariant.Outline)
+        ).Gap(1);
+
+        object content = filteredProducts.Any()
+            ? new List(items)
+            : Text.Block("No products found");
+
+        return new Fragment()
+               | new BladeHeader(header)
+               | content;
     }
 }
 
@@ -138,11 +141,12 @@ public class RefreshRootView : ViewBase
             }
         }, [refreshToken]);
 
-        return BladeHelper.WithHeader(
-            new Button("Add New Item", onClick: _ =>
-                blades.Push(this, new AddItemView(refreshToken), "Add Item")),
-            new List(items.Value.Select(x => new ListItem(x)))
-        );
+        var header = new Button("Add New Item", onClick: _ =>
+            blades.Push(this, new AddItemView(refreshToken), "Add Item"));
+
+        return new Fragment()
+               | new BladeHeader(header)
+               | new List(items.Value.Select(x => new ListItem(x)));
     }
 }
 

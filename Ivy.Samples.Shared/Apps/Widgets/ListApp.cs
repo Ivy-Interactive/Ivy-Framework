@@ -45,13 +45,14 @@ public class ListBlade : ViewBase
 
         });
 
-        return BladeHelper.WithHeader(
-            Layout.Horizontal(
-                searchString.ToSearchInput().Placeholder("Search..."),
-                new Button(icon: Icons.Plus, onClick: onCreate, variant: ButtonVariant.Outline)
-            ).Gap(1),
-            new List(items)
-        );
+        var header = Layout.Horizontal(
+            searchString.ToSearchInput().Placeholder("Search..."),
+            new Button(icon: Icons.Plus, onClick: onCreate, variant: ButtonVariant.Outline)
+        ).Gap(1);
+
+        return new Fragment()
+               | new BladeHeader(header)
+               | new List(items);
     }
 }
 
