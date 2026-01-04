@@ -42,7 +42,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       step = 1,
       disabled = false,
       placeholder = '',
-      value,
+      value = null,
       onChange,
       onBlur,
       format = {
@@ -72,8 +72,8 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     );
 
     const formatValue = useCallback(
-      (num: number | null | undefined): string => {
-        if (num == null) return '';
+      (num: number | null): string => {
+        if (num === null) return '';
         try {
           return isFocused ? num.toString() : formatter.format(num);
         } catch {
@@ -263,7 +263,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     const handleBlur = useCallback(
       (e: FocusEvent<HTMLInputElement>) => {
         setIsFocused(false);
-        if (value == null) {
+        if (value === null) {
           setDisplayValue('');
         } else {
           setDisplayValue(formatValue(value));
