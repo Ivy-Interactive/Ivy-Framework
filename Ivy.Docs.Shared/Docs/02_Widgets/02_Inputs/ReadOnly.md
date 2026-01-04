@@ -32,28 +32,35 @@ public class ReadOnlyDemo : ViewBase
 }    
 ```
 
+<WidgetDocs Type="Ivy.ReadOnlyInput" ExtensionTypes="Ivy.ReadOnlyInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/ReadOnlyInput.cs"/>
+
 ## Examples
 
-### Displaying a Value
+<Details>
+<Summary>
+ReadOnlyInput can be used to display computed or derived values in a form alongside editable inputs.
+</Summary>
+<Body>
 
-```csharp
-double value = 123.45;
-var readOnlyInput = new ReadOnlyInput<double>(value);
+```csharp demo-tabs
+public class ReadOnlyFormDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var price = UseState(100.0);
+        var quantity = UseState(5);
+        var total = price.Value * quantity.Value;
+        
+        return Layout.Vertical().Gap(2)
+            | new NumberInput<double>(price)
+                .WithField().Label("Price")
+            | new NumberInput<int>(quantity)
+                .WithField().Label("Quantity")
+            | new ReadOnlyInput<double>(total)
+                .WithField().Label("Total");
+    }
+}
 ```
 
-### Handling Events
-
-```csharp
-var state = UseState(123.45);
-var readOnlyInput = new ReadOnlyInput<double>(state)
-    .OnBlur(e => Console.WriteLine("Input blurred"));
-```
-
-### Using ShowCopyButton
-
-```csharp
-var readOnlyInput = new ReadOnlyInput<string>("ReadOnly Text")
-    .ShowCopyButton(true);
-```
-
-<WidgetDocs Type="Ivy.ReadOnlyInput" ExtensionTypes="Ivy.ReadOnlyInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/ReadOnlyInput.cs"/>
+</Body>
+</Details>

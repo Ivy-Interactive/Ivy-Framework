@@ -59,6 +59,26 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     public Type[] SupportedStateTypes() => [typeof(object)];
 }
 
+public record ReadOnlyInput : ReadOnlyInput<string>
+{
+    public ReadOnlyInput(IAnyState state) : base(state)
+    {
+    }
+
+    [OverloadResolutionPriority(1)]
+    public ReadOnlyInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null) : base(value, onChange)
+    {
+    }
+
+    public ReadOnlyInput(string value, Action<Event<IInput<string>, string>>? onChange = null) : base(value, onChange)
+    {
+    }
+
+    public ReadOnlyInput() : base()
+    {
+    }
+}
+
 public static class ReadOnlyInputExtensions
 {
     public static IAnyReadOnlyInput ToReadOnlyInput(this IAnyState state)
