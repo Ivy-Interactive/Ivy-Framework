@@ -169,7 +169,7 @@ public static class UseQueryExtensions
 
         // Server-scoped: 
         var subscriberId = context.UseRef(Guid.NewGuid);
-        var queryService = context.UseService<QueryService>();
+        var queryService = (QueryService)context.UseService<IQueryService>();
         var scopedKey = key is not null ? context.UseScopedQueryKey(key, opts) : null;
         var serializedScopedKey = scopedKey is not null ? QueryService.SerializeKey(scopedKey) : "";
 
@@ -413,7 +413,7 @@ public static class UseQueryExtensions
         if (opts.Scope == QueryScope.View)
             throw new ArgumentException("UseMutation does not support View scope.", nameof(options));
 
-        var queryManager = context.UseService<QueryService>();
+        var queryManager = (QueryService)context.UseService<IQueryService>();
         var scopedKey = context.UseScopedQueryKey(key, opts);
         var serializedScopedKey = QueryService.SerializeKey(scopedKey);
 
@@ -434,7 +434,7 @@ public static class UseQueryExtensions
         if (opts.Scope == QueryScope.View)
             throw new ArgumentException("UseMutation does not support 'View' QueryScope.", nameof(options));
 
-        var queryManager = context.UseService<QueryService>();
+        var queryManager = (QueryService)context.UseService<IQueryService>();
         var scopedKey = context.UseScopedQueryKey(key, opts);
         var serializedScopedKey = QueryService.SerializeKey(scopedKey);
 

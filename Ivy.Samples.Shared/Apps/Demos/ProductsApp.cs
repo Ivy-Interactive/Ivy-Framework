@@ -23,62 +23,66 @@ public class ProductsListBlade : ViewBase
 {
     public override object? Build()
     {
-        //This blade will display a list of products - we choose to include the name and department of the product as these are the most relevant fields for the user.
-
         var blades = UseContext<IBladeController>();
-        var factory = UseService<SampleDbContextFactory>();
         var refreshToken = UseRefreshToken();
+
+        // Filter state with throttling for search
+        var filter = UseState("");
+        var throttledFilter = UseState("");
+
+        UseEffect(() =>
+        {
+            throttledFilter.Set(filter.Value);
+            blades.Pop(this); // Close any open detail blades when filter changes
+        }, [filter.Throttle(TimeSpan.FromMilliseconds(250)).ToTrigger()]);
+
+        var productsQuery = Context.UseProductListRecords(throttledFilter.Value);
 
         UseEffect(() =>
         {
             if (refreshToken.ReturnValue is Guid productId)
             {
-                blades.Pop(this, true); // make sure the list has been refreshed
+                blades.Pop(this);
+                productsQuery.Mutator.Revalidate();
                 blades.Push(this, new ProductDetailsBlade(productId));
             }
         }, [refreshToken]);
 
+        if (productsQuery.IsLoading) return Text.Muted("Loading...");
+
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
             var product = (ProductListRecord)e.Sender.Tag!;
-            blades.Push(this, new ProductDetailsBlade(product.Id), product.Name, width: Size.Units(100)); // by setting the width we avoid jank when different blades are opened   
+            blades.Push(this, new ProductDetailsBlade(product.Id), product.Name, width: Size.Units(100)); // by setting the width we avoid jank when different blades are opened
         });
 
-        ListItem CreateItem(ProductListRecord record) =>
-            new(title: record.Name, onClick: onItemClicked, tag: record, subtitle: record.Department);
-
-        var createBtn = Icons.Plus.ToButton(_ =>
+        object CreateItem(ProductListRecord listRecord) => new FuncView(context =>
         {
-            blades.Pop(this); // make sure only the current blade is visible
-        }).Ghost().ToTrigger((isOpen) => new ProductCreateDialog(isOpen, refreshToken));
-
-        return new FilteredListView<ProductListRecord>(
-            fetchRecords: (filter) => FetchProducts(factory, filter),
-            createItem: CreateItem,
-            toolButtons: createBtn,
-            onFilterChanged: _ =>
+            var itemQuery = context.UseProductListRecord(listRecord);
+            if (itemQuery.IsLoading || itemQuery.Value == null)
             {
-                blades.Pop(this);
+                Console.WriteLine("Here");
+                return new ListItem(title: "Removed");
             }
-        );
-    }
+            var record = itemQuery.Value;
+            return new ListItem(title: record.Name, onClick: onItemClicked, tag: record, subtitle: record.Department);
+        });
 
-    private async Task<ProductListRecord[]> FetchProducts(SampleDbContextFactory factory, string filter)
-    {
-        await using var db = factory.CreateDbContext();
+        var createBtn = Icons.Plus
+            .ToButton(_ =>
+            {
+                blades.Pop(this); // make sure only the current blade is visible
+            })
+            .Ghost()
+            .ToTrigger((isOpen) => new ProductCreateDialog(isOpen, refreshToken));
 
-        var linq = db.Products.Include(e => e.Department).AsQueryable();
+        var items = (productsQuery.Value ?? []).Select(CreateItem);
 
-        if (!string.IsNullOrWhiteSpace(filter))
-        {
-            linq = linq.Where(e => e.Name.Contains(filter) || (e.Department != null && e.Department.Name.Contains(filter)));
-        }
+        var header = Layout.Horizontal().Gap(1)
+                     | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
+                     | createBtn;
 
-        return await linq
-            .OrderByDescending(e => e.CreatedAt)
-            .Take(50)
-            .Select(e => new ProductListRecord(e.Id, e.Name, e.Department != null ? e.Department.Name : null))
-            .ToArrayAsync();
+        return BladeHelper.WithHeader(header, new List(items));
     }
 }
 
@@ -88,6 +92,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
     {
         var factory = UseService<SampleDbContextFactory>();
         var blades = UseContext<IBladeController>();
+        var queryService = UseService<IQueryService>();
 
         var productQuery = UseQuery(
             key: (nameof(ProductDetailsBlade), productId),
@@ -98,7 +103,12 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
                     .Include(e => e.Category)
                     .Include(e => e.Department)
                     .SingleOrDefaultAsync(e => e.Id == productId, ct);
-            });
+            },
+            options: new QueryOptions()
+            {
+                Tags = [(typeof(Product), productId)]
+            }
+        );
 
         if (productQuery.IsLoading) return new Skeleton().Height(100);
 
@@ -113,7 +123,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
         var deleteBtn = new Button("Delete", onClick: e =>
             {
                 Delete(factory);
-                productQuery.Mutator.Mutate(null, false);
+                queryService.RevalidateByTag((typeof(Product), productId));
                 blades.Pop(refresh: true);
             })
             .Variant(ButtonVariant.Destructive)
@@ -130,7 +140,6 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
         var productCard = new Card(
             content: new
             {
-                // We include some of the interesting fields of the entity here
                 product.Id,
                 product.Name,
                 Category = product.Category?.Name,
@@ -159,7 +168,6 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
     }
 }
 
-// When creating a product we only select the most relevant fields for the user to input - Always the required fields.
 public record ProductCreateRequest
 {
     [Required]
@@ -183,8 +191,8 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
             .ToForm()
             //We only specify Builder if we want to customize the input control for the field - ToForm() will scaffold the form based on the properties of the record
             //ToAsyncSelectInput allows us to select foreign keys
-            .Builder(e => e.DepartmentId, e => e.ToAsyncSelectInput(ProductHelpers.UseDepartmentSearch, ProductHelpers.UseDepartmentLookup, placeholder: "Select Department"))
-            .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.UseCategorySearch, ProductHelpers.UseCategoryLookup, placeholder: "Select Category"))
+            .Builder(e => e.DepartmentId, e => e.ToAsyncSelectInput(ProductHelpers.UseDepartmentOptionsWithFilter, ProductHelpers.UseDepartmentOption, placeholder: "Select Department"))
+            .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.UseCategoryOptionsWithFilter, ProductHelpers.UseCategoryOption, placeholder: "Select Category"))
             .HandleSubmit(OnSubmit)
             .ToDialog(isOpen, title: "Create Product", submitTitle: "Create");
 
@@ -221,6 +229,7 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
     public override object? Build()
     {
         var factory = UseService<SampleDbContextFactory>();
+        var queryService = UseService<IQueryService>();
 
         var productQuery = UseQuery(
             key: (typeof(Product), id),
@@ -228,11 +237,15 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
             {
                 await using var db = factory.CreateDbContext();
                 return await db.Products.FirstAsync(e => e.Id == id, ct);
-            });
+            },
+            options: new QueryOptions
+            {
+                Tags = [(typeof(Product), id)]
+            }
+        );
 
-        var categoriesQuery = Context.UseCategories();
-        var departmentsQuery = Context.UseDepartments();
-        var detailsMutation = UseMutation((nameof(ProductDetailsBlade), id));
+        var categoriesQuery = Context.UseCategoryOptions();
+        var departmentsQuery = Context.UseDepartmentOptions();
 
         if (productQuery.IsLoading || categoriesQuery.IsLoading || departmentsQuery.IsLoading || productQuery.Value == null) return new Skeleton();
 
@@ -259,19 +272,70 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
             request.UpdatedAt = DateTime.UtcNow;
             db.Products.Update(request);
             await db.SaveChangesAsync();
-            productQuery.Mutator.Mutate(request, false);
-            detailsMutation.Revalidate();
+            queryService.RevalidateByTag((typeof(Product), id));
         }
     }
 }
 
 public static class ProductHelpers
 {
-    public static QueryResult<Option<Guid>[]> UseCategories(this IViewContext context)
+    public static QueryResult<ProductListRecord[]> UseProductListRecords(this IViewContext context, string filter)
     {
         var factory = context.UseService<SampleDbContextFactory>();
         return context.UseQuery(
-            key: (nameof(UseCategories)),
+            key: (nameof(UseProductListRecords), filter),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+
+                var linq = db.Products.Include(e => e.Department).AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    linq = linq.Where(e => e.Name.Contains(filter) || (e.Department != null && e.Department.Name.Contains(filter)));
+                }
+
+                return await linq
+                    .OrderByDescending(e => e.CreatedAt)
+                    .Take(50)
+                    .Select(e => new ProductListRecord(e.Id, e.Name, e.Department != null ? e.Department.Name : null))
+                    .ToArrayAsync(ct);
+            },
+            options: new QueryOptions()
+            {
+                Tags = [typeof(ProductListRecord[])]
+            }
+        );
+    }
+
+    public static QueryResult<ProductListRecord?> UseProductListRecord(this IViewContext context, ProductListRecord record)
+    {
+        var factory = context.UseService<SampleDbContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseProductListRecord), record.Id),
+            fetcher: async ct =>
+            {
+                await using var db = factory.CreateDbContext();
+                return await db.Products
+                    .Include(e => e.Department)
+                    .Where(e => e.Id == record.Id)
+                    .Select(e => new ProductListRecord(e.Id, e.Name, e.Department != null ? e.Department.Name : null))
+                    .FirstOrDefaultAsync(ct);
+            },
+            options: new QueryOptions()
+            {
+                RevalidateOnInit = false,
+                Tags = [(typeof(Product), record.Id)]
+            },
+            initialValue: record
+        );
+    }
+
+    public static QueryResult<Option<Guid>[]> UseCategoryOptions(this IViewContext context)
+    {
+        var factory = context.UseService<SampleDbContextFactory>();
+        return context.UseQuery(
+            key: (nameof(UseCategoryOptions)),
             fetcher: async (_, ct) =>
             {
                 await using var db = factory.CreateDbContext();
@@ -281,11 +345,11 @@ public static class ProductHelpers
             });
     }
 
-    public static QueryResult<Option<Guid>[]> UseDepartments(this IViewContext context)
+    public static QueryResult<Option<Guid>[]> UseDepartmentOptions(this IViewContext context)
     {
         var factory = context.UseService<SampleDbContextFactory>();
         return context.UseQuery(
-            key: (nameof(UseDepartments)),
+            key: (nameof(UseDepartmentOptions)),
             fetcher: async (_, ct) =>
             {
                 await using var db = factory.CreateDbContext();
@@ -295,16 +359,16 @@ public static class ProductHelpers
             });
     }
 
-    public static QueryResult<Option<Guid?>[]> UseCategorySearch(IViewContext context, string query)
+    public static QueryResult<Option<Guid?>[]> UseCategoryOptionsWithFilter(IViewContext context, string filter)
     {
         var factory = context.UseService<SampleDbContextFactory>();
         return context.UseQuery(
-            key: (nameof(UseCategorySearch), query),
+            key: (nameof(UseCategoryOptionsWithFilter), query: filter),
             fetcher: async ct =>
             {
                 await using var db = factory.CreateDbContext();
                 return (await db.Categories
-                        .Where(e => e.Name.Contains(query))
+                        .Where(e => e.Name.Contains(filter))
                         .Select(e => new { e.Id, e.Name })
                         .Take(50)
                         .ToArrayAsync(ct))
@@ -313,11 +377,11 @@ public static class ProductHelpers
             });
     }
 
-    public static QueryResult<Option<Guid?>?> UseCategoryLookup(IViewContext context, Guid? id)
+    public static QueryResult<Option<Guid?>?> UseCategoryOption(IViewContext context, Guid? id)
     {
         var factory = context.UseService<SampleDbContextFactory>();
         return context.UseQuery(
-            key: (nameof(UseCategoryLookup), id),
+            key: (nameof(UseCategoryOption), id),
             fetcher: async ct =>
             {
                 if (id == null) return null;
@@ -328,16 +392,16 @@ public static class ProductHelpers
             });
     }
 
-    public static QueryResult<Option<Guid?>[]> UseDepartmentSearch(IViewContext context, string query)
+    public static QueryResult<Option<Guid?>[]> UseDepartmentOptionsWithFilter(IViewContext context, string filter)
     {
         var factory = context.UseService<SampleDbContextFactory>();
         return context.UseQuery(
-            key: (nameof(UseDepartmentSearch), query),
+            key: (nameof(UseDepartmentOptionsWithFilter), query: filter),
             fetcher: async ct =>
             {
                 await using var db = factory.CreateDbContext();
                 return (await db.Departments
-                        .Where(e => e.Name.Contains(query))
+                        .Where(e => e.Name.Contains(filter))
                         .Select(e => new { e.Id, e.Name })
                         .Take(50)
                         .ToArrayAsync(ct))
@@ -346,11 +410,11 @@ public static class ProductHelpers
             });
     }
 
-    public static QueryResult<Option<Guid?>?> UseDepartmentLookup(IViewContext context, Guid? id)
+    public static QueryResult<Option<Guid?>?> UseDepartmentOption(IViewContext context, Guid? id)
     {
         var factory = context.UseService<SampleDbContextFactory>();
         return context.UseQuery(
-            key: (nameof(UseDepartmentLookup), id),
+            key: (nameof(UseDepartmentOption), id),
             fetcher: async ct =>
             {
                 if (id == null) return null;

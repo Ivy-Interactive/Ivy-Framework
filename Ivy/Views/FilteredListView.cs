@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Helpers;
-using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views.Blades;
 
@@ -21,34 +20,30 @@ public class FilteredListView<T>(
 {
     public override object? Build()
     {
+        var records = UseState(Array.Empty<T>);
+
         var filter = UseState("");
-        var throttledFilter = UseState("");
+        var loading = UseState(true);
 
         UseEffect(() =>
         {
             onFilterChanged?.Invoke(filter.Value);
-        }, [throttledFilter]);
+            loading.Set(true);
+        }, [filter]);
 
-        // Update throttled value after debounce
-        UseEffect(() =>
+        UseEffect(async () =>
         {
-            throttledFilter.Set(filter.Value);
+            records.Set(await fetchRecords(filter.Value));
+            loading.Set(false);
         }, [filter.Throttle(throttle ?? TimeSpan.FromMilliseconds(250)).ToTrigger()]);
 
-        var query = UseQuery(
-            key: (callerFile, callerLine, filter: throttledFilter.Value),
-            fetcher: (key, _) => fetchRecords(key.filter),
-            options: QueryScope.View);
-
-        var items = (query.Value ?? []).Select(createItem);
+        var items = records.Value.Select(createItem);
 
         return BladeHelper.WithHeader(
             (Layout.Horizontal().Gap(1)
              | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
              | toolButtons!),
-            query.IsLoading
-                ? Text.Muted("Loading...")
-                : new List(items)
+            loading.Value ? Text.Muted("Loading...") : new List(items)
         );
     }
 }

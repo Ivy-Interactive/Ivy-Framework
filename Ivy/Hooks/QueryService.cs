@@ -9,6 +9,38 @@ using Microsoft.Extensions.Options;
 
 namespace Ivy.Hooks;
 
+/// <summary>
+/// Public interface for query cache management operations.
+/// Use this to invalidate or revalidate cached queries by tag or predicate.
+/// </summary>
+public interface IQueryService
+{
+    /// <summary>
+    /// Invalidate all query entries with the specified tag.
+    /// </summary>
+    void InvalidateByTag(object tag);
+
+    /// <summary>
+    /// Revalidate all query entries with the specified tag.
+    /// </summary>
+    void RevalidateByTag(object tag);
+
+    /// <summary>
+    /// Invalidate all query entries where the predicate returns true for the key.
+    /// </summary>
+    void Invalidate(Func<object, bool> predicate);
+
+    /// <summary>
+    /// Revalidate all query entries where the predicate returns true for the key.
+    /// </summary>
+    void Revalidate(Func<object, bool> predicate);
+
+    /// <summary>
+    /// Clear all query entries.
+    /// </summary>
+    void Clear();
+}
+
 internal enum QueryEntryState
 {
     Empty,        // No value, no fetch in progress
@@ -90,13 +122,13 @@ public static class QueryManagerServiceExtensions
             services.Configure(configure);
         }
 
-        services.AddSingleton<QueryService>();
+        services.AddSingleton<IQueryService, QueryService>();
 
         return services;
     }
 }
 
-public class QueryService : IDisposable, IAsyncDisposable
+public class QueryService : IQueryService, IDisposable, IAsyncDisposable
 {
     private readonly ConcurrentDictionary<string, QueryEntry> _cache = new();
     private readonly ConcurrentDictionary<string, Task<object?>> _inflightRequests = new();
