@@ -128,7 +128,7 @@ public class TagInvalidationExample : ViewBase
                 await Task.Delay(800, ct);
                 return $"Users: {Random.Shared.Next(100, 500)}";
             },
-            options: new QueryOptions { Tags = ["dashboard", "users"] });
+            tags: ["dashboard", "users"]);
 
         var ordersQuery = UseQuery(
             key: "dashboard/orders",
@@ -137,7 +137,7 @@ public class TagInvalidationExample : ViewBase
                 await Task.Delay(600, ct);
                 return $"Orders: {Random.Shared.Next(50, 200)}";
             },
-            options: new QueryOptions { Tags = ["dashboard", "orders"] });
+            tags: ["dashboard", "orders"]);
 
         var revenueQuery = UseQuery(
             key: "dashboard/revenue",
@@ -146,7 +146,7 @@ public class TagInvalidationExample : ViewBase
                 await Task.Delay(700, ct);
                 return $"Revenue: ${Random.Shared.Next(10000, 50000):N0}";
             },
-            options: new QueryOptions { Tags = ["dashboard", "revenue"] });
+            tags: ["dashboard", "revenue"]);
 
         return Layout.Vertical().Gap(4)
                | Text.H3("Revalidate by Tag")
@@ -799,7 +799,7 @@ public class CacheClearExample : ViewBase
                 await Task.Delay(600, ct);
                 return $"Users loaded at {DateTime.Now:HH:mm:ss}";
             },
-            options: new QueryOptions { Tags = ["cache-demo", "users"] });
+            tags: ["cache-demo", "users"]);
 
         var ordersQuery = UseQuery(
             key: "cache-demo/orders",
@@ -808,7 +808,7 @@ public class CacheClearExample : ViewBase
                 await Task.Delay(600, ct);
                 return $"Orders loaded at {DateTime.Now:HH:mm:ss}";
             },
-            options: new QueryOptions { Tags = ["cache-demo", "orders"] });
+            tags: ["cache-demo", "orders"]);
 
         var settingsQuery = UseQuery(
             key: "cache-demo/settings",
@@ -817,7 +817,7 @@ public class CacheClearExample : ViewBase
                 await Task.Delay(600, ct);
                 return $"Settings loaded at {DateTime.Now:HH:mm:ss}";
             },
-            options: new QueryOptions { Tags = ["cache-demo", "settings"] });
+            tags: ["cache-demo", "settings"]);
 
         return Layout.Vertical().Gap(4)
                | Text.H3("Cached Queries")

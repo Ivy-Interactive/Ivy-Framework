@@ -104,10 +104,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
                     .Include(e => e.Department)
                     .SingleOrDefaultAsync(e => e.Id == productId, ct);
             },
-            options: new QueryOptions()
-            {
-                Tags = [(typeof(Product), productId)]
-            }
+            tags: [(typeof(Product), productId)]
         );
 
         if (productQuery.IsLoading) return new Skeleton().Height(100);
@@ -238,10 +235,7 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
                 await using var db = factory.CreateDbContext();
                 return await db.Products.FirstAsync(e => e.Id == id, ct);
             },
-            options: new QueryOptions
-            {
-                Tags = [(typeof(Product), id)]
-            }
+            tags: [(typeof(Product), id)]
         );
 
         var categoriesQuery = Context.UseCategoryOptions();
@@ -301,10 +295,7 @@ public static class ProductHelpers
                     .Select(e => new ProductListRecord(e.Id, e.Name, e.Department != null ? e.Department.Name : null))
                     .ToArrayAsync(ct);
             },
-            options: new QueryOptions()
-            {
-                Tags = [typeof(ProductListRecord[])]
-            }
+            tags: [typeof(ProductListRecord[])]
         );
     }
 
@@ -322,12 +313,9 @@ public static class ProductHelpers
                     .Select(e => new ProductListRecord(e.Id, e.Name, e.Department != null ? e.Department.Name : null))
                     .FirstOrDefaultAsync(ct);
             },
-            options: new QueryOptions()
-            {
-                RevalidateOnInit = false,
-                Tags = [(typeof(Product), record.Id)]
-            },
-            initialValue: record
+            options: new QueryOptions { RevalidateOnInit = false },
+            initialValue: record,
+            tags: [(typeof(Product), record.Id)]
         );
     }
 

@@ -67,49 +67,56 @@ public abstract partial class ViewBase
     protected QueryResult<TValue> UseQuery<TValue, TKey>(TKey? key,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull =>
-        this.Context.UseQuery(key, fetcher, options, initialValue);
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull =>
+        this.Context.UseQuery(key, fetcher, options, initialValue, tags);
 
     protected QueryResult<TValue> UseQuery<TValue, TKey>(TKey? key,
         Func<CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull =>
-        this.Context.UseQuery<TValue, TKey>(key, fetcher, options, initialValue);
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull =>
+        this.Context.UseQuery<TValue, TKey>(key, fetcher, options, initialValue, tags);
 
     protected QueryResult<TValue> UseQuery<TValue, TKey>(TKey? key,
         Func<Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull =>
-        this.Context.UseQuery<TValue, TKey>(key, fetcher, options, initialValue);
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull =>
+        this.Context.UseQuery<TValue, TKey>(key, fetcher, options, initialValue, tags);
 
     protected QueryResult<TValue> UseQuery<TValue>(
         Func<CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
         TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null,
         [CallerFilePath] string callerFile = "",
         [CallerLineNumber] int callerLine = 0) =>
-        this.Context.UseQuery(fetcher, options, initialValue, callerFile, callerLine);
+        this.Context.UseQuery(fetcher, options, initialValue, tags, callerFile, callerLine);
 
     protected QueryResult<TValue> UseQuery<TValue, TKey>(
         Func<TKey?> keyFactory,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull =>
-        this.Context.UseQuery(keyFactory, fetcher, options, initialValue);
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull =>
+        this.Context.UseQuery(keyFactory, fetcher, options, initialValue, tags);
 
     protected QueryResult<TValue> UseQuery<TValue, TKey>(
         Func<TKey?> keyFactory,
         Func<CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull =>
-        this.Context.UseQuery<TValue, TKey>(keyFactory, fetcher, options, initialValue);
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull =>
+        this.Context.UseQuery<TValue, TKey>(keyFactory, fetcher, options, initialValue, tags);
 
     protected QueryResult<TValue> UseQuery<TValue, TKey>(
         Func<TKey?> keyFactory,
         Func<Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull =>
-        this.Context.UseQuery<TValue, TKey>(keyFactory, fetcher, options, initialValue);
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull =>
+        this.Context.UseQuery<TValue, TKey>(keyFactory, fetcher, options, initialValue, tags);
 
     protected QueryMutator UseMutation(object key, QueryOptions? options = null) =>
         this.Context.UseMutation(key, options);

@@ -18,7 +18,6 @@ public record QueryOptions
 {
     public TimeSpan? Expiration { get; init; } = null;
     public QueryScope Scope { get; init; } = QueryScope.Server;
-    public IReadOnlyList<object> Tags { get; init; } = [];
 
     /// <summary>
     /// Whether to fetch data on initial render. Default: true.
@@ -154,7 +153,8 @@ public static class UseQueryExtensions
     public static QueryResult<TValue> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull
     {
         var opts = options ?? new QueryOptions();
 
@@ -226,7 +226,7 @@ public static class UseQueryExtensions
                         resultState.Set(resultState.Value with { Mutator = mutator, IsLoading = true });
                     }
                 }
-                subscriptionRef.Value = queryService.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, initialValue);
+                subscriptionRef.Value = queryService.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, tags, initialValue);
             }
 
             prevQueryKeyRef.Value = currentQueryKey;
@@ -234,7 +234,7 @@ public static class UseQueryExtensions
         else if (key is not null && subscriptionRef.Value is null)
         {
             // First render with non-null key - always subscribe so entry exists for mutations
-            subscriptionRef.Value = queryService.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, initialValue);
+            subscriptionRef.Value = queryService.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, tags, initialValue);
         }
 
         context.UseEffect(() => subscriptionRef.Value ?? Disposable.Empty);
@@ -447,25 +447,29 @@ public static class UseQueryExtensions
     public static QueryResult<TValue> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,
         Func<CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull
     {
         return context.UseQuery<TValue, TKey>(
             key,
             (_, ct) => fetcher(ct),
             options,
-            initialValue);
+            initialValue,
+            tags);
     }
 
     public static QueryResult<TValue> UseQuery<TValue, TKey>(this IViewContext context, TKey? key,
         Func<Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull
     {
         return context.UseQuery<TValue, TKey>(
             key,
             (_, __) => fetcher(),
             options,
-            initialValue);
+            initialValue,
+            tags);
     }
 
     public static QueryResult<TValue> UseQuery<TValue>(
@@ -473,6 +477,7 @@ public static class UseQueryExtensions
         Func<CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
         TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null,
         [CallerFilePath] string callerFile = "",
         [CallerLineNumber] int callerLine = 0)
     {
@@ -482,7 +487,8 @@ public static class UseQueryExtensions
             key,
             (_, ct) => fetcher(ct),
             options,
-            initialValue);
+            initialValue,
+            tags);
     }
 
     /// <summary>
@@ -501,10 +507,11 @@ public static class UseQueryExtensions
         Func<TKey?> keyFactory,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull
     {
         var key = keyFactory();
-        return context.UseQuery(key, fetcher, options, initialValue);
+        return context.UseQuery(key, fetcher, options, initialValue, tags);
     }
 
     /// <summary>
@@ -516,10 +523,11 @@ public static class UseQueryExtensions
         Func<TKey?> keyFactory,
         Func<CancellationToken, Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull
     {
         var key = keyFactory();
-        return context.UseQuery<TValue, TKey>(key, (_, ct) => fetcher(ct), options, initialValue);
+        return context.UseQuery<TValue, TKey>(key, (_, ct) => fetcher(ct), options, initialValue, tags);
     }
 
     /// <summary>
@@ -531,9 +539,10 @@ public static class UseQueryExtensions
         Func<TKey?> keyFactory,
         Func<Task<TValue>> fetcher,
         QueryOptions? options = null,
-        TValue? initialValue = default) where TKey : notnull
+        TValue? initialValue = default,
+        IReadOnlyList<object>? tags = null) where TKey : notnull
     {
         var key = keyFactory();
-        return context.UseQuery<TValue, TKey>(key, (_, _) => fetcher(), options, initialValue);
+        return context.UseQuery<TValue, TKey>(key, (_, _) => fetcher(), options, initialValue, tags);
     }
 }

@@ -240,6 +240,7 @@ public class QueryService : IQueryService, IDisposable, IAsyncDisposable
         string serializedScopedKey,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
         QueryOptions options,
+        IReadOnlyList<object>? tags,
         TValue? initialValue = default)
     {
         var now = _timeProvider.GetUtcNow();
@@ -260,7 +261,7 @@ public class QueryService : IQueryService, IDisposable, IAsyncDisposable
             ValueType = typeof(TValue),
             CreatedAt = now,
             LastAccessedAt = now,
-            Tags = options.Tags.Select(SerializeKey).ToList(),
+            Tags = (tags ?? []).Select(SerializeKey).ToList(),
             Options = options,
             Fetcher = wrappedFetcher
         });
