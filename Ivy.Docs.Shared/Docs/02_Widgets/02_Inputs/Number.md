@@ -132,40 +132,21 @@ public class MoneyInputDemo : ViewBase
 
 ## Styling
 
-`NumberInput`s can be customized with various styling options:
-
-### Invalid
-
-To mark a number input as invalid, this style should be used.
-This can be used via the extension function `Invalid`.
+`NumberInput`s can be customized with various styling options, including `Disabled` and `Invalid` states:
 
 ```csharp demo-below
-public class InvalidDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var num = UseState<double>(0);
-        return Layout.Vertical()
-                | num.ToNumberInput()
-                     .Invalid(num.Value > 3.1 ? "Value should be less than 3.1": "")
-                     .WithField()
-                     .Description("The value should be less than 3.1");
-    }
-}
-```
-
-### Disabled
-
-To disable a `NumberInput` this style should be used. This can be used via the extension function `Disabled`.
-
-```csharp demo-below
-public class DisabledDemo : ViewBase
+public class NumberStylingDemo : ViewBase
 {
     public override object? Build()
     {
         var num = UseState(3.14);
         return Layout.Vertical()
-                | num.ToNumberInput().Disabled();
+                | num.ToNumberInput()
+                     .Disabled()
+                     .WithField().Label("Disabled")
+                | num.ToNumberInput()
+                     .Invalid(num.Value > 3.1 ? "Value should be less than 3.1" : "")
+                     .WithField().Label("Invalid");
     }
 }
 ```
