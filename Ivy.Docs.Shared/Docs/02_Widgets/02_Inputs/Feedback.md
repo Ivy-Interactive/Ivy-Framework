@@ -20,26 +20,15 @@ The `FeedbackInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provide
 
 ## Basic Usage
 
-Here's a simple example of a `FeedbackInput` with a default variant:
+Here's a simple example of a `FeedbackInput` with the default `Stars` variant:
 
 ```csharp demo-below
 public class BasicFeedbackDemo : ViewBase
 {    
     public override object? Build()
     {    
-        var starStates = Enumerable
-                         .Range(1,5)
-                         .Select(t => UseState(t))
-                         .ToList();
-        var layout  = Layout.Vertical();        
-        starStates.ForEach
-                  ( 
-                     state => 
-                      layout = layout | state.ToFeedbackInput()
-                                             .Variant(FeedbackInputs.Stars)
-                  );
-        
-       return layout;
+        var rating = UseState(3);
+        return new FeedbackInput<int>(rating);
     }
 }    
 ```
@@ -109,38 +98,21 @@ public class FeedbackHandling: ViewBase
 
 ## Styling and Customization
 
-`FeedbackInput`s can be customized with various styling options.
-
-### Disabled
-
-To render a `FeedbackInput` in disabled state, this function `Disabled` should be used.
+`FeedbackInput`s can be customized with various styling options, including `Disabled` and `Invalid` states:
 
 ```csharp demo-below
-public class DisabledFeedbackDemo : ViewBase
+public class StyledFeedbackDemo : ViewBase
 {
     public override object? Build()
     {    
-        var fdb = UseState(3);
-        return new FeedbackInput<int>(fdb)
-                    .Variant(FeedbackInputs.Stars)
-                    .Disabled();
-    }
-}        
-```
-
-### Invalid
-
-To render a `FeedbackInput` in invalid (or error) state, the function `Invalid` should be used.
-
-```csharp demo-below
-public class InvalidFeedbackDemo : ViewBase
-{
-    public override object? Build()
-    {    
-        var fdb = UseState(3);
-        return new FeedbackInput<int>(fdb)
-                    .Variant(FeedbackInputs.Stars)
-                    .Invalid("We are maintaining this.");
+        var state = UseState(3);
+        return Layout.Vertical()
+                | new FeedbackInput<int>(state)
+                      .Disabled()
+                      .WithField().Label("Disabled")
+                | new FeedbackInput<int>(state)
+                      .Invalid("Validation error")
+                      .WithField().Label("Invalid");
     }
 }        
 ```
