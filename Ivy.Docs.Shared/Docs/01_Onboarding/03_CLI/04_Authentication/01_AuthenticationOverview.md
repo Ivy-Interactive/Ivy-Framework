@@ -94,21 +94,21 @@ Instead of .NET user secrets, you can also use environment variables to store au
 
 **Windows (PowerShell):**
 
-```powershell
-$env:Auth0__Domain="your-domain.auth0.com"
-$env:Auth0__ClientId="your-client-id"
-$env:Auth0__ClientSecret="your-client-secret"
-$env:Auth0__Audience="https://your-domain.auth0.com/api/v2"
-$env:Auth0__Namespace="https://ivy.app/"
+```terminal
+>$env:Auth0__Domain="your-domain.auth0.com"
+>$env:Auth0__ClientId="your-client-id"
+>$env:Auth0__ClientSecret="your-client-secret"
+>$env:Auth0__Audience="https://your-domain.auth0.com/api/v2"
+>$env:Auth0__Namespace="https://ivy.app/"
 ```
 
 **Mac/Linux (Bash):**
-```bash
-export Auth0__Domain="your-domain.auth0.com"
-export Auth0__ClientId="your-client-id"
-export Auth0__ClientSecret="your-client-secret"
-export Auth0__Audience="https://your-domain.auth0.com/api/v2"
-export Auth0__Namespace="https://ivy.app/"
+```terminal
+>export Auth0__Domain="your-domain.auth0.com"
+>export Auth0__ClientId="your-client-id"
+>export Auth0__ClientSecret="your-client-secret"
+>export Auth0__Audience="https://your-domain.auth0.com/api/v2"
+>export Auth0__Namespace="https://ivy.app/"
 ```
 
 If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets.
@@ -178,7 +178,15 @@ Ivy supports the following authentication providers. Click on any provider for d
 >ivy auth add --provider Basic --connection-string YourConnectionString
 ```
 
-### Best Practices
+## Complete Custom Login View
+
+For complete control over the login experience, you can replace the entire login view:
+
+```csharp
+server.UseAuth<BasicAuthProvider>(viewFactory: () => new MyCustomLoginApp());
+```
+
+## Best Practices
 
 **Security** - Always use HTTPS in production, store sensitive configuration in user secrets or environment variables, regularly rotate client secrets, use strong passwords for Basic Auth, and implement proper session management.
 
