@@ -28,10 +28,8 @@ public class BasicUsageDemo : ViewBase
 {
     public override object? Build()
     { 
-        var withoutValue = UseState((string?)null);
-        return Layout.Horizontal()
-            | new TextInput(withoutValue)
-                  .Placeholder("Enter text here...");
+        var text = UseState("");
+        return new TextInput(text).Placeholder("Enter text here...");
     }
 }
 ```
@@ -181,102 +179,40 @@ public class URLEnterDemo: ViewBase
 
 ## [Event Handling](../../01_Onboarding/02_Concepts/EventHandlers.md)
 
-We can get the value of the text entered into any of the `TextInput` variant using the `OnChange` event.
-
-```csharp
-new TextInput(onChangedState.Value, e => onChangedState.Set(e.Value))
-```
-
-In this code example shown, the value of the text input will be stored in `onChangedState` variable.
-The following demo shows how to use it in a small app, where users are greeted as they enter their name.
+Use the `OnChange` callback to react to text input changes. The callback receives an event with the current value.
 
 ```csharp demo-tabs
 public class EventsDemoApp : ViewBase
 {
-     public override object? Build()
-     {
-        var onChangedState = UseState("");
-        var onChangeLabel = UseState("");
+    public override object? Build()
+    {
+        var name = UseState("");
         return Layout.Vertical()
-                | new TextInput(onChangedState.Value, e =>
-                    {
-                       onChangedState.Set(e.Value);
-                       if(e.Value.Length == 0)
-                       {
-                            onChangeLabel.Set("");
-                       }
-                       else
-                       { 
-                            onChangeLabel.Set("Hello! " + e.Value);
-                       }
-                    })
-                    .WithField()
-                    .Label("Name")
-                | onChangeLabel;
-     }
+            | new TextInput(name.Value, e => name.Set(e.Value))
+                  .Placeholder("Enter your name...").WithField().Label("Name")
+            | (name.Value.Length > 0 ? $"Hello, {name.Value}!" : "");
+    }
 }
 ```
 
 ## Styling
 
-`TextInput` variants can be customized with various styling options to offer visual clues to the users.
-
-### Invalid
-
-When something goes wrong capturing the inputs, `Invalid` style is recommended to be used to signal an error.
-The following code shows how to make an `TextInput` use the `Invalid` style.
-
-```csharp
-new TextInput(withoutValue)
-    .Placeholder("Styled Input")
-    .Invalid("Invalid input")
-```
-
-This renders like this, an invalid text input.
+`TextInput` can be styled to provide visual feedback to users about the input state.
 
 ```csharp demo-below
-
-public class InvalidInputDemo: ViewBase
+public class TextInputStylingDemo : ViewBase
 {
     public override object? Build()
     {
-        var withoutValue = UseState("");
-        return new TextInput(withoutValue)
-                   .Placeholder("a@")
-                   .Invalid("Invalid email!");
+        var text = UseState("");
+        return Layout.Vertical()
+            | new TextInput(text).Placeholder("Invalid input").Invalid("This field has an error")
+            | new TextInput(text).Placeholder("Disabled input").Disabled();
     }
 }
 ```
 
-Whatever text is provided to the `Invalid` function, shows up when mouse is hovered on the little `i` icon in the box.
-
-### Disabled
-
-When it is necessary to disable a `TextInput` variant, `Disabled` style is needed.
-The following code shows how to disable a `TextInput`.
-
-```csharp
-new TextInput(withoutValue)
-    .Placeholder("Styled Input")
-    .Disabled()
-```
-
-This renders as shown below as a disabled text input.
-
-```csharp demo-below
-public class DisabledInputDemo : ViewBase
-{
-    public override object? Build()
-    {
-        return new TextInput(UseState(""))
-                     .Placeholder("Disabled Input")
-                     .Disabled();
-    }
-}
-```
-
-Notice, how extension functions `ToTextInput`, and `ToPasswordInput` are used  to generate `TextInput` variants
-needed for the [form](../../01_Onboarding/02_Concepts/Forms.md).
+Hover over the `i` icon on the invalid input to see the error message.
 
 ## Prefix and Suffix
 
