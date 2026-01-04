@@ -91,8 +91,8 @@ Learn more in the [Snowflake Documentation](https://docs.snowflake.com/en/user-g
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [SQL Server Provider](SqlServer.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [SQL Server Provider](02_SqlServer.md)
 - [Official Snowflake Documentation](https://docs.snowflake.com)
 - [Snowflake.Data](https://github.com/snowflakedb/snowflake-connector-net/tree/master)
 - [EFCore.Snowflake Package](https://github.com/Sielnix/EFCore.Snowflake)
