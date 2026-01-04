@@ -6,6 +6,8 @@ namespace Ivy;
 
 public record Skeleton : WidgetBase<Skeleton>
 {
+    public static object Card() => new Skeleton().Height(100);
+
     public Skeleton()
     {
         Width = Size.Full();

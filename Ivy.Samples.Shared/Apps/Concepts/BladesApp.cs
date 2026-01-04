@@ -16,7 +16,7 @@ public class RootView(string someId) : ViewBase
 {
     public override object? Build()
     {
-        var bladeController = UseContext<IBladeController>();
+        var bladeController = UseContext<IBladeService>();
         var index = bladeController.GetIndex(this);
 
         void OnClick(Event<Button> @event)

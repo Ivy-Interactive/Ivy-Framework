@@ -23,7 +23,7 @@ public class ProductsListBlade : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
         var refreshToken = UseRefreshToken();
 
         // Filter state with throttling for search
@@ -93,7 +93,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<SampleDbContextFactory>();
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
         var queryService = UseService<IQueryService>();
 
         var productQuery = UseQuery(
@@ -109,7 +109,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
             tags: [(typeof(Product), productId)]
         );
 
-        if (productQuery.IsLoading) return new Skeleton().Height(100);
+        if (productQuery.IsLoading) return Skeleton.Card();
 
         if (productQuery.Value == null)
         {
@@ -242,7 +242,9 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
         var categoriesQuery = Context.UseCategoryOptions();
         var departmentsQuery = Context.UseDepartmentOptions();
 
-        if (productQuery.IsLoading || categoriesQuery.IsLoading || departmentsQuery.IsLoading || productQuery.Value == null) return new Skeleton();
+        if (productQuery.IsLoading || categoriesQuery.IsLoading || departmentsQuery.IsLoading ||
+            productQuery.Value == null)
+            return Skeleton.Card();
 
         return productQuery.Value!
             .ToForm()

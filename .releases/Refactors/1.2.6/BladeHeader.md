@@ -141,7 +141,7 @@ public class ProductsListBlade : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
         var filter = UseState("");
         var products = GetProducts(filter.Value);
 
@@ -166,7 +166,7 @@ public class ProductsListBlade : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
         var filter = UseState("");
         var products = GetProducts(filter.Value);
 

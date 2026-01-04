@@ -5,7 +5,7 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Blades;
 
-public interface IBladeController
+public interface IBladeService
 {
     IState<ImmutableArray<BladeItem>> Blades { get; }
 
@@ -20,14 +20,14 @@ public interface IBladeController
     int GetIndex(IView bladeView);
 }
 
-public class BladeController : IBladeController
+public class BladeService : IBladeService
 {
-    public BladeController()
+    public BladeService()
     {
         Blades = new State<ImmutableArray<BladeItem>>([]);
     }
 
-    public BladeController(IState<ImmutableArray<BladeItem>> blades)
+    public BladeService(IState<ImmutableArray<BladeItem>> blades)
     {
         Blades = blades;
     }
@@ -88,7 +88,7 @@ public static class UseBladesExtensions
     public static IView UseBlades(this IViewContext context, Func<IView> rootBlade, string? title = null, Size? width = null)
     {
         var blades = context.UseState<ImmutableArray<BladeItem>>(() => [new BladeItem(rootBlade(), 0, title, width)]);
-        context.CreateContext<IBladeController>(() => new BladeController(blades));
+        context.CreateContext<IBladeService>(() => new BladeService(blades));
         IView bladeView = new BladesView();
         return bladeView;
     }

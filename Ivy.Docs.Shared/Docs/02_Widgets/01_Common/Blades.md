@@ -14,11 +14,11 @@ searchHints:
 Create stacked [navigation](../../01_Onboarding/02_Concepts/Navigation.md) experiences where new [views](../../01_Onboarding/02_Concepts/Views.md) slide in from the right, managed through a blade controller for intuitive drill-down interfaces.
 </Ingress>
 
-`Blade`s provide a stacked navigation pattern where new views slide in from the right. Use the `UseBlades` extension to create a root blade and manage a stack of blades through `IBladeController`. Perfect for master-detail [interfaces](../../01_Onboarding/02_Concepts/Views.md), wizards, and hierarchical navigation.
+`Blade`s provide a stacked navigation pattern where new views slide in from the right. Use the `UseBlades` extension to create a root blade and manage a stack of blades through `IBladeService`. Perfect for master-detail [interfaces](../../01_Onboarding/02_Concepts/Views.md), wizards, and hierarchical navigation.
 
 ## Usage
 
-Create a blade container with a root view and use `IBladeController` to push and pop blades.
+Create a blade container with a root view and use `IBladeService` to push and pop blades.
 
 ```csharp demo-tabs
 public class BladeNavigationDemo : ViewBase
@@ -33,7 +33,7 @@ public class NavigationRootView : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
         var index = blades.GetIndex(this);
 
         return Layout.Horizontal().Height(Size.Units(50))
@@ -65,7 +65,7 @@ public class SearchableListView : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
         var searchTerm = UseState("");
         var products = new[] { "iPhone 15", "MacBook Pro", "iPad Air", "Apple Watch", "AirPods Pro" };
 
@@ -126,7 +126,7 @@ public class RefreshRootView : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
         var items = UseState(new List<string> { "Item 1", "Item 2" });
         var refreshToken = UseRefreshToken();
 
@@ -154,7 +154,7 @@ public class AddItemView(RefreshToken token) : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
         var name = UseState("New Item");
 
         return Layout.Vertical().Gap(2)
@@ -186,7 +186,7 @@ public class ErrorRootView : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
 
         return Layout.Vertical()
             | Text.Block("Click to push a blade that throws an exception")
