@@ -66,7 +66,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
     <div
       style={styles}
       className={cn(
-        'flex items-center p-4 text-large-body rounded-lg border transition-colors',
+        'flex items-center p-4 my-4 text-large-body rounded-lg border transition-colors',
         variantStyles.container
       )}
       role="alert"

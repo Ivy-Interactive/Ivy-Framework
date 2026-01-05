@@ -568,11 +568,11 @@ export const convertSizeToGridValue = (size?: string): string => {
 // Typography classes - shadcn typography with Ivy spacing
 export const typography: Record<string, string> = {
   // Headings
-  h1: `text-4xl font-semibold scroll-m-20 mt-12 mb-4 [&+h2]:mt-0`,
-  h2: `text-3xl font-medium scroll-m-20 mt-10 mb-4 [&+h3]:mt-0`,
-  h3: `text-2xl font-medium scroll-m-20 mt-8 mb-4 [&+h4]:mt-0`,
-  h4: `text-xl font-medium scroll-m-20 mt-6 mb-4 [&+h5]:mt-0`,
-  h5: `text-lg font-medium scroll-m-20 mt-4 mb-2 [&+h6]:mt-0`,
+  h1: `text-4xl font-semibold scroll-m-20 mt-12 mb-4 [&+h2]:mt-2`,
+  h2: `text-3xl font-medium scroll-m-20 mt-8 mb-4 [&+h3]:mt-2`,
+  h3: `text-2xl font-medium scroll-m-20 mt-8 mb-4 [&+h4]:mt-2`,
+  h4: `text-xl font-medium scroll-m-20 mt-6 mb-4 [&+h5]:mt-2`,
+  h5: `text-lg font-medium scroll-m-20 mt-4 mb-2 [&+h6]:mt-2`,
   h6: `text-base font-medium scroll-m-20 mt-2 mb-2`,
 
   // Body
@@ -597,8 +597,8 @@ export const typography: Record<string, string> = {
   block: 'flex items-center min-w-0',
 
   // Lists
-  ul: 'ml-6 list-disc [&>li:first-child]:mt-0 mb-2',
-  ol: 'ml-6 list-decimal [&>li:first-child]:mt-0 mb-2',
+  ul: 'ml-6 list-disc [&>li:first-child]:mt-0 mb-4',
+  ol: 'ml-6 list-decimal [&>li:first-child]:mt-0 mb-4',
   li: 'mt-1 ',
 
   // Links
