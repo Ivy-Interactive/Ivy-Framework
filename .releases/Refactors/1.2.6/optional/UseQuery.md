@@ -74,7 +74,7 @@ UseEffect\s*\(\s*\(\s*\)\s*=>\s*\{[\s\S]*?\},\s*\[\s*\w+\s*\]\s*\)
 
 ## How to Refactor
 
-### 1. Replace UseEffect + UseState with UseQuery
+### Replace UseEffect + UseState with UseQuery
 
 **Before:**
 ```csharp
@@ -127,48 +127,7 @@ public override object? Build()
     // ... rest of component
 }
 ```
-
-### 2. Replace UseAlert with WithConfirm
-
-**Before:**
-```csharp
-var (alertView, showAlert) = this.UseAlert();
-
-void OnDelete()
-{
-    showAlert("Are you sure you want to delete this product?", result =>
-    {
-        if (result.IsOk())
-        {
-            Delete(factory);
-            blades.Pop(refresh: true);
-        }
-    }, "Delete Product", AlertButtonSet.OkCancel);
-}
-
-var deleteBtn = Icons.Trash.ToButton(OnDelete);
-
-return new Fragment()
-       | content
-       | alertView; // Must include alertView
-```
-
-**After:**
-```csharp
-var deleteBtn = new Button("Delete", onClick: async _ =>
-    {
-        blades.Pop(refresh: true);
-        await DeleteAsync(factory);
-        queryService.RevalidateByTag(typeof(ProductListRecord[]));
-    })
-    .Variant(ButtonVariant.Destructive)
-    .Icon(Icons.Trash)
-    .WithConfirm("Are you sure you want to delete this product?", "Delete Product");
-
-return content; // No alertView needed
-```
-
-### 3. Replace Auto-Save Pattern with HandleSubmit
+### Replace Auto-Save Pattern with HandleSubmit
 
 **Before (auto-save on state change):**
 ```csharp
@@ -221,7 +180,7 @@ async Task OnSubmit(Product? request)
 }
 ```
 
-### 4. Replace Auto-Save Pattern in Create Dialogs
+### Replace Auto-Save Pattern in Create Dialogs
 
 Create dialogs also use the auto-save pattern and need to be migrated to `HandleSubmit`.
 
@@ -286,7 +245,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
 }
 ```
 
-### 5. Replace FilteredListView with UseQuery + Manual List
+### Replace FilteredListView with UseQuery + Manual List
 
 **Before:**
 ```csharp
@@ -341,7 +300,7 @@ public static QueryResult<ProductListRecord[]> UseProductListRecords(IViewContex
 }
 ```
 
-### 6. Refresh Pattern: RefreshToken → RevalidateByTag
+### Refresh Pattern: RefreshToken → RevalidateByTag
 
 **Before:**
 ```csharp
@@ -471,8 +430,7 @@ Detail blades should include a `BladeHeader` with the entity name to set the bla
 var product = productQuery.Value;
 
 var detailsCard = new Card(
-    content: new { product.Id, product.Name }.ToDetails(),
-    footer: Layout.Horizontal().Gap(2) | deleteBtn | editBtn
+    ...
 ).Title("Product Details");
 
 return new Fragment()
@@ -528,18 +486,6 @@ When using `queryService.RevalidateByTag()`, you must first inject the service:
 var queryService = UseService<IQueryService>();
 queryService.RevalidateByTag(typeof(Product[]));
 ```
-
-## Key Refactoring Rules
-
-1. **Replace UseEffect + UseState** with `UseQuery` for all data fetching
-2. **Add loading states** using `Skeleton.*` components
-3. **Add tags** to enable cross-component cache invalidation
-4. **Use HandleSubmit** instead of auto-save pattern with `UseEffect([state])`
-5. **Use WithConfirm** instead of `UseAlert()` for confirmation dialogs
-6. **Use IQueryService.RevalidateByTag** for cross-component refresh instead of `blades.Pop(refresh: true)`
-7. **Use Throttle** for filter inputs to debounce API calls (requires `System.Reactive`)
-8. **Return Callout** for not-found states instead of `null`
-
 ## Required Usings
 
 ```csharp
