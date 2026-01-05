@@ -285,7 +285,7 @@ public class QueryService : IQueryService, IDisposable, IAsyncDisposable
             var isLoading = state is QueryEntryState.Fetching || (state is QueryEntryState.Empty && error is null);
             var isValidating = state == QueryEntryState.Revalidating;
             // Clear IsPrevious when we have fresh data
-            var isPrevious = state != QueryEntryState.Fresh && resultState.Value.IsPrevious;
+            var isPrevious = state != QueryEntryState.Fresh && resultState.Value.Previous;
 
             // When IsPrevious is set and we're still loading, preserve the previous value
             var resultValue = value is TValue typed

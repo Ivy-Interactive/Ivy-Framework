@@ -57,7 +57,7 @@ public class ProductsListBlade : ViewBase
         object CreateItem(ProductListRecord listRecord) => new FuncView(context =>
         {
             var itemQuery = UseProductListRecord(context, listRecord);
-            if (itemQuery.IsLoading || itemQuery.Value == null)
+            if (itemQuery.Loading || itemQuery.Value == null)
             {
                 return new ListItem();
             }
@@ -159,7 +159,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
             tags: [(typeof(Product), productId)]
         );
 
-        if (productQuery.IsLoading) return Skeleton.Card();
+        if (productQuery.Loading) return Skeleton.Card();
 
         if (productQuery.Value == null)
         {
@@ -241,7 +241,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
 
         var departmentsQuery = Context.UseDepartmentOptions();
 
-        if (departmentsQuery.IsLoading) return Skeleton.Form().ToDialog(isOpen, "Create Product");
+        if (departmentsQuery.Loading) return Skeleton.Form().ToDialog(isOpen, "Create Product");
 
         return customer
             .ToForm()
@@ -299,7 +299,7 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
 
         var departmentsQuery = Context.UseDepartmentOptions();
 
-        if (productQuery.IsLoading || departmentsQuery.IsLoading || productQuery.Value == null)
+        if (productQuery.Loading || departmentsQuery.Loading || productQuery.Value == null)
             return Skeleton.Form().ToSheet(isOpen, "Edit Product");
 
         return productQuery.Value!

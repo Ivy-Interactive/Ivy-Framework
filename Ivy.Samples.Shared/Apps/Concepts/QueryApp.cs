@@ -183,11 +183,11 @@ public class TagInvalidationExample : ViewBase
 
     private static object QueryCard(string title, QueryResult<string> query)
     {
-        var status = query.IsLoading ? " (Loading...)"
-            : query.IsValidating ? " (Revalidating...)"
+        var status = query.Loading ? " (Loading...)"
+            : query.Validating ? " (Revalidating...)"
             : "";
 
-        object content = query.IsLoading
+        object content = query.Loading
             ? new Skeleton().Height(Size.Units(4))
             : Text.Literal(query.Value ?? "");
 
@@ -227,12 +227,12 @@ public class ErrorHandlingExample : ViewBase
 
         return Layout.Vertical()
                | shouldFail.ToBoolInput().Label("Simulate error")
-               | (query.IsLoading
+               | (query.Loading
                    ? Text.Literal("Loading...")
                    : query.Error is { } error
                        ? Callout.Error($"Error: {error.Message}")
                        : Text.Literal(query.Value ?? "No data"))
-               | (query.IsValidating ? Text.Muted("Revalidating...") : null!)
+               | (query.Validating ? Text.Muted("Revalidating...") : null!)
                | (Layout.Horizontal()
                   | new Button("Retry", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline))
             ;
@@ -251,14 +251,14 @@ public class BasicQueryExample : ViewBase
                 return $"Fetched at {DateTime.Now:HH:mm:ss}";
             });
 
-        if (query.IsLoading)
+        if (query.Loading)
         {
             return Text.Literal("Loading...");
         }
 
         return Layout.Vertical()
                | Text.Literal(query.Value ?? "No data")
-               | (query.IsValidating ? Text.Muted("Revalidating...") : null!)
+               | (query.Validating ? Text.Muted("Revalidating...") : null!)
                | (Layout.Horizontal()
                   | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
                   | new Button("Invalidate", _ => query.Mutator.Invalidate()).Variant(ButtonVariant.Destructive))
@@ -279,7 +279,7 @@ public class ViewScopedQueryExample : ViewBase
             },
             options: QueryScope.View);
 
-        if (query.IsLoading)
+        if (query.Loading)
         {
             return Text.Literal("Loading...");
         }
@@ -308,14 +308,14 @@ public class QueryWithExpirationExample : ViewBase
                 Expiration = TimeSpan.FromSeconds(5)
             });
 
-        if (query.IsLoading)
+        if (query.Loading)
         {
             return Text.Literal("Loading...");
         }
 
         return Layout.Vertical()
                | Text.Literal(query.Value ?? "No data")
-               | (query.IsValidating ? Text.Muted("Revalidating in background...") : null!)
+               | (query.Validating ? Text.Muted("Revalidating in background...") : null!)
                | Text.Muted("Query expires after 5 seconds. Navigate away and back to see SWR in action.")
             ;
     }
@@ -339,7 +339,7 @@ public class ConditionalFetchExample : ViewBase
         return Layout.Vertical()
                | shouldFetch.ToBoolInput().Label("Enable fetching")
                | (shouldFetch.Value
-                   ? query.IsLoading
+                   ? query.Loading
                        ? Text.Literal("Loading...")
                        : Text.Literal(query.Value ?? "No data")
                    : Text.Muted("Fetching disabled (key is null)"))
@@ -375,13 +375,13 @@ public class DependentFetchExample : ViewBase
 
         return Layout.Vertical()
                | Text.Literal("User:")
-               | (user.IsLoading
+               | (user.Loading
                    ? Text.Muted("  Loading user...")
                    : Text.Literal($"  {user.Value?.Name} (ID: {user.Value?.Id})"))
                | Text.Literal("Projects:")
-               | (user.IsLoading
+               | (user.Loading
                    ? Text.Muted("  Waiting for user...")
-                   : projects.IsLoading
+                   : projects.Loading
                        ? Text.Muted("  Loading projects...")
                        : projectsList.Aggregate(Layout.Vertical(), (layout, item) => layout | item))
                | (Layout.Horizontal()
@@ -404,14 +404,14 @@ public class MutationExample : ViewBase
                 return Random.Shared.Next(1, 100);
             });
 
-        if (query.IsLoading)
+        if (query.Loading)
         {
             return Text.Literal("Loading...");
         }
 
         return Layout.Vertical()
                | Text.Literal($"Value: {query.Value}")
-               | (query.IsValidating ? Text.Muted("Syncing...") : null!)
+               | (query.Validating ? Text.Muted("Syncing...") : null!)
                | (Layout.Horizontal()
                   | new Button("Optimistic +10", _ => query.Mutator.Mutate(query.Value + 10, true))
                         .Variant(ButtonVariant.Primary)
@@ -447,14 +447,14 @@ public class SharedQueryDisplay : ViewBase
                 return $"Shared data: {Guid.NewGuid().ToString()[..8]}";
             });
 
-        if (query.IsLoading)
+        if (query.Loading)
         {
             return Text.Literal("Loading...");
         }
 
         return Layout.Horizontal()
                | Text.Literal(query.Value ?? "No data")
-               | (query.IsValidating ? Text.Muted("(Updating...)") : null!)
+               | (query.Validating ? Text.Muted("(Updating...)") : null!)
             ;
     }
 }
@@ -486,14 +486,14 @@ public class AutoKeyedQueryExample : ViewBase
             return $"Auto-keyed data: {DateTime.Now:HH:mm:ss}";
         });
 
-        if (query.IsLoading)
+        if (query.Loading)
         {
             return Text.Literal("Loading...");
         }
 
         return Layout.Vertical()
                | Text.Literal(query.Value ?? "No data")
-               | (query.IsValidating ? Text.Muted("Revalidating...") : null!)
+               | (query.Validating ? Text.Muted("Revalidating...") : null!)
                | Text.Muted("Query key is derived from the fetcher's method signature.")
                | (Layout.Horizontal()
                   | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
@@ -563,7 +563,7 @@ public class ProductListExample : ViewBase
             key: "products",
             fetcher: ProductDatabase.ListAsync);
 
-        if (products.IsLoading)
+        if (products.Loading)
         {
             return Text.Literal("Loading products...");
         }
@@ -576,7 +576,7 @@ public class ProductListExample : ViewBase
                | (Layout.Horizontal()
                   | new Button("Revalidate List", _ => products.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
                   | new Button("Invalidate List", _ => products.Mutator.Invalidate()).Variant(ButtonVariant.Destructive))
-               | (products.IsValidating ? Text.Muted("Refreshing product list...") : null!)
+               | (products.Validating ? Text.Muted("Refreshing product list...") : null!)
                | productViews
                ;
 
@@ -594,7 +594,7 @@ public class ProductDetailView(Product initialProduct) : ViewBase
             options: new QueryOptions { RevalidateOnInit = false },
             initialValue: initialProduct);
 
-        if (product.IsLoading)
+        if (product.Loading)
         {
             return Text.Literal("Loading product...");
         }
@@ -608,7 +608,7 @@ public class ProductDetailView(Product initialProduct) : ViewBase
                | Text.H3(p.Name)
                | Text.Literal($"ID: {p.Id}")
                | Text.Literal($"Price: ${p.Price}")
-               | (product.IsValidating ? Text.Muted("Refreshing...") : null!)
+               | (product.Validating ? Text.Muted("Refreshing...") : null!)
                | (Layout.Horizontal()
                   | new Button("Increase Price 10%", async _ =>
                     {
@@ -681,11 +681,11 @@ public class PaginationExample : ViewBase
                // Pagination controls
                | (Layout.Horizontal().Gap(2)
                   | new Button("← Previous", _ => page.Set(p => p - 1))
-                        .Disabled(page.Value <= 1 || itemsQuery.IsLoading)
+                        .Disabled(page.Value <= 1 || itemsQuery.Loading)
                         .Variant(ButtonVariant.Outline)
                   | Text.Literal($"{page.Value} / {totalPages}")
                   | new Button("Next →", _ => page.Set(p => p + 1))
-                        .Disabled(page.Value >= totalPages || itemsQuery.IsLoading)
+                        .Disabled(page.Value >= totalPages || itemsQuery.Loading)
                         .Variant(ButtonVariant.Outline))
 
                | Text.Muted("Notice how the previous page's items remain visible while the next page loads.")
@@ -860,20 +860,20 @@ public class CacheClearExample : ViewBase
 
     private static object QueryStatusCard(string title, QueryResult<string> query, string tag)
     {
-        var status = query.IsLoading ? "Loading..."
-            : query.IsValidating ? "Revalidating..."
+        var status = query.Loading ? "Loading..."
+            : query.Validating ? "Revalidating..."
             : "Ready";
 
-        var badge = query.IsLoading
+        var badge = query.Loading
             ? new Badge(status).Secondary()
-            : query.IsValidating
+            : query.Validating
                 ? new Badge(status).Warning()
                 : new Badge(status).Success();
 
         return new Card(
             Layout.Vertical().Gap(2)
             | badge
-            | (query.IsLoading
+            | (query.Loading
                 ? new Skeleton().Height(Size.Units(4))
                 : Text.Literal(query.Value ?? ""))
             | Text.Muted($"Tag: {tag}")
@@ -962,20 +962,20 @@ public class PredicateInvalidationExample : ViewBase
 
     private static object ProductCard(string title, QueryResult<string> query)
     {
-        var status = query.IsLoading ? "Loading..."
-            : query.IsValidating ? "Refreshing..."
+        var status = query.Loading ? "Loading..."
+            : query.Validating ? "Refreshing..."
             : "Ready";
 
-        var badge = query.IsLoading
+        var badge = query.Loading
             ? new Badge(status).Secondary()
-            : query.IsValidating
+            : query.Validating
                 ? new Badge(status).Warning()
                 : new Badge(status).Success();
 
         return new Card(
             Layout.Vertical().Gap(2)
             | badge
-            | (query.IsLoading
+            | (query.Loading
                 ? new Skeleton().Height(Size.Units(4))
                 : Text.Literal(query.Value ?? ""))
         ).Title(title);
@@ -1008,9 +1008,9 @@ public class RefreshIntervalExample : ViewBase
                 RefreshInterval = TimeSpan.FromSeconds(5)
             });
 
-        var statusBadge = liveData.IsLoading
+        var statusBadge = liveData.Loading
             ? new Badge("Loading...").Secondary()
-            : liveData.IsValidating
+            : liveData.Validating
                 ? new Badge("Refreshing...").Warning()
                 : new Badge("Live").Success();
 
@@ -1021,7 +1021,7 @@ public class RefreshIntervalExample : ViewBase
                | (Layout.Horizontal().Gap(4)
                   | (Layout.Vertical().Gap(2)
                      | statusBadge
-                     | (liveData.IsLoading
+                     | (liveData.Loading
                          ? new Skeleton().Height(Size.Units(8)).Width(Size.Units(32))
                          : (Layout.Vertical()
                             | Text.Literal($"Value: {liveData.Value?.Value}")

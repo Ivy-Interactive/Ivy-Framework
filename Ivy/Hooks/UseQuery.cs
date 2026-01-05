@@ -87,9 +87,9 @@ public record QueryMutator<TValue>(
 
 public record QueryResult<TValue>(
     TValue? Value,
-    bool IsLoading,
-    bool IsValidating,
-    bool IsPrevious,
+    bool Loading,
+    bool Validating,
+    bool Previous,
     QueryMutator<TValue> Mutator,
     Exception? Error = null);
 
@@ -99,9 +99,9 @@ public static class QueryResultExtensions
     public static object? Build<TValue>(this QueryResult<TValue> qr, IViewContext _)
     {
         var states = Layout.Horizontal()
-               | new Badge("IsLoading").Variant(qr.IsLoading ? BadgeVariant.Primary : BadgeVariant.Outline)
-               | new Badge("IsValidating").Variant(qr.IsValidating ? BadgeVariant.Primary : BadgeVariant.Outline)
-               | new Badge("IsPrevious").Variant(qr.IsPrevious ? BadgeVariant.Primary : BadgeVariant.Outline)
+               | new Badge("IsLoading").Variant(qr.Loading ? BadgeVariant.Primary : BadgeVariant.Outline)
+               | new Badge("IsValidating").Variant(qr.Validating ? BadgeVariant.Primary : BadgeVariant.Outline)
+               | new Badge("IsPrevious").Variant(qr.Previous ? BadgeVariant.Primary : BadgeVariant.Outline)
             ;
         return Layout.Vertical()
                | states
@@ -193,7 +193,7 @@ public static class UseQueryExtensions
         var initialIsLoading = key is not null && !shouldSkipInitialFetch;
 
         var resultState = context.UseState(
-            () => new QueryResult<TValue>(initialValue, initialIsLoading, IsValidating: false, IsPrevious: false, mutator)
+            () => new QueryResult<TValue>(initialValue, initialIsLoading, Validating: false, Previous: false, mutator)
         );
 
         var currentQueryKey = key is not null ? serializedScopedKey : (string?)null;
@@ -217,13 +217,13 @@ public static class UseQueryExtensions
                         resultState.Set(resultState.Value with
                         {
                             Mutator = mutator,
-                            IsLoading = true,
-                            IsPrevious = true
+                            Loading = true,
+                            Previous = true
                         });
                     }
-                    else if (!resultState.Value.IsLoading)
+                    else if (!resultState.Value.Loading)
                     {
-                        resultState.Set(resultState.Value with { Mutator = mutator, IsLoading = true });
+                        resultState.Set(resultState.Value with { Mutator = mutator, Loading = true });
                     }
                 }
                 subscriptionRef.Value = queryService.Subscribe(resultState, subscriberId.Value, key, scopedKey!, serializedScopedKey, fetcher, opts, tags, initialValue);
@@ -242,8 +242,8 @@ public static class UseQueryExtensions
         // Return idle state when key is null
         if (key is null)
         {
-            return new QueryResult<TValue>(initialValue, IsLoading: false, IsValidating: false,
-                IsPrevious: false, emptyMutator);
+            return new QueryResult<TValue>(initialValue, Loading: false, Validating: false,
+                Previous: false, emptyMutator);
         }
 
         return resultState.Value;
@@ -270,7 +270,7 @@ public static class UseQueryExtensions
             static () => { });
 
         var resultState = context.UseState(() =>
-            new QueryResult<TValue>(initialValue, initialIsLoading, IsValidating: false, IsPrevious: false, emptyMutator));
+            new QueryResult<TValue>(initialValue, initialIsLoading, Validating: false, Previous: false, emptyMutator));
 
         var mutator = key is not null
             ? new QueryMutator<TValue>(
@@ -279,15 +279,15 @@ public static class UseQueryExtensions
                     if (revalidate)
                     {
                         fetchVersionRef.Value++;
-                        resultState.Set(resultState.Value with { Value = newValue, IsValidating = true });
+                        resultState.Set(resultState.Value with { Value = newValue, Validating = true });
                     }
                     else
                     {
                         resultState.Set(resultState.Value with
                         {
                             Value = newValue,
-                            IsLoading = false,
-                            IsValidating = false,
+                            Loading = false,
+                            Validating = false,
                             Error = null
                         });
                     }
@@ -295,7 +295,7 @@ public static class UseQueryExtensions
                 () =>
                 {
                     fetchVersionRef.Value++;
-                    resultState.Set(resultState.Value with { IsValidating = true });
+                    resultState.Set(resultState.Value with { Validating = true });
                 },
                 () =>
                 {
@@ -339,13 +339,13 @@ public static class UseQueryExtensions
                 resultState.Set(resultState.Value with
                 {
                     Mutator = mutator,
-                    IsLoading = true,
-                    IsPrevious = true
+                    Loading = true,
+                    Previous = true
                 });
             }
-            else if (resultState.Value is { IsLoading: false, Value: null })
+            else if (resultState.Value is { Loading: false, Value: null })
             {
-                resultState.Set(resultState.Value with { Mutator = mutator, IsLoading = true });
+                resultState.Set(resultState.Value with { Mutator = mutator, Loading = true });
             }
 
             // Start async fetch
@@ -362,7 +362,7 @@ public static class UseQueryExtensions
 
                     if (!token.IsCancellationRequested && fetchVersionRef.Value == myVersion)
                     {
-                        resultState.Set(new QueryResult<TValue>(value, false, false, IsPrevious: false, mutator));
+                        resultState.Set(new QueryResult<TValue>(value, false, false, Previous: false, mutator));
                     }
                 }
                 catch (OperationCanceledException)
@@ -377,7 +377,7 @@ public static class UseQueryExtensions
                 {
                     if (!token.IsCancellationRequested && fetchVersionRef.Value == myVersion)
                     {
-                        resultState.Set(new QueryResult<TValue>(resultState.Value.Value, false, false, IsPrevious: false, mutator, ex));
+                        resultState.Set(new QueryResult<TValue>(resultState.Value.Value, false, false, Previous: false, mutator, ex));
                     }
                 }
             });
@@ -389,14 +389,14 @@ public static class UseQueryExtensions
         // Return idle state when key is null
         if (key is null)
         {
-            return new QueryResult<TValue>(initialValue, IsLoading: false, IsValidating: false,
-                IsPrevious: false, emptyMutator);
+            return new QueryResult<TValue>(initialValue, Loading: false, Validating: false,
+                Previous: false, emptyMutator);
         }
 
         // If skipping initial fetch with initialValue, return non-loading state
         if (shouldSkipInitialFetch && !hasFetchedRef.Value)
         {
-            return new QueryResult<TValue>(initialValue, IsLoading: false, IsValidating: false, IsPrevious: false, mutator);
+            return new QueryResult<TValue>(initialValue, Loading: false, Validating: false, Previous: false, mutator);
         }
 
         return resultState.Value;

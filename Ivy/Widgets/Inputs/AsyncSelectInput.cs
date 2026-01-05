@@ -97,7 +97,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
         var lookupResult = Lookup(Context, currentValue.Value);
         var displayValue = lookupResult.Value?.Label ?? "Loading...";
-        var loading = lookupResult.IsLoading;
+        var loading = lookupResult.Loading;
 
         ValueTask HandleSelect(Event<AsyncSelectInput> _)
         {
@@ -145,7 +145,7 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectSearc
         // Use the search delegate which now returns a QueryResult
         var searchResult = search(Context, throttledFilter.Value);
         var records = searchResult.Value ?? [];
-        var loading = searchResult.IsLoading;
+        var loading = searchResult.Loading;
 
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
