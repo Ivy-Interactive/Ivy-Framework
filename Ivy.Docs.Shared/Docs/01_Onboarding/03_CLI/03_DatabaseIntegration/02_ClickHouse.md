@@ -52,6 +52,7 @@ Ivy automatically configures the **EntityFrameworkCore.ClickHouse** package and 
 ## ClickHouse-Specific Features
 
 Key features for analytics applications:
+
 - **Columnar storage** for efficient query processing
 - **Materialized views** for pre-computed results
 - **Vectorized query execution** for high performance
@@ -70,10 +71,12 @@ See the [ClickHouse Features Overview](https://clickhouse.com/docs/en/about-us/d
 ### Common Issues
 
 **Connection Issues**
+
 - Verify server is running and listening on the specified port
 - Check credentials and permissions
 
 **Performance Issues**
+
 - Review table engine selection and indexing strategy
 - Consider materialized views for common queries
 
@@ -82,7 +85,7 @@ See the [ClickHouse Troubleshooting Guide](https://clickhouse.com/docs/guides/tr
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [Snowflake Provider](Snowflake.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [Snowflake Provider](02_Snowflake.md)
 - [Official ClickHouse Documentation](https://clickhouse.com/docs/)
 - [EntityFrameworkCore.ClickHouse Package](https://www.nuget.org/packages/EntityFrameworkCore.ClickHouse/)

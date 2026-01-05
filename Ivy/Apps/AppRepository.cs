@@ -1,5 +1,5 @@
 using Ivy.Shared;
-using Microsoft.OpenApi.Models;
+
 
 namespace Ivy.Apps;
 
@@ -57,6 +57,7 @@ public class AppRepository : IAppRepository
     private readonly List<Func<AppDescriptor[]>> _factories = [];
 
     private IAppRepositoryNode? Root { get; set; }
+
     private Dictionary<string, AppDescriptor> Apps { get; } = new();
 
     public void Reload()
@@ -184,7 +185,8 @@ public class AppRepository : IAppRepository
             ? Apps.GetValueOrDefault(id)
             : null;
 
-        return app ?? Apps.Values.First(app => app.Id != AppIds.Auth && app.Id != AppIds.Chrome);
+        return app ?? Apps.Values.FirstOrDefault(x => !AppIds.ShouldNotBeAutoDefaultApps.Contains(x.Id))
+            ?? throw new InvalidOperationException("No serviceable apps are registered on this server.");
     }
 
     public AppDescriptor? GetApp(string id)

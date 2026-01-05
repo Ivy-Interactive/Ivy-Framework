@@ -44,7 +44,6 @@ public class AreaChart0View : ViewBase
                 .Dimension("Month", e => e.Month)
                 .Measure("Desktop", e => e.Sum(f => f.Desktop))
                 .Measure("Mobile", e => e.Sum(f => f.Mobile))
-                .Toolbox()
         ;
     }
 }
@@ -69,7 +68,6 @@ public class AreaChart1View : ViewBase
                 .Measure("Desktop", e => e.Sum(f => f.Desktop))
                 .Measure("Mobile", e => e.Sum(f => f.Mobile))
                 .Measure("Tablet", e => e.Sum(f => f.Tablet))
-                .Toolbox()
         ;
     }
 }
@@ -93,7 +91,6 @@ public class AreaChart2View : ViewBase
                 .Dimension("Month", e => e.Month)
                 .Measure("Revenue", e => e.Sum(f => f.Revenue))
                 .Measure("Expenses", e => e.Sum(f => f.Expenses))
-                .Toolbox()
         ;
     }
 }

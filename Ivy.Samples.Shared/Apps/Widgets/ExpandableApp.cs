@@ -7,14 +7,14 @@ public class ExpandableApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        // Original basic expandable
-        var basicExpandable = new Expandable("This is an expandable", "This is the content of the expandable");
-
         // PROBLEMATIC CASE - Switch in Header (replicates the exact issue from HTML)
         var headerSwitchState1 = UseState(false);
         var headerSwitchState2 = UseState(true);
         var headerSwitchState3 = UseState(true);
         var headerSwitchState4 = UseState(false);
+
+        // Original basic expandable
+        var basicExpandable = new Expandable("This is an expandable", "This is the content of the expandable");
 
         object BuildScaleContent(string emphasis, string body)
         {

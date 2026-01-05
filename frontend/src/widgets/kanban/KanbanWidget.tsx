@@ -73,7 +73,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                 width={columnWidth}
               >
                 <KanbanCards id={column.id}>
-                  {(task: Task) => {
+                  {(task: Task, index: number) => {
                     const card = extractedData.cards.find(
                       c => c.cardId === task.id
                     );
@@ -82,6 +82,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                       <KanbanCardRenderer
                         key={task.id}
                         task={task}
+                        index={index}
                         card={card}
                         KanbanCard={KanbanCard}
                         KanbanHeader={KanbanHeader}

@@ -75,6 +75,10 @@ export function isAppProtocol(url: string): boolean {
   return /^app:\/\//.test(url);
 }
 
+export function isMailtoUrl(url: string): boolean {
+  return /^mailto:/i.test(url);
+}
+
 export function isRelativePath(url: string): boolean {
   return url.startsWith('/');
 }
@@ -188,6 +192,26 @@ export function validateLinkUrl(url: string | null | undefined): string {
   // Handle empty string after trimming
   if (url === '') {
     return '#';
+  }
+
+  // Allow mailto: URLs for email links
+  if (/^mailto:/i.test(url)) {
+    // Basic validation: must have at least one character after mailto:
+    // and should not contain dangerous characters or protocol injection
+    const afterProtocol = url.substring(7); // After "mailto:"
+    if (!afterProtocol || afterProtocol.trim() === '') {
+      return '#';
+    }
+    // Check for protocol injection
+    if (afterProtocol.includes('://')) {
+      return '#';
+    }
+    // Validate mailto format: mailto:email@domain.com[?subject=...&body=...]
+    // Allow query parameters for subject, body, cc, bcc but disallow fragments
+    if (!/^mailto:[^#]+$/i.test(url)) {
+      return '#';
+    }
+    return url;
   }
 
   // Allow app:// URLs (Ivy internal navigation)
@@ -464,4 +488,77 @@ export function validateVideoUrl(
   url: string | null | undefined
 ): string | null {
   return validateMediaUrl(url, { mediaType: 'video' });
+}
+
+/**
+ * Mapping of allowed embed hostnames to their platform names.
+ * This prevents attacks like:
+ * - https://evil.com/youtube.com (substring matching)
+ * - https://youtube.com.evil.com (subdomain attacks)
+ */
+const EMBED_HOST_TO_PLATFORM: Record<string, string> = {
+  'youtube.com': 'youtube',
+  'youtu.be': 'youtube',
+  'twitter.com': 'twitter',
+  'x.com': 'twitter',
+  'facebook.com': 'facebook',
+  'instagram.com': 'instagram',
+  'linkedin.com': 'linkedin',
+  'pinterest.com': 'pinterest',
+  'pin.it': 'pinterest',
+  'github.com': 'github',
+  'gist.github.com': 'github',
+  'reddit.com': 'reddit',
+  'tiktok.com': 'tiktok',
+};
+
+/**
+ * Validates an embed URL and returns the platform name if valid.
+ * This function properly validates hostnames to prevent attacks like:
+ * - https://evil.com/youtube.com (substring matching)
+ * - https://youtube.com.evil.com (subdomain attacks)
+ *
+ * @param url - The embed URL to validate
+ * @returns The platform name if valid, null otherwise
+ */
+export function validateEmbedUrl(
+  url: string | null | undefined
+): string | null {
+  if (!url || typeof url !== 'string') {
+    return null;
+  }
+
+  // Trim whitespace
+  url = url.trim();
+
+  // Handle empty string after trimming
+  if (url === '') {
+    return null;
+  }
+
+  try {
+    const urlObj = new URL(url);
+
+    // Only allow http and https protocols
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return null;
+    }
+
+    // Get hostname in lowercase for comparison
+    const hostname = urlObj.hostname.toLowerCase();
+
+    // Check if hostname matches any allowed host (exact match or subdomain)
+    for (const [allowedHost, platform] of Object.entries(
+      EMBED_HOST_TO_PLATFORM
+    )) {
+      if (hostname === allowedHost || hostname.endsWith('.' + allowedHost)) {
+        return platform;
+      }
+    }
+
+    return null;
+  } catch {
+    // Invalid URL format
+    return null;
+  }
 }

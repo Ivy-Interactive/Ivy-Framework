@@ -36,6 +36,11 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
         Value = value;
     }
 
+    internal ReadOnlyInput()
+    {
+        Value = default!;
+    }
+
     [Prop] public TValue Value { get; }
 
     [Prop] public bool Disabled { get; set; }
@@ -45,8 +50,7 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     [Prop] public bool ShowCopyButton { get; set; } = true;
 
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput    
-
-    [Prop] public new Scale? Scale { get; set; }
+    [Prop] public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
     [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 
@@ -73,6 +77,17 @@ public static class ReadOnlyInputExtensions
             return typedWidget with { OnBlur = onBlur };
         }
         throw new InvalidOperationException($"Widget is not of expected type ReadOnlyInput<{typeof(T).Name}>");
+    }
+
+    public static IAnyReadOnlyInput Nullable(this IAnyReadOnlyInput widget, bool? nullable = true)
+    {
+        // Use reflection to set the property since we don't know the generic type at compile time
+        var property = widget.GetType().GetProperty("Nullable");
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(widget, nullable ?? true);
+        }
+        return widget;
     }
 
     public static IAnyReadOnlyInput HandleBlur<T>(this IAnyReadOnlyInput widget, Action<Event<IAnyInput>> onBlur) where T : notnull

@@ -1,48 +1,74 @@
+using Ivy.Client;
+using Ivy.Core;
+using Ivy.Helpers;
 using Ivy.Hooks;
-using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
-public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : IAuthService
+public class AuthService(IAuthProvider authProvider, IAuthSession authSession, IClientProvider client, AppSessionStore sessionStore) : IAuthService
 {
-    private volatile AuthToken? _token = token;
-
     public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
-        var token = await authProvider.LoginAsync(email, password, cancellationToken);
-        _token = token;
+        var oldSession = authSession.TakeSnapshot();
+
+        var token = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.LoginAsync(authSession, email, password, ct), cancellationToken);
+        authSession.AuthToken = token;
+
+        if (authSession.HasChangedSince(oldSession))
+        {
+            SetAuthCookies(reloadPage: authSession.AuthToken != oldSession.AuthToken);
+        }
         return token;
     }
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
-        return authProvider.GetOAuthUriAsync(option, callback, cancellationToken);
+        var oldSession = authSession.TakeSnapshot();
+
+        var uri = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.GetOAuthUriAsync(authSession, option, callback, ct), cancellationToken);
+
+        if (authSession.AuthSessionData != oldSession.AuthSessionData)
+        {
+            SetAuthSessionDataCookies();
+        }
+
+        return uri;
     }
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
-        var token = await authProvider.HandleOAuthCallbackAsync(request, cancellationToken);
-        _token = token;
+        var oldSession = authSession.TakeSnapshot();
+
+        var token = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.HandleOAuthCallbackAsync(authSession, request, ct), cancellationToken);
+        authSession.AuthToken = token;
+
+        if (authSession.HasChangedSince(oldSession))
+        {
+            SetAuthCookies();
+        }
+
         return token;
     }
 
     public async Task LogoutAsync(CancellationToken cancellationToken)
     {
-        var token = Interlocked.Exchange(ref _token, null);
-
-        if (string.IsNullOrWhiteSpace(token?.AccessToken))
+        if (!string.IsNullOrWhiteSpace(authSession.AuthToken?.AccessToken))
         {
-            return;
+            await TimeoutHelper.WithTimeoutAsync(ct =>
+                authProvider.LogoutAsync(authSession, ct), cancellationToken);
         }
 
-        await authProvider.LogoutAsync(token.AccessToken, cancellationToken);
+        authSession.AuthToken = null;
+        SetAuthCookies();
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken)
     {
-        var token = _token;
+        var token = authSession.AuthToken;
 
         if (string.IsNullOrWhiteSpace(token?.AccessToken))
         {
@@ -51,7 +77,8 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
 
         //todo: cache this!
 
-        return await authProvider.GetUserInfoAsync(token.AccessToken, cancellationToken);
+        return await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.GetUserInfoAsync(authSession, ct), cancellationToken);
     }
 
     public AuthOption[] GetAuthOptions()
@@ -61,33 +88,45 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken)
     {
-        var token = _token;
-        if (token is null)
+        var oldSession = authSession.TakeSnapshot();
+        if (oldSession.AuthToken is null)
         {
             return null;
         }
 
-        var refreshedToken = await authProvider.RefreshAccessTokenAsync(token, cancellationToken);
+        var refreshedToken = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.RefreshAccessTokenAsync(authSession, ct), cancellationToken);
+        authSession.AuthToken = refreshedToken;
 
-        // Update _token only if it's still the same object we read earlier.
-        var seen = Interlocked.CompareExchange(ref _token, refreshedToken, token);
-        if (!ReferenceEquals(seen, token))
+        if (authSession.HasChangedSince(oldSession))
         {
-            // Another thread updated the token in the meantime; return it if valid.
-            if (seen is not null && await authProvider.ValidateAccessTokenAsync(seen.AccessToken, cancellationToken))
-            {
-                return seen;
-            }
-
-            // Otherwise, set and return null.
-            _token = null;
-            return null;
+            SetAuthCookies(reloadPage: authSession.AuthToken == null);
         }
 
         return refreshedToken;
     }
-    public AuthToken? GetCurrentToken()
+
+    public AuthToken? GetCurrentToken() => authSession.AuthToken;
+
+    public string? GetCurrentSessionData() => authSession.AuthSessionData;
+
+    public IAuthSession GetAuthSession() => authSession;
+
+    public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        return _token;
+        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
+    }
+
+    public void SetAuthTokenCookies(bool reloadPage = true, bool? triggerMachineReload = null)
+    {
+        var cookieJarId = sessionStore.RegisterAuthTokenCookies(authSession.AuthToken);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
+    }
+
+    public void SetAuthSessionDataCookies(bool reloadPage = false, bool? triggerMachineReload = null)
+    {
+        var cookieJarId = sessionStore.RegisterAuthSessionDataCookies(authSession.AuthSessionData);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 }

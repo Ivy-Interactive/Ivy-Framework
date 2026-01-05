@@ -20,4 +20,14 @@ public interface IAuthService
     Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken = default);
 
     AuthToken? GetCurrentToken();
+
+    string? GetCurrentSessionData();
+
+    IAuthSession GetAuthSession();
+
+    internal void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null);
+
+    internal void SetAuthTokenCookies(bool reloadPage = true, bool? triggerMachineReload = null);
+
+    internal void SetAuthSessionDataCookies(bool reloadPage = false, bool? triggerMachineReload = null);
 }

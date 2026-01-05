@@ -12,7 +12,11 @@ public record Bar
         StackId = stackId?.ToString();
     }
 
-    public string DataKey { get; }
+    internal Bar()
+    {
+    }
+
+    public string? DataKey { get; }
 
     public LegendTypes LegendType { get; set; } = LegendTypes.Line;
 

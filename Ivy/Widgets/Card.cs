@@ -19,6 +19,8 @@ public record Card : WidgetBase<Card>
         Width = Ivy.Shared.Size.Full();
     }
 
+    internal Card() { }
+
     internal object? Title { get; set; }
     internal object? Description { get; set; }
     internal object? Icon { get; set; }
@@ -31,7 +33,7 @@ public record Card : WidgetBase<Card>
 
     [Prop] public Colors? BorderColor { get; set; }
 
-    [Prop] public CardHoverVariant HoverVariant { get; set; }
+    [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
 
     [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
 
@@ -51,9 +53,11 @@ public static class CardExtensions
 
     public static Card Header(this Card card, object? title = null, object? description = null, object? icon = null)
     {
-        object? header = Layout.Horizontal()
-                         | (Layout.Vertical().Gap(0) | title | description)
-                         | icon!;
+        object? header = Layout.Vertical().Gap(0)
+                         | (Layout.Horizontal().Align(Align.Center)
+                            | title?.WithLayout().Grow()
+                            | icon)
+                         | description;
         return card with
         {
             Children = [card.GetSlot("Content"), card.GetSlot("Footer"), new Slot("Header", header)],
@@ -63,15 +67,15 @@ public static class CardExtensions
         };
     }
 
-    public static Card Title(this Card card, string title) => card.Header(Text.Block(title), card.Description, card.Icon);
+    public static Card Title(this Card card, object? title) => card.Header(title, card.Description, card.Icon);
 
-    public static Card Description(this Card card, string description) => card.Header(card.Title, Text.Muted(description), card.Icon);
+    public static Card Description(this Card card, object? description) => card.Header(card.Title, description, card.Icon);
 
     public static Card Icon(this Card card, object? icon)
     {
         if (icon is Icons iconsValue)
         {
-            icon = iconsValue.ToIcon().Color(Colors.Black);
+            icon = iconsValue.ToIcon().Color(Colors.Neutral);
         }
         return card.Header(card.Title, card.Description, icon);
     }

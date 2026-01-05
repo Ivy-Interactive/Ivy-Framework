@@ -11,7 +11,11 @@ public record Avatar : WidgetBase<Avatar>
         Image = image;
     }
 
-    [Prop] public string Fallback { get; set; }
+    internal Avatar()
+    {
+    }
+
+    [Prop] public string Fallback { get; set; } = string.Empty;
 
     [Prop] public string? Image { get; set; }
 }

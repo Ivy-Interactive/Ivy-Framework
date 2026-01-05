@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 type TextBlockVariant =
   | 'Literal'
@@ -21,6 +22,7 @@ type TextBlockVariant =
   | 'Blockquote'
   | 'InlineCode'
   | 'Lead'
+  | 'ExtraLarge'
   | 'Large'
   | 'Small'
   | 'Muted'
@@ -142,15 +144,17 @@ const variantMap: VariantMap = {
     </code>
   ),
   Lead: ({ children, className, style }) => (
-    <p className={cn(textBlockClassMap.Lead, className)} style={style}>
+    <div className={cn(textBlockClassMap.Lead, className)} style={style}>
+      <MarkdownRenderer content={children} />
+    </div>
+  ),
+  ExtraLarge: ({ children, className, style }) => (
+    <div className={cn('text-3xl ', className)} style={style}>
       {children}
-    </p>
+    </div>
   ),
   Large: ({ children, className, style }) => (
-    <div
-      className={cn('text-semi-lead font-semibold', className)}
-      style={style}
-    >
+    <div className={cn('text-lg font-semibold', className)} style={style}>
       {children}
     </div>
   ),
@@ -216,8 +220,8 @@ const variantMap: VariantMap = {
 };
 
 export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
-  content,
-  variant,
+  content = '',
+  variant = 'Literal',
   width,
   color,
   strikeThrough,

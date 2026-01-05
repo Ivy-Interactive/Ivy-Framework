@@ -19,23 +19,9 @@ Ivy is a **server-side web framework** that brings React-like patterns to C#. In
 
 ## Architecture Overview
 
-```mermaid
-graph LR
-    A["C# Views<br/>(ViewBase)"] --> B["Widget Tree<br/>(JSON)"]
-    B --> C["WebSocket<br/>Communication"]
-    C --> D["React Frontend<br/>(Shadcn/TailwindCSS)"]
-    D --> E["Browser<br/>(HTML/CSS)"]
-    
-    E --> F["User Events<br/>(clicks, input)"]
-    F --> C
-    C --> G["Event Handlers<br/>(C# methods)"]
-    G --> H["State Updates<br/>(UseState, etc.)"]
-    H --> A
-```
-
 ### Views & Components
 
-Every Ivy app is built from **Views** - C# classes that inherit from `ViewBase`. Each view implements a single `Build()` method that returns widgets or other views:
+Every Ivy app is built from **[Views](../02_Concepts/02_Views.md)** - C# classes that inherit from [ViewBase](../02_Concepts/02_Views.md). Each view implements a single `Build()` method that returns widgets or other views:
 
 ```csharp
 [App(icon: Icons.Calendar)]
@@ -45,7 +31,7 @@ public class TodoApp : ViewBase
     {
         var newTitle = UseState("");
         var todos = UseState(ImmutableArray.Create<Todo>());
-        
+
         return new Card()
             .Title("My Todos")
             .Description("What needs to be done?")
@@ -67,44 +53,55 @@ public class TodoApp : ViewBase
 
 ### Reactive State Management
 
-Ivy provides React-inspired hooks for state management:
+Ivy provides React-inspired hooks for [state management](../02_Concepts/05_State.md):
 
 **Available Hooks:**
 
-- `UseState<T>()` - Local component state that triggers re-renders
-- `UseEffect()` - Side effects with dependency tracking  
-- `UseService<T>()` - Dependency injection integration
-- `UseSignal()`, `UseDownload()`, `UseWebhook()` - And many more...
+- [UseState<T>()](../02_Concepts/05_State.md) - Local component state that triggers re-renders
+- [UseEffect()](../02_Concepts/09_Effects.md) - Side effects with dependency tracking
+- [UseService<T>()](../02_Concepts/18_Services.md) - Dependency injection integration
+- [UseSignal()](../02_Concepts/06_Signals.md), [UseDownload()](../02_Concepts/24_Downloads.md), `UseWebhook()` - And many more...
 
 ```csharp
 public override object? Build()
 {
     // State hook - triggers re-render when changed
     var count = UseState(0);
-    
+
     // Effect hook - runs when count changes
     UseEffect(() => {
         Console.WriteLine($"Count changed to: {count.Value}");
     }, count);
-    
-    return new Button($"Count: {count.Value}", 
+
+    return new Button($"Count: {count.Value}",
         onClick: _ => count.Set(count.Value + 1));
 }
 ```
 
+### Hook Guidelines
+
+Hooks rely on a strict call order to function correctly. Following these rules ensures that Ivy can properly track state between renders:
+
+1. **Call hooks at the top level** - Don't call hooks inside loops, conditions, or nested functions
+2. **Call hooks from Views only** - Hooks must be used inside the `Build()` method
+
+The **Ivy.Analyser** package automatically enforces these rules at compile time, catching violations before your code runs.
+
+For detailed examples and troubleshooting, see [Rules of Hooks](../02_Concepts/08_RulesOfHooks.md).
+
 ### Widget Library
 
-Ivy ships with a comprehensive set of strongly-typed widgets:
+Ivy ships with a comprehensive set of strongly-typed [widgets](../02_Concepts/03_Widgets.md):
 
-| Category | Examples |
-|----------|----------|
-| Common | `Button`, `Badge`, `Progress`, `Table`, `Card`, `Tooltip`, `Expandable`... |
-| Inputs | `TextInput`, `NumberInput`, `BoolInput`, `DateTimeInput`, `FileInput`... |
-| Primitives | `Text`, `Icon`, `Image`, `Markdown`, `Json`, `Code`, `Avatar`... |
-| Layouts | `Layout.Vertical()`, `GridLayout`, `TabsLayout`, `SidebarLayout`... |
-| Effects | `Animation`, `Confetti`... |
-| Charts | `LineChart`, `BarChart`, `PieChart`, `AreaChart`... |
-| Advanced | `Sheet`, `Chat`... |
+| Category   | Examples                                                                   |
+| ---------- | -------------------------------------------------------------------------- |
+| Common     | `Button`, `Badge`, `Progress`, `Table`, `Card`, `Tooltip`, `Expandable`... |
+| Inputs     | `TextInput`, `NumberInput`, `BoolInput`, `DateTimeInput`, `FileInput`...   |
+| Primitives | `Text`, `Icon`, `Image`, `Markdown`, `Json`, `Code`, `Avatar`...           |
+| Layouts    | `Layout.Vertical()`, `GridLayout`, `TabsLayout`, `SidebarLayout`...        |
+| Effects    | `Animation`, `Confetti`...                                                 |
+| Charts     | `LineChart`, `BarChart`, `PieChart`, `AreaChart`...                        |
+| Advanced   | `Sheet`, `Chat`...                                                         |
 
 ### Real-time Communication
 
@@ -124,11 +121,15 @@ When working with search results in the sidebar (both in Ivy Samples and Docs), 
 
 ## Detailed Architecture
 
+<Callout Type="info">
+The following technical documentation is intended primarily for internal developers of the Ivy-Framework.
+</Callout>
+
 For a comprehensive technical overview of Ivy's architecture, see:
 
-- **[Frontend Architecture](./05_Architecture/01_FrontendArchitecture.md)** - React/TypeScript frontend, widget rendering pipeline, and build system
-- **[Backend Architecture](./05_Architecture/02_BackendArchitecture.md)** - C# server configuration, application system, and deployment
-- **[Communication](./05_Architecture/03_Communication.md)** - SignalR protocol, message types, and state synchronization
+- **[Framework Design](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/Framework-Design)** - Design system, theming, and UI framework choices
+- **[Backend Architecture](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/Backend-Architecture)** - C# server configuration, application system, and deployment
+- **[Communication](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/BE%E2%80%90FE-communication)** - SignalR protocol, message types, and state synchronization
 
 ## Development Experience
 
@@ -165,10 +166,10 @@ public override object? Build()
     // Use any .NET library
     var db = UseService<MyDbContext>();
     var logger = UseService<ILogger<MyApp>>();
-    
+
     // Async operations work naturally
     var data = await db.Users.ToListAsync();
-    
+
     return new Table(data)
         .Columns(
             col => col.Name,

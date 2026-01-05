@@ -9,7 +9,7 @@ namespace Ivy;
 public record ListItem : WidgetBase<ListItem>
 {
     [OverloadResolutionPriority(1)]
-    public ListItem(string? title = null, string? subtitle = null, Func<Event<ListItem>, ValueTask>? onClick = null, Icons? icon = Icons.None, object? badge = null, object? tag = null, object[]? items = null) : base(items ?? [])
+    public ListItem(string? title = null, string? subtitle = null, Func<Event<ListItem>, ValueTask>? onClick = null, Icons? icon = null, object? badge = null, object? tag = null, object[]? items = null) : base(items ?? [])
     {
         Title = title;
         Subtitle = subtitle;
@@ -20,7 +20,7 @@ public record ListItem : WidgetBase<ListItem>
     }
 
     // Overload for Action<Event<ListItem>>
-    public ListItem(string? title = null, string? subtitle = null, Action<Event<ListItem>>? onClick = null, Icons? icon = Icons.None, object? badge = null, object? tag = null, object[]? items = null) : base(items ?? [])
+    public ListItem(string? title = null, string? subtitle = null, Action<Event<ListItem>>? onClick = null, Icons? icon = null, object? badge = null, object? tag = null, object[]? items = null) : base(items ?? [])
     {
         Title = title;
         Subtitle = subtitle;
@@ -31,7 +31,7 @@ public record ListItem : WidgetBase<ListItem>
     }
 
     // Overload for simple Action (no parameters)
-    public ListItem(string? title = null, string? subtitle = null, Action? onClick = null, Icons? icon = Icons.None, object? badge = null, object? tag = null, object[]? items = null) : base(items ?? [])
+    public ListItem(string? title = null, string? subtitle = null, Action? onClick = null, Icons? icon = null, object? badge = null, object? tag = null, object[]? items = null) : base(items ?? [])
     {
         Title = title;
         Subtitle = subtitle;
@@ -39,6 +39,10 @@ public record ListItem : WidgetBase<ListItem>
         Badge = badge?.ToString();
         Tag = tag;
         OnClick = onClick == null ? null : (_ => { onClick(); return ValueTask.CompletedTask; });
+    }
+
+    internal ListItem()
+    {
     }
 
     [Prop] public string? Title { get; }

@@ -16,9 +16,11 @@ import { ToastAction } from '@/components/ui/toast';
 import { setThemeGlobal } from '@/components/theme-provider';
 
 type UpdateMessage = Array<{
+  iteration: number;
   viewId: string;
   indices: number[];
   patch: Operation[];
+  treeHash?: string;
 }>;
 
 type RefreshMessage = {
@@ -42,16 +44,28 @@ type RedirectMessage = {
   state: HistoryState;
 };
 
-type AuthToken = {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: string;
-  tag?: unknown;
+type SetAuthCookiesMessage = {
+  cookieJarId: string;
+  reloadPage: boolean;
+  triggerMachineReload: boolean;
 };
 
-type SetAuthTokenMessage = {
-  authToken: AuthToken | null;
-  reloadPage: boolean;
+type HttpTunnelRequestMessage = {
+  requestId: string;
+  method: string;
+  url: string;
+  headers?: Record<string, string[]>;
+  body?: string; // Base64 encoded
+  contentType?: string;
+};
+
+type HttpTunnelResponseMessage = {
+  requestId: string;
+  statusCode: number;
+  headers?: Record<string, string[]>;
+  body?: string; // Base64 encoded
+  contentType?: string;
+  errorMessage?: string;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -72,6 +86,26 @@ const widgetTreeToXml = (node: WidgetNode) => {
   }
 };
 
+const calculateTreeSignature = (node: WidgetNode): string => {
+  const children =
+    node.children?.map(c => calculateTreeSignature(c)).join(',') ?? '';
+  return `${node.id}:${node.type}[${children}]`;
+};
+
+const hashString = (str: string): string => {
+  // djb2 hash - simple and fast
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 33) ^ str.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0');
+};
+
+const calculateTreeHash = (node: WidgetNode): string => {
+  const signature = calculateTreeSignature(node);
+  return hashString(signature);
+};
+
 const escapeXml = (str: string) => {
   return str
     .replace(/&/g, '&amp;')
@@ -81,22 +115,36 @@ const escapeXml = (str: string) => {
     .replace(/'/g, '&apos;');
 };
 
+const getFullReplacementNode = (patch: Operation[]): WidgetNode | null => {
+  if (patch.length === 1 && patch[0].op === 'replace' && patch[0].path === '') {
+    return (patch[0] as { value: WidgetNode }).value;
+  }
+  return null;
+};
+
+// Pure function - no side effects, safe for React Strict Mode double-invocation
 function applyUpdateMessage(
   tree: WidgetNode,
-  message: UpdateMessage
-): WidgetNode {
-  const newTree = cloneDeep(tree);
+  updates: UpdateMessage
+): WidgetNode | null {
+  let newTree = cloneDeep(tree);
 
-  message.forEach(update => {
+  for (const update of updates) {
     let parent = newTree;
 
     if (!parent) {
-      logger.error('No parent found in applyUpdateMessage', { message });
-      return;
+      logger.error('No parent found in applyUpdateMessage', { update });
+      continue;
     }
 
     if (update.indices.length === 0) {
-      applyPatch(parent, update.patch);
+      const replacement = getFullReplacementNode(update.patch);
+      if (replacement) {
+        // Special case: full replacement of the root node
+        newTree = replacement;
+      } else {
+        applyPatch(parent, update.patch);
+      }
     } else {
       update.indices.forEach((index, i) => {
         if (i === update.indices.length - 1) {
@@ -104,10 +152,17 @@ function applyUpdateMessage(
             logger.error('No children found in parent', { parent });
             return;
           }
-          applyPatch(parent.children[index], update.patch);
+          const target = parent.children[index];
+          const replacement = getFullReplacementNode(update.patch);
+          if (replacement) {
+            // Special case: full replacement of the target node
+            parent.children[index] = replacement;
+          } else {
+            applyPatch(target, update.patch);
+          }
         } else {
           if (!parent) {
-            logger.error('No parent found in applyUpdateMessage', { message });
+            logger.error('No parent found in applyUpdateMessage', { update });
             return;
           }
           if (!parent.children) {
@@ -136,7 +191,20 @@ function applyUpdateMessage(
         }
       });
     }
-  });
+
+    if (update.treeHash) {
+      //if we have the treeHash then we're in DEBUG
+      const frontendHash = calculateTreeHash(newTree);
+      if (frontendHash !== update.treeHash) {
+        logger.error('Tree hash mismatch after update', {
+          iteration: update.iteration,
+          viewId: update.viewId,
+          backendHash: update.treeHash,
+          frontendHash,
+        });
+      }
+    }
+  }
 
   return newTree;
 }
@@ -156,7 +224,13 @@ export const useBackend = (
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
-  const authChannelRef = useRef<BroadcastChannel | null>(null);
+  const lastIterationRef = useRef<number>(-1);
+
+  // Use a ref that gets updated with the latest connection so we always have it in the callback
+  const latestConnectionRef = useRef(connection);
+  useEffect(() => {
+    latestConnectionRef.current = connection;
+  }, [connection]);
 
   // Stable values used in dependency arrays - only updated when we want to reconnect
   const [stableAppId, setStableAppId] = useState(appId);
@@ -222,16 +296,37 @@ export const useBackend = (
   }, [widgetTree, connectionId]);
 
   const handleRefreshMessage = useCallback((message: RefreshMessage) => {
+    // Reset iteration tracking on full refresh
+    lastIterationRef.current = -1;
     setWidgetTree(message.widgets);
   }, []);
 
   const handleUpdateMessage = useCallback((message: UpdateMessage) => {
+    const lastSeen = lastIterationRef.current;
+    const newUpdates = message.filter(u => u.iteration > lastSeen);
+
+    if (newUpdates.length === 0) {
+      return;
+    }
+
+    // Check for lost iterations
+    const expectedNext = lastSeen + 1;
+    const firstNew = Math.min(...newUpdates.map(u => u.iteration));
+    if (lastSeen >= 0 && firstNew > expectedNext) {
+      logger.error('Lost iteration(s) detected', {
+        lastIteration: lastSeen,
+        receivedIteration: firstNew,
+      });
+    }
+    const maxIteration = Math.max(...newUpdates.map(u => u.iteration));
+    lastIterationRef.current = maxIteration;
+
     setWidgetTree(currentTree => {
       if (!currentTree) {
         logger.warn('No current widget tree available for update');
         return null;
       }
-      return applyUpdateMessage(currentTree, message);
+      return applyUpdateMessage(currentTree, newUpdates);
     });
   }, []);
 
@@ -242,27 +337,34 @@ export const useBackend = (
     });
   }, [connection]);
 
-  const handleSetAuthToken = useCallback(
-    async (message: SetAuthTokenMessage) => {
-      logger.debug('Processing SetAuthToken request', {
-        hasAuthToken: !!message.authToken,
-      });
-      const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message.authToken),
-        credentials: 'include',
-      });
+  const handleSetAuthCookies = useCallback(
+    async (message: SetAuthCookiesMessage) => {
+      const currentConnectionId = latestConnectionRef.current?.connectionId;
+      // logger.debug('Processing SetAuthCookies request', {
+      //   hasAuthToken: !!message.cookieJarId,
+      //   connectionId: currentConnectionId,
+      // });
+      const response = await fetch(
+        `${getIvyHost()}/ivy/auth/set-auth-cookies`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Machine-Id': getMachineId(),
+          },
+          body: JSON.stringify({
+            cookieJarId: message.cookieJarId,
+            connectionId: currentConnectionId ?? null,
+            triggerMachineReload: message.triggerMachineReload,
+          }),
+          credentials: 'include',
+        }
+      );
       if (!response.ok) {
-        logger.error('Failed to set auth token', {
+        logger.error('Failed to set auth cookies', {
           status: response.status,
           statusText: response.statusText,
         });
-      }
-
-      // Notify other tabs about logout
-      if (message.authToken === null && authChannelRef.current) {
-        authChannelRef.current.postMessage({ type: 'logout' });
       }
 
       if (message.reloadPage) {
@@ -273,7 +375,7 @@ export const useBackend = (
   );
 
   const handleRedirect = useCallback((message: RedirectMessage) => {
-    logger.debug('Processing Redirect request', message);
+    //logger.debug('Processing Redirect request', message);
     const { url, replaceHistory } = message;
 
     // Validate URL to prevent open redirect vulnerabilities
@@ -298,7 +400,7 @@ export const useBackend = (
   }, []);
 
   const handleSetTheme = useCallback((theme: string) => {
-    logger.debug('Processing SetTheme request', { theme });
+    // logger.debug('Processing SetTheme request', { theme });
     const normalizedTheme = theme.toLowerCase();
     if (['dark', 'light', 'system'].includes(normalizedTheme)) {
       logger.info('Setting theme globally', { theme: normalizedTheme });
@@ -307,6 +409,134 @@ export const useBackend = (
       logger.error('Invalid theme value received', { theme });
     }
   }, []);
+
+  const handleHttpRequest = useCallback(
+    async (request: HttpTunnelRequestMessage) => {
+      // logger.debug('Processing HttpRequest', {
+      //   requestId: request.requestId,
+      //   method: request.method,
+      //   url: request.url,
+      // });
+
+      try {
+        const headers = new Headers();
+        if (request.headers) {
+          Object.entries(request.headers).forEach(([key, values]) => {
+            values.forEach(value => headers.append(key, value));
+          });
+        }
+        if (request.contentType) {
+          headers.set('Content-Type', request.contentType);
+        }
+
+        const fetchOptions: RequestInit = {
+          method: request.method,
+          headers,
+          credentials: 'include',
+        };
+
+        if (request.body) {
+          // Decode base64 body
+          const binaryString = atob(request.body);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          fetchOptions.body = bytes;
+        }
+
+        const response = await fetch(request.url, fetchOptions);
+
+        // Read response body
+        const responseBytes = new Uint8Array(await response.arrayBuffer());
+        let responseBody = '';
+        if (responseBytes.length > 0) {
+          const binaryString = Array.from(responseBytes)
+            .map(b => String.fromCharCode(b))
+            .join('');
+          responseBody = btoa(binaryString);
+        }
+
+        // Extract headers
+        const responseHeaders: Record<string, string[]> = {};
+        response.headers.forEach((value, key) => {
+          if (!responseHeaders[key]) {
+            responseHeaders[key] = [];
+          }
+          responseHeaders[key].push(value);
+        });
+
+        const tunnelResponse: HttpTunnelResponseMessage = {
+          requestId: request.requestId,
+          statusCode: response.status,
+          headers: responseHeaders,
+          body: responseBody || undefined,
+          contentType: response.headers.get('Content-Type') || undefined,
+        };
+
+        const httpResponse = await fetch(
+          `${getIvyHost()}/ivy/http-tunnel/response`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Connection-Id': connection?.connectionId ?? '',
+            },
+            body: JSON.stringify(tunnelResponse),
+          }
+        );
+
+        if (!httpResponse.ok) {
+          logger.error('Failed to send HttpResponse via HTTP', {
+            status: httpResponse.status,
+            statusText: httpResponse.statusText,
+          });
+        } else {
+          logger.debug('Sent HttpResponse back to backend via HTTP', {
+            requestId: request.requestId,
+          });
+        }
+      } catch (error) {
+        logger.error('Error processing HttpRequest:', error);
+
+        const errorResponse: HttpTunnelResponseMessage = {
+          requestId: request.requestId,
+          statusCode: 0,
+          errorMessage:
+            error instanceof Error ? error.message : 'Unknown error',
+        };
+
+        const httpResponse = await fetch(
+          `${getIvyHost()}/ivy/http-tunnel/response`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Connection-Id': connection?.connectionId ?? '',
+            },
+            body: JSON.stringify(errorResponse),
+          }
+        ).catch(err => {
+          logger.error('Failed to send error HttpResponse via HTTP:', err);
+          return null;
+        });
+
+        if (httpResponse) {
+          if (!httpResponse.ok) {
+            logger.error('Failed to send error HttpResponse via HTTP', {
+              status: httpResponse.status,
+              statusText: httpResponse.statusText,
+            });
+          } else {
+            logger.debug('Sent error HttpResponse back to backend via HTTP', {
+              requestId: request.requestId,
+            });
+          }
+        }
+      }
+    },
+    [connection]
+  );
 
   const handleError = useCallback(
     (error: ErrorMessage) => {
@@ -350,33 +580,12 @@ export const useBackend = (
     currentConnectionRef.current = newConnection;
     queueMicrotask(() => setConnection(newConnection));
 
-    // Set up Broadcast Channel for cross-tab logout synchronization
-    if (typeof BroadcastChannel !== 'undefined') {
-      const authChannel = new BroadcastChannel('ivy-auth-channel');
-      authChannelRef.current = authChannel;
-
-      authChannel.onmessage = event => {
-        if (event.data?.type === 'logout') {
-          logger.info('Received logout event from another tab, reloading...');
-          window.location.reload();
-        }
-      };
-    } else {
-      logger.warn('BroadcastChannel API not supported in this browser');
-    }
-
     return () => {
       if (currentConnectionRef.current === newConnection) {
         newConnection.stop().catch(err => {
           logger.warn('Error stopping SignalR connection during unmount:', err);
         });
         currentConnectionRef.current = null;
-      }
-
-      // Close Broadcast Channel
-      if (authChannelRef.current) {
-        authChannelRef.current.close();
-        authChannelRef.current = null;
       }
 
       if (isRootConnection) {
@@ -426,9 +635,9 @@ export const useBackend = (
             handleError(message);
           });
 
-          connection.on('SetAuthToken', message => {
-            logger.debug(`[${connection.connectionId}] SetAuthToken`);
-            handleSetAuthToken(message);
+          connection.on('SetAuthCookies', message => {
+            logger.debug(`[${connection.connectionId}] SetAuthCookies`);
+            handleSetAuthCookies(message);
           });
 
           connection.on('SetRootAppId', (message: { rootAppId: string }) => {
@@ -441,6 +650,11 @@ export const useBackend = (
           connection.on('SetTheme', theme => {
             logger.debug(`[${connection.connectionId}] SetTheme`, { theme });
             handleSetTheme(theme);
+          });
+
+          connection.on('SetTitle', (title: string) => {
+            logger.debug(`[${connection.connectionId}] SetTitle`, { title });
+            document.title = title;
           });
 
           connection.on('CopyToClipboard', (text: string) => {
@@ -487,6 +701,20 @@ export const useBackend = (
             handleHotReloadMessage();
           });
 
+          connection.on('ReloadPage', () => {
+            logger.debug(`[${connection.connectionId}] ReloadPage`);
+            window.location.reload();
+          });
+
+          connection.on('HttpRequest', message => {
+            logger.debug(`[${connection.connectionId}] HttpRequest`, {
+              requestId: message.requestId,
+              method: message.method,
+              url: message.url,
+            });
+            handleHttpRequest(message);
+          });
+
           connection.onreconnecting(() => {
             logger.warn(`[${connection.connectionId}] Reconnecting`);
             setDisconnected(true);
@@ -513,9 +741,12 @@ export const useBackend = (
         connection.off('Error');
         connection.off('CopyToClipboard');
         connection.off('HotReload');
-        connection.off('SetAuthToken');
+        connection.off('ReloadPage');
+        connection.off('HttpRequest');
+        connection.off('SetAuthCookies');
         connection.off('SetRootAppId');
         connection.off('SetTheme');
+        connection.off('SetTitle');
         connection.off('OpenUrl');
         connection.off('Redirect');
         connection.off('ApplyTheme');
@@ -540,9 +771,10 @@ export const useBackend = (
     handleUpdateMessage,
     handleHotReloadMessage,
     toast,
-    handleSetAuthToken,
+    handleSetAuthCookies,
     handleRedirect,
     handleSetTheme,
+    handleHttpRequest,
     handleError,
     stableAppId,
     parentId,

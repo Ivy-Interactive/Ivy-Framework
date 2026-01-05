@@ -9,6 +9,7 @@ public class LongSidebarTestApp : SampleBase
     protected override object? BuildSample()
     {
         // State management for all form inputs
+        var client = UseService<IClientProvider>();
         var endpoint = UseState(() => "https://automation-ivy-staging.azurewebsites.net/api/BannerFunction");
         var text = UseState(() => "Hello World");
         var width = UseState<int?>((int?)null, false);
@@ -152,33 +153,10 @@ public class LongSidebarTestApp : SampleBase
                                                 textColor.Value, bannerRadius.Value, targetQuadrantSize.Value,
                                                 theme.Value, fileFormat.Value);
                     // Open URL in new tab for download
-                    UseService<IClientProvider>().OpenUrl(downloadUrl);
+                    client.OpenUrl(downloadUrl);
                 }
-            ).Icon(Icons.Download).Variant(ButtonVariant.Primary),
+            ).Icon(Icons.Download).Variant(ButtonVariant.Primary)
 
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg"),
-            Text.P("egg")
         ).Gap(6);
 
         // Return SidebarLayout with form inputs in sidebar and preview in main content

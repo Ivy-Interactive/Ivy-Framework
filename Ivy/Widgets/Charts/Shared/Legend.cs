@@ -39,7 +39,6 @@ public record Legend
 
     public Legend()
     {
-
     }
 
     public Layouts Layout { get; set; } = Layouts.Horizontal;

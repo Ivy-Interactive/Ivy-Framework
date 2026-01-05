@@ -19,8 +19,7 @@ internal static class FormScaffolder
 
             var label = displayInfo.Name ?? Utils.LabelFor(field.Name, field.Type);
 
-            // Trim "Id" suffix from labels (except "GovId" and plain "Id")
-            if (!field.Name.EndsWith("GovId") && field.Name != "Id" && field.Name.EndsWith("Id"))
+            if (ShouldTrimIdSuffix(displayInfo.Name, label))
             {
                 label = label[..^3];
             }
@@ -241,6 +240,14 @@ internal static class FormScaffolder
         }
 
         return validators;
+    }
+
+    private static bool ShouldTrimIdSuffix(string? displayName, string label)
+    {
+        return displayName == null
+            && label.EndsWith("Id")
+            && label != "GovId"
+            && label != "Id";
     }
 
     private static TextInputBase ApplyMaxLength(TextInputBase input, FieldPropertyInfo field)

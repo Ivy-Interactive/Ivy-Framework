@@ -1,15 +1,26 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Widgets.Inputs;
 using Ivy.Shared;
+using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
+
+public record Affix
+{
+    public Icons? Icon { get; init; }
+    public string? Text { get; init; }
+}
+
+public static class AffixExtensions
+{
+    public static Affix ToAffix(this Icons icon) => new() { Icon = icon };
+    public static Affix ToAffix(this string text) => new() { Text = text };
+}
 
 public enum TextInputs
 {
@@ -35,17 +46,17 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public TextInputs Variant { get; set; }
+    [Prop] public TextInputs Variant { get; set; } = TextInputs.Text;
 
     [Prop] public string? ShortcutKey { get; set; }
 
-    [Prop] public PrefixSuffix? Prefix { get; set; }
+    [Prop] public Affix? Prefix { get; set; }
 
-    [Prop] public PrefixSuffix? Suffix { get; set; }
-
-    [Prop] public new Scale? Scale { get; set; }
+    [Prop] public Affix? Suffix { get; set; }
 
     [Prop] public int? MaxLength { get; set; }
+
+    [Prop] public bool Nullable { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -84,7 +95,11 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
         Disabled = disabled;
     }
 
+    internal TextInput() { }
+
     [Prop] public TString Value { get; } = default!;
+
+    [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
@@ -120,6 +135,7 @@ public static class TextInputExtensions
         var type = state.GetStateType();
         Type genericType = typeof(TextInput<>).MakeGenericType(type);
         TextInputBase input = (TextInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
+        input.Nullable = type.IsNullableType();
         return input;
     }
 
@@ -143,21 +159,32 @@ public static class TextInputExtensions
 
     public static TextInputBase Invalid(this TextInputBase widget, string invalid) => widget with { Invalid = invalid };
 
+    public static TextInputBase Nullable(this TextInputBase widget, bool? nullable = true)
+    {
+        var property = widget.GetType().GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(widget, nullable ?? true);
+            return widget;
+        }
+        return widget with { Nullable = nullable ?? true };
+    }
+
     public static TextInputBase ShortcutKey(this TextInputBase widget, string shortcutKey) => widget with { ShortcutKey = shortcutKey };
 
     public static TextInputBase MaxLength(this TextInputBase widget, int maxLength) => widget with { MaxLength = maxLength };
 
     public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
-        => widget with { Prefix = new PrefixSuffix.Text(prefixText) };
+        => widget with { Prefix = prefixText.ToAffix() };
 
     public static TextInputBase Prefix(this TextInputBase widget, Icons prefixIcon)
-        => widget with { Prefix = new PrefixSuffix.Icon(prefixIcon) };
+        => widget with { Prefix = prefixIcon.ToAffix() };
 
     public static TextInputBase Suffix(this TextInputBase widget, string suffixText)
-        => widget with { Suffix = new PrefixSuffix.Text(suffixText) };
+        => widget with { Suffix = suffixText.ToAffix() };
 
     public static TextInputBase Suffix(this TextInputBase widget, Icons suffixIcon)
-        => widget with { Suffix = new PrefixSuffix.Icon(suffixIcon) };
+        => widget with { Suffix = suffixIcon.ToAffix() };
 
     [OverloadResolutionPriority(1)]
     public static TextInputBase HandleBlur(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

@@ -13,6 +13,7 @@ interface ArticleWidgetProps {
   next: InternalLink;
   documentSource?: string;
   title?: string;
+  headings?: { id: string; text: string; level: number }[];
 }
 
 export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
@@ -21,9 +22,10 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   previous,
   next,
   documentSource,
-  showFooter,
-  showToc,
+  showFooter = true,
+  showToc = true,
   title,
+  headings = [],
 }) => {
   const eventHandler = useEventHandler();
   const articleRef = useRef<HTMLElement>(null);
@@ -31,7 +33,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   return (
     <div className="flex flex-col gap-2 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8">
       <div className="flex gap-8 flex-grow">
-        <article ref={articleRef} className="w-[48rem]">
+        <article ref={articleRef} className="w-full max-w-[48rem]">
           <div className="flex flex-col gap-4 flex-grow min-h-[calc(100vh+8rem)]">
             {children}
           </div>
@@ -50,6 +52,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
           showToc={showToc}
           documentSource={documentSource}
           title={title}
+          headings={headings}
         />
       </div>
     </div>

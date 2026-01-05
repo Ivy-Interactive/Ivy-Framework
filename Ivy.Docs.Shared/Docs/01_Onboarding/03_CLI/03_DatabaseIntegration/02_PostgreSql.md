@@ -64,6 +64,7 @@ PostgreSQL supports multiple schemas. When configuring your PostgreSQL database 
 ## PostgreSQL-Specific Features
 
 Key features Ivy can leverage:
+
 - **JSONB columns** for document storage
 - **Array types** for collections
 - **Custom data types** and enums
@@ -81,10 +82,12 @@ See [About PostgreSQL](https://www.postgresql.org/about/) for more information o
 ### Common Issues
 
 **Connection Issues**
+
 - Verify server is running and listening on expected port
 - Check credentials and firewall settings
 
 **Authentication Problems**
+
 - Check `pg_hba.conf` configuration
 
 For detailed help, see the [PostgreSQL Documentation](https://www.postgresql.org/docs/current/) and search for common issues in the [PostgreSQL Wiki](https://wiki.postgresql.org/wiki/Main_Page).
@@ -92,8 +95,8 @@ For detailed help, see the [PostgreSQL Documentation](https://www.postgresql.org
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [SQL Server Provider](SqlServer.md)
-- [MySQL Provider](MySql.md)
-- [Supabase Provider](Supabase.md)
+- [SQL Server Provider](02_SqlServer.md)
+- [MySQL Provider](02_MySql.md)
+- [Supabase Provider](02_Supabase.md)
 - [Official PostgreSQL Documentation](https://www.postgresql.org/docs/current/)
 - [Npgsql Entity Framework Core Provider](https://www.npgsql.org/efcore/)

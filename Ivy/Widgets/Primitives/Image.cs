@@ -6,14 +6,18 @@ namespace Ivy;
 
 public record Image : WidgetBase<Image>
 {
-    public Image(string src)
+    public Image(string src) : this()
     {
         Src = src;
+    }
+
+    internal Image()
+    {
         Width = Size.MinContent();
         Height = Size.MinContent();
     }
 
     // TODO: Maintain aspect ratio, Clippings: Circular, Square, Rounded
 
-    [Prop] public string Src { get; set; }
+    [Prop] public string Src { get; set; } = String.Empty;
 }

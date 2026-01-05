@@ -50,6 +50,7 @@ Ivy automatically configures the **Oracle.EntityFrameworkCore** package for Orac
 ## Oracle-Specific Features
 
 Key enterprise features Ivy can leverage:
+
 - **Advanced Security** - encryption and access controls
 - **Performance** - partitioning and indexing
 - **PL/SQL** - stored procedures and functions
@@ -69,6 +70,7 @@ For complete features, see the [Oracle Database documentation](https://docs.orac
 ### Common Issues
 
 **Authentication Failed**
+
 - Check username/password and account status
 
 For detailed troubleshooting, refer to [Oracle Database Error Messages](https://docs.oracle.com/en/database/oracle/oracle-database/19/errmg/index.html).
@@ -76,8 +78,8 @@ For detailed troubleshooting, refer to [Oracle Database Error Messages](https://
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [SQL Server Provider](SqlServer.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [Enterprise Features](../../02_Concepts/Services.md)
+- [SQL Server Provider](02_SqlServer.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [Enterprise Features](../../02_Concepts/18_Services.md)
 - [Official Oracle Database Documentation](https://docs.oracle.com/en/database/oracle/oracle-database/index.html)
 - [Oracle.EntityFrameworkCore Package](https://docs.oracle.com/en/database/oracle/oracle-data-access-components/19.3/odpnt/ODPEFCore.html)

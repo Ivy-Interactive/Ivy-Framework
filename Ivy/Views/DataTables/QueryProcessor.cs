@@ -3,6 +3,8 @@ using System.Security.Cryptography;
 using System.Text;
 using Apache.Arrow;
 using Apache.Arrow.Ipc;
+using Apache.Arrow.Types;
+using Ivy.Core.Helpers;
 using Ivy.Protos.DataTable;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -27,7 +29,7 @@ public class ValuesResult
 
 public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributedCache? cache = null)
 {
-    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query)
+    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query, Func<object, object?>? idSelector = null)
     {
         try
         {
@@ -100,7 +102,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
             // Convert to Arrow table
             logger?.LogDebug("Converting to Arrow table");
-            var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType);
+            var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType, idSelector);
             logger?.LogInformation("Arrow conversion complete, {ByteCount} bytes", arrowData.Length);
 
             var result = new QueryResult
@@ -764,7 +766,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             var jsonValue = arg.Value.ToStringUtf8();
             logger?.LogDebug("Raw value: '{JsonValue}'", jsonValue);
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue);
+            var result = System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue, JsonHelper.DefaultOptions);
             logger?.LogDebug("Deserialized value: '{Result}'", result);
 
             return result;
@@ -837,15 +839,15 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             var jsonValue = arg.Value.ToStringUtf8();
             return underlyingType switch
             {
-                SystemType t when t == typeof(string) => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue),
-                SystemType t when t == typeof(int) => System.Text.Json.JsonSerializer.Deserialize<int>(jsonValue),
-                SystemType t when t == typeof(long) => System.Text.Json.JsonSerializer.Deserialize<long>(jsonValue),
-                SystemType t when t == typeof(double) => System.Text.Json.JsonSerializer.Deserialize<double>(jsonValue),
-                SystemType t when t == typeof(float) => System.Text.Json.JsonSerializer.Deserialize<float>(jsonValue),
-                SystemType t when t == typeof(bool) => System.Text.Json.JsonSerializer.Deserialize<bool>(jsonValue),
-                SystemType t when t == typeof(DateTime) => System.Text.Json.JsonSerializer.Deserialize<DateTime>(jsonValue),
-                SystemType t when t == typeof(decimal) => System.Text.Json.JsonSerializer.Deserialize<decimal>(jsonValue),
-                _ => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue)
+                SystemType t when t == typeof(string) => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(int) => System.Text.Json.JsonSerializer.Deserialize<int>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(long) => System.Text.Json.JsonSerializer.Deserialize<long>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(double) => System.Text.Json.JsonSerializer.Deserialize<double>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(float) => System.Text.Json.JsonSerializer.Deserialize<float>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(bool) => System.Text.Json.JsonSerializer.Deserialize<bool>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(DateTime) => System.Text.Json.JsonSerializer.Deserialize<DateTime>(jsonValue, JsonHelper.DefaultOptions),
+                SystemType t when t == typeof(decimal) => System.Text.Json.JsonSerializer.Deserialize<decimal>(jsonValue, JsonHelper.DefaultOptions),
+                _ => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue, JsonHelper.DefaultOptions)
             };
         }
         catch (Exception ex)
@@ -855,7 +857,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         }
     }
 
-    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType)
+    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType, Func<object, object?>? idSelector = null)
     {
         logger?.LogDebug("Converting {DataCount} items to Arrow table", data.Count);
 
@@ -884,6 +886,28 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             else
             {
                 arrays.Add(QueryHelpers.CreateArrowArray(prop, data, arrowType));
+            }
+        }
+
+        // Add _hiddenKey column if idSelector is provided
+        const string HiddenKeyColumnName = "_hiddenKey";
+        if (idSelector != null)
+        {
+            var hiddenKeyType = StringType.Default;
+            fields.Add(new ArrowField(HiddenKeyColumnName, hiddenKeyType, nullable: true));
+
+            if (!data.Any())
+            {
+                arrays.Add(QueryHelpers.CreateEmptyArrowArray(hiddenKeyType));
+            }
+            else
+            {
+                var hiddenKeyValues = data.Select(row =>
+                {
+                    var id = idSelector(row);
+                    return id?.ToString() ?? null;
+                }).ToList();
+                arrays.Add(QueryHelpers.CreateStringArray(hiddenKeyValues.Cast<object?>().ToList()));
             }
         }
 
@@ -1125,7 +1149,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             sourceId = valQuery.SourceId ?? "";
         }
 
-        var jsonQuery = System.Text.Json.JsonSerializer.Serialize(query);
+        var jsonQuery = System.Text.Json.JsonSerializer.Serialize(query, JsonHelper.DefaultOptions);
         var input = $"{prefix}:{sourceId}:{typeName}:{jsonQuery}";
         var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
         return $"DataTable:{prefix}:{sourceId}:{Convert.ToBase64String(hashBytes)}";
@@ -1160,13 +1184,13 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
     private byte[] SerializeValuesResult(ValuesResult result)
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(result);
+        var json = System.Text.Json.JsonSerializer.Serialize(result, JsonHelper.DefaultOptions);
         return Encoding.UTF8.GetBytes(json);
     }
 
     private ValuesResult DeserializeValuesResult(byte[] data)
     {
         var json = Encoding.UTF8.GetString(data);
-        return System.Text.Json.JsonSerializer.Deserialize<ValuesResult>(json) ?? new ValuesResult();
+        return System.Text.Json.JsonSerializer.Deserialize<ValuesResult>(json, JsonHelper.DefaultOptions) ?? new ValuesResult();
     }
 }

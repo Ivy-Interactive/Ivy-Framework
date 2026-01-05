@@ -1,6 +1,6 @@
 import ErrorBoundary from '@/components/ErrorBoundary';
 import React, { useRef, useEffect } from 'react';
-import { loadingState, renderWidgetTree } from '../WidgetRenderer';
+import { loadingState, renderWidgetTree } from '../widgetRenderer';
 import { useBackend } from '@/hooks/use-backend';
 import { EventHandlerProvider } from '@/components/event-handler';
 

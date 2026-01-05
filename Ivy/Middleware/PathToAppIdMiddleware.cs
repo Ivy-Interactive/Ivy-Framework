@@ -7,17 +7,20 @@ using System.Text.Json.Serialization;
 
 namespace Ivy.Middleware;
 
+public class RoutingConstantData
+{
+    [JsonPropertyName("excludedPaths")]
+    public string[] ExcludedPaths { get; set; } = [];
+
+    [JsonPropertyName("staticFileExtensions")]
+    public string[] StaticFileExtensions { get; set; } = [];
+}
+
+[JsonSerializable(typeof(RoutingConstantData))]
+internal partial class RoutingConstantDataContext : JsonSerializerContext;
+
 public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMiddleware> logger, Server server)
 {
-    public class RoutingConstantData
-    {
-        [JsonPropertyName("excludedPaths")]
-        public string[] ExcludedPaths { get; set; } = [];
-
-        [JsonPropertyName("staticFileExtensions")]
-        public string[] StaticFileExtensions { get; set; } = [];
-    }
-
     public static string[] ExcludedPaths => RoutingConstants.ExcludedPaths;
 
     private static readonly RoutingConstantData RoutingConstants;
@@ -26,7 +29,7 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
     {
         using var stream = Assembly.GetExecutingAssembly()
             .GetManifestResourceStream("RoutingConstants")!;
-        RoutingConstants = JsonSerializer.Deserialize<RoutingConstantData>(stream)!;
+        RoutingConstants = JsonSerializer.Deserialize(stream, RoutingConstantDataContext.Default.RoutingConstantData)!;
     }
 
     public async Task InvokeAsync(HttpContext context)

@@ -14,6 +14,7 @@ public class TabsApp : ViewBase
             new Tab("Orders", "Orders").Icon(Icons.DollarSign).Badge("0"),
             new Tab("Settings", "Settings").Icon(Icons.Settings).Badge("999")
         ]));
+        var width = this.UseState(1.0);
 
         void OnTabSelect(Event<TabsLayout, int> @event)
         {
@@ -35,8 +36,6 @@ public class TabsApp : ViewBase
         {
             tabs.Set(tabs.Value.Add(new Tab($"Tab {tabs.Value.Length + 1}", $"Tab {tabs.Value.Length + 1}")));
         }
-
-        var width = this.UseState(1.0);
 
         return Layout.Vertical()
             | Text.H1("Tabs layout")

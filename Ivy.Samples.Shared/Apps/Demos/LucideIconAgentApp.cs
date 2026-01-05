@@ -11,13 +11,13 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
         var client = UseService<IClientProvider>();
         var chatClient = UseService<IChatClient?>();
 
+        var messages = UseState(ImmutableArray.Create<ChatMessage>(new ChatMessage(ChatSender.Assistant,
+            "Hello! I'm the Lucide Icon Agent. I can help you find icons for your app. Please describe your application.")));
+
         if (chatClient == null)
         {
             return Callout.Error("IChatClient is not configured. Please specify OpenAi:ApiKey and OpenAi:Endpoint in your configuration.");
         }
-
-        var messages = UseState(ImmutableArray.Create<ChatMessage>(new ChatMessage(ChatSender.Assistant,
-            "Hello! I'm the Lucide Icon Agent. I can help you find icons for your app. Please describe your application.")));
 
         async ValueTask OnSendMessage(Event<Chat, string> @event)
         {
@@ -36,8 +36,8 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
 
                 Action<Event<Button>> onIconClick = e =>
                 {
-                    client.CopyToClipboard(e.Sender.Icon?.ToString() ?? "");
-                    client.Toast($"Copied '{e.Sender.Icon?.ToString()}' to clipboard", "Icon Copied");
+                    client.CopyToClipboard(e.Sender.Icon.ToString() ?? "");
+                    client.Toast($"Copied '{e.Sender.Icon.ToString()}' to clipboard", "Icon Copied");
                 };
 
                 var content = Layout.Horizontal().Gap(1)

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -18,7 +19,7 @@ public class JsonEnumConverter : JsonConverterFactory
         return (JsonConverter)Activator.CreateInstance(converterType)! ?? throw new InvalidOperationException();
     }
 
-    private class EnumDescriptionConverterInner<TEnum> : JsonConverter<TEnum> where TEnum : struct, Enum
+    private class EnumDescriptionConverterInner<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TEnum> : JsonConverter<TEnum> where TEnum : struct, Enum
     {
         public override TEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -28,13 +29,13 @@ public class JsonEnumConverter : JsonConverterFactory
                 throw new JsonException($"Cannot convert null to {typeof(TEnum).Name}.");
             }
 
-            foreach (var value in Enum.GetValues(typeof(TEnum)))
+            foreach (var value in Enum.GetValues<TEnum>())
             {
-                var description = GetEnumDescription((TEnum)value);
+                var description = GetEnumDescription(value);
                 if (string.Equals(enumText, description, StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(enumText, value.ToString(), StringComparison.OrdinalIgnoreCase))
                 {
-                    return (TEnum)value;
+                    return value;
                 }
             }
 
@@ -46,7 +47,7 @@ public class JsonEnumConverter : JsonConverterFactory
             writer.WriteStringValue(value.ToString());
         }
 
-        private string GetEnumDescription(TEnum value)
+        private static string GetEnumDescription(TEnum value)
         {
             FieldInfo? fieldInfo = typeof(TEnum).GetField(value.ToString());
             if (fieldInfo != null)

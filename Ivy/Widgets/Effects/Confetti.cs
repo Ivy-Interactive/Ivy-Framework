@@ -9,6 +9,8 @@ public record Confetti : WidgetBase<Confetti>
     {
     }
 
+    internal Confetti() { }
+
     [Prop] public AnimationTrigger Trigger { get; init; } = AnimationTrigger.Auto;
 
     public static Confetti operator |(Confetti widget, object child)

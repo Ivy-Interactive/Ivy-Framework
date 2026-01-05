@@ -17,8 +17,8 @@ public class FieldApp : SampleBase
         var emailState = this.UseState<string>();
         var passwordState = this.UseState<string>();
         var acceptedTerms = this.UseState(false);
-        var options = new List<string>() { "I read the terms and conditions and I agree" };
         var addressState = this.UseState<string>();
+        var options = new List<string>() { "I read the terms and conditions and I agree" };
 
         return Layout.Vertical().Center()
             | (new Card(

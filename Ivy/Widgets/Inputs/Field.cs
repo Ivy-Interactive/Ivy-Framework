@@ -24,12 +24,15 @@ public record Field : WidgetBase<Field>
             descriptionProp.SetValue(input, inputDescription ?? description);
             description = null;
         }
+
         Label = label;
         Description = description;
         Required = required;
         Help = help;
         Scale = scale;
     }
+
+    internal Field() { }
 
     [Prop] public string? Label { get; set; }
 

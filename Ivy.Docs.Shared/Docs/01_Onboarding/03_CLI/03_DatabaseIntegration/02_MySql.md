@@ -56,6 +56,7 @@ Ivy automatically configures the **Pomelo.EntityFrameworkCore.MySql** package fo
 ## MySQL-Specific Features
 
 Key features Ivy can leverage:
+
 - **JSON columns** for document storage (MySQL 5.7+)
 - **Full-text indexes** for search functionality
 - **Multiple storage engines** (InnoDB, MyISAM)
@@ -76,10 +77,12 @@ For more security recommendations, see [MySQL Security Guidelines](https://dev.m
 ### Common Issues
 
 **Connection Issues**
+
 - Verify server is running and listening on the expected port
 - Check firewall settings
 
 **Authentication Problems**
+
 - Verify credentials and user privileges
 
 See [MySQL Problems and Common Errors](https://dev.mysql.com/doc/refman/8.4/en/problems.html) for more help.
@@ -87,8 +90,8 @@ See [MySQL Problems and Common Errors](https://dev.mysql.com/doc/refman/8.4/en/p
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [MariaDB Provider](MariaDb.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [SQL Server Provider](SqlServer.md)
+- [MariaDB Provider](02_MariaDb.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [SQL Server Provider](02_SqlServer.md)
 - [Official MySQL Documentation](https://dev.mysql.com/doc/)
 - [Pomelo.EntityFrameworkCore.MySql](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql)

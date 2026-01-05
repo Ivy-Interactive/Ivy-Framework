@@ -6,182 +6,175 @@ searchHints:
   - fullstack
 ---
 
-# Introduction to Ivy
+# Welcome to Ivy
 
 <Ingress>
-Ivy is a full-stack C# web framework that lets you build interactive data applications without the complexity of separate frontend/backend APIs. Think React patterns, but entirely in C#.
+Ivy is the ultimate framework for building internal tools and dashboards using Pure C#, unifying frontend and backend into a single cohesive codebase. It can also be used to build general-purpose full-stack applications. Ivy's main focus is on developer's experience, UI and UX.
 </Ingress>
+
+Ivy eliminates the traditional frontend/backend split by bringing React-like declarative patterns directly to C#. You build your entire project—UI, logic, and data access—in one place.
 
 <Embed Url="https://www.youtube.com/watch?v=pQKSQR9BfD8"/>
 
-## What Makes Ivy Different
+## What You Can Do
 
-Ivy eliminates the traditional frontend/backend split by bringing React-like patterns directly to C#. You build your entire project - UI, logic, and data access - in one cohesive C# codebase.
+- **[Database Integration](https://docs.ivy.app/onboarding/cli/database-integration/database-overview)**: Connect to SQL Server, PostgreSQL, Supabase, and more with `ivy db add`.
+- **[Authentication](https://docs.ivy.app/onboarding/cli/authentication/authentication-overview)**: Add Auth0, Clerk, or Microsoft Entra with `ivy auth add`.
+- **[Deployment](https://docs.ivy.app/onboarding/cli/deploy)**: Deploy to AWS, Azure, GCP, or Sliplane with `ivy deploy`.
+- **AI Agentic Features** : Generate entire back-office applications from your database schema using `ivy app create`. You can also try and generate an entire application with a DB using the `ivy db generate` command.
+
+## Getting Started
+
+### Easiest Way: File-based Apps in under 1 minute
+
+The fastest way to try Ivy is using [.NET 10's file-based apps feature](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/overview). This allows you to create a self-contained full-stack application in a single script-like file without any project files.
+
+Make sure to have latest .NET 10 installed, [download it here](https://dotnet.microsoft.com/en-us/download)
+
+1. Create a new file called `HelloWorldApp.cs`.
+2. Paste the following code:
 
 ```csharp
-[App(icon: Icons.Users)]
-public class UserDashboard : ViewBase
+#:package Ivy@*
+
+using Ivy;
+using Ivy.Shared;
+using Ivy.Views;
+using Ivy.Widgets.Inputs;
+
+var server = new Server();
+server.AddApp<HelloApp>();
+await server.RunAsync();
+
+[App]
+class HelloApp : ViewBase
 {
     public override object? Build()
     {
-        var users = UseService<IUserService>();
-        var searchTerm = UseState("");
-        
-        return new Card()
-            .Title("User Management")
-            | Layout.Vertical(
-                searchTerm.ToTextInput(placeholder: "Search users..."),
-                new Table(users.SearchUsers(searchTerm.Value))
-                    .Columns(
-                        col => col.Name,
-                        col => col.Email,
-                        col => col.LastLogin
-                    )
-            );
+        var nameState = this.UseState<string>();
+
+        return Layout.Center()
+               | new Card(
+                   Layout.Vertical().Gap(6).Padding(2)
+                   | new Confetti(new IvyLogo())
+                   | Text.H2("Hello " + (string.IsNullOrEmpty(nameState.Value) ? "there" : nameState.Value) + "!")
+                   | Text.Block("Welcome to the fantastic world of Ivy. Let's build something amazing together!")
+                   | nameState.ToInput(placeholder: "What is your name?")
+                   | new Separator()
+                   | Text.Markdown("You'd be a hero to us if you could ⭐ us on [Github](https://github.com/Ivy-Interactive/Ivy-Framework)")
+                 )
+                 .Width(Size.Units(120).Max(500));
     }
 }
 ```
 
-## Why Ivy Exists
+#### Understanding the Code
 
-The Ivy Framework is a comprehensive solution for building internal business applications. The framework targets scenarios where rapid development, maintainability, and integration with existing enterprise systems are prioritized.
+Let's break down each part of the file-based application.
 
-We created Ivy to solve common frustrations with modern web development:
+##### Package Reference
 
-### Cost & Speed Optimization
-
-Everyday tasks should be simple and idiomatic. Complex requirements should remain possible, but building basic CRUD projects shouldn't require weeks of setup.
-
-### Eliminating Boilerplate
-
-Traditional SPA solutions require separate frontend/backend codebases communicating through APIs. This creates massive amounts of boilerplate for simple data operations.
-
-### Avoiding Technical Debt
-
-Many low-code SaaS products are limited, expensive long-term, and create vendor lock-in. Ivy gives you the productivity benefits without the constraints.
-
-## Core Features
-
-### Full-Stack C# Development
-
-```mermaid
-graph LR
-    A[C# Views] --> B[Widget Tree]
-    B --> C[SignalR Hub]
-    C --> D[React Frontend]
-    D --> E[User Events]
-    E --> C
-    C --> A
-    
+```csharp
+#:package Ivy@*
 ```
 
-- Full-stack C# development with no separate API layer needed
-- React-like declarative UI patterns using C# syntax
-- Views render into strongly-typed Widgets
-- Built-in scaffolding for common patterns (Tables, Forms, CRUD operations)
+This is a direct [Ivy nuget package](https://www.nuget.org/packages/Ivy) reference. It tells the .NET runtime to download and use the latest version of the framework, allowing you to run this file as a standalone script without a project file.
 
-### Real-Time & Interactive
+##### Server Initialization
 
-```mermaid
-graph LR
-    A[User Input] --> B[C# Handler]
-    B --> C[State Change]
-    C --> D[Auto Re-render]
-    D --> E[UI Update]
-    
-    F[Hot Reload] --> G[State Preserved]
-    
+```csharp
+var server = new Server();
+server.AddApp<HelloWorldApp>();
+
+await server.RunAsync();
 ```
 
-- WebSocket-based UI updates (similar to Streamlit)
-- Hot reloading with state preservation during development
-- Any .NET object can be rendered using ContentBuilder pipelines
-- Automatic change detection and selective re-rendering
+This part initializes the Ivy server, registers your `HelloWorldApp` view, and starts the server. The server handles all state management and real-time communication. [Learn more about the Ivy program here](https://docs.ivy.app/onboarding/concepts/program).
 
-### Modern Frontend Integration
+##### The View
 
-```mermaid
-graph LR
-    A[Ivy Widgets] --> B[React + Shadcn]
-    B --> C[TailwindCSS]
-    
-    D[External Components] --> E[NuGet Packages]
-    E --> A
-    
-    F[Dark Mode] -->  G[Theming System]
-    G --> A
-    H[Custom Chromes] --> A
-    
+```csharp
+[App]
+class HelloWorldApp : ViewBase
+{
+  // ...
+}
 ```
 
-- Widgets rendered using React + Shadcn + TailwindCSS
-- Import external React components as Ivy widgets via NuGet
-- Built-in dark mode and theming support
-- Customizable application "chromes" (also built in Ivy)
+In Ivy, your UI is organized into views. By inheriting from `ViewBase`, you get access to all the hooks and lifecycle methods. The [[App] attribute](https://docs.ivy.app/onboarding/concepts/apps) tells Ivy to show this view in the main navigation.
 
-### Enterprise Ready
+##### The Build Method
 
-```mermaid
-graph LR
-    A[Security] --- B[Data] --- C[Architecture]
+```csharp
+public override object? Build()
+{
+  return Layout.Center()
+      | new Card(
+          // ...
+      );
+}
 ```
 
-- Multiple authentication providers (Supabase, Authelia, Basic Auth) with RBAC
-- Database integration (SQL Server, PostgreSQL, SQLite, MySQL) via Entity Framework Core
-- Secrets management and configuration
-- Dependency injection throughout
-- Caching and performance optimizations
-- Flexible routing system
+The `Build()` method is where you define your UI. It returns a tree of components that Ivy renders on the client. Just like in React, whenever state changes, this method is called again to determine the new UI structure.
 
-### Development & Deployment
+##### UI Composition
 
-```mermaid
-graph LR
-    A[Your Code] --> B[ivy init]
-    B --> C[ivy run]
-    C --> H[Docker-first deployment]
-    
-    F[Rich CLI] --> B
-    G[Unit Tests] --> A
-    
+```csharp
+Layout.Center()
+    | new Card(...)
 ```
 
-- Rich CLI tooling for project scaffolding and deployment
-- One-command container deployment to AWS, Azure, GCP, or your own infrastructure
-- Unit testing without browser automation complexity
-- Docker-first deployment with environment management
+Ivy uses a fluent API and the pipe operator (`|`) to compose layouts and widgets. This makes it easy to read and build complex hierarchical UIs. Learn more about the [Card widget here](https://docs.ivy.app/widgets/common/card).
 
-## Getting Started
+3. Run it immediately using the Ivy CLI:
 
-Ready to try Ivy? The fastest way to get started is:
+```terminal
+>dotnet run HelloWorldApp.cs
+```
+
+Ivy will start a local server at `http://localhost:5010`. Open it in your browser to see your interactive "Hello" app!
+
+---
+
+### Advanced Projects: Regular Projects in under 3 minutes
+
+For larger applications that require multiple files, services, and deep integrations, we recommend creating a regular Ivy project using the CLI.
+
+#### Installing the CLI
+
+To use the `ivy` command, you'll need the **.NET 10 SDK** installed. Then, install the Ivy CLI globally:
 
 ```terminal
 >dotnet tool install -g Ivy.Console
->ivy init --namespace MyCompany.InternalProject
+```
+
+Verify the installation:
+
+```terminal
+>ivy --version
+```
+
+#### Initializing a Project
+
+Create a new directory for your project and initialize it. We recommend using the `--hello` flag to include an example hello app:
+
+```terminal
+>mkdir MyProject
+>cd MyProject
+>ivy init --hello
+```
+
+#### Running Your Project
+
+Run the project with hot reloading enabled:
+
+```terminal
 >dotnet watch
 ```
 
-You can install Ivy with a simple command, check its version to verify if it installed correctly and initialize your first project.
+## Community & Resources
 
-That's it! You'll have a running Ivy application with hot reloading enabled.
-
-<Callout Type="tip">
-If you want to use Ivy agent features, you will need an Ivy account https://ivy.app/auth/sign-up
-</Callout>
-
-## What's Next
-
-Ivy is actively developed with exciting features on the roadmap:
-
-### Advanced Data Handling
-
-- Apache Arrow integration for massive datasets
-- Advanced filtering, sorting, and pagination
-- Airtable-like experiences from Entity Framework queries
-- Real-time data visualization and dashboards
-
-### AI Development Integration
-
-- Deep integration with modern AI coding tools like Cursor and Claude Code
-- AI-powered scaffolding and code generation
-- Smart component suggestions and auto-completion
+- **[Ivy Samples](https://samples.ivy.app)**: Real-time demo of all Ivy widgets and layouts.
+- **[App Gallery](https://ivy.app/gallery)**: See real-world applications and integrations built with Ivy.
+- **[Ivy Framework GitHub](https://github.com/Ivy-Interactive/Ivy-Framework)**: The core framework source code. Open-source and free to use.
+- **[Ivy Examples GitHub](https://github.com/Ivy-Interactive/Ivy-Examples)**: A collection of example projects to kickstart your development.

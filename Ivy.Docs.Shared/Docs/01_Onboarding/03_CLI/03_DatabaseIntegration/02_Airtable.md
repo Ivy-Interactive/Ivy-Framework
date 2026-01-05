@@ -43,7 +43,7 @@ See [Database Overview](01_DatabaseOverview.md) for more information on adding d
 
 Airtable uses personal access tokens (PATs) for authentication. You can generate a token from the [Personal access tokens](https://airtable.com/create/tokens) page in your Airtable Builder Hub. Be sure to enable the scopes `data.records:read` and `schema.bases:read`, and if writing to Airtable is needed for your project, `data.records:write` as well. No other scopes are currently used by Ivy. Then, give it access to the Airtable base(s) you wish to use or select "Add all resources."
 
-![Airtable create personal access token page](assets/airtable_create_pat.webp "Airtable create personal access token page")
+![Airtable create personal access token page]../../../../Assets/airtable_create_pat.webp "Airtable create personal access token page")
 
 For detailed instructions, see the [Airtable personal access tokens documentation](https://airtable.com/developers/web/guides/personal-access-tokens).
 
@@ -51,11 +51,11 @@ For detailed instructions, see the [Airtable personal access tokens documentatio
 
 To find your base ID, login to Airtable in your browser and visit the [Airtable API Reference](https://airtable.com/api). At the bottom of that page, you should see a list of bases your account has access to:
 
-![Airtable API Reference](assets/airtable_api_reference.webp "Airtable API Reference")
+![Airtable API Reference]../../../../Assets/airtable_api_reference.webp "Airtable API Reference")
 
 Select the one you want your Ivy project to connect to. This will lead you to base-specific API documentation. You can find the base ID on the Introduction page. Look for "The ID of this base is..."
 
-![Airtable Base-Specific API Reference, showing the chosen base's ID](assets/airtable_base_id.webp "Airtable Base-Specific API Reference")
+![Airtable Base-Specific API Reference, showing the chosen base's ID]../../../../Assets/airtable_base_id.webp "Airtable Base-Specific API Reference")
 
 ## Configuration
 
@@ -68,6 +68,7 @@ Ivy maps Airtable tables to entity classes, handles Airtable's data types, and p
 ## Airtable-Specific Features
 
 Key features Ivy can leverage:
+
 - **Rich field types** (attachments, links, formulas)
 - **Record linking** for relationships
   - _Disclaimer: links are currently exposed as raw record IDs instead of entity references_
@@ -80,18 +81,21 @@ See [Airtable's API Reference](https://airtable.com/developers/web/api/introduct
 ### Common Issues
 
 **Authentication Failed**
+
 - Verify token validity and permissions
 
 **Base Access Issues**
+
 - Confirm Base ID and account access
 
 **Rate Limiting**
+
 - For details on API limits, see [Airtable API Rate Limits](https://airtable.com/developers/web/api/rate-limits).
 
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [SQLite Provider](SQLite.md)
-- [PostgreSQL Provider](PostgreSql.md)
+- [SQLite Provider](02_SQLite.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
 - [Official Airtable API Documentation](https://airtable.com/developers/web/api/introduction)
 - [Airtable .NET API Client](https://github.com/ngocnicholas/airtable.net)

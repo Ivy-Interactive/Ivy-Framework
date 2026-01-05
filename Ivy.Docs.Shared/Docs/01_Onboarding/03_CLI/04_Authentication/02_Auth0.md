@@ -25,15 +25,15 @@ Before using Auth0 with Ivy, you'll need to create an Auth0 application and obta
 ### Step 1: Create an Auth0 Account and Application
 
 1. **Sign up** at [Auth0](https://auth0.com) if you don't have an account
-2. **Go to** the [Auth0 Dashboard](https://manage.auth0.com/dashboard) and navigate to **Applications**: ![Auth0 Applications Option in Sidebar](assets/auth0_applications.webp "Auth0 Applications Option in Sidebar")
+2. **Go to** the [Auth0 Dashboard](https://manage.auth0.com/dashboard) and navigate to **Applications**: ![Auth0 Applications Option in Sidebar]../../../../Assets/auth0_applications.webp "Auth0 Applications Option in Sidebar")
 3. **Click "Create Application"**
 4. **Choose "Regular Web Applications"** as the application type
-5. **Click "Create"**: ![Auth0 Create Application Panel](assets/auth0_create_application.webp "Auth0 Create Application Panel")
+5. **Click "Create"**: ![Auth0 Create Application Panel]../../../../Assets/auth0_create_application.webp "Auth0 Create Application Panel")
 
 ### Step 2: Configure Your Application
 
-1. Navigate to your application's **Settings** tab: ![Auth0 Settings Tab](assets/auth0_application_settings_tab.webp "Auth0 Settings Tab")
-2. **Set Allowed Callback URLs** to `http://localhost:5010/ivy/webhook`, replacing the base URL (`http://localhost:5010`) with your application's URL: ![Auth0 Allowed Callback URLs](assets/auth0_callback.webp "Auth0 Allowed Callback URLs")
+1. Navigate to your application's **Settings** tab: ![Auth0 Settings Tab]../../../../Assets/auth0_application_settings_tab.webp "Auth0 Settings Tab")
+2. **Set Allowed Callback URLs** to `http://localhost:5010/ivy/webhook`, replacing the base URL (`http://localhost:5010`) with your application's URL: ![Auth0 Allowed Callback URLs]../../../../Assets/auth0_callback.webp "Auth0 Allowed Callback URLs")
 3. **Click "Save"**
 
 ### Step 3: Get Your Configuration Values
@@ -44,7 +44,7 @@ In your application settings, copy these values from the Basic Information secti
 - **Client ID**
 - **Client Secret**
 
-![Auth0 Basic Information](assets/auth0_basic_information.webp "Auth0 Basic Information")
+![Auth0 Basic Information]../../../../Assets/auth0_basic_information.webp "Auth0 Basic Information")
 
 ### Step 4: Create an API
 
@@ -56,7 +56,7 @@ In your application settings, copy these values from the Basic Information secti
 6. **Click "Create"**
 7. **Copy the Identifier** - this is your **Audience** value
 
-![Auth0 Create API](assets/auth0_create_api.webp "Auth0 Create API")
+![Auth0 Create API]../../../../Assets/auth0_create_api.webp "Auth0 Create API")
 
 ### Step 5: Enable Authentication Options
 
@@ -64,12 +64,12 @@ You'll need to enable the specific authentication options you want to use in you
 
 #### Email and Password
 
-1. **Go to Authentication > Database** in the Auth0 Dashboard: ![Auth0 Database](assets/auth0_database.webp "Auth0 Database")
-2. **Click on the "Username-Password-Authentication" connection**: ![Auth0 Database Connections](assets/auth0_database_connections.webp "Auth0 Database Connections")
-3. **Go to the "Applications" tab and ensure that the connection is enabled on your application**: ![Auth0 Connection Enabled](assets/auth0_connection_enabled.webp "Auth0 Connection Enabled")
+1. **Go to Authentication > Database** in the Auth0 Dashboard: ![Auth0 Database]../../../../Assets/auth0_database.webp "Auth0 Database")
+2. **Click on the "Username-Password-Authentication" connection**: ![Auth0 Database Connections]../../../../Assets/auth0_database_connections.webp "Auth0 Database Connections")
+3. **Go to the "Applications" tab and ensure that the connection is enabled on your application**: ![Auth0 Connection Enabled]../../../../Assets/auth0_connection_enabled.webp "Auth0 Connection Enabled")
 4. **Go to the "Settings" tab and enable "Disable Sign Ups"** if you want to control user registration manually
 5. **Go to the "Authentication Methods" tab and configure your password policy** as needed for your security requirements
-6. **Enable the Password Grant**: In your Auth0 application, go to the **Settings** tab, scroll down to **Advanced Settings**, click **Grant Types**, and ensure the **Password** grant type is checked: ![Auth0 Password Grant](assets/auth0_password_grant.webp "Auth0 Password Grant")
+6. **Enable the Password Grant**: In your Auth0 application, go to the **Settings** tab, scroll down to **Advanced Settings**, click **Grant Types**, and ensure the **Password** grant type is checked: ![Auth0 Password Grant]../../../../Assets/auth0_password_grant.webp "Auth0 Password Grant")
 
 ##### Adding Users for Email and Password Authentication
 
@@ -116,7 +116,7 @@ For more information on setting up Google authentication, see Auth0's [Google do
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing GitHub authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
+> **Note**: For testing GitHub authentication, you can use Auth0 Development Keys by leaving Client ID and Client Secret blank. These keys are not to be used for production.
 
 For more information on setting up GitHub authentication, see Auth0's [GitHub documentation](https://marketplace.auth0.com/integrations/github-social-connection).
 
@@ -131,7 +131,7 @@ For more information on setting up GitHub authentication, see Auth0's [GitHub do
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) can not be used for Microsoft authentication.
+> **Note**: Auth0 Development Keys can not be used for Microsoft authentication.
 
 For more information on setting up Microsoft authentication, see Auth0's [Microsoft documentation](https://marketplace.auth0.com/integrations/microsoft-account-social-connection).
 
@@ -146,7 +146,7 @@ For more information on setting up Microsoft authentication, see Auth0's [Micros
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing Apple authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID, Client Secret Signing Key, Apple Team ID, and Key ID blank. These development keys are not to be used for production.
+> **Note**: For testing Apple authentication, you can use Auth0 Development Keys by leaving Client ID, Client Secret Signing Key, Apple Team ID, and Key ID blank. These development keys are not to be used for production.
 
 For more information on setting up Apple authentication, see Auth0's [Apple documentation](https://marketplace.auth0.com/integrations/apple-social-connection).
 
@@ -160,7 +160,7 @@ For more information on setting up Apple authentication, see Auth0's [Apple docu
 6. **Click "Create"**
 7. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing Twitter/X authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving API Key and Secret blank. These development keys are not to be used for production.
+> **Note**: For testing Twitter/X authentication, you can use Auth0 Development Keys by leaving API Key and Secret blank. These development keys are not to be used for production.
 
 For more information on setting up Twitter/X authentication, see Auth0's [Twitter documentation](https://marketplace.auth0.com/integrations/twitter-social-connection).
 
@@ -172,6 +172,7 @@ To allow the Ivy application to properly display the users email, name and avata
 2. **Click "Create Action" > "Create Custom Action"**
 3. **Give it a name like "Add user claims to JWT" and choose "Login / Post Login" as the trigger.**
 4. **Add the following code:**
+
 ```javascript
 exports.onExecutePostLogin = async (event, api) => {
     // You can change this if you want - but then also update the "Auth0:Namespace" configuration in your Ivy project
@@ -186,6 +187,7 @@ exports.onExecutePostLogin = async (event, api) => {
     api.accessToken.setCustomClaim(namespace + 'avatar', event.user.picture);
 };
 ```
+
 5. **Click Deploy**
 6. **Go to Actions > Triggers** in the Auth0 Dashboard
 7. **Click "post-login"**
@@ -239,7 +241,7 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
@@ -253,7 +255,7 @@ The following parameters are supported via connection string, environment variab
 - **Auth0:ClientId**: Required. Your Auth0 application's client ID.
 - **Auth0:ClientSecret**: Required. Your Auth0 application's client secret.
 - **Auth0:Audience**: Required. API identifier for securing API access.
-- **Auth0:Namespace**: Optional. Your JWT claims namespace, as chosen earlier in this guide. If left empty "https://ivy.app/" will be used.
+- **Auth0:Namespace**: Optional. Your JWT claims namespace, as chosen earlier in this guide. If left empty "<https://ivy.app/>" will be used.
 
 ## Authentication Flow
 
@@ -317,5 +319,5 @@ Key features of the Auth0 provider:
 ## Related Documentation
 
 - [Authentication Overview](01_AuthenticationOverview.md)
-- [Supabase Authentication](Supabase.md)
-- [Microsoft Entra Provider](MicrosoftEntra.md)
+- [Supabase Authentication](02_Supabase.md)
+- [Microsoft Entra Provider](02_MicrosoftEntra.md)

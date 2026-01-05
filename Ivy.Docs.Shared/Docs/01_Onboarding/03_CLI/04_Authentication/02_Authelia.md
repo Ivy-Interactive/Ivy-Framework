@@ -58,7 +58,7 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Authelia auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Authelia auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
@@ -101,16 +101,19 @@ Key features of the Authelia provider:
 ### Common Issues
 
 **Connection Refused**
+
 - Verify Authelia service is running and accessible
 - Check firewall settings allow connections to your Authelia port
 - Ensure network connectivity between your application and Authelia instance
 
 **Configuration Issues**
+
 - Verify your Authelia URL is correct and accessible from your Ivy application
 - Check that Authelia is properly configured and running
 - Ensure your Authelia instance has the required API endpoints enabled
 
 **Authentication Failed**
+
 - Check user credentials exist in your configured authentication backend
 - Verify password hashing matches Authelia's configuration
 - Ensure authentication backend (file, LDAP) is properly configured
@@ -118,5 +121,5 @@ Key features of the Authelia provider:
 ## Related Documentation
 
 - [Authentication Overview](01_AuthenticationOverview.md)
-- [Auth0 Provider](Auth0.md)
-- [Microsoft Entra Provider](MicrosoftEntra.md)
+- [Auth0 Provider](02_Auth0.md)
+- [Microsoft Entra Provider](02_MicrosoftEntra.md)

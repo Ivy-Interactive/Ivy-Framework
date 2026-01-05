@@ -1,4 +1,4 @@
-﻿using Ivy.Hooks;
+using Ivy.Hooks;
 using Ivy.Samples.Shared.Helpers;
 using Ivy.Shared;
 using Ivy.Views.Alerts;
@@ -26,11 +26,11 @@ public class ProductsListBlade : ViewBase
     {
         //This blade will display a list of products - we choose to include the name and department of the product as these are the most relevant fields for the user.
 
-        var blades = this.UseContext<IBladeController>();
-        var factory = this.UseService<SampleDbContextFactory>();
+        var blades = UseContext<IBladeController>();
+        var factory = UseService<SampleDbContextFactory>();
         var refreshToken = this.UseRefreshToken();
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             if (refreshToken.ReturnValue is Guid productId)
             {
@@ -87,12 +87,12 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
 {
     public override object? Build()
     {
-        var factory = this.UseService<SampleDbContextFactory>();
-        var blades = this.UseContext<IBladeController>();
+        var product = UseState<Product?>(() => null!);
+        var factory = UseService<SampleDbContextFactory>();
+        var blades = UseContext<IBladeController>();
         var refreshToken = this.UseRefreshToken();
-        var product = this.UseState<Product?>(() => null!);
 
-        this.UseEffect(async () =>
+        UseEffect(async () =>
         {
             product.Set((await factory.CreateDbContext().Products.Include(e => e.Category).SingleOrDefaultAsync(e => e.Id == productId))!);
         }, [EffectTrigger.AfterInit(), refreshToken]);
@@ -135,10 +135,6 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
 
         return Layout.Vertical().Gap(4) | new object[]
         {
-            productCard,
-            productCard,
-            productCard,
-            productCard,
             productCard
         };
     }
@@ -169,10 +165,10 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
 {
     public override object? Build()
     {
-        var factory = this.UseService<SampleDbContextFactory>();
-        var customer = this.UseState(() => new ProductCreateRequest());
+        var factory = UseService<SampleDbContextFactory>();
+        var customer = UseState(() => new ProductCreateRequest());
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             var productId = CreateProduct(factory, customer.Value);
             refreshToken.Refresh(productId);
@@ -211,10 +207,10 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id, RefreshToken refresh
 {
     public override object? Build()
     {
-        var factory = this.UseService<SampleDbContextFactory>();
-        var product = this.UseState(() => factory.CreateDbContext().Products.Find(id)!);
+        var factory = UseService<SampleDbContextFactory>();
+        var product = UseState(() => factory.CreateDbContext().Products.Find(id)!);
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             var db = factory.CreateDbContext();
             product.Value.UpdatedAt = DateTime.UtcNow;

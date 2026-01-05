@@ -1,7 +1,6 @@
 using Ivy.Auth;
 using Ivy.Core;
 using Ivy.Shared;
-using Ivy;
 
 namespace Ivy.Client;
 
@@ -30,10 +29,11 @@ public class RedirectMessage
     public HistoryState? State { get; set; }
 }
 
-public class SetAuthTokenMessage
+public class SetAuthCookiesMessage
 {
-    public required AuthToken? AuthToken { get; set; }
+    public required string CookieJarId { get; set; }
     public required bool ReloadPage { get; set; }
+    public required bool TriggerMachineReload { get; set; }
 }
 
 public class SetRootAppIdMessage
@@ -88,9 +88,40 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetAuthToken(this IClientProvider client, AuthToken? authToken, bool reloadPage = true)
+    public static void SetTitle(this IClientProvider client, string? title, string? metaTitle = null)
     {
-        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { AuthToken = authToken, ReloadPage = reloadPage });
+        var hasTitle = !string.IsNullOrWhiteSpace(title);
+        var hasMetaTitle = !string.IsNullOrWhiteSpace(metaTitle);
+        if (hasTitle && hasMetaTitle)
+        {
+            title = $"{title} - {metaTitle}";
+        }
+        else if (hasMetaTitle)
+        {
+            title = metaTitle;
+        }
+        else if (!hasTitle)
+        {
+            title = "Ivy";
+        }
+        client.Sender.Send("SetTitle", title);
+    }
+
+    public static void SetAuthCookies(this IClientProvider client, CookieJarId cookieJarId, bool reloadPage, bool? triggerMachineReload = null)
+    {
+        client.Sender.Send(
+            "SetAuthCookies",
+            new SetAuthCookiesMessage
+            {
+                CookieJarId = cookieJarId.Value,
+                ReloadPage = reloadPage,
+                TriggerMachineReload = triggerMachineReload ?? reloadPage
+            });
+    }
+
+    public static void ReloadPage(this IClientProvider client)
+    {
+        client.Sender.Send("ReloadPage", new { });
     }
 
     public static void SetRootAppId(this IClientProvider client, string rootAppId)

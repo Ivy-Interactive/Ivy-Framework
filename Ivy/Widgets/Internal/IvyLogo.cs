@@ -6,9 +6,13 @@ namespace Ivy;
 
 public record IvyLogo : WidgetBase<IvyLogo>
 {
-    public IvyLogo(Colors color = Colors.Primary) : base([])
+    public IvyLogo(Colors color = Colors.Primary) : this()
     {
         Color = color;
+    }
+
+    internal IvyLogo()
+    {
         Width = Size.Units(25);
         Height = Size.Auto();
     }

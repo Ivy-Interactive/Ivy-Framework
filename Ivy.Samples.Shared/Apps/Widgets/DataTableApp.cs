@@ -38,11 +38,11 @@ public class DataTableApp : SampleBase
     {
         var client = UseService<IClientProvider>();
 
-        var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
-
         // Create the employee data once at app level (like Kanban caches its tasks)
         var employees = this.UseState(() =>
         {
+            var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
+
             var random = new Random(42);
             var startDate = new DateTime(2020, 1, 1);
 
@@ -80,7 +80,7 @@ public class DataTableApp : SampleBase
                     .ToArray();
 
                 // Generate link URLs
-                var widgetLink = "/widgets/charts/area-chart-app"; // Internal widget link - relative URL works on any domain
+                var widgetLink = "/widgets/charts/area-chart"; // Internal widget link - relative URL works on any domain
                 var profileLink = $"https://linkedin.com/in/{firstName.ToLower()}{lastName.ToLower()}{i}"; // External LinkedIn profile
 
                 return new EmployeeRecord(
@@ -108,7 +108,7 @@ public class DataTableApp : SampleBase
         });
 
         // The DataTable builder will be recreated each time, but use the cached employee data
-        var dataTable = employees.Value.AsQueryable().ToDataTable()
+        var dataTable = employees.Value.AsQueryable().ToDataTable(idSelector: e => e.Id)
             // Table dimensions (fix for issue #1311)
             .Width(Size.Full()) // Table width set to 120 units (30rem)
             .Height(Size.Full()) // Table height set to 120 units (30rem)
@@ -238,7 +238,7 @@ public class DataTableApp : SampleBase
             .HandleRowAction(async e =>
             {
                 var args = e.Value;
-                client.Toast($"Row action: {args.ActionId} at row {args.RowIndex}");
+                client.Toast($"Row action: ID: {args.Id}, Tag: {args.Tag}");
                 await ValueTask.CompletedTask;
             });
 

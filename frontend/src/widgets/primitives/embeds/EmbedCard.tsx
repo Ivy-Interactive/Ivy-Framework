@@ -49,7 +49,7 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
             href={sanitizedUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary whitespace-nowrap"
+            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none whitespace-nowrap"
           >
             {linkText}
           </a>
@@ -61,7 +61,7 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
         href={sanitizedUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="@[30rem]:hidden flex items-center gap-3 p-2 hover:bg-accent transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+        className="@[30rem]:hidden flex items-center gap-3 p-2 hover:bg-accent transition-colors rounded-lg focus:outline-none"
       >
         <div className="flex-shrink-0">
           <Icon name={iconName} size={24} className={iconColor} />

@@ -37,7 +37,7 @@ You will be asked to name your connection, then prompted for a connection string
 
 For more detailed information, see the [official Supabase documentation on connecting to Postgres](https://supabase.com/docs/guides/database/connecting-to-postgres).
 
-![Supabase connect screen, showing all three types of connection string](assets/supabase_connect_screen.webp "Supabase connect screen")
+![Supabase connect screen, showing all three types of connection string]../../../../Assets/supabase_connect_screen.webp "Supabase connect screen")
 
 Your connection string will look something like this:
 
@@ -79,6 +79,7 @@ See [Supabase Row Level Security documentation](https://supabase.com/docs/guides
 ### Common Issues
 
 **Connection Problems**
+
 - Verify your Supabase project is active
 - Use correct host URL and credentials
 
@@ -88,7 +89,7 @@ See [Supabase Connection Troubleshooting](https://supabase.com/docs/guides/datab
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [Supabase Authentication](../04_Authentication/Supabase.md)
-- [PostgreSQL Provider](PostgreSql.md)
+- [Supabase Authentication](../04_Authentication/02_Supabase.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
 - [Official Supabase Documentation](https://supabase.com/docs)
 - [Npgsql Entity Framework Core Provider](https://www.npgsql.org/efcore/)

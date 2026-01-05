@@ -13,11 +13,12 @@ public class DataTableView(
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellClick = null,
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = null,
     MenuItem[]? rowActions = null,
-    Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null) : ViewBase, IMemoized
+    Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null,
+    Func<object, object?>? idSelector = null) : ViewBase, IMemoized
 {
     public override object? Build()
     {
-        var connection = this.UseDataTable(queryable);
+        var connection = this.UseDataTable(queryable, idSelector);
         if (connection == null)
         {
             return null;

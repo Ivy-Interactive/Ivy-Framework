@@ -2,7 +2,7 @@
   <Import Project="../../Ivy/Directory.Build.props" Condition="Exists('../../Ivy/Directory.Build.props')" />
   
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Ivy.Docs.Shared</RootNamespace>
@@ -17,7 +17,6 @@
 
   <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="../Ivy/Ivy.csproj" />
-    <ProjectReference Include="../Ivy.Docs.Tools/Ivy.Docs.Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup>

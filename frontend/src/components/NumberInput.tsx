@@ -287,7 +287,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
               ref.current = node;
             }
           }}
-          type="text"
+          type="number"
           inputMode="decimal"
           value={displayValueToUse}
           onChange={handleChange}
@@ -303,7 +303,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           placeholder={placeholder}
           scale={scale}
           className={`${className} ${
-            !isValid ? 'border-red-500' : ''
+            !isValid ? 'border-[var(--color-destructive)]' : ''
           } ${dragState?.isDragging ? 'select-none' : ''} cursor-pointer`}
           data-testid={dataTestId}
           {...props}

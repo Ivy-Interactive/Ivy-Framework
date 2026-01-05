@@ -7,25 +7,29 @@ namespace Ivy;
 
 public record AreaChart : WidgetBase<AreaChart>
 {
-    public AreaChart(object data, params Area[] areas)
+    public AreaChart(object data, params Area[] areas) : this()
     {
         Data = data;
         Areas = areas;
+    }
+
+    internal AreaChart()
+    {
         Width = Size.Full();
         Height = Size.Full();
     }
 
-    [Prop] public object Data { get; init; }
+    [Prop] public object? Data { get; init; }
 
     [Prop] public Layouts Layout { get; init; } = Layouts.Vertical; //todo: not implemented on the frontend
 
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
-    [Prop] public Area[] Areas { get; init; }
+    [Prop] public Area[] Areas { get; init; } = [];
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
@@ -106,14 +110,14 @@ public static class AreaChartExtensions
         return chart with { YAxis = [.. chart.YAxis, new YAxis(dataKey)] };
     }
 
-    public static AreaChart Tooltip(this AreaChart chart, Ivy.Charts.Tooltip? tooltip)
+    public static AreaChart Tooltip(this AreaChart chart, Charts.Tooltip? tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static AreaChart Tooltip(this AreaChart chart)
     {
-        return chart with { Tooltip = new Ivy.Charts.Tooltip() };
+        return chart with { Tooltip = new Charts.Tooltip() };
     }
 
     public static AreaChart Legend(this AreaChart chart, Legend legend)

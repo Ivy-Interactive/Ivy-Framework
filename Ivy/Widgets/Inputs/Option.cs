@@ -7,19 +7,35 @@ public interface IAnyOption
 {
     public Type GetOptionType();
 
-    public string Label { get; set; }
+    public string? Label { get; set; }
 
     public string? Description { get; set; }
 
     public string? Group { get; set; }
 
     public object Value { get; set; }
+
+    public Icons? Icon { get; set; }
 }
 
-public class Option<TValue>(string label, TValue value, string? group = null, string? description = null) : IAnyOption
+public class Option<TValue> : IAnyOption
 {
     public Option(TValue value) : this(value?.ToString() ?? "?", value, null)
     {
+    }
+
+    internal Option()
+    {
+        Value = null!;
+    }
+
+    public Option(string? label, TValue value, string? group = null, string? description = null, Icons? icon = null)
+    {
+        Label = label;
+        Description = description;
+        Value = value!;
+        Group = group;
+        Icon = icon;
     }
 
     public Type GetOptionType()
@@ -27,15 +43,17 @@ public class Option<TValue>(string label, TValue value, string? group = null, st
         return typeof(TValue);
     }
 
-    public string Label { get; set; } = label;
+    public string? Label { get; set; }
 
-    public string? Description { get; set; } = description;
+    public string? Description { get; set; }
 
-    public object Value { get; set; } = value!;
+    public object Value { get; set; }
 
     public TValue TypedValue => (TValue)Value;
 
-    public string? Group { get; set; } = group;
+    public string? Group { get; set; }
+
+    public Icons? Icon { get; set; }
 }
 
 public static class OptionExtensions
@@ -50,6 +68,8 @@ public static class OptionExtensions
         if (!enumType.IsEnum)
             throw new ArgumentException("Type must be an enum", nameof(enumType));
 
+        var optionType = typeof(Option<>).MakeGenericType(enumType);
+
         IAnyOption MakeOption(object e)
         {
             var label = enumType.GetField(e.ToString()!)?
@@ -57,13 +77,10 @@ public static class OptionExtensions
                 .Cast<DescriptionAttribute>()
                 .FirstOrDefault()?.Description ?? Utils.SplitPascalCase(e.ToString());
 
-            return (IAnyOption)Activator.CreateInstance(
-                typeof(Option<>).MakeGenericType(enumType),
-                label,
-                Convert.ChangeType(e, enumType),
-                null,
-                null
-            )!;
+            var value = Convert.ChangeType(e, enumType);
+
+            // Pass all 5 parameters including optional ones (label, value, group, description, icon)
+            return (IAnyOption)Activator.CreateInstance(optionType, label, value, null, null, null)!;
         }
 
         return Enum.GetValues(enumType).Cast<object>().Select(MakeOption).ToArray();
@@ -71,7 +88,6 @@ public static class OptionExtensions
 
     public static MenuItem[] ToMenuItems(this IEnumerable<IAnyOption> options)
     {
-        return options.Select(e => MenuItem.Default(e.Label, e.Value)).ToArray();
+        return options.Select(e => MenuItem.Default(e.Label ?? "", e.Value)).ToArray();
     }
-
 }

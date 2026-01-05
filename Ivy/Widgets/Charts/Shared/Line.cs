@@ -11,7 +11,11 @@ public record Line
         Name = name ?? Utils.SplitPascalCase(dataKey);
     }
 
-    public string DataKey { get; }
+    internal Line()
+    {
+    }
+
+    public string? DataKey { get; }
 
     public CurveTypes CurveType { get; set; } = CurveTypes.Natural;
 

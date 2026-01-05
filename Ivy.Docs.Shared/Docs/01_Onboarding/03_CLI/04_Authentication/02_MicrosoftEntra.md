@@ -44,7 +44,7 @@ From your app registration **Overview** page, copy these values:
 - **Application (client) ID**: This is your **Client ID**
 - **Directory (tenant) ID**: This is your **Tenant ID**
 
-![Entra client and tenant IDs](assets/entra_client_and_tenant_ids.webp "Entra client and tenant IDs")
+![Entra client and tenant IDs]../../../../Assets/entra_client_and_tenant_ids.webp "Entra client and tenant IDs")
 
 ### Step 3: Create a Client Secret
 
@@ -55,7 +55,7 @@ From your app registration **Overview** page, copy these values:
 5. **Click "Add"**
 6. **Copy the secret Value** (this is your **Client Secret**). Note that only **Value** is needed, not **Secret ID**.
 
-![Newly-created Entra client secret](assets/entra_client_secret.webp "Newly-created Entra client secret")
+![Newly-created Entra client secret]../../../../Assets/entra_client_secret.webp "Newly-created Entra client secret")
 
 > ⚠️ **Warning:** This secret value will only be shown once, so copy it before leaving the page.
 
@@ -66,15 +66,17 @@ From your app registration **Overview** page, copy these values:
 3. **Under "Implicit grant and hybrid flows"**, check **"ID tokens"**
 4. **Click "Save"**
 
-![ID tokens enabled](assets/entra_id_tokens_enabled.webp "ID tokens enabled")
+![ID tokens enabled]../../../../Assets/entra_id_tokens_enabled.webp "ID tokens enabled")
 
 ### Step 5: Set API Permissions
 
 First, check for the `User.Read` permission, required by Ivy:
+
 1. **Go to "API permissions"** in your app registration
 2. **Verify that `User.Read` is shown and enabled under "Microsoft Graph"**
 
 If `User.Read` is not enabled:
+
 1. **Click "Add a permission"**
 2. **Choose "Microsoft Graph"**
 3. **Select "Delegated permissions"**
@@ -115,7 +117,7 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Entra Auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Entra Auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
@@ -155,28 +157,32 @@ The following parameters are supported via connection string, environment variab
 ### Common Issues
 
 **Invalid Client Credentials**
+
 - Verify Client ID and Client Secret are correct and match your Microsoft Entra application
 - Check that the client secret hasn't expired (secrets have expiration dates)
 - Ensure you're using the secret value, not the secret ID
 
 **Redirect URI Mismatch**
+
 - Verify redirect URIs in Microsoft Entra match your application URLs exactly
 - Check for case sensitivity in URLs
 - Ensure HTTPS is used in production environments
 
 **Authentication Failed**
+
 - Check that your Microsoft Entra application is properly configured
 - Verify users exist in your tenant and are not blocked
 - Ensure the application has appropriate permissions granted
 
 **Token Issues**
+
 - Ensure refresh tokens are working properly for seamless session management
 
 ## Related Documentation
 
 - [Authentication Overview](01_AuthenticationOverview.md)
-- [Auth0 Provider](Auth0.md)
-- [Supabase Provider](Supabase.md)
+- [Auth0 Provider](02_Auth0.md)
+- [Supabase Provider](02_Supabase.md)
 - [Microsoft Entra ID Documentation](https://learn.microsoft.com/en-us/entra/identity/)
 - [Register an application in Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
 - [Microsoft identity platform app types and authentication flows](https://learn.microsoft.com/en-us/entra/identity-platform/authentication-flows-app-scenarios)

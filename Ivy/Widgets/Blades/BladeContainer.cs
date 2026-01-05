@@ -9,4 +9,8 @@ public record BladeContainer : WidgetBase<BladeContainer>
     public BladeContainer(params BladeView[] blades) : base(blades.Cast<object>().ToArray())
     {
     }
+
+    internal BladeContainer()
+    {
+    }
 }

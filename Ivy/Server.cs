@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Ivy.Shared;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -46,12 +48,6 @@ public record ServerArgs
 
 public class Server
 {
-    private IContentBuilder? _contentBuilder;
-    private bool _useHotReload;
-    private bool _useHttpRedirection;
-    private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
-    private readonly List<Action<WebApplication>> _appMods = new();
-    private List<string> _reservedPaths = new();
     public IReadOnlyList<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
@@ -59,6 +55,14 @@ public class Server
     public IConfiguration Configuration { get; private set; } = ServerUtils.GetConfiguration();
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
+
+    private IContentBuilder? _contentBuilder;
+    private bool _useHotReload;
+    private bool _useHttpRedirection;
+    internal IServiceProvider? ServiceProvider;
+    private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
+    private readonly List<Action<WebApplication>> _appMods = new();
+    private List<string> _reservedPaths = new();
     private ServerArgs _args;
 
     public Server(ServerArgs? args = null)
@@ -81,6 +85,13 @@ public class Server
 
         Services.AddSingleton(_args);
         Services.AddSingleton(Configuration);
+
+        AddDefaultApps();
+    }
+
+    private void AddDefaultApps()
+    {
+        this.UseErrorNotFound<NotFoundApp>();
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
@@ -210,6 +221,24 @@ public class Server
     public Server UseDefaultApp(Type appType)
     {
         DefaultAppId = AppHelpers.GetApp(appType).Id;
+        return this;
+    }
+
+    public Server UseErrorNotFound<T>() where T : ViewBase
+    {
+        return UseErrorNotFound((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+    }
+
+    public Server UseErrorNotFound(Func<ViewBase>? viewFactory = null)
+    {
+        AddApp(new AppDescriptor
+        {
+            Id = AppIds.ErrorNotFound,
+            Title = "App Not Found",
+            ViewFactory = viewFactory,
+            Path = [],
+            IsVisible = false
+        });
         return this;
     }
 
@@ -377,6 +406,9 @@ public class Server
         builder.Services.AddSignalR(options =>
         {
             options.EnableDetailedErrors = _args.Verbose;
+        }).AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
@@ -427,6 +459,7 @@ public class Server
         builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
 
         var app = builder.Build();
+        ServiceProvider = app.Services;
 
         app.UseExceptionHandler(error =>
         {
@@ -446,7 +479,7 @@ public class Server
                     {
                         error = ex.Message,
                         detail = ex.StackTrace
-                    });
+                    }, Ivy.Core.Helpers.JsonHelper.DefaultOptions);
                     await context.Response.WriteAsync(result);
                 }
             });
@@ -497,7 +530,7 @@ public class Server
             var localUrl = $"http://localhost:{port}";
             if (!_args.Silent)
             {
-                Console.WriteLine($@"Ivy is running on {localUrl}. Press Ctrl+C to stop.");
+                Console.WriteLine($@"Ivy is running on {localUrl} [{Process.GetCurrentProcess().Id}]. Press Ctrl+C to stop.");
             }
             if (_args.Browse)
             {
@@ -593,6 +626,10 @@ public static class WebApplicationExtensions
                 context.Response.Headers["ivy-version"] = version;
             }
 
+            // Determine HTTP status code based on app routing
+            var server = app.Services.GetRequiredService<Server>();
+            var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
+
             await using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
             {
@@ -640,7 +677,7 @@ public static class WebApplicationExtensions
                 }
 
                 context.Response.ContentType = "text/html";
-                context.Response.StatusCode = 200;
+                context.Response.StatusCode = httpStatusCode;
                 var bytes = Encoding.UTF8.GetBytes(html);
                 await context.Response.Body.WriteAsync(bytes);
             }
@@ -705,5 +742,12 @@ public static class WebApplicationExtensions
 #endif
             }
         };
+    }
+
+    private static int GetHttpStatusCodeForRequest(Server server, HttpContext context)
+    {
+        var appRouter = new AppRouter(server);
+        var routeResult = appRouter.Resolve(context);
+        return routeResult.HttpStatusCode ?? 200;
     }
 }

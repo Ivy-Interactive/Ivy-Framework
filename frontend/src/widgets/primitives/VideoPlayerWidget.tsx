@@ -6,6 +6,7 @@ import {
   validateImageUrl,
   isFullUrl,
   normalizeRelativePath,
+  validateEmbedUrl,
 } from '@/lib/urlValidation';
 
 interface VideoPlayerWidgetProps {
@@ -42,14 +43,8 @@ const getVideoUrl = (url: string | undefined | null): string | null => {
 };
 
 const isYouTube = (url: string): boolean => {
-  try {
-    const u = new URL(url);
-    return (
-      u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')
-    );
-  } catch {
-    return false;
-  }
+  // Use validateEmbedUrl to properly validate hostname (prevents substring/subdomain attacks)
+  return validateEmbedUrl(url) === 'youtube';
 };
 
 export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({

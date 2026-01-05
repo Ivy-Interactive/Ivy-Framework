@@ -1,7 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
-import './ListWidget.css';
 
 type ListWidgetProps = {
   children: React.ReactNode;
@@ -11,6 +10,18 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const childArray = React.Children.toArray(children);
 
+  // Add remove-parent-padding class to the immediate parent (flex container)
+  useLayoutEffect(() => {
+    const parentElement = parentRef.current?.parentElement;
+    if (parentElement) {
+      parentElement.classList.add('remove-parent-padding');
+      return () => {
+        parentElement.classList.remove('remove-parent-padding');
+      };
+    }
+  }, []);
+
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: childArray.length,
     getScrollElement: () => parentRef.current,
@@ -23,7 +34,7 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
   return (
     <div
       ref={parentRef}
-      className="relative h-full w-full overflow-y-auto remove-parent-padding"
+      className="remove-parent-padding relative h-full w-full overflow-y-auto"
     >
       <div
         style={{

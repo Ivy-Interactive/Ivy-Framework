@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
 using System.Reflection;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.Forms;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
@@ -19,9 +16,9 @@ public class DefaultAuthApp : ViewBase
 {
     public override object Build()
     {
-        var auth = this.UseService<IAuthService>();
-        var errorMessage = this.UseState<string?>();
-        var serverArgs = this.UseService<ServerArgs>();
+        var auth = UseService<IAuthService>();
+        var errorMessage = UseState<string?>();
+        var serverArgs = UseService<ServerArgs>();
         var appName = serverArgs.MetaTitle.NullIfEmpty() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
         var options = auth.GetAuthOptions();
@@ -36,7 +33,7 @@ public class DefaultAuthApp : ViewBase
         if (options.Any(e => e.Flow == AuthFlow.OAuth))
         {
             var oAuthOptions = options.Where(e => e.Flow == AuthFlow.OAuth).ToList();
-            renderedOptions.Add(Layout.Vertical() | oAuthOptions.Select(e => new OAuthFlowView(e, errorMessage)));
+            renderedOptions.Add(Layout.Vertical() | oAuthOptions.Select(e => new OAuthFlowView(e)));
         }
 
         var flows = renderedOptions
@@ -111,14 +108,9 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 loading.Set(true);
                 errorMessage.Set((string?)null);
 
-                var token = await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.LoginAsync(credentials.Value.User, credentials.Value.Password, ct));
+                await auth.LoginAsync(credentials.Value.User, credentials.Value.Password);
 
-                if (token != null)
-                {
-                    client.SetAuthToken(token);
-                }
-                else
+                if (auth.GetCurrentToken() == null)
                 {
                     errorMessage.Set("Login failed. Please check your credentials.");
                 }
@@ -139,40 +131,31 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                    .HandleClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
-                   .Scale(formBuilder.Scale)
+                   .Scale(formBuilder._scale)
                    .Width(Size.Full());
     }
 }
 
 
-public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : ViewBase
+public class OAuthFlowView(AuthOption option) : ViewBase
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
+        var args = this.UseService<AppArgs>();
         var auth = this.UseService<IAuthService>();
+
         var callback = this.UseWebhook(async (request) =>
         {
-            var token = await TimeoutHelper.WithTimeoutAsync(
-                ct => auth.HandleOAuthCallbackAsync(request, ct));
-            client.SetAuthToken(token);
+            var token = await auth.HandleOAuthCallbackAsync(request);
             return new RedirectResult("/");
         });
 
-        async ValueTask Login()
+        // Redirect to our OAuth login endpoint, which will in turn redirect to the provider's OAuth URL.
+        // This is done to evade Safari's pop-up blocking feature.
+        var oauthUriBuilder = new UriBuilder($"{args.Scheme}://{args.Host}/ivy/auth/oauth-login")
         {
-            try
-            {
-                var uri = await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.GetOAuthUriAsync(option, callback, ct));
-                client.OpenUrl(uri);
-            }
-            catch (Exception e)
-            {
-                errorMessage.Set(e.Message);
-            }
-        }
-
-        return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).HandleClick(Login);
+            Query = $"optionId={Uri.EscapeDataString(option.Id ?? "")}&callbackId={Uri.EscapeDataString(callback.Id)}&connectionId={Uri.EscapeDataString(args.ConnectionId)}"
+        };
+        return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).Url(oauthUriBuilder.ToString());
     }
 }

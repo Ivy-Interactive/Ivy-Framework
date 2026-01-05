@@ -56,6 +56,7 @@ Ivy automatically configures the **Pomelo.EntityFrameworkCore.MySql** package fo
 ## MariaDB-Specific Features
 
 Key advantages over MySQL:
+
 - **Advanced JSON support** with better performance
 - **Temporal tables** for data versioning
 - **Multiple storage engines** including Aria and ColumnStore
@@ -74,10 +75,12 @@ See the [MariaDB Documentation](https://mariadb.com/kb/en/library/documentation/
 ### Common Issues
 
 **Connection Issues**
+
 - Verify server is running and listening on the expected port
 - Check firewall settings
 
 **Authentication Problems**
+
 - Verify credentials and user privileges
 
 See [MariaDB Troubleshooting](https://mariadb.com/kb/en/troubleshooting-connection-issues/) for more help.
@@ -85,8 +88,8 @@ See [MariaDB Troubleshooting](https://mariadb.com/kb/en/troubleshooting-connecti
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [MySQL Provider](MySql.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [SQL Server Provider](SqlServer.md)
+- [MySQL Provider](02_MySql.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [SQL Server Provider](02_SqlServer.md)
 - [Official MariaDB Documentation](https://mariadb.com/kb/en/documentation/)
 - [Pomelo.EntityFrameworkCore.MySql for MariaDB](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql)

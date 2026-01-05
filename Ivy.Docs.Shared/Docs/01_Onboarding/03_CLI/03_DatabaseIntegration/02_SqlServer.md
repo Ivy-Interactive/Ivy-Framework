@@ -32,11 +32,13 @@ You will be asked to name your connection, then prompted for a connection string
 > For details on authentication modes, see Microsoft's [Choose an authentication mode](https://learn.microsoft.com/en-us/sql/relational-databases/security/choose-an-authentication-mode).
 
 **Windows Authentication (Recommended)**
+
 ```text
 Server=localhost; Database=my_db; Trusted_Connection=True;
 ```
 
 **SQL Server Authentication**
+
 ```text
 Server=localhost; Database=my_db; User Id=user; Password=password;
 ```
@@ -88,6 +90,7 @@ See Microsoft's [Create a database schema](https://learn.microsoft.com/en-us/sql
 ### Common Issues
 
 **Connection Problems**
+
 - Verify server is running and network connectivity
 - Check credentials and permissions
 - Ensure firewall allows port 1433
@@ -97,8 +100,8 @@ For detailed troubleshooting, see [SQL Server Troubleshooting](https://learn.mic
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [MySQL Provider](MySql.md)
-- [SQLite Provider](SQLite.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [MySQL Provider](02_MySql.md)
+- [SQLite Provider](02_SQLite.md)
 - [SQL Server Technical Documentation](https://learn.microsoft.com/en-us/sql/sql-server/)
 - [SQL Server EF Core Database Provider](https://learn.microsoft.com/en-us/ef/core/providers/sql-server/)

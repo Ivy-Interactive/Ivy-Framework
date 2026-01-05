@@ -21,10 +21,11 @@ public class SheetView : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
+        var feedbackState = UseState(0);
 
         return new FooterLayout(
             new Button("Save", onClick: _ => client.Toast("Sheet Saved")),
-            "This is the content"
+            feedbackState.ToFeedbackInput()
         );
     }
 }

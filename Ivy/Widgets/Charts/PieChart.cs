@@ -9,14 +9,18 @@ public record PieChartTotal(string FormattedValue, string Label);
 
 public record PieChart : WidgetBase<PieChart>
 {
-    public PieChart(object data)
+    public PieChart(object data) : this()
     {
-        Width = Size.Full();
-        Height = Size.Full();
         Data = data;
     }
 
-    [Prop] public object Data { get; init; }
+    internal PieChart()
+    {
+        Width = Size.Full();
+        Height = Size.Full();
+    }
+
+    [Prop] public object? Data { get; init; }
 
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
@@ -26,7 +30,7 @@ public record PieChart : WidgetBase<PieChart>
 
     [Prop] public Pie[] Pies { get; init; } = [];
 
-    [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
     [Prop] public PieChartTotal? Total { get; init; }
 
@@ -73,14 +77,14 @@ public static class PieChartExtensions
         return chart with { Toolbox = new Toolbox() };
     }
 
-    public static PieChart Tooltip(this PieChart chart, Ivy.Charts.Tooltip tooltip)
+    public static PieChart Tooltip(this PieChart chart, Charts.Tooltip tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static PieChart Tooltip(this PieChart chart)
     {
-        return chart with { Tooltip = new Ivy.Charts.Tooltip() };
+        return chart with { Tooltip = new Charts.Tooltip() };
     }
 
     public static PieChart Total(this PieChart chart, PieChartTotal? pieChartTotal)

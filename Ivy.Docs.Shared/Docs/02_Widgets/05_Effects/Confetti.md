@@ -11,10 +11,10 @@ searchHints:
 # Confetti
 
 <Ingress>
-Add celebratory confetti effects to any widget with customizable triggers for automatic, click, or hover activation.
+Add celebratory confetti effects to any [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) with customizable triggers for automatic, click, or hover activation.
 </Ingress>
 
-The `Confetti` animation can be triggered automatically, on click, or when the mouse hovers over the widget. Perfect for celebrating user achievements, form submissions, or adding delightful interactions to your interface.
+The `Confetti` animation can be triggered automatically, on click, or when the mouse hovers over the widget. Perfect for celebrating user achievements, [form](../../01_Onboarding/02_Concepts/13_Forms.md) submissions, or adding delightful interactions to your [interface](../../01_Onboarding/02_Concepts/02_Views.md).
 
 ## Basic Usage
 
@@ -63,7 +63,7 @@ Layout.Vertical().Gap(10)
 Integration with Other Widgets
 </Summary>
 <Body>
-Confetti works seamlessly with all Ivy widgets, allowing you to add celebratory effects to any interface element.
+Confetti works seamlessly with all Ivy [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md), allowing you to add celebratory effects to any interface element.
 
 ```csharp demo-tabs ivy-bg
 Layout.Vertical().Gap(10)

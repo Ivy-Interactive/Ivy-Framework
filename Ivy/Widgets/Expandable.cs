@@ -10,6 +10,8 @@ public record Expandable : WidgetBase<Expandable>
 
     }
 
+    internal Expandable() { }
+
     [Prop] public bool Disabled { get; set; } = false;
 
     [Prop] public bool Open { get; set; } = false;
@@ -17,7 +19,7 @@ public record Expandable : WidgetBase<Expandable>
 
 public static class ExpandableExtensions
 {
-    public static Expandable Disabled(this Expandable widget, bool disabled)
+    public static Expandable Disabled(this Expandable widget, bool disabled = true)
     {
         widget.Disabled = disabled;
         return widget;

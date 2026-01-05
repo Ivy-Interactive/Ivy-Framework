@@ -9,6 +9,10 @@ public record FooterLayout : WidgetBase<FooterLayout>
     {
     }
 
+    internal FooterLayout()
+    {
+    }
+
     public static FooterLayout operator |(FooterLayout widget, object child)
     {
         throw new NotSupportedException("FooterLayout does not support children.");
