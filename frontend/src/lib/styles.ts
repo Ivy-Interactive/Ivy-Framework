@@ -568,16 +568,16 @@ export const convertSizeToGridValue = (size?: string): string => {
 // Typography classes - shadcn typography with Ivy spacing
 export const typography: Record<string, string> = {
   // Headings
-  h1: 'text-4xl font-extrabold tracking-tight scroll-m-20 mt-10 mb-2',
-  h2: 'text-3xl font-semibold tracking-tight scroll-m-20 mt-10 mb-2',
-  h3: 'text-2xl font-semibold tracking-tight scroll-m-20 mt-6 mb-2',
-  h4: 'text-xl font-semibold tracking-tight scroll-m-20 mt-6 mb-2',
-  h5: 'text-lg font-semibold tracking-tight scroll-m-20 mt-6 mb-2',
-  h6: 'text-base font-semibold tracking-tight scroll-m-20 mt-6 mb-2',
+  h1: `text-4xl font-semibold scroll-m-20 mt-12 mb-4 [&+h2]:mt-0`,
+  h2: `text-3xl font-medium scroll-m-20 mt-10 mb-4 [&+h3]:mt-0`,
+  h3: `text-2xl font-medium scroll-m-20 mt-8 mb-4 [&+h4]:mt-0`,
+  h4: `text-xl font-medium scroll-m-20 mt-6 mb-4 [&+h5]:mt-0`,
+  h5: `text-lg font-medium scroll-m-20 mt-4 mb-2 [&+h6]:mt-0`,
+  h6: `text-base font-medium scroll-m-20 mt-2 mb-2`,
 
   // Body
-  p: 'text-sm leading-relaxed scroll-m-20',
-  lead: 'text-sm text-muted-foreground',
+  p: `text-base scroll-m-20 mb-4`,
+  lead: `[&_p]:text-lg text-muted-foreground [&_p]:leading-tight`,
   strong: 'font-semibold',
   em: 'italic',
 
@@ -599,7 +599,7 @@ export const typography: Record<string, string> = {
   // Lists
   ul: 'ml-6 list-disc [&>li:first-child]:mt-0 mb-2',
   ol: 'ml-6 list-decimal [&>li:first-child]:mt-0 mb-2',
-  li: 'mt-1 text-sm',
+  li: 'mt-1 ',
 
   // Links
   a: 'text-primary underline brightness-90 hover:brightness-100',
@@ -622,4 +622,4 @@ export const typography: Record<string, string> = {
 };
 
 // Container class for text content with consistent spacing
-export const typographyContainer = 'flex flex-col gap-4';
+export const typographyContainer = 'flex flex-col';
