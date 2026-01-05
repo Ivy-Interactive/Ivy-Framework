@@ -6,7 +6,7 @@ using Ivy.Views.Builders;
 using Ivy.Views.Forms;
 using Microsoft.EntityFrameworkCore;
 
-namespace Ivy.Samples.Shared.Apps.Demos;
+namespace Ivy.Samples.Shared.Apps.Demos.Database;
 
 [App(icon: Icons.Database, searchHints: ["crud", "management", "list", "details", "forms", "entity"])]
 public class ProductsApp : ViewBase
@@ -91,7 +91,6 @@ public class ProductsListBlade : ViewBase
             key: (nameof(UseProductListRecords), filter),
             fetcher: async ct =>
             {
-                await Task.Delay(2000, ct);
                 await using var db = factory.CreateDbContext();
 
                 var linq = db.Products.Include(e => e.Department).AsQueryable();
@@ -122,7 +121,6 @@ public class ProductsListBlade : ViewBase
             key: (nameof(UseProductListRecord), record.Id),
             fetcher: async ct =>
             {
-                await Task.Delay(2000, ct);
                 await using var db = factory.CreateDbContext();
                 return await db.Products
                     .Include(e => e.Department)
@@ -147,9 +145,8 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
 
         var productQuery = UseQuery(
             key: (nameof(ProductDetailsBlade), productId),
-            fetcher: async (_, ct) =>
+            fetcher: async (ct) =>
             {
-                await Task.Delay(2000, ct);
                 await using var db = factory.CreateDbContext();
                 return await db.Products
                     .Include(e => e.Category)
@@ -209,7 +206,6 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
 
     private async Task DeleteAsync(SampleDbContextFactory dbFactory)
     {
-        await Task.Delay(2000);
         await using var db = dbFactory.CreateDbContext();
         var product = await db.Products.FindAsync(productId);
         if (product != null)
@@ -259,7 +255,6 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
 
     private async Task<Guid> CreateProduct(SampleDbContextFactory factory, ProductCreateRequest request)
     {
-        await Task.Delay(2000);
         await using var db = factory.CreateDbContext();
 
         var id = Guid.NewGuid();
@@ -290,7 +285,6 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
             key: (typeof(Product), id),
             fetcher: async (_, ct) =>
             {
-                await Task.Delay(2000, ct);
                 await using var db = factory.CreateDbContext();
                 return await db.Products.FirstAsync(e => e.Id == id, ct);
             },
@@ -318,7 +312,6 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
         async Task OnSubmit(Product? request)
         {
             if (request == null) return;
-            await Task.Delay(2000);
             var db = factory.CreateDbContext();
             request.UpdatedAt = DateTime.UtcNow;
             db.Products.Update(request);
@@ -337,12 +330,12 @@ public static class ProductHelpers
             key: (nameof(UseCategoryOptions)),
             fetcher: async (_, ct) =>
             {
-                await Task.Delay(2000, ct);
                 await using var db = factory.CreateDbContext();
                 return await db.Categories
                     .Select(e => new Option<Guid>(e.Name, e.Id))
                     .ToArrayAsync(ct);
-            });
+            },
+            tags: [nameof(UseCategoryOptions)]);
     }
 
     public static QueryResult<Option<Guid>[]> UseDepartmentOptions(this IViewContext context)
@@ -352,12 +345,12 @@ public static class ProductHelpers
             key: (nameof(UseDepartmentOptions)),
             fetcher: async (_, ct) =>
             {
-                await Task.Delay(2000, ct);
                 await using var db = factory.CreateDbContext();
                 return await db.Departments
                     .Select(e => new Option<Guid>(e.Name, e.Id))
                     .ToArrayAsync(ct);
-            });
+            },
+            tags: [nameof(UseDepartmentOptions)]);
     }
 
     public static QueryResult<Option<Guid?>[]> UseCategoryOptions(IViewContext context, string filter)
@@ -367,7 +360,6 @@ public static class ProductHelpers
             key: (nameof(UseCategoryOptions), query: filter),
             fetcher: async ct =>
             {
-                await Task.Delay(2000, ct);
                 await using var db = factory.CreateDbContext();
                 return (await db.Categories
                         .Where(e => e.Name.Contains(filter))
@@ -376,7 +368,8 @@ public static class ProductHelpers
                         .ToArrayAsync(ct))
                     .Select(e => new Option<Guid?>(e.Name, e.Id))
                     .ToArray();
-            });
+            },
+            tags: [nameof(UseCategoryOptions)]);
     }
 
     public static QueryResult<Option<Guid?>?> UseCategoryOption(IViewContext context, Guid? id)
@@ -387,11 +380,11 @@ public static class ProductHelpers
             fetcher: async ct =>
             {
                 if (id == null) return null;
-                await Task.Delay(2000, ct);
                 await using var db = factory.CreateDbContext();
                 var category = await db.Categories.FindAsync([id], ct);
                 if (category == null) return null;
                 return new Option<Guid?>(category.Name, category.Id);
-            });
+            },
+            tags: [nameof(UseCategoryOptions)]);
     }
 }

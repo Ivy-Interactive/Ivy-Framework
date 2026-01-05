@@ -96,7 +96,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         }, [refreshToken]);
 
         var lookupResult = Lookup(Context, currentValue.Value);
-        var displayValue = lookupResult.Value?.Label ?? "Loading...";
+        var displayValue = lookupResult.Value?.Label ?? (lookupResult.Loading ? "Loading..." : null);
         var loading = lookupResult.Loading;
 
         ValueTask HandleSelect(Event<AsyncSelectInput> _)
