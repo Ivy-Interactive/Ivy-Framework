@@ -95,6 +95,9 @@ export const DateVariant: React.FC<DateVariantProps> = ({
             onSelect={handleSelect}
             initialFocus
             scale={scale}
+            captionLayout="dropdown"
+            fromYear={1900}
+            toYear={2100}
           />
         </PopoverContent>
       </Popover>
