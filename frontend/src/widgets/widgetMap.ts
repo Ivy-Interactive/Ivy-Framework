@@ -111,7 +111,7 @@ export const widgetMap = {
   'Ivy.Spacer': SpacerWidget,
   'Ivy.Loading': LoadingWidget,
   'Ivy.AppHost': AppHostWidget,
-  'Ivy.Audio': AudioPlayerWidget,
+  'Ivy.AudioPlayer': AudioPlayerWidget,
   'Ivy.VideoPlayer': VideoPlayerWidget,
   'Ivy.Stepper': React.lazy(() => import('@/widgets/primitives/StepperWidget')),
 

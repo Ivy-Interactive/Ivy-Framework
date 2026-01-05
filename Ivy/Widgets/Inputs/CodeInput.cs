@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -27,7 +28,9 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public CodeInputs Variant { get; set; }
+    [Prop] public bool Nullable { get; set; }
+
+    [Prop] public CodeInputs Variant { get; set; } = CodeInputs.Default;
 
     [Prop] public Languages? Language { get; set; } = null;
 
@@ -64,16 +67,22 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
         Value = value;
     }
 
-    public CodeInput(string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
+    public CodeInput(string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default) : this()
     {
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
+    }
+
+    internal CodeInput()
+    {
         Width = Size.Full();
         Height = Size.Units(25);
     }
 
     [Prop] public TString Value { get; } = default!;
+
+    [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
@@ -85,12 +94,24 @@ public static class CodeInputExtensions
         var type = state.GetStateType();
         Type genericType = typeof(CodeInput<>).MakeGenericType(type);
         CodeInputBase input = (CodeInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
+        input.Nullable = type.IsNullableType();
         return input;
     }
 
     public static CodeInputBase Placeholder(this CodeInputBase widget, string placeholder)
     {
         return widget with { Placeholder = placeholder };
+    }
+
+    public static CodeInputBase Nullable(this CodeInputBase widget, bool? nullable = true)
+    {
+        var property = widget.GetType().GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(widget, nullable ?? true);
+            return widget;
+        }
+        return widget with { Nullable = nullable ?? true };
     }
 
     public static CodeInputBase Disabled(this CodeInputBase widget, bool disabled = true)

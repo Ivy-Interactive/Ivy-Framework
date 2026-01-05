@@ -29,6 +29,11 @@ import {
 import { ChartData } from './chartTypes';
 import { getTransformValueFn } from './sharedUtils';
 import { ReferenceDot } from './chartTypes';
+import {
+  LINE_DEFAULTS,
+  REFERENCE_LINE_DEFAULTS,
+  applyDefaults,
+} from './chartDefaults';
 
 interface AreaChartWidgetProps {
   id: string;
@@ -42,27 +47,27 @@ interface AreaChartWidgetProps {
   tooltip?: ToolTipProps;
   toolbox?: ToolboxProps;
   legend?: LegendProps;
-  referenceLines?: MarkLine;
-  referenceAreas?: MarkArea;
-  referenceDots?: ReferenceDot;
+  referenceLines?: MarkLine[];
+  referenceAreas?: MarkArea[];
+  referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
 }
 
 const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
-  data,
-  width,
-  height,
-  areas,
+  data = [],
+  width = 'Full',
+  height = 'Full',
+  areas = [],
   cartesianGrid,
-  xAxis,
-  yAxis,
+  xAxis = [],
+  yAxis = [],
   tooltip,
   toolbox,
   legend,
-  referenceLines,
-  referenceAreas,
-  referenceDots,
-  colorScheme,
+  referenceLines = [],
+  referenceAreas = [],
+  referenceDots = [],
+  colorScheme = 'Default',
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -82,6 +87,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
+    position: 'relative',
     ...(isFull
       ? { display: 'flex', flexDirection: 'column', height: '100%' }
       : {}),
@@ -111,28 +117,77 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
     [chartColors]
   );
 
+  // Convert ReferenceDot[] to ECharts markPoint format
+  const markPoint = useMemo(
+    () =>
+      referenceDots.length > 0
+        ? {
+            data: referenceDots.map(d => ({
+              coord: [d.x, d.y],
+              name: d.label,
+            })),
+          }
+        : {},
+    [referenceDots]
+  );
+
+  // Merge MarkLine[] into single markLine config with C# defaults
+  const markLine = useMemo(
+    () =>
+      referenceLines.length > 0
+        ? {
+            ...referenceLines[0],
+            lineStyle: {
+              width:
+                referenceLines[0]?.lineStyle?.width ??
+                REFERENCE_LINE_DEFAULTS.strokeWidth,
+              ...referenceLines[0]?.lineStyle,
+            },
+            data: referenceLines.flatMap(ml => ml.data),
+          }
+        : {},
+    [referenceLines]
+  );
+
+  // Merge MarkArea[] into single markArea config
+  const markAreaConfig = useMemo(
+    () =>
+      referenceAreas.length > 0
+        ? {
+            ...referenceAreas[0],
+            data: referenceAreas.flatMap(ma => ma.data),
+          }
+        : {},
+    [referenceAreas]
+  );
+
   // Memoize series configuration
   const series = useMemo(
     () =>
       valueKeys.map((key, i) => {
-        const areaConfig = areas?.find(a => a.dataKey.toLowerCase() === key);
+        const rawAreaConfig = areas?.find(a => a.dataKey.toLowerCase() === key);
+        // Apply C# defaults for area config
+        const areaConfig = rawAreaConfig
+          ? applyDefaults(rawAreaConfig, LINE_DEFAULTS)
+          : LINE_DEFAULTS;
 
         return {
           name: key,
           type: ChartType.Line,
-          smooth: areaConfig?.curveType?.toLowerCase() === 'natural',
+          smooth: areaConfig.curveType?.toLowerCase() === 'natural',
           lineStyle: {
-            width: areaConfig?.strokeWidth ?? 2,
-            color: areaConfig?.stroke ?? chartColors[i],
-            type: areaConfig?.strokeDashArray ? 'dashed' : 'solid',
+            width: areaConfig.strokeWidth ?? LINE_DEFAULTS.strokeWidth,
+            color: areaConfig.stroke ?? chartColors[i],
+            type: areaConfig.strokeDashArray ? 'dashed' : 'solid',
           },
           showSymbol: false,
           areaStyle: gradientColors[i],
           emphasis: { focus: 'series' },
           data: data.map(d => d[key]),
-          markPoint: referenceDots ?? {},
-          markLine: referenceLines ?? {},
-          markArea: referenceAreas ?? {},
+          connectNulls: areaConfig.connectNulls ?? LINE_DEFAULTS.connectNulls,
+          markPoint,
+          markLine,
+          markArea: markAreaConfig,
         };
       }),
     [
@@ -141,9 +196,9 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       chartColors,
       gradientColors,
       data,
-      referenceDots,
-      referenceLines,
-      referenceAreas,
+      markPoint,
+      markLine,
+      markAreaConfig,
     ]
   );
 
@@ -156,6 +211,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
         background: themeColors.background,
+        mutedForeground: themeColors.mutedForeground,
       }),
       legend: generateEChartLegend(legend, {
         foreground: themeColors.foreground,

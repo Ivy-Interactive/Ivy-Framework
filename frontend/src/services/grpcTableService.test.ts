@@ -765,8 +765,13 @@ describe('GrpcTableService', () => {
   });
 
   describe('singleton instance', () => {
-    it('should export a singleton grpcTableService', () => {
-      expect(grpcTableService).toBeInstanceOf(GrpcTableService);
+    it('should export a lazy grpcTableService proxy that delegates to GrpcTableService', () => {
+      // grpcTableService is now a Proxy that lazily initializes GrpcTableService
+      // We test that it has the expected methods
+      expect(typeof grpcTableService.queryTable).toBe('function');
+      expect(typeof grpcTableService.parseFilter).toBe('function');
+      expect(typeof grpcTableService.isStreaming).toBe('function');
+      expect(typeof grpcTableService.disconnect).toBe('function');
     });
   });
 });

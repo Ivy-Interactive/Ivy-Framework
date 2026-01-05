@@ -24,7 +24,7 @@ interface StepperWidgetProps {
 export const StepperWidget: React.FC<StepperWidgetProps> = ({
   id,
   selectedIndex = 0,
-  items,
+  items = [],
   width,
   allowSelectForward = false,
   events = [],

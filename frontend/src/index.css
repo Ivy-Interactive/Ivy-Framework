@@ -1,70 +1,5 @@
 @import 'tailwindcss';
-
-/* Geist Sans Font Family */
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist/webfonts/Geist-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist/webfonts/Geist-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist/webfonts/Geist-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist/webfonts/Geist-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Geist Mono Font Family */
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMono/webfonts/GeistMono-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMono/webfonts/GeistMono-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMono/webfonts/GeistMono-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMono/webfonts/GeistMono-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+@import '@ivy-interactive/ivy-design-system/css/fonts';
 
 @theme {
   --color-scheme: light;
@@ -103,6 +38,7 @@
     /* Additional dark theme overrides not in design system yet */
     --toolbox: #edeaf1;
   }
+
   @theme inline {
     /* Semantic color mappings for Tailwind utility classes */
     /* These reference CSS variables injected by the backend */
@@ -217,6 +153,7 @@
     --tracking-wider: calc(var(--tracking-normal) + 0.05em);
     --tracking-widest: calc(var(--tracking-normal) + 0.1em);
   }
+
   body {
     font-family: var(--font-sans);
   }
@@ -362,6 +299,7 @@
     height: 0;
     opacity: 0;
   }
+
   to {
     height: var(
       --radix-accordion-content-height,
@@ -379,6 +317,7 @@
     );
     opacity: 1;
   }
+
   to {
     height: 0;
     opacity: 0;
@@ -390,6 +329,7 @@
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -399,6 +339,7 @@
   from {
     transform: translateX(0);
   }
+
   to {
     transform: translateX(100%);
   }
@@ -408,6 +349,7 @@
   from {
     transform: translateX(-100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -417,6 +359,7 @@
   from {
     transform: translateX(0);
   }
+
   to {
     transform: translateX(-100%);
   }
@@ -426,6 +369,7 @@
   from {
     transform: translateY(-100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -435,6 +379,7 @@
   from {
     transform: translateY(0);
   }
+
   to {
     transform: translateY(-100%);
   }
@@ -444,6 +389,7 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -453,6 +399,7 @@
   from {
     transform: translateY(0);
   }
+
   to {
     transform: translateY(100%);
   }
@@ -480,6 +427,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -489,6 +437,7 @@
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -509,6 +458,7 @@
     opacity: 0;
     transform: scale(0.8);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -525,6 +475,7 @@
     opacity: 0;
     transform: translateX(100%);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -549,6 +500,7 @@
   * {
     @apply border-border;
   }
+
   html,
   body {
     margin: 0;
@@ -556,6 +508,7 @@
     height: 100%;
     width: 100%;
   }
+
   body {
     @apply bg-background text-foreground;
   }

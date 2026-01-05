@@ -66,6 +66,8 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
         Disabled = disabled;
     }
 
+    internal DateRangeInput() { }
+
     [Prop] public TDateRange Value { get; set; } = default!;
 
     [Event] public Func<Event<IInput<TDateRange>, TDateRange>, ValueTask>? OnChange { get; set; }

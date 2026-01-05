@@ -45,7 +45,9 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
     {
     }
 
-    [Prop] public MenuItem[] Items { get; set; }
+    internal DropDownMenu() { }
+
+    [Prop] public MenuItem[] Items { get; set; } = [];
 
     [Prop] public SideOptions Side { get; set; } = SideOptions.Bottom;
 
@@ -53,7 +55,7 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
 
     [Prop] public int AlignOffset { get; set; } = 0;
 
-    [Event] public Func<Event<DropDownMenu, object>, ValueTask> OnSelect { get; set; }
+    [Event] public Func<Event<DropDownMenu, object>, ValueTask>? OnSelect { get; set; }
 
     public static DropDownMenu operator |(DropDownMenu widget, object child)
     {

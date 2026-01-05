@@ -10,5 +10,7 @@ public record Html : WidgetBase<Html>
         Content = content;
     }
 
-    [Prop] public string Content { get; set; }
+    internal Html() { }
+
+    [Prop] public string Content { get; set; } = string.Empty;
 }

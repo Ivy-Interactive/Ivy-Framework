@@ -11,8 +11,8 @@ interface SvgWidgetProps {
 export const SvgWidget: React.FC<SvgWidgetProps> = ({
   id,
   content,
-  width,
-  height,
+  width = 'Auto',
+  height = 'Auto',
 }) => {
   const styles: React.CSSProperties = {
     ...getWidth(width),

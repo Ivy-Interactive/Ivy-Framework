@@ -9,8 +9,8 @@ interface SkeletonWidgetProps {
 }
 
 export const SkeletonWidget: React.FC<SkeletonWidgetProps> = ({
-  width,
-  height,
+  width = 'Full',
+  height = 'Full',
 }) => {
   const styles = {
     ...getWidth(width),

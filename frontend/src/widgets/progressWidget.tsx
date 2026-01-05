@@ -44,8 +44,8 @@ const SparkleStyles = () => (
 export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   value,
   goal,
-  colorVariant,
-  width,
+  colorVariant = 'Primary',
+  width = 'Full',
 }) => {
   const isCompleted = value && value >= 100;
   const styles = getWidth(width);

@@ -35,6 +35,10 @@ public abstract record AxisBase<T> where T : AxisBase<T>
         this.DataKey = dataKey;
     }
 
+    internal AxisBase()
+    {
+    }
+
     public string? DataKey { get; init; }
 
     public AxisTypes Type { get; set; } = AxisTypes.Category;

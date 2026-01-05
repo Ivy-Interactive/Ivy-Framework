@@ -15,5 +15,7 @@ public record Json : WidgetBase<Json>
         Content = content;
     }
 
-    [Prop] public string Content { get; set; }
+    internal Json() { }
+
+    [Prop] public string Content { get; set; } = string.Empty;
 }

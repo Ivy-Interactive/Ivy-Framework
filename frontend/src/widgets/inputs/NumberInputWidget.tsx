@@ -8,6 +8,7 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { X } from 'lucide-react';
 import React from 'react';
 import { Scales } from '@/types/scale';
+import { xIconVariants } from '@/components/ui/input/text-input-variants';
 
 const formatStyleMap = {
   Decimal: 'decimal',
@@ -54,7 +55,7 @@ interface NumberInputBaseProps {
 
 interface NumberInputWidgetProps
   extends Omit<NumberInputBaseProps, 'onValueChange'> {
-  variant?: 'Default' | 'Slider';
+  variant?: 'Number' | 'Slider';
   targetType?: string;
   width?: string;
 }
@@ -243,8 +244,10 @@ const NumberVariant = memo(
           onChange={handleNumberChange}
           className={cn(
             invalid && inputStyles.invalidInput,
-            // Add padding for icon container
-            ((nullable && value !== null && !disabled) || invalid) && 'pr-12'
+            // Add padding for icon container - match TextInput behavior
+            // pr-8 for single icon (either clear or invalid), pr-16 for both
+            (invalid || (nullable && value !== null && !disabled)) && 'pr-8',
+            nullable && value !== null && !disabled && invalid && 'pr-16'
           )}
           data-testid={dataTestId}
         />
@@ -260,11 +263,13 @@ const NumberVariant = memo(
                 onClick={() => onValueChange(null)}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}
-            {invalid && <InvalidIcon message={invalid} />}
+            {invalid && (
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
+            )}
           </div>
         )}
       </div>
@@ -277,7 +282,8 @@ NumberVariant.displayName = 'NumberVariant';
 export const NumberInputWidget = memo(
   ({
     id,
-    variant = 'Default',
+    variant = 'Number',
+    formatStyle = 'Decimal',
     nullable = false,
     width,
     ...props
@@ -329,6 +335,7 @@ export const NumberInputWidget = memo(
           <NumberVariant
             id={id}
             {...props}
+            formatStyle={formatStyle}
             value={normalizedValue}
             nullable={nullable}
             onValueChange={handleChange}

@@ -28,9 +28,9 @@ interface StackLayoutWidgetProps {
 }
 
 export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
-  orientation,
+  orientation = 'Vertical',
   children,
-  gap,
+  gap = 4,
   padding,
   margin,
   width,
@@ -38,8 +38,8 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   background,
   align,
   scroll,
-  removeParentPadding,
-  visible,
+  removeParentPadding = false,
+  visible = true,
 }) => {
   const styles = {
     ...getPadding(padding),

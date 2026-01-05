@@ -64,8 +64,6 @@ public class ProductsListBlade : ViewBase
         );
     }
 
-
-
     private async Task<ProductListRecord[]> FetchProducts(SampleDbContextFactory factory, string filter)
     {
         await using var db = factory.CreateDbContext();
@@ -137,15 +135,9 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
 
         return Layout.Vertical().Gap(4) | new object[]
         {
-            productCard,
-            productCard,
-            productCard,
-            productCard,
             productCard
         };
     }
-
-
 
     private void Delete(SampleDbContextFactory dbFactory)
     {

@@ -31,6 +31,11 @@ import {
   YAxisProps,
 } from './chartTypes';
 import { ChartData } from './chartTypes';
+import {
+  BAR_DEFAULTS,
+  REFERENCE_LINE_DEFAULTS,
+  applyDefaults,
+} from './chartDefaults';
 
 interface BarChartWidgetProps {
   id: string;
@@ -44,38 +49,38 @@ interface BarChartWidgetProps {
   tooltip?: ToolTipProps;
   legend?: LegendProps;
   toolbox?: ToolboxProps;
-  referenceLines?: MarkLine;
-  referenceAreas?: MarkArea;
-  referenceDots?: ReferenceDot;
+  referenceLines?: MarkLine[];
+  referenceAreas?: MarkArea[];
+  referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
   barGap?: number;
   barCategoryGap?: number | string;
   maxBarSize?: number;
   reverseStackOrder?: boolean;
-  layout?: 'horizontal' | 'vertical';
+  layout?: 'Horizontal' | 'Vertical';
 }
 
 const BarChartWidget: React.FC<BarChartWidgetProps> = ({
-  data,
-  width,
-  height,
+  data = [],
+  width = 'Full',
+  height = 'Full',
   bars,
   cartesianGrid,
-  xAxis,
-  yAxis,
+  xAxis = [],
+  yAxis = [],
   tooltip,
   legend,
   toolbox,
-  referenceLines,
-  referenceAreas,
-  referenceDots,
-  colorScheme,
+  referenceLines = [],
+  referenceAreas = [],
+  referenceDots = [],
+  colorScheme = 'Default',
   //stackOffset,
-  barGap,
-  barCategoryGap,
+  barGap = 4,
+  barCategoryGap = '10%',
   maxBarSize,
   reverseStackOrder,
-  layout,
+  layout = 'Horizontal',
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -95,6 +100,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
+    position: 'relative',
     ...(isFull
       ? { display: 'flex', flexDirection: 'column', height: '100%' }
       : {}),
@@ -116,31 +122,87 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
     [colorScheme, colors]
   );
 
+  // Convert ReferenceDot[] to ECharts markPoint format
+  const markPoint = useMemo(
+    () =>
+      referenceDots.length > 0
+        ? {
+            label: { show: true },
+            data: referenceDots.map(d => ({
+              coord: [d.x, d.y],
+              name: d.label,
+            })),
+          }
+        : { label: { show: false } },
+    [referenceDots]
+  );
+
+  // Merge MarkLine[] into single markLine config with C# defaults
+  const markLine = useMemo(
+    () =>
+      referenceLines.length > 0
+        ? {
+            ...referenceLines[0],
+            lineStyle: {
+              width:
+                referenceLines[0]?.lineStyle?.width ??
+                REFERENCE_LINE_DEFAULTS.strokeWidth,
+              ...referenceLines[0]?.lineStyle,
+            },
+            data: referenceLines.flatMap(ml => ml.data),
+          }
+        : {},
+    [referenceLines]
+  );
+
+  // Merge MarkArea[] into single markArea config
+  const markAreaConfig = useMemo(
+    () =>
+      referenceAreas.length > 0
+        ? {
+            ...referenceAreas[0],
+            data: referenceAreas.flatMap(ma => ma.data),
+          }
+        : {},
+    [referenceAreas]
+  );
+
   // Memoize series configuration
   const series = useMemo(
     () =>
-      valueKeys.map((key, i) => ({
-        name: key,
-        type: ChartType.Bar,
-        legendHoverLink: true,
-        showBackground: true,
-        data: data.map(d => d[key]),
-        stack:
-          bars && bars[i]?.stackId !== undefined
-            ? String(bars[i].stackId)
-            : undefined,
-        barGap: barGap ? `${barGap}%` : '4%',
-        barCategoryGap: barCategoryGap ? `${barCategoryGap}%` : '10%',
-        barMaxWidth: maxBarSize,
-        stackOrder: reverseStackOrder ? 'seriesDesc' : 'seriesAsc',
-        markPoint: {
-          label: {
-            show: referenceDots ? true : false,
+      valueKeys.map((key, i) => {
+        const rawBarConfig = bars?.[i];
+        // Apply C# defaults for bar config
+        const barConfig = rawBarConfig
+          ? applyDefaults(rawBarConfig, BAR_DEFAULTS)
+          : BAR_DEFAULTS;
+
+        return {
+          name: key,
+          type: ChartType.Bar,
+          legendHoverLink: true,
+          showBackground: true,
+          data: data.map(d => d[key]),
+          stack:
+            barConfig.stackId !== undefined
+              ? String(barConfig.stackId)
+              : undefined,
+          barGap: barGap ? `${barGap}%` : '4%',
+          barCategoryGap: barCategoryGap ? `${barCategoryGap}%` : '10%',
+          barMaxWidth: maxBarSize,
+          stackOrder: reverseStackOrder ? 'seriesDesc' : 'seriesAsc',
+          itemStyle: {
+            borderRadius: barConfig.radius ?? BAR_DEFAULTS.radius,
+            borderColor: barConfig.stroke ?? undefined,
+            borderWidth: barConfig.strokeWidth ?? BAR_DEFAULTS.strokeWidth,
+            color: barConfig.fill ?? undefined,
+            opacity: barConfig.fillOpacity ?? undefined,
           },
-        },
-        markLine: referenceLines ?? {},
-        markArea: referenceAreas ?? {},
-      })),
+          markPoint,
+          markLine,
+          markArea: markAreaConfig,
+        };
+      }),
     [
       valueKeys,
       data,
@@ -149,9 +211,9 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       barCategoryGap,
       maxBarSize,
       reverseStackOrder,
-      referenceDots,
-      referenceLines,
-      referenceAreas,
+      markPoint,
+      markLine,
+      markAreaConfig,
     ]
   );
 
@@ -192,6 +254,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
         background: themeColors.background,
+        mutedForeground: themeColors.mutedForeground,
       }),
       toolbox: generateEChartToolbox(toolbox),
     }),

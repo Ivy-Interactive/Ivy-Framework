@@ -22,6 +22,8 @@ import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
 import { Scales } from '@/types/scale';
+import { X } from 'lucide-react';
+import { xIconVariants } from '@/components/ui/input/text-input-variants';
 import {
   keymap,
   EditorView,
@@ -37,7 +39,7 @@ interface CodeInputWidgetProps {
   language?: string;
   disabled: boolean;
   invalid?: string;
-  showCopyButton?: boolean;
+  nullable?: boolean;
   events: string[];
   width?: string;
   height?: string;
@@ -64,13 +66,13 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   placeholder,
   value,
   language,
-  disabled,
+  disabled = false,
   invalid,
-  showCopyButton = false,
+  nullable = false,
   width,
   height,
   scale = Scales.Medium,
-  events,
+  events = [],
 }) => {
   const eventHandler = useEventHandler();
   const [localValue, setLocalValue] = useState(value || '');
@@ -106,6 +108,25 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     setIsFocused(true);
   }, []);
 
+  const handleClear = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!events.includes('OnChange')) return;
+      if (disabled) return;
+      // For nullable inputs, set to null; otherwise set to empty string
+      const clearedValue = nullable ? null : '';
+      setLocalValue(clearedValue ?? '');
+      eventHandler('OnChange', id, [clearedValue]);
+    },
+    [eventHandler, id, events, disabled, nullable]
+  );
+
+  const hasValue = localValue && localValue.toString().trim() !== '';
+  const showClear = nullable && !disabled && hasValue;
+  // Copy button always shows when there's a value (doesn't depend on showCopyButton prop)
+  const showCopy = hasValue;
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
@@ -140,12 +161,30 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
 
   return (
     <div style={styles} className="relative w-full h-full overflow-hidden">
-      {showCopyButton && (
-        <div className="absolute top-2 right-2 z-10 rounded-md">
-          <CopyToClipboardButton
-            textToCopy={localValue}
-            aria-label="Copy to clipboard"
-          />
+      {(showCopy || showClear || invalid) && (
+        <div className="absolute top-2 right-2 z-50 flex items-center">
+          {showCopy && (
+            <CopyToClipboardButton
+              textToCopy={localValue}
+              aria-label="Copy to clipboard"
+              scale={scale}
+            />
+          )}
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <X className={xIconVariants({ scale })} />
+            </button>
+          )}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
         </div>
       )}
       <CodeMirror
@@ -166,16 +205,6 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         height="100%"
         basicSetup={false}
       />
-      {invalid && (
-        <div
-          className={cn(
-            'absolute top-2.5',
-            showCopyButton ? 'right-14' : 'right-4'
-          )}
-        >
-          <InvalidIcon message={invalid} />
-        </div>
-      )}
     </div>
   );
 };

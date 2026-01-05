@@ -21,7 +21,7 @@ interface WrapLayoutWidgetProps {
 
 export const WrapLayoutWidget: React.FC<WrapLayoutWidgetProps> = ({
   children,
-  gap,
+  gap = 4,
   padding,
   margin,
   width,

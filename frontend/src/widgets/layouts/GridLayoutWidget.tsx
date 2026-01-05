@@ -10,8 +10,8 @@ import {
 interface GridLayoutWidgetProps {
   columns?: number;
   rows?: number;
-  gap?: number;
-  padding?: string;
+  gap: number;
+  padding: string;
   autoFlow?: 'Row' | 'Column' | 'RowDense' | 'ColumnDense';
   width?: string;
   height?: string;
@@ -65,11 +65,11 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   children,
   columns = 1,
   rows = 1,
-  autoFlow = 'Row',
+  autoFlow,
   width,
   height,
-  gap = 16,
-  padding,
+  gap = 4,
+  padding = '0,0,0,0',
   columnWidths,
   rowHeights,
   childColumn = [],

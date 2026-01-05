@@ -65,13 +65,7 @@ export function getChromeParam(): boolean {
   return urlParams.get('chrome')?.toLowerCase() !== 'false';
 }
 
-export function wrapAppContent(
-  content: React.ReactNode,
-  chrome: boolean
-): React.ReactNode {
-  if (chrome) {
-    return content;
-  }
+export function wrapAppContent(content: React.ReactNode): React.ReactNode {
   return React.createElement(
     'div',
     { className: 'w-full h-full p-4 overflow-y-auto' },
@@ -256,6 +250,25 @@ export function camelCase(titleCase: unknown): unknown {
 
 // Shared Ivy tag-to-class map for headings, paragraphs, lists, tables, etc.
 export const ivyTagClassMap = textBlockClassMap;
+
+/**
+ * Apply defaults to an object, only setting values that are undefined.
+ * Used to apply C# backend defaults to frontend objects when values
+ * are not serialized because they equal the default.
+ */
+export function applyDefaults<T extends object>(
+  obj: Partial<T> | undefined,
+  defaults: Partial<T>
+): Partial<T> {
+  if (!obj) return { ...defaults };
+  const result = { ...defaults };
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      (result as Record<string, unknown>)[key] = obj[key];
+    }
+  }
+  return result;
+}
 
 // Re-export URL validation functions from dedicated module
 export {

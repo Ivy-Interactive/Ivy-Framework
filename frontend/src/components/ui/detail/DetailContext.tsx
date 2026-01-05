@@ -5,6 +5,7 @@ import { Scales } from '@/types/scale';
 
 type DetailContextValue = VariantProps<typeof detailValueSizeVariants>;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const DetailContext = createContext<DetailContextValue>({
   scale: Scales.Medium,
 });

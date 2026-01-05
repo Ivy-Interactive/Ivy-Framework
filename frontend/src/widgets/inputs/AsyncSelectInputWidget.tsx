@@ -15,13 +15,13 @@ import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
 
 const asyncSelectContainerVariants = cva(
-  'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-md border border-input bg-transparent shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer',
+  'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-md border border-input bg-transparent shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer relative',
   {
     variants: {
       scale: {
-        Small: 'h-7 px-2 py-1',
-        Medium: 'h-9 px-3 py-2',
-        Large: 'h-11 px-4 py-3',
+        Small: 'h-7 px-2 py-1 pr-7',
+        Medium: 'h-9 px-3 py-2 pr-9',
+        Large: 'h-11 px-4 py-3 pr-11',
       },
     },
     defaultVariants: {
@@ -37,9 +37,9 @@ const asyncSelectTextVariants = {
 };
 
 const asyncSelectIconContainerVariants = {
-  Small: 'w-5',
-  Medium: 'w-6',
-  Large: 'w-8',
+  Small: 'w-7 right-0 px-2',
+  Medium: 'w-8 right-0 px-2',
+  Large: 'w-10 right-0 px-2',
 };
 
 const asyncSelectIconVariants = {
@@ -52,8 +52,8 @@ interface AsyncSelectInputWidgetProps {
   id: string;
   placeholder?: string;
   displayValue?: string;
-  disabled: boolean;
-  loading: boolean;
+  disabled?: boolean;
+  loading?: boolean;
   invalid?: string;
   scale?: Scales;
 }
@@ -62,7 +62,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   id,
   placeholder,
   displayValue,
-  disabled,
+  disabled = false,
   invalid,
   scale = Scales.Medium,
 }) => {
@@ -142,7 +142,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   );
 
   return (
-    <div className="relative">
+    <div>
       <button
         type="button"
         disabled={disabled}
@@ -163,25 +163,23 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
             {placeholder}
           </span>
         )}
-        <div className="flex items-center gap-2 shrink-0 ml-2">
-          {invalid && (
-            <div className="flex items-center">
-              <InvalidIcon message={invalid} />
-            </div>
-          )}
-          <div
-            className={cn(
-              'border-l flex items-center justify-center pl-2',
-              asyncSelectIconContainerVariants[scale]
-            )}
-          >
-            <ChevronRight
-              className={cn(
-                'opacity-50 shrink-0',
-                asyncSelectIconVariants[scale]
-              )}
-            />
+        {invalid && (
+          <div className="flex items-center shrink-0 ml-2 mr-2">
+            <InvalidIcon message={invalid} />
           </div>
+        )}
+        <div
+          className={cn(
+            'absolute top-0 bottom-0 border-l flex items-center justify-center',
+            asyncSelectIconContainerVariants[scale]
+          )}
+        >
+          <ChevronRight
+            className={cn(
+              'opacity-50 shrink-0',
+              asyncSelectIconVariants[scale]
+            )}
+          />
         </div>
       </button>
     </div>

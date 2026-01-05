@@ -66,7 +66,9 @@ public record Animation : WidgetBase<Animation>
         Type = animation;
     }
 
-    [Prop] public AnimationType Type { get; set; }
+    internal Animation() { }
+
+    [Prop] public AnimationType Type { get; set; } = AnimationType.Rotate;
 
     [Prop] public double Duration { get; set; } = 0.5;
 
@@ -89,58 +91,25 @@ public record Animation : WidgetBase<Animation>
 
 public static class AnimationExtensions
 {
-    public static Animation WithAnimation(this IWidget widget, AnimationType animation)
-    {
-        return new Animation(animation).Content(widget);
-    }
+    public static Animation WithAnimation(this IWidget widget, AnimationType animation) => new Animation(animation).Content(widget);
 
-    public static Animation Duration(this Animation animation, double duration)
-    {
-        return animation with { Duration = duration };
-    }
+    public static Animation Duration(this Animation animation, double duration) => animation with { Duration = duration };
 
-    public static Animation Delay(this Animation animation, double delay)
-    {
-        return animation with { Delay = delay };
-    }
+    public static Animation Delay(this Animation animation, double delay) => animation with { Delay = delay };
 
-    public static Animation Direction(this Animation animation, AnimationDirection direction)
-    {
-        return animation with { Direction = direction };
-    }
+    public static Animation Direction(this Animation animation, AnimationDirection direction) => animation with { Direction = direction };
 
-    public static Animation Distance(this Animation animation, double distance)
-    {
-        return animation with { Distance = distance };
-    }
+    public static Animation Distance(this Animation animation, double distance) => animation with { Distance = distance };
 
-    public static Animation Easing(this Animation animation, AnimationEasing easing)
-    {
-        return animation with { Easing = easing };
-    }
+    public static Animation Easing(this Animation animation, AnimationEasing easing) => animation with { Easing = easing };
 
-    public static Animation Repeat(this Animation animation, int? repeat)
-    {
-        return animation with { Repeat = repeat };
-    }
+    public static Animation Repeat(this Animation animation, int? repeat) => animation with { Repeat = repeat };
 
-    public static Animation RepeatDelay(this Animation animation, double repeatDelay)
-    {
-        return animation with { RepeatDelay = repeatDelay };
-    }
+    public static Animation RepeatDelay(this Animation animation, double repeatDelay) => animation with { RepeatDelay = repeatDelay };
 
-    public static Animation Intensity(this Animation animation, double intensity)
-    {
-        return animation with { Intensity = intensity };
-    }
+    public static Animation Intensity(this Animation animation, double intensity) => animation with { Intensity = intensity };
 
-    public static Animation Trigger(this Animation animation, AnimationTrigger trigger)
-    {
-        return animation with { Trigger = trigger };
-    }
+    public static Animation Trigger(this Animation animation, AnimationTrigger trigger) => animation with { Trigger = trigger };
 
-    public static Animation Content(this Animation animation, object child)
-    {
-        return animation with { Children = [child] };
-    }
+    public static Animation Content(this Animation animation, object child) => animation with { Children = [child] };
 }

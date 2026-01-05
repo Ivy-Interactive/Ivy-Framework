@@ -18,12 +18,12 @@ import { useDrag } from './hooks/useDrag';
 export const TabsLayoutWidget = ({
   id,
   children,
-  events,
+  events = [],
   selectedIndex,
-  removeParentPadding,
-  variant = 'Tabs',
-  padding,
-  width,
+  removeParentPadding = false,
+  variant = 'Content',
+  padding = '4,4,4,4',
+  width = 'Full',
   addButtonText,
 }: TabsLayoutWidgetProps) => {
   const tabWidgets = React.useMemo(

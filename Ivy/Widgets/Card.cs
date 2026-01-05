@@ -19,6 +19,8 @@ public record Card : WidgetBase<Card>
         Width = Ivy.Shared.Size.Full();
     }
 
+    internal Card() { }
+
     internal object? Title { get; set; }
     internal object? Description { get; set; }
     internal object? Icon { get; set; }
@@ -31,7 +33,7 @@ public record Card : WidgetBase<Card>
 
     [Prop] public Colors? BorderColor { get; set; }
 
-    [Prop] public CardHoverVariant HoverVariant { get; set; }
+    [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
 
     [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
 
@@ -73,7 +75,7 @@ public static class CardExtensions
     {
         if (icon is Icons iconsValue)
         {
-            icon = iconsValue.ToIcon().Color(Colors.Muted);
+            icon = iconsValue.ToIcon().Color(Colors.Neutral);
         }
         return card.Header(card.Title, card.Description, icon);
     }

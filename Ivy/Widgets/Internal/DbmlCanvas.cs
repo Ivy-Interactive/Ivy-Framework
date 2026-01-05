@@ -9,5 +9,7 @@ public record DbmlCanvas : WidgetBase<DbmlCanvas>
         Dbml = dbml;
     }
 
+    internal DbmlCanvas() { }
+
     [Prop] public string? Dbml { get; set; }
 }

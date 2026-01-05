@@ -6,8 +6,7 @@ namespace Ivy;
 
 public record StackLayout : WidgetBase<StackLayout>
 {
-    public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? align = null,
-    bool removeParentPadding = false) : base(children)
+    public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? align = null, bool removeParentPadding = false) : base(children)
     {
         Orientation = orientation;
         Gap = gap;
@@ -18,9 +17,11 @@ public record StackLayout : WidgetBase<StackLayout>
         RemoveParentPadding = removeParentPadding;
     }
 
-    [Prop] public Orientation Orientation { get; set; }
+    internal StackLayout() { }
 
-    [Prop] public int Gap { get; set; }
+    [Prop] public Orientation Orientation { get; set; } = Orientation.Vertical;
+
+    [Prop] public int Gap { get; set; } = 4;
 
     [Prop] public Thickness? Padding { get; set; }
 

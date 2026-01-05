@@ -42,14 +42,14 @@ interface CardWidgetProps {
 
 export const CardWidget: React.FC<CardWidgetProps> = ({
   id,
-  events,
-  width,
+  events = [],
+  width = 'Full',
   height,
   borderThickness,
   borderRadius,
   borderStyle,
   borderColor,
-  hoverVariant,
+  hoverVariant = 'None',
   scale = Scales.Medium,
   slots,
   'data-testid': testId,

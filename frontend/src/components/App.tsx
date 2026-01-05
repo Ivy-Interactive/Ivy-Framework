@@ -58,10 +58,7 @@ export function App() {
         <EventHandlerProvider eventHandler={eventHandler}>
           <>
             {!removeBranding && <MadeWithIvy />}
-            {wrapAppContent(
-              renderWidgetTree(widgetTree || loadingState()),
-              chrome
-            )}
+            {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
             <ErrorSheet />
             <Toaster />
             {disconnected && <ConnectionModal />}

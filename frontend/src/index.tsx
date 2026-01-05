@@ -16,8 +16,15 @@ if (!root) {
   (window as WindowWithReactRoot).__reactRoot = root;
 }
 
+// Toggle via VITE_STRICT_MODE=false in .env.development or command line
+const useStrictMode = import.meta.env.VITE_STRICT_MODE !== 'false';
+
 root.render(
-  <StrictMode>
+  useStrictMode ? (
+    <StrictMode>
+      <App />
+    </StrictMode>
+  ) : (
     <App />
-  </StrictMode>
+  )
 );

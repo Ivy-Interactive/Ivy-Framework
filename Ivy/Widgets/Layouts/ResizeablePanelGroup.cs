@@ -12,6 +12,12 @@ public record ResizeablePanelGroup : WidgetBase<ResizeablePanelGroup>
         Height = Size.Full();
     }
 
+    internal ResizeablePanelGroup()
+    {
+        Width = Size.Full();
+        Height = Size.Full();
+    }
+
     [Prop] public bool ShowHandle { get; init; } = true;
 
     [Prop] public Orientation Direction { get; init; } = Orientation.Horizontal;

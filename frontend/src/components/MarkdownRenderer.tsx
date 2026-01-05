@@ -249,18 +249,48 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   // Memoize static components separately (they don't need handleLinkClick)
   const staticComponents = useMemo(
     () => ({
-      h1: memo(({ children }: { children: React.ReactNode }) => (
-        <h1 className={textBlockClassMap.h1}>{children}</h1>
-      )),
-      h2: memo(({ children }: { children: React.ReactNode }) => (
-        <h2 className={textBlockClassMap.h2}>{children}</h2>
-      )),
-      h3: memo(({ children }: { children: React.ReactNode }) => (
-        <h3 className={textBlockClassMap.h3}>{children}</h3>
-      )),
-      h4: memo(({ children }: { children: React.ReactNode }) => (
-        <h4 className={textBlockClassMap.h4}>{children}</h4>
-      )),
+      h1: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h1 className={textBlockClassMap.h1} {...props}>
+            {children}
+          </h1>
+        )
+      ),
+      h2: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h2 className={textBlockClassMap.h2} {...props}>
+            {children}
+          </h2>
+        )
+      ),
+      h3: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h3 className={textBlockClassMap.h3} {...props}>
+            {children}
+          </h3>
+        )
+      ),
+      h4: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h4 className={textBlockClassMap.h4} {...props}>
+            {children}
+          </h4>
+        )
+      ),
+      h5: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h5 className={textBlockClassMap.h5} {...props}>
+            {children}
+          </h5>
+        )
+      ),
+      h6: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h6 className={textBlockClassMap.h6} {...props}>
+            {children}
+          </h6>
+        )
+      ),
       p: memo(({ children }: { children: React.ReactNode }) => (
         <p className={textBlockClassMap.p}>{children}</p>
       )),

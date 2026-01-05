@@ -10,6 +10,8 @@ public record Table : WidgetBase<Table>
     {
     }
 
+    internal Table() { }
+
     public static Table operator |(Table table, TableRow child)
     {
         return table with { Children = [.. table.Children, child] };

@@ -14,6 +14,10 @@ public record ReferenceArea
         Label = label;
     }
 
+    internal ReferenceArea()
+    {
+    }
+
     public double X1 { get; set; }
 
     public double Y1 { get; set; }

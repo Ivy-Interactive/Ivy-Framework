@@ -3,7 +3,7 @@ using Ivy.Shared;
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 #pragma warning disable IVYHOOK001, IVYHOOK002, IVYHOOK003, IVYHOOK004, IVYHOOK005
-[App(icon: Icons.Bug, searchHints: ["analyzer", "hooks", "rules", "warnings", "test"])]
+[App(icon: Icons.Bug, searchHints: ["analyzer", "hooks", "rules", "warnings", "test"], isVisible: false)]
 public class HookAnalyzerTestApp : ViewBase
 {
     public override object? Build()

@@ -88,6 +88,25 @@ public static class ClientExtensions
             });
     }
 
+    public static void SetTitle(this IClientProvider client, string? title, string? metaTitle = null)
+    {
+        var hasTitle = !string.IsNullOrWhiteSpace(title);
+        var hasMetaTitle = !string.IsNullOrWhiteSpace(metaTitle);
+        if (hasTitle && hasMetaTitle)
+        {
+            title = $"{title} - {metaTitle}";
+        }
+        else if (hasMetaTitle)
+        {
+            title = metaTitle;
+        }
+        else if (!hasTitle)
+        {
+            title = "Ivy";
+        }
+        client.Sender.Send("SetTitle", title);
+    }
+
     public static void SetAuthCookies(this IClientProvider client, CookieJarId cookieJarId, bool reloadPage, bool? triggerMachineReload = null)
     {
         client.Sender.Send(

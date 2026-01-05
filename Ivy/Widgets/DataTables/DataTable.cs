@@ -37,11 +37,17 @@ public record DataTable : WidgetBase<DataTable>
         Config = config;
     }
 
-    [Prop] public DataTableColumn[] Columns { get; set; }
+    internal DataTable()
+    {
+        Width = Size.Full();
+        Height = Size.Full();
+    }
 
-    [Prop] public DataTableConnection Connection { get; set; }
+    [Prop] public DataTableColumn[] Columns { get; set; } = [];
 
-    [Prop] public DataTableConfig Config { get; set; }
+    [Prop] public DataTableConnection? Connection { get; set; }
+
+    [Prop] public DataTableConfig? Config { get; set; }
 
     [Prop] public MenuItem[]? RowActions { get; set; }
 

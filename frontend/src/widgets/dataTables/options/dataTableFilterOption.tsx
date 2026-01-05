@@ -87,7 +87,8 @@ export const DataTableFilterOption: React.FC<{
         .filter(col => col.filterable ?? true)
         .map(col => {
           // Map column types to filter-query-editor supported types
-          let editorType = col.type.toLowerCase();
+          // Default to 'text' if type is undefined (shouldn't happen but defensive)
+          let editorType = (col.type ?? ColType.Text).toLowerCase();
           // DateTime should be treated as date for filtering purposes
           if (editorType === 'datetime') {
             editorType = 'date';

@@ -8,8 +8,8 @@ interface IvyLogoWidgetProps {
 }
 
 export const IvyLogoWidget: React.FC<IvyLogoWidgetProps> = ({
-  width,
-  height,
+  width = 'Units:25',
+  height = 'Auto',
   color,
 }) => {
   const styles = {

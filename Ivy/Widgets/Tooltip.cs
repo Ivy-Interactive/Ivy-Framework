@@ -9,6 +9,8 @@ public record Tooltip : WidgetBase<Tooltip>
     {
     }
 
+    internal Tooltip() { }
+
     public static Tooltip operator |(Tooltip widget, object child)
     {
         throw new NotSupportedException("Tooltip does not support children.");

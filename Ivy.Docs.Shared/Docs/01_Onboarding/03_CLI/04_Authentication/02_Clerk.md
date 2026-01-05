@@ -40,7 +40,7 @@ To find your API keys, go to **Configure → API keys** in your Clerk Dashboard.
 - **Publishable key**: Starts with `pk_test_` (development) or `pk_live_` (production)
 - **Secret key**: Starts with `sk_test_` (development) or `sk_live_` (production)
 
-![Clerk API Keys](assets/clerk_api_keys.webp "Clerk API Keys")
+![Clerk API Keys]../../../../Assets/clerk_api_keys.webp "Clerk API Keys")
 
 > **Important**: Keep your secret key secure. Never commit it to version control or expose it in client-side code.
 
@@ -278,8 +278,8 @@ Key features of the Clerk provider:
 
 ## Related Documentation
 
-- [Authentication Overview](AuthenticationOverview.md)
-- [Auth0 Authentication](Auth0.md)
-- [Supabase Authentication](Supabase.md)
+- [Authentication Overview](01_AuthenticationOverview.md)
+- [Auth0 Authentication](02_Auth0.md)
+- [Supabase Authentication](02_Supabase.md)
 - [Clerk Official Documentation](https://clerk.com/docs)
 - [Clerk Social Connections](https://clerk.com/docs/authentication/social-connections/overview)

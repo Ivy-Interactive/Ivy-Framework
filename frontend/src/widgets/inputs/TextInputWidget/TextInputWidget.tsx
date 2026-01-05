@@ -14,12 +14,13 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   id,
   placeholder,
   value,
-  variant,
-  disabled,
+  variant = 'Text',
+  disabled = false,
   invalid,
+  nullable = false,
   width,
   height,
-  events,
+  events = [],
   shortcutKey,
   scale = Scales.Medium,
   prefix,
@@ -28,11 +29,18 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
-  const [localValue, setLocalValue] = useState(value);
+  // Normalize null/undefined to empty string for display (HTML inputs can't have null values)
+  const [localValue, setLocalValue] = useState(value ?? '');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
-  useSyncServerValue(value, localValue, isFocused, setLocalValue);
+  // Wrapper to normalize null/undefined to empty string for useSyncServerValue
+  const setLocalValueNormalized = useCallback(
+    (val: string | undefined) => setLocalValue(val ?? ''),
+    []
+  );
+
+  useSyncServerValue(value, localValue, isFocused, setLocalValueNormalized);
 
   useShortcutKey({
     shortcutKey,
@@ -62,6 +70,20 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     if (events.includes('OnFocus')) eventHandler('OnFocus', id, []);
   }, [eventHandler, id, events]);
 
+  const handleClear = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!events.includes('OnChange')) return;
+      if (disabled) return;
+      // For nullable inputs, set to null; otherwise set to empty string
+      const clearedValue = nullable ? null : '';
+      setLocalValue(clearedValue ?? '');
+      eventHandler('OnChange', id, [clearedValue]);
+    },
+    [eventHandler, id, events, disabled, nullable]
+  );
+
   const commonProps = useMemo(
     () => ({
       id,
@@ -69,6 +91,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       value: localValue,
       disabled,
       invalid,
+      nullable,
       width,
       height,
       events,
@@ -85,6 +108,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       localValue,
       disabled,
       invalid,
+      nullable,
       events,
       width,
       height,
@@ -105,6 +129,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onClear={handleClear}
           inputRef={inputRef}
           scale={scale}
         />
@@ -116,6 +141,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onClear={handleClear}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}
@@ -128,6 +154,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onClear={handleClear}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}
@@ -141,6 +168,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onClear={handleClear}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}

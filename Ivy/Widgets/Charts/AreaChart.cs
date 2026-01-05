@@ -7,21 +7,25 @@ namespace Ivy;
 
 public record AreaChart : WidgetBase<AreaChart>
 {
-    public AreaChart(object data, params Area[] areas)
+    public AreaChart(object data, params Area[] areas) : this()
     {
         Data = data;
         Areas = areas;
+    }
+
+    internal AreaChart()
+    {
         Width = Size.Full();
         Height = Size.Full();
     }
 
-    [Prop] public object Data { get; init; }
+    [Prop] public object? Data { get; init; }
 
     [Prop] public Layouts Layout { get; init; } = Layouts.Vertical; //todo: not implemented on the frontend
 
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
-    [Prop] public Area[] Areas { get; init; }
+    [Prop] public Area[] Areas { get; init; } = [];
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 

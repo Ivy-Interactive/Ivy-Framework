@@ -36,7 +36,7 @@ public class GridView : ViewBase, IStateless
 
     public GridView Padding(int padding)
     {
-        _definition.Padding = padding;
+        _definition.Padding = new(padding);
         return this;
     }
 

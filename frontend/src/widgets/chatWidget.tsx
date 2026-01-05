@@ -18,7 +18,7 @@ interface ChatMessageWidgetProps {
 
 export const ChatMessageWidget: React.FC<ChatMessageWidgetProps> = ({
   id,
-  sender,
+  sender = 'User',
   children,
 }) => {
   return (
@@ -55,9 +55,9 @@ interface ChatWidgetProps {
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
   id,
   children,
-  placeholder,
-  width,
-  height,
+  placeholder = 'Type a message...',
+  width = 'Full',
+  height = 'Full',
 }) => {
   const eventHandler = useEventHandler();
 

@@ -13,6 +13,10 @@ public record Article : WidgetBase<Article>
     {
     }
 
+    internal Article()
+    {
+    }
+
     [Prop] public bool ShowToc { get; set; } = true;
 
     [Prop] public bool ShowFooter { get; set; } = true;

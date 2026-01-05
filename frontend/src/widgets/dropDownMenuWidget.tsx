@@ -34,10 +34,10 @@ interface DropDownMenuWidgetProps {
 export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   slots,
   id,
-  items,
+  items = [],
   align = 'Start',
   side = 'Bottom',
-  alignOffset,
+  alignOffset = 0,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
