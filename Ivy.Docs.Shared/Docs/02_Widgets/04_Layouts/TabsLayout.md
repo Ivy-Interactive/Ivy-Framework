@@ -120,4 +120,26 @@ new TabsLayout(null, null, null, null, 0,
 ).Variant(TabsVariant.Tabs)
 ```
 
+## Responsive Overflow
+
+When there are many tabs that don't fit in the available width, the component automatically shows a dropdown menu for hidden tabs. Try resizing your browser window to see this in action.
+
+```csharp demo-tabs
+Layout.Tabs(
+    new Tab("Home", "Home content"),
+    new Tab("Products", "Products content"),
+    new Tab("Services", "Services content"),
+    new Tab("About", "About content"),
+    new Tab("Contact", "Contact content"),
+    new Tab("Blog", "Blog content"),
+    new Tab("FAQ", "FAQ content"),
+    new Tab("Support", "Support content"),
+    new Tab("Careers", "Careers content"),
+    new Tab("Partners", "Partners content"),
+    new Tab("Pricing", "Pricing content"),
+    new Tab("Documentation", "Documentation content"),
+    new Tab("Community", "Community content")
+)
+```
+
 <WidgetDocs Type="Ivy.TabsLayout" ExtensionTypes="Ivy.Views.Tabs.TabsLayoutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/TabsLayout/TabsLayout.cs"/>

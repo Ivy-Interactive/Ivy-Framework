@@ -38,7 +38,7 @@ public class ProfileDetailView : ViewBase
             }
         };
         
-        return Layout.Vertical().Gap(4).Width(Size.Units(600))
+        return Layout.Vertical().Gap(4)
             | Text.H1("User Profile")
             
             | Layout.Vertical().Gap(2)

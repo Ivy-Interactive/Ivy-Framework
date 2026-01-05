@@ -76,6 +76,15 @@ new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .Poster("https://www.w3schools.com/html/pic_trulli.jpg")
 ```
 
+### Large Video Files
+
+The VideoPlayer also supports streaming of large video files.
+
+```csharp demo-tabs
+new VideoPlayer("https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4")
+    .Height(Size.Units(100))
+```
+
 ### YouTube Video Embed
 
 Embed a YouTube video directly by providing its URL:

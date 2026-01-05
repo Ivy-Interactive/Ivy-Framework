@@ -61,13 +61,13 @@ public static class ChromeSettingsExtensions
 [Signal(BroadcastType.Chrome)]
 public class NavigateSignal : AbstractSignal<NavigateArgs, Unit> { }
 
-public enum NavigationPurpose
+public enum HistoryOp
 {
-    NewDestination,
-    HistoryTraversal,
+    Push,
+    Pop,
 }
 
-public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId = null, NavigationPurpose Purpose = NavigationPurpose.NewDestination, bool Chrome = true)
+public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId = null, HistoryOp HistoryOp = HistoryOp.Push, bool Chrome = true)
 {
     public AppHost ToAppHost(string? parentId = null)
     {
