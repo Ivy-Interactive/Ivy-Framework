@@ -84,7 +84,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 
     return (
-      <div className={cn('relative', height && 'h-full pb-2')}>
+      <div className={cn('relative', height && 'h-full')}>
         {showCopyButton && <MemoizedCopyButton textToCopy={content} />}
         <ScrollArea
           className={cn(
