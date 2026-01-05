@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ClipboardCopy, Check } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { createPrismTheme } from '@/lib/ivy-prism-theme';
+import { createPrismTheme } from '@/lib/prismTheme';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface ErrorDisplayProps {

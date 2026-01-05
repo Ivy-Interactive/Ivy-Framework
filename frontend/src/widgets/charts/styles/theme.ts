@@ -1,4 +1,4 @@
-import { ThemeColors } from '@/lib/color-utils';
+import { ThemeColors } from '@/lib/theme';
 
 /**
  * Chart theme colors interface

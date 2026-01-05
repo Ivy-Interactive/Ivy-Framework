@@ -1,6 +1,6 @@
 import React from 'react';
-import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
-import { validateLinkUrl } from '@/lib/utils';
+import { typography, typographyContainer } from '@/lib/styles';
+import { validateLinkUrl } from '@/lib/url';
 
 interface HtmlRendererProps {
   content: string;
@@ -95,33 +95,31 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
 
         switch (tagName) {
           case 'h1':
-            return <h1 className={textBlockClassMap.h1}>{children}</h1>;
+            return <h1 className={typography.h1}>{children}</h1>;
           case 'h2':
-            return <h2 className={textBlockClassMap.h2}>{children}</h2>;
+            return <h2 className={typography.h2}>{children}</h2>;
           case 'h3':
-            return <h3 className={textBlockClassMap.h3}>{children}</h3>;
+            return <h3 className={typography.h3}>{children}</h3>;
           case 'h4':
-            return <h4 className={textBlockClassMap.h4}>{children}</h4>;
+            return <h4 className={typography.h4}>{children}</h4>;
           case 'p':
-            return <p className={textBlockClassMap.p}>{children}</p>;
+            return <p className={typography.p}>{children}</p>;
           case 'ul':
-            return <ul className={textBlockClassMap.ul}>{children}</ul>;
+            return <ul className={typography.ul}>{children}</ul>;
           case 'ol':
-            return <ol className={textBlockClassMap.ol}>{children}</ol>;
+            return <ol className={typography.ol}>{children}</ol>;
           case 'li':
-            return <li className={textBlockClassMap.li}>{children}</li>;
+            return <li className={typography.li}>{children}</li>;
           case 'strong':
-            return (
-              <strong className={textBlockClassMap.strong}>{children}</strong>
-            );
+            return <strong className={typography.strong}>{children}</strong>;
           case 'em':
-            return <em className={textBlockClassMap.em}>{children}</em>;
+            return <em className={typography.em}>{children}</em>;
           case 'a': {
             const href = element.getAttribute('href');
             const safeHref = validateLinkUrl(href);
             return (
               <a
-                className={textBlockClassMap.a}
+                className={typography.a}
                 href={safeHref}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -132,30 +130,28 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
           }
           case 'blockquote':
             return (
-              <blockquote className={textBlockClassMap.blockquote}>
+              <blockquote className={typography.blockquote}>
                 {children}
               </blockquote>
             );
           case 'table':
-            return (
-              <table className={textBlockClassMap.table}>{children}</table>
-            );
+            return <table className={typography.table}>{children}</table>;
           case 'thead':
             return <thead className="bg-muted">{children}</thead>;
           case 'tr':
             return <tr className="border border-border">{children}</tr>;
           case 'th':
-            return <th className={textBlockClassMap.th}>{children}</th>;
+            return <th className={typography.th}>{children}</th>;
           case 'td':
-            return <td className={textBlockClassMap.td}>{children}</td>;
+            return <td className={typography.td}>{children}</td>;
           case 'code':
-            return <code className={textBlockClassMap.code}>{children}</code>;
+            return <code className={typography.code}>{children}</code>;
           case 'img':
             return (
               <img
                 src={element.getAttribute('src') || ''}
                 alt={element.getAttribute('alt') || ''}
-                className={textBlockClassMap.img}
+                className={typography.img}
               />
             );
           case 'hr':
@@ -176,6 +172,6 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
   };
 
   return (
-    <div className={textContainerClass}>{renderHtml(sanitizedContent)}</div>
+    <div className={typographyContainer}>{renderHtml(sanitizedContent)}</div>
   );
 };

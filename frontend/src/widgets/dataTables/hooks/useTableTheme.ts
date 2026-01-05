@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { Theme } from '@glideapps/glide-data-grid';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
-import { ThemeColors } from '@/lib/color-utils';
+import { ThemeColors } from '@/lib/theme';
 
 interface UseTableThemeProps {
   showVerticalBorders: boolean | undefined;

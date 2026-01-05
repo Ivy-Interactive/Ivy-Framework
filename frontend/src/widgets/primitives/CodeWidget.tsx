@@ -4,7 +4,7 @@ import React, { CSSProperties, useMemo, memo, lazy, Suspense } from 'react';
 const SyntaxHighlighter = lazy(() =>
   import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
 );
-import { createPrismTheme } from '@/lib/ivy-prism-theme';
+import { createPrismTheme } from '@/lib/prismTheme';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 

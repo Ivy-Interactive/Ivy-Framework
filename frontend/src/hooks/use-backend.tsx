@@ -3,12 +3,8 @@ import * as signalR from '@microsoft/signalr';
 import { WidgetEventHandlerType, WidgetNode } from '@/types/widgets';
 import { useToast } from '@/hooks/use-toast';
 import { showError } from '@/hooks/use-error-sheet';
-import {
-  getIvyHost,
-  getMachineId,
-  validateRedirectUrl,
-  validateLinkUrl,
-} from '@/lib/utils';
+import { getIvyHost, getMachineId } from '@/lib/utils';
+import { validateRedirectUrl, validateLinkUrl } from '@/lib/url';
 import { logger } from '@/lib/logger';
 import { applyPatch, Operation } from 'fast-json-patch';
 import { cloneDeep } from 'lodash';
