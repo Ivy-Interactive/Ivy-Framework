@@ -60,33 +60,30 @@ public class SignalReceiver<TInput, TOutput>(Guid receiverId, AbstractSignal<TIn
 
 public static class UseSignalExtensions
 {
-    extension(IViewContext context)
+    public static ISignalSender<TInput, TOutput> CreateSignal<T, TInput, TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
     {
-        public ISignalSender<TInput, TOutput> CreateSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput>
+        var signalType = typeof(T);
+        if (signalType.GetBroadcastType() is { } broadcastType)
         {
-            var signalType = typeof(T);
-            if (signalType.GetBroadcastType() is { } broadcastType)
-            {
-                var signalHub = context.UseService<SignalRouter>();
-                var appArgs = context.UseService<AppContext>();
-                return signalHub.CreateSignal<T, TInput, TOutput>(signalType, broadcastType, appArgs.ConnectionId);
-            }
-            return context.CreateContext(Activator.CreateInstance<T>);
+            var signalHub = context.UseService<SignalRouter>();
+            var appArgs = context.UseService<AppContext>();
+            return signalHub.CreateSignal<T, TInput, TOutput>(signalType, broadcastType, appArgs.ConnectionId);
         }
+        return context.CreateContext(Activator.CreateInstance<T>);
+    }
 
-        public ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput>
+    public static ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
+    {
+        var receiverId = context.UseRef(Guid.NewGuid);
+        var signalType = typeof(T);
+        if (signalType.GetBroadcastType() is not null)
         {
-            var receiverId = context.UseRef(Guid.NewGuid);
-            var signalType = typeof(T);
-            if (signalType.GetBroadcastType() is not null)
-            {
-                var signalHub = context.UseService<SignalRouter>();
-                var appArgs = context.UseService<AppContext>();
-                return signalHub.UseSignal<T, TInput, TOutput>(signalType, receiverId.Value, appArgs.ConnectionId);
-            }
-            var signal = context.UseContext<T>();
-            return new SignalReceiver<TInput, TOutput>(receiverId.Value, signal);
+            var signalHub = context.UseService<SignalRouter>();
+            var appArgs = context.UseService<AppContext>();
+            return signalHub.UseSignal<T, TInput, TOutput>(signalType, receiverId.Value, appArgs.ConnectionId);
         }
+        var signal = context.UseContext<T>();
+        return new SignalReceiver<TInput, TOutput>(receiverId.Value, signal);
     }
 }
 
