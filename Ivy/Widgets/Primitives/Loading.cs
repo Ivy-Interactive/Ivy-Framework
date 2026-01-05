@@ -5,7 +5,7 @@ namespace Ivy;
 
 public record Loading : WidgetBase<Loading>
 {
-    internal Loading() { }
+    public Loading() { }
 }
 
 public static class LoadingExtensions

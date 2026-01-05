@@ -90,8 +90,8 @@ See [MySQL Problems and Common Errors](https://dev.mysql.com/doc/refman/8.4/en/p
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [MariaDB Provider](MariaDb.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [SQL Server Provider](SqlServer.md)
+- [MariaDB Provider](02_MariaDb.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [SQL Server Provider](02_SqlServer.md)
 - [Official MySQL Documentation](https://dev.mysql.com/doc/)
 - [Pomelo.EntityFrameworkCore.MySql](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql)

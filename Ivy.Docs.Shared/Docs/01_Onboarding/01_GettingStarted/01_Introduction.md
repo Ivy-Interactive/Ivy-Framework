@@ -128,8 +128,8 @@ Ivy uses a fluent API and the pipe operator (`|`) to compose layouts and widgets
 
 3. Run it immediately using the Ivy CLI:
 
-```bash
-dotnet run HelloWorldApp.cs
+```terminal
+>dotnet run HelloWorldApp.cs
 ```
 
 Ivy will start a local server at `http://localhost:5010`. Open it in your browser to see your interactive "Hello" app!
@@ -144,32 +144,32 @@ For larger applications that require multiple files, services, and deep integrat
 
 To use the `ivy` command, you'll need the **.NET 10 SDK** installed. Then, install the Ivy CLI globally:
 
-```bash
-dotnet tool install -g Ivy.Console
+```terminal
+>dotnet tool install -g Ivy.Console
 ```
 
 Verify the installation:
 
-```bash
-ivy --version
+```terminal
+>ivy --version
 ```
 
 #### Initializing a Project
 
 Create a new directory for your project and initialize it. We recommend using the `--hello` flag to include an example hello app:
 
-```bash
-mkdir MyProject
-cd MyProject
-ivy init --hello
+```terminal
+>mkdir MyProject
+>cd MyProject
+>ivy init --hello
 ```
 
 #### Running Your Project
 
 Run the project with hot reloading enabled:
 
-```bash
-dotnet watch
+```terminal
+>dotnet watch
 ```
 
 ## Community & Resources

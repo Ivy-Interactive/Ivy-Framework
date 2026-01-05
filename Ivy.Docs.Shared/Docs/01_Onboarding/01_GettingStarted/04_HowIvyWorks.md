@@ -21,7 +21,7 @@ Ivy is a **server-side web framework** that brings React-like patterns to C#. In
 
 ### Views & Components
 
-Every Ivy app is built from **[Views](../02_Concepts/Views.md)** - C# classes that inherit from [ViewBase](../02_Concepts/Views.md). Each view implements a single `Build()` method that returns widgets or other views:
+Every Ivy app is built from **[Views](../02_Concepts/02_Views.md)** - C# classes that inherit from [ViewBase](../02_Concepts/02_Views.md). Each view implements a single `Build()` method that returns widgets or other views:
 
 ```csharp
 [App(icon: Icons.Calendar)]
@@ -53,14 +53,14 @@ public class TodoApp : ViewBase
 
 ### Reactive State Management
 
-Ivy provides React-inspired hooks for [state management](../02_Concepts/State.md):
+Ivy provides React-inspired hooks for [state management](../02_Concepts/05_State.md):
 
 **Available Hooks:**
 
-- [UseState<T>()](../02_Concepts/State.md) - Local component state that triggers re-renders
-- [UseEffect()](../02_Concepts/Effects.md) - Side effects with dependency tracking
-- [UseService<T>()](../02_Concepts/Services.md) - Dependency injection integration
-- [UseSignal()](../02_Concepts/Signals.md), [UseDownload()](../02_Concepts/Downloads.md), `UseWebhook()` - And many more...
+- [UseState<T>()](../02_Concepts/05_State.md) - Local component state that triggers re-renders
+- [UseEffect()](../02_Concepts/09_Effects.md) - Side effects with dependency tracking
+- [UseService<T>()](../02_Concepts/18_Services.md) - Dependency injection integration
+- [UseSignal()](../02_Concepts/06_Signals.md), [UseDownload()](../02_Concepts/24_Downloads.md), `UseWebhook()` - And many more...
 
 ```csharp
 public override object? Build()
@@ -87,11 +87,11 @@ Hooks rely on a strict call order to function correctly. Following these rules e
 
 The **Ivy.Analyser** package automatically enforces these rules at compile time, catching violations before your code runs.
 
-For detailed examples and troubleshooting, see [Rules of Hooks](../02_Concepts/RulesOfHooks.md).
+For detailed examples and troubleshooting, see [Rules of Hooks](../02_Concepts/08_RulesOfHooks.md).
 
 ### Widget Library
 
-Ivy ships with a comprehensive set of strongly-typed [widgets](../02_Concepts/Widgets.md):
+Ivy ships with a comprehensive set of strongly-typed [widgets](../02_Concepts/03_Widgets.md):
 
 | Category   | Examples                                                                   |
 | ---------- | -------------------------------------------------------------------------- |

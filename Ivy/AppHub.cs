@@ -147,6 +147,11 @@ public class AppHub(
                 }
             }
 
+            if (routeResult.AppDescriptor.Title is { } title && routeResult.AppId != AppIds.Chrome && parentId == null)
+            {
+                clientProvider.SetTitle(title, server.Args.MetaTitle);
+            }
+
             appServices.AddSingleton(routeResult.AppRepository);
 
             var appArgs = GetAppArgs(Context.ConnectionId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);

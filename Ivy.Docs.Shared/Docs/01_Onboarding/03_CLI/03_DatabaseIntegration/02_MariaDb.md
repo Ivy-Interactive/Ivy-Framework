@@ -88,8 +88,8 @@ See [MariaDB Troubleshooting](https://mariadb.com/kb/en/troubleshooting-connecti
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [MySQL Provider](MySql.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [SQL Server Provider](SqlServer.md)
+- [MySQL Provider](02_MySql.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [SQL Server Provider](02_SqlServer.md)
 - [Official MariaDB Documentation](https://mariadb.com/kb/en/documentation/)
 - [Pomelo.EntityFrameworkCore.MySql for MariaDB](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql)

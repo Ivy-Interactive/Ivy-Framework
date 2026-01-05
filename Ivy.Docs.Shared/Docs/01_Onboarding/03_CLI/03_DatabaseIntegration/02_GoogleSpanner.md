@@ -123,7 +123,7 @@ For more information, visit the [Spanner documentation](https://cloud.google.com
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [SQL Server Provider](SqlServer.md)
-- [PostgreSQL Provider](PostgreSql.md)
+- [SQL Server Provider](02_SqlServer.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
 - [Official Google Cloud Spanner Documentation](https://cloud.google.com/spanner/docs)
 - [Google.Cloud.EntityFrameworkCore.Spanner Package](https://github.com/googleapis/dotnet-spanner-entity-framework)

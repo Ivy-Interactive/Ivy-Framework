@@ -31,7 +31,7 @@ public class ThemeService : IThemeService
 
         // Generate :root (light theme) variables
         sb.AppendLine(":root {");
-        AppendThemeColors(sb, _currentTheme.Colors.Light);
+        AppendThemeColors(sb, _currentTheme.Colors.Light, ThemeColors.DefaultLight);
         AppendNeutralColors(sb);
         AppendChromaticColors(sb);
         AppendOtherThemeProperties(sb);
@@ -39,7 +39,7 @@ public class ThemeService : IThemeService
 
         // Generate .dark theme variables
         sb.AppendLine(".dark {");
-        AppendThemeColors(sb, _currentTheme.Colors.Dark);
+        AppendThemeColors(sb, _currentTheme.Colors.Dark, ThemeColors.DefaultDark);
         AppendNeutralColors(sb);
         AppendChromaticColors(sb);
         sb.AppendLine("}");
@@ -55,40 +55,40 @@ public class ThemeService : IThemeService
         return $"<meta name=\"ivy-theme\" content=\"{encodedTheme}\" />";
     }
 
-    private void AppendThemeColors(StringBuilder sb, ThemeColors colors)
+    private void AppendThemeColors(StringBuilder sb, ThemeColors colors, ThemeColors defaults)
     {
         // Main theme colors
-        AppendColorVariable(sb, "--primary", colors.Primary);
-        AppendColorVariable(sb, "--primary-foreground", colors.PrimaryForeground);
-        AppendColorVariable(sb, "--secondary", colors.Secondary);
-        AppendColorVariable(sb, "--secondary-foreground", colors.SecondaryForeground);
-        AppendColorVariable(sb, "--background", colors.Background);
-        AppendColorVariable(sb, "--foreground", colors.Foreground);
+        AppendColorVariable(sb, "--primary", colors.Primary ?? defaults.Primary);
+        AppendColorVariable(sb, "--primary-foreground", colors.PrimaryForeground ?? defaults.PrimaryForeground);
+        AppendColorVariable(sb, "--secondary", colors.Secondary ?? defaults.Secondary);
+        AppendColorVariable(sb, "--secondary-foreground", colors.SecondaryForeground ?? defaults.SecondaryForeground);
+        AppendColorVariable(sb, "--background", colors.Background ?? defaults.Background);
+        AppendColorVariable(sb, "--foreground", colors.Foreground ?? defaults.Foreground);
 
         // Semantic colors
-        AppendColorVariable(sb, "--destructive", colors.Destructive);
-        AppendColorVariable(sb, "--destructive-foreground", colors.DestructiveForeground);
-        AppendColorVariable(sb, "--success", colors.Success);
-        AppendColorVariable(sb, "--success-foreground", colors.SuccessForeground);
-        AppendColorVariable(sb, "--warning", colors.Warning);
-        AppendColorVariable(sb, "--warning-foreground", colors.WarningForeground);
-        AppendColorVariable(sb, "--info", colors.Info);
-        AppendColorVariable(sb, "--info-foreground", colors.InfoForeground);
+        AppendColorVariable(sb, "--destructive", colors.Destructive ?? defaults.Destructive);
+        AppendColorVariable(sb, "--destructive-foreground", colors.DestructiveForeground ?? defaults.DestructiveForeground);
+        AppendColorVariable(sb, "--success", colors.Success ?? defaults.Success);
+        AppendColorVariable(sb, "--success-foreground", colors.SuccessForeground ?? defaults.SuccessForeground);
+        AppendColorVariable(sb, "--warning", colors.Warning ?? defaults.Warning);
+        AppendColorVariable(sb, "--warning-foreground", colors.WarningForeground ?? defaults.WarningForeground);
+        AppendColorVariable(sb, "--info", colors.Info ?? defaults.Info);
+        AppendColorVariable(sb, "--info-foreground", colors.InfoForeground ?? defaults.InfoForeground);
 
         // UI element colors
-        AppendColorVariable(sb, "--border", colors.Border);
-        AppendColorVariable(sb, "--input", colors.Input);
-        AppendColorVariable(sb, "--ring", colors.Ring);
-        AppendColorVariable(sb, "--muted", colors.Muted);
-        AppendColorVariable(sb, "--muted-foreground", colors.MutedForeground);
-        AppendColorVariable(sb, "--accent", colors.Accent);
-        AppendColorVariable(sb, "--accent-foreground", colors.AccentForeground);
-        AppendColorVariable(sb, "--card", colors.Card);
-        AppendColorVariable(sb, "--card-foreground", colors.CardForeground);
+        AppendColorVariable(sb, "--border", colors.Border ?? defaults.Border);
+        AppendColorVariable(sb, "--input", colors.Input ?? defaults.Input);
+        AppendColorVariable(sb, "--ring", colors.Ring ?? defaults.Ring);
+        AppendColorVariable(sb, "--muted", colors.Muted ?? defaults.Muted);
+        AppendColorVariable(sb, "--muted-foreground", colors.MutedForeground ?? defaults.MutedForeground);
+        AppendColorVariable(sb, "--accent", colors.Accent ?? defaults.Accent);
+        AppendColorVariable(sb, "--accent-foreground", colors.AccentForeground ?? defaults.AccentForeground);
+        AppendColorVariable(sb, "--card", colors.Card ?? defaults.Card);
+        AppendColorVariable(sb, "--card-foreground", colors.CardForeground ?? defaults.CardForeground);
 
         // Popover colors
-        AppendColorVariable(sb, "--popover", colors.Popover);
-        AppendColorVariable(sb, "--popover-foreground", colors.PopoverForeground);
+        AppendColorVariable(sb, "--popover", colors.Popover ?? defaults.Popover);
+        AppendColorVariable(sb, "--popover-foreground", colors.PopoverForeground ?? defaults.PopoverForeground);
     }
 
     private void AppendNeutralColors(StringBuilder sb)

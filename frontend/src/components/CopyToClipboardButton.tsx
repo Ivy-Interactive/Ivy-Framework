@@ -38,6 +38,7 @@ interface CopyToClipboardButtonProps {
   label?: string;
   'aria-label'?: string;
   scale?: Scales;
+  className?: string;
 }
 
 const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
@@ -45,6 +46,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
   label = '',
   'aria-label': ariaLabel,
   scale = Scales.Medium,
+  className,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -78,7 +80,8 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
         isIconOnly && !copied && 'bg-background hover:bg-accent',
         copied &&
           isIconOnly &&
-          'hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary'
+          'hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary',
+        className
       )}
     >
       <span className={cn('relative', copyIconVariants({ scale }))}>

@@ -15,6 +15,7 @@
     <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
@@ -50,6 +51,10 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Filters.g4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

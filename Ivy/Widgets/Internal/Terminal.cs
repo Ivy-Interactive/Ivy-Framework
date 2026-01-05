@@ -13,6 +13,8 @@ public record Terminal : WidgetBase<Terminal>
     [Prop] public string? Title { get; init; }
 
     [Prop] public bool ShowHeader { get; init; } = true;
+
+    [Prop] public bool ShowCopyButton { get; init; } = true;
 }
 
 public static class TerminalExtensions
@@ -35,5 +37,10 @@ public static class TerminalExtensions
     public static Terminal Title(this Terminal terminal, string title)
     {
         return terminal with { Title = title };
+    }
+
+    public static Terminal ShowCopyButton(this Terminal terminal, bool show = true)
+    {
+        return terminal with { ShowCopyButton = show };
     }
 }
