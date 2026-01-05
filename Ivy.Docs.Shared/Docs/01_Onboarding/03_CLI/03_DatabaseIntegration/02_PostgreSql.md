@@ -95,8 +95,8 @@ For detailed help, see the [PostgreSQL Documentation](https://www.postgresql.org
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [SQL Server Provider](SqlServer.md)
-- [MySQL Provider](MySql.md)
-- [Supabase Provider](Supabase.md)
+- [SQL Server Provider](02_SqlServer.md)
+- [MySQL Provider](02_MySql.md)
+- [Supabase Provider](02_Supabase.md)
 - [Official PostgreSQL Documentation](https://www.postgresql.org/docs/current/)
 - [Npgsql Entity Framework Core Provider](https://www.npgsql.org/efcore/)

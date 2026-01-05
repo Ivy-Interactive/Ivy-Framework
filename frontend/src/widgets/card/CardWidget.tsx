@@ -42,7 +42,7 @@ interface CardWidgetProps {
 
 export const CardWidget: React.FC<CardWidgetProps> = ({
   id,
-  events,
+  events = [],
   width = 'Full',
   height,
   borderThickness,

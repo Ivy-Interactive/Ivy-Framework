@@ -72,7 +72,7 @@ public MyDbContextFactory(
 The `IVolume` parameter allows custom storage locations for your SQLite database, defaulting to the user's local application data folder. Inject your custom `IVolume` implementation through dependency injection for production deployments, containerized applications, or multi-tenant scenarios.
 </Callout>
 
-For more details on volume configuration, see the [Volume documentation](../../02_Concepts/Volume.md).
+For more details on volume configuration, see the [Volume documentation](../../02_Concepts/21_Volume.md).
 
 ## SQLite-Specific Features
 
@@ -110,8 +110,8 @@ See the [SQLite FAQ](https://www.sqlite.org/faq.html) for more help.
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [SQL Server Provider](SqlServer.md)
-- [MySQL Provider](MySql.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [SQL Server Provider](02_SqlServer.md)
+- [MySQL Provider](02_MySql.md)
 - [Official SQLite Documentation](https://www.sqlite.org/docs.html)
 - [EF Core SQLite Provider](https://learn.microsoft.com/en-us/ef/core/providers/sqlite/)

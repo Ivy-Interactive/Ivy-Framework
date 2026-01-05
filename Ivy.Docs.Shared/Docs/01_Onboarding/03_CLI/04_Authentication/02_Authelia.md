@@ -121,5 +121,5 @@ Key features of the Authelia provider:
 ## Related Documentation
 
 - [Authentication Overview](01_AuthenticationOverview.md)
-- [Auth0 Provider](Auth0.md)
-- [Microsoft Entra Provider](MicrosoftEntra.md)
+- [Auth0 Provider](02_Auth0.md)
+- [Microsoft Entra Provider](02_MicrosoftEntra.md)

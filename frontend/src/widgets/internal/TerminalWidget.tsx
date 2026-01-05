@@ -15,7 +15,7 @@ export interface TerminalWidgetProps {
 }
 
 const TerminalWidget = ({
-  lines,
+  lines = [],
   title,
   showHeader = true,
   showCopyButton = true,

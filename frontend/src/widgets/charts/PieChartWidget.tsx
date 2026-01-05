@@ -18,7 +18,7 @@ import {
 } from './chartDefaults';
 
 const PieChartWidget: React.FC<PieChartWidgetProps> = ({
-  data,
+  data = [],
   width = 'Full',
   height = 'Full',
   pies = [],

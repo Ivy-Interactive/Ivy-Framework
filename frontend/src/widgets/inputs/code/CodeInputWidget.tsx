@@ -66,13 +66,13 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   placeholder,
   value,
   language,
-  disabled,
+  disabled = false,
   invalid,
   nullable = false,
   width,
   height,
   scale = Scales.Medium,
-  events,
+  events = [],
 }) => {
   const eventHandler = useEventHandler();
   const [localValue, setLocalValue] = useState(value || '');

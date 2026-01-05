@@ -145,12 +145,12 @@ await auth.LogoutAsync();
 
 Ivy supports the following authentication providers. Click on any provider for detailed setup instructions:
 
-- **[Auth0](Auth0.md)** - Universal authentication with social logins and enterprise integrations
-- **[Clerk](Clerk.md)** - Modern authentication platform with passwordless login, social connections, and comprehensive user management
-- **[Supabase](Supabase.md)** - Email/password, magic links, social auth, and Row Level Security integration
-- **[Microsoft Entra](MicrosoftEntra.md)** - Enterprise SSO, conditional access, and Microsoft Graph integration
-- **[Authelia](Authelia.md)** - Self-hosted identity provider with LDAP and forward auth
-- **[Basic Auth](BasicAuth.md)** - Simple username/password authentication for development and internal tools
+- **[Auth0](02_Auth0.md)** - Universal authentication with social logins and enterprise integrations
+- **[Clerk](02_Clerk.md)** - Modern authentication platform with passwordless login, social connections, and comprehensive user management
+- **[Supabase](02_Supabase.md)** - Email/password, magic links, social auth, and Row Level Security integration
+- **[Microsoft Entra](02_MicrosoftEntra.md)** - Enterprise SSO, conditional access, and Microsoft Graph integration
+- **[Authelia](02_Authelia.md)** - Self-hosted identity provider with LDAP and forward auth
+- **[Basic Auth](02_BasicAuth.md)** - Simple username/password authentication for development and internal tools
 
 ## Examples
 
