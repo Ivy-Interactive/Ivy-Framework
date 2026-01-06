@@ -63,8 +63,17 @@ public class SsrMarkdownMiddleware
         }
 
         context.Response.Body = originalBodyStream;
-        context.Response.ContentLength = null;
-        await context.Response.WriteAsync(html);
+
+        if (!context.Response.HasStarted)
+        {
+            var bytes = Encoding.UTF8.GetBytes(html);
+            context.Response.ContentLength = bytes.Length;
+            await context.Response.Body.WriteAsync(bytes);
+        }
+        else
+        {
+            await context.Response.WriteAsync(html);
+        }
     }
 
     private static bool ShouldSkip(HttpContext context, string? path)
@@ -72,10 +81,16 @@ public class SsrMarkdownMiddleware
         if (string.IsNullOrEmpty(path))
             return true;
 
+        if (context.WebSockets.IsWebSocketRequest)
+            return true;
+
         if (path.Contains('.') && !path.EndsWith(".html"))
             return true;
 
         if (context.Request.Headers.Accept.Any(h => h?.Contains("application/json") == true))
+            return true;
+
+        if (path.StartsWith("/ivy/", StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;
