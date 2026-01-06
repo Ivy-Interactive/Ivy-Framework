@@ -78,11 +78,25 @@ public class SsrMarkdownMiddleware
 
     private static readonly string[] KnownBots =
     [
-        "GPTBot", "ChatGPT-User", "ClaudeBot", "Claude-Web", "PerplexityBot",
-        "Googlebot", "Bingbot", "Slurp", "DuckDuckBot", "Baiduspider",
-        "YandexBot", "facebookexternalhit", "Twitterbot", "LinkedInBot",
-        "Applebot", "Discordbot", "TelegramBot", "github-actions", "GitHub-Hookshot",
-        "Copilot", "GitHubCopilot"
+        // OpenAI
+        "GPTBot", "ChatGPT-User", "OAI-SearchBot",
+        // Anthropic
+        "ClaudeBot", "Claude-User", "Claude-SearchBot", "anthropic-ai",
+        // Perplexity
+        "PerplexityBot", "Perplexity-User",
+        // Search engines
+        "Googlebot", "Google-Extended", "Bingbot", "Slurp", "DuckDuckBot", "DuckAssistBot",
+        "Baiduspider", "YandexBot",
+        // Social & messaging
+        "facebookexternalhit", "Meta-ExternalAgent", "Twitterbot", "LinkedInBot",
+        "Discordbot", "TelegramBot", "Slackbot", "WhatsApp",
+        // Tech platforms
+        "Applebot", "Applebot-Extended", "Amazonbot",
+        "github-actions", "GitHub-Hookshot", "Copilot", "GitHubCopilot",
+        // Other AI
+        "cohere-ai", "AI2Bot", "Bytespider", "CCBot", "DataForSeoBot",
+        "Diffbot", "ImagesiftBot", "Omgilibot", "Timpibot", "VelenPublicWebCrawler",
+        "Webzio-Extended", "YouBot"
     ];
 
     private static bool IsBot(HttpContext context)
