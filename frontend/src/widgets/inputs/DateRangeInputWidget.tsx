@@ -32,10 +32,10 @@ import {
 
 interface DateRangeInputWidgetProps {
   id: string;
-  value: {
-    item1: string;
-    item2: string;
-  };
+  value?: {
+    item1: string | null;
+    item2: string | null;
+  } | null;
   disabled?: boolean;
   placeholder?: string;
   format?: string;
@@ -55,7 +55,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   invalid,
   nullable = false,
   scale = Scales.Medium,
-  events,
+  events = [],
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -129,8 +129,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   };
 
   const date: DateRange = {
-    from: parseDate(value.item1),
-    to: parseDate(value.item2),
+    from: parseDate(value?.item1),
+    to: parseDate(value?.item2),
   };
 
   const [month, setMonth] = useState(today);
@@ -334,6 +334,9 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   className="p-2 bg-background"
                   disabled={[{ after: today }]}
                   scale={scale}
+                  captionLayout="dropdown"
+                  fromYear={1900}
+                  toYear={2100}
                 />
               </div>
             </div>

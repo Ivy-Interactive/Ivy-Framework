@@ -3,7 +3,7 @@ import {
   Filter,
   SortOrder,
   TableQuery,
-  grpcTableService,
+  getGrpcTableService,
   ParseFilterResult,
 } from '@/services/grpcTableService';
 import * as arrow from 'apache-arrow';
@@ -19,7 +19,7 @@ export const parseInvalidQuery = async (
     // Use getIvyHost() which returns the correct backend URL from meta tag or window.location.origin
     const serverUrl = getIvyHost();
 
-    const result = await grpcTableService.parseFilter(
+    const result = await getGrpcTableService().parseFilter(
       {
         payload: invalidQuery,
         connectionId: connection?.connectionId,
@@ -60,7 +60,7 @@ export const fetchTableData = async (
   };
 
   try {
-    const result = await grpcTableService.queryTable({
+    const result = await getGrpcTableService().queryTable({
       serverUrl,
       query,
     });

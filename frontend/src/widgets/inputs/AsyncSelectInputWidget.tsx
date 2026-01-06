@@ -52,8 +52,8 @@ interface AsyncSelectInputWidgetProps {
   id: string;
   placeholder?: string;
   displayValue?: string;
-  disabled: boolean;
-  loading: boolean;
+  disabled?: boolean;
+  loading?: boolean;
   invalid?: string;
   scale?: Scales;
 }
@@ -62,7 +62,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   id,
   placeholder,
   displayValue,
-  disabled,
+  disabled = false,
   invalid,
   scale = Scales.Medium,
 }) => {

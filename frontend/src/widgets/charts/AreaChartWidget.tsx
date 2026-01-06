@@ -54,7 +54,7 @@ interface AreaChartWidgetProps {
 }
 
 const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
-  data,
+  data = [],
   width = 'Full',
   height = 'Full',
   areas = [],

@@ -32,14 +32,14 @@ interface GitHubContributorsProps {
   show?: boolean;
 }
 
-// Ivy team members with their roles
-const IVY_TEAM_MEMBERS: Record<string, string> = {
-  ArtemKhvorostianyi: 'Engineer',
-  rorychatt: 'Founding Engineer',
-  nielsbosma: 'Founder',
-  zachwolfe: 'Software Developer',
-  // Add more team members as needed
-};
+// Ivy team members with their roles and display names
+const IVY_TEAM_MEMBERS: Record<string, { role: string; displayName?: string }> =
+  {
+    ArtemKhvorostianyi: { role: 'Engineer' },
+    rorychatt: { role: 'Founding Engineer' },
+    nielsbosma: { role: 'Founder', displayName: 'Niels Bosma' },
+    zachwolfe: { role: 'Software Developer' },
+  };
 
 // Helper function to generate correct commits URL for main branch
 const getCommitsUrl = (githubUrl: string): string => {
@@ -126,36 +126,41 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
         return response.json();
       })
       .then((commits: GitHubCommit[]) => {
-        // Extract unique contributors from commits
         const contributorMap = new Map<string, Contributor>();
 
         commits.forEach(commit => {
           if (commit.author) {
             const login = commit.author.login;
-            if (contributorMap.has(login)) {
-              contributorMap.get(login)!.contributions += 1;
+            const existing = contributorMap.get(login);
+            if (existing) {
+              existing.contributions += 1;
             } else {
-              const isIvyMember = login in IVY_TEAM_MEMBERS;
+              const teamMember = IVY_TEAM_MEMBERS[login];
               contributorMap.set(login, {
-                login: commit.author.login,
-                name: commit.commit.author.name,
+                login,
+                name:
+                  teamMember?.displayName ||
+                  (commit.commit.author.name !== login
+                    ? commit.commit.author.name
+                    : undefined),
                 avatar_url: commit.author.avatar_url,
                 html_url: commit.author.html_url,
                 contributions: 1,
-                role: isIvyMember
-                  ? IVY_TEAM_MEMBERS[login]
-                  : 'Open Source Contributor',
-                isIvyMember,
+                role:
+                  login in IVY_TEAM_MEMBERS
+                    ? IVY_TEAM_MEMBERS[login].role
+                    : 'Open Source Contributor',
+                isIvyMember: login in IVY_TEAM_MEMBERS,
               });
             }
           }
         });
 
-        const sortedContributors = Array.from(contributorMap.values()).sort(
-          (a, b) => b.contributions - a.contributions
+        setContributors(
+          Array.from(contributorMap.values()).sort(
+            (a, b) => b.contributions - a.contributions
+          )
         );
-
-        setContributors(sortedContributors);
       })
       .catch(err => {
         console.error('Failed to fetch contributors:', err);

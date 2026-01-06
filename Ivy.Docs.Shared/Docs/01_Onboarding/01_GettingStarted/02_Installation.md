@@ -17,7 +17,7 @@ searchHints:
 This page covers the installation of Ivy Framework components, setting up a new Ivy project, and understanding the basic project structure. It provides the foundational steps needed before building applications with Ivy.
 </Ingress>
 
-For information about core Ivy concepts like [Views](../02_Concepts/Views.md) and [state management](../02_Concepts/State.md), see [Core Concepts](../02_Concepts/Views.md). For guidance on building your first application, see [Basics](./03_Basics.md). For development tools and CLI commands, see [CLI Tools](../03_CLI/01_CLIOverview.md).
+For information about core Ivy concepts like [Views](../02_Concepts/02_Views.md) and [state management](../02_Concepts/05_State.md), see [Core Concepts](../02_Concepts/02_Views.md). For guidance on building your first application, see [Basics](./03_Basics.md). For development tools and CLI commands, see [CLI Tools](../03_CLI/01_CLIOverview.md).
 
 ## Quick Start: Using the CLI
 
@@ -163,7 +163,7 @@ For enterprise-scale applications, we recommend a multi-project structure to sep
 
 The server configuration follows a builder pattern where each method configures different aspects of the Ivy application before calling `RunAsync()` to start the web server.
 
-For detailed server configuration options, including `ServerArgs` properties and advanced settings, see [Program](../02_Concepts/Program.md).
+For detailed server configuration options, including `ServerArgs` properties and advanced settings, see [Program](../02_Concepts/01_Program.md).
 
 ### Development vs Production
 

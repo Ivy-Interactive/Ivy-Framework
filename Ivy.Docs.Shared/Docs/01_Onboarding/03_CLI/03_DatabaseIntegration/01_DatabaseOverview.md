@@ -74,23 +74,23 @@ This command opens a GUI to guide you through the process of designing a databas
 
 First, you will be prompted for a choice of database provider, a format for table and field names, and a description of your database schema. Currently, database schema generation supports the providers SQLite, SQL Server, PostgreSQL, and MySQL, and the casing schemes `PascalCase`, `camelCase` and `snake_case`. The defaults are SQLite and `snake_case`.
 
-![Ivy Database Generator UI, start page](assets/db_generator_1.webp "Ivy Database Generator UI")
+![Ivy Database Generator UI, start page]../../../../Assets/db_generator_1.webp "Ivy Database Generator UI")
 
 If you're having trouble coming up with a schema description, Ivy includes a variety of examples to serve as a starting point:
 
-![Ivy Database Generator UI, samples dropdown](assets/db_generator_2.webp "Ivy Database Generator UI")
+![Ivy Database Generator UI, samples dropdown]../../../../Assets/db_generator_2.webp "Ivy Database Generator UI")
 
 On the next page, you can preview Ivy's generated schema on the left, with a graph of relationships on the right:
 
-![Ivy Database Generator UI, preview page](assets/db_generator_3.webp "Ivy Database Generator UI")
+![Ivy Database Generator UI, preview page]../../../../Assets/db_generator_3.webp "Ivy Database Generator UI")
 
 Finally, you can choose which apps to generate, make a final selection of database provider, tweak the connection string, and choose whether or not to generate seed data:
 
-![Ivy Database Generator UI, app selection page](assets/db_generator_4.webp "Ivy Database Generator UI")
+![Ivy Database Generator UI, app selection page]../../../../Assets/db_generator_4.webp "Ivy Database Generator UI")
 
 Ivy will then generate your database schema and associated apps:
 
-![Ivy Database Generator UI, generation page](assets/db_generator_5.webp "Ivy Database Generator UI")
+![Ivy Database Generator UI, generation page]../../../../Assets/db_generator_5.webp "Ivy Database Generator UI")
 
 ## Supported Database Providers
 
@@ -98,23 +98,23 @@ Ivy supports the following database providers. Click on any provider for detaile
 
 ### Relational Databases
 
-- **[SQL Server](SqlServer.md)** - Microsoft's enterprise database
-- **[PostgreSQL](PostgreSql.md)** - Advanced open-source database
-- **[MySQL](MySql.md)** - Popular open-source database
-- **[MariaDB](MariaDb.md)** - MySQL fork with enhanced features
-- **[SQLite](SQLite.md)** - Lightweight file-based database
-- **[Oracle](Oracle.md)** - Enterprise database system
+- **[SQL Server](02_SqlServer.md)** - Microsoft's enterprise database
+- **[PostgreSQL](02_PostgreSql.md)** - Advanced open-source database
+- **[MySQL](02_MySql.md)** - Popular open-source database
+- **[MariaDB](02_MariaDb.md)** - MySQL fork with enhanced features
+- **[SQLite](02_SQLite.md)** - Lightweight file-based database
+- **[Oracle](02_Oracle.md)** - Enterprise database system
 
 ### Cloud Databases
 
-- **[Supabase](Supabase.md)** - Open-source Firebase alternative with PostgreSQL
-- **[Google Spanner](GoogleSpanner.md)** - Globally distributed database
-- **[Snowflake](Snowflake.md)** - Cloud data platform
+- **[Supabase](02_Supabase.md)** - Open-source Firebase alternative with PostgreSQL
+- **[Google Spanner](02_GoogleSpanner.md)** - Globally distributed database
+- **[Snowflake](02_Snowflake.md)** - Cloud data platform
 
 ### Specialized Databases
 
-- **[ClickHouse](ClickHouse.md)** - Column-oriented database for analytics
-- **[Airtable](Airtable.md)** - Spreadsheet-database hybrid
+- **[ClickHouse](02_ClickHouse.md)** - Column-oriented database for analytics
+- **[Airtable](02_Airtable.md)** - Spreadsheet-database hybrid
 
 ## Connection Configuration Details
 

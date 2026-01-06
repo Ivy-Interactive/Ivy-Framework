@@ -7,7 +7,10 @@ interface MarkdownWidgetProps {
   content: string;
 }
 
-const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({ id, content }) => {
+const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
+  id,
+  content = '',
+}) => {
   const eventHandler = useEventHandler();
 
   const handleLinkClick = useCallback(

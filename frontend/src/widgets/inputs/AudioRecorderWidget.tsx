@@ -44,10 +44,10 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
   label,
   recordingLabel,
   mimeType = 'audio/webm',
-  disabled,
+  disabled = false,
   width,
   uploadUrl,
-  chunkInterval,
+  chunkInterval = 1000,
   scale = Scales.Medium,
 }) => {
   const normalizedMimeTypes = useMemo(() => {

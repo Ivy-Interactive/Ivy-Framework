@@ -147,6 +147,11 @@ public class AppHub(
                 }
             }
 
+            if (routeResult.AppDescriptor.Title is { } title && routeResult.AppId != AppIds.Chrome && parentId == null)
+            {
+                clientProvider.SetTitle(title, server.Args.MetaTitle);
+            }
+
             appServices.AddSingleton(routeResult.AppRepository);
 
             var appArgs = GetAppArgs(Context.ConnectionId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
@@ -542,7 +547,7 @@ public class AppHub(
                 _ => new NavigateSignal()
             );
 
-            await navigateSignal.Send(new NavigateArgs(appId, TabId: state?.TabId, Purpose: NavigationPurpose.HistoryTraversal));
+            await navigateSignal.Send(new NavigateArgs(appId, TabId: state?.TabId, HistoryOp: HistoryOp.Pop));
 
             logger.LogInformation("Navigate signal sent: {ConnectionId} to [{AppId}]", Context.ConnectionId, appId);
         }

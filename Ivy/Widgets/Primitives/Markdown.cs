@@ -21,7 +21,9 @@ public record Markdown : WidgetBase<Markdown>
         OnLinkClick = onLinkClick?.ToValueTask();
     }
 
-    [Prop] public string Content { get; set; }
+    internal Markdown() { }
+
+    [Prop] public string Content { get; set; } = string.Empty;
 
     [Event] public Func<Event<Markdown, string>, ValueTask>? OnLinkClick { get; set; }
 }

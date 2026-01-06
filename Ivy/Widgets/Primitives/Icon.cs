@@ -12,6 +12,8 @@ public record Icon : WidgetBase<Icon>
         Color = color;
     }
 
+    internal Icon() { }
+
     [Prop] public Icons Name { get; set; }
 
     [Prop] public Colors? Color { get; set; }
