@@ -32,9 +32,19 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
         var menuItems = UseState(() => appRepository.GetMenuItems());
-        var args = UseService<AppContext>();
-        var navigate = UseSignal<NavigateSignal, NavigateArgs, Unit>();
-        var navigator = UseNavigation();
+        var args = UseService<AppArgs>();
+        var serverArgs = UseService<ServerArgs>();
+        var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
+        var navigator = this.UseNavigation();
+
+        void SetAppTitle(string appId)
+        {
+            var app = appRepository.GetAppOrDefault(appId);
+            if (app.Title is { } title)
+            {
+                client.SetTitle(title, serverArgs.MetaTitle);
+            }
+        }
 
         UseEffect(() =>
         {
@@ -89,8 +99,15 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     : null;
 
                 currentApp.Set(appHost);
+
+                // Set page title
+                if (navigateArgs.AppId != null)
+                {
+                    SetAppTitle(navigateArgs.AppId);
+                }
+
                 // Update browser URL for page navigation
-                if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousApp != navigateArgs.AppId)
+                if (navigateArgs.HistoryOp is HistoryOp.Push && previousApp != navigateArgs.AppId)
                 {
                     client.Redirect(navigateArgs.GetUrl(), replaceHistory);
                 }
@@ -105,16 +122,19 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     {
                         selectedIndex.Set(tabIndex);
 
-                        // Update browser URL when switching to existing tab
+                        // Set page title
                         var tab = tabs.Value[tabIndex];
-                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination)
+                        SetAppTitle(tab.AppId);
+
+                        // Update browser URL when switching to existing tab
+                        if (navigateArgs.HistoryOp is HistoryOp.Push)
                         {
                             client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tab.Id);
                         }
                         return;
                     }
 
-                    if (navigateArgs.Purpose is NavigationPurpose.HistoryTraversal)
+                    if (navigateArgs.HistoryOp is HistoryOp.Pop)
                     {
                         client.Error(new InvalidOperationException("Tab no longer exists."));
                         return;
@@ -148,8 +168,12 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                         var previousSelectedIndex = selectedIndex.Value;
                         selectedIndex.Set(existingTabIndex);
                         tabId = tabs.Value[existingTabIndex].Id;
+
+                        // Set page title
+                        SetAppTitle(appId);
+
                         // Update browser URL when switching to existing tab
-                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousSelectedIndex != existingTabIndex)
+                        if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
                         {
                             client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
                         }
@@ -157,12 +181,15 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     }
                 }
 
-                if (navigateArgs.Purpose is NavigationPurpose.NewDestination)
+                if (navigateArgs.HistoryOp is HistoryOp.Push)
                 {
                     var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
                     var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
                     tabs.Set(newTabs);
                     selectedIndex.Set(newTabs.Length - 1);
+
+                    // Set page title
+                    SetAppTitle(app.Id);
 
                     // Update browser URL when new tab is opened
                     client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
@@ -223,8 +250,11 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             {
                 selectedIndex.Set(@event.Value);
 
-                // Update browser URL when tab is selected
+                // Set page title
                 var tab = tabs.Value[@event.Value];
+                SetAppTitle(tab.AppId);
+
+                // Update browser URL when tab is selected
                 var navigateArgs = new NavigateArgs(tab.AppId);
                 client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
             }
@@ -264,11 +294,18 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 if (newIndex != null)
                 {
                     var tab = newTabs[newIndex.Value];
+
+                    // Set page title
+                    SetAppTitle(tab.AppId);
+
                     var navigateArgs = new NavigateArgs(tab.AppId);
                     client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
                 }
                 else
                 {
+                    // Reset to default title when all tabs are closed
+                    client.SetTitle(serverArgs.MetaTitle);
+
                     client.Redirect("/");
                 }
             }
@@ -355,6 +392,21 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 )
         };
 
+        var authSession = auth?.GetAuthSession();
+        var isLoggedIn = authSession != null;
+
+        var onLogout = new Action(async () =>
+        {
+            try
+            {
+                if (auth == null) return;
+                await auth.LogoutAsync();
+            }
+            catch (Exception)
+            {
+            }
+        });
+
         DropDownMenu? footer;
         if (user.Value != null)
         {
@@ -376,20 +428,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     trigger)
                 .Top();
 
-            var onLogout = new Action(async () =>
-            {
-                try
-                {
-                    if (auth == null) return;
-
-                    var authSession = auth.GetAuthSession();
-                    await auth.LogoutAsync();
-                }
-                catch (Exception)
-                {
-                }
-            });
-
             footer = footer.Items(settings.FooterMenuItemsTransformer([
                 ..commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).HandleSelect(onLogout)
             ], navigator));
@@ -404,12 +442,16 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     )
                     .Variant(ButtonVariant.Ghost).Width(Size.Full());
 
+            var footerMenuItems = isLoggedIn
+                ? [.. commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).HandleSelect(onLogout)]
+                : commonMenuItems;
+
             footer = new DropDownMenu(
                     DropDownMenu.DefaultSelectHandler(),
                     trigger)
                 .Top()
                 .Items(
-                    settings.FooterMenuItemsTransformer(commonMenuItems, navigator)
+                    settings.FooterMenuItemsTransformer(footerMenuItems, navigator)
                 );
         }
 

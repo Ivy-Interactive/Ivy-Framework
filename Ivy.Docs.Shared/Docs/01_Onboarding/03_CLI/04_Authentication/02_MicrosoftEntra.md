@@ -44,7 +44,7 @@ From your app registration **Overview** page, copy these values:
 - **Application (client) ID**: This is your **Client ID**
 - **Directory (tenant) ID**: This is your **Tenant ID**
 
-![Entra client and tenant IDs](assets/entra_client_and_tenant_ids.webp "Entra client and tenant IDs")
+![Entra client and tenant IDs]../../../../Assets/entra_client_and_tenant_ids.webp "Entra client and tenant IDs")
 
 ### Step 3: Create a Client Secret
 
@@ -55,7 +55,7 @@ From your app registration **Overview** page, copy these values:
 5. **Click "Add"**
 6. **Copy the secret Value** (this is your **Client Secret**). Note that only **Value** is needed, not **Secret ID**.
 
-![Newly-created Entra client secret](assets/entra_client_secret.webp "Newly-created Entra client secret")
+![Newly-created Entra client secret]../../../../Assets/entra_client_secret.webp "Newly-created Entra client secret")
 
 > ⚠️ **Warning:** This secret value will only be shown once, so copy it before leaving the page.
 
@@ -66,7 +66,7 @@ From your app registration **Overview** page, copy these values:
 3. **Under "Implicit grant and hybrid flows"**, check **"ID tokens"**
 4. **Click "Save"**
 
-![ID tokens enabled](assets/entra_id_tokens_enabled.webp "ID tokens enabled")
+![ID tokens enabled]../../../../Assets/entra_id_tokens_enabled.webp "ID tokens enabled")
 
 ### Step 5: Set API Permissions
 
@@ -181,8 +181,8 @@ The following parameters are supported via connection string, environment variab
 ## Related Documentation
 
 - [Authentication Overview](01_AuthenticationOverview.md)
-- [Auth0 Provider](Auth0.md)
-- [Supabase Provider](Supabase.md)
+- [Auth0 Provider](02_Auth0.md)
+- [Supabase Provider](02_Supabase.md)
 - [Microsoft Entra ID Documentation](https://learn.microsoft.com/en-us/entra/identity/)
 - [Register an application in Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
 - [Microsoft identity platform app types and authentication flows](https://learn.microsoft.com/en-us/entra/identity-platform/authentication-flows-app-scenarios)

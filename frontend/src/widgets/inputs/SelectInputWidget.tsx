@@ -1076,6 +1076,7 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
     scale: props.scale ?? Scales.Medium,
     variant: props.variant ?? 'Select',
     separator: props.separator ?? ';',
+    selectMany: props.selectMany ?? false,
   };
 
   switch (normalizedProps.variant) {

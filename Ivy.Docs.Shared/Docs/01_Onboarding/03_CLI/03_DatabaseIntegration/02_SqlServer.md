@@ -100,8 +100,8 @@ For detailed troubleshooting, see [SQL Server Troubleshooting](https://learn.mic
 ## Related Documentation
 
 - [Database Overview](01_DatabaseOverview.md)
-- [PostgreSQL Provider](PostgreSql.md)
-- [MySQL Provider](MySql.md)
-- [SQLite Provider](SQLite.md)
+- [PostgreSQL Provider](02_PostgreSql.md)
+- [MySQL Provider](02_MySql.md)
+- [SQLite Provider](02_SQLite.md)
 - [SQL Server Technical Documentation](https://learn.microsoft.com/en-us/sql/sql-server/)
 - [SQL Server EF Core Database Provider](https://learn.microsoft.com/en-us/ef/core/providers/sql-server/)

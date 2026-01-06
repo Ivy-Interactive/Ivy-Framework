@@ -61,7 +61,7 @@ interface BarChartWidgetProps {
 }
 
 const BarChartWidget: React.FC<BarChartWidgetProps> = ({
-  data,
+  data = [],
   width = 'Full',
   height = 'Full',
   bars,

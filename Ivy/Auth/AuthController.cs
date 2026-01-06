@@ -1,6 +1,7 @@
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,65 @@ public record SetAuthCookiesRequest(string CookieJarId, string? ConnectionId, bo
 
 public class AuthController() : Controller
 {
+    [Route("ivy/auth/oauth-login")]
+    [HttpGet]
+    public async Task<IActionResult> OAuthLogin(
+        [FromQuery] string optionId,
+        [FromQuery] string callbackId,
+        [FromQuery] string connectionId,
+        [FromServices] AppSessionStore sessionStore,
+        [FromServices] ILogger<AuthController> logger)
+    {
+        if (string.IsNullOrWhiteSpace(optionId) || string.IsNullOrWhiteSpace(callbackId) || string.IsNullOrWhiteSpace(connectionId))
+        {
+            logger.LogWarning("OAuth login failed: Missing required parameters");
+            return BadRequest("Authentication error");
+        }
+
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
+        {
+            logger.LogWarning("OAuth login failed: Session not found for connection {ConnectionId}", connectionId);
+            return BadRequest("Authentication error");
+        }
+
+        var authService = appSession.AppServices.GetService<IAuthService>();
+        if (authService == null)
+        {
+            logger.LogWarning("OAuth login failed: Auth service not configured for connection {ConnectionId}", connectionId);
+            return BadRequest("Authentication error");
+        }
+
+        // Find the auth option by ID
+        var options = authService.GetAuthOptions();
+        var option = options.FirstOrDefault(o => o.Id == optionId);
+        if (option == null)
+        {
+            logger.LogWarning("OAuth login failed: Auth option '{OptionId}' not found for connection {ConnectionId}", optionId, connectionId);
+            return BadRequest("Authentication error");
+        }
+
+        // Construct the webhook endpoint
+        var scheme = HttpContext.Request.Scheme;
+        if (HttpContext.Request.Headers.TryGetValue("X-Forwarded-Proto", out var forwardedProto))
+        {
+            scheme = forwardedProto.ToString();
+        }
+        var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
+        var callback = new WebhookEndpoint(callbackId, scheme, host);
+
+        try
+        {
+            // Get the OAuth URI and redirect to it
+            var uri = await authService.GetOAuthUriAsync(option, callback, HttpContext.RequestAborted);
+            return Redirect(uri.ToString());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "OAuth login failed: Error initiating OAuth for option '{OptionId}' on connection {ConnectionId}", optionId, connectionId);
+            return BadRequest("Authentication error");
+        }
+    }
+
     [Route("ivy/auth/set-auth-cookies")]
     [HttpPatch]
     public async Task<IActionResult> SetAuthCookies(

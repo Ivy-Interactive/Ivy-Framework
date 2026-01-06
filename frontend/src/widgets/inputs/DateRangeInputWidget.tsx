@@ -55,7 +55,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   invalid,
   nullable = false,
   scale = Scales.Medium,
-  events,
+  events = [],
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -334,6 +334,9 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   className="p-2 bg-background"
                   disabled={[{ after: today }]}
                   scale={scale}
+                  captionLayout="dropdown"
+                  fromYear={1900}
+                  toYear={2100}
                 />
               </div>
             </div>

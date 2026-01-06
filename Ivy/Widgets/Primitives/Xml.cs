@@ -15,5 +15,7 @@ public record Xml : WidgetBase<Xml>
         Content = content;
     }
 
-    [Prop] public string Content { get; set; }
+    internal Xml() { }
+
+    [Prop] public string Content { get; set; } = string.Empty;
 }

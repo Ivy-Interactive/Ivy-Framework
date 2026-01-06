@@ -18,7 +18,7 @@ import { useDrag } from './hooks/useDrag';
 export const TabsLayoutWidget = ({
   id,
   children,
-  events,
+  events = [],
   selectedIndex,
   removeParentPadding = false,
   variant = 'Content',

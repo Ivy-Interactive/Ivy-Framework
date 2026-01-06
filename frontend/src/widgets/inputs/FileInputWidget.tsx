@@ -50,9 +50,9 @@ interface FileInputWidgetProps {
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   id,
   value,
-  disabled,
+  disabled = false,
   invalid,
-  events,
+  events = [],
   width,
   accept,
   maxFileSize,

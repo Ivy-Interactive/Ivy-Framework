@@ -353,7 +353,7 @@ const renderMenuItems = (
 
 export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   id,
-  items,
+  items = [],
   searchActive = false,
 }) => {
   const eventHandler = useEventHandler();

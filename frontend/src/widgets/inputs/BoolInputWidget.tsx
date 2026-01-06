@@ -239,7 +239,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   id,
   label,
   description,
-  value,
+  value = null,
   disabled = false,
   invalid,
   nullable = false,

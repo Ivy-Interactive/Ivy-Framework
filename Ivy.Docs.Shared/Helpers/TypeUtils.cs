@@ -143,6 +143,15 @@ public static class TypeUtils
         {
             return constructor.Invoke([]);
         }
+        var nonPublicConstructor = type.GetConstructor(
+            BindingFlags.Instance | BindingFlags.NonPublic,
+            null,
+            Type.EmptyTypes,
+            null);
+        if (nonPublicConstructor != null)
+        {
+            return nonPublicConstructor.Invoke([]);
+        }
         var primaryConstructor = type.GetConstructors().FirstOrDefault(c => c.GetParameters().All(p => p.HasDefaultValue));
         if (primaryConstructor != null)
         {
@@ -366,10 +375,15 @@ public static class TypeUtils
             // Pair nullable/non-nullable enums/other
             if (!result.Any(r => r.NonNullable?.ToString() == GetTypeDescription(baseType, false).ToString()))
             {
-                var nullableType = typeof(Nullable<>).MakeGenericType(baseType);
+                object? nullableDesc = null;
+                if (baseType.IsValueType)
+                {
+                    var nullableType = typeof(Nullable<>).MakeGenericType(baseType);
+                    nullableDesc = typeSet.Contains(nullableType) ? GetTypeDescription(nullableType, true) : null;
+                }
                 result.Add((group,
                     typeSet.Contains(baseType) ? GetTypeDescription(baseType, false) : null!,
-                    typeSet.Contains(nullableType) ? GetTypeDescription(nullableType, true) : null!));
+                    nullableDesc!));
             }
         }
         return result;

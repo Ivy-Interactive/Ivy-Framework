@@ -94,21 +94,21 @@ Instead of .NET user secrets, you can also use environment variables to store au
 
 **Windows (PowerShell):**
 
-```powershell
-$env:Auth0__Domain="your-domain.auth0.com"
-$env:Auth0__ClientId="your-client-id"
-$env:Auth0__ClientSecret="your-client-secret"
-$env:Auth0__Audience="https://your-domain.auth0.com/api/v2"
-$env:Auth0__Namespace="https://ivy.app/"
+```terminal
+>$env:Auth0__Domain="your-domain.auth0.com"
+>$env:Auth0__ClientId="your-client-id"
+>$env:Auth0__ClientSecret="your-client-secret"
+>$env:Auth0__Audience="https://your-domain.auth0.com/api/v2"
+>$env:Auth0__Namespace="https://ivy.app/"
 ```
 
 **Mac/Linux (Bash):**
-```bash
-export Auth0__Domain="your-domain.auth0.com"
-export Auth0__ClientId="your-client-id"
-export Auth0__ClientSecret="your-client-secret"
-export Auth0__Audience="https://your-domain.auth0.com/api/v2"
-export Auth0__Namespace="https://ivy.app/"
+```terminal
+>export Auth0__Domain="your-domain.auth0.com"
+>export Auth0__ClientId="your-client-id"
+>export Auth0__ClientSecret="your-client-secret"
+>export Auth0__Audience="https://your-domain.auth0.com/api/v2"
+>export Auth0__Namespace="https://ivy.app/"
 ```
 
 If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets.
@@ -145,12 +145,12 @@ await auth.LogoutAsync();
 
 Ivy supports the following authentication providers. Click on any provider for detailed setup instructions:
 
-- **[Auth0](Auth0.md)** - Universal authentication with social logins and enterprise integrations
-- **[Clerk](Clerk.md)** - Modern authentication platform with passwordless login, social connections, and comprehensive user management
-- **[Supabase](Supabase.md)** - Email/password, magic links, social auth, and Row Level Security integration
-- **[Microsoft Entra](MicrosoftEntra.md)** - Enterprise SSO, conditional access, and Microsoft Graph integration
-- **[Authelia](Authelia.md)** - Self-hosted identity provider with LDAP and forward auth
-- **[Basic Auth](BasicAuth.md)** - Simple username/password authentication for development and internal tools
+- **[Auth0](02_Auth0.md)** - Universal authentication with social logins and enterprise integrations
+- **[Clerk](02_Clerk.md)** - Modern authentication platform with passwordless login, social connections, and comprehensive user management
+- **[Supabase](02_Supabase.md)** - Email/password, magic links, social auth, and Row Level Security integration
+- **[Microsoft Entra](02_MicrosoftEntra.md)** - Enterprise SSO, conditional access, and Microsoft Graph integration
+- **[Authelia](02_Authelia.md)** - Self-hosted identity provider with LDAP and forward auth
+- **[Basic Auth](02_BasicAuth.md)** - Simple username/password authentication for development and internal tools
 
 ## Examples
 
@@ -178,7 +178,15 @@ Ivy supports the following authentication providers. Click on any provider for d
 >ivy auth add --provider Basic --connection-string YourConnectionString
 ```
 
-### Best Practices
+## Complete Custom Login View
+
+For complete control over the login experience, you can replace the entire login view:
+
+```csharp
+server.UseAuth<BasicAuthProvider>(viewFactory: () => new MyCustomLoginApp());
+```
+
+## Best Practices
 
 **Security** - Always use HTTPS in production, store sensitive configuration in user secrets or environment variables, regularly rotate client secrets, use strong passwords for Basic Auth, and implement proper session management.
 
