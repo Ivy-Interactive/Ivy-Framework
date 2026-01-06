@@ -12,7 +12,7 @@ public static class DocsServer
         server.AddAppsFromAssembly(typeof(DocsServer).Assembly);
         server.UseHotReload();
 
-        server.UseWebApplication(app => app.UseLlmsTxt());
+        server.UseWebApplication(app => app.UseMarkdownFiles());
 
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
         server.SetMetaTitle($"Ivy Docs {version}");

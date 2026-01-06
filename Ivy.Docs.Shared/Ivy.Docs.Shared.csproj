@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Assets/**/*" />
-    <EmbeddedResource Include="Generated/**/*.llms.txt" />
+    <EmbeddedResource Include="Generated/**/*.md" />
   </ItemGroup>
 
   <ItemGroup>

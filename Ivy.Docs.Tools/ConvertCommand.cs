@@ -48,7 +48,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             Directory.CreateDirectory(folder);
 
             string ivyOutput = Path.Combine(folder, $"{name}.g.cs");
-            string llmsTxtOutput = Path.Combine(folder, $"{name}.llms.txt");
+            string llmsTxtOutput = Path.Combine(folder, $"{name}.md");
 
             var namespaceSuffix = relativeOutputPath
                 .Replace(Path.DirectorySeparatorChar, '.')
