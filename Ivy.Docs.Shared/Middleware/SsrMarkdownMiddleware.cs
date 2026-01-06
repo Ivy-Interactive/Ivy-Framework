@@ -43,6 +43,16 @@ public class SsrMarkdownMiddleware
             return;
         }
 
+        if (IsBot(context))
+        {
+            var markdownContent = GetMarkdownContent(appId);
+            if (!string.IsNullOrEmpty(markdownContent))
+            {
+                await ServeBotResponse(context, markdownContent);
+                return;
+            }
+        }
+
         var originalBodyStream = context.Response.Body;
         using var memoryStream = new MemoryStream();
         context.Response.Body = memoryStream;
@@ -51,16 +61,6 @@ public class SsrMarkdownMiddleware
 
         memoryStream.Seek(0, SeekOrigin.Begin);
         var html = await new StreamReader(memoryStream).ReadToEndAsync();
-
-        if (context.Response.ContentType?.Contains("text/html") == true)
-        {
-            var markdownContent = GetMarkdownContent(appId);
-            if (!string.IsNullOrEmpty(markdownContent))
-            {
-                var plainTextContent = $"<pre style=\"white-space: pre-wrap; font-family: system-ui, sans-serif; padding: 20px; line-height: 1.6;\">{System.Web.HttpUtility.HtmlEncode(markdownContent)}</pre>";
-                html = html.Replace("<div id=\"root\"></div>", $"<div id=\"root\">{plainTextContent}</div>");
-            }
-        }
 
         context.Response.Body = originalBodyStream;
 
@@ -74,6 +74,46 @@ public class SsrMarkdownMiddleware
         {
             await context.Response.WriteAsync(html);
         }
+    }
+
+    private static readonly string[] KnownBots =
+    [
+        "GPTBot", "ChatGPT-User", "ClaudeBot", "Claude-Web", "PerplexityBot",
+        "Googlebot", "Bingbot", "Slurp", "DuckDuckBot", "Baiduspider",
+        "YandexBot", "facebookexternalhit", "Twitterbot", "LinkedInBot",
+        "Applebot", "Discordbot", "TelegramBot", "github-actions", "GitHub-Hookshot",
+        "Copilot", "GitHubCopilot"
+    ];
+
+    private static bool IsBot(HttpContext context)
+    {
+        var userAgent = context.Request.Headers.UserAgent.ToString();
+        if (string.IsNullOrEmpty(userAgent))
+            return false;
+
+        return KnownBots.Any(bot => userAgent.Contains(bot, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static async Task ServeBotResponse(HttpContext context, string markdownContent)
+    {
+        var html = $"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body>
+            <pre style="white-space: pre-wrap; font-family: system-ui, sans-serif; padding: 20px; line-height: 1.6;">{System.Web.HttpUtility.HtmlEncode(markdownContent)}</pre>
+            </body>
+            </html>
+            """;
+
+        context.Response.ContentType = "text/html; charset=utf-8";
+        context.Response.StatusCode = 200;
+        var bytes = Encoding.UTF8.GetBytes(html);
+        context.Response.ContentLength = bytes.Length;
+        await context.Response.Body.WriteAsync(bytes);
     }
 
     private static bool ShouldSkip(HttpContext context, string? path)
