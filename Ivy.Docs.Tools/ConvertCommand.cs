@@ -54,7 +54,6 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 .Replace(Path.DirectorySeparatorChar, '.')
                 .Replace(Path.AltDirectorySeparatorChar, '.').Trim('.');
 
-            //Remove "Generated." from start:
             if (namespaceSuffix.StartsWith("Generated."))
                 namespaceSuffix = namespaceSuffix.Substring("Generated.".Length);
 
@@ -63,8 +62,6 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 : $"{rootNamespace}.Apps.{namespaceSuffix}";
 
             await MarkdownConverter.ConvertAsync(name, relativeInputPath, absoluteInputPath, ivyOutput, @namespace, settings.SkipIfNotChanged, order);
-
-            // Generate LLM-friendly content file
             await GenerateLlmsTxtAsync(absoluteInputPath, llmsTxtOutput, settings.SkipIfNotChanged);
         });
 
@@ -105,7 +102,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             var oldHash = FileHashMetadata.ReadHash(outputFile);
             if (oldHash != null && oldHash == hash)
             {
-                return; // Skip if content hasn't changed
+                return;
             }
         }
 

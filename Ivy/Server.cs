@@ -499,7 +499,6 @@ public class Server
         app.UseCors();
         app.UseGrpcWeb();
 
-        // Apply custom app modifications (middleware, etc.)
         foreach (var mod in _appMods)
         {
             mod(app);

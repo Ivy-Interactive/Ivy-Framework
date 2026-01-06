@@ -6,15 +6,10 @@ using Ivy.Widgets.Inputs;
 
 namespace Ivy.Docs.Tools;
 
-/// <summary>
-/// Generates markdown API documentation for widgets using reflection.
-/// </summary>
 public static class ApiDocGenerator
 {
-    // Cached assembly reference
     private static readonly Assembly IvyAssembly = typeof(IWidget).Assembly;
 
-    // Type alias mapping for C# keywords
     private static readonly Dictionary<Type, string> TypeAliases = new()
     {
         [typeof(string)] = "string",
@@ -31,13 +26,6 @@ public static class ApiDocGenerator
         [typeof(decimal)] = "decimal",
     };
 
-    /// <summary>
-    /// Generates complete API documentation for a widget type.
-    /// </summary>
-    /// <param name="typeName">The full type name (e.g., "Ivy.BoolInput")</param>
-    /// <param name="extensionTypesString">Semicolon-separated extension type names</param>
-    /// <param name="sourceUrl">URL to source code</param>
-    /// <returns>Markdown string with API documentation</returns>
     public static string GenerateApiDoc(string typeName, string? extensionTypesString, string? sourceUrl)
     {
         var type = GetTypeFromName(typeName);
@@ -53,7 +41,6 @@ public static class ApiDocGenerator
         sb.AppendLine("## API");
         sb.AppendLine();
 
-        // Source link
         if (!string.IsNullOrEmpty(sourceUrl))
         {
             var fileName = System.IO.Path.GetFileName(sourceUrl);
@@ -61,28 +48,24 @@ public static class ApiDocGenerator
             sb.AppendLine();
         }
 
-        // Constructors section
         var constructorsSection = GenerateConstructorsSection(type, extensionTypes);
         if (!string.IsNullOrEmpty(constructorsSection))
         {
             sb.AppendLine(constructorsSection);
         }
 
-        // Supported Types section (for input widgets)
         var supportedTypesSection = GenerateSupportedTypesSection(type);
         if (!string.IsNullOrEmpty(supportedTypesSection))
         {
             sb.AppendLine(supportedTypesSection);
         }
 
-        // Properties section
         var propertiesSection = GeneratePropertiesSection(type, extensionTypes);
         if (!string.IsNullOrEmpty(propertiesSection))
         {
             sb.AppendLine(propertiesSection);
         }
 
-        // Events section
         var eventsSection = GenerateEventsSection(type, extensionTypes);
         if (!string.IsNullOrEmpty(eventsSection))
         {
@@ -92,24 +75,17 @@ public static class ApiDocGenerator
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Gets a type from its name, searching in the Ivy assembly.
-    /// </summary>
     private static Type? GetTypeFromName(string typeName)
     {
         var type = IvyAssembly.GetType(typeName);
         if (type != null) return type;
 
-        // Try to find generic type definition
         type = IvyAssembly.GetTypes()
             .FirstOrDefault(t => t.FullName?.StartsWith(typeName + "`") == true && t.IsGenericTypeDefinition);
 
         return type;
     }
 
-    /// <summary>
-    /// Parses semicolon-separated extension type names.
-    /// </summary>
     private static Type[] ParseExtensionTypes(string? extensionTypesString)
     {
         if (string.IsNullOrEmpty(extensionTypesString))
@@ -123,14 +99,10 @@ public static class ApiDocGenerator
             .ToArray();
     }
 
-    /// <summary>
-    /// Tries to create an instance of a type for reflection purposes.
-    /// </summary>
     private static object? TryToActivate(Type type)
     {
         try
         {
-            // Handle generic types
             if (type.ContainsGenericParameters)
             {
                 if (type.GetGenericArguments().Length == 1)
@@ -143,14 +115,12 @@ public static class ApiDocGenerator
                 }
             }
 
-            // Try parameterless constructor
             var constructor = type.GetConstructor(Type.EmptyTypes);
             if (constructor != null)
             {
                 return constructor.Invoke([]);
             }
 
-            // Try constructor with all default parameters
             var primaryConstructor = type.GetConstructors()
                 .FirstOrDefault(c => c.GetParameters().All(p => p.HasDefaultValue));
             if (primaryConstructor != null)
@@ -168,12 +138,8 @@ public static class ApiDocGenerator
         }
     }
 
-    /// <summary>
-    /// Generates the Supported Types section for input widgets.
-    /// </summary>
     private static string GenerateSupportedTypesSection(Type type)
     {
-        // Try to create an instance to get supported types
         var instance = TryToActivate(type);
         if (instance is not IAnyInput anyInput)
             return string.Empty;
@@ -203,12 +169,8 @@ public static class ApiDocGenerator
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Groups and pairs supported types by category.
-    /// </summary>
     private static List<(string Group, string? NonNullable, string? Nullable)> GroupAndPairSupportedTypes(Type[] types)
     {
-        // Define groups and their type sets
         var groups = new List<(string Group, HashSet<Type> Types)>
         {
             ("Boolean", [typeof(bool)]),
@@ -245,7 +207,6 @@ public static class ApiDocGenerator
             }
         }
 
-        // Handle enums and other types not in the above groups
         foreach (var t in typeSet)
         {
             if (handled.Contains(t)) continue;
@@ -254,7 +215,6 @@ public static class ApiDocGenerator
             var baseType = Nullable.GetUnderlyingType(t) ?? t;
             var group = baseType.IsEnum ? "Enum" : "Other";
 
-            // Check if we already have this base type
             if (result.Any(r => r.NonNullable == GetTypeName(baseType)))
                 continue;
 
@@ -267,15 +227,11 @@ public static class ApiDocGenerator
         return result;
     }
 
-    /// <summary>
-    /// Generates the Constructors section.
-    /// </summary>
     private static string GenerateConstructorsSection(Type type, Type[] extensionTypes)
     {
         var sb = new StringBuilder();
         var signatures = new List<string>();
 
-        // Get constructors from the type
         foreach (var ctor in type.GetConstructors())
         {
             var sig = GetConstructorSignature(ctor);
@@ -283,7 +239,6 @@ public static class ApiDocGenerator
                 signatures.Add(sig);
         }
 
-        // Get "To*" extension methods (e.g., ToBoolInput)
         foreach (var extType in extensionTypes)
         {
             var toMethods = extType.GetMethods()
@@ -316,14 +271,11 @@ public static class ApiDocGenerator
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Generates the Properties section.
-    /// </summary>
     private static string GeneratePropertiesSection(Type type, Type[] extensionTypes)
     {
         var properties = type.GetProperties()
             .Where(p => p.GetCustomAttribute<PropAttribute>() != null)
-            .Where(p => p.Name != "TestId") // Skip internal properties
+            .Where(p => p.Name != "TestId")
             .OrderBy(p => p.Name)
             .ToList();
 
@@ -347,9 +299,6 @@ public static class ApiDocGenerator
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Generates the Events section.
-    /// </summary>
     private static string GenerateEventsSection(Type type, Type[] extensionTypes)
     {
         var events = type.GetProperties()
@@ -377,9 +326,6 @@ public static class ApiDocGenerator
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Gets the C# signature for a constructor.
-    /// </summary>
     private static string GetConstructorSignature(ConstructorInfo ctor)
     {
         var type = ctor.DeclaringType!;
@@ -388,18 +334,12 @@ public static class ApiDocGenerator
         return $"new {typeName}({parameters})";
     }
 
-    /// <summary>
-    /// Gets the C# signature for a method.
-    /// </summary>
     private static string GetMethodSignature(MethodInfo method)
     {
         var parameters = GetParameterList(method.GetParameters());
         return $"{method.Name}({parameters})";
     }
 
-    /// <summary>
-    /// Gets a formatted parameter list.
-    /// </summary>
     private static string GetParameterList(ParameterInfo[] parameters)
     {
         var parts = parameters.Select(p =>
@@ -411,9 +351,6 @@ public static class ApiDocGenerator
         return string.Join(", ", parts);
     }
 
-    /// <summary>
-    /// Gets extension methods related to a property.
-    /// </summary>
     private static string GetExtensionMethodsForProperty(PropertyInfo prop, Type baseType, Type[] extensionTypes)
     {
         var methods = new List<string>();
@@ -434,9 +371,6 @@ public static class ApiDocGenerator
         return string.Join(", ", methods.Distinct());
     }
 
-    /// <summary>
-    /// Checks if a method is an extension method for the given type.
-    /// </summary>
     private static bool IsExtensionMethodForType(MethodInfo method, Type baseType)
     {
         var firstParam = method.GetParameters().FirstOrDefault();
@@ -444,13 +378,10 @@ public static class ApiDocGenerator
 
         var paramType = firstParam.ParameterType;
 
-        // Direct match
         if (paramType == baseType) return true;
 
-        // Check if parameter type is assignable from baseType
         if (paramType.IsAssignableFrom(baseType)) return true;
 
-        // Check for generic base type (WidgetBase<T>)
         var current = baseType.BaseType;
         while (current != null && current != typeof(object))
         {
@@ -466,9 +397,6 @@ public static class ApiDocGenerator
         return false;
     }
 
-    /// <summary>
-    /// Gets a simple type name (handles generics).
-    /// </summary>
     private static string GetSimpleTypeName(Type type)
     {
         if (!type.IsGenericType)
@@ -479,21 +407,15 @@ public static class ApiDocGenerator
         return $"{baseName}<{args}>";
     }
 
-    /// <summary>
-    /// Gets a C# type name.
-    /// </summary>
     private static string GetTypeName(Type type)
     {
-        // Handle nullable value types
         var underlying = Nullable.GetUnderlyingType(type);
         if (underlying != null)
             return GetTypeName(underlying) + "?";
 
-        // Handle common type aliases
         if (TypeAliases.TryGetValue(type, out var alias))
             return alias;
 
-        // Handle generics
         if (type.IsGenericType)
         {
             var baseName = type.Name[..type.Name.IndexOf('`')];
@@ -501,13 +423,9 @@ public static class ApiDocGenerator
             return $"{baseName}<{args}>";
         }
 
-        // Handle nullable reference types (just return base name)
         return type.Name;
     }
 
-    /// <summary>
-    /// Formats a default value for display.
-    /// </summary>
     private static string FormatDefaultValue(object? value)
     {
         if (value == null) return "null";

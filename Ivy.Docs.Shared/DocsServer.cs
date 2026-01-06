@@ -12,7 +12,6 @@ public static class DocsServer
         server.AddAppsFromAssembly(typeof(DocsServer).Assembly);
         server.UseHotReload();
 
-        // Enable serving .llms.txt files from embedded resources
         server.UseApp(app => app.UseLlmsTxt());
 
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
