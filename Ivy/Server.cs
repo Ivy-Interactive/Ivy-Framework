@@ -248,7 +248,7 @@ public class Server
         return this;
     }
 
-    public Server UseApp(Action<WebApplication> modify)
+    public Server UseWebApplication(Action<WebApplication> modify)
     {
         _appMods.Add(modify);
         return this;
