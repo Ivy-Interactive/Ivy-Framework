@@ -18,13 +18,13 @@ const copyIconVariants = cva('', {
 });
 
 const copyButtonSizeVariants = cva(
-  'p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center',
+  'p-2 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center',
   {
     variants: {
       scale: {
-        Small: 'h-5',
-        Medium: 'h-6',
-        Large: 'h-7',
+        Small: 'h-6',
+        Medium: 'h-8',
+        Large: 'h-9',
       },
     },
     defaultVariants: {
