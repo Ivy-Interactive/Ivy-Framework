@@ -20,6 +20,8 @@ public class TypographyComparisonApp : SampleBase
 
 This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.
 
+This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.
+
 * Unordered List Item 1
 * Unordered List Item 2
 
@@ -44,6 +46,7 @@ End of the typography test.
 <h6>Heading 6</h6>
 
 <p>This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.</p>
+<p>This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.</p>
 
 <ul>
   <li>Unordered List Item 1</li>
@@ -66,14 +69,16 @@ End of the typography test.
 
         return Layout.Grid().Columns(3).Gap(20)
             | new Card(new Markdown(markdown)).Title("Markdown Rendering")
+            | new Card(new Html(html)).Title("HTML Rendering")
             | new Card(
-                Layout.Vertical()
+                Layout.Vertical().Gap(0)
                 | Text.H1("Heading 1")
                 | Text.H2("Heading 2")
                 | Text.H3("Heading 3")
                 | Text.H4("Heading 4")
                 | Text.P("Heading 5 (Not supported by Text widget)")
                 | Text.P("Heading 6 (Not supported by Text widget)")
+                | Text.P("This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.")
                 | Text.P("This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.")
                 | Layout.Vertical() // Unordered List simulation
                     | (Layout.Horizontal().Gap(8) | Text.P("•") | Text.P("Unordered List Item 1"))
@@ -91,7 +96,6 @@ End of the typography test.
                   )
                  | new Separator()
                  | Text.P("End of the typography test.")
-              ).Title("Text Widgets Rendering")
-            | new Card(new Html(html)).Title("HTML Rendering");
+              ).Title("Text Widgets Rendering");
     }
 }
