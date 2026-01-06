@@ -33,7 +33,7 @@ public class BasicQueryTab : ViewBase
     {
         return Layout.Vertical()
                | Text.H2("Basic Usage")
-               | Text.P("Server-scoped query is shared across all views. Multiple components using the same key share the cached data.")
+               | Text.P("By default, queries follow the SWR pattern: show cached data immediately, then revalidate in background. Multiple components using the same key share the cached data.")
                | new Card(new BasicQueryExample()).Title("Server Scope - Instance 1")
                | new Card(new BasicQueryExample()).Title("Server Scope - Instance 2")
             ;
@@ -57,8 +57,8 @@ public class ExpirationTab : ViewBase
     public override object? Build()
     {
         return Layout.Vertical()
-               | Text.H2("Expiration & Stale-While-Revalidate")
-               | Text.P("Configure query TTL to automatically mark data as stale and trigger background revalidation.")
+               | Text.H2("Expiration (TTL-Based Revalidation)")
+               | Text.P("Set an expiration to switch from always-revalidate (default) to TTL-based revalidation. Data is shown immediately and only revalidated after it becomes stale.")
                | new Card(new QueryWithExpirationExample()).Title("Query with Expiration")
             ;
     }
@@ -251,14 +251,9 @@ public class BasicQueryExample : ViewBase
                 return $"Fetched at {DateTime.Now:HH:mm:ss}";
             });
 
-        if (query.Loading)
-        {
-            return Text.Literal("Loading...");
-        }
-
         return Layout.Vertical()
+               | query
                | Text.Literal(query.Value ?? "No data")
-               | (query.Validating ? Text.Muted("Revalidating...") : null!)
                | (Layout.Horizontal()
                   | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
                   | new Button("Invalidate", _ => query.Mutator.Invalidate()).Variant(ButtonVariant.Destructive))
@@ -316,7 +311,7 @@ public class QueryWithExpirationExample : ViewBase
         return Layout.Vertical()
                | Text.Literal(query.Value ?? "No data")
                | (query.Validating ? Text.Muted("Revalidating in background...") : null!)
-               | Text.Muted("Query expires after 5 seconds. Navigate away and back to see SWR in action.")
+               | Text.Muted("Data stays fresh for 5 seconds. After expiration, revisiting triggers background revalidation while showing stale data.")
             ;
     }
 }
@@ -479,7 +474,7 @@ public class AutoKeyedQueryExample : ViewBase
 {
     public override object? Build()
     {
-        // No key specified - uses the fetcher's method signature as the query key
+        // No key specified - uses the call site (file:line) as the query key
         var query = UseQuery(async ct =>
         {
             await Task.Delay(1000, ct);
@@ -494,7 +489,7 @@ public class AutoKeyedQueryExample : ViewBase
         return Layout.Vertical()
                | Text.Literal(query.Value ?? "No data")
                | (query.Validating ? Text.Muted("Revalidating...") : null!)
-               | Text.Muted("Query key is derived from the fetcher's method signature.")
+               | Text.Muted("Query key is derived from the call site (file and line number).")
                | (Layout.Horizontal()
                   | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
                   | new Button("Invalidate", _ => query.Mutator.Invalidate()).Variant(ButtonVariant.Destructive))
@@ -507,7 +502,8 @@ public class PrePopulatedTab : ViewBase
     public override object? Build()
     {
         return Layout.Vertical()
-               | Text.H2("Pre-Populated")
+               | Text.H2("Pre-Populated (Skip Initial Fetch)")
+               | Text.P("Use RevalidateOnInit=false with an initialValue to populate the cache without fetching. Ideal for list-to-detail patterns where detail data comes from the list.")
                | new Card(new ProductListExample()).Title("Product List")
             ;
     }
@@ -587,7 +583,7 @@ public class ProductDetailView(Product initialProduct) : ViewBase
 {
     public override object? Build()
     {
-        // Use the product from the list as initialValue, skip initial fetch
+        // RevalidateOnInit=false + initialValue = populate cache, no fetch
         var product = UseQuery(
             key: $"product/{initialProduct.Id}",
             fetcher: ct => ProductDatabase.GetAsync(initialProduct.Id, ct),

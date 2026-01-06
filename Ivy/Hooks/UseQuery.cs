@@ -20,8 +20,10 @@ public record QueryOptions
     public QueryScope Scope { get; init; } = QueryScope.Server;
 
     /// <summary>
-    /// Whether to fetch data on initial render. Default: true.
-    /// When false and initialValue is provided, shows initialValue without fetching.
+    /// Whether to revalidate data on mount/subscribe. Default: true (SWR pattern).
+    /// When true: always revalidates in background (unless Expiration is set).
+    /// When false with initialValue: populates cache with initialValue, no fetch.
+    /// When false without initialValue: fetches once, no background revalidation.
     /// Useful for pre-populating from a parent query (e.g., list → detail pattern).
     /// </summary>
     public bool RevalidateOnInit { get; init; } = true;

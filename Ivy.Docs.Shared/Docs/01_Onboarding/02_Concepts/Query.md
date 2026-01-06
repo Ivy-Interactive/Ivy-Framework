@@ -21,7 +21,7 @@ The `UseQuery` hook provides a powerful way to fetch and cache asynchronous data
 ```mermaid
 graph TD
     A[UseQuery] --> B[Automatic Caching]
-    A --> C[Background Revalidation]
+    A --> C[Background Revalidation]``
     A --> D[Error Handling]
     A --> E[Mutations & Invalidation]
 ```

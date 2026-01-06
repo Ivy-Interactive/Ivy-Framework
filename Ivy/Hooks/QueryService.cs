@@ -329,15 +329,22 @@ public class QueryService : IQueryService, IDisposable, IAsyncDisposable
             switch (entry.State)
             {
                 case QueryEntryState.Empty:
-                    if (options.RevalidateOnInit)
-                    {
-                        await StartFetchAsync(entry);
-                    }
-                    // else: skip initial fetch, subscriber uses their initialValue
+                    // Always fetch when empty - no cached data to show.
+                    // The only time we skip is when RevalidateOnInit=false AND initialValue was provided,
+                    // but in that case entry.State would already be Fresh (set in Subscribe method).
+                    await StartFetchAsync(entry);
                     break;
 
                 case QueryEntryState.Fresh:
                     NotifySubscribers(entry);
+                    // SWR pattern: revalidate in background unless opted out.
+                    // Skip revalidation when:
+                    // - RevalidateOnInit=false (explicit opt-out), OR
+                    // - Expiration is set (use TTL-based staleness instead)
+                    if (options.RevalidateOnInit && !entry.Options.Expiration.HasValue)
+                    {
+                        await StartRevalidationAsync(entry);
+                    }
                     break;
 
                 case QueryEntryState.Stale:
