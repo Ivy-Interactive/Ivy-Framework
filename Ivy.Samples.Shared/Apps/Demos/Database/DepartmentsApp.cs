@@ -126,7 +126,7 @@ public class DepartmentsListBlade : ViewBase
                     .Select(e => new DepartmentListRecord(e.Id, e.Name))
                     .FirstOrDefaultAsync(ct);
             },
-            options: new QueryOptions { RevalidateOnInit = false },
+            options: new QueryOptions { RevalidateOnMount = false },
             initialValue: record,
             tags: [(typeof(Department), record.Id)]
         );

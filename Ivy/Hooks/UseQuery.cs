@@ -26,7 +26,7 @@ public record QueryOptions
     /// When false without initialValue: fetches once, no background revalidation.
     /// Useful for pre-populating from a parent query (e.g., list → detail pattern).
     /// </summary>
-    public bool RevalidateOnInit { get; init; } = true;
+    public bool RevalidateOnMount { get; init; } = true;
 
     /// <summary>
     /// When true, keeps showing previous data while fetching with a new key.
@@ -191,7 +191,7 @@ public static class UseQueryExtensions
                 () => queryService.Invalidate(serializedScopedKey))
             : emptyMutator;
 
-        var shouldSkipInitialFetch = !opts.RevalidateOnInit && hasInitialValueRef.Value;
+        var shouldSkipInitialFetch = !opts.RevalidateOnMount && hasInitialValueRef.Value;
         var initialIsLoading = key is not null && !shouldSkipInitialFetch;
 
         var resultState = context.UseState(
@@ -263,7 +263,7 @@ public static class UseQueryExtensions
         var hasInitialValueRef = context.UseRef(() => initialValue is not null);
 
         // Determine initial loading state based on RevalidateOnInit
-        var shouldSkipInitialFetch = !opts.RevalidateOnInit && hasInitialValueRef.Value;
+        var shouldSkipInitialFetch = !opts.RevalidateOnMount && hasInitialValueRef.Value;
         var initialIsLoading = key is not null && !shouldSkipInitialFetch;
 
         var emptyMutator = new QueryMutator<TValue>(

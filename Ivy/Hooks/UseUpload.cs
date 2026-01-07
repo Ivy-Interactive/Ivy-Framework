@@ -19,7 +19,7 @@ public static class UseUploadExtensions
             var (cleanup, uploadUrl) = uploadService.AddUpload(handler, () => (ctxState.Value.Accept, ctxState.Value.MaxFileSize), defaultContentType, defaultFileName);
             ctxState.Set(ctxState.Value with { UploadUrl = uploadUrl, Cancel = fileId => uploadService.Cancel(fileId) });
             return cleanup;
-        }, [EffectTrigger.AfterInit()]);
+        }, [EffectTrigger.OnMount()]);
         return ctxState;
     }
 

@@ -587,7 +587,7 @@ public class ProductDetailView(Product initialProduct) : ViewBase
         var product = UseQuery(
             key: $"product/{initialProduct.Id}",
             fetcher: ct => ProductDatabase.GetAsync(initialProduct.Id, ct),
-            options: new QueryOptions { RevalidateOnInit = false },
+            options: new QueryOptions { RevalidateOnMount = false },
             initialValue: initialProduct);
 
         if (product.Loading)

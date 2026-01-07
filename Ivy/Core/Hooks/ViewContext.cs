@@ -237,7 +237,7 @@ public class ViewContext : IViewContext
             {
                 if (trigger.Type == EffectTriggerType.AfterRender)
                 {
-                    _effectQueue.Enqueue(effect, EffectPriority.AfterRender);
+                    _effectQueue.Enqueue(effect, EffectPriority.OnBuild);
                 }
             }
             return;
@@ -249,14 +249,14 @@ public class ViewContext : IViewContext
             {
                 case EffectTriggerType.AfterChange:
                     _disposables.Add(
-                        trigger.State?.SubscribeAny(() => _effectQueue.Enqueue(effect, EffectPriority.StateChange)) ?? Disposable.Empty
+                        trigger.State?.SubscribeAny(() => _effectQueue.Enqueue(effect, EffectPriority.OnStateChange)) ?? Disposable.Empty
                     );
                     break;
                 case EffectTriggerType.AfterRender:
-                    _effectQueue.Enqueue(effect, EffectPriority.AfterRender);
+                    _effectQueue.Enqueue(effect, EffectPriority.OnBuild);
                     break;
                 case EffectTriggerType.AfterInit:
-                    _effectQueue.Enqueue(effect, EffectPriority.AfterInit);
+                    _effectQueue.Enqueue(effect, EffectPriority.OnMount);
                     break;
             }
         }

@@ -271,7 +271,7 @@ public class QueryService : IQueryService, IDisposable, IAsyncDisposable
         entry.Options = options;
 
         // Populate entry with initialValue when skipping initial fetch
-        if (!options.RevalidateOnInit && initialValue is not null && entry.Value is null)
+        if (!options.RevalidateOnMount && initialValue is not null && entry.Value is null)
         {
             entry.Value = initialValue;
             entry.State = QueryEntryState.Fresh;
@@ -341,7 +341,7 @@ public class QueryService : IQueryService, IDisposable, IAsyncDisposable
                     // Skip revalidation when:
                     // - RevalidateOnInit=false (explicit opt-out), OR
                     // - Expiration is set (use TTL-based staleness instead)
-                    if (options.RevalidateOnInit && !entry.Options.Expiration.HasValue)
+                    if (options.RevalidateOnMount && !entry.Options.Expiration.HasValue)
                     {
                         await StartRevalidationAsync(entry);
                     }

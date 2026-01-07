@@ -18,7 +18,7 @@ public class RefreshToken(IState<(Guid, object?, bool)> state) : IEffectTriggerC
 
     public IEffectTrigger ToTrigger()
     {
-        return EffectTrigger.AfterChange(state);
+        return EffectTrigger.OnStateChange(state);
     }
 }
 

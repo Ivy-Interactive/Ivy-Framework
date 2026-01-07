@@ -44,9 +44,9 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
                 }
 
                 // Process each priority level in order
-                await ProcessEffectsForPriority(EffectPriority.StateChange);
-                await ProcessEffectsForPriority(EffectPriority.AfterRender);
-                await ProcessEffectsForPriority(EffectPriority.AfterInit);
+                await ProcessEffectsForPriority(EffectPriority.OnStateChange);
+                await ProcessEffectsForPriority(EffectPriority.OnBuild);
+                await ProcessEffectsForPriority(EffectPriority.OnMount);
             }
         }
         finally

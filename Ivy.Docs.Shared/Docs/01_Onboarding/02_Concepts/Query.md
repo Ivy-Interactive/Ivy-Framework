@@ -106,7 +106,7 @@ var query = UseQuery(
         Expiration = TimeSpan.FromMinutes(5), // TTL before revalidation
         KeepPrevious = true,              // Keep previous data during key change
         RefreshInterval = TimeSpan.FromSeconds(30), // Auto-refresh interval
-        RevalidateOnInit = true           // Fetch on mount (default: true)
+        RevalidateOnMount = true           // Fetch on mount (default: true)
     });
 ```
 
@@ -459,7 +459,7 @@ public class ProductDetailView(Product initialProduct) : ViewBase
         var product = UseQuery(
             key: $"product/{initialProduct.Id}",
             fetcher: ct => FetchProduct(initialProduct.Id, ct),
-            options: new QueryOptions { RevalidateOnInit = false },
+            options: new QueryOptions { RevalidateOnMount = false },
             initialValue: initialProduct);
 
         return new Card(

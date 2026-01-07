@@ -12,13 +12,13 @@ public class EffectTrigger : IEffectTrigger
         State = state;
     }
 
-    public static EffectTrigger AfterChange(IAnyState state) =>
+    public static EffectTrigger OnStateChange(IAnyState state) =>
     new(EffectTriggerType.AfterChange, state);
 
-    public static EffectTrigger AfterInit() =>
+    public static EffectTrigger OnMount() =>
     new(EffectTriggerType.AfterInit, null);
 
-    public static EffectTrigger AfterRender() =>
+    public static EffectTrigger OnBuild() =>
     new(EffectTriggerType.AfterRender, null);
 
     public IEffectTrigger ToTrigger()
@@ -66,7 +66,7 @@ public static class EffectExtensions
 
     public static IEffectTrigger ToTrigger<T>(this IObservable<T> observable)
     {
-        return EffectTrigger.AfterChange(new ObservableState<T>(observable));
+        return EffectTrigger.OnStateChange(new ObservableState<T>(observable));
     }
 }
 

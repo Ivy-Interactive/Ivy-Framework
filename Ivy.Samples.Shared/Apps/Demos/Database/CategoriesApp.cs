@@ -126,7 +126,7 @@ public class CategoriesListBlade : ViewBase
                     .Select(e => new CategoryListRecord(e.Id, e.Name))
                     .FirstOrDefaultAsync(ct);
             },
-            options: new QueryOptions { RevalidateOnInit = false },
+            options: new QueryOptions { RevalidateOnMount = false },
             initialValue: record,
             tags: [(typeof(Category), record.Id)]
         );

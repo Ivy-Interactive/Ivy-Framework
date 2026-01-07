@@ -103,7 +103,7 @@ public class AreaChartBuilder<TSource>(
             {
                 loading.Set(false);
             }
-        }, [EffectTrigger.AfterInit()]);
+        }, [EffectTrigger.OnMount()]);
 
         if (loading.Value)
         {

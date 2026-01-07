@@ -37,7 +37,7 @@ public static class UseWebhookExtensions
         var webhookController = context.UseService<IWebhookRegistry>();
         var args = context.UseService<AppContext>();
 
-        context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.AfterInit()]);
+        context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.OnMount()]);
 
         return new WebhookEndpoint(webhookId.Value, args.Scheme, args.Host);
     }

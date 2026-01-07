@@ -128,7 +128,7 @@ public class ProductsListBlade : ViewBase
                     .Select(e => new ProductListRecord(e.Id, e.Name, e.Department != null ? e.Department.Name : null))
                     .FirstOrDefaultAsync(ct);
             },
-            options: new QueryOptions { RevalidateOnInit = false },
+            options: new QueryOptions { RevalidateOnMount = false },
             initialValue: record,
             tags: [(typeof(Product), record.Id)]
         );
