@@ -48,7 +48,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             Directory.CreateDirectory(folder);
 
             string ivyOutput = Path.Combine(folder, $"{name}.g.cs");
-            string llmsTxtOutput = Path.Combine(folder, $"{name}.md");
+            string llmMarkdownOutput = Path.Combine(folder, $"{name}.md");
 
             var namespaceSuffix = relativeOutputPath
                 .Replace(Path.DirectorySeparatorChar, '.')
@@ -62,7 +62,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 : $"{rootNamespace}.Apps.{namespaceSuffix}";
 
             await MarkdownConverter.ConvertAsync(name, relativeInputPath, absoluteInputPath, ivyOutput, @namespace, settings.SkipIfNotChanged, order);
-            await GenerateLlmsTxtAsync(absoluteInputPath, llmsTxtOutput, settings.SkipIfNotChanged);
+            await GenerateLlmMarkdownAsync(absoluteInputPath, llmMarkdownOutput, settings.SkipIfNotChanged);
         });
 
         await Task.WhenAll(tasks);
@@ -92,7 +92,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         throw new FileNotFoundException("No .csproj file found in the directory hierarchy.");
     }
 
-    private static async Task GenerateLlmsTxtAsync(string inputFile, string outputFile, bool skipIfNotChanged)
+    private static async Task GenerateLlmMarkdownAsync(string inputFile, string outputFile, bool skipIfNotChanged)
     {
         string markdownContent = await File.ReadAllTextAsync(inputFile);
         string hash = Utils.GetShortHash(markdownContent);
@@ -108,12 +108,12 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
         Console.WriteLine("Generating {0}", outputFile);
 
-        string llmsContent = await LlmMarkdownGenerator.GenerateAsync(markdownContent, inputFile);
+        string outputContent = await LlmMarkdownGenerator.GenerateAsync(markdownContent, inputFile);
 
         await using (var stream = File.Open(outputFile, FileMode.Create, FileAccess.Write, FileShare.None))
         await using (var writer = new StreamWriter(stream))
         {
-            await writer.WriteAsync(llmsContent);
+            await writer.WriteAsync(outputContent);
         }
 
         FileHashMetadata.WriteHash(outputFile, hash);

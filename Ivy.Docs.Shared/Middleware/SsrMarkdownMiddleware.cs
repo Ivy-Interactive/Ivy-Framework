@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Builder;
@@ -18,8 +19,7 @@ public class SsrMarkdownMiddleware
     private readonly RequestDelegate _next;
     private static readonly Assembly Assembly = typeof(SsrMarkdownMiddleware).Assembly;
     private static readonly string ResourcePrefix = "Ivy.Docs.Shared.Generated.";
-    private static readonly Dictionary<string, string> ContentCache = new();
-    private static readonly object CacheLock = new();
+    private static readonly ConcurrentDictionary<string, string> ContentCache = new();
 
     public SsrMarkdownMiddleware(RequestDelegate next)
     {
@@ -53,27 +53,7 @@ public class SsrMarkdownMiddleware
             }
         }
 
-        var originalBodyStream = context.Response.Body;
-        using var memoryStream = new MemoryStream();
-        context.Response.Body = memoryStream;
-
         await _next(context);
-
-        memoryStream.Seek(0, SeekOrigin.Begin);
-        var html = await new StreamReader(memoryStream).ReadToEndAsync();
-
-        context.Response.Body = originalBodyStream;
-
-        if (!context.Response.HasStarted)
-        {
-            var bytes = Encoding.UTF8.GetBytes(html);
-            context.Response.ContentLength = bytes.Length;
-            await context.Response.Body.WriteAsync(bytes);
-        }
-        else
-        {
-            await context.Response.WriteAsync(html);
-        }
     }
 
     private static readonly string[] KnownBots =
@@ -152,26 +132,16 @@ public class SsrMarkdownMiddleware
 
     private static string? GetMarkdownContent(string appId)
     {
-        lock (CacheLock)
+        return ContentCache.GetOrAdd(appId, id =>
         {
-            if (ContentCache.TryGetValue(appId, out var cached))
-                return cached;
-        }
+            var resourceName = ConvertAppIdToResourceName(id);
+            using var stream = Assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+                return null!;
 
-        var resourceName = ConvertAppIdToResourceName(appId);
-        using var stream = Assembly.GetManifestResourceStream(resourceName);
-        if (stream == null)
-            return null;
-
-        using var reader = new StreamReader(stream);
-        var content = reader.ReadToEnd();
-
-        lock (CacheLock)
-        {
-            ContentCache.TryAdd(appId, content);
-        }
-
-        return content;
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
+        });
     }
 
     private static string ConvertAppIdToResourceName(string appId)

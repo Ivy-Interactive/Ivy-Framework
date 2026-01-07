@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Builder;
@@ -18,8 +19,7 @@ public class MarkdownMiddleware
     private readonly RequestDelegate _next;
     private static readonly Assembly Assembly = typeof(MarkdownMiddleware).Assembly;
     private static readonly string ResourcePrefix = "Ivy.Docs.Shared.Generated.";
-    private static readonly Dictionary<string, byte[]> ContentCache = new();
-    private static readonly object CacheLock = new();
+    private static readonly ConcurrentDictionary<string, byte[]?> ContentCache = new();
 
     public MarkdownMiddleware(RequestDelegate next)
     {
@@ -64,26 +64,16 @@ public class MarkdownMiddleware
 
     private static byte[]? GetOrLoadContent(string resourceName)
     {
-        lock (CacheLock)
+        return ContentCache.GetOrAdd(resourceName, name =>
         {
-            if (ContentCache.TryGetValue(resourceName, out var cached))
-                return cached;
-        }
+            using var stream = Assembly.GetManifestResourceStream(name);
+            if (stream == null)
+                return null;
 
-        using var stream = Assembly.GetManifestResourceStream(resourceName);
-        if (stream == null)
-            return null;
-
-        using var ms = new MemoryStream();
-        stream.CopyTo(ms);
-        var content = ms.ToArray();
-
-        lock (CacheLock)
-        {
-            ContentCache.TryAdd(resourceName, content);
-        }
-
-        return content;
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
+            return ms.ToArray();
+        });
     }
 
     private static string ConvertPathToResourceName(string urlPath)

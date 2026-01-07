@@ -14,8 +14,6 @@ public static class SitemapMiddlewareExtensions
 
 public class SitemapMiddleware(RequestDelegate next, Server server)
 {
-    private const string BaseUrl = "https://docs.ivy.app";
-
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value?.ToLowerInvariant();
@@ -37,11 +35,12 @@ public class SitemapMiddleware(RequestDelegate next, Server server)
 
     private static async Task ServeRobotsTxt(HttpContext context)
     {
+        var baseUrl = $"{context.Request.Scheme}://{context.Request.Host}";
         var content = $"""
             User-agent: *
             Allow: /
 
-            Sitemap: {BaseUrl}/sitemap.xml
+            Sitemap: {baseUrl}/sitemap.xml
             """;
 
         context.Response.ContentType = "text/plain; charset=utf-8";
@@ -51,7 +50,7 @@ public class SitemapMiddleware(RequestDelegate next, Server server)
 
     private async Task ServeSitemapXml(HttpContext context)
     {
-        server.AppRepository.Reload();
+        var baseUrl = $"{context.Request.Scheme}://{context.Request.Host}";
         var apps = server.AppRepository.All()
             .Where(app => app.IsVisible)
             .ToList();
@@ -62,7 +61,7 @@ public class SitemapMiddleware(RequestDelegate next, Server server)
 
         foreach (var app in apps)
         {
-            var url = $"{BaseUrl}/{app.Id}";
+            var url = $"{baseUrl}/{app.Id}";
             sb.AppendLine($"  <url><loc>{url}</loc></url>");
         }
 
