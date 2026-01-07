@@ -76,8 +76,8 @@ End of the typography test.
                 | Text.H2("Heading 2")
                 | Text.H3("Heading 3")
                 | Text.H4("Heading 4")
-                | Text.P("Heading 5 (Not supported by Text widget)")
-                | Text.P("Heading 6 (Not supported by Text widget)")
+                | Text.H5("Heading 5")
+                | Text.H6("Heading 6")
                 | Text.P("This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.")
                 | Text.P("This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.")
                 | Layout.Vertical() // Unordered List simulation

@@ -568,16 +568,16 @@ export const convertSizeToGridValue = (size?: string): string => {
 // Typography classes - shadcn typography with Ivy spacing
 export const typography: Record<string, string> = {
   // Headings
-  h1: `text-4xl font-semibold scroll-m-20 mt-12 mb-4 [&+h2]:mt-2`,
-  h2: `text-3xl font-medium scroll-m-20 mt-8 mb-4 [&+h3]:mt-2`,
-  h3: `text-2xl font-medium scroll-m-20 mt-8 mb-4 [&+h4]:mt-2`,
-  h4: `text-xl font-medium scroll-m-20 mt-6 mb-4 [&+h5]:mt-2`,
-  h5: `text-lg font-medium scroll-m-20 mt-4 mb-2 [&+h6]:mt-2`,
-  h6: `text-base font-medium scroll-m-20 mt-2 mb-2`,
+  h1: `text-4xl font-semibold scroll-m-20 mt-12 mb-4 [&+h2]:mt-2 [&+p]:mt-0`,
+  h2: `text-3xl font-medium scroll-m-20 mt-8 mb-4 [&+h3]:mt-2 [&+p]:mt-0`,
+  h3: `text-2xl font-medium scroll-m-20 mt-8 mb-4 [&+h4]:mt-2 [&+p]:mt-0`,
+  h4: `text-xl font-medium scroll-m-20 mt-6 mb-4 [&+h5]:mt-2 [&+p]:mt-0`,
+  h5: `text-lg font-medium scroll-m-20 mt-4 mb-2 [&+h6]:mt-2 [&+p]:mt-0`,
+  h6: `text-base font-medium scroll-m-20 mt-2 mb-2 [&+p]:mt-0`,
 
   // Body
-  p: `text-base scroll-m-20 mb-4`,
-  lead: `[&_p]:text-lg text-muted-foreground [&_p]:leading-tight`,
+  p: `text-base scroll-m-20 my-4 [&+p]:mt-0`,
+  lead: `text-muted-foreground`,
   strong: 'font-semibold',
   em: 'italic',
 
@@ -585,7 +585,7 @@ export const typography: Record<string, string> = {
   extralarge: 'text-3xl',
   large: 'text-lg font-semibold',
   small: 'text-large-body font-medium leading-none',
-  muted: 'text-sm text-muted-foreground',
+  muted: 'text-base text-muted-foreground',
 
   // Semantic variants
   danger: 'text-large-body text-destructive font-semibold',
@@ -620,6 +620,3 @@ export const typography: Record<string, string> = {
   // Media
   img: 'max-w-full h-auto cursor-zoom-in mb-2',
 };
-
-// Container class for text content with consistent spacing
-export const typographyContainer = 'flex flex-col';

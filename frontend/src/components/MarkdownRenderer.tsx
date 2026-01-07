@@ -28,7 +28,7 @@ import {
 } from '@/lib/url';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/prismTheme';
-import { typography, typographyContainer } from '@/lib/styles';
+import { typography } from '@/lib/styles';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { CustomEmoji } from './custom-emojis/CustomEmoji';
 import { remarkCustomEmojiPlugin } from './custom-emojis/remarkCustomEmojiPlugin';
@@ -307,20 +307,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       em: memo(({ children }: { children: React.ReactNode }) => (
         <em className={typography.em}>{children}</em>
       )),
-
-      // Pre tag (for code blocks)
       pre: memo(({ children }: { children: React.ReactNode }) => (
         <>{children}</>
       )),
-
-      // Blockquotes
       blockquote: memo(
         ({ children }: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
           <blockquote className={typography.blockquote}>{children}</blockquote>
         )
       ),
-
-      // Tables
       table: memo(({ children }: { children: React.ReactNode }) => (
         <table className={typography.table}>{children}</table>
       )),
@@ -336,7 +330,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       td: memo(({ children }: { children: React.ReactNode }) => (
         <td className={typography.td}>{children}</td>
       )),
-
+      hr: memo(() => <hr className="my-6" />),
       img: memo(
         (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
           const [showOverlay, setShowOverlay] = useState(false);
@@ -519,7 +513,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   }, []);
 
   return (
-    <div className={cn(typographyContainer)}>
+    <>
       <ReactMarkdown
         components={{
           ...componentsParams,
@@ -530,7 +524,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       >
         {content}
       </ReactMarkdown>
-    </div>
+    </>
   );
 };
 

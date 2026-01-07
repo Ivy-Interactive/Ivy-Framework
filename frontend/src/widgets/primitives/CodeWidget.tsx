@@ -44,7 +44,7 @@ const mapLanguageToPrism = (language: string): string | undefined => {
 };
 
 const MemoizedCopyButton = memo(({ textToCopy }: { textToCopy: string }) => (
-  <div className="absolute top-6 right-2 z-50">
+  <div className="absolute top-3 right-3 z-50">
     <CopyToClipboardButton textToCopy={textToCopy} />
   </div>
 ));
@@ -85,7 +85,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 
     return (
-      <div className="relative py-4">
+      <div className="relative">
         {showCopyButton && <MemoizedCopyButton textToCopy={content} />}
         <ScrollArea
           className={cn(

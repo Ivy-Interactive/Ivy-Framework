@@ -1,5 +1,5 @@
 import React from 'react';
-import { typography, typographyContainer } from '@/lib/styles';
+import { typography } from '@/lib/styles';
 import { validateLinkUrl } from '@/lib/url';
 
 interface HtmlRendererProps {
@@ -102,6 +102,10 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
             return <h3 className={typography.h3}>{children}</h3>;
           case 'h4':
             return <h4 className={typography.h4}>{children}</h4>;
+          case 'h5':
+            return <h5 className={typography.h5}>{children}</h5>;
+          case 'h6':
+            return <h6 className={typography.h6}>{children}</h6>;
           case 'p':
             return <p className={typography.p}>{children}</p>;
           case 'ul':
@@ -114,6 +118,14 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
             return <strong className={typography.strong}>{children}</strong>;
           case 'em':
             return <em className={typography.em}>{children}</em>;
+          case 'b':
+            return <strong className={typography.strong}>{children}</strong>;
+          case 'i':
+            return <em className={typography.em}>{children}</em>;
+          case 'span':
+            return <span>{children}</span>;
+          case 'div':
+            return <div>{children}</div>;
           case 'a': {
             const href = element.getAttribute('href');
             const safeHref = validateLinkUrl(href);
@@ -158,8 +170,12 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
             return <hr className="my-6" />;
           case 'br':
             return <br />;
+          case 'pre':
+            return <pre>{children}</pre>;
+          case 'tbody':
+            return <tbody>{children}</tbody>;
           default:
-            return <div>{children}</div>;
+            return <>{children}</>;
         }
       }
 
@@ -171,7 +187,5 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
     ));
   };
 
-  return (
-    <div className={typographyContainer}>{renderHtml(sanitizedContent)}</div>
-  );
+  return <>{renderHtml(sanitizedContent)}</>;
 };

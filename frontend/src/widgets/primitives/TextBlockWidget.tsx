@@ -16,6 +16,8 @@ type TextBlockVariant =
   | 'H2'
   | 'H3'
   | 'H4'
+  | 'H5'
+  | 'H6'
   | 'P'
   | 'Inline'
   | 'Block'
@@ -77,6 +79,16 @@ const variantMap: VariantMap = {
     <h4 className={cn(typography.h4, className)} style={style}>
       {children}
     </h4>
+  ),
+  H5: ({ children, className, style }) => (
+    <h5 className={cn(typography.h5, className)} style={style}>
+      {children}
+    </h5>
+  ),
+  H6: ({ children, className, style }) => (
+    <h6 className={cn(typography.h6, className)} style={style}>
+      {children}
+    </h6>
   ),
   Block: ({ children, className, style }) => {
     const spanRef = React.useRef<HTMLSpanElement>(null);
