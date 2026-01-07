@@ -210,6 +210,30 @@ public class LayoutView : ViewBase, IStateless
         return this;
     }
 
+    public LayoutView TopMargin(int margin)
+    {
+        _margin = new Thickness(_margin?.Left ?? 0, margin, _margin?.Right ?? 0, _margin?.Bottom ?? 0);
+        return this;
+    }
+
+    public LayoutView BottomMargin(int margin)
+    {
+        _margin = new Thickness(_margin?.Left ?? 0, _margin?.Top ?? 0, _margin?.Right ?? 0, margin);
+        return this;
+    }
+
+    public LayoutView LeftMargin(int margin)
+    {
+        _margin = new Thickness(margin, _margin?.Top ?? 0, _margin?.Right ?? 0, _margin?.Bottom ?? 0);
+        return this;
+    }
+
+    public LayoutView RightMargin(int margin)
+    {
+        _margin = new Thickness(_margin?.Left ?? 0, _margin?.Top ?? 0, margin, _margin?.Bottom ?? 0);
+        return this;
+    }
+
     public LayoutView Background(Colors color)
     {
         _background = color;
