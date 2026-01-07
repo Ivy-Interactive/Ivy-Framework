@@ -8,6 +8,7 @@ using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.Forms;
 using Microsoft.AspNetCore.Mvc;
+using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy.Auth;
 
@@ -141,7 +142,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
 {
     public override object? Build()
     {
-        var args = this.UseService<AppArgs>();
+        var args = this.UseService<AppContext>();
         var auth = this.UseService<IAuthService>();
 
         var callback = this.UseWebhook(async (request) =>
