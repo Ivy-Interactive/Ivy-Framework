@@ -14,6 +14,7 @@ public static class DocsServer
 
         server.UseWebApplication(app =>
         {
+            app.UseSitemap();
             app.UseSsrMarkdown();
             app.UseMarkdownFiles();
         });
