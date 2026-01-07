@@ -80,7 +80,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   barCategoryGap = '10%',
   maxBarSize,
   reverseStackOrder,
-  layout = 'Horizontal',
+  layout = 'Vertical',
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
