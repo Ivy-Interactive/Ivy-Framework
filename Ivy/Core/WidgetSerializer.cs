@@ -5,7 +5,6 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Ivy.Core.Helpers;
-using Ivy.Widgets.Inputs;
 
 namespace Ivy.Core;
 
@@ -123,7 +122,7 @@ public static class WidgetSerializer
                 Type.EmptyTypes,
                 null);
 
-            if (defaultCtor != null && !typeof(IAnyInput).IsAssignableFrom(t))
+            if (defaultCtor != null)
             {
                 try
                 {
@@ -179,8 +178,8 @@ public static class WidgetSerializer
         {
             var value = GetPropertyValue(widget, propInfo.Property, propInfo.Attribute);
 
-            // Skip properties that match their default values
-            if (metadata.DefaultInstance != null)
+            // Skip properties that match their default values (unless AlwaysSerialize is set)
+            if (!propInfo.Attribute.AlwaysSerialize && metadata.DefaultInstance != null)
             {
                 var defaultValue = GetPropertyValue(metadata.DefaultInstance, propInfo.Property, propInfo.Attribute);
                 if (ValuesAreEqual(value, defaultValue))
