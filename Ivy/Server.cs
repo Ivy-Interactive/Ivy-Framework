@@ -242,7 +242,7 @@ public class Server
         return this;
     }
 
-    public Server UseBuilder(Action<WebApplicationBuilder> modify)
+    public Server UseWebApplicationBuilder(Action<WebApplicationBuilder> modify)
     {
         _builderMods.Add(modify);
         return this;
