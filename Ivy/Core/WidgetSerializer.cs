@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Ivy.Core.Helpers;
+using Ivy.Widgets.Inputs;
 
 namespace Ivy.Core;
 
@@ -122,7 +123,7 @@ public static class WidgetSerializer
                 Type.EmptyTypes,
                 null);
 
-            if (defaultCtor != null)
+            if (defaultCtor != null && !typeof(IAnyInput).IsAssignableFrom(t))
             {
                 try
                 {
