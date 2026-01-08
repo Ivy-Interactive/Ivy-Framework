@@ -6,178 +6,25 @@
 
 The `Server.UseBuilder()` method has been renamed to `UseWebApplicationBuilder()` for better clarity and to distinguish it from the new `UseWebApplication()` method.
 
-**Migration Guide:**
-
-```csharp
-// Before
-server.UseBuilder(builder => {
-    builder.Services.AddSingleton<MyService>();
-});
-
-// After
-server.UseWebApplicationBuilder(builder => {
-    builder.Services.AddSingleton<MyService>();
-});
-```
-
-The new naming makes it clear that you're configuring the `WebApplicationBuilder` specifically, while the new `UseWebApplication()` method allows you to configure the built `WebApplication` instance for middleware setup.
-
 ### NavigationPurpose Renamed to HistoryOp
 
-The `NavigationPurpose` enum has been renamed to `HistoryOp` with clearer, more concise values for better clarity in navigation APIs.
-
-**Migration Guide:**
-
-If you're manually creating `NavigateArgs` or using the `NavigateSignal`, update your code:
-
-```csharp
-// Before
-await navigateSignal.Send(new NavigateArgs(
-    appId,
-    Purpose: NavigationPurpose.NewDestination
-));
-
-await navigateSignal.Send(new NavigateArgs(
-    appId,
-    Purpose: NavigationPurpose.HistoryTraversal
-));
-
-// After
-await navigateSignal.Send(new NavigateArgs(
-    appId,
-    HistoryOp: HistoryOp.Push
-));
-
-await navigateSignal.Send(new NavigateArgs(
-    appId,
-    HistoryOp: HistoryOp.Pop
-));
-```
-
-**What changed:**
-- `NavigationPurpose` → `HistoryOp`
-- `NavigationPurpose.NewDestination` → `HistoryOp.Push`
-- `NavigationPurpose.HistoryTraversal` → `HistoryOp.Pop`
-
-The new naming better reflects the underlying browser history operations (push new entries vs. pop back through history). Most applications using standard navigation methods won't need any changes - this primarily affects code that directly works with the `NavigateSignal` and `NavigateArgs` classes.
+- `NavigationPurpose` - `HistoryOp`
+- `NavigationPurpose.NewDestination` - `HistoryOp.Push`
+- `NavigationPurpose.HistoryTraversal` - `HistoryOp.Pop`
 
 ### Audio Widget Renamed to AudioPlayer
 
 The `Audio` widget has been renamed to `AudioPlayer` for better clarity and consistency. All references throughout the codebase have been updated.
 
-**Migration Guide:**
-
-If you're using the `Audio` widget in your code, simply replace it with `AudioPlayer`:
-
-```csharp
-// Before
-var audio = new Audio("https://example.com/audio.mp3")
-    .Loop(true)
-    .Autoplay(true);
-
-// After
-var audio = new AudioPlayer("https://example.com/audio.mp3")
-    .Loop(true)
-    .Autoplay(true);
-```
-
-The API remains exactly the same - only the class name has changed. All extension methods and properties work identically.
-
 ### Icons Enum Updated to Match Lucide React 0.562.0
 
-The `Icons` enum has been updated to align with the latest version of lucide-react (0.562.0), resulting in several icon renames. If you're using any of the following icons, you'll need to update your code:
-
-**Text Alignment Icons:**
-```csharp
-// Before
-Icons.AlignCenter
-Icons.AlignJustify
-Icons.AlignLeft
-Icons.AlignRight
-
-// After
-Icons.TextAlignCenter
-Icons.TextAlignJustify
-Icons.TextAlignStart  // was AlignLeft
-Icons.TextAlignEnd    // was AlignRight
-```
-
-**File Icons:**
-```csharp
-// Before
-Icons.FileAudio
-Icons.FileAudio2
-Icons.FileCheck2
-Icons.FileCode2
-Icons.FileJson
-Icons.FileJson2
-Icons.FileKey2
-Icons.FileLock2
-Icons.FileMinus2
-Icons.FilePlus2
-Icons.FileSearch2
-Icons.FileType2
-Icons.FileVolume2
-Icons.FileWarning
-Icons.FileX2
-Icons.Text
-
-// After
-Icons.FileMusic        // was FileAudio/FileAudio2
-Icons.FileCheck        // FileCheck2 removed, use FileCheck
-Icons.FileCode         // FileCode2 removed, use FileCode
-Icons.FileBraces       // new icon for JSON files
-Icons.FileKey          // FileKey2 removed, use FileKey
-Icons.FileLock         // FileLock2 removed, use FileLock
-Icons.FileMinus        // FileMinus2 removed, use FileMinus
-Icons.FilePlus         // FilePlus2 removed, use FilePlus
-Icons.FileSearch       // FileSearch2 removed, use FileSearch
-Icons.FileType         // FileType2 removed, use FileType
-Icons.FileVolume       // FileVolume2 removed, use FileVolume
-Icons.FileExclamationPoint  // was FileWarning
-Icons.FileX            // FileX2 removed, use FileX
-Icons.FileText         // was Text
-```
-
-**Other Icon Changes:**
-```csharp
-// Before
-Icons.Chrome
-Icons.Fingerprint
-Icons.IndentDecrease
-Icons.IndentIncrease
-Icons.LetterText
-Icons.WrapText
-
-// After
-Icons.Chromium                // was Chrome
-Icons.FingerprintPattern      // was Fingerprint
-Icons.ListIndentDecrease      // was IndentDecrease
-Icons.ListIndentIncrease      // was IndentIncrease
-// LetterText removed
-Icons.TextWrap                // was WrapText
-```
-
-**Example Migration:**
-```csharp
-// Before
-var table = new DataTable<MyData>(data)
-    .Icon(row => row.Value, Icons.Text.ToString())
-    .Icon(row => row.Status, Icons.FileWarning.ToString());
-
-// After
-var table = new DataTable<MyData>(data)
-    .Icon(row => row.Value, Icons.FileText.ToString())
-    .Icon(row => row.Status, Icons.FileExclamationPoint.ToString());
-```
-
-These changes ensure the Icons enum stays in sync with the latest lucide-react icon set, providing access to new icons and improved naming consistency.
+The `Icons` enum has been updated to align with the latest version of lucide-react (0.562.0).
 
 ## Improvements
 
 ### Spacer and Loading Widgets Now Public
 
-The `Spacer` and `Loading` widget constructors are now public, allowing you to create instances directly in your layouts. Previously, these widgets could only be created through layout helper methods or internal APIs - now you have the flexibility to instantiate them explicitly when needed.
+The `Spacer` and `Loading` widget constructors are now public, allowing you to create instances directly in your layouts.
 
 **Usage:**
 
@@ -198,84 +45,17 @@ var content = isLoading
     : new Text("Content loaded!");
 ```
 
-This is particularly useful when building dynamic layouts or conditional UI. The `Spacer` widget expands to fill available space, pushing adjacent elements apart, while the `Loading` widget displays a spinner to indicate processing or data fetching states.
-
 ### ReadOnlyInput Simplified Constructor
 
 The `ReadOnlyInput` widget now includes a non-generic constructor for string values, making it more convenient to use for common scenarios where you're displaying text-based read-only data.
 
-**Before:**
 ```csharp
-var readOnly = new ReadOnlyInput<string>("User ID: 12345");
-```
-
-**After:**
-```csharp
-// More concise for string values
 var readOnly = new ReadOnlyInput("User ID: 12345");
 ```
 
-The generic version `ReadOnlyInput<T>` is still available when you need to work with other data types. This enhancement reduces verbosity when working with string-based read-only displays, which is the most common use case for read-only inputs.
-
-### Layout Class Documentation
-
-Comprehensive documentation for the `Layout` static class has been added, making it easier to understand and use Ivy's primary API for building UI compositions. The Layout class provides a fluent, pipe-operator-based syntax for creating common layout patterns with minimal code.
-
-**What's documented:**
-
-- **Basic usage patterns** - Simple vertical and horizontal layouts with clear examples
-- **Pipe operator syntax** - Clean composition using the `|` operator for adding children
-- **Configuration methods** - Gap, padding, margin, width, height, and alignment options
-- **Integration examples** - How Layout methods work with specialized layout widgets like Grid and Tabs
-- **Extension methods** - Helper methods like `.WithMargin()` and `.WithLayout()`
-- **Complete reference** - All available Layout factory methods and layout types
-
-**Example from the docs:**
-
-```csharp
-Layout.Vertical().Gap(4)
-    | Text.Label("User Profile")
-    | (Layout.Horizontal().Gap(2)
-        | new Badge("Active").Primary()
-        | new Badge("Premium").Secondary())
-    | Text.Small("Choose your plan")
-```
-
-This documentation serves as the primary entry point for understanding how to build UI structures in Ivy, complementing the existing Views documentation and providing practical examples of layout composition patterns.
+The generic version `ReadOnlyInput<T>` is still available when you need to work with other data types.
 
 ### LLM-Friendly Documentation
-
-The Ivy documentation site now includes enhanced support for Large Language Models (LLMs) and AI assistants. When AI bots like ChatGPT, Claude, or Perplexity access the documentation, they receive optimized markdown content that's easier to parse and understand.
-
-**What's included:**
-
-- **Automatic bot detection** - The framework detects AI crawlers and serves them simplified, LLM-friendly content in plain HTML
-- **robots.txt and sitemap.xml** - Proper indexing support for search engines and AI systems
-- **Direct markdown access** - Documentation pages are available as raw markdown files (e.g., `/widgets/button.md`)
-- **API documentation generation** - Automatic generation of API reference documentation via reflection
-- **SSR markdown rendering** - Server-side rendering of markdown content for bot user agents
-- **Generated markdown files** - Embedded resource files that are automatically included in your documentation package
-
-This enhancement makes it easier for developers to get help from AI assistants when working with the Ivy Framework, as the documentation is now optimized for both human and AI consumption. The implementation uses the emerging [llms.txt](https://llmstxt.org/) standard for serving LLM-optimized documentation.
-
-**Package Distribution:**
-
-Generated documentation files are now properly included in the Ivy Framework NuGet package (in the `docs/generated` path), ensuring that API reference documentation and generated content are available to all users who install the framework.
-
-**For documentation site builders:**
-
-You can leverage this infrastructure in your own Ivy documentation sites by configuring three middleware components:
-
-```csharp
-server.UseWebApplication(app =>
-{
-    app.UseSitemap();        // Serves robots.txt and sitemap.xml
-    app.UseSsrMarkdown();    // Server-side renders markdown for bots
-    app.UseMarkdownFiles();  // Serves raw .md files from embedded resources
-});
-```
-
-**How it works:**
 
 - `UseSitemap()` - Automatically generates `/robots.txt` and `/sitemap.xml` based on your visible apps
 - `UseSsrMarkdown()` - Detects bot user agents (ChatGPT, Claude, Perplexity, etc.) and serves simplified HTML with markdown content
@@ -289,40 +69,13 @@ Calendar widgets (`DateInput`, `DateTimeInput`, `DateRangeInput`) now include dr
 - **Select month from dropdown** - Jump to any month instantly
 - **Improved date visibility** - Fixed an issue where some dates could appear invisible in certain scenarios
 
-**Example use cases this improves:**
-- Selecting birth dates (no more clicking back through decades)
-- Setting historical dates for data entry
-- Scheduling events years in advance
-- Date range selection for reporting periods
-
-This enhancement is automatically applied to all date input widgets - no code changes needed. The calendar popup now provides a much more efficient navigation experience for users selecting dates outside the current month.
-
-### Theme Customization Enhancements
-
-Theme presets now include proper popover color definitions for both light and dark modes, ensuring consistent styling across all UI elements. Additionally, the theme service now includes automatic fallback support - if a theme preset doesn't define a particular color, the framework automatically falls back to the default theme colors.
-
-**What this means for you:**
-- More complete and consistent theming across all components
-- Popover components (tooltips, dropdowns, context menus) now properly respect your theme
-- Safer custom themes - missing color properties automatically use sensible defaults instead of breaking
-
-This enhancement is handled automatically by the framework when you use custom themes or the built-in theme presets (Ocean, Forest, Sunset, Midnight). No code changes required.
-
 ### DataTable Service Lazy Initialization
 
 The `GrpcTableService` is now initialized lazily, only when DataTables are actually used in your application. This provides significant performance improvements for applications that don't use DataTables:
 
-- **Faster startup** - No overhead from initializing table services when they're not needed
-- **Reduced memory footprint** - Service only created when first DataTable is rendered
-- **Zero code changes required** - The API remains exactly the same
-
-This optimization is handled automatically by the framework. If your application uses DataTables (`DataTable<T>` widget), the service initializes seamlessly on first use. If you don't use DataTables, you no longer pay the initialization cost.
-
 ### Font Loading Performance
 
 Font flickering during page load has been eliminated by migrating to the Ivy Design System package. Fonts now load more reliably and smoothly, providing a better visual experience when your application first renders.
-
-**Technical details:** The framework now loads Geist and Geist Mono fonts from the `@ivy-interactive/ivy-design-system` npm package instead of bundling them locally. This improves font loading consistency and reduces the framework's bundle size.
 
 ### Better Number Input Validation and Formatting
 
@@ -330,16 +83,13 @@ The `NumberInput` widget has been enhanced with improved null value handling and
 
 - **Better null value handling** - Default null values are now properly managed, with nullable inputs defaulting to null and non-nullable inputs defaulting to 0
 - **Improved format fallback** - When formatted display fails, the widget gracefully falls back to the raw number string instead of showing blank
-- **Better mobile experience** - Uses `inputMode="decimal"` to display numeric keyboards on mobile while maintaining text input flexibility
-- **Improved accessibility** - Screen readers better understand the input purpose
-
-No code changes required - this enhancement is automatically applied to all numeric input widgets.
 
 ### Automatic Color Input Validation
 
-The `ColorInput` widget now automatically validates color values and displays an error state when invalid formats are entered. This eliminates the need for manual validation and provides immediate feedback to users.
+The `ColorInput` widget now automatically validates color values and displays an error state when invalid formats are entered.
 
 **What's validated:**
+
 - **Hex colors** - Must match valid formats: `#RGB`, `#RRGGBB`, or `#RRGGBBAA`
 - **Color enums** - Must be a valid value from the `Colors` enum
 - **Invalid entries** - Automatically marked with "Invalid color format" error message
@@ -360,21 +110,12 @@ The validation happens automatically when you use `ToColorInput()`, so you no lo
 
 ### Widget Serialization Optimization
 
-Widget serialization has been improved to omit properties with default values, reducing the payload size sent to the frontend. The framework now uses deep comparison logic for array properties, ensuring accurate detection of default values even when properties contain complex array data.
-
-**What's improved:**
-- **Deep array comparison** - Arrays are now compared element-by-element rather than by reference, ensuring accurate default value detection
-- **Faster initial page loads** - Smaller payloads mean quicker page rendering
-- **Reduced network bandwidth usage** - Only non-default values are sent to the browser
-- **Cleaner serialized JSON output** - More readable and efficient wire format
-
-For example, a `Button` with default settings will now only serialize the properties you've explicitly set, rather than all properties. This optimization is particularly beneficial for widgets with array properties like chart configurations, where the framework can now accurately detect when array values match defaults and omit them from serialization.
-
 ### Scale Inheritance for Nested Widgets
 
 Widgets now properly inherit scale settings from their parent widgets, ensuring consistent sizing throughout nested component hierarchies. When you set a scale on a parent widget, all children automatically inherit that scale unless explicitly overridden.
 
 **Example:**
+
 ```csharp
 // The Details widget and all its children will use the Large scale
 new Details(Scales.Large)
@@ -383,48 +124,12 @@ new Details(Scales.Large)
     .Add(new Input().Placeholder("Enter text")); // Inherits Large scale
 ```
 
-This eliminates the need to manually set the scale on every nested widget, providing a cleaner API and more consistent visual hierarchy. Previously, nested widgets would fall back to their default scale (Medium) even when their parent had a different scale configured.
-
-### Multiple Reference Lines, Areas, and Dots in Charts
-
-Chart widgets (`AreaChart`, `BarChart`, `LineChart`) now support multiple reference lines, areas, and dots - perfect for highlighting multiple thresholds, ranges, or data points on the same chart.
-
-**Before:**
-```csharp
-// You could only add one reference line
-var chart = new AreaChart(data)
-    .ReferenceLines(new MarkLine { /* config */ });
-```
-
-**After:**
-```csharp
-// Now you can add multiple reference lines, areas, and dots
-var chart = new AreaChart(data)
-    .ReferenceLines(new[]
-    {
-        new MarkLine { /* warning threshold */ },
-        new MarkLine { /* critical threshold */ },
-        new MarkLine { /* target line */ }
-    })
-    .ReferenceAreas(new[]
-    {
-        new MarkArea { /* acceptable range */ },
-        new MarkArea { /* danger zone */ }
-    })
-    .ReferenceDots(new[]
-    {
-        new ReferenceDot { X = "2024-01", Y = 100, Label = "Launch" },
-        new ReferenceDot { X = "2024-06", Y = 250, Label = "Milestone" }
-    });
-```
-
-This enhancement makes it much easier to create rich, annotated charts with multiple visual indicators without needing custom configurations.
-
 ### ECharts Upgraded to v6
 
 The charting library has been upgraded from ECharts v5.6.0 to v6.0.0, bringing performance improvements and new features to all chart widgets (`AreaChart`, `BarChart`, `LineChart`, `PieChart`).
 
 **What's improved:**
+
 - **Better rendering performance** - Faster rendering for large datasets with the new v6 engine
 - **Enhanced toolbox theming** - Toolbox buttons, data view dialog, and icons now properly respect your theme colors (muted-foreground for borders, card colors for backgrounds)
 - **Fixed legend key casing** - Resolved an issue where chart legend keys had inconsistent casing by removing dictionary key policy from the serializer
@@ -449,6 +154,7 @@ This change eliminates confusion from having a non-functional chart type switche
 Card icons now use `Colors.Neutral` instead of `Colors.Muted` for a more balanced visual appearance. This subtle change provides better contrast and readability for card icons while maintaining a clean, professional look.
 
 **Example:**
+
 ```csharp
 // Icons passed to Card headers now automatically use Neutral color
 var card = new Card()
@@ -464,6 +170,7 @@ This is handled automatically when you use the `Header()` extension method with 
 The contributor display in documentation pages now shows proper display names for team members instead of only GitHub usernames. This provides a more professional appearance in the built-in `GitHubContributors` widget used for article pages.
 
 **What's improved:**
+
 - **Display names for team members** - Team members can now have custom display names (e.g., "Niels Bosma" instead of "nielsbosma")
 - **Smart name fallback** - If no display name is configured, the widget shows the commit author name when it differs from the username
 - **More accurate contribution tracking** - Improved logic for counting contributions per contributor
@@ -476,6 +183,7 @@ This makes it easier to identify core team members by their full names while sti
 The framework now includes `ToPivotTable()` extension method for aggregating and summarizing data by grouping on dimensions and calculating measures. This powerful feature allows you to transform raw data into aggregated results perfect for reporting and analytics dashboards.
 
 **Example:**
+
 ```csharp
 record SalesData(string Browser, string Region, int Sessions, decimal Revenue);
 record BrowserSummary(string Browser, int TotalSessions, decimal TotalRevenue, decimal AverageRevenue);
@@ -521,6 +229,7 @@ return pivotByBrowser.ToExpando().ToTable().Width(Size.Full());
 ```
 
 **Key Features:**
+
 - **Dimensions**: Group data by one or more fields (like SQL GROUP BY)
 - **Measures**: Perform aggregations (Sum, Count, Average, Max, Min)
 - **Strongly-typed results**: Use `.Produces<T>()` to get typed objects
@@ -588,11 +297,13 @@ These improvements provide a more polished and consistent reading experience acr
 The `Terminal` widget now includes a convenient copy-to-clipboard button that automatically extracts and copies all command lines from the terminal display. This is especially useful in documentation and tutorials where users need to copy commands.
 
 **Features:**
+
 - Automatically positioned in the top-right corner of the terminal
 - Only copies command lines (ignoring output text)
 - Can be disabled if needed using `.ShowCopyButton(false)`
 
 **Example:**
+
 ```csharp
 // Default behavior - copy button is shown
 var terminal = new Terminal()
@@ -612,6 +323,7 @@ When users click the copy button, only the actual commands (lines prefixed with 
 The copy-to-clipboard button for code snippets has been enhanced with better sizing and improved visual feedback:
 
 **What's improved:**
+
 - **Larger buttons** - Copy buttons are now more accessible across all scales (Small: 24px, Medium: 32px, Large: 36px, up from 20px/24px/28px)
 - **Better padding** - Increased from 4px to 8px for easier clicking
 - **Refined styling** - Icon-only buttons now have transparent background by default with smooth hover transitions
@@ -646,6 +358,7 @@ Tooltips now intelligently handle word breaking and have a maximum height constr
 - **Manual control** - Override automatic behavior with the `breakType` prop (`'auto'`, `'normal'`, `'all'`, or `'words'`)
 
 **Example:**
+
 ```typescript
 // Automatic behavior (default)
 <TooltipContent>
@@ -669,6 +382,7 @@ The Sheet component no longer displays a focus outline on its container element,
 The Ivy CLI's `DatabaseGenerator` now automatically cleans up the initial migration entry from the `__EFMigrationsHistory` table after applying it. This prevents issues where EF Core would look for a migration file (`InitialCreate`) that only exists in the temporary database generator project, not in your actual application.
 
 **What this fixes:**
+
 - Eliminates errors when EF Core tries to find the `InitialCreate` migration in your project
 - Ensures a clean migration history that only references migrations in your codebase
 - No manual cleanup required after database generation
@@ -686,6 +400,7 @@ This fix improves reliability for applications that dynamically swap out their e
 Resolved an issue where users couldn't logout from applications using `DefaultSidebarChrome` if their user information failed to load. The logout functionality now works reliably based on authentication session state rather than user info availability.
 
 **What this fixes:**
+
 - Users can now logout even if `GetUserInfoAsync()` returns null or fails
 - The logout menu item appears correctly when authenticated, regardless of user info state
 - Prevents users from being stuck in an authenticated state when profile data is unavailable
@@ -697,6 +412,7 @@ This is particularly helpful in scenarios where user profile services are tempor
 OAuth authentication now works reliably in Safari and other browsers with strict popup blocking policies. Previously, OAuth login buttons would open popups directly, which Safari would block as unauthorized popup windows.
 
 **What changed:**
+
 - OAuth login buttons now navigate to a server endpoint (`/ivy/auth/oauth-login`) which redirects to the OAuth provider
 - This server-side redirect approach bypasses Safari's popup blocker
 - Better error handling with more concise error messages
@@ -734,6 +450,7 @@ The component intelligently manages available space and provides a seamless expe
 Resolved an issue where the chevron arrow indicator for collapsible sidebar menu items with nested groups was not rotating correctly when expanded/collapsed. The arrow now properly rotates 90 degrees when toggling nested menu items, providing consistent visual feedback across all levels of menu nesting.
 
 **What changed:**
+
 - Fixed CSS class selector from `group-data-[state=open]/collapsible` to `group-data-[state=open]`
 - Added proper null coalescing for the `expanded` state to ensure boolean values
 - Cleaned up redundant group class definitions
@@ -745,6 +462,7 @@ This fix ensures that nested sidebar menu items (like grouped navigation section
 Fixed an issue where chart properties weren't being applied consistently between the backend and frontend. The framework now ensures that default values for chart configurations (lines, bars, pies, legends, grids, tooltips, toolboxes, and reference lines) are properly applied on the frontend, matching the C# backend behavior.
 
 **What this fixes:**
+
 - Charts now render more consistently with expected default values
 - Properties that equal backend defaults are now properly applied even when not explicitly serialized
 - Eliminates subtle rendering inconsistencies in chart widgets (`AreaChart`, `BarChart`, `PieChart`)
@@ -755,7 +473,7 @@ This improvement ensures that charts behave predictably and consistently, partic
 
 ### Clerk Authentication Provider
 
-A new authentication provider for Clerk (https://clerk.com) has been added to the framework, allowing you to leverage Clerk's complete user management platform in your Ivy applications. Clerk provides a modern, secure, and flexible authentication solution with support for multiple authentication methods.
+A new authentication provider for Clerk (<https://clerk.com>) has been added to the framework, allowing you to leverage Clerk's complete user management platform in your Ivy applications. Clerk provides a modern, secure, and flexible authentication solution with support for multiple authentication methods.
 
 **Installation:**
 
@@ -777,7 +495,7 @@ dotnet user-secrets set "Clerk:PublishableKey" "your_publishable_key"
 
 > **Note:** Both keys must be for the same environment (either both `test` or both `live`).
 
-3. Configure the provider in your application:
+1. Configure the provider in your application:
 
 ```csharp
 var server = new Server();
@@ -795,6 +513,7 @@ await server.RunAsync();
 ```
 
 **Supported Authentication Methods:**
+
 - **Email/Password** - Traditional email and password authentication
 - **Google OAuth** - Sign in with Google accounts
 - **GitHub OAuth** - Sign in with GitHub accounts
@@ -803,6 +522,7 @@ await server.RunAsync();
 - **Apple OAuth** - Sign in with Apple ID
 
 **Features:**
+
 - **Multi-provider support** - Mix and match authentication methods based on your needs
 - **Complete user management** - Leverages Clerk's full user management platform
 - **Security best practices** - Built-in security features, session management, and user verification
@@ -847,7 +567,7 @@ server.UseAuth<GitHubAuthProvider>(c => c.UseGitHub());
 await server.RunAsync();
 ```
 
-3. Configure your GitHub OAuth App credentials using .NET user secrets (development) or environment variables (production):
+1. Configure your GitHub OAuth App credentials using .NET user secrets (development) or environment variables (production):
 
 ```terminal
 dotnet user-secrets set "GitHub:ClientId" "your_client_id"
@@ -856,6 +576,7 @@ dotnet user-secrets set "GitHub:RedirectUri" "http://localhost:5010/ivy/webhook"
 ```
 
 **Features:**
+
 - **Standard OAuth 2.0 flow** - Secure authorization code flow
 - **Automatic user info retrieval** - Fetches user ID, email, display name, and avatar from GitHub
 - **Smart email handling** - Automatically selects primary or first verified email
@@ -895,12 +616,14 @@ public class MyAppRepository : AppRepository
 ```
 
 **For applications using `DefaultSidebarChrome` with tabs:**
+
 - Opening a new tab sets the page title to match the tab's application
 - Switching between tabs updates the page title dynamically
 - Closing all tabs resets the title to your application's default `MetaTitle`
 
 **Title formatting:**
 If you've configured a `MetaTitle` in your server configuration, page titles are automatically formatted as:
+
 ```
 {AppTitle} - {MetaTitle}
 ```
@@ -921,6 +644,7 @@ server.UseAuth<BasicAuthProvider>(viewFactory: () => new MyCustomLoginApp());
 ```
 
 This allows you to:
+
 - Design a completely custom login experience that matches your brand
 - Add custom elements like marketing content, help text, or additional authentication options
 - Implement complex multi-step login flows
