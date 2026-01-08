@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { ThemeProviderContext } from './context';
-import { getThemeColors, isDarkMode, ThemeColors } from '@/lib/color-utils';
+import { getThemeColors, isDarkMode, ThemeColors } from '@/lib/theme';
 import type { Theme } from '@glideapps/glide-data-grid';
 
 export const useTheme = () => {

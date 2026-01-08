@@ -437,7 +437,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 .Content(
                     Layout.Horizontal().Align(Align.Left)
                         | Icons.Settings.ToIcon()
-                        | Text.Muted("Settings")
+                        | Text.Small("Settings").Muted()
                     )
                     .Variant(ButtonVariant.Ghost).Width(Size.Full());
 

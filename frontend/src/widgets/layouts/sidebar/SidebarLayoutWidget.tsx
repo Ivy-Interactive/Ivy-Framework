@@ -203,7 +203,7 @@ const CollapsibleMenuItem: React.FC<{
   widgetId: string;
   level: number;
 }> = ({ item, eventHandler, widgetId, level }) => {
-  const [isOpen, setIsOpen] = useState(item.expanded);
+  const [isOpen, setIsOpen] = useState(item.expanded ?? false);
 
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -219,16 +219,11 @@ const CollapsibleMenuItem: React.FC<{
 
   if (!!item.children && item.children!.length > 0) {
     return (
-      <Collapsible
-        className="group/collapsible"
-        key={item.label}
-        open={isOpen}
-        onOpenChange={setIsOpen}
-      >
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <li className="relative">
           <CollapsibleTrigger asChild>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
+              className="group flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
               onClick={() => {
                 // For items with children, toggle the collapsible state
                 // Only try to navigate if the item has a tag
@@ -240,7 +235,7 @@ const CollapsibleMenuItem: React.FC<{
             >
               <Icon name={item.icon} size={16} />
               <span className="text-sm">{item.label}</span>
-              <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
+              <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>

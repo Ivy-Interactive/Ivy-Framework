@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { getIvyHost } from '@/lib/utils';
-import {
-  validateAudioUrl,
-  isFullUrl,
-  normalizeRelativePath,
-} from '@/lib/urlValidation';
+import { validateAudioUrl, isFullUrl, normalizeRelativePath } from '@/lib/url';
 
 interface AudioPlayerWidgetProps {
   id: string;

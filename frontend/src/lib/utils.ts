@@ -1,7 +1,6 @@
 import React from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { textBlockClassMap } from './textBlockClassMap';
 import routingConstants from '../routing-constants.json' assert { type: 'json' };
 
 export function cn(...inputs: ClassValue[]) {
@@ -248,9 +247,6 @@ export function camelCase(titleCase: unknown): unknown {
   return titleCase.charAt(0).toLowerCase() + titleCase.slice(1);
 }
 
-// Shared Ivy tag-to-class map for headings, paragraphs, lists, tables, etc.
-export const ivyTagClassMap = textBlockClassMap;
-
 /**
  * Apply defaults to an object, only setting values that are undefined.
  * Used to apply C# backend defaults to frontend objects when values
@@ -269,26 +265,3 @@ export function applyDefaults<T extends object>(
   }
   return result;
 }
-
-// Re-export URL validation functions from dedicated module
-export {
-  getCurrentOrigin,
-  _getCurrentOriginRef,
-  validateRedirectUrl,
-  validateLinkUrl,
-  validateMediaUrl,
-  validateImageUrl,
-  validateAudioUrl,
-  validateVideoUrl,
-  type ValidateMediaUrlOptions,
-  // URL type detection helpers
-  isExternalUrl,
-  isAnchorLink,
-  isAppProtocol,
-  isRelativePath,
-  isDataUrl,
-  isBlobUrl,
-  isStandardUrl,
-  isFullUrl,
-  normalizeRelativePath,
-} from './urlValidation';

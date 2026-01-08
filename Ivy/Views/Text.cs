@@ -42,6 +42,20 @@ public static class Text
 
     public static TextBuilder H4(IAnyState state) => H4(state.ToString() ?? "");
 
+    public static TextBuilder H5(string content)
+    {
+        return new TextBuilder(content, TextVariant.H5);
+    }
+
+    public static TextBuilder H5(IAnyState state) => H5(state.ToString() ?? "");
+
+    public static TextBuilder H6(string content)
+    {
+        return new TextBuilder(content, TextVariant.H6);
+    }
+
+    public static TextBuilder H6(IAnyState state) => H6(state.ToString() ?? "");
+
     public static TextBuilder P(string content)
     {
         return new TextBuilder(content, TextVariant.P);

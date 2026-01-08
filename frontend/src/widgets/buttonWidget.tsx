@@ -10,7 +10,7 @@ import {
   isExternalUrl,
   isMailtoUrl,
   normalizeRelativePath,
-} from '@/lib/urlValidation';
+} from '@/lib/url';
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';

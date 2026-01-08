@@ -6,7 +6,7 @@ import {
   Item,
 } from '@glideapps/glide-data-grid';
 import { useEventHandler } from '@/components/event-handler';
-import { validateLinkUrl, validateRedirectUrl } from '@/lib/utils';
+import { validateLinkUrl, validateRedirectUrl } from '@/lib/url';
 import { DataColumn } from '../types/types';
 
 interface UseCellInteractionsProps {

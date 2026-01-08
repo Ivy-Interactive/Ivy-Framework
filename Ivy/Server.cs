@@ -61,6 +61,7 @@ public class Server
     private bool _useHttpRedirection;
     internal IServiceProvider? ServiceProvider;
     private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
+    private readonly List<Action<WebApplication>> _appMods = new();
     private List<string> _reservedPaths = new();
     private ServerArgs _args;
 
@@ -241,9 +242,15 @@ public class Server
         return this;
     }
 
-    public Server UseBuilder(Action<WebApplicationBuilder> modify)
+    public Server UseWebApplicationBuilder(Action<WebApplicationBuilder> modify)
     {
         _builderMods.Add(modify);
+        return this;
+    }
+
+    public Server UseWebApplication(Action<WebApplication> modify)
+    {
+        _appMods.Add(modify);
         return this;
     }
 
@@ -491,6 +498,11 @@ public class Server
         app.UseRouting();
         app.UseCors();
         app.UseGrpcWeb();
+
+        foreach (var mod in _appMods)
+        {
+            mod(app);
+        }
 
         app.MapControllers();
         app.MapHub<AppHub>("/ivy/messages");

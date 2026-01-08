@@ -18,13 +18,13 @@ const copyIconVariants = cva('', {
 });
 
 const copyButtonSizeVariants = cva(
-  'p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center',
+  'p-2 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center',
   {
     variants: {
       scale: {
-        Small: 'h-5',
-        Medium: 'h-6',
-        Large: 'h-7',
+        Small: 'h-6',
+        Medium: 'h-8',
+        Large: 'h-9',
       },
     },
     defaultVariants: {
@@ -74,7 +74,13 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
             )
           : 'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer hover:bg-accent hover:shadow-sm border-0',
         !isIconOnly &&
-          (copied ? 'bg-primary text-primary-foreground' : 'text-foreground'),
+          (copied
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-transparent text-muted-foreground hover:text-foreground'),
+        isIconOnly && !copied && 'bg-background hover:bg-accent',
+        copied &&
+          isIconOnly &&
+          'hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary',
         className
       )}
     >
