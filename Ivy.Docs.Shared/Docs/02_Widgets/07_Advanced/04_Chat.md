@@ -23,7 +23,7 @@ This demonstrates the fundamental usage of the Chat widget with basic message ha
 
 ```csharp demo-tabs
 public class BasicChatDemo : ViewBase
-{   
+{
     public override object? Build()
     {
         var messages = UseState(ImmutableArray.Create<ChatMessage>(
@@ -54,7 +54,7 @@ This example shows how to implement async message handling with loading states a
 
 ```csharp demo-tabs
 public class LoadingChatDemo : ViewBase
-{   
+{
     public override object? Build()
     {
         var messages = UseState(ImmutableArray.Create<ChatMessage>(
@@ -73,7 +73,7 @@ public class LoadingChatDemo : ViewBase
 
             // Add user message
             var list = messages.Value.Add(new ChatMessage(ChatSender.User, e.Value));
-            
+
             // Add assistant message with loading
             var assistantIndex = list.Length;
             list = list.Add(new ChatMessage(ChatSender.Assistant, new ChatLoading()));
@@ -84,10 +84,10 @@ public class LoadingChatDemo : ViewBase
                 try
                 {
                     await Task.Delay(3000, cts.Token);
-                    
+
                     // Replace loading with response
                     var all = messages.Value.ToList();
-                    all[assistantIndex] = new ChatMessage(ChatSender.Assistant, 
+                    all[assistantIndex] = new ChatMessage(ChatSender.Assistant,
                         $"Response to: '{e.Value}'");
                     messages.Set(all.ToImmutableArray());
                 }
@@ -118,56 +118,102 @@ public class LoadingChatDemo : ViewBase
 }
 ```
 
-## Interactive Chat with Streaming Output
+## Interactive Chat with Streaming Output and Cancel
 
-A chat that demonstrates real-time streaming responses, where the assistant's message appears word by word as it's being generated.
+A chat that demonstrates real-time streaming responses with the ability to cancel streaming at any time.
 
-This example shows how to implement streaming chat responses. The user's message is added immediately, followed by a loading state. Then, the assistant's response streams in word by word from a simple array, updating the UI in real-time. This pattern is useful for AI assistants that generate responses incrementally, providing immediate feedback to users.
+This example shows how to implement streaming chat responses with proper cancellation support. The user's message is added immediately, followed by a loading indicator. Then, the assistant's response streams in word by word. The Cancel Request button remains visible throughout the streaming process, allowing the user to stop it at any moment. If cancelled, the partial response is preserved.
 
 ```csharp demo-tabs
 public class StreamingChatDemo : ViewBase
-{   
+{
     public override object? Build()
     {
         var messages = UseState(ImmutableArray.Create<ChatMessage>(
-            new ChatMessage(ChatSender.Assistant, "I'm a streaming assistant! Ask me anything and I'll respond with streaming text.")
+            new ChatMessage(ChatSender.Assistant, "I'm a streaming assistant! You can cancel my responses at any time.")
         ));
+
+        // Tracks whether streaming is active - controls Cancel Request button visibility
+        var isStreaming = UseState(false);
+        var ctsState = UseState<CancellationTokenSource?>(default(CancellationTokenSource?));
 
         void OnSendMessage(Event<Chat, string> @event)
         {
+            // Cancel previous request if any
+            ctsState.Value?.Cancel();
+
+            var cts = new CancellationTokenSource();
+            ctsState.Set(cts);
+
+            // Set streaming state to true - this shows the Cancel Request button
+            isStreaming.Set(true);
+
             // Add user message immediately
             var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
             messages.Set(messagesWithUser);
-            
-            // Add loading state immediately
+
+            // Add loading indicator
             var assistantMessageIndex = messagesWithUser.Length;
-            var messagesWithLoading = messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, new ChatStatus("Thinking...")));
+            var messagesWithLoading = messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, new ChatLoading()));
             messages.Set(messagesWithLoading);
-            
-            // Start streaming after a delay
+
+            // Start streaming in background
             _ = Task.Run(async () =>
             {
-                await Task.Delay(2000);
-                
-                var words = new[] { "I'm", "processing", "your", "message:", $"'{@event.Value}'.", 
-                    "This", "is", "a", "streaming", "response", "that", "appears", "word", "by", "word." };
-                
-                var collectedWords = new List<string>();
-                foreach (var word in words)
+                var hasStartedStreaming = false;
+                try
                 {
-                    collectedWords.Add(word);
-                    var text = string.Join(" ", collectedWords);
-                    
+                    await Task.Delay(3000, cts.Token);
+
+                    var words = new[] { "I'm", "processing", "your", "message:", $"'{@event.Value}'.",
+                        "This", "is", "a", "streaming", "response", "that", "appears", "word", "by", "word." };
+
+                    var collectedWords = new List<string>();
+                    foreach (var word in words)
+                    {
+                        collectedWords.Add(word);
+                        var text = string.Join(" ", collectedWords);
+
+                        // Update message with accumulated text
+                        var all = messages.Value.ToList();
+                        all[assistantMessageIndex] = new ChatMessage(ChatSender.Assistant, text);
+                        messages.Set(all.ToImmutableArray());
+
+                        hasStartedStreaming = true;
+                        await Task.Delay(300, cts.Token);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
                     var all = messages.Value.ToList();
-                    all[assistantMessageIndex] = new ChatMessage(ChatSender.Assistant, text);
-                    messages.Set(all.ToImmutableArray());
-                    
-                    await Task.Delay(300);
+                    if (assistantMessageIndex < all.Count)
+                    {
+                        if (!hasStartedStreaming)
+                        {
+                            all[assistantMessageIndex] = new ChatMessage(ChatSender.Assistant,
+                            new Error("Cancelled", "Response was cancelled."));
+                            messages.Set(all.ToImmutableArray());
+                        }
+                        // Otherwise preserve partial streamed text
+                        messages.Set(all.ToImmutableArray());
+                    }
+                }
+                finally
+                {
+                    // Clear streaming state - hides Cancel Request button
+                    isStreaming.Set(false);
+                    ctsState.Set(default(CancellationTokenSource?));
                 }
             });
         }
 
-        return new Chat(messages.Value.ToArray(), OnSendMessage)
+        void OnCancelRequest(Event<Chat> _)
+        {
+            ctsState.Value?.Cancel();
+        }
+
+        return new Chat(messages.Value.ToArray(), OnSendMessage, OnCancelRequest)
+            .Streaming(isStreaming.Value)  // Pass streaming state to control Cancel button
             .Width(Size.Full())
             .Height(Size.Auto());
     }
@@ -182,7 +228,7 @@ This demonstrates how to return complex UI components as chat responses, creatin
 
 ```csharp demo-tabs
 public class InteractiveChatDemo : ViewBase
-{   
+{
     public override object? Build()
     {
         var messages = UseState(ImmutableArray.Create<ChatMessage>(
@@ -193,24 +239,24 @@ public class InteractiveChatDemo : ViewBase
         {
             var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
             messages.Set(messagesWithUser);
-            
+
             object response = @event.Value.ToLower() switch
             {
                 "buttons" => Layout.Horizontal().Gap(1)
                     | new Button("Primary").Variant(ButtonVariant.Primary)
                     | new Button("Secondary").Variant(ButtonVariant.Secondary)
                     | new Button("Outline").Variant(ButtonVariant.Outline),
-                
+
                 "card" => new Card("Interactive Card", new Button("Action")),
-                
+
                 "form" => Layout.Vertical().Gap(1)
                     | new TextInput().Placeholder("Enter your name")
                     | new TextInput().Placeholder("Enter your email")
                     | new Button("Submit").Variant(ButtonVariant.Primary),
-                
+
                 _ => $"You said: '{@event.Value}'. Try sending 'buttons', 'card', or 'form' for interactive responses!"
             };
-            
+
             messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, response)));
         }
 
@@ -229,7 +275,7 @@ This example shows how to use the [Error](../01_Primitives/13_Error.md) widget f
 
 ```csharp demo-tabs
 public class ErrorHandlingChatDemo : ViewBase
-{   
+{
     public override object? Build()
     {
         var messages = UseState(ImmutableArray.Create<ChatMessage>(
@@ -240,20 +286,20 @@ public class ErrorHandlingChatDemo : ViewBase
         {
             var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
             messages.Set(messagesWithUser);
-            
+
             object response = @event.Value.ToLower() switch
             {
                 "error" => new Error("Something went wrong!", "This is an error message! Something went wrong."),
-                
+
                 "warning" => new Error("Be careful!", "This is a warning message! Be careful."),
-                
+
                 "success" => new Error("Great job!", "This is a success message! Everything worked."),
-                
+
                 "loading" => new ChatStatus("Processing your request..."),
-                
+
                 _ => $"You said: '{@event.Value}'. Try sending 'error', 'warning', 'success', or 'loading'!"
             };
-            
+
             messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, response)));
         }
 
@@ -272,11 +318,11 @@ This example showcasing the full range of Ivy [widgets](../../01_Onboarding/02_C
 
 ```csharp demo-tabs
 public class AdvancedChatDemo : ViewBase
-{   
+{
     public override object? Build()
     {
         var messages = UseState(ImmutableArray.Create<ChatMessage>(
-            new ChatMessage(ChatSender.Assistant, 
+            new ChatMessage(ChatSender.Assistant,
                 "Welcome to the Advanced Chat! Try these commands:\n" +
                 "• 'analyze code' - I'll show code analysis\n" +
                 "• 'create form' - I'll show an interactive form\n" +
@@ -289,7 +335,7 @@ public class AdvancedChatDemo : ViewBase
         {
             var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
             messages.Set(messagesWithUser);
-            
+
             object response = @event.Value.ToLower() switch
             {
                 "analyze code" => new Code("""
@@ -299,21 +345,21 @@ public class AdvancedChatDemo : ViewBase
                         {
                             if (string.IsNullOrEmpty(input))
                                 return "Empty input";
-                            
+
                             return input.ToUpper();
                         }
                     }
                     """, Languages.Csharp),
-                
+
                 "create form" => Layout.Vertical().Gap(1)
                     | new TextInput().Placeholder("Enter project name")
                     | new TextInput().Placeholder("Enter description")
                     | new SelectInput<string>(new[] { new Option<string>("Web", "Web"), new Option<string>("Mobile", "Mobile"), new Option<string>("Desktop", "Desktop") })
                     | new SelectInput<string>(new[] { new Option<string>("Low", "Low"), new Option<string>("Medium", "Medium"), new Option<string>("High", "High") })
                     | new Button("Create Project").Variant(ButtonVariant.Primary),
-                
+
                 "show chart" => new LineChart(
-                    new[] { 
+                    new[] {
                         new { Month = "Jan", Value = 10 },
                         new { Month = "Feb", Value = 20 },
                         new { Month = "Mar", Value = 15 },
@@ -321,12 +367,12 @@ public class AdvancedChatDemo : ViewBase
                         new { Month = "May", Value = 30 },
                         new { Month = "Jun", Value = 35 },
                         new { Month = "Jul", Value = 40 }
-                    }, 
-                    "Value", 
+                    },
+                    "Value",
                     "Month"
                 ).Height(Size.Units(50))
                  .Width(Size.Units(80)),
-                
+
                 "table data" => new Table(
                     new TableRow(new TableCell("Name"), new TableCell("Age"), new TableCell("Role"), new TableCell("Department")).IsHeader(),
                     new TableRow(new TableCell("John Doe"), new TableCell("30"), new TableCell("Developer"), new TableCell("Engineering")),
@@ -335,10 +381,10 @@ public class AdvancedChatDemo : ViewBase
                     new TableRow(new TableCell("Alice Williams"), new TableCell("28"), new TableCell("Developer"), new TableCell("Engineering")),
                     new TableRow(new TableCell("Charlie Brown"), new TableCell("32"), new TableCell("QA Engineer"), new TableCell("Quality Assurance"))
                 ).Width(Size.Units(100)),
-                
+
                 _ => $"You said: '{@event.Value}'. Try the commands: 'analyze code', 'create form', 'show chart', or 'table data'!"
             };
-            
+
             messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, response)));
         }
 
