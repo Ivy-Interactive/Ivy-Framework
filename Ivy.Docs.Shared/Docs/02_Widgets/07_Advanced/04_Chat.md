@@ -46,13 +46,11 @@ public class BasicChatDemo : ViewBase
 }
 ```
 
-## AI Assistant with Loading States
+## AI Assistant with Loading States and Cancel Request
 
-A chat that simulates AI processing with loading indicators.
+A chat that simulates AI processing with loading indicators and demonstrates how to cancel ongoing requests.
 
-First, the handler appends the user's message so the transcript updates immediately. It then pushes a `ChatStatus` entry that renders the animated "thinking" indicator while the asynchronous work (a delay in this demo, your AI call in production) runs. When the task completes, the status message is removed and replaced by the assistant's final response so the user never sees an empty gap.
-
-This example shows how to implement async message handling, display loading states using `ChatStatus`, and manage message updates during processing.
+This example shows how to implement async message handling with loading states and request cancellation. When a user sends a message, a loading indicator appears. The user can click the Cancel button at any time to stop the operation.
 
 ```csharp demo-tabs
 public class LoadingChatDemo : ViewBase
@@ -60,28 +58,60 @@ public class LoadingChatDemo : ViewBase
     public override object? Build()
     {
         var messages = UseState(ImmutableArray.Create<ChatMessage>(
-            new ChatMessage(ChatSender.Assistant, "I'm an AI assistant! Ask me anything and I'll respond with a loading state.")
+            new ChatMessage(ChatSender.Assistant, "I'm an AI assistant! You can cancel my responses.")
         ));
 
-        async ValueTask OnSendMessage(Event<Chat, string> @event)
+        var ctsState = UseState<CancellationTokenSource?>(default(CancellationTokenSource?));
+
+        void OnSendMessage(Event<Chat, string> e)
         {
-            var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
-            messages.Set(messagesWithUser);
+            // Cancel previous request if any
+            ctsState.Value?.Cancel();
+
+            var cts = new CancellationTokenSource();
+            ctsState.Set(cts);
+
+            // Add user message
+            var list = messages.Value.Add(new ChatMessage(ChatSender.User, e.Value));
             
-            // Show loading state
-            var messagesWithStatus = messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, new ChatStatus("Thinking...")));
-            messages.Set(messagesWithStatus);
-            
-            // Simulate processing delay
-            await Task.Delay(2000);
-            
-            // Remove loading and add response
-            var withoutStatus = messagesWithStatus.RemoveAt(messagesWithStatus.Length - 1);
-            messages.Set(withoutStatus.Add(new ChatMessage(ChatSender.Assistant, 
-                $"I processed your message: '{@event.Value}'. Here's a thoughtful response based on what you said.")));
+            // Add assistant message with loading
+            var assistantIndex = list.Length;
+            list = list.Add(new ChatMessage(ChatSender.Assistant, new ChatLoading()));
+            messages.Set(list);
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(3000, cts.Token);
+                    
+                    // Replace loading with response
+                    var all = messages.Value.ToList();
+                    all[assistantIndex] = new ChatMessage(ChatSender.Assistant, 
+                        $"Response to: '{e.Value}'");
+                    messages.Set(all.ToImmutableArray());
+                }
+                catch (OperationCanceledException)
+                {
+                    // Handle cancellation
+                    var all = messages.Value.ToList();
+                    all[assistantIndex] = new ChatMessage(ChatSender.Assistant,
+                        new Error("Request Cancelled", "The request was cancelled by the user."));
+                    messages.Set(all.ToImmutableArray());
+                }
+                finally
+                {
+                    ctsState.Set(default(CancellationTokenSource?));
+                }
+            });
         }
 
-        return new Chat(messages.Value.ToArray(), OnSendMessage)
+        void OnCancelRequest(Event<Chat> _)
+        {
+            ctsState.Value?.Cancel();
+        }
+
+        return new Chat(messages.Value.ToArray(), OnSendMessage, OnCancelRequest)
             .Width(Size.Full())
             .Height(Size.Auto());
     }
