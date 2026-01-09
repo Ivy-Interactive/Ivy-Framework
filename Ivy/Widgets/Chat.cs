@@ -51,7 +51,8 @@ public record Chat : WidgetBase<Chat>
     ) : this(
         messages,
         e => { onSendMessage(e); return ValueTask.CompletedTask; },
-        e => { onCancelRequest(e); return ValueTask.CompletedTask; }
+        onCancelRequest != null ? e => { onCancelRequest(e); return ValueTask.CompletedTask; }
+    : null
     )
     {
     }
