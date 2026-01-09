@@ -3,7 +3,7 @@ import Icon from '@/components/Icon';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { RotateCw, X } from 'lucide-react';
-import type { TabWidgetProps } from '../types';
+import { getTabProps } from '../utils/tabUtils';
 
 interface TabContentRendererProps {
   tabWidget: React.ReactElement;
@@ -38,7 +38,10 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
 }) => {
   if (!React.isValidElement(tabWidget)) return null;
 
-  const { title, id: tabId, icon, badge } = tabWidget.props as TabWidgetProps;
+  const tabProps = getTabProps(tabWidget);
+  if (!tabProps) return null;
+
+  const { title, id: tabId, icon, badge } = tabProps;
   const isActive = activeTabId === tabId;
 
   return (

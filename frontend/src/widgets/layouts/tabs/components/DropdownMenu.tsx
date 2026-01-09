@@ -10,7 +10,7 @@ import { ChevronDown } from 'lucide-react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import { SortableDropdownMenuItem } from './Sortable';
-import type { TabWidgetProps } from '../types';
+import { getTabProps } from '../utils/tabUtils';
 
 interface TabsDropdownMenuProps {
   dropdownOpen: boolean;
@@ -74,8 +74,8 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
               <div className="flex flex-col gap-1 w-48">
                 {orderedTabWidgets.map(tabWidget => {
                   if (!React.isValidElement(tabWidget)) return null;
-                  const props = tabWidget.props as Partial<TabWidgetProps>;
-                  if (!props.id) return null;
+                  const props = getTabProps(tabWidget);
+                  if (!props?.id) return null;
                   const { title, id } = props;
 
                   // Only render tabs that are hidden

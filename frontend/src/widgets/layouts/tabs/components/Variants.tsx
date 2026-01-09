@@ -5,7 +5,7 @@ import { getPadding, getWidth } from '@/lib/styles';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import { SortableTabTrigger } from './Sortable';
-import type { TabWidgetProps } from '../types';
+import { getTabProps } from '../utils/tabUtils';
 
 interface ContentVariantProps {
   removeParentPadding?: boolean;
@@ -141,8 +141,8 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
         >
           {orderedTabWidgets.map((tabWidget, index) => {
             if (!React.isValidElement(tabWidget)) return null;
-            const props = tabWidget.props as Partial<TabWidgetProps>;
-            if (!props.id) return null;
+            const props = getTabProps(tabWidget);
+            if (!props?.id) return null;
             const { title, id } = props;
 
             // Only render tabs that are visible
@@ -199,8 +199,8 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
       <div className="flex-1 overflow-hidden">
         {orderedTabWidgets.map(tabWidget => {
           if (!React.isValidElement(tabWidget)) return null;
-          const props = tabWidget.props as Partial<TabWidgetProps>;
-          if (!props.id) return null;
+          const props = getTabProps(tabWidget);
+          if (!props?.id) return null;
           const { id } = props;
           if (!loadedTabs.has(id)) return null;
           const paddingStyle = getPadding(padding);
@@ -296,8 +296,8 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
               >
                 {orderedTabWidgets.map(tabWidget => {
                   if (!React.isValidElement(tabWidget)) return null;
-                  const props = tabWidget.props as Partial<TabWidgetProps>;
-                  if (!props.id) return null;
+                  const props = getTabProps(tabWidget);
+                  if (!props?.id) return null;
                   const { id } = props;
 
                   // Only render tabs that are visible
@@ -355,8 +355,8 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
         {React.useMemo(() => {
           return tabWidgets.map(tabWidget => {
             if (!React.isValidElement(tabWidget)) return null;
-            const props = tabWidget.props as Partial<TabWidgetProps>;
-            if (!props.id) return null;
+            const props = getTabProps(tabWidget);
+            if (!props?.id) return null;
             const { id } = props;
 
             if (!loadedTabs.has(id)) return null;

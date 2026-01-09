@@ -2,23 +2,70 @@ import React from 'react';
 import type { TabWidgetProps } from '../types';
 
 // ====================
+// Props Extraction Helpers
+// ====================
+
+/**
+ * Extracts TabWidgetProps from either a direct TabWidget or MemoizedWidget wrapper
+ * @param element - React element (TabWidget or MemoizedWidget)
+ * @returns The tab widget props, or undefined if not a valid tab
+ */
+export function getTabProps(
+  element: React.ReactElement
+): TabWidgetProps | undefined {
+  const directProps = element.props as TabWidgetProps;
+
+  // Check if it's a MemoizedWidget wrapping a tab
+  const memoProps = element.props as {
+    node?: TabWidgetProps & { type?: string };
+  };
+  if (memoProps.node?.type === 'Ivy.Tab') {
+    // Extract props from the node, mapping widget node structure to TabWidgetProps
+    const node = memoProps.node;
+    return {
+      id: node.id,
+      title:
+        (node as unknown as { props?: { title?: string } }).props?.title ?? '',
+      icon: (node as unknown as { props?: { icon?: string } }).props?.icon,
+      badge: (node as unknown as { props?: { badge?: string } }).props?.badge,
+      children: node.children,
+    } as TabWidgetProps;
+  }
+
+  // Direct TabWidget - props are already in the right format
+  if (directProps.id !== undefined) {
+    return directProps;
+  }
+
+  return undefined;
+}
+
+// ====================
 // Tab Filtering & Ordering
 // ====================
 
 /**
  * Filters children to only include valid TabWidget elements
+ * Supports both direct TabWidget elements and MemoizedWidget-wrapped tabs
  * @param children - React children to filter
  * @returns Array of valid TabWidget elements
  */
 export function filterTabWidgets(
   children: React.ReactNode[]
 ): React.ReactElement<TabWidgetProps>[] {
-  return React.Children.toArray(children).filter(
-    child =>
-      React.isValidElement(child) &&
-      (child.type as React.ComponentType<TabWidgetProps>)?.displayName ===
-        'TabWidget'
-  ) as React.ReactElement<TabWidgetProps>[];
+  return React.Children.toArray(children).filter(child => {
+    if (!React.isValidElement(child)) return false;
+
+    // Direct TabWidget check
+    const componentType = child.type as React.ComponentType<TabWidgetProps>;
+    if (componentType?.displayName === 'TabWidget') return true;
+
+    // MemoizedWidget wrapping a Tab - check the node.type prop
+    const props = child.props as { node?: { type?: string } };
+    if (props.node?.type === 'Ivy.Tab') return true;
+
+    return false;
+  }) as React.ReactElement<TabWidgetProps>[];
 }
 
 /**
@@ -33,9 +80,10 @@ export function orderTabWidgets(
 ): React.ReactElement<TabWidgetProps>[] {
   return tabOrder
     .map(id =>
-      tabWidgets.find(
-        tab => (tab as React.ReactElement<TabWidgetProps>).props.id === id
-      )
+      tabWidgets.find(tab => {
+        const props = getTabProps(tab);
+        return props?.id === id;
+      })
     )
     .filter(Boolean) as React.ReactElement<TabWidgetProps>[];
 }
@@ -48,9 +96,9 @@ export function orderTabWidgets(
 export function extractTabIds(
   tabWidgets: React.ReactElement<TabWidgetProps>[]
 ): string[] {
-  return tabWidgets.map(
-    tab => (tab as React.ReactElement<TabWidgetProps>).props.id
-  );
+  return tabWidgets
+    .map(tab => getTabProps(tab)?.id)
+    .filter((id): id is string => id !== undefined);
 }
 
 /**
@@ -216,12 +264,16 @@ export function estimateUnrenderedTabWidths(
     // Skip if we already have a measurement
     if (measurements.has(tabId)) continue;
 
-    const tabWidget = tabWidgets.find(
-      tab => (tab as React.ReactElement<TabWidgetProps>).props.id === tabId
-    );
+    const tabWidget = tabWidgets.find(tab => {
+      const props = getTabProps(tab);
+      return props?.id === tabId;
+    });
     if (!tabWidget || !React.isValidElement(tabWidget)) continue;
 
-    const { title, icon, badge } = tabWidget.props as TabWidgetProps;
+    const tabProps = getTabProps(tabWidget);
+    if (!tabProps) continue;
+
+    const { title, icon, badge } = tabProps;
     const estimatedWidth = estimateTabWidth(
       title,
       icon,
