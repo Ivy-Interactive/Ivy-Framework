@@ -39,6 +39,8 @@ public record Chat : WidgetBase<Chat>
 
     [Prop] public string Placeholder { get; set; } = "Type a message...";
 
+    [Prop] public bool Streaming { get; set; }
+
     public Chat(ChatMessage[] messages, Action<Event<Chat, string>> onSendMessage)
     : this(messages, e => { onSendMessage(e); return ValueTask.CompletedTask; }, null)
     {
@@ -63,6 +65,12 @@ public static class ChatExtensions
     public static Chat Placeholder(this Chat chat, string placeholder)
     {
         chat.Placeholder = placeholder;
+        return chat;
+    }
+
+    public static Chat Streaming(this Chat chat, bool streaming)
+    {
+        chat.Streaming = streaming;
         return chat;
     }
 }

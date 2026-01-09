@@ -47,6 +47,7 @@ ChatMessageWidget.displayName = 'ChatMessageWidget';
 interface ChatWidgetProps {
   id: string;
   placeholder?: string;
+  streaming?: boolean;
   children: React.ReactElement<ChatMessageWidgetProps>[];
   width?: string;
   height?: string;
@@ -56,6 +57,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   id,
   children,
   placeholder = 'Type a message...',
+  streaming = false,
   width = 'Full',
   height = 'Full',
 }) => {
@@ -69,7 +71,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   );
 
   // Check if any ChatMessage contains ChatLoading as its child
-  const isLoading = React.Children.toArray(children).some(child => {
+  const hasLoadingWidget = React.Children.toArray(children).some(child => {
     if (
       React.isValidElement(child) &&
       (child.type as React.ComponentType<unknown>)?.displayName ===
@@ -91,6 +93,8 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     }
     return false;
   });
+
+  const isLoading = hasLoadingWidget || streaming;
 
   const [input, setInput] = useState('');
 
