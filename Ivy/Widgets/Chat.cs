@@ -15,11 +15,16 @@ public enum ChatSender
 public record Chat : WidgetBase<Chat>
 {
     [OverloadResolutionPriority(1)]
-    public Chat(ChatMessage[] messages, Func<Event<Chat, string>, ValueTask> onSendMessage) : base(messages.Cast<object>().ToArray())
+    public Chat(
+        ChatMessage[] messages,
+        Func<Event<Chat, string>, ValueTask> onSendMessage,
+        Func<Event<Chat>, ValueTask>? onCancelRequest = null
+    ) : base(messages.Cast<object>().ToArray())
     {
         Width = Size.Full();
         Height = Size.Full();
         OnSendMessage = onSendMessage;
+        OnCancelRequest = onCancelRequest;
     }
 
     internal Chat()
@@ -30,10 +35,24 @@ public record Chat : WidgetBase<Chat>
 
     [Event] public Func<Event<Chat, string>, ValueTask>? OnSendMessage { get; set; }
 
+    [Event] public Func<Event<Chat>, ValueTask>? OnCancelRequest { get; set; }
+
     [Prop] public string Placeholder { get; set; } = "Type a message...";
 
     public Chat(ChatMessage[] messages, Action<Event<Chat, string>> onSendMessage)
-    : this(messages, e => { onSendMessage(e); return ValueTask.CompletedTask; })
+    : this(messages, e => { onSendMessage(e); return ValueTask.CompletedTask; }, null)
+    {
+    }
+
+    public Chat(
+        ChatMessage[] messages,
+        Action<Event<Chat, string>> onSendMessage,
+        Action<Event<Chat>>? onCancelRequest
+    ) : this(
+        messages,
+        e => { onSendMessage(e); return ValueTask.CompletedTask; },
+        e => { onCancelRequest(e); return ValueTask.CompletedTask; }
+    )
     {
     }
 }

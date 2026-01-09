@@ -4,7 +4,7 @@ import { ChatMessageList } from '@/components/ChatMessageList';
 import { useEventHandler } from '@/components/event-handler';
 import { MessageLoading } from '@/components/MessageLoading';
 import { Button } from '@/components/ui/button';
-import { CornerDownLeft } from 'lucide-react';
+import { CornerDownLeft, Square } from 'lucide-react';
 import React, { FormEvent, useState, KeyboardEvent, ReactNode } from 'react';
 import { User, LucideStars } from 'lucide-react';
 import { TextShimmer } from '@/components/TextShimmer';
@@ -68,6 +68,30 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
         'ChatMessageWidget'
   );
 
+  // Check if any ChatMessage contains ChatLoading as its child
+  const isLoading = React.Children.toArray(children).some(child => {
+    if (
+      React.isValidElement(child) &&
+      (child.type as React.ComponentType<unknown>)?.displayName ===
+        'ChatMessageWidget' &&
+      child.props &&
+      typeof child.props === 'object' &&
+      'children' in child.props
+    ) {
+      // Check children of ChatMessage for ChatLoadingWidget
+      const messageChildren = React.Children.toArray(
+        (child.props as { children?: ReactNode }).children
+      );
+      return messageChildren.some(
+        msgChild =>
+          React.isValidElement(msgChild) &&
+          (msgChild.type as React.ComponentType<unknown>)?.displayName ===
+            'ChatLoadingWidget'
+      );
+    }
+    return false;
+  });
+
   const [input, setInput] = useState('');
 
   const handleSubmit = (e: FormEvent) => {
@@ -75,6 +99,11 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     if (!input.trim()) return;
     setInput('');
     eventHandler('OnSendMessage', id, [input.trim()]);
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    eventHandler('OnCancelRequest', id, []);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -108,10 +137,22 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
             className="min-h-12 resize-none rounded-lg bg-background border-0 p-3 shadow-none focus-visible:ring-0"
           />
           <div className="flex items-center p-3 pt-0 justify-between">
-            <Button type="submit" className="ml-auto gap-1.5">
-              Send Message
-              <CornerDownLeft className="size-3.5" />
-            </Button>
+            {isLoading ? (
+              <Button
+                type="button"
+                onClick={handleCancel}
+                variant="destructive"
+                className="ml-auto gap-1.5"
+              >
+                Cancel Request
+                <Square className="size-3.5 fill-black" />
+              </Button>
+            ) : (
+              <Button type="submit" className="ml-auto gap-1.5">
+                Send Message
+                <CornerDownLeft className="size-3.5" />
+              </Button>
+            )}
           </div>
         </form>
       </div>
@@ -124,6 +165,8 @@ type ChatLoadingWidgetProps = Record<never, never>;
 export const ChatLoadingWidget: React.FC<ChatLoadingWidgetProps> = () => {
   return <MessageLoading />;
 };
+
+ChatLoadingWidget.displayName = 'ChatLoadingWidget';
 
 interface ChatStatusWidgetProps {
   text: string;
