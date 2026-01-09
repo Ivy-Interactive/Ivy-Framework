@@ -13,18 +13,10 @@ searchHints:
 # Query
 
 <Ingress>
-Fetch, cache, and synchronize server data with the UseQuery hook - an SWR-style data fetching solution for Ivy [views](./Views.md).
+Fetch, cache, and synchronize server data with the UseQuery hook.
 </Ingress>
 
-The `UseQuery` hook provides a powerful way to fetch and cache asynchronous data. Inspired by SWR (stale-while-revalidate), it returns cached data immediately while revalidating in the background, keeping your UI fast and your data fresh.
-
-```mermaid
-graph TD
-    A[UseQuery] --> B[Automatic Caching]
-    A --> C[Background Revalidation]``
-    A --> D[Error Handling]
-    A --> E[Mutations & Invalidation]
-```
+The `UseQuery` hook provides a powerful way to fetch and cache asynchronous data. Inspired by [SWR](https://swr.vercel.app/) (stale-while-revalidate), it returns cached data immediately while revalidating in the background, keeping your UI fast and your data fresh.
 
 ## Basic Usage
 
@@ -52,6 +44,10 @@ public class BasicQueryView : ViewBase
     }
 }
 ```
+
+## Keys
+
+Todo: Explain keys in more detail, including key factories.
 
 ## Query Result
 
@@ -113,14 +109,6 @@ var query = UseQuery(
 ## Query Scopes
 
 Control where query data is cached and shared:
-
-```mermaid
-graph LR
-    A[QueryScope] --> B[Server - Shared across all users]
-    A --> C[App - Per browser session]
-    A --> D[Device - Per device]
-    A --> E[View - Per component instance]
-```
 
 | Scope | Description |
 |-------|-------------|
@@ -386,7 +374,7 @@ public class PollingView : ViewBase
 
 Use `KeepPrevious` to show previous page data while loading the next:
 
-```csharp demo-tabs
+```csharp demo-below
 public class PaginatedView : ViewBase
 {
     public override object? Build()
@@ -423,7 +411,7 @@ public class PaginatedView : ViewBase
 
 Skip initial fetch when you already have data (e.g., from a list view):
 
-```csharp demo-tabs
+```csharp demo-below
 public class ProductListView : ViewBase
 {
     public override object? Build()
@@ -481,7 +469,7 @@ public class ProductDetailView(Product initialProduct) : ViewBase
 
 Errors are captured in the `Error` property:
 
-```csharp demo-tabs
+```csharp demo-below
 public class ErrorHandlingView : ViewBase
 {
     public override object? Build()
@@ -512,57 +500,8 @@ public class ErrorHandlingView : ViewBase
 }
 ```
 
-## Best Practices
-
-### 1. Use Meaningful Keys
-
-```csharp
-// Good: Descriptive, includes parameters
-UseQuery(key: $"user/{userId}", fetcher: ...);
-UseQuery(key: $"products?category={category}&page={page}", fetcher: ...);
-
-// Bad: Generic or ambiguous
-UseQuery(key: "data", fetcher: ...);
-UseQuery(key: "1", fetcher: ...);
-```
-
-### 2. Choose the Right Scope
-
-```csharp
-// Server scope: Global data shared by everyone
-UseQuery(key: "exchange-rates", options: QueryScope.Server, ...);
-
-// View scope: Component-specific data with automatic cleanup
-UseQuery(key: "form-suggestions", options: QueryScope.View, ...);
-```
-
-### 3. Handle Loading States
-
-```csharp
-// Good: Graceful loading UI
-if (query.Loading)
-    return new Skeleton().Height(Size.Units(4));
-
-// Show data with revalidation indicator
-return Layout.Vertical()
-    | Text.Literal(query.Value ?? "")
-    | (query.Validating ? Text.Muted("Updating...") : null!);
-```
-
-### 4. Use Tags for Related Queries
-
-```csharp
-// Tag related queries for bulk operations
-UseQuery(key: "user/profile", tags: ["user"], ...);
-UseQuery(key: "user/settings", tags: ["user"], ...);
-UseQuery(key: "user/notifications", tags: ["user"], ...);
-
-// Invalidate all user data at once
-queryService.InvalidateByTag("user");
-```
-
 ## See Also
 
-- [State Management](./State.md) - Managing component state
-- [Effects](./Effects.md) - Performing side effects
-- [Services](./Services.md) - Dependency injection in Ivy
+- [State](./05_State.md) - Managing view state
+- [Effects](./09_Effects.md) - Performing side effects
+- [Services](./18_Services.md) - Dependency injection in Ivy
