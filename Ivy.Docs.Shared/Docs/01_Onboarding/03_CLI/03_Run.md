@@ -1,3 +1,13 @@
+---
+searchHints:
+  - run
+  - start
+  - serve
+  - dev
+  - watch
+  - hot-reload
+---
+
 # Ivy Run
 
 <Ingress>
