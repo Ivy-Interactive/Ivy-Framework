@@ -68,11 +68,8 @@ public class SsrMarkdownMiddleware
             var encodedMarkdown = System.Web.HttpUtility.HtmlEncode(markdown);
             var noscriptFallback =
                 "<noscript>" +
-                "<style>body > *:not(noscript) { display: none !important; }</style>" +
-                "<div style=\"padding: 20px;\">" +
-                "<h1 style=\"font-family: system-ui, sans-serif; margin-bottom: 20px;\">Ivy Documentation</h1>" +
-                "<pre style=\"white-space: pre-wrap; font-family: system-ui, sans-serif; line-height: 1.6;\">" + encodedMarkdown + "</pre>" +
-                "</div>" +
+                "<style>#root { display: none; }</style>" +
+                "<pre style=\"white-space: pre-wrap; font-family: system-ui, sans-serif; padding: 20px; line-height: 1.6;\">" + encodedMarkdown + "</pre>" +
                 "</noscript>";
 
             html = html.Replace("</body>", noscriptFallback + "</body>");
