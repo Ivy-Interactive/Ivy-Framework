@@ -19,6 +19,8 @@ The `Server.UseBuilder()` method has been renamed to `UseWebApplicationBuilder()
 
 The `Audio` widget has been renamed to `AudioPlayer` for better clarity and consistency. It can be visible in the AudioPlayer [doc page](https://docs.ivy.app/widgets/primitives/audio-player)
 
+<img width="782" height="100" alt="Screenshot 2026-01-10 at 04 48 14" src="https://github.com/user-attachments/assets/271105c4-124e-4f69-9287-e1b1c9f3904c" />
+
 ### Icons Enum Updated to Match Lucide React 0.562.0
 
 The `Icons` enum [has been updated](https://github.com/Ivy-Interactive/Ivy-Framework/pull/1912) to align with the latest version of lucide-react (0.562.0).
@@ -37,6 +39,8 @@ The `ReadOnlyInput` widget now includes a non-generic constructor for string val
 var readOnly = new ReadOnlyInput("User ID: 12345");
 ```
 
+<img width="786" height="94" alt="Screenshot 2026-01-10 at 04 48 37" src="https://github.com/user-attachments/assets/f0787a55-57ef-44c8-bea3-1eb819511ff4" />
+
 ### LLM-Friendly Documentation
 
 [Ivy.Docs](https://docs.ivy.app/onboarding/getting-started/introduction) had gotten a lot of LLM-friendly updates. `/robots.txt` and `/sitemap.xml` are now provided at the root for bots
@@ -50,6 +54,8 @@ Calendar widgets (`DateInput`, `DateTimeInput`, `DateRangeInput`) now include dr
 - **Improved date visibility** - Fixed an issue where some dates could appear invisible in certain scenarios
 
 More info on the [Date Time input here](https://docs.ivy.app/widgets/inputs/date-time) and on [Date Range input here](https://docs.ivy.app/widgets/inputs/date-range)
+
+<img width="663" height="315" alt="Screenshot 2026-01-10 at 04 49 30" src="https://github.com/user-attachments/assets/d4817c57-9f52-4381-8346-afdc05d70412" />
 
 ### Font Loading Performance
 
@@ -75,7 +81,11 @@ Widgets now inherit scale settings from their parent widgets, ensuring consisten
 
 The `Terminal` widget now includes a convenient copy-to-clipboard button that automatically extracts and copies only command lines from the terminal display.
 
+<img width="780" height="96" alt="Screenshot 2026-01-10 at 04 51 43" src="https://github.com/user-attachments/assets/a1e917fe-19c2-404e-a639-c3bdd34b9da8" />
+
 ### Code Snippet Copy Button Enhancement
+
+<img width="756" height="107" alt="Screenshot 2026-01-10 at 04 56 59" src="https://github.com/user-attachments/assets/1d31e0c6-97d8-4c6c-acc2-72219337e010" />
 
 ## Bug Fixes
 
