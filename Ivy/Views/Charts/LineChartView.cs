@@ -105,8 +105,6 @@ public class LineChartBuilder<TSource>(
     private readonly List<TableCalculation> _calculations = new();
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
-    private Func<Dictionary<string, object>, object>? _sortKeySelector;
-    private SortOrder _sortOrder = SortOrder.None;
 
     public override object? Build()
     {
@@ -130,12 +128,6 @@ public class LineChartBuilder<TSource>(
                 var results = await data
                     .ToPivotTable()
                     .Dimension(dimension).Measures(_measures).TableCalculations(_calculations).ExecuteAsync();
-
-                if (_sortOrder != SortOrder.None)
-                {
-                    results = ApplySorting(results, dimension.Name);
-                }
-
                 lineChartData.Set([.. results]);
             }
             finally
@@ -210,36 +202,6 @@ public class LineChartBuilder<TSource>(
     public LineChartBuilder<TSource> Toolbox()
     {
         return Toolbox(_ => new Toolbox());
-    }
-
-    public LineChartBuilder<TSource> SortBy(SortOrder order)
-    {
-        _sortOrder = order;
-        _sortKeySelector = null;
-        return this;
-    }
-
-    public LineChartBuilder<TSource> SortBy<TKey>(
-        Func<Dictionary<string, object>, TKey> keySelector,
-        SortOrder order = SortOrder.Ascending)
-    {
-        _sortOrder = order;
-        _sortKeySelector = row => keySelector(row)!;
-        return this;
-    }
-
-    private Dictionary<string, object>[] ApplySorting(Dictionary<string, object>[] data, string dimensionName)
-    {
-        if (_sortKeySelector != null)
-        {
-            return _sortOrder == SortOrder.Ascending
-                ? data.OrderBy(_sortKeySelector).ToArray()
-                : data.OrderByDescending(_sortKeySelector).ToArray();
-        }
-
-        return _sortOrder == SortOrder.Ascending
-            ? data.OrderBy(row => row[dimensionName]).ToArray()
-            : data.OrderByDescending(row => row[dimensionName]).ToArray();
     }
 }
 

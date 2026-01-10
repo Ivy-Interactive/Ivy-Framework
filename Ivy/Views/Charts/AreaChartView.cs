@@ -74,8 +74,6 @@ public class AreaChartBuilder<TSource>(
     private readonly List<Measure<TSource>> _measures = [.. measures ?? []];
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
-    private Func<Dictionary<string, object>, object>? _sortKeySelector;
-    private SortOrder _sortOrder = SortOrder.None;
 
     public override object? Build()
     {
@@ -99,12 +97,6 @@ public class AreaChartBuilder<TSource>(
                 var results = await data
                     .ToPivotTable()
                     .Dimension(dimension).Measures(_measures).ExecuteAsync();
-
-                if (_sortOrder != SortOrder.None)
-                {
-                    results = ApplySorting(results, dimension.Name);
-                }
-
                 lineChartData.Set([.. results]);
             }
             finally
@@ -172,36 +164,6 @@ public class AreaChartBuilder<TSource>(
     public AreaChartBuilder<TSource> Toolbox()
     {
         return Toolbox(_ => new Toolbox());
-    }
-
-    public AreaChartBuilder<TSource> SortBy(SortOrder order)
-    {
-        _sortOrder = order;
-        _sortKeySelector = null;
-        return this;
-    }
-
-    public AreaChartBuilder<TSource> SortBy<TKey>(
-        Func<Dictionary<string, object>, TKey> keySelector,
-        SortOrder order = SortOrder.Ascending)
-    {
-        _sortOrder = order;
-        _sortKeySelector = row => keySelector(row)!;
-        return this;
-    }
-
-    private Dictionary<string, object>[] ApplySorting(Dictionary<string, object>[] data, string dimensionName)
-    {
-        if (_sortKeySelector != null)
-        {
-            return _sortOrder == SortOrder.Ascending
-                ? data.OrderBy(_sortKeySelector).ToArray()
-                : data.OrderByDescending(_sortKeySelector).ToArray();
-        }
-
-        return _sortOrder == SortOrder.Ascending
-            ? data.OrderBy(row => row[dimensionName]).ToArray()
-            : data.OrderByDescending(row => row[dimensionName]).ToArray();
     }
 }
 
