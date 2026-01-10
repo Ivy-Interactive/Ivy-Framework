@@ -69,6 +69,8 @@ The `ColorInput` widget now automatically validates color values and displays an
 - **Color enums** - Must be a valid value from the `Colors` enum
 - **Invalid entries** - Automatically marked with "Invalid color format" error message
 
+<img width="550" height="236" alt="Screenshot 2026-01-10 at 16 24 03" src="https://github.com/user-attachments/assets/4306ca18-9627-41f5-a6c0-3449bfeaa787" />
+
 ### Widget Serialization Optimization
 
 Added `AlwaysSerialize` property to `Prop` attribute to bypass default value optimization for specific properties. This is used by default for values in `Select` input.
@@ -76,6 +78,8 @@ Added `AlwaysSerialize` property to `Prop` attribute to bypass default value opt
 ### Scale API inheritance in widgets
 
 Widgets now inherit scale settings from their parent widgets, ensuring consistent sizing throughout nested component hierarchies. When you set a scale on a parent widget, all children automatically inherit that scale unless explicitly overridden.
+
+<img width="1200" height="588" alt="Screenshot 2026-01-10 at 16 42 08" src="https://github.com/user-attachments/assets/3b084b7b-dbd8-42c7-b93c-80ecbb742cc5" />
 
 ### Terminal Widget Copy Button
 
@@ -97,9 +101,7 @@ The `Terminal` widget now includes a convenient copy-to-clipboard button that au
 - Chart Configuration Consistency
 - GrpcDataTableService is now loaded lazily
 - Fixed incorrent display of x-axis labels in some charts
-- When applying a new theme, if some variables were not defined in the new theme, defaults are now applied
-
-## New Features
+- When applying a new theme, if some variables were not defined in the new theme, defaults are now applied.
 
 ### Clerk Authentication Provider
 
@@ -178,6 +180,8 @@ yield return new AppDescriptor(
     MenuItems: [/* ... */]
 )
 ```
+
+<img width="261" height="41" alt="Screenshot 2026-01-10 at 16 33 32" src="https://github.com/user-attachments/assets/fb59a13b-fe5b-445c-a921-206c9c1e494f" />
 
 ## What's Changed
 
