@@ -17,13 +17,13 @@ The `Server.UseBuilder()` method has been renamed to `UseWebApplicationBuilder()
 
 ### Audio Widget Renamed to AudioPlayer
 
-The `Audio` widget has been renamed to `AudioPlayer` for better clarity and consistency. [Read more here](https://docs.ivy.app/widgets/primitives/audio-player)
+The `Audio` widget has been renamed to `AudioPlayer` for better clarity and consistency. It can be visible in the AudioPlayer [doc page](https://docs.ivy.app/widgets/primitives/audio-player)
 
 ### Icons Enum Updated to Match Lucide React 0.562.0
 
 The `Icons` enum [has been updated](https://github.com/Ivy-Interactive/Ivy-Framework/pull/1912) to align with the latest version of lucide-react (0.562.0).
 
-- 10 icons were renamed (e.g., AlignCenter → TextAlignCenter, Chrome → Chromium)
+- 10 icons were renamed (e.g., AlignCenter - TextAlignCenter, Chrome - Chromium)
 - 16 icons were removed (mostly *2 variants like FileCheck2, plus Text, FileJson, LetterText)
 More info on how to use Icons can be found [here](https://docs.ivy.app/widgets/primitives/icon)
 
@@ -31,7 +31,7 @@ More info on how to use Icons can be found [here](https://docs.ivy.app/widgets/p
 
 ### ReadOnlyInput Simplified Constructor
 
-The `ReadOnlyInput` widget now includes a non-generic constructor for string values. [Read more here](https://docs.ivy.app/widgets/inputs/read-only)
+The `ReadOnlyInput` widget now includes a non-generic constructor for string values. [For more info visit full doc page](https://docs.ivy.app/widgets/inputs/read-only)
 
 ```csharp
 var readOnly = new ReadOnlyInput("User ID: 12345");
@@ -58,8 +58,6 @@ Font flickering during page load has been eliminated by migrating to the Ivy Des
 ### Automatic Color Input Validation
 
 The `ColorInput` widget now automatically validates color values and displays an error state when invalid formats are entered.
-
-**What's validated:**
 
 - **Hex colors** - Must match valid formats: `#RGB`, `#RRGGBB`, or `#RRGGBBAA`
 - **Color enums** - Must be a valid value from the `Colors` enum
