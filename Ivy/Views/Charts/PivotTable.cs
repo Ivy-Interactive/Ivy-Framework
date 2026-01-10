@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using Ivy.Charts;
+using Ivy.Core.Helpers;
 
 namespace Ivy.Views.Charts;
 
@@ -137,6 +139,8 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
     private List<Measure<TSource>> _measures { get; } = new();
     private List<TableCalculation> _calculations { get; } = new();
     private IQueryable<TSource> Data { get; } = data;
+    private Expression<Func<TSource, object>>? _sortSelector;
+    private SortOrder _sortOrder = SortOrder.None;
 
     public PivotTableBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
@@ -187,10 +191,86 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return new PivotTableMapper<TSource, TDestination>(this);
     }
 
-    public Task<Dictionary<string, object>[]> ExecuteAsync(CancellationToken cancellationToken = default)
+    public PivotTableBuilder<TSource> SortBy(Expression<Func<TSource, object>> selector, SortOrder order = SortOrder.Ascending)
+    {
+        _sortSelector = selector;
+        _sortOrder = order;
+        return this;
+    }
+
+    public PivotTableBuilder<TSource> SortBy(SortOrder order)
+    {
+        _sortOrder = order;
+        _sortSelector = null;
+        return this;
+    }
+
+    public async Task<Dictionary<string, object>[]> ExecuteAsync(CancellationToken cancellationToken = default)
     {
         var pivotTable = new PivotTable<TSource>(_dimensions, _measures, _calculations);
-        return pivotTable.ExecuteAsync(Data, cancellationToken);
+        var results = await pivotTable.ExecuteAsync(Data, cancellationToken);
+
+        if (_sortOrder != SortOrder.None)
+        {
+            results = ApplySorting(results);
+        }
+
+        return results;
+    }
+
+    private Dictionary<string, object>[] ApplySorting(Dictionary<string, object>[] data)
+    {
+        if (_sortSelector != null)
+        {
+            // Compile the selector and create a key extractor that works with Dictionary rows
+            var compiledSelector = _sortSelector.Compile();
+            var dimensionName = _dimensions.FirstOrDefault()?.Name ?? string.Empty;
+
+            // We need to extract the original value and apply the selector
+            // Since data is already aggregated, we use the dimension value
+            Func<Dictionary<string, object>, object> keyExtractor = row =>
+            {
+                if (!row.TryGetValue(dimensionName, out var dimValue))
+                    return null!;
+                // Apply the original selector logic to convert the value
+                // We create a mock object with just the dimension value
+                return dimValue;
+            };
+
+            // For complex selectors like int.Parse(e.Label), we need to apply the transformation
+            // Get the expression body to understand what transformation is needed
+            var body = _sortSelector.Body;
+            if (body is UnaryExpression { Operand: MethodCallExpression methodCall })
+            {
+                // Handle int.Parse, DateTime.Parse, etc.
+                var method = methodCall.Method;
+                if (method.DeclaringType == typeof(int) && method.Name == "Parse")
+                {
+                    return _sortOrder == SortOrder.Ascending
+                        ? data.OrderBy(row => int.TryParse(row.TryGetValue(dimensionName, out var v) ? v?.ToString() : null, out var num) ? num : 0).ToArray()
+                        : data.OrderByDescending(row => int.TryParse(row.TryGetValue(dimensionName, out var v) ? v?.ToString() : null, out var num) ? num : 0).ToArray();
+                }
+                if (method.DeclaringType == typeof(DateTime) && method.Name == "Parse")
+                {
+                    return _sortOrder == SortOrder.Ascending
+                        ? data.OrderBy(row => DateTime.TryParse(row.TryGetValue(dimensionName, out var v) ? v?.ToString() : null, out var dt) ? dt : DateTime.MinValue).ToArray()
+                        : data.OrderByDescending(row => DateTime.TryParse(row.TryGetValue(dimensionName, out var v) ? v?.ToString() : null, out var dt) ? dt : DateTime.MinValue).ToArray();
+                }
+            }
+
+            // Default: sort by dimension value as-is
+            return _sortOrder == SortOrder.Ascending
+                ? data.OrderBy(row => row.TryGetValue(dimensionName, out var v) ? v : null).ToArray()
+                : data.OrderByDescending(row => row.TryGetValue(dimensionName, out var v) ? v : null).ToArray();
+        }
+
+        // No selector - sort by first dimension
+        var sortKey = _dimensions.FirstOrDefault()?.Name;
+        if (string.IsNullOrEmpty(sortKey)) return data;
+
+        return _sortOrder == SortOrder.Ascending
+            ? data.OrderBy(row => row.TryGetValue(sortKey, out var v) ? v : null).ToArray()
+            : data.OrderByDescending(row => row.TryGetValue(sortKey, out var v) ? v : null).ToArray();
     }
 }
 

@@ -105,6 +105,8 @@ public class LineChartBuilder<TSource>(
     private readonly List<TableCalculation> _calculations = new();
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
+    private Expression<Func<TSource, object>>? _sortSelector;
+    private SortOrder _sortOrder = SortOrder.None;
 
     public override object? Build()
     {
@@ -125,9 +127,18 @@ public class LineChartBuilder<TSource>(
         {
             try
             {
-                var results = await data
+                var pivotBuilder = data
                     .ToPivotTable()
-                    .Dimension(dimension).Measures(_measures).TableCalculations(_calculations).ExecuteAsync();
+                    .Dimension(dimension).Measures(_measures).TableCalculations(_calculations);
+
+                if (_sortOrder != SortOrder.None)
+                {
+                    pivotBuilder = _sortSelector != null
+                        ? pivotBuilder.SortBy(_sortSelector, _sortOrder)
+                        : pivotBuilder.SortBy(_sortOrder);
+                }
+
+                var results = await pivotBuilder.ExecuteAsync();
                 lineChartData.Set([.. results]);
             }
             finally
@@ -202,6 +213,20 @@ public class LineChartBuilder<TSource>(
     public LineChartBuilder<TSource> Toolbox()
     {
         return Toolbox(_ => new Toolbox());
+    }
+
+    public LineChartBuilder<TSource> SortBy(Expression<Func<TSource, object>> selector, SortOrder order = SortOrder.Ascending)
+    {
+        _sortSelector = selector;
+        _sortOrder = order;
+        return this;
+    }
+
+    public LineChartBuilder<TSource> SortBy(SortOrder order)
+    {
+        _sortOrder = order;
+        _sortSelector = null;
+        return this;
     }
 }
 
