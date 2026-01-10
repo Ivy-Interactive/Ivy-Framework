@@ -53,6 +53,37 @@ public class SsrMarkdownMiddleware
             }
         }
 
+        var markdown = GetMarkdownContent(appId);
+        if (!string.IsNullOrEmpty(markdown))
+        {
+            var originalBodyStream = context.Response.Body;
+            using var memoryStream = new MemoryStream();
+            context.Response.Body = memoryStream;
+
+            await _next(context);
+
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            var html = await new StreamReader(memoryStream).ReadToEndAsync();
+
+            var encodedMarkdown = System.Web.HttpUtility.HtmlEncode(markdown);
+            var noscriptFallback =
+                "<noscript>" +
+                "<style>body > *:not(noscript) { display: none !important; }</style>" +
+                "<div style=\"padding: 20px;\">" +
+                "<h1 style=\"font-family: system-ui, sans-serif; margin-bottom: 20px;\">Ivy Documentation</h1>" +
+                "<pre style=\"white-space: pre-wrap; font-family: system-ui, sans-serif; line-height: 1.6;\">" + encodedMarkdown + "</pre>" +
+                "</div>" +
+                "</noscript>";
+
+            html = html.Replace("</body>", noscriptFallback + "</body>");
+
+            context.Response.Body = originalBodyStream;
+            var bytes = Encoding.UTF8.GetBytes(html);
+            context.Response.ContentLength = bytes.Length;
+            await context.Response.Body.WriteAsync(bytes);
+            return;
+        }
+
         await _next(context);
     }
 
