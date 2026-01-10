@@ -43,17 +43,17 @@ public class LucideIconAgentApp : SampleBase
         var messages = UseState(ImmutableArray.Create<ChatMessage>(new ChatMessage(ChatSender.Assistant,
             "Hello! I'm the Lucide Icon Agent. I can help you find icons for your app. Please describe your application.")));
 
-        return new Chat(messages.Value.ToArray(), OnSendMessage);
+        return new Chat(messages.Value.ToArray(), OnSend);
     }
 }
 ```
 
 ## Add Message Handling
 
-Now let's implement the message handling logic. We'll add the `OnSendMessage` method that processes user input and generates icon suggestions:
+Now let's implement the message handling logic. We'll add the `OnSend` method that processes user input and generates icon suggestions:
 
 ```csharp
-async ValueTask OnSendMessage(Event<Chat, string> @event)
+async ValueTask OnSend(Event<Chat, string> @event)
 {
     messages.Set(messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value)));
     var currentMessages = messages.Value;

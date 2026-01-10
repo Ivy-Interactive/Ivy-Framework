@@ -528,7 +528,7 @@ public class AdvancedWidgetsDemo : ViewBase
             new ChatMessage(ChatSender.Assistant, "Hello! I'm a demo chat bot.")
         ));
         
-        void OnSendMessage(Event<Chat, string> @event)
+        void OnSend(Event<Chat, string> @event)
         {
             var currentMessages = messages.Value;
             messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));
@@ -547,7 +547,7 @@ public class AdvancedWidgetsDemo : ViewBase
                 )
             ).Title("Sheet").Description("Side panel overlay").Height(Size.Units(40))
             | new Card(
-                new Chat(messages.Value.ToArray(), OnSendMessage)
+                new Chat(messages.Value.ToArray(), OnSend)
                     .Height(Size.Units(30))
             ).Title("Chat").Description("Conversation interface").Height(Size.Units(70));
     }

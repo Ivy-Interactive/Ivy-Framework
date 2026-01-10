@@ -13,7 +13,7 @@ searchHints:
 
 The `Chat` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) renders a conversation between a user and an assistant.
 
-Messages are supplied as `ChatMessage` objects and new messages are sent through the `OnSendMessage` event.
+Messages are supplied as `ChatMessage` objects and new messages are sent through the `OnSend` event.
 
 ## Basic Chat
 
@@ -30,7 +30,7 @@ public class BasicChatDemo : ViewBase
             new ChatMessage(ChatSender.Assistant, "Hello! I'm an echo bot. I'll repeat whatever you say!")
         ));
 
-        void OnSendMessage(Event<Chat, string> @event)
+        void OnSend(Event<Chat, string> @event)
         {
             var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
             messages.Set(messagesWithUser);
@@ -39,7 +39,7 @@ public class BasicChatDemo : ViewBase
             messages.Set(messagesWithAssistant);
         }
 
-        return new Chat(messages.Value.ToArray(), OnSendMessage)
+        return new Chat(messages.Value.ToArray(), OnSend)
             .Width(Size.Full())
             .Height(Size.Auto());
     }
@@ -63,7 +63,7 @@ public class LoadingChatDemo : ViewBase
 
         var ctsState = UseState<CancellationTokenSource?>(default(CancellationTokenSource?));
 
-        void OnSendMessage(Event<Chat, string> e)
+        void OnSend(Event<Chat, string> e)
         {
             // Cancel previous request if any
             ctsState.Value?.Cancel();
@@ -106,12 +106,12 @@ public class LoadingChatDemo : ViewBase
             });
         }
 
-        void OnCancelRequest(Event<Chat> _)
+        void OnCancel(Event<Chat> _)
         {
             ctsState.Value?.Cancel();
         }
 
-        return new Chat(messages.Value.ToArray(), OnSendMessage, OnCancelRequest)
+        return new Chat(messages.Value.ToArray(), OnSend, OnCancel)
             .Width(Size.Full())
             .Height(Size.Auto());
     }
@@ -137,7 +137,7 @@ public class StreamingChatDemo : ViewBase
         var isStreaming = UseState(false);
         var ctsState = UseState<CancellationTokenSource?>(default(CancellationTokenSource?));
 
-        void OnSendMessage(Event<Chat, string> @event)
+        void OnSend(Event<Chat, string> @event)
         {
             // Cancel previous request if any
             ctsState.Value?.Cancel();
@@ -207,12 +207,12 @@ public class StreamingChatDemo : ViewBase
             });
         }
 
-        void OnCancelRequest(Event<Chat> _)
+        void OnCancel(Event<Chat> _)
         {
             ctsState.Value?.Cancel();
         }
 
-        return new Chat(messages.Value.ToArray(), OnSendMessage, OnCancelRequest)
+        return new Chat(messages.Value.ToArray(), OnSend, OnCancel)
             .Streaming(isStreaming.Value)  // Pass streaming state to control Cancel button
             .Width(Size.Full())
             .Height(Size.Auto());
@@ -235,7 +235,7 @@ public class InteractiveChatDemo : ViewBase
             new ChatMessage(ChatSender.Assistant, "I can show interactive elements! Try sending 'buttons', 'card', or 'form' to see different responses.")
         ));
 
-        void OnSendMessage(Event<Chat, string> @event)
+        void OnSend(Event<Chat, string> @event)
         {
             var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
             messages.Set(messagesWithUser);
@@ -260,7 +260,7 @@ public class InteractiveChatDemo : ViewBase
             messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, response)));
         }
 
-        return new Chat(messages.Value.ToArray(), OnSendMessage)
+        return new Chat(messages.Value.ToArray(), OnSend)
             .Width(Size.Full())
             .Height(Size.Auto());
     }
@@ -282,7 +282,7 @@ public class ErrorHandlingChatDemo : ViewBase
             new ChatMessage(ChatSender.Assistant, "I demonstrate error handling! Try sending 'error', 'warning', or 'success' to see different message types.")
         ));
 
-        void OnSendMessage(Event<Chat, string> @event)
+        void OnSend(Event<Chat, string> @event)
         {
             var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
             messages.Set(messagesWithUser);
@@ -303,7 +303,7 @@ public class ErrorHandlingChatDemo : ViewBase
             messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, response)));
         }
 
-        return new Chat(messages.Value.ToArray(), OnSendMessage)
+        return new Chat(messages.Value.ToArray(), OnSend)
             .Width(Size.Full())
             .Height(Size.Auto());
     }
@@ -331,7 +331,7 @@ public class AdvancedChatDemo : ViewBase
                 "• Any other message - I'll respond normally")
         ));
 
-        void OnSendMessage(Event<Chat, string> @event)
+        void OnSend(Event<Chat, string> @event)
         {
             var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
             messages.Set(messagesWithUser);
@@ -388,7 +388,7 @@ public class AdvancedChatDemo : ViewBase
             messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, response)));
         }
 
-        return new Chat(messages.Value.ToArray(), OnSendMessage)
+        return new Chat(messages.Value.ToArray(), OnSend)
             .Placeholder("Type your message here...")
             .Width(Size.Full())
             .Height(Size.Auto());

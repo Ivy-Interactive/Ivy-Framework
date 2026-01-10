@@ -102,12 +102,12 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     e.preventDefault();
     if (!input.trim()) return;
     setInput('');
-    eventHandler('OnSendMessage', id, [input.trim()]);
+    eventHandler('OnSend', id, [input.trim()]);
   };
 
   const handleCancel = (e: React.MouseEvent) => {
     e.preventDefault();
-    eventHandler('OnCancelRequest', id, []);
+    eventHandler('OnCancel', id, []);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {

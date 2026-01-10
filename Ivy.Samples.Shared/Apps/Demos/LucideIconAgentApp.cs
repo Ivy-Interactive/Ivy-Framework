@@ -19,7 +19,7 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
             return Callout.Error("IChatClient is not configured. Please specify OpenAi:ApiKey and OpenAi:Endpoint in your configuration.");
         }
 
-        async ValueTask OnSendMessage(Event<Chat, string> @event)
+        async ValueTask OnSend(Event<Chat, string> @event)
         {
             messages.Set(messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value)));
             var currentMessages = messages.Value;
@@ -52,7 +52,7 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
         }
 
         return Layout.Center().Padding(0, 10, 0, 10)
-            | new Chat(messages.Value.ToArray(), OnSendMessage).Width(Size.Full().Max(200));
+            | new Chat(messages.Value.ToArray(), OnSend).Width(Size.Full().Max(200));
     }
 }
 
