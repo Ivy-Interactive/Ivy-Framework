@@ -78,7 +78,7 @@ export function BladeWidget({
           type="hover"
           className="blade-container h-full [&>div>div[style*='min-width']]:!h-full [&>div>div[style*='min-width']]:!block"
         >
-          <div className="h-full p-4">{children}</div>
+          <div className="p-4 h-full overflow-y-auto">{children}</div>
         </ScrollArea>
       </div>
     </div>
