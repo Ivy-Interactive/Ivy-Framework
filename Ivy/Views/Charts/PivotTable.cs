@@ -220,37 +220,24 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
 
     private Dictionary<string, object>[] ApplySorting(Dictionary<string, object>[] data)
     {
+        var dimension = _dimensions.FirstOrDefault();
+        if (dimension == null)
+        {
+            return data;
+        }
+        var dimensionName = dimension.Name;
+
         if (_sortSelector != null)
         {
-            // Compile the selector and create a key extractor that works with Dictionary rows
-            var compiledSelector = _sortSelector.Compile();
-            var dimensionName = _dimensions.FirstOrDefault()?.Name ?? string.Empty;
-
-            // We need to extract the original value and apply the selector
-            // Since data is already aggregated, we use the dimension value
-            Func<Dictionary<string, object>, object> keyExtractor = row =>
+            if (TryExtractParseMethod(_sortSelector.Body, out var parseType))
             {
-                if (!row.TryGetValue(dimensionName, out var dimValue))
-                    return null!;
-                // Apply the original selector logic to convert the value
-                // We create a mock object with just the dimension value
-                return dimValue;
-            };
-
-            // For complex selectors like int.Parse(e.Label), we need to apply the transformation
-            // Get the expression body to understand what transformation is needed
-            var body = _sortSelector.Body;
-            if (body is UnaryExpression { Operand: MethodCallExpression methodCall })
-            {
-                // Handle int.Parse, DateTime.Parse, etc.
-                var method = methodCall.Method;
-                if (method.DeclaringType == typeof(int) && method.Name == "Parse")
+                if (parseType == typeof(int))
                 {
                     return _sortOrder == SortOrder.Ascending
                         ? data.OrderBy(row => int.TryParse(row.TryGetValue(dimensionName, out var v) ? v?.ToString() : null, out var num) ? num : 0).ToArray()
                         : data.OrderByDescending(row => int.TryParse(row.TryGetValue(dimensionName, out var v) ? v?.ToString() : null, out var num) ? num : 0).ToArray();
                 }
-                if (method.DeclaringType == typeof(DateTime) && method.Name == "Parse")
+                if (parseType == typeof(DateTime))
                 {
                     return _sortOrder == SortOrder.Ascending
                         ? data.OrderBy(row => DateTime.TryParse(row.TryGetValue(dimensionName, out var v) ? v?.ToString() : null, out var dt) ? dt : DateTime.MinValue).ToArray()
@@ -258,19 +245,49 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
                 }
             }
 
-            // Default: sort by dimension value as-is
             return _sortOrder == SortOrder.Ascending
                 ? data.OrderBy(row => row.TryGetValue(dimensionName, out var v) ? v : null).ToArray()
                 : data.OrderByDescending(row => row.TryGetValue(dimensionName, out var v) ? v : null).ToArray();
         }
 
-        // No selector - sort by first dimension
-        var sortKey = _dimensions.FirstOrDefault()?.Name;
-        if (string.IsNullOrEmpty(sortKey)) return data;
-
         return _sortOrder == SortOrder.Ascending
-            ? data.OrderBy(row => row.TryGetValue(sortKey, out var v) ? v : null).ToArray()
-            : data.OrderByDescending(row => row.TryGetValue(sortKey, out var v) ? v : null).ToArray();
+            ? data.OrderBy(row => row.TryGetValue(dimensionName, out var v) ? v : null).ToArray()
+            : data.OrderByDescending(row => row.TryGetValue(dimensionName, out var v) ? v : null).ToArray();
+    }
+
+    private static bool TryExtractParseMethod(Expression expression, out Type? parseType)
+    {
+        if (expression is UnaryExpression { Operand: MethodCallExpression methodCall })
+        {
+            return IsParseMethod(methodCall, out parseType);
+        }
+
+        if (expression is MethodCallExpression directCall)
+        {
+            return IsParseMethod(directCall, out parseType);
+        }
+
+        parseType = null;
+        return false;
+    }
+
+    private static bool IsParseMethod(MethodCallExpression methodCall, out Type? parseType)
+    {
+        parseType = null;
+        if (methodCall.Method.Name != "Parse") return false;
+
+        if (methodCall.Method.DeclaringType == typeof(int))
+        {
+            parseType = typeof(int);
+            return true;
+        }
+        if (methodCall.Method.DeclaringType == typeof(DateTime))
+        {
+            parseType = typeof(DateTime);
+            return true;
+        }
+
+        return false;
     }
 }
 
