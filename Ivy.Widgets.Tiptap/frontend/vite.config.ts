@@ -24,7 +24,7 @@ export default defineConfig({
       // Output filename
       fileName: () => 'TiptapInput.js',
       // Global variable name for the library (must match C# class name)
-      name: 'TiptapInput',
+      name: 'Ivy_Widgets_Tiptap',
     },
     rollupOptions: {
       // Externalize React - the host app provides these via globals

@@ -5,7 +5,7 @@ using Ivy.Core.ExternalWidgets;
 
 namespace ExternalWidgetExample;
 
-[ExternalWidget("frontend/dist/SuperChart.js", ExportName = "SuperChart")]
+[ExternalWidget("frontend/dist/ExternalWidgets.js", ExportName = "SuperChart")]
 public record SuperChart : WidgetBase<SuperChart>
 {
     public SuperChart(string title, double[] data)

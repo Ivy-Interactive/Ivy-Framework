@@ -1,9 +1,10 @@
 /**
  * External Widget Example - Entry Point
  *
- * This file exports the widget components that will be loaded by the Ivy framework.
- * The default export should be the main widget component.
+ * This file exports all widget components that will be loaded by the Ivy framework.
+ * Multiple widgets can be bundled together and accessed via their export names.
  */
 
 export { SuperChart } from './SuperChart';
-export { default } from './SuperChart';
+export { Foo } from './Foo';
+export { Bar } from './Bar';

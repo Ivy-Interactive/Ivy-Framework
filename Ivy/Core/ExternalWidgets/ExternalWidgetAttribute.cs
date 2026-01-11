@@ -25,4 +25,11 @@ public class ExternalWidgetAttribute(string scriptPath) : Attribute
     /// Defaults to "default" (the default export).
     /// </summary>
     public string ExportName { get; set; } = "default";
+
+    /// <summary>
+    /// The name of the global variable created by the IIFE bundle.
+    /// This is the 'name' property in the vite.config lib options.
+    /// Required for IIFE bundles that contain multiple widgets.
+    /// </summary>
+    public string? GlobalName { get; set; }
 }

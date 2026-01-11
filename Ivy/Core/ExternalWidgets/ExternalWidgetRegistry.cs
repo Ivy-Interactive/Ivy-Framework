@@ -29,6 +29,11 @@ public record ExternalWidgetInfo
     public required string ExportName { get; init; }
 
     /// <summary>
+    /// The name of the global variable created by the IIFE bundle.
+    /// </summary>
+    public string? GlobalName { get; init; }
+
+    /// <summary>
     /// The assembly containing the widget and its assets.
     /// </summary>
     public required Assembly Assembly { get; init; }
@@ -48,6 +53,11 @@ public record ExternalWidgetRegistryDto
     public required string ScriptUrl { get; init; }
     public string? StyleUrl { get; init; }
     public required string ExportName { get; init; }
+
+    /// <summary>
+    /// The name of the global variable created by the IIFE bundle.
+    /// </summary>
+    public string? GlobalName { get; init; }
 }
 
 /// <summary>
@@ -125,7 +135,8 @@ public class ExternalWidgetRegistry
             StyleUrl = w.StylePath != null
                 ? $"/ivy/external-widgets/{Uri.EscapeDataString(w.TypeName)}/style.css"
                 : null,
-            ExportName = w.ExportName
+            ExportName = w.ExportName,
+            GlobalName = w.GlobalName
         });
     }
 
@@ -317,12 +328,17 @@ public class ExternalWidgetRegistry
                 }
             }
 
+            // Auto-derive GlobalName from namespace if not explicitly specified
+            // e.g., "Ivy.Widgets.Tiptap" -> "Ivy_Widgets_Tiptap"
+            var globalName = attr.GlobalName ?? type.Namespace?.Replace('.', '_') ?? type.Name;
+
             var info = new ExternalWidgetInfo
             {
                 TypeName = typeName,
                 ScriptPath = attr.ScriptPath,
                 StylePath = attr.StylePath,
                 ExportName = attr.ExportName,
+                GlobalName = globalName,
                 Assembly = assembly,
                 ResourceBasePath = assemblyName
             };

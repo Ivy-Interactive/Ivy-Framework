@@ -17,10 +17,10 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       // Use IIFE format for browser globals compatibility
       formats: ['iife'],
-      // Output filename
-      fileName: () => 'SuperChart.js',
-      // Global variable name for the library (must match C# class name)
-      name: 'SuperChart',
+      // Output filename - single bundle for all widgets
+      fileName: () => 'ExternalWidgets.js',
+      // Global variable name for the library (contains all widget exports)
+      name: 'ExternalWidgetExample',
     },
     rollupOptions: {
       // Externalize React - the host app provides these via globals
@@ -31,8 +31,8 @@ export default defineConfig({
           react: 'React',
           'react-dom': 'ReactDOM',
         },
-        // Ensure the exports are accessible
-        extend: true,
+        // Use extend: false to create a proper global variable
+        extend: false,
       },
     },
     // Output to dist folder

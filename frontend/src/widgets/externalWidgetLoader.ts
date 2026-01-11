@@ -10,6 +10,7 @@ export interface ExternalWidgetInfo {
   scriptUrl: string;
   styleUrl?: string;
   exportName: string;
+  globalName?: string;
 }
 
 /**
@@ -171,15 +172,17 @@ export const loadExternalWidget = async (
       await loadScript(fullScriptUrl);
 
       // Get the component from the global variable
-      // The IIFE exports to window[widgetName]
-      const widgetName = typeName.split('.').pop() ?? typeName;
+      // The IIFE exports to window[globalName] where globalName is specified in the widget attribute
+      // Falls back to the widget's class name (last part of typeName) for backwards compatibility
+      const globalName =
+        widgetInfo.globalName ?? typeName.split('.').pop() ?? typeName;
       const globalModule = (
         window as unknown as Record<string, Record<string, unknown>>
-      )[widgetName];
+      )[globalName];
 
       logger.info('External widget lookup', {
         typeName,
-        widgetName,
+        globalName,
         exportName: widgetInfo.exportName,
         globalModuleExists: !!globalModule,
         globalModuleKeys: globalModule ? Object.keys(globalModule) : [],
@@ -187,14 +190,14 @@ export const loadExternalWidget = async (
 
       if (!globalModule) {
         throw new Error(
-          `Global '${widgetName}' not found after loading external widget script`
+          `Global '${globalName}' not found after loading external widget script`
         );
       }
 
       // Get the exported component
       const Component = (
         widgetInfo.exportName === 'default'
-          ? (globalModule.default ?? globalModule[widgetName])
+          ? (globalModule.default ?? globalModule[globalName])
           : globalModule[widgetInfo.exportName]
       ) as React.ComponentType<Record<string, unknown>> | undefined;
 
