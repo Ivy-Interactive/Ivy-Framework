@@ -28,10 +28,8 @@ public class BasicMemoDemo : ViewBase
         var count = UseState(0);
         var multiplier = UseState(2);
         
-        // In real code, you would use:
-        // var result = UseMemo(() => count.Value * multiplier.Value, count.Value, multiplier.Value);
-        // This caches the result and only recalculates when dependencies change
-        var result = count.Value * multiplier.Value;
+        // Cache the result and only recalculate when dependencies change
+        var result = this.UseMemo(() => count.Value * multiplier.Value, count.Value, multiplier.Value);
         
         return Layout.Vertical(
             Text.P($"Result: {result}"),
@@ -56,13 +54,14 @@ public class ExpensiveCalculationDemo : ViewBase
         var numbers = UseState(() => Enumerable.Range(1, 1000).ToArray());
         var filter = UseState("");
         
-        // In real code with UseMemo, this expensive operation would only run when dependencies change:
-        // var processedNumbers = UseMemo(() => /* expensive filtering */, numbers.Value, filter.Value);
-        var processedNumbers = numbers.Value
-            .Where(n => filter.Value == "" || n.ToString().Contains(filter.Value))
-            .OrderByDescending(n => n)
-            .Take(10)
-            .ToArray();
+        // This expensive operation only runs when dependencies change
+        var processedNumbers = this.UseMemo(() => 
+            numbers.Value
+                .Where(n => filter.Value == "" || n.ToString().Contains(filter.Value))
+                .OrderByDescending(n => n)
+                .Take(10)
+                .ToArray(), 
+            numbers.Value, filter.Value);
         
         return Layout.Vertical(
             filter.ToTextInput().Placeholder("Filter numbers..."),
@@ -88,9 +87,8 @@ public class DerivedStateDemo : ViewBase
             new { Name = "Orange", Price = 2.00m, Quantity = 2 }
         });
         
-        // With UseMemo, these would only recalculate when items changes:
-        // var total = UseMemo(() => items.Value.Sum(item => item.Price * item.Quantity), items.Value);
-        var total = items.Value.Sum(item => item.Price * item.Quantity);
+        // Only recalculate when items changes
+        var total = this.UseMemo(() => items.Value.Sum(item => item.Price * item.Quantity), items.Value);
         var itemCount = items.Value.Length;
         
         return Layout.Vertical(
@@ -122,15 +120,17 @@ public class DataTransformationDemo : ViewBase
         
         var roleFilter = UseState("All");
         
-        // With UseMemo, this transformation would only run when dependencies change:
-        // var groupedUsers = UseMemo(() => /* transformation */, users.Value, roleFilter.Value);
-        var filtered = roleFilter.Value == "All" 
-            ? users.Value 
-            : users.Value.Where(u => u.Role == roleFilter.Value);
-            
-        var groupedUsers = filtered
-            .GroupBy(u => u.Active)
-            .ToDictionary(g => g.Key ? "Active" : "Inactive", g => g.ToList());
+        // This transformation only runs when dependencies change
+        var groupedUsers = this.UseMemo(() =>
+        {
+            var filtered = roleFilter.Value == "All" 
+                ? users.Value 
+                : users.Value.Where(u => u.Role == roleFilter.Value);
+                
+            return filtered
+                .GroupBy(u => u.Active)
+                .ToDictionary(g => g.Key ? "Active" : "Inactive", g => g.ToList());
+        }, users.Value, roleFilter.Value);
         
         return Layout.Vertical(
             roleFilter.ToSelectInput(new[] { "All", "Admin", "User" }.ToOptions()),
@@ -199,18 +199,20 @@ public class FilterSortDemo : ViewBase
         var categoryFilter = UseState("All");
         var sortBy = UseState("Name");
         
-        // With UseMemo, this would only recalculate when dependencies change:
-        // var filteredSorted = UseMemo(() => /* filter and sort */, products.Value, categoryFilter.Value, sortBy.Value);
-        var filtered = categoryFilter.Value == "All"
-            ? products.Value
-            : products.Value.Where(p => p.Category == categoryFilter.Value);
-            
-        var filteredSorted = sortBy.Value switch
+        // Only recalculate when dependencies change
+        var filteredSorted = this.UseMemo(() =>
         {
-            "Price" => filtered.OrderBy(p => p.Price).ToArray(),
-            "Name" => filtered.OrderBy(p => p.Name).ToArray(),
-            _ => filtered.ToArray()
-        };
+            var filtered = categoryFilter.Value == "All"
+                ? products.Value
+                : products.Value.Where(p => p.Category == categoryFilter.Value);
+                
+            return sortBy.Value switch
+            {
+                "Price" => filtered.OrderBy(p => p.Price).ToArray(),
+                "Name" => filtered.OrderBy(p => p.Name).ToArray(),
+                _ => filtered.ToArray()
+            };
+        }, products.Value, categoryFilter.Value, sortBy.Value);
         
         return Layout.Vertical(
             Layout.Horizontal(
@@ -233,16 +235,15 @@ public class StatisticsDemo : ViewBase
     {
         var numbers = UseState(() => new[] { 10, 20, 30, 40, 50 });
         
-        // With UseMemo, these stats would only recalculate when numbers changes:
-        // var stats = UseMemo(() => new { Count = ..., Sum = ..., }, numbers.Value);
-        var stats = new
+        // Only recalculate when numbers changes
+        var stats = this.UseMemo(() => new
         {
             Count = numbers.Value.Length,
             Sum = numbers.Value.Sum(),
             Average = numbers.Value.Average(),
             Min = numbers.Value.Min(),
             Max = numbers.Value.Max()
-        };
+        }, numbers.Value);
         
         return new Card(
             Layout.Vertical(
