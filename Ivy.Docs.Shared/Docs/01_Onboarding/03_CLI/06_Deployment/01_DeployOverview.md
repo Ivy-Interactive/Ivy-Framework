@@ -8,7 +8,7 @@ searchHints:
   - docker
 ---
 
-# Ivy Deployment
+# Ivy Deployment Overview
 
 <Ingress>
 Deploy your Ivy applications to cloud platforms with automated containerization, infrastructure setup, and configuration management.
