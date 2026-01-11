@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import './tiptap.css';
 import StarterKit from '@tiptap/starter-kit';
@@ -88,8 +88,25 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
   const hasFocusHandler = events.includes('OnFocus');
   const hasBlurHandler = events.includes('OnBlur');
 
+  // Local state for immediate updates (like CodeInputWidget pattern)
+  const [localValue, setLocalValue] = useState(value || '');
+  const [isFocused, setIsFocused] = useState(false);
+  const localValueRef = useRef(localValue);
+
   // Combine disabled and editable - disabled takes precedence
   const isEditable = !disabled && editable;
+
+  // Update local value when server value changes and control is not focused
+  useEffect(() => {
+    if (!isFocused && value !== localValueRef.current) {
+      queueMicrotask(() => setLocalValue(value || ''));
+    }
+  }, [value, isFocused]);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    localValueRef.current = localValue;
+  }, [localValue]);
 
   const editor = useEditor({
     extensions: [
@@ -98,32 +115,36 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
         placeholder: placeholder ?? 'Start typing...',
       }),
     ],
-    content: value,
+    content: localValue,
     editable: isEditable,
     autofocus: autoFocus,
     onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      setLocalValue(html);
       if (hasChangeHandler && onIvyEvent) {
-        onIvyEvent('OnChange', id, [editor.getHTML()]);
+        onIvyEvent('OnChange', id, [html]);
       }
     },
     onFocus: () => {
+      setIsFocused(true);
       if (hasFocusHandler && onIvyEvent) {
         onIvyEvent('OnFocus', id, []);
       }
     },
     onBlur: () => {
+      setIsFocused(false);
       if (hasBlurHandler && onIvyEvent) {
         onIvyEvent('OnBlur', id, []);
       }
     },
   });
 
-  // Update editor content when prop changes
+  // Sync localValue to editor when it changes (from server sync)
   useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value);
+    if (editor && localValue !== editor.getHTML()) {
+      editor.commands.setContent(localValue);
     }
-  }, [editor, value]);
+  }, [editor, localValue]);
 
   // Update editable state when prop changes
   useEffect(() => {
