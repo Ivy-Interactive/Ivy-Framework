@@ -30,7 +30,7 @@ public class TiptapEditorApp : SampleBase
                 Layout.Vertical(
                     Text.P("Editor").Bold(),
                     new Tiptap(content.Value)
-                        .WithPlaceholder("Start typing here...")
+                        .Placeholder("Start typing here...")
                         .MinHeight(200)
                         .HandleChange(html =>
                         {
@@ -73,7 +73,7 @@ public class TiptapEditorApp : SampleBase
             new Card() | Layout.Vertical(
                 Text.P("Minimal (No Toolbar)").Bold(),
                 new Tiptap()
-                    .WithPlaceholder("A simple editor without toolbar...")
+                    .Placeholder("A simple editor without toolbar...")
                     .HideToolbar()
                     .MinHeight(100)
             )
