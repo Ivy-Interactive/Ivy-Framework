@@ -11,8 +11,8 @@
     <Company>Ivy Interactive</Company>
     <PackageTags>ivy;widget;tiptap;richtext;editor;wysiwyg</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -43,11 +43,16 @@
   <ItemGroup>
     <EmbeddedResource Include="frontend\dist\**\*" />
   </ItemGroup>
-
+  
   <!-- Build frontend before packing -->
   <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend\package.json')">
     <Exec Command="npm install" WorkingDirectory="frontend" />
     <Exec Command="npm run build" WorkingDirectory="frontend" />
   </Target>
 
+  <ItemGroup>
+    <Compile Remove=".samples\**\*.cs" />
+    <None Include=".samples\**\*" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+  
 </Project>

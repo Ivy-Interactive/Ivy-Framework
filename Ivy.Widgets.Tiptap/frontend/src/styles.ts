@@ -135,7 +135,7 @@ const getWantedHeight = (height?: string): React.CSSProperties => {
       return { height: `${fraction * 100}%` };
     }
     case 'full':
-      return { height: '100%' };
+      return { height: '100%', flexGrow: 1 };
     case 'fit':
       return { height: 'fit-content' };
     case 'screen':

@@ -48,10 +48,10 @@ export const setExternalWidgetRegistry = (
   if (!widgets) return;
 
   externalWidgetRegistry = new Map(widgets.map(w => [w.typeName, w]));
-  logger.info('External widget registry updated', {
-    count: widgets.length,
-    widgets: widgets.map(w => w.typeName),
-  });
+  // logger.info('External widget registry updated', {
+  //   count: widgets.length,
+  //   widgets: widgets.map(w => w.typeName),
+  // });
 };
 
 /**
@@ -180,13 +180,13 @@ export const loadExternalWidget = async (
         window as unknown as Record<string, Record<string, unknown>>
       )[globalName];
 
-      logger.info('External widget lookup', {
-        typeName,
-        globalName,
-        exportName: widgetInfo.exportName,
-        globalModuleExists: !!globalModule,
-        globalModuleKeys: globalModule ? Object.keys(globalModule) : [],
-      });
+      // logger.info('External widget lookup', {
+      //   typeName,
+      //   globalName,
+      //   exportName: widgetInfo.exportName,
+      //   globalModuleExists: !!globalModule,
+      //   globalModuleKeys: globalModule ? Object.keys(globalModule) : [],
+      // });
 
       if (!globalModule) {
         throw new Error(
@@ -210,7 +210,7 @@ export const loadExternalWidget = async (
       // Cache the loaded component
       loadedComponents.set(typeName, Component);
 
-      logger.info('External widget loaded successfully', { typeName });
+      // logger.info('External widget loaded successfully', { typeName });
 
       return Component as React.ComponentType<Record<string, unknown>>;
     } catch (error) {

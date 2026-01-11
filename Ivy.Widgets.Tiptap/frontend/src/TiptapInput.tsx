@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import './tiptap.css';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import {
@@ -21,9 +22,6 @@ import {
 import { getWidth, getHeight } from './styles';
 import { IvyEventHandler } from './types';
 
-/**
- * Props interface matching the C# TiptapInput widget properties.
- */
 interface TiptapInputProps {
   id: string;
   value?: string;
@@ -61,7 +59,7 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
     title={title}
     className={`p-1.5 rounded transition-colors ${
       isActive
-        ? 'bg-primary text-primary-foreground'
+        ? 'bg-secondary text-secondary-foreground'
         : 'hover:bg-muted text-foreground'
     } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
   >
@@ -73,9 +71,6 @@ const ToolbarDivider: React.FC = () => (
   <div className="w-px h-6 bg-border mx-1" />
 );
 
-/**
- * TiptapInput - A rich text editor widget for Ivy.
- */
 export const TiptapInput: React.FC<TiptapInputProps> = ({
   id,
   value = '',
@@ -83,8 +78,8 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
   disabled = false,
   editable = true,
   autoFocus = false,
-  width,
-  height,
+  width = 'Full',
+  height = 'Full',
   showToolbar = true,
   events = [],
   onIvyEvent,
@@ -279,7 +274,7 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
       )}
       <EditorContent
         editor={editor}
-        className="prose prose-sm max-w-none p-4 focus:outline-none flex-1 overflow-auto [&_.ProseMirror]:outline-none [&_.ProseMirror]:h-full [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none"
+        className="prose prose-sm max-w-none p-4 focus:outline-none flex-1 overflow-auto [&_.tiptap]:outline-none [&_.tiptap:focus]:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror:focus]:outline-none [&_.ProseMirror]:h-full [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none"
       />
     </div>
   );

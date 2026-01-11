@@ -63,7 +63,7 @@ public record TiptapInput<TString> : TiptapInputBase, IInput<TString>
         Value = value;
     }
 
-    public TiptapInput(string? placeholder = null, bool disabled = false)
+    public TiptapInput(string? placeholder = null, bool disabled = false) : this()
     {
         Placeholder = placeholder;
         Disabled = disabled;
