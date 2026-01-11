@@ -56,31 +56,12 @@ public class NestedDemo : ViewBase
     {
         return Layout.Vertical(
             Text.H3("Nested External Widgets"),
-            Text.P("Foo is a container widget that can hold Bar children, demonstrating widget composition.").Muted(),
-
-            Layout.Grid().Columns(2)
-            | new Foo("Programming Languages",
+            Text.P("Foo is a container widget that can hold Bar children, demonstrating widget composition with external widgets.").Muted(),
+            new Foo("Programming Languages",
                 new Bar("C#").Color("#68217a"),
                 new Bar("TypeScript").Color("#3178c6"),
                 new Bar("Python").Color("#3776ab"),
                 new Bar("Rust").Color("#dea584")
-            )
-            | new Foo("Frontend Frameworks",
-                new Bar("React").Color("#61dafb"),
-                new Bar("Vue").Color("#4fc08d"),
-                new Bar("Svelte").Color("#ff3e00"),
-                new Bar("Angular").Color("#dd0031")
-            )
-            | new Foo("Status Indicators",
-                new Bar("Active").Color("#10b981"),
-                new Bar("Pending").Color("#f59e0b"),
-                new Bar("Inactive").Color("#6b7280")
-            )
-            | new Foo("Priority Levels",
-                new Bar("Critical").Color("#ef4444"),
-                new Bar("High").Color("#f97316"),
-                new Bar("Medium").Color("#eab308"),
-                new Bar("Low").Color("#22c55e")
             )
         );
     }
