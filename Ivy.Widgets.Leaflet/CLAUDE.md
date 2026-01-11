@@ -129,6 +129,31 @@ if (typeof window !== 'undefined') {
 export { Map, MyWidget };
 ```
 
+### 4. Create a Sample File
+
+Create a `.samples/{WidgetName}.cs` file to demonstrate the widget:
+
+```csharp
+#:project ..\Ivy.Widgets.Leaflet.csproj
+
+using Ivy;
+using Ivy.Shared;
+using Ivy.Widgets.Leaflet;
+
+var server = new Server();
+server.AddApp<MyWidgetView>();
+await server.RunAsync();
+
+[App]
+class MyWidgetView : ViewBase
+{
+    public override object Build() =>
+        new MyWidget();
+}
+```
+
+Run the sample with: `dotnet run MyWidget.cs`
+
 ## Key Concepts
 
 ### ExternalWidget Attribute

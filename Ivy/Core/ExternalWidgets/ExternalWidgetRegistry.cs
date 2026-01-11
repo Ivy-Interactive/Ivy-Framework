@@ -128,15 +128,19 @@ public class ExternalWidgetRegistry
     /// </summary>
     public IEnumerable<ExternalWidgetRegistryDto> GetRegistryForFrontend()
     {
-        return _widgets.Values.Select(w => new ExternalWidgetRegistryDto
+        return _widgets.Values.Select(w =>
         {
-            TypeName = w.TypeName,
-            ScriptUrl = $"/ivy/external-widgets/{Uri.EscapeDataString(w.TypeName)}/script.js",
-            StyleUrl = w.StylePath != null
-                ? $"/ivy/external-widgets/{Uri.EscapeDataString(w.TypeName)}/style.css"
-                : null,
-            ExportName = w.ExportName,
-            GlobalName = w.GlobalName
+            var version = w.Assembly.GetName().Version?.ToString() ?? "0";
+            return new ExternalWidgetRegistryDto
+            {
+                TypeName = w.TypeName,
+                ScriptUrl = $"/ivy/external-widgets/{Uri.EscapeDataString(w.TypeName)}/script.js?v={version}",
+                StyleUrl = w.StylePath != null
+                    ? $"/ivy/external-widgets/{Uri.EscapeDataString(w.TypeName)}/style.css?v={version}"
+                    : null,
+                ExportName = w.ExportName,
+                GlobalName = w.GlobalName
+            };
         });
     }
 

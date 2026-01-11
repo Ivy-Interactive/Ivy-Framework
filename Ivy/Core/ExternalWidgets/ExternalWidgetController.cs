@@ -39,7 +39,14 @@ public class ExternalWidgetController : ControllerBase
             return NotFound($"Script resource not found for widget '{decodedTypeName}'");
         }
 
-        Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+        if (Ivy.Utils.IsDevelopment())
+        {
+            Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+        }
+        else
+        {
+            Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+        }
         return File(stream, "application/javascript");
     }
 
@@ -68,7 +75,14 @@ public class ExternalWidgetController : ControllerBase
             return NotFound($"Style resource not found for widget '{decodedTypeName}'");
         }
 
-        Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+        if (Ivy.Utils.IsDevelopment())
+        {
+            Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+        }
+        else
+        {
+            Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+        }
         return File(stream, "text/css");
     }
 
