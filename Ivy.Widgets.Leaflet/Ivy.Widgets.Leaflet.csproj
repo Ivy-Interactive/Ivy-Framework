@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>Ivy.Widgets.Leaflet</PackageId>
+    <Description>Custom Ivy widgets</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\Ivy\Ivy.csproj" />
+
+  </ItemGroup>
+
+  <!-- Embed the built frontend assets as resources -->
+  <ItemGroup>
+    <EmbeddedResource Include="frontend\dist\**\*" />
+  </ItemGroup>
+
+  <!-- Build frontend before building -->
+  <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend/package.json')">
+    <Exec Command="npm install" WorkingDirectory="frontend" />
+    <Exec Command="npm run build" WorkingDirectory="frontend" />
+  </Target>
+
+</Project>
