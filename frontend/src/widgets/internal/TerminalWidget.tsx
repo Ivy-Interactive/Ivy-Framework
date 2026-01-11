@@ -53,7 +53,7 @@ const TerminalWidget = ({
           <div className="absolute top-2 right-2 z-50">
             <CopyToClipboardButton
               textToCopy={commandsText}
-              className="bg-zinc-800 text-white hover:bg-zinc-700"
+              forceDarkMode={true}
             />
           </div>
         )}

@@ -39,6 +39,7 @@ interface CopyToClipboardButtonProps {
   'aria-label'?: string;
   scale?: Scales;
   className?: string;
+  forceDarkMode?: boolean;
 }
 
 const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
@@ -47,6 +48,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
   'aria-label': ariaLabel,
   scale = Scales.Medium,
   className,
+  forceDarkMode = false,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -62,6 +64,12 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
 
   const isIconOnly = !label;
 
+  const darkModeStyles = forceDarkMode
+    ? copied
+      ? 'bg-emerald-600 text-white hover:bg-emerald-500'
+      : 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700'
+    : '';
+
   return (
     <button
       onClick={handleCopy}
@@ -70,17 +78,23 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
         isIconOnly
           ? cn(
               copyButtonSizeVariants({ scale }),
-              copied && 'bg-primary text-primary-foreground'
+              !forceDarkMode && copied && 'bg-primary text-primary-foreground'
             )
           : 'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer hover:bg-accent hover:shadow-sm border-0',
-        !isIconOnly &&
+        !forceDarkMode &&
+          !isIconOnly &&
           (copied
             ? 'bg-primary text-primary-foreground'
             : 'bg-transparent text-muted-foreground hover:text-foreground'),
-        isIconOnly && !copied && 'bg-background hover:bg-accent',
-        copied &&
+        !forceDarkMode &&
+          isIconOnly &&
+          !copied &&
+          'bg-background hover:bg-accent',
+        !forceDarkMode &&
+          copied &&
           isIconOnly &&
           'hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary',
+        darkModeStyles,
         className
       )}
     >
