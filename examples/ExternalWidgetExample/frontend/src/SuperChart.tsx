@@ -14,7 +14,7 @@ type IvyEventHandler = (
  * Props interface matching the C# SuperChart widget properties.
  * Props come from the [Prop] attributes on the C# class.
  */
-interface SuperChartWidgetProps {
+interface SuperChartProps {
   /** Widget ID (automatically provided by Ivy) */
   id: string;
   /** The chart title */
@@ -42,7 +42,7 @@ interface SuperChartWidgetProps {
  * 2. Uses Tailwind CSS classes from the host app
  * 3. Triggers events back to the C# backend via the onIvyEvent prop
  */
-export const SuperChartWidget: React.FC<SuperChartWidgetProps> = ({
+export const SuperChart: React.FC<SuperChartProps> = ({
   id,
   title,
   data = [],
@@ -114,4 +114,4 @@ export const SuperChartWidget: React.FC<SuperChartWidgetProps> = ({
   );
 };
 
-export default SuperChartWidget;
+export default SuperChart;

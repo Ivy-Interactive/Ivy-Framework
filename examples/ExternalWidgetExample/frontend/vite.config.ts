@@ -18,7 +18,7 @@ export default defineConfig({
       // Use IIFE format for browser globals compatibility
       formats: ['iife'],
       // Output filename
-      fileName: () => 'SuperChartWidget.js',
+      fileName: () => 'SuperChart.js',
       // Global variable name for the library (must match C# class name)
       name: 'SuperChart',
     },

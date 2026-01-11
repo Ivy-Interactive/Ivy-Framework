@@ -24,7 +24,7 @@ import { IvyEventHandler } from './types';
 /**
  * Props interface matching the C# TiptapInput widget properties.
  */
-interface TiptapInputWidgetProps {
+interface TiptapInputProps {
   id: string;
   value?: string;
   placeholder?: string;
@@ -76,7 +76,7 @@ const ToolbarDivider: React.FC = () => (
 /**
  * TiptapInput - A rich text editor widget for Ivy.
  */
-export const TiptapInputWidget: React.FC<TiptapInputWidgetProps> = ({
+export const TiptapInput: React.FC<TiptapInputProps> = ({
   id,
   value = '',
   placeholder,
@@ -285,4 +285,4 @@ export const TiptapInputWidget: React.FC<TiptapInputWidgetProps> = ({
   );
 };
 
-export default TiptapInputWidget;
+export default TiptapInput;

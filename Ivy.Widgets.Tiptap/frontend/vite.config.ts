@@ -22,7 +22,7 @@ export default defineConfig({
       // Use IIFE format for browser globals compatibility
       formats: ['iife'],
       // Output filename
-      fileName: () => 'TiptapInputWidget.js',
+      fileName: () => 'TiptapInput.js',
       // Global variable name for the library (must match C# class name)
       name: 'TiptapInput',
     },

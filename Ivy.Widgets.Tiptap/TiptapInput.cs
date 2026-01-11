@@ -37,7 +37,7 @@ public abstract record TiptapInputBase : WidgetBase<TiptapInputBase>, IAnyTiptap
     public Type[] SupportedStateTypes() => [];
 }
 
-[ExternalWidget("frontend/dist/TiptapInputWidget.js", ExportName = "TiptapInputWidget")]
+[ExternalWidget("frontend/dist/TiptapInput.js", ExportName = "TiptapInput")]
 public record TiptapInput<TString> : TiptapInputBase, IInput<TString>
 {
     public TiptapInput(IAnyState state, string? placeholder = null, bool disabled = false)
@@ -82,7 +82,7 @@ public record TiptapInput<TString> : TiptapInputBase, IInput<TString>
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
 
-[ExternalWidget("frontend/dist/TiptapInputWidget.js", ExportName = "TiptapInputWidget")]
+[ExternalWidget("frontend/dist/TiptapInput.js", ExportName = "TiptapInput")]
 public record TiptapInput : TiptapInput<string>
 {
     public TiptapInput(IAnyState state, string? placeholder = null, bool disabled = false)

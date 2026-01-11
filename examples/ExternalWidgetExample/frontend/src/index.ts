@@ -5,5 +5,5 @@
  * The default export should be the main widget component.
  */
 
-export { SuperChartWidget } from './SuperChartWidget';
-export { default } from './SuperChartWidget';
+export { SuperChart } from './SuperChart';
+export { default } from './SuperChart';
