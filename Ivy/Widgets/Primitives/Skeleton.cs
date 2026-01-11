@@ -6,7 +6,7 @@ namespace Ivy;
 
 public record Skeleton : WidgetBase<Skeleton>
 {
-    internal Skeleton()
+    public Skeleton()
     {
         Width = Size.Full();
         Height = Size.Full();
