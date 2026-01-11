@@ -8,6 +8,7 @@ using Ivy.Auth;
 using Ivy.Chrome;
 using Ivy.Connections;
 using Ivy.Core;
+using Ivy.Core.ExternalWidgets;
 using Ivy.Themes;
 using Ivy.Middleware;
 using Ivy.Views;
@@ -381,6 +382,9 @@ public class Server
         }
 
         AppRepository.Reload();
+
+        // Initialize external widget registry by scanning loaded assemblies
+        ExternalWidgetRegistry.Instance.Initialize();
 
         // Ensure sufficient ThreadPool workers to avoid heartbeat warnings under bursty loads
         try

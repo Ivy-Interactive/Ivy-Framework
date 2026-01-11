@@ -4,6 +4,7 @@ using Ivy.Auth;
 using Ivy.Chrome;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.ExternalWidgets;
 using Ivy.Core.Helpers;
 using Ivy.Core.Exceptions;
 using Ivy.Core.HttpTunneling;
@@ -224,9 +225,16 @@ public class AppHub(
             {
                 await widgetTree.BuildAsync();
                 logger.LogInformation("Refresh: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
+
+                // Include external widget registry only on initial connection (not for child connections)
+                var externalWidgets = parentId == null
+                    ? ExternalWidgetRegistry.Instance.GetRegistryForFrontend()
+                    : null;
+
                 await Clients.Caller.SendAsync("Refresh", new
                 {
-                    Widgets = widgetTree.GetWidgets().Serialize()
+                    Widgets = widgetTree.GetWidgets().Serialize(),
+                    ExternalWidgets = externalWidgets
                 }, cancellationToken: connectionAborted);
             }
             catch (Exception e)
@@ -235,7 +243,8 @@ public class AppHub(
                 await tree.BuildAsync();
                 await Clients.Caller.SendAsync("Refresh", new
                 {
-                    Widgets = tree.GetWidgets().Serialize()
+                    Widgets = tree.GetWidgets().Serialize(),
+                    ExternalWidgets = (object?)null
                 }, cancellationToken: connectionAborted);
             }
 
