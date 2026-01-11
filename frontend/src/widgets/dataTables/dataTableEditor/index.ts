@@ -1,1 +1,1 @@
-export { DataTableEditor } from './dataTableEditor';
+export { DataTableEditor } from './DataTableEditor';

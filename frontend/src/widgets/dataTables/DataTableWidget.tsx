@@ -6,15 +6,15 @@ import { useTable } from './dataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
 import { DataTableEditor } from './dataTableEditor';
-import { DataTableHeader } from './dataTableHeader';
-import { DataTableFooter } from './dataTableFooter';
-import { DataTableOption } from './dataTableOption';
-import { DataTableFilterOption } from './options/dataTableFilterOption';
+import { DataTableHeader } from './DataTableHeader';
+import { DataTableFooter } from './DataTableFooter';
+import { DataTableOption } from './DataTableOption';
+import { DataTableFilterOption } from './options/DataTableFilterOption';
 import { Filter as FilterIcon } from 'lucide-react';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
 import { getWidth, getHeight } from '@/lib/styles';
-import { applyConfigDefaults, applyColumnsDefaults } from './dataTableDefaults';
+import { applyConfigDefaults, applyColumnsDefaults } from './DataTableDefaults';
 
 interface TableLayoutProps {
   children?: React.ReactNode;
