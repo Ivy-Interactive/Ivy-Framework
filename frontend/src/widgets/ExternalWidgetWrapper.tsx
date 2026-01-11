@@ -28,16 +28,6 @@ export const ExternalWidgetWrapper: React.FC<ExternalWidgetWrapperProps> = ({
 };
 
 /**
- * Loading fallback for external widgets.
- */
-export const ExternalWidgetLoadingFallback: React.FC = () => (
-  <div className="flex items-center justify-center p-4 text-muted-foreground">
-    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-    <span className="ml-2 text-sm">Loading...</span>
-  </div>
-);
-
-/**
  * Creates a wrapped version of an external widget component.
  */
 export const wrapExternalWidget = (
@@ -46,7 +36,7 @@ export const wrapExternalWidget = (
   >
 ): React.FC<Record<string, unknown>> => {
   const WrappedComponent: React.FC<Record<string, unknown>> = props => (
-    <Suspense fallback={<ExternalWidgetLoadingFallback />}>
+    <Suspense>
       <ExternalWidgetWrapper Component={LazyComponent} props={props}>
         {props.children as React.ReactNode}
       </ExternalWidgetWrapper>

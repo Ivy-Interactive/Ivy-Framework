@@ -17,7 +17,5 @@ class MapView : ViewBase
             .Zoom(13)
             .Marker("m1", 51.505, -0.09, popup: "Hello London!")
             .Marker("m2", 51.51, -0.1, popup: "Another spot", draggable: true)
-            .Circle("c1", 51.508, -0.11, 200, "#ff6b6b")
-            .Width(Size.Full())
-            .Height(Size.Px(500));
+            .Circle("c1", 51.508, -0.11, 200, "#ff6b6b");
 }

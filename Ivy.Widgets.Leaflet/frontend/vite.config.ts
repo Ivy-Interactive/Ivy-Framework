@@ -28,12 +28,13 @@ export default defineConfig({
     },
     rollupOptions: {
       // Externalize React - the host app provides these via globals
-      external: ['react', 'react-dom'],
+      external: ['react', 'react-dom', 'react-dom/client'],
       output: {
         // Global variable names for externals
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
+          'react-dom/client': 'ReactDOM',
         },
         // Use extend: false to create a proper global variable
         extend: false,

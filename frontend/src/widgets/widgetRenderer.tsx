@@ -67,11 +67,6 @@ const isChartComponent = (nodeType: string): boolean => {
   return nodeType.startsWith('Ivy.') && nodeType.includes('Chart');
 };
 
-const isExternalWidgetType = (nodeType: string): boolean => {
-  // External widgets are not in the Ivy namespace
-  return !nodeType.startsWith('Ivy.') && !nodeType.startsWith('$');
-};
-
 const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
   return children.flatMap(child => {
     if (child.type === 'Ivy.Fragment') {
@@ -156,23 +151,6 @@ export const renderWidgetTree = (
           <div className="flex items-center justify-center p-8 text-muted-foreground">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             <span className="ml-2">Loading chart...</span>
-          </div>
-        }
-        key={node.id}
-      >
-        {content}
-      </Suspense>
-    );
-  }
-
-  // For external widgets, provide a loading indicator
-  if (isLazyComponent(Component) && isExternalWidgetType(node.type)) {
-    return (
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center p-4 text-muted-foreground">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-            <span className="ml-2 text-sm">Loading widget...</span>
           </div>
         }
         key={node.id}

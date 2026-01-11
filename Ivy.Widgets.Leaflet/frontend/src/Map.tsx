@@ -45,6 +45,8 @@ interface MapProps {
   height?: string;
   /** Event handler provided by Ivy */
   onIvyEvent: IvyEventHandler;
+  /** List of registered events */
+  events?: string[];
   /** Center coordinates of the map */
   center?: LatLng;
   /** Zoom level (0-18) */
@@ -81,26 +83,35 @@ interface MapProps {
 const MapEventHandler: React.FC<{
   id: string;
   onIvyEvent: IvyEventHandler;
-}> = ({ id, onIvyEvent }) => {
+  events: string[];
+}> = ({ id, onIvyEvent, events }) => {
   useMapEvents({
     click: (e) => {
-      onIvyEvent('onMapClick', id, [{ position: { lat: e.latlng.lat, lng: e.latlng.lng } }]);
+      if (events.includes('OnMapClick')) {
+        onIvyEvent('OnMapClick', id, [{ position: { lat: e.latlng.lat, lng: e.latlng.lng } }]);
+      }
     },
     zoomend: (e) => {
-      const map = e.target;
-      onIvyEvent('onZoomChange', id, [{ zoom: map.getZoom() }]);
+      if (events.includes('OnZoomChange')) {
+        const map = e.target;
+        onIvyEvent('OnZoomChange', id, [{ zoom: map.getZoom() }]);
+      }
     },
     moveend: (e) => {
       const map = e.target;
       const center = map.getCenter();
       const bounds = map.getBounds();
-      onIvyEvent('onCenterChange', id, [{ center: { lat: center.lat, lng: center.lng } }]);
-      onIvyEvent('onBoundsChange', id, [
-        {
-          southWest: { lat: bounds.getSouthWest().lat, lng: bounds.getSouthWest().lng },
-          northEast: { lat: bounds.getNorthEast().lat, lng: bounds.getNorthEast().lng },
-        },
-      ]);
+      if (events.includes('OnCenterChange')) {
+        onIvyEvent('OnCenterChange', id, [{ center: { lat: center.lat, lng: center.lng } }]);
+      }
+      if (events.includes('OnBoundsChange')) {
+        onIvyEvent('OnBoundsChange', id, [
+          {
+            southWest: { lat: bounds.getSouthWest().lat, lng: bounds.getSouthWest().lng },
+            northEast: { lat: bounds.getNorthEast().lat, lng: bounds.getNorthEast().lng },
+          },
+        ]);
+      }
     },
   });
 
@@ -142,29 +153,34 @@ const DraggableMarker: React.FC<{
   marker: MapMarker;
   widgetId: string;
   onIvyEvent: IvyEventHandler;
-}> = ({ marker, widgetId, onIvyEvent }) => {
+  events: string[];
+}> = ({ marker, widgetId, onIvyEvent, events }) => {
   const markerRef = useRef<L.Marker>(null);
 
   const handleClick = () => {
-    onIvyEvent('onMarkerClick', widgetId, [
-      {
-        markerId: marker.id,
-        position: { lat: marker.position.lat, lng: marker.position.lng },
-      },
-    ]);
+    if (events.includes('OnMarkerClick')) {
+      onIvyEvent('OnMarkerClick', widgetId, [
+        {
+          markerId: marker.id,
+          position: { lat: marker.position.lat, lng: marker.position.lng },
+        },
+      ]);
+    }
   };
 
   const handleDragEnd = () => {
-    const m = markerRef.current;
-    if (m) {
-      const newPos = m.getLatLng();
-      onIvyEvent('onMarkerDrag', widgetId, [
-        {
-          markerId: marker.id,
-          oldPosition: { lat: marker.position.lat, lng: marker.position.lng },
-          newPosition: { lat: newPos.lat, lng: newPos.lng },
-        },
-      ]);
+    if (events.includes('OnMarkerDrag')) {
+      const m = markerRef.current;
+      if (m) {
+        const newPos = m.getLatLng();
+        onIvyEvent('OnMarkerDrag', widgetId, [
+          {
+            markerId: marker.id,
+            oldPosition: { lat: marker.position.lat, lng: marker.position.lng },
+            newPosition: { lat: newPos.lat, lng: newPos.lng },
+          },
+        ]);
+      }
     }
   };
 
@@ -186,9 +202,10 @@ const DraggableMarker: React.FC<{
 
 export const Map: React.FC<MapProps> = ({
   id,
-  width,
-  height,
+  width = 'Full',
+  height = 'Full',
   onIvyEvent,
+  events = [],
   center = { lat: 51.505, lng: -0.09 },
   zoom = 13,
   minZoom = 0,
@@ -235,7 +252,7 @@ export const Map: React.FC<MapProps> = ({
       >
         <TileLayer url={tileUrl} attribution={tileAttribution} />
 
-        <MapEventHandler id={id} onIvyEvent={onIvyEvent} />
+        <MapEventHandler id={id} onIvyEvent={onIvyEvent} events={events} />
         <MapSync center={center} zoom={zoom} />
 
         {/* Render markers */}
@@ -245,6 +262,7 @@ export const Map: React.FC<MapProps> = ({
             marker={marker}
             widgetId={id}
             onIvyEvent={onIvyEvent}
+            events={events}
           />
         ))}
 

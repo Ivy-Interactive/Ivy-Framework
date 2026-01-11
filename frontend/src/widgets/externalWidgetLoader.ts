@@ -100,7 +100,7 @@ const loadScript = (url: string): Promise<void> => {
 
     script.onload = () => {
       loadedScripts.add(url);
-      logger.debug('Loaded external widget script', { url });
+      //logger.debug('Loaded external widget script', { url });
       resolve();
     };
 
@@ -124,7 +124,7 @@ const loadStylesheet = (url: string): void => {
   document.head.appendChild(link);
   loadedStylesheets.add(url);
 
-  logger.debug('Loaded external widget stylesheet', { url });
+  //logger.debug('Loaded external widget stylesheet', { url });
 };
 
 /**
@@ -163,10 +163,10 @@ export const loadExternalWidget = async (
   const loadPromise = (async () => {
     try {
       const fullScriptUrl = `${backendHost}${widgetInfo.scriptUrl}`;
-      logger.debug('Loading external widget', {
-        typeName,
-        scriptUrl: fullScriptUrl,
-      });
+      // logger.debug('Loading external widget', {
+      //   typeName,
+      //   scriptUrl: fullScriptUrl,
+      // });
 
       // Load IIFE script via script tag (dynamic import doesn't work with IIFE)
       await loadScript(fullScriptUrl);
