@@ -294,5 +294,5 @@ graph TB
 
 ## See Also
 
-- [State Management](./05_State.md)
-- [Effects](./09_Effects.md)
+- [State Management](../../04_Hooks/03_UseState.md)
+- [Effects](../../04_Hooks/04_UseEffect.md)

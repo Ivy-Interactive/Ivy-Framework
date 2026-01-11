@@ -53,12 +53,12 @@ public class TodoApp : ViewBase
 
 ### Reactive State Management
 
-Ivy provides React-inspired hooks for [state management](../02_Concepts/05_State.md):
+Ivy provides React-inspired hooks for [state management](../../04_Hooks/03_UseState.md):
 
 **Available Hooks:**
 
-- [UseState<T>()](../02_Concepts/05_State.md) - Local component state that triggers re-renders
-- [UseEffect()](../02_Concepts/09_Effects.md) - Side effects with dependency tracking
+- [UseState<T>()](../../04_Hooks/03_UseState.md) - Local component state that triggers re-renders
+- [UseEffect()](../../04_Hooks/04_UseEffect.md) - Side effects with dependency tracking
 - [UseService<T>()](../02_Concepts/18_Services.md) - Dependency injection integration
 - [UseSignal()](../02_Concepts/06_Signals.md), [UseDownload()](../02_Concepts/24_Downloads.md), `UseWebhook()` - And many more...
 
@@ -87,7 +87,7 @@ Hooks rely on a strict call order to function correctly. Following these rules e
 
 The **Ivy.Analyser** package automatically enforces these rules at compile time, catching violations before your code runs.
 
-For detailed examples and troubleshooting, see [Rules of Hooks](../02_Concepts/08_RulesOfHooks.md).
+For detailed examples and troubleshooting, see [Rules of Hooks](../../04_Hooks/09_RulesOfHooks.md).
 
 ### Widget Library
 

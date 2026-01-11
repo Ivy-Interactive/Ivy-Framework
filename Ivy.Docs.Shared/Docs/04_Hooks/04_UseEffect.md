@@ -11,7 +11,7 @@ searchHints:
 # Effects
 
 <Ingress>
-Perform side effects in your Ivy [views](./02_Views.md) with the UseEffect hook, similar to React's useEffect but optimized for server-side architecture.
+Perform side effects in your Ivy [views](../../01_Onboarding/02_Concepts/02_Views.md) with the UseEffect hook, similar to React's useEffect but optimized for server-side architecture.
 </Ingress>
 
 The `UseEffect` hook is a powerful feature in Ivy that allows you to perform side effects in your views. It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
@@ -106,7 +106,7 @@ Effects can be triggered by different events using trigger parameters:
 
 ### State Dependencies
 
-Effects can depend on [state changes](./05_State.md):
+Effects can depend on [state changes](../../04_Hooks/03_UseState.md):
 
 ```csharp demo-below
 public class DependentEffectView : ViewBase
@@ -157,7 +157,7 @@ graph LR
     
     B --> B1["Runs once during initialization"]
     C --> C1["Runs after virtual DOM updates"]
-    D --> D1["Runs when [state changes](./05_State.md)"]
+    D --> D1["Runs when [state changes](../../04_Hooks/03_UseState.md)"]
 ```
 
 ```csharp
@@ -470,7 +470,7 @@ UseEffect(async () =>
 
 ## See Also
 
-- [State Management](./05_State.md) - Managing component state
-- [Memoization](./10_Memoization.md) - Optimizing performance with memoization
-- [Signals](./06_Signals.md) - Reactive state management
-- [Views](./02_Views.md) - Understanding Ivy views and components
+- [State Management](./03_UseState.md) - Managing component state
+- [Memoization](../../01_Onboarding/02_Concepts/10_Memoization.md) - Optimizing performance with memoization
+- [Signals](../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
+- [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
