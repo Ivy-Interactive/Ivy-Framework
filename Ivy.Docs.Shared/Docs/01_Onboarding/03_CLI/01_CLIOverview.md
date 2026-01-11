@@ -104,4 +104,4 @@ For detailed information on each feature, see the specific documentation files:
 - [Project Initialization](02_Init.md)
 - [Database Integration](05_DatabaseIntegration/01_DatabaseOverview.md)
 - [Authentication Setup](04_Authentication/01_AuthenticationOverview.md)
-- [Deployment Guide](06_Deployment/01_DeployOverview.md)
+- [Deployment Guide](06_Deployment/01_DeploymentOverview.md)

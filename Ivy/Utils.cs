@@ -273,7 +273,13 @@ public static class Utils
         {
             if (char.IsUpper(input[i]) && i > 0)
             {
-                sb.Append(' ');
+                bool prevIsUpper = char.IsUpper(input[i - 1]);
+                bool nextIsLower = (i + 1 < input.Length) && char.IsLower(input[i + 1]);
+
+                if (input[i - 1] != ' ' && (!prevIsUpper || nextIsLower))
+                {
+                    sb.Append(' ');
+                }
             }
 
             sb.Append(input[i]);
