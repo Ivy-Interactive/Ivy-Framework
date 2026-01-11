@@ -22,9 +22,9 @@ export default defineConfig({
       // Use IIFE format for browser globals compatibility
       formats: ['iife'],
       // Output filename
-      fileName: () => 'TiptapWidget.js',
+      fileName: () => 'TiptapInputWidget.js',
       // Global variable name for the library (must match C# class name)
-      name: 'Tiptap',
+      name: 'TiptapInput',
     },
     rollupOptions: {
       // Externalize React - the host app provides these via globals
@@ -35,8 +35,9 @@ export default defineConfig({
           react: 'React',
           'react-dom': 'ReactDOM',
         },
-        // Ensure the exports are accessible
-        extend: true,
+        // Use extend: false to create a proper global variable
+        // (extend: true uses 'this' which is undefined in strict mode)
+        extend: false,
       },
     },
     // Output to dist folder

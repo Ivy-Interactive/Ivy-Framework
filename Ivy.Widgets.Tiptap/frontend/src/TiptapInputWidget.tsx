@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -18,6 +18,7 @@ import {
   LuUndo2,
   LuRedo2,
 } from 'react-icons/lu';
+import { getWidth, getHeight } from './styles';
 
 /**
  * Event handler type provided by Ivy to external widgets.
@@ -29,17 +30,19 @@ type IvyEventHandler = (
 ) => void;
 
 /**
- * Props interface matching the C# Tiptap widget properties.
+ * Props interface matching the C# TiptapInput widget properties.
  */
-interface TiptapWidgetProps {
+interface TiptapInputWidgetProps {
   id: string;
-  content?: string;
+  value?: string;
   placeholder?: string;
+  disabled?: boolean;
   editable?: boolean;
   autoFocus?: boolean;
-  minHeight?: number;
-  maxHeight?: number;
+  width?: string;
+  height?: string;
   showToolbar?: boolean;
+  nullable?: boolean;
   events?: string[];
   onIvyEvent?: IvyEventHandler;
 }
@@ -79,16 +82,17 @@ const ToolbarDivider: React.FC = () => (
 );
 
 /**
- * Tiptap - A rich text editor widget for Ivy.
+ * TiptapInput - A rich text editor widget for Ivy.
  */
-export const TiptapWidget: React.FC<TiptapWidgetProps> = ({
+export const TiptapInputWidget: React.FC<TiptapInputWidgetProps> = ({
   id,
-  content = '',
+  value = '',
   placeholder,
+  disabled = false,
   editable = true,
   autoFocus = false,
-  minHeight,
-  maxHeight,
+  width,
+  height,
   showToolbar = true,
   events = [],
   onIvyEvent,
@@ -97,6 +101,9 @@ export const TiptapWidget: React.FC<TiptapWidgetProps> = ({
   const hasFocusHandler = events.includes('OnFocus');
   const hasBlurHandler = events.includes('OnBlur');
 
+  // Combine disabled and editable - disabled takes precedence
+  const isEditable = !disabled && editable;
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -104,8 +111,8 @@ export const TiptapWidget: React.FC<TiptapWidgetProps> = ({
         placeholder: placeholder ?? 'Start typing...',
       }),
     ],
-    content,
-    editable,
+    content: value,
+    editable: isEditable,
     autofocus: autoFocus,
     onUpdate: ({ editor }) => {
       if (hasChangeHandler && onIvyEvent) {
@@ -126,17 +133,17 @@ export const TiptapWidget: React.FC<TiptapWidgetProps> = ({
 
   // Update editor content when prop changes
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value);
     }
-  }, [editor, content]);
+  }, [editor, value]);
 
   // Update editable state when prop changes
   useEffect(() => {
     if (editor) {
-      editor.setEditable(editable);
+      editor.setEditable(isEditable);
     }
-  }, [editor, editable]);
+  }, [editor, isEditable]);
 
   const runCommand = useCallback(
     (command: () => boolean) => {
@@ -146,20 +153,22 @@ export const TiptapWidget: React.FC<TiptapWidgetProps> = ({
     [editor]
   );
 
+  const containerStyle = useMemo<React.CSSProperties>(() => ({
+    ...getWidth(width),
+    ...getHeight(height),
+  }), [width, height]);
+
   if (!editor) {
     return null;
   }
 
-  const editorStyle: React.CSSProperties = {
-    minHeight: minHeight ? `${minHeight}px` : '150px',
-    maxHeight: maxHeight ? `${maxHeight}px` : undefined,
-    overflowY: maxHeight ? 'auto' : undefined,
-  };
-
   return (
-    <div className="rounded-lg border bg-card shadow-sm">
-      {showToolbar && editable && (
-        <div className="flex flex-wrap items-center gap-0.5 p-2 border-b bg-muted/30">
+    <div
+      className={`rounded-lg border bg-card shadow-sm flex flex-col ${disabled ? 'opacity-60' : ''}`}
+      style={containerStyle}
+    >
+      {showToolbar && isEditable && (
+        <div className="flex flex-wrap items-center gap-0.5 p-2 border-b bg-muted/30 shrink-0">
           {/* Text formatting */}
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleBold().run())}
@@ -278,11 +287,10 @@ export const TiptapWidget: React.FC<TiptapWidgetProps> = ({
       )}
       <EditorContent
         editor={editor}
-        className="prose prose-sm max-w-none p-4 focus:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[inherit] [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none"
-        style={editorStyle}
+        className="prose prose-sm max-w-none p-4 focus:outline-none flex-1 overflow-auto [&_.ProseMirror]:outline-none [&_.ProseMirror]:h-full [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none"
       />
     </div>
   );
 };
 
-export default TiptapWidget;
+export default TiptapInputWidget;
