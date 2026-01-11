@@ -19,15 +19,7 @@ import {
   LuRedo2,
 } from 'react-icons/lu';
 import { getWidth, getHeight } from './styles';
-
-/**
- * Event handler type provided by Ivy to external widgets.
- */
-type IvyEventHandler = (
-  eventName: string,
-  widgetId: string,
-  args: unknown[]
-) => void;
+import { IvyEventHandler } from './types';
 
 /**
  * Props interface matching the C# TiptapInput widget properties.
