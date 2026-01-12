@@ -1,9 +1,60 @@
-# UseCallback
+---
+searchHints:
+  - performance
+  - optimization
+  - callbacks
+  - usecallback
+  - memoization
+  - rendering
+  - event handlers
+---
 
-The `UseCallback` hook memoizes callback functions, preventing unnecessary re-renders when the callback is passed as a prop to child components.
+# Callbacks
+
+<Ingress>
+The `UseCallback` hook memoizes callback functions, preventing unnecessary re-renders when callbacks are passed as props to child components or used as dependencies in other hooks.
+</Ingress>
+
+## Overview
+
+The `UseCallback` hook provides a way to optimize callback functions in Ivy applications:
+
+- **Stable Function References** - Returns the same function reference when dependencies haven't changed
+- **Prevents Re-renders** - Child components won't re-render unnecessarily when receiving memoized callbacks
+- **Stable Dependencies** - Ensures callbacks used in `UseEffect` and other hooks have stable references
 
 <Callout type="Tip">
 `UseCallback` memoizes the function reference itself, while `UseMemo` memoizes the result of calling a function. The memoized callback is only executed when you invoke it.
+</Callout>
+
+## When to Use UseCallback
+
+```mermaid
+flowchart TD
+    A["Need to optimize callbacks?"] --> B{What's the use case?}
+    
+    B --> C["Callback passed to<br/>child component"]
+    B --> D["Callback used as<br/>dependency in UseEffect"]
+    B --> E["Event handler with<br/>expensive setup"]
+    B --> F["Callback in list items<br/>or repeated components"]
+    
+    C --> G["Use UseCallback<br/>Prevents child re-renders"]
+    D --> H["Use UseCallback<br/>Prevents infinite loops"]
+    E --> I["Use UseCallback<br/>Avoids recreation overhead"]
+    F --> J["Use UseCallback<br/>Optimizes list performance"]
+    
+    G --> K["Stable function reference<br/> Child won't re-render<br/> Better performance"]
+    H --> L["Stable dependency<br/> Effect runs correctly<br/> No infinite loops"]
+    I --> M[" Handler created once<br/> Less memory churn<br/> Faster renders"]
+    J --> N[" List items optimized<br/> Better scrolling<br/> Smoother UI"]
+```
+
+## UseCallback Hook
+
+The `UseCallback` hook memoizes callback functions and only recreates them when their dependencies change.
+
+<Callout type="Tip">
+`UseCallback` hook stores only the most recent dependency values for comparison; older values are discarded.
 </Callout>
 
 ### How UseCallback Works
@@ -16,7 +67,7 @@ sequenceDiagram
     
     Note over C,S: First Render
     C->>CB: UseCallback(() => handleClick(), [dep1, dep2])
-    CB->>S: UseState(new CallbackRef(callback, deps))
+    CB->>S: UseState(() => new CallbackRef(callback, deps))
     S-->>CB: Create new CallbackRef with callback
     CB->>S: Store CallbackRef(callback, [dep1, dep2])
     CB-->>C: Return callback function
@@ -39,7 +90,7 @@ sequenceDiagram
     CB-->>C: Return new callback function
 ```
 
-### Basic UseCallback Usage
+### Basic Usage
 
 ```csharp
 public class ParentView : ViewBase
@@ -69,15 +120,23 @@ public class ParentView : ViewBase
 }
 ```
 
-### When to Use UseCallback
+### Use Cases
 
 Use `UseCallback` when:
 
-- **Passing callbacks to child components** - Prevents unnecessary re-renders
-- **Callbacks are dependencies of other hooks** - Ensures stable references
+- **Passing callbacks to child components** - Prevents unnecessary re-renders when the callback reference is stable
+- **Callbacks are dependencies of other hooks** - Ensures stable references for `UseEffect` and other hooks
 - **Event handlers with expensive setup** - Avoids recreating handlers on every render
+- **Callbacks in lists** - Optimizes performance when rendering many components with callbacks
 
-### UseCallback Examples
+### Best Practices
+
+- **Dependency Array**: Always specify the dependencies that should trigger callback recreation
+- **Stable References**: Only include values that actually affect the callback's behavior
+- **Avoid Over-Memoization**: Don't memoize simple callbacks that don't cause performance issues
+- **Combine with IMemoized**: Use `UseCallback` together with `IMemoized` components for maximum optimization
+
+### Examples
 
 #### Preventing Child Re-renders
 
@@ -160,3 +219,226 @@ public class DataFetcherView : ViewBase
     }
 }
 ```
+
+## Performance Considerations
+
+### Memory vs Speed Trade-offs
+
+- **Function References**: `UseCallback` stores function references in memory. Consider the number of memoized callbacks:
+
+```csharp
+// Good: Small number of memoized callbacks
+var handleClick = UseCallback(() => DoSomething(), []);
+var handleSubmit = UseCallback(() => SubmitForm(), formData);
+
+// Caution: Many memoized callbacks might consume memory
+// Consider if all are necessary
+```
+
+- **Dependency Stability**: If dependencies change frequently, callbacks will be recreated often, reducing the effectiveness of memoization:
+
+```csharp
+// Bad: Dependency changes on every render
+var config = new { threshold: 100 };
+var handleAction = UseCallback(() => DoAction(config), config);
+
+// Good: Stable dependency
+var threshold = UseState(100);
+var handleAction = UseCallback(() => DoAction(threshold.Value), threshold);
+```
+
+- **Callback Complexity**: Simple callbacks may not benefit from memoization:
+
+```csharp
+// Unnecessary memoization for simple callback
+var handleClick = UseCallback(() => count.Set(count.Value + 1), count);
+
+// Consider direct inline for simple cases
+// Or memoize only if passed to many child components
+```
+
+### When NOT to Use UseCallback
+
+- **Simple callbacks**: Don't memoize trivial callbacks that don't cause performance issues
+- **Frequently changing dependencies**: If dependencies change often, memoization provides no benefit
+- **Single-use callbacks**: If a callback is only used once and not passed to children, memoization may be unnecessary
+
+```csharp
+// Unnecessary memoization
+var handleClick = UseCallback(() => Console.WriteLine("Clicked"), []);
+
+// Just use directly
+var handleClick = () => Console.WriteLine("Clicked");
+```
+
+## Common Pitfalls and Solutions
+
+### Callback Troubleshooting Guide
+
+```mermaid
+flowchart TD
+    A["UseCallback not working as expected?"] --> B{Check your implementation}
+    
+    B --> C["Dependencies changing unexpectedly?"]
+    B --> D["Performance not improving?"]
+    E --> E1["✓ Use stable references<br/>✓ Avoid creating objects in deps<br/>✓ Use UseStatic for constants"]
+    B --> E["Infinite loops in UseEffect?"]
+    B --> F["Children still re-rendering?"]
+    
+    C --> C1["✓ Use stable references<br/>✓ Avoid creating objects in deps<br/>✓ Use UseStatic for constants"]
+    D --> D1["✓ Profile before optimizing<br/>✓ Only memoize when needed<br/>✓ Check if deps change frequently"]
+    E1 --> G["Problem solved?"]
+    F --> F1["✓ Check all dependencies<br/>✓ Ensure child uses IMemoized<br/>✓ Verify callback is actually used"]
+    
+    C1 --> G
+    D1 --> G
+    F1 --> G
+    
+    G -->|Yes| H["Great! Your callbacks are optimized"]
+    G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
+```
+
+### 1. Unstable Dependencies
+
+**Problem**: Creating new objects or arrays in the dependency array
+
+```csharp
+// Bad: New object created on every render
+var handleAction = UseCallback(() => 
+{
+    ProcessData(data.Value, new Config { threshold: 100 });
+}, data.Value, new Config { threshold: 100 });
+```
+
+**Solution**: Use stable references
+
+```csharp
+// Good: Stable dependency
+var config = UseStatic(new Config { threshold: 100 });
+var handleAction = UseCallback(() => 
+{
+    ProcessData(data.Value, config);
+}, data, config);
+```
+
+### 2. Missing Dependencies
+
+**Problem**: Not including all values used in the callback
+
+```csharp
+// Bad: Missing 'multiplier' dependency
+var handleCalculate = UseCallback(() => 
+{
+    result.Set(items.Value.Sum(x => x.Price * multiplier.Value));
+}, items);
+```
+
+**Solution**: Include all dependencies
+
+```csharp
+// Good: All dependencies included
+var handleCalculate = UseCallback(() => 
+{
+    result.Set(items.Value.Sum(x => x.Price * multiplier.Value));
+}, items, multiplier);
+```
+
+### 3. Over-Memoization
+
+**Problem**: Memoizing everything without considering the cost
+
+```csharp
+// Bad: Unnecessary memoization of simple callbacks
+var handleClick = UseCallback(() => count.Set(count.Value + 1), count);
+var handleReset = UseCallback(() => count.Set(0), []);
+var handleLog = UseCallback(() => Console.WriteLine("Log"), []);
+```
+
+**Solution**: Only memoize when necessary
+
+```csharp
+// Good: Memoize only when passed to children or used in effects
+var handleClick = UseCallback(() => count.Set(count.Value + 1), count);
+// Simple callback used directly - no memoization needed
+var handleLog = () => Console.WriteLine("Log");
+```
+
+### 4. Callback Dependencies Issues
+
+**Problem**: Callbacks that capture too many variables
+
+```csharp
+// Bad: Callback recreated whenever any state changes
+var handleAction = UseCallback(() => 
+{
+    DoSomething(data.Value, filter.Value, sortOrder.Value);
+}, data, filter, sortOrder); // Too many dependencies
+```
+
+**Solution**: Split into smaller, focused callbacks
+
+```csharp
+// Good: Separate callbacks with minimal dependencies
+var handleDataAction = UseCallback(() => DoSomethingWithData(data.Value), data);
+var handleFilterAction = UseCallback(() => ApplyFilter(filter.Value), filter);
+```
+
+### 5. Forgetting Keys in Lists
+
+**Problem**: Not providing stable keys for components receiving callbacks in lists
+
+```csharp
+// Bad: No keys, memoization won't work properly
+return Layout.Vertical(
+    items.Value.Select(item => new ItemComponent(item, handleClick)) // Missing .Key()
+);
+```
+
+**Solution**: Always provide stable keys
+
+```csharp
+// Good: Stable keys enable proper memoization
+return Layout.Vertical(
+    items.Value.Select(item => new ItemComponent(item, handleClick).Key(item.Id))
+);
+```
+
+### 6. Infinite Loops in UseEffect
+
+**Problem**: Callback dependency causes infinite re-renders
+
+```csharp
+// Bad: Callback recreated on every render
+var fetchData = UseCallback(async () => 
+{
+    await ApiService.Fetch(data.Value);
+}, data); // data changes frequently
+
+UseEffect(async () => 
+{
+    await fetchData();
+}, fetchData); // Effect runs on every data change
+```
+
+**Solution**: Use stable dependencies or split concerns
+
+```csharp
+// Good: Stable dependency or use refs for values
+var searchTerm = UseState("");
+var fetchData = UseCallback(async () => 
+{
+    await ApiService.Fetch(searchTerm.Value);
+}, searchTerm); // Only recreate when searchTerm changes
+
+UseEffect(async () => 
+{
+    await fetchData();
+}, fetchData);
+```
+
+## See Also
+
+- [Memoization](../../04_Hooks/05_Memo.md)
+- [Effects](../../04_Hooks/04_Effect.md)
+- [State Management](../../04_Hooks/03_State.md)
+- [Widgets](../../01_Onboarding/02_Concepts/03_Widgets.md)
