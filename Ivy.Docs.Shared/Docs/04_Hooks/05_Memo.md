@@ -430,17 +430,17 @@ flowchart TD
     B --> E["Memory usage too high?"]
     B --> F["Components still re-rendering?"]
     
-    C --> C1["✓ Use stable references<br/>✓ Avoid creating objects in deps<br/>✓ Use UseStatic for constants"]
-    D --> D1["✓ Profile before optimizing<br/>✓ Only memoize expensive operations<br/>✓ Check if deps change frequently"]
-    E --> E1["✓ Reduce cached data size<br/>✓ Use specific dependencies<br/>✓ Consider conditional memoization"]
-    F --> F1["✓ Implement IMemoized correctly<br/>✓ Provide stable keys<br/>✓ Check GetMemoValues()"]
+    C --> C1["Use stable references<br/>Avoid creating objects in deps<br/> Use UseStatic for constants"]
+    D --> D1["Profile before optimizing<br/>Only memoize expensive operations<br/> Check if deps change frequently"]
+    E --> E1["Reduce cached data size<br/>Use specific dependencies<br/> Consider conditional memoization"]
+    F --> F1["Implement IMemoized correctly<br/>Provide stable keys<br/> Check GetMemoValues()"]
     
     C1 --> G["Problem solved?"]
     D1 --> G
     E1 --> G
     F1 --> G
     
-    G -->|Yes| H["✅ Great! Your memoization is working"]
+    G -->|Yes| H["Great! Your memoization is working"]
     G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
 ```
 

@@ -281,14 +281,14 @@ flowchart TD
     
     B --> C["Dependencies changing unexpectedly?"]
     B --> D["Performance not improving?"]
-    E --> E1["✓ Use stable references<br/>✓ Avoid creating objects in deps<br/>✓ Use UseStatic for constants"]
+    E --> E1["Use stable references<br/> Avoid creating objects in deps<br/> Use UseStatic for constants"]
     B --> E["Infinite loops in UseEffect?"]
     B --> F["Children still re-rendering?"]
     
-    C --> C1["✓ Use stable references<br/>✓ Avoid creating objects in deps<br/>✓ Use UseStatic for constants"]
-    D --> D1["✓ Profile before optimizing<br/>✓ Only memoize when needed<br/>✓ Check if deps change frequently"]
+    C --> C1["Use stable references<br/> Avoid creating objects in deps<br/> Use UseStatic for constants"]
+    D --> D1["Profile before optimizing<br/> Only memoize when needed<br/> Check if deps change frequently"]
     E1 --> G["Problem solved?"]
-    F --> F1["✓ Check all dependencies<br/>✓ Ensure child uses IMemoized<br/>✓ Verify callback is actually used"]
+    F --> F1["Check all dependencies<br/> Ensure child uses IMemoized<br/> Verify callback is actually used"]
     
     C1 --> G
     D1 --> G

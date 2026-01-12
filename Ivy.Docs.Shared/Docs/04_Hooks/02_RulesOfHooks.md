@@ -13,7 +13,7 @@ searchHints:
 # Rules of Hooks
 
 <Ingress>
-Ivy hooks (functions starting with `Use...`) are a powerful feature that lets you use state and other Ivy features. However, hooks rely on a strict call order to function correctly. Follow these rules to ensure your hooks work as expected.
+Ivy hooks (functions starting with `Use...`) are a powerful feature that lets you use [state](./03_State.md) and other Ivy features. However, hooks rely on a strict call order to function correctly. Follow these rules to ensure your hooks work as expected.
 </Ingress>
 
 ## Overview
@@ -86,7 +86,7 @@ flowchart TD
 
 ## Why These Rules Matter
 
-Hooks rely on call order to preserve state between renders. When hooks are called in the same order every time, Ivy can correctly match each hook call with its stored state.
+Hooks rely on call order to preserve [state](./03_State.md) between renders. When hooks are called in the same order every time, Ivy can correctly match each hook call with its stored state.
 
 ### How Hook Order Works
 
@@ -330,7 +330,7 @@ flowchart LR
 
 **Valid Examples:**
 
-- `UseState`, `UseEffect`, `UseCustomHook`, `UseMyFeature`, `UseReducer`, `UseMemo`
+- [`UseState`](./03_State.md), [`UseEffect`](./04_Effect.md), `UseCustomHook`, `UseMyFeature`, [`UseReducer`](./07_Reducer.md), [`UseMemo`](./05_Memo.md)
 
 **Invalid Examples:**
 
@@ -421,7 +421,7 @@ flowchart TD
     D --> D1["Remove if/else around hook<br/>Call hook unconditionally<br/>Move condition after hook"]
     E --> E1["Extract to component<br/>Create ItemView class<br/>Call hook in component"]
     F --> F1["Move hooks to top<br/>Before any returns<br/>Before any logic"]
-    G --> G1["Check hook order<br/>Verify same order every render<br/>Check for conditional calls"]
+    G --> G1["Check hook order<br/>Verify same order every render<br/>Check for conditional calls<br/>Review state updates"]
     
     C1 --> H["Problem solved?"]
     D1 --> H
@@ -448,7 +448,7 @@ flowchart LR
 
 **Rules Checklist:**
 
-- In View Build method or custom hook
+- In [View](../../01_Onboarding/02_Concepts/02_Views.md) Build method or custom hook
 - At top level of Build method
 - Same order every render
 - Before all conditional logic

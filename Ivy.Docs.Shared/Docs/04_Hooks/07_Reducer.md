@@ -376,10 +376,10 @@ flowchart TD
     B --> E["Performance issues?"]
     B --> F["Side effects in reducer?"]
     
-    C --> C1["✓ Check reducer returns new state<br/>✓ Verify dispatch is called<br/>✓ Ensure action is handled"]
-    D --> D1["✓ Check for state mutations<br/>✓ Verify action types match<br/>✓ Review reducer logic"]
-    E --> E1["✓ Keep reducers simple<br/>✓ Move complex logic outside<br/>✓ Consider memoization"]
-    F --> F1["✓ Remove side effects<br/>✓ Use UseEffect for side effects<br/>✓ Keep reducer pure"]
+    C --> C1["Check reducer returns new state<br/> Verify dispatch is called<br/> Ensure action is handled"]
+    D --> D1["Check for state mutations<br/> Verify action types match<br/> Review reducer logic"]
+    E --> E1["Keep reducers simple<br/> Move complex logic outside<br/> Consider memoization"]
+    F --> F1["Remove side effects<br/> Use UseEffect for side effects<br/> Keep reducer pure"]
     
     C1 --> G["Problem solved?"]
     D1 --> G
