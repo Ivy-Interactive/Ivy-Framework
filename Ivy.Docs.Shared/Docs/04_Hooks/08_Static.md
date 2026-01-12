@@ -6,86 +6,209 @@ searchHints:
   - mutable
   - persistence
   - hooks
+  - non-reactive
+  - timers
+  - subscriptions
+imports:
+  - Ivy.Core.Hooks
 ---
 
-# UseStatic
+# Static
 
 <Ingress>
 Store values that persist across re-renders without triggering updates, similar to React's useRef for holding mutable values that don't affect the view lifecycle.
 </Ingress>
 
-The `UseStatic` hook lets you store a value that is initialized only once and persists across re-renders. Unlike UseState, changing a static value does NOT trigger a re-render.
+## Overview
 
-## Basic Usage
+The `UseStatic` hook lets you store a value that is initialized only once and persists across re-renders. Unlike `UseState`, changing a static value does NOT trigger a re-render.
 
-Store a value that persists but doesn't trigger re-renders:
+Key characteristics of `UseStatic`:
 
-```csharp demo-below
+- **Non-Reactive Storage** - Values persist but don't trigger re-renders when changed
+- **Mutable References** - Perfect for storing timers, subscriptions, and other mutable objects
+- **Performance** - No dependency tracking or re-render overhead
+- **Persistence** - Values survive across component re-renders
+
+<Callout type="Tip">
+`UseStatic` is ideal for storing mutable references that don't affect rendering, such as timers, subscriptions, DOM references, or previous values for comparison.
+</Callout>
+
+## When to Use UseStatic
+
+```mermaid
+flowchart TD
+    A["Need to store a value?"] --> B{Does it affect rendering?}
+    
+    B --> C["Yes - affects UI"]
+    B --> D["No - doesn't affect UI"]
+    
+    C --> E["Use UseState<br/>Triggers re-renders"]
+    D --> F{What type of value?}
+    
+    F --> G["Mutable reference<br/>Timer, subscription, etc."]
+    F --> H["Previous value<br/>For comparison"]
+    F --> I["Expensive initialization<br/>Cache once"]
+    F --> J["Computed value<br/>From other state"]
+    
+    G --> K["Use UseStatic<br/>Perfect for refs"]
+    H --> L["Use UseStatic<br/>Track previous state"]
+    I --> M["Use UseStatic<br/>Initialize once"]
+    J --> N["Use UseMemo<br/>Recompute on deps"]
+    
+    K --> O["No re-render overhead<br/>Mutable storage<br/>Perfect for cleanup"]
+    L --> P["Compare values<br/>Track changes<br/>No re-render"]
+    M --> Q["Expensive init once<br/>Persist across renders<br/>Better performance"]
+```
+
+## UseStatic Hook
+
+The `UseStatic` hook stores a value that persists across re-renders without triggering updates.
+
+<Callout type="Tip">
+`UseStatic` values are initialized only once and remain stable across re-renders. Changing the value directly won't cause the component to re-render.
+</Callout>
+
+### How UseStatic Works
+
+```mermaid
+sequenceDiagram
+    participant C as Component
+    participant US as UseStatic Hook
+    participant S as Storage
+    
+    Note over C,S: First Render
+    C->>US: UseStatic(initialValue)
+    US->>S: Check if value exists
+    S-->>US: No value found
+    US->>S: Store initialValue (buildOnChange: false)
+    S-->>US: Return stored value
+    US-->>C: Return value (no state wrapper)
+    
+    Note over C,S: Subsequent Render
+    C->>US: UseStatic(initialValue)
+    US->>S: Get stored value
+    S-->>US: Return cached value
+    US-->>C: Return same value (no re-render)
+    
+    Note over C,S: Value Mutation (External)
+    C->>US: Direct mutation (value.Property = newValue)
+    Note right of C: Value changed but<br/>NO re-render triggered
+    US->>S: Value updated in storage
+    Note right of US: Component continues<br/>with same render
+```
+
+### Basic Usage
+
+```csharp demo-tabs
 public class BasicStaticDemo : ViewBase
 {
     class Counter { public int Value = 0; }
     
     public override object? Build()
     {
-        // In real code: var renderCount = UseStatic(() => new Counter());
-        // For demo purposes, showing the concept:
-        var renderCount = new Counter { Value = 1 };
+        var renderCount = this.UseStatic(() => new Counter());
         var forceUpdate = UseState(0);
         
-        // In real code, this would increment without triggering re-render:
-        // renderCount.Value++;
+        // Increment without triggering re-render
+        renderCount.Value++;
         
         return Layout.Vertical(
             Text.P($"This component has rendered {renderCount.Value} times"),
+            Text.Small("(Note: The count increments on each render, but doesn't trigger re-renders)"),
             new Button("Force Re-render", _ => forceUpdate.Set(forceUpdate.Value + 1))
         );
     }
 }
 ```
 
-## When to Use UseStatic
+### Use Cases
 
-### Storing Timers and Intervals
+Use `UseStatic` when:
 
-Keep references to timers for cleanup:
+- **Storing Timers and Intervals** - Keep references to timers for cleanup without triggering re-renders
+- **Tracking Previous Values** - Store previous state values for comparison
+- **Mutable References** - Store objects that you need to mutate without causing re-renders
+- **Expensive Initialization** - Cache expensive objects that only need to be created once
+- **Subscriptions and Disposables** - Keep references to subscriptions for cleanup
 
-```csharp
-// In real code with UseStatic:
-// var timer = UseStatic<Timer?>(null);
-// 
-// var startTimer = () => {
-//     timer = new Timer(_ => { /* update state */ }, null, 0, 1000);
-// };
-//
-// UseEffect(() => {
-//     return () => timer?.Dispose(); // Cleanup on unmount
-// });
-```
+### Best Practices
 
-### Tracking Previous Values
+- **Use for Non-Reactive Values** - Only use `UseStatic` for values that don't affect rendering
+- **Clean Up Resources** - Always clean up timers, subscriptions, and other resources in `UseEffect`
+- **Initialize with Factory Function** - Use factory functions for expensive initialization
+- **Avoid for UI State** - Never use `UseStatic` for values that should trigger re-renders
+- **Document Mutations** - Clearly document when and why static values are mutated
 
-Store previous state values for comparison:
+### Examples
+
+#### Tracking Previous Values
 
 ```csharp demo-tabs
 public class PreviousValueDemo : ViewBase
 {
+    class PreviousValue { public int? Value = null; }
+    class Counter { public int Value = 0; }
+    
     public override object? Build()
     {
         var count = UseState(0);
-        // In real code: var previousCount = UseStatic<int?>(null);
-        var previousCount = 0; // Simplified for demo
+        var previousValue = this.UseStatic(() => new PreviousValue());
+        var renderCount = this.UseStatic(() => new Counter());
         
-        var delta = count.Value - previousCount;
+        renderCount.Value++;
         
-        // In real UseEffect, you would update previousCount after render:
-        // UseEffect(() => { previousCount = count.Value; }, count.Value);
+        // Get the previous value before updating it
+        var previous = previousValue.Value;
+        var delta = previous.HasValue 
+            ? count.Value - previous.Value 
+            : 0;
+        
+        // Update previous value for next render (in real app, use UseEffect)
+        previousValue.Value = count.Value;
         
         return Layout.Vertical(
             Text.P($"Current: {count.Value}"),
-            Text.P($"Previous: {previousCount}"),
+            Text.P($"Previous: {previous?.ToString() ?? "None"}"),
             Text.P($"Delta: {delta}"),
-            new Button("+1", _ => count.Set(count.Value + 1)),
-            new Button("+5", _ => count.Set(count.Value + 5))
+            Text.Small($"Renders: {renderCount.Value}"),
+            Layout.Horizontal(
+                new Button("+1", _ => count.Set(count.Value + 1)),
+                new Button("+5", _ => count.Set(count.Value + 5)),
+                new Button("Reset", _ => {
+                    count.Set(0);
+                    previousValue.Value = null;
+                })
+            )
+        );
+    }
+}
+```
+
+#### Storing Mutable References
+
+```csharp demo-tabs
+public class MutableReferenceDemo : ViewBase
+{
+    class RenderTracker { public int Count = 0; public DateTime LastRender = DateTime.Now; }
+    
+    public override object? Build()
+    {
+        var count = UseState(0);
+        var tracker = this.UseStatic(() => new RenderTracker());
+        
+        // Mutate static value without triggering re-render
+        tracker.Count++;
+        tracker.LastRender = DateTime.Now;
+        
+        return Layout.Vertical(
+            Text.H3($"Count: {count.Value}"),
+            new { 
+                RenderCount = tracker.Count.ToString(),
+                LastRender = tracker.LastRender.ToString("HH:mm:ss")
+            }.ToDetails(),
+            Text.Small("Render tracker is stored in UseStatic - it persists across re-renders but doesn't trigger them"),
+            new Button("Increment", _ => count.Set(count.Value + 1))
         );
     }
 }
@@ -97,54 +220,73 @@ Understanding when to use each hook:
 
 | Hook | Triggers Re-render | Mutable | Use Case |
 |------|-------------------|---------|----------|
-| UseState | ✓ | ✗ | UI state that affects rendering |
-| UseMemo | ✗ | ✗ | Expensive calculations |
-| UseStatic | ✗ | ✓ | Mutable refs, timers, subscriptions |
+| UseState | True | False | UI state that affects rendering |
+| UseMemo | False | False | Expensive calculations |
+| UseStatic | False | True | Mutable refs, timers, subscriptions |
 
-## Best Practices
+## Performance Considerations
 
-### 1. Use for Non-Reactive Values
+### Memory and Overhead
 
-```csharp
-// Good: Timer reference doesn't affect rendering
-// var timer = UseStatic<Timer?>(null);
+- **Minimal Overhead**: `UseStatic` has very low overhead - no dependency tracking, no re-render logic
+- **Direct Storage**: Values are stored directly without wrappers, making access fast
+- **No Cleanup Cost**: Unlike `UseState`, there's no change detection or comparison logic
 
-// Bad: Use UseState for values that affect UI
-// var count = UseStatic(0); // Should be UseState!
+### Appropriate Use Cases
+
+- Storing mutable references (timers, subscriptions)
+- Tracking previous values for comparison
+- Caching expensive initializations
+- Managing DOM references
+- Storing callback references that don't need to trigger updates
+
+### Inappropriate Use Cases
+
+- Value affects rendering (use `UseState`)
+- Value is computed from other values (use `UseMemo`)
+- Value is a simple constant (use regular variables)
+- Value needs to trigger side effects (use `UseState` with `UseEffect`)
+
+## Common Pitfalls and Solutions
+
+### Static Troubleshooting Guide
+
+```mermaid
+flowchart TD
+    A["UseStatic not working as expected?"] --> B{Check your implementation}
+    
+    B --> C["UI not updating?"]
+    B --> D["Value not persisting?"]
+    B --> E["Memory leaks?"]
+    B --> F["Using for reactive state?"]
+    
+    C --> C1["UseStatic doesn't trigger re-renders<br/>Use UseState for UI updates<br/> Mutate then manually update state"]
+    D --> D1["Check initialization<br/>Verify factory function<br/> Ensure value is stored"]
+    E --> E1["Clean up in UseEffect<br/>Dispose timers/subscriptions<br/> Set to null on unmount"]
+    F --> F1["Use UseState instead<br/>Static is for non-reactive values<br/> Check if value affects rendering"]
+    
+    C1 --> G["Problem solved?"]
+    D1 --> G
+    E1 --> G
+    F1 --> G
+    
+    G -->|Yes| H["Great! Your static values are working correctly"]
+    G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
 ```
-
-### 2. Clean Up Resources
-
-```csharp
-// Good: Clean up in effect
-// var subscription = UseStatic<IDisposable?>(null);
-// UseEffect(() => {
-//     return () => subscription?.Dispose();
-// });
-
-// Bad: No cleanup, potential memory leak
-// var subscription = UseStatic<IDisposable?>(null);
-```
-
-### 3. Initialize with Factory Function
-
-```csharp
-// Good: Factory function for expensive initialization
-// var data = UseStatic(() => new ExpensiveObject());
-
-// Acceptable: Simple value
-// var count = UseStatic(0);
-```
-
-## Common Pitfalls
 
 ### 1. Using for Reactive State
 
+**Problem**: Using `UseStatic` for values that should trigger re-renders
+
 ```csharp
 // Wrong: Static value won't trigger re-render
-// var count = UseStatic(0);
-// return new Button($"Count: {count}", _ => count++); // UI won't update!
+var count = UseStatic(0);
+return new Button($"Count: {count}", _ => count++); // UI won't update!
+```
 
+**Solution**: Use `UseState` for reactive values
+
+```csharp
 // Correct: Use UseState for reactive values
 var count = UseState(0);
 return new Button($"Count: {count.Value}", _ => count.Set(count.Value + 1));
@@ -152,38 +294,99 @@ return new Button($"Count: {count.Value}", _ => count.Set(count.Value + 1));
 
 ### 2. Forgetting Cleanup
 
-```csharp
-// Wrong: No cleanup
-// var timer = UseStatic(() => new Timer(_ => { }, null, 0, 1000));
+**Problem**: Not cleaning up resources stored in `UseStatic`
 
-// Correct: Clean up in effect
-// var timer = UseStatic<Timer?>(null);
-// UseEffect(() => {
-//     timer = new Timer(_ => { }, null, 0, 1000);
-//     return () => timer?.Dispose();
-// });
+```csharp
+// Wrong: No cleanup, potential memory leak
+var timer = UseStatic(() => new Timer(_ => { }, null, 0, 1000));
 ```
 
-## Performance Considerations
+**Solution**: Clean up in `UseEffect`
 
-UseStatic is lightweight and has minimal overhead:
-- No dependency tracking
-- No re-render triggering
-- Direct value storage
+```csharp
+// Correct: Clean up in effect
+var timer = UseStatic<Timer?>(null);
+UseEffect(() => {
+    timer.Value = new Timer(_ => { }, null, 0, 1000);
+    return () => timer.Value?.Dispose();
+});
+```
 
-Use it when:
-- ✓ Storing mutable references (timers, subscriptions)
-- ✓ Tracking previous values
-- ✓ Caching expensive initializations
-- ✓ Managing DOM references
+### 3. Mutating Without Manual Updates
 
-Don't use it when:
-- ✗ Value affects rendering (use UseState)
-- ✗ Value is computed from other values (use UseMemo)
-- ✗ Value is a simple constant (use regular variables)
+**Problem**: Mutating static values and expecting UI to update
+
+```csharp
+// Wrong: UI won't update automatically
+var data = UseStatic(() => new List<string>());
+data.Value.Add("new item"); // UI doesn't update!
+```
+
+**Solution**: Manually trigger update or use `UseState`
+
+```csharp
+// Option 1: Use UseState if you need reactivity
+var data = UseState(() => new List<string>());
+data.Set(data.Value.Append("new item").ToList());
+
+// Option 2: Mutate static, then update reactive state
+var data = UseStatic(() => new List<string>());
+var updateTrigger = UseState(0);
+data.Value.Add("new item");
+updateTrigger.Set(updateTrigger.Value + 1); // Force re-render
+```
+
+### 4. Using for Simple Constants
+
+**Problem**: Using `UseStatic` for values that don't need persistence
+
+```csharp
+// Unnecessary: Just use a regular variable
+var config = UseStatic(new { threshold: 100 });
+```
+
+**Solution**: Use regular variables for constants
+
+```csharp
+// Better: Regular variable for constants
+var config = new { threshold: 100 };
+```
+
+### 5. Not Initializing Properly
+
+**Problem**: Not using factory functions for expensive initialization
+
+```csharp
+// Less efficient: Creates object on every render check
+var expensive = UseStatic(new ExpensiveObject());
+```
+
+**Solution**: Use factory function for expensive initialization
+
+```csharp
+// Better: Factory function only called once
+var expensive = UseStatic(() => new ExpensiveObject());
+```
+
+### 6. Confusing with UseMemo
+
+**Problem**: Using `UseStatic` when `UseMemo` is more appropriate
+
+```csharp
+// Wrong: UseStatic for computed values
+var data = UseStatic(() => ProcessItems(items.Value));
+```
+
+**Solution**: Use `UseMemo` for computed values
+
+```csharp
+// Correct: UseMemo recomputes when dependencies change
+var data = UseMemo(() => ProcessItems(items.Value), items);
+```
 
 ## See Also
 
-- [UseState](./03_State.md) - Reactive state management
-- [UseEffect](./04_Effect.md) - Side effects and cleanup
-- [Memoization](./05_Memo.md) - Performance optimization
+- [State Management](../../04_Hooks/03_State.md) - Reactive state with UseState
+- [Effects](../../04_Hooks/04_Effect.md) - Side effects and cleanup
+- [Memoization](../../04_Hooks/05_Memo.md) - Performance optimization with UseMemo
+- [Callbacks](../../04_Hooks/06_Callback.md) - Memoized callback functions
