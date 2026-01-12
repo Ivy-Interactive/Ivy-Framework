@@ -143,6 +143,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
     {
         var args = this.UseService<AppArgs>();
         var auth = this.UseService<IAuthService>();
+        var client = this.UseService<IClientProvider>();
 
         var callback = this.UseWebhook(async (request) =>
         {
@@ -152,10 +153,19 @@ public class OAuthFlowView(AuthOption option) : ViewBase
 
         // Redirect to our OAuth login endpoint, which will in turn redirect to the provider's OAuth URL.
         // This is done to evade Safari's pop-up blocking feature.
+        // Use client.Redirect() instead of navigator.Navigate() to open in the same tab.
+        // navigator.Navigate() for HTTP URLs calls client.OpenUrl() which opens in a new tab.
         var oauthUriBuilder = new UriBuilder($"{args.Scheme}://{args.Host}/ivy/auth/oauth-login")
         {
             Query = $"optionId={Uri.EscapeDataString(option.Id ?? "")}&callbackId={Uri.EscapeDataString(callback.Id)}&connectionId={Uri.EscapeDataString(args.ConnectionId)}"
         };
-        return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).Url(oauthUriBuilder.ToString());
+        // Extract relative path (path + query) for Redirect - it only accepts relative paths
+        // Uri.PathAndQuery already includes the query string with proper formatting
+        var oauthPath = oauthUriBuilder.Uri.PathAndQuery;
+        return new Button(option.Name)
+            .Secondary()
+            .Icon(option.Icon)
+            .Width(Size.Full())
+            .HandleClick(() => client.Redirect(oauthPath));
     }
 }
