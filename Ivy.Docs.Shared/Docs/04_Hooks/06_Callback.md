@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - usecallback
   - performance
   - optimization
   - callbacks
@@ -12,19 +13,19 @@ searchHints:
 # Callbacks
 
 <Ingress>
-The `UseCallback` hook memoizes callback functions, preventing unnecessary re-renders when callbacks are passed as props to child components or used as dependencies in other hooks.
+The `UseCallback` [hook](./02_RulesOfHooks.md) memoizes callback functions, preventing unnecessary re-renders when callbacks are passed as props to [child components](../../01_Onboarding/02_Concepts/03_Widgets.md) or used as dependencies in other [hooks](./02_RulesOfHooks.md).
 </Ingress>
 
 ## Overview
 
-The `UseCallback` hook provides a way to optimize callback functions in Ivy applications:
+The `UseCallback` [hook](./02_RulesOfHooks.md) provides a way to optimize callback functions in Ivy [applications](../../01_Onboarding/02_Concepts/15_Apps.md):
 
-- **Stable Function References** - Returns the same function reference when dependencies haven't changed
-- **Prevents Re-renders** - Child components won't re-render unnecessarily when receiving memoized callbacks
-- **Stable Dependencies** - Ensures callbacks used in `UseEffect` and other hooks have stable references
+- **Stable Function References** - Returns the same function reference when [state](./03_State.md) dependencies haven't changed
+- **Prevents Re-renders** - [Child components](../../01_Onboarding/02_Concepts/03_Widgets.md) won't re-render unnecessarily when receiving memoized callbacks
+- **Stable Dependencies** - Ensures callbacks used in [`UseEffect`](./04_Effect.md) and other hooks have stable references
 
 <Callout type="Tip">
-`UseCallback` memoizes the function reference itself, while `UseMemo` memoizes the result of calling a function. The memoized callback is only executed when you invoke it.
+`UseCallback` memoizes the function reference itself, while [`UseMemo`](./05_Memo.md) memoizes the result of calling a function. The memoized callback is only executed when you invoke it.
 </Callout>
 
 ## When to Use UseCallback
@@ -51,7 +52,7 @@ flowchart TD
 
 ## UseCallback Hook
 
-The `UseCallback` hook memoizes callback functions and only recreates them when their dependencies change.
+The `UseCallback` [hook](./02_RulesOfHooks.md) memoizes callback functions and only recreates them when their [state](./03_State.md) dependencies change.
 
 <Callout type="Tip">
 `UseCallback` hook stores only the most recent dependency values for comparison; older values are discarded.
@@ -124,17 +125,17 @@ public class ParentView : ViewBase
 
 Use `UseCallback` when:
 
-- **Passing callbacks to child components** - Prevents unnecessary re-renders when the callback reference is stable
-- **Callbacks are dependencies of other hooks** - Ensures stable references for `UseEffect` and other hooks
+- **Passing callbacks to [child components](../../01_Onboarding/02_Concepts/03_Widgets.md)** - Prevents unnecessary re-renders when the callback reference is stable
+- **Callbacks are dependencies of other [hooks](./02_RulesOfHooks.md)** - Ensures stable references for [`UseEffect`](./04_Effect.md) and other [hooks](./02_RulesOfHooks.md)
 - **Event handlers with expensive setup** - Avoids recreating handlers on every render
-- **Callbacks in lists** - Optimizes performance when rendering many components with callbacks
+- **Callbacks in lists** - Optimizes performance when rendering many [components](../../01_Onboarding/02_Concepts/02_Views.md) with callbacks
 
 ### Best Practices
 
-- **Dependency Array**: Always specify the dependencies that should trigger callback recreation
-- **Stable References**: Only include values that actually affect the callback's behavior
+- **Dependency Array**: Always specify the [state](./03_State.md) dependencies that should trigger callback recreation
+- **Stable References**: Only include state values that actually affect the callback's behavior
 - **Avoid Over-Memoization**: Don't memoize simple callbacks that don't cause performance issues
-- **Combine with IMemoized**: Use `UseCallback` together with `IMemoized` components for maximum optimization
+- **Combine with IMemoized**: Use `UseCallback` together with `IMemoized` [components](../../01_Onboarding/02_Concepts/02_Views.md) for maximum optimization
 
 ### Examples
 
@@ -180,7 +181,7 @@ public class TodoListView : ViewBase
 }
 ```
 
-#### Stable Dependencies for [Effects](../../04_Hooks/04_Effect.md)
+#### Stable Dependencies for [Effects](./04_Effect.md)
 
 ```csharp
 public class DataFetcherView : ViewBase
@@ -235,7 +236,7 @@ var handleSubmit = UseCallback(() => SubmitForm(), formData);
 // Consider if all are necessary
 ```
 
-- **Dependency Stability**: If dependencies change frequently, callbacks will be recreated often, reducing the effectiveness of memoization:
+- **[State](./03_State.md) Dependency Stability**: If state dependencies change frequently, callbacks will be recreated often, reducing the effectiveness of memoization:
 
 ```csharp
 // Bad: Dependency changes on every render
@@ -260,8 +261,8 @@ var handleClick = UseCallback(() => count.Set(count.Value + 1), count);
 ### When NOT to Use UseCallback
 
 - **Simple callbacks**: Don't memoize trivial callbacks that don't cause performance issues
-- **Frequently changing dependencies**: If dependencies change often, memoization provides no benefit
-- **Single-use callbacks**: If a callback is only used once and not passed to children, memoization may be unnecessary
+- **Frequently changing [state](./03_State.md) dependencies**: If state dependencies change often, memoization provides no benefit
+- **Single-use callbacks**: If a callback is only used once and not passed to [children](../../01_Onboarding/02_Concepts/03_Widgets.md), memoization may be unnecessary
 
 ```csharp
 // Unnecessary memoization
@@ -281,7 +282,7 @@ flowchart TD
     
     B --> C["Dependencies changing unexpectedly?"]
     B --> D["Performance not improving?"]
-    E --> E1["Use stable references<br/> Avoid creating objects in deps<br/> Use UseStatic for constants"]
+    E --> E1["Use stable references<br/>Avoid creating objects in deps<br/>Use [UseStatic](./08_Static.md) for constants"]
     B --> E["Infinite loops in UseEffect?"]
     B --> F["Children still re-rendering?"]
     
@@ -310,7 +311,7 @@ var handleAction = UseCallback(() =>
 }, data.Value, new Config { threshold: 100 });
 ```
 
-**Solution**: Use stable references
+**Solution**: Use stable references with [UseStatic](./08_Static.md)
 
 ```csharp
 // Good: Stable dependency
@@ -323,7 +324,7 @@ var handleAction = UseCallback(() =>
 
 ### 2. Missing Dependencies
 
-**Problem**: Not including all values used in the callback
+**Problem**: Not including all state values used in the callback
 
 ```csharp
 // Bad: Missing 'multiplier' dependency
@@ -365,7 +366,7 @@ var handleLog = () => Console.WriteLine("Log");
 
 ### 4. Callback Dependencies Issues
 
-**Problem**: Callbacks that capture too many variables
+**Problem**: Callbacks that capture too many state variables
 
 ```csharp
 // Bad: Callback recreated whenever any state changes
@@ -403,7 +404,7 @@ return Layout.Vertical(
 );
 ```
 
-### 6. Infinite Loops in UseEffect
+### 6. Infinite Loops in [UseEffect](./04_Effect.md)
 
 **Problem**: Callback dependency causes infinite re-renders
 
@@ -438,7 +439,11 @@ UseEffect(async () =>
 
 ## See Also
 
-- [Memoization](../../04_Hooks/05_Memo.md)
-- [Effects](../../04_Hooks/04_Effect.md)
-- [State Management](../../04_Hooks/03_State.md)
-- [Widgets](../../01_Onboarding/02_Concepts/03_Widgets.md)
+- [Memoization](./05_Memo.md) - Caching computed values with UseMemo
+- [UseMemo](./05_Memo.md) - Memoizing function resultss
+- [Effects](./04_Effect.md) - Performing side effects with stable dependencies
+- [State Management](./03_State.md) - Managing component state
+- [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [UseStatic](./08_Static.md) - Storing stable references
+- [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+- [Widgets](../../01_Onboarding/02_Concepts/03_Widgets.md) - Building UI components

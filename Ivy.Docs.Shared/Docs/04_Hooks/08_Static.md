@@ -16,22 +16,22 @@ imports:
 # Static
 
 <Ingress>
-Store values that persist across re-renders without triggering updates, similar to React's useRef for holding mutable values that don't affect the view lifecycle.
+Store values that persist across re-renders without triggering updates, similar to React's useRef for holding mutable values that don't affect the [view](../../01_Onboarding/02_Concepts/02_Views.md) lifecycle.
 </Ingress>
 
 ## Overview
 
-The `UseStatic` hook lets you store a value that is initialized only once and persists across re-renders. Unlike `UseState`, changing a static value does NOT trigger a re-render.
+The `UseStatic` [hook](./02_RulesOfHooks.md) lets you store a value that is initialized only once and persists across re-renders. Unlike [`UseState`](./03_State.md), changing a static value does NOT trigger a re-render.
 
 Key characteristics of `UseStatic`:
 
 - **Non-Reactive Storage** - Values persist but don't trigger re-renders when changed
 - **Mutable References** - Perfect for storing timers, subscriptions, and other mutable objects
 - **Performance** - No dependency tracking or re-render overhead
-- **Persistence** - Values survive across component re-renders
+- **Persistence** - Values survive across [component](../../01_Onboarding/02_Concepts/02_Views.md) re-renders
 
 <Callout type="Tip">
-`UseStatic` is ideal for storing mutable references that don't affect rendering, such as timers, subscriptions, DOM references, or previous values for comparison.
+`UseStatic` is ideal for storing mutable references that don't affect rendering, such as timers, subscriptions, DOM references, or previous [state](./03_State.md) values for comparison.
 </Callout>
 
 ## When to Use UseStatic
@@ -63,10 +63,10 @@ flowchart TD
 
 ## UseStatic Hook
 
-The `UseStatic` hook stores a value that persists across re-renders without triggering updates.
+The `UseStatic` [hook](./02_RulesOfHooks.md) stores a value that persists across re-renders without triggering updates.
 
 <Callout type="Tip">
-`UseStatic` values are initialized only once and remain stable across re-renders. Changing the value directly won't cause the component to re-render.
+`UseStatic` values are initialized only once and remain stable across re-renders. Changing the value directly won't cause the [component](../../01_Onboarding/02_Concepts/02_Views.md) to re-render.
 </Callout>
 
 ### How UseStatic Works
@@ -127,7 +127,7 @@ public class BasicStaticDemo : ViewBase
 Use `UseStatic` when:
 
 - **Storing Timers and Intervals** - Keep references to timers for cleanup without triggering re-renders
-- **Tracking Previous Values** - Store previous state values for comparison
+- **Tracking Previous Values** - Store previous [state](./03_State.md) values for comparison
 - **Mutable References** - Store objects that you need to mutate without causing re-renders
 - **Expensive Initialization** - Cache expensive objects that only need to be created once
 - **Subscriptions and Disposables** - Keep references to subscriptions for cleanup
@@ -135,9 +135,9 @@ Use `UseStatic` when:
 ### Best Practices
 
 - **Use for Non-Reactive Values** - Only use `UseStatic` for values that don't affect rendering
-- **Clean Up Resources** - Always clean up timers, subscriptions, and other resources in `UseEffect`
+- **Clean Up Resources** - Always clean up timers, subscriptions, and other resources in [`UseEffect`](./04_Effect.md)
 - **Initialize with Factory Function** - Use factory functions for expensive initialization
-- **Avoid for UI State** - Never use `UseStatic` for values that should trigger re-renders
+- **Avoid for UI [State](./03_State.md)** - Never use `UseStatic` for values that should trigger re-renders (use [`UseState`](./03_State.md))
 - **Document Mutations** - Clearly document when and why static values are mutated
 
 ### Examples
@@ -220,9 +220,9 @@ Understanding when to use each hook:
 
 | Hook | Triggers Re-render | Mutable | Use Case |
 |------|-------------------|---------|----------|
-| UseState | True | False | UI state that affects rendering |
-| UseMemo | False | False | Expensive calculations |
-| UseStatic | False | True | Mutable refs, timers, subscriptions |
+| [`UseState`](./03_State.md) | True | False | UI [state](./03_State.md) that affects rendering |
+| [`UseMemo`](./05_Memo.md) | False | False | Expensive calculations |
+| `UseStatic` | False | True | Mutable refs, timers, subscriptions |
 
 ## Performance Considerations
 
@@ -235,17 +235,17 @@ Understanding when to use each hook:
 ### Appropriate Use Cases
 
 - Storing mutable references (timers, subscriptions)
-- Tracking previous values for comparison
+- Tracking previous [state](./03_State.md) values for comparison
 - Caching expensive initializations
 - Managing DOM references
 - Storing callback references that don't need to trigger updates
 
 ### Inappropriate Use Cases
 
-- Value affects rendering (use `UseState`)
-- Value is computed from other values (use `UseMemo`)
+- Value affects rendering (use [`UseState`](./03_State.md))
+- Value is computed from other values (use [`UseMemo`](./05_Memo.md))
 - Value is a simple constant (use regular variables)
-- Value needs to trigger side effects (use `UseState` with `UseEffect`)
+- Value needs to trigger side effects (use [`UseState`](./03_State.md) with [`UseEffect`](./04_Effect.md))
 
 ## Common Pitfalls and Solutions
 
@@ -260,10 +260,10 @@ flowchart TD
     B --> E["Memory leaks?"]
     B --> F["Using for reactive state?"]
     
-    C --> C1["UseStatic doesn't trigger re-renders<br/>Use UseState for UI updates<br/> Mutate then manually update state"]
+    C --> C1["UseStatic doesn't trigger re-renders<br/>Use [UseState](./03_State.md) for UI updates<br/>Mutate then manually update state"]
     D --> D1["Check initialization<br/>Verify factory function<br/> Ensure value is stored"]
-    E --> E1["Clean up in UseEffect<br/>Dispose timers/subscriptions<br/> Set to null on unmount"]
-    F --> F1["Use UseState instead<br/>Static is for non-reactive values<br/> Check if value affects rendering"]
+    E --> E1["Clean up in [UseEffect](./04_Effect.md)<br/>Dispose timers/subscriptions<br/>Set to null on unmount"]
+    F --> F1["Use [UseState](./03_State.md) instead<br/>Static is for non-reactive values<br/>Check if value affects rendering"]
     
     C1 --> G["Problem solved?"]
     D1 --> G
@@ -284,7 +284,7 @@ var count = UseStatic(0);
 return new Button($"Count: {count}", _ => count++); // UI won't update!
 ```
 
-**Solution**: Use `UseState` for reactive values
+**Solution**: Use [`UseState`](./03_State.md) for reactive values
 
 ```csharp
 // Correct: Use UseState for reactive values
@@ -301,7 +301,7 @@ return new Button($"Count: {count.Value}", _ => count.Set(count.Value + 1));
 var timer = UseStatic(() => new Timer(_ => { }, null, 0, 1000));
 ```
 
-**Solution**: Clean up in `UseEffect`
+**Solution**: Clean up in [`UseEffect`](./04_Effect.md)
 
 ```csharp
 // Correct: Clean up in effect
@@ -322,7 +322,7 @@ var data = UseStatic(() => new List<string>());
 data.Value.Add("new item"); // UI doesn't update!
 ```
 
-**Solution**: Manually trigger update or use `UseState`
+**Solution**: Manually trigger update or use [`UseState`](./03_State.md)
 
 ```csharp
 // Option 1: Use UseState if you need reactivity
@@ -368,16 +368,16 @@ var expensive = UseStatic(new ExpensiveObject());
 var expensive = UseStatic(() => new ExpensiveObject());
 ```
 
-### 6. Confusing with UseMemo
+### 6. Confusing with [`UseMemo`](./05_Memo.md)
 
-**Problem**: Using `UseStatic` when `UseMemo` is more appropriate
+**Problem**: Using `UseStatic` when [`UseMemo`](./05_Memo.md) is more appropriate
 
 ```csharp
 // Wrong: UseStatic for computed values
 var data = UseStatic(() => ProcessItems(items.Value));
 ```
 
-**Solution**: Use `UseMemo` for computed values
+**Solution**: Use [`UseMemo`](./05_Memo.md) for computed values
 
 ```csharp
 // Correct: UseMemo recomputes when dependencies change
@@ -386,7 +386,9 @@ var data = UseMemo(() => ProcessItems(items.Value), items);
 
 ## See Also
 
-- [State Management](../../04_Hooks/03_State.md) - Reactive state with UseState
-- [Effects](../../04_Hooks/04_Effect.md) - Side effects and cleanup
-- [Memoization](../../04_Hooks/05_Memo.md) - Performance optimization with UseMemo
-- [Callbacks](../../04_Hooks/06_Callback.md) - Memoized callback functions
+- [State Management](./03_State.md) - Reactive state with UseState
+- [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [Effects](./04_Effect.md) - Side effects and cleanup
+- [Memoization](./05_Memo.md) - Performance optimization with UseMemo
+- [Callbacks](./06_Callback.md) - Memoized callback functions with UseCallback
+- [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

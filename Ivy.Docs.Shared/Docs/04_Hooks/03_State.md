@@ -1,6 +1,7 @@
 ---
 searchHints:
   - usestate
+  - state
   - reactive
   - data
   - hooks

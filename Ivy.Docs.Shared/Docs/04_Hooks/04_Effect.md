@@ -11,12 +11,12 @@ searchHints:
 # Effects
 
 <Ingress>
-Perform side effects in your Ivy [views](../../01_Onboarding/02_Concepts/02_Views.md) with the UseEffect hook, similar to React's useEffect but optimized for server-side architecture.
+Perform side effects in your Ivy [views](../../01_Onboarding/02_Concepts/02_Views.md) with the UseEffect [hook](./02_RulesOfHooks.md), similar to React's useEffect but optimized for server-side architecture.
 </Ingress>
 
-The `UseEffect` hook is a powerful feature in Ivy that allows you to perform side effects in your views. It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
+The `UseEffect` [hook](./02_RulesOfHooks.md) is a powerful feature in Ivy that allows you to perform side effects in your [views](../../01_Onboarding/02_Concepts/02_Views.md). It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
 
-Effects are essential for handling operations that don't directly relate to rendering:
+Effects are essential for handling operations that don't directly relate to rendering, such as working with [state](./03_State.md) updates, [async operations](../../01_Onboarding/02_Concepts/11_TasksAndObservables.md), and external services:
 
 ```mermaid
 graph TD
@@ -106,7 +106,7 @@ Effects can be triggered by different events using trigger parameters:
 
 ### State Dependencies
 
-Effects can depend on [state changes](../../04_Hooks/03_State.md):
+Effects can depend on [state](./03_State.md) changes:
 
 ```csharp demo-below
 public class DependentEffectView : ViewBase
@@ -116,7 +116,7 @@ public class DependentEffectView : ViewBase
         var count = UseState(0);
         var log = UseState<List<string>>(new List<string>());
         
-        // Effect runs when count changes
+        // Effect runs when state changes
         UseEffect(() =>
         {
             var currentLog = log.Value;
@@ -157,7 +157,7 @@ graph LR
     
     B --> B1["Runs once during initialization"]
     C --> C1["Runs after virtual DOM updates"]
-    D --> D1["Runs when [state changes](../../04_Hooks/03_State.md)"]
+    D --> D1["Runs when state changes"]
 ```
 
 ```csharp
@@ -360,7 +360,7 @@ UseEffect(async () =>
 ### 4. Avoid Infinite Loops
 
 ```csharp
-// Bad: Creates infinite loop
+// Bad: Creates infinite loop with state updates
 UseEffect(() =>
 {
     count.Set(count.Value + 1); // This triggers the effect again!
@@ -378,6 +378,8 @@ UseEffect(() =>
 
 ### 5. Use [Memoized](./05_Memo.md) Callbacks for Complex Dependencies
 
+For complex dependencies, use [UseCallback](./06_Callback.md) or [UseMemo](./05_Memo.md) to [memoize](./05_Memo.md) values and prevent unnecessary effect re-runs:
+
 ```csharp
 public class ComplexEffectView : ViewBase
 {
@@ -386,7 +388,7 @@ public class ComplexEffectView : ViewBase
         var data = UseState<List<Item>>(new List<Item>());
         var filter = UseState("");
         
-        // Memoize the processing function
+        // Memoize the processing function with UseCallback
         var processData = this.UseCallback(async () =>
         {
             var filtered = data.Value
@@ -419,7 +421,7 @@ UseEffect(() =>
     // ...
 }, count); // Missing multiplier dependency
 
-// Correct: Include all dependencies
+// Correct: Include all state dependencies
 UseEffect(() =>
 {
     var result = count.Value * multiplier.Value;
@@ -441,7 +443,7 @@ UseEffect(() =>
     return timer;
 }); // No dependencies - effect only runs once
 
-// Correct: Update dependencies or use current values
+// Correct: Update dependencies or use current state values
 UseEffect(() =>
 {
     var timer = new Timer(_ =>
@@ -449,7 +451,7 @@ UseEffect(() =>
         Console.WriteLine(count.Value); // Will see current value
     }, null, 1000, 1000);
     return timer;
-}, count); // Re-create timer when count changes
+}, count); // Re-create timer when state changes
 ```
 
 ### 3. Not Awaiting Async Operations
@@ -471,6 +473,8 @@ UseEffect(async () =>
 ## See Also
 
 - [State Management](./03_State.md) - Managing component state
+- [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Memoization](./05_Memo.md) - Optimizing performance with memoization
+- [UseCallback](./06_Callback.md) - Memoizing callback functions
 - [Signals](../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
 - [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
