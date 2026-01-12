@@ -3,16 +3,16 @@ import * as signalR from '@microsoft/signalr';
 import { WidgetEventHandlerType, WidgetNode } from '@/types/widgets';
 import { useToast } from '@/hooks/use-toast';
 import { showError } from '@/hooks/use-error-sheet';
-import {
-  getIvyHost,
-  getMachineId,
-  validateRedirectUrl,
-  validateLinkUrl,
-} from '@/lib/utils';
+import { getIvyHost, getMachineId } from '@/lib/utils';
+import { validateRedirectUrl, validateLinkUrl } from '@/lib/url';
 import { logger } from '@/lib/logger';
 import { applyPatch, Operation } from 'fast-json-patch';
 import { ToastAction } from '@/components/ui/toast';
 import { setThemeGlobal } from '@/components/theme-provider';
+import {
+  setExternalWidgetRegistry,
+  ExternalWidgetInfo,
+} from '@/widgets/externalWidgetLoader';
 
 type UpdateMessage = Array<{
   iteration: number;
@@ -24,6 +24,7 @@ type UpdateMessage = Array<{
 
 type RefreshMessage = {
   widgets: WidgetNode;
+  externalWidgets?: ExternalWidgetInfo[] | null;
 };
 
 type ErrorMessage = {
@@ -382,6 +383,12 @@ export const useBackend = (
   const handleRefreshMessage = useCallback((message: RefreshMessage) => {
     // Reset iteration tracking on full refresh
     lastIterationRef.current = -1;
+
+    // Update external widget registry if provided
+    if (message.externalWidgets) {
+      setExternalWidgetRegistry(message.externalWidgets);
+    }
+
     setWidgetTree(message.widgets);
   }, []);
 

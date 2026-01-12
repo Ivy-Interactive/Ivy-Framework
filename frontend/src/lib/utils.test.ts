@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as utils from './utils';
-import * as urlValidation from './urlValidation';
-import { validateEmbedUrl } from './urlValidation';
+import * as urlValidation from './url';
+import {
+  validateEmbedUrl,
+  validateRedirectUrl,
+  validateLinkUrl,
+  validateImageUrl,
+  validateAudioUrl,
+  validateVideoUrl,
+} from './url';
 
 describe('validateRedirectUrl', () => {
   let getCurrentOriginSpy: ReturnType<typeof vi.fn>;
@@ -15,73 +22,63 @@ describe('validateRedirectUrl', () => {
 
   describe('valid relative paths', () => {
     it('should accept valid relative paths', () => {
-      expect(utils.validateRedirectUrl('/dashboard')).toBe('/dashboard');
-      expect(utils.validateRedirectUrl('/users/profile')).toBe(
-        '/users/profile'
-      );
-      expect(utils.validateRedirectUrl('/app/settings')).toBe('/app/settings');
-      expect(utils.validateRedirectUrl('/')).toBe('/');
+      expect(validateRedirectUrl('/dashboard')).toBe('/dashboard');
+      expect(validateRedirectUrl('/users/profile')).toBe('/users/profile');
+      expect(validateRedirectUrl('/app/settings')).toBe('/app/settings');
+      expect(validateRedirectUrl('/')).toBe('/');
     });
 
     it('should accept relative paths with query strings', () => {
-      expect(utils.validateRedirectUrl('/path?query=value')).toBe(
+      expect(validateRedirectUrl('/path?query=value')).toBe(
         '/path?query=value'
       );
-      expect(utils.validateRedirectUrl('/path#fragment')).toBe(
-        '/path#fragment'
-      );
+      expect(validateRedirectUrl('/path#fragment')).toBe('/path#fragment');
     });
   });
 
   describe('external URLs', () => {
     it('should reject external URLs when allowExternal is false', () => {
-      expect(utils.validateRedirectUrl('http://evil.com', false)).toBeNull();
-      expect(utils.validateRedirectUrl('https://evil.com', false)).toBeNull();
+      expect(validateRedirectUrl('http://evil.com', false)).toBeNull();
+      expect(validateRedirectUrl('https://evil.com', false)).toBeNull();
     });
 
     it('should allow same-origin URLs when allowExternal is false', () => {
-      expect(utils.validateRedirectUrl('https://example.com', false)).toBe(
+      expect(validateRedirectUrl('https://example.com', false)).toBe(
         'https://example.com/'
       );
-      expect(utils.validateRedirectUrl('https://example.com/path', false)).toBe(
+      expect(validateRedirectUrl('https://example.com/path', false)).toBe(
         'https://example.com/path'
       );
     });
 
     it('should allow external URLs when allowExternal is true', () => {
-      expect(utils.validateRedirectUrl('http://example.com', true)).toBe(
+      expect(validateRedirectUrl('http://example.com', true)).toBe(
         'http://example.com/'
       );
-      expect(utils.validateRedirectUrl('https://other.com', true)).toBe(
+      expect(validateRedirectUrl('https://other.com', true)).toBe(
         'https://other.com/'
       );
     });
 
     it('should reject URLs with different ports', () => {
       getCurrentOriginSpy.mockReturnValue('https://example.com:8080');
-      expect(
-        utils.validateRedirectUrl('https://example.com:5000', false)
-      ).toBeNull();
+      expect(validateRedirectUrl('https://example.com:5000', false)).toBeNull();
     });
 
     it('should reject URLs with different schemes', () => {
       getCurrentOriginSpy.mockReturnValue('http://example.com');
-      expect(
-        utils.validateRedirectUrl('https://example.com', false)
-      ).toBeNull();
+      expect(validateRedirectUrl('https://example.com', false)).toBeNull();
     });
   });
 
   describe('dangerous protocols', () => {
     it('should reject javascript: protocol', () => {
-      expect(
-        utils.validateRedirectUrl('javascript:alert("xss")', true)
-      ).toBeNull();
+      expect(validateRedirectUrl('javascript:alert("xss")', true)).toBeNull();
     });
 
     it('should reject data: protocol', () => {
       expect(
-        utils.validateRedirectUrl(
+        validateRedirectUrl(
           'data:text/html,<script>alert("xss")</script>',
           true
         )
@@ -89,50 +86,48 @@ describe('validateRedirectUrl', () => {
     });
 
     it('should reject file: protocol', () => {
-      expect(utils.validateRedirectUrl('file:///etc/passwd', true)).toBeNull();
+      expect(validateRedirectUrl('file:///etc/passwd', true)).toBeNull();
     });
 
     it('should reject vbscript: protocol', () => {
-      expect(
-        utils.validateRedirectUrl('vbscript:msgbox("xss")', true)
-      ).toBeNull();
+      expect(validateRedirectUrl('vbscript:msgbox("xss")', true)).toBeNull();
     });
   });
 
   describe('invalid inputs', () => {
     it('should return null for null input', () => {
-      expect(utils.validateRedirectUrl(null)).toBeNull();
+      expect(validateRedirectUrl(null)).toBeNull();
     });
 
     it('should return null for undefined input', () => {
-      expect(utils.validateRedirectUrl(undefined)).toBeNull();
+      expect(validateRedirectUrl(undefined)).toBeNull();
     });
 
     it('should return null for empty string', () => {
-      expect(utils.validateRedirectUrl('')).toBeNull();
+      expect(validateRedirectUrl('')).toBeNull();
     });
 
     it('should return null for whitespace-only string', () => {
-      expect(utils.validateRedirectUrl('   ')).toBeNull();
-      expect(utils.validateRedirectUrl('\t')).toBeNull();
+      expect(validateRedirectUrl('   ')).toBeNull();
+      expect(validateRedirectUrl('\t')).toBeNull();
     });
 
     it('should trim whitespace', () => {
-      expect(utils.validateRedirectUrl('  /dashboard  ')).toBe('/dashboard');
+      expect(validateRedirectUrl('  /dashboard  ')).toBe('/dashboard');
     });
   });
 
   describe('relative paths with colons', () => {
     it('should reject relative paths containing colons', () => {
-      expect(utils.validateRedirectUrl('/path:with:colons')).toBeNull();
+      expect(validateRedirectUrl('/path:with:colons')).toBeNull();
     });
   });
 
   describe('invalid URL formats', () => {
     it('should return null for malformed URLs', () => {
-      expect(utils.validateRedirectUrl('not-a-url', true)).toBeNull();
-      expect(utils.validateRedirectUrl('://malformed', true)).toBeNull();
-      expect(utils.validateRedirectUrl('invalid://url', true)).toBeNull();
+      expect(validateRedirectUrl('not-a-url', true)).toBeNull();
+      expect(validateRedirectUrl('://malformed', true)).toBeNull();
+      expect(validateRedirectUrl('invalid://url', true)).toBeNull();
     });
   });
 });
@@ -140,53 +135,51 @@ describe('validateRedirectUrl', () => {
 describe('validateLinkUrl', () => {
   describe('valid relative paths', () => {
     it('should accept valid relative paths', () => {
-      expect(utils.validateLinkUrl('/dashboard')).toBe('/dashboard');
-      expect(utils.validateLinkUrl('/users/profile')).toBe('/users/profile');
-      expect(utils.validateLinkUrl('/app/settings')).toBe('/app/settings');
-      expect(utils.validateLinkUrl('/')).toBe('/');
+      expect(validateLinkUrl('/dashboard')).toBe('/dashboard');
+      expect(validateLinkUrl('/users/profile')).toBe('/users/profile');
+      expect(validateLinkUrl('/app/settings')).toBe('/app/settings');
+      expect(validateLinkUrl('/')).toBe('/');
     });
 
     it('should accept relative paths with query strings and fragments', () => {
-      expect(utils.validateLinkUrl('/path?query=value')).toBe(
-        '/path?query=value'
-      );
-      expect(utils.validateLinkUrl('/path#fragment')).toBe('/path#fragment');
+      expect(validateLinkUrl('/path?query=value')).toBe('/path?query=value');
+      expect(validateLinkUrl('/path#fragment')).toBe('/path#fragment');
     });
   });
 
   describe('valid http/https URLs', () => {
     it('should accept valid http URLs', () => {
-      const result = utils.validateLinkUrl('http://example.com');
+      const result = validateLinkUrl('http://example.com');
       expect(result).toBeTruthy();
       expect(result).toContain('http://example.com');
     });
 
     it('should accept valid https URLs', () => {
-      const result = utils.validateLinkUrl('https://example.com');
+      const result = validateLinkUrl('https://example.com');
       expect(result).toBeTruthy();
       expect(result).toContain('https://example.com');
     });
 
     it('should accept URLs with paths', () => {
-      expect(utils.validateLinkUrl('https://example.com/path')).toBe(
+      expect(validateLinkUrl('https://example.com/path')).toBe(
         'https://example.com/path'
       );
     });
 
     it('should accept URLs with query strings', () => {
-      expect(
-        utils.validateLinkUrl('https://example.com/path?query=value')
-      ).toBe('https://example.com/path?query=value');
+      expect(validateLinkUrl('https://example.com/path?query=value')).toBe(
+        'https://example.com/path?query=value'
+      );
     });
 
     it('should accept URLs with fragments', () => {
-      expect(utils.validateLinkUrl('https://example.com/path#fragment')).toBe(
+      expect(validateLinkUrl('https://example.com/path#fragment')).toBe(
         'https://example.com/path#fragment'
       );
     });
 
     it('should accept URLs with ports', () => {
-      expect(utils.validateLinkUrl('http://example.com:8080/path')).toBe(
+      expect(validateLinkUrl('http://example.com:8080/path')).toBe(
         'http://example.com:8080/path'
       );
     });
@@ -194,112 +187,112 @@ describe('validateLinkUrl', () => {
 
   describe('app:// URLs', () => {
     it('should accept valid app:// URLs', () => {
-      expect(utils.validateLinkUrl('app://dashboard')).toBe('app://dashboard');
-      expect(utils.validateLinkUrl('app://users/profile')).toBe(
+      expect(validateLinkUrl('app://dashboard')).toBe('app://dashboard');
+      expect(validateLinkUrl('app://users/profile')).toBe(
         'app://users/profile'
       );
-      expect(utils.validateLinkUrl('app://my-app')).toBe('app://my-app');
+      expect(validateLinkUrl('app://my-app')).toBe('app://my-app');
     });
 
     it('should accept app:// URLs with query strings', () => {
-      expect(utils.validateLinkUrl('app://path?query=value')).toBe(
+      expect(validateLinkUrl('app://path?query=value')).toBe(
         'app://path?query=value'
       );
-      expect(utils.validateLinkUrl('app://MyApp?param=value')).toBe(
+      expect(validateLinkUrl('app://MyApp?param=value')).toBe(
         'app://MyApp?param=value'
       );
     });
 
     it('should reject app:// URLs with fragments', () => {
-      expect(utils.validateLinkUrl('app://path#fragment')).toBe('#');
+      expect(validateLinkUrl('app://path#fragment')).toBe('#');
     });
 
     it('should accept app:// URLs with ampersands in query strings', () => {
-      expect(
-        utils.validateLinkUrl('app://path?param1=value1&param2=value2')
-      ).toBe('app://path?param1=value1&param2=value2');
+      expect(validateLinkUrl('app://path?param1=value1&param2=value2')).toBe(
+        'app://path?param1=value1&param2=value2'
+      );
     });
 
     it('should reject app:// URLs with multiple colons', () => {
-      expect(utils.validateLinkUrl('app://path:extra:colons')).toBe('#');
+      expect(validateLinkUrl('app://path:extra:colons')).toBe('#');
     });
   });
 
   describe('anchor links', () => {
     it('should accept valid anchor links', () => {
-      expect(utils.validateLinkUrl('#section1')).toBe('#section1');
-      expect(utils.validateLinkUrl('#heading-2')).toBe('#heading-2');
-      expect(utils.validateLinkUrl('#_anchor')).toBe('#_anchor');
+      expect(validateLinkUrl('#section1')).toBe('#section1');
+      expect(validateLinkUrl('#heading-2')).toBe('#heading-2');
+      expect(validateLinkUrl('#_anchor')).toBe('#_anchor');
     });
 
     it('should reject anchor links with query strings', () => {
-      expect(utils.validateLinkUrl('#anchor?query=value')).toBe('#');
+      expect(validateLinkUrl('#anchor?query=value')).toBe('#');
     });
 
     it('should reject anchor links with ampersands', () => {
-      expect(utils.validateLinkUrl('#anchor&evil')).toBe('#');
+      expect(validateLinkUrl('#anchor&evil')).toBe('#');
     });
 
     it('should accept anchor links with colons', () => {
-      expect(utils.validateLinkUrl('#anchor:colons')).toBe('#anchor:colons');
-      expect(utils.validateLinkUrl('#section:value')).toBe('#section:value');
+      expect(validateLinkUrl('#anchor:colons')).toBe('#anchor:colons');
+      expect(validateLinkUrl('#section:value')).toBe('#section:value');
     });
   });
 
   describe('dangerous protocols', () => {
     it('should reject javascript: protocol', () => {
-      expect(utils.validateLinkUrl('javascript:alert("xss")')).toBe('#');
+      expect(validateLinkUrl('javascript:alert("xss")')).toBe('#');
     });
 
     it('should reject data: protocol', () => {
       expect(
-        utils.validateLinkUrl('data:text/html,<script>alert("xss")</script>')
+        validateLinkUrl('data:text/html,<script>alert("xss")</script>')
       ).toBe('#');
     });
 
     it('should reject file: protocol', () => {
-      expect(utils.validateLinkUrl('file:///etc/passwd')).toBe('#');
+      expect(validateLinkUrl('file:///etc/passwd')).toBe('#');
     });
 
     it('should reject vbscript: protocol', () => {
-      expect(utils.validateLinkUrl('vbscript:msgbox("xss")')).toBe('#');
+      expect(validateLinkUrl('vbscript:msgbox("xss")')).toBe('#');
     });
   });
 
   describe('invalid inputs', () => {
     it('should return # for null input', () => {
-      expect(utils.validateLinkUrl(null)).toBe('#');
+      expect(validateLinkUrl(null)).toBe('#');
     });
 
     it('should return # for undefined input', () => {
-      expect(utils.validateLinkUrl(undefined)).toBe('#');
+      expect(validateLinkUrl(undefined)).toBe('#');
     });
 
     it('should return # for empty string', () => {
-      expect(utils.validateLinkUrl('')).toBe('#');
+      expect(validateLinkUrl('')).toBe('#');
     });
 
     it('should return # for whitespace-only string', () => {
       // After trimming, whitespace becomes empty string, which should return #
-      expect(utils.validateLinkUrl('   ')).toBe('#');
-      expect(utils.validateLinkUrl('\t')).toBe('#');
+      expect(validateLinkUrl('   ')).toBe('#');
+      expect(validateLinkUrl('\t')).toBe('#');
     });
 
     it('should trim whitespace', () => {
-      expect(utils.validateLinkUrl('  /dashboard  ')).toBe('/dashboard');
+      expect(validateLinkUrl('  /dashboard  ')).toBe('/dashboard');
     });
   });
 
   describe('relative paths with colons', () => {
     it('should reject relative paths containing colons', () => {
-      expect(utils.validateLinkUrl('/path:with:colons')).toBe('#');
+      expect(validateLinkUrl('/path:with:colons')).toBe('#');
     });
   });
 
   describe('relative paths without leading slash', () => {
     it('should add leading slash to relative paths', () => {
-      expect(utils.validateLinkUrl('relative-path')).toBe('/relative-path');
-      expect(utils.validateLinkUrl('path/without/leading/slash')).toBe(
+      expect(validateLinkUrl('relative-path')).toBe('/relative-path');
+      expect(validateLinkUrl('path/without/leading/slash')).toBe(
         '/path/without/leading/slash'
       );
     });
@@ -307,32 +300,32 @@ describe('validateLinkUrl', () => {
 
   describe('invalid URL formats', () => {
     it('should return # for malformed URLs with colons', () => {
-      expect(utils.validateLinkUrl('invalid://url')).toBe('#');
-      expect(utils.validateLinkUrl('://malformed')).toBe('#');
+      expect(validateLinkUrl('invalid://url')).toBe('#');
+      expect(validateLinkUrl('://malformed')).toBe('#');
     });
 
     it('should treat URLs without colons as relative paths', () => {
-      expect(utils.validateLinkUrl('not-a-url')).toBe('/not-a-url');
+      expect(validateLinkUrl('not-a-url')).toBe('/not-a-url');
     });
   });
 
   describe('edge cases', () => {
     it('should handle URLs with subdomains', () => {
-      const result = utils.validateLinkUrl('https://subdomain.example.com');
+      const result = validateLinkUrl('https://subdomain.example.com');
       expect(result).toBeTruthy();
       expect(result).toContain('https://subdomain.example.com');
     });
 
     it('should handle URLs with multiple path segments', () => {
-      expect(
-        utils.validateLinkUrl('https://example.com/path/to/resource')
-      ).toBe('https://example.com/path/to/resource');
+      expect(validateLinkUrl('https://example.com/path/to/resource')).toBe(
+        'https://example.com/path/to/resource'
+      );
     });
 
     it('should handle URLs with encoded characters', () => {
-      expect(
-        utils.validateLinkUrl('https://example.com/path%20with%20spaces')
-      ).toBe('https://example.com/path%20with%20spaces');
+      expect(validateLinkUrl('https://example.com/path%20with%20spaces')).toBe(
+        'https://example.com/path%20with%20spaces'
+      );
     });
   });
 });
@@ -993,19 +986,19 @@ describe('getIvyHost', () => {
 const mediaValidationCases = [
   {
     name: 'validateImageUrl',
-    validate: utils.validateImageUrl,
+    validate: validateImageUrl,
     validDataUrl: 'data:image/png;base64,AAAA',
     invalidDataUrl: 'data:text/html;base64,AAAA',
   },
   {
     name: 'validateAudioUrl',
-    validate: utils.validateAudioUrl,
+    validate: validateAudioUrl,
     validDataUrl: 'data:audio/ogg;base64,AAAA',
     invalidDataUrl: 'data:text/plain;base64,AAAA',
   },
   {
     name: 'validateVideoUrl',
-    validate: utils.validateVideoUrl,
+    validate: validateVideoUrl,
     validDataUrl: 'data:video/mp4;base64,AAAA',
     invalidDataUrl: 'data:text/plain;base64,AAAA',
   },

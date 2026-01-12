@@ -16,6 +16,8 @@
 
   <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="../Ivy/Ivy.csproj" />
+    <ProjectReference Include="../examples/ExternalWidgetExample/ExternalWidgetExample.csproj" />
+    <ProjectReference Include="../Ivy.Widgets.Tiptap/Ivy.Widgets.Tiptap.csproj" />
   </ItemGroup>
   
   <!-- enable ivy analyzer for samples -->

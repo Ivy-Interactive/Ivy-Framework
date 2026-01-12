@@ -1,7 +1,7 @@
 import { getColor, getOverflow, getWidth, Overflow } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
-import { textBlockClassMap } from '../../lib/textBlockClassMap';
+import { typography } from '../../lib/styles';
 import {
   Tooltip,
   TooltipContent,
@@ -16,6 +16,8 @@ type TextBlockVariant =
   | 'H2'
   | 'H3'
   | 'H4'
+  | 'H5'
+  | 'H6'
   | 'P'
   | 'Inline'
   | 'Block'
@@ -59,24 +61,34 @@ const variantMap: VariantMap = {
     </span>
   ),
   H1: ({ children, className, style }) => (
-    <h1 className={cn(textBlockClassMap.H1, className)} style={style}>
+    <h1 className={cn(typography.h1, className)} style={style}>
       {children}
     </h1>
   ),
   H2: ({ children, className, style }) => (
-    <h2 className={cn(textBlockClassMap.H2, className)} style={style}>
+    <h2 className={cn(typography.h2, className)} style={style}>
       {children}
     </h2>
   ),
   H3: ({ children, className, style }) => (
-    <h3 className={cn(textBlockClassMap.H3, className)} style={style}>
+    <h3 className={cn(typography.h3, className)} style={style}>
       {children}
     </h3>
   ),
   H4: ({ children, className, style }) => (
-    <h4 className={cn(textBlockClassMap.H4, className)} style={style}>
+    <h4 className={cn(typography.h4, className)} style={style}>
       {children}
     </h4>
+  ),
+  H5: ({ children, className, style }) => (
+    <h5 className={cn(typography.h5, className)} style={style}>
+      {children}
+    </h5>
+  ),
+  H6: ({ children, className, style }) => (
+    <h6 className={cn(typography.h6, className)} style={style}>
+      {children}
+    </h6>
   ),
   Block: ({ children, className, style }) => {
     const spanRef = React.useRef<HTMLSpanElement>(null);
@@ -90,14 +102,13 @@ const variantMap: VariantMap = {
         }
       };
       checkTruncation();
-      // Optionally, listen for window resize to re-check truncation
       window.addEventListener('resize', checkTruncation);
       return () => {
         window.removeEventListener('resize', checkTruncation);
       };
     }, [children, style]);
     return (
-      <div className={cn('flex items-center min-w-0', className)} style={style}>
+      <div className={cn(typography.block, className)} style={style}>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -121,7 +132,7 @@ const variantMap: VariantMap = {
     );
   },
   P: ({ children, className, style }) => (
-    <p className={cn(textBlockClassMap.P, className)} style={style}>
+    <p className={cn(typography.p, className)} style={style}>
       {children}
     </p>
   ),
@@ -131,89 +142,62 @@ const variantMap: VariantMap = {
     </span>
   ),
   Blockquote: ({ children, className, style }) => (
-    <blockquote
-      className={cn(textBlockClassMap.Blockquote, className)}
-      style={style}
-    >
+    <blockquote className={cn(typography.blockquote, className)} style={style}>
       {children}
     </blockquote>
   ),
   InlineCode: ({ children, className, style }) => (
-    <code className={cn(textBlockClassMap.InlineCode, className)} style={style}>
+    <code className={cn(typography.code, className)} style={style}>
       {children}
     </code>
   ),
   Lead: ({ children, className, style }) => (
-    <div className={cn(textBlockClassMap.Lead, className)} style={style}>
+    <div className={cn(typography.lead, className)} style={style}>
       <MarkdownRenderer content={children} />
     </div>
   ),
   ExtraLarge: ({ children, className, style }) => (
-    <div className={cn('text-3xl ', className)} style={style}>
+    <div className={cn(typography.extralarge, className)} style={style}>
       {children}
     </div>
   ),
   Large: ({ children, className, style }) => (
-    <div className={cn('text-lg font-semibold', className)} style={style}>
+    <div className={cn(typography.large, className)} style={style}>
       {children}
     </div>
   ),
   Small: ({ children, className, style }) => (
-    <div
-      className={cn('text-large-body font-medium leading-none', className)}
-      style={style}
-    >
+    <div className={cn(typography.small, className)} style={style}>
       {children}
     </div>
   ),
   Muted: ({ children, className, style }) => (
-    <div
-      className={cn('text-sm text-muted-foreground', className)}
-      style={style}
-    >
+    <div className={cn(typography.muted, className)} style={style}>
       {children}
     </div>
   ),
   Danger: ({ children, className, style }) => (
-    <div
-      className={cn(
-        'text-large-body text-destructive font-semibold',
-        className
-      )}
-      style={style}
-    >
+    <div className={cn(typography.danger, className)} style={style}>
       {children}
     </div>
   ),
   Warning: ({ children, className, style }) => (
-    <div
-      className={cn('text-large-body text-amber font-semibold', className)}
-      style={style}
-    >
+    <div className={cn(typography.warning, className)} style={style}>
       {children}
     </div>
   ),
   Success: ({ children, className, style }) => (
-    <div
-      className={cn('text-large-body text-green font-semibold', className)}
-      style={style}
-    >
+    <div className={cn(typography.success, className)} style={style}>
       {children}
     </div>
   ),
   Label: ({ children, className, style }) => (
-    <div
-      className={cn(
-        'text-large-label font-medium leading-none flex items-center',
-        className
-      )}
-      style={style}
-    >
+    <div className={cn(typography.label, className)} style={style}>
       {children}
     </div>
   ),
   Strong: ({ children, className, style }) => (
-    <strong className={cn('font-semibold', className)} style={style}>
+    <strong className={cn(typography.strong, className)} style={style}>
       {children}
     </strong>
   ),

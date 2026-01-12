@@ -69,7 +69,7 @@ Additional instructions in our [documentation](https://docs.ivy.app).
 
 ## Want to help build Ivy Framework?
 
-Check out our [Internal Developer Wiki)(https://github.com/Ivy-Interactive/Ivy-Framework/wiki).
+Check out our [Internal Developer Wiki](https://github.com/Ivy-Interactive/Ivy-Framework/wiki).
 
 
 

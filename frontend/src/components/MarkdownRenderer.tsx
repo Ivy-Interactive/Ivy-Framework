@@ -25,10 +25,10 @@ import {
   isRelativePath,
   isStandardUrl,
   extractAnchorId,
-} from '@/lib/urlValidation';
+} from '@/lib/url';
 import CopyToClipboardButton from './CopyToClipboardButton';
-import { createPrismTheme } from '@/lib/ivy-prism-theme';
-import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
+import { createPrismTheme } from '@/lib/prismTheme';
+import { typography } from '@/lib/styles';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { CustomEmoji } from './custom-emojis/CustomEmoji';
 import { remarkCustomEmojiPlugin } from './custom-emojis/remarkCustomEmojiPlugin';
@@ -193,9 +193,7 @@ const CodeBlock = memo(
       );
     }
 
-    return (
-      <code className={cn(textBlockClassMap.code, className)}>{children}</code>
-    );
+    return <code className={cn(typography.code, className)}>{children}</code>;
   }
 );
 
@@ -251,82 +249,74 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     () => ({
       h1: memo(
         ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h1 className={textBlockClassMap.h1} {...props}>
+          <h1 className={typography.h1} {...props}>
             {children}
           </h1>
         )
       ),
       h2: memo(
         ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h2 className={textBlockClassMap.h2} {...props}>
+          <h2 className={typography.h2} {...props}>
             {children}
           </h2>
         )
       ),
       h3: memo(
         ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h3 className={textBlockClassMap.h3} {...props}>
+          <h3 className={typography.h3} {...props}>
             {children}
           </h3>
         )
       ),
       h4: memo(
         ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h4 className={textBlockClassMap.h4} {...props}>
+          <h4 className={typography.h4} {...props}>
             {children}
           </h4>
         )
       ),
       h5: memo(
         ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h5 className={textBlockClassMap.h5} {...props}>
+          <h5 className={typography.h5} {...props}>
             {children}
           </h5>
         )
       ),
       h6: memo(
         ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h6 className={textBlockClassMap.h6} {...props}>
+          <h6 className={typography.h6} {...props}>
             {children}
           </h6>
         )
       ),
       p: memo(({ children }: { children: React.ReactNode }) => (
-        <p className={textBlockClassMap.p}>{children}</p>
+        <p className={typography.p}>{children}</p>
       )),
       ul: memo(({ children }: { children: React.ReactNode }) => (
-        <ul className={textBlockClassMap.ul}>{children}</ul>
+        <ul className={typography.ul}>{children}</ul>
       )),
       ol: memo(({ children }: { children: React.ReactNode }) => (
-        <ol className={textBlockClassMap.ol}>{children}</ol>
+        <ol className={typography.ol}>{children}</ol>
       )),
       li: memo(({ children }: { children: React.ReactNode }) => (
-        <li className={textBlockClassMap.li}>{children}</li>
+        <li className={typography.li}>{children}</li>
       )),
       strong: memo(({ children }: { children: React.ReactNode }) => (
-        <strong className={textBlockClassMap.strong}>{children}</strong>
+        <strong className={typography.strong}>{children}</strong>
       )),
       em: memo(({ children }: { children: React.ReactNode }) => (
-        <em className={textBlockClassMap.em}>{children}</em>
+        <em className={typography.em}>{children}</em>
       )),
-
-      // Pre tag (for code blocks)
       pre: memo(({ children }: { children: React.ReactNode }) => (
         <>{children}</>
       )),
-
-      // Blockquotes
       blockquote: memo(
         ({ children }: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
-          <blockquote className={textBlockClassMap.blockquote}>
-            {children}
-          </blockquote>
+          <blockquote className={typography.blockquote}>{children}</blockquote>
         )
       ),
-
-      // Tables
       table: memo(({ children }: { children: React.ReactNode }) => (
-        <table className={textBlockClassMap.table}>{children}</table>
+        <table className={typography.table}>{children}</table>
       )),
       thead: memo(({ children }: { children: React.ReactNode }) => (
         <thead className="bg-muted">{children}</thead>
@@ -335,12 +325,12 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         <tr className="border border-border">{children}</tr>
       )),
       th: memo(({ children }: { children: React.ReactNode }) => (
-        <th className={textBlockClassMap.th}>{children}</th>
+        <th className={typography.th}>{children}</th>
       )),
       td: memo(({ children }: { children: React.ReactNode }) => (
-        <td className={textBlockClassMap.td}>{children}</td>
+        <td className={typography.td}>{children}</td>
       )),
-
+      hr: memo(() => <hr className="my-6" />),
       img: memo(
         (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
           const [showOverlay, setShowOverlay] = useState(false);
@@ -378,7 +368,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               <img
                 {...props}
                 src={imageSrc}
-                className={cn(textBlockClassMap.img, 'cursor-zoom-in')}
+                className={cn(typography.img, 'cursor-zoom-in')}
                 loading="lazy"
                 onClick={() => setShowOverlay(true)}
               />
@@ -523,7 +513,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   }, []);
 
   return (
-    <div className={cn(textContainerClass)}>
+    <>
       <ReactMarkdown
         components={{
           ...componentsParams,
@@ -534,7 +524,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       >
         {content}
       </ReactMarkdown>
-    </div>
+    </>
   );
 };
 

@@ -33,7 +33,7 @@ const TerminalWidget = ({
     <div
       role="terminal"
       className={cn(
-        'rounded-lg overflow-hidden border border-border shadow-md'
+        'rounded-lg overflow-hidden border border-border shadow-md mb-4'
       )}
     >
       {showHeader && (
@@ -53,7 +53,7 @@ const TerminalWidget = ({
           <div className="absolute top-2 right-2 z-50">
             <CopyToClipboardButton
               textToCopy={commandsText}
-              className="text-white hover:bg-zinc-700"
+              className="bg-zinc-800 text-white hover:bg-zinc-700"
             />
           </div>
         )}

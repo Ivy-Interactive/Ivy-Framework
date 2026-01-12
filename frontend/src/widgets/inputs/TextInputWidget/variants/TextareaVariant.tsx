@@ -108,7 +108,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         )}
         {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-6">
-            <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
+            <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-md">
               {shortcutDisplay}
             </kbd>
           </div>

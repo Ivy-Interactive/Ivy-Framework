@@ -29,7 +29,12 @@ export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({
 
   if (text) {
     return (
-      <div className="relative flex items-center justify-center">
+      <div
+        className={cn(
+          'relative flex items-center justify-center',
+          orientation === 'Horizontal' && 'my-6'
+        )}
+      >
         {separator}
         <span className="absolute px-2 text-small-label text-muted-foreground bg-background">
           {text}
@@ -39,7 +44,13 @@ export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({
   }
 
   return (
-    <div style={styles} className="flex items-center justify-center">
+    <div
+      style={styles}
+      className={cn(
+        'flex items-center justify-center',
+        orientation === 'Horizontal' && 'my-6'
+      )}
+    >
       {separator}
     </div>
   );

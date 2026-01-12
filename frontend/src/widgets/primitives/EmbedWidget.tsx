@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import { validateEmbedUrl } from '../../lib/urlValidation';
+import { validateEmbedUrl } from '../../lib/url';
 import EmbedErrorFallback from './embeds/EmbedErrorFallback';
 import EmbedLoadingFallback from './embeds/EmbedLoadingFallback';
 import EmbedErrorBoundary from './embeds/EmbedErrorBoundary';

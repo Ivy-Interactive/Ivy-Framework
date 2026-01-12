@@ -1,10 +1,6 @@
 import { getHeight, getWidth } from '@/lib/styles';
 import { getIvyHost } from '@/lib/utils';
-import {
-  validateImageUrl,
-  isFullUrl,
-  normalizeRelativePath,
-} from '@/lib/urlValidation';
+import { validateImageUrl, isFullUrl, normalizeRelativePath } from '@/lib/url';
 import React from 'react';
 
 interface ImageWidgetProps {

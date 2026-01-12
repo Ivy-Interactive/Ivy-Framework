@@ -1,4 +1,5 @@
-import { cn, validateLinkUrl } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { validateLinkUrl } from '@/lib/url';
 import { useEffect, useState } from 'react';
 import * as React from 'react';
 import { hasLicensedFeature } from '@/lib/license';

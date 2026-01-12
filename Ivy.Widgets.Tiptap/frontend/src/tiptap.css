@@ -1,0 +1,76 @@
+.ProseMirror:focus,
+.ProseMirror-focused,
+.tiptap:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.ProseMirror h1 {
+  font-size: 2em !important;
+  font-weight: 700 !important;
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+}
+.ProseMirror h2 {
+  font-size: 1.5em !important;
+  font-weight: 600 !important;
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+}
+.ProseMirror h3 {
+  font-size: 1.25em !important;
+  font-weight: 600 !important;
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+}
+.ProseMirror ul {
+  list-style-type: disc !important;
+  padding-left: 1.5em !important;
+  margin: 0.5em 0 !important;
+}
+.ProseMirror ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5em !important;
+  margin: 0.5em 0 !important;
+}
+.ProseMirror li {
+  margin: 0.25em 0 !important;
+}
+.ProseMirror blockquote {
+  border-left: 3px solid var(--border, #e5e7eb) !important;
+  padding-left: 1em !important;
+  margin: 0.5em 0 !important;
+  font-style: italic !important;
+  color: var(--muted-foreground, #6b7280) !important;
+}
+.ProseMirror code {
+  background-color: var(--muted, #f3f4f6) !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 0.25em !important;
+  font-family: monospace !important;
+  font-size: 0.9em !important;
+}
+.ProseMirror pre {
+  background-color: var(--muted, #1f2937) !important;
+  color: var(--muted-foreground, #e5e7eb) !important;
+  padding: 1em !important;
+  border-radius: 0.5em !important;
+  overflow-x: auto !important;
+  margin: 0.5em 0 !important;
+}
+.ProseMirror pre code {
+  background: none !important;
+  padding: 0 !important;
+  color: inherit !important;
+}
+.ProseMirror hr {
+  border: none !important;
+  border-top: 1px solid var(--border, #e5e7eb) !important;
+  margin: 1em 0 !important;
+}
+.ProseMirror p {
+  margin: 0.5em 0 !important;
+}
+.ProseMirror p:first-child {
+  margin-top: 0 !important;
+}

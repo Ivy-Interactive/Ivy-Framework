@@ -1,18 +1,27 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import React, { StrictMode } from 'react';
+import * as ReactDOMClient from 'react-dom/client';
+import * as ReactDOM from 'react-dom';
 import './index.css';
 import { App } from './components/App';
+
+// Expose React globally for external widgets (IIFE format)
+// Merge react-dom and react-dom/client exports for full API coverage
+(window as unknown as Record<string, unknown>).React = React;
+(window as unknown as Record<string, unknown>).ReactDOM = {
+  ...ReactDOM,
+  ...ReactDOMClient,
+};
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Failed to find root element');
 
 interface WindowWithReactRoot extends Window {
-  __reactRoot?: ReturnType<typeof createRoot>;
+  __reactRoot?: ReturnType<typeof ReactDOMClient.createRoot>;
 }
 
 let root = (window as WindowWithReactRoot).__reactRoot;
 if (!root) {
-  root = createRoot(container);
+  root = ReactDOMClient.createRoot(container);
   (window as WindowWithReactRoot).__reactRoot = root;
 }
 

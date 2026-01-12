@@ -8,7 +8,7 @@ searchHints:
   - docker
 ---
 
-# Ivy Deployment
+# Ivy Deployment Overview
 
 <Ingress>
 Deploy your Ivy applications to cloud platforms with automated containerization, infrastructure setup, and configuration management.
@@ -65,68 +65,6 @@ When you run `ivy deploy` without specifying options, Ivy will guide you through
 2. **Configuration Setup**: Configure provider-specific settings
 3. **Build Process**: Ivy will build and containerize your project
 4. **Deployment**: Deploy to the selected cloud platform
-
-### Deployment Provider Configuration
-
-**AWS (Amazon Web Services)** - Comprehensive cloud platform with various services for application deployment.
-
-**Setup Process**
-
-```terminal
->ivy deploy
-# Select AWS when prompted
-```
-
-**Required Configuration** - AWS Credentials (access key and secret key), Region, ECR Repository, and App Runner Service.
-
-**AWS Services Used** - Amazon ECR (container registry), AWS App Runner (serverless container service), Amazon S3 (storage for build artifacts), and AWS IAM (identity and access management).
-
-**AWS Setup Prerequisites** - Create an AWS account, install and configure AWS CLI, create an IAM user with appropriate permissions, and configure AWS credentials: `aws configure`.
-
-**Azure (Microsoft Azure)** - Cloud services for building, deploying, and managing applications.
-
-**Setup Process**
-
-```terminal
->ivy deploy
-# Select Azure when prompted
-```
-
-**Required Configuration** - Azure Subscription, Resource Group, Container Registry (ACR), and Container Apps Environment.
-
-**Azure Services Used** - Azure Container Registry, Azure Container Apps (serverless container platform), Azure Resource Manager, and Azure Active Directory.
-
-**Azure Setup Prerequisites** - Create an Azure account, install Azure CLI, login to Azure: `az login`, and set your subscription: `az account set --subscription <subscription-id>`.
-
-**GCP (Google Cloud Platform)** - Cloud computing services for building, testing, and deploying applications.
-
-**Setup Process**
-
-```terminal
->ivy deploy
-# Select GCP when prompted
-```
-
-**Required Configuration** - GCP Project, Container Registry (GCR), Cloud Run Service, and Region.
-
-**GCP Services Used** - Google Container Registry, Cloud Run (serverless container platform), Cloud Build, and IAM.
-
-**GCP Setup Prerequisites** - Create a Google Cloud account, install Google Cloud CLI, login to GCP: `gcloud auth login`, and set your project: `gcloud config set project <project-id>`.
-
-**Sliplane** - Modern container deployment platform with automated infrastructure and simplified deployment workflow.
-
-**Setup Process**
-
-```terminal
->ivy deploy
-# Select Sliplane when prompted
-```
-
-**Required Configuration** - Sliplane API Key, Server (optional, will be created if not specified), and Port Configuration (defaults to port 80).
-
-**Sliplane Services Used** - Container hosting and deployment, automated SSL/TLS certificates, load balancing and traffic routing, and automated health checks and monitoring.
-
-**Sliplane Setup Prerequisites** - Create a Sliplane account, generate an API key from your Sliplane dashboard, and optionally create a server in your Sliplane dashboard (or let Ivy create one automatically).
 
 ### Deployment Process
 
@@ -244,38 +182,6 @@ ASPNETCORE_ENVIRONMENT="Production"
 ```
 
 ## Examples
-
-**Basic AWS Deployment**
-
-```terminal
->ivy deploy
-# Select AWS
-# Follow prompts for configuration
-```
-
-**Azure Deployment with Custom Settings**
-
-```terminal
->ivy deploy --verbose
-# Select Azure
-# Configure custom resource group and region
-```
-
-**GCP Deployment**
-
-```terminal
->ivy deploy
-# Select GCP
-# Configure project and region
-```
-
-**Sliplane Deployment**
-
-```terminal
->ivy deploy
-# Select Sliplane
-# Configure server and deployment settings
-```
 
 ### Best Practices
 
