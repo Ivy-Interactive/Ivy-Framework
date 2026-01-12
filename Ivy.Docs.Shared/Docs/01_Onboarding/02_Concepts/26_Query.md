@@ -35,19 +35,23 @@ public class BasicQueryView : ViewBase
                 return new { Name = "Alice", Email = "alice@example.com" };
             });
 
-        if (query.Loading)
-            return Text.P("Loading...");
+        if (query.Loading) return "Loading...";
 
         return Layout.Vertical()
-            | Text.H3(query.Value?.Name ?? "")
-            | Text.P(query.Value?.Email ?? "");
+            | query //query has a Build extension that produces a debug view
+            | query.Value?.Name
+            | query.Value?.Email
+            | (Layout.Horizontal() 
+                | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Primary) 
+                | new Button("Invalidate", _ => query.Mutator.Invalidate()).Variant(ButtonVariant.Primary)) 
+                ;
     }
 }
 ```
 
 ## Keys
 
-Todo: Explain keys in more detail, including key factories.
+Keys can be any serializable value, such as strings, numbers, or complex objects like tuples. You can also use a key factory function.
 
 ## Query Result
 
@@ -62,32 +66,6 @@ Todo: Explain keys in more detail, including key factories.
 | `Error` | `Exception?` | The error if fetch failed |
 | `Mutator` | `QueryMutator<T>` | Methods to mutate the cache |
 
-```csharp demo-tabs
-public class QueryResultView : ViewBase
-{
-    public override object? Build()
-    {
-        var query = UseQuery(
-            key: "data",
-            fetcher: async ct =>
-            {
-                await Task.Delay(1000, ct);
-                return $"Fetched at {DateTime.Now:HH:mm:ss}";
-            });
-
-        return Layout.Vertical()
-            | (query.Loading
-                ? Text.Literal("Loading...")
-                : Text.Literal(query.Value ?? ""))
-            | (query.Validating ? Text.Muted("Revalidating...") : null!)
-            | (query.Error is { } err ? Callout.Error(err.Message) : null!)
-            | Layout.Horizontal()
-                | new Button("Revalidate", _ => query.Mutator.Revalidate())
-                    .Variant(ButtonVariant.Outline);
-    }
-}
-```
-
 ## Query Options
 
 Configure query behavior with `QueryOptions`:
@@ -98,11 +76,11 @@ var query = UseQuery(
     fetcher: FetchData,
     options: new QueryOptions
     {
-        Scope = QueryScope.Server,        // Cache scope
-        Expiration = TimeSpan.FromMinutes(5), // TTL before revalidation
-        KeepPrevious = true,              // Keep previous data during key change
+        Scope = QueryScope.Server,                  // Cache scope
+        Expiration = TimeSpan.FromMinutes(5),       // TTL before revalidation
+        KeepPrevious = true,                        // Keep previous data during key change
         RefreshInterval = TimeSpan.FromSeconds(30), // Auto-refresh interval
-        RevalidateOnMount = true           // Fetch on mount (default: true)
+        RevalidateOnMount = true                    // Fetch on mount
     });
 ```
 
@@ -110,54 +88,18 @@ var query = UseQuery(
 
 Control where query data is cached and shared:
 
-| Scope | Description |
-|-------|-------------|
-| `Server` | Shared across all users (default) |
-| `App` | Shared within a browser session |
-| `Device` | Shared across sessions on same device |
+| Scope | Description                                           |
+|-------|-------------------------------------------------------|
+| `Server` | Shared across all users (default)                     |
+| `App` | Shared within a app session                           |
+| `Device` | Shared across apps on same device                     |
 | `View` | Isolated to component instance, cleaned up on unmount |
-
-```csharp demo-tabs
-public class ScopedQueryView : ViewBase
-{
-    public override object? Build()
-    {
-        // Server-scoped: shared across all users
-        var globalData = UseQuery(
-            key: "global-stats",
-            fetcher: FetchGlobalStats,
-            options: QueryScope.Server);
-
-        // View-scoped: isolated to this component
-        var localData = UseQuery(
-            key: "local-data",
-            fetcher: FetchLocalData,
-            options: QueryScope.View);
-
-        return Layout.Vertical()
-            | Text.Literal($"Global: {globalData.Value}")
-            | Text.Literal($"Local: {localData.Value}");
-    }
-
-    private async Task<string> FetchGlobalStats(CancellationToken ct)
-    {
-        await Task.Delay(500, ct);
-        return $"Stats at {DateTime.Now:HH:mm:ss}";
-    }
-
-    private async Task<string> FetchLocalData(CancellationToken ct)
-    {
-        await Task.Delay(500, ct);
-        return $"Local at {DateTime.Now:HH:mm:ss}";
-    }
-}
-```
 
 ## Conditional Fetching
 
 When the key is `null`, UseQuery returns an idle result without fetching:
 
-```csharp demo-tabs
+```csharp demo-below
 public class ConditionalQueryView : ViewBase
 {
     public override object? Build()
@@ -187,7 +129,7 @@ public class ConditionalQueryView : ViewBase
 
 Use a key factory to fetch data that depends on another query:
 
-```csharp demo-tabs
+```csharp demo-below
 public class DependentQueryView : ViewBase
 {
     public override object? Build()
@@ -226,7 +168,7 @@ The `Mutator` provides methods to update cached data:
 | `Revalidate()` | Trigger background revalidation |
 | `Invalidate()` | Clear cache and refetch |
 
-```csharp demo-tabs
+```csharp demo-below
 public class MutationView : ViewBase
 {
     public override object? Build()
@@ -262,7 +204,7 @@ public class MutationView : ViewBase
 
 Use `UseMutation` to control a query from a different component:
 
-```csharp demo-tabs
+```csharp demo-below
 public class SharedDataDisplay : ViewBase
 {
     public override object? Build()
@@ -298,14 +240,14 @@ public class SharedDataControls : ViewBase
 
 ## Tag-Based Invalidation
 
-Assign tags to queries for bulk invalidation:
+Assign tags to queries for bulk invalidation. Tags are serializable the same way as keys.
 
-```csharp demo-tabs
+```csharp demo-below
 public class TaggedQueriesView : ViewBase
 {
     public override object? Build()
     {
-        var queryService = UseService<QueryService>();
+        var queryService = UseService<IQueryService>();
 
         var users = UseQuery(
             key: "dashboard/users",
@@ -328,11 +270,10 @@ public class TaggedQueriesView : ViewBase
         return Layout.Vertical()
             | Text.Literal(users.Loading ? "Loading..." : users.Value ?? "")
             | Text.Literal(orders.Loading ? "Loading..." : orders.Value ?? "")
-            | Layout.Horizontal()
+            | (Layout.Horizontal()
                 | new Button("Refresh All", _ => queryService.RevalidateByTag("dashboard"))
-                    .Variant(ButtonVariant.Primary)
                 | new Button("Invalidate All", _ => queryService.InvalidateByTag("dashboard"))
-                    .Variant(ButtonVariant.Destructive);
+            );
     }
 }
 ```
@@ -341,7 +282,7 @@ public class TaggedQueriesView : ViewBase
 
 Automatically revalidate at intervals with `RefreshInterval`:
 
-```csharp demo-tabs
+```csharp demo-below
 public class PollingView : ViewBase
 {
     public override object? Build()
@@ -394,15 +335,17 @@ public class PaginatedView : ViewBase
             options: new QueryOptions { KeepPrevious = true });
 
         return Layout.Vertical()
-            | Text.H4($"Page {page.Value}")
+            | items
             | (items.Previous ? Text.Muted("Loading next page...") : null!)
             | Layout.Vertical(items.Value?.Select(Text.Literal) ?? [])
-            | Layout.Horizontal()
+            | (Layout.Horizontal()
                 | new Button("Previous", _ => page.Set(p => Math.Max(1, p - 1)))
                     .Disabled(page.Value <= 1)
-                    .Variant(ButtonVariant.Outline)
+                    .Variant(ButtonVariant.Primary)
                 | new Button("Next", _ => page.Set(p => p + 1))
-                    .Variant(ButtonVariant.Outline);
+                    .Variant(ButtonVariant.Primary) 
+                | Text.Muted($"Page {page.Value}")
+            );
     }
 }
 ```
@@ -452,9 +395,9 @@ public class ProductDetailView(Product initialProduct) : ViewBase
 
         return new Card(
             Layout.Vertical()
-            | Text.H4(product.Value?.Name ?? "")
+            | Text.Literal(product.Value?.Name ?? "").Bold()
             | Text.Literal($"${product.Value?.Price}")
-        );
+        ).Small();
     }
 
     private async Task<Product> FetchProduct(int id, CancellationToken ct)
@@ -495,13 +438,10 @@ public class ErrorHandlingView : ViewBase
                     .Variant(ButtonVariant.Outline);
         }
 
-        return Text.Literal(query.Value ?? "");
+        return Layout.Vertical()
+            | Text.Literal(query.Value ?? "")
+            | new Button("Refresh", _ => query.Mutator.Revalidate())
+                .Variant(ButtonVariant.Primary);
     }
 }
 ```
-
-## See Also
-
-- [State](./05_State.md) - Managing view state
-- [Effects](./09_Effects.md) - Performing side effects
-- [Services](./18_Services.md) - Dependency injection in Ivy

@@ -118,7 +118,7 @@ public class TagInvalidationExample : ViewBase
 {
     public override object? Build()
     {
-        var queryManager = UseService<QueryService>();
+        var queryManager = UseService<IQueryService>();
 
         // Three separate queries, all tagged with "dashboard"
         var usersQuery = UseQuery(
@@ -785,7 +785,7 @@ public class CacheClearExample : ViewBase
 {
     public override object? Build()
     {
-        var queryManager = UseService<QueryService>();
+        var queryManager = UseService<IQueryService>();
 
         // Multiple queries with different tags
         var usersQuery = UseQuery(
@@ -883,7 +883,7 @@ public class PredicateInvalidationExample : ViewBase
 {
     public override object? Build()
     {
-        var queryManager = UseService<QueryService>();
+        var queryManager = UseService<IQueryService>();
 
         // Queries with structured keys
         var electronics1 = UseQuery(

@@ -349,7 +349,7 @@ public class ExternalWidgetRegistry
 
             if (_widgets.TryAdd(typeName, info))
             {
-                Console.WriteLine($"[ExternalWidgetRegistry] Registered external widget: {typeName}");
+                //Console.WriteLine($"[ExternalWidgetRegistry] Registered external widget: {typeName}");
             }
         }
     }
