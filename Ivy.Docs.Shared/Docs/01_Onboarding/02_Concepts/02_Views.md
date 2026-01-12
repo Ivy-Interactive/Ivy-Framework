@@ -30,7 +30,7 @@ All views inherit from the abstract `ViewBase` class, which provides:
 
 - **Build() method**: The core method that returns the UI structure
 - **Lifecycle management**: Automatic disposal and cleanup
-- **Hook access**: Built-in state management and effect [hooks](../../03_Hooks/Core/02_RulesOfHooks.md)
+- **Hook access**: Built-in state management and effect [hooks](../../03_Hooks/02_RulesOfHooks.md)
 - **Service injection**: Access to [application services](./18_Services.md)
 - **Context management**: Shared data between parent and child views
 
@@ -86,7 +86,7 @@ public class CounterView : ViewBase
 ### Rules of Hooks
 
 To ensure correct state management, Ivy hooks must follow specific rules.
-Read the full guide on **[Rules of Hooks](../../03_Hooks/Core/02_RulesOfHooks.md)** to learn more and troubleshoot common errors.
+Read the full guide on **[Rules of Hooks](../../03_Hooks/02_RulesOfHooks.md)** to learn more and troubleshoot common errors.
 
 ### State Initialization
 

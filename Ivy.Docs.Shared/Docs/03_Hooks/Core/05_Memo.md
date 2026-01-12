@@ -23,7 +23,7 @@ Memoization in Ivy provides several powerful tools to optimize performance:
 - **[`UseCallback`](./06_Callback.md)** - Memoizes callback functions to prevent unnecessary re-renders.
 - **`IMemoized`** - Interface for component-level memoization
 
-These [hooks](./02_RulesOfHooks.md) work similarly to their React counterparts (`useMemo`, `useCallback`) but are designed specifically for Ivy's architecture.
+These [hooks](../02_RulesOfHooks.md) work similarly to their React counterparts (`useMemo`, `useCallback`) but are designed specifically for Ivy's architecture.
 
 ## Choosing the Right Memoization Approach
 
@@ -46,7 +46,7 @@ flowchart TD
 
 ## UseMemo Hook
 
-The `UseMemo` [hook](./02_RulesOfHooks.md) caches the result of a computation and only recomputes it when its [state](./03_State.md) dependencies change.
+The `UseMemo` [hook](../02_RulesOfHooks.md) caches the result of a computation and only recomputes it when its [state](./03_State.md) dependencies change.
 
 <Callout type="Tip">
 `UseMemo` hook stores only the most recent dependency values for comparison; older values are discarded.
@@ -573,7 +573,7 @@ return Layout.Vertical(
 - [State Management](./03_State.md) - Managing component state
 - [UseCallback](./06_Callback.md) - Memoizing callback functions
 - [Effects](./04_Effect.md) - Performing side effects with dependencies
-- [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [UseStatic](./08_Static.md) - Storing stable references
 - [Signals](../../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

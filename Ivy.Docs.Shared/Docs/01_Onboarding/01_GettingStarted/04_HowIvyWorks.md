@@ -87,7 +87,7 @@ Hooks rely on a strict call order to function correctly. Following these rules e
 
 The **Ivy.Analyser** package automatically enforces these rules at compile time, catching violations before your code runs.
 
-For detailed examples and troubleshooting, see [Rules of Hooks](../../03_Hooks/Core/02_RulesOfHooks.md).
+For detailed examples and troubleshooting, see [Rules of Hooks](../../03_Hooks/02_RulesOfHooks.md).
 
 ### Widget Library
 

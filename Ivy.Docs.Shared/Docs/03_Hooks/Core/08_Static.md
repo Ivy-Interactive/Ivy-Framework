@@ -21,7 +21,7 @@ Store values that persist across re-renders without triggering updates, similar 
 
 ## Overview
 
-The `UseStatic` [hook](./02_RulesOfHooks.md) lets you store a value that is initialized only once and persists across re-renders. Unlike [`UseState`](./03_State.md), changing a static value does NOT trigger a re-render.
+The `UseStatic` [hook](../02_RulesOfHooks.md) lets you store a value that is initialized only once and persists across re-renders. Unlike [`UseState`](./03_State.md), changing a static value does NOT trigger a re-render.
 
 Key characteristics of `UseStatic`:
 
@@ -63,7 +63,7 @@ flowchart TD
 
 ## UseStatic Hook
 
-The `UseStatic` [hook](./02_RulesOfHooks.md) stores a value that persists across re-renders without triggering updates.
+The `UseStatic` [hook](../02_RulesOfHooks.md) stores a value that persists across re-renders without triggering updates.
 
 <Callout type="Tip">
 `UseStatic` values are initialized only once and remain stable across re-renders. Changing the value directly won't cause the [component](../../../01_Onboarding/02_Concepts/02_Views.md) to re-render.
@@ -387,7 +387,7 @@ var data = UseMemo(() => ProcessItems(items.Value), items);
 ## See Also
 
 - [State Management](./03_State.md) - Reactive state with UseState
-- [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Effects](./04_Effect.md) - Side effects and cleanup
 - [Memoization](./05_Memo.md) - Performance optimization with UseMemo
 - [Callbacks](./06_Callback.md) - Memoized callback functions with UseCallback

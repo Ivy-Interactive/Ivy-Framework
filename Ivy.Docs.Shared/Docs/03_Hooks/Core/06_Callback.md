@@ -13,12 +13,12 @@ searchHints:
 # Callbacks
 
 <Ingress>
-The `UseCallback` [hook](./02_RulesOfHooks.md) memoizes callback functions, preventing unnecessary re-renders when callbacks are passed as props to [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md) or used as dependencies in other [hooks](./02_RulesOfHooks.md).
+The `UseCallback` [hook](../02_RulesOfHooks.md) memoizes callback functions, preventing unnecessary re-renders when callbacks are passed as props to [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md) or used as dependencies in other [hooks](../02_RulesOfHooks.md).
 </Ingress>
 
 ## Overview
 
-The `UseCallback` [hook](./02_RulesOfHooks.md) provides a way to optimize callback functions in Ivy [applications](../../../01_Onboarding/02_Concepts/15_Apps.md):
+The `UseCallback` [hook](../02_RulesOfHooks.md) provides a way to optimize callback functions in Ivy [applications](../../../01_Onboarding/02_Concepts/15_Apps.md):
 
 - **Stable Function References** - Returns the same function reference when [state](./03_State.md) dependencies haven't changed
 - **Prevents Re-renders** - [Child components](../../../01_Onboarding/02_Concepts/03_Widgets.md) won't re-render unnecessarily when receiving memoized callbacks
@@ -52,7 +52,7 @@ flowchart TD
 
 ## UseCallback Hook
 
-The `UseCallback` [hook](./02_RulesOfHooks.md) memoizes callback functions and only recreates them when their [state](./03_State.md) dependencies change.
+The `UseCallback` [hook](../02_RulesOfHooks.md) memoizes callback functions and only recreates them when their [state](./03_State.md) dependencies change.
 
 <Callout type="Tip">
 `UseCallback` hook stores only the most recent dependency values for comparison; older values are discarded.
@@ -126,7 +126,7 @@ public class ParentView : ViewBase
 Use `UseCallback` when:
 
 - **Passing callbacks to [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md)** - Prevents unnecessary re-renders when the callback reference is stable
-- **Callbacks are dependencies of other [hooks](./02_RulesOfHooks.md)** - Ensures stable references for [`UseEffect`](./04_Effect.md) and other [hooks](./02_RulesOfHooks.md)
+- **Callbacks are dependencies of other [hooks](../02_RulesOfHooks.md)** - Ensures stable references for [`UseEffect`](./04_Effect.md) and other [hooks](../02_RulesOfHooks.md)
 - **Event handlers with expensive setup** - Avoids recreating handlers on every render
 - **Callbacks in lists** - Optimizes performance when rendering many [components](../../../01_Onboarding/02_Concepts/02_Views.md) with callbacks
 
@@ -443,7 +443,7 @@ UseEffect(async () =>
 - [UseMemo](./05_Memo.md) - Memoizing function resultss
 - [Effects](./04_Effect.md) - Performing side effects with stable dependencies
 - [State Management](./03_State.md) - Managing component state
-- [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [UseStatic](./08_Static.md) - Storing stable references
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
 - [Widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) - Building UI components

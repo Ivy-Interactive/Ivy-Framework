@@ -20,7 +20,7 @@ Manage complex [state](./03_State.md) logic with reducers, providing a predictab
 
 ## Overview
 
-The `UseReducer` [hook](./02_RulesOfHooks.md) is an alternative to [`UseState`](./03_State.md) that is better suited for managing complex [state](./03_State.md) logic. It follows the reducer pattern where state updates are handled by a pure function.
+The `UseReducer` [hook](../02_RulesOfHooks.md) is an alternative to [`UseState`](./03_State.md) that is better suited for managing complex [state](./03_State.md) logic. It follows the reducer pattern where state updates are handled by a pure function.
 
 Key benefits of `UseReducer`:
 
@@ -57,7 +57,7 @@ flowchart TD
 
 ## UseReducer Hook
 
-The `UseReducer` [hook](./02_RulesOfHooks.md) manages [state](./03_State.md) through a reducer function that takes the current [state](./03_State.md) and an action, returning the new [state](./03_State.md).
+The `UseReducer` [hook](../02_RulesOfHooks.md) manages [state](./03_State.md) through a reducer function that takes the current [state](./03_State.md) and an action, returning the new [state](./03_State.md).
 
 <Callout type="Tip">
 Reducers should be pure functions - they should not have side effects and should return a new [state](./03_State.md) object rather than mutating the existing one. Use [`UseEffect`](./04_Effect.md) for side effects.
@@ -595,7 +595,7 @@ private State Reducer(State state, object action) => action switch
 ## See Also
 
 - [State Management](./03_State.md) - Simple state management with UseState
-- [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Effects](./04_Effect.md) - Side effects and async operations
 - [Memoization](./05_Memo.md) - Performance optimization with UseMemo
 - [Callbacks](./06_Callback.md) - Memoized callback functions with UseCallback
