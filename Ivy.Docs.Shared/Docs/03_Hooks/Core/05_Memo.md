@@ -12,7 +12,7 @@ searchHints:
 # Memoization
 
 <Ingress>
-Memoization helps Ivy [applications](../../01_Onboarding/02_Concepts/15_Apps.md) run faster by caching results of expensive computations and preventing unnecessary re-renders in your [views](../../01_Onboarding/02_Concepts/02_Views.md).
+Memoization helps Ivy [applications](../../../01_Onboarding/02_Concepts/15_Apps.md) run faster by caching results of expensive computations and preventing unnecessary re-renders in your [views](../../../01_Onboarding/02_Concepts/02_Views.md).
 </Ingress>
 
 ## Overview
@@ -117,7 +117,7 @@ public class ExpensiveCalculationView : ViewBase
 Use memoization when:
 
 - You have expensive computations that don't need to be redone on every render
-- You want to prevent unnecessary re-renders of [child components](../../01_Onboarding/02_Concepts/03_Widgets.md)
+- You want to prevent unnecessary re-renders of [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md)
 - You're dealing with complex data transformations that depend on [state](./03_State.md) changes
 - You need stable function references for [`UseEffect`](./04_Effect.md) dependencies
 
@@ -184,7 +184,7 @@ public class DashboardView : ViewBase
 
 ## Component Memoization with IMemoized
 
-The `IMemoized` interface allows entire [components](../../01_Onboarding/02_Concepts/02_Views.md) to be memoized, preventing re-renders when their props haven't changed. This is useful for optimizing [views](../../01_Onboarding/02_Concepts/02_Views.md) with expensive rendering logic.
+The `IMemoized` interface allows entire [components](../../../01_Onboarding/02_Concepts/02_Views.md) to be memoized, preventing re-renders when their props haven't changed. This is useful for optimizing [views](../../../01_Onboarding/02_Concepts/02_Views.md) with expensive rendering logic.
 
 ### How IMemoized Works
 
@@ -409,7 +409,7 @@ var greeting = UseMemo(() => $"Hello, {userName}!", userName);
 
 - **Simple computations**: Don't memoize trivial operations
 - **Frequently changing [state](./03_State.md) dependencies**: If state dependencies change often, memoization provides no benefit
-- **Small component trees**: In simple [views](../../01_Onboarding/02_Concepts/02_Views.md), the overhead might outweigh benefits
+- **Small component trees**: In simple [views](../../../01_Onboarding/02_Concepts/02_Views.md), the overhead might outweigh benefits
 
 ```csharp
 // Unnecessary memoization
@@ -575,5 +575,5 @@ return Layout.Vertical(
 - [Effects](./04_Effect.md) - Performing side effects with dependencies
 - [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [UseStatic](./08_Static.md) - Storing stable references
-- [Signals](../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
-- [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+- [Signals](../../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

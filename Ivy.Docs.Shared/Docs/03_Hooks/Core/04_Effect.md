@@ -11,12 +11,12 @@ searchHints:
 # Effects
 
 <Ingress>
-Perform side effects in your Ivy [views](../../01_Onboarding/02_Concepts/02_Views.md) with the UseEffect [hook](./02_RulesOfHooks.md), similar to React's useEffect but optimized for server-side architecture.
+Perform side effects in your Ivy [views](../../../01_Onboarding/02_Concepts/02_Views.md) with the UseEffect [hook](./02_RulesOfHooks.md), similar to React's useEffect but optimized for server-side architecture.
 </Ingress>
 
-The `UseEffect` [hook](./02_RulesOfHooks.md) is a powerful feature in Ivy that allows you to perform side effects in your [views](../../01_Onboarding/02_Concepts/02_Views.md). It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
+The `UseEffect` [hook](./02_RulesOfHooks.md) is a powerful feature in Ivy that allows you to perform side effects in your [views](../../../01_Onboarding/02_Concepts/02_Views.md). It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
 
-Effects are essential for handling operations that don't directly relate to rendering, such as working with [state](./03_State.md) updates, [async operations](../../01_Onboarding/02_Concepts/11_TasksAndObservables.md), and external services:
+Effects are essential for handling operations that don't directly relate to rendering, such as working with [state](./03_State.md) updates, [async operations](../../../01_Onboarding/02_Concepts/11_TasksAndObservables.md), and external services:
 
 ```mermaid
 graph TD
@@ -476,5 +476,5 @@ UseEffect(async () =>
 - [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Memoization](./05_Memo.md) - Optimizing performance with memoization
 - [UseCallback](./06_Callback.md) - Memoizing callback functions
-- [Signals](../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
-- [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+- [Signals](../../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

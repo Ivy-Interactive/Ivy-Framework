@@ -18,7 +18,7 @@ Ivy hooks (functions starting with `Use...`) are a powerful feature that lets yo
 
 ## Overview
 
-Ivy hooks provide a way to add stateful logic and side effects to your [Views](../../01_Onboarding/02_Concepts/02_Views.md). To work correctly, hooks must be called in a consistent order on every render.
+Ivy hooks provide a way to add stateful logic and side effects to your [Views](../../../01_Onboarding/02_Concepts/02_Views.md). To work correctly, hooks must be called in a consistent order on every render.
 
 Key principles:
 
@@ -63,7 +63,7 @@ flowchart TD
 
 **Don't call hooks from regular C# functions.** Hooks can only be called from:
 
-- Ivy [Views](../../01_Onboarding/02_Concepts/02_Views.md) (inside `Build` method)
+- Ivy [Views](../../../01_Onboarding/02_Concepts/02_Views.md) (inside `Build` method)
 - Custom hooks (functions starting with `Use...`)
 
 ```mermaid
@@ -448,7 +448,7 @@ flowchart LR
 
 **Rules Checklist:**
 
-- In [View](../../01_Onboarding/02_Concepts/02_Views.md) Build method or custom hook
+- In [View](../../../01_Onboarding/02_Concepts/02_Views.md) Build method or custom hook
 - At top level of Build method
 - Same order every render
 - Before all conditional logic
@@ -459,4 +459,4 @@ flowchart LR
 - [State Management](./03_State.md) - Using UseState hook
 - [Effects](./04_Effect.md) - Using UseEffect hook
 - [Memoization](./05_Memo.md) - Using UseMemo and UseCallback
-- [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy Views
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy Views

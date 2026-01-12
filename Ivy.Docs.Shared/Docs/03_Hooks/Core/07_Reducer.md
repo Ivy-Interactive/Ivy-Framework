@@ -15,7 +15,7 @@ imports:
 # Reducers
 
 <Ingress>
-Manage complex [state](./03_State.md) logic with reducers, providing a predictable state management pattern for [components](../../01_Onboarding/02_Concepts/02_Views.md) with multiple sub-values or interdependent state updates.
+Manage complex [state](./03_State.md) logic with reducers, providing a predictable state management pattern for [components](../../../01_Onboarding/02_Concepts/02_Views.md) with multiple sub-values or interdependent state updates.
 </Ingress>
 
 ## Overview
@@ -599,4 +599,4 @@ private State Reducer(State state, object action) => action switch
 - [Effects](./04_Effect.md) - Side effects and async operations
 - [Memoization](./05_Memo.md) - Performance optimization with UseMemo
 - [Callbacks](./06_Callback.md) - Memoized callback functions with UseCallback
-- [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

@@ -16,7 +16,7 @@ imports:
 # Static
 
 <Ingress>
-Store values that persist across re-renders without triggering updates, similar to React's useRef for holding mutable values that don't affect the [view](../../01_Onboarding/02_Concepts/02_Views.md) lifecycle.
+Store values that persist across re-renders without triggering updates, similar to React's useRef for holding mutable values that don't affect the [view](../../../01_Onboarding/02_Concepts/02_Views.md) lifecycle.
 </Ingress>
 
 ## Overview
@@ -28,7 +28,7 @@ Key characteristics of `UseStatic`:
 - **Non-Reactive Storage** - Values persist but don't trigger re-renders when changed
 - **Mutable References** - Perfect for storing timers, subscriptions, and other mutable objects
 - **Performance** - No dependency tracking or re-render overhead
-- **Persistence** - Values survive across [component](../../01_Onboarding/02_Concepts/02_Views.md) re-renders
+- **Persistence** - Values survive across [component](../../../01_Onboarding/02_Concepts/02_Views.md) re-renders
 
 <Callout type="Tip">
 `UseStatic` is ideal for storing mutable references that don't affect rendering, such as timers, subscriptions, DOM references, or previous [state](./03_State.md) values for comparison.
@@ -66,7 +66,7 @@ flowchart TD
 The `UseStatic` [hook](./02_RulesOfHooks.md) stores a value that persists across re-renders without triggering updates.
 
 <Callout type="Tip">
-`UseStatic` values are initialized only once and remain stable across re-renders. Changing the value directly won't cause the [component](../../01_Onboarding/02_Concepts/02_Views.md) to re-render.
+`UseStatic` values are initialized only once and remain stable across re-renders. Changing the value directly won't cause the [component](../../../01_Onboarding/02_Concepts/02_Views.md) to re-render.
 </Callout>
 
 ### How UseStatic Works
@@ -391,4 +391,4 @@ var data = UseMemo(() => ProcessItems(items.Value), items);
 - [Effects](./04_Effect.md) - Side effects and cleanup
 - [Memoization](./05_Memo.md) - Performance optimization with UseMemo
 - [Callbacks](./06_Callback.md) - Memoized callback functions with UseCallback
-- [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

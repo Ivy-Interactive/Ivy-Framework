@@ -11,9 +11,9 @@ searchHints:
 
 # State
 
-Master reactive state management in Ivy using [hooks](./02_RulesOfHooks.md) like UseState, [UseSignal](../../01_Onboarding/02_Concepts/06_Signals.md), and [UseEffect](./04_Effect.md) to build dynamic, responsive [applications](../../01_Onboarding/02_Concepts/15_Apps.md).
+Master reactive state management in Ivy using [hooks](./02_RulesOfHooks.md) like UseState, [UseSignal](../../../01_Onboarding/02_Concepts/06_Signals.md), and [UseEffect](./04_Effect.md) to build dynamic, responsive [applications](../../../01_Onboarding/02_Concepts/15_Apps.md).
 
-State management is a fundamental concept in Ivy that allows you to handle and update data within your [views](../../01_Onboarding/02_Concepts/02_Views.md). Ivy provides several mechanisms for managing state, each suited for different use cases.
+State management is a fundamental concept in Ivy that allows you to handle and update data within your [views](../../../01_Onboarding/02_Concepts/02_Views.md). Ivy provides several mechanisms for managing state, each suited for different use cases.
 
 ## Basic Usage
 
@@ -50,7 +50,7 @@ public class CounterApp : ViewBase
 
 ### State with Factory Functions
 
-For complex initialization or when you need to defer object creation, use factory functions with UseState. This pattern is useful for expensive computations, [dependency injection](../../01_Onboarding/02_Concepts/18_Services.md), [memoization](./05_Memo.md), and [lazy loading](../../01_Onboarding/02_Concepts/15_Apps.md):
+For complex initialization or when you need to defer object creation, use factory functions with UseState. This pattern is useful for expensive computations, [dependency injection](../../../01_Onboarding/02_Concepts/18_Services.md), [memoization](./05_Memo.md), and [lazy loading](../../../01_Onboarding/02_Concepts/15_Apps.md):
 
 ```csharp demo-tabs
 public class FactoryStateDemo : ViewBase
@@ -199,7 +199,7 @@ public class StateUpdatesDemo : ViewBase
 
 ### State in Forms
 
-[Forms](../../01_Onboarding/02_Concepts/13_Forms.md) in Ivy use state variables bound to input widgets, allowing for real-time validation, live previews, and easy form submission handling. The ToTextInput, ToNumberInput, and ToBoolInput extensions provide seamless state binding:
+[Forms](../../../01_Onboarding/02_Concepts/13_Forms.md) in Ivy use state variables bound to input widgets, allowing for real-time validation, live previews, and easy form submission handling. The ToTextInput, ToNumberInput, and ToBoolInput extensions provide seamless state binding:
 
 ```csharp demo-tabs
 public class FormStateDemo : ViewBase

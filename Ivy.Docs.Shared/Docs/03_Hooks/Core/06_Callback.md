@@ -13,15 +13,15 @@ searchHints:
 # Callbacks
 
 <Ingress>
-The `UseCallback` [hook](./02_RulesOfHooks.md) memoizes callback functions, preventing unnecessary re-renders when callbacks are passed as props to [child components](../../01_Onboarding/02_Concepts/03_Widgets.md) or used as dependencies in other [hooks](./02_RulesOfHooks.md).
+The `UseCallback` [hook](./02_RulesOfHooks.md) memoizes callback functions, preventing unnecessary re-renders when callbacks are passed as props to [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md) or used as dependencies in other [hooks](./02_RulesOfHooks.md).
 </Ingress>
 
 ## Overview
 
-The `UseCallback` [hook](./02_RulesOfHooks.md) provides a way to optimize callback functions in Ivy [applications](../../01_Onboarding/02_Concepts/15_Apps.md):
+The `UseCallback` [hook](./02_RulesOfHooks.md) provides a way to optimize callback functions in Ivy [applications](../../../01_Onboarding/02_Concepts/15_Apps.md):
 
 - **Stable Function References** - Returns the same function reference when [state](./03_State.md) dependencies haven't changed
-- **Prevents Re-renders** - [Child components](../../01_Onboarding/02_Concepts/03_Widgets.md) won't re-render unnecessarily when receiving memoized callbacks
+- **Prevents Re-renders** - [Child components](../../../01_Onboarding/02_Concepts/03_Widgets.md) won't re-render unnecessarily when receiving memoized callbacks
 - **Stable Dependencies** - Ensures callbacks used in [`UseEffect`](./04_Effect.md) and other hooks have stable references
 
 <Callout type="Tip">
@@ -125,17 +125,17 @@ public class ParentView : ViewBase
 
 Use `UseCallback` when:
 
-- **Passing callbacks to [child components](../../01_Onboarding/02_Concepts/03_Widgets.md)** - Prevents unnecessary re-renders when the callback reference is stable
+- **Passing callbacks to [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md)** - Prevents unnecessary re-renders when the callback reference is stable
 - **Callbacks are dependencies of other [hooks](./02_RulesOfHooks.md)** - Ensures stable references for [`UseEffect`](./04_Effect.md) and other [hooks](./02_RulesOfHooks.md)
 - **Event handlers with expensive setup** - Avoids recreating handlers on every render
-- **Callbacks in lists** - Optimizes performance when rendering many [components](../../01_Onboarding/02_Concepts/02_Views.md) with callbacks
+- **Callbacks in lists** - Optimizes performance when rendering many [components](../../../01_Onboarding/02_Concepts/02_Views.md) with callbacks
 
 ### Best Practices
 
 - **Dependency Array**: Always specify the [state](./03_State.md) dependencies that should trigger callback recreation
 - **Stable References**: Only include state values that actually affect the callback's behavior
 - **Avoid Over-Memoization**: Don't memoize simple callbacks that don't cause performance issues
-- **Combine with IMemoized**: Use `UseCallback` together with `IMemoized` [components](../../01_Onboarding/02_Concepts/02_Views.md) for maximum optimization
+- **Combine with IMemoized**: Use `UseCallback` together with `IMemoized` [components](../../../01_Onboarding/02_Concepts/02_Views.md) for maximum optimization
 
 ### Examples
 
@@ -262,7 +262,7 @@ var handleClick = UseCallback(() => count.Set(count.Value + 1), count);
 
 - **Simple callbacks**: Don't memoize trivial callbacks that don't cause performance issues
 - **Frequently changing [state](./03_State.md) dependencies**: If state dependencies change often, memoization provides no benefit
-- **Single-use callbacks**: If a callback is only used once and not passed to [children](../../01_Onboarding/02_Concepts/03_Widgets.md), memoization may be unnecessary
+- **Single-use callbacks**: If a callback is only used once and not passed to [children](../../../01_Onboarding/02_Concepts/03_Widgets.md), memoization may be unnecessary
 
 ```csharp
 // Unnecessary memoization
@@ -445,5 +445,5 @@ UseEffect(async () =>
 - [State Management](./03_State.md) - Managing component state
 - [Rules of Hooks](./02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [UseStatic](./08_Static.md) - Storing stable references
-- [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
-- [Widgets](../../01_Onboarding/02_Concepts/03_Widgets.md) - Building UI components
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+- [Widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) - Building UI components
