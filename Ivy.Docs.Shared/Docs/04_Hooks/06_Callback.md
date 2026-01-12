@@ -1,228 +1,162 @@
----
-searchHints:
-  - usecallback
-  - memoization
-  - callbacks
-  - performance
-  - optimization
-  - hooks
----
-
 # UseCallback
 
-<Ingress>
-Memoize callback functions to prevent unnecessary re-creations and optimize performance when passing functions to child components or effects.
-</Ingress>
+The `UseCallback` hook memoizes callback functions, preventing unnecessary re-renders when the callback is passed as a prop to child components.
 
-The `UseCallback` hook returns a memoized version of a callback function that only changes when its dependencies change.
+<Callout type="Tip">
+`UseCallback` memoizes the function reference itself, while `UseMemo` memoizes the result of calling a function. The memoized callback is only executed when you invoke it.
+</Callout>
 
-## Basic Usage
+### How UseCallback Works
 
-Create a memoized callback that only changes when dependencies change:
+```mermaid
+sequenceDiagram
+    participant C as Component
+    participant CB as UseCallback Hook
+    participant S as UseState Storage
+    
+    Note over C,S: First Render
+    C->>CB: UseCallback(() => handleClick(), [dep1, dep2])
+    CB->>S: UseState(new CallbackRef(callback, deps))
+    S-->>CB: Create new CallbackRef with callback
+    CB->>S: Store CallbackRef(callback, [dep1, dep2])
+    CB-->>C: Return callback function
+    
+    Note over C,S: Subsequent Render (deps unchanged)
+    C->>CB: UseCallback(() => handleClick(), [dep1, dep2])
+    CB->>S: Get stored CallbackRef
+    S-->>CB: Return CallbackRef(cachedCallback, [dep1, dep2])
+    CB->>CB: AreDependenciesEqual([dep1, dep2], [dep1, dep2])
+    Note right of CB: Dependencies equal!<br/>Return same function reference
+    CB-->>C: Return cached callback (same reference)
+    
+    Note over C,S: Subsequent Render (deps changed)
+    C->>CB: UseCallback(() => handleClick(), [dep1_new, dep2])
+    CB->>S: Get stored CallbackRef
+    S-->>CB: Return CallbackRef(oldCallback, [dep1, dep2])
+    CB->>CB: AreDependenciesEqual([dep1, dep2], [dep1_new, dep2])
+    Note right of CB: Dependencies changed!<br/>Create new function reference
+    CB->>S: Update CallbackRef(newCallback, [dep1_new, dep2])
+    CB-->>C: Return new callback function
+```
 
-```csharp demo-below
-public class BasicCallbackDemo : ViewBase
+### Basic UseCallback Usage
+
+```csharp
+public class ParentView : ViewBase
 {
     public override object? Build()
     {
         var count = UseState(0);
-        var text = UseState("");
+        var multiplier = UseState(2);
         
-        // Callback only re-created when count changes
-        var handleClick = () =>
+        // Memoize the callback to prevent child re-renders
+        var handleIncrement = UseCallback(() => 
         {
-            Console.WriteLine($"Count is: {count.Value}");
-        };
+            count.Set(count.Value + 1);
+        }, count); // Only recreate when count changes
+        
+        var handleReset = UseCallback(() => 
+        {
+            count.Set(0);
+        }); // No dependencies - callback never changes
         
         return Layout.Vertical(
-            new Button($"Log Count ({count.Value})", _ => handleClick()),
-            new Button("Increment", _ => count.Set(count.Value + 1)),
-            text.ToTextInput().Placeholder("Type here (doesn't affect callback)")
+            Text.Inline($"Count: {count.Value}"),
+            new ChildComponent(handleIncrement, handleReset),
+            new NumberInput("Multiplier", multiplier.Value, v => multiplier.Set(v))
         );
     }
 }
 ```
 
-## When to Use UseCallback
+### When to Use UseCallback
 
-### Event Handler Stability
+Use `UseCallback` when:
 
-Create stable event handlers for forms and inputs:
+- **Passing callbacks to child components** - Prevents unnecessary re-renders
+- **Callbacks are dependencies of other hooks** - Ensures stable references
+- **Event handlers with expensive setup** - Avoids recreating handlers on every render
 
-```csharp demo-tabs
-public class FormCallbackDemo : ViewBase
+### UseCallback Examples
+
+#### Preventing Child Re-renders
+
+```csharp
+public class TodoListView : ViewBase
 {
     public override object? Build()
     {
-        var formData = UseState(() => new { Name = "", Email = "" });
-        var submitCount = UseState(0);
+        var todos = UseState(new List<Todo>());
+        var filter = UseState("");
         
-        // Stable handlers
-        var handleNameChange = (string name) =>
+        // Memoize callbacks to prevent TodoItem re-renders
+        var handleToggle = UseCallback((int id) => 
         {
-            formData.Set(new { Name = name, Email = formData.Value.Email });
-        };
+            todos.Set(todos.Value.Select(t => 
+                t.Id == id ? t with { Completed = !t.Completed } : t
+            ).ToList());
+        }, todos);
         
-        var handleEmailChange = (string email) =>
+        var handleDelete = UseCallback((int id) => 
         {
-            formData.Set(new { Name = formData.Value.Name, Email = email });
-        };
+            todos.Set(todos.Value.Where(t => t.Id != id).ToList());
+        }, todos);
         
-        var handleSubmit = () =>
-        {
-            submitCount.Set(submitCount.Value + 1);
-            Console.WriteLine($"Submitted: {formData.Value.Name}, {formData.Value.Email}");
-        };
-        
-        var name = UseState(formData.Value.Name);
-        var email = UseState(formData.Value.Email);
+        var filteredTodos = UseMemo(() => 
+            todos.Value.Where(t => 
+                t.Title.Contains(filter.Value, StringComparison.OrdinalIgnoreCase)
+            ).ToList(),
+            todos, filter
+        );
         
         return Layout.Vertical(
-            Text.P("Name:"),
-            name.ToTextInput(),
-            Text.P("Email:"),
-            email.ToTextInput(),
-            new Button("Submit", _ => handleSubmit()),
-            Text.P($"Submitted {submitCount.Value} times")
+            new TextInput("Filter", filter.Value, v => filter.Set(v)),
+            Layout.Vertical(
+                filteredTodos.Select(todo => 
+                    new TodoItem(todo, handleToggle, handleDelete).Key(todo.Id)
+                )
+            )
         );
     }
 }
 ```
 
-### Callback Composition
+#### Stable Dependencies for [Effects](../../04_Hooks/04_Effect.md)
 
-Combine multiple callbacks:
-
-```csharp demo-tabs
-public class CallbackCompositionDemo : ViewBase
+```csharp
+public class DataFetcherView : ViewBase
 {
     public override object? Build()
     {
-        var logs = UseState(() => new List<string>());
+        var data = UseState<List<Item>?>(null);
+        var loading = UseState(false);
+        var searchTerm = UseState("");
         
-        var log = (string message) =>
+        // Memoize the fetch function
+        var fetchData = UseCallback(async () => 
         {
-            var newLogs = logs.Value.ToList();
-            newLogs.Add($"{DateTime.Now:HH:mm:ss} - {message}");
-            if (newLogs.Count > 5) newLogs.RemoveAt(0);
-            logs.Set(newLogs);
-        };
-        
-        var handleClick = () =>
-        {
-            log("Button clicked");
-        };
-        
-        var handleDoubleClick = () =>
-        {
-            log("Button double-clicked");
-        };
-        
-        return Layout.Vertical(
-            new Button("Click Me", _ => handleClick()),
-            new Button("Double Click", _ => handleDoubleClick()),
-            Layout.Vertical(logs.Value.Select(Text.Small))
-        );
-    }
-}
-```
-
-### Conditional Callbacks
-
-Create callbacks with conditional logic:
-
-```csharp demo-tabs
-public class ConditionalCallbackDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var isEnabled = UseState(true);
-        var count = UseState(0);
-        
-        var handleClick = () =>
-        {
-            if (isEnabled.Value)
+            loading.Set(true);
+            try
             {
-                count.Set(count.Value + 1);
+                var result = await ApiService.SearchItems(searchTerm.Value);
+                data.Set(result);
             }
-        };
+            finally
+            {
+                loading.Set(false);
+            }
+        }, searchTerm);
+        
+        // Use the memoized callback in an effect
+        UseEffect(async () => 
+        {
+            await fetchData();
+        }, fetchData); // Stable dependency prevents infinite loops
         
         return Layout.Vertical(
-            Text.P($"Count: {count.Value}"),
-            new Button("Increment", _ => handleClick()),
-            Text.P("Enable counting:"),
-            isEnabled.ToBoolInput()
+            new TextInput("Search", searchTerm.Value, v => searchTerm.Set(v)),
+            loading.Value ? new Loading() : new ItemList(data.Value ?? new List<Item>())
         );
     }
 }
 ```
-
-## Best Practices
-
-### 1. Don't Overuse
-
-```csharp
-// Bad: Unnecessary for simple inline handlers
-// Good: Simple inline handler
-return new Button("Increment", _ => count.Set(count.Value + 1));
-```
-
-### 2. Keep Callbacks Pure
-
-```csharp
-// Good: Pure callback
-var handleClick = () =>
-{
-    count.Set(count.Value + 1);
-};
-
-// Avoid: Side effects in callback (use UseEffect instead)
-var handleClick = () =>
-{
-    Console.WriteLine("Clicked!"); // Side effect
-    count.Set(count.Value + 1);
-};
-```
-
-## Common Pitfalls
-
-### 1. Forgetting Dependencies
-
-```csharp
-// Wrong: multiplier not captured correctly
-var calculate = () =>
-{
-    return count.Value * multiplier.Value; // Uses multiplier!
-};
-
-// Correct: Ensure all dependencies are captured
-var calculate = () =>
-{
-    return count.Value * multiplier.Value;
-};
-```
-
-## Performance Considerations
-
-Only use callbacks when:
-- The callback is passed to optimized child components
-- The callback is used as an effect dependency
-- The callback creation is expensive (rare)
-
-```csharp
-// When to use callbacks:
-// ✓ Callbacks passed to child components
-// ✓ Callbacks used in effect dependencies
-// ✓ Event handlers that trigger expensive operations
-
-// When NOT to use callbacks:
-// ✗ Simple inline event handlers
-// ✗ Callbacks only used once
-// ✗ Callbacks not passed to other components
-```
-
-## See Also
-
-- [UseState](./03_State.md) - Managing component state
-- [UseEffect](./04_Effect.md) - Side effects and dependencies
-- [Memoization](../../01_Onboarding/02_Concepts/10_Memoization.md) - Performance optimization guide
