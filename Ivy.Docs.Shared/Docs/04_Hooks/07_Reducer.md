@@ -8,6 +8,8 @@ searchHints:
   - hooks
   - state-updates
   - predictable-state
+imports:
+  - Ivy.Core.Hooks
 ---
 
 # Reducers
@@ -95,7 +97,7 @@ sequenceDiagram
 
 ### Basic Usage
 
-```csharp
+```csharp demo-below
 public class BasicReducerDemo : ViewBase
 {
     // Reducer function
@@ -109,10 +111,10 @@ public class BasicReducerDemo : ViewBase
     
     public override object? Build()
     {
-        var (count, dispatch) = UseReducer(CounterReducer, 0);
+        var (count, dispatch) = this.UseReducer(CounterReducer, 0);
         
         return Layout.Vertical(
-            Text.H3($"Count: {count.Value}"),
+            Text.H3($"Count: {count}"),
             Layout.Horizontal(
                 new Button("-", _ => dispatch("decrement")),
                 new Button("Reset", _ => dispatch("reset")),
@@ -155,111 +157,145 @@ Choose between `UseReducer` and `UseState` based on complexity:
 
 ### Examples
 
-#### Complex State Logic
+#### Shopping Cart with Interdependent State
 
-```csharp
-public class ComplexStateDemo : ViewBase
+This example demonstrates why reducers are powerful - multiple interdependent values (items, subtotal, tax, discount, total) that must stay in sync. With `UseState`, you'd need to update each value separately and risk inconsistencies.
+
+```csharp demo-tabs
+public class ShoppingCartDemo : ViewBase
 {
-    record TodoState(List<string> Items, int CompletedCount, string Filter);
+    record CartItem(string Name, decimal Price, int Quantity);
+    record CartState(List<CartItem> Items, decimal DiscountPercent, decimal Subtotal, decimal Tax, decimal Total);
     
-    private TodoState TodoReducer(TodoState state, (string Action, string? Value) action) =>
-        action.Action switch
+    private CartState CartReducer(CartState state, string action)
+    {
+        var parts = action.Split('|', 2);
+        var actionType = parts[0];
+        var actionValue = parts.Length > 1 ? parts[1] : "";
+        
+        return actionType switch
         {
-            "add" => state with { Items = state.Items.Append(action.Value!).ToList() },
-            "remove" => state with { Items = state.Items.Where(x => x != action.Value).ToList() },
-            "complete" => state with { CompletedCount = state.CompletedCount + 1 },
-            "setFilter" => state with { Filter = action.Value ?? "" },
-            "clearCompleted" => state with 
-            { 
-                Items = state.Items.Where(x => !x.StartsWith("[X]")).ToList(),
-                CompletedCount = 0
-            },
+            "addItem" => CalculateTotals(state with { 
+                Items = state.Items.Append(new CartItem(actionValue, 10.00m, 1)).ToList() 
+            }),
+            "removeItem" => CalculateTotals(state with { 
+                Items = state.Items.Where((item, idx) => idx.ToString() != actionValue).ToList() 
+            }),
+            "setDiscount" => CalculateTotals(state with { 
+                DiscountPercent = decimal.TryParse(actionValue, out var discount) ? discount : 0m 
+            }),
             _ => state
         };
+    }
+    
+    private CartState CalculateTotals(CartState state)
+    {
+        var subtotal = state.Items.Sum(item => item.Price * item.Quantity);
+        var discountAmount = subtotal * (state.DiscountPercent / 100m);
+        var afterDiscount = subtotal - discountAmount;
+        var tax = afterDiscount * 0.08m; // 8% tax
+        var total = afterDiscount + tax;
+        
+        return state with 
+        { 
+            Subtotal = subtotal,
+            Tax = tax,
+            Total = total
+        };
+    }
     
     public override object? Build()
     {
-        var (state, dispatch) = UseReducer(TodoReducer, new TodoState(new List<string>(), 0, ""));
-        var newTodo = UseState("");
-        
-        var filteredItems = UseMemo(() => 
-            state.Value.Items.Where(item => 
-                item.Contains(state.Value.Filter, StringComparison.OrdinalIgnoreCase)
-            ).ToList(),
-            state
-        );
+        var (cart, dispatch) = this.UseReducer(CartReducer, new CartState(new List<CartItem>(), 0m, 0m, 0m, 0m));
+        var newItemName = UseState("");
         
         return Layout.Vertical(
+            Text.H3("Shopping Cart"),
             Layout.Horizontal(
-                newTodo.ToTextInput().Placeholder("New todo..."),
-                new Button("Add", _ =>
-                {
-                    if (!string.IsNullOrWhiteSpace(newTodo.Value))
+                newItemName.ToTextInput().Placeholder("Item name"),
+                new Button("Add Item", _ => {
+                    if (!string.IsNullOrWhiteSpace(newItemName.Value))
                     {
-                        dispatch(("add", newTodo.Value));
-                        newTodo.Set("");
+                        dispatch($"addItem|{newItemName.Value}");
+                        newItemName.Set("");
                     }
                 })
             ),
-            new TextInput("Filter", state.Value.Filter, v => dispatch(("setFilter", v))),
-            filteredItems.Select(item =>
-                Layout.Horizontal(
-                    Text.P(item),
-                    new Button("Complete", _ => dispatch(("complete", null))),
-                    new Button("Remove", _ => dispatch(("remove", item)))
-                )),
-            Text.P($"Completed: {state.Value.CompletedCount}"),
-            new Button("Clear Completed", _ => dispatch(("clearCompleted", null)))
+            new Separator(),
+            cart.Items.Count > 0 
+                ? Layout.Vertical(
+                    new { 
+                        Items = string.Join(", ", cart.Items.Select(item => $"{item.Name} (${item.Price:F2} x {item.Quantity})"))
+                    }.ToDetails(),
+                    Layout.Horizontal(
+                        cart.Items.Select((item, idx) => 
+                            new Button($"Remove {item.Name}", _ => dispatch($"removeItem|{idx}"))
+                        ).ToArray()
+                    )
+                )
+                : Text.Small("No items in cart"),
+            new Separator(),
+            Layout.Vertical(
+                Text.P($"Subtotal: ${cart.Subtotal:F2}"),
+                Text.P($"Discount ({cart.DiscountPercent}%): ${cart.Subtotal * (cart.DiscountPercent / 100m):F2}"),
+                Text.P($"Tax (8%): ${cart.Tax:F2}"),
+                Text.H4($"Total: ${cart.Total:F2}")
+            ),
+            Layout.Horizontal(
+                new Button("10% Off", _ => dispatch("setDiscount|10")),
+                new Button("20% Off", _ => dispatch("setDiscount|20")),
+                new Button("Clear Discount", _ => dispatch("setDiscount|0"))
+            )
         );
     }
 }
 ```
 
-#### Form State Management
+#### Game State with Multiple Interdependent Values
 
-```csharp
-public class FormStateDemo : ViewBase
+This example shows a game state where actions affect multiple values simultaneously - perfect for demonstrating reducer's centralized state management.
+
+```csharp demo-tabs
+public class GameStateDemo : ViewBase
 {
-    record FormState(string Name, string Email, bool IsValid, List<string> Errors);
+    record GameState(int Score, int Level, int Lives, int Multiplier, bool IsGameOver);
     
-    private FormState FormReducer(FormState state, (string Field, string? Value) action) =>
-        action.Field switch
-        {
-            "setName" => ValidateForm(state with { Name = action.Value ?? "" }),
-            "setEmail" => ValidateForm(state with { Email = action.Value ?? "" }),
-            "reset" => new FormState("", "", false, new List<string>()),
-            _ => state
-        };
-    
-    private FormState ValidateForm(FormState state)
+    private GameState GameReducer(GameState state, string action) => action switch
     {
-        var errors = new List<string>();
-        
-        if (string.IsNullOrWhiteSpace(state.Name))
-            errors.Add("Name is required");
-        
-        if (string.IsNullOrWhiteSpace(state.Email))
-            errors.Add("Email is required");
-        else if (!state.Email.Contains("@"))
-            errors.Add("Email is invalid");
-        
-        return state with 
-        { 
-            IsValid = errors.Count == 0,
-            Errors = errors
-        };
-    }
+        "score" => state.IsGameOver ? state : state with { 
+            Score = state.Score + (10 * state.Multiplier),
+            Level = (state.Score + (10 * state.Multiplier)) / 100 + 1,
+            Multiplier = Math.Min(state.Multiplier + 1, 5)
+        },
+        "miss" => state.IsGameOver ? state : state with { 
+            Lives = state.Lives - 1,
+            Multiplier = 1,
+            IsGameOver = state.Lives <= 1
+        },
+        "reset" => new GameState(0, 1, 3, 1, false),
+        _ => state
+    };
     
     public override object? Build()
     {
-        var (formState, dispatch) = UseReducer(FormReducer, new FormState("", "", false, new List<string>()));
+        var (game, dispatch) = this.UseReducer(GameReducer, new GameState(0, 1, 3, 1, false));
         
         return Layout.Vertical(
-            new TextInput("Name", formState.Value.Name, v => dispatch(("setName", v))),
-            new TextInput("Email", formState.Value.Email, v => dispatch(("setEmail", v))),
-            formState.Value.Errors.Select(error => Text.Small(error, color: "red")),
-            new Button("Submit", _ => { /* Submit logic */ }, disabled: !formState.Value.IsValid),
-            new Button("Reset", _ => dispatch(("reset", null)))
+            Text.H3("Game State"),
+            Layout.Vertical(
+                Text.P($"Score: {game.Score}"),
+                Text.P($"Level: {game.Level}"),
+                Text.P($"Lives: {game.Lives}"),
+                Text.P($"Multiplier: {game.Multiplier}x"),
+                game.IsGameOver ? Text.Danger("Game Over!") : Text.Success("Playing...")
+            ),
+            new Separator(),
+            Layout.Horizontal(
+                new Button("Score!", _ => dispatch("score")).Disabled(game.IsGameOver),
+                new Button("Miss", _ => dispatch("miss")).Disabled(game.IsGameOver),
+                new Button("Reset", _ => dispatch("reset"))
+            ),
+            Text.Small("Notice how scoring updates level and multiplier, while missing resets multiplier and decreases lives - all in one reducer!")
         );
     }
 }
@@ -363,8 +399,8 @@ flowchart TD
 private State Reducer(State state, Action action)
 {
     if (action == "add")
-    {
-        state.Items.Add(newItem); // Mutation!
+{
+    state.Items.Add(newItem); // Mutation!
         return state;
     }
     return state;
