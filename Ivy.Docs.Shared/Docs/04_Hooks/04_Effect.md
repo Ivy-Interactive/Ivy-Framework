@@ -376,7 +376,7 @@ UseEffect(() =>
 }, count);
 ```
 
-### 5. Use [Memoized](./10_Memoization.md) Callbacks for Complex Dependencies
+### 5. Use [Memoized](./05_Memo.md) Callbacks for Complex Dependencies
 
 ```csharp
 public class ComplexEffectView : ViewBase
@@ -387,7 +387,7 @@ public class ComplexEffectView : ViewBase
         var filter = UseState("");
         
         // Memoize the processing function
-        var processData = UseCallback(async () =>
+        var processData = this.UseCallback(async () =>
         {
             var filtered = data.Value
                 .Where(item => item.Name.Contains(filter.Value))
@@ -471,6 +471,6 @@ UseEffect(async () =>
 ## See Also
 
 - [State Management](./03_State.md) - Managing component state
-- [Memoization](../../01_Onboarding/02_Concepts/10_Memoization.md) - Optimizing performance with memoization
+- [Memoization](./05_Memo.md) - Optimizing performance with memoization
 - [Signals](../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
 - [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

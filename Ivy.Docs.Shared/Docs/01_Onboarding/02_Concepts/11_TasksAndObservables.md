@@ -108,7 +108,7 @@ public class StateManagementExample : ViewBase
 
 ### Observable with Throttling
 
-This example demonstrates how to use observables for search functionality with [performance optimizations](./10_Memoization.md). It shows throttled updates to prevent excessive filtering while typing, and proper [state management](../../04_Hooks/03_State.md) to avoid duplicate data.
+This example demonstrates how to use observables for search functionality with [performance optimizations](../../04_Hooks/05_Memo.md). It shows throttled updates to prevent excessive filtering while typing, and proper [state management](../../04_Hooks/03_State.md) to avoid duplicate data.
 
 ```csharp demo-tabs
 public class ObservableSearchExample : ViewBase

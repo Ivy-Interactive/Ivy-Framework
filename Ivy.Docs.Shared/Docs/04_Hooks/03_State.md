@@ -49,7 +49,7 @@ public class CounterApp : ViewBase
 
 ### State with Factory Functions
 
-For complex initialization or when you need to defer object creation, use factory functions with UseState. This pattern is useful for expensive computations, [dependency injection](../../01_Onboarding/02_Concepts/18_Services.md), [memoization](../../01_Onboarding/02_Concepts/10_Memoization.md), and [lazy loading](../../01_Onboarding/02_Concepts/15_Apps.md):
+For complex initialization or when you need to defer object creation, use factory functions with UseState. This pattern is useful for expensive computations, [dependency injection](../../01_Onboarding/02_Concepts/18_Services.md), [memoization](./05_Memo.md), and [lazy loading](../../01_Onboarding/02_Concepts/15_Apps.md):
 
 ```csharp demo-tabs
 public class FactoryStateDemo : ViewBase

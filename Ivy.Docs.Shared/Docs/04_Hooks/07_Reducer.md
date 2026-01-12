@@ -220,4 +220,4 @@ private State Reducer(State state, Action action)
 
 - [UseState](./03_State.md) - Simple state management
 - [UseEffect](./04_Effect.md) - Side effects and async operations
-- [Memoization](../../01_Onboarding/02_Concepts/10_Memoization.md) - Performance optimization
+- [Memoization](./05_Memo.md) - Performance optimization
