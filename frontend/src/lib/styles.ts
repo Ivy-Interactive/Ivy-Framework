@@ -582,7 +582,6 @@ export const typography: Record<string, string> = {
   em: 'italic',
 
   // Size variants
-  extralarge: 'text-3xl',
   large: 'text-lg font-semibold',
   small: 'text-large-body font-medium leading-none',
   muted: 'text-base text-muted-foreground',

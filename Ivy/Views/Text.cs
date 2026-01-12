@@ -301,4 +301,10 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         _scale = scale;
         return this;
     }
+
+    public TextBuilder Small() => Scale(Scale.Small);
+
+    public TextBuilder Medium() => Scale(Scale.Medium);
+
+    public TextBuilder Large() => Scale(Scale.Large);
 }
