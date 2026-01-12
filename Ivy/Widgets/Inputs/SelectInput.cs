@@ -81,7 +81,7 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
 
     internal SelectInput() { }
 
-    [Prop] public TValue Value { get; } = default!;
+    [Prop(AlwaysSerialize = true)] public TValue Value { get; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 

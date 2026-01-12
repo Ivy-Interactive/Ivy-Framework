@@ -38,7 +38,7 @@ Ivy provides a comprehensive `DefaultContentBuilder` that handles a wide variety
   - JSON nodes > JSON views
   - XML objects > XML views
   - Collections > [Tables](../../02_Widgets/03_Common/08_Table.md)
-  - [Icons](../../03_ApiReference/IvyShared/Icons.md) > Icon views
+  - [Icons](../../02_Widgets/01_Primitives/02_Icon.md) > Icon views
   - [Widgets](./03_Widgets.md) and [Views](./02_Views.md) > Direct rendering
 
 ## Custom Content Builders

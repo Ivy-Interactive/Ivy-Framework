@@ -1,6 +1,6 @@
 ---
 prepare: |
-    var client = this.UseService<IClientProvider>();
+  var client = this.UseService<IClientProvider>();
 searchHints:
   - fundamentals
   - views
@@ -82,6 +82,8 @@ public class CounterApp : ViewBase
     }
 }
 ```
+
+---
 
 ```csharp demo
 public class CounterApp : ViewBase

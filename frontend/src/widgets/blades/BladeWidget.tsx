@@ -76,9 +76,9 @@ export function BladeWidget({
         {/* radix scrollarea breaks the nested containers widths*/}
         <ScrollArea
           type="hover"
-          className="blade-container h-full [&>div>div[style]]:block!"
+          className="blade-container h-full [&>div>div[style*='min-width']]:!h-full [&>div>div[style*='min-width']]:!block"
         >
-          <div className="p-4">{children}</div>
+          <div className="p-4 h-full overflow-y-auto">{children}</div>
         </ScrollArea>
       </div>
     </div>

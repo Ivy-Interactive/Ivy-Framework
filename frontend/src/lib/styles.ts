@@ -564,3 +564,59 @@ export const convertSizeToGridValue = (size?: string): string => {
       return 'minmax(0, 1fr)';
   }
 };
+
+// Typography classes - shadcn typography with Ivy spacing
+export const typography: Record<string, string> = {
+  // Headings
+  h1: `text-4xl font-semibold scroll-m-20 mt-12 mb-4 [&+h2]:mt-2 [&+p]:mt-0`,
+  h2: `text-3xl font-medium scroll-m-20 mt-8 mb-4 [&+h3]:mt-2 [&+p]:mt-0`,
+  h3: `text-2xl font-medium scroll-m-20 mt-8 mb-4 [&+h4]:mt-2 [&+p]:mt-0`,
+  h4: `text-xl font-medium scroll-m-20 mt-6 mb-4 [&+h5]:mt-2 [&+p]:mt-0`,
+  h5: `text-lg font-medium scroll-m-20 mt-4 mb-2 [&+h6]:mt-2 [&+p]:mt-0`,
+  h6: `text-base font-medium scroll-m-20 mt-2 mb-2 [&+p]:mt-0`,
+
+  // Body
+  p: `text-base scroll-m-20 my-4 [&+p]:mt-0`,
+  lead: `text-muted-foreground`,
+  strong: 'font-semibold',
+  em: 'italic',
+
+  // Size variants
+  extralarge: 'text-3xl',
+  large: 'text-lg font-semibold',
+  small: 'text-large-body font-medium leading-none',
+  muted: 'text-base text-muted-foreground',
+
+  // Semantic variants
+  danger: 'text-large-body text-destructive font-semibold',
+  warning: 'text-large-body text-amber font-semibold',
+  success: 'text-large-body text-green font-semibold',
+
+  // UI variants
+  label: 'text-large-label font-medium leading-none flex items-center',
+  block: 'flex items-center min-w-0',
+
+  // Lists
+  ul: 'ml-6 list-disc [&>li:first-child]:mt-0 mb-4',
+  ol: 'ml-6 list-decimal [&>li:first-child]:mt-0 mb-4',
+  li: 'mt-1 ',
+
+  // Links
+  a: 'text-primary underline brightness-90 hover:brightness-100',
+
+  // Blockquote
+  blockquote: 'border-l-2 pl-6 italic mb-2',
+
+  // Code
+  code: 'relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono text-sm font-semibold',
+
+  // Table
+  table: 'w-full border-collapse border border-border mb-2',
+  thead: 'bg-muted',
+  tr: 'border border-border',
+  th: 'border border-border px-4 py-2 text-left font-bold text-sm',
+  td: 'border border-border px-4 py-2 text-sm',
+
+  // Media
+  img: 'max-w-full h-auto cursor-zoom-in mb-2',
+};

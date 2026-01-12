@@ -5,5 +5,5 @@ namespace Ivy;
 
 public record Empty : WidgetBase<Empty>
 {
-    internal Empty() { }
+    public Empty() { }
 }

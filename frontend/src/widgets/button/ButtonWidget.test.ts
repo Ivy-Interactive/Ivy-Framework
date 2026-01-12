@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateLinkUrl } from '@/lib/utils';
+import { validateLinkUrl } from '@/lib/url';
 
 /**
  * Tests for ButtonWidget URL validation, especially for Link variant.

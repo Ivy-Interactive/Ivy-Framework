@@ -1,4 +1,5 @@
 ﻿using Ivy.Chrome;
+using Ivy.Docs.Shared.Middleware;
 
 namespace Ivy.Docs.Shared;
 
@@ -10,6 +11,13 @@ public static class DocsServer
         var server = new Server(args);
         server.AddAppsFromAssembly(typeof(DocsServer).Assembly);
         server.UseHotReload();
+
+        server.UseWebApplication(app =>
+        {
+            app.UseSitemap();
+            app.UseSsrMarkdown();
+            app.UseMarkdownFiles();
+        });
 
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
         server.SetMetaTitle($"Ivy Docs {version}");

@@ -35,9 +35,9 @@ export const detailValueSizeVariants = cva('align-middle min-w-0', {
 export const detailValueMultiLinePaddingVariants = cva('', {
   variants: {
     scale: {
-      Small: 'pb-2',
-      Medium: 'pb-3',
-      Large: 'pb-4',
+      Small: 'pb-2 pt-0',
+      Medium: 'pb-3 pt-1',
+      Large: 'pb-4 pt-2',
     },
   },
   defaultVariants: {

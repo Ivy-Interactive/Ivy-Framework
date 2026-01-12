@@ -7,7 +7,7 @@ import {
   isFullUrl,
   normalizeRelativePath,
   validateEmbedUrl,
-} from '@/lib/urlValidation';
+} from '@/lib/url';
 
 interface VideoPlayerWidgetProps {
   id: string;

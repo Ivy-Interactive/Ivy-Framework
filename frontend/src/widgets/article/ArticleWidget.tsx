@@ -31,10 +31,10 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   const articleRef = useRef<HTMLElement>(null);
 
   return (
-    <div className="flex flex-col gap-2 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8">
-      <div className="flex gap-8 flex-grow">
+    <div className="flex flex-col gap-2 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8">
+      <div className="flex flex-grow gap-8">
         <article ref={articleRef} className="w-full max-w-[48rem]">
-          <div className="flex flex-col gap-4 flex-grow min-h-[calc(100vh+8rem)]">
+          <div className="flex flex-col flex-grow min-h-[calc(100vh+8rem)]">
             {children}
           </div>
           {showFooter && (

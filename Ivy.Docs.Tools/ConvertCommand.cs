@@ -1,8 +1,6 @@
-﻿using System.Collections.Specialized;
-using Spectre.Console.Cli;
-using System.ComponentModel;
-using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
 using System.Xml.Linq;
+using Spectre.Console.Cli;
 
 namespace Ivy.Docs.Tools;
 
@@ -50,12 +48,12 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             Directory.CreateDirectory(folder);
 
             string ivyOutput = Path.Combine(folder, $"{name}.g.cs");
+            string llmMarkdownOutput = Path.Combine(folder, $"{name}.md");
 
             var namespaceSuffix = relativeOutputPath
                 .Replace(Path.DirectorySeparatorChar, '.')
                 .Replace(Path.AltDirectorySeparatorChar, '.').Trim('.');
 
-            //Remove "Generated." from start:
             if (namespaceSuffix.StartsWith("Generated."))
                 namespaceSuffix = namespaceSuffix.Substring("Generated.".Length);
 
@@ -64,6 +62,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 : $"{rootNamespace}.Apps.{namespaceSuffix}";
 
             await MarkdownConverter.ConvertAsync(name, relativeInputPath, absoluteInputPath, ivyOutput, @namespace, settings.SkipIfNotChanged, order);
+            await GenerateLlmMarkdownAsync(absoluteInputPath, llmMarkdownOutput, settings.SkipIfNotChanged);
         });
 
         await Task.WhenAll(tasks);
@@ -91,6 +90,33 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             currentFolder = Directory.GetParent(currentFolder)?.FullName;
         }
         throw new FileNotFoundException("No .csproj file found in the directory hierarchy.");
+    }
+
+    private static async Task GenerateLlmMarkdownAsync(string inputFile, string outputFile, bool skipIfNotChanged)
+    {
+        string markdownContent = await File.ReadAllTextAsync(inputFile);
+        string hash = Utils.GetShortHash(markdownContent);
+
+        if (File.Exists(outputFile) && skipIfNotChanged)
+        {
+            var oldHash = FileHashMetadata.ReadHash(outputFile);
+            if (oldHash != null && oldHash == hash)
+            {
+                return;
+            }
+        }
+
+        Console.WriteLine("Generating {0}", outputFile);
+
+        string outputContent = await LlmMarkdownGenerator.GenerateAsync(markdownContent, inputFile);
+
+        await using (var stream = File.Open(outputFile, FileMode.Create, FileAccess.Write, FileShare.None))
+        await using (var writer = new StreamWriter(stream))
+        {
+            await writer.WriteAsync(outputContent);
+        }
+
+        FileHashMetadata.WriteHash(outputFile, hash);
     }
 }
 

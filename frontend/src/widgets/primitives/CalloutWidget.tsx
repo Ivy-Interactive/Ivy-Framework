@@ -66,7 +66,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
     <div
       style={styles}
       className={cn(
-        'flex items-center p-4 text-large-body rounded-lg border transition-colors',
+        'flex items-center px-4 my-4 text-large-body rounded-lg border transition-colors',
         variantStyles.container
       )}
       role="alert"
@@ -82,7 +82,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
       <div className="flex flex-col min-w-0 flex-1">
         {title && <div className="font-medium leading-none mb-1">{title}</div>}
         {children && (
-          <div className="text-sm opacity-90 leading-relaxed">{children}</div>
+          <div className="text-sm opacity-90 [&_p]:text-sm">{children}</div>
         )}
       </div>
     </div>

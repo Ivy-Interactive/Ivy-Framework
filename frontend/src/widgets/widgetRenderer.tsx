@@ -2,6 +2,55 @@ import React, { Suspense } from 'react';
 import { WidgetNode } from '@/types/widgets';
 import { widgetMap } from '@/widgets/widgetMap';
 import { Scales } from '@/types/scale';
+import {
+  isExternalWidget,
+  createLazyExternalWidget,
+  getCachedExternalWidget,
+} from '@/widgets/externalWidgetLoader';
+import {
+  wrapExternalWidget,
+  ExternalWidgetWrapper,
+} from '@/widgets/ExternalWidgetWrapper';
+
+// Cache for wrapped external widget components
+const wrappedExternalWidgetCache = new Map<
+  string,
+  React.ComponentType<Record<string, unknown>>
+>();
+
+/**
+ * Gets or creates a wrapped component for an external widget.
+ * The wrapper provides the event handler as a prop.
+ */
+const getExternalWidgetComponent = (
+  typeName: string
+): React.ComponentType<Record<string, unknown>> => {
+  // Check if we have a wrapped component cached
+  const cached = wrappedExternalWidgetCache.get(typeName);
+  if (cached) {
+    return cached;
+  }
+
+  // Check if the component is already loaded (not lazy)
+  const loadedComponent = getCachedExternalWidget(typeName);
+  if (loadedComponent) {
+    // Already loaded, wrap it with ExternalWidgetWrapper
+    const Wrapped: React.FC<Record<string, unknown>> = props => (
+      <ExternalWidgetWrapper Component={loadedComponent} props={props}>
+        {props.children as React.ReactNode}
+      </ExternalWidgetWrapper>
+    );
+    wrappedExternalWidgetCache.set(typeName, Wrapped);
+    return Wrapped;
+  }
+
+  // Create lazy component and wrap it
+  const lazyComponent = createLazyExternalWidget(typeName);
+  const wrapped = wrapExternalWidget(lazyComponent);
+  wrappedExternalWidgetCache.set(typeName, wrapped);
+
+  return wrapped;
+};
 
 const isLazyComponent = (
   component:
@@ -31,9 +80,15 @@ export const renderWidgetTree = (
   node: WidgetNode,
   inheritedScale?: Scales
 ): React.ReactNode => {
-  const Component = widgetMap[
+  // First check built-in widgets
+  let Component = widgetMap[
     node.type as keyof typeof widgetMap
   ] as React.ComponentType<Record<string, unknown>>;
+
+  // If not found, check if it's an external widget
+  if (!Component && isExternalWidget(node.type)) {
+    Component = getExternalWidgetComponent(node.type);
+  }
 
   if (!Component) {
     return <div>{`Unknown component type: ${node.type}`}</div>;

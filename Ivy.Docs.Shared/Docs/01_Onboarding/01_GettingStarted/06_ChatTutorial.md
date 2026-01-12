@@ -12,7 +12,7 @@ searchHints:
 # Chat Tutorial
 
 <Ingress>
-Create an AI-powered chat application that suggests [Lucide icons](../../03_ApiReference/IvyShared/Icons.md) based on application descriptions using modern chat patterns.
+Create an AI-powered chat application that suggests [Lucide icons](../../02_Widgets/01_Primitives/02_Icon.md) based on application descriptions using modern chat patterns.
 </Ingress>
 
 ## Prerequisites

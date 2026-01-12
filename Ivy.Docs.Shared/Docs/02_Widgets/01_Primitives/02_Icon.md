@@ -21,12 +21,40 @@ The `Icon` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays vect
 We use the [Lucide Icons](https://lucide.dev/icons/) set, which is a collection of 1000+ free icons. You can find the full set [here](https://lucide.dev/icons/).
 
 ```csharp demo-tabs
-Layout.Horizontal()
-    | new Icon(Icons.Clipboard)
-    | new Icon(Icons.Settings)
-    | new Icon(Icons.User)
-    | new Icon(Icons.Calendar)
-    | new Icon(Icons.Mail)
+public class LucideIconsView : ViewBase
+{
+    public override object? Build()
+    {
+        var client = this.UseService<IClientProvider>();
+        var searchState = this.UseState("code");
+        var iconsState = this.UseState<Icons[]>(Array.Empty<Icons>());
+        
+        UseEffect(() =>
+        {
+            var allIcons = Enum.GetValues<Icons>().Where(e => e != Icons.None);
+            iconsState.Set(string.IsNullOrEmpty(searchState.Value)
+                ? []
+                : allIcons.Where(e => e.ToString().Contains(searchState.Value, StringComparison.OrdinalIgnoreCase)).Take(10).ToArray());
+        }, [ EffectTrigger.AfterInit(), searchState.Throttle(TimeSpan.FromMilliseconds(500)).ToTrigger() ]);
+        
+        var searchInput = searchState.ToSearchInput().Placeholder("Type an icon name");
+        
+        var icons = iconsState.Value.Select(e => Layout.Horizontal().Gap(2)
+            | new Button(null, @event =>
+            {
+                var iconCode = "Icons." + e.ToString();
+                client.CopyToClipboard(iconCode);
+                client.Toast($"Copied '{iconCode}' to clipboard", "Icon Code Copied");
+            }, ButtonVariant.Ghost, e).Small().WithTooltip($"Click to copy {e.ToString()}")
+            | Text.Label("Icons." + e.ToString())
+        );
+
+        return Layout.Vertical()
+               | searchInput
+               | icons
+            ; 
+    }
+}
 ```
 
 ## Colors
