@@ -101,7 +101,7 @@ public class InteractiveListDemo : ViewBase
 
 ### Dynamic Content
 
-Create lists from dynamic data sources using [UseState](../../04_Hooks/03_UseState.md).
+Create lists from dynamic data sources using [UseState](../../04_Hooks/03_State.md).
 
 ```csharp demo-tabs
 public class DynamicListDemo : ViewBase

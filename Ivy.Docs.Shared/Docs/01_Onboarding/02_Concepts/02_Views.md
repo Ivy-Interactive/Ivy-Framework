@@ -14,7 +14,7 @@ searchHints:
 
 Understand how Views work as the core building blocks of Ivy [apps](./15_Apps.md), similar to React components but written entirely in C#.
 
-Views are the fundamental building blocks of Ivy apps. They are similar to React components, providing a way to encapsulate UI logic and [state management](../../04_Hooks/03_UseState.md) in a reusable way. Every view inherits from `ViewBase` and implements a `Build()` method that returns the UI structure.
+Views are the fundamental building blocks of Ivy apps. They are similar to React components, providing a way to encapsulate UI logic and [state management](../../04_Hooks/03_State.md) in a reusable way. Every view inherits from `ViewBase` and implements a `Build()` method that returns the UI structure.
 
 ## Basic Usage
 
@@ -114,7 +114,7 @@ new Button("Show Toast",
 
 ## Effects and Side Effects
 
-Use `UseEffect()` for [side effects](../../04_Hooks/04_UseEffect.md) like API calls, timers, or [subscriptions](./06_Signals.md):
+Use `UseEffect()` for [side effects](../../04_Hooks/04_Effect.md) like API calls, timers, or [subscriptions](./06_Signals.md):
 
 ```csharp demo-below
 public class TimerView : ViewBase

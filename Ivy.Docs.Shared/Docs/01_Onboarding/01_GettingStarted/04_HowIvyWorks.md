@@ -53,12 +53,12 @@ public class TodoApp : ViewBase
 
 ### Reactive State Management
 
-Ivy provides React-inspired hooks for [state management](../../04_Hooks/03_UseState.md):
+Ivy provides React-inspired hooks for [state management](../../04_Hooks/03_State.md):
 
 **Available Hooks:**
 
-- [UseState<T>()](../../04_Hooks/03_UseState.md) - Local component state that triggers re-renders
-- [UseEffect()](../../04_Hooks/04_UseEffect.md) - Side effects with dependency tracking
+- [UseState<T>()](../../04_Hooks/03_State.md) - Local component state that triggers re-renders
+- [UseEffect()](../../04_Hooks/04_Effect.md) - Side effects with dependency tracking
 - [UseService<T>()](../02_Concepts/18_Services.md) - Dependency injection integration
 - [UseSignal()](../02_Concepts/06_Signals.md), [UseDownload()](../02_Concepts/24_Downloads.md), `UseWebhook()` - And many more...
 

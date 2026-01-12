@@ -223,6 +223,6 @@ Only use callbacks when:
 
 ## See Also
 
-- [UseState](./03_UseState.md) - Managing component state
-- [UseEffect](./04_UseEffect.md) - Side effects and dependencies
+- [UseState](./03_State.md) - Managing component state
+- [UseEffect](./04_Effect.md) - Side effects and dependencies
 - [Memoization](../../01_Onboarding/02_Concepts/10_Memoization.md) - Performance optimization guide

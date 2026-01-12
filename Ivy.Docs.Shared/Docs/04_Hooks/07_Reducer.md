@@ -218,6 +218,6 @@ private State Reducer(State state, Action action)
 
 ## See Also
 
-- [UseState](./03_UseState.md) - Simple state management
-- [UseEffect](./04_UseEffect.md) - Side effects and async operations
+- [UseState](./03_State.md) - Simple state management
+- [UseEffect](./04_Effect.md) - Side effects and async operations
 - [Memoization](../../01_Onboarding/02_Concepts/10_Memoization.md) - Performance optimization

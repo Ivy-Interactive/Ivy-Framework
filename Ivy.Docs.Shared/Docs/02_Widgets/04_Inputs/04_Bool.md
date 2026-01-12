@@ -49,7 +49,7 @@ var nullableInput = new BoolInput<bool?>(); // For nullable boolean
 var intInput = new BoolInput<int>(); // For integer-based boolean (0/1)
 ```
 
-**Using extension methods from [state](../../04_Hooks/03_UseState.md):**
+**Using extension methods from [state](../../04_Hooks/03_State.md):**
 
 ```csharp
 var state = UseState(false);

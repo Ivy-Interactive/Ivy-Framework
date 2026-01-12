@@ -4,17 +4,17 @@ Hooks are functions that let you "hook into" Ivy state and lifecycle features fr
 
 ## Core Hooks
 
-- [UseState](./03_UseState.md): Add local state to your components.
-- [UseEffect](./04_UseEffect.md): Perform side effects in your components.
+- [UseState](./03_State.md): Add local state to your components.
+- [UseEffect](./04_Effect.md): Perform side effects in your components.
 
 ## Performance Hooks
 
-- [UseMemo](./05_UseMemo.md): Memoize expensive calculations.
-- [UseCallback](./06_UseCallback.md): Memoize callback functions.
+- [UseMemo](./05_Memo.md): Memoize expensive calculations.
+- [UseCallback](./06_Callback.md): Memoize callback functions.
 
 ## Other Hooks
 
-- [UseStatic](./08_UseStatic.md): Store static values.
+- [UseStatic](./08_Static.md): Store static values.
 - [Rules of Hooks](./09_RulesOfHooks.md): Essential rules for using hooks.
 
 ## Creating Custom Hooks

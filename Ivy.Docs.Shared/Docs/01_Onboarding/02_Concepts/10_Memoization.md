@@ -303,7 +303,7 @@ public class TodoListView : ViewBase
 }
 ```
 
-#### Stable Dependencies for [Effects](../../04_Hooks/04_UseEffect.md)
+#### Stable Dependencies for [Effects](../../04_Hooks/04_Effect.md)
 
 ```csharp
 public class DataFetcherView : ViewBase
@@ -731,6 +731,6 @@ return Layout.Vertical(
 
 ## See Also
 
-- [State Management](../../04_Hooks/03_UseState.md)
-- [Effects](../../04_Hooks/04_UseEffect.md)
+- [State Management](../../04_Hooks/03_State.md)
+- [Effects](../../04_Hooks/04_Effect.md)
 - [Signals](./06_Signals.md)

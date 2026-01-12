@@ -286,7 +286,7 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 
 - **Memoize Navigation Callbacks**: Use `UseCallback` for navigation handlers to prevent unnecessary re-renders
 - **Lazy App Loading**: Apps are loaded on-demand when navigated to
-- **State Cleanup**: Navigation automatically handles cleanup of previous app [state management](../../04_Hooks/03_UseState.md)
+- **State Cleanup**: Navigation automatically handles cleanup of previous app [state management](../../04_Hooks/03_State.md)
 - **Memory Management**: The [Chrome](./16_Chrome.md) system manages app lifecycle and memory usage
 
 ## See Also
@@ -294,4 +294,4 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 - [Chrome Settings](./16_Chrome.md)
 - [App Arguments](./02_Views.md)
 - [Signals](./06_Signals.md)
-- [State Management](../../04_Hooks/03_UseState.md)
+- [State Management](../../04_Hooks/03_State.md)

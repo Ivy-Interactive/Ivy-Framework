@@ -487,7 +487,7 @@ public class ChartWidgetsDemo : ViewBase
 
 ### Effects
 
-Ivy provides a rich collection of built-in effects and animations to enhance your user interfaces. Working with effects in Ivy is incredibly simple and intuitive. For detailed information about specific effects, refer to the [animation](../../04_Hooks/04_UseEffect.md) and [confetti](../../04_Hooks/04_UseEffect.md) documentation pages.
+Ivy provides a rich collection of built-in effects and animations to enhance your user interfaces. Working with effects in Ivy is incredibly simple and intuitive. For detailed information about specific effects, refer to the [animation](../../04_Hooks/04_Effect.md) and [confetti](../../04_Hooks/04_Effect.md) documentation pages.
 
 ```csharp demo-tabs ivy-bg
 public class EffectWidgetsDemo : ViewBase

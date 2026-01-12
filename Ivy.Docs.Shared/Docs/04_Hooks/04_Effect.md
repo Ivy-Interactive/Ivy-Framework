@@ -106,7 +106,7 @@ Effects can be triggered by different events using trigger parameters:
 
 ### State Dependencies
 
-Effects can depend on [state changes](../../04_Hooks/03_UseState.md):
+Effects can depend on [state changes](../../04_Hooks/03_State.md):
 
 ```csharp demo-below
 public class DependentEffectView : ViewBase
@@ -157,7 +157,7 @@ graph LR
     
     B --> B1["Runs once during initialization"]
     C --> C1["Runs after virtual DOM updates"]
-    D --> D1["Runs when [state changes](../../04_Hooks/03_UseState.md)"]
+    D --> D1["Runs when [state changes](../../04_Hooks/03_State.md)"]
 ```
 
 ```csharp
@@ -470,7 +470,7 @@ UseEffect(async () =>
 
 ## See Also
 
-- [State Management](./03_UseState.md) - Managing component state
+- [State Management](./03_State.md) - Managing component state
 - [Memoization](../../01_Onboarding/02_Concepts/10_Memoization.md) - Optimizing performance with memoization
 - [Signals](../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
 - [Views](../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

@@ -1,6 +1,6 @@
 # Rules of Hooks
 
-Ivy hooks (functions starting with `Use...`) are a powerful feature that lets you use [state](./03_UseState.md) and other Ivy features without writing a class. However, hooks rely on a strict call order to function correctly. This page explains the rules you must follow and how to troubleshoot common errors.
+Ivy hooks (functions starting with `Use...`) are a powerful feature that lets you use [state](./03_State.md) and other Ivy features without writing a class. However, hooks rely on a strict call order to function correctly. This page explains the rules you must follow and how to troubleshoot common errors.
 
 ## The Rules
 

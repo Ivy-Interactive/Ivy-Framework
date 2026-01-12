@@ -184,6 +184,6 @@ Don't use it when:
 
 ## See Also
 
-- [UseState](./03_UseState.md) - Reactive state management
-- [UseEffect](./04_UseEffect.md) - Side effects and cleanup
+- [UseState](./03_State.md) - Reactive state management
+- [UseEffect](./04_Effect.md) - Side effects and cleanup
 - [Memoization](../../01_Onboarding/02_Concepts/10_Memoization.md) - Performance optimization

@@ -170,7 +170,7 @@ public class SheetWidthExamples : ViewBase
 
 ### Sheet with Navigation
 
-This example shows a sheet with internal navigation between multiple pages using [state management](../../04_Hooks/03_UseState.md).
+This example shows a sheet with internal navigation between multiple pages using [state management](../../04_Hooks/03_State.md).
 
 ```csharp demo-tabs
 public class NavigationSheet : ViewBase
