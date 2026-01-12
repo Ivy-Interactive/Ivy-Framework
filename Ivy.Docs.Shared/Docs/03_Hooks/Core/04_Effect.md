@@ -11,12 +11,12 @@ searchHints:
 # Effects
 
 <Ingress>
-Perform side effects in your Ivy [views](./02_Views.md) with the UseEffect hook, similar to React's useEffect but optimized for server-side architecture.
+Perform side effects in your Ivy [views](../../../01_Onboarding/02_Concepts/02_Views.md) with the UseEffect [hook](../02_RulesOfHooks.md), similar to React's useEffect but optimized for server-side architecture.
 </Ingress>
 
-The `UseEffect` hook is a powerful feature in Ivy that allows you to perform side effects in your views. It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
+The `UseEffect` [hook](../02_RulesOfHooks.md) is a powerful feature in Ivy that allows you to perform side effects in your [views](../../../01_Onboarding/02_Concepts/02_Views.md). It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
 
-Effects are essential for handling operations that don't directly relate to rendering:
+Effects are essential for handling operations that don't directly relate to rendering, such as working with [state](./03_State.md) updates, [async operations](../../../01_Onboarding/02_Concepts/11_TasksAndObservables.md), and external services:
 
 ```mermaid
 graph TD
@@ -106,7 +106,7 @@ Effects can be triggered by different events using trigger parameters:
 
 ### State Dependencies
 
-Effects can depend on [state changes](./05_State.md):
+Effects can depend on [state](./03_State.md) changes:
 
 ```csharp demo-below
 public class DependentEffectView : ViewBase
@@ -116,7 +116,7 @@ public class DependentEffectView : ViewBase
         var count = UseState(0);
         var log = UseState<List<string>>(new List<string>());
         
-        // Effect runs when count changes
+        // Effect runs when state changes
         UseEffect(() =>
         {
             var currentLog = log.Value;
@@ -157,7 +157,7 @@ graph LR
 
     B --> B1["Runs once during initialization"]
     C --> C1["Runs after virtual DOM updates"]
-    D --> D1["Runs when [state changes](./05_State.md)"]
+    D --> D1["Runs when state changes"]
 ```
 
 ```csharp
@@ -304,108 +304,6 @@ public class ConditionalEffectView : ViewBase
 }
 ```
 
-## Best Practices
-
-### 1. Always Handle Cleanup
-
-```csharp
-// Good: Returns disposable for cleanup
-UseEffect(() =>
-{
-    var timer = new Timer(callback, null, 0, 1000);
-    return timer;
-});
-
-// Bad: No cleanup, potential memory leak
-UseEffect(() =>
-{
-    var timer = new Timer(callback, null, 0, 1000);
-    // Timer never disposed!
-});
-```
-
-### 2. Use Appropriate Dependencies
-
-```csharp
-// Good: Specific dependencies
-UseEffect(() =>
-{
-    ProcessData(data.Value, filter.Value);
-}, data, filter);
-
-// Bad: Missing dependencies
-UseEffect(() =>
-{
-    ProcessData(data.Value, filter.Value); // filter not in dependencies!
-}, data);
-
-// Bad: Too many dependencies
-UseEffect(() =>
-{
-    ProcessData(data.Value);
-}, data, filter, sortOrder, pageSize); // Unnecessary dependencies
-```
-
-### 3. Let Ivy Handle Exceptions
-
-```csharp
-UseEffect(async () =>
-{
-    // No need for try-catch - Ivy automatically handles exceptions
-    var result = await RiskyOperation();
-    // Handle success...
-});
-```
-
-### 4. Avoid Infinite Loops
-
-```csharp
-// Bad: Creates infinite loop
-UseEffect(() =>
-{
-    count.Set(count.Value + 1); // This triggers the effect again!
-}, count);
-
-// Good: Conditional updates
-UseEffect(() =>
-{
-    if (count.Value < 10)
-    {
-        count.Set(count.Value + 1);
-    }
-}, count);
-```
-
-### 5. Use [Memoized](./10_Memoization.md) Callbacks for Complex Dependencies
-
-```csharp
-public class ComplexEffectView : ViewBase
-{
-    public override object? Build()
-    {
-        var data = UseState<List<Item>>(new List<Item>());
-        var filter = UseState("");
-        
-        // Memoize the processing function
-        var processData = UseCallback(async () =>
-        {
-            var filtered = data.Value
-                .Where(item => item.Name.Contains(filter.Value))
-                .ToList();
-            // Process filtered data...
-        }, data, filter);
-        
-        // Use memoized callback in effect
-        UseEffect(async () =>
-        {
-            await processData();
-        }, processData);
-        
-        return /* UI */;
-    }
-}
-```
-
 ## Common Pitfalls
 
 ### 1. Forgetting Dependencies
@@ -419,7 +317,7 @@ UseEffect(() =>
     // ...
 }, count); // Missing multiplier dependency
 
-// Correct: Include all dependencies
+// Correct: Include all state dependencies
 UseEffect(() =>
 {
     var result = count.Value * multiplier.Value;
@@ -441,7 +339,7 @@ UseEffect(() =>
     return timer;
 }); // No dependencies - effect only runs once
 
-// Correct: Update dependencies or use current values
+// Correct: Update dependencies or use current state values
 UseEffect(() =>
 {
     var timer = new Timer(_ =>
@@ -449,7 +347,7 @@ UseEffect(() =>
         Console.WriteLine(count.Value); // Will see current value
     }, null, 1000, 1000);
     return timer;
-}, count); // Re-create timer when count changes
+}, count); // Re-create timer when state changes
 ```
 
 ### 3. Not Awaiting Async Operations
@@ -470,7 +368,9 @@ UseEffect(async () =>
 
 ## See Also
 
-- [State Management](./05_State.md) - Managing component state
-- [Memoization](./10_Memoization.md) - Optimizing performance with memoization
-- [Signals](./06_Signals.md) - Reactive state management
-- [Views](./02_Views.md) - Understanding Ivy views and components
+- [State Management](./03_State.md) - Managing component state
+- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [Memoization](./05_Memo.md) - Optimizing performance with memoization
+- [UseCallback](./06_Callback.md) - Memoizing callback functions
+- [Signals](../../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

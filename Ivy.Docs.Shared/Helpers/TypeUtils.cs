@@ -37,7 +37,6 @@ public static class TypeUtils
     {
         { typeof(Align), new AlignApp(true)},
         { typeof(Colors), new ColorsApp(true)},
-        { typeof(Icons), new IconsApp(true)},
         { typeof(Size), new SizeApp(true)},
         { typeof(Thickness), new ThicknessApp(true)},
     };

@@ -491,7 +491,7 @@ public class ChartWidgetsDemo : ViewBase
 
 ### Effects
 
-Ivy provides a rich collection of built-in effects and animations to enhance your user interfaces. Working with effects in Ivy is incredibly simple and intuitive. For detailed information about specific effects, refer to the [animation](./09_Effects.md) and [confetti](./09_Effects.md) documentation pages.
+Ivy provides a rich collection of built-in effects and animations to enhance your user interfaces. Working with effects in Ivy is incredibly simple and intuitive. For detailed information about specific effects, refer to the [animation](../../03_Hooks/Core/04_Effect.md) and [confetti](../../03_Hooks/Core/04_Effect.md) documentation pages.
 
 ```csharp demo-tabs ivy-bg
 public class EffectWidgetsDemo : ViewBase
@@ -532,7 +532,7 @@ public class AdvancedWidgetsDemo : ViewBase
             new ChatMessage(ChatSender.Assistant, "Hello! I'm a demo chat bot.")
         ));
         
-        void OnSendMessage(Event<Chat, string> @event)
+        void OnSend(Event<Chat, string> @event)
         {
             var currentMessages = messages.Value;
             messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));
@@ -551,7 +551,7 @@ public class AdvancedWidgetsDemo : ViewBase
                 )
             ).Title("Sheet").Description("Side panel overlay").Height(Size.Units(40))
             | new Card(
-                new Chat(messages.Value.ToArray(), OnSendMessage)
+                new Chat(messages.Value.ToArray(), OnSend)
                     .Height(Size.Units(30))
             ).Title("Chat").Description("Conversation interface").Height(Size.Units(70));
     }

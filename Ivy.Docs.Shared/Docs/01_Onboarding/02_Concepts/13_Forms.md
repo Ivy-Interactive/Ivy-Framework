@@ -13,7 +13,7 @@ searchHints:
 # Forms
 
 <Ingress>
-Build robust forms with built-in [state management](./05_State.md), validation, and submission handling for collecting and processing user input.
+Build robust forms with built-in [state management](../../03_Hooks/Core/03_State.md), validation, and submission handling for collecting and processing user input.
 </Ingress>
 
 <Callout Type="important">
@@ -591,7 +591,7 @@ public class FormSubmissionExample : ViewBase
 
 ### Form Submission with State Updates
 
-React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully, triggering [state changes](./05_State.md) and UI updates.
+React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully, triggering [state changes](../../03_Hooks/Core/03_State.md) and UI updates.
 
 ```csharp demo-tabs
 public class FormStatesExample : ViewBase

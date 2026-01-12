@@ -248,7 +248,7 @@ public static partial class MarkdownConverter
                     continue;
                 }
 
-                HandleHtmlBlock(markdownContent, htmlBlock, codeBuilder, viewBuilder, usedClassNames, linkConverter, referencedApps);
+                HandleHtmlBlock(markdownContent, htmlBlock, codeBuilder, viewBuilder, usedClassNames, linkConverter, referencedApps, headings);
             }
 
             else if (child is FencedCodeBlock codeBlock)
@@ -325,7 +325,7 @@ public static partial class MarkdownConverter
         }
     }
 
-    private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder, StringBuilder viewBuilder, HashSet<string> usedClassNames, LinkConverter linkConverter, HashSet<string> referencedApps)
+    private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder, StringBuilder viewBuilder, HashSet<string> usedClassNames, LinkConverter linkConverter, HashSet<string> referencedApps, List<(string Id, string Text, int Level)>? headings)
     {
         string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length).Trim();
 
@@ -367,7 +367,7 @@ public static partial class MarkdownConverter
         }
         else if (xml.Name.LocalName == "WidgetDocs")
         {
-            HandleWidgetDocsBlock(codeBuilder, xml);
+            HandleWidgetDocsBlock(codeBuilder, xml, headings);
         }
         else if (xml.Name.LocalName == "Details")
         {
@@ -472,12 +472,13 @@ public static partial class MarkdownConverter
         }
     }
 
-    private static void HandleWidgetDocsBlock(StringBuilder codeBuilder, XElement xml)
+    private static void HandleWidgetDocsBlock(StringBuilder codeBuilder, XElement xml, List<(string Id, string Text, int Level)>? headings)
     {
         string typeName = xml.Attribute("Type")?.Value ?? throw new Exception("WidgetDocs block must have a Type attribute.");
         string? extensionTypes = xml.Attribute("ExtensionTypes")?.Value;
         string? sourceUrl = xml.Attribute("SourceUrl")?.Value;
         codeBuilder.AppendTab(3).AppendLine($"""| new WidgetDocsView("{typeName}", {(!string.IsNullOrEmpty(extensionTypes) ? FormatLiteral(extensionTypes) : "null")}, {(!string.IsNullOrEmpty(sourceUrl) ? FormatLiteral(sourceUrl) : "null")})""");
+        headings?.Add(("api", "API", 2));
     }
 
     private static void HandleCalloutBlock(StringBuilder codeBuilder, XElement xml, LinkConverter linkConverter, HashSet<string> referencedApps)

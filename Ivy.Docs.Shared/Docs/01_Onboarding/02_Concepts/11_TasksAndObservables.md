@@ -67,7 +67,7 @@ public class TimeBasedObservableExample : ViewBase
 
 ### Observable with State Management
 
-This example demonstrates how to properly manage [state](./05_State.md) with observables by controlling when subscriptions are active. It shows a timer-based counter that only increments when a state flag is active, with proper UI updates and subscription cleanup.
+This example demonstrates how to properly manage [state](../../03_Hooks/Core/03_State.md) with observables by controlling when subscriptions are active. It shows a timer-based counter that only increments when a state flag is active, with proper UI updates and subscription cleanup.
 
 ```csharp demo-tabs
 public class StateManagementExample : ViewBase
@@ -108,7 +108,7 @@ public class StateManagementExample : ViewBase
 
 ### Observable with Throttling
 
-This example demonstrates how to use observables for search functionality with [performance optimizations](./10_Memoization.md). It shows throttled updates to prevent excessive filtering while typing, and proper [state management](./05_State.md) to avoid duplicate data.
+This example demonstrates how to use observables for search functionality with [performance optimizations](../../03_Hooks/Core/05_Memo.md). It shows throttled updates to prevent excessive filtering while typing, and proper [state management](../../03_Hooks/Core/03_State.md) to avoid duplicate data.
 
 ```csharp demo-tabs
 public class ObservableSearchExample : ViewBase

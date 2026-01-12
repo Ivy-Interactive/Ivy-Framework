@@ -13,7 +13,7 @@ searchHints:
 # Basics
 
 <Ingress>
-Learn the essential concepts of Ivy development including [Views](../02_Concepts/02_Views.md), [Widgets](../02_Concepts/03_Widgets.md), [state management](../02_Concepts/05_State.md), and how to build your first interactive application.
+Learn the essential concepts of Ivy development including [Views](../02_Concepts/02_Views.md), [Widgets](../02_Concepts/03_Widgets.md), [state management](../../03_Hooks/Core/03_State.md), and how to build your first interactive application.
 </Ingress>
 
 First, make sure you have [installed Ivy](./02_Installation.md) on your development machine.
@@ -66,7 +66,7 @@ In this example, you can see how to use an Ivy Button. For more details, check o
 
 ## State Management
 
-Ivy has a built-in state management system through the [UseState](../02_Concepts/05_State.md) hook (similar to React).
+Ivy has a built-in state management system through the [UseState](../../03_Hooks/Core/03_State.md) hook (similar to React).
 
 ```csharp
 [App(icon: Icons.Box)]

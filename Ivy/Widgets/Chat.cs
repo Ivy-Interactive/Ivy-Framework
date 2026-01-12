@@ -15,11 +15,16 @@ public enum ChatSender
 public record Chat : WidgetBase<Chat>
 {
     [OverloadResolutionPriority(1)]
-    public Chat(ChatMessage[] messages, Func<Event<Chat, string>, ValueTask> onSendMessage) : base(messages.Cast<object>().ToArray())
+    public Chat(
+        ChatMessage[] messages,
+        Func<Event<Chat, string>, ValueTask> onSend,
+        Func<Event<Chat>, ValueTask>? onCancel = null
+    ) : base(messages.Cast<object>().ToArray())
     {
         Width = Size.Full();
         Height = Size.Full();
-        OnSendMessage = onSendMessage;
+        OnSend = onSend;
+        OnCancel = onCancel;
     }
 
     internal Chat()
@@ -28,12 +33,29 @@ public record Chat : WidgetBase<Chat>
         Height = Size.Full();
     }
 
-    [Event] public Func<Event<Chat, string>, ValueTask>? OnSendMessage { get; set; }
+    [Event] public Func<Event<Chat, string>, ValueTask>? OnSend { get; set; }
+
+    [Event] public Func<Event<Chat>, ValueTask>? OnCancel { get; set; }
 
     [Prop] public string Placeholder { get; set; } = "Type a message...";
 
-    public Chat(ChatMessage[] messages, Action<Event<Chat, string>> onSendMessage)
-    : this(messages, e => { onSendMessage(e); return ValueTask.CompletedTask; })
+    [Prop] public bool Streaming { get; set; }
+
+    public Chat(ChatMessage[] messages, Action<Event<Chat, string>> onSend)
+    : this(messages, e => { onSend(e); return ValueTask.CompletedTask; }, null)
+    {
+    }
+
+    public Chat(
+        ChatMessage[] messages,
+        Action<Event<Chat, string>> onSend,
+        Action<Event<Chat>>? onCancel
+    ) : this(
+        messages,
+        e => { onSend(e); return ValueTask.CompletedTask; },
+        onCancel != null ? e => { onCancel(e); return ValueTask.CompletedTask; }
+    : null
+    )
     {
     }
 }
@@ -43,6 +65,12 @@ public static class ChatExtensions
     public static Chat Placeholder(this Chat chat, string placeholder)
     {
         chat.Placeholder = placeholder;
+        return chat;
+    }
+
+    internal static Chat Streaming(this Chat chat, bool streaming)
+    {
+        chat.Streaming = streaming;
         return chat;
     }
 }

@@ -1,19 +1,14 @@
 export { ArticleWidget } from './article';
-export { BadgeWidget } from './badgeWidget';
-export { ButtonWidget } from './buttonWidget';
+export * from './badge';
+export * from './button';
 export { CardWidget } from './card';
-export {
-  ChatLoadingWidget,
-  ChatMessageWidget,
-  ChatStatusWidget,
-  ChatWidget,
-} from './chatWidget';
-export { DropDownMenuWidget } from './dropDownMenuWidget';
-export { ExpandableWidget } from './expandableWidget';
-export { ProgressWidget } from './progressWidget';
-export { SheetWidget } from './sheetWidget';
-export { SlotWidget } from './slotWidget';
-export { TooltipWidget } from './tooltipWidget';
+export * from './chat';
+export * from './dropDownMenu';
+export * from './expandable';
+export * from './progress';
+export * from './sheet';
+export * from './slot';
+export * from './tooltip';
 
-export { PaginationWidget } from './paginationWidget';
+export * from './pagination';
 export { KanbanWidget, KanbanCardWidget } from './kanban';

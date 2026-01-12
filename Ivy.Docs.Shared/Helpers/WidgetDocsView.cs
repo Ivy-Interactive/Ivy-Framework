@@ -120,7 +120,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
         string? fileName = sourceUrl != null ? System.IO.Path.GetFileName(sourceUrl) : null;
 
         return Layout.Vertical().Gap(2)
-               | Text.H2("API")
+               | new Markdown("## API")
                | (fileName != null
                    ? (Layout.Horizontal().Align(Align.Left).Gap(0) | Icons.Github.ToIcon() |
                       new Button(fileName).Link().Url(sourceUrl))

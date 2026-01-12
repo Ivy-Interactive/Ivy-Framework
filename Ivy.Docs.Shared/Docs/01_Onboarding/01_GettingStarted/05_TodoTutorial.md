@@ -11,7 +11,7 @@ searchHints:
 # Todo Tutorial
 
 <Ingress>
-Build a complete todo application from scratch to learn essential Ivy concepts including [state management](../02_Concepts/05_State.md), [components](../02_Concepts/03_Widgets.md), and [event handling](../02_Concepts/07_EventHandlers.md).
+Build a complete todo application from scratch to learn essential Ivy concepts including [state management](../../03_Hooks/Core/03_State.md), [components](../02_Concepts/03_Widgets.md), and [event handling](../02_Concepts/07_EventHandlers.md).
 </Ingress>
 
 ## Prerequisites

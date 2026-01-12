@@ -98,7 +98,7 @@ new {
 
 ## Working with State
 
-Details work seamlessly with [reactive state](../../01_Onboarding/02_Concepts/05_State.md). When the underlying data changes, the details automatically update to reflect the new values, making it perfect for dynamic, interactive interfaces:
+Details work seamlessly with [reactive state](../../03_Hooks/Core/03_State.md). When the underlying data changes, the details automatically update to reflect the new values, making it perfect for dynamic, interactive interfaces:
 
 ```csharp demo-tabs
 UseState(() => new { Name = "John Doe", Age = 30 })

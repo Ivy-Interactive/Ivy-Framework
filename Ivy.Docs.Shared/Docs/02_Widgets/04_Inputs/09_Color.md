@@ -20,7 +20,7 @@ The `ColorInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provide
 
 ## Basic Usage
 
-Here's a simple example of a `ColorInput` that updates a [state](../../01_Onboarding/02_Concepts/05_State.md) with the selected color:
+Here's a simple example of a `ColorInput` that updates a [state](../../03_Hooks/Core/03_State.md) with the selected color:
 
 ```csharp demo-below
 public class ColorDemo : ViewBase

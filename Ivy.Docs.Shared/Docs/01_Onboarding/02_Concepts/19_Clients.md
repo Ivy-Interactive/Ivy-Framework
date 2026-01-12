@@ -101,14 +101,14 @@ client.ApplyTheme(customCss);
 1. **Dependency Injection**: Always use `UseService<IClientProvider>()` to get the client instance.
 2. **Error Handling**: Wrap client operations in try-catch blocks when appropriate.
 3. **Async Operations**: Use async/await for operations that might take time.
-4. **State Management**: Use clients in combination with [state management](./05_State.md) for reactive updates.
+4. **State Management**: Use clients in combination with [state management](../../03_Hooks/Core/03_State.md) for reactive updates.
 
 ## UI Refresh & State Management
 
 Ivy automatically handles UI refreshes in most cases. You typically **don't need** to manually refresh the UI:
 
 - **[Form Submissions](./13_Forms.md)**: When forms are submitted successfully, the UI automatically updates
-- **State Changes**: When [state](./05_State.md) values change, the UI automatically re-renders
+- **State Changes**: When [state](../../03_Hooks/Core/03_State.md) values change, the UI automatically re-renders
 - **Sheet Dismissal**: [Sheets](../../02_Widgets/07_Advanced/02_Sheet.md) are automatically closed by the framework when forms are submitted successfully
 - **Navigation**: Page [navigation](./14_Navigation.md) automatically refreshes the UI
 
@@ -283,6 +283,6 @@ public class ClientNavigationApp : ViewBase
 ## See Also
 
 - [Forms](./13_Forms.md)
-- [State Management](./05_State.md)
-- [Effects](./09_Effects.md)
+- [State Management](../../03_Hooks/Core/03_State.md)
+- [Effects](../../03_Hooks/Core/04_Effect.md)
 - [Alerts & Notifications](./23_Alerts.md)
