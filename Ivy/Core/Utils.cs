@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Core.Helpers;
@@ -22,14 +23,13 @@ public static class Utils
     public static int StableHash(params object?[] items)
     {
         var hash = new HashCode();
-        foreach (var prop in items)
+        foreach (var prop in items.Where(p => p is not null))
         {
-            if (prop == null) continue;
             if (prop is string stringProp)
             {
                 hash.Add(StableHash(stringProp));
             }
-            else if (prop.GetType().IsValueType)
+            else if (prop!.GetType().IsValueType)
             {
                 hash.Add(prop);
             }
