@@ -1,3 +1,7 @@
+---
+title: Hooks
+---
+
 # Hooks
 
 Hooks are functions that let you "hook into" Ivy state and lifecycle features from functional components. They allow you to use state and other features without writing a class.
@@ -15,7 +19,7 @@ Hooks are functions that let you "hook into" Ivy state and lifecycle features fr
 ## Other Hooks
 
 - [UseStatic](./08_Static.md): Store static values.
-- [Rules of Hooks](./09_RulesOfHooks.md): Essential rules for using hooks.
+- [Rules of Hooks](./02_RulesOfHooks.md): Essential rules for using hooks.
 
 ## Creating Custom Hooks
 
