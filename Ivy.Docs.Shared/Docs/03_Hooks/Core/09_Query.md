@@ -13,10 +13,10 @@ searchHints:
 # Query
 
 <Ingress>
-Fetch, cache, and synchronize server data with the [UseQuery](./02_RulesOfHooks.md) hook.
+Fetch, cache, and synchronize server data with the [UseQuery](../02_RulesOfHooks.md) hook.
 </Ingress>
 
-The `UseQuery` hook provides a powerful way to fetch and cache asynchronous data. Inspired by [SWR](https://swr.vercel.app/) (stale-while-revalidate), it returns cached data immediately while revalidating in the background, keeping your [UI](../../01_Onboarding/02_Concepts/02_Views.md) fast and your data fresh.
+The `UseQuery` [hook](../02_RulesOfHooks.md) provides a powerful way to fetch and cache asynchronous data. Inspired by [SWR](https://swr.vercel.app/) (stale-while-revalidate), it returns cached data immediately while revalidating in the background, keeping your [UI](../../01_Onboarding/02_Concepts/02_Views.md) fast and your data fresh.
 
 ## Basic Usage
 
@@ -313,7 +313,7 @@ public class PollingView : ViewBase
 
 ## Pagination
 
-Use `KeepPrevious` to show previous page data while loading the next (managed by `UseState`):
+Use `KeepPrevious` to show previous page data while loading the next (managed by [UseState](./03_State.md)):
 
 ```csharp demo-below
 public class PaginatedView : ViewBase
