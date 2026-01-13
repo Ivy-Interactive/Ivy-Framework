@@ -63,12 +63,25 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
-  const messageWidgets = React.Children.toArray(children).filter(
-    child =>
-      React.isValidElement(child) &&
+  const messageWidgets = React.Children.toArray(children).filter(child => {
+    if (!React.isValidElement(child)) return false;
+
+    // Direct component check
+    if (
       (child.type as React.ComponentType<unknown>)?.displayName ===
-        'ChatMessageWidget'
-  );
+      'ChatMessageWidget'
+    ) {
+      return true;
+    }
+
+    // MemoizedWidget check - look at node.type prop
+    const props = child.props as { node?: { type?: string } };
+    if (props.node?.type === 'Ivy.ChatMessage') {
+      return true;
+    }
+
+    return false;
+  });
 
   // Check if any ChatMessage contains ChatLoading as its child
   const hasLoadingWidget = React.Children.toArray(children).some(child => {

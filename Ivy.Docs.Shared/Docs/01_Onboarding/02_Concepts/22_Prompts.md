@@ -33,8 +33,8 @@ public class BasicPromptView : ViewBase
 {
     public override object? Build()
     {
-        var (alertView, showAlert) = this.UseAlert();
-        var client = this.UseService<IClientProvider>();
+        var (alertView, showAlert) = UseAlert();
+        var client = UseService<IClientProvider>();
         
         return Layout.Vertical(
             new Button("Delete Item", onClick: _ =>
@@ -68,11 +68,11 @@ public class RenameView : ViewBase
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
-        var isOpen = this.UseState(false);
-        var renameData = this.UseState(new RenameRequest());
+        var client = UseService<IClientProvider>();
+        var isOpen = UseState(false);
+        var renameData = UseState(new RenameRequest());
         
-        this.UseEffect(() => {
+        UseEffect(() => {
             if (!isOpen.Value && !string.IsNullOrEmpty(renameData.Value.Name))
             {
                 // Item would be renamed here
@@ -112,11 +112,11 @@ public class CustomPromptView : ViewBase
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
-        var isOpen = this.UseState(false);
-        var options = this.UseState(new CustomOptions());
+        var client = UseService<IClientProvider>();
+        var isOpen = UseState(false);
+        var options = UseState(new CustomOptions());
         
-        this.UseEffect(() => {
+        UseEffect(() => {
             if (!isOpen.Value && (options.Value.Option1 || options.Value.Option2 || !string.IsNullOrEmpty(options.Value.CustomText)))
             {
                 // Options would be saved here
@@ -162,12 +162,12 @@ public class DeleteWithOptionsView : ViewBase
 {
     public override object? Build()
     {
-        var (alertView, showAlert) = this.UseAlert();
-        var client = this.UseService<IClientProvider>();
-        var isOptionsOpen = this.UseState(false);
-        var deleteOptions = this.UseState(new DeleteOptions());
+        var (alertView, showAlert) = UseAlert();
+        var client = UseService<IClientProvider>();
+        var isOptionsOpen = UseState(false);
+        var deleteOptions = UseState(new DeleteOptions());
         
-        this.UseEffect(() => {
+        UseEffect(() => {
             if (!isOptionsOpen.Value && (deleteOptions.Value.DeleteAssociatedFiles || deleteOptions.Value.ArchiveInsteadOfDelete || !string.IsNullOrEmpty(deleteOptions.Value.ReasonForDeletion)))
             {
                 // Deletion with options would be performed here

@@ -1,6 +1,6 @@
 ---
 prepare: |
-    var client = this.UseService<IClientProvider>();
+    var client = UseService<IClientProvider>();
 searchHints:
   - components
   - viewbase
@@ -50,7 +50,7 @@ public class FlexibleContentView : ViewBase
 {
     public override object? Build()
     {
-        var showContent = this.UseState(true);
+        var showContent = UseState(true);
         
         return Layout.Vertical()
             | new Button($"{(showContent.Value ? "Hide" : "Show")} Content", 
@@ -69,7 +69,7 @@ public class CounterView : ViewBase
 {
     public override object? Build()
     {
-        var count = this.UseState(0);
+        var count = UseState(0);
         
         return new Card(
             Layout.Vertical().Align(Align.Center).Gap(4)
@@ -94,13 +94,13 @@ You can initialize state in multiple ways:
 
 ```csharp
 // Direct value
-var count = this.UseState(0);
+var count = UseState(0);
 
 // Lazy initialization (called only once)
-var expensiveData = this.UseState(() => ComputeExpensiveData());
+var expensiveData = UseState(() => ComputeExpensiveData());
 
 // State that doesn't trigger rebuilds
-var cache = this.UseState(new Dictionary<string, object>(), buildOnChange: false);
+var cache = UseState(new Dictionary<string, object>(), buildOnChange: false);
 ```
 
 ## Service Injection
@@ -121,10 +121,10 @@ public class TimerView : ViewBase
 {
     public override object? Build()
     {
-        var time = this.UseState(DateTime.Now);
+        var time = UseState(DateTime.Now);
         
         // Update time every second
-        this.UseEffect(async () =>
+        UseEffect(async () =>
         {
             while (true)
             {
@@ -214,7 +214,7 @@ public class ConditionalView : ViewBase
 {
     public override object? Build()
     {
-        var isLoggedIn = this.UseState(false);
+        var isLoggedIn = UseState(false);
         
         return Layout.Vertical()
             | new Button(isLoggedIn.Value ? "Logout" : "Login", 
@@ -233,8 +233,8 @@ public class TodoApp : ViewBase
 {
     public override object? Build()
     {
-        var todos = this.UseState(new List<string>());
-        var newTodo = this.UseState("");
+        var todos = UseState(new List<string>());
+        var newTodo = UseState("");
         
         return Layout.Vertical()
             | new Card(

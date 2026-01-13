@@ -432,7 +432,7 @@ flowchart TD
     B --> E["Memory usage too high?"]
     B --> F["Components still re-rendering?"]
     
-    C --> C1["Use stable references<br/>Avoid creating objects in deps<br/>Use [UseStatic](./08_Static.md) for constants"]
+    C --> C1["Use stable references<br/>Avoid creating objects in deps<br/>Use [UseRef](./08_Ref.md) for constants"]
     D --> D1["Profile before optimizing<br/>Only memoize expensive operations<br/> Check if deps change frequently"]
     E --> E1["Reduce cached data size<br/>Use specific dependencies<br/> Consider conditional memoization"]
     F --> F1["Implement IMemoized correctly<br/>Provide stable keys<br/> Check GetMemoValues()"]
@@ -455,11 +455,11 @@ flowchart TD
 var result = UseMemo(() => ProcessData(data.Value), data.Value, new[] { "option1", "option2" });
 ```
 
-**Solution**: Use stable references with [UseStatic](./08_Static.md)
+**Solution**: Use stable references with [UseRef](./08_Ref.md)
 
 ```csharp
 // Good: Stable dependency
-var options = UseStatic(new[] { "option1", "option2" });
+var options = UseRef(new[] { "option1", "option2" });
 var result = UseMemo(() => ProcessData(data.Value), data.Value, options);
 ```
 
@@ -574,6 +574,6 @@ return Layout.Vertical(
 - [UseCallback](./06_Callback.md) - Memoizing callback functions
 - [Effects](./04_Effect.md) - Performing side effects with dependencies
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
-- [UseStatic](./08_Static.md) - Storing stable references
+- [UseRef](./08_Ref.md) - Storing stable references
 - [Signals](../../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

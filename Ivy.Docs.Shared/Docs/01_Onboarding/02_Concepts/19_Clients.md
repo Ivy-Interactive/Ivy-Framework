@@ -19,7 +19,7 @@ Bridge server-side C# code with client-side React components for seamless browse
 The `IClientProvider` interface is the main entry point for client-side interactions. It's available through dependency injection using the `UseService` hook:
 
 ```csharp
-var client = this.UseService<IClientProvider>();
+var client = UseService<IClientProvider>();
 ```
 
 ## Common Use Cases

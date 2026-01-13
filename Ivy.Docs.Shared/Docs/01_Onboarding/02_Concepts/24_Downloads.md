@@ -29,7 +29,7 @@ The download system in Ivy supports:
 Here's a simple example of using the [client](./19_Clients.md) to download a file:
 
 ```csharp
-var client = this.UseService<IClientProvider>();
+var client = UseService<IClientProvider>();
 client.DownloadFile("example.csv", csvContent);
 ```
 
@@ -42,7 +42,7 @@ public class ReportView : ViewBase
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
+        var client = UseService<IClientProvider>();
         
         return new Button(
             "Download Report",
@@ -64,7 +64,7 @@ public class ReportView : ViewBase
 For large files, you can track download progress:
 
 ```csharp
-var client = this.UseService<IClientProvider>();
+var client = UseService<IClientProvider>();
 var progress = UseState(0.0);
 
 client.DownloadFile(
@@ -83,9 +83,9 @@ public class DownloadView : ViewBase
 {
         public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
+        var client = UseService<IClientProvider>();
         var error = UseState<string?>(() => null);
-        var downloadUrl = this.UseDownload(
+        var downloadUrl = UseDownload(
             () => Task.FromResult(System.Text.Encoding.UTF8.GetBytes("Hello World")),
             "text/plain",
             "file.txt"
@@ -127,7 +127,7 @@ public class DataExportView : ViewBase
 {
         public override object? Build()
     {
-        var downloadUrl = this.UseDownload(
+        var downloadUrl = UseDownload(
             () => Task.FromResult(System.Text.Encoding.UTF8.GetBytes("Name,Email,Age\nJohn,john@example.com,30\nJane,jane@example.com,25")),
             "text/csv",
             $"export-{DateTime.Now:yyyy-MM-dd}.csv"
@@ -156,7 +156,7 @@ public class LargeFileView : ViewBase
 {
     public override object? Build()
     {
-        var downloadUrl = this.UseDownload(
+        var downloadUrl = UseDownload(
             () => Task.FromResult(GenerateLargeFile()),
             "application/zip",
             "large-file.zip"

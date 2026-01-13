@@ -1,8 +1,3 @@
-using System.Reactive.Disposables;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using Ivy.Apps;
-using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -10,7 +5,7 @@ using Ivy.Core.Hooks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public abstract class ViewBase() : IView, IViewContextOwner
+public abstract partial class ViewBase() : IView, IViewContextOwner
 {
     protected ViewBase(string? key) : this()
     {
@@ -33,18 +28,19 @@ public abstract class ViewBase() : IView, IViewContextOwner
         }
     }
 
-    private string? _id;
     public string? Id
     {
         get
         {
-            if (_id == null)
+            if (field == null)
             {
-                throw new InvalidOperationException($"Trying to access an uninitialized ViewBase Id in a {this.GetType().FullName} view.");
+                throw new InvalidOperationException(
+                    $"Trying to access an uninitialized ViewBase Id in a {this.GetType().FullName} view.");
             }
-            return _id;
+
+            return field;
         }
-        set => _id = value;
+        set;
     }
 
     public string? Key { get; set; }
@@ -77,42 +73,4 @@ public abstract class ViewBase() : IView, IViewContextOwner
     {
         (_disposables as IDisposable)?.Dispose();
     }
-
-    protected void CreateContext<T>(Func<T> factory) =>
-        this.Context.CreateContext(factory);
-
-    protected T UseContext<T>()
-        => this.Context.UseContext<T>();
-
-    protected object UseContext(Type type)
-        => this.Context.UseContext(type);
-
-    protected T UseService<T>()
-        => this.Context.UseService<T>();
-
-    protected object UseService(Type type)
-        => this.Context.UseService(type);
-
-    protected IState<T> UseState<T>(T? initialValue = default(T?), bool buildOnChange = true) =>
-        this.Context.UseState(initialValue!, buildOnChange);
-
-    protected IState<T> UseState<T>(Func<T> buildInitialValue, bool buildOnChange = true) =>
-        this.Context.UseState(buildInitialValue, buildOnChange);
-
-    [OverloadResolutionPriority(1)]
-    protected void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers) =>
-        this.Context.UseEffect(handler, triggers);
-
-    protected void UseEffect(Func<Task<IDisposable>> handler, params IEffectTriggerConvertible[] triggers) =>
-        this.Context.UseEffect(handler, triggers);
-
-    protected void UseEffect(Func<IDisposable> handler, params IEffectTriggerConvertible[] triggers) =>
-        this.Context.UseEffect(handler, triggers);
-
-    protected void UseEffect(Action handler, params IEffectTriggerConvertible[] triggers) =>
-        this.Context.UseEffect(handler, triggers);
-
-    protected T? UseArgs<T>() where T : class =>
-        this.Context.UseArgs<T>();
-
 }

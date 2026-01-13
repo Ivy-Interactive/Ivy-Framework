@@ -4,18 +4,13 @@ using Ivy.Core;
 using Ivy.Core.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy.Hooks;
 
 public static class UseWebhookExtensions
 {
     // Synchronous
-
-    public static WebhookEndpoint UseWebhook<TView>(this TView view, Func<HttpRequest, IActionResult> handler) where TView : ViewBase =>
-        view.Context.UseWebhook(handler);
-
-    public static WebhookEndpoint UseWebhook<TView>(this TView view, Action<HttpRequest> handler) where TView : ViewBase =>
-        view.Context.UseWebhook(handler);
 
     public static WebhookEndpoint UseWebhook(this IViewContext context, Action<HttpRequest> handler) =>
         context.UseWebhook(e =>
@@ -29,16 +24,6 @@ public static class UseWebhookExtensions
 
     // Asynchronous
 
-    public static WebhookEndpoint UseWebhook<TView>(this TView view, Func<HttpRequest, Task<IActionResult>> handler) where TView : ViewBase =>
-        view.Context.UseWebhook(handler);
-
-    public static WebhookEndpoint UseWebhook<TView>(this TView view, Func<HttpRequest, Task> handler) where TView : ViewBase =>
-        view.Context.UseWebhook(async e =>
-        {
-            await handler(e);
-            return new OkResult();
-        });
-
     public static WebhookEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, Task> handler) =>
         context.UseWebhook(async e =>
         {
@@ -50,9 +35,9 @@ public static class UseWebhookExtensions
     {
         var webhookId = context.UseState(() => Guid.NewGuid().ToString(), false);
         var webhookController = context.UseService<IWebhookRegistry>();
-        var args = context.UseService<AppArgs>();
+        var args = context.UseService<AppContext>();
 
-        context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.AfterInit()]);
+        context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.OnMount()]);
 
         return new WebhookEndpoint(webhookId.Value, args.Scheme, args.Host);
     }

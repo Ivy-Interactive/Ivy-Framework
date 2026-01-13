@@ -2,6 +2,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Ivy.Core.Helpers;
 
 namespace Ivy.Core;
 
@@ -16,6 +17,29 @@ public static class Utils
                 hash = (hash * 31) + c;
             return hash;
         }
+    }
+
+    public static int StableHash(params object?[] items)
+    {
+        var hash = new HashCode();
+        foreach (var prop in items)
+        {
+            if (prop == null) continue;
+            if (prop is string stringProp)
+            {
+                hash.Add(StableHash(stringProp));
+            }
+            else if (prop.GetType().IsValueType)
+            {
+                hash.Add(prop);
+            }
+            else
+            {
+                var json = JsonSerializer.Serialize(prop, JsonHelper.DefaultOptions);
+                hash.Add(StableHash(json));
+            }
+        }
+        return hash.ToHashCode();
     }
 
     public static Func<T, ValueTask> ToValueTask<T>(this Action<T> action)

@@ -107,7 +107,7 @@ public class InteractiveXmlEditor : ViewBase
 {
     public override object? Build()
     {
-        var xmlContent = this.UseState("""
+        var xmlContent = UseState("""
             <person>
                 <name>Jane Doe</name>
                 <age>25</age>
@@ -119,8 +119,8 @@ public class InteractiveXmlEditor : ViewBase
             </person>
             """);
         
-        var isValid = this.UseState(true);
-        var errorMessage = this.UseState("");
+        var isValid = UseState(true);
+        var errorMessage = UseState("");
         
         void ValidateXml()
         {

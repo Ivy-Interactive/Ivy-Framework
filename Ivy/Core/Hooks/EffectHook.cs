@@ -13,7 +13,7 @@ public class EffectHook(int identity, Func<Task<IDisposable>> handler, IEffectTr
         // If no triggers are provided, assume the effect should be triggered after initialization
         if (triggers.Length == 0)
         {
-            triggers = [EffectTrigger.AfterInit()];
+            triggers = [EffectTrigger.OnMount()];
         }
         return new(identity, effect, triggers);
     }

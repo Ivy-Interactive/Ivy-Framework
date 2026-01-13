@@ -40,13 +40,26 @@ export const ResizeablePanelGroupWidget: React.FC<
   width = 'Full',
   height = 'Full',
 }) => {
-  const panelWidgets = React.Children.toArray(children).filter(
-    child =>
-      React.isValidElement(child) &&
+  const panelWidgets = React.Children.toArray(children).filter(child => {
+    if (!React.isValidElement(child)) return false;
+
+    // Direct component check
+    if (
       typeof child.type === 'function' &&
       (child.type as { displayName?: string })?.displayName ===
         'ResizeablePanelWidget'
-  );
+    ) {
+      return true;
+    }
+
+    // MemoizedWidget check - look at node.type prop
+    const props = child.props as { node?: { type?: string } };
+    if (props.node?.type === 'Ivy.ResizeablePanel') {
+      return true;
+    }
+
+    return false;
+  });
 
   if (panelWidgets.length === 0)
     return <div className="remove-parent-padding"></div>;

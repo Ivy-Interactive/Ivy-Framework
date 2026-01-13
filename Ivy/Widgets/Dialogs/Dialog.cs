@@ -1,7 +1,12 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Hooks;
 using Ivy.Shared;
+using Ivy.Views;
+using Ivy.Views.Forms;
+using static Ivy.Views.Forms.FormHelpers;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -29,4 +34,68 @@ public record Dialog : WidgetBase<Dialog>
     }
 
     internal Dialog() { }
+}
+
+public static class DialogExtensions
+{
+    [OverloadResolutionPriority(-1)]
+    public static IView ToDialog(this object content, IState<bool> isOpen, string? title = null, string? description = null, Size? width = null)
+    {
+        return new FuncView(_ =>
+        {
+            if (!isOpen.Value) return null;
+
+            return new Dialog(
+                _ => isOpen.Set(false),
+                new DialogHeader(title ?? ""),
+                new DialogBody(
+                    Layout.Vertical()
+                    | description!
+                    | content
+                ),
+                new DialogFooter()
+            ).Width(width ?? Dialog.DefaultWidth);
+        });
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static IView ToDialog<TModel>(this FormBuilder<TModel> formBuilder, IState<bool> isOpen, string? title = null, string? description = null, string? submitTitle = null, Size? width = null)
+    {
+        return new FuncView((context) =>
+        {
+            (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) =
+                formBuilder.UseForm(context);
+
+            var (handleSubmit, isUploading) = context.UseUploadAwareSubmit(formBuilder.GetModel(), onSubmit);
+
+            if (!isOpen.Value) return null; //shouldn't happen
+
+            async ValueTask HandleSubmitAndClose()
+            {
+                if (await handleSubmit())
+                {
+                    isOpen.Value = false;
+                }
+            }
+
+            var isLoading = loading || isUploading;
+
+            return new Dialog(
+                _ => isOpen.Set(false),
+                new DialogHeader(title ?? ""),
+                new DialogBody(
+                    Layout.Vertical()
+                    | description!
+                    | formView
+                ),
+                new DialogFooter(
+                    validationView,
+                    new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Scale(formBuilder._scale),
+                    FormBuilder<TModel>.DefaultSubmitBuilder(submitTitle ?? "Save")(isLoading)
+                        .HandleClick(_ => HandleSubmitAndClose())
+                        .Scale(formBuilder._scale)
+                )
+            ).Width(width ?? Dialog.DefaultWidth);
+        });
+    }
 }

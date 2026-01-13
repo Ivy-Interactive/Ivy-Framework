@@ -10,7 +10,7 @@ public class ListApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return Context.UseBlades(() => new ListBlade(), "List");
+        return UseBlades(() => new ListBlade(), "List");
     }
 }
 
@@ -18,13 +18,13 @@ public class ListBlade : ViewBase
 {
     public override object? Build()
     {
-        var products = this.UseMemo(() => SampleData.GetUsers(100), []);
-        var searchString = this.UseState("");
-        var filteredProducts = this.UseState(products);
+        var products = UseMemo(() => SampleData.GetUsers(100), []);
+        var searchString = UseState("");
+        var filteredProducts = UseState(products);
 
-        var blades = this.UseContext<IBladeController>();
+        var blades = UseContext<IBladeService>();
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             var filtered = products.Where(p => p.Name.Contains(searchString.Value)).ToArray();
             filteredProducts.Set(filtered);
@@ -45,13 +45,14 @@ public class ListBlade : ViewBase
 
         });
 
-        return BladeHelper.WithHeader(
-            Layout.Horizontal(
-                searchString.ToSearchInput().Placeholder("Search..."),
-                new Button(icon: Icons.Plus, onClick: onCreate, variant: ButtonVariant.Outline)
-            ).Gap(1),
-            new List(items)
-        );
+        var header = Layout.Horizontal(
+            searchString.ToSearchInput().Placeholder("Search..."),
+            new Button(icon: Icons.Plus, onClick: onCreate, variant: ButtonVariant.Outline)
+        ).Gap(1);
+
+        return new Fragment()
+               | new BladeHeader(header)
+               | new List(items);
     }
 }
 

@@ -27,19 +27,23 @@ public class AsyncSelectBasicDemo : ViewBase
 
     public override object? Build()
     {
-        var selectedCategory = this.UseState<string?>(default(string?));
+        var selectedCategory = UseState<string?>(default(string?));
 
-        Task<Option<string>[]> QueryCategories(string query)
+        QueryResult<Option<string>[]> QueryCategories(IViewContext context, string query)
         {
-            return Task.FromResult(Categories
-                .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
-                .Select(c => new Option<string>(c))
-                .ToArray());
+            return context.UseQuery<Option<string>[], (string, string)>(
+                key: (nameof(QueryCategories), query),
+                fetcher: ct => Task.FromResult(Categories
+                    .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Select(c => new Option<string>(c))
+                    .ToArray()));
         }
 
-        Task<Option<string>?> LookupCategory(string? category)
+        QueryResult<Option<string>?> LookupCategory(IViewContext context, string? category)
         {
-            return Task.FromResult(category != null ? new Option<string>(category) : null);
+            return context.UseQuery<Option<string>?, (string, string?)>(
+                key: (nameof(LookupCategory), category),
+                fetcher: ct => Task.FromResult(category != null ? new Option<string>(category) : null));
         }
 
         return selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, "Search categories...")
@@ -85,81 +89,102 @@ public class DataTypesDemo : ViewBase
 
     public override object? Build()
     {
-        var selectedCountry = this.UseState<string?>(default(string));
-        var selectedYear = this.UseState<int?>(default(int));
-        var selectedLanguage = this.UseState(ProgrammingLanguage.CSharp);
+        var selectedCountry = UseState<string?>(default(string));
+        var selectedYear = UseState<int?>(default(int));
+        var selectedLanguage = UseState(ProgrammingLanguage.CSharp);
 
-        Task<Option<string>[]> QueryCountries(string query)
+        QueryResult<Option<string>[]> QueryCountries(IViewContext context, string query)
         {
-            return Task.FromResult(CountryRegions.Keys
-                .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
-                .Select(c => new Option<string>(c, c, description: CountryRegions[c]))
-                .ToArray());
+            return context.UseQuery<Option<string>[], (string, string)>(
+                key: (nameof(QueryCountries), query),
+                fetcher: ct => Task.FromResult(CountryRegions.Keys
+                    .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Select(c => new Option<string>(c, c, description: CountryRegions[c]))
+                    .ToArray()));
         }
 
-        Task<Option<string>?> LookupCountry(string country)
+        QueryResult<Option<string>?> LookupCountry(IViewContext context, string? country)
         {
-            if (string.IsNullOrEmpty(country)) return Task.FromResult<Option<string>?>(null);
-            return Task.FromResult<Option<string>?>(new Option<string>(country, country, description: CountryRegions.GetValueOrDefault(country)));
+            return context.UseQuery<Option<string>?, (string, string?)>(
+                key: (nameof(LookupCountry), country),
+                fetcher: ct =>
+                {
+                    if (string.IsNullOrEmpty(country)) return Task.FromResult<Option<string>?>(null);
+                    return Task.FromResult<Option<string>?>(new Option<string>(country, country, description: CountryRegions.GetValueOrDefault(country)));
+                });
         }
 
-        Task<Option<int>[]> QueryYears(string query)
+        QueryResult<Option<int>[]> QueryYears(IViewContext context, string query)
         {
-            var currentYear = DateTime.Now.Year;
-            var years = Enumerable.Range(currentYear - 100, 101).ToArray();
-            
-            if (string.IsNullOrEmpty(query))
-                return Task.FromResult(years.Take(20).Select(y => new Option<int>(y.ToString(), y)).ToArray());
-            
-            if (int.TryParse(query, out var yearQuery))
-            {
-                return Task.FromResult(years
-                    .Where(y => y >= yearQuery && y <= yearQuery + 10)
-                    .Take(20)
-                    .Select(y => new Option<int>(y.ToString(), y))
-                    .ToArray());
-            }
-            
-            return Task.FromResult(years
-                .Where(y => y.ToString().Contains(query))
-                .Take(20)
-                .Select(y => new Option<int>(y.ToString(), y))
-                .ToArray());
+            return context.UseQuery<Option<int>[], (string, string)>(
+                key: (nameof(QueryYears), query),
+                fetcher: ct =>
+                {
+                    var currentYear = DateTime.Now.Year;
+                    var years = Enumerable.Range(currentYear - 100, 101).ToArray();
+
+                    if (string.IsNullOrEmpty(query))
+                        return Task.FromResult(years.Take(20).Select(y => new Option<int>(y.ToString(), y)).ToArray());
+
+                    if (int.TryParse(query, out var yearQuery))
+                    {
+                        return Task.FromResult(years
+                            .Where(y => y >= yearQuery && y <= yearQuery + 10)
+                            .Take(20)
+                            .Select(y => new Option<int>(y.ToString(), y))
+                            .ToArray());
+                    }
+
+                    return Task.FromResult(years
+                        .Where(y => y.ToString().Contains(query))
+                        .Take(20)
+                        .Select(y => new Option<int>(y.ToString(), y))
+                        .ToArray());
+                });
         }
 
-        Task<Option<int>?> LookupYear(int year)
+        QueryResult<Option<int>?> LookupYear(IViewContext context, int year)
         {
-            return Task.FromResult<Option<int>?>(new Option<int>(year.ToString(), year));
+            return context.UseQuery<Option<int>?, (string, int)>(
+                key: (nameof(LookupYear), year),
+                fetcher: ct => Task.FromResult<Option<int>?>(new Option<int>(year.ToString(), year)));
         }
 
-        Task<Option<ProgrammingLanguage>[]> QueryLanguages(string query)
+        QueryResult<Option<ProgrammingLanguage>[]> QueryLanguages(IViewContext context, string query)
         {
-            var languages = new[] 
-            { 
-                ProgrammingLanguage.CSharp, 
-                ProgrammingLanguage.Java, 
-                ProgrammingLanguage.Python, 
-                ProgrammingLanguage.JavaScript, 
-                ProgrammingLanguage.Go, 
-                ProgrammingLanguage.Rust, 
-                ProgrammingLanguage.FSharp, 
-                ProgrammingLanguage.Kotlin, 
-                ProgrammingLanguage.Swift, 
-                ProgrammingLanguage.TypeScript 
-            };
-            
-            if (string.IsNullOrEmpty(query))
-                return Task.FromResult(languages.Select(l => new Option<ProgrammingLanguage>(l.ToString(), l)).ToArray());
-            
-            return Task.FromResult(languages
-                .Where(l => l.ToString().Contains(query, StringComparison.OrdinalIgnoreCase))
-                .Select(l => new Option<ProgrammingLanguage>(l.ToString(), l))
-                .ToArray());
+            return context.UseQuery<Option<ProgrammingLanguage>[], (string, string)>(
+                key: (nameof(QueryLanguages), query),
+                fetcher: ct =>
+                {
+                    var languages = new[]
+                    {
+                        ProgrammingLanguage.CSharp,
+                        ProgrammingLanguage.Java,
+                        ProgrammingLanguage.Python,
+                        ProgrammingLanguage.JavaScript,
+                        ProgrammingLanguage.Go,
+                        ProgrammingLanguage.Rust,
+                        ProgrammingLanguage.FSharp,
+                        ProgrammingLanguage.Kotlin,
+                        ProgrammingLanguage.Swift,
+                        ProgrammingLanguage.TypeScript
+                    };
+
+                    if (string.IsNullOrEmpty(query))
+                        return Task.FromResult(languages.Select(l => new Option<ProgrammingLanguage>(l.ToString(), l)).ToArray());
+
+                    return Task.FromResult(languages
+                        .Where(l => l.ToString().Contains(query, StringComparison.OrdinalIgnoreCase))
+                        .Select(l => new Option<ProgrammingLanguage>(l.ToString(), l))
+                        .ToArray());
+                });
         }
 
-        Task<Option<ProgrammingLanguage>?> LookupLanguage(ProgrammingLanguage language)
+        QueryResult<Option<ProgrammingLanguage>?> LookupLanguage(IViewContext context, ProgrammingLanguage language)
         {
-            return Task.FromResult<Option<ProgrammingLanguage>?>(new Option<ProgrammingLanguage>(language.ToString(), language));
+            return context.UseQuery<Option<ProgrammingLanguage>?, (string, ProgrammingLanguage)>(
+                key: (nameof(LookupLanguage), language),
+                fetcher: ct => Task.FromResult<Option<ProgrammingLanguage>?>(new Option<ProgrammingLanguage>(language.ToString(), language)));
         }
 
         return Layout.Vertical()
@@ -218,45 +243,55 @@ public class AdvancedQueryDemo : ViewBase
 
     public override object? Build()
     {
-        var selectedUser = this.UseState<Guid>(default(Guid));
-        var selectedUserInfo = this.UseState<string>("No user selected");
+        var selectedUser = UseState<Guid>(default(Guid));
+        var selectedUserInfo = UseState<string>("No user selected");
 
         // Update display when selection changes
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             var user = Users.FirstOrDefault(u => u.Id == selectedUser.Value);
             selectedUserInfo.Set(user != null ? $"{user.Name} - {user.Email} ({user.Department})" : "No user selected");
         }, [selectedUser]);
 
-        Task<Option<Guid>[]> QueryUsers(string query)
+        QueryResult<Option<Guid>[]> QueryUsers(IViewContext context, string query)
         {
-            if (string.IsNullOrEmpty(query))
-                return Task.FromResult(Users.Where(u => u.IsActive).Take(5)
-                    .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id, description: u.Email))
-                    .ToArray());
+            return context.UseQuery<Option<Guid>[], (string, string)>(
+                key: (nameof(QueryUsers), query),
+                fetcher: ct =>
+                {
+                    if (string.IsNullOrEmpty(query))
+                        return Task.FromResult(Users.Where(u => u.IsActive).Take(5)
+                            .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id, description: u.Email))
+                            .ToArray());
 
-            var queryLower = query.ToLowerInvariant();
-            return Task.FromResult(Users
-                .Where(u => u.IsActive && 
-                           (u.Name.ToLowerInvariant().Contains(queryLower) || 
-                            u.Email.ToLowerInvariant().Contains(queryLower) ||
-                            u.Department.ToLowerInvariant().Contains(queryLower)))
-                .Take(10)
-                .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id, description: u.Email))
-                .ToArray());
+                    var queryLower = query.ToLowerInvariant();
+                    return Task.FromResult(Users
+                        .Where(u => u.IsActive &&
+                                   (u.Name.ToLowerInvariant().Contains(queryLower) ||
+                                    u.Email.ToLowerInvariant().Contains(queryLower) ||
+                                    u.Department.ToLowerInvariant().Contains(queryLower)))
+                        .Take(10)
+                        .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id, description: u.Email))
+                        .ToArray());
+                });
         }
 
-        Task<Option<Guid>?> LookupUser(Guid id)
+        QueryResult<Option<Guid>?> LookupUser(IViewContext context, Guid id)
         {
-            var user = Users.FirstOrDefault(u => u.Id == id);
-            return Task.FromResult(user != null 
-                ? new Option<Guid>($"{user.Name} ({user.Department})", user.Id, description: user.Email) 
-                : null);
+            return context.UseQuery<Option<Guid>?, (string, Guid)>(
+                key: (nameof(LookupUser), id),
+                fetcher: ct =>
+                {
+                    var user = Users.FirstOrDefault(u => u.Id == id);
+                    return Task.FromResult(user != null
+                        ? new Option<Guid>($"{user.Name} ({user.Department})", user.Id, description: user.Email)
+                        : null);
+                });
         }
 
         var customAsyncSelect = new AsyncSelectInputView<Guid>(
             selectedUser.Value,
-            e => selectedUser.Set(e.Value),
+            e => { selectedUser.Set(e.Value); return ValueTask.CompletedTask; },
             QueryUsers,
             LookupUser,
             placeholder: "Search by name, email, or department..."
@@ -283,22 +318,26 @@ public class StylingDemo : ViewBase
 {
     public override object? Build()
     {
-        var normalSelect = this.UseState<string?>(default(string));
-        var invalidSelect = this.UseState<string?>(default(string));
-        var disabledSelect = this.UseState<string?>(default(string));
+        var normalSelect = UseState<string?>(default(string));
+        var invalidSelect = UseState<string?>(default(string));
+        var disabledSelect = UseState<string?>(default(string));
 
-        Task<Option<string>[]> QueryOptions(string query)
+        QueryResult<Option<string>[]> QueryOptions(IViewContext context, string query)
         {
             var options = new[] { "Option 1", "Option 2", "Option 3" };
-            return Task.FromResult(options
-                .Where(opt => opt.Contains(query, StringComparison.OrdinalIgnoreCase))
-                .Select(opt => new Option<string>(opt))
-                .ToArray());
+            return context.UseQuery<Option<string>[], (string, string)>(
+                key: (nameof(QueryOptions), query),
+                fetcher: ct => Task.FromResult(options
+                    .Where(opt => opt.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Select(opt => new Option<string>(opt))
+                    .ToArray()));
         }
 
-        Task<Option<string>?> LookupOption(string option)
+        QueryResult<Option<string>?> LookupOption(IViewContext context, string? option)
         {
-            return Task.FromResult<Option<string>?>(new Option<string>(option));
+            return context.UseQuery<Option<string>?, (string, string?)>(
+                key: (nameof(LookupOption), option),
+                fetcher: ct => Task.FromResult<Option<string>?>(option != null ? new Option<string>(option) : null));
         }
 
         return Layout.Vertical()

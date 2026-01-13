@@ -25,7 +25,7 @@ public class BoolInputDemo : ViewBase
 {
     public override object? Build()
     {
-        var state = this.UseState(false);
+        var state = UseState(false);
         return new BoolInput(state).Label("Accept Terms");
     }
 }

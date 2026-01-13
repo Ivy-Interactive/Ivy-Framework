@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Forms;
@@ -474,19 +475,26 @@ public class FormExample : ViewBase
     {
         var sampleOptions = new[] { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Another Option", "Yet Another Option", "Final Option" };
 
-        Task<Option<string?>[]> QueryOptions(string query)
+        QueryResult<Option<string?>[]> QueryOptions(IViewContext context, string query)
         {
             var lowerQuery = query.ToLowerInvariant();
-            return Task.FromResult(sampleOptions
-                .Where(o => o.Contains(lowerQuery, StringComparison.OrdinalIgnoreCase))
-                .Select(o => new Option<string?>(o, o))
-                .ToArray());
+            return context.UseQuery<Option<string?>[], (string, string)>(
+                key: ("FormApp.QueryOptions", query),
+                fetcher: _ => Task.FromResult(sampleOptions
+                    .Where(o => o.Contains(lowerQuery, StringComparison.OrdinalIgnoreCase))
+                    .Select(o => new Option<string?>(o, o))
+                    .ToArray()));
         }
 
-        Task<Option<string?>?> LookupOption(string? value)
+        QueryResult<Option<string?>?> LookupOption(IViewContext context, string? value)
         {
-            if (value == null) return Task.FromResult<Option<string?>?>(null);
-            return Task.FromResult<Option<string?>?>(new Option<string?>(value, value));
+            return context.UseQuery<Option<string?>?, (string, string?)>(
+                key: ("FormApp.LookupOption", value),
+                fetcher: _ =>
+                {
+                    if (value == null) return Task.FromResult<Option<string?>?>(null);
+                    return Task.FromResult<Option<string?>?>(new Option<string?>(value, value));
+                });
         }
 
         return Layout.Horizontal()

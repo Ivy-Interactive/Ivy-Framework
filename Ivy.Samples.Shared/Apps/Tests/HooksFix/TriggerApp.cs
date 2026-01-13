@@ -7,7 +7,7 @@ public class TriggerApp : ViewBase
 {
     public override object? Build()
     {
-        var (triggerView, showTrigger) = this.UseTrigger((IState<bool> isOpen, int id) => new FooView(isOpen, id));
+        var (triggerView, showTrigger) = UseTrigger((IState<bool> isOpen, int id) => new FooView(isOpen, id));
 
         var body = Layout.Vertical()
                    | DateTime.Now.Ticks

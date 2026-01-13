@@ -37,9 +37,9 @@ public class FileInputVariants : ViewBase
         var multipleFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
         var placeholderFile = UseState<FileUpload<byte[]>?>(() => null);
 
-        var singleFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleFile));
-        var multipleFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleFiles));
-        var placeholderFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(placeholderFile));
+        var singleFileUpload = UseUpload(MemoryStreamUploadHandler.Create(singleFile));
+        var multipleFilesUpload = UseUpload(MemoryStreamUploadHandler.Create(multipleFiles));
+        var placeholderFileUpload = UseUpload(MemoryStreamUploadHandler.Create(placeholderFile));
 
         return Layout.Vertical()
                | Text.H2("Variants")
@@ -76,8 +76,8 @@ public class FileInputSizeVariants : ViewBase
         var singleSizeFile = UseState<FileUpload<byte[]>?>(() => null);
         var multipleSizeFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
 
-        var singleSizeFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleSizeFile));
-        var multipleSizeFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleSizeFiles));
+        var singleSizeFileUpload = UseUpload(MemoryStreamUploadHandler.Create(singleSizeFile));
+        var multipleSizeFilesUpload = UseUpload(MemoryStreamUploadHandler.Create(multipleSizeFiles));
 
         return Layout.Vertical()
                | Text.H2("Size Variants")
@@ -106,13 +106,13 @@ public class FileInputDataBinding : ViewBase
     public override object? Build()
     {
         var dataBindingFile = UseState<FileUpload<byte[]>?>(() => null);
-        var dataBindingFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dataBindingFile));
+        var dataBindingFileUpload = UseUpload(MemoryStreamUploadHandler.Create(dataBindingFile));
 
         var dataBindingNullableFile = UseState<FileUpload<byte[]>?>(() => null);
-        var dataBindingNullableFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dataBindingNullableFile));
+        var dataBindingNullableFileUpload = UseUpload(MemoryStreamUploadHandler.Create(dataBindingNullableFile));
 
         var dataBindingMultipleFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var dataBindingMultipleFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dataBindingMultipleFiles));
+        var dataBindingMultipleFilesUpload = UseUpload(MemoryStreamUploadHandler.Create(dataBindingMultipleFiles));
 
         var dataBinding = Layout.Grid().Columns(3)
                           | Text.InlineCode("FileInput")
@@ -147,10 +147,10 @@ public class FileInputTypeRestrictions : ViewBase
         var imageFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
         var singleLimitFile = UseState<FileUpload<byte[]>?>(() => null);
 
-        var textFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(textFiles));
-        var pdfFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(pdfFiles));
-        var imageFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(imageFiles));
-        var singleLimitFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
+        var textFilesUpload = UseUpload(MemoryStreamUploadHandler.Create(textFiles));
+        var pdfFilesUpload = UseUpload(MemoryStreamUploadHandler.Create(pdfFiles));
+        var imageFilesUpload = UseUpload(MemoryStreamUploadHandler.Create(imageFiles));
+        var singleLimitFileUpload = UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
 
         return Layout.Vertical()
                | Text.H2("File Type Restrictions")
@@ -187,9 +187,9 @@ public class FileInputCountLimits : ViewBase
         var singleLimitFile = UseState<FileUpload<byte[]>?>(() => null);
         var multipleLimitFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
 
-        var limitedFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(limitedFiles));
-        var singleLimitFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
-        var multipleLimitFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleLimitFiles));
+        var limitedFilesUpload = UseUpload(MemoryStreamUploadHandler.Create(limitedFiles));
+        var singleLimitFileUpload = UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
+        var multipleLimitFilesUpload = UseUpload(MemoryStreamUploadHandler.Create(multipleLimitFiles));
 
         return Layout.Vertical()
                | Text.H2("File Count Limits")
@@ -219,7 +219,7 @@ public class FileInputContentDisplay : ViewBase
     public override object? Build()
     {
         var singleLimitFile = UseState<FileUpload<byte[]>?>(() => null);
-        var singleLimitFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
+        var singleLimitFileUpload = UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
 
         return Layout.Vertical()
                | Text.H2("File Content Display")
@@ -245,7 +245,7 @@ public class FileInputEventHandlersExample : ViewBase
         var blurMessage = UseState("");
         var cancelCount = UseState(0);
         var blurCount = UseState(0);
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files));
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
 
         return Layout.Vertical()
                | Text.H2("Event Handlers")
@@ -345,7 +345,7 @@ public class ProfilePhotoUpload(IState<FileUpload<byte[]>?> state) : ViewBase
 {
     public override object Build()
     {
-        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(state))
+        var uploadContext = UseUpload(MemoryStreamUploadHandler.Create(state))
             .Accept("image/*")
             .MaxFileSize(5 * 1024 * 1024); // 5 MB
         const long maxSize = 5 * 1024 * 1024;
@@ -359,7 +359,7 @@ public class DocumentUpload(IState<FileUpload<byte[]>?> state) : ViewBase
 {
     public override object Build()
     {
-        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(state))
+        var uploadContext = UseUpload(MemoryStreamUploadHandler.Create(state))
             .Accept(".pdf,.doc,.docx")
             .MaxFileSize(10 * 1024 * 1024); // 10 MB
         const long maxSize = 10 * 1024 * 1024;
@@ -372,7 +372,7 @@ public class CertificateUpload(IState<FileUpload<byte[]>?> state) : ViewBase
 {
     public override object Build()
     {
-        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(state))
+        var uploadContext = UseUpload(MemoryStreamUploadHandler.Create(state))
             .Accept(".pdf")
             .MaxFileSize(2 * 1024 * 1024); // 2 MB
         const long maxSize = 2 * 1024 * 1024;
@@ -394,7 +394,7 @@ public class DialogFileUploadExample : ViewBase
         // Dialog visibility state
         var isOpen = UseState(false);
 
-        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(dialogFile)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
+        var uploadContext = UseUpload(MemoryStreamUploadHandler.Create(dialogFile)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
 
 
 
@@ -480,7 +480,7 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
     public override object? Build()
     {
         var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles))
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(selectedFiles))
             .Accept(settings.Accept!)
             .MaxFileSize(settings.MaxFileSize)
             .MaxFiles(settings.MaxFiles);

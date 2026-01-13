@@ -127,7 +127,7 @@ public class PieChartBuilder<TSource>(
             {
                 loading.Set(false);
             }
-        }, [EffectTrigger.AfterInit()]);
+        }, [EffectTrigger.OnMount()]);
 
         if (exception.Value is not null)
         {

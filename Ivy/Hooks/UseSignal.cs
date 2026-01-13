@@ -3,6 +3,7 @@ using System.Reactive.Disposables;
 using System.Reflection;
 using Ivy.Apps;
 using Ivy.Core.Hooks;
+using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy.Hooks;
 
@@ -65,23 +66,23 @@ public static class UseSignalExtensions
         if (signalType.GetBroadcastType() is { } broadcastType)
         {
             var signalHub = context.UseService<SignalRouter>();
-            var appArgs = context.UseService<AppArgs>();
+            var appArgs = context.UseService<AppContext>();
             return signalHub.CreateSignal<T, TInput, TOutput>(signalType, broadcastType, appArgs.ConnectionId);
         }
         return context.CreateContext(Activator.CreateInstance<T>);
     }
 
-    public static ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>(this IViewContext view) where T : AbstractSignal<TInput, TOutput>
+    public static ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
     {
-        var receiverId = view.UseState(Guid.NewGuid, buildOnChange: false);
+        var receiverId = context.UseRef(Guid.NewGuid);
         var signalType = typeof(T);
         if (signalType.GetBroadcastType() is not null)
         {
-            var signalHub = view.UseService<SignalRouter>();
-            var appArgs = view.UseService<AppArgs>();
+            var signalHub = context.UseService<SignalRouter>();
+            var appArgs = context.UseService<AppContext>();
             return signalHub.UseSignal<T, TInput, TOutput>(signalType, receiverId.Value, appArgs.ConnectionId);
         }
-        var signal = view.UseContext<T>();
+        var signal = context.UseContext<T>();
         return new SignalReceiver<TInput, TOutput>(receiverId.Value, signal);
     }
 }
@@ -89,7 +90,7 @@ public static class UseSignalExtensions
 public enum BroadcastType
 {
     Server,
-    Machine,
+    User,
     App,
     Chrome
 }
@@ -162,7 +163,7 @@ public class SignalRouter(AppSessionStore sessionStore)
             {
                 BroadcastType.Server =>
                     store.Sessions.Values.Where(s => !s.IsDisposed()).ToList(),
-                BroadcastType.Machine =>
+                BroadcastType.User =>
                     store.Sessions.Values.Where(s => !s.IsDisposed() && s.MachineId == store.Sessions[session.ConnectionId].MachineId).ToList(),
                 BroadcastType.App =>
                     store.Sessions.Values.Where(s => !s.IsDisposed() && s.AppId == store.Sessions[session.ConnectionId].AppId).ToList(),

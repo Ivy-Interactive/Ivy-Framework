@@ -32,7 +32,7 @@ public class BasicDialogAlertDemo : ViewBase
 {
     public override object? Build()
     {
-        var (alertView, showAlert) = this.UseAlert();
+        var (alertView, showAlert) = UseAlert();
         var client = UseService<IClientProvider>();
 
         return Layout.Vertical(
@@ -56,7 +56,7 @@ public class AlertButtonSetsDemo : ViewBase
 {
     public override object? Build()
     {
-        var (alertView, showAlert) = this.UseAlert();
+        var (alertView, showAlert) = UseAlert();
         var client = UseService<IClientProvider>();
 
         return Layout.Horizontal(
@@ -146,7 +146,7 @@ public class FormSubmissionDemo : ViewBase
 {
     public override object? Build()
     {
-        var (alertView, showAlert) = this.UseAlert();
+        var (alertView, showAlert) = UseAlert();
         var client = UseService<IClientProvider>();
         var isSubmitting = UseState(false);
 

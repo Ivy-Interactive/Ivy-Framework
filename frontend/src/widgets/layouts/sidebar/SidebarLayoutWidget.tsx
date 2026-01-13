@@ -35,7 +35,8 @@ interface SidebarLayoutWidgetProps {
   width?: string; // Width of the sidebar (default: 256px)
 }
 
-// Helper function to check if a slot has meaningful content by checking props.children
+// Helper function to check if a slot has meaningful content
+// Checks both props.children (legacy) and props.node (MemoizedWidget)
 const hasContent = (slot?: React.ReactNode[]): boolean => {
   if (!slot || slot.length === 0) return false;
 
@@ -44,7 +45,15 @@ const hasContent = (slot?: React.ReactNode[]): boolean => {
     if (typeof node === 'string') return node.trim().length > 0;
     if (typeof node === 'number') return true;
     if (React.isValidElement(node)) {
-      const props = node.props as { children?: React.ReactNode };
+      const props = node.props as {
+        children?: React.ReactNode;
+        node?: { children?: unknown[] };
+      };
+      // Check for MemoizedWidget's node prop first
+      if (props.node !== undefined) {
+        return true; // MemoizedWidget with a node always has content
+      }
+      // Legacy check for direct children
       if (props.children === null || props.children === undefined) return false;
       if (typeof props.children === 'string')
         return props.children.trim().length > 0;

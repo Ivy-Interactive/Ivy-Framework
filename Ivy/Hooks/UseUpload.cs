@@ -6,9 +6,6 @@ namespace Ivy.Hooks;
 
 public static class UseUploadExtensions
 {
-    public static IState<UploadContext> UseUpload<TView>(this TView view, UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null) where TView : ViewBase =>
-        view.Context.UseUpload(handler, defaultContentType, defaultFileName);
-
     public static IState<UploadContext> UseUpload(this IViewContext context, UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null)
     {
         var uploadService = context.UseService<IUploadService>();
@@ -20,19 +17,11 @@ public static class UseUploadExtensions
         context.UseEffect(() =>
         {
             var (cleanup, uploadUrl) = uploadService.AddUpload(handler, () => (ctxState.Value.Accept, ctxState.Value.MaxFileSize), defaultContentType, defaultFileName);
-            ctxState.Set(new UploadContext(uploadUrl, fileId => uploadService.Cancel(fileId))
-            {
-                Accept = ctxState.Value.Accept,
-                MaxFileSize = ctxState.Value.MaxFileSize,
-                MaxFiles = ctxState.Value.MaxFiles
-            });
+            ctxState.Set(ctxState.Value with { UploadUrl = uploadUrl, Cancel = fileId => uploadService.Cancel(fileId) });
             return cleanup;
-        }, [EffectTrigger.AfterInit()]);
+        }, [EffectTrigger.OnMount()]);
         return ctxState;
     }
-
-    public static IState<UploadContext> UseUpload<TView>(this TView view, IUploadHandler handler, string? defaultContentType = null, string? defaultFileName = null) where TView : ViewBase =>
-    view.Context.UseUpload(handler, defaultContentType, defaultFileName);
 
     public static IState<UploadContext> UseUpload(this IViewContext context, IUploadHandler handler, string? defaultContentType = null, string? defaultFileName = null)
     {

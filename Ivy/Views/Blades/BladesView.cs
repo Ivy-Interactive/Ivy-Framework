@@ -7,7 +7,7 @@ public class BladesView : ViewBase
 {
     public override object? Build()
     {
-        var controller = UseContext<IBladeController>();
+        var controller = UseContext<IBladeService>();
 
         var blades = controller.Blades.Value
             .Select(e => new BladeView(

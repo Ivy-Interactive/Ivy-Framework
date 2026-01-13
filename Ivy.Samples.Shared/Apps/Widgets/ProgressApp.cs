@@ -7,10 +7,10 @@ public class ProgressApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var progress1 = this.UseState((int?)50);
-        var progress2 = this.UseState((int?)75);
-        var progress3 = this.UseState((int?)100);
-        var progress4 = this.UseState((int?)25);
+        var progress1 = UseState((int?)50);
+        var progress2 = UseState((int?)75);
+        var progress3 = UseState((int?)100);
+        var progress4 = UseState((int?)25);
 
         return Layout.Vertical()
             | Text.H1("Progress")

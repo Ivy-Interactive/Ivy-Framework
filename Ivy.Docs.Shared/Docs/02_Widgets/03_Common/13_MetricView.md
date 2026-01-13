@@ -1,6 +1,6 @@
 ---
 prepare: |
-  var client = this.UseService<IClientProvider>();
+  var client = UseService<IClientProvider>();
 searchHints:
   - kpi
   - metrics
@@ -13,25 +13,28 @@ searchHints:
 # MetricView
 
 <Ingress>
-Display key performance indicators (KPIs) and metrics with trend indicators, goal progress tracking, and async data loading for dashboard [applications](../../01_Onboarding/02_Concepts/15_Apps.md).
+Display key performance indicators (KPIs) and metrics with trend indicators, goal progress tracking, and data loading via UseQuery hooks for dashboard [applications](../../01_Onboarding/02_Concepts/15_Apps.md).
 </Ingress>
 
-The `MetricView` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a specialized dashboard component built on top of [Card](04_Card.md) that displays business metrics with visual indicators for performance trends and goal achievement. It automatically handles loading states, error handling, and provides a consistent layout for KPI dashboards.
+The `MetricView` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a specialized dashboard component built on top of [Card](04_Card.md) that displays business metrics with visual indicators for performance trends and goal achievement. It uses [UseQuery](../../../03_Hooks/Core/09_Query.md) hooks for data fetching and automatically handles loading states, error handling, and provides a consistent layout for KPI dashboards.
 
 ## Basic Usage
 
-Here's a simple example of a metric view showing total sales with a trend indicator and goal progress.
+Here's a simple example of a metric view showing total sales with a trend indicator and goal progress. The third parameter is a hook function that receives an `IViewContext` and returns a `QueryResult<MetricRecord>`.
 
 ```csharp demo-below
 new MetricView(
-    "Total Sales", 
-    Icons.DollarSign, 
-    () => Task.FromResult(new MetricRecord(
-        "$84,250",      // Current metric value
-        0.21,           // 21% increase from previous period
-        0.21,           // 21% of goal achieved
-        "$800,000"      // Goal target
-    ))
+    "Total Sales",
+    Icons.DollarSign,
+    ctx => ctx.UseQuery(
+        key: "total-sales",
+        fetcher: () => Task.FromResult(new MetricRecord(
+            "$84,250",      // Current metric value
+            0.21,           // 21% increase from previous period
+            0.21,           // 21% of goal achieved
+            "$800,000"      // Goal target
+        ))
+    )
 )
 ```
 
@@ -45,14 +48,17 @@ Trend Arrows: Green up arrow for positive trends, red down arrow for negative tr
 
 ```csharp demo-tabs
 new MetricView(
-    "Stock Price", 
-    Icons.CircleDollarSign, 
-    () => Task.FromResult(new MetricRecord(
-        "$42.30",
-        -0.15,          // 15% decrease (negative trend)
-        0.45,
-        "$95.00 target"
-    ))
+    "Stock Price",
+    Icons.CircleDollarSign,
+    ctx => ctx.UseQuery(
+        key: "stock-price",
+        fetcher: () => Task.FromResult(new MetricRecord(
+            "$42.30",
+            -0.15,          // 15% decrease (negative trend)
+            0.45,
+            "$95.00 target"
+        ))
+    )
 )
 ```
 
@@ -66,43 +72,49 @@ MetricRecord takes four parameters: MetricFormatted (string) for the value, Tren
 
 ```csharp demo-tabs
 Layout.Grid().Columns(2)
-    | new MetricView("Total Sales", Icons.DollarSign, 
-        () => Task.FromResult(new MetricRecord("$84,250", 0.21, 0.21, "$800,000")))
-    | new MetricView("Post Engagement", Icons.Heart, 
-        () => Task.FromResult(new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%")))
-    | new MetricView("User Comments", Icons.UserCheck, 
-        () => Task.FromResult(new MetricRecord("2.25", 0.381, 0.90, "2.50")))
-    | new MetricView("System Health", Icons.Activity, 
-        () => Task.FromResult(new MetricRecord("99.9%", null, 0.99, "100% uptime")))
+    | new MetricView("Total Sales", Icons.DollarSign,
+        ctx => ctx.UseQuery(key: "sales", fetcher: () => Task.FromResult(new MetricRecord("$84,250", 0.21, 0.21, "$800,000"))))
+    | new MetricView("Post Engagement", Icons.Heart,
+        ctx => ctx.UseQuery(key: "engagement", fetcher: () => Task.FromResult(new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%"))))
+    | new MetricView("User Comments", Icons.UserCheck,
+        ctx => ctx.UseQuery(key: "comments", fetcher: () => Task.FromResult(new MetricRecord("2.25", 0.381, 0.90, "2.50"))))
+    | new MetricView("System Health", Icons.Activity,
+        ctx => ctx.UseQuery(key: "health", fetcher: () => Task.FromResult(new MetricRecord("99.9%", null, 0.99, "100% uptime"))))
 ```
 
 ### Async Data Loading
 
-The MetricView automatically handles [async](../../01_Onboarding/02_Concepts/11_TasksAndObservables.md) data loading with a skeleton loader. This is useful when fetching metrics from [databases](../../01_Onboarding/02_Concepts/01_Program.md) or APIs.
+The MetricView uses [UseQuery](../../../03_Hooks/Core/09_Query.md) hooks for data fetching, which automatically handle loading states with a skeleton loader. This is useful when fetching metrics from [databases](../../01_Onboarding/02_Concepts/01_Program.md) or APIs.
 
 ```csharp demo-tabs
 new MetricView(
-    "Database Query", 
-    Icons.Database, 
-    async () => {
-        await Task.Delay(1000); // Simulate API call
-        return new MetricRecord("1,247 records", 0.125, 0.75, "1,500 records");
-    }
+    "Database Query",
+    Icons.Database,
+    ctx => ctx.UseQuery(
+        key: "db-query",
+        fetcher: async ct => {
+            await Task.Delay(1000, ct); // Simulate API call
+            return new MetricRecord("1,247 records", 0.125, 0.75, "1,500 records");
+        }
+    )
 )
 ```
 
 ### Error Handling
 
-When the async data loading fails, the MetricView automatically displays an error state.
+When the data fetching fails, the MetricView automatically displays an error state from the QueryResult.
 
 ```csharp demo-tabs
 new MetricView(
-    "Failed Metric", 
-    Icons.TriangleAlert, 
-    async () => {
-        await Task.Delay(500);
-        throw new Exception("Failed to load metric data");
-    }
+    "Failed Metric",
+    Icons.TriangleAlert,
+    ctx => ctx.UseQuery<MetricRecord, string>(
+        key: "failing-metric",
+        fetcher: async ct => {
+            await Task.Delay(500, ct);
+            throw new Exception("Failed to load metric data");
+        }
+    )
 )
 ```
 
@@ -121,71 +133,95 @@ A complete e-commerce dashboard showing sales metrics, customer engagement, and 
 public class ECommerceDashboard : ViewBase
 {
     public record SalesData(decimal Revenue, decimal PreviousRevenue, int Orders, int PreviousOrders, decimal ConversionRate, decimal PreviousConversionRate);
-    
-    private async Task<MetricRecord> GetRevenueMetric()
+
+    private QueryResult<MetricRecord> UseRevenueMetric(IViewContext context)
     {
-        await Task.Delay(800); // Simulate database query
-        var data = new SalesData(
-            Revenue: 284750.50m,
-            PreviousRevenue: 235000m,
-            Orders: 1247,
-            PreviousOrders: 1089,
-            ConversionRate: 3.45m,
-            PreviousConversionRate: 2.87m
-        );
-        
-        var trend = (double)((data.Revenue - data.PreviousRevenue) / data.PreviousRevenue);
-        var goalAchieved = (double)(data.Revenue / 400000m); // Monthly goal: $400k
-        
-        return new MetricRecord(
-            data.Revenue.ToString("C0"),
-            trend,
-            goalAchieved,
-            "$400,000 target"
-        );
-    }
-    
-    private async Task<MetricRecord> GetOrdersMetric()
-    {
-        await Task.Delay(600);
-        var orders = 1247;
-        var previousOrders = 1089;
-        var trend = (double)(orders - previousOrders) / previousOrders;
-        
-        return new MetricRecord(
-            orders.ToString("N0"),
-            trend,
-            (double)orders / 1500, // Goal: 1500 orders
-            "1,500 orders target"
+        return context.UseQuery(
+            key: "revenue-metric",
+            fetcher: async ct =>
+            {
+                await Task.Delay(800, ct); // Simulate database query
+                var data = new SalesData(
+                    Revenue: 284750.50m,
+                    PreviousRevenue: 235000m,
+                    Orders: 1247,
+                    PreviousOrders: 1089,
+                    ConversionRate: 3.45m,
+                    PreviousConversionRate: 2.87m
+                );
+
+                var trend = (double)((data.Revenue - data.PreviousRevenue) / data.PreviousRevenue);
+                var goalAchieved = (double)(data.Revenue / 400000m); // Monthly goal: $400k
+
+                return new MetricRecord(
+                    data.Revenue.ToString("C0"),
+                    trend,
+                    goalAchieved,
+                    "$400,000 target"
+                );
+            }
         );
     }
-    
-    private async Task<MetricRecord> GetConversionMetric()
+
+    private QueryResult<MetricRecord> UseOrdersMetric(IViewContext context)
     {
-        await Task.Delay(700);
-        var rate = 3.45;
-        var previous = 2.87;
-        var trend = (rate - previous) / previous;
-        
-        return new MetricRecord(
-            rate.ToString("F2") + "%",
-            trend,
-            rate / 5.0, // Target: 5% conversion
-            "5% target"
+        return context.UseQuery(
+            key: "orders-metric",
+            fetcher: async ct =>
+            {
+                await Task.Delay(600, ct);
+                var orders = 1247;
+                var previousOrders = 1089;
+                var trend = (double)(orders - previousOrders) / previousOrders;
+
+                return new MetricRecord(
+                    orders.ToString("N0"),
+                    trend,
+                    (double)orders / 1500, // Goal: 1500 orders
+                    "1,500 orders target"
+                );
+            }
         );
     }
-    
-    private async Task<MetricRecord> GetAverageOrderValue()
+
+    private QueryResult<MetricRecord> UseConversionMetric(IViewContext context)
     {
-        await Task.Delay(500);
-        var aov = 228.45m;
-        var previous = 215.80m;
-        
-        return new MetricRecord(
-            aov.ToString("C2"),
-            (double)((aov - previous) / previous),
-            null,
-            null
+        return context.UseQuery(
+            key: "conversion-metric",
+            fetcher: async ct =>
+            {
+                await Task.Delay(700, ct);
+                var rate = 3.45;
+                var previous = 2.87;
+                var trend = (rate - previous) / previous;
+
+                return new MetricRecord(
+                    rate.ToString("F2") + "%",
+                    trend,
+                    rate / 5.0, // Target: 5% conversion
+                    "5% target"
+                );
+            }
+        );
+    }
+
+    private QueryResult<MetricRecord> UseAverageOrderValue(IViewContext context)
+    {
+        return context.UseQuery(
+            key: "aov-metric",
+            fetcher: async ct =>
+            {
+                await Task.Delay(500, ct);
+                var aov = 228.45m;
+                var previous = 215.80m;
+
+                return new MetricRecord(
+                    aov.ToString("C2"),
+                    (double)((aov - previous) / previous),
+                    null,
+                    null
+                );
+            }
         );
     }
 
@@ -194,10 +230,10 @@ public class ECommerceDashboard : ViewBase
         return Layout.Vertical().Gap(4)
             | Text.H2("E-Commerce Dashboard")
             | (Layout.Grid().Columns(2).Gap(3)
-                | new MetricView("Total Revenue", Icons.DollarSign, GetRevenueMetric)
-                | new MetricView("Total Orders", Icons.ShoppingCart, GetOrdersMetric)
-                | new MetricView("Conversion Rate", Icons.TrendingUp, GetConversionMetric)
-                | new MetricView("Avg Order Value", Icons.CreditCard, GetAverageOrderValue)
+                | new MetricView("Total Revenue", Icons.DollarSign, UseRevenueMetric)
+                | new MetricView("Total Orders", Icons.ShoppingCart, UseOrdersMetric)
+                | new MetricView("Conversion Rate", Icons.TrendingUp, UseConversionMetric)
+                | new MetricView("Avg Order Value", Icons.CreditCard, UseAverageOrderValue)
             );
     }
 }
@@ -211,119 +247,101 @@ public class ECommerceDashboard : ViewBase
 SaaS Metrics Dashboard
 </Summary>
 <Body>
-Track key SaaS metrics including MRR, churn rate, active users, and customer lifetime value with [real-time](../../01_Onboarding/02_Concepts/06_Signals.md) data updates.
+Track key SaaS metrics including MRR, churn rate, active users, and customer lifetime value with [UseQuery](../../../03_Hooks/Core/09_Query.md) hooks for data caching and automatic revalidation.
 
 ```csharp demo-tabs
 public class SaaSDashboard : ViewBase
 {
-    public record SaaSMetrics(
-        decimal MRR,
-        decimal PreviousMRR,
-        int ActiveUsers,
-        int PreviousActiveUsers,
-        double ChurnRate,
-        double PreviousChurnRate,
-        decimal LTV,
-        decimal PreviousLTV,
-        int NewSignups,
-        int PreviousSignups,
-        decimal ARPU
-    );
-    
-    private async Task<SaaSMetrics> FetchMetrics()
+    private QueryResult<MetricRecord> UseMrrMetric(IViewContext context)
     {
-        await Task.Delay(1000); // Simulate API call to analytics service
-        
-        return new SaaSMetrics(
-            MRR: 125430m,
-            PreviousMRR: 108750m,
-            ActiveUsers: 3847,
-            PreviousActiveUsers: 3520,
-            ChurnRate: 2.3,
-            PreviousChurnRate: 3.1,
-            LTV: 8450m,
-            PreviousLTV: 7890m,
-            NewSignups: 287,
-            PreviousSignups: 245,
-            ARPU: 32.60m
+        return context.UseQuery(
+            key: "mrr-metric",
+            fetcher: async ct =>
+            {
+                await Task.Delay(800, ct); // Simulate API call
+                var mrr = 125430m;
+                var previousMrr = 108750m;
+
+                return new MetricRecord(
+                    mrr.ToString("C0"),
+                    (double)((mrr - previousMrr) / previousMrr),
+                    (double)(mrr / 150000m),
+                    "$150K target"
+                );
+            }
         );
     }
-    
+
+    private QueryResult<MetricRecord> UseActiveUsersMetric(IViewContext context)
+    {
+        return context.UseQuery(
+            key: "active-users-metric",
+            fetcher: async ct =>
+            {
+                await Task.Delay(600, ct);
+                var activeUsers = 3847;
+                var previousActiveUsers = 3520;
+
+                return new MetricRecord(
+                    activeUsers.ToString("N0"),
+                    (double)(activeUsers - previousActiveUsers) / previousActiveUsers,
+                    (double)activeUsers / 5000,
+                    "5,000 users goal"
+                );
+            }
+        );
+    }
+
+    private QueryResult<MetricRecord> UseChurnRateMetric(IViewContext context)
+    {
+        return context.UseQuery(
+            key: "churn-rate-metric",
+            fetcher: async ct =>
+            {
+                await Task.Delay(700, ct);
+                var churnRate = 2.3;
+                var previousChurnRate = 3.1;
+
+                return new MetricRecord(
+                    churnRate.ToString("F1") + "%",
+                    -(churnRate - previousChurnRate) / previousChurnRate, // Negative is good for churn
+                    1 - (churnRate / 5.0), // Lower is better
+                    "Target: <2%"
+                );
+            }
+        );
+    }
+
+    private QueryResult<MetricRecord> UseLtvMetric(IViewContext context)
+    {
+        return context.UseQuery(
+            key: "ltv-metric",
+            fetcher: async ct =>
+            {
+                await Task.Delay(500, ct);
+                var ltv = 8450m;
+                var previousLtv = 7890m;
+
+                return new MetricRecord(
+                    ltv.ToString("C0"),
+                    (double)((ltv - previousLtv) / previousLtv),
+                    null,
+                    null
+                );
+            }
+        );
+    }
+
     public override object? Build()
     {
-        var metrics = UseState<SaaSMetrics?>(() => null);
-        
-        UseEffect(async () =>
-        {
-            metrics.Set(await FetchMetrics());
-        }, []);
-        
-        if (metrics.Value == null)
-        {
-            return Layout.Grid().Columns(2).Gap(3)
-                | new MetricView("MRR", Icons.DollarSign, () => Task.FromResult(new MetricRecord("Loading...", null, null, null)))
-                | new MetricView("Active Users", Icons.Users, () => Task.FromResult(new MetricRecord("Loading...", null, null, null)))
-                | new MetricView("Churn Rate", Icons.UserMinus, () => Task.FromResult(new MetricRecord("Loading...", null, null, null)))
-                | new MetricView("Customer LTV", Icons.Gem, () => Task.FromResult(new MetricRecord("Loading...", null, null, null)));
-        }
-        
-        var m = metrics.Value;
-        
         return Layout.Vertical().Gap(4)
             | Text.H2("SaaS Metrics Dashboard")
             | Text.Muted("Real-time business metrics and KPIs")
             | (Layout.Grid().Columns(2).Gap(3)
-                | new MetricView("Monthly Recurring Revenue", Icons.DollarSign, 
-                    () => Task.FromResult(new MetricRecord(
-                        m.MRR.ToString("C0"),
-                        (double)((m.MRR - m.PreviousMRR) / m.PreviousMRR),
-                        (double)(m.MRR / 150000m),
-                        "$150K target"
-                    )))
-                | new MetricView("Active Users", Icons.Users, 
-                    () => Task.FromResult(new MetricRecord(
-                        m.ActiveUsers.ToString("N0"),
-                        (double)(m.ActiveUsers - m.PreviousActiveUsers) / m.PreviousActiveUsers,
-                        (double)m.ActiveUsers / 5000,
-                        "5,000 users goal"
-                    )))
-                | new MetricView("Churn Rate", Icons.UserMinus, 
-                    () => Task.FromResult(new MetricRecord(
-                        m.ChurnRate.ToString("F1") + "%",
-                        -(m.ChurnRate - m.PreviousChurnRate) / m.PreviousChurnRate, // Negative is good for churn
-                        1 - (m.ChurnRate / 5.0), // Lower is better
-                        "Target: <2%"
-                    )))
-                | new MetricView("Customer LTV", Icons.Gem, 
-                    () => Task.FromResult(new MetricRecord(
-                        m.LTV.ToString("C0"),
-                        (double)((m.LTV - m.PreviousLTV) / m.PreviousLTV),
-                        null,
-                        null
-                    )))
-            )
-            | (Layout.Grid().Columns(3).Gap(3)
-                | new MetricView("New Signups", Icons.UserPlus, 
-                    () => Task.FromResult(new MetricRecord(
-                        m.NewSignups.ToString("N0"),
-                        (double)(m.NewSignups - m.PreviousSignups) / m.PreviousSignups,
-                        (double)m.NewSignups / 500,
-                        "500/month target"
-                    )))
-                | new MetricView("ARPU", Icons.Wallet, 
-                    () => Task.FromResult(new MetricRecord(
-                        m.ARPU.ToString("C2"),
-                        null,
-                        null,
-                        null
-                    )))
-                | new MetricView("Net Revenue Retention", Icons.Repeat, 
-                    () => Task.FromResult(new MetricRecord(
-                        "112%",
-                        0.08,
-                        1.12,
-                        "Target: >100%"
-                    )))
+                | new MetricView("Monthly Recurring Revenue", Icons.DollarSign, UseMrrMetric)
+                | new MetricView("Active Users", Icons.Users, UseActiveUsersMetric)
+                | new MetricView("Churn Rate", Icons.UserMinus, UseChurnRateMetric)
+                | new MetricView("Customer LTV", Icons.Gem, UseLtvMetric)
             );
     }
 }

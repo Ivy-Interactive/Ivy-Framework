@@ -1,4 +1,7 @@
 using System.Collections;
+using System.Collections.Concurrent;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
 using Ivy.Apps;
@@ -36,6 +39,8 @@ public class ContentBuilder : IContentBuilder
 
 public class DefaultContentBuilder : IContentBuilder
 {
+    private static readonly ConcurrentDictionary<Type, MethodInfo?> BuildMethodCache = new();
+
     private string IntegerFormat { get; set; } = "N0";
 
     private string DecimalFormat { get; set; } = "#,#.##";
@@ -153,12 +158,103 @@ public class DefaultContentBuilder : IContentBuilder
 
         if (content is IEnumerable enumerable)
         {
-            //todo: zero items? 
+            //todo: zero items?
             //todo: one items?
             return TableBuilderFactory.FromEnumerable(enumerable);
         }
 
+        // Check if type has a Build method or extension that takes IViewContext and returns object?
+        var buildMethod = GetBuildMethod(content.GetType());
+        if (buildMethod is not null)
+        {
+            return new FuncView(context => buildMethod.Invoke(
+                buildMethod.IsStatic ? null : content,
+                buildMethod.IsStatic ? [content, context] : [context]));
+        }
+
         return new TextBlock(content.ToString()!, TextVariant.Block);
+    }
+
+    private static MethodInfo? GetBuildMethod(Type type)
+    {
+        return BuildMethodCache.GetOrAdd(type, t =>
+        {
+            // Check for instance method: Build(IViewContext) -> object?
+            var instanceMethod = t.GetMethod(
+                "Build",
+                BindingFlags.Public | BindingFlags.Instance,
+                null,
+                [typeof(IViewContext)],
+                null);
+
+            if (instanceMethod is not null && typeof(object).IsAssignableFrom(instanceMethod.ReturnType))
+            {
+                return instanceMethod;
+            }
+
+            // Check for extension method: Build(this T, IViewContext) -> object?
+            return FindExtensionMethod(t);
+        });
+    }
+
+    private static MethodInfo? FindExtensionMethod(Type targetType)
+    {
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            try
+            {
+                foreach (var extensionType in assembly.GetTypes()
+                    .Where(t => t is { IsSealed: true, IsGenericType: false, IsNested: false, IsAbstract: true }))
+                {
+                    foreach (var method in extensionType.GetMethods(BindingFlags.Static | BindingFlags.Public))
+                    {
+                        if (method.Name != "Build" || !method.IsDefined(typeof(ExtensionAttribute), false))
+                        {
+                            continue;
+                        }
+
+                        var parameters = method.GetParameters();
+                        if (parameters.Length != 2)
+                        {
+                            continue;
+                        }
+
+                        var firstParam = parameters[0].ParameterType;
+                        var secondParam = parameters[1].ParameterType;
+
+                        // Handle generic extension methods like Build<TValue>(this QueryResult<TValue>, IViewContext)
+                        if (method.IsGenericMethodDefinition)
+                        {
+                            if (targetType.IsGenericType &&
+                                firstParam.IsGenericType &&
+                                firstParam.GetGenericTypeDefinition() == targetType.GetGenericTypeDefinition() &&
+                                secondParam == typeof(IViewContext))
+                            {
+                                try
+                                {
+                                    var genericArgs = targetType.GetGenericArguments();
+                                    return method.MakeGenericMethod(genericArgs);
+                                }
+                                catch
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                        else if (firstParam.IsAssignableFrom(targetType) && secondParam == typeof(IViewContext))
+                        {
+                            return method;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Some assemblies may not be accessible
+            }
+        }
+
+        return null;
     }
 }
 

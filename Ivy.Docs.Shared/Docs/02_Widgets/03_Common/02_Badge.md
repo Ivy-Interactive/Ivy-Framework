@@ -1,6 +1,6 @@
 ---
 prepare: |
-  var client = this.UseService<IClientProvider>();
+  var client = UseService<IClientProvider>();
 searchHints:
   - tag
   - label

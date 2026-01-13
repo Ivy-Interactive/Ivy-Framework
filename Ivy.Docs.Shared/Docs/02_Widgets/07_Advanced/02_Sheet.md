@@ -228,7 +228,7 @@ public class KanbanWithSheetExample : ViewBase
         
         var client = UseService<IClientProvider>();
         
-        var (sheetView, showEdit) = this.UseTrigger((IState<bool> isOpen, string taskId) =>
+        var (sheetView, showEdit) = UseTrigger((IState<bool> isOpen, string taskId) =>
             new TaskFormSheet(isOpen, taskId, tasks, client));
         
         var kanban = tasks.Value
@@ -299,7 +299,7 @@ public class TaskFormSheet : ViewBase
         var task = UseState(() => _tasks.Value.FirstOrDefault(t => t.Id == _taskId) ?? 
             new TaskItem(_taskId, "", "Todo", 1, ""));
         
-        var (onSubmit, formView, validationView, loading) = Context.UseForm(() => task.ToForm()
+        var (onSubmit, formView, validationView, loading) = UseForm(() => task.ToForm()
             .Required(m => m.Title, m => m.Description)
             .Builder(m => m.Status, s => s.ToSelectInput(new[] { "Todo", "In Progress", "Done" }.ToOptions()))
             .Builder(m => m.Description, s => s.ToTextAreaInput())

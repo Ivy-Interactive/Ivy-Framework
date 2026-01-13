@@ -8,7 +8,7 @@ public class AlertsApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var (alertView, showAlert) = this.UseAlert();
+        var (alertView, showAlert) = UseAlert();
         var client = UseService<IClientProvider>();
 
         return Layout.Vertical(

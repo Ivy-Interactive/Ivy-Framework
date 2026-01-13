@@ -7,7 +7,6 @@ import { getIvyHost, getMachineId } from '@/lib/utils';
 import { validateRedirectUrl, validateLinkUrl } from '@/lib/url';
 import { logger } from '@/lib/logger';
 import { applyPatch, Operation } from 'fast-json-patch';
-import { cloneDeep } from 'lodash';
 import { ToastAction } from '@/components/ui/toast';
 import { setThemeGlobal } from '@/components/theme-provider';
 import {
@@ -116,85 +115,170 @@ const escapeXml = (str: string) => {
     .replace(/'/g, '&apos;');
 };
 
-const getFullReplacementNode = (patch: Operation[]): WidgetNode | null => {
-  if (patch.length === 1 && patch[0].op === 'replace' && patch[0].path === '') {
-    return (patch[0] as { value: WidgetNode }).value;
+/**
+ * Shallow clones a WidgetNode, preserving children array reference unless specified.
+ */
+function shallowCloneNode(node: WidgetNode, cloneChildren = false): WidgetNode {
+  const cloned = { ...node };
+  if (cloneChildren && node.children) {
+    cloned.children = [...node.children];
   }
-  return null;
-};
+  return cloned;
+}
 
-// Pure function - no side effects, safe for React Strict Mode double-invocation
+/**
+ * Deep clones a WidgetNode and all its descendants.
+ * Uses structuredClone for proper deep cloning of props (which may have nested objects/arrays).
+ * Used only when applying patches that may modify nested structures.
+ */
+function deepCloneNode(node: WidgetNode): WidgetNode {
+  // Use structuredClone for a true deep clone - handles nested props correctly
+  // and is faster than JSON.parse(JSON.stringify()) for complex objects
+  return structuredClone(node);
+}
+
+/**
+ * Creates a new tree with structural sharing, cloning only the path to the target node.
+ * All unchanged subtrees maintain their reference identity for React reconciliation optimization.
+ *
+ * @param tree - The original tree
+ * @param indices - Path to the target node (array of child indices)
+ * @returns Object containing the new tree root and the parent of the target node, or null on error
+ */
+function clonePathToTarget(
+  tree: WidgetNode,
+  indices: number[]
+): { newTree: WidgetNode; parent: WidgetNode; targetIndex: number } | null {
+  if (indices.length === 0) {
+    // No path - return a shallow clone of root with cloned children array
+    const newTree = shallowCloneNode(tree, true);
+    return { newTree, parent: newTree, targetIndex: -1 };
+  }
+
+  // Shallow clone root with its children array
+  const newTree = shallowCloneNode(tree, true);
+  let current = newTree;
+
+  // Walk down the path, shallow cloning each node along the way
+  for (let i = 0; i < indices.length - 1; i++) {
+    const index = indices[i];
+
+    if (!current.children) {
+      logger.error('No children found while cloning path', {
+        nodeId: current.id,
+        nodeType: current.type,
+        pathIndex: i,
+        indices,
+      });
+      return null;
+    }
+
+    if (index >= current.children.length) {
+      logger.error('Index out of bounds while cloning path', {
+        index,
+        childrenLength: current.children.length,
+        pathIndex: i,
+        indices,
+      });
+      return null;
+    }
+
+    const child = current.children[index];
+    if (!child) {
+      logger.error('Child at index is null/undefined', {
+        index,
+        childrenLength: current.children.length,
+        parentType: current.type,
+        parentId: current.id,
+      });
+      return null;
+    }
+
+    // Shallow clone this child with its children array
+    current.children[index] = shallowCloneNode(child, true);
+    current = current.children[index];
+  }
+
+  // Validate final parent has children
+  const targetIndex = indices[indices.length - 1];
+  if (!current.children) {
+    logger.error('No children found at final parent', {
+      nodeId: current.id,
+      nodeType: current.type,
+      targetIndex,
+    });
+    return null;
+  }
+
+  if (targetIndex >= current.children.length) {
+    logger.error('Target index out of bounds', {
+      targetIndex,
+      childrenLength: current.children.length,
+      parentId: current.id,
+    });
+    return null;
+  }
+
+  return { newTree, parent: current, targetIndex };
+}
+
+/**
+ * Pure function that applies updates to the widget tree using structural sharing.
+ * Only the path to changed nodes is cloned - unchanged subtrees keep their references.
+ * This allows React to skip re-rendering unchanged components via reference equality checks.
+ *
+ * Safe for React Strict Mode double-invocation.
+ */
 function applyUpdateMessage(
   tree: WidgetNode,
   updates: UpdateMessage
 ): WidgetNode | null {
-  let newTree = cloneDeep(tree);
+  let newTree = tree;
 
   for (const update of updates) {
-    let parent = newTree;
+    const firstPatch = update.patch[0];
+    const isFullReplacement =
+      update.patch.length === 1 &&
+      firstPatch.op === 'replace' &&
+      firstPatch.path === '';
 
-    if (!parent) {
-      logger.error('No parent found in applyUpdateMessage', { update });
-      continue;
-    }
+    if (isFullReplacement) {
+      // Full node replacement - just swap in the new value
+      const newValue = (firstPatch as { value: unknown }).value as WidgetNode;
 
-    if (update.indices.length === 0) {
-      const replacement = getFullReplacementNode(update.patch);
-      if (replacement) {
-        // Special case: full replacement of the root node
-        newTree = replacement;
+      if (update.indices.length === 0) {
+        // Replacing entire tree
+        newTree = newValue;
       } else {
-        applyPatch(parent, update.patch);
+        // Clone path to target and replace
+        const result = clonePathToTarget(newTree, update.indices);
+        if (!result) continue;
+        newTree = result.newTree;
+        result.parent.children![result.targetIndex] = newValue;
       }
     } else {
-      update.indices.forEach((index, i) => {
-        if (i === update.indices.length - 1) {
-          if (!parent.children) {
-            logger.error('No children found in parent', { parent });
-            return;
-          }
-          const target = parent.children[index];
-          const replacement = getFullReplacementNode(update.patch);
-          if (replacement) {
-            // Special case: full replacement of the target node
-            parent.children[index] = replacement;
-          } else {
-            applyPatch(target, update.patch);
-          }
-        } else {
-          if (!parent) {
-            logger.error('No parent found in applyUpdateMessage', { update });
-            return;
-          }
-          if (!parent.children) {
-            logger.error('No children found in parent', { parent });
-            return;
-          }
-          if (index >= parent.children.length) {
-            logger.error('Index out of bounds', {
-              index,
-              childrenLength: parent.children.length,
-              parent,
-            });
-            return;
-          }
-          const nextParent = parent.children[index];
-          if (!nextParent) {
-            logger.error('Child at index is null/undefined', {
-              index,
-              childrenLength: parent.children.length,
-              parentType: parent.type,
-              parentId: parent.id,
-            });
-            return;
-          }
-          parent = nextParent;
-        }
-      });
+      // Patch operation - need to clone target before mutating
+      if (update.indices.length === 0) {
+        // Patching root - deep clone since patch may affect nested props
+        newTree = deepCloneNode(newTree);
+        applyPatch(newTree, update.patch);
+      } else {
+        // Clone path to target
+        const result = clonePathToTarget(newTree, update.indices);
+        if (!result) continue;
+        newTree = result.newTree;
+
+        // Deep clone the target node before applying patch (patch mutates in place)
+        const targetClone = deepCloneNode(
+          result.parent.children![result.targetIndex]
+        );
+        result.parent.children![result.targetIndex] = targetClone;
+        applyPatch(targetClone, update.patch);
+      }
     }
 
     if (update.treeHash) {
-      //if we have the treeHash then we're in DEBUG
+      // Verify tree integrity in DEBUG mode
       const frontendHash = calculateTreeHash(newTree);
       if (frontendHash !== update.treeHash) {
         logger.error('Tree hash mismatch after update', {

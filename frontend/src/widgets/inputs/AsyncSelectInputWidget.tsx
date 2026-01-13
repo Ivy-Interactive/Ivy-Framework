@@ -64,6 +64,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   displayValue,
   disabled = false,
   invalid,
+  loading,
   scale = Scales.Medium,
 }) => {
   const eventHandler = useEventHandler();
@@ -116,8 +117,10 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
     <span
       ref={displayValueRef}
       className={cn(
-        'grow text-primary font-semibold underline overflow-hidden text-ellipsis whitespace-nowrap',
-        asyncSelectTextVariants[scale]
+        'grow overflow-hidden text-ellipsis whitespace-nowrap',
+        asyncSelectTextVariants[scale],
+        !loading && 'text-primary font-semibold underline',
+        loading && 'text-muted-foreground'
       )}
     >
       {displayValue}

@@ -7,6 +7,7 @@ using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Widgets.Internal;
 using System.Collections.Immutable;
+using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy.Chrome;
 
@@ -31,10 +32,10 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
         var menuItems = UseState(() => appRepository.GetMenuItems());
-        var args = UseService<AppArgs>();
+        var args = UseService<AppContext>();
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
-        var navigator = this.UseNavigation();
+        var navigator = UseNavigation();
 
         void SetAppTitle(string appId)
         {

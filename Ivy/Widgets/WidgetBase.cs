@@ -52,11 +52,9 @@ public static class WidgetBaseExtensions
 
     public static T Height<T>(this T widget, string percent) where T : WidgetBase<T>
     {
-        if (percent.EndsWith("%"))
-        {
-            if (float.TryParse(percent[..^1], out var value))
-                return widget with { Height = Shared.Size.Fraction(value / 100) };
-        }
+        if (!percent.EndsWith("%")) throw new ArgumentException("Invalid percentage value.");
+        if (float.TryParse(percent[..^1], out var value))
+            return widget with { Height = Shared.Size.Fraction(value / 100) };
         throw new ArgumentException("Invalid percentage value.");
     }
 
@@ -70,15 +68,10 @@ public static class WidgetBaseExtensions
 
     public static T Size<T>(this T widget, string percent) where T : WidgetBase<T>
     {
-        if (percent.EndsWith("%"))
-        {
-            if (float.TryParse(percent.Substring(0, percent.Length - 1), out var value))
-            {
-                var val = Shared.Size.Fraction(value / 100);
-                return widget with { Width = val, Height = val };
-            }
-        }
-        throw new ArgumentException("Invalid percentage value.");
+        if (!percent.EndsWith("%")) throw new ArgumentException("Invalid percentage value.");
+        if (!float.TryParse(percent[..^1], out var value)) throw new ArgumentException("Invalid percentage value.");
+        var val = Shared.Size.Fraction(value / 100);
+        return widget with { Width = val, Height = val };
     }
 
     public static T Scale<T>(this T widget, Scale scale) where T : WidgetBase<T> => widget with { Scale = scale };

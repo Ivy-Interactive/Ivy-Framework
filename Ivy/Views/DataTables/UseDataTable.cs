@@ -5,12 +5,6 @@ namespace Ivy.Views.DataTables;
 
 public static class UseDataTableExtensions
 {
-    public static DataTableConnection? UseDataTable<TView>(this TView view, IQueryable queryable) where TView : ViewBase =>
-        view.Context.UseDataTable(queryable);
-
-    public static DataTableConnection? UseDataTable<TView>(this TView view, IQueryable queryable, Func<object, object?>? idSelector) where TView : ViewBase =>
-        view.Context.UseDataTable(queryable, idSelector);
-
     public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable)
     {
         return UseDataTable(context, queryable, null);

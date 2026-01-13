@@ -17,16 +17,16 @@ public interface IAnyAsyncSelectInputBase : IAnyInput
 {
 }
 
-public delegate Task<Option<T>[]> AsyncSelectQueryDelegate<T>(string query);
+public delegate QueryResult<Option<T>[]> AsyncSelectSearchDelegate<T>(IViewContext context, string query);
 
-public delegate Task<Option<T>?> AsyncSelectLookupDelegate<T>(T id);
+public delegate QueryResult<Option<T>?> AsyncSelectLookupDelegate<T>(IViewContext context, T id);
 
 public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
 {
     public Type[] SupportedStateTypes() => [];
 
-    public AsyncSelectInputView(IAnyState state, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
-        : this(query, lookup, placeholder, disabled)
+    public AsyncSelectInputView(IAnyState state, AsyncSelectSearchDelegate<TValue> search, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
+        : this(search, lookup, placeholder, disabled)
     {
         var typedState = state.As<TValue>();
         Value = typedState.Value;
@@ -34,29 +34,29 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     }
 
     [OverloadResolutionPriority(1)]
-    public AsyncSelectInputView(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
-        : this(query, lookup, placeholder, disabled)
+    public AsyncSelectInputView(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, AsyncSelectSearchDelegate<TValue> search, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
+        : this(search, lookup, placeholder, disabled)
     {
         OnChange = onChange;
         Value = value;
     }
 
-    public AsyncSelectInputView(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
-        : this(query, lookup, placeholder, disabled)
+    public AsyncSelectInputView(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, AsyncSelectSearchDelegate<TValue> search, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
+        : this(search, lookup, placeholder, disabled)
     {
         OnChange = onChange == null ? null : e => { onChange(e); return ValueTask.CompletedTask; };
         Value = value;
     }
 
-    public AsyncSelectInputView(AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
+    public AsyncSelectInputView(AsyncSelectSearchDelegate<TValue> search, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
     {
-        Query = query;
+        Search = search;
         Lookup = lookup;
         Placeholder = placeholder;
         Disabled = disabled;
     }
 
-    public AsyncSelectQueryDelegate<TValue> Query { get; }
+    public AsyncSelectSearchDelegate<TValue> Search { get; }
 
     public AsyncSelectLookupDelegate<TValue> Lookup { get; }
 
@@ -78,40 +78,26 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public override object? Build()
     {
-        IState<string?> displayValue = UseState<string?>();
         var open = UseState(false);
-        var loading = UseState(false);
-        var refreshToken = this.UseRefreshToken();
+        var refreshToken = UseRefreshToken();
+        var currentValue = UseState(() => Value);
 
-        UseEffect(async () =>
+        UseEffect(() =>
         {
-            open.Set(false);
-
             if (refreshToken.IsRefreshed)
             {
-                Value = (TValue)refreshToken.ReturnValue!;
+                open.Set(false);
+                currentValue.Set((TValue)refreshToken.ReturnValue!);
                 if (OnChange != null)
-                    await OnChange(new Event<IInput<TValue>, TValue>("OnChange", this, Value));
+                {
+                    _ = OnChange(new Event<IInput<TValue>, TValue>("OnChange", this, currentValue.Value));
+                }
             }
+        }, [refreshToken]);
 
-            if (Value is not null)
-            {
-                loading.Set(true);
-                try
-                {
-                    if ((await Lookup(Value)) is { } option)
-                    {
-                        displayValue.Set(option.Label);
-                        return;
-                    }
-                }
-                finally
-                {
-                    loading.Set(false);
-                }
-            }
-            displayValue.Set((string?)null!);
-        }, [EffectTrigger.AfterInit(), refreshToken]);
+        var lookupResult = Lookup(Context, currentValue.Value);
+        var displayValue = lookupResult.Value?.Label ?? (lookupResult.Loading ? "Loading..." : null);
+        var loading = lookupResult.Loading;
 
         ValueTask HandleSelect(Event<AsyncSelectInput> _)
         {
@@ -130,34 +116,36 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 Placeholder = Placeholder,
                 Disabled = Disabled,
                 Invalid = Invalid,
-                DisplayValue = displayValue.Value,
+                DisplayValue = displayValue,
                 OnSelect = HandleSelect,
-                Loading = loading.Value,
+                Loading = loading,
                 Scale = Scale
             },
             open.Value ? new Sheet(
                 OnClose,
-                new AsyncSelectListSheet<TValue>(refreshToken, Query),
+                new AsyncSelectListSheet<TValue>(refreshToken, Search),
                 title: Placeholder
                 ) : null
         );
     }
 }
 
-public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query) : ViewBase
+public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectSearchDelegate<T> search) : ViewBase
 {
     public override object? Build()
     {
-        var records = UseState(Array.Empty<Option<T>>);
         var filter = UseState("");
-        var loading = UseState(true);
+        var throttledFilter = UseState("");
 
-        UseEffect(async () =>
+        UseEffect(() =>
         {
-            loading.Set(true);
-            records.Set(await query(filter.Value));
-            loading.Set(false);
+            throttledFilter.Set(filter.Value);
         }, [filter.Throttle(TimeSpan.FromMilliseconds(250)).ToTrigger()]);
+
+        // Use the search delegate which now returns a QueryResult
+        var searchResult = search(Context, throttledFilter.Value);
+        var records = searchResult.Value ?? [];
+        var loading = searchResult.Loading;
 
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
@@ -165,7 +153,7 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
             refreshToken.Refresh(option.TypedValue);
         });
 
-        var items = records.Value.Select(option =>
+        var items = records.Select(option =>
             new ListItem(title: option.Label, subtitle: option.Description, onClick: onItemClicked, tag: option)).ToArray();
 
         var searchInput = filter.ToSearchInput().Placeholder("Search").Width(Size.Grow());
@@ -174,7 +162,7 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
             | searchInput;
 
         var content = Layout.Vertical().Gap(2)
-            | (loading.Value ? Text.Block("Loading...") : new List(items));
+            | (loading ? Text.Block("Loading...") : new List(items));
 
         return new HeaderLayout(header, content)
         {
@@ -187,7 +175,7 @@ public static class AsyncSelectInputViewExtensions
 {
     public static IAnyAsyncSelectInputBase ToAsyncSelectInput<TValue>(
         this IAnyState state,
-        AsyncSelectQueryDelegate<TValue> query,
+        AsyncSelectSearchDelegate<TValue> search,
         AsyncSelectLookupDelegate<TValue> lookup,
         string? placeholder = null,
         bool disabled = false
@@ -199,7 +187,7 @@ public static class AsyncSelectInputViewExtensions
         try
         {
             IAnyAsyncSelectInputBase input = (IAnyAsyncSelectInputBase)Activator
-                .CreateInstance(genericType, state, query, lookup, placeholder, disabled)!;
+                .CreateInstance(genericType, state, search, lookup, placeholder, disabled)!;
             return input;
         }
         catch (TargetInvocationException ex)

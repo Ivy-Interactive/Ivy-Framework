@@ -7,11 +7,11 @@ public class ObservableApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var progress = this.UseState(0);
+        var progress = UseState(0);
 
-        var timeObservable = this.UseStatic(() => Observable.Interval(TimeSpan.FromSeconds(1)).Select(_ => DateTime.Now.ToString("HH:mm:ss")));
+        var timeObservable = UseRef(() => Observable.Interval(TimeSpan.FromSeconds(1)).Select(_ => DateTime.Now.ToString("HH:mm:ss"))).Value;
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             return Observable.Interval(TimeSpan.FromMilliseconds(100)).Take(101).Do(e => progress.Set((int)e)).Subscribe();
         });

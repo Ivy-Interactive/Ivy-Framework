@@ -52,7 +52,7 @@ public class CounterApp : ViewBase
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
+        var client = UseService<IClientProvider>();
         return new Button("Click me", onClick: _ => client.Toast("Hello!"));
     }
 }

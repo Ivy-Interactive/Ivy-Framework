@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy;
 
@@ -29,7 +30,7 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    private AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
+    private AppContext GetAppArgs(string connectionId, string machineId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
     {
         string? appArgs = null;
         if (httpContext.Request.Query.TryGetValue("appArgs", out var appArgsParam))
@@ -37,7 +38,7 @@ public class AppHub(
             appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
-        return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!);
+        return new AppContext(connectionId, machineId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!);
     }
 
     public override async Task OnConnectedAsync()
@@ -155,7 +156,9 @@ public class AppHub(
 
             appServices.AddSingleton(routeResult.AppRepository);
 
-            var appArgs = GetAppArgs(Context.ConnectionId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
+            var machineId = AppRouter.GetMachineId(httpContext);
+
+            var appArgs = GetAppArgs(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
 
             logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
 
@@ -174,7 +177,7 @@ public class AppHub(
             var appState = new AppSession
             {
                 AppId = routeResult.AppId,
-                MachineId = AppRouter.GetMachineId(httpContext),
+                MachineId = machineId,
                 ParentId = parentId,
                 AppDescriptor = routeResult.AppDescriptor,
                 App = app,

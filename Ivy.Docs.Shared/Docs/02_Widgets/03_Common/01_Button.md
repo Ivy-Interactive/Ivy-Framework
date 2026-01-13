@@ -1,6 +1,6 @@
 ---
 prepare: |
-  var client = this.UseService<IClientProvider>();
+  var client = UseService<IClientProvider>();
 searchHints:
   - click
   - action
@@ -23,7 +23,7 @@ The `Button` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is one of t
 Here's a simple example of a button that shows a [toast message](../../01_Onboarding/02_Concepts/19_Clients.md) when clicked:
 
 ```csharp
-var client = this.UseService<IClientProvider>();
+var client = UseService<IClientProvider>();
 new Button("Click Me", onClick: _ => client.Toast("Hello!"));
 ```
 

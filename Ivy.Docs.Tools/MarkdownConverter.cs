@@ -55,7 +55,7 @@ public static partial class MarkdownConverter
             var oldHash = FileHashMetadata.ReadHash(outputFile);
             if (oldHash != null && oldHash == hash)
             {
-                Console.WriteLine("Skipping {0}", absolutePath);
+                //Console.WriteLine("Skipping {0}", absolutePath);
                 return;
             }
         }

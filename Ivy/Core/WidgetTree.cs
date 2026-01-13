@@ -30,7 +30,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
     public IView RootView { get; }
     public WidgetTreeNode? NodeTree { get; private set; }
 
-    public static readonly JsonPatchDeltaFormatter JsonPatchDeltaFormatter = new();
     public static readonly JsonDiffOptions JsonDiffOptions = new()
     {
         ArrayObjectItemKeyFinder = (node, _) =>
@@ -231,6 +230,9 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                 else
                 {
                     parent.Children[node.Index] = partial;
+
+                    // Invalidate serialization cache for all ancestors since their child changed
+                    InvalidateAncestorCaches(parentId);
                 }
             }
             else
@@ -259,7 +261,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             }
             else
             {
-                patch = previous.Diff(update, JsonPatchDeltaFormatter, JsonDiffOptions);
+                patch = previous.Diff(update, new JsonPatchDeltaFormatter(), JsonDiffOptions);
             }
 
             if (patch == null || patch.IsEmptyArray())
@@ -271,7 +273,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             string? hash = null;
 
 #if DEBUG
-            //DebugHelpers.CheckIfIdUsedMultipleTimes(NodeTree);
+            DebugHelpers.CheckIfIdUsedMultipleTimes(NodeTree);
             hash = DebugHelpers.CalculateTreeHash(NodeTree?.GetWidgetTree()?.Serialize());
             if (Environment.GetEnvironmentVariable("IVY_DUMP_WIDGET_TREES") == "1")
             {
@@ -393,27 +395,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     internal static int CalculateMemoizedHashCode(string viewId, object?[] props)
     {
-        var hash = new HashCode();
-        hash.Add(Utils.StableHash(viewId));
-        foreach (var prop in props)
-        {
-            if (prop == null) continue;
-            if (prop is string stringProp)
-            {
-                hash.Add(Utils.StableHash(stringProp));
-            }
-            else if (prop.GetType().IsValueType)
-            {
-                hash.Add(prop);
-            }
-            else
-            {
-                var json = JsonSerializer.Serialize(prop, JsonHelper.DefaultOptions);
-                hash.Add(Utils.StableHash(json));
-            }
-
-        }
-        return hash.ToHashCode();
+        return Utils.StableHash([viewId, .. props]);
     }
 
     private WidgetTreeNode? BuildObject(object? anything, TreePath treePath, int index, string parentId, IViewContext? ancestorContext, bool isHotReload)
@@ -555,6 +537,20 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             {
                 DestroyRemovedNodes(previousChild, newChild, skipViewId);
             }
+        }
+    }
+
+    private void InvalidateAncestorCaches(string nodeId)
+    {
+        // Walk up the tree and invalidate serialization cache for all ancestors
+        var currentId = nodeId;
+        while (currentId != null)
+        {
+            if (_nodes.TryGetValue(currentId, out var node))
+            {
+                node.InvalidateSerializationCache();
+            }
+            _parents.TryGetValue(currentId, out currentId);
         }
     }
 

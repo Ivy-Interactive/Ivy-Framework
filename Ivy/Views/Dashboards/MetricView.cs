@@ -1,4 +1,6 @@
 ﻿using Ivy.Core;
+using Ivy.Core.Hooks;
+using Ivy.Hooks;
 using Ivy.Shared;
 
 namespace Ivy.Views.Dashboards;
@@ -12,27 +14,14 @@ public record MetricRecord(
 public class MetricView(
     string title,
     Icons? icon,
-    Func<Task<MetricRecord>> metricData
+    Func<IViewContext, QueryResult<MetricRecord>> useMetricData
 ) : ViewBase
 {
     public override object? Build()
     {
-        var data = UseState<MetricRecord?>(() => null);
-        var failed = UseState<Exception?>(() => null);
+        var query = useMetricData(Context);
 
-        UseEffect(async () =>
-        {
-            try
-            {
-                data.Set(await metricData());
-            }
-            catch (Exception ex)
-            {
-                failed.Set(ex);
-            }
-        }, []);
-
-        if (failed.Value is not null)
+        if (query.Error is not null)
         {
             return new Card(
                 Layout.Vertical().Gap(2)
@@ -40,11 +29,11 @@ public class MetricView(
                    | Text.Small(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)
                    | new Spacer().Width(Size.Grow())
                    | (icon?.ToIcon().Color(Colors.Gray)))
-                | new ErrorTeaserView(failed.Value)
+                | new ErrorTeaserView(query.Error)
             ).Height(Size.Full());
         }
 
-        if (data.Value is null)
+        if (query.Loading || query.Value is null)
         {
             return new Card(
                 Layout.Vertical().Gap(2)
@@ -56,7 +45,7 @@ public class MetricView(
             ).Height(Size.Full());
         }
 
-        var x = data.Value;
+        var x = query.Value;
 
         object? footer = x.GoalAchieved != null
             ? new Progress((int)Math.Round(x.GoalAchieved.Value * 100.0))

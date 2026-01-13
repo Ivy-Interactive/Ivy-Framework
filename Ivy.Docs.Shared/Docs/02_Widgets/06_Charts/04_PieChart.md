@@ -222,7 +222,7 @@ public class DrillDownDemo : ViewBase
                             .Distinct()
                             .ToArray();
 
-        var country = this.UseState(countries[0]);
+        var country = UseState(countries[0]);
 
         var countryInput = country.ToSelectInput(countries.ToOptions());
 

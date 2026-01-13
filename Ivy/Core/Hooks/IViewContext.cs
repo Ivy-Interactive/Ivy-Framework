@@ -33,6 +33,4 @@ public interface IViewContext : IDisposable
     T UseService<T>();
 
     object UseService(Type serviceType);
-
-    T? UseArgs<T>() where T : class;
 }

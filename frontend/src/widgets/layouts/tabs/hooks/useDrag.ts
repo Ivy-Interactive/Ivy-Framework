@@ -6,7 +6,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import type { TabWidgetProps } from '../types';
+import { getTabProps } from '../utils/tabUtils';
 
 /**
  * Custom hook to manage drag-and-drop functionality for tabs.
@@ -80,9 +80,9 @@ export function useDrag(
         setTabOrder(newOrder);
 
         // Send reorder event to backend with mapping from new order to original backend indices
-        const originalTabOrder = tabWidgets.map(
-          tab => (tab as React.ReactElement<TabWidgetProps>).props.id
-        );
+        const originalTabOrder = tabWidgets
+          .map(tab => getTabProps(tab)?.id)
+          .filter((id): id is string => id !== undefined);
         const reorderMapping = newOrder.map(tabId => {
           const index = originalTabOrder.indexOf(tabId);
           if (index === -1) {

@@ -60,12 +60,12 @@ Inside the `Build` method, we'll add state management for our todos and input fi
 
 ```csharp
 //State for the input field where users type new todo titles
-var newTitle = this.UseState("");
+var newTitle = UseState("");
 //State for storing the list of todo items
-var todos = this.UseState(ImmutableArray.Create<Todo>());
+var todos = UseState(ImmutableArray.Create<Todo>());
 
 //Service for showing toast notifications
-var client = this.UseService<IClientProvider>();
+var client = UseService<IClientProvider>();
 ```
 
 ### 5. Build the UI

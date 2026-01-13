@@ -62,7 +62,7 @@ public class CommonWidgetsDemo : ViewBase
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
+        var client = UseService<IClientProvider>();
         return Layout.Grid().Columns(2).Gap(4)
             | new Card(
                 Layout.Horizontal().Gap(2)
@@ -154,26 +154,30 @@ public class InputWidgetsDemo : ViewBase
         var colorState = UseState("#00cc92");
         var codeState = UseState("var x = 10;");
         var fileState = UseState<FileUpload<byte[]>?>();
-        var fileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState));
+        var fileUpload = UseUpload(MemoryStreamUploadHandler.Create(fileState));
         var feedbackState = UseState(4);
         var selectState = UseState("");
         var asyncSelectState = UseState((string?)null);
         
-        var selectedCategory = this.UseState<string?>(default(string?));
+        var selectedCategory = UseState<string?>(default(string?));
 
-        Task<Option<string>[]> QueryCategories(string query)
+        QueryResult<Option<string>[]> QueryCategories(IViewContext context, string query)
         {
-            return Task.FromResult(Categories
-                .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
-                .Select(c => new Option<string>(c))
-                .ToArray());
+            return context.UseQuery<Option<string>[], (string, string)>(
+                key: (nameof(QueryCategories), query),
+                fetcher: ct => Task.FromResult(Categories
+                    .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Select(c => new Option<string>(c))
+                    .ToArray()));
         }
 
-        Task<Option<string>?> LookupCategory(string? category)
+        QueryResult<Option<string>?> LookupCategory(IViewContext context, string? category)
         {
-            return Task.FromResult(category != null ? new Option<string>(category) : null);
+            return context.UseQuery<Option<string>?, (string, string?)>(
+                key: (nameof(LookupCategory), category),
+                fetcher: ct => Task.FromResult(category != null ? new Option<string>(category) : null));
         }
-        
+
         return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
             | new Card(
                 Layout.Vertical().Gap(2)

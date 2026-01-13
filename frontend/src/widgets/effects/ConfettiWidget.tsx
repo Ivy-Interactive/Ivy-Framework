@@ -8,7 +8,7 @@ interface ConfettiWidgetProps {
 
 const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({
   children,
-  trigger = 'Click',
+  trigger = 'Auto',
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
 

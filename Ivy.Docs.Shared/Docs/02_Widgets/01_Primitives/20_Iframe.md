@@ -87,7 +87,7 @@ public class RefreshableIframeView : ViewBase
 {
     public override object? Build()
     {
-        var refreshToken = this.UseRefreshToken();
+        var refreshToken = UseRefreshToken();
         var url = UseState("https://httpbin.org/uuid");
         
         return Layout.Vertical().Gap(4)
@@ -144,7 +144,7 @@ public class RefreshTokenExample : ViewBase
 {
     public override object? Build()
     {
-        var refreshToken = this.UseRefreshToken();
+        var refreshToken = UseRefreshToken();
         
         return Layout.Vertical()
             | new Button("Reload Content", onClick: _ => refreshToken.Refresh())

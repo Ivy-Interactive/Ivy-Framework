@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEventHandler } from '@/components/event-handler';
-import type { TabWidgetProps } from '../types';
+import { getTabProps } from '../utils/tabUtils';
 
 /**
  * Hook to manage all tab-related state, refs, and synchronization
@@ -21,9 +21,9 @@ export function useTabManagement(
 
   const initialTabOrder = React.useMemo(
     () =>
-      tabWidgets.map(
-        tab => (tab as React.ReactElement<{ id: string }>).props.id
-      ),
+      tabWidgets
+        .map(tab => getTabProps(tab)?.id)
+        .filter((id): id is string => id !== undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [] // Only run on mount
   );
@@ -113,9 +113,9 @@ export function useTabManagement(
   // Sync tab order on add/remove
   React.useEffect(() => {
     const prev = tabOrderRef.current;
-    const currentTabIds = tabWidgets.map(
-      tab => (tab as React.ReactElement<TabWidgetProps>).props.id
-    );
+    const currentTabIds = tabWidgets
+      .map(tab => getTabProps(tab)?.id)
+      .filter((id): id is string => id !== undefined);
     const added = currentTabIds.filter(id => !prev.includes(id));
     const removed = prev.filter(id => !currentTabIds.includes(id));
 

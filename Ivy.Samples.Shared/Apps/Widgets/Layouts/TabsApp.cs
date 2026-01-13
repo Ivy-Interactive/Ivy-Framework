@@ -7,14 +7,14 @@ public class TabsApp : ViewBase
 {
     public override object? Build()
     {
-        var selectedIndex = this.UseState<int?>();
+        var selectedIndex = UseState<int?>();
         var client = UseService<IClientProvider>();
         var tabs = UseState(() => ImmutableArray.Create<Tab>([
             new Tab("Customers", "Customers").Icon(Icons.User).Badge("10"),
             new Tab("Orders", "Orders").Icon(Icons.DollarSign).Badge("0"),
             new Tab("Settings", "Settings").Icon(Icons.Settings).Badge("999")
         ]));
-        var width = this.UseState(1.0);
+        var width = UseState(1.0);
 
         void OnTabSelect(Event<TabsLayout, int> @event)
         {

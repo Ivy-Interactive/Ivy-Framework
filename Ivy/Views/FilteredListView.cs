@@ -1,7 +1,5 @@
 using System.Reactive.Linq;
-using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Helpers;
 using Ivy.Shared;
 using Ivy.Views.Blades;
 
@@ -36,11 +34,14 @@ public class FilteredListView<T>(
 
         var items = records.Value.Select(createItem);
 
-        return BladeHelper.WithHeader(
-            (Layout.Horizontal().Gap(1)
-             | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
-             | toolButtons!),
-            loading.Value ? Text.Muted("Loading...") : new List(items)
-        );
+        var header = Layout.Horizontal().Gap(1)
+                      | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
+                      | toolButtons;
+
+        return new Fragment()
+               | new BladeHeader(header)
+               | (loading.Value ? Text.Muted("Loading...") : new List(items))
+            ;
+
     }
 }

@@ -129,11 +129,6 @@ public static class NavigateSignalExtensions
         return new Navigator(signal, repository, client);
     }
 
-    public static INavigator UseNavigation(this IView view)
-    {
-        return view.Context.UseNavigation();
-    }
-
     private class Navigator(ISignalSender<NavigateArgs, Unit> signal, IAppRepository repository, IClientProvider client) : INavigator
     {
         public void Navigate(Type type, object? appArgs = null)

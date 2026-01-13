@@ -9,9 +9,6 @@ public delegate void ShowAlertDelegate(string message, Action<AlertResult> callb
 
 public static class UseAlertExtensions
 {
-    public static (IView? alertView, ShowAlertDelegate showAlert) UseAlert<TW>(this TW view) where TW : ViewBase =>
-        view.Context.UseAlert();
-
     public static (IView? alertView, ShowAlertDelegate showAlert) UseAlert(this IViewContext context)
     {
         var open = context.UseRef(false);

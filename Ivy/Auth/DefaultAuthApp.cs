@@ -8,6 +8,7 @@ using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.Forms;
 using Microsoft.AspNetCore.Mvc;
+using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy.Auth;
 
@@ -69,10 +70,10 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
     public override object Build()
     {
-        var credentials = this.UseState(() => new LoginFormModel("", ""));
-        var loading = this.UseState<bool>();
-        var auth = this.UseService<IAuthService>();
-        var client = this.UseService<IClientProvider>();
+        var credentials = UseState(() => new LoginFormModel("", ""));
+        var loading = UseState<bool>();
+        var auth = UseService<IAuthService>();
+        var client = UseService<IClientProvider>();
 
         var formBuilder = credentials.ToForm("Login")
             .Required(m => m.User, m => m.Password)
@@ -141,7 +142,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
 {
     public override object? Build()
     {
-        var args = this.UseService<AppArgs>();
+        var args = this.UseService<AppContext>();
         var auth = this.UseService<IAuthService>();
 
         var callback = this.UseWebhook(async (request) =>

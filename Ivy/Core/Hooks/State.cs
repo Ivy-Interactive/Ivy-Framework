@@ -131,6 +131,6 @@ public class State<T> : IState<T>
 
     public IEffectTrigger ToTrigger()
     {
-        return EffectTrigger.AfterChange(this);
+        return EffectTrigger.OnStateChange(this);
     }
 }

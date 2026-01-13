@@ -21,7 +21,7 @@ public class BasicRefreshExample : ViewBase
 {
     public override object? Build()
     {
-        var refreshToken = this.UseRefreshToken();
+        var refreshToken = UseRefreshToken();
         var timestamp = UseState(DateTime.Now);
         
         // Effect runs when refresh token changes
@@ -64,7 +64,7 @@ public class ReturnValueExample : ViewBase
 {
     public override object? Build()
     {
-        var refreshToken = this.UseRefreshToken();
+        var refreshToken = UseRefreshToken();
         var selectedColor = UseState("No color selected");
         
         UseEffect(() =>
@@ -112,15 +112,15 @@ UseEffect(() =>
 }, [refreshToken]);
 ```
 
-### Combine with AfterInit Trigger
+### Combine with OnMount Trigger
 
 ```csharp
-// Load data on init AND when manually refreshed
+// Load data on mount AND when manually refreshed
 UseEffect(async () =>
 {
     var data = await LoadData();
     // ...
-}, [EffectTrigger.AfterInit(), refreshToken]);
+}, [EffectTrigger.OnMount(), refreshToken]);
 ```
 
 ### Guard Against Unnecessary Actions

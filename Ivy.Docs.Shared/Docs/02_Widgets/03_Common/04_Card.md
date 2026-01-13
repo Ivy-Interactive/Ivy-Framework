@@ -1,6 +1,6 @@
 ---
 prepare: |
-  var client = this.UseService<IClientProvider>();
+  var client = UseService<IClientProvider>();
 searchHints:
   - container
   - panel
@@ -61,21 +61,24 @@ new Card(
 
 ## Dashboard Metrics
 
-For dashboard applications, Ivy provides the specialized `MetricView` component that extends Card functionality with KPI-specific features like trend indicators and goal tracking.
+For dashboard applications, Ivy provides the specialized `MetricView` component that extends Card functionality with KPI-specific features like trend indicators and goal tracking. It uses [UseQuery](../../../03_Hooks/Core/09_Query.md) hooks for data fetching.
 
 ```csharp demo-below
 new MetricView(
-    "Revenue", 
+    "Revenue",
     Icons.DollarSign,
-    () => Task.FromResult(new MetricRecord(
-        "$125,430", 
-        0.12, // 12% increase
-        0.85, // 85% of goal
-        "Target: $150,000"
-    ))
+    ctx => ctx.UseQuery(
+        key: "revenue",
+        fetcher: () => Task.FromResult(new MetricRecord(
+            "$125,430",
+            0.12, // 12% increase
+            0.85, // 85% of goal
+            "Target: $150,000"
+        ))
+    )
 )
 ```
 
-The `MetricView` automatically handles loading states, error handling, and displays trend arrows with color-coded indicators for performance tracking. See the [MetricView documentation](13_MetricView.md) for more details.
+The `MetricView` uses UseQuery hooks for data loading, which automatically handles loading states, error handling, and caching. It also displays trend arrows with color-coded indicators for performance tracking. See the [MetricView documentation](13_MetricView.md) for more details.
 
 <WidgetDocs Type="Ivy.Card" ExtensionTypes="Ivy.CardExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Card.cs"/>

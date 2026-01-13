@@ -114,7 +114,7 @@ public class BarChartBuilder<TSource>(
             {
                 loading.Set(false);
             }
-        }, [EffectTrigger.AfterInit()]);
+        }, [EffectTrigger.OnMount()]);
 
         if (loading.Value)
         {

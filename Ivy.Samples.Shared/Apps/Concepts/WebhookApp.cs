@@ -9,7 +9,7 @@ public class WebhookApp : ViewBase
     public override object? Build()
     {
         var counter = UseState(0);
-        var url = this.UseWebhook(_ =>
+        var url = UseWebhook(_ =>
         {
             counter.Set(counter.Value + 1);
         });

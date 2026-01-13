@@ -1,6 +1,6 @@
 ---
 prepare: |
-  var client = this.UseService<IClientProvider>();
+  var client = UseService<IClientProvider>();
 searchHints:
   - loading
   - percentage
@@ -25,7 +25,7 @@ public class ProgressDemo : ViewBase
 {
     public override object? Build()
     {
-        var progress = this.UseState(25);
+        var progress = UseState(25);
 
         return Layout.Vertical(
             new Progress(progress.Value).Goal($"{progress.Value}% Complete"),

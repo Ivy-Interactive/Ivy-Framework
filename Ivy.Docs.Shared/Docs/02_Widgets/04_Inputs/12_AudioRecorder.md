@@ -26,7 +26,7 @@ public class BasicAudioRecorderDemo : ViewBase
     public override object? Build()
     {
         var audioFile = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(
+        var upload = UseUpload(
             MemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );
@@ -54,7 +54,7 @@ public class ChunkedUploadDemo : ViewBase
         var chunkCount = UseState(0);
 
         // Use ChunkedMemoryStreamUploadHandler to accumulate chunks into a single file
-        var upload = this.UseUpload(
+        var upload = UseUpload(
             ChunkedMemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );
@@ -87,7 +87,7 @@ public class AudioFormatDemo : ViewBase
         var audioFile = UseState<FileUpload<byte[]>?>();
 
         // Use webm format (most compatible)
-        var upload = this.UseUpload(
+        var upload = UseUpload(
             MemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );
@@ -118,7 +118,7 @@ public class CustomLabelsDemo : ViewBase
     public override object? Build()
     {
         var audioFile = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(
+        var upload = UseUpload(
             MemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );
@@ -144,7 +144,7 @@ public class AudioRecorderDisabledDemo : ViewBase
     public override object? Build()
     {
         var audioFile = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(
+        var upload = UseUpload(
             MemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );

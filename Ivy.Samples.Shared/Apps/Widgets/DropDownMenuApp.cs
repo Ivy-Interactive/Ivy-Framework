@@ -7,7 +7,7 @@ public class DropDownMenuApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var client = this.UseService<IClientProvider>();
+        var client = UseService<IClientProvider>();
 
         var trigger = new Button("Open Menu");
 

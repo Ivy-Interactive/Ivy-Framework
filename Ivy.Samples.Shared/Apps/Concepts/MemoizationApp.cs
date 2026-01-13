@@ -8,7 +8,7 @@ public class MemoizationApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var list = this.UseState(() => ImmutableArray.Create(1, 2, 3));
+        var list = UseState(() => ImmutableArray.Create(1, 2, 3));
 
         return Layout.Vertical(
             Layout.Horizontal(

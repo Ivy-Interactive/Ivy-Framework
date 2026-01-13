@@ -1,6 +1,6 @@
 ---
 prepare: |
-  var client = this.UseService<IClientProvider>();
+  var client = UseService<IClientProvider>();
 searchHints:
   - picker
   - palette
@@ -27,7 +27,7 @@ public class ColorDemo : ViewBase
 {
     public override object? Build()
     {    
-        var colorState = this.UseState("#ff0000");
+        var colorState = UseState("#ff0000");
         return colorState.ToColorInput();
     }   
 }
@@ -88,7 +88,7 @@ public class ColorChangedDemo : ViewBase
 
     public override object? Build()
     {    
-        var colorState = this.UseState("#ff0000");
+        var colorState = UseState("#ff0000");
         var colorName = UseState(colorState.Value);
         var onChangeHandler = (Event<IInput<string>, string> e) =>
         {

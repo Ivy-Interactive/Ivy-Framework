@@ -18,7 +18,7 @@ Hooks are functions that let you "hook into" Ivy state and lifecycle features fr
 
 ## Other Hooks
 
-- [UseStatic](./08_Static.md): Store static values.
+- [UseRef](./08_Ref.md): Store mutable values.
 
 ## Creating Custom Hooks
 

@@ -151,38 +151,38 @@ UseEffect(() =>
 
 ```mermaid
 graph LR
-    A[UseEffect] --> B[AfterInit - Default]
-    A --> C[AfterRender]
-    A --> D[AfterChange]
-    
+    A[UseEffect] --> B[OnMount - Default]
+    A --> C[OnBuild]
+    A --> D[OnStateChange]
+
     B --> B1["Runs once during initialization"]
     C --> C1["Runs after virtual DOM updates"]
     D --> D1["Runs when state changes"]
 ```
 
 ```csharp
-// AfterInit (default) - runs once during initialization
+// OnMount (default) - runs once during initialization
 UseEffect(() => { /* ... */ });
-UseEffect(() => { /* ... */ }, EffectTrigger.AfterInit());
+UseEffect(() => { /* ... */ }, EffectTrigger.OnMount());
 
-// AfterRender - runs after virtual DOM updates
-UseEffect(() => { /* ... */ }, EffectTrigger.AfterRender());
+// OnBuild - runs after virtual DOM updates
+UseEffect(() => { /* ... */ }, EffectTrigger.OnBuild());
 
-// AfterChange - runs when state changes
-UseEffect(() => { /* ... */ }, EffectTrigger.AfterChange(myState));
+// OnStateChange - runs when state changes
+UseEffect(() => { /* ... */ }, EffectTrigger.OnStateChange(myState));
 ```
 
 ### Effect Execution Order
 
 ```mermaid
 graph TD
-    A[Effect Processing] --> B["1. StateChange Priority"]
-    B --> C["2. AfterRender Priority"]
-    C --> D["3. AfterInit Priority"]
-    
-    B --> B1[AfterChange triggers]
-    C --> C1[AfterRender triggers]
-    D --> D1[AfterInit triggers - Default]
+    A[Effect Processing] --> B["1. OnStateChange Priority"]
+    B --> C["2. OnBuild Priority"]
+    C --> D["3. OnMount Priority"]
+
+    B --> B1[OnStateChange triggers]
+    C --> C1[OnBuild triggers]
+    D --> D1[OnMount triggers - Default]
 ```
 
 ## Common Patterns
