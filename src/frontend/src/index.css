@@ -9,6 +9,11 @@
 
 /* Hardcoded CSS variables removed - now using Ivy Design System flat CSS imports above */
 
+/* Custom element for widget inspector */
+ivy-widget {
+  display: contents;
+}
+
 /* Additional theme customization variables */
 @layer base {
   :root {
@@ -375,4 +380,228 @@
     outline: none !important;
     box-shadow: none !important;
   }
+}
+
+/* DevTools Styles */
+.ivy-devtools-toolbar {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 100000;
+  display: flex;
+  gap: 8px;
+}
+
+.ivy-devtools-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: var(--shadow-md);
+  transition:
+    opacity 0.15s,
+    background-color 0.15s;
+}
+
+.ivy-devtools-btn:hover {
+  opacity: 0.9;
+}
+
+.ivy-devtools-btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.ivy-devtools-btn-muted {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+}
+
+.ivy-devtools-btn-muted:hover {
+  background-color: var(--accent);
+}
+
+.ivy-devtools-btn-success {
+  background-color: var(--success);
+  color: var(--success-foreground);
+}
+
+.ivy-devtools-btn-destructive {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.ivy-devtools-overlay {
+  position: fixed;
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  border: 2px solid color-mix(in srgb, var(--primary) 80%, transparent);
+  pointer-events: none;
+  z-index: 99999;
+  box-sizing: border-box;
+}
+
+.ivy-devtools-label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--background);
+  color: var(--foreground);
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: var(--font-sans);
+  border-radius: 6px;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  line-height: 1.4;
+}
+
+.ivy-devtools-label-type {
+  font-weight: 500;
+}
+
+.ivy-devtools-label-id {
+  opacity: 0.6;
+  font-size: 10px;
+}
+
+.ivy-devtools-popover {
+  position: fixed;
+  z-index: 100001;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 12px;
+  width: 300px;
+  font-family: var(--font-sans);
+}
+
+.ivy-devtools-popover-header {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.ivy-devtools-popover-type {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.ivy-devtools-popover-id {
+  margin-left: 8px;
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.ivy-devtools-textarea-wrapper {
+  position: relative;
+}
+
+.ivy-devtools-textarea {
+  width: 100%;
+  height: 80px;
+  padding: 8px;
+  padding-right: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  resize: none;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  box-sizing: border-box;
+}
+
+.ivy-devtools-textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+.ivy-devtools-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.ivy-devtools-mic-btn {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.ivy-devtools-mic-btn:hover {
+  background: var(--accent);
+}
+
+.ivy-devtools-mic-active {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.ivy-devtools-popover-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
+.ivy-devtools-popover-actions .ivy-devtools-btn {
+  padding: 6px 12px;
+}
+
+.ivy-devtools-popover-hint {
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--muted-foreground);
+  text-align: right;
+}
+
+.ivy-devtools-marker {
+  position: fixed;
+  z-index: 99998;
+  width: 20px;
+  height: 20px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: var(--font-sans);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.ivy-devtools-marker:hover {
+  transform: scale(1.1);
 }

@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ErrorSheet } from '@/components/ErrorSheet';
 import ErrorBoundary from './ErrorBoundary';
 import MadeWithIvy from './MadeWithIvy';
+import { DevTools } from './DevTools';
 import {
   getAppArgs,
   getAppId,
@@ -58,6 +59,7 @@ export function App() {
         <EventHandlerProvider eventHandler={eventHandler}>
           <>
             {!removeBranding && <MadeWithIvy />}
+            <DevTools />
             {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
             <ErrorSheet />
             <Toaster />
