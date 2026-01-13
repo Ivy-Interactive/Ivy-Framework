@@ -109,27 +109,16 @@ public static class Utils
 
     public static bool IsPortInUse(int port)
     {
-        // Check both IPv4 and IPv6 since the server binds to all interfaces (http://*:port)
-        try
-        {
-            using var listener = new TcpListener(IPAddress.Any, port);
-            listener.Start();
-            listener.Stop();
-        }
-        catch (SocketException)
-        {
-            return true;
-        }
+        // Check active TCP listeners using IPGlobalProperties
+        var ipProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
+        var tcpListeners = ipProperties.GetActiveTcpListeners();
 
-        try
+        foreach (var endpoint in tcpListeners)
         {
-            using var listener = new TcpListener(IPAddress.IPv6Any, port);
-            listener.Start();
-            listener.Stop();
-        }
-        catch (SocketException)
-        {
-            return true;
+            if (endpoint.Port == port)
+            {
+                return true;
+            }
         }
 
         return false;

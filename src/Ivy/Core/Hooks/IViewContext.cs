@@ -1,6 +1,6 @@
 namespace Ivy.Core.Hooks;
 
-public interface IViewContext : IDisposable
+public interface IViewContext : IAsyncDisposable
 {
     void TrackDisposable(IDisposable disposable);
 
@@ -18,11 +18,13 @@ public interface IViewContext : IDisposable
 
     void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers);
 
-    void UseEffect(Func<Task<IDisposable>> handler, params IEffectTriggerConvertible[] triggers);
+    void UseEffect(Func<Task<IDisposable?>> handler, params IEffectTriggerConvertible[] triggers);
 
-    void UseEffect(Func<Task<IAsyncDisposable>> handler, params IEffectTriggerConvertible[] triggers);
+    void UseEffect(Func<Task<IAsyncDisposable?>> handler, params IEffectTriggerConvertible[] triggers);
 
-    void UseEffect(Func<IDisposable> handler, params IEffectTriggerConvertible[] triggers);
+    void UseEffect(Func<IDisposable?> handler, params IEffectTriggerConvertible[] triggers);
+
+    void UseEffect(Func<IAsyncDisposable?> handler, params IEffectTriggerConvertible[] triggers);
 
     void UseEffect(Action handler, params IEffectTriggerConvertible[] triggers);
 

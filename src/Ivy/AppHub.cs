@@ -309,7 +309,7 @@ public class AppHub(
                         // ignored
                     }
 
-                    appState.Dispose();
+                    await appState.DisposeAsync();
                 }
                 catch (Exception ex)
                 {

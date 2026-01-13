@@ -2,7 +2,7 @@ using System.Text.Json.Nodes;
 
 namespace Ivy.Core;
 
-public interface IWidgetTree : IDisposable
+public interface IWidgetTree : IAsyncDisposable
 {
     public IView RootView { get; }
 

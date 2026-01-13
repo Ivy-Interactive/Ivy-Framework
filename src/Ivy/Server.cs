@@ -359,18 +359,18 @@ public class Server
 
                 if (attemptCount >= maxAttempts)
                 {
-                    Console.WriteLine($@"[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.[0m");
+                    Console.WriteLine($@"Could not find an available port after checking {maxAttempts} ports starting from {originalPort}.");
                     return;
                 }
 
                 if (_args.Port != originalPort)
                 {
-                    Console.WriteLine($@"[33mPort {originalPort} is in use. Using port {_args.Port} instead.[0m");
+                    Console.WriteLine($@"Port {originalPort} is in use. Using port {_args.Port} instead.");
                 }
             }
             else
             {
-                Console.WriteLine($@"[31mPort {_args.Port} is already in use on this machine.[0m");
+                Console.WriteLine($@"Port {_args.Port} is already in use on this machine.");
 
                 Console.WriteLine(
                     @"Specify a different port using '--port <number>' or '--i-kill-for-this-port' to just take it.");

@@ -498,19 +498,38 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         }
     }
 
+    // Sync version for use during tree building - disposes fire-and-forget
     private void DestroyNode(string nodeId, string? skipViewId = null)
     {
         if (_nodes.TryGetValue(nodeId, out var node))
         {
             if (nodeId != skipViewId)
             {
-                node.Dispose();
+                _ = node.DisposeAsync(); // Fire and forget
                 _nodes.Remove(nodeId);
                 _parents.Remove(nodeId);
             }
             foreach (var child in node.Children)
             {
                 DestroyNode(child.Id);
+            }
+        }
+    }
+
+    // Async version for proper cleanup on shutdown
+    private async ValueTask DestroyNodeAsync(string nodeId, string? skipViewId = null)
+    {
+        if (_nodes.TryGetValue(nodeId, out var node))
+        {
+            if (nodeId != skipViewId)
+            {
+                await node.DisposeAsync();
+                _nodes.Remove(nodeId);
+                _parents.Remove(nodeId);
+            }
+            foreach (var child in node.Children)
+            {
+                await DestroyNodeAsync(child.Id);
             }
         }
     }
@@ -563,14 +582,14 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     public IDisposable Subscribe(IObserver<WidgetTreeChanged[]> observer) => _treeChangedSubject.Subscribe(observer);
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _buildRequestedSemaphore.Wait();
+        await _buildRequestedSemaphore.WaitAsync();
         try
         {
             if (NodeTree != null)
             {
-                DestroyNode(NodeTree!.Id);
+                await DestroyNodeAsync(NodeTree!.Id);
             }
             _disposables.Dispose();
             _treeChangedSubject.Dispose();

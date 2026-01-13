@@ -4,7 +4,7 @@ using Ivy.Core.Helpers;
 
 namespace Ivy.Apps;
 
-public class AppSession : IDisposable
+public class AppSession : IAsyncDisposable
 {
     private readonly Disposables _disposables = new();
     private bool _isDisposed = false;
@@ -38,12 +38,12 @@ public class AppSession : IDisposable
 
     public EventDispatchQueue? EventQueue { get; set; }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _isDisposed = true;
         EventQueue?.Dispose();
         _disposables.Dispose();
-        WidgetTree.Dispose();
+        await WidgetTree.DisposeAsync();
     }
 
     public bool IsDisposed() => _isDisposed;

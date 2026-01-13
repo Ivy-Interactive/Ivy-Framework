@@ -48,13 +48,18 @@ public abstract partial class ViewBase
     protected void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
-    protected void UseEffect(Func<Task<IDisposable>> handler, params IEffectTriggerConvertible[] triggers) =>
+    [OverloadResolutionPriority(1)]
+    protected void UseEffect(Func<Task<IDisposable?>> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
-    protected void UseEffect(Func<Task<IAsyncDisposable>> handler, params IEffectTriggerConvertible[] triggers) =>
+    protected void UseEffect(Func<Task<IAsyncDisposable?>> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
-    protected void UseEffect(Func<IDisposable> handler, params IEffectTriggerConvertible[] triggers) =>
+    [OverloadResolutionPriority(1)]
+    protected void UseEffect(Func<IDisposable?> handler, params IEffectTriggerConvertible[] triggers) =>
+        this.Context.UseEffect(handler, triggers);
+
+    protected void UseEffect(Func<IAsyncDisposable?> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
     protected void UseEffect(Action handler, params IEffectTriggerConvertible[] triggers) =>
