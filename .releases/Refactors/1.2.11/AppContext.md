@@ -1,4 +1,4 @@
-# AppArgs Rename - v1.2.6
+# AppArgs Rename - v1.2.11
 
 ## Summary
 
@@ -6,13 +6,13 @@
 
 ## What Changed
 
-### Before (v1.2.5 and earlier)
+### Before (v1.2.10 and earlier)
 ```csharp
 var args = UseService<AppArgs>();
 var url = $"{args.Scheme}://{args.Host}/path";
 ```
 
-### After (v1.2.6+)
+### After (v1.2.11+)
 ```csharp
 var args = UseService<Ivy.Apps.AppContext>();
 var url = $"{args.Scheme}://{args.Host}/path";

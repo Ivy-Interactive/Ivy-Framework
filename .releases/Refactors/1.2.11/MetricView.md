@@ -1,4 +1,4 @@
-# MetricView Refactor (1.2.6)
+# MetricView Refactor (1.2.11)
 
 ## Breaking Change
 

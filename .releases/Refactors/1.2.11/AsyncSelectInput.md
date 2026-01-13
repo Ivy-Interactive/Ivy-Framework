@@ -1,4 +1,4 @@
-# AsyncSelectInput Breaking Change - v1.2.6
+# AsyncSelectInput Breaking Change - v1.2.11
 
 ## Summary
 
@@ -6,13 +6,13 @@ The `AsyncSelectQueryDelegate<T>` and `AsyncSelectLookupDelegate<T>` signatures 
 
 ## What Changed
 
-### Before (v1.2.5 and earlier)
+### Before (v1.2.10 and earlier)
 ```csharp
 public delegate Task<Option<T>[]> AsyncSelectQueryDelegate<T>(string query);
 public delegate Task<Option<T>?> AsyncSelectLookupDelegate<T>(T id);
 ```
 
-### After (v1.2.6+)
+### After (v1.2.11+)
 ```csharp
 public delegate QueryResult<Option<T>[]> AsyncSelectSearchDelegate<T>(IViewContext context, string query);
 public delegate QueryResult<Option<T>?> AsyncSelectLookupDelegate<T>(IViewContext context, T id);
@@ -57,7 +57,7 @@ The simplest and recommended pattern is to create static methods that directly m
 
 #### Example: Database Query Methods
 
-**Before (v1.2.5):**
+**Before (v1.2.10):**
 ```csharp
 // Old delegate type name was AsyncSelectQueryDelegate
 public static AsyncSelectQueryDelegate<Guid?> QueryCategories(SampleDbContextFactory factory)
@@ -94,7 +94,7 @@ public static AsyncSelectLookupDelegate<Guid?> LookupCategory(SampleDbContextFac
     placeholder: "Select Category"))
 ```
 
-**After (v1.2.6+):**
+**After (v1.2.11+):**
 ```csharp
 // Method signature matches AsyncSelectSearchDelegate<Guid?> (renamed from AsyncSelectQueryDelegate)
 public static QueryResult<Option<Guid?>[]> UseCategorySearch(IViewContext context, string query)

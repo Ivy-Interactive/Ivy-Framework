@@ -1,4 +1,4 @@
-# BladeHeader Breaking Change - v1.2.6
+# BladeHeader Breaking Change - v1.2.11
 
 ## Summary
 
@@ -6,12 +6,12 @@ The `BladeHelper.WithHeader()` static method has been replaced with the `BladeHe
 
 ## What Changed
 
-### Before (v1.2.5 and earlier)
+### Before (v1.2.10 and earlier)
 ```csharp
 return BladeHelper.WithHeader(header, content);
 ```
 
-### After (v1.2.6+)
+### After (v1.2.11+)
 ```csharp
 return new Fragment()
        | new BladeHeader(header)

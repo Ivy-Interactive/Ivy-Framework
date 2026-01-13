@@ -1,4 +1,4 @@
-# BladeService Rename - v1.2.6
+# BladeService Rename - v1.2.11
 
 ## Summary
 
@@ -6,12 +6,12 @@
 
 ## What Changed
 
-### Before (v1.2.5 and earlier)
+### Before (v1.2.10 and earlier)
 ```csharp
 var blades = UseContext<IBladeController>();
 ```
 
-### After (v1.2.6+)
+### After (v1.2.11+)
 ```csharp
 var blades = UseContext<IBladeService>();
 ```
