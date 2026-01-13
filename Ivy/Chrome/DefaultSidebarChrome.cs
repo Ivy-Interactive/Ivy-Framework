@@ -35,7 +35,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var args = UseService<AppContext>();
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
-        var navigator = this.UseNavigation();
+        var navigator = UseNavigation();
 
         void SetAppTitle(string appId)
         {
