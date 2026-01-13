@@ -330,7 +330,6 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       td: memo(({ children }: { children: React.ReactNode }) => (
         <td className={typography.td}>{children}</td>
       )),
-      hr: memo(() => <hr className="my-6" />),
       img: memo(
         (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
           const [showOverlay, setShowOverlay] = useState(false);
@@ -385,6 +384,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         (prevProps, nextProps) =>
           prevProps.src === nextProps.src && prevProps.alt === nextProps.alt
       ),
+      hr: memo((props: React.HTMLAttributes<HTMLHRElement>) => (
+        <hr className={typography.hr} {...props} />
+      )),
     }),
     []
   );
