@@ -6,7 +6,7 @@ searchHints:
   - fullstack
 ---
 
-# Welcome to Ivy2
+# Welcome to Ivy
 
 <Ingress>
 Ivy is the ultimate framework for building internal tools and dashboards using Pure C#, unifying frontend and backend into a single cohesive codebase. It can also be used to build general-purpose full-stack applications. Ivy's main focus is on developer's experience, UI and UX.
