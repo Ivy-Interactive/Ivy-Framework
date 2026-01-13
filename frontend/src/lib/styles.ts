@@ -576,7 +576,7 @@ export const typography: Record<string, string> = {
   h6: `text-base font-medium scroll-m-20 mt-2 mb-2 [&+p]:mt-0`,
 
   // Body
-  p: `text-base scroll-m-20 [&+p]:mt-0`,
+  p: `text-base scroll-m-20 [&+p]:my-4`,
   lead: `text-muted-foreground`,
   strong: 'font-semibold',
   em: 'italic',
