@@ -9,5 +9,5 @@ if [ -n "$CS_STAGED_FILES" ]; then
 fi
 
 # TS and JS files are handled well by lint-staged
-cd frontend
+cd src/frontend
 npx lint-staged
