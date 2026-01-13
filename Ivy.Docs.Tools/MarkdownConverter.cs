@@ -195,7 +195,7 @@ public static partial class MarkdownConverter
     {
         var sectionBuilder = new StringBuilder();
 
-        void WriteSection()
+        void WriteSection(bool removeBottomMargin = false)
         {
             if (sectionBuilder.Length > 0)
             {
@@ -203,7 +203,9 @@ public static partial class MarkdownConverter
                 referencedApps.UnionWith(types);
                 AppendAsMultiLineStringIfNecessary(baseIndentLevel, convertedMarkdown, codeBuilder,
                     isNestedContent ? ", new Markdown(" : "| new Markdown(",
-                    ").HandleLinkClick(onLinkClick).WithLayout().Margin(0, 0, 0, 4)");
+                    removeBottomMargin
+                        ? ").HandleLinkClick(onLinkClick).WithLayout().Margin(0, 0, 0, 0)"
+                        : ").HandleLinkClick(onLinkClick).WithLayout().Margin(0, 0, 0, 4)");
                 sectionBuilder.Clear();
             }
         }
@@ -260,7 +262,8 @@ public static partial class MarkdownConverter
 
                 if (!isInsideDetailsBlock)
                 {
-                    WriteSection();
+                    // Always remove bottom margin from preceding text for code blocks to ensure visual continuity
+                    WriteSection(true);
                     HandleCodeBlock(codeBlock, markdownContent, codeBuilder, viewBuilder, usedClassNames, isNestedContent, baseIndentLevel);
                 }
             }
