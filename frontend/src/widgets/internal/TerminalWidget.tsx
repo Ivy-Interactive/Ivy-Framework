@@ -33,7 +33,7 @@ const TerminalWidget = ({
     <div
       role="terminal"
       className={cn(
-        'rounded-lg overflow-hidden border border-border shadow-md mb-4'
+        'rounded-lg overflow-hidden border border-border shadow-md'
       )}
     >
       {showHeader && (

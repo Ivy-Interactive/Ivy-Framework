@@ -11,7 +11,7 @@ public class HelloApp : ViewBase
 
         return Layout.Center()
                | (new Card(
-                   Layout.Vertical().Gap(6).Padding(2)
+                   Layout.Vertical()
                   | new Confetti(new IvyLogo())
                   | Text.H2("Hello " + (string.IsNullOrEmpty(nameState.Value) ? "there" : nameState.Value) + "!")
                   | Text.Markdown("Welcome to the fantastic world of Ivy.<br>Let's build something amazing together!")
