@@ -1,6 +1,8 @@
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Ivy.Services;
 
 namespace Ivy.Views.Forms;
@@ -118,7 +120,19 @@ public static class FormHelpers
 
     public static bool CheckForLoadingUploads(object? obj)
     {
+        var visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+        return CheckForLoadingUploads(obj, visited);
+    }
+
+    private static bool CheckForLoadingUploads(object? obj, HashSet<object> visited)
+    {
         if (obj == null) return false;
+
+        // Prevent infinite recursion by tracking visited objects
+        if (visited.Contains(obj))
+            return false;
+
+        visited.Add(obj);
 
         // Check single file upload
         if (obj is IFileUpload file)
@@ -144,7 +158,7 @@ public static class FormHelpers
             try
             {
                 var value = prop.GetValue(obj);
-                if (CheckForLoadingUploads(value))
+                if (CheckForLoadingUploads(value, visited))
                     return true;
             }
             catch
@@ -159,7 +173,7 @@ public static class FormHelpers
             try
             {
                 var value = field.GetValue(obj);
-                if (CheckForLoadingUploads(value))
+                if (CheckForLoadingUploads(value, visited))
                     return true;
             }
             catch
@@ -169,6 +183,21 @@ public static class FormHelpers
         }
 
         return false;
+    }
+
+    private class ReferenceEqualityComparer : IEqualityComparer<object>
+    {
+        public static readonly ReferenceEqualityComparer Instance = new();
+
+        bool IEqualityComparer<object>.Equals(object? x, object? y)
+        {
+            return ReferenceEquals(x, y);
+        }
+
+        int IEqualityComparer<object>.GetHashCode(object obj)
+        {
+            return RuntimeHelpers.GetHashCode(obj);
+        }
     }
 
     public record DisplayInfo(

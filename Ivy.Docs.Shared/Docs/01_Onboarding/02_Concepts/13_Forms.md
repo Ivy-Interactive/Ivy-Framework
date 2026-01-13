@@ -499,13 +499,10 @@ public class CollectionValidationExample : ViewBase
     public class SurveyModel
     {
         [Display(Name = "Interests", Description = "Select at least one interest")]
-        [Required(ErrorMessage = "Please select at least one interest")]
-        [MinLength(1, ErrorMessage = "You must select at least one interest")]
         [AllowedValues("Technology", "Sports", "Music", "Art", "Travel")]
         public string[] Interests { get; set; } = Array.Empty<string>();
         
         [Display(Name = "Tags")]
-        [Length(1, 5, ErrorMessage = "Select between 1 and 5 tags")]
         public List<string> Tags { get; set; } = new();
     }
 
@@ -517,7 +514,12 @@ public class CollectionValidationExample : ViewBase
         
         return survey.ToForm()
             .Builder(m => m.Interests, s => s.ToSelectInput(interestOptions).List())
-            .Builder(m => m.Tags, s => s.ToSelectInput(tagOptions).List());
+            .Builder(m => m.Tags, s => s.ToSelectInput(tagOptions).List())
+            // Validate collection counts using programmatic validation
+            .Validate<string[]>(m => m.Interests, interests =>
+                (interests.Length >= 1, "You must select at least one interest"))
+            .Validate<List<string>>(m => m.Tags, tags =>
+                (tags.Count >= 1 && tags.Count <= 5, "Select between 1 and 5 tags"));
     }
 }
 ```
