@@ -198,6 +198,9 @@ The TextBuilder class provides several modifiers for customizing text appearance
 | `StrikeThrough()` | Add strikethrough | `Text.P("Crossed out").StrikeThrough()` |
 | `NoWrap()` | Prevent wrapping | `Text.P("Single line").NoWrap()` |
 | `Overflow()` | Handle overflow | `Text.P("Long text").Overflow(Overflow.Clip)` |
+| `Small()` | Apply small text size | `Text.P("Small text").Small()` |
+| `Medium()` | Apply medium text size (default) | `Text.P("Normal text").Medium()` |
+| `Large()` | Apply large text size | `Text.P("Large text").Large()` |
 
 ## Best Practices
 
