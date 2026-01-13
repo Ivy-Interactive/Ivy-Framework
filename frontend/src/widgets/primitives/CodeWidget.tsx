@@ -44,7 +44,7 @@ const mapLanguageToPrism = (language: string): string | undefined => {
 };
 
 const MemoizedCopyButton = memo(({ textToCopy }: { textToCopy: string }) => (
-  <div className="absolute top-3 right-3 z-50">
+  <div className="absolute top-2 right-2 z-50">
     <CopyToClipboardButton textToCopy={textToCopy} />
   </div>
 ));
@@ -90,17 +90,13 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         <ScrollArea
           className={cn(
             'w-full h-full',
-            showBorder && 'border border-border rounded-md',
-            showCopyButton && 'pr-16'
+            showBorder && 'border border-border rounded-md'
           )}
         >
           <Suspense
             fallback={
               <pre
-                className={cn(
-                  'p-4 bg-muted rounded-md font-mono text-sm',
-                  showCopyButton && 'pr-16'
-                )}
+                className={cn('p-4 bg-muted rounded-md font-mono text-sm')}
                 style={styles}
               >
                 {content}
