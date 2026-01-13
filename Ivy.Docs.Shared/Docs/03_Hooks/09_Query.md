@@ -16,7 +16,7 @@ searchHints:
 Fetch, cache, and synchronize server data with the UseQuery hook.
 </Ingress>
 
-The `UseQuery` hook provides a powerful way to fetch and cache asynchronous data. Inspired by [SWR](https://swr.vercel.app/) (stale-while-revalidate), it returns cached data immediately while revalidating in the background, keeping your UI fast and your data fresh.
+The `UseQuery` [hook](./02_RulesOfHooks.md) provides a powerful way to fetch and cache asynchronous data. Inspired by [SWR](https://swr.vercel.app/) (stale-while-revalidate), it returns cached data immediately while revalidating in the background, keeping your [UI](../01_Onboarding/02_Concepts/02_Views.md) fast and your data fresh.
 
 ## Basic Usage
 
@@ -97,7 +97,7 @@ Control where query data is cached and shared:
 
 ## Conditional Fetching
 
-When the key is `null`, UseQuery returns an idle result without fetching:
+When the key is `null` (often controlled by [UseState](./Core/03_State.md)), UseQuery returns an idle result without fetching:
 
 ```csharp demo-below
 public class ConditionalQueryView : ViewBase
@@ -240,7 +240,7 @@ public class SharedDataControls : ViewBase
 
 ## Tag-Based Invalidation
 
-Assign tags to queries for bulk invalidation. Tags are serializable the same way as keys.
+Assign tags to queries for bulk invalidation (using [UseService](../01_Onboarding/02_Concepts/18_Services.md)). Tags are serializable the same way as keys.
 
 ```csharp demo-below
 public class TaggedQueriesView : ViewBase
@@ -313,7 +313,7 @@ public class PollingView : ViewBase
 
 ## Pagination
 
-Use `KeepPrevious` to show previous page data while loading the next:
+Use `KeepPrevious` to show previous page data while loading the next (managed by [UseState](./Core/03_State.md)):
 
 ```csharp demo-below
 public class PaginatedView : ViewBase
