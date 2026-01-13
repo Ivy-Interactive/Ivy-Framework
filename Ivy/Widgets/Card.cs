@@ -14,7 +14,13 @@ public enum CardHoverVariant
 
 public record Card : WidgetBase<Card>
 {
-    public Card(object? content = null, object? footer = null, object? header = null) : base([new Slot("Content", content), new Slot("Footer", footer!), new Slot("Header", header!)])
+    public Card(object? content = null, object? footer = null, object? header = null) : base(
+        new List<object?>
+        {
+            content != null ? new Slot("Content", content) : null,
+            footer != null ? new Slot("Footer", footer) : null,
+            header != null ? new Slot("Header", header) : null
+        }.Where(x => x != null).Cast<object>().ToArray())
     {
         Width = Ivy.Shared.Size.Full();
     }
@@ -43,13 +49,21 @@ public record Card : WidgetBase<Card>
         {
             throw new NotSupportedException("Cards does not support multiple children.");
         }
-        return widget with { Children = [new Slot("Content", child), widget.GetSlot("Footer"), widget.GetSlot("Header")] };
+
+        var slots = new List<object?>
+        {
+            new Slot("Content", child),
+            widget.GetSlot("Footer"),
+            widget.GetSlot("Header")
+        };
+
+        return widget with { Children = slots.Where(x => x != null).Cast<object>().ToArray() };
     }
 }
 
 public static class CardExtensions
 {
-    internal static Slot GetSlot(this Card card, string name) => card.Children.FirstOrDefault(e => e is Slot slot && slot.Name == name) as Slot ?? new Slot(name, null!);
+    internal static Slot? GetSlot(this Card card, string name) => card.Children.FirstOrDefault(e => e is Slot slot && slot.Name == name) as Slot;
 
     public static Card Header(this Card card, object? title = null, object? description = null, object? icon = null)
     {
@@ -58,9 +72,17 @@ public static class CardExtensions
                             | title?.WithLayout().Grow()
                             | icon)
                          | description;
+
+        var slots = new List<object?>
+        {
+            card.GetSlot("Content"),
+            card.GetSlot("Footer"),
+            header != null ? new Slot("Header", header) : null
+        };
+
         return card with
         {
-            Children = [card.GetSlot("Content"), card.GetSlot("Footer"), new Slot("Header", header)],
+            Children = slots.Where(x => x != null).Cast<object>().ToArray(),
             Title = title,
             Description = description,
             Icon = icon

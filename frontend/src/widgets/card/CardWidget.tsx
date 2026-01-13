@@ -17,7 +17,6 @@ import {
 import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import React, { useCallback } from 'react';
-import { EmptyWidget } from '../primitives/EmptyWidget';
 import { Scales } from '@/types/scale';
 import { cardStyles, getSizeClasses } from './styles';
 
@@ -66,17 +65,8 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
     ...(borderColor && getColor(borderColor, 'borderColor', 'background')),
   };
 
-  const footerIsEmpty =
-    slots?.Footer?.length === 0 ||
-    slots?.Footer?.some(
-      node => React.isValidElement(node) && node.type === EmptyWidget
-    );
-
-  const headerIsEmpty =
-    slots?.Header?.length === 0 ||
-    slots?.Header?.some(
-      node => React.isValidElement(node) && node.type === EmptyWidget
-    );
+  const footerIsEmpty = !slots?.Footer || slots.Footer.length === 0;
+  const headerIsEmpty = !slots?.Header || slots.Header.length === 0;
 
   const handleClick = useCallback(() => {
     if (events.includes('OnClick')) eventHandler('OnClick', id, []);
