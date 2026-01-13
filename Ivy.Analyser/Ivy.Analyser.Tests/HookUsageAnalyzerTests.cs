@@ -501,7 +501,7 @@ public class TestView : ViewBase
         UseEffect(() => { });
         var memo = UseMemo(() => 42);
         var reducer = UseReducer((s, a) => s, 0);
-        var staticVal = UseStatic(100);
+        var refVal = UseRef(100);
         var signal = UseSignal<MySignal, int, int>();
         var trigger = UseTrigger<int>((open, value) => null);
         var service = UseService<MyService>();
@@ -517,7 +517,7 @@ public abstract class ViewBase
     protected void UseEffect(Action effect) { }
     protected T UseMemo<T>(Func<T> factory) => default!;
     protected (T, Func<string, T>) UseReducer<T>(Func<T, string, T> reducer, T initialState) => default!;
-    protected T UseStatic<T>(T initialValue) => default!;
+    protected IState<T> UseRef<T>(T initialValue) => default!;
     protected ISignalReceiver<TInput, TOutput> UseSignal<TSignal, TInput, TOutput>() => default!;
     protected (object?, Action<T>) UseTrigger<T>(Func<IState<bool>, T, object?> factory) => default!;
     protected T UseService<T>() => default!;

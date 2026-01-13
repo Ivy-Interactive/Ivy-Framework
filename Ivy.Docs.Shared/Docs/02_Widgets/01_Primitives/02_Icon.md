@@ -35,7 +35,7 @@ public class LucideIconsView : ViewBase
             iconsState.Set(string.IsNullOrEmpty(searchState.Value)
                 ? []
                 : allIcons.Where(e => e.ToString().Contains(searchState.Value, StringComparison.OrdinalIgnoreCase)).Take(10).ToArray());
-        }, [ EffectTrigger.AfterInit(), searchState.Throttle(TimeSpan.FromMilliseconds(500)).ToTrigger() ]);
+        }, [ EffectTrigger.OnMount(), searchState.Throttle(TimeSpan.FromMilliseconds(500)).ToTrigger() ]);
         
         var searchInput = searchState.ToSearchInput().Placeholder("Type an icon name");
         

@@ -282,11 +282,11 @@ flowchart TD
     
     B --> C["Dependencies changing unexpectedly?"]
     B --> D["Performance not improving?"]
-    E --> E1["Use stable references<br/>Avoid creating objects in deps<br/>Use [UseStatic](./08_Static.md) for constants"]
+    E --> E1["Use stable references<br/>Avoid creating objects in deps<br/>Use [UseRef](./08_Ref.md) for constants"]
     B --> E["Infinite loops in UseEffect?"]
     B --> F["Children still re-rendering?"]
     
-    C --> C1["Use stable references<br/> Avoid creating objects in deps<br/> Use UseStatic for constants"]
+    C --> C1["Use stable references<br/> Avoid creating objects in deps<br/> Use UseRef for constants"]
     D --> D1["Profile before optimizing<br/> Only memoize when needed<br/> Check if deps change frequently"]
     E1 --> G["Problem solved?"]
     F --> F1["Check all dependencies<br/> Ensure child uses IMemoized<br/> Verify callback is actually used"]
@@ -311,14 +311,14 @@ var handleAction = UseCallback(() =>
 }, data.Value, new Config { threshold: 100 });
 ```
 
-**Solution**: Use stable references with [UseStatic](./08_Static.md)
+**Solution**: Use stable references with [UseRef](./08_Ref.md)
 
 ```csharp
 // Good: Stable dependency
-var config = UseStatic(new Config { threshold: 100 });
+var config = UseRef(new Config { threshold: 100 });
 var handleAction = UseCallback(() => 
 {
-    ProcessData(data.Value, config);
+    ProcessData(data.Value, config.Value);
 }, data, config);
 ```
 
@@ -444,6 +444,6 @@ UseEffect(async () =>
 - [Effects](./04_Effect.md) - Performing side effects with stable dependencies
 - [State Management](./03_State.md) - Managing component state
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
-- [UseStatic](./08_Static.md) - Storing stable references
+- [UseRef](./08_Ref.md) - Storing stable references
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
 - [Widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) - Building UI components
