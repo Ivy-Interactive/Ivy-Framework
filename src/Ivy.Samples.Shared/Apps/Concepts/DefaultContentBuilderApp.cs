@@ -49,7 +49,7 @@ public static class PersonExtensions
             | Text.Label(person.Name)
             | Layout.Horizontal().Gap(4)
             | new Badge($"Age: {person.Age}")
-            | Text.Small(person.Email)
+            | Text.P(person.Email).Small()
         );
     }
 }

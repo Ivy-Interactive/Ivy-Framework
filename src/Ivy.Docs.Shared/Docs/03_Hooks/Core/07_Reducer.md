@@ -233,7 +233,7 @@ public class ShoppingCartDemo : ViewBase
                         ).ToArray()
                     )
                 )
-                : Text.Small("No items in cart"),
+                : Text.P("No items in cart").Small(),
             new Separator(),
             Layout.Vertical(
                 Text.P($"Subtotal: ${cart.Subtotal:F2}"),
@@ -295,7 +295,7 @@ public class GameStateDemo : ViewBase
                 new Button("Miss", _ => dispatch("miss")).Disabled(game.IsGameOver),
                 new Button("Reset", _ => dispatch("reset"))
             ),
-            Text.Small("Notice how scoring updates level and multiplier, while missing resets multiplier and decreases lives - all in one reducer!")
+            Text.P("Notice how scoring updates level and multiplier, while missing resets multiplier and decreases lives - all in one reducer!").Small()
         );
     }
 }
