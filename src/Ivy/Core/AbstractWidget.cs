@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using Ivy.Core.Helpers;
@@ -13,6 +13,9 @@ public abstract record AbstractWidget : IWidget
     protected AbstractWidget(params object[] children)
     {
         Children = children;
+#if DEBUG
+        CallSite = CallSite.From(new StackTrace(fNeedFileInfo: true));
+#endif
     }
 
     public void SetAttachedValue(Type parentType, string name, object? value)
@@ -25,7 +28,6 @@ public abstract record AbstractWidget : IWidget
         return _attachedProps.GetValueOrDefault((t, name));
     }
 
-    [ScaffoldColumn(false)]
     public string? Id
     {
         get
@@ -39,10 +41,10 @@ public abstract record AbstractWidget : IWidget
         set => _id = value;
     }
 
-    [ScaffoldColumn(false)]
     public string? Key { get; set; }
 
-    [ScaffoldColumn(false)]
+    public CallSite? CallSite { get; set; }
+
     public object[] Children { get; set; }
 
     public JsonNode Serialize() => WidgetSerializer.Serialize(this);
@@ -59,14 +61,6 @@ public abstract record AbstractWidget : IWidget
 
         if (eventDelegate == null)
             return false;
-
-        // Unwrap EventHandler<T> wrapper to get the underlying Func delegate
-        var eventDelegateType = eventDelegate.GetType();
-        if (eventDelegateType.IsGenericType && eventDelegateType.GetGenericTypeDefinition() == typeof(EventHandler<>))
-        {
-            eventDelegate = eventDelegateType.GetProperty("Handler")!.GetValue(eventDelegate);
-            if (eventDelegate == null) return false;
-        }
 
         if (IsFunc(eventDelegate, out Type? eventType, out Type? returnType) && returnType == typeof(ValueTask))
         {

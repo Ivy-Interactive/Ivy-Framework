@@ -439,7 +439,6 @@ ivy-widget {
 .ivy-devtools-overlay {
   position: fixed;
   background: color-mix(in srgb, var(--primary) 30%, transparent);
-  border: 2px solid color-mix(in srgb, var(--primary) 80%, transparent);
   pointer-events: none;
   z-index: 99999;
   box-sizing: border-box;
@@ -490,6 +489,11 @@ ivy-widget {
 .ivy-devtools-popover-type {
   font-weight: 500;
   color: var(--foreground);
+}
+
+.ivy-devtools-callsite-muted {
+  font-weight: 400;
+  opacity: 0.5;
 }
 
 .ivy-devtools-popover-id {

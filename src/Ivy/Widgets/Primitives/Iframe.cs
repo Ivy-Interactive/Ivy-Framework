@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -24,4 +25,17 @@ public record Iframe : WidgetBase<Iframe>
     [Prop] public string Src { get; set; } = null!;
 
     [Prop] public long? RefreshToken { get; }
+
+    [Event] public Func<Event<(string type, JsonNode payload)>, ValueTask>? OnMessageReceived { get; set; }
+}
+
+public static class IframeExtensions
+{
+    public static Iframe HandleMessageReceived(
+        this Iframe widget,
+        Func<Event<(string type, JsonNode payload)>, ValueTask> callback)
+    {
+        widget.OnMessageReceived = callback;
+        return widget;
+    }
 }

@@ -205,6 +205,19 @@ public static class WidgetSerializer
             json["events"] = eventsArray;
         }
 
+#if DEBUG
+        if (widget is AbstractWidget { CallSite: { } callSite })
+        {
+            json["callSite"] = new JsonObject
+            {
+                ["filePath"] = callSite.FilePath,
+                ["lineNumber"] = callSite.LineNumber,
+                ["memberName"] = callSite.MemberName,
+                ["declaringType"] = callSite.DeclaringType
+            };
+        }
+#endif
+
         return json;
     }
 

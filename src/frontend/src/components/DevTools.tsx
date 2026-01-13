@@ -2,13 +2,15 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import SpeechRecognition, {
   useSpeechRecognition,
 } from 'react-speech-recognition';
-import { logger } from '@/lib/logger';
+import { CallSite } from '@/types/widgets';
+import { widgetCallSiteRegistry } from '@/widgets/widgetRenderer';
 
 interface WidgetInfo {
   id: string;
   type: string;
   element: HTMLElement;
   bounds: DOMRect;
+  callSite?: CallSite;
 }
 
 interface ChangeRequest {
@@ -18,6 +20,7 @@ interface ChangeRequest {
   widgetType: string;
   description: string;
   bounds: DOMRect;
+  callSite?: CallSite;
 }
 
 function getWidgetBounds(wrapperElement: HTMLElement): DOMRect {
@@ -85,7 +88,8 @@ export function DevTools() {
     const widgetId = element.getAttribute('id')!;
     const widgetType = element.getAttribute('type')!;
     const bounds = getWidgetBounds(element);
-    return { id: widgetId, type: widgetType, element, bounds };
+    const callSite = widgetCallSiteRegistry.get(widgetId);
+    return { id: widgetId, type: widgetType, element, bounds, callSite };
   }, []);
 
   const handleMouseOver = useCallback(
@@ -210,6 +214,7 @@ export function DevTools() {
           widgetType: selectedWidget.type,
           description: finalText.trim(),
           bounds: selectedWidget.bounds,
+          callSite: selectedWidget.callSite,
         };
         setChangeRequests(prev => [...prev, newRequest]);
         setNextIndex(prev => prev + 1);
@@ -279,8 +284,15 @@ export function DevTools() {
   };
 
   const handleApplyChanges = () => {
-    logger.info('Applying changes:', changeRequests);
-    // TODO: Implement actual change application
+    const payload = changeRequests.map(request => ({
+      widgetId: request.widgetId,
+      widgetType: request.widgetType,
+      description: request.description,
+      callSite: request.callSite,
+    }));
+
+    window.parent.postMessage({ type: 'DEVTOOLS_APPLY_CHANGES', payload }, '*');
+
     setChangeRequests([]);
     setNextIndex(1);
   };
@@ -330,7 +342,7 @@ export function DevTools() {
 
     const label = document.createElement('div');
     label.className = 'ivy-devtools-label';
-    label.innerHTML = `<div class="ivy-devtools-label-type">${type}</div>`;
+    label.innerHTML = `<div class="ivy-devtools-label-type">${type.replace(/^Ivy\./, '')}</div>`;
     overlay.appendChild(label);
 
     document.body.appendChild(overlay);
@@ -394,7 +406,13 @@ export function DevTools() {
         >
           <div className="ivy-devtools-popover-header">
             <span className="ivy-devtools-popover-type">
-              {selectedWidget.type}
+              {selectedWidget.type.replace(/^Ivy\./, '')}
+              {selectedWidget.callSite && (
+                <span className="ivy-devtools-callsite-muted">
+                  @{selectedWidget.callSite.filePath.split(/[/\\]/).pop()}:
+                  {selectedWidget.callSite.lineNumber}
+                </span>
+              )}
             </span>
           </div>
           <div className="ivy-devtools-textarea-wrapper">
