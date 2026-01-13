@@ -85,6 +85,8 @@ public class BarChartBuilder<TSource>(
     private readonly List<Measure<TSource>> _measures = [.. measures ?? []];
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
+    private Expression<Func<TSource, object>>? _sortSelector;
+    private SortOrder _sortOrder = SortOrder.None;
 
     public override object? Build()
     {
@@ -105,9 +107,18 @@ public class BarChartBuilder<TSource>(
         {
             try
             {
-                var results = await data
+                var pivotBuilder = data
                     .ToPivotTable()
-                    .Dimension(dimension).Measures(_measures).ExecuteAsync();
+                    .Dimension(dimension).Measures(_measures);
+
+                if (_sortOrder != SortOrder.None)
+                {
+                    pivotBuilder = _sortSelector != null
+                        ? pivotBuilder.SortBy(_sortSelector, _sortOrder)
+                        : pivotBuilder.SortBy(_sortOrder);
+                }
+
+                var results = await pivotBuilder.ExecuteAsync();
                 lineChartData.Set([.. results]);
             }
             finally
@@ -175,6 +186,20 @@ public class BarChartBuilder<TSource>(
     public BarChartBuilder<TSource> Toolbox()
     {
         return Toolbox(_ => new Toolbox());
+    }
+
+    public BarChartBuilder<TSource> SortBy(Expression<Func<TSource, object>> selector, SortOrder order = SortOrder.Ascending)
+    {
+        _sortSelector = selector;
+        _sortOrder = order;
+        return this;
+    }
+
+    public BarChartBuilder<TSource> SortBy(SortOrder order)
+    {
+        _sortOrder = order;
+        _sortSelector = null;
+        return this;
     }
 }
 

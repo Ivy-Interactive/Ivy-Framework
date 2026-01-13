@@ -96,3 +96,10 @@ public enum StackOffsetTypes
     Wiggle,
     Silhouette
 }
+
+public enum SortOrder
+{
+    None,
+    Ascending,
+    Descending
+}
