@@ -80,12 +80,6 @@ End of the typography test.
                 | Text.H6("Heading 6")
                 | Text.P("This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.")
                 | Text.P("This is a paragraph of text to compare the typography. It should have comfortable line height and spacing.")
-                | Layout.Vertical() // Unordered List simulation
-                    | (Layout.Horizontal() | Text.P("•") | Text.P("Unordered List Item 1"))
-                    | (Layout.Horizontal() | Text.P("•") | Text.P("Unordered List Item 2"))
-                | Layout.Vertical() // Ordered List simulation
-                    | (Layout.Horizontal() | Text.P("1.") | Text.P("Ordered List Item 1"))
-                    | (Layout.Horizontal() | Text.P("2.") | Text.P("Ordered List Item 2"))
                 | Text.Blockquote("This is a blockquote. It should stand out from the rest of the text.")
                 | (Layout.Horizontal().Gap(4)
                     | Text.Bold("Bold Text")
