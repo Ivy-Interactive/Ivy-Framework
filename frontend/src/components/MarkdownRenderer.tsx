@@ -384,6 +384,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         (prevProps, nextProps) =>
           prevProps.src === nextProps.src && prevProps.alt === nextProps.alt
       ),
+      hr: memo((props: React.HTMLAttributes<HTMLHRElement>) => (
+        <hr className={typography.hr} {...props} />
+      )),
     }),
     []
   );

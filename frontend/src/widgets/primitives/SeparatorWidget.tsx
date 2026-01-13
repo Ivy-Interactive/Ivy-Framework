@@ -18,7 +18,9 @@ export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({
   height,
 }) => {
   const styles =
-    orientation === 'Vertical' ? getWidth(width) : getHeight(height);
+    orientation === 'Vertical'
+      ? getWidth(width)
+      : getHeight(height || 'units:4');
 
   const separator = (
     <Separator

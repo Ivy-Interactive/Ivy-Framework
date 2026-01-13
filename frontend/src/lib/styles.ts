@@ -619,4 +619,5 @@ export const typography: Record<string, string> = {
 
   // Media
   img: 'max-w-full h-auto cursor-zoom-in mb-2',
+  hr: 'my-6 border-t border-border',
 };
