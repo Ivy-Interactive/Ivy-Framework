@@ -82,7 +82,9 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
       <div className="flex flex-col min-w-0 flex-1 py-4">
         {title && <div className="font-medium leading-none mb-1">{title}</div>}
         {children && (
-          <div className="text-sm opacity-90 [&_p]:text-sm">{children}</div>
+          <div className="text-sm opacity-90 [&_p]:text-sm mb-0">
+            {children}
+          </div>
         )}
       </div>
     </div>
