@@ -170,9 +170,9 @@ public class CodeInputWithValidation : ViewBase
                     .Language(Languages.Javascript)
                     .WithField()
                     .Label("Enter Code:")
-            | Text.Small(isValid 
+            | Text.P(isValid 
                 ? "Entered code is valid ✅" 
-                : "Enter some code to validate");
+                : "Enter some code to validate").Small();
     }
 }
 ```

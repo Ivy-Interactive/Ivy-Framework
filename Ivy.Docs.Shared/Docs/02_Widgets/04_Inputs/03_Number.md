@@ -253,9 +253,9 @@ public class GroceryAppDemo : ViewBase
                               .WithField()
                               .Label("Bread")
                               .Description("Maximum 5"))
-                | Text.Large($"{eggs} eggs and {breads} breads")
+                | Text.P($"{eggs} eggs and {breads} breads").Large()
                 | (Layout.Horizontal()
-                   | Text.Large("Bill : ")
+                   | Text.P("Bill : ").Large()
                    // Since it is disabled, no need to have an onChange event
                    | new NumberInput<decimal>(eggs.Value * eggCost + breadCost * breads.Value,_ => { })
                                      .Disabled()

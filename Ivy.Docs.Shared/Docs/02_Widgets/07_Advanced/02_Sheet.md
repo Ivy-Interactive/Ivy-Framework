@@ -111,8 +111,8 @@ public class ComplexSheetLayout : ViewBase
                     Layout.Horizontal()
                         | new Avatar("JD").Size(64)
                         | Layout.Vertical()
-                            | Text.Small("John Doe").NoWrap()
-                            | Text.Small("john.doe@example.com")
+                            | Text.P("John Doe").Small().NoWrap()
+                            | Text.P("john.doe@example.com").Small()
                 ).Title("User Information")
                 | new Card(
                     Layout.Vertical()
@@ -379,7 +379,7 @@ public class ConditionalSheetExample : ViewBase
                 "details" => new Card(
                     Layout.Vertical().Gap(2)
                         | Text.H3("Detailed Information")
-                        | Text.Small("This is a detailed view with more information about the selected item.")
+                        | Text.P("This is a detailed view with more information about the selected item.").Small()
                         | new Button("Action").Variant(ButtonVariant.Primary).HandleClick(_ => client.Toast("Action performed on detailed item!"))
                 ).Title("Details View"),
                 

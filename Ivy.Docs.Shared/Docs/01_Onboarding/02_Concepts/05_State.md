@@ -61,7 +61,7 @@ public class FactoryStateDemo : ViewBase
         var service = UseState(() => new DataService(GetConfig()));
         
         return Layout.Vertical(
-            Text.Large("Factory Functions Demo"),
+            Text.P("Factory Functions Demo").Large(),
             Text.Literal($"Data: {expensiveData.Value}"),
             Text.Literal($"Service: {service.Value.Status}"),
             new Button("Refresh", _ => expensiveData.Set(ComputeExpensiveData()))
@@ -102,7 +102,7 @@ public class StatePatternsDemo : ViewBase
         var selectedItem = UseState(() => (string?)null);
         
         return Layout.Vertical(
-            Text.Large("State Types & Patterns"),
+            Text.P("State Types & Patterns").Large(),
             
             // Primitive state
             Layout.Horizontal(
@@ -165,7 +165,7 @@ public class StateUpdatesDemo : ViewBase
         var items = UseState(() => new List<string> { "Item 1", "Item 2" });
         
         return Layout.Vertical(
-            Text.Large("State Updates Demo"),
+            Text.P("State Updates Demo").Large(),
             
             // Direct updates
             Layout.Horizontal(
@@ -212,7 +212,7 @@ public class FormStateDemo : ViewBase
         var client = UseService<IClientProvider>();
 
         return Layout.Vertical(
-            Text.Large("Form State Demo"),
+            Text.P("Form State Demo").Large(),
             
             name.ToTextInput("Name").Placeholder("Enter your name"),
             email.ToTextInput("Email").Placeholder("Enter your email"),
@@ -255,7 +255,7 @@ public class EffectsStateDemo : ViewBase
         }, [count]);
         
         return Layout.Vertical(
-            Text.Large("State with Effects Demo"),
+            Text.P("State with Effects Demo").Large(),
             
             Layout.Horizontal(
                 new Button($"Count: {count.Value}", _ => count.Set(count.Value + 1)),

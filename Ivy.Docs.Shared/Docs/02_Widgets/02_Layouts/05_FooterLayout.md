@@ -90,7 +90,7 @@ public class SheetWithFooterExample : ViewBase
             | new Card("Sheet Header")
                     | Layout.Vertical()
                         | Text.P("Article Editor")
-                        | Text.Small("Create and edit your articles with ease").Color(Colors.Gray)
+                        | Text.P("Create and edit your articles with ease").Small().Color(Colors.Gray)
             | new FooterLayout(
                 footer: Layout.Horizontal().Align(Align.Right)
                     | new Button("Save Draft", _ => client.Toast("Draft saved"))
@@ -138,7 +138,7 @@ public class ComplexFooterExample : ViewBase
             | new Card("Project Header")
                     | Layout.Vertical()
                         | Text.P("Document Editor")
-                        | Text.Small("Comprehensive project management tool").Color(Colors.Gray)
+                        | Text.P("Comprehensive project management tool").Small().Color(Colors.Gray)
             | new FooterLayout(
                 footer: Layout.Horizontal().Align(Align.Right)
                     | new Badge("Draft").Variant(BadgeVariant.Secondary)

@@ -18,7 +18,7 @@ public class DropDownMenuApp : SampleBase
 
         return new DropDownMenu(onSelect, trigger)
                    .Header(
-                       Layout.Vertical().Gap(0) | Text.Muted("Signed in as") | Text.Small("niels@bosmainteractive.se")
+                       Layout.Vertical().Gap(0) | Text.Muted("Signed in as") | Text.P("niels@bosmainteractive.se").Small()
                    )
                    .Bottom()
                | MenuItem.Separator()

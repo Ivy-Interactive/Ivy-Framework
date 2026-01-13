@@ -136,9 +136,9 @@ public class MetricView(string title) : ViewBase
     {
         return new Card(
                 content: (Layout.Horizontal().Align(Align.Left).Gap(2)
-                         | Text.Large("$84,250")
+                         | Text.P("$84,250").Large()
                          | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                         | Text.Small("21%").Color(Colors.Emerald)),
+                         | Text.P("21%").Small().Color(Colors.Emerald)),
                 footer: new Progress(21).Goal(800_000.ToString("C0")),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4(title).WithLayout().Grow()
@@ -153,9 +153,9 @@ public class LongNumberMetricView : ViewBase
     {
         return new Card(
                 content: (Layout.Horizontal().Align(Align.Left).Gap(2)
-                         | Text.Large("$123,456,789.99")
+                         | Text.P("$123,456,789.99").Large()
                          | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                         | Text.Small("1,234.5%").Color(Colors.Emerald)),
+                         | Text.P("1,234.5%").Small().Color(Colors.Emerald)),
                 footer: new Progress(85).Goal("$100,000,000"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Very Long Revenue Number").WithLayout().Grow()
@@ -170,9 +170,9 @@ public class HighPercentageMetricView : ViewBase
     {
         return new Card(
                 content: (Layout.Horizontal().Align(Align.Left).Gap(2)
-                         | Text.Large("1,012.50%")
+                         | Text.P("1,012.50%").Large()
                          | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                         | Text.Small("38.1%").Color(Colors.Emerald)),
+                         | Text.P("38.1%").Small().Color(Colors.Emerald)),
                 footer: new Progress(125).Goal("806.67%"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Post Engagement Rate").WithLayout().Grow()
@@ -187,9 +187,9 @@ public class VeryLongTitleMetricView : ViewBase
     {
         return new Card(
                 content: (Layout.Horizontal().Align(Align.Left).Gap(2)
-                         | Text.Large("2.25")
+                         | Text.P("2.25").Large()
                          | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                         | Text.Small("38.1%").Color(Colors.Emerald)),
+                         | Text.P("38.1%").Small().Color(Colors.Emerald)),
                 footer: new Progress(90).Goal("2.50"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Total Comments per Author in This Period").WithLayout().Grow()
@@ -204,9 +204,9 @@ public class TotalCommentsPerAuthorMetricView : ViewBase
     {
         return new Card(
                 content: (Layout.Horizontal().Align(Align.Left).Gap(2)
-                         | Text.Large("2.25")
+                         | Text.P("2.25").Large()
                          | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                         | Text.Small("38.1%").Color(Colors.Emerald)),
+                         | Text.P("38.1%").Small().Color(Colors.Emerald)),
                 footer: new Progress(90).Goal("2.50"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Total Comments per Author").WithLayout().Grow()
@@ -225,12 +225,12 @@ public class UserEngagementWidget : ViewBase
                 content: Layout.Vertical().Gap(3)
                         | (Layout.Horizontal().Align(Align.Left).Gap(2)
                            | Icons.Users.ToIcon().Color(Colors.Blue)
-                           | Text.Large("1,247")
-                           | Text.Small("Active Users").Color(Colors.Gray))
+                           | Text.P("1,247").Large()
+                           | Text.P("Active Users").Small().Color(Colors.Gray))
                         | (Layout.Horizontal().Align(Align.Left).Gap(2)
                            | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                           | Text.Small("+12.5%").Color(Colors.Emerald)
-                           | Text.Small("vs last month").Color(Colors.Gray)),
+                           | Text.P("+12.5%").Small().Color(Colors.Emerald)
+                           | Text.P("vs last month").Small().Color(Colors.Gray)),
                 footer: new Progress(75).Goal("1,500 users"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("User Engagement").WithLayout().Grow()
@@ -247,11 +247,11 @@ public class TaskCompletionWidget : ViewBase
                 content: Layout.Vertical().Gap(3)
                         | (Layout.Horizontal().Align(Align.Left).Gap(2)
                            | Icons.Check.ToIcon().Color(Colors.Emerald)
-                           | Text.Large("87%")
-                           | Text.Small("Completed").Color(Colors.Gray))
+                           | Text.P("87%").Large()
+                           | Text.P("Completed").Small().Color(Colors.Gray))
                         | (Layout.Horizontal().Align(Align.Left).Gap(2)
                            | Icons.Clock.ToIcon().Color(Colors.Orange)
-                           | Text.Small("23 tasks remaining").Color(Colors.Orange)),
+                           | Text.P("23 tasks remaining").Small().Color(Colors.Orange)),
                 footer: new Progress(87).Goal("100% completion"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Task Progress").WithLayout().Grow()
@@ -268,13 +268,13 @@ public class SystemHealthWidget : ViewBase
                 content: Layout.Vertical().Gap(3)
                         | (Layout.Horizontal().Align(Align.Left).Gap(2)
                            | Icons.Server.ToIcon().Color(Colors.Emerald)
-                           | Text.Large("99.9%")
-                           | Text.Small("Uptime").Color(Colors.Gray))
+                           | Text.P("99.9%").Large()
+                           | Text.P("Uptime").Small().Color(Colors.Gray))
                         | (Layout.Horizontal().Align(Align.Left).Gap(2)
                            | Icons.Cpu.ToIcon().Color(Colors.Blue)
-                           | Text.Small("CPU: 45%").Color(Colors.Blue)
+                           | Text.P("CPU: 45%").Small().Color(Colors.Blue)
                            | Icons.HardDrive.ToIcon().Color(Colors.Purple)
-                           | Text.Small("RAM: 67%").Color(Colors.Purple)),
+                           | Text.P("RAM: 67%").Small().Color(Colors.Purple)),
                 footer: new Progress(99).Goal("100% uptime"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("System Health").WithLayout().Grow()
@@ -291,13 +291,13 @@ public class RevenueGrowthWidget : ViewBase
                 content: Layout.Vertical().Gap(3)
                         | (Layout.Horizontal().Align(Align.Left).Gap(2)
                            | Icons.DollarSign.ToIcon().Color(Colors.Emerald)
-                           | Text.Large("$45,230")
-                           | Text.Small("This Month").Color(Colors.Gray))
+                           | Text.P("$45,230").Large()
+                           | Text.P("This Month").Small().Color(Colors.Gray))
                         | (Layout.Horizontal().Align(Align.Left).Gap(2)
                            | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                           | Text.Small("+18.3%").Color(Colors.Emerald)
+                           | Text.P("+18.3%").Small().Color(Colors.Emerald)
                            | Icons.Calendar.ToIcon().Color(Colors.Blue)
-                           | Text.Small("vs last month").Color(Colors.Blue)),
+                           | Text.P("vs last month").Small().Color(Colors.Blue)),
                 footer: new Progress(65).Goal("$70,000 target"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Revenue Growth").WithLayout().Grow()
@@ -314,20 +314,20 @@ public class IconTextShowcaseWidget : ViewBase
                 content: Layout.Vertical().Gap(4)
                         | (Layout.Horizontal().Align(Align.Left).Gap(3)
                            | Icons.Heart.ToIcon().Color(Colors.Red)
-                           | Text.Large("Likes").Color(Colors.Gray)
-                           | Text.Large("2,847").Color(Colors.Red))
+                           | Text.P("Likes").Large().Color(Colors.Gray)
+                           | Text.P("2,847").Large().Color(Colors.Red))
                         | (Layout.Horizontal().Align(Align.Left).Gap(3)
                            | Icons.MessageCircle.ToIcon().Color(Colors.Blue)
-                           | Text.Large("Comments").Color(Colors.Gray)
-                           | Text.Large("156").Color(Colors.Blue))
+                           | Text.P("Comments").Large().Color(Colors.Gray)
+                           | Text.P("156").Large().Color(Colors.Blue))
                         | (Layout.Horizontal().Align(Align.Left).Gap(3)
                            | Icons.Share.ToIcon().Color(Colors.Purple)
-                           | Text.Large("Shares").Color(Colors.Gray)
-                           | Text.Large("89").Color(Colors.Purple))
+                           | Text.P("Shares").Large().Color(Colors.Gray)
+                           | Text.P("89").Large().Color(Colors.Purple))
                         | (Layout.Horizontal().Align(Align.Left).Gap(3)
                            | Icons.Eye.ToIcon().Color(Colors.Orange)
-                           | Text.Large("Views").Color(Colors.Gray)
-                           | Text.Large("12,456").Color(Colors.Orange)),
+                           | Text.P("Views").Large().Color(Colors.Gray)
+                           | Text.P("12,456").Large().Color(Colors.Orange)),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Social Engagement").WithLayout().Grow()
                         | Icons.Star.ToIcon().Color(Colors.Neutral)
@@ -342,20 +342,20 @@ public class ProgressBarVariationsWidget : ViewBase
         return new Card(
                 content: Layout.Vertical().Gap(4)
                         | (Layout.Vertical().Gap(1)
-                           | Text.Small("Low Progress").Color(Colors.Gray)
+                           | Text.P("Low Progress").Small().Color(Colors.Gray)
                            | new Progress(25).Goal("25%"))
                         | (Layout.Vertical().Gap(1)
-                           | Text.Small("Medium Progress").Color(Colors.Gray)
+                           | Text.P("Medium Progress").Small().Color(Colors.Gray)
                            | new Progress(50).Goal("50%"))
                         | (Layout.Vertical().Gap(1)
-                           | Text.Small("High Progress").Color(Colors.Gray)
+                           | Text.P("High Progress").Small().Color(Colors.Gray)
                            | new Progress(85).Goal("85%"))
                         | (Layout.Vertical().Gap(1)
-                           | Text.Small("Overflow Progress").Color(Colors.Gray)
+                           | Text.P("Overflow Progress").Small().Color(Colors.Gray)
                            | new Progress(120).Goal("100%"))
                         | (Layout.Horizontal().Align(Align.Left).Gap(2)
                            | Icons.Target.ToIcon().Color(Colors.Emerald)
-                           | Text.Small("Average: 70%").Color(Colors.Emerald)),
+                           | Text.P("Average: 70%").Small().Color(Colors.Emerald)),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Progress Variations").WithLayout().Grow()
                         | Icons.Star.ToIcon().Color(Colors.Neutral)
@@ -372,15 +372,15 @@ public class LayoutTestWidget : ViewBase
                         | (Layout.Horizontal().Align(Align.Left)
                            | (Layout.Vertical().Gap(1)
                               | Icons.Star.ToIcon().Color(Colors.Yellow)
-                              | Text.Small("Rating").Color(Colors.Gray))
+                              | Text.P("Rating").Small().Color(Colors.Gray))
                            | (Layout.Vertical().Gap(1)
-                              | Text.Large("4.8")
-                              | Text.Small("out of 5").Color(Colors.Gray)))
+                              | Text.P("4.8").Large()
+                              | Text.P("out of 5").Small().Color(Colors.Gray)))
                         | (Layout.Horizontal().Align(Align.Center).Gap(2)
                            | Icons.ThumbsUp.ToIcon().Color(Colors.Emerald)
-                           | Text.Large("Excellent").Color(Colors.Emerald)
+                           | Text.P("Excellent").Large().Color(Colors.Emerald)
                            | Icons.ThumbsDown.ToIcon().Color(Colors.Red)
-                           | Text.Large("Poor").Color(Colors.Red)),
+                           | Text.P("Poor").Large().Color(Colors.Red)),
                 footer: new Progress(96).Goal("5.0 rating"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Layout Testing").WithLayout().Grow()
@@ -397,18 +397,18 @@ public class MixedContentWidget : ViewBase
                 content: Layout.Vertical().Gap(4)
                         | (Layout.Horizontal().Align(Align.Left).Gap(3)
                            | Icons.Download.ToIcon().Color(Colors.Blue)
-                           | Text.Large("Downloads").Color(Colors.Blue)
+                           | Text.P("Downloads").Large().Color(Colors.Blue)
                            | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                           | Text.Small("+25%").Color(Colors.Emerald))
+                           | Text.P("+25%").Small().Color(Colors.Emerald))
                         | (Layout.Grid().Columns(2).Gap(3)
                            | (Layout.Vertical().Gap(1)
                               | Icons.Smartphone.ToIcon().Color(Colors.Purple)
-                              | Text.Small("Mobile").Color(Colors.Gray)
-                              | Text.Large("1,234").Color(Colors.Purple))
+                              | Text.P("Mobile").Small().Color(Colors.Gray)
+                              | Text.P("1,234").Large().Color(Colors.Purple))
                            | (Layout.Vertical().Gap(1)
                               | Icons.Monitor.ToIcon().Color(Colors.Blue)
-                              | Text.Small("Desktop").Color(Colors.Gray)
-                              | Text.Large("856").Color(Colors.Blue))),
+                              | Text.P("Desktop").Small().Color(Colors.Gray)
+                              | Text.P("856").Large().Color(Colors.Blue))),
                 footer: new Progress(78).Goal("2,500 total"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Download Analytics").WithLayout().Grow()
@@ -426,23 +426,23 @@ public class ResponsiveLayoutWidget : ViewBase
                         | (Layout.Horizontal().Align(Align.Left)
                            | (Layout.Vertical().Gap(1)
                               | Icons.Globe.ToIcon().Color(Colors.Blue)
-                              | Text.Small("Global Reach").Color(Colors.Gray))
+                              | Text.P("Global Reach").Small().Color(Colors.Gray))
                            | (Layout.Vertical().Gap(1)
-                              | Text.Large("47")
-                              | Text.Small("Countries").Color(Colors.Gray)))
+                              | Text.P("47").Large()
+                              | Text.P("Countries").Small().Color(Colors.Gray)))
                         | (Layout.Grid().Columns(3).Gap(2)
                            | (Layout.Vertical().Gap(1)
                               | Icons.Flag.ToIcon().Color(Colors.Red)
-                              | Text.Small("US").Color(Colors.Gray)
-                              | Text.Large("35%").Color(Colors.Red))
+                              | Text.P("US").Small().Color(Colors.Gray)
+                              | Text.P("35%").Large().Color(Colors.Red))
                            | (Layout.Vertical().Gap(1)
                               | Icons.Flag.ToIcon().Color(Colors.Blue)
-                              | Text.Small("EU").Color(Colors.Gray)
-                              | Text.Large("28%").Color(Colors.Blue))
+                              | Text.P("EU").Small().Color(Colors.Gray)
+                              | Text.P("28%").Large().Color(Colors.Blue))
                            | (Layout.Vertical().Gap(1)
                               | Icons.Flag.ToIcon().Color(Colors.Green)
-                              | Text.Small("APAC").Color(Colors.Gray)
-                              | Text.Large("37%").Color(Colors.Green))),
+                              | Text.P("APAC").Small().Color(Colors.Gray)
+                              | Text.P("37%").Large().Color(Colors.Green))),
                 footer: new Progress(85).Goal("50 countries"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Global Distribution").WithLayout().Grow()
@@ -461,13 +461,13 @@ public class TextSpacingDemoWidget : ViewBase
                 content: Layout.Vertical().Gap(2)
                         | (Layout.Horizontal().Align(Align.Left).Gap(1)
                            | Icons.Info.ToIcon().Color(Colors.Blue)
-                           | Text.Small("No spacing").Color(Colors.Gray))
+                           | Text.P("No spacing").Small().Color(Colors.Gray))
                         | (Layout.Horizontal().Align(Align.Left).Gap(1)
                            | Icons.Info.ToIcon().Color(Colors.Blue)
-                           | Text.Small("Minimal gaps").Color(Colors.Gray))
+                           | Text.P("Minimal gaps").Small().Color(Colors.Gray))
                         | (Layout.Horizontal().Align(Align.Left).Gap(1)
                            | Icons.Info.ToIcon().Color(Colors.Blue)
-                           | Text.Small("Compact layout").Color(Colors.Gray)),
+                           | Text.P("Compact layout").Small().Color(Colors.Gray)),
                 footer: new Progress(60).Goal("Tight spacing"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Text Spacing Demo").WithLayout().Grow()
@@ -484,13 +484,13 @@ public class CardPaddingOverrideWidget : ViewBase
                 content: Layout.Vertical().Gap(0)
                         | (Layout.Horizontal().Align(Align.Left).Gap(0)
                            | Icons.Zap.ToIcon().Color(Colors.Orange)
-                           | Text.Large("Zero Gap").Color(Colors.Orange))
+                           | Text.P("Zero Gap").Large().Color(Colors.Orange))
                         | (Layout.Horizontal().Align(Align.Left).Gap(0)
                            | Icons.Zap.ToIcon().Color(Colors.Orange)
-                           | Text.Small("No spacing between elements").Color(Colors.Gray))
+                           | Text.P("No spacing between elements").Small().Color(Colors.Gray))
                         | (Layout.Horizontal().Align(Align.Left).Gap(0)
                            | Icons.Zap.ToIcon().Color(Colors.Orange)
-                           | Text.Small("Compact card content").Color(Colors.Gray)),
+                           | Text.P("Compact card content").Small().Color(Colors.Gray)),
                 footer: new Progress(75).Goal("Dense layout"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Zero Spacing").WithLayout().Grow()
@@ -507,13 +507,13 @@ public class LayoutSpacingControlWidget : ViewBase
                 content: Layout.Vertical().Gap(1)
                         | (Layout.Horizontal().Align(Align.Left).Gap(1)
                            | Icons.Settings.ToIcon().Color(Colors.Purple)
-                           | Text.Small("Custom spacing").Color(Colors.Gray))
+                           | Text.P("Custom spacing").Small().Color(Colors.Gray))
                         | (Layout.Horizontal().Align(Align.Left).Gap(1)
                            | Icons.Settings.ToIcon().Color(Colors.Purple)
-                           | Text.Small("Controlled gaps").Color(Colors.Gray))
+                           | Text.P("Controlled gaps").Small().Color(Colors.Gray))
                         | (Layout.Horizontal().Align(Align.Left).Gap(1)
                            | Icons.Settings.ToIcon().Color(Colors.Purple)
-                           | Text.Small("Precise layout").Color(Colors.Gray)),
+                           | Text.P("Precise layout").Small().Color(Colors.Gray)),
                 footer: new Progress(90).Goal("Custom control"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Spacing Control").WithLayout().Grow()
@@ -531,7 +531,7 @@ public class SmallMetricView : ViewBase
                 content: Layout.Horizontal().Align(Align.Left).Gap(1)
                          | Text.Strong("$12.5K")
                          | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                         | Text.Small("+5%").Color(Colors.Emerald),
+                         | Text.P("+5%").Small().Color(Colors.Emerald),
                 footer: new Progress(25).Goal("$50K target"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Small Revenue").WithLayout().Grow()
@@ -548,7 +548,7 @@ public class MediumMetricView : ViewBase
                 content: Layout.Horizontal().Align(Align.Left).Gap(2)
                          | Text.Strong("$84,250")
                          | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                         | Text.Small("21%").Color(Colors.Emerald),
+                         | Text.P("21%").Small().Color(Colors.Emerald),
                 footer: new Progress(21).Goal("$400K target"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Medium Revenue").WithLayout().Grow()
@@ -563,9 +563,9 @@ public class LargeMetricView : ViewBase
     {
         return new Card(
                 content: Layout.Horizontal().Align(Align.Left).Gap(3)
-                         | Text.Large("$1,234,567")
+                         | Text.P("$1,234,567").Large()
                          | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                         | Text.Literal("+45%").Color(Colors.Emerald),
+                         | Text.P("+45%").Color(Colors.Emerald),
                 footer: new Progress(75).Goal("$1.5M target"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Large Revenue").WithLayout().Grow()

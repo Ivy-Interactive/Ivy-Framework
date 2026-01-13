@@ -69,9 +69,9 @@ public class ColorVariantsDemo : ViewBase
     {    
         var colorState = UseState("#ff0000");
         return Layout.Grid().Columns(2).ColumnWidths(Size.Units(30), null)
-            | Text.Small("Just Text") | colorState.ToColorInput().Variant(ColorInputs.Text)
-            | Text.Small("Just Picker") | colorState.ToColorInput().Variant(ColorInputs.Picker)
-            | Text.Small("Text and Picker") | colorState.ToColorInput().Variant(ColorInputs.TextAndPicker);
+            | Text.P("Just Text").Small() | colorState.ToColorInput().Variant(ColorInputs.Text)
+            | Text.P("Just Picker").Small() | colorState.ToColorInput().Variant(ColorInputs.Picker)
+            | Text.P("Text and Picker").Small() | colorState.ToColorInput().Variant(ColorInputs.TextAndPicker);
     }   
 }
 ```
@@ -119,8 +119,8 @@ public class ColorStylingDemo : ViewBase
     {
         var colorState = UseState("#ff0000");
         return Layout.Grid().Columns(2).ColumnWidths(Size.Units(30), null)
-            | Text.Small("Disabled") | colorState.ToColorInput().Disabled()
-            | Text.Small("Invalid") | colorState.ToColorInput().Invalid("Invalid color value");
+            | Text.P("Disabled").Small() | colorState.ToColorInput().Disabled()
+            | Text.P("Invalid").Small() | colorState.ToColorInput().Invalid("Invalid color value");
     }
 }
 ```

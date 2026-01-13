@@ -47,10 +47,10 @@ Enable or disable browser playback controls:
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
-| Text.Small("With Controls (default)")
+| Text.P("With Controls (default)").Small()
 | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .Controls(true)
-| Text.Small("Without Controls (programmatic control only)")
+| Text.P("Without Controls (programmatic control only)").Small()
 | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .Controls(false)
 ```
@@ -61,7 +61,7 @@ Control width and height of the video player:
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
-| Text.Small("50% width, fixed height")
+| Text.P("50% width, fixed height").Small()
 | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .Width(Size.Fraction(0.5f))
     .Height(Size.Units(50))

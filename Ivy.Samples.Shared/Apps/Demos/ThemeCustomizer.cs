@@ -49,7 +49,7 @@ public class ThemeCustomizer : SampleBase
             | new Card(
                 Layout.Vertical()
                     | Text.Block("🎨 Live Theme Application")
-                    | Text.Small("Select a preset and click 'Apply Selected Theme' to see changes instantly - no page refresh needed!")
+                    | Text.P("Select a preset and click 'Apply Selected Theme' to see changes instantly - no page refresh needed!").Small()
             ).BorderColor(Colors.Primary)
 
             // Preset selector
@@ -183,7 +183,7 @@ public class ThemeCustomizer : SampleBase
             };
 
             return Layout.Vertical()
-                | Text.Small(label)
+                | Text.P(label).Small()
                 | Layout.Horizontal(
                     // Color preview box using appropriate predefined color
                     new Box("Preview")
@@ -194,9 +194,9 @@ public class ThemeCustomizer : SampleBase
                         .Padding(3)
                         .ContentAlign(Align.Center),
                     Layout.Vertical()
-                        | Text.Small("Background:")
+                        | Text.P("Background:").Small()
                         | bgState.ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
-                        | Text.Small("Foreground:")
+                        | Text.P("Foreground:").Small()
                         | fgState.ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
                 );
         }

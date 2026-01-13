@@ -302,9 +302,9 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    public TextBuilder Small() => Scale(Scale.Small);
+    public TextBuilder Small() => Scale(Ivy.Shared.Scale.Small);
 
-    public TextBuilder Medium() => Scale(Scale.Medium);
+    public TextBuilder Medium() => Scale(Ivy.Shared.Scale.Medium);
 
-    public TextBuilder Large() => Scale(Scale.Large);
+    public TextBuilder Large() => Scale(Ivy.Shared.Scale.Large);
 }

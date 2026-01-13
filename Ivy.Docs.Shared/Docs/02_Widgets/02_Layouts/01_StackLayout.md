@@ -112,7 +112,7 @@ public class NavigationExample : ViewBase
              // App title and user info
             new StackLayout([
                 Text.H3("MyApp"),
-                Text.Small("Welcome back!")
+                Text.P("Welcome back!").Small()
             ], Orientation.Vertical, align: Align.Left),
             
             // User actions
