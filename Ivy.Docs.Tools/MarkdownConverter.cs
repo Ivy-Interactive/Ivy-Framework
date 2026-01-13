@@ -101,6 +101,7 @@ public static partial class MarkdownConverter
         codeBuilder.AppendLine("using Ivy.Views.Kanban;");
         codeBuilder.AppendLine("using static Ivy.Views.Layout;");
         codeBuilder.AppendLine("using static Ivy.Views.Text;");
+        codeBuilder.AppendLine("using Ivy.Views;");
         if (appMeta.Imports != null)
         {
             foreach (var import in appMeta.Imports)
@@ -202,7 +203,7 @@ public static partial class MarkdownConverter
                 referencedApps.UnionWith(types);
                 AppendAsMultiLineStringIfNecessary(baseIndentLevel, convertedMarkdown, codeBuilder,
                     isNestedContent ? ", new Markdown(" : "| new Markdown(",
-                    ").HandleLinkClick(onLinkClick)");
+                    ").HandleLinkClick(onLinkClick).WithLayout().Margin(0, 0, 0, 4)");
                 sectionBuilder.Clear();
             }
         }
@@ -447,7 +448,7 @@ public static partial class MarkdownConverter
             {
                 // Multiple items - wrap in Vertical()
                 codeBuilder.AppendTab(3).AppendLine($"""| new Expandable("{summary}",""");
-                codeBuilder.AppendTab(4).AppendLine("Vertical()");
+                codeBuilder.AppendTab(4).AppendLine("Vertical().Gap(4)");
                 codeBuilder.Append(bodyOutput);
                 codeBuilder.AppendLine();
                 codeBuilder.AppendTab(3).AppendLine(")");
@@ -500,13 +501,13 @@ public static partial class MarkdownConverter
         var (types, convertedContent) = linkConverter.Convert(content);
         referencedApps.UnionWith(types);
 
-        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).HandleLinkClick(onLinkClick)");
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).HandleLinkClick(onLinkClick).WithLayout().Margin(0, 0, 0, 4)");
     }
 
     private static void HandleEmbedBlock(StringBuilder codeBuilder, XElement xml)
     {
         string url = xml.Attribute("Url")?.Value ?? throw new Exception("Embed block must have an Url attribute.");
-        codeBuilder.AppendTab(3).AppendLine($"""| new Embed("{url}")""");
+        codeBuilder.AppendTab(3).AppendLine($"""| new Embed("{url}").WithLayout().Margin(0, 0, 0, 4)""");
     }
 
     private static void HandleIngressBlock(StringBuilder codeBuilder, XElement xml, LinkConverter linkConverter, HashSet<string> referencedApps)
@@ -520,7 +521,7 @@ public static partial class MarkdownConverter
         var (types, convertedContent) = linkConverter.Convert(content);
         referencedApps.UnionWith(types);
 
-        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| Lead(", ")");
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| Lead(", ").WithLayout().Margin(0, 0, 0, 4)");
     }
 
     private static string MapLanguageToEnum(string lang)
@@ -555,7 +556,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
         else if (language == "terminal")
         {
             var lines = codeContent.Split('\n');
-            codeBuilder.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "new Terminal() ");
+            codeBuilder.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "new Terminal()");
             foreach (var line in lines)
             {
                 if (line.StartsWith('>'))
@@ -567,6 +568,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
                     codeBuilder.AppendTab(baseIndentLevel + 1).AppendLine($".AddOutput({FormatLiteral(line.Trim())})");
                 }
             }
+            codeBuilder.AppendTab(baseIndentLevel + 1).AppendLine(".WithLayout().Margin(0, 0, 0, 4)");
         }
         else if (language == "mermaid")
         {
@@ -574,13 +576,13 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
             string mermaidBlock = $"```mermaid\n{codeContent}\n```";
             AppendAsMultiLineStringIfNecessary(baseIndentLevel, mermaidBlock, codeBuilder,
                 isNestedContent ? ", new Markdown(" : "| new Markdown(",
-                ").HandleLinkClick(onLinkClick)");
+                ").HandleLinkClick(onLinkClick).WithLayout().Margin(0, 0, 0, 4)");
         }
         else
         {
             AppendAsMultiLineStringIfNecessary(baseIndentLevel, codeContent, codeBuilder,
                 isNestedContent ? ", Code(" : "| Code(",
-                $",{MapLanguageToEnum(language)})");
+                $",{MapLanguageToEnum(language)}).WithLayout().Margin(0, 0, 0, 4)");
         }
     }
 
@@ -606,7 +608,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
             cb.AppendTab(baseIndentLevel + 1).AppendLine($"new Tab(\"Demo\", new Box().Content({insert})),");
             AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "new Tab(\"Code\", new Code(", $",{MapLanguageToEnum(lang)}))")
                 ;
-            cb.AppendTab(baseIndentLevel).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0).Variant(TabsVariant.Content)");
+            cb.AppendTab(baseIndentLevel).AppendLine(").Height(Size.Fit()).Padding(0, 0, 0, 0).Variant(TabsVariant.Content)");
         }
 
         void AppendVerticalDemo(StringBuilder cb, string code, string insert, string lang, bool demoBelow)

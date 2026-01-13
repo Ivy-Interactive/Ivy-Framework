@@ -19,11 +19,13 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   );
 
   return (
-    <MarkdownRenderer
-      key={id}
-      content={content}
-      onLinkClick={handleLinkClick}
-    />
+    <div className="markdown-widget w-full">
+      <MarkdownRenderer
+        key={id}
+        content={content}
+        onLinkClick={handleLinkClick}
+      />
+    </div>
   );
 };
 

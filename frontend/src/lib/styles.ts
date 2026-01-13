@@ -576,7 +576,7 @@ export const typography: Record<string, string> = {
   h6: `text-base font-medium scroll-m-20 mt-2 mb-2 [&+p]:mt-0`,
 
   // Body
-  p: `text-base scroll-m-20 [&+p]:my-4`,
+  p: `text-base scroll-m-20 mb-4`,
   lead: `text-muted-foreground`,
   strong: 'font-semibold',
   em: 'italic',
@@ -605,19 +605,19 @@ export const typography: Record<string, string> = {
   a: 'text-primary underline brightness-90 hover:brightness-100',
 
   // Blockquote
-  blockquote: 'border-l-2 pl-6 italic mb-2',
+  blockquote: 'border-l-2 pl-6 italic mb-4',
 
   // Code
   code: 'relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono text-sm font-semibold',
 
   // Table
-  table: 'w-full border-collapse border border-border mb-2',
+  table: 'w-full border-collapse border border-border mb-4',
   thead: 'bg-muted',
   tr: 'border border-border',
   th: 'border border-border px-4 py-2 text-left font-bold text-sm',
   td: 'border border-border px-4 py-2 text-sm',
 
   // Media
-  img: 'max-w-full h-auto cursor-zoom-in mb-2',
+  img: 'max-w-full h-auto cursor-zoom-in mb-4',
   hr: 'my-6 border-t border-border',
 };
