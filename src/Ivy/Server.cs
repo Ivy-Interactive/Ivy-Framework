@@ -41,7 +41,12 @@ public record ServerArgs
     public string? MetaTitle { get; set; } = null;
     public string? MetaDescription { get; set; } = null;
     public Assembly? AssetAssembly { get; set; } = null;
+    public bool EnableDevTools { get; set; } = false;
+#if DEBUG
+    public bool FindAvailablePort { get; set; } = true;
+#else
     public bool FindAvailablePort { get; set; } = false;
+#endif
 }
 
 public class Server
@@ -53,7 +58,7 @@ public class Server
     public IConfiguration Configuration { get; private set; } = ServerUtils.GetConfiguration();
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
-    public static Action<CookieOptions>? ConfigureAuthCookieOptions { get; set; }
+
     private IContentBuilder? _contentBuilder;
     private bool _useHotReload;
     private bool _useHttpRedirection;
@@ -332,8 +337,6 @@ public class Server
                 }
             }
         }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-#endif
-
 
         if (Utils.IsPortInUse(_args.Port))
         {
@@ -355,13 +358,13 @@ public class Server
 
                 if (attemptCount >= maxAttempts)
                 {
-                    Console.WriteLine($"\x1b[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.\x1b[0m");
+                    Console.WriteLine($@"[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.[0m");
                     return;
                 }
 
-                if (_args.Port != originalPort && !_args.Silent)
+                if (_args.Port != originalPort)
                 {
-                    Console.WriteLine($"\x1b[33mPort {originalPort} is in use. Using port {_args.Port} instead.\x1b[0m");
+                    Console.WriteLine($@"[33mPort {originalPort} is in use. Using port {_args.Port} instead.[0m");
                 }
             }
             else
@@ -369,12 +372,12 @@ public class Server
                 Console.WriteLine($@"[31mPort {_args.Port} is already in use on this machine.[0m");
 
                 Console.WriteLine(
-                    "Specify a different port using '--port <number>', '--find-available-port', or '--i-kill-for-this-port' to just take it.");
+                    @"Specify a different port using '--port <number>' or '--i-kill-for-this-port' to just take it.");
 
                 return;
             }
         }
-
+#endif
         if (!string.IsNullOrEmpty(_args.DefaultAppId))
         {
             DefaultAppId = _args.DefaultAppId;
@@ -422,7 +425,6 @@ public class Server
         builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
         builder.Services.AddSingleton(_contentBuilder ?? new DefaultContentBuilder());
         builder.Services.AddSingleton(sessionStore);
-        builder.Services.AddSingleton<IOAuthCallbackRegistry, OAuthCallbackRegistry>();
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
         builder.Services.AddHealthChecks();
         builder.Services.AddQueryManager();
@@ -462,12 +464,6 @@ public class Server
         builder.Logging.AddConsole();
 
         builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
-
-        // Suppress hosting startup errors when not verbose (we handle IOException with a friendly message)
-        if (!_args.Verbose)
-        {
-            builder.Logging.AddFilter("Microsoft.Extensions.Hosting.Internal.Host", LogLevel.None);
-        }
 
         var app = builder.Build();
         ServiceProvider = app.Services;
@@ -662,8 +658,14 @@ public static class WebApplicationExtensions
                         $"<meta name=\"ivy-license-public-key\" content=\"{ivyLicensePublicKey}\" />";
                     html = html.Replace("</head>", $"  {ivyLicensePublicKeyTag}\n</head>");
                 }
-#endif
 
+                if (serverArgs.EnableDevTools)
+                {
+                    var ivyEnableDevToolsTag = $"<meta name=\"ivy-enable-dev-tools\" content=\"true\" />";
+                    html = html.Replace("</head>", $"  {ivyEnableDevToolsTag}\n</head>");
+                }
+                
+#endif
                 //Inject Meta Title and Description
                 if (!string.IsNullOrEmpty(serverArgs.MetaDescription))
                 {

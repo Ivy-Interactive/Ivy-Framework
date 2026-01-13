@@ -12,6 +12,7 @@ import {
   getChromeParam,
   getParentId,
   wrapAppContent,
+  isDevToolsEnabled,
 } from '@/lib/utils';
 import { hasLicensedFeature } from '@/lib/license';
 import { ConnectionModal } from './ConnectionModal';
@@ -59,7 +60,7 @@ export function App() {
         <EventHandlerProvider eventHandler={eventHandler}>
           <>
             {!removeBranding && <MadeWithIvy />}
-            <DevTools />
+            {isDevToolsEnabled() && <DevTools />}
             {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
             <ErrorSheet />
             <Toaster />
