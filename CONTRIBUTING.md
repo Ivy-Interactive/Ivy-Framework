@@ -78,11 +78,11 @@ Ivy Framework uses multiple testing approaches to ensure code quality:
 ### Unit Testing
 
 - **Backend (C#)**: Run `dotnet test` in the root directory
-- **Frontend (TypeScript)**: Run `npm run test` in the `frontend/` directory
+- **Frontend (TypeScript)**: Run `npm run test` in the `src/frontend/` directory
 
 ### End-to-End Testing
 
-E2E tests are written using Playwright and are located in `frontend/e2e/`. We provide npm scripts for running these tests:
+E2E tests are written using Playwright and are located in `src/frontend/e2e/`. We provide npm scripts for running these tests:
 
 ```bash
 # Run all E2E tests
@@ -143,7 +143,7 @@ When contributing a new widget to Ivy Framework, your submission **must** includ
 
 ### 2. Frontend Widget Implementation (React/TypeScript)
 
-- **React component** in `frontend/src/widgets/` following TypeScript conventions
+- **React component** in `src/frontend/src/widgets/` following TypeScript conventions
 - **Props interface** with proper typing and optional properties
 - **Consistent styling** using only Tailwind CSS and shadcn/ui components
 - **Accessibility support** with proper ARIA attributes and semantic HTML
@@ -165,9 +165,9 @@ When contributing a new widget to Ivy Framework, your submission **must** includ
 
 ### 5. Testing Requirements
 
-- **C# unit tests** in `Ivy.Test/` covering widget functionality
-- **Frontend unit tests** using Vitest in `frontend/src/` with `.test.ts` extension
-- **Frontend E2E tests** using Playwright in `frontend/e2e/`
+- **C# unit tests** in `src/Ivy.Test/` covering widget functionality
+- **Frontend unit tests** using Vitest in `src/frontend/src/` with `.test.ts` extension
+- **Frontend E2E tests** using Playwright in `src/frontend/e2e/`
   - Run all E2E tests: `npm run e2e`
   - Run Ivy.Docs tests: `npm run e2e:docs`
   - Run Ivy.Samples tests: `npm run e2e:samples`
@@ -262,13 +262,13 @@ Before submitting your code, ensure it follows the project's linting and formatt
 
 - Use `npm run lint:fix` to automatically fix ESLint issues
 - Use `npm run format` to format code with Prettier
-- These commands should be run from the `frontend/` directory
+- These commands should be run from the `src/frontend/` directory
 
 #### Pre-commit Hooks
 
-The project uses pre-commit hooks that will automatically run linting and formatting on staged files. Make sure your code passes these checks before committing. More details how pre-commit hooks are being set up can be found in `./frontend/README.md`
+The project uses pre-commit hooks that will automatically run linting and formatting on staged files. Make sure your code passes these checks before committing. More details how pre-commit hooks are being set up can be found in `src/frontend/README.md`
 
-TL;DR, if you have run `npm install` in the `./frontend`, most likely all pre-commit hooks will be working for you, that cover linting and formatting for Ivy-Framework.
+TL;DR, if you have run `npm install` in the `src/frontend`, most likely all pre-commit hooks will be working for you, that cover linting and formatting for Ivy-Framework.
 
 ### C# Guidelines
 
@@ -332,14 +332,14 @@ TL;DR, if you have run `npm install` in the `./frontend`, most likely all pre-co
 dotnet test
 
 # Run specific test project
-dotnet test Ivy.Test
+dotnet test src/Ivy.Test
 
 # Run frontend unit tests
-cd frontend
+cd src/frontend
 npm run test
 
 # Run all frontend E2E tests
-cd frontend
+cd src/frontend
 npm run e2e
 
 # Run specific E2E test suites
@@ -404,8 +404,8 @@ When reporting an issue, include:
 
 - **GitHub Issues** - For bugs and feature requests
 - **GitHub Discussions** - For questions and general discussion
-- **Join our Discord** - https://discord.gg/sSwGzZAYb6
+- **Join our Discord** - <https://discord.gg/sSwGzZAYb6>
 - **Join our Slack** - If you want, we can invite you to a dedicated Slack channel for Ivy Framework development.
-- **Documentation** - Check the [Ivy.Docs](Ivy.Docs/) for guides and examples
+- **Documentation** - Check the [Ivy.Docs](src/Ivy.Docs/) for guides and examples
 
 Thank you for contributing to Ivy Framework! Your contributions help make Ivy better for everyone.

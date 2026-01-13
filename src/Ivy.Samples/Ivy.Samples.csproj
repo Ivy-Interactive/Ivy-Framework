@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../../Ivy/Directory.Build.props" Condition="Exists('../../../Ivy/Directory.Build.props')" />
+  
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS1591</NoWarn>
+    <UserSecretsId>c484b30a-b440-4aee-9a34-604c3ed3032e</UserSecretsId>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Ivy.Samples.Shared\Ivy.Samples.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

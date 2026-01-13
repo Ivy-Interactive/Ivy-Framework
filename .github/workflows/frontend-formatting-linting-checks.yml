@@ -3,38 +3,38 @@ permissions:
   contents: read
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
     paths:
-      - 'frontend/**'
+      - "src/frontend/**"
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
     paths:
-      - 'frontend/**'
+      - "src/frontend/**"
 
 jobs:
   frontend-checks:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # Setup Node.js
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
+      # Setup Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
-    - name: Install dependencies
-      working-directory: ./frontend
-      run: npm ci
-    
-    # Frontend code quality checks
-    - name: Check code formatting
-      working-directory: ./frontend
-      run: npm run format:check
-    
-    - name: Check linting
-      working-directory: ./frontend
-      run: npm run lint
-    
-    - name: Check frontend build
-      working-directory: ./frontend
-      run: npm run build 
+      - name: Install dependencies
+        working-directory: ./src/frontend
+        run: npm ci
+
+      # Frontend code quality checks
+      - name: Check code formatting
+        working-directory: ./src/frontend
+        run: npm run format:check
+
+      - name: Check linting
+        working-directory: ./src/frontend
+        run: npm run lint
+
+      - name: Check frontend build
+        working-directory: ./src/frontend
+        run: npm run build

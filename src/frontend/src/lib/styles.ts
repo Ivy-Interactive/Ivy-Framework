@@ -1,0 +1,622 @@
+export const inputStyles = {
+  invalid:
+    'bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive',
+  invalidInput:
+    'border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive',
+};
+
+export const getWidth = (width?: string): React.CSSProperties => {
+  if (!width) return {};
+
+  const [wantedWidth, minWidth, maxWidth] = width.split(',');
+
+  return {
+    ..._getWantedWidth(wantedWidth),
+    ..._getMinWidth(minWidth),
+    ..._getMaxWidth(maxWidth),
+  };
+};
+
+const _getWantedWidth = (width?: string): React.CSSProperties => {
+  if (!width) return {};
+  const [sizeType, value] = width.split(':');
+  const remValue = parseFloat(value) * 0.25;
+  switch (sizeType.toLowerCase()) {
+    case 'units':
+      return { width: `${remValue}rem`, maxWidth: `${remValue}rem` };
+    case 'px':
+      return { width: `${value}px` };
+    case 'rem':
+      return { width: `${value}rem` };
+    case 'fraction':
+      return {
+        width: `${parseFloat(value) * 100}%`,
+      };
+    case 'fraction-gap':
+      return {
+        flexBasis: `${parseFloat(value) * 100}%`,
+        flexShrink: 1,
+        flexGrow: 0,
+        minWidth: 0, // Allow shrinking below flex-basis to accommodate gaps
+      };
+    case 'full':
+      return { width: '100%' };
+    case 'fit':
+      return { width: 'fit-content' };
+    case 'screen':
+      return { width: '100vw' };
+    case 'mincontent':
+      return { width: 'min-content' };
+    case 'maxcontent':
+      return { width: 'max-content' };
+    case 'auto':
+      return { width: 'auto' };
+    case 'grow':
+      return { flexGrow: parseFloat(value) || 1 };
+    case 'shrink':
+      return { flexShrink: parseFloat(value) || 1 };
+    default:
+      console.warn(`Unknown size type: ${sizeType}`);
+      return {};
+  }
+};
+
+const _getMinWidth = (width?: string): React.CSSProperties => {
+  if (!width) return {};
+  const [sizeType, value] = width.split(':');
+  switch (sizeType.toLowerCase()) {
+    case 'units':
+      return { minWidth: `${parseFloat(value) * 0.25}rem` };
+    case 'px':
+      return { minWidth: `${value}px` };
+    case 'rem':
+      return { minWidth: `${value}rem` };
+    case 'fraction':
+      return {
+        minWidth: `${parseFloat(value) * 100}%`,
+      };
+    case 'fraction-gap':
+      return {
+        minWidth: 0, // Allow shrinking to accommodate gaps
+      };
+    case 'full':
+      return { minWidth: '100%' };
+    case 'fit':
+      return { minWidth: 'fit-content' };
+    case 'screen':
+      return { minWidth: '100vw' };
+    case 'mincontent':
+      return { minWidth: 'min-content' };
+    case 'maxcontent':
+      return { minWidth: 'max-content' };
+    case 'auto':
+      return { minWidth: 'auto' };
+    default:
+      console.warn(`Unknown size type: ${sizeType}`);
+      return {};
+  }
+};
+
+const _getMaxWidth = (width?: string): React.CSSProperties => {
+  if (!width) return {};
+  const [sizeType, value] = width.split(':');
+  switch (sizeType.toLowerCase()) {
+    case 'units':
+      return { maxWidth: `${parseFloat(value) * 0.25}rem` };
+    case 'px':
+      return { maxWidth: `${value}px` };
+    case 'rem':
+      return { maxWidth: `${value}rem` };
+    case 'fraction':
+      return {
+        maxWidth: `${parseFloat(value) * 100}%`,
+      };
+    case 'fraction-gap':
+      return {
+        maxWidth: `${parseFloat(value) * 100}%`,
+      };
+    case 'full':
+      return { maxWidth: '100%' };
+    case 'fit':
+      return { maxWidth: 'fit-content' };
+    case 'screen':
+      return { maxWidth: '100vw' };
+    case 'mincontent':
+      return { maxWidth: 'min-content' };
+    case 'maxcontent':
+      return { maxWidth: 'max-content' };
+    case 'auto':
+      return { maxWidth: 'auto' };
+    default:
+      console.warn(`Unknown size type: ${sizeType}`);
+      return {};
+  }
+};
+
+export const getHeight = (height?: string): React.CSSProperties => {
+  if (!height) return {};
+
+  const [wantedHeight, minHeight, maxHeight] = height.split(',');
+
+  return {
+    ..._getWantedHeight(wantedHeight),
+    ..._getMinHeight(minHeight),
+    ..._getMaxHeight(maxHeight),
+  };
+};
+
+const _getWantedHeight = (height?: string): React.CSSProperties => {
+  if (!height) return {};
+
+  const [sizeType, value] = height.split(':');
+
+  switch (sizeType.toLowerCase()) {
+    case 'units': {
+      const units = parseFloat(value);
+      return { height: `${units * 0.25}rem` };
+    }
+
+    case 'px':
+      return { height: `${value}px` };
+
+    case 'rem':
+      return { height: `${value}rem` };
+
+    case 'fraction': {
+      const fraction = parseFloat(value);
+      return { height: `${fraction * 100}%` };
+    }
+
+    case 'full':
+      return { height: '100%' };
+
+    case 'fit':
+      return { height: 'fit-content' };
+
+    case 'screen':
+      return { height: '100vh' };
+
+    case 'mincontent':
+      return { height: 'min-content' };
+
+    case 'maxcontent':
+      return { height: 'max-content' };
+
+    case 'auto':
+      return { height: 'auto' };
+
+    case 'grow':
+      return { flexGrow: parseFloat(value) || 1 };
+
+    case 'shrink':
+      return { flexShrink: parseFloat(value) || 1 };
+
+    default:
+      console.warn(`Unknown size type: ${sizeType}`);
+      return {};
+  }
+};
+
+const _getMinHeight = (height?: string): React.CSSProperties => {
+  if (!height) return {};
+
+  const [sizeType, value] = height.split(':');
+  switch (sizeType.toLowerCase()) {
+    case 'units':
+      return { minHeight: `${parseFloat(value) * 0.25}rem` };
+    case 'px':
+      return { minHeight: `${value}px` };
+    case 'rem':
+      return { minHeight: `${value}rem` };
+    case 'fraction':
+      return { minHeight: `${parseFloat(value) * 100}%` };
+    case 'full':
+      return { minHeight: '100%' };
+    case 'fit':
+      return { minHeight: 'fit-content' };
+    case 'screen':
+      return { minHeight: '100vh' };
+    case 'mincontent':
+      return { minHeight: 'min-content' };
+    case 'maxcontent':
+      return { minHeight: 'max-content' };
+    case 'auto':
+      return { minHeight: 'auto' };
+    default:
+      console.warn(`Unknown size type: ${sizeType}`);
+      return {};
+  }
+};
+
+const _getMaxHeight = (height?: string): React.CSSProperties => {
+  if (!height) return {};
+
+  const [sizeType, value] = height.split(':');
+  switch (sizeType.toLowerCase()) {
+    case 'units':
+      return { maxHeight: `${parseFloat(value) * 0.25}rem` };
+    case 'px':
+      return { maxHeight: `${value}px` };
+    case 'rem':
+      return { maxHeight: `${value}rem` };
+    case 'fraction':
+      return { maxHeight: `${parseFloat(value) * 100}%` };
+    case 'full':
+      return { maxHeight: '100%' };
+    case 'fit':
+      return { maxHeight: 'fit-content' };
+    case 'screen':
+      return { maxHeight: '100vh' };
+    case 'mincontent':
+      return { maxHeight: 'min-content' };
+    case 'maxcontent':
+      return { maxHeight: 'max-content' };
+    case 'auto':
+      return { maxHeight: 'auto' };
+    default:
+      console.warn(`Unknown size type: ${sizeType}`);
+      return {};
+  }
+};
+
+export type BorderStyle = 'None' | 'Solid' | 'Dashed' | 'Dotted';
+
+export const getBorderStyle = (
+  borderStyle: BorderStyle
+): React.CSSProperties => {
+  return {
+    borderStyle: borderStyle.toLowerCase(),
+  };
+};
+
+export const getBorderThickness = (
+  getBorderThickness?: string
+): React.CSSProperties => {
+  if (!getBorderThickness) return {};
+
+  if (
+    typeof getBorderThickness === 'string' &&
+    getBorderThickness.indexOf(',') > -1
+  ) {
+    const [left, top, right, bottom] = getBorderThickness
+      .split(',')
+      .map(val => (val ? `${parseFloat(val)}px` : '0'));
+
+    return {
+      borderWidth: left,
+      borderTopWidth: top,
+      borderRightWidth: right,
+      borderBottomWidth: bottom,
+    };
+  }
+
+  return {
+    borderWidth: `${parseFloat(getBorderThickness)}px`,
+  };
+};
+
+export type BorderRadius = 'None' | 'Rounded' | 'Full';
+
+export const getBorderRadius = (
+  borderRadius?: BorderRadius
+): React.CSSProperties => {
+  if (!borderRadius) return {};
+  return {
+    borderRadius:
+      borderRadius === 'Rounded'
+        ? '0.5rem'
+        : borderRadius === 'Full'
+          ? '9999px'
+          : '0',
+  };
+};
+
+export const getPadding = (padding?: string): React.CSSProperties => {
+  if (!padding) return {};
+
+  if (typeof padding === 'string' && padding.indexOf(',') > -1) {
+    const [left, top, right, bottom] = padding
+      .split(',')
+      .map(val => (val ? `${parseFloat(val) * 0.25}rem` : '0'));
+
+    return {
+      paddingLeft: left,
+      paddingTop: top,
+      paddingRight: right,
+      paddingBottom: bottom,
+    };
+  }
+  return {
+    padding: `${parseFloat(padding) * 0.25}rem`,
+  };
+};
+
+export const getMargin = (margin?: string): React.CSSProperties => {
+  if (!margin) return {};
+
+  if (typeof margin === 'string' && margin.indexOf(',') > -1) {
+    const [left, top, right, bottom] = margin
+      .split(',')
+      .map(val => (val ? `${parseFloat(val) * 0.25}rem` : '0'));
+
+    return {
+      marginLeft: left,
+      marginTop: top,
+      marginRight: right,
+      marginBottom: bottom,
+    };
+  }
+  return {
+    margin: `${parseFloat(margin) * 0.25}rem`,
+  };
+};
+
+export const getGap = (gap?: number): React.CSSProperties => {
+  if (!gap) return {};
+  return {
+    gap: `${gap * 0.25}rem`,
+  };
+};
+
+export type Overflow = 'Clip' | 'Ellipsis' | 'Auto';
+
+export const getOverflow = (overflow?: Overflow): React.CSSProperties => {
+  if (!overflow) return {};
+
+  if (overflow === 'Clip') {
+    return {
+      overflow: 'hidden',
+    };
+  }
+
+  if (overflow === 'Ellipsis') {
+    return {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    };
+  }
+
+  return {
+    overflow: overflow.toLowerCase(),
+  };
+};
+
+export type Orientation = 'Horizontal' | 'Vertical';
+
+export type Align =
+  | 'TopLeft'
+  | 'TopRight'
+  | 'TopCenter'
+  | 'BottomLeft'
+  | 'BottomRight'
+  | 'BottomCenter'
+  | 'Left'
+  | 'Right'
+  | 'Center'
+  | 'Stretch';
+
+export const getAlign = (
+  orientation: Orientation,
+  align?: Align
+): React.CSSProperties => {
+  const styles: React.CSSProperties = {
+    display: 'flex',
+  };
+
+  styles.flexDirection = orientation === 'Horizontal' ? 'row' : 'column';
+
+  // Prevent wrapping in horizontal layouts so that fractional widths (e.g., flex: 1, width: 50%) correctly share available space; wrapping would break the intended distribution.
+  if (orientation === 'Horizontal') {
+    styles.flexWrap = 'nowrap';
+    styles.width = '100%';
+    // Default to flex-start for horizontal layouts so fractional widths work properly
+    if (!align) {
+      styles.justifyContent = 'flex-start';
+    }
+  }
+
+  if (orientation === 'Horizontal') {
+    // Horizontal layout alignment
+    switch (align) {
+      case 'TopLeft':
+      case 'TopCenter':
+      case 'TopRight':
+        styles.alignItems = 'flex-start';
+        break;
+      case 'BottomLeft':
+      case 'BottomCenter':
+      case 'BottomRight':
+        styles.alignItems = 'flex-end';
+        break;
+      case 'Left':
+      case 'Right':
+      case 'Center':
+        styles.alignItems = 'center';
+        break;
+      case 'Stretch':
+        styles.alignItems = 'stretch !important';
+        break;
+    }
+
+    switch (align) {
+      case 'TopLeft':
+      case 'Left':
+      case 'BottomLeft':
+        styles.justifyContent = 'flex-start';
+        break;
+      case 'TopRight':
+      case 'Right':
+      case 'BottomRight':
+        styles.justifyContent = 'flex-end';
+        break;
+      case 'TopCenter':
+      case 'Center':
+      case 'BottomCenter':
+        styles.justifyContent = 'center';
+        break;
+    }
+  } else {
+    // Vertical layout alignment
+    // Set horizontal alignment (Left/Center/Right)
+    switch (align) {
+      case 'TopLeft':
+      case 'Left':
+      case 'BottomLeft':
+        styles.alignItems = 'flex-start';
+        break;
+      case 'TopRight':
+      case 'Right':
+      case 'BottomRight':
+        styles.alignItems = 'flex-end';
+        break;
+      case 'TopCenter':
+      case 'Center':
+      case 'BottomCenter':
+        styles.alignItems = 'center';
+        break;
+      case 'Stretch':
+        styles.alignItems = 'stretch !important';
+        break;
+    }
+
+    // Set vertical alignment (Top/Center/Bottom)
+    switch (align) {
+      case 'TopLeft':
+      case 'TopCenter':
+      case 'TopRight':
+        styles.justifyContent = 'flex-start';
+        break;
+      case 'Left':
+      case 'Center':
+      case 'Right':
+        styles.justifyContent = 'center';
+        break;
+      case 'BottomLeft':
+      case 'BottomCenter':
+      case 'BottomRight':
+        styles.justifyContent = 'flex-end';
+        break;
+    }
+  }
+
+  return styles;
+};
+
+export const getColor = (
+  color?: string,
+  cssProperty: 'color' | 'backgroundColor' | 'borderColor' = 'color',
+  role: 'background' | 'foreground' = 'background',
+  percentage: number | undefined = undefined
+) => {
+  if (!color) return {};
+  const varName =
+    color.toLowerCase() + (role === 'background' ? '' : '-foreground');
+  if (percentage && percentage > -100 && percentage < 100) {
+    return {
+      [cssProperty]: `color-mix(in srgb, var(--${varName}), var(--background) ${Math.abs(percentage)}%)`,
+    };
+  }
+  return {
+    [cssProperty]: 'var(--' + varName + ')',
+  };
+};
+
+/**
+ * Converts Ivy Size format to CSS Grid column/row value
+ * Example: "Px:100" -> "100px", "Fraction:1" -> "1fr"
+ */
+export const convertSizeToGridValue = (size?: string): string => {
+  if (!size) return 'minmax(0, 1fr)';
+
+  const [sizeType, value] = size.split(':');
+
+  switch (sizeType.toLowerCase()) {
+    case 'px':
+      return `${value}px`;
+
+    case 'rem':
+      return `${value}rem`;
+
+    case 'units':
+      return `${parseFloat(value) * 0.25}rem`;
+
+    case 'fraction':
+      return `${value}fr`;
+
+    case 'full':
+      return '100%';
+
+    case 'fit':
+      return 'fit-content';
+
+    case 'mincontent':
+      return 'min-content';
+
+    case 'maxcontent':
+      return 'max-content';
+
+    case 'auto':
+      return 'auto';
+
+    default:
+      console.warn(`Unknown size type for grid: ${sizeType}`);
+      return 'minmax(0, 1fr)';
+  }
+};
+
+// Typography classes - shadcn typography with Ivy spacing
+export const typography: Record<string, string> = {
+  // Headings
+  h1: `text-4xl font-semibold scroll-m-20 mt-12 mb-4 [&+h2]:mt-2 [&+p]:mt-0`,
+  h2: `text-3xl font-medium scroll-m-20 mt-8 mb-4 [&+h3]:mt-2 [&+p]:mt-0`,
+  h3: `text-2xl font-medium scroll-m-20 mt-8 mb-4 [&+h4]:mt-2 [&+p]:mt-0`,
+  h4: `text-xl font-medium scroll-m-20 mt-6 mb-4 [&+h5]:mt-2 [&+p]:mt-0`,
+  h5: `text-lg font-medium scroll-m-20 mt-4 mb-2 [&+h6]:mt-2 [&+p]:mt-0`,
+  h6: `text-base font-medium scroll-m-20 mt-2 mb-2 [&+p]:mt-0`,
+
+  // Body
+  p: `text-base scroll-m-20 mb-4`,
+  lead: `text-muted-foreground`,
+  strong: 'font-semibold',
+  em: 'italic',
+
+  // Size variants
+  large: 'text-lg font-semibold',
+  small: 'text-large-body font-medium leading-none',
+  muted: 'text-base text-muted-foreground',
+
+  // Semantic variants
+  danger: 'text-large-body text-destructive font-semibold',
+  warning: 'text-large-body text-amber font-semibold',
+  success: 'text-large-body text-green font-semibold',
+
+  // UI variants
+  label: 'text-large-label font-medium leading-none flex items-center',
+  block: 'flex items-center min-w-0',
+
+  // Lists
+  ul: 'ml-6 list-disc [&>li:first-child]:mt-0 mb-4',
+  ol: 'ml-6 list-decimal [&>li:first-child]:mt-0 mb-4',
+  li: 'mt-1 ',
+
+  // Links
+  a: 'text-primary underline brightness-90 hover:brightness-100',
+
+  // Blockquote
+  blockquote: 'border-l-2 pl-6 italic mb-4',
+
+  // Code
+  code: 'relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono text-sm font-semibold',
+
+  // Table
+  table: 'w-full border-collapse border border-border mb-4',
+  thead: 'bg-muted',
+  tr: 'border border-border',
+  th: 'border border-border px-4 py-2 text-left font-bold text-sm',
+  td: 'border border-border px-4 py-2 text-sm',
+
+  // Media
+  img: 'max-w-full h-auto cursor-zoom-in mb-4',
+  hr: 'my-6 border-t border-border',
+};

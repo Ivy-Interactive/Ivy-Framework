@@ -407,9 +407,9 @@ FodyWeavers.xsd
 
 # Possible Playwright test results in root folder
 test-results/
-/Ivy/.claude/settings.local.json
-/Ivy.Samples/.claude/settings.local.json
-/.releases/Commits/*
+/src/Ivy/.claude/settings.local.json
+/src/Ivy.Samples/.claude/settings.local.json
+/src/.releases/Commits/*
 
 # Claude - ignore personal settings and commands, but keep skills and project config
 .claude/settings.local.json
