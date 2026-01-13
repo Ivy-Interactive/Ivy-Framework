@@ -98,6 +98,17 @@ public class ViewContext : IViewContext
         );
     }
 
+    public void UseEffect(Func<Task<IAsyncDisposable>> handler, params IEffectTriggerConvertible[] triggers)
+    {
+        UseEffectHook(
+            EffectHook.Create(
+                _callingIndex++,
+                async () => new AsyncDisposableAdapter(await handler()),
+                triggers.Select(e => e.ToTrigger()).ToArray()
+            )
+        );
+    }
+
     public void UseEffect(Func<IDisposable> handler, params IEffectTriggerConvertible[] triggers)
     {
         UseEffectHook(

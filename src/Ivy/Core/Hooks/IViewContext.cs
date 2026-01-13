@@ -20,6 +20,8 @@ public interface IViewContext : IDisposable
 
     void UseEffect(Func<Task<IDisposable>> handler, params IEffectTriggerConvertible[] triggers);
 
+    void UseEffect(Func<Task<IAsyncDisposable>> handler, params IEffectTriggerConvertible[] triggers);
+
     void UseEffect(Func<IDisposable> handler, params IEffectTriggerConvertible[] triggers);
 
     void UseEffect(Action handler, params IEffectTriggerConvertible[] triggers);

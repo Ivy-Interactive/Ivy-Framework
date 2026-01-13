@@ -337,6 +337,7 @@ public class Server
                 }
             }
         }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+#endif
 
         if (Utils.IsPortInUse(_args.Port))
         {
@@ -377,7 +378,7 @@ public class Server
                 return;
             }
         }
-#endif
+
         if (!string.IsNullOrEmpty(_args.DefaultAppId))
         {
             DefaultAppId = _args.DefaultAppId;

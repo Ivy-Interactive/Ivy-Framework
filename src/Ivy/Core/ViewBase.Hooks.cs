@@ -51,6 +51,9 @@ public abstract partial class ViewBase
     protected void UseEffect(Func<Task<IDisposable>> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
+    protected void UseEffect(Func<Task<IAsyncDisposable>> handler, params IEffectTriggerConvertible[] triggers) =>
+        this.Context.UseEffect(handler, triggers);
+
     protected void UseEffect(Func<IDisposable> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
