@@ -576,7 +576,7 @@ export const typography: Record<string, string> = {
   h6: `text-base font-medium scroll-m-20 mt-2 mb-2 [&+p]:mt-0`,
 
   // Body
-  p: `text-base scroll-m-20 mb-4`,
+  p: `text-base scroll-m-20 m-0`,
   lead: `text-muted-foreground`,
   strong: 'font-semibold',
   em: 'italic',
@@ -605,7 +605,7 @@ export const typography: Record<string, string> = {
   a: 'text-primary underline brightness-90 hover:brightness-100',
 
   // Blockquote
-  blockquote: 'border-l-2 pl-6 italic mb-4',
+  blockquote: 'border-l-2 pl-6 italic',
 
   // Code
   code: 'relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono text-sm font-semibold',
