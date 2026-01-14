@@ -17,7 +17,6 @@ public class TextApp : SampleBase
 
         var basic = Layout.Vertical(
             Text.H4("Basic Text").Bold(),
-            Text.P("Literal().Bold()").Bold(),
             Text.P("P().Italic()").Italic(),
             Text.Inline("Inline().Muted()").Muted(),
             Text.Block("Block().Bold().Italic()").Bold().Italic()
