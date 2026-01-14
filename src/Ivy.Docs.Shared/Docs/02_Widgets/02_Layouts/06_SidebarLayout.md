@@ -50,7 +50,7 @@ public class SidebarWithHeaderFooterExample : ViewBase
         return new SidebarLayout(
             mainContent: new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.Large("Welcome to the App")
+                    | Text.P("Welcome to the App").Large()
                     | Text.P("This is the main content area with a sidebar navigation.")
                     | new Button("Action Button")
                         .Variant(ButtonVariant.Primary)
@@ -64,7 +64,7 @@ public class SidebarWithHeaderFooterExample : ViewBase
             sidebarHeader: Layout.Vertical().Gap(1)
                 | Text.Lead("Navigation"),
             sidebarFooter: Layout.Vertical().Gap(1)
-                | Text.Small("Version 1.0.0").Color(Colors.Gray)
+                | Text.P("Version 1.0.0").Small().Color(Colors.Gray)
         );
     }
 }
@@ -138,8 +138,8 @@ public class SidebarMenuExample : ViewBase
             sidebarFooter: Layout.Horizontal().Gap(2)
                 | new Avatar("JD").Size(20)
                 | (Layout.Vertical()
-                    | Text.Small("John Doe")
-                    | Text.Small("john@example.com").Color(Colors.Gray))
+                    | Text.P("John Doe").Small()
+                    | Text.P("john@example.com").Small().Color(Colors.Gray))
         );
     }
 }
@@ -164,7 +164,7 @@ public class MainAppSidebarExample : ViewBase
             mainContent: Layout.Vertical().Gap(4)
                 | new Card(
                     Layout.Vertical().Gap(2)
-                        | Text.Large("Main Application")
+                        | Text.P("Main Application").Large()
                         | Text.P("This sidebar is configured as the main app sidebar with toggle functionality.")
                         | new Button("Test Action").HandleClick(_ => client.Toast("Action performed!"))
                 ).Title("Welcome")
@@ -245,7 +245,7 @@ public class SidebarMenuAdvancedExample : ViewBase
         return new SidebarLayout(
             mainContent: new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.Large("Documentation")
+                    | Text.P("Documentation").Large()
                     | Text.P($"Currently viewing: {(string.IsNullOrEmpty(selectedItem.Value) ? "None" : selectedItem.Value)}")
             ).Title("Content Area"),
             sidebarContent: menu,

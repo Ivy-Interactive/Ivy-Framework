@@ -148,19 +148,19 @@ Layout.Vertical()
     | new Card(
         Layout.Vertical()
             | Text.H4("Alice Smith")
-            | Text.Small("alice@example.com").Color(Colors.Gray)
+            | Text.P("alice@example.com").Small().Color(Colors.Gray)
             | new Badge("Admin").Secondary()
     )
     | new Card(
         Layout.Vertical()
             | Text.H4("Bob Johnson")
-            | Text.Small("bob@example.com").Color(Colors.Gray)
+            | Text.P("bob@example.com").Small().Color(Colors.Gray)
             | new Badge("User").Secondary()
     )
     | new Card(
         Layout.Vertical()
             | Text.H4("Carol Brown")
-            | Text.Small("carol@example.com").Color(Colors.Gray)
+            | Text.P("carol@example.com").Small().Color(Colors.Gray)
             | new Badge("Manager").Secondary()
     )
 ```

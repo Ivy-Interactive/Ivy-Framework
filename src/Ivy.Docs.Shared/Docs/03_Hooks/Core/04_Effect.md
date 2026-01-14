@@ -129,7 +129,7 @@ public class DependentEffectView : ViewBase
         return Layout.Vertical()
             | new Button($"Count: {count.Value}", 
                 onClick: _ => count.Set(count.Value + 1))
-            | Layout.Vertical(log.Value.Select(Text.Small));
+            | Layout.Vertical(log.Value.Select(e => Text.P(e).Small()));
     }
 }
 ```

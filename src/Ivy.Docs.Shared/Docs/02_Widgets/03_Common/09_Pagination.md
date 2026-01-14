@@ -44,11 +44,11 @@ public class PaginationConfigurationApp : ViewBase
         var page = UseState(5);
 
         return Layout.Vertical().Gap(4)
-            | Text.Large("Siblings")
+            | Text.P("Siblings").Large()
             | (Layout.Vertical()
                 | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(1)
                 | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(2))
-            | Text.Large("Boundaries")
+            | Text.P("Boundaries").Large()
             | (Layout.Vertical()
                 | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(1)
                 | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(2));

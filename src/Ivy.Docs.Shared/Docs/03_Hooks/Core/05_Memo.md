@@ -259,7 +259,7 @@ public class ExpensiveComponent : ViewBase, IMemoized
         return Layout.Vertical(
             Text.Heading(_title),
             Text.Block($"Value: {_value}"),
-            Text.Small($"Rendered at: {DateTime.Now}")
+            Text.P($"Rendered at: {DateTime.Now}").Small()
         );
     }
 }
@@ -325,7 +325,7 @@ public class ProductItem : ViewBase, IMemoized
                 Layout.Vertical(
                     Text.Heading(_product.Name),
                     Text.Block($"${_product.Price:N2}"),
-                    Text.Small($"Position: {_index + 1}")
+                    Text.P($"Position: {_index + 1}").Small()
                 )
             )
         );

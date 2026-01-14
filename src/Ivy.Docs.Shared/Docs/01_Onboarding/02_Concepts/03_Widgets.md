@@ -252,7 +252,7 @@ public class PrimitiveWidgetsDemo : ViewBase
                     | Text.H3("Heading 3")
                     | Text.P("Paragraph text")
                     | Text.Label("Label text")
-                    | Text.Large("Large text")
+                    | Text.P("Large text").Large()
                     | Text.Lead("Lead text")
             ).Title("Text").Description("Text variants").Height(Size.Units(75))
             | new Card(

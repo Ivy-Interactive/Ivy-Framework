@@ -169,8 +169,8 @@ public class DynamicContentView : ViewBase
                         new Card(
                             Layout.Vertical().Gap(2)
                                 | Text.H3(item)
-                                | Text.Small("Active").Color(Colors.Green)
-                                | (showDetails.Value ? Text.Small($"Details for {item}") : Text.Small("Click 'Toggle Details' to see more"))
+                                | Text.P("Active").Small().Color(Colors.Green)
+                                | (showDetails.Value ? Text.P($"Details for {item}").Small() : Text.P("Click 'Toggle Details' to see more").Small())
                         ).Title("List Item")
                     )
               );

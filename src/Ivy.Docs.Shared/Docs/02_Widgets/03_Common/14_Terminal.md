@@ -34,16 +34,16 @@ You can customize the terminal appearance and behavior:
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
-    | Text.Large("With Title")
+    | Text.P("With Title").Large()
     | new Terminal()
         .Title("My Terminal")
         .AddCommand("echo Hello World")
         .AddOutput("Hello World")
-    | Text.Large("Without Header")
+    | Text.P("Without Header").Large()
     | new Terminal() { ShowHeader = false }
         .AddCommand("npm install")
         .AddOutput("added 125 packages")
-    | Text.Large("Without Copy Button")
+    | Text.P("Without Copy Button").Large()
     | new Terminal()
         .Title("Read Only")
         .ShowCopyButton(false)

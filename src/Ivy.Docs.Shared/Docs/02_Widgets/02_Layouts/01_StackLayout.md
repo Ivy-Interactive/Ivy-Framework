@@ -41,9 +41,9 @@ public class StackLayoutExample : ViewBase
 {
     public override object? Build()
     {
-        var box1 = new Box().Width(2).Height(2);
-        var box2 = new Box().Width(2).Height(2);
-        var box3 = new Box().Width(2).Height(2);
+        var box1 = new Box().Color(Colors.Primary).Width(2).Height(2);
+        var box2 = new Box().Color(Colors.Primary).Width(2).Height(2);
+        var box3 = new Box().Color(Colors.Primary).Width(2).Height(2);
         
         return new StackLayout([
             Text.H2("StackLayout Features"),
@@ -65,7 +65,7 @@ public class AdvancedStackLayoutExample : ViewBase
 {
     public override object? Build()
     {
-        var box = new Box().Width(2).Height(2);
+        var box = new Box().Color(Colors.Primary).Width(2).Height(2);
         
         return new StackLayout([
             Text.H2("Advanced StackLayout Features"),
@@ -112,7 +112,7 @@ public class NavigationExample : ViewBase
              // App title and user info
             new StackLayout([
                 Text.H3("MyApp"),
-                Text.Small("Welcome back!")
+                Text.P("Welcome back!").Small()
             ], Orientation.Vertical, align: Align.Left),
             
             // User actions

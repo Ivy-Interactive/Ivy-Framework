@@ -26,7 +26,7 @@ public class BasicAreaChart : ViewBase
         };
     
         return Layout.Vertical()
-            | Text.Large("Sales figures")
+            | Text.P("Sales figures").Large()
             | new AreaChart(data)
                     .ColorScheme(ColorScheme.Default)
                     .Area(new Area("Mobile", 1).Fill(Colors.Red).LegendType(LegendTypes.Square))

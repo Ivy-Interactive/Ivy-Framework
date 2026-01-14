@@ -14,21 +14,11 @@ searchHints:
 Interact with users and gather input using Ivy's [alert system](./23_Alerts.md) and [dialog system](./23_Alerts.md).
 </Ingress>
 
-## Overview
-
-The alert system in Ivy supports:
-
-- Confirmation dialogs
-- Custom alert buttons
-- [Dialog](./23_Alerts.md)-based prompts
-- [Form](./13_Forms.md)-based input collection
-- Alert chaining
-
 ## Basic Usage
 
 Here's a simple example of showing a confirmation alert:
 
-```csharp demo-tabs
+```csharp demo-below
 public class BasicPromptView : ViewBase
 {
     public override object? Build()
@@ -52,6 +42,19 @@ public class BasicPromptView : ViewBase
         );
     }
 }
+```
+
+```mermaid
+flowchart LR
+    A[User Action] --> B{Input Type}
+    B -->|Confirm| C[UseAlert<br/>showAlert]
+    B -->|Text| D[Form.ToDialog]
+    B -->|Multiple| E[Custom Form<br/>ToDialog]
+    B -->|Chain| F[Alert → Alert]
+    C --> G[AlertResult]
+    D --> H[Form Submit]
+    E --> H
+    F --> G
 ```
 
 ### Text Input Prompts

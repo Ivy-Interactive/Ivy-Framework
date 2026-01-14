@@ -109,17 +109,17 @@ public class DashboardHeaderExample : ViewBase
         var dashboardContent = Layout.Grid().Columns(3).Rows(2).Gap(4)
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.Small("Users")
+                    | Text.P("Users").Small()
                     | Text.Label("12.3K").Color(Colors.Primary)
             ).GridColumn(1).GridRow(1)
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.Small("Revenue")
+                    | Text.P("Revenue").Small()
                     | Text.Label("$54K").Color(Colors.Primary)
             ).GridColumn(2).GridRow(1)
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.Small("Growth")
+                    | Text.P("Growth").Small()
                     | Text.Label("+23%").Color(Colors.Primary)
             ).GridColumn(3).GridRow(1)
             | new Card("Chart Area - Interactive dashboard content")
@@ -233,21 +233,21 @@ public class FormHeaderExample : ViewBase
         var formContent = Layout.Vertical().Gap(4)
             | new Card(
                 Layout.Vertical().Gap(3)
-                    | Text.Small("Personal Information")
+                    | Text.P("Personal Information").Small()
                     | name.ToTextInput().Placeholder("Full Name")
                     | email.ToTextInput().Placeholder("Email")
                     | bio.ToTextInput().Placeholder("Bio").Variant(TextInputs.Textarea)
             )
             | new Card(
                 Layout.Vertical().Gap(3)
-                    | Text.Small("Account Settings")
+                    | Text.P("Account Settings").Small()
                     | new BoolInput<bool>(UseState(true)).Label("Email notifications")
                     | new BoolInput<bool>(UseState(false)).Label("SMS notifications")
                     | new BoolInput<bool>(UseState(true)).Label("Marketing emails")
             )
             | new Card(
                 Layout.Vertical().Gap(3)
-                    | Text.Small("Privacy")
+                    | Text.P("Privacy").Small()
                     | new BoolInput<bool>(UseState(true)).Label("Profile visibility")
                     | new BoolInput<bool>(UseState(false)).Label("Show online status")
             );

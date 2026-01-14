@@ -271,14 +271,14 @@ public class FileInputEventHandlersExample : ViewBase
                | Layout.Vertical().Gap(4)
                    | new Card(
                        Layout.Vertical().Gap(2)
-                           | Text.Small("The blur event fires when you close the file dialog or click away from the input.")
+                           | Text.P("The blur event fires when you close the file dialog or click away from the input.").Small()
                            | (blurMessage.Value != ""
                                ? Callout.Success(blurMessage.Value)
                                : Callout.Info("Interact with the file input above to see blur events"))
                    ).Title("OnBlur Handler")
                    | new Card(
                        Layout.Vertical().Gap(2)
-                           | Text.Small("The cancel event fires when you click the X button next to a file in the list.")
+                           | Text.P("The cancel event fires when you click the X button next to a file in the list.").Small()
                            | (files.Value.Length > 0
                                ? files.Value.ToTable()
                                    .Width(Size.Full())

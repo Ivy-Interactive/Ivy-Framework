@@ -31,7 +31,7 @@ public class BasicDateRangeDemo : ViewBase
         var span = $"That's {(end-start).Days} days";
         return Layout.Vertical()
                 | dateRangeState.ToDateRangeInput()
-                | Text.Large(span);
+                | Text.P(span).Large();
     }    
 }        
 ```
@@ -63,11 +63,11 @@ public class DateRangeVariantsDemo : ViewBase
              DateOnly.FromDateTime(DateTime.Today)));
 
         return Layout.Vertical().Gap(4)
-            | Text.Small("Disabled State")
+            | Text.P("Disabled State").Small()
             | dateRange.ToDateRangeInput().Disabled()
-            | Text.Small("Invalid State")
+            | Text.P("Invalid State").Small()
             | dateRange.ToDateRangeInput().Invalid("Invalid date range")
-            | Text.Small("Nullable State")
+            | Text.P("Nullable State").Small()
             | nullableRange.ToDateRangeInput();
     }
 }
@@ -124,15 +124,15 @@ public class HotelBookingDemo : ViewBase
         var totalPrice = nights * PricePerNight;
 
         return Layout.Vertical().Gap(4)
-            | Text.Large("Book Your Stay").Bold()
+            | Text.P("Book Your Stay").Large().Bold()
             | bookingRange.ToDateRangeInput()
                 .Placeholder("Select check-in and check-out dates")
                 .Format("MMM dd, yyyy")
                 .Invalid(errorMessage)
             | (nights > 0 
                 ? Layout.Horizontal().Gap(2)
-                    | Text.Small($"{nights} night(s)").Muted()
-                    | Text.Small($"Total: ${totalPrice}").Bold()
+                    | Text.P($"{nights} night(s)").Small().Muted()
+                    | Text.P($"Total: ${totalPrice}").Small().Bold()
                 : null);
     }
 }

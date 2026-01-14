@@ -49,7 +49,7 @@ public class VideoPlayerApp : SampleBase
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Basic Video Player")
-                    | Text.Small("Default video player with standard browser controls.")
+                    | Text.P("Default video player with standard browser controls.").Small()
                     | basicVideo
                 ).Title("Basic Usage"))
 
@@ -57,7 +57,7 @@ public class VideoPlayerApp : SampleBase
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Muted Autoplay Video")
-                    | Text.Small("Muted autoplay video (browsers usually allow muted autoplay).")
+                    | Text.P("Muted autoplay video (browsers usually allow muted autoplay).").Small()
                     | autoplayMutedVideo
                     | Text.H4("Looping Video")
                     | loopingVideo
@@ -67,9 +67,9 @@ public class VideoPlayerApp : SampleBase
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Controls Toggle")
-                    | Text.Small("Video with controls enabled.")
+                    | Text.P("Video with controls enabled.").Small()
                     | withControls
-                    | Text.Small("Video without controls (programmatic control only).")
+                    | Text.P("Video without controls (programmatic control only).").Small()
                     | withoutControls
                     | new Button("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the video programmatically"))
                         .Variant(ButtonVariant.Outline)
@@ -79,7 +79,7 @@ public class VideoPlayerApp : SampleBase
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Custom Sized Video Player")
-                    | Text.Small("Video player with 50% width and fixed height.")
+                    | Text.P("Video player with 50% width and fixed height.").Small()
                     | customSizedVideo
                 ).Title("Custom Sizing"))
 
@@ -87,7 +87,7 @@ public class VideoPlayerApp : SampleBase
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Poster Image")
-                    | Text.Small("Video player with a preview image before playback.")
+                    | Text.P("Video player with a preview image before playback.").Small()
                     | posterVideo
                 ).Title("Poster Example"))
 
@@ -95,7 +95,7 @@ public class VideoPlayerApp : SampleBase
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("YouTube Video Embed")
-                    | Text.Small("Embed YouTube videos directly by URL. Supports normal videos, Shorts, and timecodes.")
+                    | Text.P("Embed YouTube videos directly by URL. Supports normal videos, Shorts, and timecodes.").Small()
                         | new VideoPlayer("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=100s")
                             .Width(Size.Fraction(0.5f))
                             .Height(Size.Units(100))

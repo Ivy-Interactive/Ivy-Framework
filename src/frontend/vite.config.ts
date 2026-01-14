@@ -69,6 +69,14 @@ const injectMeta = (mode: string): Plugin => {
 
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss(), injectMeta(mode)] as Plugin[],
+  server: {
+    proxy: {
+      '^/.*\\.md$': {
+        target: process.env.IVY_HOST || 'http://localhost:5010',
+        changeOrigin: true,
+      },
+    },
+  },
   esbuild: {
     drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
     legalComments: 'none',

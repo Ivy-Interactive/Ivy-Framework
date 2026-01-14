@@ -34,9 +34,8 @@ public class TextVariantsDemo : ViewBase
             | Text.Blockquote("Blockquote text")
             | Text.InlineCode("InlineCode")
             | Text.Lead("Lead text for prominent display")
-            | Text.ExtraLarge("Extra Large text")
-            | Text.Large("Large text")
-            | Text.Small("Small text")
+            | Text.P("Large text").Large()
+            | Text.P("Small text").Small()
             | Text.Label("Label text")
             | Text.Strong("Strong/bold text")
             | Text.Muted("Muted text")
@@ -130,7 +129,7 @@ public class FormDemo : ViewBase
         return Layout.Vertical()
             | Text.Label("Email Address")
             | Text.P("Enter your email address below")
-            | Text.Small("We'll never share your email with anyone else.")
+            | Text.P("We'll never share your email with anyone else.").Small()
             | Layout.Horizontal()
                 | Text.Success("✓ Email sent successfully!")
                 | Text.Warning("⚠ Please check your spam folder")
@@ -179,7 +178,7 @@ public class StatusDemo : ViewBase
                 | Text.Success("API: Online")
                 | Text.Warning("Cache: Warming up...")
                 | Text.Danger("Backup: Failed")
-            | Text.Small("Last updated: 2 minutes ago")
+            | Text.P("Last updated: 2 minutes ago").Small()
             | Text.Muted("System monitoring is active");
     }
 }
@@ -199,6 +198,9 @@ The TextBuilder class provides several modifiers for customizing text appearance
 | `StrikeThrough()` | Add strikethrough | `Text.P("Crossed out").StrikeThrough()` |
 | `NoWrap()` | Prevent wrapping | `Text.P("Single line").NoWrap()` |
 | `Overflow()` | Handle overflow | `Text.P("Long text").Overflow(Overflow.Clip)` |
+| `Small()` | Apply small text size | `Text.P("Small text").Small()` |
+| `Medium()` | Apply medium text size (default) | `Text.P("Normal text").Medium()` |
+| `Large()` | Apply large text size | `Text.P("Large text").Large()` |
 
 ## Best Practices
 

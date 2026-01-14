@@ -44,7 +44,7 @@ From your app registration **Overview** page, copy these values:
 - **Application (client) ID**: This is your **Client ID**
 - **Directory (tenant) ID**: This is your **Tenant ID**
 
-![Entra client and tenant IDs]../../../../Assets/entra_client_and_tenant_ids.webp "Entra client and tenant IDs")
+![Entra client and tenant IDs](/ivy/assets/entra_client_and_tenant_ids.webp "Entra client and tenant IDs")
 
 ### Step 3: Create a Client Secret
 
@@ -55,7 +55,7 @@ From your app registration **Overview** page, copy these values:
 5. **Click "Add"**
 6. **Copy the secret Value** (this is your **Client Secret**). Note that only **Value** is needed, not **Secret ID**.
 
-![Newly-created Entra client secret]../../../../Assets/entra_client_secret.webp "Newly-created Entra client secret")
+![Newly-created Entra client secret](/ivy/assets/entra_client_secret.webp "Newly-created Entra client secret")
 
 > ⚠️ **Warning:** This secret value will only be shown once, so copy it before leaving the page.
 
@@ -66,7 +66,7 @@ From your app registration **Overview** page, copy these values:
 3. **Under "Implicit grant and hybrid flows"**, check **"ID tokens"**
 4. **Click "Save"**
 
-![ID tokens enabled]../../../../Assets/entra_id_tokens_enabled.webp "ID tokens enabled")
+![ID tokens enabled](/ivy/assets/entra_id_tokens_enabled.webp "ID tokens enabled")
 
 ### Step 5: Set API Permissions
 

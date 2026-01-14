@@ -37,7 +37,7 @@ public class PieChartDemo : ViewBase
         };
          //Showing default placement of the legend at the bottom of the chart
          return Layout.Vertical()
-            | Text.Large("Mobile sales over Q1(January-March)")
+            | Text.P("Mobile sales over Q1(January-March)").Large()
            | data.ToPieChart
                  (
                     e => e.Month,
@@ -45,7 +45,7 @@ public class PieChartDemo : ViewBase
                     PieChartStyles.Dashboard
                 )
                 .Toolbox(new Toolbox())
-           | Text.Large("Desktop sales over Q1(January-March)")
+           | Text.P("Desktop sales over Q1(January-March)").Large()
            // Showing custom placement of the legend at the right bottom of the chart
            | data.ToPieChart
                  (
@@ -235,12 +235,12 @@ public class DrillDownDemo : ViewBase
         return Layout.Vertical()
                 | (Layout.Horizontal()
                 | (Layout.Vertical()
-                   | Text.Small("Countries Population")
+                   | Text.P("Countries Population").Small()
                    | new PieChart(countryData)
                         .Pie("Measure", "Dimension")
                         .Tooltip())
                 | (Layout.Vertical()
-                    | Text.Small($"{country.Value} - States Population")
+                    | Text.P($"{country.Value} - States Population").Small()
                     | new PieChart(selectedCountryStates)
                             .Pie("Measure", "Dimension")
                             .Tooltip()))
