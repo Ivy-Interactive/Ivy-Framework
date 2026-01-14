@@ -97,7 +97,7 @@ sequenceDiagram
 
 ### Basic Usage
 
-```csharp demo-below
+```csharp demo-tabs
 public class BasicReducerDemo : ViewBase
 {
     // Reducer function
@@ -390,7 +390,7 @@ flowchart TD
     G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
 ```
 
-### 1. Mutating [State](./03_State.md)
+### Mutating [State](./03_State.md)
 
 **Problem**: Mutating [state](./03_State.md) directly instead of returning new [state](./03_State.md)
 
@@ -418,7 +418,7 @@ private State Reducer(State state, Action action) => action switch
 };
 ```
 
-### 2. Side Effects in Reducer
+### Side Effects in Reducer
 
 **Problem**: Performing side effects inside the reducer function. Reducers should be pure - use [`UseEffect`](./04_Effect.md) for side effects.
 
@@ -456,7 +456,7 @@ UseEffect(() =>
 }, state.Value.ShouldSave);
 ```
 
-### 3. Not Handling All Actions
+### Not Handling All Actions
 
 **Problem**: Missing default case or not handling all action types
 
@@ -482,7 +482,7 @@ private State Reducer(State state, Action action) => action switch
 };
 ```
 
-### 4. Complex Logic in Reducer
+### Complex Logic in Reducer
 
 **Problem**: Putting too much complex logic inside the reducer. Consider using [`UseMemo`](./05_Memo.md) for expensive computations.
 
@@ -526,7 +526,7 @@ private State Reducer(State state, Action action) => action switch
 };
 ```
 
-### 5. Forgetting to Update Related [State](./03_State.md)
+### Forgetting to Update Related [State](./03_State.md)
 
 **Problem**: Updating one part of [state](./03_State.md) but forgetting related parts
 
@@ -556,7 +556,7 @@ private State Reducer(State state, Action action) => action switch
 };
 ```
 
-### 6. Using Wrong Action Types
+### Using Wrong Action Types
 
 **Problem**: Dispatching actions that don't match the reducer's expected types
 

@@ -299,7 +299,7 @@ flowchart TD
     G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
 ```
 
-### 1. Unstable Dependencies
+### Unstable Dependencies
 
 **Problem**: Creating new objects or arrays in the dependency array
 
@@ -322,7 +322,7 @@ var handleAction = UseCallback(() =>
 }, data, config);
 ```
 
-### 2. Missing Dependencies
+### Missing Dependencies
 
 **Problem**: Not including all state values used in the callback
 
@@ -344,7 +344,7 @@ var handleCalculate = UseCallback(() =>
 }, items, multiplier);
 ```
 
-### 3. Over-Memoization
+### Over-Memoization
 
 **Problem**: Memoizing everything without considering the cost
 
@@ -364,7 +364,7 @@ var handleClick = UseCallback(() => count.Set(count.Value + 1), count);
 var handleLog = () => Console.WriteLine("Log");
 ```
 
-### 4. Callback Dependencies Issues
+### Callback Dependencies Issues
 
 **Problem**: Callbacks that capture too many state variables
 
@@ -384,7 +384,7 @@ var handleDataAction = UseCallback(() => DoSomethingWithData(data.Value), data);
 var handleFilterAction = UseCallback(() => ApplyFilter(filter.Value), filter);
 ```
 
-### 5. Forgetting Keys in Lists
+### Forgetting Keys in Lists
 
 **Problem**: Not providing stable keys for components receiving callbacks in lists
 
@@ -404,7 +404,7 @@ return Layout.Vertical(
 );
 ```
 
-### 6. Infinite Loops in [UseEffect](./04_Effect.md)
+### Infinite Loops in [UseEffect](./04_Effect.md)
 
 **Problem**: Callback dependency causes infinite re-renders
 

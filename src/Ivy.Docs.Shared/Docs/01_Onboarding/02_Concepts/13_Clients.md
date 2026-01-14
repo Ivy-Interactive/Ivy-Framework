@@ -48,7 +48,7 @@ client.OpenUrl("https://github.com");
 client.OpenUrl(new Uri("https://stackoverflow.com"));
 ```
 
-You can [download](./24_Downloads.md) and [upload](../../02_Widgets/04_Inputs/10_File.md) files:
+You can download and [upload](../../02_Widgets/04_Inputs/10_File.md) files:
 
 ```csharp
 // Download CSV data

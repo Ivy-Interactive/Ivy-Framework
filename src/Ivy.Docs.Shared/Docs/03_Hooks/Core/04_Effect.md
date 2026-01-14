@@ -53,7 +53,7 @@ public class BasicEffectView : ViewBase
 
 Ivy provides four different overloads of `UseEffect` to handle various scenarios:
 
-### 1. Action Handler
+### Action Handler
 
 For simple synchronous operations:
 
@@ -64,7 +64,7 @@ UseEffect(() =>
 });
 ```
 
-### 2. Async Task Handler
+### Async Task Handler
 
 For asynchronous operations:
 
@@ -76,7 +76,7 @@ UseEffect(async () =>
 });
 ```
 
-### 3. Disposable Handler
+### Disposable Handler
 
 For operations that need cleanup:
 
@@ -88,7 +88,7 @@ UseEffect(() =>
 });
 ```
 
-### 4. Async Disposable Handler
+### Async Disposable Handler
 
 For async operations with cleanup:
 
@@ -306,7 +306,7 @@ public class ConditionalEffectView : ViewBase
 
 ## Common Pitfalls
 
-### 1. Forgetting Dependencies
+### Forgetting Dependencies
 
 ```csharp
 // Wrong: Missing dependency
@@ -325,7 +325,7 @@ UseEffect(() =>
 }, count, multiplier);
 ```
 
-### 2. Stale Closures
+### Stale Closures
 
 ```csharp
 // Wrong: Captures stale state
@@ -350,7 +350,7 @@ UseEffect(() =>
 }, count); // Re-create timer when state changes
 ```
 
-### 3. Not Awaiting Async Operations
+### Not Awaiting Async Operations
 
 ```csharp
 // Wrong: Fire-and-forget async
@@ -372,5 +372,5 @@ UseEffect(async () =>
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Memoization](./05_Memo.md) - Optimizing performance with memoization
 - [UseCallback](./06_Callback.md) - Memoizing callback functions
-- [Signals](../../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
+- [Signals](./10_Signal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

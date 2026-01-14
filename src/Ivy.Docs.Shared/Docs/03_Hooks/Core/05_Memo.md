@@ -446,7 +446,7 @@ flowchart TD
     G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
 ```
 
-### 1. Unstable Dependencies
+### Unstable Dependencies
 
 **Problem**: Creating new objects or arrays in the dependency array
 
@@ -463,7 +463,7 @@ var options = UseRef(new[] { "option1", "option2" });
 var result = UseMemo(() => ProcessData(data.Value), data.Value, options);
 ```
 
-### 2. Missing Dependencies
+### Missing Dependencies
 
 **Problem**: Not including all values used in the memoized function
 
@@ -479,7 +479,7 @@ var result = UseMemo(() => items.Value.Sum(x => x.Price * multiplier.Value), ite
 var result = UseMemo(() => items.Value.Sum(x => x.Price * multiplier.Value), items, multiplier);
 ```
 
-### 3. Over-Memoization
+### Over-Memoization
 
 **Problem**: Memoizing everything without considering the cost
 
@@ -506,7 +506,7 @@ var expensiveResult = UseMemo(() =>
     items);
 ```
 
-### 4. Incorrect IMemoized Implementation
+### Incorrect IMemoized Implementation
 
 **Problem**: Including volatile values in `GetMemoValues()`
 
@@ -528,7 +528,7 @@ public object[] GetMemoValues()
 }
 ```
 
-### 5. Callback Dependencies Issues
+### Callback Dependencies Issues
 
 **Problem**: [UseCallback](./06_Callback.md) callbacks that capture too many state variables
 
@@ -548,7 +548,7 @@ var handleDataAction = UseCallback(() => DoSomethingWithData(data.Value), data);
 var handleFilterAction = UseCallback(() => ApplyFilter(filter.Value), filter);
 ```
 
-### 6. Forgetting Keys in Lists
+### Forgetting Keys in Lists
 
 **Problem**: Not providing stable keys for memoized list items
 
@@ -575,5 +575,5 @@ return Layout.Vertical(
 - [Effects](./04_Effect.md) - Performing side effects with dependencies
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [UseRef](./08_Ref.md) - Storing stable references
-- [Signals](../../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
+- [Signals](./10_Signal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

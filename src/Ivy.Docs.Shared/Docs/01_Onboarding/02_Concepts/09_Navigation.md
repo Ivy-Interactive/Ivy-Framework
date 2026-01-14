@@ -25,7 +25,7 @@ Navigation in Ivy is handled through the `UseNavigation()` hook, which returns a
 - **Deep Linking** - Navigate to specific apps with deep linking parameters and arguments
 - **Type-Safe Navigation** - Navigate using strongly-typed app classes
 
-The navigation system is built on top of Ivy's [signal system](./06_Signals.md) and integrates seamlessly with the [Chrome framework](./16_Chrome.md) for managing app lifecycle and routing.
+The navigation system is built on top of Ivy's [signal system](../../03_Hooks/Core/10_Signal.md) and integrates seamlessly with the [Chrome framework](./16_Chrome.md) for managing app lifecycle and routing.
 
 ## How UseNavigation Works
 
@@ -260,7 +260,7 @@ var navigateToUser = UseCallback((int userId) =>
 Ensure your app has the `[App]` attribute:
 
 ```csharp
-[App(icon: Icons.Dashboard)]
+[App(icon: Icons.LayoutDashboard)]
 public class MyApp : ViewBase { }
 ```
 
@@ -293,5 +293,5 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 
 - [Chrome Settings](./16_Chrome.md)
 - [App Arguments](./02_Views.md)
-- [Signals](./06_Signals.md)
+- [Signals](../../03_Hooks/Core/10_Signal.md)
 - [State Management](../../03_Hooks/Core/03_State.md)
