@@ -60,7 +60,7 @@ Ivy provides React-inspired hooks for [state management](../../03_Hooks/Core/03_
 - [UseState<T>()](../../03_Hooks/Core/03_State.md) - Local component state that triggers re-renders
 - [UseEffect()](../../03_Hooks/Core/04_Effect.md) - Side effects with dependency tracking
 - [UseService<T>()](../02_Concepts/18_Services.md) - Dependency injection integration
-- [UseSignal()](../02_Concepts/06_Signals.md), [UseDownload()](../03_Hooks/Core/15_Download.md), `UseWebhook()` - And many more...
+- [UseSignal()](../02_Concepts/06_Signals.md), [UseDownload()](../../03_Hooks/Core/15_Download.md), `UseWebhook()` - And many more...
 
 ```csharp
 public override object? Build()
