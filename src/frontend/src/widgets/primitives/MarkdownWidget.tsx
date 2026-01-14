@@ -8,14 +8,12 @@ interface MarkdownWidgetProps {
   id: string;
   content: string;
   scale?: Scales;
-  gap?: number;
 }
 
 const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   id,
   content = '',
   scale = Scales.Medium,
-  gap = 4,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -46,7 +44,7 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   const styles: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
-    gap: `${gap * 0.25}rem`,
+    gap: '1rem',
     ...getScaleStyle(scale),
   };
 

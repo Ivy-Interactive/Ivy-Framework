@@ -6,14 +6,12 @@ interface HtmlWidgetProps {
   id: string;
   content: string;
   scale?: Scales;
-  gap?: number;
 }
 
 export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
   id,
   content,
   scale = Scales.Medium,
-  gap = 4,
 }) => {
   const getScaleStyle = (s: Scales): React.CSSProperties => {
     switch (s) {
@@ -37,7 +35,7 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
   const styles: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
-    gap: `${gap * 0.25}rem`,
+    gap: '1rem',
     ...getScaleStyle(scale),
   };
 

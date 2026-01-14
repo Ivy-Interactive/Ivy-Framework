@@ -24,7 +24,6 @@ public record Markdown : WidgetBase<Markdown>
     internal Markdown() { }
 
     [Prop] public string Content { get; set; } = string.Empty;
-    [Prop] public int Gap { get; set; } = 4;
 
     [Event] public Func<Event<Markdown, string>, ValueTask>? OnLinkClick { get; set; }
 }
@@ -48,5 +47,4 @@ public static class MarkdownExtensions
         return button with { OnLinkClick = @event => { onLinkClick(@event.Value); return ValueTask.CompletedTask; } };
     }
 
-    public static Markdown Gap(this Markdown widget, int gap) => widget with { Gap = gap };
 }
