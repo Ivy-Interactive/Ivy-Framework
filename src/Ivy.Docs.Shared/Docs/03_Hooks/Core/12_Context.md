@@ -253,7 +253,7 @@ public class UserSettingsView : ViewBase
         
         return Layout.Vertical()
             | Text.Block("Settings Form")
-            | Text.Small($"Editing settings for {user.UserName}");
+            | Text.P($"Editing settings for {user.UserName}").Small();
     }
 }
 ```
