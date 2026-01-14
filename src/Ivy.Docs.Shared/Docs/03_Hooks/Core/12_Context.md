@@ -149,7 +149,7 @@ public class NestedView : ViewBase
 
 ## Examples
 
-### Example 1: Theme Context
+### Theme Context
 
 ```csharp
 public class ThemeContext
@@ -191,7 +191,7 @@ public class HeaderView : ViewBase
 }
 ```
 
-### Example 2: User Context
+### User Context
 
 ```csharp
 public class UserContext
@@ -255,7 +255,7 @@ public class UserSettingsView : ViewBase
 }
 ```
 
-### Example 3: Component-Scoped Service
+### Component-Scoped Service
 
 ```csharp
 public interface IDataCache
@@ -358,7 +358,7 @@ public class FileView : ViewBase
 
 ## Best Practices
 
-### 1. Use Context for Component-Scoped Data
+### Use Context for Component-Scoped Data
 
 Context is perfect for data that should be shared within a component subtree but not globally:
 
@@ -370,7 +370,7 @@ var theme = CreateContext(() => new ThemeContext());
 var theme = UseService<IThemeService>(); // Better for app-wide theme
 ```
 
-### 2. Keep Context Values Simple
+### Keep Context Values Simple
 
 Context values should be simple data containers or lightweight services:
 
@@ -386,7 +386,7 @@ public class ConfigContext
 // Consider using services for complex operations
 ```
 
-### 3. Use Type Safety
+### Use Type Safety
 
 Always use strongly typed context access:
 
@@ -398,7 +398,7 @@ var theme = UseContext<ThemeContext>();
 var theme = UseContext(typeof(ThemeContext));
 ```
 
-### 4. Avoid Context for Frequently Changing Data
+### Avoid Context for Frequently Changing Data
 
 For data that changes frequently, consider using [state](./03_State.md) instead:
 
@@ -410,7 +410,7 @@ var count = UseState(0);
 var config = CreateContext(() => new Config());
 ```
 
-### 5. Document Context Dependencies
+### Document Context Dependencies
 
 Make it clear when a component requires a context:
 
@@ -429,7 +429,7 @@ public class ChildView : ViewBase
 
 ## Common Patterns
 
-### Pattern 1: Provider Component
+### Provider Component
 
 Create a provider component that sets up context for its children:
 
@@ -451,7 +451,7 @@ public class ThemeProvider : ViewBase
 }
 ```
 
-### Pattern 2: Context with Factory
+### Context with Factory
 
 Use factory functions for lazy initialization:
 
@@ -473,7 +473,7 @@ public class DataView : ViewBase
 }
 ```
 
-### Pattern 3: Conditional Context
+### Conditional Context
 
 Create context conditionally based on state:
 

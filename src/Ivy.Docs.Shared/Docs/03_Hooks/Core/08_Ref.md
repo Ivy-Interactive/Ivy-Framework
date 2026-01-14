@@ -274,7 +274,7 @@ flowchart TD
     G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
 ```
 
-### 1. Using for Reactive State
+### Using for Reactive State
 
 **Problem**: Using `UseRef` for values that should trigger re-renders
 
@@ -292,7 +292,7 @@ var count = UseState(0);
 return new Button($"Count: {count.Value}", _ => count.Set(count.Value + 1));
 ```
 
-### 2. Forgetting Cleanup
+### Forgetting Cleanup
 
 **Problem**: Not cleaning up resources stored in `UseRef`
 
@@ -312,7 +312,7 @@ UseEffect(() => {
 });
 ```
 
-### 3. Mutating Without Manual Updates
+### Mutating Without Manual Updates
 
 **Problem**: Mutating ref values and expecting UI to update
 
@@ -336,7 +336,7 @@ data.Value.Add("new item");
 updateTrigger.Set(updateTrigger.Value + 1); // Force re-render
 ```
 
-### 4. Using for Simple Constants
+### Using for Simple Constants
 
 **Problem**: Using `UseRef` for values that don't need persistence
 
@@ -352,7 +352,7 @@ var config = UseRef(new { threshold: 100 });
 var config = new { threshold: 100 };
 ```
 
-### 5. Not Initializing Properly
+### Not Initializing Properly
 
 **Problem**: Not using factory functions for expensive initialization
 
@@ -368,7 +368,7 @@ var expensive = UseRef(new ExpensiveObject());
 var expensive = UseRef(() => new ExpensiveObject());
 ```
 
-### 6. Confusing with [`UseMemo`](./05_Memo.md)
+### Confusing with [`UseMemo`](./05_Memo.md)
 
 **Problem**: Using `UseRef` when [`UseMemo`](./05_Memo.md) is more appropriate
 

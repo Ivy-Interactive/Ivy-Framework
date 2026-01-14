@@ -220,7 +220,7 @@ mutator.Invalidate();
 
 ## Examples
 
-### Example 1: Form Submission with Optimistic Update
+### Form Submission with Optimistic Update
 
 ```csharp
 public class UserFormView : ViewBase
@@ -275,7 +275,7 @@ public class UserDisplayView : ViewBase
 }
 ```
 
-### Example 2: Delete with Cache Invalidation
+### Delete with Cache Invalidation
 
 ```csharp
 public class ProductListView : ViewBase
@@ -333,7 +333,7 @@ public class ProductItem : ViewBase
 }
 ```
 
-### Example 3: Cross-Component Synchronization
+### Cross-Component Synchronization
 
 ```csharp
 public class DashboardView : ViewBase
@@ -405,7 +405,7 @@ public class RefreshControls : ViewBase
 }
 ```
 
-### Example 4: Optimistic Like Button
+### Optimistic Like Button
 
 ```csharp
 public class PostView : ViewBase
@@ -486,7 +486,7 @@ public class LikeButton : ViewBase
 
 ## Best Practices
 
-### 1. Use Typed Mutations for Optimistic Updates
+### Use Typed Mutations for Optimistic Updates
 
 Use the typed overload when you need optimistic updates:
 
@@ -500,7 +500,7 @@ var mutator = UseMutation("user");
 // No Mutate method available
 ```
 
-### 2. Revalidate After Mutations
+### Revalidate After Mutations
 
 Always revalidate after mutations to ensure data consistency:
 
@@ -512,7 +512,7 @@ mutator.Mutate(newValue, revalidate: true);
 mutator.Invalidate();
 ```
 
-### 3. Use Invalidate for Destructive Operations
+### Use Invalidate for Destructive Operations
 
 Use `Invalidate()` for operations that change data structure:
 
@@ -526,7 +526,7 @@ await CreateItem(item);
 mutator.Invalidate();
 ```
 
-### 4. Use Revalidate for Non-Destructive Updates
+### Use Revalidate for Non-Destructive Updates
 
 Use `Revalidate()` for updates that don't change data structure:
 
@@ -536,7 +536,7 @@ await UpdateItem(item);
 mutator.Revalidate();
 ```
 
-### 5. Match Query Keys Exactly
+### Match Query Keys Exactly
 
 Ensure mutation keys match query keys exactly:
 
@@ -552,7 +552,7 @@ var mutator = UseMutation("userData"); // Won't work!
 
 ## Common Patterns
 
-### Pattern 1: Action Buttons
+### Action Buttons
 
 Control queries from action buttons in separate components:
 
@@ -571,7 +571,7 @@ public class ActionBar : ViewBase
 }
 ```
 
-### Pattern 2: Form Submission
+### Form Submission
 
 Update cache optimistically when submitting forms:
 
@@ -596,7 +596,7 @@ public class EditForm : ViewBase
 }
 ```
 
-### Pattern 3: Bulk Operations
+### Bulk Operations
 
 Invalidate multiple related queries:
 

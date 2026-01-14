@@ -174,7 +174,7 @@ The URL is stored in [state](./03_State.md) and will be `null` until the downloa
 
 ## Examples
 
-### Example 1: CSV Export
+### CSV Export
 
 Export data to CSV format:
 
@@ -231,7 +231,7 @@ public class DataExportView : ViewBase
 }
 ```
 
-### Example 2: PDF Report Generation
+### PDF Report Generation
 
 Generate and download a PDF report:
 
@@ -290,7 +290,7 @@ public class ReportView : ViewBase
 }
 ```
 
-### Example 3: Image Download
+### Image Download
 
 Generate and download an image:
 
@@ -339,7 +339,7 @@ public class ImageDownloadView : ViewBase
 }
 ```
 
-### Example 4: Dynamic File Based on State
+### Dynamic File Based on State
 
 Generate files based on component [state](./03_State.md):
 
@@ -482,7 +482,7 @@ public class ProgressDownloadView : ViewBase
 
 ## Best Practices
 
-### 1. Check for Null URL
+### Check for Null URL
 
 Always check if the download URL is null before using it:
 
@@ -500,7 +500,7 @@ var downloadUrl = UseDownload(...);
 return new Button("Download").Url(downloadUrl.Value); // Could throw
 ```
 
-### 2. Use Appropriate MIME Types
+### Use Appropriate MIME Types
 
 Always specify the correct MIME type for proper file handling:
 
@@ -516,7 +516,7 @@ UseDownload(..., mimeType: "application/octet-stream", fileName: "data.csv");
 UseDownload(..., mimeType: "text/plain", fileName: "report.pdf");
 ```
 
-### 3. Use Descriptive File Names
+### Use Descriptive File Names
 
 Include timestamps or identifiers in file names:
 
@@ -532,7 +532,7 @@ fileName: "download.pdf"
 fileName: "data.json"
 ```
 
-### 4. Handle Async Operations Properly
+### Handle Async Operations Properly
 
 Use the async overload for operations that require async:
 
@@ -554,7 +554,7 @@ var downloadUrl = UseDownload(
 );
 ```
 
-### 5. Clean Up Large Files
+### Clean Up Large Files
 
 For large file generation, consider cleanup:
 
@@ -573,7 +573,7 @@ var downloadUrl = UseDownload(
 
 ## Common Patterns
 
-### Pattern 1: Export Button
+### Export Button
 
 Simple export button pattern:
 
@@ -603,7 +603,7 @@ public class ExportButton : ViewBase
 }
 ```
 
-### Pattern 2: Multiple Format Exports
+### Multiple Format Exports
 
 Allow users to choose export format:
 
@@ -639,7 +639,7 @@ public class MultiFormatExportView : ViewBase
 }
 ```
 
-### Pattern 3: Conditional Download
+### Conditional Download
 
 Show download button only when data is ready:
 

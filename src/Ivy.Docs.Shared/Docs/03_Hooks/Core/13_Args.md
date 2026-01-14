@@ -158,7 +158,7 @@ var receivedArgs = UseArgs<UserProfileArgs>();
 
 ## Examples
 
-### Example 1: User Profile with Tab Navigation
+### User Profile with Tab Navigation
 
 ```csharp
 public record UserProfileArgs(int UserId, string Tab = "overview");
@@ -230,7 +230,7 @@ public class UserProfileApp : ViewBase
 }
 ```
 
-### Example 2: Product Search with Filters
+### Product Search with Filters
 
 ```csharp
 public record ProductSearchArgs(
@@ -292,7 +292,7 @@ public class ProductSearchApp : ViewBase
 }
 ```
 
-### Example 3: Conditional Rendering Based on Args
+### Conditional Rendering Based on Args
 
 ```csharp
 public record DashboardArgs(string? View = null, int? ItemId = null);
@@ -320,7 +320,7 @@ public class DashboardApp : ViewBase
 }
 ```
 
-### Example 4: URL Query Parameters
+### URL Query Parameters
 
 Arguments can also be passed via URL query parameters:
 
@@ -344,7 +344,7 @@ public class ProductSearchApp : ViewBase
 
 ## Best Practices
 
-### 1. Use Records for Simple Arguments
+### Use Records for Simple Arguments
 
 Records are ideal for argument types because they're immutable and provide value equality:
 
@@ -361,7 +361,7 @@ public class UserArgs
 }
 ```
 
-### 2. Provide Default Values
+### Provide Default Values
 
 Use default parameter values to make arguments optional:
 
@@ -374,7 +374,7 @@ var args = UseArgs<SearchArgs>();
 // args.Query is required, but Page and SortBy have defaults
 ```
 
-### 3. Handle Null Arguments
+### Handle Null Arguments
 
 Always check for null when using `UseArgs`:
 
@@ -391,7 +391,7 @@ var args = UseArgs<UserArgs>();
 return Text.Literal($"User: {args.UserId}"); // Could throw NullReferenceException
 ```
 
-### 4. Keep Arguments Simple
+### Keep Arguments Simple
 
 Arguments should be simple data structures that serialize well:
 
@@ -407,7 +407,7 @@ public record ComplexArgs(
 );
 ```
 
-### 5. Use Descriptive Names
+### Use Descriptive Names
 
 Make argument types descriptive and specific to their use case:
 
@@ -423,7 +423,7 @@ public record Data(object Payload);
 
 ## Common Patterns
 
-### Pattern 1: Default Arguments
+### Default Arguments
 
 Provide default behavior when args are null:
 
@@ -444,7 +444,7 @@ public class ProductListApp : ViewBase
 }
 ```
 
-### Pattern 2: Argument Validation
+### Argument Validation
 
 Validate arguments and show errors if invalid:
 
@@ -470,7 +470,7 @@ public class UserDetailApp : ViewBase
 }
 ```
 
-### Pattern 3: Argument-Based Routing
+### Argument-Based Routing
 
 Use arguments to determine which view to render:
 

@@ -31,7 +31,7 @@ graph LR
 The `UseAlert` hook returns an alert view that should be included in your component's render output, and a delegate function that can be called to show alerts programmatically.
 </Callout>
 
-## Usage
+## Basic Usage
 
 Use `UseAlert` to create modal dialog alerts for confirmations and user feedback.
 

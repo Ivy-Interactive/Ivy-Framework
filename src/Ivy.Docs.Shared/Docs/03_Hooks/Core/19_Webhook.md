@@ -167,7 +167,7 @@ var url = webhook.GetUri(); // Full URL: https://example.com/ivy/webhook/{id}
 
 ## Examples
 
-### Example 1: Payment Webhook Handler
+### Payment Webhook Handler
 
 Handle payment callbacks from a payment processor:
 
@@ -221,7 +221,7 @@ public class PaymentWebhookView : ViewBase
 public record Payment(decimal Amount, string Status, DateTime Timestamp);
 ```
 
-### Example 2: OAuth Callback Handler
+### OAuth Callback Handler
 
 Handle OAuth authorization callbacks:
 
@@ -266,7 +266,7 @@ public class OAuthCallbackView : ViewBase
 }
 ```
 
-### Example 3: External API Integration
+### External API Integration
 
 Create a webhook endpoint for external services to send data:
 
@@ -325,7 +325,7 @@ public record WebhookEvent(string Type, string Body, DateTime Timestamp, string 
 
 ## Best Practices
 
-### 1. Always Handle Errors
+### Always Handle Errors
 
 Webhook handlers should always handle exceptions gracefully:
 
@@ -355,7 +355,7 @@ var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =
 });
 ```
 
-### 2. Validate Request Authenticity
+### Validate Request Authenticity
 
 For sensitive operations, always verify request authenticity:
 
@@ -377,7 +377,7 @@ var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =
 });
 ```
 
-### 3. Use Async Handlers for I/O Operations
+### Use Async Handlers for I/O Operations
 
 Always use async handlers when performing I/O operations:
 
@@ -405,7 +405,7 @@ var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
 });
 ```
 
-### 4. Return Appropriate HTTP Responses
+### Return Appropriate HTTP Responses
 
 Return appropriate HTTP status codes based on the operation result:
 
@@ -430,7 +430,7 @@ var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
 });
 ```
 
-### 5. Update State Safely
+### Update State Safely
 
 When updating component state from webhook handlers, ensure thread safety:
 
@@ -445,7 +445,7 @@ var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
 });
 ```
 
-### 6. Keep Handlers Fast
+### Keep Handlers Fast
 
 Webhook handlers should complete quickly to avoid timeouts:
 
@@ -473,7 +473,7 @@ var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =
 });
 ```
 
-### 7. Log Important Events
+### Log Important Events
 
 Log webhook calls for debugging and auditing:
 
@@ -499,7 +499,7 @@ var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =
 });
 ```
 
-### 8. Cleanup is Automatic
+### Cleanup is Automatic
 
 Webhooks are automatically cleaned up when components unmount, so you don't need to manually unregister them:
 

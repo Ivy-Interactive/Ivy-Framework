@@ -32,7 +32,7 @@ graph LR
 In most cases, you'll use `.ToForm()` directly on your state objects for automatic form rendering. Use the `UseForm` hook when you need custom layouts, want to place the form in dialogs/sheets, or need manual control over form submission.
 </Callout>
 
-## Usage
+## Basic Usage
 
 Use `UseForm` when you need manual control over form rendering and submission, such as in dialogs or sheets.
 

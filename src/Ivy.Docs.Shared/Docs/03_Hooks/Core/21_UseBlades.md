@@ -30,7 +30,7 @@ graph LR
 In most cases, you'll use `UseBlades()` directly in your views. The hook manages the blade stack and provides `IBladeService` through context for pushing and popping blades.
 </Callout>
 
-## Usage
+## Basic Usage
 
 Create a blade container with a root view and use `IBladeService` to push and pop blades.
 

@@ -92,7 +92,7 @@ Navigation behavior depends on Chrome settings:
 
 ## Examples
 
-### Example 1: Type-Safe Navigation
+### Type-Safe Navigation
 
 Navigate to apps using their class types for compile-time safety:
 
@@ -115,7 +115,7 @@ public class NavigationTypeSafeDemoApp : ViewBase
 }
 ```
 
-### Example 2: Navigation with Arguments
+### Navigation with Arguments
 
 Pass data to target apps using strongly-typed arguments:
 
@@ -137,7 +137,7 @@ public class NavigationWithArgsDemoApp : ViewBase
 }
 ```
 
-### Example 3: URI-Based Navigation
+### URI-Based Navigation
 
 Use URI strings for dynamic navigation scenarios:
 
@@ -166,7 +166,7 @@ public class NavigationUriDemoApp : ViewBase
 }
 ```
 
-### Example 4: External URL Navigation
+### External URL Navigation
 
 Open external websites and resources:
 
@@ -191,7 +191,7 @@ public class NavigationExternalLinksDemoApp : ViewBase
 
 ## Best Practices
 
-### 1. Prefer Type-Safe Navigation
+### Prefer Type-Safe Navigation
 
 Use type-safe navigation when the app type is known at compile time:
 
@@ -204,7 +204,7 @@ navigator.Navigate(typeof(StateApp));
 navigator.Navigate("app://hooks/core/state");
 ```
 
-### 2. Use Navigation Arguments for Data Passing
+### Use Navigation Arguments for Data Passing
 
 Pass data using strongly-typed argument objects:
 
@@ -215,7 +215,7 @@ public record DemoArgs(int Id, string Mode);
 navigator.Navigate(typeof(ArgsApp), new DemoArgs(123, "details"));
 ```
 
-### 3. Handle Navigation Errors
+### Handle Navigation Errors
 
 Ensure target apps exist and have the `[App]` attribute:
 
@@ -226,7 +226,7 @@ public class MyApp : ViewBase { }
 
 ## Common Patterns
 
-### Pattern 1: Master-Detail Navigation
+### Master-Detail Navigation
 
 Navigate from list views to detail views:
 
@@ -254,7 +254,7 @@ public class NavigationMasterDetailDemoApp : ViewBase
 }
 ```
 
-### Pattern 2: Conditional Navigation
+### Conditional Navigation
 
 Navigate based on user permissions or state:
 
@@ -278,7 +278,7 @@ public class NavigationConditionalDemoApp : ViewBase
 }
 ```
 
-### Pattern 3: Navigation Helpers
+### Navigation Helpers
 
 Create reusable navigation patterns:
 
