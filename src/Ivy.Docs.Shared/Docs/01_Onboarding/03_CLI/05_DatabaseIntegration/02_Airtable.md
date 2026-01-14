@@ -43,7 +43,7 @@ See [Database Overview](01_DatabaseOverview.md) for more information on adding d
 
 Airtable uses personal access tokens (PATs) for authentication. You can generate a token from the [Personal access tokens](https://airtable.com/create/tokens) page in your Airtable Builder Hub. Be sure to enable the scopes `data.records:read` and `schema.bases:read`, and if writing to Airtable is needed for your project, `data.records:write` as well. No other scopes are currently used by Ivy. Then, give it access to the Airtable base(s) you wish to use or select "Add all resources."
 
-![Airtable create personal access token page]../../../../Assets/airtable_create_pat.webp "Airtable create personal access token page")
+![Airtable create personal access token page](/ivy/assets/airtable_create_pat.webp "Airtable create personal access token page")
 
 For detailed instructions, see the [Airtable personal access tokens documentation](https://airtable.com/developers/web/guides/personal-access-tokens).
 
@@ -51,11 +51,11 @@ For detailed instructions, see the [Airtable personal access tokens documentatio
 
 To find your base ID, login to Airtable in your browser and visit the [Airtable API Reference](https://airtable.com/api). At the bottom of that page, you should see a list of bases your account has access to:
 
-![Airtable API Reference]../../../../Assets/airtable_api_reference.webp "Airtable API Reference")
+![Airtable API Reference](/ivy/assets/airtable_api_reference.webp "Airtable API Reference")
 
 Select the one you want your Ivy project to connect to. This will lead you to base-specific API documentation. You can find the base ID on the Introduction page. Look for "The ID of this base is..."
 
-![Airtable Base-Specific API Reference, showing the chosen base's ID]../../../../Assets/airtable_base_id.webp "Airtable Base-Specific API Reference")
+![Airtable Base-Specific API Reference, showing the chosen base's ID](/ivy/assets/airtable_base_id.webp "Airtable Base-Specific API Reference")
 
 ## Configuration
 

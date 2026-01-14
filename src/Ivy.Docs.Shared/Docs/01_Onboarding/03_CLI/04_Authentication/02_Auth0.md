@@ -25,15 +25,15 @@ Before using Auth0 with Ivy, you'll need to create an Auth0 application and obta
 ### Step 1: Create an Auth0 Account and Application
 
 1. **Sign up** at [Auth0](https://auth0.com) if you don't have an account
-2. **Go to** the [Auth0 Dashboard](https://manage.auth0.com/dashboard) and navigate to **Applications**: ![Auth0 Applications Option in Sidebar]../../../../Assets/auth0_applications.webp "Auth0 Applications Option in Sidebar")
+2. **Go to** the [Auth0 Dashboard](https://manage.auth0.com/dashboard) and navigate to **Applications**: ![Auth0 Applications Option in Sidebar](/ivy/assets/auth0_applications.webp "Auth0 Applications Option in Sidebar")
 3. **Click "Create Application"**
 4. **Choose "Regular Web Applications"** as the application type
-5. **Click "Create"**: ![Auth0 Create Application Panel]../../../../Assets/auth0_create_application.webp "Auth0 Create Application Panel")
+5. **Click "Create"**: ![Auth0 Create Application Panel](/ivy/assets/auth0_create_application.webp "Auth0 Create Application Panel")
 
 ### Step 2: Configure Your Application
 
-1. Navigate to your application's **Settings** tab: ![Auth0 Settings Tab]../../../../Assets/auth0_application_settings_tab.webp "Auth0 Settings Tab")
-2. **Set Allowed Callback URLs** to `http://localhost:5010/ivy/webhook`, replacing the base URL (`http://localhost:5010`) with your application's URL: ![Auth0 Allowed Callback URLs]../../../../Assets/auth0_callback.webp "Auth0 Allowed Callback URLs")
+1. Navigate to your application's **Settings** tab: ![Auth0 Settings Tab](/ivy/assets/auth0_application_settings_tab.webp "Auth0 Settings Tab")
+2. **Set Allowed Callback URLs** to `http://localhost:5010/ivy/webhook`, replacing the base URL (`http://localhost:5010`) with your application's URL: ![Auth0 Allowed Callback URLs](/ivy/assets/auth0_callback.webp "Auth0 Allowed Callback URLs")
 3. **Click "Save"**
 
 ### Step 3: Get Your Configuration Values
@@ -44,7 +44,7 @@ In your application settings, copy these values from the Basic Information secti
 - **Client ID**
 - **Client Secret**
 
-![Auth0 Basic Information]../../../../Assets/auth0_basic_information.webp "Auth0 Basic Information")
+![Auth0 Basic Information](/ivy/assets/auth0_basic_information.webp "Auth0 Basic Information")
 
 ### Step 4: Create an API
 
@@ -56,7 +56,7 @@ In your application settings, copy these values from the Basic Information secti
 6. **Click "Create"**
 7. **Copy the Identifier** - this is your **Audience** value
 
-![Auth0 Create API]../../../../Assets/auth0_create_api.webp "Auth0 Create API")
+![Auth0 Create API](/ivy/assets/auth0_create_api.webp "Auth0 Create API")
 
 ### Step 5: Enable Authentication Options
 
@@ -64,12 +64,12 @@ You'll need to enable the specific authentication options you want to use in you
 
 #### Email and Password
 
-1. **Go to Authentication > Database** in the Auth0 Dashboard: ![Auth0 Database]../../../../Assets/auth0_database.webp "Auth0 Database")
-2. **Click on the "Username-Password-Authentication" connection**: ![Auth0 Database Connections]../../../../Assets/auth0_database_connections.webp "Auth0 Database Connections")
-3. **Go to the "Applications" tab and ensure that the connection is enabled on your application**: ![Auth0 Connection Enabled]../../../../Assets/auth0_connection_enabled.webp "Auth0 Connection Enabled")
+1. **Go to Authentication > Database** in the Auth0 Dashboard: ![Auth0 Database](/ivy/assets/auth0_database.webp "Auth0 Database")
+2. **Click on the "Username-Password-Authentication" connection**: ![Auth0 Database Connections](/ivy/assets/auth0_database_connections.webp "Auth0 Database Connections")
+3. **Go to the "Applications" tab and ensure that the connection is enabled on your application**: ![Auth0 Connection Enabled](/ivy/assets/auth0_connection_enabled.webp "Auth0 Connection Enabled")
 4. **Go to the "Settings" tab and enable "Disable Sign Ups"** if you want to control user registration manually
 5. **Go to the "Authentication Methods" tab and configure your password policy** as needed for your security requirements
-6. **Enable the Password Grant**: In your Auth0 application, go to the **Settings** tab, scroll down to **Advanced Settings**, click **Grant Types**, and ensure the **Password** grant type is checked: ![Auth0 Password Grant]../../../../Assets/auth0_password_grant.webp "Auth0 Password Grant")
+6. **Enable the Password Grant**: In your Auth0 application, go to the **Settings** tab, scroll down to **Advanced Settings**, click **Grant Types**, and ensure the **Password** grant type is checked: ![Auth0 Password Grant](/ivy/assets/auth0_password_grant.webp "Auth0 Password Grant")
 
 ##### Adding Users for Email and Password Authentication
 
