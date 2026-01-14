@@ -167,7 +167,7 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
               />
             );
           case 'hr':
-            return <hr className="my-6" />;
+            return <hr />;
           case 'br':
             return <br />;
           case 'pre':
