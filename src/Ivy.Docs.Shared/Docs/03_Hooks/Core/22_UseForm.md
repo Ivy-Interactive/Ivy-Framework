@@ -37,7 +37,7 @@ In most cases, you'll use `.ToForm()` directly on your state objects for automat
 Use `UseForm` when you need manual control over form rendering and submission, such as in dialogs or sheets.
 
 ```csharp demo-tabs
-public class FormHookExample : ViewBase
+public class UseFormHookExample : ViewBase
 {
     public record UserModel(string Name, string Email, int Age);
 

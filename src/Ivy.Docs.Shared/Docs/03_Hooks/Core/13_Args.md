@@ -18,7 +18,7 @@ The `UseArgs` [hook](../02_RulesOfHooks.md) provides access to arguments passed 
 
 The `UseArgs` [hook](../02_RulesOfHooks.md) allows you to access component arguments:
 
-- **Navigation Arguments** - Retrieve arguments passed during [navigation](./23_Navigation.md)
+- **Navigation Arguments** - Retrieve arguments passed during [navigation](./23_UseNavigation.md)
 - **Type Safety** - Strongly typed argument access with compile-time checking
 - **JSON Serialization** - Arguments are automatically serialized and deserialized
 - **Optional Arguments** - Returns null if arguments are not available
@@ -48,7 +48,7 @@ public class SearchArgs
 
 ### Passing Arguments During Navigation
 
-Use the [navigation hook](./23_Navigation.md) to pass arguments to target components:
+Use the [navigation hook](./23_UseNavigation.md) to pass arguments to target components:
 
 ```csharp
 public class DashboardView : ViewBase
@@ -558,7 +558,7 @@ var args = UseArgs<DifferentArgs>(); // Returns null
 
 ## See Also
 
-- [Navigation](./23_Navigation.md) - Programmatic navigation between components
+- [Navigation](./23_UseNavigation.md) - Programmatic navigation between components
 - [State](./03_State.md) - Component state management
 - [Context](./12_Context.md) - Component-scoped data sharing
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices

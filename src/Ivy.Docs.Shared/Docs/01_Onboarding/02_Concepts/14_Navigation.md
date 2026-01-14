@@ -260,7 +260,7 @@ var navigateToUser = UseCallback((int userId) =>
 Ensure your app has the `[App]` attribute:
 
 ```csharp
-[App(icon: Icons.Dashboard)]
+[App(icon: Icons.LayoutDashboard)]
 public class MyApp : ViewBase { }
 ```
 
