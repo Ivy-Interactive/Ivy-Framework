@@ -9,17 +9,13 @@ namespace Ivy.Hooks;
 
 public struct Unit { }
 
-public interface ISignalSender<TInput, TOutput>
+public interface ISignal<TInput, TOutput>
 {
-    public Task<TOutput[]> Send(TInput input);
+    Task<TOutput[]> Send(TInput input);
+    IDisposable Receive(Func<TInput, TOutput> callback);
 }
 
-public interface ISignalReceiver<out TInput, in TOutput>
-{
-    public IDisposable Receive(Func<TInput, TOutput> callback);
-}
-
-public abstract class AbstractSignal<TInput, TOutput>() : ISignalSender<TInput, TOutput>
+public abstract class AbstractSignal<TInput, TOutput>
 {
     private readonly ConcurrentDictionary<Guid, Func<TInput, TOutput>> _subscribers = new();
 
@@ -39,7 +35,7 @@ public abstract class AbstractSignal<TInput, TOutput>() : ISignalSender<TInput, 
         return (await Task.WhenAll(tasks))!;
     }
 
-    public IDisposable Receive(Guid receiverId, Func<TInput, TOutput> callback)
+    internal IDisposable ReceiveWithId(Guid receiverId, Func<TInput, TOutput> callback)
     {
         _subscribers.TryRemove(receiverId, out _);
         _subscribers.TryAdd(receiverId, callback);
@@ -50,40 +46,34 @@ public abstract class AbstractSignal<TInput, TOutput>() : ISignalSender<TInput, 
     }
 }
 
-public class SignalReceiver<TInput, TOutput>(Guid receiverId, AbstractSignal<TInput, TOutput> signal) : ISignalReceiver<TInput, TOutput>
+internal class SignalHandle<TInput, TOutput>(
+    AbstractSignal<TInput, TOutput> signal,
+    Guid receiverId
+) : ISignal<TInput, TOutput>
 {
-    public IDisposable Receive(Func<TInput, TOutput> callback)
-    {
-        return signal.Receive(receiverId, callback);
-    }
+    public Task<TOutput[]> Send(TInput input) => signal.Send(input);
+
+    public IDisposable Receive(Func<TInput, TOutput> callback) => signal.ReceiveWithId(receiverId, callback);
 }
 
 public static class UseSignalExtensions
 {
-    public static ISignalSender<TInput, TOutput> CreateSignal<T, TInput, TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
-    {
-        var signalType = typeof(T);
-        if (signalType.GetBroadcastType() is { } broadcastType)
-        {
-            var signalHub = context.UseService<SignalRouter>();
-            var appArgs = context.UseService<AppContext>();
-            return signalHub.CreateSignal<T, TInput, TOutput>(signalType, broadcastType, appArgs.ConnectionId);
-        }
-        return context.CreateContext(Activator.CreateInstance<T>);
-    }
-
-    public static ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
+    public static ISignal<TInput, TOutput> UseSignal<T, TInput, TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
     {
         var receiverId = context.UseRef(Guid.NewGuid);
         var signalType = typeof(T);
-        if (signalType.GetBroadcastType() is not null)
+        var appContext = context.UseService<AppContext>();
+        var sessionStore = context.UseService<AppSessionStore>();
+        var session = sessionStore.Sessions[appContext.ConnectionId];
+        var signal = (T)session.Signals.GetOrAdd(signalType, _ => Activator.CreateInstance(signalType)!);
+
+        if (signalType.GetBroadcastType() is { } broadcastType)
         {
             var signalHub = context.UseService<SignalRouter>();
-            var appArgs = context.UseService<AppContext>();
-            return signalHub.UseSignal<T, TInput, TOutput>(signalType, receiverId.Value, appArgs.ConnectionId);
+            return signalHub.GetSignal<T, TInput, TOutput>(signalType, broadcastType, receiverId.Value, appContext.ConnectionId);
         }
-        var signal = context.UseContext<T>();
-        return new SignalReceiver<TInput, TOutput>(receiverId.Value, signal);
+
+        return new SignalHandle<TInput, TOutput>(signal, receiverId.Value);
     }
 }
 
@@ -108,30 +98,14 @@ public static class HubSignalExtensions
 
 public class SignalRouter(AppSessionStore sessionStore)
 {
-    public ISignalSender<TInput, TOutput> CreateSignal<T, TInput, TOutput>(
+    public ISignal<TInput, TOutput> GetSignal<T, TInput, TOutput>(
         Type signalType,
         BroadcastType broadcastType,
-        string connectionId
-    ) where T : AbstractSignal<TInput, TOutput>
-    {
-        return new RouterSignalSender<TInput, TOutput, T>(signalType, broadcastType, connectionId, sessionStore);
-    }
-
-    public ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>(
-        Type signalType,
         Guid receiverId,
         string connectionId
     ) where T : AbstractSignal<TInput, TOutput>
     {
-        var session = GetSession(connectionId);
-        var signal = (T)GetOrAddSignal(signalType, session);
-        return new SignalReceiver<TInput, TOutput>(receiverId, signal);
-    }
-
-    private AppSession GetSession(string connectionId)
-    {
-        return sessionStore.Sessions.TryGetValue(connectionId, out var session) ? session
-            : throw new InvalidOperationException("Session not found.");
+        return new RouterSignal<TInput, TOutput, T>(signalType, broadcastType, connectionId, receiverId, sessionStore);
     }
 
     private static object GetOrAddSignal(Type signalType, AppSession session)
@@ -139,12 +113,13 @@ public class SignalRouter(AppSessionStore sessionStore)
         return session.Signals.GetOrAdd(signalType, _ => Activator.CreateInstance(signalType)!);
     }
 
-    private class RouterSignalSender<TInput, TOutput, TSignal>(
+    private class RouterSignal<TInput, TOutput, TSignal>(
         Type signalType,
         BroadcastType broadcastType,
         string connectionId,
+        Guid receiverId,
         AppSessionStore store
-    ) : ISignalSender<TInput, TOutput>
+    ) : ISignal<TInput, TOutput>
         where TSignal : AbstractSignal<TInput, TOutput>
     {
         public async Task<TOutput[]> Send(TInput input)
@@ -155,6 +130,14 @@ public class SignalRouter(AppSessionStore sessionStore)
             var tasks = signals.Select(signal => signal.Send(input));
             var results = await Task.WhenAll(tasks);
             return results.SelectMany(r => r).ToArray();
+        }
+
+        public IDisposable Receive(Func<TInput, TOutput> callback)
+        {
+            var session = store.Sessions.TryGetValue(connectionId, out var s) ? s
+                : throw new InvalidOperationException("Session not found.");
+            var signal = (TSignal)GetOrAddSignal(signalType, session);
+            return signal.ReceiveWithId(receiverId, callback);
         }
 
         private static List<AppSession> GetTargetSessions(BroadcastType type, AppSession session, AppSessionStore store)

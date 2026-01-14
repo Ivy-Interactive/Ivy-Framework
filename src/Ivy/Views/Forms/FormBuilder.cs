@@ -344,8 +344,8 @@ public class FormBuilder<TModel> : ViewBase
     {
         var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange: false);
 
-        var validationSignal = context.CreateSignal<FormValidateSignal, Unit, bool>();
-        var updateSignal = context.CreateSignal<FormUpdateSignal, Unit, Unit>();
+        var validationSignal = context.UseSignal<FormValidateSignal, Unit, bool>();
+        var updateSignal = context.UseSignal<FormUpdateSignal, Unit, Unit>();
         var invalidFields = context.UseState(0);
 
         var fields = _fields

@@ -11,13 +11,7 @@ public class SignalApp : SampleBase
     protected override object? BuildSample()
     {
         var output = UseState<string>("");
-        var signal = CreateSignal<MySignal, int, string>();
-
-        async void OnClick(Event<Button> _)
-        {
-            var results = await signal.Send(1);
-            output.Set(string.Join(';', results));
-        }
+        var signal = UseSignal<MySignal, int, string>();
 
         return
             Layout.Vertical()
@@ -27,6 +21,12 @@ public class SignalApp : SampleBase
                | new ChildView())
             | output
             ;
+
+        async void OnClick(Event<Button> _)
+        {
+            var results = await signal.Send(1);
+            output.Set(string.Join(';', results));
+        }
     }
 }
 

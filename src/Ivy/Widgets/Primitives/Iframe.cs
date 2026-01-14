@@ -26,14 +26,14 @@ public record Iframe : WidgetBase<Iframe>
 
     [Prop] public long? RefreshToken { get; }
 
-    [Event] public Func<Event<(string type, JsonNode payload)>, ValueTask>? OnMessageReceived { get; set; }
+    [Event] public Func<Event<Iframe, (string type, JsonNode payload)>, ValueTask>? OnMessageReceived { get; set; }
 }
 
 public static class IframeExtensions
 {
     public static Iframe HandleMessageReceived(
         this Iframe widget,
-        Func<Event<(string type, JsonNode payload)>, ValueTask> callback)
+        Func<Event<Iframe, (string type, JsonNode payload)>, ValueTask> callback)
     {
         widget.OnMessageReceived = callback;
         return widget;

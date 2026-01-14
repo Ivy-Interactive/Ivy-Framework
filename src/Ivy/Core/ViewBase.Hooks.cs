@@ -68,9 +68,7 @@ public abstract partial class ViewBase
     protected T? UseArgs<T>() where T : class =>
         this.Context.UseArgs<T>();
 
-    public ISignalSender<TInput, TOutput> CreateSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput> => this.Context.CreateSignal<T, TInput, TOutput>();
-
-    public ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput> => this.Context.UseSignal<T, TInput, TOutput>();
+    public ISignal<TInput, TOutput> UseSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput> => this.Context.UseSignal<T, TInput, TOutput>();
 
     protected QueryResult<TValue> UseQuery<TValue, TKey>(TKey? key,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,

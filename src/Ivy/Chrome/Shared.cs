@@ -123,13 +123,13 @@ public static class NavigateSignalExtensions
 {
     public static INavigator UseNavigation(this IViewContext context)
     {
-        var signal = context.CreateSignal<NavigateSignal, NavigateArgs, Unit>();
+        var signal = context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
         var repository = context.UseService<IAppRepository>();
         var client = context.UseService<IClientProvider>();
         return new Navigator(signal, repository, client);
     }
 
-    private class Navigator(ISignalSender<NavigateArgs, Unit> signal, IAppRepository repository, IClientProvider client) : INavigator
+    private class Navigator(ISignal<NavigateArgs, Unit> signal, IAppRepository repository, IClientProvider client) : INavigator
     {
         public void Navigate(Type type, object? appArgs = null)
         {
