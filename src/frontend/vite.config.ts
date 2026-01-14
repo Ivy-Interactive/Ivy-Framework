@@ -72,7 +72,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     proxy: {
       '^/.*\\.md$': {
-        target: process.env.IVY_HOST,
+        target: process.env.IVY_HOST || 'http://localhost:5010',
         changeOrigin: true,
       },
     },
