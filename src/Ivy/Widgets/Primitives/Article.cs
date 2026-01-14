@@ -29,6 +29,8 @@ public record Article : WidgetBase<Article>
 
     [Prop] public List<ArticleHeading> Headings { get; set; } = [];
 
+    [Prop] public int Gap { get; set; } = 4;
+
     [Event] public Func<Event<Article, string>, ValueTask>? OnLinkClick { get; set; }
 }
 
@@ -45,6 +47,8 @@ public static class ArticleExtensions
     public static Article Next(this Article article, InternalLink? navigateForward) => article with { Next = navigateForward };
 
     public static Article DocumentSource(this Article article, string? documentSource) => article with { DocumentSource = documentSource };
+
+    public static Article Gap(this Article article, int gap) => article with { Gap = gap };
 
     public static Article Headings(this Article article, List<ArticleHeading> headings) => article with { Headings = headings };
 
