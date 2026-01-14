@@ -2,14 +2,20 @@ import { useEventHandler } from '@/components/event-handler';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import React, { useCallback } from 'react';
 
+import { Scales } from '@/types/scale';
+
 interface MarkdownWidgetProps {
   id: string;
   content: string;
+  scale?: Scales;
+  gap?: number;
 }
 
 const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   id,
   content = '',
+  scale = Scales.Medium,
+  gap = 4,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -18,8 +24,34 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
     [eventHandler, id]
   );
 
+  const getScaleStyle = (s: Scales): React.CSSProperties => {
+    switch (s) {
+      case Scales.Small:
+        return {
+          transform: 'scale(0.85)',
+          width: '117.65%',
+          transformOrigin: 'top left',
+        };
+      case Scales.Large:
+        return {
+          transform: 'scale(1.15)',
+          width: '86.96%',
+          transformOrigin: 'top left',
+        };
+      default:
+        return {};
+    }
+  };
+
+  const styles: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: `${gap * 0.25}rem`,
+    ...getScaleStyle(scale),
+  };
+
   return (
-    <div className="markdown-widget w-full">
+    <div className="markdown-widget w-full" style={styles}>
       <MarkdownRenderer
         key={id}
         content={content}

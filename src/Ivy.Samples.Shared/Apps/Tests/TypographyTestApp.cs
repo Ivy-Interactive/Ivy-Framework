@@ -52,8 +52,8 @@ End of the typography test.
 """;
 
         return Layout.Grid().Columns(3).Gap(20)
-            | new Card(new Markdown(markdown)).Title("Markdown Rendering")
-            | new Card(new Html(html)).Title("HTML Rendering")
+            | new Card(new Markdown(markdown)).Title("Markdown")
+            | new Card(new Html(html)).Title("HTML")
             | new Card(
                 Layout.Vertical()
                 | Text.H1("Heading 1")
