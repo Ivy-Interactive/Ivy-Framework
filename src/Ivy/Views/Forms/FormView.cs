@@ -193,9 +193,10 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
         {
             var gap = scale switch
             {
-                Scale.Small => 4,
-                Scale.Medium => 6,
-                _ => 8
+                Scale.Medium => 3,
+                Scale.Small => 2,
+                Scale.Large => 4,
+                _ => 2
             };
 
             return Layout
