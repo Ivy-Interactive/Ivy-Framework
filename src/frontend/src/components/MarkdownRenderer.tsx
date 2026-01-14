@@ -28,7 +28,7 @@ import {
 } from '@/lib/url';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/prismTheme';
-import { typography } from '@/lib/styles';
+import { useTypography } from '@/contexts/TypographyContext';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { CustomEmoji } from './custom-emojis/CustomEmoji';
 import { remarkCustomEmojiPlugin } from './custom-emojis/remarkCustomEmojiPlugin';
@@ -114,6 +114,7 @@ const CodeBlock = memo(
 
     // Create dynamic theme that adapts to current CSS variables
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
+    const typography = useTypography();
 
     if (match && hasCodeBlocks) {
       // Handle Mermaid diagrams
@@ -201,6 +202,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   content,
   onLinkClick,
 }) => {
+  const typography = useTypography();
   const contentFeatures = useMemo(
     () => ({
       hasMath: hasContentFeature(content, /(\$|\\\(|\\\[|\\begin\{)/),
@@ -388,7 +390,26 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         <hr className={typography.hr} {...props} />
       )),
     }),
-    []
+    [
+      typography.h1,
+      typography.h2,
+      typography.h3,
+      typography.h4,
+      typography.h5,
+      typography.h6,
+      typography.p,
+      typography.ul,
+      typography.ol,
+      typography.li,
+      typography.strong,
+      typography.em,
+      typography.blockquote,
+      typography.table,
+      typography.td,
+      typography.th,
+      typography.img,
+      typography.hr,
+    ]
   );
 
   // Memoize code component separately (depends on contentFeatures.hasCodeBlocks and hasMermaid)

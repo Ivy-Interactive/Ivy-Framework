@@ -17,6 +17,9 @@ interface ArticleWidgetProps {
   gap?: number;
 }
 
+import { TypographyProvider } from '@/contexts/TypographyContext';
+import { articleTypography } from '@/lib/styles';
+
 export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   id,
   children,
@@ -36,12 +39,14 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
     <div className="flex flex-col gap-2 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8">
       <div className="flex flex-grow gap-8">
         <article ref={articleRef} className="w-full max-w-[48rem]">
-          <div
-            className="flex flex-col flex-grow min-h-[calc(100vh+8rem)]"
-            style={{ gap: `${gap * 0.25}rem` }}
-          >
-            {children}
-          </div>
+          <TypographyProvider value={articleTypography}>
+            <div
+              className="flex flex-col flex-grow min-h-[calc(100vh+8rem)]"
+              style={{ gap: `${gap * 0.25}rem` }}
+            >
+              {children}
+            </div>
+          </TypographyProvider>
           {showFooter && (
             <ArticleFooter
               id={id}
