@@ -29,8 +29,6 @@ The `UseArgs` [hook](../02_RulesOfHooks.md) allows you to access component argum
 
 ## Basic Usage
 
-### Defining Argument Types
-
 Arguments are typically defined as records or classes:
 
 ```csharp
@@ -50,33 +48,16 @@ public class SearchArgs
 
 Use the [navigation hook](./23_UseNavigation.md) to pass arguments to target components:
 
-```csharp
-public class DashboardView : ViewBase
+```csharp demo-tabs
+public record ArgsNavigationUserArgs(int UserId);
+
+public class ArgsNavigationDemo : ViewBase
 {
     public override object? Build()
     {
         var navigator = UseNavigation();
-        
-        return Layout.Vertical(
-            new Button("View User Profile")
-                .HandleClick(() => 
-                {
-                    navigator.Navigate(typeof(UserProfileApp), 
-                        new UserProfileArgs(123, "details"));
-                }),
-            
-            new Button("Search Products")
-                .HandleClick(() => 
-                {
-                    navigator.Navigate(typeof(ProductSearchApp),
-                        new SearchArgs 
-                        { 
-                            Query = "laptop",
-                            Category = "electronics",
-                            Page = 1
-                        });
-                })
-        );
+        return new Button("View User")
+            .HandleClick(() => navigator.Navigate(typeof(ArgsApp), new ArgsNavigationUserArgs(123)));
     }
 }
 ```
@@ -85,22 +66,17 @@ public class DashboardView : ViewBase
 
 Use `UseArgs` to retrieve arguments in the target component:
 
-```csharp
-public class UserProfileApp : ViewBase
+```csharp demo-tabs
+public record ArgsReceivingUserArgs(int UserId);
+
+public class ArgsReceivingDemo : ViewBase
 {
     public override object? Build()
     {
-        var args = UseArgs<UserProfileArgs>();
-        
-        if (args == null)
-        {
-            return Text.Literal("No user ID provided");
-        }
-        
-        return Layout.Vertical(
-            Text.Heading($"User Profile: {args.UserId}"),
-            Text.Literal($"Tab: {args.Tab}")
-        );
+        var args = UseArgs<ArgsReceivingUserArgs>();
+        return args == null 
+            ? Text.Block("No user ID provided")
+            : Text.Block($"User ID: {args.UserId}");
     }
 }
 ```
@@ -158,81 +134,28 @@ var receivedArgs = UseArgs<UserProfileArgs>();
 
 ## Examples
 
-### User Profile with Tab Navigation
+### User Profile with Arguments
 
 ```csharp
 public record UserProfileArgs(int UserId, string Tab = "overview");
 
-public class UserListView : ViewBase
-{
-    public override object? Build()
-    {
-        var users = UseState(new[] { 
-            new { Id = 1, Name = "Alice" },
-            new { Id = 2, Name = "Bob" }
-        });
-        
-        var navigator = UseNavigation();
-        
-        return Layout.Vertical(
-            users.Value.Select(user => 
-                new Button(user.Name)
-                    .HandleClick(() => 
-                    {
-                        navigator.Navigate(typeof(UserProfileApp),
-                            new UserProfileArgs(user.Id, "details"));
-                    })
-            )
-        );
-    }
-}
-
-public class UserProfileApp : ViewBase
+public class ArgsUserProfileDemo : ViewBase
 {
     public override object? Build()
     {
         var args = UseArgs<UserProfileArgs>();
+        if (args == null) return Text.Block("No user provided");
         
-        if (args == null)
-        {
-            return Text.Literal("Invalid user profile");
-        }
-        
-        var activeTab = UseState(args.Tab);
-        
-        return Layout.Vertical(
-            Text.Heading($"User {args.UserId}"),
-            Layout.Horizontal(
-                new Button("Overview", 
-                    active: activeTab.Value == "overview",
-                    onClick: _ => activeTab.Set("overview")),
-                new Button("Details",
-                    active: activeTab.Value == "details",
-                    onClick: _ => activeTab.Set("details")),
-                new Button("Settings",
-                    active: activeTab.Value == "settings",
-                    onClick: _ => activeTab.Set("settings"))
-            ),
-            RenderTabContent(args.UserId, activeTab.Value)
-        );
-    }
-    
-    private object RenderTabContent(int userId, string tab)
-    {
-        return tab switch
-        {
-            "overview" => Text.Literal($"Overview for user {userId}"),
-            "details" => Text.Literal($"Details for user {userId}"),
-            "settings" => Text.Literal($"Settings for user {userId}"),
-            _ => Text.Literal("Unknown tab")
-        };
+        return Layout.Vertical()
+            | Text.H3($"User {args.UserId}")
+            | Text.Block($"Tab: {args.Tab}");
     }
 }
 ```
 
 ### Product Search with Filters
 
-```csharp
+```csharp demo-below
 public record ProductSearchArgs(
     string Query,
     string? Category = null,
@@ -241,7 +164,7 @@ public record ProductSearchArgs(
     int Page = 1
 );
 
-public class ProductSearchApp : ViewBase
+public class ArgsProductSearchDemo : ViewBase
 {
     public override object? Build()
     {
@@ -254,50 +177,36 @@ public class ProductSearchApp : ViewBase
         var minPrice = UseState(args?.MinPrice ?? 0m);
         var maxPrice = UseState(args?.MaxPrice ?? 1000m);
         
-        var results = UseQuery(
-            () => SearchProducts(query.Value, category.Value, minPrice.Value, maxPrice.Value),
-            query, category, minPrice, maxPrice
-        );
-        
-        return Layout.Vertical(
-            Layout.Horizontal(
-                query.ToTextInput("Search").Placeholder("Enter search term"),
-                category.ToTextInput("Category").Placeholder("Filter by category"),
-                minPrice.ToNumberInput("Min Price"),
-                maxPrice.ToNumberInput("Max Price")
-            ),
-            new Button("Search")
+        return Layout.Vertical()
+            | Text.H3("Product Search")
+            | Layout.Horizontal()
+                | query.ToTextInput("Search").Placeholder("Enter search term")
+                | category.ToTextInput("Category").Placeholder("Filter by category")
+            | Layout.Horizontal()
+                | minPrice.ToNumberInput("Min Price")
+                | maxPrice.ToNumberInput("Max Price")
+            | new Button("Search")
                 .HandleClick(() =>
                 {
-                    navigator.Navigate(typeof(ProductSearchApp),
+                    navigator.Navigate(typeof(ArgsApp),
                         new ProductSearchArgs(
                             query.Value,
                             category.Value,
                             minPrice.Value,
                             maxPrice.Value
                         ));
-                }),
-            results.Value != null 
-                ? new ProductList(results.Value)
-                : Text.Literal("Loading...")
-        );
-    }
-    
-    private Task<List<Product>> SearchProducts(
-        string query, string? category, decimal minPrice, decimal maxPrice)
-    {
-        // Implementation
-        return Task.FromResult(new List<Product>());
+                })
+            | Text.Block($"Current filters: Query={query.Value}, Category={category.Value}, Price={minPrice.Value}-{maxPrice.Value}");
     }
 }
 ```
 
 ### Conditional Rendering Based on Args
 
-```csharp
+```csharp demo-below
 public record DashboardArgs(string? View = null, int? ItemId = null);
 
-public class DashboardApp : ViewBase
+public class ArgsConditionalDemo : ViewBase
 {
     public override object? Build()
     {
@@ -306,16 +215,22 @@ public class DashboardApp : ViewBase
         // Render different views based on arguments
         if (args?.View == "details" && args.ItemId.HasValue)
         {
-            return new ItemDetailView(args.ItemId.Value);
+            return Layout.Vertical()
+                | Text.H3("Item Details")
+                | Text.Block($"Viewing details for item {args.ItemId.Value}");
         }
         
         if (args?.View == "settings")
         {
-            return new SettingsView();
+            return Layout.Vertical()
+                | Text.H3("Settings")
+                | Text.Block("Settings view content");
         }
         
         // Default dashboard view
-        return new DashboardOverview();
+        return Layout.Vertical()
+            | Text.H3("Dashboard Overview")
+            | Text.Block("Default dashboard content");
     }
 }
 ```
@@ -428,7 +343,9 @@ public record Data(object Payload);
 Provide default behavior when args are null:
 
 ```csharp
-public class ProductListApp : ViewBase
+public record ProductListArgs(string? Category = null, string? SortBy = null, int Page = 1);
+
+public class ArgsDefaultDemo : ViewBase
 {
     public override object? Build()
     {
@@ -439,7 +356,11 @@ public class ProductListApp : ViewBase
         var sortBy = args?.SortBy ?? "name";
         var page = args?.Page ?? 1;
         
-        return RenderProductList(category, sortBy, page);
+        return Layout.Vertical()
+            | Text.H3("Product List")
+            | Text.Block($"Category: {category}")
+            | Text.Block($"Sort By: {sortBy}")
+            | Text.Block($"Page: {page}");
     }
 }
 ```
@@ -449,7 +370,9 @@ public class ProductListApp : ViewBase
 Validate arguments and show errors if invalid:
 
 ```csharp
-public class UserDetailApp : ViewBase
+public record UserDetailArgs(int UserId);
+
+public class ArgsValidationDemo : ViewBase
 {
     public override object? Build()
     {
@@ -457,15 +380,16 @@ public class UserDetailApp : ViewBase
         
         if (args == null || args.UserId <= 0)
         {
-            return Layout.Vertical(
-                Text.Heading("Error"),
-                Text.Literal("Invalid user ID provided"),
-                new Button("Go Back")
-                    .HandleClick(() => UseNavigation().Navigate(typeof(UserListApp)))
-            );
+            return Layout.Vertical()
+                | Text.H3("Error")
+                | Text.Block("Invalid user ID provided")
+                | new Button("Go Back")
+                    .HandleClick(() => UseNavigation().Navigate(typeof(ArgsApp)));
         }
         
-        return RenderUserDetails(args.UserId);
+        return Layout.Vertical()
+            | Text.H3("User Details")
+            | Text.Block($"User ID: {args.UserId}");
     }
 }
 ```
@@ -475,7 +399,9 @@ public class UserDetailApp : ViewBase
 Use arguments to determine which view to render:
 
 ```csharp
-public class MainApp : ViewBase
+public record MainAppArgs(string? View = null, int? UserId = null);
+
+public class ArgsRoutingDemo : ViewBase
 {
     public override object? Build()
     {
@@ -483,10 +409,18 @@ public class MainApp : ViewBase
         
         return args?.View switch
         {
-            "dashboard" => new DashboardView(),
-            "settings" => new SettingsView(),
-            "profile" => new ProfileView(args.UserId),
-            _ => new DefaultView()
+            "dashboard" => Layout.Vertical()
+                | Text.H3("Dashboard")
+                | Text.Block("Dashboard view content"),
+            "settings" => Layout.Vertical()
+                | Text.H3("Settings")
+                | Text.Block("Settings view content"),
+            "profile" => Layout.Vertical()
+                | Text.H3("Profile")
+                | Text.Block($"User ID: {args.UserId}"),
+            _ => Layout.Vertical()
+                | Text.H3("Default View")
+                | Text.Block("Default view content")
         };
     }
 }
@@ -508,7 +442,7 @@ navigator.Navigate(typeof(TargetApp), new MyArgs("value"));
 navigator.Navigate(typeof(TargetApp));
 ```
 
-2. **Argument type matches**:
+1. **Argument type matches**:
 
 ```csharp
 // Correct: Types match
@@ -534,7 +468,7 @@ public record GoodArgs(string Name, int Count);
 public record BadArgs(string Name, Action Callback);
 ```
 
-2. **No circular references**:
+1. **No circular references**:
 
 ```csharp
 // Bad: Circular reference

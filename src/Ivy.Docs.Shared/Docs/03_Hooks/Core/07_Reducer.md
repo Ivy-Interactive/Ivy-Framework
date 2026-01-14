@@ -97,7 +97,7 @@ sequenceDiagram
 
 ### Basic Usage
 
-```csharp demo-below
+```csharp demo-tabs
 public class BasicReducerDemo : ViewBase
 {
     // Reducer function

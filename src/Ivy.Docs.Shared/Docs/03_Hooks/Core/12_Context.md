@@ -29,40 +29,38 @@ Context is different from [services](./11_Service.md). Services are registered g
 
 ## Basic Usage
 
-### Creating Context
+Use `CreateContext` to create a context value and `UseContext` to retrieve it:
 
-Use `CreateContext` to create a context value that will be available to the current component and all its child components:
+```csharp demo-tabs
+public class BasicThemeContext
+{
+    public string PrimaryColor { get; set; } = "blue";
+    public int FontSize { get; set; } = 16;
+}
 
-```csharp
-public class ParentView : ViewBase
+public class BasicContextParentView : ViewBase
 {
     public override object? Build()
     {
         // Create a context value that will be available to children
-        var theme = CreateContext(() => new ThemeContext 
+        CreateContext(() => new BasicThemeContext 
         { 
             PrimaryColor = "blue",
             FontSize = 16 
         });
         
-        return new ChildView();
+        return new BasicContextChildView();
     }
 }
-```
 
-### Using Context
-
-Use `UseContext` to retrieve a context value. It first checks the current component's context, then walks up the component tree to find the context in a parent component:
-
-```csharp
-public class ChildView : ViewBase
+public class BasicContextChildView : ViewBase
 {
     public override object? Build()
     {
         // Retrieve the theme context from parent
-        var theme = UseContext<ThemeContext>();
+        var theme = UseContext<BasicThemeContext>();
         
-        return Text.Literal($"Theme: {theme.PrimaryColor}");
+        return Text.Block($"Theme: {theme.PrimaryColor}, Font Size: {theme.FontSize}px");
     }
 }
 ```
@@ -151,7 +149,7 @@ public class NestedView : ViewBase
 
 ### Theme Context
 
-```csharp
+```csharp demo-tabs
 public class ThemeContext
 {
     public string PrimaryColor { get; set; } = "blue";
@@ -163,18 +161,16 @@ public class ThemedApp : ViewBase
 {
     public override object? Build()
     {
-        var theme = CreateContext(() => new ThemeContext 
+        CreateContext(() => new ThemeContext 
         { 
             PrimaryColor = "purple",
             FontSize = 18,
             DarkMode = true
         });
         
-        return Layout.Vertical(
-            new HeaderView(),
-            new ContentView(),
-            new FooterView()
-        );
+        return Layout.Vertical()
+            | new HeaderView()
+            | new ContentView();
     }
 }
 
@@ -184,16 +180,25 @@ public class HeaderView : ViewBase
     {
         var theme = UseContext<ThemeContext>();
         
-        return new Card()
-            .Style($"background-color: {theme.PrimaryColor}; font-size: {theme.FontSize}px")
-            .Content(Text.Heading("Header"));
+        return new Card(Text.Block($"Primary Color: {theme.PrimaryColor}, Font Size: {theme.FontSize}px"))
+            .Title("Header");
+    }
+}
+
+public class ContentView : ViewBase
+{
+    public override object? Build()
+    {
+        var theme = UseContext<ThemeContext>();
+        
+        return Text.Block($"Content using theme - Dark Mode: {theme.DarkMode}");
     }
 }
 ```
 
 ### User Context
 
-```csharp
+```csharp demo-tabs
 public class UserContext
 {
     public string UserId { get; set; } = "";
@@ -210,19 +215,16 @@ public class AuthenticatedView : ViewBase
 {
     public override object? Build()
     {
-        var user = UseService<IUserService>().GetCurrentUser();
-        
-        var userContext = CreateContext(() => new UserContext
+        CreateContext(() => new UserContext
         {
-            UserId = user.Id,
-            UserName = user.Name,
-            Permissions = user.Permissions
+            UserId = "123",
+            UserName = "John Doe",
+            Permissions = new List<string> { "settings:edit", "profile:view" }
         });
         
-        return Layout.Vertical(
-            new UserProfileView(),
-            new UserSettingsView()
-        );
+        return Layout.Vertical()
+            | new UserProfileView()
+            | new UserSettingsView();
     }
 }
 
@@ -232,10 +234,9 @@ public class UserProfileView : ViewBase
     {
         var user = UseContext<UserContext>();
         
-        return Layout.Vertical(
-            Text.Heading($"Welcome, {user.UserName}!"),
-            Text.Literal($"User ID: {user.UserId}")
-        );
+        return Layout.Vertical()
+            | Text.H3($"Welcome, {user.UserName}!")
+            | Text.Block($"User ID: {user.UserId}");
     }
 }
 
@@ -247,10 +248,12 @@ public class UserSettingsView : ViewBase
         
         if (!user.HasPermission("settings:edit"))
         {
-            return Text.Literal("You don't have permission to edit settings.");
+            return Text.Block("You don't have permission to edit settings.");
         }
         
-        return new SettingsForm();
+        return Layout.Vertical()
+            | Text.Block("Settings Form")
+            | Text.Small($"Editing settings for {user.UserName}");
     }
 }
 ```
