@@ -1,8 +1,6 @@
 @import 'tailwindcss';
 @import '@ivy-interactive/ivy-design-system/css/fonts';
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
   --color-scheme: light;
 }
@@ -25,27 +23,25 @@ ivy-widget {
     /* Additional variables not in design system yet */
     --toolbox: #38363a;
     --spacing: 0.27rem;
-    --shadow-2xs: 0 1px 2px 0 hsl(0 0% 0% / 0.03);
-    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.03);
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.04);
-    --shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.05);
-    --shadow-md: 0 2px 4px 0 hsl(0 0% 0% / 0.05);
-    --shadow-lg: 0 4px 6px 0 hsl(0 0% 0% / 0.05);
-    --shadow-xl: 0 6px 10px 0 hsl(0 0% 0% / 0.05);
-    --shadow-2xl: 0 8px 14px 0 hsl(0 0% 0% / 0.08);
+    --radius: 0.5rem;
+    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm:
+      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow:
+      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md:
+      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg:
+      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    --shadow-xl:
+      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   }
 
   .dark {
     /* Additional dark theme overrides not in design system yet */
     --toolbox: #edeaf1;
-    --shadow-2xs: none;
-    --shadow-xs: none;
-    --shadow-sm: none;
-    --shadow: none;
-    --shadow-md: none;
-    --shadow-lg: none;
-    --shadow-xl: none;
-    --shadow-2xl: none;
   }
 
   @theme inline {
@@ -136,12 +132,17 @@ ivy-widget {
     --text-small-label: 12px;
 
     /* Spacing */
-    --radius-boxes: var(--radius-boxes);
-    --radius-fields: var(--radius-fields);
-    --radius-selectors: var(--radius-selectors);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
     --font-sans: var(--font-sans);
     --font-mono: var(--font-mono);
     --font-serif: var(--font-serif);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
     --shadow-2xs: var(--shadow-2xs);
     --shadow-xs: var(--shadow-xs);
     --shadow-sm: var(--shadow-sm);
@@ -202,6 +203,134 @@ ivy-widget {
   }
 }
 
+/* Sheet slide animations */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToLeft {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOutToTop {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOutToBottom {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* Sheet animations using Radix UI data-state attributes */
+[data-radix-dialog-content][data-state='open'] {
+  animation: slideInFromRight 300ms ease-out;
+}
+
+[data-radix-dialog-content][data-state='closed'] {
+  animation: slideOutToRight 300ms ease-in;
+}
+
+/* Sheet overlay animations */
+[data-radix-dialog-overlay][data-state='open'] {
+  animation: fadeIn 300ms ease-out;
+}
+
+[data-radix-dialog-overlay][data-state='closed'] {
+  animation: fadeOut 300ms ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* Sheet animation classes */
+.sheet-animate-enter {
+  animation: slideInFromRight 300ms ease-out;
+}
+
+.sheet-animate-exit {
+  animation: slideOutToRight 300ms ease-in;
+}
+
 /* Alert animation */
 @keyframes alertGrowIn {
   from {
@@ -241,28 +370,9 @@ ivy-widget {
   animation: toastSlideIn 300ms ease-out;
 }
 
-/* Indeterminate progress bar animation */
-@keyframes indeterminate {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(400%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-indeterminate {
-    animation: none;
-    opacity: 0.7;
-  }
-}
-
 @theme inline {
   --animate-accordion-down: accordion-down 0.1s ease-out;
   --animate-accordion-up: accordion-up 0.1s ease-out;
-  --animate-indeterminate: indeterminate 1.5s ease-in-out infinite;
 }
 
 @layer base {
@@ -289,30 +399,8 @@ ivy-widget {
   }
 }
 
-/* Semantic border radius utility classes */
-@layer utilities {
-  /* For large container components: Card, Sheet, Dialog, Alert, Modal */
-  .rounded-box {
-    border-radius: var(--radius-boxes);
-  }
-
-  /* For input field components: Button, Input, Textarea, Select */
-  .rounded-field {
-    border-radius: var(--radius-fields);
-  }
-
-  /* For small selector components: Toggle, Badge, Radio */
-  .rounded-selector {
-    border-radius: var(--radius-selectors);
-  }
-
-  /* For checkboxes: half of selector radius (avoids circle when selectors use 1rem) */
-  .rounded-checkbox {
-    border-radius: calc(var(--radius-selectors) / 2);
-  }
-}
-
-:has(> DIV.remove-parent-padding) {
+:has(> DIV.remove-parent-padding),
+:has(> ivy-widget > DIV.remove-parent-padding) {
   padding: 0 !important;
 }
 
@@ -382,14 +470,39 @@ ivy-widget {
   }
 }
 
-/* DevTools Styles */
+/* DevTools Styles - Inverted theme to stand out from app */
+.ivy-devtools-container {
+  /* Light mode app -> Dark DevTools */
+  --devtools-bg: #1a1a1a;
+  --devtools-fg: #fafafa;
+  --devtools-border: #333;
+  --devtools-muted: #2a2a2a;
+  --devtools-muted-fg: #a0a0a0;
+  --devtools-accent: #3a3a3a;
+}
+
+.dark .ivy-devtools-container {
+  /* Dark mode app -> Light DevTools */
+  --devtools-bg: #ffffff;
+  --devtools-fg: #171717;
+  --devtools-border: #e5e5e5;
+  --devtools-muted: #f5f5f5;
+  --devtools-muted-fg: #737373;
+  --devtools-accent: #e5e5e5;
+}
+
 .ivy-devtools-toolbar {
   position: fixed;
   top: 12px;
   right: 12px;
   z-index: 100000;
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  padding: 8px;
+  background: var(--devtools-bg);
+  border: 1px solid var(--devtools-border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .ivy-devtools-btn {
@@ -412,18 +525,86 @@ ivy-widget {
   opacity: 0.9;
 }
 
+.ivy-devtools-icon-btn {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity 0.15s,
+    background-color 0.15s;
+}
+
+.ivy-devtools-apply-btn {
+  position: relative;
+  height: 28px;
+  padding: 0 10px;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  transition:
+    opacity 0.15s,
+    background-color 0.15s;
+}
+
+.ivy-devtools-apply-btn:hover {
+  opacity: 0.9;
+}
+
+.ivy-devtools-icon-btn:hover {
+  opacity: 0.85;
+}
+
+.ivy-devtools-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  background: var(--devtools-fg);
+  color: var(--devtools-bg);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .ivy-devtools-btn-primary {
   background-color: var(--primary);
   color: var(--primary-foreground);
 }
 
+.ivy-devtools-btn-blue {
+  background-color: var(--blue);
+  color: var(--blue-foreground);
+}
+
 .ivy-devtools-btn-muted {
-  background-color: var(--muted);
-  color: var(--muted-foreground);
+  background-color: var(--devtools-muted);
+  color: var(--devtools-muted-fg);
 }
 
 .ivy-devtools-btn-muted:hover {
-  background-color: var(--accent);
+  background-color: var(--devtools-accent);
 }
 
 .ivy-devtools-btn-success {
@@ -448,14 +629,14 @@ ivy-widget {
   position: absolute;
   top: 0;
   right: 0;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--devtools-bg);
+  color: var(--devtools-fg);
   padding: 4px 8px;
   font-size: 11px;
   font-family: var(--font-sans);
   border-radius: 6px;
   white-space: nowrap;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   line-height: 1.4;
 }
 
@@ -471,10 +652,10 @@ ivy-widget {
 .ivy-devtools-popover {
   position: fixed;
   z-index: 100001;
-  background: var(--background);
-  border: 1px solid var(--border);
+  background: var(--devtools-bg);
+  border: 1px solid var(--devtools-border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 4px 8px rgba(0, 0, 0, 0.15);
   padding: 12px;
   width: 300px;
   font-family: var(--font-sans);
@@ -483,12 +664,15 @@ ivy-widget {
 .ivy-devtools-popover-header {
   margin-bottom: 8px;
   font-size: 12px;
-  color: var(--muted-foreground);
+  color: var(--devtools-muted-fg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .ivy-devtools-popover-type {
   font-weight: 500;
-  color: var(--foreground);
+  color: var(--devtools-fg);
 }
 
 .ivy-devtools-callsite-muted {
@@ -511,23 +695,23 @@ ivy-widget {
   height: 80px;
   padding: 8px;
   padding-right: 36px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--devtools-border);
   border-radius: var(--radius);
   font-size: 13px;
   resize: none;
   font-family: var(--font-sans);
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--devtools-muted);
+  color: var(--devtools-fg);
   box-sizing: border-box;
 }
 
 .ivy-devtools-textarea::placeholder {
-  color: var(--muted-foreground);
+  color: var(--devtools-muted-fg);
 }
 
 .ivy-devtools-textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 2px var(--ring);
+  border-color: var(--primary);
 }
 
 .ivy-devtools-mic-btn {
@@ -538,8 +722,8 @@ ivy-widget {
   height: 28px;
   border: none;
   border-radius: var(--radius);
-  background: var(--muted);
-  color: var(--muted-foreground);
+  background: var(--devtools-accent);
+  color: var(--devtools-muted-fg);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -550,7 +734,7 @@ ivy-widget {
 }
 
 .ivy-devtools-mic-btn:hover {
-  background: var(--accent);
+  background: var(--devtools-border);
 }
 
 .ivy-devtools-mic-active {
@@ -583,7 +767,7 @@ ivy-widget {
 .ivy-devtools-popover-hint {
   margin-top: 8px;
   font-size: 10px;
-  color: var(--muted-foreground);
+  color: var(--devtools-muted-fg);
   text-align: right;
 }
 
@@ -592,8 +776,8 @@ ivy-widget {
   z-index: 99998;
   width: 20px;
   height: 20px;
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: var(--muted);
+  color: var(--muted-foreground);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -606,6 +790,48 @@ ivy-widget {
   transition: transform 0.15s;
 }
 
+.ivy-devtools-marker-modify {
+  background: var(--success);
+  color: var(--success-foreground);
+}
+
 .ivy-devtools-marker:hover {
   transform: scale(1.1);
 }
+
+/* Delete mode styles */
+.ivy-devtools-overlay-delete {
+  background: color-mix(in srgb, var(--destructive) 30%, transparent);
+}
+
+.ivy-devtools-label-delete {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.ivy-devtools-marker-delete {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+/* Text edit mode styles */
+.ivy-devtools-overlay-text-edit {
+  background: color-mix(in srgb, var(--blue) 30%, transparent);
+}
+
+.ivy-devtools-label-text-edit {
+  background: var(--blue);
+  color: var(--blue-foreground);
+}
+
+.ivy-devtools-marker-text-edit {
+  background: var(--blue);
+  color: var(--blue-foreground);
+}
+
+.ivy-devtools-tooltip {
+  background: white !important;
+  color: black !important;
+  z-index: 100001 !important;
+}
+

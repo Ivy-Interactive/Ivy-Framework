@@ -206,15 +206,27 @@ public static class WidgetSerializer
         }
 
 #if DEBUG
-        if (widget is AbstractWidget { CallSite: { } callSite })
+        if (widget is AbstractWidget abstractWidget)
         {
-            json["callSite"] = new JsonObject
+            var callSiteObj = new JsonObject();
+
+            if (widget.Path != null)
             {
-                ["filePath"] = callSite.FilePath,
-                ["lineNumber"] = callSite.LineNumber,
-                ["memberName"] = callSite.MemberName,
-                ["declaringType"] = callSite.DeclaringType
-            };
+                callSiteObj["path"] = widget.Path;
+            }
+
+            if (abstractWidget.CallSite is { } callSite)
+            {
+                callSiteObj["filePath"] = callSite.FilePath;
+                callSiteObj["lineNumber"] = callSite.LineNumber;
+                callSiteObj["memberName"] = callSite.MemberName;
+                callSiteObj["declaringType"] = callSite.DeclaringType;
+            }
+
+            if (callSiteObj.Count > 0)
+            {
+                json["callSite"] = callSiteObj;
+            }
         }
 #endif
 

@@ -1,6 +1,6 @@
 import { getColor, getOverflow, getWidth, Overflow } from '@/lib/styles';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { typography } from '../../lib/styles';
 import {
   Tooltip,
@@ -9,8 +9,10 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
-import { Scales } from '@/types/scale';
-import { TextAlignment } from '@/types/textAlignment';
+import {
+  widgetContentOverrides,
+  subscribeToContentOverride,
+} from '@/widgets/widgetRenderer';
 
 type TextBlockVariant =
   | 'Literal'
@@ -26,15 +28,18 @@ type TextBlockVariant =
   | 'Blockquote'
   | 'InlineCode'
   | 'Lead'
+  | 'ExtraLarge'
+  | 'Large'
+  | 'Small'
   | 'Muted'
   | 'Danger'
   | 'Warning'
   | 'Success'
   | 'Label'
-  | 'Strong'
-  | 'Display';
+  | 'Strong';
 
 interface TextBlockWidgetProps {
+  id: string;
   content: string;
   variant: TextBlockVariant;
   width?: string;
@@ -45,8 +50,6 @@ interface TextBlockWidgetProps {
   bold?: boolean;
   italic?: boolean;
   muted?: boolean;
-  scale?: Scales;
-  textAlignment?: TextAlignment;
 }
 
 interface VariantMap {
@@ -158,6 +161,21 @@ const variantMap: VariantMap = {
       <MarkdownRenderer content={children} />
     </div>
   ),
+  ExtraLarge: ({ children, className, style }) => (
+    <div className={cn(typography.extralarge, className)} style={style}>
+      {children}
+    </div>
+  ),
+  Large: ({ children, className, style }) => (
+    <div className={cn(typography.large, className)} style={style}>
+      {children}
+    </div>
+  ),
+  Small: ({ children, className, style }) => (
+    <div className={cn(typography.small, className)} style={style}>
+      {children}
+    </div>
+  ),
   Muted: ({ children, className, style }) => (
     <div className={cn(typography.muted, className)} style={style}>
       {children}
@@ -188,14 +206,10 @@ const variantMap: VariantMap = {
       {children}
     </strong>
   ),
-  Display: ({ children, className, style }) => (
-    <div className={cn(typography.display, className)} style={style}>
-      {children}
-    </div>
-  ),
 };
 
 export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
+  id,
   content = '',
   variant = 'Literal',
   width,
@@ -206,24 +220,21 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   bold,
   italic,
   muted,
-  scale,
-  textAlignment,
 }) => {
+  const [, forceUpdate] = useState(0);
+
+  // Subscribe to content override changes
+  useEffect(() => {
+    return subscribeToContentOverride(id, () => forceUpdate(n => n + 1));
+  }, [id]);
+
+  // Use override content if available, otherwise use prop
+  const displayContent = widgetContentOverrides.get(id) ?? content;
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getColor(color, 'color', 'background'),
     ...getOverflow(overflow),
-    wordBreak: 'normal',
-    overflowWrap: 'break-word',
-    ...(textAlignment && {
-      textAlign:
-        textAlignment.toLowerCase() as React.CSSProperties['textAlign'],
-    }),
-  };
-
-  const scaleClasses: Record<string, string> = {
-    [Scales.Small]: typography.small,
-    [Scales.Large]: typography.large,
   };
 
   const Component = variantMap[variant];
@@ -235,11 +246,10 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
         noWrap && 'whitespace-nowrap',
         bold && 'font-semibold',
         italic && 'italic',
-        muted && 'text-muted-foreground',
-        scale && scaleClasses[scale]
+        muted && 'text-muted-foreground'
       )}
     >
-      {content}
+      {displayContent}
     </Component>
   );
 };

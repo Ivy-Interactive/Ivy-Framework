@@ -31,6 +31,11 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="" />
     <EmbeddedResource Include="../../AGENTS.md" Link="AGENTS.md" />

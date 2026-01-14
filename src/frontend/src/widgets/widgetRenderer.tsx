@@ -15,6 +15,40 @@ import {
 // Registry for widget callsite information, keyed by widget id
 export const widgetCallSiteRegistry = new Map<string, CallSite>();
 
+// Registry for widget content overrides (used by DevTools text editing)
+export const widgetContentOverrides = new Map<string, string>();
+const contentListeners = new Map<string, Set<() => void>>();
+
+export const setWidgetContentOverride = (widgetId: string, content: string) => {
+  widgetContentOverrides.set(widgetId, content);
+  // Notify listeners
+  const listeners = contentListeners.get(widgetId);
+  if (listeners) {
+    listeners.forEach(listener => listener());
+  }
+};
+
+export const clearWidgetContentOverride = (widgetId: string) => {
+  widgetContentOverrides.delete(widgetId);
+  const listeners = contentListeners.get(widgetId);
+  if (listeners) {
+    listeners.forEach(listener => listener());
+  }
+};
+
+export const subscribeToContentOverride = (widgetId: string, listener: () => void) => {
+  if (!contentListeners.has(widgetId)) {
+    contentListeners.set(widgetId, new Set());
+  }
+  contentListeners.get(widgetId)!.add(listener);
+  return () => {
+    contentListeners.get(widgetId)?.delete(listener);
+  };
+};
+
+// Types that support text editing
+const TEXT_EDITABLE_TYPES = ['Ivy.TextBlock', 'Ivy.Markdown'];
+
 // Cache for wrapped external widget components
 const wrappedExternalWidgetCache = new Map<
   string,
@@ -147,8 +181,12 @@ const MemoizedWidget = memo(
       widgetCallSiteRegistry.set(node.id, node.callSite);
     }
 
+    // Store raw content for text-editable widgets
+    const isTextEditable = TEXT_EDITABLE_TYPES.includes(node.type);
+    const rawContent = isTextEditable ? (node.props.content as string) || (node.props.text as string) || '' : undefined;
+
     const content = (
-      <ivy-widget id={node.id} type={node.type}>
+      <ivy-widget id={node.id} type={node.type} data-content={rawContent}>
         <Component {...props} slots={slots}>
           {slots.default}
         </Component>

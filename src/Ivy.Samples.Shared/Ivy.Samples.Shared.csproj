@@ -10,6 +10,11 @@
     <UserSecretsId>7a9ec095-f521-43d6-852a-1ae71e38a08e</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(IvyPackageVersion)' != ''">
     <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
   </ItemGroup>

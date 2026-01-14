@@ -1,8 +1,9 @@
 export interface CallSite {
-  filePath: string;
-  lineNumber: number;
-  memberName: string;
-  declaringType: string;
+  path?: string;
+  filePath?: string;
+  lineNumber?: number;
+  memberName?: string;
+  declaringType?: string;
 }
 
 export interface WidgetNode {

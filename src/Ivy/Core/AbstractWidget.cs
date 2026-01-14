@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using Ivy.Core.Helpers;
@@ -10,11 +9,20 @@ public abstract record AbstractWidget : IWidget
     private string? _id;
     private readonly Dictionary<(Type, string), object?> _attachedProps = new();
 
+#if DEBUG
+    /// <summary>
+    /// Tracks the current view's callsite during Build() execution.
+    /// Widgets created during Build() will use this as a fallback if they don't have their own user-code callsite.
+    /// </summary>
+    internal static readonly AsyncLocal<CallSite?> CurrentViewCallSite = new();
+#endif
+
     protected AbstractWidget(params object[] children)
     {
         Children = children;
 #if DEBUG
-        CallSite = CallSite.From(new StackTrace(fNeedFileInfo: true));
+        // Widgets get their callsite from their parent view's Build() context
+        CallSite = CurrentViewCallSite.Value;
 #endif
     }
 
@@ -42,6 +50,10 @@ public abstract record AbstractWidget : IWidget
     }
 
     public string? Key { get; set; }
+
+#if DEBUG
+    public string? Path { get; set; }
+#endif
 
     public CallSite? CallSite { get; set; }
 

@@ -7,6 +7,8 @@ public interface IWidget
     public string? Id { get; set; }
 
     public string? Key { get; set; }
+    
+    public string? Path { get; set; }
 
     public object[] Children { get; set; }
 
