@@ -568,15 +568,15 @@ export const convertSizeToGridValue = (size?: string): string => {
 // Typography classes - shadcn typography with Ivy spacing
 export const typography: Record<string, string> = {
   // Headings
-  h1: `text-4xl font-semibold scroll-m-20 mt-12 mb-4 [&+h2]:mt-2 [&+p]:mt-0`,
-  h2: `text-3xl font-medium scroll-m-20 mt-8 mb-4 [&+h3]:mt-2 [&+p]:mt-0`,
-  h3: `text-2xl font-medium scroll-m-20 mt-8 mb-4 [&+h4]:mt-2 [&+p]:mt-0`,
-  h4: `text-xl font-medium scroll-m-20 mt-6 mb-4 [&+h5]:mt-2 [&+p]:mt-0`,
-  h5: `text-lg font-medium scroll-m-20 mt-4 mb-2 [&+h6]:mt-2 [&+p]:mt-0`,
-  h6: `text-base font-medium scroll-m-20 mt-2 mb-2 [&+p]:mt-0`,
+  h1: `text-4xl font-semibold scroll-m-20`,
+  h2: `text-3xl font-medium scroll-m-20`,
+  h3: `text-2xl font-medium scroll-m-20`,
+  h4: `text-xl font-medium scroll-m-20`,
+  h5: `text-lg font-medium scroll-m-20`,
+  h6: `text-base font-medium scroll-m-20`,
 
   // Body
-  p: `text-base scroll-m-20 m-0`,
+  p: `text-base scroll-m-20`,
   lead: `text-muted-foreground`,
   strong: 'font-semibold',
   em: 'italic',
@@ -597,9 +597,8 @@ export const typography: Record<string, string> = {
   block: 'flex items-center min-w-0',
 
   // Lists
-  ul: 'ml-6 list-disc [&>li:first-child]:mt-0 mb-4',
-  ol: 'ml-6 list-decimal [&>li:first-child]:mt-0 mb-4',
-  li: 'mt-1 ',
+  ul: 'list-disc',
+  ol: 'list-decimal',
 
   // Links
   a: 'text-primary underline brightness-90 hover:brightness-100',
@@ -611,13 +610,13 @@ export const typography: Record<string, string> = {
   code: 'relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono text-sm font-semibold',
 
   // Table
-  table: 'w-full border-collapse border border-border mb-4',
+  table: 'w-full border-collapse border border-border',
   thead: 'bg-muted',
   tr: 'border border-border',
   th: 'border border-border px-4 py-2 text-left font-bold text-sm',
   td: 'border border-border px-4 py-2 text-sm',
 
   // Media
-  img: 'max-w-full h-auto cursor-zoom-in mb-4',
+  img: 'max-w-full h-auto cursor-zoom-in',
   hr: 'my-6 border-t border-border',
 };
