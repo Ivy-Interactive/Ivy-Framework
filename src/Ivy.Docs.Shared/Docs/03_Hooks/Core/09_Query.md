@@ -240,7 +240,7 @@ public class SharedDataControls : ViewBase
 
 ## Tag-Based Invalidation
 
-Assign tags to queries for bulk invalidation (using [UseService](../../01_Onboarding/02_Concepts/18_Services.md)). Tags are serializable the same way as keys.
+Assign tags to queries for bulk invalidation (using [UseService](./11_Service.md)). Tags are serializable the same way as keys.
 
 ```csharp demo-below
 public class TaggedQueriesView : ViewBase

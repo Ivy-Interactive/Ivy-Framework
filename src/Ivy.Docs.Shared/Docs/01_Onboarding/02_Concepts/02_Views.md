@@ -31,7 +31,7 @@ All views inherit from the abstract `ViewBase` class, which provides:
 - **Build() method**: The core method that returns the UI structure
 - **Lifecycle management**: Automatic disposal and cleanup
 - **Hook access**: Built-in state management and effect [hooks](../../03_Hooks/02_RulesOfHooks.md)
-- **Service injection**: Access to [application services](./18_Services.md)
+- **Service injection**: Access to [application services](../../03_Hooks/Core/11_Service.md)
 - **Context management**: Shared data between parent and child views
 
 ### Build Method
@@ -114,7 +114,7 @@ new Button("Show Toast",
 
 ## Effects and Side Effects
 
-Use `UseEffect()` for [side effects](../../03_Hooks/Core/04_Effect.md) like API calls, timers, or [subscriptions](./06_Signals.md):
+Use `UseEffect()` for [side effects](../../03_Hooks/Core/04_Effect.md) like API calls, timers, or [subscriptions](../../03_Hooks/Core/10_Signal.md):
 
 ```csharp demo-below
 public class TimerView : ViewBase

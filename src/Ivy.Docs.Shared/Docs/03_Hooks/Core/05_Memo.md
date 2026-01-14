@@ -575,5 +575,5 @@ return Layout.Vertical(
 - [Effects](./04_Effect.md) - Performing side effects with dependencies
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [UseRef](./08_Ref.md) - Storing stable references
-- [Signals](../../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
+- [Signals](./10_Signal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

@@ -372,5 +372,5 @@ UseEffect(async () =>
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Memoization](./05_Memo.md) - Optimizing performance with memoization
 - [UseCallback](./06_Callback.md) - Memoizing callback functions
-- [Signals](../../../01_Onboarding/02_Concepts/06_Signals.md) - Reactive state management
+- [Signals](./10_Signal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
