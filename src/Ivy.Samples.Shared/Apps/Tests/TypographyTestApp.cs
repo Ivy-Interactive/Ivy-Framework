@@ -55,7 +55,7 @@ End of the typography test.
             | new Card(new Markdown(markdown)).Title("Markdown Rendering")
             | new Card(new Html(html)).Title("HTML Rendering")
             | new Card(
-                Layout.Vertical().Gap(0)
+                Layout.Vertical()
                 | Text.H1("Heading 1")
                 | Text.H2("Heading 2")
                 | Text.H3("Heading 3")
