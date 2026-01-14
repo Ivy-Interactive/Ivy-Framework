@@ -74,8 +74,8 @@ public class AudioRecorderBasic : ViewBase
                | Text.P("Basic AudioRecorder example. Records audio and uploads the complete recording when you stop.")
                | new AudioRecorder(upload.Value, "Start recording", "Recording audio...")
                | (audioFile.Value != null
-                   ? Text.Small($"Last upload: {Utils.FormatBytes(audioFile.Value.Length)}")
-                   : Text.Small("No recordings uploaded yet"));
+                   ? Text.P($"Last upload: {Utils.FormatBytes(audioFile.Value.Length)}").Small()
+                   : Text.P("No recordings uploaded yet").Small());
     }
 }
 
@@ -108,9 +108,9 @@ public class AudioRecorderChunkedUpload : ViewBase
                | Text.P("Records audio and uploads in 2-second chunks while recording. Each chunk is accumulated into a single file.")
                | new AudioRecorder(upload.Value, "Start chunked recording", "Recording (uploading every 2s)...")
                    .ChunkInterval(2000)
-               | Text.Small($"Chunks received: {chunkCount.Value}")
+               | Text.P($"Chunks received: {chunkCount.Value}").Small()
                | (audioFile.Value != null
-                   ? Text.Small($"Total accumulated: {Utils.FormatBytes(audioFile.Value.Length)}")
+                   ? Text.P($"Total accumulated: {Utils.FormatBytes(audioFile.Value.Length)}").Small()
                    : null);
     }
 }

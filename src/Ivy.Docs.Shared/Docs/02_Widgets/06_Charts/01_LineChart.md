@@ -105,10 +105,10 @@ public class LineColorSchemeDemo: ViewBase
             new { Month = "May", Desktop = 325, Mobile = 200}
         };
         return Layout.Vertical()
-                 | Text.Large("Default Colors")
+                 | Text.P("Default Colors").Large()
                  | new LineChart(data, "Desktop", "Month")
                        .ColorScheme(ColorScheme.Default)
-                 | Text.Large("Rainbow Colors")      
+                 | Text.P("Rainbow Colors").Large()      
                  | new LineChart(data, "Mobile", "Month")
                        .ColorScheme(ColorScheme.Rainbow);
     }
@@ -300,8 +300,8 @@ public class BitcoinChart : ViewBase
             .ToArray();
         
         return Layout.Vertical()
-                 | Text.Large("Bitcoin Price - Last 100 Days")
-                 | Text.Small($"Showing {bitcoinData.Length} days of data")
+                 | Text.P("Bitcoin Price - Last 100 Days").Large()
+                 | Text.P($"Showing {bitcoinData.Length} days of data").Small()
                  | Text.Html($"<i>From {bitcoinData.First().Date:yyyy-MM-dd} to {bitcoinData.Last().Date:yyyy-MM-dd}</i>")
                  | bitcoinData.ToLineChart(
                         style: LineChartStyles.Dashboard)

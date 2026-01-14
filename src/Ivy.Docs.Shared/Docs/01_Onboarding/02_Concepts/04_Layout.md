@@ -51,7 +51,7 @@ Layout.Vertical().Gap(4)
     | (Layout.Horizontal().Gap(2)
         | new Badge("Active").Primary()
         | new Badge("Premium").Secondary())
-    | Text.Small("Choose your plan")
+    | Text.P("Choose your plan").Small()
 ```
 
 ## Configuration Methods

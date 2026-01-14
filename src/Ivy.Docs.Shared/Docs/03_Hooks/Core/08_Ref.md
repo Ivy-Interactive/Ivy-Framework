@@ -115,7 +115,7 @@ public class BasicRefDemo : ViewBase
         
         return Layout.Vertical(
             Text.P($"This component has rendered {renderCount.Value.Value} times"),
-            Text.Small("(Note: The count increments on each render, but doesn't trigger re-renders)"),
+            Text.P("(Note: The count increments on each render, but doesn't trigger re-renders)").Small(),
             new Button("Force Re-render", _ => forceUpdate.Set(forceUpdate.Value + 1))
         );
     }
@@ -171,7 +171,7 @@ public class PreviousValueDemo : ViewBase
             Text.P($"Current: {count.Value}"),
             Text.P($"Previous: {previous?.ToString() ?? "None"}"),
             Text.P($"Delta: {delta}"),
-            Text.Small($"Renders: {renderCount.Value.Value}"),
+            Text.P($"Renders: {renderCount.Value.Value}").Small(),
             Layout.Horizontal(
                 new Button("+1", _ => count.Set(count.Value + 1)),
                 new Button("+5", _ => count.Set(count.Value + 5)),
@@ -207,7 +207,7 @@ public class MutableReferenceDemo : ViewBase
                 RenderCount = tracker.Value.Count.ToString(),
                 LastRender = tracker.Value.LastRender.ToString("HH:mm:ss")
             }.ToDetails(),
-            Text.Small("Render tracker is stored in UseRef - it persists across re-renders but doesn't trigger them"),
+            Text.P("Render tracker is stored in UseRef - it persists across re-renders but doesn't trigger them").Small(),
             new Button("Increment", _ => count.Set(count.Value + 1))
         );
     }

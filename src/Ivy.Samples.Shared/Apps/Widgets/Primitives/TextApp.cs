@@ -17,7 +17,6 @@ public class TextApp : SampleBase
 
         var basic = Layout.Vertical(
             Text.H4("Basic Text").Bold(),
-            Text.Literal("Literal().Bold()").Bold(),
             Text.P("P().Italic()").Italic(),
             Text.Inline("Inline().Muted()").Muted(),
             Text.Block("Block().Bold().Italic()").Bold().Italic()
@@ -37,11 +36,11 @@ public class TextApp : SampleBase
             Text.H4("Size Variants").Bold(),
             Text.Lead("Lead().Bold()").Bold(),
             Text.Lead("Lead().Italic()").Italic(),
-            Text.Large("Large().Bold()").Bold(),
-            Text.Large("Large().Italic()").Italic(),
-            Text.Small("Small().Bold()").Bold(),
-            Text.Small("Small().Italic()").Italic(),
-            Text.Small("Small().Muted()").Muted()
+            Text.P("P().Large().Bold()").Large().Bold(),
+            Text.P("P().Large().Italic()").Large().Italic(),
+            Text.P("P().Small().Bold()").Small().Bold(),
+            Text.P("P().Small().Italic()").Small().Italic(),
+            Text.P("P().Small().Muted()").Small().Muted()
         );
 
         var emphasis = Layout.Vertical(

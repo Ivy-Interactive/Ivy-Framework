@@ -47,19 +47,19 @@ public class ListConfigDemo : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(4)
-            | Text.Large("Title and Subtitle")
+            | Text.P("Title and Subtitle").Large()
             | new List(new[]
             {
                 new ListItem("John Doe", subtitle: "Software Engineer"),
                 new ListItem("Jane Smith", subtitle: "Product Manager")
             })
-            | Text.Large("Icons")
+            | Text.P("Icons").Large()
             | new List(new[]
             {
                 new ListItem("Dashboard", icon: Icons.House, subtitle: "Main overview"),
                 new ListItem("Settings", icon: Icons.Settings, subtitle: "Configuration")
             })
-            | Text.Large("Badges")
+            | Text.P("Badges").Large()
             | new List(new[]
             {
                 new ListItem("New Message", subtitle: "From John Doe", badge: "3"),
@@ -199,9 +199,9 @@ public class ExamplesListDemo : ViewBase
         );
 
         return Layout.Vertical().Gap(4)
-            | Text.Large("Custom Item Rendering")
+            | Text.P("Custom Item Rendering").Large()
             | new List(customItems)
-            | Text.Large("Time Rendering")
+            | Text.P("Time Rendering").Large()
             | new List(new[] { timeItem });
     }
 }

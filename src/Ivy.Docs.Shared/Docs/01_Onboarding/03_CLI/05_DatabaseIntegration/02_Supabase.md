@@ -37,7 +37,7 @@ You will be asked to name your connection, then prompted for a connection string
 
 For more detailed information, see the [official Supabase documentation on connecting to Postgres](https://supabase.com/docs/guides/database/connecting-to-postgres).
 
-![Supabase connect screen, showing all three types of connection string]../../../../Assets/supabase_connect_screen.webp "Supabase connect screen")
+![Supabase connect screen, showing all three types of connection string](/ivy/assets/supabase_connect_screen.webp "Supabase connect screen")
 
 Your connection string will look something like this:
 

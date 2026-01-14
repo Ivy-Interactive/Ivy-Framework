@@ -47,13 +47,13 @@ Control how much audio data is loaded:
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
-| Text.Small("Preload: None (no data loaded)")
+| Text.P("Preload: None (no data loaded)").Small()
 | new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
     .Preload(AudioPreload.None)
-| Text.Small("Preload: Metadata (duration and basic info)")
+| Text.P("Preload: Metadata (duration and basic info)").Small()
 | new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
     .Preload(AudioPreload.Metadata)
-| Text.Small("Preload: Auto (entire file)")
+| Text.P("Preload: Auto (entire file)").Small()
 | new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
     .Preload(AudioPreload.Auto)
 ```

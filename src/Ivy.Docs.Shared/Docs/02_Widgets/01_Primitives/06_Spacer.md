@@ -168,19 +168,19 @@ public class DashboardSpacerView : ViewBase
         var statsRow = Layout.Horizontal().Gap(4)
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.Small("Total Users")
+                    | Text.P("Total Users").Small()
                     | Text.Label("12.3K").Color(Colors.Primary)
             )
             | new Spacer().Width(Size.Grow())
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.Small("Revenue")
+                    | Text.P("Revenue").Small()
                     | Text.Label("$54K").Color(Colors.Green)
             )
             | new Spacer().Width(Size.Grow())
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.Small("Growth")
+                    | Text.P("Growth").Small()
                     | Text.Label("+23%").Color(Colors.Amber)
             );
             

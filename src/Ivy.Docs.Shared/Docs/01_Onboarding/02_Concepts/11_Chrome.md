@@ -33,7 +33,7 @@ var chromeSettings = new ChromeSettings()
         Layout.Vertical().Gap(2)
         | new Button("Support")
             .HandleClick(_ => { })
-        | Text.Small("Enterprise Application Framework")
+        | Text.P("Enterprise Application Framework").Small()
     )
     .DefaultApp<MyApp>()
     .UseTabs(preventDuplicates: true);

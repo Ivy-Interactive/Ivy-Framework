@@ -173,9 +173,9 @@ public class SingleToggleDemo : ViewBase
                     |  isFavorite.ToToggleInput(isFavorite.Value ? Icons.Heart : Icons.HeartOff)
                                  .Label(isFavorite.Value ? "Remove from Favorites" : "Add to Favorites")
                     | Text.Block(isFavorite.Value ? "❤️ Favorited!" : "🤍 Not favourite!"))            
-                | Text.Small(isFavorite.Value 
+                | Text.P(isFavorite.Value 
                     ? "This article has been added to your favorites." 
-                    : "Click the heart to save this article.");
+                    : "Click the heart to save this article.").Small();
     }
 }
 ```
@@ -224,8 +224,8 @@ public class SimpleFlightBooking : ViewBase
                            .WithField()
                            .Label("Return Date:")
                 // Summary
-                | Text.Small($"Round trip: {departureDate.Value:MMM dd} → {returnDate.Value:MMM dd}")
-                | Text.Small($"One way: {departureDate.Value:MMM dd}");
+                | Text.P($"Round trip: {departureDate.Value:MMM dd} → {returnDate.Value:MMM dd}").Small()
+                | Text.P($"One way: {departureDate.Value:MMM dd}").Small();
     }
 }
 ```
