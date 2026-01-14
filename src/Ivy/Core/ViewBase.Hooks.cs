@@ -68,6 +68,8 @@ public abstract partial class ViewBase
     protected T? UseArgs<T>() where T : class =>
         this.Context.UseArgs<T>();
 
+    public ISignal<TInput, Unit> UseSignal<T, TInput>() where T : AbstractSignal<TInput, Unit> => this.Context.UseSignal<T, TInput>();
+
     public ISignal<TInput, TOutput> UseSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput> => this.Context.UseSignal<T, TInput, TOutput>();
 
     protected QueryResult<TValue> UseQuery<TValue, TKey>(TKey? key,

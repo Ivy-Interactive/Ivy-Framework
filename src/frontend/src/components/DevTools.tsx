@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import SpeechRecognition, {
   useSpeechRecognition,
 } from 'react-speech-recognition';
+import './devtools.css';
 import { CallSite } from '@/types/widgets';
 import {
   widgetCallSiteRegistry,
@@ -33,10 +34,11 @@ interface ChangeRequest {
   index: number;
   widgetId: string;
   widgetType: string;
-  description: string;
+  prompt: string;
   bounds: DOMRect;
   callSite?: CallSite;
   action: 'modify' | 'delete' | 'text-edit';
+  currentContent?: string;
 }
 
 // Constants
@@ -79,6 +81,17 @@ function getPopoverPosition(bounds: DOMRect, offsetHeight = 240) {
     top: Math.min(bounds.top, window.innerHeight - offsetHeight),
     left: Math.min(bounds.right + 10, window.innerWidth - 320),
   };
+}
+
+function getTextContent(element: HTMLElement, widgetType: string): string | undefined {
+  if (!TEXT_EDITABLE_TYPES.includes(widgetType)) return undefined;
+  const content = element.getAttribute('data-content') || element.textContent || '';
+  if (!content) return undefined;
+  const trimmed = content.trim();
+  if (trimmed.length > 50) {
+    return trimmed.substring(0, 50).trim() + ' (truncated)';
+  }
+  return trimmed;
 }
 
 // Sub-components
@@ -144,7 +157,7 @@ interface DevToolsPopoverProps {
   listening: boolean;
   isEditing: boolean;
   placeholder: string;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   browserSupportsSpeechRecognition: boolean;
   onChange: (value: string) => void;
   onCancel: () => void;
@@ -399,10 +412,11 @@ export function DevTools() {
           index: nextIndex,
           widgetId: highlightedWidget.id,
           widgetType: highlightedWidget.type,
-          description: 'Delete this widget',
+          prompt: 'Delete this widget',
           bounds: highlightedWidget.bounds,
           callSite: highlightedWidget.callSite,
           action: 'delete',
+          currentContent: getTextContent(highlightedWidget.element, highlightedWidget.type),
         };
         setChangeRequests(prev => [...prev, newRequest]);
         setNextIndex(prev => prev + 1);
@@ -456,7 +470,7 @@ export function DevTools() {
         setChangeRequests(prev =>
           prev.map(r =>
             r.id === editingRequestId
-              ? { ...r, description: finalText.trim(), bounds: selectedWidget.bounds }
+              ? { ...r, prompt: finalText.trim(), bounds: selectedWidget.bounds }
               : r
           )
         );
@@ -466,10 +480,11 @@ export function DevTools() {
           index: nextIndex,
           widgetId: selectedWidget.id,
           widgetType: selectedWidget.type,
-          description: finalText.trim(),
+          prompt: finalText.trim(),
           bounds: selectedWidget.bounds,
           callSite: selectedWidget.callSite,
           action: 'modify',
+          currentContent: getTextContent(selectedWidget.element, selectedWidget.type),
         };
         setChangeRequests(prev => [...prev, newRequest]);
         setNextIndex(prev => prev + 1);
@@ -530,7 +545,7 @@ export function DevTools() {
         setChangeRequests(prev =>
           prev.map(r =>
             r.id === editingRequestId
-              ? { ...r, description: finalText, bounds: textEditWidget.bounds }
+              ? { ...r, prompt: finalText, bounds: textEditWidget.bounds }
               : r
           )
         );
@@ -540,10 +555,11 @@ export function DevTools() {
           index: nextIndex,
           widgetId: textEditWidget.id,
           widgetType: textEditWidget.type,
-          description: finalText,
+          prompt: finalText,
           bounds: textEditWidget.bounds,
           callSite: textEditWidget.callSite,
           action: 'text-edit',
+          currentContent: getTextContent(textEditWidget.element, textEditWidget.type),
         };
         setChangeRequests(prev => [...prev, newRequest]);
         setNextIndex(prev => prev + 1);
@@ -600,25 +616,25 @@ export function DevTools() {
     if (request.action === 'text-edit') {
       const originalContent = element.getAttribute('data-content') || '';
       setTextEditWidget(widgetInfo);
-      setTextEditValue(request.description);
+      setTextEditValue(request.prompt);
       setOriginalTextValue(originalContent);
       setEditingRequestId(request.id);
       resetTranscript();
       setTimeout(() => {
         if (textEditRef.current) {
           textEditRef.current.focus();
-          textEditRef.current.setSelectionRange(request.description.length, request.description.length);
+          textEditRef.current.setSelectionRange(request.prompt.length, request.prompt.length);
         }
       }, 0);
     } else {
       setSelectedWidget(widgetInfo);
-      setPopoverText(request.description);
+      setPopoverText(request.prompt);
       setEditingRequestId(request.id);
       resetTranscript();
       setTimeout(() => {
         if (textareaRef.current) {
           textareaRef.current.focus();
-          textareaRef.current.setSelectionRange(request.description.length, request.description.length);
+          textareaRef.current.setSelectionRange(request.prompt.length, request.prompt.length);
         }
       }, 0);
     }
@@ -626,13 +642,15 @@ export function DevTools() {
 
   // Apply changes handler
   const handleApplyChanges = useCallback(() => {
-    const payload = changeRequests.map(({ widgetId, widgetType, description, callSite, action }) => ({
-      widgetId, widgetType, description, callSite, action,
+    const payload = changeRequests.map(({ widgetId, widgetType, prompt, callSite, action, currentContent }) => ({
+      widgetId, widgetType, prompt, callSite, action, currentContent,
     }));
     window.parent.postMessage({ type: 'DEVTOOLS_APPLY_CHANGES', payload }, '*');
     setChangeRequests([]);
     setNextIndex(1);
-  }, [changeRequests]);
+    setMode('off');
+    resetModeState();
+  }, [changeRequests, resetModeState]);
 
   // Event listeners effect
   useEffect(() => {
@@ -662,7 +680,7 @@ export function DevTools() {
     if (bounds.width === 0 && bounds.height === 0) return;
 
     const overlay = document.createElement('div');
-    overlay.className = `ivy-devtools-overlay ${
+    overlay.className = `ivy-devtools ivy-devtools-overlay ${
       mode === 'delete' ? 'ivy-devtools-overlay-delete' :
       mode === 'text-edit' ? 'ivy-devtools-overlay-text-edit' : ''
     }`;

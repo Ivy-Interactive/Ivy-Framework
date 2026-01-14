@@ -15,6 +15,16 @@ public interface ISignal<TInput, TOutput>
     IDisposable Receive(Func<TInput, TOutput> callback);
 }
 
+public static class SignalExtensions
+{
+    public static IDisposable Receive<TInput>(this ISignal<TInput, Unit> signal, Action<TInput> callback)
+        => signal.Receive(input =>
+        {
+            callback(input);
+            return default;
+        });
+}
+
 public abstract class AbstractSignal<TInput, TOutput>
 {
     private readonly ConcurrentDictionary<Guid, Func<TInput, TOutput>> _subscribers = new();
@@ -58,6 +68,9 @@ internal class SignalHandle<TInput, TOutput>(
 
 public static class UseSignalExtensions
 {
+    public static ISignal<TInput, Unit> UseSignal<T, TInput>(this IViewContext context) where T : AbstractSignal<TInput, Unit>
+        => context.UseSignal<T, TInput, Unit>();
+
     public static ISignal<TInput, TOutput> UseSignal<T, TInput, TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
     {
         var receiverId = context.UseRef(Guid.NewGuid);
