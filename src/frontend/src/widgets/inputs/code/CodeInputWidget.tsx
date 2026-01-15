@@ -168,6 +168,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
               textToCopy={localValue}
               aria-label="Copy to clipboard"
               scale={scale}
+              className="!h-auto !p-1"
             />
           )}
           {showClear && (
@@ -183,7 +184,10 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           )}
           {/* Invalid icon - rightmost */}
           {invalid && (
-            <InvalidIcon message={invalid} className="pointer-events-auto" />
+            <InvalidIcon
+              message={invalid}
+              className="pointer-events-auto p-1"
+            />
           )}
         </div>
       )}
