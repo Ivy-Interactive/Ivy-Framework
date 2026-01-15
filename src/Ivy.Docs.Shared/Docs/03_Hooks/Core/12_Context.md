@@ -31,36 +31,24 @@ Context is different from [services](./11_Service.md). Services are registered g
 
 Use `CreateContext` to create a context value and `UseContext` to retrieve it:
 
-```csharp demo-tabs
-public class BasicThemeContext
-{
-    public string PrimaryColor { get; set; } = "blue";
-    public int FontSize { get; set; } = 16;
-}
+```csharp demo-below
+public record AppSettings(string Theme, int FontSize);
 
-public class BasicContextParentView : ViewBase
+public class SettingsProvider : ViewBase
 {
     public override object? Build()
     {
-        // Create a context value that will be available to children
-        CreateContext(() => new BasicThemeContext 
-        { 
-            PrimaryColor = "blue",
-            FontSize = 16 
-        });
-        
-        return new BasicContextChildView();
+        CreateContext(() => new AppSettings("dark", 14));
+        return new SettingsConsumer();
     }
 }
 
-public class BasicContextChildView : ViewBase
+public class SettingsConsumer : ViewBase
 {
     public override object? Build()
     {
-        // Retrieve the theme context from parent
-        var theme = UseContext<BasicThemeContext>();
-        
-        return Text.Block($"Theme: {theme.PrimaryColor}, Font Size: {theme.FontSize}px");
+        var settings = UseContext<AppSettings>();
+        return Text.Block($"Theme: {settings.Theme}, Size: {settings.FontSize}px");
     }
 }
 ```
@@ -131,201 +119,13 @@ public class NestedView : ViewBase
 
 ## When to Use Context
 
-### Use Context For
-
-- **Component-Specific Configuration** - Settings that apply to a component subtree
-- **Shared State** - Data that multiple child components need without prop drilling
-- **Service Instances** - Component-scoped services (different from global services)
-- **Theme and Styling** - Theme values that cascade through components
-- **Feature Flags** - Feature toggles specific to a component tree
-
-### Use Services Instead For
-
-- **Application-Wide Services** - Services used across the entire application
-- **Singleton Services** - Services that should have a single instance
-- **Infrastructure Services** - Logging, database, HTTP clients, etc.
-
-## Examples
-
-### Theme Context
-
-```csharp demo-tabs
-public class ThemeContext
-{
-    public string PrimaryColor { get; set; } = "blue";
-    public int FontSize { get; set; } = 16;
-    public bool DarkMode { get; set; } = false;
-}
-
-public class ThemedApp : ViewBase
-{
-    public override object? Build()
-    {
-        CreateContext(() => new ThemeContext 
-        { 
-            PrimaryColor = "purple",
-            FontSize = 18,
-            DarkMode = true
-        });
-        
-        return Layout.Vertical()
-            | new HeaderView()
-            | new ContentView();
-    }
-}
-
-public class HeaderView : ViewBase
-{
-    public override object? Build()
-    {
-        var theme = UseContext<ThemeContext>();
-        
-        return new Card(Text.Block($"Primary Color: {theme.PrimaryColor}, Font Size: {theme.FontSize}px"))
-            .Title("Header");
-    }
-}
-
-public class ContentView : ViewBase
-{
-    public override object? Build()
-    {
-        var theme = UseContext<ThemeContext>();
-        
-        return Text.Block($"Content using theme - Dark Mode: {theme.DarkMode}");
-    }
-}
-```
-
-### User Context
-
-```csharp demo-tabs
-public class UserContext
-{
-    public string UserId { get; set; } = "";
-    public string UserName { get; set; } = "";
-    public List<string> Permissions { get; set; } = new();
-    
-    public bool HasPermission(string permission)
-    {
-        return Permissions.Contains(permission);
-    }
-}
-
-public class AuthenticatedView : ViewBase
-{
-    public override object? Build()
-    {
-        CreateContext(() => new UserContext
-        {
-            UserId = "123",
-            UserName = "John Doe",
-            Permissions = new List<string> { "settings:edit", "profile:view" }
-        });
-        
-        return Layout.Vertical()
-            | new UserProfileView()
-            | new UserSettingsView();
-    }
-}
-
-public class UserProfileView : ViewBase
-{
-    public override object? Build()
-    {
-        var user = UseContext<UserContext>();
-        
-        return Layout.Vertical()
-            | Text.H3($"Welcome, {user.UserName}!")
-            | Text.Block($"User ID: {user.UserId}");
-    }
-}
-
-public class UserSettingsView : ViewBase
-{
-    public override object? Build()
-    {
-        var user = UseContext<UserContext>();
-        
-        if (!user.HasPermission("settings:edit"))
-        {
-            return Text.Block("You don't have permission to edit settings.");
-        }
-        
-        return Layout.Vertical()
-            | Text.Block("Settings Form")
-            | Text.P($"Editing settings for {user.UserName}").Small();
-    }
-}
-```
-
-### Component-Scoped Service
-
-```csharp
-public interface IDataCache
-{
-    void Set<T>(string key, T value);
-    T? Get<T>(string key);
-    void Clear();
-}
-
-public class MemoryCache : IDataCache, IDisposable
-{
-    private readonly Dictionary<string, object> _cache = new();
-    
-    public void Set<T>(string key, T value)
-    {
-        _cache[key] = value!;
-    }
-    
-    public T? Get<T>(string key)
-    {
-        return _cache.TryGetValue(key, out var value) ? (T?)value : default;
-    }
-    
-    public void Clear()
-    {
-        _cache.Clear();
-    }
-    
-    public void Dispose()
-    {
-        _cache.Clear();
-    }
-}
-
-public class DataView : ViewBase
-{
-    public override object? Build()
-    {
-        // Create a cache scoped to this component and its children
-        var cache = CreateContext(() => new MemoryCache());
-        
-        return Layout.Vertical(
-            new DataListView(),
-            new DataDetailView()
-        );
-    }
-}
-
-public class DataListView : ViewBase
-{
-    public override object? Build()
-    {
-        var cache = UseContext<IDataCache>();
-        
-        var cachedData = cache.Get<List<Data>>("dataList");
-        if (cachedData == null)
-        {
-            cachedData = LoadDataFromDatabase();
-            cache.Set("dataList", cachedData);
-        }
-        
-        return new Table(cachedData);
-    }
-    
-    private List<Data> LoadDataFromDatabase() => new();
-}
-```
+| Use Context For | Use Services Instead For |
+|-----------------|--------------------------|
+| Component-Specific Configuration | Application-Wide Services |
+| Shared State (avoid prop drilling) | Singleton Services |
+| Component-Scoped Services | Infrastructure Services (logging, database, HTTP) |
+| Theme and Styling | |
+| Feature Flags (component tree specific) | |
 
 ## Lifecycle Management
 
@@ -355,77 +155,6 @@ public class FileView : ViewBase
         var resource = CreateContext(() => new ResourceContext("data.txt"));
         
         return new FileContentView();
-    }
-}
-```
-
-## Best Practices
-
-### Use Context for Component-Scoped Data
-
-Context is perfect for data that should be shared within a component subtree but not globally:
-
-```csharp
-// Good: Component-scoped theme
-var theme = CreateContext(() => new ThemeContext());
-
-// Bad: Use service for global theme
-var theme = UseService<IThemeService>(); // Better for app-wide theme
-```
-
-### Keep Context Values Simple
-
-Context values should be simple data containers or lightweight services:
-
-```csharp
-// Good: Simple context
-public class ConfigContext
-{
-    public string ApiUrl { get; set; } = "";
-    public int Timeout { get; set; } = 30;
-}
-
-// Caution: Heavy services should use dependency injection
-// Consider using services for complex operations
-```
-
-### Use Type Safety
-
-Always use strongly typed context access:
-
-```csharp
-// Good: Type-safe
-var theme = UseContext<ThemeContext>();
-
-// Bad: Runtime type checking
-var theme = UseContext(typeof(ThemeContext));
-```
-
-### Avoid Context for Frequently Changing Data
-
-For data that changes frequently, consider using [state](./03_State.md) instead:
-
-```csharp
-// Good: Use state for reactive data
-var count = UseState(0);
-
-// Context is better for stable configuration
-var config = CreateContext(() => new Config());
-```
-
-### Document Context Dependencies
-
-Make it clear when a component requires a context:
-
-```csharp
-public class ChildView : ViewBase
-{
-    // This component requires ThemeContext from a parent
-    public override object? Build()
-    {
-        var theme = UseContext<ThemeContext>(); // Will throw if not found
-        
-        return Text.Literal($"Theme: {theme.PrimaryColor}");
     }
 }
 ```
@@ -546,9 +275,164 @@ var config = UseState(new Config { Value = 10 });
 // Changing config.Value will trigger re-renders
 ```
 
+## Best Practices
+
+- **Use context for component-scoped data** - Use services for app-wide data
+- **Keep context values simple** - Data containers or lightweight services; use DI for heavy services
+- **Use type safety** - Always use `UseContext<T>()` instead of runtime type checking
+- **Avoid frequently changing data** - Use [state](./03_State.md) for reactive updates
+- **Document context dependencies** - Make it clear when a component requires a parent context
+
 ## See Also
 
 - [Services](./11_Service.md) - Application-wide dependency injection
 - [State](./03_State.md) - Reactive state management
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+
+## Examples
+
+<Details>
+<Summary>
+User Context
+</Summary>
+<Body>
+
+```csharp demo-below
+public class UserContext
+{
+    public string UserId { get; set; } = "";
+    public string UserName { get; set; } = "";
+    public List<string> Permissions { get; set; } = new();
+    
+    public bool HasPermission(string permission)
+    {
+        return Permissions.Contains(permission);
+    }
+}
+
+public class AuthenticatedView : ViewBase
+{
+    public override object? Build()
+    {
+        CreateContext(() => new UserContext
+        {
+            UserId = "123",
+            UserName = "John Doe",
+            Permissions = new List<string> { "settings:edit", "profile:view" }
+        });
+        
+        return Layout.Vertical()
+            | new UserProfileView()
+            | new UserSettingsView();
+    }
+}
+
+public class UserProfileView : ViewBase
+{
+    public override object? Build()
+    {
+        var user = UseContext<UserContext>();
+        
+        return Layout.Vertical()
+            | Text.H3($"Welcome, {user.UserName}!")
+            | Text.Block($"User ID: {user.UserId}");
+    }
+}
+
+public class UserSettingsView : ViewBase
+{
+    public override object? Build()
+    {
+        var user = UseContext<UserContext>();
+        
+        if (!user.HasPermission("settings:edit"))
+        {
+            return Text.Block("You don't have permission to edit settings.");
+        }
+        
+        return Layout.Vertical()
+            | Text.Block("Settings Form")
+            | Text.P($"Editing settings for {user.UserName}").Small();
+    }
+}
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Component-Scoped Service
+</Summary>
+<Body>
+
+```csharp
+public interface IDataCache
+{
+    void Set<T>(string key, T value);
+    T? Get<T>(string key);
+    void Clear();
+}
+
+public class MemoryCache : IDataCache, IDisposable
+{
+    private readonly Dictionary<string, object> _cache = new();
+    
+    public void Set<T>(string key, T value)
+    {
+        _cache[key] = value!;
+    }
+    
+    public T? Get<T>(string key)
+    {
+        return _cache.TryGetValue(key, out var value) ? (T?)value : default;
+    }
+    
+    public void Clear()
+    {
+        _cache.Clear();
+    }
+    
+    public void Dispose()
+    {
+        _cache.Clear();
+    }
+}
+
+public class DataView : ViewBase
+{
+    public override object? Build()
+    {
+        // Create a cache scoped to this component and its children
+        var cache = CreateContext(() => new MemoryCache());
+        
+        return Layout.Vertical(
+            new DataListView(),
+            new DataDetailView()
+        );
+    }
+}
+
+public class DataListView : ViewBase
+{
+    public override object? Build()
+    {
+        var cache = UseContext<IDataCache>();
+        
+        var cachedData = cache.Get<List<Data>>("dataList");
+        if (cachedData == null)
+        {
+            cachedData = LoadDataFromDatabase();
+            cache.Set("dataList", cachedData);
+        }
+        
+        return new Table(cachedData);
+    }
+    
+    private List<Data> LoadDataFromDatabase() => new();
+}
+```
+
+</Body>
+</Details>
