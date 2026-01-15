@@ -38,21 +38,19 @@ public class BasicRefreshExample : ViewBase
 }
 ```
 
-## Use Refresh Tokens
-
-Refresh tokens are useful when you need to:
-
-- Trigger effects after async operations complete
-- Pass data from background operations to trigger UI updates
-- Coordinate updates across different parts of your view
-- Refresh external content like iframes
+## When to Use RefreshToken
 
 ```mermaid
-graph LR
-    A[User Action] --> B[refreshToken.Refresh]
-    B --> C[New GUID Generated]
-    C --> D[Effects Triggered]
-    D --> E[UI Updated]
+sequenceDiagram
+    participant U as User/Background
+    participant R as RefreshToken
+    participant E as UseEffect
+    participant UI as UI
+    
+    U->>R: refreshToken.Refresh()
+    R->>R: Generate new GUID
+    R->>E: Trigger dependent effects
+    E->>UI: Update component
 ```
 
 ## Passing Return Values
@@ -95,6 +93,16 @@ Return values can be any type, including complex objects like records or classes
 | `IsRefreshed` | `bool` | `true` if the token has been refreshed at least once |
 | `ReturnValue` | `object?` | The value passed to the last `Refresh()` call |
 
+## Refresh Tokens vs [Event Handlers](./07_EventHandlers.md)
+
+| Feature | Event Handlers | Refresh Tokens |
+|---------|---------------|----------------|
+| **Trigger** | User interaction (click, blur, change) | Programmatic call to `Refresh()` |
+| **Timing** | Synchronous, immediate | Can trigger async effects |
+| **Scope** | Single component/element | Can trigger multiple effects |
+| **Use Case** | Direct UI interactions | Background operations, coordinated updates |
+| **Data Flow** | Event args (e.g., Event<Button>) | Return values via `ReturnValue` |
+
 ## Best Practices
 
 ### Use Return Values for Data Flow
@@ -135,18 +143,6 @@ UseEffect(() =>
     }
 }, [refreshToken]);
 ```
-
-## Refresh Tokens vs [Event Handlers](./07_EventHandlers.md)
-
-### Comparison Table
-
-| Feature | Event Handlers | Refresh Tokens |
-|---------|---------------|----------------|
-| **Trigger** | User interaction (click, blur, change) | Programmatic call to `Refresh()` |
-| **Timing** | Synchronous, immediate | Can trigger async effects |
-| **Scope** | Single component/element | Can trigger multiple effects |
-| **Use Case** | Direct UI interactions | Background operations, coordinated updates |
-| **Data Flow** | Event args (e.g., Event<Button>) | Return values via `ReturnValue` |
 
 ## See Also
 
