@@ -208,16 +208,6 @@ public class DataProvider : ViewBase
 }
 ```
 
-## API Reference
-
-### Required Imports
-
-Add `using Ivy.Hooks;` to access signal functionality:
-
-```csharp
-using Ivy.Hooks;
-```
-
 ### Key Types
 
 - **`AbstractSignal<TInput, TOutput>`** - Base class for signals
