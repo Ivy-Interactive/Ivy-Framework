@@ -166,8 +166,4 @@ public class PaymentView : ViewBase
 }
 ```
 
-## See Also
 
-- [Database Integration](../03_CLI/05_DatabaseIntegration/01_DatabaseOverview.md)
-- [Secrets Management](./20_Secrets.md)
-- [Services & Dependency Injection](./18_Services.md)
