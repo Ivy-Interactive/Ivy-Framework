@@ -11,7 +11,7 @@ searchHints:
 # UseUpload
 
 <Ingress>
-The `UseUpload` [hook](../02_RulesOfHooks.md) creates an upload endpoint and returns an upload context that can be used with [FileInput](../../../02_Widgets/04_Inputs/10_File.md) to enable file uploads with automatic state management, progress tracking, and validation.
+The `UseUpload` [hook](../02_RulesOfHooks.md) creates an upload endpoint and returns an upload context that can be used with [FileInput](../../../02_Widgets/04_Inputs/10_FileInput.md) to enable file uploads with automatic state management, progress tracking, and validation.
 </Ingress>
 
 ## Basic Usage
@@ -109,4 +109,4 @@ For complete file upload documentation, including:
 - Form integration
 - Custom upload handlers
 
-See the [FileInput Widget](../../../02_Widgets/04_Inputs/10_File.md) documentation.
+See the [FileInput Widget](../../../02_Widgets/04_Inputs/10_FileInput.md) documentation.
