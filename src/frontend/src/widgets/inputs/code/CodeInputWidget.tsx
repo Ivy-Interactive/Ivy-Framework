@@ -17,12 +17,11 @@ import { useEventHandler } from '@/components/event-handler';
 import { cn } from '@/lib/utils';
 import { getHeight, getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
 import { Scales } from '@/types/scale';
-import { X } from 'lucide-react';
+import { X, Copy } from 'lucide-react';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
 import {
   keymap,
@@ -164,12 +163,14 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       {(showCopy || showClear || invalid) && (
         <div className="absolute top-2 right-2 z-50 flex items-center">
           {showCopy && (
-            <CopyToClipboardButton
-              textToCopy={localValue}
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(localValue)}
               aria-label="Copy to clipboard"
-              scale={scale}
-              className="!h-auto !p-1"
-            />
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <Copy className={xIconVariants({ scale })} />
+            </button>
           )}
           {showClear && (
             <button
