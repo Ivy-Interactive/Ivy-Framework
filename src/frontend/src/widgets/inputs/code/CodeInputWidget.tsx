@@ -13,6 +13,7 @@ import { html } from '@codemirror/lang-html';
 import { css } from '@codemirror/lang-css';
 import { json } from '@codemirror/lang-json';
 import { markdown } from '@codemirror/lang-markdown';
+import { yaml } from '@codemirror/lang-yaml';
 import { useEventHandler } from '@/components/event-handler';
 import { cn } from '@/lib/utils';
 import { getHeight, getWidth, inputStyles } from '@/lib/styles';
@@ -59,6 +60,7 @@ const languageExtensions = {
   Dbml: dbml,
   Markdown: markdown,
   Text: undefined,
+  Yaml: yaml,
 };
 
 export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({

@@ -31,6 +31,7 @@ const languageMap: Record<string, string> = {
   Dbml: 'sql',
   Text: 'text',
   Xml: 'xml',
+  Yaml: 'yaml',
 };
 
 const mapLanguageToPrism = (language: string): string | undefined => {
