@@ -21,8 +21,10 @@ public abstract record AbstractWidget : IWidget
     {
         Children = children;
 #if DEBUG
-        // Widgets get their callsite from their parent view's Build() context
-        CallSite = CurrentViewCallSite.Value;
+        // Try to capture the widget's own callsite from the stack trace first
+        // This gives us the exact line where the widget was instantiated
+        CallSite = CallSite.From(new System.Diagnostics.StackTrace(fNeedFileInfo: true))
+                   ?? CurrentViewCallSite.Value;
 #endif
     }
 
