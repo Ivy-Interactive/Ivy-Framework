@@ -174,7 +174,7 @@ Layout.Horizontal().Gap(2).Center()
 
 ### Custom Event Handling
 
-Custom event handling allows you to implement complex [business logic](../../03_Hooks/Core/11_Service.md) based on menu selections, making your dropdowns more interactive and useful.
+Custom event handling allows you to implement complex [business logic](../../03_Hooks/Core/11_UseService.md) based on menu selections, making your dropdowns more interactive and useful.
 
 ```csharp demo-tabs
 new DropDownMenu(@evt => {

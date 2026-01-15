@@ -8,7 +8,7 @@ searchHints:
   - provider
 ---
 
-# Context
+# UseContext
 
 <Ingress>
 The `UseContext` and `CreateContext` [hooks](../02_RulesOfHooks.md) enable component-level context management, allowing you to share data and services within a component tree without prop drilling.
@@ -24,7 +24,7 @@ Context [hooks](../02_RulesOfHooks.md) provide a way to share data and services 
 - **Lifecycle Management** - Context values are automatically disposed when the component is disposed
 
 <Callout type="Tip">
-Context is different from [services](./11_Service.md). Services are registered globally in your application, while context is scoped to a specific component and its children. Use context for component-specific data and services for application-wide functionality.
+Context is different from [services](./11_UseService.md). Services are registered globally in your application, while context is scoped to a specific component and its children. Use context for component-specific data and services for application-wide functionality.
 </Callout>
 
 ## Basic Usage
@@ -263,7 +263,7 @@ public class ParentView : ViewBase
 
 ### Context Value Changes
 
-Context values are created once per component. If you need reactive updates, use [state](./03_State.md) instead:
+Context values are created once per component. If you need reactive updates, use [state](./03_UseState.md) instead:
 
 ```csharp
 // Context value doesn't update reactively
@@ -280,13 +280,13 @@ var config = UseState(new Config { Value = 10 });
 - **Use context for component-scoped data** - Use services for app-wide data
 - **Keep context values simple** - Data containers or lightweight services; use DI for heavy services
 - **Use type safety** - Always use `UseContext<T>()` instead of runtime type checking
-- **Avoid frequently changing data** - Use [state](./03_State.md) for reactive updates
+- **Avoid frequently changing data** - Use [state](./03_UseState.md) for reactive updates
 - **Document context dependencies** - Make it clear when a component requires a parent context
 
 ## See Also
 
-- [Services](./11_Service.md) - Application-wide dependency injection
-- [State](./03_State.md) - Reactive state management
+- [Services](./11_UseService.md) - Application-wide dependency injection
+- [State](./03_UseState.md) - Reactive state management
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
 

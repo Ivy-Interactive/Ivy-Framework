@@ -181,6 +181,6 @@ input.HandleBlur(async () => await SaveToApi());
 ## See Also
 
 - [Forms](./13_Forms.md) - Building forms with validation
-- [State](../../03_Hooks/Core/03_State.md) - Managing component state
-- [Effects](../../03_Hooks/Core/04_Effect.md) - Performing side effects
+- [State](../../03_Hooks/Core/03_UseState.md) - Managing component state
+- [Effects](../../03_Hooks/Core/04_UseEffect.md) - Performing side effects
 - [Widgets](./03_Widgets.md) - Understanding Ivy widgets

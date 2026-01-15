@@ -11,7 +11,7 @@ searchHints:
 # Program
 
 <Ingress>
-Configure and bootstrap your Ivy [application](./15_Apps.md) with [dependency injection](../../03_Hooks/Core/11_Service.md), [services](../../03_Hooks/Core/11_Service.md), and middleware for production-ready deployment.
+Configure and bootstrap your Ivy [application](./15_Apps.md) with [dependency injection](../../03_Hooks/Core/11_UseService.md), [services](../../03_Hooks/Core/11_UseService.md), and middleware for production-ready deployment.
 </Ingress>
 
 The `Program.cs` file is the entry point for your Ivy application. It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other sevices..

@@ -19,7 +19,7 @@ Messages are supplied as `ChatMessage` objects and new messages are sent through
 
 A simple chat with an echo bot that repeats user messages.
 
-This demonstrates the fundamental usage of the Chat widget with basic message handling and [state management](../../03_Hooks/Core/03_State.md).
+This demonstrates the fundamental usage of the Chat widget with basic message handling and [state management](../../03_Hooks/Core/03_UseState.md).
 
 ```csharp demo-tabs
 public class BasicChatDemo : ViewBase

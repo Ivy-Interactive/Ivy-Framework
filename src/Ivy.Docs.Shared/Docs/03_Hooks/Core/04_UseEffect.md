@@ -8,7 +8,7 @@ searchHints:
   - cleanup
 ---
 
-# Effects
+# UseEffect
 
 <Ingress>
 Perform side effects in your Ivy [views](../../../01_Onboarding/02_Concepts/02_Views.md) with the UseEffect [hook](../02_RulesOfHooks.md), similar to React's useEffect but optimized for server-side architecture.
@@ -16,7 +16,7 @@ Perform side effects in your Ivy [views](../../../01_Onboarding/02_Concepts/02_V
 
 The `UseEffect` [hook](../02_RulesOfHooks.md) is a powerful feature in Ivy that allows you to perform side effects in your [views](../../../01_Onboarding/02_Concepts/02_Views.md). It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
 
-Effects are essential for handling operations that don't directly relate to rendering, such as working with [state](./03_State.md) updates, [async operations](../../../01_Onboarding/02_Concepts/11_TasksAndObservables.md), and external services:
+Effects are essential for handling operations that don't directly relate to rendering, such as working with [state](./03_UseState.md) updates, [async operations](../../../01_Onboarding/02_Concepts/11_TasksAndObservables.md), and external services:
 
 ```mermaid
 graph TD
@@ -106,7 +106,7 @@ Effects can be triggered by different events using trigger parameters:
 
 ### State Dependencies
 
-Effects can depend on [state](./03_State.md) changes:
+Effects can depend on [state](./03_UseState.md) changes:
 
 ```csharp demo-below
 public class DependentEffectView : ViewBase
@@ -368,9 +368,9 @@ UseEffect(async () =>
 
 ## See Also
 
-- [State Management](./03_State.md) - Managing component state
+- [State Management](./03_UseState.md) - Managing component state
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
-- [Memoization](./05_Memo.md) - Optimizing performance with memoization
-- [UseCallback](./06_Callback.md) - Memoizing callback functions
-- [Signals](./10_Signal.md) - Reactive state management
+- [Memoization](./05_UseMemo.md) - Optimizing performance with memoization
+- [UseCallback](./06_UseCallback.md) - Memoizing callback functions
+- [Signals](./10_UseSignal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

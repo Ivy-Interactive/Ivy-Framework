@@ -9,7 +9,7 @@ searchHints:
   - memo
 ---
 
-# Memoization
+# UseMemo
 
 <Ingress>
 Memoization helps Ivy [applications](../../../01_Onboarding/02_Concepts/15_Apps.md) run faster by caching results of expensive computations and preventing unnecessary re-renders in your [views](../../../01_Onboarding/02_Concepts/02_Views.md).
@@ -20,7 +20,7 @@ Memoization helps Ivy [applications](../../../01_Onboarding/02_Concepts/15_Apps.
 Memoization in Ivy provides several powerful tools to optimize performance:
 
 - **[`UseMemo`](#usememo-hook)** - Caches the result of expensive computations
-- **[`UseCallback`](./06_Callback.md)** - Memoizes callback functions to prevent unnecessary re-renders.
+- **[`UseCallback`](./06_UseCallback.md)** - Memoizes callback functions to prevent unnecessary re-renders.
 - **`IMemoized`** - Interface for component-level memoization
 
 These [hooks](../02_RulesOfHooks.md) work similarly to their React counterparts (`useMemo`, `useCallback`) but are designed specifically for Ivy's architecture.
@@ -46,7 +46,7 @@ flowchart TD
 
 ## UseMemo Hook
 
-The `UseMemo` [hook](../02_RulesOfHooks.md) caches the result of a computation and only recomputes it when its [state](./03_State.md) dependencies change.
+The `UseMemo` [hook](../02_RulesOfHooks.md) caches the result of a computation and only recomputes it when its [state](./03_UseState.md) dependencies change.
 
 <Callout type="Tip">
 `UseMemo` hook stores only the most recent dependency values for comparison; older values are discarded.
@@ -118,15 +118,15 @@ Use memoization when:
 
 - You have expensive computations that don't need to be redone on every render
 - You want to prevent unnecessary re-renders of [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md)
-- You're dealing with complex data transformations that depend on [state](./03_State.md) changes
-- You need stable function references for [`UseEffect`](./04_Effect.md) dependencies
+- You're dealing with complex data transformations that depend on [state](./03_UseState.md) changes
+- You need stable function references for [`UseEffect`](./04_UseEffect.md) dependencies
 
 ### Best Practices
 
-- **Dependency Array**: Always specify the [state](./03_State.md) dependencies that should trigger a recomputation
+- **Dependency Array**: Always specify the [state](./03_UseState.md) dependencies that should trigger a recomputation
 - **Expensive Operations**: Only memoize truly expensive operations
 - **Clean Dependencies**: Keep the dependency array minimal and focused on state values
-- **Avoid Side Effects**: Memoized functions should be pure and not have side effects (use [UseEffect](./04_Effect.md) for side effects)
+- **Avoid Side Effects**: Memoized functions should be pure and not have side effects (use [UseEffect](./04_UseEffect.md) for side effects)
 
 ### Examples
 
@@ -370,7 +370,7 @@ stateDiagram-v2
 
 ### Memory vs Speed Trade-offs
 
-- **Memory Usage**: Memoization caches values in memory. Consider the size of cached [state](./03_State.md) data:
+- **Memory Usage**: Memoization caches values in memory. Consider the size of cached [state](./03_UseState.md) data:
 
 - **Cache Invalidation**: If state dependencies change too often or are unstable, cached results will be invalidated frequently, reducing the effectiveness of memoization. Ensure dependencies are stable and don't change unnecessarily:
 
@@ -408,7 +408,7 @@ var greeting = UseMemo(() => $"Hello, {userName}!", userName);
 ### When NOT to Memoize
 
 - **Simple computations**: Don't memoize trivial operations
-- **Frequently changing [state](./03_State.md) dependencies**: If state dependencies change often, memoization provides no benefit
+- **Frequently changing [state](./03_UseState.md) dependencies**: If state dependencies change often, memoization provides no benefit
 - **Small component trees**: In simple [views](../../../01_Onboarding/02_Concepts/02_Views.md), the overhead might outweigh benefits
 
 ```csharp
@@ -432,7 +432,7 @@ flowchart TD
     B --> E["Memory usage too high?"]
     B --> F["Components still re-rendering?"]
     
-    C --> C1["Use stable references<br/>Avoid creating objects in deps<br/>Use [UseRef](./08_Ref.md) for constants"]
+    C --> C1["Use stable references<br/>Avoid creating objects in deps<br/>Use [UseRef](./08_UseRef.md) for constants"]
     D --> D1["Profile before optimizing<br/>Only memoize expensive operations<br/> Check if deps change frequently"]
     E --> E1["Reduce cached data size<br/>Use specific dependencies<br/> Consider conditional memoization"]
     F --> F1["Implement IMemoized correctly<br/>Provide stable keys<br/> Check GetMemoValues()"]
@@ -455,7 +455,7 @@ flowchart TD
 var result = UseMemo(() => ProcessData(data.Value), data.Value, new[] { "option1", "option2" });
 ```
 
-**Solution**: Use stable references with [UseRef](./08_Ref.md)
+**Solution**: Use stable references with [UseRef](./08_UseRef.md)
 
 ```csharp
 // Good: Stable dependency
@@ -530,7 +530,7 @@ public object[] GetMemoValues()
 
 ### Callback Dependencies Issues
 
-**Problem**: [UseCallback](./06_Callback.md) callbacks that capture too many state variables
+**Problem**: [UseCallback](./06_UseCallback.md) callbacks that capture too many state variables
 
 ```csharp
 // Bad: Callback recreated whenever any state changes
@@ -540,7 +540,7 @@ var handleClick = UseCallback(() =>
 }, data, filter, sortOrder); // Too many dependencies
 ```
 
-**Solution**: Split into smaller, focused callbacks using [UseCallback](./06_Callback.md)
+**Solution**: Split into smaller, focused callbacks using [UseCallback](./06_UseCallback.md)
 
 ```csharp
 // Good: Separate callbacks with minimal dependencies
@@ -570,10 +570,10 @@ return Layout.Vertical(
 
 ## See Also
 
-- [State Management](./03_State.md) - Managing component state
-- [UseCallback](./06_Callback.md) - Memoizing callback functions
-- [Effects](./04_Effect.md) - Performing side effects with dependencies
+- [State Management](./03_UseState.md) - Managing component state
+- [UseCallback](./06_UseCallback.md) - Memoizing callback functions
+- [Effects](./04_UseEffect.md) - Performing side effects with dependencies
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
-- [UseRef](./08_Ref.md) - Storing stable references
-- [Signals](./10_Signal.md) - Reactive state management
+- [UseRef](./08_UseRef.md) - Storing stable references
+- [Signals](./10_UseSignal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

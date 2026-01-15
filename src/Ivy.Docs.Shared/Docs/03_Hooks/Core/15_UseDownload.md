@@ -8,7 +8,7 @@ searchHints:
   - download-link
 ---
 
-# Download
+# UseDownload
 
 <Ingress>
 The `UseDownload` [hook](../02_RulesOfHooks.md) enables file downloads in your [application](../../../01_Onboarding/02_Concepts/15_Apps.md), generating download links for files created on-demand.
@@ -120,7 +120,7 @@ public class DownloadMultiFormatDemo : ViewBase
 
 ## See Also
 
-- [State](./03_State.md) - Component state management
-- [Effects](./04_Effect.md) - Side effects and lifecycle
+- [State](./03_UseState.md) - Component state management
+- [Effects](./04_UseEffect.md) - Side effects and lifecycle
 - [Clients](../../../01_Onboarding/02_Concepts/19_Clients.md) - Client-side interactions including `DownloadFile()`
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices

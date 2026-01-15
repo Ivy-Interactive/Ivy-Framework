@@ -35,7 +35,7 @@ public class BasicFragmentView : ViewBase
 
 ### Conditional Rendering
 
-Fragment is excellent for conditional rendering, allowing you to show or hide content based on [state](../../03_Hooks/Core/03_State.md):
+Fragment is excellent for conditional rendering, allowing you to show or hide content based on [state](../../03_Hooks/Core/03_UseState.md):
 
 ```csharp demo-tabs
 public class ConditionalRenderingView : ViewBase

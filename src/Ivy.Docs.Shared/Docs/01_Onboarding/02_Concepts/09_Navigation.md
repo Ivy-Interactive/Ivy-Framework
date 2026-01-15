@@ -25,7 +25,7 @@ Navigation in Ivy is handled through the `UseNavigation()` hook, which returns a
 - **Deep Linking** - Navigate to specific apps with deep linking parameters and arguments
 - **Type-Safe Navigation** - Navigate using strongly-typed app classes
 
-The navigation system is built on top of Ivy's [signal system](../../03_Hooks/Core/10_Signal.md) and integrates seamlessly with the [Chrome framework](./16_Chrome.md) for managing app lifecycle and routing.
+The navigation system is built on top of Ivy's [signal system](../../03_Hooks/Core/10_UseSignal.md) and integrates seamlessly with the [Chrome framework](./16_Chrome.md) for managing app lifecycle and routing.
 
 ## How UseNavigation Works
 
@@ -286,12 +286,12 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 
 - **Memoize Navigation Callbacks**: Use `UseCallback` for navigation handlers to prevent unnecessary re-renders
 - **Lazy App Loading**: Apps are loaded on-demand when navigated to
-- **State Cleanup**: Navigation automatically handles cleanup of previous app [state management](../../03_Hooks/Core/03_State.md)
+- **State Cleanup**: Navigation automatically handles cleanup of previous app [state management](../../03_Hooks/Core/03_UseState.md)
 - **Memory Management**: The [Chrome](./16_Chrome.md) system manages app lifecycle and memory usage
 
 ## See Also
 
 - [Chrome Settings](./16_Chrome.md)
 - [App Arguments](./02_Views.md)
-- [Signals](../../03_Hooks/Core/10_Signal.md)
-- [State Management](../../03_Hooks/Core/03_State.md)
+- [Signals](../../03_Hooks/Core/10_UseSignal.md)
+- [State Management](../../03_Hooks/Core/03_UseState.md)

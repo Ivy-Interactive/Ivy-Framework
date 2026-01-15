@@ -80,6 +80,6 @@ For detailed troubleshooting, refer to [Oracle Database Error Messages](https://
 - [Database Overview](01_DatabaseOverview.md)
 - [SQL Server Provider](02_SqlServer.md)
 - [PostgreSQL Provider](02_PostgreSql.md)
-- [Enterprise Features](../../../03_Hooks/Core/11_Service.md)
+- [Enterprise Features](../../../03_Hooks/Core/11_UseService.md)
 - [Official Oracle Database Documentation](https://docs.oracle.com/en/database/oracle/oracle-database/index.html)
 - [Oracle.EntityFrameworkCore Package](https://docs.oracle.com/en/database/oracle/oracle-data-access-components/19.3/odpnt/ODPEFCore.html)

@@ -8,7 +8,7 @@ searchHints:
   - form-handling
 ---
 
-# Form
+# UseForm
 
 <Ingress>
 The `UseForm` [hook](../02_RulesOfHooks.md) provides comprehensive form handling with validation, submission, and state management for complex forms in your [application](../../../01_Onboarding/02_Concepts/15_Apps.md). It's the foundation for advanced form patterns used in dialogs, sheets, and custom form layouts.

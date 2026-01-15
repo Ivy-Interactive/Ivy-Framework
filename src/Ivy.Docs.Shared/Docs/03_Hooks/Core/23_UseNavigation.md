@@ -8,7 +8,7 @@ searchHints:
   - navigation-args
 ---
 
-# Navigation
+# UseNavigation
 
 <Ingress>
 The `UseNavigation` [hook](../02_RulesOfHooks.md) provides navigation capabilities, allowing you to programmatically navigate between [apps](../../../01_Onboarding/02_Concepts/15_Apps.md) and routes in your [application](../../../01_Onboarding/02_Concepts/15_Apps.md).
@@ -34,8 +34,8 @@ public class NavigationBasicDemoApp : ViewBase
         var navigator = UseNavigation();
         
         return Layout.Horizontal()
-            | new Button("Go to State docs").HandleClick(() => navigator.Navigate(typeof(StateApp)))
-            | new Button("Go to Effect docs").HandleClick(() => navigator.Navigate(typeof(EffectApp)));
+            | new Button("Go to State docs").HandleClick(() => navigator.Navigate("app://hooks/core/usestate"))
+            | new Button("Go to Effect docs").HandleClick(() => navigator.Navigate("app://hooks/core/useeffect"));
     }
 }
 ```
@@ -121,5 +121,5 @@ Ensure argument types match exactly between source and target:
 
 - [Navigation Concepts](../../../01_Onboarding/02_Concepts/14_Navigation.md) - Complete navigation documentation
 - [Chrome Framework](../../../01_Onboarding/02_Concepts/16_Chrome.md) - App lifecycle and routing
-- [App Arguments](./13_Args.md) - Receiving navigation arguments
-- [State Management](./03_State.md) - Managing state during navigation
+- [App Arguments](./13_UseArgs.md) - Receiving navigation arguments
+- [State Management](./03_UseState.md) - Managing state during navigation

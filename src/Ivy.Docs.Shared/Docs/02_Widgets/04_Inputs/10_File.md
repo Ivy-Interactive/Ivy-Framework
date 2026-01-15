@@ -14,16 +14,16 @@ searchHints:
 # FileInput
 
 <Ingress>
-Enable file uploads with automatic [state management](../../03_Hooks/Core/03_State.md), progress tracking, type filtering, size limits, and support for single or multiple file selections.
+Enable file uploads with automatic [state management](../../03_Hooks/Core/03_UseState.md), progress tracking, type filtering, size limits, and support for single or multiple file selections.
 </Ingress>
 
-The `FileInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a file upload interface with built-in validation, progress tracking, and drag-and-drop support. It works seamlessly with the upload system to automatically manage file data in [state](../../03_Hooks/Core/03_State.md).
+The `FileInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a file upload interface with built-in validation, progress tracking, and drag-and-drop support. It works seamlessly with the upload system to automatically manage file data in [state](../../03_Hooks/Core/03_UseState.md).
 
 ## Basic Usage
 
 The upload system uses three key components working together:
 
-1. **[State](../../03_Hooks/Core/03_State.md) for Files**: Holds the uploaded file(s) data in memory
+1. **[State](../../03_Hooks/Core/03_UseState.md) for Files**: Holds the uploaded file(s) data in memory
 2. **UseUpload Hook**: Creates an upload endpoint and returns an upload context
 3. **MemoryStreamUploadHandler**: Automatically manages file data in state
 

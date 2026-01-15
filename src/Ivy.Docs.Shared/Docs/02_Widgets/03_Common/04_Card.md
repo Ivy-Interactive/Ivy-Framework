@@ -61,7 +61,7 @@ new Card(
 
 ## Dashboard Metrics
 
-For dashboard applications, Ivy provides the specialized `MetricView` component that extends Card functionality with KPI-specific features like trend indicators and goal tracking. It uses [UseQuery](../../../03_Hooks/Core/09_Query.md) hooks for data fetching.
+For dashboard applications, Ivy provides the specialized `MetricView` component that extends Card functionality with KPI-specific features like trend indicators and goal tracking. It uses [UseQuery](../../../03_Hooks/Core/09_UseQuery.md) hooks for data fetching.
 
 ```csharp demo-below
 new MetricView(

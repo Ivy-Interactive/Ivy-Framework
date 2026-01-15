@@ -18,7 +18,7 @@ The `AudioRecorder` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) allo
 
 ## Basic Usage
 
-Here's a simple example of an `AudioRecorder` that uploads audio to the server and stores it in [state](../../03_Hooks/Core/03_State.md):
+Here's a simple example of an `AudioRecorder` that uploads audio to the server and stores it in [state](../../03_Hooks/Core/03_UseState.md):
 
 ```csharp demo-below
 public class BasicAudioRecorderDemo : ViewBase

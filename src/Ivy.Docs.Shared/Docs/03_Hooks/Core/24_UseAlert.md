@@ -8,7 +8,7 @@ searchHints:
   - show-alert
 ---
 
-# Alert
+# UseAlert
 
 <Ingress>
 The `UseAlert` [hook](../02_RulesOfHooks.md) provides alert and notification functionality, enabling you to display modal dialog alerts for confirmations and user feedback in your [application](../../../01_Onboarding/02_Concepts/15_Apps.md). It's the foundation for alert and notification patterns used throughout Ivy applications.

@@ -110,7 +110,7 @@ public class ProductDetailView(string productName) : ViewBase
 
 ## Refresh Tokens
 
-You can use [Refresh Tokens](../../../03_Hooks/Core/16_RefreshToken.md) to trigger updates in parent blades when returning from a child blade. This is common for "save and close" workflows.
+You can use [Refresh Tokens](../../../03_Hooks/Core/16_UseRefreshToken.md) to trigger updates in parent blades when returning from a child blade. This is common for "save and close" workflows.
 
 ```csharp demo-tabs
 public class BladeRefreshDemo : ViewBase

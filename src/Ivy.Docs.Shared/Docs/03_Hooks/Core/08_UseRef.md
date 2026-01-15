@@ -13,7 +13,7 @@ imports:
   - Ivy.Core.Hooks
 ---
 
-# Ref
+# UseRef
 
 <Ingress>
 Store values that persist across re-renders without triggering updates, similar to React's useRef for holding mutable values that don't affect the [view](../../../01_Onboarding/02_Concepts/02_Views.md) lifecycle.
@@ -21,7 +21,7 @@ Store values that persist across re-renders without triggering updates, similar 
 
 ## Overview
 
-The `UseRef` [hook](../02_RulesOfHooks.md) lets you store a value that is initialized only once and persists across re-renders. Unlike [`UseState`](./03_State.md), changing a ref value does NOT trigger a re-render.
+The `UseRef` [hook](../02_RulesOfHooks.md) lets you store a value that is initialized only once and persists across re-renders. Unlike [`UseState`](./03_UseState.md), changing a ref value does NOT trigger a re-render.
 
 Key characteristics of `UseRef`:
 
@@ -31,7 +31,7 @@ Key characteristics of `UseRef`:
 - **Persistence** - Values survive across [component](../../../01_Onboarding/02_Concepts/02_Views.md) re-renders
 
 <Callout type="Tip">
-`UseRef` is ideal for storing mutable references that don't affect rendering, such as timers, subscriptions, DOM references, or previous [state](./03_State.md) values for comparison.
+`UseRef` is ideal for storing mutable references that don't affect rendering, such as timers, subscriptions, DOM references, or previous [state](./03_UseState.md) values for comparison.
 </Callout>
 
 ## When to Use UseRef
@@ -127,7 +127,7 @@ public class BasicRefDemo : ViewBase
 Use `UseRef` when:
 
 - **Storing Timers and Intervals** - Keep references to timers for cleanup without triggering re-renders
-- **Tracking Previous Values** - Store previous [state](./03_State.md) values for comparison
+- **Tracking Previous Values** - Store previous [state](./03_UseState.md) values for comparison
 - **Mutable References** - Store objects that you need to mutate without causing re-renders
 - **Expensive Initialization** - Cache expensive objects that only need to be created once
 - **Subscriptions and Disposables** - Keep references to subscriptions for cleanup
@@ -135,9 +135,9 @@ Use `UseRef` when:
 ### Best Practices
 
 - **Use for Non-Reactive Values** - Only use `UseRef` for values that don't affect rendering
-- **Clean Up Resources** - Always clean up timers, subscriptions, and other resources in [`UseEffect`](./04_Effect.md)
+- **Clean Up Resources** - Always clean up timers, subscriptions, and other resources in [`UseEffect`](./04_UseEffect.md)
 - **Initialize with Factory Function** - Use factory functions for expensive initialization
-- **Avoid for UI [State](./03_State.md)** - Never use `UseRef` for values that should trigger re-renders (use [`UseState`](./03_State.md))
+- **Avoid for UI [State](./03_UseState.md)** - Never use `UseRef` for values that should trigger re-renders (use [`UseState`](./03_UseState.md))
 - **Document Mutations** - Clearly document when and why ref values are mutated
 
 ### Examples
@@ -220,8 +220,8 @@ Understanding when to use each hook:
 
 | Hook | Triggers Re-render | Mutable | Use Case |
 |------|-------------------|---------|----------|
-| [`UseState`](./03_State.md) | True | False | UI [state](./03_State.md) that affects rendering |
-| [`UseMemo`](./05_Memo.md) | False | False | Expensive calculations |
+| [`UseState`](./03_UseState.md) | True | False | UI [state](./03_UseState.md) that affects rendering |
+| [`UseMemo`](./05_UseMemo.md) | False | False | Expensive calculations |
 | `UseRef` | False | True | Mutable refs, timers, subscriptions |
 
 ## Performance Considerations
@@ -235,17 +235,17 @@ Understanding when to use each hook:
 ### Appropriate Use Cases
 
 - Storing mutable references (timers, subscriptions)
-- Tracking previous [state](./03_State.md) values for comparison
+- Tracking previous [state](./03_UseState.md) values for comparison
 - Caching expensive initializations
 - Managing DOM references
 - Storing callback references that don't need to trigger updates
 
 ### Inappropriate Use Cases
 
-- Value affects rendering (use [`UseState`](./03_State.md))
-- Value is computed from other values (use [`UseMemo`](./05_Memo.md))
+- Value affects rendering (use [`UseState`](./03_UseState.md))
+- Value is computed from other values (use [`UseMemo`](./05_UseMemo.md))
 - Value is a simple constant (use regular variables)
-- Value needs to trigger side effects (use [`UseState`](./03_State.md) with [`UseEffect`](./04_Effect.md))
+- Value needs to trigger side effects (use [`UseState`](./03_UseState.md) with [`UseEffect`](./04_UseEffect.md))
 
 ## Common Pitfalls and Solutions
 
@@ -260,10 +260,10 @@ flowchart TD
     B --> E["Memory leaks?"]
     B --> F["Using for reactive state?"]
     
-    C --> C1["UseRef doesn't trigger re-renders<br/>Use [UseState](./03_State.md) for UI updates<br/>Mutate then manually update state"]
+    C --> C1["UseRef doesn't trigger re-renders<br/>Use [UseState](./03_UseState.md) for UI updates<br/>Mutate then manually update state"]
     D --> D1["Check initialization<br/>Verify factory function<br/> Ensure value is stored"]
-    E --> E1["Clean up in [UseEffect](./04_Effect.md)<br/>Dispose timers/subscriptions<br/>Set to null on unmount"]
-    F --> F1["Use [UseState](./03_State.md) instead<br/>Ref is for non-reactive values<br/>Check if value affects rendering"]
+    E --> E1["Clean up in [UseEffect](./04_UseEffect.md)<br/>Dispose timers/subscriptions<br/>Set to null on unmount"]
+    F --> F1["Use [UseState](./03_UseState.md) instead<br/>Ref is for non-reactive values<br/>Check if value affects rendering"]
     
     C1 --> G["Problem solved?"]
     D1 --> G
@@ -284,7 +284,7 @@ var count = UseRef(0);
 return new Button($"Count: {count.Value}", _ => count.Value++); // UI won't update!
 ```
 
-**Solution**: Use [`UseState`](./03_State.md) for reactive values
+**Solution**: Use [`UseState`](./03_UseState.md) for reactive values
 
 ```csharp
 // Correct: Use UseState for reactive values
@@ -301,7 +301,7 @@ return new Button($"Count: {count.Value}", _ => count.Set(count.Value + 1));
 var timer = UseRef(() => new Timer(_ => { }, null, 0, 1000));
 ```
 
-**Solution**: Clean up in [`UseEffect`](./04_Effect.md)
+**Solution**: Clean up in [`UseEffect`](./04_UseEffect.md)
 
 ```csharp
 // Correct: Clean up in effect
@@ -322,7 +322,7 @@ var data = UseRef(() => new List<string>());
 data.Value.Add("new item"); // UI doesn't update!
 ```
 
-**Solution**: Manually trigger update or use [`UseState`](./03_State.md)
+**Solution**: Manually trigger update or use [`UseState`](./03_UseState.md)
 
 ```csharp
 // Option 1: Use UseState if you need reactivity
@@ -368,16 +368,16 @@ var expensive = UseRef(new ExpensiveObject());
 var expensive = UseRef(() => new ExpensiveObject());
 ```
 
-### Confusing with [`UseMemo`](./05_Memo.md)
+### Confusing with [`UseMemo`](./05_UseMemo.md)
 
-**Problem**: Using `UseRef` when [`UseMemo`](./05_Memo.md) is more appropriate
+**Problem**: Using `UseRef` when [`UseMemo`](./05_UseMemo.md) is more appropriate
 
 ```csharp
 // Wrong: UseRef for computed values
 var data = UseRef(() => ProcessItems(items.Value));
 ```
 
-**Solution**: Use [`UseMemo`](./05_Memo.md) for computed values
+**Solution**: Use [`UseMemo`](./05_UseMemo.md) for computed values
 
 ```csharp
 // Correct: UseMemo recomputes when dependencies change
@@ -386,9 +386,9 @@ var data = UseMemo(() => ProcessItems(items.Value), items);
 
 ## See Also
 
-- [State Management](./03_State.md) - Reactive state with UseState
+- [State Management](./03_UseState.md) - Reactive state with UseState
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
-- [Effects](./04_Effect.md) - Side effects and cleanup
-- [Memoization](./05_Memo.md) - Performance optimization with UseMemo
-- [Callbacks](./06_Callback.md) - Memoized callback functions with UseCallback
+- [Effects](./04_UseEffect.md) - Side effects and cleanup
+- [Memoization](./05_UseMemo.md) - Performance optimization with UseMemo
+- [Callbacks](./06_UseCallback.md) - Memoized callback functions with UseCallback
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

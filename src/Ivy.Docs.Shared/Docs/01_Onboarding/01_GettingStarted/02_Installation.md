@@ -17,7 +17,7 @@ searchHints:
 This page covers the installation of Ivy Framework components, setting up a new Ivy project, and understanding the basic project structure. It provides the foundational steps needed before building applications with Ivy.
 </Ingress>
 
-For information about core Ivy concepts like [Views](../02_Concepts/02_Views.md) and [state management](../../03_Hooks/Core/03_State.md), see [Core Concepts](../02_Concepts/02_Views.md). For guidance on building your first application, see [Basics](./03_Basics.md). For development tools and CLI commands, see [CLI Tools](../03_CLI/01_CLIOverview.md).
+For information about core Ivy concepts like [Views](../02_Concepts/02_Views.md) and [state management](../../03_Hooks/Core/03_UseState.md), see [Core Concepts](../02_Concepts/02_Views.md). For guidance on building your first application, see [Basics](./03_Basics.md). For development tools and CLI commands, see [CLI Tools](../03_CLI/01_CLIOverview.md).
 
 ## Quick Start: Using the CLI
 

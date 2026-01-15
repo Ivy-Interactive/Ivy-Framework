@@ -16,7 +16,7 @@ searchHints:
 Display key performance indicators (KPIs) and metrics with trend indicators, goal progress tracking, and data loading via UseQuery hooks for dashboard [applications](../../01_Onboarding/02_Concepts/15_Apps.md).
 </Ingress>
 
-The `MetricView` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a specialized dashboard component built on top of [Card](04_Card.md) that displays business metrics with visual indicators for performance trends and goal achievement. It uses [UseQuery](../../../03_Hooks/Core/09_Query.md) hooks for data fetching and automatically handles loading states, error handling, and provides a consistent layout for KPI dashboards.
+The `MetricView` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a specialized dashboard component built on top of [Card](04_Card.md) that displays business metrics with visual indicators for performance trends and goal achievement. It uses [UseQuery](../../../03_Hooks/Core/09_UseQuery.md) hooks for data fetching and automatically handles loading states, error handling, and provides a consistent layout for KPI dashboards.
 
 ## Basic Usage
 
@@ -84,7 +84,7 @@ Layout.Grid().Columns(2)
 
 ### Async Data Loading
 
-The MetricView uses [UseQuery](../../../03_Hooks/Core/09_Query.md) hooks for data fetching, which automatically handle loading states with a skeleton loader. This is useful when fetching metrics from [databases](../../01_Onboarding/02_Concepts/01_Program.md) or APIs.
+The MetricView uses [UseQuery](../../../03_Hooks/Core/09_UseQuery.md) hooks for data fetching, which automatically handle loading states with a skeleton loader. This is useful when fetching metrics from [databases](../../01_Onboarding/02_Concepts/01_Program.md) or APIs.
 
 ```csharp demo-tabs
 new MetricView(
@@ -247,7 +247,7 @@ public class ECommerceDashboard : ViewBase
 SaaS Metrics Dashboard
 </Summary>
 <Body>
-Track key SaaS metrics including MRR, churn rate, active users, and customer lifetime value with [UseQuery](../../../03_Hooks/Core/09_Query.md) hooks for data caching and automatic revalidation.
+Track key SaaS metrics including MRR, churn rate, active users, and customer lifetime value with [UseQuery](../../../03_Hooks/Core/09_UseQuery.md) hooks for data caching and automatic revalidation.
 
 ```csharp demo-tabs
 public class SaaSDashboard : ViewBase

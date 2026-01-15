@@ -8,7 +8,7 @@ searchHints:
   - panel
 ---
 
-# Blades
+# UseBlades
 
 <Ingress>
 The `UseBlades` [hook](../02_RulesOfHooks.md) creates a blade (side panel) interface, providing a slide-out panel for additional content, navigation, or actions. It's the foundation for the [Blades widget](../../../02_Widgets/03_Common/12_Blades.md).

@@ -10,7 +10,7 @@ searchHints:
   - revalidate
 ---
 
-# Query
+# UseQuery
 
 <Ingress>
 Fetch, cache, and synchronize server data with the [UseQuery](../02_RulesOfHooks.md) hook.
@@ -97,7 +97,7 @@ Control where query data is cached and shared:
 
 ## Conditional Fetching
 
-When the key is `null` (often controlled by [UseState](./03_State.md)), UseQuery returns an idle result without fetching:
+When the key is `null` (often controlled by [UseState](./03_UseState.md)), UseQuery returns an idle result without fetching:
 
 ```csharp demo-below
 public class ConditionalQueryView : ViewBase
@@ -240,7 +240,7 @@ public class SharedDataControls : ViewBase
 
 ## Tag-Based Invalidation
 
-Assign tags to queries for bulk invalidation (using [UseService](./11_Service.md)). Tags are serializable the same way as keys.
+Assign tags to queries for bulk invalidation (using [UseService](./11_UseService.md)). Tags are serializable the same way as keys.
 
 ```csharp demo-below
 public class TaggedQueriesView : ViewBase
@@ -313,7 +313,7 @@ public class PollingView : ViewBase
 
 ## Pagination
 
-Use `KeepPrevious` to show previous page data while loading the next (managed by [UseState](./03_State.md)):
+Use `KeepPrevious` to show previous page data while loading the next (managed by [UseState](./03_UseState.md)):
 
 ```csharp demo-below
 public class PaginatedView : ViewBase

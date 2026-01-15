@@ -9,7 +9,7 @@ searchHints:
   - show-hide
 ---
 
-# Trigger
+# UseTrigger
 
 <Ingress>
 The `UseTrigger` [hook](../02_RulesOfHooks.md) provides a way to conditionally render [components](../../../01_Onboarding/02_Concepts/02_Views.md) based on trigger state, commonly used for modals, dialogs, and other conditional UI elements. It manages visibility state and provides a callback to show the triggered component.
@@ -187,8 +187,8 @@ public override object? Build()
 
 ## See Also
 
-- [State](./03_State.md) - Component state management
-- [Effect](./04_Effect.md) - Side effects and lifecycle
+- [State](./03_UseState.md) - Component state management
+- [Effect](./04_UseEffect.md) - Side effects and lifecycle
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
 

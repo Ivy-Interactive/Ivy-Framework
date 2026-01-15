@@ -49,7 +49,7 @@ The Volume Management system in Ivy provides:
 - **Namespace isolation**: Files are organized under `Ivy/{YourAppName}/` to prevent conflicts between [applications](./15_Apps.md)
 - **Fallback to local app data**: If the configured root directory doesn't exist, it falls back to the system's local application data folder
 - **Clean path composition**: Use params array for path parts instead of manual string concatenation
-- **Dependency injection support**: Volumes are registered as [services](../../03_Hooks/Core/11_Service.md) and can be injected into your [application components](./02_Views.md)
+- **Dependency injection support**: Volumes are registered as [services](../../03_Hooks/Core/11_UseService.md) and can be injected into your [application components](./02_Views.md)
 
 ## FolderVolume Implementation
 
@@ -115,7 +115,7 @@ public class FileService(IVolume volume)
 Using Volumes in Views
 </Summary>
 <Body>
-Access volumes through [dependency injection](../../03_Hooks/Core/11_Service.md) in your [views](./02_Views.md):
+Access volumes through [dependency injection](../../03_Hooks/Core/11_UseService.md) in your [views](./02_Views.md):
 
 ```csharp
 public class DataManagementView : ViewBase

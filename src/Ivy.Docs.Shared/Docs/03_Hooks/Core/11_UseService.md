@@ -8,7 +8,7 @@ searchHints:
   - container
 ---
 
-# Services
+# UseService
 
 <Ingress>
 Services in Ivy provide dependency injection and service management for clean application architecture.

@@ -65,7 +65,7 @@ new TabsLayout(null, null, null, null, 0,
 - `onReorder`: Enables drag-and-drop tab reordering
 - `selectedIndex`: Sets the initially selected tab
 
-This example demonstrates how to handle all available events. The event handlers receive the tab index and can perform custom actions such as logging, [state](../../03_Hooks/Core/03_State.md) updates, or API calls.
+This example demonstrates how to handle all available events. The event handlers receive the tab index and can perform custom actions such as logging, [state](../../03_Hooks/Core/03_UseState.md) updates, or API calls.
 
 ```csharp demo-tabs
 new TabsLayout(

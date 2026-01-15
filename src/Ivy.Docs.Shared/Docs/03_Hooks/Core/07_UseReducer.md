@@ -12,25 +12,25 @@ imports:
   - Ivy.Core.Hooks
 ---
 
-# Reducers
+# UseReducer
 
 <Ingress>
-Manage complex [state](./03_State.md) logic with reducers, providing a predictable state management pattern for [components](../../../01_Onboarding/02_Concepts/02_Views.md) with multiple sub-values or interdependent state updates.
+Manage complex [state](./03_UseState.md) logic with reducers, providing a predictable state management pattern for [components](../../../01_Onboarding/02_Concepts/02_Views.md) with multiple sub-values or interdependent state updates.
 </Ingress>
 
 ## Overview
 
-The `UseReducer` [hook](../02_RulesOfHooks.md) is an alternative to [`UseState`](./03_State.md) that is better suited for managing complex [state](./03_State.md) logic. It follows the reducer pattern where state updates are handled by a pure function.
+The `UseReducer` [hook](../02_RulesOfHooks.md) is an alternative to [`UseState`](./03_UseState.md) that is better suited for managing complex [state](./03_UseState.md) logic. It follows the reducer pattern where state updates are handled by a pure function.
 
 Key benefits of `UseReducer`:
 
-- **Predictable [State](./03_State.md) Updates** - All state changes go through a single reducer function
-- **Complex [State](./03_State.md) Logic** - Better suited for state with multiple sub-values or interdependent updates
+- **Predictable [State](./03_UseState.md) Updates** - All state changes go through a single reducer function
+- **Complex [State](./03_UseState.md) Logic** - Better suited for state with multiple sub-values or interdependent updates
 - **Action-Based Updates** - State changes are explicit and traceable through actions
 - **Testability** - Pure reducer functions are easy to test in isolation
 
 <Callout type="Tip">
-`UseReducer` is ideal when you have complex [state](./03_State.md) logic involving multiple sub-values, when the next state depends on the previous one, or when you want to centralize state update logic in one place.
+`UseReducer` is ideal when you have complex [state](./03_UseState.md) logic involving multiple sub-values, when the next state depends on the previous one, or when you want to centralize state update logic in one place.
 </Callout>
 
 ## When to Use UseReducer
@@ -57,10 +57,10 @@ flowchart TD
 
 ## UseReducer Hook
 
-The `UseReducer` [hook](../02_RulesOfHooks.md) manages [state](./03_State.md) through a reducer function that takes the current [state](./03_State.md) and an action, returning the new [state](./03_State.md).
+The `UseReducer` [hook](../02_RulesOfHooks.md) manages [state](./03_UseState.md) through a reducer function that takes the current [state](./03_UseState.md) and an action, returning the new [state](./03_UseState.md).
 
 <Callout type="Tip">
-Reducers should be pure functions - they should not have side effects and should return a new [state](./03_State.md) object rather than mutating the existing one. Use [`UseEffect`](./04_Effect.md) for side effects.
+Reducers should be pure functions - they should not have side effects and should return a new [state](./03_UseState.md) object rather than mutating the existing one. Use [`UseEffect`](./04_UseEffect.md) for side effects.
 </Callout>
 
 ### How UseReducer Works
@@ -129,15 +129,15 @@ public class BasicReducerDemo : ViewBase
 
 Use `UseReducer` when:
 
-- **Complex [State](./03_State.md) Logic** - Managing state with multiple sub-values or interdependent properties
+- **Complex [State](./03_UseState.md) Logic** - Managing state with multiple sub-values or interdependent properties
 - **State Updates Depend on Previous State** - When the next state depends on the previous state value
 - **Action-Based Updates** - When you want explicit, traceable state changes through actions
 - **Centralized State Logic** - When you want to centralize all state update logic in one place
 - **Better Testability** - When you need to test state logic in isolation
 
-### UseReducer vs [`UseState`](./03_State.md)
+### UseReducer vs [`UseState`](./03_UseState.md)
 
-Choose between `UseReducer` and [`UseState`](./03_State.md) based on complexity:
+Choose between `UseReducer` and [`UseState`](./03_UseState.md) based on complexity:
 
 | UseState | UseReducer |
 |----------|------------|
@@ -149,11 +149,11 @@ Choose between `UseReducer` and [`UseState`](./03_State.md) based on complexity:
 
 ### Best Practices
 
-- **Keep Reducers Pure** - Reducers should not have side effects and should return new [state](./03_State.md) objects. Use [`UseEffect`](./04_Effect.md) for side effects.
+- **Keep Reducers Pure** - Reducers should not have side effects and should return new [state](./03_UseState.md) objects. Use [`UseEffect`](./04_UseEffect.md) for side effects.
 - **Use Immutable Updates** - Always return new state objects rather than mutating existing ones
 - **Handle All Action Types** - Include a default case to handle unknown actions gracefully
-- **Type Safety** - Use strongly-typed actions and [state](./03_State.md) for better compile-time safety
-- **Extract Complex Logic** - Move complex reducer logic into separate functions for clarity and use [`UseMemo`](./05_Memo.md) for expensive computations
+- **Type Safety** - Use strongly-typed actions and [state](./03_UseState.md) for better compile-time safety
+- **Extract Complex Logic** - Move complex reducer logic into separate functions for clarity and use [`UseMemo`](./05_UseMemo.md) for expensive computations
 
 ### Examples
 
@@ -305,7 +305,7 @@ public class GameStateDemo : ViewBase
 
 ### State Update Efficiency
 
-- **Immutable Updates**: Creating new [state](./03_State.md) objects has a small overhead, but enables better change detection and prevents bugs:
+- **Immutable Updates**: Creating new [state](./03_UseState.md) objects has a small overhead, but enables better change detection and prevents bugs:
 
 ```csharp
 // Good: Immutable update with records
@@ -351,8 +351,8 @@ dispatch(("add", item));
 
 ### When NOT to Use UseReducer
 
-- **Simple [State](./03_State.md)**: Don't use `UseReducer` for simple state that can be managed with [`UseState`](./03_State.md)
-- **Independent Values**: If state values are independent, [`UseState`](./03_State.md) is more appropriate
+- **Simple [State](./03_UseState.md)**: Don't use `UseReducer` for simple state that can be managed with [`UseState`](./03_UseState.md)
+- **Independent Values**: If state values are independent, [`UseState`](./03_UseState.md) is more appropriate
 - **No Complex Logic**: If state updates are straightforward, `UseReducer` adds unnecessary complexity
 
 ```csharp
@@ -378,7 +378,7 @@ flowchart TD
     
     C --> C1["Check reducer returns new state<br/>Verify dispatch is called<br/>Ensure action is handled"]
     D --> D1["Check for state mutations<br/>Verify action types match<br/>Review reducer logic"]
-    E --> E1["Keep reducers simple<br/>Move complex logic outside<br/>Consider [memoization](./05_Memo.md)"]
+    E --> E1["Keep reducers simple<br/>Move complex logic outside<br/>Consider [memoization](./05_UseMemo.md)"]
     F --> F1["Remove side effects<br/> Use UseEffect for side effects<br/> Keep reducer pure"]
     
     C1 --> G["Problem solved?"]
@@ -390,9 +390,9 @@ flowchart TD
     G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
 ```
 
-### Mutating [State](./03_State.md)
+### Mutating [State](./03_UseState.md)
 
-**Problem**: Mutating [state](./03_State.md) directly instead of returning new [state](./03_State.md)
+**Problem**: Mutating [state](./03_UseState.md) directly instead of returning new [state](./03_UseState.md)
 
 ```csharp
 // Wrong: Mutating state directly
@@ -407,7 +407,7 @@ private State Reducer(State state, Action action)
 }
 ```
 
-**Solution**: Always return new [state](./03_State.md) objects
+**Solution**: Always return new [state](./03_UseState.md) objects
 
 ```csharp
 // Correct: Return new state
@@ -420,7 +420,7 @@ private State Reducer(State state, Action action) => action switch
 
 ### Side Effects in Reducer
 
-**Problem**: Performing side effects inside the reducer function. Reducers should be pure - use [`UseEffect`](./04_Effect.md) for side effects.
+**Problem**: Performing side effects inside the reducer function. Reducers should be pure - use [`UseEffect`](./04_UseEffect.md) for side effects.
 
 ```csharp
 // Wrong: Side effects in reducer
@@ -435,7 +435,7 @@ private State Reducer(State state, Action action)
 }
 ```
 
-**Solution**: Use [`UseEffect`](./04_Effect.md) for side effects
+**Solution**: Use [`UseEffect`](./04_UseEffect.md) for side effects
 
 ```csharp
 // Correct: Pure reducer
@@ -484,7 +484,7 @@ private State Reducer(State state, Action action) => action switch
 
 ### Complex Logic in Reducer
 
-**Problem**: Putting too much complex logic inside the reducer. Consider using [`UseMemo`](./05_Memo.md) for expensive computations.
+**Problem**: Putting too much complex logic inside the reducer. Consider using [`UseMemo`](./05_UseMemo.md) for expensive computations.
 
 ```csharp
 // Wrong: Complex computation in reducer
@@ -526,9 +526,9 @@ private State Reducer(State state, Action action) => action switch
 };
 ```
 
-### Forgetting to Update Related [State](./03_State.md)
+### Forgetting to Update Related [State](./03_UseState.md)
 
-**Problem**: Updating one part of [state](./03_State.md) but forgetting related parts
+**Problem**: Updating one part of [state](./03_UseState.md) but forgetting related parts
 
 ```csharp
 // Wrong: Incomplete state update
@@ -540,7 +540,7 @@ private State Reducer(State state, Action action) => action switch
 };
 ```
 
-**Solution**: Update all related [state](./03_State.md) properties
+**Solution**: Update all related [state](./03_UseState.md) properties
 
 ```csharp
 // Correct: Update all related state
@@ -594,9 +594,9 @@ private State Reducer(State state, object action) => action switch
 
 ## See Also
 
-- [State Management](./03_State.md) - Simple state management with UseState
+- [State Management](./03_UseState.md) - Simple state management with UseState
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
-- [Effects](./04_Effect.md) - Side effects and async operations
-- [Memoization](./05_Memo.md) - Performance optimization with UseMemo
-- [Callbacks](./06_Callback.md) - Memoized callback functions with UseCallback
+- [Effects](./04_UseEffect.md) - Side effects and async operations
+- [Memoization](./05_UseMemo.md) - Performance optimization with UseMemo
+- [Callbacks](./06_UseCallback.md) - Memoized callback functions with UseCallback
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

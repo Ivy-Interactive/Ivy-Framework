@@ -8,7 +8,7 @@ searchHints:
   - http-handler
 ---
 
-# Webhook
+# UseWebhook
 
 <Ingress>
 The `UseWebhook` [hook](../02_RulesOfHooks.md) creates HTTP endpoints that can be called from external systems, enabling integration with third-party services, webhooks, and external callbacks.
@@ -76,7 +76,7 @@ sequenceDiagram
 
 1. **Component Initialization**: When your component calls `UseWebhook`, the hook generates a unique identifier (GUID) for this specific webhook instance.
 
-2. **Handler Registration**: The handler function you provide is registered with the webhook registry service, associating it with the generated ID. This registration happens in a [UseEffect](./04_Effect.md) that runs on component mount.
+2. **Handler Registration**: The handler function you provide is registered with the webhook registry service, associating it with the generated ID. This registration happens in a [UseEffect](./04_UseEffect.md) that runs on component mount.
 
 3. **Endpoint Creation**: A `WebhookEndpoint` is created containing:
    - The unique ID
@@ -513,5 +513,5 @@ var webhook = UseWebhook(_ => { });
 
 ## See Also
 
-- [State Management](./03_State.md) - Update state from webhook handlers
-- [Effects](./04_Effect.md) - Perform side effects in response to webhook calls
+- [State Management](./03_UseState.md) - Update state from webhook handlers
+- [Effects](./04_UseEffect.md) - Perform side effects in response to webhook calls

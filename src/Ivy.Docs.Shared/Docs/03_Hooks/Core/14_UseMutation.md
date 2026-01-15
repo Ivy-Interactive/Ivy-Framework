@@ -8,15 +8,15 @@ searchHints:
   - invalidate
 ---
 
-# Mutation
+# UseMutation
 
 <Ingress>
-The `UseMutation` [hook](../02_RulesOfHooks.md) provides a way to control [query](./09_Query.md) caches from different components, enabling optimistic updates, cache invalidation, and cross-component data synchronization.
+The `UseMutation` [hook](../02_RulesOfHooks.md) provides a way to control [query](./09_UseQuery.md) caches from different components, enabling optimistic updates, cache invalidation, and cross-component data synchronization.
 </Ingress>
 
 ## Overview
 
-The `UseMutation` [hook](../02_RulesOfHooks.md) enables you to control [query](./09_Query.md) caches from any component:
+The `UseMutation` [hook](../02_RulesOfHooks.md) enables you to control [query](./09_UseQuery.md) caches from any component:
 
 - **Cross-Component Control** - Control queries from components that don't use `UseQuery`
 - **Optimistic Updates** - Update cache immediately before server confirmation
@@ -684,7 +684,7 @@ var mutator = UseMutation<Product, string>("user"); // Wrong type!
 
 ## See Also
 
-- [Query](./09_Query.md) - Fetching and caching data
-- [State](./03_State.md) - Component state management
+- [Query](./09_UseQuery.md) - Fetching and caching data
+- [State](./03_UseState.md) - Component state management
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components

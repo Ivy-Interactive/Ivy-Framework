@@ -13,7 +13,7 @@ searchHints:
 # Rules of Hooks
 
 <Ingress>
-Ivy hooks (functions starting with `Use...`) are a powerful feature that lets you use [state](./Core/03_State.md) and other Ivy features. However, hooks rely on a strict call order to function correctly. Follow these rules to ensure your hooks work as expected.
+Ivy hooks (functions starting with `Use...`) are a powerful feature that lets you use [state](./Core/03_UseState.md) and other Ivy features. However, hooks rely on a strict call order to function correctly. Follow these rules to ensure your hooks work as expected.
 </Ingress>
 
 ## Overview
@@ -86,7 +86,7 @@ flowchart TD
 
 ## Why These Rules Matter
 
-Hooks rely on call order to preserve [state](./Core/03_State.md) between renders. When hooks are called in the same order every time, Ivy can correctly match each hook call with its stored state.
+Hooks rely on call order to preserve [state](./Core/03_UseState.md) between renders. When hooks are called in the same order every time, Ivy can correctly match each hook call with its stored state.
 
 ### How Hook Order Works
 
@@ -330,7 +330,7 @@ flowchart LR
 
 **Valid Examples:**
 
-- [`UseState`](./Core/03_State.md), [`UseEffect`](./Core/04_Effect.md), `UseCustomHook`, `UseMyFeature`, [`UseReducer`](./Core/07_Reducer.md), [`UseMemo`](./Core/05_Memo.md)
+- [`UseState`](./Core/03_UseState.md), [`UseEffect`](./Core/04_UseEffect.md), `UseCustomHook`, `UseMyFeature`, [`UseReducer`](./Core/07_UseReducer.md), [`UseMemo`](./Core/05_UseMemo.md)
 
 **Invalid Examples:**
 
@@ -392,7 +392,7 @@ flowchart LR
 
 ## See Also
 
-- [State Management](./Core/03_State.md) - Using UseState hook
-- [Effects](./Core/04_Effect.md) - Using UseEffect hook
-- [Memoization](./Core/05_Memo.md) - Using UseMemo and UseCallback
+- [State Management](./Core/03_UseState.md) - Using UseState hook
+- [Effects](./Core/04_UseEffect.md) - Using UseEffect hook
+- [Memoization](./Core/05_UseMemo.md) - Using UseMemo and UseCallback
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy Views

@@ -53,14 +53,14 @@ public class TodoApp : ViewBase
 
 ### Reactive State Management
 
-Ivy provides React-inspired hooks for [state management](../../03_Hooks/Core/03_State.md):
+Ivy provides React-inspired hooks for [state management](../../03_Hooks/Core/03_UseState.md):
 
 **Available Hooks:**
 
-- [UseState<T>()](../../03_Hooks/Core/03_State.md) - Local component state that triggers re-renders
-- [UseEffect()](../../03_Hooks/Core/04_Effect.md) - Side effects with dependency tracking
-- [UseService<T>()](../../03_Hooks/Core/11_Service.md) - Dependency injection integration
-- [UseSignal()](../../03_Hooks/Core/10_Signal.md), [UseDownload()](../../03_Hooks/Core/15_Download.md), `UseWebhook()` - And many more...
+- [UseState<T>()](../../03_Hooks/Core/03_UseState.md) - Local component state that triggers re-renders
+- [UseEffect()](../../03_Hooks/Core/04_UseEffect.md) - Side effects with dependency tracking
+- [UseService<T>()](../../03_Hooks/Core/11_UseService.md) - Dependency injection integration
+- [UseSignal()](../../03_Hooks/Core/10_UseSignal.md), [UseDownload()](../../03_Hooks/Core/15_UseDownload.md), `UseWebhook()` - And many more...
 
 ```csharp
 public override object? Build()
