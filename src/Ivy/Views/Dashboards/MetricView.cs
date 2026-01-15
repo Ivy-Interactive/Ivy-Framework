@@ -56,7 +56,7 @@ public class MetricView(
         return new Card(
                 content: Text.P(x.MetricFormatted).Large().NoWrap().Overflow(Overflow.Clip),
                 header: Layout.Horizontal().Align(Align.Center)
-                    | Text.H4(title).WithLayout().Grow()
+                    | Text.H4(title).NoWrap().Overflow(Overflow.Ellipsis).WithLayout().Grow()
                     | (Layout.Horizontal().Align(Align.Right).Gap(1).Width(Size.Fit())
                         | (x.TrendComparedToPreviousPeriod != null ? x.TrendComparedToPreviousPeriod >= 0
                                 ? Icons.TrendingUp.ToIcon().Color(Colors.Success).Small()

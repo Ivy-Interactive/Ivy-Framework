@@ -52,7 +52,7 @@ const _getWantedWidth = (width?: string): React.CSSProperties => {
     case 'auto':
       return { width: 'auto' };
     case 'grow':
-      return { flexGrow: parseFloat(value) || 1 };
+      return { flexGrow: parseFloat(value) || 1, minWidth: 0 };
     case 'shrink':
       return { flexShrink: parseFloat(value) || 1 };
     default:
