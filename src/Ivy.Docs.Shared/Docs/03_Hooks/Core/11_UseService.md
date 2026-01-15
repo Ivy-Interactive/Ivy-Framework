@@ -169,7 +169,7 @@ public class LoggingServiceMiddleware : IServiceMiddleware
 .UseServiceMiddleware<LoggingServiceMiddleware>()
 ```
 
-### Best Practices
+## Best Practices
 
 1. **Interface-based Design**: Always define interfaces for your services
 2. **Single Responsibility**: Each service should have a single, well-defined purpose
