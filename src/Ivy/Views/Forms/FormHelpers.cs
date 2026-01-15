@@ -116,9 +116,14 @@ public static class FormHelpers
         return nullabilityInfo.ReadState != NullabilityState.Nullable;
     }
 
-    public static bool CheckForLoadingUploads(object? obj)
+    public static bool CheckForLoadingUploads(object? obj) => CheckForLoadingUploads(obj, new HashSet<object>(ReferenceEqualityComparer.Instance));
+
+    private static bool CheckForLoadingUploads(object? obj, HashSet<object> visited)
     {
         if (obj == null) return false;
+
+        // Prevent infinite recursion by tracking visited objects
+        if (!visited.Add(obj)) return false;
 
         // Check single file upload
         if (obj is IFileUpload file)
@@ -135,6 +140,14 @@ public static class FormHelpers
         if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset))
             return false;
 
+        // Skip arrays and collections of non-file types - they don't contain file uploads
+        if (type.IsArray)
+        {
+            var elementType = type.GetElementType();
+            if (elementType != null && !typeof(IFileUpload).IsAssignableFrom(elementType) && !elementType.IsClass)
+                return false;
+        }
+
         foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             // Skip indexed properties
@@ -144,7 +157,7 @@ public static class FormHelpers
             try
             {
                 var value = prop.GetValue(obj);
-                if (CheckForLoadingUploads(value))
+                if (CheckForLoadingUploads(value, visited))
                     return true;
             }
             catch
@@ -159,7 +172,7 @@ public static class FormHelpers
             try
             {
                 var value = field.GetValue(obj);
-                if (CheckForLoadingUploads(value))
+                if (CheckForLoadingUploads(value, visited))
                     return true;
             }
             catch
