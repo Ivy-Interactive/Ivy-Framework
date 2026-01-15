@@ -21,8 +21,6 @@ Store values that persist across re-renders without triggering updates, similar 
 
 ## Overview
 
-The `UseRef` [hook](../02_RulesOfHooks.md) lets you store a value that is initialized only once and persists across re-renders. Unlike [`UseState`](./03_UseState.md), changing a ref value does NOT trigger a re-render.
-
 Key characteristics of `UseRef`:
 
 - **Non-Reactive Storage** - Values persist but don't trigger re-renders when changed
@@ -34,42 +32,31 @@ Key characteristics of `UseRef`:
 `UseRef` is ideal for storing mutable references that don't affect rendering, such as timers, subscriptions, DOM references, or previous [state](./03_UseState.md) values for comparison.
 </Callout>
 
-## When to Use UseRef
+## Basic Usage
 
-```mermaid
-flowchart TD
-    A["Need to store a value?"] --> B{Does it affect rendering?}
+```csharp demo-tabs
+public class BasicRefDemo : ViewBase
+{
+    class Counter { public int Value = 0; }
     
-    B --> C["Yes - affects UI"]
-    B --> D["No - doesn't affect UI"]
-    
-    C --> E["Use UseState<br/>Triggers re-renders"]
-    D --> F{What type of value?}
-    
-    F --> G["Mutable reference<br/>Timer, subscription, etc."]
-    F --> H["Previous value<br/>For comparison"]
-    F --> I["Expensive initialization<br/>Cache once"]
-    F --> J["Computed value<br/>From other state"]
-    
-    G --> K["Use UseRef<br/>Perfect for refs"]
-    H --> L["Use UseRef<br/>Track previous state"]
-    I --> M["Use UseRef<br/>Initialize once"]
-    J --> N["Use UseMemo<br/>Recompute on deps"]
-    
-    K --> O["No re-render overhead<br/>Mutable storage<br/>Perfect for cleanup"]
-    L --> P["Compare values<br/>Track changes<br/>No re-render"]
-    M --> Q["Expensive init once<br/>Persist across renders<br/>Better performance"]
+    public override object? Build()
+    {
+        var renderCount = this.UseRef(() => new Counter());
+        var forceUpdate = UseState(0);
+        
+        // Increment without triggering re-render
+        renderCount.Value.Value++;
+        
+        return Layout.Vertical(
+            Text.P($"This component has rendered {renderCount.Value.Value} times"),
+            Text.P("(Note: The count increments on each render, but doesn't trigger re-renders)").Small(),
+            new Button("Force Re-render", _ => forceUpdate.Set(forceUpdate.Value + 1))
+        );
+    }
+}
 ```
 
-## UseRef Hook
-
-The `UseRef` [hook](../02_RulesOfHooks.md) stores a value that persists across re-renders without triggering updates.
-
-<Callout type="Tip">
-`UseRef` values are initialized only once and remain stable across re-renders. Changing the value directly won't cause the [component](../../../01_Onboarding/02_Concepts/02_Views.md) to re-render.
-</Callout>
-
-### How UseRef Works
+## How UseRef Works
 
 ```mermaid
 sequenceDiagram
@@ -98,154 +85,38 @@ sequenceDiagram
     Note right of UR: Component continues<br/>with same render
 ```
 
-### Basic Usage
+## When to Use UseRef
 
-```csharp demo-tabs
-public class BasicRefDemo : ViewBase
-{
-    class Counter { public int Value = 0; }
-    
-    public override object? Build()
-    {
-        var renderCount = this.UseRef(() => new Counter());
-        var forceUpdate = UseState(0);
-        
-        // Increment without triggering re-render
-        renderCount.Value.Value++;
-        
-        return Layout.Vertical(
-            Text.P($"This component has rendered {renderCount.Value.Value} times"),
-            Text.P("(Note: The count increments on each render, but doesn't trigger re-renders)").Small(),
-            new Button("Force Re-render", _ => forceUpdate.Set(forceUpdate.Value + 1))
-        );
-    }
-}
-```
+| Use UseRef For | Use Other Hooks Instead |
+|----------------|-------------------------|
+| Mutable references (timers, subscriptions) | Value affects UI → UseState |
+| Tracking previous state values | Computed from other values → UseMemo |
+| Caching expensive initializations | Needs to trigger side effects → UseState + UseEffect |
+| Storing callback references | Simple constant → regular variable |
 
-### Use Cases
-
-Use `UseRef` when:
-
-- **Storing Timers and Intervals** - Keep references to timers for cleanup without triggering re-renders
-- **Tracking Previous Values** - Store previous [state](./03_UseState.md) values for comparison
-- **Mutable References** - Store objects that you need to mutate without causing re-renders
-- **Expensive Initialization** - Cache expensive objects that only need to be created once
-- **Subscriptions and Disposables** - Keep references to subscriptions for cleanup
-
-### Best Practices
-
-- **Use for Non-Reactive Values** - Only use `UseRef` for values that don't affect rendering
-- **Clean Up Resources** - Always clean up timers, subscriptions, and other resources in [`UseEffect`](./04_UseEffect.md)
-- **Initialize with Factory Function** - Use factory functions for expensive initialization
-- **Avoid for UI [State](./03_UseState.md)** - Never use `UseRef` for values that should trigger re-renders (use [`UseState`](./03_UseState.md))
-- **Document Mutations** - Clearly document when and why ref values are mutated
-
-### Examples
-
-#### Tracking Previous Values
-
-```csharp demo-tabs
-public class PreviousValueDemo : ViewBase
-{
-    class PreviousValue { public int? Value = null; }
-    class Counter { public int Value = 0; }
-    
-    public override object? Build()
-    {
-        var count = UseState(0);
-        var previousValue = this.UseRef(() => new PreviousValue());
-        var renderCount = this.UseRef(() => new Counter());
-        
-        renderCount.Value.Value++;
-        
-        // Get the previous value before updating it
-        var previous = previousValue.Value.Value;
-        var delta = previous.HasValue 
-            ? count.Value - previous.Value 
-            : 0;
-        
-        // Update previous value for next render (in real app, use UseEffect)
-        previousValue.Value.Value = count.Value;
-        
-        return Layout.Vertical(
-            Text.P($"Current: {count.Value}"),
-            Text.P($"Previous: {previous?.ToString() ?? "None"}"),
-            Text.P($"Delta: {delta}"),
-            Text.P($"Renders: {renderCount.Value.Value}").Small(),
-            Layout.Horizontal(
-                new Button("+1", _ => count.Set(count.Value + 1)),
-                new Button("+5", _ => count.Set(count.Value + 5)),
-                new Button("Reset", _ => {
-                    count.Set(0);
-                    previousValue.Value.Value = null;
-                })
-            )
-        );
-    }
-}
-```
-
-#### Storing Mutable References
-
-```csharp demo-tabs
-public class MutableReferenceDemo : ViewBase
-{
-    class RenderTracker { public int Count = 0; public DateTime LastRender = DateTime.Now; }
-    
-    public override object? Build()
-    {
-        var count = UseState(0);
-        var tracker = this.UseRef(() => new RenderTracker());
-        
-        // Mutate ref value without triggering re-render
-        tracker.Value.Count++;
-        tracker.Value.LastRender = DateTime.Now;
-        
-        return Layout.Vertical(
-            Text.H3($"Count: {count.Value}"),
-            new { 
-                RenderCount = tracker.Value.Count.ToString(),
-                LastRender = tracker.Value.LastRender.ToString("HH:mm:ss")
-            }.ToDetails(),
-            Text.P("Render tracker is stored in UseRef - it persists across re-renders but doesn't trigger them").Small(),
-            new Button("Increment", _ => count.Set(count.Value + 1))
-        );
-    }
-}
-```
-
-## UseRef vs UseState vs UseMemo
-
-Understanding when to use each hook:
+### UseRef vs UseState vs UseMemo
 
 | Hook | Triggers Re-render | Mutable | Use Case |
 |------|-------------------|---------|----------|
-| [`UseState`](./03_UseState.md) | True | False | UI [state](./03_UseState.md) that affects rendering |
-| [`UseMemo`](./05_UseMemo.md) | False | False | Expensive calculations |
-| `UseRef` | False | True | Mutable refs, timers, subscriptions |
+| [`UseState`](./03_UseState.md) | Yes | No | UI state that affects rendering |
+| [`UseMemo`](./05_UseMemo.md) | No | No | Expensive calculations |
+| `UseRef` | No | Yes | Mutable refs, timers, subscriptions |
 
 ## Performance Considerations
 
-### Memory and Overhead
+```csharp
+// Good: Timer reference (no re-render needed)
+var timerId = UseRef<Timer?>(null);
 
-- **Minimal Overhead**: `UseRef` has very low overhead - no dependency tracking, no re-render logic
-- **Direct Storage**: Values are stored directly without wrappers, making access fast
-- **No Cleanup Cost**: Unlike `UseState`, there's no change detection or comparison logic
+// Good: Previous value tracking
+var previousCount = UseRef(0);
 
-### Appropriate Use Cases
+// Bad: Value affects UI - use UseState instead
+var count = UseRef(0); // Won't trigger re-render!
 
-- Storing mutable references (timers, subscriptions)
-- Tracking previous [state](./03_UseState.md) values for comparison
-- Caching expensive initializations
-- Managing DOM references
-- Storing callback references that don't need to trigger updates
-
-### Inappropriate Use Cases
-
-- Value affects rendering (use [`UseState`](./03_UseState.md))
-- Value is computed from other values (use [`UseMemo`](./05_UseMemo.md))
-- Value is a simple constant (use regular variables)
-- Value needs to trigger side effects (use [`UseState`](./03_UseState.md) with [`UseEffect`](./04_UseEffect.md))
+// Bad: Computed value - use UseMemo instead
+var total = UseRef(items.Sum()); // Won't update when items change!
+```
 
 ## Common Pitfalls and Solutions
 
@@ -336,22 +207,6 @@ data.Value.Add("new item");
 updateTrigger.Set(updateTrigger.Value + 1); // Force re-render
 ```
 
-### Using for Simple Constants
-
-**Problem**: Using `UseRef` for values that don't need persistence
-
-```csharp
-// Unnecessary: Just use a regular variable
-var config = UseRef(new { threshold: 100 });
-```
-
-**Solution**: Use regular variables for constants
-
-```csharp
-// Better: Regular variable for constants
-var config = new { threshold: 100 };
-```
-
 ### Not Initializing Properly
 
 **Problem**: Not using factory functions for expensive initialization
@@ -384,6 +239,14 @@ var data = UseRef(() => ProcessItems(items.Value));
 var data = UseMemo(() => ProcessItems(items.Value), items);
 ```
 
+## Best Practices
+
+- **Use for Non-Reactive Values** - Only use `UseRef` for values that don't affect rendering
+- **Clean Up Resources** - Always clean up timers, subscriptions, and other resources in [`UseEffect`](./04_UseEffect.md)
+- **Initialize with Factory Function** - Use factory functions for expensive initialization
+- **Avoid for UI [State](./03_UseState.md)** - Never use `UseRef` for values that should trigger re-renders (use [`UseState`](./03_UseState.md))
+- **Document Mutations** - Clearly document when and why ref values are mutated
+
 ## See Also
 
 - [State Management](./03_UseState.md) - Reactive state with UseState
@@ -392,3 +255,91 @@ var data = UseMemo(() => ProcessItems(items.Value), items);
 - [Memoization](./05_UseMemo.md) - Performance optimization with UseMemo
 - [Callbacks](./06_UseCallback.md) - Memoized callback functions with UseCallback
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+
+## Examples
+
+<Details>
+<Summary>
+Tracking Previous Values
+</Summary>
+<Body>
+
+```csharp demo-tabs
+public class PreviousValueDemo : ViewBase
+{
+    class PreviousValue { public int? Value = null; }
+    class Counter { public int Value = 0; }
+    
+    public override object? Build()
+    {
+        var count = UseState(0);
+        var previousValue = this.UseRef(() => new PreviousValue());
+        var renderCount = this.UseRef(() => new Counter());
+        
+        renderCount.Value.Value++;
+        
+        // Get the previous value before updating it
+        var previous = previousValue.Value.Value;
+        var delta = previous.HasValue 
+            ? count.Value - previous.Value 
+            : 0;
+        
+        // Update previous value for next render (in real app, use UseEffect)
+        previousValue.Value.Value = count.Value;
+        
+        return Layout.Vertical(
+            Text.P($"Current: {count.Value}"),
+            Text.P($"Previous: {previous?.ToString() ?? "None"}"),
+            Text.P($"Delta: {delta}"),
+            Text.P($"Renders: {renderCount.Value.Value}").Small(),
+            Layout.Horizontal(
+                new Button("+1", _ => count.Set(count.Value + 1)),
+                new Button("+5", _ => count.Set(count.Value + 5)),
+                new Button("Reset", _ => {
+                    count.Set(0);
+                    previousValue.Value.Value = null;
+                })
+            )
+        );
+    }
+}
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Storing Mutable References
+</Summary>
+<Body>
+
+```csharp demo-tabs
+public class MutableReferenceDemo : ViewBase
+{
+    class RenderTracker { public int Count = 0; public DateTime LastRender = DateTime.Now; }
+    
+    public override object? Build()
+    {
+        var count = UseState(0);
+        var tracker = this.UseRef(() => new RenderTracker());
+        
+        // Mutate ref value without triggering re-render
+        tracker.Value.Count++;
+        tracker.Value.LastRender = DateTime.Now;
+        
+        return Layout.Vertical(
+            Text.H3($"Count: {count.Value}"),
+            new { 
+                RenderCount = tracker.Value.Count.ToString(),
+                LastRender = tracker.Value.LastRender.ToString("HH:mm:ss")
+            }.ToDetails(),
+            Text.P("Render tracker is stored in UseRef - it persists across re-renders but doesn't trigger them").Small(),
+            new Button("Increment", _ => count.Set(count.Value + 1))
+        );
+    }
+}
+```
+
+</Body>
+</Details>
