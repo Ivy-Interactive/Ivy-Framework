@@ -33,7 +33,7 @@ The `UseTrigger` [hook](../02_RulesOfHooks.md) enables conditional component ren
 
 Use `UseTrigger` when you need to show/hide a component without passing parameters:
 
-```csharp
+```csharp demo-below
 public class SimpleTriggerExample : ViewBase
 {
     public override object? Build()
@@ -62,7 +62,7 @@ public class ModalDialog(IState<bool> isOpen) : ViewBase
 
 Use `UseTrigger<T>` when you need to pass data to the triggered component:
 
-```csharp
+```csharp demo-below
 public class TriggerWithParamsExample : ViewBase
 {
     public override object? Build()
@@ -71,8 +71,9 @@ public class TriggerWithParamsExample : ViewBase
             new ItemDetailDialog(isOpen, itemId));
 
         return Layout.Vertical()
+            | (Layout.Horizontal()
             | new Button("Show Item 1", onClick: _ => showTrigger(1))
-            | new Button("Show Item 2", onClick: _ => showTrigger(2))
+            | new Button("Show Item 2", onClick: _ => showTrigger(2)))
             | triggerView;
     }
 }
@@ -91,8 +92,6 @@ public class ItemDetailDialog(IState<bool> isOpen, int itemId) : ViewBase
 ```
 
 ## How Trigger Works
-
-### Trigger Flow
 
 ```mermaid
 sequenceDiagram
@@ -118,94 +117,146 @@ sequenceDiagram
     S->>V: Hide component
 ```
 
-### Trigger State Management
+## Common Patterns
 
-The `UseTrigger` hook manages visibility state internally:
+Use trigger with Alert for confirmation dialogs:
 
-- **Trigger State** - Internal state managed by the hook
-- **Factory Function** - Creates the component when triggered
-- **Callback Function** - Programmatically shows the component
-- **Visibility Control** - Component is only rendered when trigger state is true
+```csharp demo-below
+public class DeleteConfirmationExample : ViewBase
+{
+    public override object? Build()
+    {
+        var items = UseState(new List<string> { "Item 1", "Item 2", "Item 3" });
+        var (alertView, showAlert) = UseAlert();
+
+        return Layout.Vertical()
+            | Text.Block($"Items: {string.Join(", ", items.Value)}")
+            | (Layout.Horizontal()
+                | new Button("Delete #0", onClick: _ => showAlert("Delete item 0?", result =>
+                {
+                    if (result == AlertResult.Ok)
+                    {
+                        var list = items.Value.ToList();
+                        if (list.Count > 0) list.RemoveAt(0);
+                        items.Set(list);
+                    }
+                }, "Confirm"))
+                | new Button("Delete #1", onClick: _ => showAlert("Delete item 1?", result =>
+                {
+                    if (result == AlertResult.Ok)
+                    {
+                        var list = items.Value.ToList();
+                        if (list.Count > 1) list.RemoveAt(1);
+                        items.Set(list);
+                    }
+                }, "Confirm")))
+            | alertView;
+    }
+}
+```
+
+## Troubleshooting
+
+Ensure the trigger view is included in your component's return value:
+
+```csharp
+// Error: Trigger view not included
+public override object? Build()
+{
+    var (triggerView, showTrigger) = UseTrigger(...);
+    return Layout.Vertical() | new Button("Show", onClick: _ => showTrigger());
+    // Missing: triggerView
+}
+
+// Solution: Include trigger view
+public override object? Build()
+{
+    var (triggerView, showTrigger) = UseTrigger(...);
+    return Layout.Vertical()
+        | new Button("Show", onClick: _ => showTrigger())
+        | triggerView; // Include trigger view
+}
+```
+
+## Best Practices
+
+- **Check visibility state** - Always check `isOpen.Value` before rendering triggered content
+- **Use provided state to close** - Call `isOpen.Set(false)` to close the component
+- **Include trigger view in layout** - Always include `triggerView` in your return value
+- **Use appropriate overload** - Simple for no params, generic `UseTrigger<T>` when passing data
+
+## See Also
+
+- [State](./03_State.md) - Component state management
+- [Effect](./04_Effect.md) - Side effects and lifecycle
+- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
 
 ## Examples
 
-### Modal Dialog
+<Details>
+<Summary>
+Modal Dialog with Alert
+</Summary>
+<Body>
 
-Create a simple modal dialog using `UseTrigger`:
-
-```csharp
+```csharp demo-tabs
 public class ModalDialogExample : ViewBase
 {
     public override object? Build()
     {
-        var (dialogView, showDialog) = UseTrigger((IState<bool> isOpen) =>
-            isOpen.Value ? new ConfirmationDialog(isOpen) : null);
+        var (alertView, showAlert) = UseAlert();
+        var client = UseService<IClientProvider>();
 
         return Layout.Vertical()
-            | new Button("Open Dialog", onClick: _ => showDialog())
-            | dialogView;
-    }
-}
-
-public class ConfirmationDialog(IState<bool> isOpen) : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Vertical().Gap(2)
-            | Text.Block("Are you sure you want to continue?")
-            | Layout.Horizontal().Gap(2)
-                | new Button("Confirm", onClick: _ => isOpen.Set(false))
-                | new Button("Cancel", onClick: _ => isOpen.Set(false));
+            | new Button("Open Dialog", onClick: _ => showAlert("Are you sure you want to continue?", result =>
+            {
+                client.Toast($"You selected: {result}");
+            }, "Confirm Action"))
+            | alertView;
     }
 }
 ```
 
-### Detail View with Data
+</Body>
+</Details>
 
-Pass data to the triggered component:
+<Details>
+<Summary>
+Detail View with Sheet
+</Summary>
+<Body>
 
-```csharp
-public record UserInfo(int Id, string Name, string Email);
-
-public class UserListExample : ViewBase
+```csharp demo-tabs
+public class UserListSheetExample : ViewBase
 {
     public override object? Build()
     {
-        var users = UseState(new[]
-        {
-            new UserInfo(1, "Alice", "alice@example.com"),
-            new UserInfo(2, "Bob", "bob@example.com")
-        });
-
-        var (detailView, showDetail) = UseTrigger((IState<bool> isOpen, UserInfo user) =>
-            new UserDetailView(isOpen, user));
-
-        return Layout.Vertical()
-            | new List(users.Value.Select(user =>
-                new ListItem(user.Name, onClick: _ => showDetail(user))))
-            | detailView;
-    }
-}
-
-public class UserDetailView(IState<bool> isOpen, UserInfo user) : ViewBase
-{
-    public override object? Build()
-    {
-        if (!isOpen.Value) return null;
-
-        return Layout.Vertical().Gap(2)
-            | Text.Block($"Name: {user.Name}")
-            | Text.Block($"Email: {user.Email}")
-            | new Button("Close", onClick: _ => isOpen.Set(false));
+        return Layout.Horizontal()
+            | new Button("View Alice").WithSheet(
+                () => Layout.Vertical()
+                    | Text.Block("Name: Alice")
+                    | Text.Block("Email: alice@example.com"),
+                title: "User Details")
+            | new Button("View Bob").WithSheet(
+                () => Layout.Vertical()
+                    | Text.Block("Name: Bob")
+                    | Text.Block("Email: bob@example.com"),
+                title: "User Details");
     }
 }
 ```
 
-### Edit Form Trigger
+</Body>
+</Details>
 
-Use trigger for edit forms in data tables:
+<Details>
+<Summary>
+Edit Form Trigger
+</Summary>
+<Body>
 
-```csharp
+```csharp demo-tabs
 public class DataTableEditExample : ViewBase
 {
     public override object? Build()
@@ -245,194 +296,5 @@ public class EditForm(IState<bool> isOpen, IState<string[]> items, int index) : 
 }
 ```
 
-## Best Practices
-
-### Always Check Visibility State
-
-Check the visibility state in your triggered component to handle unmounting:
-
-```csharp
-// Good: Check state before rendering
-public override object? Build()
-{
-    if (!isOpen.Value) return null;
-    return Layout.Vertical() | Text.Block("Content");
-}
-
-// Avoid: Rendering content when not visible
-public override object? Build()
-{
-    return Layout.Vertical() | Text.Block("Content"); // Always rendered
-}
-```
-
-### Close State Management
-
-Use the provided state to close the triggered component:
-
-```csharp
-// Good: Use state to close
-new Button("Close", onClick: _ => isOpen.Set(false))
-
-// Avoid: Don't try to manipulate trigger directly
-```
-
-### Use Appropriate Overload
-
-Choose the right overload based on whether you need to pass parameters:
-
-```csharp
-// Use simple overload when no parameters needed
-var (view, show) = UseTrigger((IState<bool> isOpen) => new Dialog(isOpen));
-
-// Use generic overload when passing data
-var (view, show) = UseTrigger((IState<bool> isOpen, string id) => new Dialog(isOpen, id));
-```
-
-### Include Trigger View in Layout
-
-Always include the trigger view in your component's return value:
-
-```csharp
-// Good: Include trigger view
-return Layout.Vertical()
-    | content
-    | triggerView;
-
-// Bad: Forgot to include trigger view - component won't appear
-return Layout.Vertical() | content;
-```
-
-## Common Patterns
-
-### Confirmation Dialogs
-
-Use trigger for confirmation dialogs before actions:
-
-```csharp
-public class DeleteConfirmationExample : ViewBase
-{
-    public override object? Build()
-    {
-        var items = UseState(new List<string> { "Item 1", "Item 2" });
-
-        var (confirmView, showConfirm) = UseTrigger((IState<bool> isOpen, int index) =>
-            new DeleteConfirmDialog(isOpen, () => 
-            {
-                var list = items.Value.ToList();
-                list.RemoveAt(index);
-                items.Set(list);
-            }));
-
-        return Layout.Vertical()
-            | new List(items.Value.Select((item, index) =>
-                new ListItem(item, onClick: _ => showConfirm(index))))
-            | confirmView;
-    }
-}
-```
-
-### Detail Sheets
-
-Use trigger with Sheet widget for detail views:
-
-```csharp
-public class DetailSheetExample : ViewBase
-{
-    public override object? Build()
-    {
-        var (sheetView, showDetail) = UseTrigger((IState<bool> isOpen, string itemId) =>
-            new DetailSheet(isOpen, itemId));
-
-        return Layout.Vertical()
-            | new Button("Show Details", onClick: _ => showDetail("item-1"))
-            | sheetView;
-    }
-}
-```
-
-### Multi-Step Forms
-
-Use trigger to show different steps in a multi-step form:
-
-```csharp
-public class MultiStepFormExample : ViewBase
-{
-    public override object? Build()
-    {
-        var (formView, showForm) = UseTrigger((IState<bool> isOpen, int step) =>
-            new FormStep(isOpen, step));
-
-        return Layout.Vertical()
-            | new Button("Start Form", onClick: _ => showForm(1))
-            | formView;
-    }
-}
-```
-
-## Troubleshooting
-
-### Trigger View Not Showing
-
-Ensure the trigger view is included in your component's return value:
-
-```csharp
-// Error: Trigger view not included
-public override object? Build()
-{
-    var (triggerView, showTrigger) = UseTrigger(...);
-    return Layout.Vertical() | new Button("Show", onClick: _ => showTrigger());
-    // Missing: triggerView
-}
-
-// Solution: Include trigger view
-public override object? Build()
-{
-    var (triggerView, showTrigger) = UseTrigger(...);
-    return Layout.Vertical()
-        | new Button("Show", onClick: _ => showTrigger())
-        | triggerView; // Include trigger view
-}
-```
-
-### State Not Updating
-
-Use the provided `IState<bool>` parameter to control visibility:
-
-```csharp
-// Correct: Use provided state
-public override object? Build()
-{
-    if (!isOpen.Value) return null;
-    return Layout.Vertical()
-        | new Button("Close", onClick: _ => isOpen.Set(false));
-}
-
-// Incorrect: Don't create your own state
-public override object? Build()
-{
-    var myState = UseState(false); // Wrong - use provided isOpen
-    return Layout.Vertical();
-}
-```
-
-### Parameter Type Mismatch
-
-Ensure the callback type matches the factory parameter type:
-
-```csharp
-// Correct: Types match
-var (view, show) = UseTrigger((IState<bool> isOpen, int id) => new Dialog(isOpen, id));
-show(123); // int matches
-
-// Incorrect: Type mismatch
-var (view, show) = UseTrigger((IState<bool> isOpen, int id) => new Dialog(isOpen, id));
-show("123"); // string doesn't match int
-```
-
-## See Also
-
-- [State](./03_State.md) - Component state management
-- [Effect](./04_Effect.md) - Side effects and lifecycle
-- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
-- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+</Body>
+</Details>
