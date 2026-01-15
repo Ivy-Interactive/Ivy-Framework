@@ -25,19 +25,17 @@ The `UseNavigation` [hook](../02_RulesOfHooks.md) enables programmatic navigatio
 
 ## Basic Usage
 
-```csharp demo-below
-[App(icon: Icons.Navigation)]
-public class NavigationBasicDemoApp : ViewBase
-{
-    public override object? Build()
-    {
-        var navigator = UseNavigation();
-        
-        return Layout.Horizontal()
-            | new Button("Go to State docs").HandleClick(() => navigator.Navigate("app://hooks/core/usestate"))
-            | new Button("Go to Effect docs").HandleClick(() => navigator.Navigate("app://hooks/core/useeffect"));
-    }
-}
+```csharp
+var navigator = UseNavigation();
+
+// Navigate by URI
+navigator.Navigate("app://hooks/core/usestate");
+
+// Navigate by type
+navigator.Navigate(typeof(MyApp));
+
+// Navigate with arguments
+navigator.Navigate(typeof(MyApp), new MyArgs(123));
 ```
 
 ## How Navigation Works
@@ -74,19 +72,11 @@ var args = UseArgs<UserArgs>();
 
 Open external websites and resources:
 
-```csharp demo-below
-[App(icon: Icons.ExternalLink)]
-public class NavigationExternalLinksDemoApp : ViewBase
-{
-    public override object? Build()
-    {
-        var navigator = UseNavigation();
-        
-        return Layout.Horizontal()
-            | new Button("Open Docs").HandleClick(() => navigator.Navigate("https://docs.ivy.app/onboarding/getting-started/introduction"))
-            | new Button("Open GitHub").HandleClick(() => navigator.Navigate("https://github.com/Ivy-Interactive/Ivy-Framework"));
-    }
-}
+```csharp
+var navigator = UseNavigation();
+
+navigator.Navigate("https://docs.ivy.app");
+navigator.Navigate("mailto:support@example.com");
 ``` 
 
 ## Troubleshooting
