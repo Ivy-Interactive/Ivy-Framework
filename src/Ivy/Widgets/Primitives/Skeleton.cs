@@ -5,6 +5,9 @@ using Ivy.Views;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A placeholder loading state that mimics the shape of content (text, shapes). Use to reduce perceived loading time.
+/// </summary>
 public record Skeleton : WidgetBase<Skeleton>
 {
     public static object Card() => new Skeleton().Height(100);

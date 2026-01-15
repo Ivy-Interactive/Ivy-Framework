@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Displays a user's profile picture or initials in a rounded container. Supports size variants and status indicators.
+/// </summary>
 public record Avatar : WidgetBase<Avatar>
 {
     public Avatar(string fallback, string? image = null)

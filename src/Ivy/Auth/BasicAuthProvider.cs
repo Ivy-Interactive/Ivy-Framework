@@ -10,6 +10,10 @@ using Isopoh.Cryptography.Argon2;
 
 namespace Ivy.Auth;
 
+/// <summary>
+/// A basic authentication provider using username/password hash verification.
+/// Manages JWT token issuance and validation.
+/// </summary>
 public class BasicAuthProvider : IAuthProvider
 {
     private readonly List<(string user, string hash)> _users = [];

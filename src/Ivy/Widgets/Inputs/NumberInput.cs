@@ -81,6 +81,9 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 ];
 }
 
+/// <summary>
+/// A numeric input field with increment/decrement controls. Supports min/max limits, step values, and number formatting.
+/// </summary>
 public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumberInput
 {
     [OverloadResolutionPriority(1)]

@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Renders a vector icon from the standardized Ivy icon set. Supports customization of size, color, and variants.
+/// </summary>
 public record Icon : WidgetBase<Icon>
 {
     public Icon(Icons name, Colors? color = null)

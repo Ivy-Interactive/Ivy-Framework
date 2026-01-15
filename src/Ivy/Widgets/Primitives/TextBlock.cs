@@ -34,6 +34,9 @@ public enum TextVariant
     Strong
 }
 
+/// <summary>
+/// A versatile text component supporting various typography styles (headings, paragraphs, inline). Use this for all text rendering requirements.
+/// </summary>
 public record TextBlock : WidgetBase<TextBlock>
 {
     internal TextBlock(string content = "", TextVariant variant = TextVariant.Literal, Size? width = null,

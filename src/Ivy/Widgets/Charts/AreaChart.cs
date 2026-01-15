@@ -5,6 +5,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A chart that visualizes data using filled areas. Useful for showing magnitude changes over time.
+/// </summary>
 public record AreaChart : WidgetBase<AreaChart>
 {
     public AreaChart(object data, params Area[] areas) : this()

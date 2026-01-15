@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A specialized item for Lists, supporting titles, subtitles, icons, and badges.
+/// </summary>
 public record ListItem : WidgetBase<ListItem>
 {
     [OverloadResolutionPriority(1)]

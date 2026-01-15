@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A layout that wraps its children to the next line when they run out of space.
+/// </summary>
 public record WrapLayout : WidgetBase<WrapLayout>
 {
     public WrapLayout(object[] children, int gap = 4, Thickness? padding = null, Thickness? margin = null,

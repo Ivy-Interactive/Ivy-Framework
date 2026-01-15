@@ -9,6 +9,10 @@ using Ivy.Views.Builders;
 
 namespace Ivy.Views.Tables;
 
+/// <summary>
+/// A builder view for creating tables with fluent configuration of columns, sorting, and styling.
+/// Scaffolds columns from model properties and allows custom builders.
+/// </summary>
 public class TableBuilder<TModel> : ViewBase, IStateless
 {
     private class TableBuilderColumn(

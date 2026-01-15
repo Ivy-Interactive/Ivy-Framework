@@ -4,6 +4,10 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Kanban;
 
+/// <summary>
+/// A view for rendering a Kanban board from a collection of grouped models.
+/// Displays cards in columns based on group keys.
+/// </summary>
 public class KanbanView<TModel, TGroupKey>(IEnumerable<TModel> model) : ViewBase, IStateless
     where TGroupKey : notnull
 {

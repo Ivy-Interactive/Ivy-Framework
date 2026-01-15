@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A flexible layout that arranges children vertically or horizontally with consistent spacing.
+/// </summary>
 public record StackLayout : WidgetBase<StackLayout>
 {
     public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? align = null, bool removeParentPadding = false) : base(children)

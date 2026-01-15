@@ -63,6 +63,10 @@ public class DashboardAreaChartStyle<TSource> : IAreaChartStyle<TSource>
     }
 }
 
+/// <summary>
+/// A builder view for identifying and configuring an Area Chart.
+/// Associates data with dimensions and measures for visualization.
+/// </summary>
 public class AreaChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource>? dimension = null,

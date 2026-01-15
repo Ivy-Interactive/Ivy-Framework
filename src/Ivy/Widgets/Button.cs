@@ -26,6 +26,9 @@ public enum ButtonVariant
     Ai,
 }
 
+/// <summary>
+/// A standard clickable button with support for variants, icons, and loading states. Use for user actions, form submissions, and navigation.
+/// </summary>
 public record Button : WidgetBase<Button>
 {
     internal Button() { }

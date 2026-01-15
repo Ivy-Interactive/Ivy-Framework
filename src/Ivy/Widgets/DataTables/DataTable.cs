@@ -20,6 +20,9 @@ public class RowActionClickEventArgs
     public object? Tag { get; set; }
 }
 
+/// <summary>
+/// A powerful widget for displaying data in a tabular format. Supports sorting, filtering, and pagination.
+/// </summary>
 public record DataTable : WidgetBase<DataTable>
 {
     public DataTable(

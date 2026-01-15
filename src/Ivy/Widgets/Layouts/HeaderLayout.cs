@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A standard layout with a fixed header and scrolling content area.
+/// </summary>
 public record HeaderLayout : WidgetBase<HeaderLayout>
 {
     public HeaderLayout(object header, object content) : base([new Slot("Header", header), new Slot("Content", content)])

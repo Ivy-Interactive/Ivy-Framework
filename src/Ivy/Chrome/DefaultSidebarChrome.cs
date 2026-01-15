@@ -12,6 +12,10 @@ using AppContext = Ivy.Apps.AppContext;
 namespace Ivy.Chrome;
 
 [App(isVisible: false)]
+/// <summary>
+/// A chrome view that implements a sidebar layout.
+/// Manages the navigation structure with header, menu items, and footer.
+/// </summary>
 public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 {
     internal ChromeSettings Settings => settings;

@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A visual divider line to separate content sections. Can be horizontal or vertical.
+/// </summary>
 public record Separator : WidgetBase<Separator>
 {
     public Separator(string? text = null, Orientation orientation = Orientation.Horizontal)

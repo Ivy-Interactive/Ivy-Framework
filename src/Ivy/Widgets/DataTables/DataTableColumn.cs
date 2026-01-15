@@ -4,6 +4,9 @@ using System.Text.Json.Serialization;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Defines the configuration for a single column in a DataTable, including its header, type, and behavior.
+/// </summary>
 public class DataTableColumn
 {
     public DataTableColumn()

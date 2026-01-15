@@ -48,6 +48,9 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
     ];
 }
 
+/// <summary>
+/// A date and time picker control. Supports various formats and date/time selection modes.
+/// </summary>
 public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 {
     [OverloadResolutionPriority(1)]

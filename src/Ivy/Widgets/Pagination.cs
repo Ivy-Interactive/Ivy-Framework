@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A navigation control for splitting large datasets into pages. Features previous/next controls, page indicators, and configurable page size.
+/// </summary>
 public record Pagination : WidgetBase<Pagination>
 {
     public Pagination(int? page, int? numPages, Func<Event<Pagination, int>, ValueTask> onChange, bool disabled = false)

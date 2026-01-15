@@ -5,6 +5,10 @@ using Ivy.Views.Blades;
 
 namespace Ivy.Views;
 
+/// <summary>
+/// A generic list view with built-in search filtering and asynchronous data fetching.
+/// Provides a search input, loading state, and renders items using a blade-style header layout.
+/// </summary>
 public class FilteredListView<T>(
     Func<string, Task<T[]>> fetchRecords,
     Func<T, ListItem> createItem,

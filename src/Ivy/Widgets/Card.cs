@@ -12,6 +12,9 @@ public enum CardHoverVariant
     PointerAndTranslate,
 }
 
+/// <summary>
+/// A versatile container component with structured slots for header, content, and footer. Supports borders, hover effects, and click interactions.
+/// </summary>
 public record Card : WidgetBase<Card>
 {
     public Card(object? content = null, object? footer = null, object? header = null) : base(

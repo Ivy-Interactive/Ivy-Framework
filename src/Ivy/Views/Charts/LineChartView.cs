@@ -92,6 +92,10 @@ public class CustomLineChartStyle<TSource> : ILineChartStyle<TSource>
     }
 }
 
+/// <summary>
+/// A builder view for identifying and configuring a Line Chart.
+/// Suitable for trend analysis with support for multiple measures and custom styling.
+/// </summary>
 public class LineChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource>? dimension = null,

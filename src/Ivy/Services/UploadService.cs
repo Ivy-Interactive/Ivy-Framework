@@ -293,6 +293,10 @@ public class UploadController(AppSessionStore sessionStore, Server server) : Con
     }
 }
 
+/// <summary>
+/// A service for handling file uploads over SignalR with progress tracking and validation.
+/// Manages upload sessions, validation rules, and cleanup.
+/// </summary>
 public class UploadService(string connectionId, IClientProvider clientProvider) : IUploadService, IDisposable
 {
     private readonly ConcurrentDictionary<Guid, (UploadDelegate handler, CancellationTokenSource cts, string? mimeType, string? fileName, Func<(string? accept, long? maxFileSize)> getValidation)> _uploads = new();

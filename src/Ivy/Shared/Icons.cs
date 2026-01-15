@@ -13,6 +13,10 @@ public static class IconsHelper
     }
 }
 
+/// <summary>
+/// A centralized enumeration of all available icons in the framework.
+/// Includes brand icons and the complete Lucide icon set.
+/// </summary>
 public enum Icons
 {
     None,

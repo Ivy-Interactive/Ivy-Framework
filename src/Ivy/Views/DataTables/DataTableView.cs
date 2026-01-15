@@ -4,6 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Ivy.Views.DataTables;
 
+/// <summary>
+/// A view for rendering a data table with configured columns, layout, and interaction handlers.
+/// Memoizes properties to optimize re-rendering.
+/// </summary>
 public class DataTableView(
     IQueryable queryable,
     Size? width,

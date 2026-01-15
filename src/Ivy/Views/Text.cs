@@ -190,6 +190,10 @@ public static class Text
     public static TextBuilder Latex(IAnyState state) => Latex(state.ToString() ?? "");
 }
 
+/// <summary>
+/// A builder view for creating text elements with various styles and variants (process, markdown, code, etc.).
+/// Supports fluent configuration for color, sizing, and typography options.
+/// </summary>
 public class TextBuilder(string content, TextVariant variant, Languages codeLanguage = Languages.Csharp) : ViewBase, IStateless
 {
     private bool _strikeThrough;

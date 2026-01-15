@@ -7,6 +7,9 @@ using Ivy.Core.Docs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A toggleable menu that displays a list of actions or links. Supports alignment, positioning, and nested items.
+/// </summary>
 public record DropDownMenu : WidgetBase<DropDownMenu>
 {
     public enum SideOptions

@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Displays an error message with details and optional stack trace. Useful for error boundaries and debugging.
+/// </summary>
 public record Error : WidgetBase<Error>
 {
     public Error(string? title = null, string? message = null, string? stackTrace = null)

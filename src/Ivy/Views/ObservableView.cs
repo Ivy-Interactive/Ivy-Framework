@@ -4,6 +4,10 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Views;
 
+/// <summary>
+/// A reactive view that renders content based on values emitted from an <see cref="IObservable{T}"/>.
+/// Automatically updates the UI whenever the observable pushes a new value.
+/// </summary>
 public class ObservableView<T>(IObservable<T> observable) : ViewBase
 {
     public override object? Build()

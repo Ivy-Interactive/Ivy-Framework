@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A floating bubble that reveals information when hovering over an element. Provides context or property details without cluttering the UI.
+/// </summary>
 public record Tooltip : WidgetBase<Tooltip>
 {
     public Tooltip(object trigger, object content) : base([new Slot("Trigger", trigger), new Slot("Content", content)])

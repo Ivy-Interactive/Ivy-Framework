@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A container that can expand or collapse its content. Useful for organizing content and minimizing screen clutter (e.g., accordions).
+/// </summary>
 public record Expandable : WidgetBase<Expandable>
 {
     public Expandable(object header, object content) : base([new Slot("Header", header), new Slot("Content", content)])

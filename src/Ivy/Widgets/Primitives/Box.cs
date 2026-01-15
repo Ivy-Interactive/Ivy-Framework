@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A fundamental container for grouping elements with styling capabilities (padding, margin, border, background). Use as a building block for custom layouts.
+/// </summary>
 public record Box : WidgetBase<Box>
 {
     public Box(params IEnumerable<object> content) : base(content.ToArray())

@@ -91,6 +91,10 @@ public class DonutPieChartStyle<TSource> : IPieChartStyle<TSource>
     }
 }
 
+/// <summary>
+/// A builder view for identifying and configuring a Pie or Donut Chart.
+/// Visualizes proportional data with optional totals and legends.
+/// </summary>
 public class PieChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource> dimension,

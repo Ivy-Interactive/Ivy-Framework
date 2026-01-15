@@ -10,6 +10,9 @@ using static Ivy.Views.Forms.FormHelpers;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A side panel overlay for displaying supplementary content or forms. Slides in from the edge of the screen and overlays the main view.
+/// </summary>
 public record Sheet : WidgetBase<Sheet>
 {
     public static Size DefaultWidth => Size.Rem(24);

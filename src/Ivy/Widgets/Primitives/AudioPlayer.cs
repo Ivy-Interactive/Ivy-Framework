@@ -11,6 +11,9 @@ public enum AudioPreload
     Auto
 }
 
+/// <summary>
+/// Embeds an audio player for playback of sound files. Supports auto-play, loop, and muted options.
+/// </summary>
 public record AudioPlayer : WidgetBase<AudioPlayer>
 {
     public AudioPlayer(string src) : this()

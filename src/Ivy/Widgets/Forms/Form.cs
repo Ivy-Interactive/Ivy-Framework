@@ -4,6 +4,10 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A widget representing an HTML form element.
+/// Provides configuration for action URL, HTTP method, and validation behavior.
+/// </summary>
 public record Form : WidgetBase<Form>
 {
     internal Form(params object[] children) : base(children)

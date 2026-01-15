@@ -39,6 +39,10 @@ public enum FormValidationStrategy
     OnSubmit
 }
 
+/// <summary>
+/// A view representing a single form field with validation, binding, and layout logic.
+/// Handles input rendering, state synchronization, and visibility toggling.
+/// </summary>
 public class FormFieldView(
     IAnyState bindingState,
     Func<IAnyState, IViewContext, IAnyInput> inputFactory,
@@ -178,6 +182,10 @@ public interface IFormFieldBinding<TModel>
     (IFormFieldView fieldView, IDisposable disposable) Bind(IState<TModel> model);
 }
 
+/// <summary>
+/// A view that acts as a container for multiple form fields, arranging them into columns and groups.
+/// Supports a submit handler and customizable scaling/density.
+/// </summary>
 public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Scale scale = Scale.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
 {
     public override object? Build()

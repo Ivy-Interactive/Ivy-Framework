@@ -39,6 +39,9 @@ public class GridDefinition
     public Func<object, object>? CellBuilder { get; set; } = null;
 }
 
+/// <summary>
+/// A powerful grid layout system based on CSS Grid. Supports rows, columns, and gaps.
+/// </summary>
 public record GridLayout : WidgetBase<GridLayout>
 {
     public GridLayout(GridDefinition def, params object[] children) : base(children)

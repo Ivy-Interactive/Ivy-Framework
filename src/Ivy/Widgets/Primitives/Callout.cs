@@ -14,6 +14,9 @@ public enum CalloutVariant
     Success
 }
 
+/// <summary>
+/// A highlighted box for emphasizing important information (tips, warnings, errors). Features an icon, title, and colored background.
+/// </summary>
 public record Callout : WidgetBase<Callout>
 {
     public Callout(object? description = null, string? title = null, CalloutVariant variant = CalloutVariant.Info, Icons? icon = null)

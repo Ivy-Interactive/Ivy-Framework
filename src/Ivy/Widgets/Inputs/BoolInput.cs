@@ -62,6 +62,9 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
     ];
 }
 
+/// <summary>
+/// A checkbox or toggle switch for boolean values.
+/// </summary>
 public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 {
     [OverloadResolutionPriority(1)]
@@ -105,6 +108,9 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
     [Event] public Func<Event<IInput<TBool>, TBool>, ValueTask>? OnChange { get; }
 }
 
+/// <summary>
+/// A checkbox or toggle switch for boolean values.
+/// </summary>
 public record BoolInput : BoolInput<bool>
 {
     [OverloadResolutionPriority(1)]

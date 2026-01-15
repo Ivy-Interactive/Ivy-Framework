@@ -94,6 +94,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     }
 }
 
+/// <summary>
+/// A file upload control supporting drag-and-drop and multiple files.
+/// </summary>
 public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 {
     [OverloadResolutionPriority(1)]

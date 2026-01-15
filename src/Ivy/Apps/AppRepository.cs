@@ -52,6 +52,10 @@ public class AppRepositoryGroup(string title) : IAppRepositoryGroup
     public InternalLink? Previous { get; set; } = null;
 }
 
+/// <summary>
+/// A repository that manages the discovery and organization of registered Ivy apps.
+/// Builds the navigation tree and resolves app instances by ID.
+/// </summary>
 public class AppRepository : IAppRepository
 {
     private readonly List<Func<AppDescriptor[]>> _factories = [];

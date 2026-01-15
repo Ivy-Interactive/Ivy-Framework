@@ -74,6 +74,10 @@ public class DashboardBarChartStyle<TSource> : IBarChartStyle<TSource>
     }
 }
 
+/// <summary>
+/// A builder view for identifying and configuring a Bar Chart.
+/// Supports standard and dashboard styles for categorical comparisons.
+/// </summary>
 public class BarChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource>? dimension = null,

@@ -13,6 +13,10 @@ public interface IThemeService
     string GenerateThemeMetaTag();
 }
 
+/// <summary>
+/// A service for managing application themes (light/dark/system).
+/// Generates CSS variables and meta tags for theming support.
+/// </summary>
 public class ThemeService : IThemeService
 {
     private Theme _currentTheme = Theme.Default;

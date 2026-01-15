@@ -3,6 +3,10 @@ using Ivy.Shared;
 
 namespace Ivy.Views;
 
+/// <summary>
+/// A view for creating tabbed interfaces with customizable variants and sizing.
+/// Manages tab selection state and rendering of tab content.
+/// </summary>
 public class TabView : ViewBase
 {
     private readonly List<Tab> _tabs = new();

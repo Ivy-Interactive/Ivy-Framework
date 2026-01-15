@@ -59,6 +59,9 @@ public enum AnimationTrigger
     Hover
 }
 
+/// <summary>
+/// Applies animation effects to its child widget, such as fading, sliding, or rotating.
+/// </summary>
 public record Animation : WidgetBase<Animation>
 {
     public Animation(AnimationType animation)

@@ -4,6 +4,10 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Alerts;
 
+/// <summary>
+/// A centralized view for displaying alerts/dialogs with custom buttons and result handling.
+/// Manages the dialog state and user interactions.
+/// </summary>
 public class AlertView(IState<AlertResult> alertResult, IState<bool> isOpen, AlertOptions options) : ViewBase
 {
     public override object? Build()

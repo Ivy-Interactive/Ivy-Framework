@@ -4,6 +4,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Renders a JSON object in a formatted, interactive code block. Ideal for displaying data structures or API responses.
+/// </summary>
 public record Json : WidgetBase<Json>
 {
     public Json(JsonNode json) : this(json.ToString())

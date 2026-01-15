@@ -7,6 +7,10 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Builders;
 
+/// <summary>
+/// A builder view for creating detailed read-only property lists or definition lists.
+/// Automatically scaffolds fields from a model type with customization options.
+/// </summary>
 public class DetailsBuilder<TModel> : ViewBase, IStateless
 {
     private class Item(string label, IBuilder<TModel> builder, FieldInfo fieldInfo,

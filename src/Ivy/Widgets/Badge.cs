@@ -15,6 +15,9 @@ public enum BadgeVariant
     Info
 }
 
+/// <summary>
+/// A small count and labeling component, often used to display status or notifications.
+/// </summary>
 public record Badge : WidgetBase<Badge>
 {
     public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Primary, Icons? icon = null)

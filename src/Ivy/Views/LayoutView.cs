@@ -4,6 +4,10 @@ using Ivy.Shared;
 
 namespace Ivy.Views;
 
+/// <summary>
+/// A versatile container view for stacking, wrapping, or arranging child elements.
+/// Serves as the implementation for `Layout.Vertical`, `Layout.Horizontal`, and `Layout.Wrap` builders.
+/// </summary>
 public class LayoutView : ViewBase, IStateless
 {
     private enum LayoutType

@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// The root container for an Ivy application. Manages global state, routing, theme injection, and app-wide services.
+/// </summary>
 public record AppHost : WidgetBase<AppHost>
 {
     public AppHost(string appId, string? appArgs, string? parentId)

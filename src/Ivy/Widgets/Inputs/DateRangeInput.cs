@@ -34,6 +34,9 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
     ];
 }
 
+/// <summary>
+/// A control for selecting a start and end date range. Useful for filtering or scheduling.
+/// </summary>
 public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange>
 {
     [OverloadResolutionPriority(1)]

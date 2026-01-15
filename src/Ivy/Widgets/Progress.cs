@@ -5,6 +5,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A visual indicator of task completion or loading status. Supports determined (percentage) or indeterminate states.
+/// </summary>
 public record Progress : WidgetBase<Progress>
 {
     public enum ColorVariants

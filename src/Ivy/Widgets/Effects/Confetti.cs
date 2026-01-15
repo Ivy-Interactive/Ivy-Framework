@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Triggers a confetti celebration effect. Useful for success states or celebrations.
+/// </summary>
 public record Confetti : WidgetBase<Confetti>
 {
     public Confetti(object? child = null) : base(child != null ? [child] : [])

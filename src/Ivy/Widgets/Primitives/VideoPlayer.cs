@@ -3,6 +3,9 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Embeds a video player with playback controls. Supports auto-play, loop, muted, and poster image options.
+/// </summary>
 public record VideoPlayer : WidgetBase<VideoPlayer>
 {
     public VideoPlayer(

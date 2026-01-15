@@ -20,6 +20,9 @@ public enum Languages
     Xml,
 }
 
+/// <summary>
+/// Displays a block of code with syntax highlighting. Supports various programming languages and themes.
+/// </summary>
 public record Code : WidgetBase<Code>
 {
     public Code(string content, Languages language = Languages.Csharp)

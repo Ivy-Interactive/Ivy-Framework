@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A read-only display of a label and value pair, often used in property lists.
+/// </summary>
 public record Detail : WidgetBase<Detail>
 {
     public Detail(string? label, object? value, bool multiLine) : base(value != null ? [value] : [])

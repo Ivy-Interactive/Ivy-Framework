@@ -6,6 +6,10 @@ using Ivy.Views.Builders;
 
 namespace Ivy.Views.Kanban;
 
+/// <summary>
+/// A builder view for creating Kanban boards with fluent configuration of columns, cards, and ordering.
+/// supports grouping, drag-and-drop, and custom card rendering.
+/// </summary>
 public class KanbanBuilder<TModel, TGroupKey>(
     IEnumerable<TModel> records,
     Func<TModel, TGroupKey> groupBySelector,

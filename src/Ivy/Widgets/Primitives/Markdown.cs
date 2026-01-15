@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Renders Markdown content as formatted HTML. Supports standard Markdown syntax including tables, lists, and code blocks.
+/// </summary>
 public record Markdown : WidgetBase<Markdown>
 {
     [OverloadResolutionPriority(1)]

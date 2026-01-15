@@ -3,6 +3,10 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Blades;
 
+/// <summary>
+/// A view that orchestrates a collection of blade views in a sliding horizontal layout.
+/// Manages navigation, opening, closing, and refreshing of individual blades.
+/// </summary>
 public class BladesView : ViewBase
 {
     public override object? Build()
@@ -30,6 +34,10 @@ public class BladesView : ViewBase
     }
 }
 
+/// <summary>
+/// Represents a single blade within the blades layout, wrapping a content view.
+/// Handles unique identification and lifecycle events like close and refresh.
+/// </summary>
 public class BladeView(IView bladeView, int index, long refreshToken, string? title, Size? width, Action<Event<Blade>>? onClose, Action<Event<Blade>>? onRefresh) : ViewBase, IMemoized
 {
     public override object? Build()

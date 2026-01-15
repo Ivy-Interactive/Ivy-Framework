@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A highly performant table widget for displaying structured data rows.
+/// </summary>
 public record Table : WidgetBase<Table>
 {
     public Table(params TableRow[] rows) : base(rows.Cast<object>().ToArray())

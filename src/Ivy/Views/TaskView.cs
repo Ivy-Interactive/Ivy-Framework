@@ -3,6 +3,10 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Views;
 
+/// <summary>
+/// A view that asynchronously renders content from a <see cref="Task{T}"/>.
+/// Displays a loading state while the task is executing and updates when completed.
+/// </summary>
 public class TaskView<T>(Task<T> task) : ViewBase
 {
     public override object? Build()

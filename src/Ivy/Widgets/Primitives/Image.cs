@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Displays an image from a URL. Supports styling, object-fit sizing, and aspect ratio control.
+/// </summary>
 public record Image : WidgetBase<Image>
 {
     public Image(string src) : this()

@@ -63,6 +63,9 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
     public Type[] SupportedStateTypes() => [];
 }
 
+/// <summary>
+/// A standard text input field. Supports various types (text, password, email), validation, and placeholders.
+/// </summary>
 public record TextInput<TString> : TextInputBase, IInput<TString>
 {
     public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
@@ -104,6 +107,9 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
 
+/// <summary>
+/// A standard text input field. Supports various types (text, password, email), validation, and placeholders.
+/// </summary>
 public record TextInput : TextInput<string>
 {
     public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)

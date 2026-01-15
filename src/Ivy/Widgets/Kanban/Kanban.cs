@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A board for visualized workflow management, organizing items into columns.
+/// </summary>
 public record Kanban : WidgetBase<Kanban>
 {
     public Kanban(params KanbanCard[] cards) : base([.. cards])

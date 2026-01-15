@@ -12,6 +12,9 @@ public enum ChatSender
     Assistant
 }
 
+/// <summary>
+/// A conversational interface component for displaying messages and accepting user input. Features streaming support, sender attribution, and message history.
+/// </summary>
 public record Chat : WidgetBase<Chat>
 {
     [OverloadResolutionPriority(1)]

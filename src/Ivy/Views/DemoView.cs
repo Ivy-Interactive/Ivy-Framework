@@ -5,6 +5,10 @@ using Ivy.Helpers;
 
 namespace Ivy.Views;
 
+/// <summary>
+/// A demonstration view that renders content alongside its source code representation.
+/// Useful for creating live examples, documentation, or style guides where the code snippet is displayed next to the rendered output.
+/// </summary>
 public class DemoView : ViewBase
 {
     private readonly object _content;

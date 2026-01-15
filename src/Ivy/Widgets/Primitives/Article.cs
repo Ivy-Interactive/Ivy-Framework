@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A container optimized for long-form content like documentation or blog posts. Applies specialized typography styles for readability.
+/// </summary>
 public record Article : WidgetBase<Article>
 {
     public Article(params IEnumerable<object> content) : base(content)

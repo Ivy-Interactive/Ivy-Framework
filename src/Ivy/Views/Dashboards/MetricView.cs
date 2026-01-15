@@ -11,6 +11,10 @@ public record MetricRecord(
     double? GoalAchieved = null,
     string? GoalFormatted = null);
 
+/// <summary>
+/// A view for displaying a single metric with an optional trend indicator and goal progress.
+/// Used primarily in dashboards to show key performance indicators.
+/// </summary>
 public class MetricView(
     string title,
     Icons? icon,
