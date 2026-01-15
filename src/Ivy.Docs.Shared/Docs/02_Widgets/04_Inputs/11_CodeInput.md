@@ -110,6 +110,16 @@ UseState("interface User {\n  name: string;\n  age: number;\n}\n\nconst user: Us
     .Language(Languages.Typescript)
 ```
 
+### YAML
+
+```csharp demo-tabs
+UseState("name: my-app\nversion: 1.0.0\nservices:\n  web:\n    image: nginx:latest\n    ports:\n      - \"80:80\"")
+    .ToCodeInput()
+    .Width(Size.Full())
+    .Height(Size.Auto())
+    .Language(Languages.Yaml)
+```
+
 ### Plain Text
 
 ```csharp demo-tabs
