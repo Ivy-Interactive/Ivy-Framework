@@ -108,19 +108,22 @@ ivy run --verbose                   # Enable detailed logging
 
 We have cleaned up the `Text` widget API to be more consistent and predictable.
 
-#### Scale Property
+#### Fluent Scale API
 
-Previously, text sizing was handled via specific methods like `.Small()`, `.Large()`, or `Text.H1()`. We have unified this under a `Scale` property.
-
-- **Removed**: `Text.Small()`, `Text.Large()`, and similar specific size variants.
-- **Added**: `Text.P().Scale(0.8)` or `.Scale(Scale.Small)`.
+Replaced static methods `Text.Small()` and `Text.Large()` with chainable modifiers on `TextBuilder`. Updated 43 files across the codebase.
 
 ```csharp
-// Old
-Text.P("Small text").Small()
+// Before (removed)
+Text.Small("Small text")
+Text.Large("Large text")
 
-// New
-Text.P("Small text").Scale(0.8) // or .Scale(Scale.Small)
+// After
+Text.P("Small text").Small()
+Text.P("Normal text")
+Text.P("Large text").Large()
+
+// Chainable
+Text.P("Important").Large().Bold().Color(Colors.Primary)
 ```
 
 ## Other improvements
