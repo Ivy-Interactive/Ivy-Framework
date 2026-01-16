@@ -22,19 +22,28 @@ Ivy now includes **UseQuery** - a powerful data fetching and caching system insp
 ```csharp
 public override object? Build()
 {
+    var factory = UseService<SampleDbContextFactory>();
+    
     var productsQuery = UseQuery(
         key: "products",
-        queryFn: async () => await Database.Products.ToListAsync()
+        fetcher: async ct =>
+        {
+            await using var db = factory.CreateDbContext();
+            return await db.Products.ToListAsync(ct);
+        }
     );
 
     if (productsQuery.Loading)
         return new Skeleton();
 
     if (productsQuery.Error != null)
-        return new Error("Failed", productsQuery.Error.Message);
+        return Callout.Error($"Failed to load products: {productsQuery.Error.Message}");
+
+    if (productsQuery.Value == null)
+        return Text.Muted("No products found");
 
     return Layout.Vertical()
-        | productsQuery.Data.Select(p => new Text(p.Name));
+        | productsQuery.Value.Select(p => Text.Literal(p.Name));
 }
 ```
 
