@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A container for grouping input fields and validation logic.
+/// </summary>
 public record Form : WidgetBase<Form>
 {
     internal Form(params object[] children) : base(children)

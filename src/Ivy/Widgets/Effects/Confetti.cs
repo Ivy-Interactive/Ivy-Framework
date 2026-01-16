@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A fun visual effect that simulates falling confetti, useful for celebrations.
+/// </summary>
 public record Confetti : WidgetBase<Confetti>
 {
     public Confetti(object? child = null) : base(child != null ? [child] : [])

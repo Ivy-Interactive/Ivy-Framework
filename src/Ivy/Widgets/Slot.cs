@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A placeholder for dynamic content injection.
+/// </summary>
 public record Slot : WidgetBase<Slot>
 {
     [Prop] public string? Name { get; set; }

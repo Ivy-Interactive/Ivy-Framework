@@ -20,6 +20,9 @@ public class RowActionClickEventArgs
     public object? Tag { get; set; }
 }
 
+/// <summary>
+/// A comprehensive grid for displaying and interacting with rows of data, supporting sorting and pagination.
+/// </summary>
 public record DataTable : WidgetBase<DataTable>
 {
     public DataTable(

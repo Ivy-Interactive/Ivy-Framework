@@ -41,6 +41,9 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
     public Type[] SupportedStateTypes() => [typeof(string)];
 }
 
+/// <summary>
+/// An editor input optimized for writing code snippets.
+/// </summary>
 public record CodeInput<TString> : CodeInputBase, IInput<TString>
 {
     [OverloadResolutionPriority(1)]

@@ -20,6 +20,9 @@ public enum Languages
     Xml,
 }
 
+/// <summary>
+/// Displays inline or block code snippets.
+/// </summary>
 public record Code : WidgetBase<Code>
 {
     public Code(string content, Languages language = Languages.Csharp)

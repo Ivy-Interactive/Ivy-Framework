@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Navigation controls for paging through lists or data.
+/// </summary>
 public record Pagination : WidgetBase<Pagination>
 {
     public Pagination(int? page, int? numPages, Func<Event<Pagination, int>, ValueTask> onChange, bool disabled = false)

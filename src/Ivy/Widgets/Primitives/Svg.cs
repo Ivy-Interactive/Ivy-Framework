@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Renders SVG content.
+/// </summary>
 public record Svg : WidgetBase<Svg>
 {
     public Svg(string content)

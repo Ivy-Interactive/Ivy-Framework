@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Displays an image.
+/// </summary>
 public record Image : WidgetBase<Image>
 {
     public Image(string src) : this()

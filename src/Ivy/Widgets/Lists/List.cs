@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Displays a sequence of items in a list format.
+/// </summary>
 public record List : WidgetBase<List>
 {
     public List(params object[] items) : base(items)

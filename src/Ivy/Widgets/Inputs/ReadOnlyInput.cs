@@ -59,6 +59,9 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     public Type[] SupportedStateTypes() => [typeof(object)];
 }
 
+/// <summary>
+/// Displays a value that cannot be edited by the user.
+/// </summary>
 public record ReadOnlyInput : ReadOnlyInput<string>
 {
     public ReadOnlyInput(IAnyState state) : base(state)

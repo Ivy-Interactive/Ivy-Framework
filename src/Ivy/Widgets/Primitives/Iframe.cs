@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Embeds an iframe.
+/// </summary>
 public record Iframe : WidgetBase<Iframe>
 {
     public Iframe(string src, long? refreshToken = null) : this()

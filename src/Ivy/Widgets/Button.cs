@@ -26,6 +26,9 @@ public enum ButtonVariant
     Ai,
 }
 
+/// <summary>
+/// An interactive element for triggering actions or navigation.
+/// </summary>
 public record Button : WidgetBase<Button>
 {
     internal Button() { }

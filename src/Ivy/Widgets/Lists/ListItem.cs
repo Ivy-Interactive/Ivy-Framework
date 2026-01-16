@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A single item within a List or SidebarMenu.
+/// </summary>
 public record ListItem : WidgetBase<ListItem>
 {
     [OverloadResolutionPriority(1)]

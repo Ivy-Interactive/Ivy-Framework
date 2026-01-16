@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A specific detail item within a Details view.
+/// </summary>
 public record Detail : WidgetBase<Detail>
 {
     public Detail(string? label, object? value, bool multiLine) : base(value != null ? [value] : [])

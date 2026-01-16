@@ -5,6 +5,9 @@ using Ivy.Views;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A placeholder for content that is loading.
+/// </summary>
 public record Skeleton : WidgetBase<Skeleton>
 {
     public static object Card() => new Skeleton().Height(100);

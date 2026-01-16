@@ -11,6 +11,9 @@ using static Ivy.Views.Forms.FormHelpers;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A modal window that interrupts the current workflow to request information or confirmation.
+/// </summary>
 public record Dialog : WidgetBase<Dialog>
 {
     public static Size DefaultWidth => Size.Rem(24);

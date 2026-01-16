@@ -4,6 +4,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Displays JSON data.
+/// </summary>
 public record Json : WidgetBase<Json>
 {
     public Json(JsonNode json) : this(json.ToString())

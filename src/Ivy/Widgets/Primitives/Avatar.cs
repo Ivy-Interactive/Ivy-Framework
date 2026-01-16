@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A graphical representation of a user or entity.
+/// </summary>
 public record Avatar : WidgetBase<Avatar>
 {
     public Avatar(string fallback, string? image = null)

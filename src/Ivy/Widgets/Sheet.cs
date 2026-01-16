@@ -10,6 +10,9 @@ using static Ivy.Views.Forms.FormHelpers;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A side-aligned modal panel for editing or displaying distinct sub-tasks.
+/// </summary>
 public record Sheet : WidgetBase<Sheet>
 {
     public static Size DefaultWidth => Size.Rem(24);

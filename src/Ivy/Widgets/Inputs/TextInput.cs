@@ -104,6 +104,9 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
 
+/// <summary>
+/// A standard input field for single-line text.
+/// </summary>
 public record TextInput : TextInput<string>
 {
     public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)

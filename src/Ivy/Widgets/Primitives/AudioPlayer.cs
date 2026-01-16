@@ -11,6 +11,9 @@ public enum AudioPreload
     Auto
 }
 
+/// <summary>
+/// Plays audio files.
+/// </summary>
 public record AudioPlayer : WidgetBase<AudioPlayer>
 {
     public AudioPlayer(string src) : this()

@@ -6,6 +6,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A slide-out panel component for secondary content or actions.
+/// </summary>
 public record Blade : WidgetBase<Blade>
 {
     [OverloadResolutionPriority(1)]

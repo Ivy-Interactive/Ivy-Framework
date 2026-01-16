@@ -7,6 +7,9 @@ namespace Ivy;
 
 public record PieChartTotal(string FormattedValue, string Label);
 
+/// <summary>
+/// A circular statistical graphic divided into slices to illustrate numerical proportion.
+/// </summary>
 public record PieChart : WidgetBase<PieChart>
 {
     public PieChart(object data) : this()

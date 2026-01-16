@@ -94,6 +94,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     }
 }
 
+/// <summary>
+/// Allows users to select and upload files.
+/// </summary>
 public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 {
     [OverloadResolutionPriority(1)]

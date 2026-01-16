@@ -12,6 +12,9 @@ public enum ChatSender
     Assistant
 }
 
+/// <summary>
+/// A complete chat interface component with message history and input.
+/// </summary>
 public record Chat : WidgetBase<Chat>
 {
     [OverloadResolutionPriority(1)]

@@ -82,6 +82,9 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
     [Event] public Func<Event<IInput<TColor>, TColor>, ValueTask>? OnChange { get; }
 }
 
+/// <summary>
+/// An input field for selecting colors.
+/// </summary>
 public record ColorInput : ColorInput<string>
 {
     [OverloadResolutionPriority(1)]

@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Renders markdown content.
+/// </summary>
 public record Markdown : WidgetBase<Markdown>
 {
     [OverloadResolutionPriority(1)]

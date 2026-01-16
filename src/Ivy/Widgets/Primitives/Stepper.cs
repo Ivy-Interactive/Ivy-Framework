@@ -7,6 +7,9 @@ namespace Ivy;
 
 public record StepperItem(string Symbol, Icons? Icon = null, string? Label = null, string? Description = null);
 
+/// <summary>
+/// A step-by-step progress indicator.
+/// </summary>
 public record Stepper : WidgetBase<Stepper>
 {
     [OverloadResolutionPriority(1)]

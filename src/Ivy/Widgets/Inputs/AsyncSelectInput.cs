@@ -21,6 +21,9 @@ public delegate QueryResult<Option<T>[]> AsyncSelectSearchDelegate<T>(IViewConte
 
 public delegate QueryResult<Option<T>?> AsyncSelectLookupDelegate<T>(IViewContext context, T id);
 
+/// <summary>
+/// A selection input that fetches options asynchronously.
+/// </summary>
 public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
 {
     public Type[] SupportedStateTypes() => [];

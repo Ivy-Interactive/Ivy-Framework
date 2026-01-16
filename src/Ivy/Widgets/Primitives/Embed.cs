@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Embeds external content.
+/// </summary>
 public record Embed : WidgetBase<Embed>
 {
     public Embed(string url)

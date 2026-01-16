@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A simple container for grouping content.
+/// </summary>
 public record Box : WidgetBase<Box>
 {
     public Box(params IEnumerable<object> content) : base(content.ToArray())

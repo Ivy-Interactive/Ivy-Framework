@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A container for panels that can be resized relative to each other.
+/// </summary>
 public record ResizeablePanelGroup : WidgetBase<ResizeablePanelGroup>
 {
     public ResizeablePanelGroup(params ResizeablePanel[] children) : base(children.Cast<object>().ToArray())
@@ -34,6 +37,9 @@ public static class ResizeablePanelsExtensions
     public static ResizeablePanelGroup Vertical(this ResizeablePanelGroup widget) => widget with { Direction = Orientation.Vertical };
 }
 
+/// <summary>
+/// A panel within a group that can be resized by the user.
+/// </summary>
 public record ResizeablePanel : WidgetBase<ResizeablePanel>
 {
     public ResizeablePanel(int? defaultSize, params object[] children) : base(children)

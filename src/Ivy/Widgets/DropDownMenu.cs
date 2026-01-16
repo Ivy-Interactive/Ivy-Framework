@@ -7,6 +7,9 @@ using Ivy.Core.Docs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A menu that appears when an element is clicked.
+/// </summary>
 public record DropDownMenu : WidgetBase<DropDownMenu>
 {
     public enum SideOptions

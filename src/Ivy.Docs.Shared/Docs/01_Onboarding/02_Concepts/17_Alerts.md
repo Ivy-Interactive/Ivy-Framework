@@ -19,7 +19,7 @@ Communicate with users effectively using modal dialog alerts for important confi
 Ivy provides two main types of alerts:
 
 1. **Dialog Alerts** - Modal dialogs for important confirmations and decisions
-2. **Toast Notifications** - Non-blocking notifications for [feedback](../../02_Widgets/04_Inputs/13_Feedback.md) and status updates
+2. **Toast Notifications** - Non-blocking notifications for [feedback](../../02_Widgets/04_Inputs/13_FeedbackInput.md) and status updates
 
 ## Dialog Alerts
 

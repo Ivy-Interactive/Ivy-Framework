@@ -5,6 +5,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A chart that displays information as a series of data points connected by straight line segments.
+/// </summary>
 public record LineChart : WidgetBase<LineChart>
 {
     public LineChart(object data, params Line[] lines) : this()

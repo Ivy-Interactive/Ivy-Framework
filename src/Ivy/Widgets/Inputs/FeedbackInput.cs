@@ -42,6 +42,9 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
     ];
 }
 
+/// <summary>
+/// A specialized input for collecting user feedback or ratings.
+/// </summary>
 public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 {
     [OverloadResolutionPriority(1)]

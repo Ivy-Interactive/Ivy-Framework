@@ -12,6 +12,9 @@ public enum TabsVariant
     Content
 }
 
+/// <summary>
+/// Organizes content into separate views accessible via tabs.
+/// </summary>
 public record TabsLayout : WidgetBase<TabsLayout>
 {
     [OverloadResolutionPriority(1)]
@@ -135,6 +138,9 @@ public static class TabsLayoutExtensions
     }
 }
 
+/// <summary>
+/// A single tab item within a TabsLayout.
+/// </summary>
 public record Tab : WidgetBase<Tab>
 {
     public Tab(string title, object? content = null) : base(content != null ? [content] : [])

@@ -4,6 +4,9 @@ namespace Ivy;
 
 public record TerminalLine(string Content, bool IsCommand = false, string Prompt = ">");
 
+/// <summary>
+/// Displays a command-line interface or log output.
+/// </summary>
 public record Terminal : WidgetBase<Terminal>
 {
     internal Terminal() { }

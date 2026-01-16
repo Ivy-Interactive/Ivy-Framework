@@ -59,6 +59,9 @@ public enum AnimationTrigger
     Hover
 }
 
+/// <summary>
+/// Applies CSS animations or transitions to its child content.
+/// </summary>
 public record Animation : WidgetBase<Animation>
 {
     public Animation(AnimationType animation)

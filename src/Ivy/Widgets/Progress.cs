@@ -5,6 +5,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A visual indicator of an operation's progress.
+/// </summary>
 public record Progress : WidgetBase<Progress>
 {
     public enum ColorVariants

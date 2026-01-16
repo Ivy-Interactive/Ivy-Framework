@@ -15,6 +15,9 @@ public enum BadgeVariant
     Info
 }
 
+/// <summary>
+/// A small visual indicator for status, counts, or labeling.
+/// </summary>
 public record Badge : WidgetBase<Badge>
 {
     public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Primary, Icons? icon = null)

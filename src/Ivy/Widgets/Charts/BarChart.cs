@@ -5,6 +5,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Displays categorical data using rectangular bars with proportional heights or lengths.
+/// </summary>
 public record BarChart : WidgetBase<BarChart>
 {
     public BarChart(object data, params Bar[] bars) : this()

@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A brief informational message that appears when hovering over an element.
+/// </summary>
 public record Tooltip : WidgetBase<Tooltip>
 {
     public Tooltip(object trigger, object content) : base([new Slot("Trigger", trigger), new Slot("Content", content)])

@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Displays an icon.
+/// </summary>
 public record Icon : WidgetBase<Icon>
 {
     public Icon(Icons name, Colors? color = null)

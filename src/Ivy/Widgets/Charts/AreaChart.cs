@@ -5,6 +5,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Renders data as an area chart for visualizing quantitative progression over time.
+/// </summary>
 public record AreaChart : WidgetBase<AreaChart>
 {
     public AreaChart(object data, params Area[] areas) : this()

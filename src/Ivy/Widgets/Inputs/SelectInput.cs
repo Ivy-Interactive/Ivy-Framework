@@ -44,6 +44,9 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
     public Type[] SupportedStateTypes() => [];
 }
 
+/// <summary>
+/// A dropdown list for selecting one or more options.
+/// </summary>
 public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectInput
 {
     [OverloadResolutionPriority(1)]

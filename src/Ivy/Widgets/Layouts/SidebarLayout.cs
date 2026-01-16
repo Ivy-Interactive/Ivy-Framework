@@ -6,6 +6,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A common application layout with a collapsible sidebar and main content area.
+/// </summary>
 public record SidebarLayout : WidgetBase<SidebarLayout>
 {
     public static Size DefaultWidth => Size.Rem(16);

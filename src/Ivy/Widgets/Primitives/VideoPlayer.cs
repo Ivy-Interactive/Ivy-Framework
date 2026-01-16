@@ -3,6 +3,9 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Plays video files.
+/// </summary>
 public record VideoPlayer : WidgetBase<VideoPlayer>
 {
     public VideoPlayer(

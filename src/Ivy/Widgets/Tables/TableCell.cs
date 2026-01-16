@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A data cell within a TableRow.
+/// </summary>
 public record TableCell : WidgetBase<TableCell>
 {
     public TableCell(object? content) : base(content != null ? [content] : [])

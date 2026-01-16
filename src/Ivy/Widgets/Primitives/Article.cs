@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A container for article content.
+/// </summary>
 public record Article : WidgetBase<Article>
 {
     public Article(params IEnumerable<object> content) : base(content)

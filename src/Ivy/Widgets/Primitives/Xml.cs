@@ -4,6 +4,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Displays XML data.
+/// </summary>
 public record Xml : WidgetBase<Xml>
 {
     public Xml(XObject xml) : this(xml.ToString() ?? string.Empty)

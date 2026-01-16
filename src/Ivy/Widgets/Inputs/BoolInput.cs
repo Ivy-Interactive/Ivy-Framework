@@ -105,6 +105,9 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
     [Event] public Func<Event<IInput<TBool>, TBool>, ValueTask>? OnChange { get; }
 }
 
+/// <summary>
+/// A checkbox or switch for toggling boolean values.
+/// </summary>
 public record BoolInput : BoolInput<bool>
 {
     [OverloadResolutionPriority(1)]

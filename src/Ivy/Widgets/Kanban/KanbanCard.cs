@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A single card item within a Kanban board.
+/// </summary>
 public record KanbanCard : WidgetBase<KanbanCard>
 {
     public KanbanCard(object? content) : base(content != null ? [content] : [])

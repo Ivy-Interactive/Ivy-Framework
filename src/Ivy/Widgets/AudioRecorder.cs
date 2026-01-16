@@ -5,6 +5,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// Allows users to record audio directly from the browser.
+/// </summary>
 public record AudioRecorder : WidgetBase<AudioRecorder>
 {
     public AudioRecorder(UploadContext upload, string? label = null, string? recordingLabel = null, string mimeType = "audio/webm", int? chunkInterval = null, bool disabled = false)

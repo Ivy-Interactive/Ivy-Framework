@@ -4,6 +4,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// A panel that floats above other content, often used for popovers or tool palettes.
+/// </summary>
 public record FloatingPanel : WidgetBase<FloatingPanel>
 {
     public FloatingPanel(object? child = null, Align align = Align.BottomRight) : base(child != null ? [child] : [])

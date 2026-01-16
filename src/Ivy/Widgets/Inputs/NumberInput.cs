@@ -81,6 +81,9 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 ];
 }
 
+/// <summary>
+/// An input field restricted to numerical values.
+/// </summary>
 public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumberInput
 {
     [OverloadResolutionPriority(1)]

@@ -3,6 +3,9 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>
+/// The top area of a Dialog containing the title and close button.
+/// </summary>
 public record DialogHeader : WidgetBase<DialogHeader>
 {
     public DialogHeader(string title)

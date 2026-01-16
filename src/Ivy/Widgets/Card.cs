@@ -12,6 +12,9 @@ public enum CardHoverVariant
     PointerAndTranslate,
 }
 
+/// <summary>
+/// A flexible container with a border and shadow for grouping related content.
+/// </summary>
 public record Card : WidgetBase<Card>
 {
     public Card(object? content = null, object? footer = null, object? header = null) : base(

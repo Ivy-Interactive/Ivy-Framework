@@ -48,6 +48,9 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
     ];
 }
 
+/// <summary>
+/// An input for selecting both date and time.
+/// </summary>
 public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 {
     [OverloadResolutionPriority(1)]
