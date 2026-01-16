@@ -85,7 +85,6 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 
-    // When height is Full (100%), use flex to expand. Otherwise use explicit height.
     const isFull = height?.toLowerCase().startsWith('full');
     const containerStyles: React.CSSProperties = isFull
       ? {
