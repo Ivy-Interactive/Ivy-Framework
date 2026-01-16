@@ -89,8 +89,12 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       role="details"
     >
       <CollapsibleTrigger
-        disabled={false}
-        className={cn(expandableTriggerVariants({ scale }), 'relative')}
+        disabled={disabled}
+        className={cn(
+          expandableTriggerVariants({ scale }),
+          'relative',
+          disabled && 'cursor-not-allowed'
+        )}
         onClick={handleTriggerClick}
         data-collapsible-trigger
       >
