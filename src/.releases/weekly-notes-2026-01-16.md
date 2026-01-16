@@ -7,6 +7,9 @@
 
 Ivy now includes **UseQuery** - a powerful data fetching and caching system inspired by React Query and SWR. This hook provides automatic caching, background revalidation, and loading state management for async data operations.
 
+![output](https://github.com/user-attachments/assets/b7cf7340-26b4-4b1a-9f7a-ecfe0d4b1411)
+
+
 **Key Features:**
 
 - Automatic request deduplication and caching
