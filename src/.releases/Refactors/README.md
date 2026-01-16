@@ -53,7 +53,7 @@ dotnet test  # if tests exist
 
 ## Tips for LLMs
 
-1. **Read the entire file** before making change
+1. **Read the entire file** before making changes
 2. **Start with `dotnet build`** — compiler errors often point directly to affected code
 3. **Apply changes file by file**, running `dotnet build` after each
 4. **Check `optional/` subfolder** after completing required migrations
