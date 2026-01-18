@@ -53,7 +53,7 @@ const mapLanguageToPrism = (language: string): string | undefined => {
 const MemoizedCopyButton = memo(
   ({ textToCopy, scale }: { textToCopy: string; scale: Scales }) => (
     <div className={codeCopyButtonVariants({ scale })}>
-      <CopyToClipboardButton textToCopy={textToCopy} />
+      <CopyToClipboardButton textToCopy={textToCopy} scale={scale} />
     </div>
   )
 );

@@ -16,9 +16,9 @@ export const codeContainerVariants = cva('', {
 export const codeCopyButtonVariants = cva('absolute z-50', {
     variants: {
         scale: {
-            Small: 'top-0 right-1',
-            Medium: 'top-1.5 right-2',
-            Large: 'top-2.5 right-3',
+            Small: 'top-1 right-1',
+            Medium: 'top-1.5 right-1.5',
+            Large: 'top-2 right-2',
         },
     },
     defaultVariants: {
