@@ -36,13 +36,19 @@
   </ItemGroup>
     
   <ItemGroup>
-
     <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
-
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="frontend\dist\**\*" />
+  </ItemGroup>
+
+  <!-- Include frontend source files in up-to-date check so changes trigger rebuild -->
+  <ItemGroup>
+    <UpToDateCheckInput Include="frontend\src\**\*" />
+    <UpToDateCheckInput Include="frontend\package.json" />
+    <UpToDateCheckInput Include="frontend\tsconfig.json" />
+    <UpToDateCheckInput Include="frontend\vite.config.ts" />
   </ItemGroup>
   
   <ItemGroup>

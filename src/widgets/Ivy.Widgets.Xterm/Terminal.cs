@@ -30,11 +30,14 @@ public record Terminal : WidgetBase<Terminal>
     [Prop] public CursorStyle CursorStyle { get; init; } = CursorStyle.Block;
     [Prop] public int Scrollback { get; init; } = 1000;
     [Prop] public string? InitialContent { get; init; }
+    [Prop] public bool Closed { get; init; }
+    [Prop] public bool AllowClipboard { get; init; } = true;
 
     [Prop] public IWriteStream<string>? Stream { get; init; }
 
     [Event] public Func<Event<Terminal, string>, ValueTask>? OnInput { get; init; }
     [Event] public Func<Event<Terminal, TerminalSize>, ValueTask>? OnResize { get; init; }
+    [Event] public Func<Event<Terminal, string>, ValueTask>? OnLinkClick { get; init; }
 }
 
 public static class TerminalExtensions
@@ -57,6 +60,12 @@ public static class TerminalExtensions
     public static Terminal InitialContent(this Terminal widget, string content) =>
         widget with { InitialContent = content };
 
+    public static Terminal Closed(this Terminal widget, bool closed = true) =>
+        widget with { Closed = closed };
+
+    public static Terminal AllowClipboard(this Terminal widget, bool allowClipboard = true) =>
+        widget with { AllowClipboard = allowClipboard };
+
     public static Terminal Stream(this Terminal widget, IWriteStream<string> stream) =>
         widget with { Stream = stream };
 
@@ -74,4 +83,10 @@ public static class TerminalExtensions
 
     public static Terminal HandleResize(this Terminal widget, Action<int, int> handler) =>
         widget with { OnResize = e => { handler(e.Value.Cols, e.Value.Rows); return ValueTask.CompletedTask; } };
+
+    public static Terminal HandleLinkClick(this Terminal widget, Func<Event<Terminal, string>, ValueTask> handler) =>
+        widget with { OnLinkClick = handler };
+
+    public static Terminal HandleLinkClick(this Terminal widget, Action<string> handler) =>
+        widget with { OnLinkClick = e => { handler(e.Value); return ValueTask.CompletedTask; } };
 }

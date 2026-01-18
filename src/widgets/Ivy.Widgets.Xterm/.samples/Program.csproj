@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ivy.Widgets.Xterm.csproj" />
+    <ProjectReference Include="..\..\..\Ivy.Hooks.Pty\Ivy.Pty.csproj" />
   </ItemGroup>
 </Project>
