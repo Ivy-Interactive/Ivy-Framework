@@ -250,7 +250,7 @@ public class TodoApp : ViewBase
                         }).Icon(Icons.Plus))
                     | todos.Value.Select((todo, index) => 
                         Layout.Horizontal()
-                            | Text.Literal(todo).Width(Size.Grow())
+                            | Text.Literal(todo)
                             | new Button("Remove", onClick: _ => {
                                 var list = todos.Value.ToList();
                                 list.RemoveAt(index);

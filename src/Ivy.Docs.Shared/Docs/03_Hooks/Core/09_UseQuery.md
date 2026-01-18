@@ -395,7 +395,7 @@ public class ProductDetailView(Product initialProduct) : ViewBase
 
         return new Card(
             Layout.Vertical()
-            | Text.Literal(product.Value?.Name ?? "").Bold()
+            | Text.Literal(product.Value?.Name ?? "")
             | Text.Literal($"${product.Value?.Price}")
         ).Small();
     }
