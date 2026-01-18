@@ -48,23 +48,35 @@ public interface IWriteStream<in T> : IStream
 internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
 {
     private readonly IClientSender _sender;
-    private readonly List<T> _buffer = new();
+    private readonly List<T>? _buffer;
     private readonly object _lock = new();
+    private readonly bool _bufferEnabled;
     private bool _subscribed;
     private bool _disposed;
 
     public string Id { get; }
 
-    public WriteStream(string id, IClientSender sender)
+    public WriteStream(string id, IClientSender sender, bool buffer = true)
     {
         Id = id;
         _sender = sender;
-        StreamRegistry.Register(id, this);
+        _bufferEnabled = buffer;
+        if (buffer)
+        {
+            _buffer = new List<T>();
+            StreamRegistry.Register(id, this);
+        }
     }
 
     public void Write(T data)
     {
         if (_disposed) return;
+
+        if (!_bufferEnabled)
+        {
+            _sender.Send("StreamData", new { streamId = Id, data });
+            return;
+        }
 
         lock (_lock)
         {
@@ -74,13 +86,15 @@ internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
             }
             else
             {
-                _buffer.Add(data);
+                _buffer!.Add(data);
             }
         }
     }
 
     public override void OnSubscribed()
     {
+        if (!_bufferEnabled || _buffer == null) return;
+
         lock (_lock)
         {
             if (_subscribed) return;
@@ -100,8 +114,11 @@ internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
         lock (_lock)
         {
             _disposed = true;
-            _buffer.Clear();
-            StreamRegistry.Unregister(Id);
+            if (_bufferEnabled)
+            {
+                _buffer!.Clear();
+                StreamRegistry.Unregister(Id);
+            }
         }
     }
 }
@@ -142,12 +159,12 @@ public class WriteStreamJsonConverter : JsonConverterFactory
 
 public static class UseStreamExtensions
 {
-    public static IWriteStream<T> UseStream<T>(this IViewContext context)
+    public static IWriteStream<T> UseStream<T>(this IViewContext context, bool buffer = true)
     {
         var streamId = context.UseState(() => Guid.NewGuid().ToString(), false);
         var clientProvider = context.UseService<IClientProvider>();
 
-        var stream = context.UseRef(() => new WriteStream<T>(streamId.Value, clientProvider.Sender));
+        var stream = context.UseRef(() => new WriteStream<T>(streamId.Value, clientProvider.Sender, buffer));
 
         context.UseEffect(() => stream.Value, [EffectTrigger.OnMount()]);
 
