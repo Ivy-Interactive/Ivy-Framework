@@ -18,6 +18,7 @@ import { hasLicensedFeature } from '@/lib/license';
 import { ConnectionModal } from './ConnectionModal';
 import { ThemeProvider } from './theme-provider';
 import { EventHandlerProvider } from './event-handler';
+import { StreamHandlerProvider } from './stream-handler';
 
 export function App() {
   const appId = getAppId();
@@ -25,7 +26,7 @@ export function App() {
   const parentId = getParentId();
   const chrome = getChromeParam();
 
-  const { connection, widgetTree, eventHandler, disconnected } = useBackend(
+  const { connection, widgetTree, eventHandler, subscribeToStream, disconnected } = useBackend(
     appId,
     appArgs,
     parentId,
@@ -58,14 +59,16 @@ export function App() {
     <ThemeProvider defaultTheme="system" storageKey="ivy-ui-theme">
       <ErrorBoundary>
         <EventHandlerProvider eventHandler={eventHandler}>
-          <>
-            {!removeBranding && <MadeWithIvy />}
-            {isDevToolsEnabled() && <DevTools />}
-            {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
-            <ErrorSheet />
-            <Toaster />
-            {disconnected && <ConnectionModal />}
-          </>
+          <StreamHandlerProvider subscribeToStream={subscribeToStream}>
+            <>
+              {!removeBranding && <MadeWithIvy />}
+              {isDevToolsEnabled() && <DevTools />}
+              {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
+              <ErrorSheet />
+              <Toaster />
+              {disconnected && <ConnectionModal />}
+            </>
+          </StreamHandlerProvider>
         </EventHandlerProvider>
       </ErrorBoundary>
     </ThemeProvider>

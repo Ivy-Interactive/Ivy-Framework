@@ -192,4 +192,10 @@ public abstract partial class ViewBase
 
     protected (IView? alertView, ShowAlertDelegate showAlert) UseAlert() =>
         this.Context.UseAlert();
+
+    protected IWriteStream<T> UseStream<T>() =>
+        this.Context.UseStream<T>();
+
+    protected static EffectTrigger OnMount() =>
+        EffectTrigger.OnMount();
 }

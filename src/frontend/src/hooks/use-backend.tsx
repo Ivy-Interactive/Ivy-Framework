@@ -68,6 +68,17 @@ type HttpTunnelResponseMessage = {
   errorMessage?: string;
 };
 
+type StreamDataMessage = {
+  streamId: string;
+  data: unknown;
+};
+
+type StreamHandler = (data: unknown) => void;
+type StreamSubscriber = (
+  streamId: string,
+  onData: StreamHandler
+) => () => void;
+
 const widgetTreeToXml = (node: WidgetNode) => {
   const tagName = node.type.replace('Ivy.', '');
   const attributes: string[] = [`Id="${escapeXml(node.id)}"`];
@@ -335,6 +346,9 @@ export const useBackend = (
   }, [chrome]);
 
   const rootAppIdRef = useRef<string | undefined>(undefined);
+
+  // Stream registry for server-to-client streaming
+  const streamRegistryRef = useRef<Map<string, StreamHandler>>(new Map());
 
   const isRootConnection = parentId === null;
 
@@ -808,6 +822,13 @@ export const useBackend = (
             handleHttpRequest(message);
           });
 
+          connection.on('StreamData', (message: StreamDataMessage) => {
+            const handler = streamRegistryRef.current.get(message.streamId);
+            if (handler) {
+              handler(message.data);
+            }
+          });
+
           connection.onreconnecting(() => {
             if (isStoppingRef.current) return;
             logger.warn(`[${connection.connectionId}] Reconnecting`);
@@ -840,6 +861,7 @@ export const useBackend = (
         connection.off('HotReload');
         connection.off('ReloadPage');
         connection.off('HttpRequest');
+        connection.off('StreamData');
         connection.off('SetAuthCookies');
         connection.off('SetRootAppId');
         connection.off('SetTheme');
@@ -894,10 +916,21 @@ export const useBackend = (
     [connection, connectionId]
   );
 
+  const subscribeToStream: StreamSubscriber = useCallback(
+    (streamId: string, onData: StreamHandler) => {
+      streamRegistryRef.current.set(streamId, onData);
+      return () => {
+        streamRegistryRef.current.delete(streamId);
+      };
+    },
+    []
+  );
+
   return {
     connection,
     widgetTree,
     eventHandler,
+    subscribeToStream,
     disconnected,
   };
 };

@@ -156,6 +156,13 @@ public class LayoutView : ViewBase, IStateless
         return this;
     }
 
+    public LayoutView Full()
+    {
+        _width = Shared.Size.Full();
+        _height = Shared.Size.Full();
+        return this;
+    }
+
     public LayoutView Padding(int padding)
     {
         _padding = new Thickness(padding);

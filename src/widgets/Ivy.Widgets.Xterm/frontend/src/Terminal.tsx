@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
-import '@xterm/xterm/css/xterm.css';
-import { IvyEventHandler } from './types';
+import xtermStyles from '@xterm/xterm/css/xterm.css?inline';
+import { EventHandler, StreamSubscriber } from './types';
 import { getWidth, getHeight } from './styles';
 
 type CursorStyle = 'Block' | 'Underline' | 'Bar';
@@ -37,7 +37,8 @@ interface TerminalProps {
   width?: string;
   height?: string;
   events?: string[];
-  onIvyEvent: IvyEventHandler;
+  eventHandler: EventHandler;
+  subscribeToStream?: StreamSubscriber;
   cols?: number;
   rows?: number;
   fontSize?: number;
@@ -48,6 +49,7 @@ interface TerminalProps {
   scrollback?: number;
   theme?: TerminalTheme;
   initialContent?: string;
+  stream?: { id: string };
 }
 
 const defaultTheme: TerminalTheme = {
@@ -91,7 +93,8 @@ export const Terminal: React.FC<TerminalProps> = ({
   width = 'Full',
   height = 'Full',
   events = [],
-  onIvyEvent,
+  eventHandler,
+  subscribeToStream,
   cols,
   rows,
   fontSize = 14,
@@ -102,47 +105,74 @@ export const Terminal: React.FC<TerminalProps> = ({
   scrollback = 1000,
   theme,
   initialContent,
+  stream,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const shadowRootRef = useRef<ShadowRoot | null>(null);
+  const terminalContainerRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<XTerm | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
   const initialContentWrittenRef = useRef(false);
 
   const handleData = useCallback(
     (data: string) => {
-      if (events.includes('OnData')) {
-        onIvyEvent('OnData', id, [data]);
+      if (events.includes('OnInput')) {
+        eventHandler('OnInput', id, [data]);
       }
     },
-    [events, onIvyEvent, id]
+    [events, eventHandler, id]
   );
 
   const handleResize = useCallback(
     (size: { cols: number; rows: number }) => {
       if (events.includes('OnResize')) {
-        onIvyEvent('OnResize', id, [{ cols: size.cols, rows: size.rows }]);
+        eventHandler('OnResize', id, [{ cols: size.cols, rows: size.rows }]);
       }
     },
-    [events, onIvyEvent, id]
+    [events, eventHandler, id]
   );
 
-  const handleTitleChange = useCallback(
-    (title: string) => {
-      if (events.includes('OnTitleChange')) {
-        onIvyEvent('OnTitleChange', id, [title]);
-      }
-    },
-    [events, onIvyEvent, id]
-  );
-
+  // Initialize Shadow DOM and terminal
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!hostRef.current) return;
+
+    // Create shadow root if it doesn't exist
+    if (!shadowRootRef.current) {
+      shadowRootRef.current = hostRef.current.attachShadow({ mode: 'open' });
+
+      // Inject xterm styles into shadow root
+      const styleEl = document.createElement('style');
+      styleEl.textContent = xtermStyles + `
+        :host {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+        .terminal-container {
+          width: 100%;
+          height: 100%;
+        }
+      `;
+      shadowRootRef.current.appendChild(styleEl);
+
+      // Create terminal container inside shadow root
+      const container = document.createElement('div');
+      container.className = 'terminal-container';
+      shadowRootRef.current.appendChild(container);
+      terminalContainerRef.current = container;
+    }
+
+    const container = terminalContainerRef.current;
+    if (!container) return;
+
+    // Clear any existing terminal content
+    container.innerHTML = '';
 
     const mergedTheme = { ...defaultTheme, ...theme };
 
     const term = new XTerm({
-      cols: cols,
-      rows: rows,
+      ...(cols !== undefined && { cols }),
+      ...(rows !== undefined && { rows }),
       fontSize,
       fontFamily,
       lineHeight,
@@ -159,23 +189,29 @@ export const Terminal: React.FC<TerminalProps> = ({
     term.loadAddon(fitAddon);
     term.loadAddon(webLinksAddon);
 
-    term.open(containerRef.current);
+    let disposed = false;
 
-    if (!cols && !rows) {
-      fitAddon.fit();
-    }
+    // Defer opening until container has dimensions
+    requestAnimationFrame(() => {
+      if (disposed) return;
 
-    terminalRef.current = term;
-    fitAddonRef.current = fitAddon;
+      term.open(container);
 
-    term.onData(handleData);
-    term.onResize(handleResize);
-    term.onTitleChange(handleTitleChange);
+      if (!cols && !rows) {
+        fitAddon.fit();
+      }
 
-    if (initialContent && !initialContentWrittenRef.current) {
-      term.write(initialContent);
-      initialContentWrittenRef.current = true;
-    }
+      terminalRef.current = term;
+      fitAddonRef.current = fitAddon;
+
+      term.onData(handleData);
+      term.onResize(handleResize);
+
+      if (initialContent && !initialContentWrittenRef.current) {
+        term.write(initialContent);
+        initialContentWrittenRef.current = true;
+      }
+    });
 
     const handleWindowResize = () => {
       if (!cols && !rows && fitAddonRef.current) {
@@ -191,11 +227,10 @@ export const Terminal: React.FC<TerminalProps> = ({
       }
     });
 
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
+    resizeObserver.observe(hostRef.current);
 
     return () => {
+      disposed = true;
       window.removeEventListener('resize', handleWindowResize);
       resizeObserver.disconnect();
       term.dispose();
@@ -213,8 +248,20 @@ export const Terminal: React.FC<TerminalProps> = ({
     initialContent,
     handleData,
     handleResize,
-    handleTitleChange,
   ]);
+
+  // Subscribe to stream data
+  useEffect(() => {
+    if (!stream?.id || !subscribeToStream) return;
+
+    const unsubscribe = subscribeToStream(stream.id, (data) => {
+      if (terminalRef.current && typeof data === 'string') {
+        terminalRef.current.write(data);
+      }
+    });
+
+    return unsubscribe;
+  }, [stream?.id, subscribeToStream]);
 
   const style: React.CSSProperties = {
     ...getWidth(width),
@@ -222,5 +269,5 @@ export const Terminal: React.FC<TerminalProps> = ({
     overflow: 'hidden',
   };
 
-  return <div ref={containerRef} style={style} />;
+  return <div ref={hostRef} style={style} />;
 };

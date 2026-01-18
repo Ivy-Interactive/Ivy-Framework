@@ -13,7 +13,7 @@ import {
 } from 'react-leaflet';
 import L from 'leaflet';
 import type {
-  IvyEventHandler,
+  EventHandler,
   LatLng,
   MapMarker,
   MapPolyline,
@@ -44,7 +44,7 @@ interface MapProps {
   /** Height prop from Ivy */
   height?: string;
   /** Event handler provided by Ivy */
-  onIvyEvent: IvyEventHandler;
+  eventHandler: EventHandler;
   /** List of registered events */
   events?: string[];
   /** Center coordinates of the map */
@@ -82,19 +82,19 @@ interface MapProps {
  */
 const MapEventHandler: React.FC<{
   id: string;
-  onIvyEvent: IvyEventHandler;
+  eventHandler: EventHandler;
   events: string[];
-}> = ({ id, onIvyEvent, events }) => {
+}> = ({ id, eventHandler, events }) => {
   useMapEvents({
     click: (e) => {
       if (events.includes('OnMapClick')) {
-        onIvyEvent('OnMapClick', id, [{ position: { lat: e.latlng.lat, lng: e.latlng.lng } }]);
+        eventHandler('OnMapClick', id, [{ position: { lat: e.latlng.lat, lng: e.latlng.lng } }]);
       }
     },
     zoomend: (e) => {
       if (events.includes('OnZoomChange')) {
         const map = e.target;
-        onIvyEvent('OnZoomChange', id, [{ zoom: map.getZoom() }]);
+        eventHandler('OnZoomChange', id, [{ zoom: map.getZoom() }]);
       }
     },
     moveend: (e) => {
@@ -102,10 +102,10 @@ const MapEventHandler: React.FC<{
       const center = map.getCenter();
       const bounds = map.getBounds();
       if (events.includes('OnCenterChange')) {
-        onIvyEvent('OnCenterChange', id, [{ center: { lat: center.lat, lng: center.lng } }]);
+        eventHandler('OnCenterChange', id, [{ center: { lat: center.lat, lng: center.lng } }]);
       }
       if (events.includes('OnBoundsChange')) {
-        onIvyEvent('OnBoundsChange', id, [
+        eventHandler('OnBoundsChange', id, [
           {
             southWest: { lat: bounds.getSouthWest().lat, lng: bounds.getSouthWest().lng },
             northEast: { lat: bounds.getNorthEast().lat, lng: bounds.getNorthEast().lng },
@@ -152,14 +152,14 @@ const MapSync: React.FC<{
 const DraggableMarker: React.FC<{
   marker: MapMarker;
   widgetId: string;
-  onIvyEvent: IvyEventHandler;
+  eventHandler: EventHandler;
   events: string[];
-}> = ({ marker, widgetId, onIvyEvent, events }) => {
+}> = ({ marker, widgetId, eventHandler, events }) => {
   const markerRef = useRef<L.Marker>(null);
 
   const handleClick = () => {
     if (events.includes('OnMarkerClick')) {
-      onIvyEvent('OnMarkerClick', widgetId, [
+      eventHandler('OnMarkerClick', widgetId, [
         {
           markerId: marker.id,
           position: { lat: marker.position.lat, lng: marker.position.lng },
@@ -173,7 +173,7 @@ const DraggableMarker: React.FC<{
       const m = markerRef.current;
       if (m) {
         const newPos = m.getLatLng();
-        onIvyEvent('OnMarkerDrag', widgetId, [
+        eventHandler('OnMarkerDrag', widgetId, [
           {
             markerId: marker.id,
             oldPosition: { lat: marker.position.lat, lng: marker.position.lng },
@@ -204,7 +204,7 @@ export const Map: React.FC<MapProps> = ({
   id,
   width = 'Full',
   height = 'Full',
-  onIvyEvent,
+  eventHandler,
   events = [],
   center = { lat: 51.505, lng: -0.09 },
   zoom = 13,
@@ -252,7 +252,7 @@ export const Map: React.FC<MapProps> = ({
       >
         <TileLayer url={tileUrl} attribution={tileAttribution} />
 
-        <MapEventHandler id={id} onIvyEvent={onIvyEvent} events={events} />
+        <MapEventHandler id={id} eventHandler={eventHandler} events={events} />
         <MapSync center={center} zoom={zoom} />
 
         {/* Render markers */}
@@ -261,7 +261,7 @@ export const Map: React.FC<MapProps> = ({
             key={marker.id}
             marker={marker}
             widgetId={id}
-            onIvyEvent={onIvyEvent}
+            eventHandler={eventHandler}
             events={events}
           />
         ))}

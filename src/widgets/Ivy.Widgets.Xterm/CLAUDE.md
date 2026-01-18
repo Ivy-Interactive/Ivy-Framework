@@ -62,14 +62,14 @@ Create a corresponding `.tsx` file in `frontend/src/`:
 
 ```tsx
 import React from 'react';
-import { IvyEventHandler } from './types';
+import { EventHandler } from './types';
 import { getWidth, getHeight } from './styles';
 
 interface MyWidgetProps {
   id: string;
   width?: string;
   height?: string;
-  onIvyEvent: IvyEventHandler;
+  eventHandler: EventHandler;
   title?: string;
   count?: number;
   disabled?: boolean;
@@ -79,17 +79,17 @@ export const MyWidget: React.FC<MyWidgetProps> = ({
   id,
   width = 'Full',
   height = 'Full',
-  onIvyEvent,
+  eventHandler,
   title,
   count,
   disabled,
 }) => {
   const handleClick = () => {
-    onIvyEvent('onClick', id, []);
+    eventHandler('onClick', id, []);
   };
 
   const handleChange = (value: string) => {
-    onIvyEvent('onChange', id, [value]);
+    eventHandler('onChange', id, [value]);
   };
 
   const style: React.CSSProperties = {
@@ -178,7 +178,7 @@ Document the new widget in README.md including:
 
 ### Event Handler Signature
 
-In React, call `onIvyEvent(eventName, widgetId, args)`:
+In React, call `eventHandler(eventName, widgetId, args)`:
 - `eventName`: The event name in PascalCase with 'On' prefix (e.g., 'OnClick', 'OnChange')
 - `widgetId`: Always pass `id`
 - `args`: Array of arguments to pass to the C# handler
@@ -191,25 +191,25 @@ Ivy passes an `events` array prop containing the names of registered event handl
 interface MyWidgetProps {
   id: string;
   events?: string[];
-  onIvyEvent: IvyEventHandler;
+  eventHandler: EventHandler;
   // ... other props
 }
 
 export const MyWidget: React.FC<MyWidgetProps> = ({
   id,
   events = [],
-  onIvyEvent,
+  eventHandler,
 }) => {
   const handleClick = () => {
     // Only fire if the event handler is registered in C#
     if (events.includes('OnClick')) {
-      onIvyEvent('OnClick', id, []);
+      eventHandler('OnClick', id, []);
     }
   };
 
   const handleChange = (value: string) => {
     if (events.includes('OnChange')) {
-      onIvyEvent('OnChange', id, [value]);
+      eventHandler('OnChange', id, [value]);
     }
   };
 
@@ -322,7 +322,7 @@ export const MyInput: React.FC<MyInputProps> = ({
   id,
   value = '',
   events = [],
-  onIvyEvent,
+  eventHandler,
 }) => {
   // 1. Local state for immediate UI updates
   const [localValue, setLocalValue] = useState(value || '');
@@ -344,24 +344,24 @@ export const MyInput: React.FC<MyInputProps> = ({
   // 4. Update local immediately AND notify server
   const handleChange = useCallback((newValue: string) => {
     setLocalValue(newValue);
-    if (events.includes('OnChange') && onIvyEvent) {
-      onIvyEvent('OnChange', id, [newValue]);
+    if (events.includes('OnChange') && eventHandler) {
+      eventHandler('OnChange', id, [newValue]);
     }
-  }, [events, onIvyEvent, id]);
+  }, [events, eventHandler, id]);
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
-    if (events.includes('OnFocus') && onIvyEvent) {
-      onIvyEvent('OnFocus', id, []);
+    if (events.includes('OnFocus') && eventHandler) {
+      eventHandler('OnFocus', id, []);
     }
-  }, [events, onIvyEvent, id]);
+  }, [events, eventHandler, id]);
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
-    if (events.includes('OnBlur') && onIvyEvent) {
-      onIvyEvent('OnBlur', id, []);
+    if (events.includes('OnBlur') && eventHandler) {
+      eventHandler('OnBlur', id, []);
     }
-  }, [events, onIvyEvent, id]);
+  }, [events, eventHandler, id]);
 
   // 5. Use localValue for display
   return (
@@ -392,8 +392,8 @@ When the editor manages its own internal state, sync `localValue` to the editor:
 onUpdate: ({ editor }) => {
   const html = editor.getHTML();
   setLocalValue(html);
-  if (events.includes('OnChange') && onIvyEvent) {
-    onIvyEvent('OnChange', id, [html]);
+  if (events.includes('OnChange') && eventHandler) {
+    eventHandler('OnChange', id, [html]);
   }
 },
 

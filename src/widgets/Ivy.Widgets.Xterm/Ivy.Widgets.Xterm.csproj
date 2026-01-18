@@ -49,6 +49,10 @@
     <Compile Remove=".samples\**\*.cs" />
     <None Include=".samples\**\*" CopyToOutputDirectory="Never" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include=".samples\.console\" />
+  </ItemGroup>
 
   <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend/package.json')">
     <Exec Command="npm install" WorkingDirectory="frontend" />
