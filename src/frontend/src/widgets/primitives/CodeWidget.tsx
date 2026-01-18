@@ -71,10 +71,25 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     scale = Scales.Medium,
   }) => {
     const styles = useMemo<CSSProperties>(() => {
-      const scaleStyles: Record<Scales, { fontSize: string; padding: string; lineHeight: string }> = {
-        [Scales.Small]: { fontSize: '0.75rem', padding: '0.5rem', lineHeight: '1.4' },
-        [Scales.Medium]: { fontSize: '0.875rem', padding: '0.75rem', lineHeight: '1.5' },
-        [Scales.Large]: { fontSize: '1rem', padding: '1rem', lineHeight: '1.6' },
+      const scaleStyles: Record<
+        Scales,
+        { fontSize: string; padding: string; lineHeight: string }
+      > = {
+        [Scales.Small]: {
+          fontSize: '0.75rem',
+          padding: '0.5rem',
+          lineHeight: '1.4',
+        },
+        [Scales.Medium]: {
+          fontSize: '0.875rem',
+          padding: '0.75rem',
+          lineHeight: '1.5',
+        },
+        [Scales.Large]: {
+          fontSize: '1rem',
+          padding: '1rem',
+          lineHeight: '1.6',
+        },
       };
 
       const currentScale = scaleStyles[scale];
@@ -107,7 +122,9 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
 
     return (
       <div className={cn('relative', codeContainerVariants({ scale }))}>
-        {showCopyButton && <MemoizedCopyButton textToCopy={content} scale={scale} />}
+        {showCopyButton && (
+          <MemoizedCopyButton textToCopy={content} scale={scale} />
+        )}
         <ScrollArea
           className={cn(
             'w-full h-full',
