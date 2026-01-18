@@ -16,7 +16,7 @@ class TerminalView : ViewBase
         var helloAppPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".console", "HelloApp");
 
         var pty = this.Context.UsePty(
-            ["cmd"],
+            ["dotnet run"],
             Path.GetFullPath(helloAppPath)
         );
 

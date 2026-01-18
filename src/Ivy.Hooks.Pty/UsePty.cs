@@ -15,10 +15,11 @@ public record PtyOptions
     public int Cols { get; init; } = 120;
     public int Rows { get; init; } = 30;
     public bool? ForceWinPty { get; init; }
+    public Action<string>? OnOutput { get; init; }
 }
 
 public record PtyHandle(
-    IWriteStream<string> Stream,
+    IWriteStream<byte[]> Stream,
     Action<string> HandleInput,
     Action<int, int> HandleResize,
     Action Kill,
@@ -37,7 +38,7 @@ public static class UsePtyExtensions
         options ??= new PtyOptions();
         var cwd = workingDirectory ?? options.WorkingDirectory;
 
-        var stream = context.UseStream<string>();
+        var stream = context.UseStream<byte[]>();
         var closed = context.UseState(false);
         var exitCode = context.UseState<int?>(() => null);
         var pty = context.UseRef<IPtyConnection?>(() => null);
@@ -115,7 +116,7 @@ public static class UsePtyExtensions
         string[] commandLine,
         string? workingDirectory,
         PtyOptions options,
-        IWriteStream<string> stream,
+        IWriteStream<byte[]> stream,
         IState<IPtyConnection?> ptyRef,
         IState<bool> closed,
         IState<int?> exitCode,
@@ -126,7 +127,7 @@ public static class UsePtyExtensions
         var app = commandLine[0];
         var cwd = workingDirectory ?? Directory.GetCurrentDirectory();
 
-        // ForceWinPty only applies on Windows - default to true to avoid missing conpty.dll
+        // ForceWinPty only applies on Windows - default to true since ConPty DLL may not be available
         var forceWinPty = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             && (options.ForceWinPty ?? true);
 
@@ -185,8 +186,14 @@ public static class UsePtyExtensions
                     int bytesRead;
                     while ((bytesRead = await pty.ReaderStream.ReadAsync(buffer, cancellationToken)) > 0)
                     {
+                        // Send raw bytes - JSON serializer will base64 encode automatically
+                        var data = new byte[bytesRead];
+                        Buffer.BlockCopy(buffer, 0, data, 0, bytesRead);
+                        stream.Write(data);
+
+                        // OnOutput callback gets the decoded text for parsing
                         var text = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        stream.Write(text);
+                        options.OnOutput?.Invoke(text);
                     }
                 }
                 catch (OperationCanceledException) { }
@@ -206,7 +213,8 @@ public static class UsePtyExtensions
         }
         catch (Exception ex)
         {
-            stream.Write($"\r\n[Error starting PTY: {ex.Message}]\r\n");
+            var errorMsg = Encoding.UTF8.GetBytes($"\r\n[Error starting PTY: {ex.Message}]\r\n");
+            stream.Write(errorMsg);
             closed.Set(true);
         }
     }

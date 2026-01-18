@@ -72,9 +72,14 @@ internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
     {
         if (_disposed) return;
 
+        // Explicitly base64 encode byte arrays to ensure proper serialization
+        object serializedData = data is byte[] bytes
+            ? Convert.ToBase64String(bytes)
+            : data!;
+
         if (!_bufferEnabled)
         {
-            _sender.Send("StreamData", new { streamId = Id, data });
+            _sender.Send("StreamData", new { streamId = Id, data = serializedData });
             return;
         }
 
@@ -82,7 +87,7 @@ internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
         {
             if (_subscribed)
             {
-                _sender.Send("StreamData", new { streamId = Id, data });
+                _sender.Send("StreamData", new { streamId = Id, data = serializedData });
             }
             else
             {
@@ -103,7 +108,11 @@ internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
             // Flush buffered data
             foreach (var data in _buffer)
             {
-                _sender.Send("StreamData", new { streamId = Id, data });
+                // Explicitly base64 encode byte arrays to ensure proper serialization
+                object serializedData = data is byte[] bytes
+                    ? Convert.ToBase64String(bytes)
+                    : data!;
+                _sender.Send("StreamData", new { streamId = Id, data = serializedData });
             }
             _buffer.Clear();
         }

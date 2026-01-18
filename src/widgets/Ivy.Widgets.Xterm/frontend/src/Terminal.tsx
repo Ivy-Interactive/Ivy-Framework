@@ -56,7 +56,7 @@ interface TerminalProps {
 }
 
 const defaultTheme: TerminalTheme = {
-  background: '#1e1e1e',
+  background: '#000000',
   foreground: '#d4d4d4',
   cursor: '#aeafad',
   cursorAccent: '#000000',
@@ -100,7 +100,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   subscribeToStream,
   cols,
   rows,
-  fontFamily = "Geist Mono, Menlo, Monaco, 'Courier New', monospace, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji'",
+  fontFamily = "Cascadia Mono, Geist Mono, Menlo, Monaco, 'Courier New', monospace, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji'",
   lineHeight = 1.0,
   cursorBlink = true,
   cursorStyle = 'Block',
@@ -184,7 +184,7 @@ export const Terminal: React.FC<TerminalProps> = ({
         .terminal-container {
           width: 100%;
           height: 100%;
-          background: #1e1e1e;
+          background: #000000;
           padding: 10px 0px 10px 10px;
           box-sizing: border-box;
         }
@@ -368,13 +368,37 @@ export const Terminal: React.FC<TerminalProps> = ({
     }
   }, [isReadOnly]);
 
-  // Subscribe to stream data
+  // Subscribe to stream data (base64 encoded to preserve control characters)
   useEffect(() => {
     if (!stream?.id || !subscribeToStream) return;
 
     const unsubscribe = subscribeToStream(stream.id, (data) => {
       if (terminalRef.current && typeof data === 'string') {
-        terminalRef.current.write(data);
+        try {
+          // Decode base64 to binary string, then to UTF-8
+          const binaryString = atob(data);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const text = new TextDecoder('utf-8').decode(bytes);
+          // Debug: log first chunk to verify encoding
+          if (bytes.length > 0 && bytes.length < 100) {
+            console.log('[Terminal] base64 decoded:', {
+              rawLength: data.length,
+              decodedLength: bytes.length,
+              firstBytes: Array.from(bytes.slice(0, 20)),
+              text: text.slice(0, 50)
+            });
+          }
+          terminalRef.current.write(text);
+        } catch (e) {
+          // Fallback for non-base64 data
+          console.warn('[Terminal] base64 decode failed, using raw data:', e, { data: data.slice(0, 50) });
+          terminalRef.current.write(data);
+        }
+      } else {
+        console.warn('[Terminal] unexpected data type:', typeof data, data);
       }
     });
 

@@ -33,7 +33,7 @@ public record Terminal : WidgetBase<Terminal>
     [Prop] public bool Closed { get; init; }
     [Prop] public bool AllowClipboard { get; init; } = true;
 
-    [Prop] public IWriteStream<string>? Stream { get; init; }
+    [Prop] public IWriteStream<byte[]>? Stream { get; init; }
 
     [Event] public Func<Event<Terminal, string>, ValueTask>? OnInput { get; init; }
     [Event] public Func<Event<Terminal, TerminalSize>, ValueTask>? OnResize { get; init; }
@@ -66,7 +66,7 @@ public static class TerminalExtensions
     public static Terminal AllowClipboard(this Terminal widget, bool allowClipboard = true) =>
         widget with { AllowClipboard = allowClipboard };
 
-    public static Terminal Stream(this Terminal widget, IWriteStream<string> stream) =>
+    public static Terminal Stream(this Terminal widget, IWriteStream<byte[]> stream) =>
         widget with { Stream = stream };
 
     public static Terminal HandleInput(this Terminal widget, Func<Event<Terminal, string>, ValueTask> handler) =>
