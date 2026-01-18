@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>CS1591;CS1573</NoWarn>
-    <PackageId>Ivy.Pty</PackageId>
+    <PackageId>Ivy.Hooks.Pty</PackageId>
     <Description>PTY support for Ivy Framework</Description>
     <Authors>Ivy Interactive</Authors>
     <Company>Ivy Interactive</Company>

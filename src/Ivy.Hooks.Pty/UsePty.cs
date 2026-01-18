@@ -2,10 +2,9 @@ using System.Collections;
 using System.Reactive.Disposables;
 using System.Text;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
 using Porta.Pty;
 
-namespace Ivy.Pty;
+namespace Ivy.Hooks.Pty;
 
 public record PtyOptions
 {
@@ -127,9 +126,9 @@ public static class UsePtyExtensions
 
         // Merge with parent environment
         var env = new Dictionary<string, string>();
-        foreach (DictionaryEntry entry in System.Environment.GetEnvironmentVariables())
+        foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables())
         {
-            if (entry.Key is string key && entry.Value is string value)
+            if (entry is { Key: string key, Value: string value })
             {
                 env[key] = value;
             }
