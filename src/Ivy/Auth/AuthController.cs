@@ -113,7 +113,7 @@ public class AuthController() : Controller
         try
         {
             var tempSession = new AuthSession(new HttpClientHandler());
-            
+
             var token = await authProvider.HandleOAuthCallbackAsync(tempSession, HttpContext.Request);
 
             if (token == null)

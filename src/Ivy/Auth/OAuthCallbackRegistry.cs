@@ -5,7 +5,7 @@ namespace Ivy.Auth;
 public interface IOAuthCallbackRegistry
 {
     string RegisterPending(string connectionId, string optionId);
-    
+
     PendingOAuthCallback? GetAndRemove(string state);
 }
 
@@ -21,7 +21,7 @@ public class OAuthCallbackRegistry : IOAuthCallbackRegistry
     public string RegisterPending(string connectionId, string optionId)
     {
         CleanupExpiredIfNeeded();
-        
+
         var state = Guid.NewGuid().ToString();
         _pending[state] = new PendingOAuthCallback(connectionId, optionId, DateTime.UtcNow);
         return state;
@@ -37,7 +37,7 @@ public class OAuthCallbackRegistry : IOAuthCallbackRegistry
             if (DateTime.UtcNow - callback.CreatedAt < Expiration)
                 return callback;
         }
-        
+
         return null;
     }
 
@@ -47,7 +47,7 @@ public class OAuthCallbackRegistry : IOAuthCallbackRegistry
             return;
 
         _lastCleanup = DateTime.UtcNow;
-        
+
         var expiredKeys = _pending
             .Where(kvp => DateTime.UtcNow - kvp.Value.CreatedAt > Expiration)
             .Select(kvp => kvp.Key)
