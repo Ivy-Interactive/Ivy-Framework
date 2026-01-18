@@ -35,4 +35,22 @@ for (let i = 0; i < 10; i++) {
       .Height(Size.Auto())
 ```
 
+## Scale
+
+Use Scale to adjust the font size for different contexts.
+
+```csharp demo-tabs
+Layout.Horizontal().Gap(4).AlignItems(Align.Start)
+    | (Layout.Vertical()
+        | Text.Label("Small")
+        | new Code("var x = 1;", Languages.Csharp).Small())
+    | (Layout.Vertical()
+        | Text.Label("Medium")
+        | new Code("var x = 1;", Languages.Csharp).Medium())
+    | (Layout.Vertical()
+        | Text.Label("Large")
+        | new Code("var x = 1;", Languages.Csharp).Large())
+```
+
 <WidgetDocs Type="Ivy.Code" ExtensionTypes="Ivy.CodeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Code.cs"/>
+
