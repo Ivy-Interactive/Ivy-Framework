@@ -100,7 +100,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   subscribeToStream,
   cols,
   rows,
-  fontFamily = "Cascadia Mono, Geist Mono, Menlo, Monaco, 'Courier New', monospace, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji'",
+  fontFamily = "Geist Mono, Menlo, Monaco, 'Courier New', monospace, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji'",
   lineHeight = 1.0,
   cursorBlink = true,
   cursorStyle = 'Block',

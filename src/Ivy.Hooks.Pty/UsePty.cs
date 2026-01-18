@@ -1,10 +1,9 @@
 using System.Collections;
 using System.Reactive.Disposables;
-using System.Runtime.InteropServices;
 using System.Text;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
-using Pty.Net;
+using Porta.Pty;
 
 namespace Ivy.Pty;
 
@@ -14,7 +13,6 @@ public record PtyOptions
     public Dictionary<string, string>? Environment { get; init; }
     public int Cols { get; init; } = 120;
     public int Rows { get; init; } = 30;
-    public bool? ForceWinPty { get; init; }
     public Action<string>? OnOutput { get; init; }
 }
 
@@ -127,10 +125,6 @@ public static class UsePtyExtensions
         var app = commandLine[0];
         var cwd = workingDirectory ?? Directory.GetCurrentDirectory();
 
-        // ForceWinPty only applies on Windows - default to true since ConPty DLL may not be available
-        var forceWinPty = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            && (options.ForceWinPty ?? true);
-
         // Merge with parent environment
         var env = new Dictionary<string, string>();
         foreach (DictionaryEntry entry in System.Environment.GetEnvironmentVariables())
@@ -154,7 +148,7 @@ public static class UsePtyExtensions
             }
         }
 
-        var ptyOptions = new global::Pty.Net.PtyOptions
+        var ptyOptions = new global::Porta.Pty.PtyOptions
         {
             Name = "xterm-256color",
             Cols = options.Cols,
@@ -162,7 +156,6 @@ public static class UsePtyExtensions
             Cwd = cwd,
             App = app,
             CommandLine = commandLine,
-            ForceWinPty = forceWinPty,
             Environment = env
         };
 

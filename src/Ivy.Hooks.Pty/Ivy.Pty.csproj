@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Quick.PtyNet" Version="1.0.3" />
+    <PackageReference Include="Porta.Pty" Version="1.0.6" />
   </ItemGroup>
 
 </Project>
