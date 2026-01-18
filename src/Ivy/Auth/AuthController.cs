@@ -51,14 +51,15 @@ public class AuthController() : Controller
             return BadRequest("Authentication error");
         }
 
-        // Construct the webhook endpoint
+        // Construct the OAuth callback endpoint
         var scheme = HttpContext.Request.Scheme;
         if (HttpContext.Request.Headers.TryGetValue("X-Forwarded-Proto", out var forwardedProto))
         {
             scheme = forwardedProto.ToString();
         }
         var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
-        var callback = new WebhookEndpoint(callbackId, scheme, host);
+        var callbackBaseUrl = $"{scheme}://{host}/ivy/auth/oauth-callback";
+        var callback = new WebhookEndpoint(callbackId, callbackBaseUrl);
 
         try
         {
@@ -70,6 +71,70 @@ public class AuthController() : Controller
         {
             logger.LogError(ex, "OAuth login failed: Error initiating OAuth for option '{OptionId}' on connection {ConnectionId}", optionId, connectionId);
             return BadRequest("Authentication error");
+        }
+    }
+
+    [Route("ivy/auth/oauth-callback")]
+    [HttpGet]
+    public async Task<IActionResult> OAuthCallback(
+        [FromQuery] string? code,
+        [FromQuery] string? state,
+        [FromQuery] string? error,
+        [FromQuery(Name = "error_description")] string? errorDescription,
+        [FromServices] IOAuthCallbackRegistry registry,
+        [FromServices] IAuthProvider authProvider,
+        [FromServices] ILogger<AuthController> logger)
+    {
+        if (!string.IsNullOrEmpty(error))
+        {
+            logger.LogWarning("OAuth callback error: {Error} - {Description}", error, errorDescription);
+            return BadRequest($"OAuth error: {error}");
+        }
+
+        if (string.IsNullOrEmpty(state))
+        {
+            logger.LogWarning("OAuth callback failed: Missing state parameter");
+            return BadRequest("Invalid OAuth callback: missing state");
+        }
+
+        if (string.IsNullOrEmpty(code))
+        {
+            logger.LogWarning("OAuth callback failed: Missing code parameter");
+            return BadRequest("Invalid OAuth callback: missing authorization code");
+        }
+
+        var pending = registry.GetAndRemove(state);
+        if (pending == null)
+        {
+            logger.LogWarning("OAuth callback failed: Invalid or expired state '{State}'", state);
+            return BadRequest("Invalid or expired OAuth state. Please try logging in again.");
+        }
+
+        try
+        {
+            var tempSession = new AuthSession(new HttpClientHandler());
+            
+            var token = await authProvider.HandleOAuthCallbackAsync(tempSession, HttpContext.Request);
+
+            if (token == null)
+            {
+                logger.LogWarning("OAuth callback failed: No token returned");
+                return BadRequest("Authentication failed: no token received");
+            }
+
+            logger.LogInformation("OAuth callback successful, setting auth cookies");
+
+            // Use CookieJar to ensure consistent cookie handling (including splitting for large tokens)
+            var cookies = new CookieJar();
+            cookies.AddCookiesForAuthToken(token);
+            cookies.WriteToResponse(Response);
+
+            return Redirect("/");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "OAuth callback failed: Error processing callback");
+            return BadRequest($"Authentication error: {ex.Message}");
         }
     }
 
