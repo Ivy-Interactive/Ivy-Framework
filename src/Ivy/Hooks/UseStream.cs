@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ivy.Core;
@@ -10,15 +11,46 @@ public interface IStream
     string Id { get; }
 }
 
+public static class StreamRegistry
+{
+    private static readonly ConcurrentDictionary<string, WeakReference<WriteStream>> Streams = new();
+
+    internal static void Register(string streamId, WriteStream stream)
+    {
+        Streams[streamId] = new WeakReference<WriteStream>(stream);
+    }
+
+    internal static void Unregister(string streamId)
+    {
+        Streams.TryRemove(streamId, out _);
+    }
+
+    public static void NotifySubscribed(string streamId)
+    {
+        if (Streams.TryGetValue(streamId, out var weakRef) && weakRef.TryGetTarget(out var stream))
+        {
+            stream.OnSubscribed();
+        }
+    }
+}
+
+internal abstract class WriteStream
+{
+    public abstract void OnSubscribed();
+}
+
 [JsonConverter(typeof(WriteStreamJsonConverter))]
 public interface IWriteStream<in T> : IStream
 {
     void Write(T data);
 }
 
-internal class WriteStream<T> : IWriteStream<T>, IDisposable
+internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
 {
     private readonly IClientSender _sender;
+    private readonly List<T> _buffer = new();
+    private readonly object _lock = new();
+    private bool _subscribed;
     private bool _disposed;
 
     public string Id { get; }
@@ -27,17 +59,50 @@ internal class WriteStream<T> : IWriteStream<T>, IDisposable
     {
         Id = id;
         _sender = sender;
+        StreamRegistry.Register(id, this);
     }
 
     public void Write(T data)
     {
         if (_disposed) return;
-        _sender.Send("StreamData", new { streamId = Id, data });
+
+        lock (_lock)
+        {
+            if (_subscribed)
+            {
+                _sender.Send("StreamData", new { streamId = Id, data });
+            }
+            else
+            {
+                _buffer.Add(data);
+            }
+        }
+    }
+
+    public override void OnSubscribed()
+    {
+        lock (_lock)
+        {
+            if (_subscribed) return;
+            _subscribed = true;
+
+            // Flush buffered data
+            foreach (var data in _buffer)
+            {
+                _sender.Send("StreamData", new { streamId = Id, data });
+            }
+            _buffer.Clear();
+        }
     }
 
     public void Dispose()
     {
-        _disposed = true;
+        lock (_lock)
+        {
+            _disposed = true;
+            _buffer.Clear();
+            StreamRegistry.Unregister(Id);
+        }
     }
 }
 

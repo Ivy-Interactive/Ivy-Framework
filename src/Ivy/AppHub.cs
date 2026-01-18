@@ -534,6 +534,12 @@ public class AppHub(
         return Task.CompletedTask;
     }
 
+    public void StreamSubscribe(string streamId)
+    {
+        logger.LogDebug("StreamSubscribe: {StreamId}", streamId);
+        StreamRegistry.NotifySubscribed(streamId);
+    }
+
     public async Task Navigate(string? appId, HistoryState? state)
     {
         logger.LogInformation("Navigate: {ConnectionId} to [{AppId}] with tab ID {TabId}", Context.ConnectionId, appId, state?.TabId);

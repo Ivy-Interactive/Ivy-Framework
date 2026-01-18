@@ -919,6 +919,10 @@ export const useBackend = (
   const subscribeToStream: StreamSubscriber = useCallback(
     (streamId: string, onData: StreamHandler) => {
       streamRegistryRef.current.set(streamId, onData);
+      // Notify backend that we're subscribed so it can flush any buffered data
+      latestConnectionRef.current?.invoke('StreamSubscribe', streamId).catch(err => {
+        logger.error('Failed to notify stream subscription:', err);
+      });
       return () => {
         streamRegistryRef.current.delete(streamId);
       };
