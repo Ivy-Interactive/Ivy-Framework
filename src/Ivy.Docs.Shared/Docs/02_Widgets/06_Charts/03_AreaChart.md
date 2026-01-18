@@ -10,6 +10,10 @@ searchHints:
 
 # AreaChart
 
+<Ingress>
+Display quantitative data over time with filled areas that can be stacked with different colors.
+</Ingress>
+
 `AreaChart`s display quantitative data over time. Multiple series can be stacked
 with different colors.
 

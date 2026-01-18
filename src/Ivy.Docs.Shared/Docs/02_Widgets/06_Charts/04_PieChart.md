@@ -10,6 +10,10 @@ searchHints:
 
 # PieChart
 
+<Ingress>
+Represent parts of a whole with pie and donut charts, supporting custom labels and drill-down interactions.
+</Ingress>
+
 `PieChart`s represent parts of a whole. Each slice is drawn from the provided data.
 
 The following example showcases a sample case where possible sale data from a store is listed.
@@ -248,3 +252,5 @@ public class DrillDownDemo : ViewBase
     }
 }
 ```
+
+<WidgetDocs Type="Ivy.PieChart" ExtensionTypes="Ivy.PieChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Charts/PieChart.cs"/>

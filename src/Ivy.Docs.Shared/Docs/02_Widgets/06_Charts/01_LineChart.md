@@ -87,120 +87,13 @@ public class LineStylesDemo: ViewBase
 }
 ```
 
-## Selecting Colors
 
-There are two possible color schemes to choose from. `Default` or `Rainbow`.
+## Changing Line Widths
 
-```csharp demo-tabs
-public class LineColorSchemeDemo: ViewBase
-{
-    public override object? Build()
-    {
-        var data = new[]
-        {
-            new { Month = "January", Desktop = 186, Mobile = 100},
-            new { Month = "February", Desktop = 305, Mobile = 200},
-            new { Month = "March", Desktop = 237, Mobile = 300},
-            new { Month = "April", Desktop = 186, Mobile = 100},
-            new { Month = "May", Desktop = 325, Mobile = 200}
-        };
-        return Layout.Vertical()
-                 | Text.P("Default Colors").Large()
-                 | new LineChart(data, "Desktop", "Month")
-                       .ColorScheme(ColorScheme.Default)
-                 | Text.P("Rainbow Colors").Large()      
-                 | new LineChart(data, "Mobile", "Month")
-                       .ColorScheme(ColorScheme.Rainbow);
-    }
-}
-```
-
-## Grid Lines
-
-To turn grid lines on and off `CartesianGrid` should be used.
+To change the width of individual lines, use the `StrokeWidth` function:
 
 ```csharp demo-tabs
-public class GridLineDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var data = new[]
-        {
-            new { Month = "January", Desktop = 186, Mobile = 100},
-            new { Month = "February", Desktop = 305, Mobile = 200},
-            new { Month = "March", Desktop = 237, Mobile = 300},
-            new { Month = "April", Desktop = 186, Mobile = 100},
-            new { Month = "May", Desktop = 325, Mobile = 200}
-        };
-        return Layout.Vertical()
-                 | new LineChart(data, "Desktop", "Month")
-                       .CartesianGrid().Horizontal()
-                 | new LineChart(data, "Mobile", "Month")
-                       .CartesianGrid().Horizontal().Vertical();
-    }
-}
-```
-
-## Showing Legend
-
-To show the legend of the charts the `Legend` function should be used.
-
-```csharp demo-tabs
-public class GridLineDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var data = new[]
-        {
-            new { Month = "January", Desktop = 186, Mobile = 100},
-            new { Month = "February", Desktop = 305, Mobile = 200},
-            new { Month = "March", Desktop = 237, Mobile = 300},
-            new { Month = "April", Desktop = 186, Mobile = 100},
-            new { Month = "May", Desktop = 325, Mobile = 200}
-        };
-        return Layout.Vertical()
-                 | new LineChart(data, "Desktop", "Month")
-                        .Line("Mobile")
-                       .Legend();
-    }
-}
-```
-
-## Labeling X and Y Axis
-
-To label X and Y axis, `XAxis` and `YAxis` should be used along with the `Label` function like
-this.
-
-```csharp demo-below
-public class GridLineDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var data = new[]
-        {
-            new { Month = "January", Desktop = 186, Mobile = 100},
-            new { Month = "February", Desktop = 305, Mobile = 200},
-            new { Month = "March", Desktop = 237, Mobile = 300},
-            new { Month = "April", Desktop = 186, Mobile = 100},
-            new { Month = "May", Desktop = 325, Mobile = 200}
-        };
-        return Layout.Vertical()
-                 | new LineChart(data, "Desktop", "Month")
-                        .Line("Mobile")
-                        .XAxis(new XAxis().Label<XAxis>("Month"))
-                        .YAxis(new YAxis().Label<YAxis>("Sales"))
-                       .Legend();
-    }
-}
-```
-
-## Changing Line widths
-
-To Change the widths of the individual line in a line chart, `StrokeWidth` function
-should be used. The following example shows how this can be done.
-
-```csharp demo-below
-public class GridLineDemo : ViewBase
+public class LineWidthDemo : ViewBase
 {
     public override object? Build()
     {
@@ -220,56 +113,7 @@ public class GridLineDemo : ViewBase
 }
 ```
 
-## Changing size (height and width)
-
-Sizes of the chart can be altered by altering the values of the width and height.
-
-```csharp demo-tabs
-public class GridLineDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var data = new[]
-        {
-            new { Month = "January", Desktop = 186, Mobile = 100},
-            new { Month = "February", Desktop = 305, Mobile = 200},
-            new { Month = "March", Desktop = 237, Mobile = 300},
-            new { Month = "April", Desktop = 186, Mobile = 100},
-            new { Month = "May", Desktop = 325, Mobile = 200}
-        };
-        var height = UseState(50);
-        var width  = UseState(50);
-        
-        return Layout.Vertical()
-                 | new LineChart(data, "Desktop", "Month")
-                        .Line("Mobile")
-                        .Height(height.Value)
-                        .Width(width.Value)
-                       .Legend()
-                 | new NumberInput<int>(
-                           height.Value,
-                            e => {
-                                 height.Set(e); 
-                            })
-                     .Min(50)
-                     .Max(100)
-                     .Variant(NumberInputs.Slider)
-                     .WithField()
-                     .Label("Height")
-                 | new NumberInput<int>(
-                           width.Value,
-                            e => {
-                                 width.Set(e); 
-                            })
-                     .Step(1)
-                     .Min(0)
-                     .Max(190)
-                     .Variant(NumberInputs.Slider)
-                     .WithField()
-                     .Label("Width");
-    }
-}
-```
+<WidgetDocs Type="Ivy.LineChart" ExtensionTypes="Ivy.LineChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Charts/LineChart.cs"/>
 
 ## Example
 
