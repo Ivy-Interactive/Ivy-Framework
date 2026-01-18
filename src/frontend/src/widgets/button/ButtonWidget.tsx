@@ -31,20 +31,21 @@ interface ButtonWidgetProps {
   iconPosition?: 'Left' | 'Right';
   scale?: Scales;
   variant?:
-    | 'Primary'
-    | 'Inline'
-    | 'Destructive'
-    | 'Outline'
-    | 'Secondary'
-    | 'Ghost'
-    | 'Link'
-    | 'Inline'
-    | 'Ai';
+  | 'Primary'
+  | 'Inline'
+  | 'Destructive'
+  | 'Outline'
+  | 'Secondary'
+  | 'Ghost'
+  | 'Link'
+  | 'Inline'
+  | 'Ai';
   disabled: boolean;
   tooltip?: string;
   foreground?: string;
   loading?: boolean;
   url?: string;
+  target?: 'Blank' | 'Self';
   width?: string;
   children?: React.ReactNode;
   borderRadius?: BorderRadius;
@@ -97,6 +98,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   tooltip,
   foreground,
   url,
+  target = 'Blank',
   loading = false,
   width,
   children,
@@ -267,7 +269,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
             borderRadiusClasses.button,
             buttonSize !== 'icon' && 'w-min',
             hasChildren &&
-              'p-2 h-auto items-start justify-start text-left inline-block'
+            'p-2 h-auto items-start justify-start text-left inline-block'
           )}
           tooltipText={tooltip || undefined}
           data-testid={dataTestId}
@@ -277,7 +279,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
               href={validatedHref}
               {...(isDownloadUrl || isMailto
                 ? {}
-                : { target: '_blank', rel: 'noopener noreferrer' })}
+                : { target: target === 'Self' ? '_self' : '_blank', rel: target === 'Self' ? undefined : 'noopener noreferrer' })}
             >
               {buttonContent}
             </a>
@@ -297,21 +299,21 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       onClick={hasUrl ? undefined : handleClick}
       variant={
         (variant === 'Primary' ? 'default' : camelCase(variant)) as
-          | 'default'
-          | 'destructive'
-          | 'outline'
-          | 'secondary'
-          | 'ghost'
-          | 'link'
-          | 'inline'
+        | 'default'
+        | 'destructive'
+        | 'outline'
+        | 'secondary'
+        | 'ghost'
+        | 'link'
+        | 'inline'
       }
       disabled={disabled}
       className={cn(
         buttonSize !== 'icon' && 'w-min',
         hasChildren &&
-          'p-2 h-auto items-start justify-start text-left inline-block',
+        'p-2 h-auto items-start justify-start text-left inline-block',
         (variant === 'Link' || variant === 'Inline') &&
-          'min-w-0 max-w-full overflow-hidden'
+        'min-w-0 max-w-full overflow-hidden'
       )}
       tooltipText={
         tooltip ||
@@ -326,7 +328,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           href={validatedHref}
           {...(isDownloadUrl || isMailto
             ? {}
-            : { target: '_blank', rel: 'noopener noreferrer' })}
+            : { target: target === 'Self' ? '_self' : '_blank', rel: target === 'Self' ? undefined : 'noopener noreferrer' })}
         >
           {buttonContent}
         </a>
