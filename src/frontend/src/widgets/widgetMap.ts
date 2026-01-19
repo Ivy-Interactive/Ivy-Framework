@@ -222,9 +222,6 @@ export const widgetMap = {
 
   // Internal
 
-  'Ivy.Widgets.Internal.DbmlCanvas': React.lazy(
-    () => import('@/widgets/internal/DbmlCanvasWidget')
-  ),
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')
   ),
