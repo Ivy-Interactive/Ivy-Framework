@@ -32,9 +32,7 @@ const TerminalWidget = ({
   return (
     <div
       role="terminal"
-      className={cn(
-        'rounded-lg overflow-hidden border border-border'
-      )}
+      className={cn('rounded-lg overflow-hidden border border-border')}
     >
       {showHeader && (
         <div className="bg-zinc-800 px-4 py-2 flex items-center">

@@ -5,18 +5,14 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          'bg-primary text-primary-foreground hover:brightness-90',
+        default: 'bg-primary text-primary-foreground hover:brightness-90',
         destructive:
           'bg-destructive text-destructive-foreground hover:brightness-90',
         outline:
           'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-        secondary:
-          'bg-secondary text-secondary-foreground hover:brightness-90',
-        success:
-          'bg-success text-success-foreground hover:brightness-90',
-        warning:
-          'bg-warning text-warning-foreground hover:brightness-90',
+        secondary: 'bg-secondary text-secondary-foreground hover:brightness-90',
+        success: 'bg-success text-success-foreground hover:brightness-90',
+        warning: 'bg-warning text-warning-foreground hover:brightness-90',
         info: 'bg-info text-info-foreground hover:brightness-90',
         ghost: 'hover:bg-accent',
         link: 'text-primary underline-offset-4 hover:underline brightness-90 hover:brightness-100',
