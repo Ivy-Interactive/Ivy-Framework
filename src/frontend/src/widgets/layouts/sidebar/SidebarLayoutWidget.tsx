@@ -155,7 +155,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       <div
         className={cn(
           `relative h-full overflow-auto`,
-          !mainAppSidebar ? `p-${mainContentPadding}` : ''
+          !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : ''
         )}
       >
         {/* Toggle Button - Only show for main app sidebar */}
