@@ -117,6 +117,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   const terminalRef = useRef<XTerm | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
   const initialContentWrittenRef = useRef(false);
+  const terminalReadyRef = useRef(false);
 
   const isReadOnly = closed || !events.includes('OnInput');
 
@@ -204,6 +205,7 @@ export const Terminal: React.FC<TerminalProps> = ({
     // Clear any existing terminal content and reset state
     container.innerHTML = '';
     initialContentWrittenRef.current = false;
+    terminalReadyRef.current = false;
 
     const mergedTheme = { ...defaultTheme, ...theme };
 
@@ -321,10 +323,13 @@ export const Terminal: React.FC<TerminalProps> = ({
         term.write(initialContent);
         initialContentWrittenRef.current = true;
       }
+
+      // Mark terminal as ready after initialization is complete
+      terminalReadyRef.current = true;
     });
 
     const handleWindowResize = () => {
-      if (!cols && !rows && fitAddonRef.current) {
+      if (!cols && !rows && terminalReadyRef.current && fitAddonRef.current) {
         fitAddonRef.current.fit();
       }
     };
@@ -332,7 +337,7 @@ export const Terminal: React.FC<TerminalProps> = ({
     window.addEventListener('resize', handleWindowResize);
 
     const resizeObserver = new ResizeObserver(() => {
-      if (!cols && !rows && fitAddonRef.current) {
+      if (!cols && !rows && terminalReadyRef.current && fitAddonRef.current) {
         fitAddonRef.current.fit();
       }
     });
@@ -341,6 +346,7 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     return () => {
       disposed = true;
+      terminalReadyRef.current = false;
       window.removeEventListener('resize', handleWindowResize);
       container.removeEventListener('paste', handlePaste);
       container.removeEventListener('keydown', handleKeyDown);
