@@ -119,6 +119,13 @@ public static class Text
 
     public static TextBuilder Strong(IAnyState state) => Strong(state.ToString() ?? "");
 
+    public static TextBuilder Metric(string content)
+    {
+        return new TextBuilder(content, TextVariant.Metric);
+    }
+
+    public static TextBuilder Metric(IAnyState state) => Metric(state.ToString() ?? "");
+
     public static TextBuilder Bold(string content)
     {
         return new TextBuilder(content, TextVariant.Strong);
