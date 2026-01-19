@@ -9,7 +9,11 @@
     <Description>Example external widget package for Ivy Framework</Description>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(IvyPackageVersion)' != ''">
+    <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
   </ItemGroup>
 
