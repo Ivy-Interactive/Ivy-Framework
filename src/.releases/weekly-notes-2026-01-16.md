@@ -115,6 +115,8 @@ ivy run --verbose                   # Enable detailed logging
 
 ## Breaking Changes
 
+> List of all breaking changes and instructions for LLMS how to apply them can be found [here](https://github.com/Ivy-Interactive/Ivy-Framework/tree/main/src/.releases/Refactors/1.2.11)
+
 ### Text Widget Refactor: Scale & Margins
 
 We have cleaned up the `Text` widget API to be more consistent and predictable.

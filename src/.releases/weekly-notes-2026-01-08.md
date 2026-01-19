@@ -5,6 +5,8 @@
 
 ## Breaking Changes
 
+> List of all breaking changes and instructions for LLMS how to apply them can be found [here](https://github.com/Ivy-Interactive/Ivy-Framework/tree/main/src/.releases/Refactors/1.2.7)
+
 ### UseBuilder Renamed to UseWebApplicationBuilder
 
 The `Server.UseBuilder()` method has been renamed to `UseWebApplicationBuilder()` for better clarity and to distinguish it from the new `UseWebApplication()` method. [Read more here](https://docs.ivy.app/onboarding/concepts/program)
