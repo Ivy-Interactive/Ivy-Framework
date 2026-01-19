@@ -140,11 +140,7 @@ public class SupabaseAuthProvider : IAuthProvider
             var errorCode = request.Query["error_code"].ToString();
             var errorDescription = request.Query["error_description"].ToString();
 
-            var details = !string.IsNullOrEmpty(errorDescription) ? errorDescription
-                        : !string.IsNullOrEmpty(error) ? error
-                        : "unknown reason";
-
-            throw new InvalidOperationException($"OAuth callback failed: {details}");
+            throw new SupabaseOAuthException(error, errorCode, errorDescription);
         }
 
         try
