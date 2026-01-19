@@ -26,7 +26,7 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({ slots }) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>{slots.Trigger}</TooltipTrigger>
-        <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+        <TooltipContent className="bg-popover text-popover-foreground">
           {slots.Content}
         </TooltipContent>
       </Tooltip>

@@ -75,7 +75,7 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
                   'relative z-10 flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-medium transition-all bg-background',
                   state === 'completed' &&
                     isClickable &&
-                    'border-primary bg-primary text-primary-foreground cursor-pointer hover:scale-110 hover:shadow-md',
+                    'border-primary bg-primary text-primary-foreground cursor-pointer hover:scale-110',
                   state === 'completed' &&
                     !isClickable &&
                     'border-primary bg-primary text-primary-foreground',

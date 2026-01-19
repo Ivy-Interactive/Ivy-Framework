@@ -72,7 +72,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
               copyButtonSizeVariants({ scale }),
               copied && 'bg-primary text-primary-foreground'
             )
-          : 'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer hover:bg-accent hover:shadow-sm border-0',
+          : 'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer hover:bg-accent border-0',
         !isIconOnly &&
           (copied
             ? 'bg-primary text-primary-foreground'

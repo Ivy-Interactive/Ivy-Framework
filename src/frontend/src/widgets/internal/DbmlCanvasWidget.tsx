@@ -128,7 +128,7 @@ export const DatabaseSchemaNode = ({
 }: DatabaseSchemaNodeProps) => {
   return (
     <div
-      className={`rounded-md border bg-background shadow-sm ${selected ? 'border-primary' : 'border-border'} ${className}`}
+      className={`rounded-md border bg-background ${selected ? 'border-primary' : 'border-border'} ${className}`}
     >
       {children}
     </div>
@@ -233,7 +233,7 @@ const DbmlTableNode: React.FC<DbmlTableNodeProps> = ({ data, selected }) => {
                         {field.name}
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-xs">
+                    <TooltipContent className="bg-popover text-popover-foreground max-w-xs">
                       {field.name}
                     </TooltipContent>
                   </Tooltip>
@@ -249,7 +249,7 @@ const DbmlTableNode: React.FC<DbmlTableNodeProps> = ({ data, selected }) => {
                       {field.nullable ? '?' : ''}
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-xs">
+                  <TooltipContent className="bg-popover text-popover-foreground max-w-xs">
                     {`${field.type}${field.nullable ? '?' : ''}`}
                   </TooltipContent>
                 </Tooltip>
@@ -627,7 +627,6 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
             backgroundColor: 'var(--background)',
             border: '1px solid var(--border)',
             borderRadius: '4px',
-            boxShadow: 'var(--shadow-sm)',
           }}
           showZoom={true}
           showFitView={true}

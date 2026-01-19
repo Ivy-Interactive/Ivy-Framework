@@ -71,13 +71,13 @@ const Slider = React.forwardRef<
       </SliderPrimitive.Track>
       <SliderPrimitive.Thumb
         className={cn(
-          'relative block rounded-full border bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+          'relative block rounded-full border bg-background transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
           variant.thumb
         )}
       >
         <div
           className={cn(
-            'absolute left-1/2 transform -translate-x-1/2 bg-popover text-foreground p-1 rounded shadow',
+            'absolute left-1/2 transform -translate-x-1/2 bg-popover text-foreground p-1 rounded',
             variant.tooltip
           )}
         >

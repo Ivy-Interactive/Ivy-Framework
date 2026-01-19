@@ -72,12 +72,10 @@ export const tableStyles = {
       .query-editor-wrapper .cm-editor {
         border: none !important;
         border-radius: 0 !important;
-        box-shadow: none !important;
       }
       .query-editor-wrapper .cm-editor.cm-focused {
         outline: none !important;
         border: none !important;
-        box-shadow: none !important;
       }
       .query-editor-wrapper .cm-content {
         padding: 12px 16px 10px 16px;
@@ -89,7 +87,6 @@ export const tableStyles = {
         background: var(--popover) !important;
         border: 1px solid var(--border) !important;
         border-radius: calc(var(--radius) - 2px) !important;
-        box-shadow: var(--shadow-md) !important;
         padding: 4px !important;
         font-family: var(--font-mono) !important;
         font-size: 12px !important;

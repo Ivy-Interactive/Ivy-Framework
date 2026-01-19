@@ -82,7 +82,7 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
                     />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                <TooltipContent className="bg-popover text-popover-foreground">
                   {help}
                 </TooltipContent>
               </Tooltip>

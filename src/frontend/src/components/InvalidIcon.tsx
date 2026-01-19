@@ -20,7 +20,7 @@ export const InvalidIcon: React.FC<{ message: string; className?: string }> = ({
         >
           <InfoIcon className="h-4 w-4 text-red-900 hover:text-red-400 transition-colors duration-200" />
         </TooltipTrigger>
-        <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+        <TooltipContent className="bg-popover text-popover-foreground">
           <div className="max-w-60">{message}</div>
         </TooltipContent>
       </Tooltip>

@@ -31,7 +31,7 @@ function withTooltip<P extends React.JSX.IntrinsicAttributes>(
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>{componentWithStyles}</TooltipTrigger>
-          <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+          <TooltipContent className="bg-popover text-popover-foreground">
             {tooltipText}
           </TooltipContent>
         </Tooltip>

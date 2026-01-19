@@ -36,7 +36,7 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
   return (
     <div className="tiktok-embed">
       <blockquote
-        className="tiktok-embed w-full h-96 sm:h-[500px] md:h-[600px] border-0 rounded-lg shadow-md"
+        className="tiktok-embed w-full h-96 sm:h-[500px] md:h-[600px] border-0 rounded-lg"
         cite={sanitizedUrl}
         data-video-id={videoId}
         style={{ maxWidth: '605px', minWidth: '325px' }}

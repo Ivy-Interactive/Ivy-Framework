@@ -29,7 +29,7 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
 
   return (
     <div
-      className={`${platform.toLowerCase()}-embed border rounded-lg bg-card shadow-sm w-full @container`}
+      className={`${platform.toLowerCase()}-embed border rounded-lg bg-card w-full @container`}
     >
       {/* Button layout - shown when container is wide enough */}
       <div className="@[30rem]:flex hidden items-center gap-3 p-2">
@@ -49,7 +49,7 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
             href={sanitizedUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none whitespace-nowrap"
+            className="inline-flex items-center px-3 py-2 border text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none whitespace-nowrap"
           >
             {linkText}
           </a>

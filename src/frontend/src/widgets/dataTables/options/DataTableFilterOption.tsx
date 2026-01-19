@@ -317,7 +317,7 @@ export const DataTableFilterOption: React.FC<{
           onChange={handleQueryChange}
           placeholder={placeholderText}
           height={40}
-          className="font-mono border-0 shadow-none [&>.cm-editor]:border-0 [&>.cm-editor]:shadow-none [&_.cm-content]:overflow-x-auto"
+          className="font-mono border-0 [&>.cm-editor]:border-0 [&_.cm-content]:overflow-x-auto"
         />
         <style>{tableStyles.queryEditor.css}</style>
       </div>

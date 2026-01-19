@@ -53,7 +53,7 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
       <div className="linkedin-embed-container w-full">
         <iframe
           src={`https://www.linkedin.com/embed/feed/update/urn:li:activity:${postId}`}
-          className="w-full h-96 sm:h-[32rem] md:h-[40rem] border-0 rounded-lg shadow-md"
+          className="w-full h-96 sm:h-[32rem] md:h-[40rem] border-0 rounded-lg"
           allowFullScreen
           title="Embedded LinkedIn post"
         />

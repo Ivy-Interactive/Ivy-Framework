@@ -121,7 +121,7 @@ const variantMap: VariantMap = {
               </span>
             </TooltipTrigger>
             {showTooltip && isTruncated && typeof children === 'string' && (
-              <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+              <TooltipContent className="bg-popover text-popover-foreground">
                 {children}
               </TooltipContent>
             )}

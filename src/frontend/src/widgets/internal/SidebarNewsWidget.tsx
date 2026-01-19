@@ -314,7 +314,7 @@ function NewsCard({
         'bg-gradient-to-br from-background to-muted',
         'relative select-none gap-2 p-2 text-[0.8125rem]',
         'translate-x-[calc(var(--dx)*1px)] rotate-[calc(var(--dx)*0.05deg)] opacity-[calc(1-max(var(--dx),-1*var(--dx))/var(--w)/2)]',
-        'transition-shadow data-[dragging=true]:shadow-md'
+        'transition-shadow'
       )}
       data-dragging={dragging}
       onPointerDown={onPointerDown}

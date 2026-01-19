@@ -35,7 +35,7 @@ import { cva } from 'class-variance-authority';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
 // variants for SelectInputWidget container
 const selectContainerVariants = cva(
-  'relative border border-input bg-transparent rounded-md shadow-sm focus-within:ring-1 focus-within:ring-ring',
+  'relative border border-input bg-transparent rounded-md focus-within:ring-1 focus-within:ring-ring',
   {
     variants: {
       scale: {
@@ -253,7 +253,7 @@ const ToggleOptionItem: React.FC<{
       <TooltipProvider key={option.value}>
         <Tooltip>
           <TooltipTrigger asChild>{toggleItem}</TooltipTrigger>
-          <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+          <TooltipContent className="bg-popover text-popover-foreground">
             <div className="max-w-xs sm:max-w-sm">{invalid}</div>
           </TooltipContent>
         </Tooltip>
@@ -615,7 +615,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        'relative w-full border border-input bg-transparent rounded-md shadow-sm px-3 py-2 focus-within:ring-1 focus-within:ring-ring',
+        'relative w-full border border-input bg-transparent rounded-md px-3 py-2 focus-within:ring-1 focus-within:ring-ring',
         invalid && 'border-destructive focus-within:ring-destructive'
       )}
       style={styles}
@@ -657,7 +657,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                             )}
                           />
                         </TooltipTrigger>
-                        <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                        <TooltipContent className="bg-popover text-popover-foreground">
                           <div className="max-w-xs sm:max-w-sm">{invalid}</div>
                         </TooltipContent>
                       </Tooltip>
@@ -981,7 +981,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
     <TooltipProvider>
       <Tooltip delayDuration={300} open={!isOpen ? undefined : false}>
         <TooltipTrigger asChild>{selectTriggerElement}</TooltipTrigger>
-        <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+        <TooltipContent className="bg-popover text-popover-foreground max-w-sm">
           <div className="whitespace-pre-wrap break-words">{selectedLabel}</div>
         </TooltipContent>
       </Tooltip>

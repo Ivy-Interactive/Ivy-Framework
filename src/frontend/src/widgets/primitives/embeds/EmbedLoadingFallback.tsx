@@ -1,7 +1,7 @@
 import React from 'react';
 
 const EmbedLoadingFallback: React.FC = () => (
-  <div className="embed-loading border rounded-lg p-4 bg-card shadow-sm">
+  <div className="embed-loading border rounded-lg p-4 bg-card">
     <div className="flex items-center space-x-3">
       <div className="flex-shrink-0">
         <div className="w-8 h-8 bg-muted animate-pulse rounded"></div>

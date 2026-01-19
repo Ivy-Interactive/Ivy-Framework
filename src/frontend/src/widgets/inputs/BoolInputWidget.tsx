@@ -90,7 +90,7 @@ const withTooltip = (content: React.ReactNode, invalid?: string) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>{content}</TooltipTrigger>
-        <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+        <TooltipContent className="bg-popover text-popover-foreground">
           {invalid}
         </TooltipContent>
       </Tooltip>

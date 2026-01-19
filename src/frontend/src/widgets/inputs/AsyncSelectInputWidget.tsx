@@ -15,7 +15,7 @@ import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
 
 const asyncSelectContainerVariants = cva(
-  'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-md border border-input bg-transparent shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer relative',
+  'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-md border border-input bg-transparent transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer relative',
   {
     variants: {
       scale: {
@@ -133,7 +133,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
     <TooltipProvider>
       <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>{displayValueSpan}</TooltipTrigger>
-        <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+        <TooltipContent className="bg-popover text-popover-foreground max-w-sm">
           <div className="whitespace-pre-wrap wrap-break-word">
             {displayValue}
           </div>

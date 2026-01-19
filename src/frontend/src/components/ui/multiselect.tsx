@@ -120,7 +120,7 @@ const MultipleSelector = React.forwardRef<
         ref={ref}
         onKeyDown={handleKeyDown}
         className={cn(
-          'overflow-visible bg-transparent h-auto flex-row rounded-none border-0 shadow-none p-0',
+          'overflow-visible bg-transparent h-auto flex-row rounded-none border-0 p-0',
           className
         )}
         {...commandProps}
@@ -224,7 +224,7 @@ const MultipleSelector = React.forwardRef<
           {open && (
             <>
               {selectables.length > 0 && (
-                <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+                <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground outline-none animate-in">
                   <CommandGroup className="h-full overflow-auto max-h-[300px]">
                     {selectables.map(option => {
                       return (
@@ -249,7 +249,7 @@ const MultipleSelector = React.forwardRef<
                 </div>
               )}
               {selectables.length === 0 && emptyIndicator && (
-                <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none p-2">
+                <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground outline-none p-2">
                   {emptyIndicator}
                 </div>
               )}
