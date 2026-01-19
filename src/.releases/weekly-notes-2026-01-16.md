@@ -9,7 +9,6 @@ Ivy now includes **UseQuery** - a powerful data fetching and caching system insp
 
 ![output](https://github.com/user-attachments/assets/b7cf7340-26b4-4b1a-9f7a-ecfe0d4b1411)
 
-
 **Key Features:**
 
 - Automatic request deduplication and caching
@@ -136,6 +135,85 @@ Text.P("Large text").Large()
 
 // Chainable
 Text.P("Important").Large().Bold().Color(Colors.Primary)
+```
+
+### AppContext Rename
+
+`AppArgs` has been renamed to `Ivy.Apps.AppContext`.
+
+```csharp
+// Before
+var args = UseService<AppArgs>();
+
+// After
+var args = UseService<Ivy.Apps.AppContext>();
+```
+
+### AsyncSelectInput Delegates
+
+Delegates now support hooks and `UseQuery`. `AsyncSelectQueryDelegate` renamed to `AsyncSelectSearchDelegate`.
+
+```csharp
+// Before
+public delegate Task<Option<T>[]> AsyncSelectQueryDelegate<T>(string query);
+
+// After
+public delegate QueryResult<Option<T>[]> AsyncSelectSearchDelegate<T>(IViewContext context, string query);
+```
+
+### BladeHeader Component
+
+`BladeHelper.WithHeader` replaced by `BladeHeader` component.
+
+```csharp
+// Before
+return BladeHelper.WithHeader(header, content);
+
+// After
+return new Fragment()
+       | new BladeHeader(header)
+       | content;
+```
+
+### BladeService Rename
+
+`IBladeController` renamed to `IBladeService`.
+
+```csharp
+// Before
+var blades = UseContext<IBladeController>();
+
+// After
+var blades = UseContext<IBladeService>();
+```
+
+### MetricView Hook Support
+
+`MetricView` now supports hooks via `IViewContext`.
+
+```csharp
+// Before
+new MetricView("Sales", Icons.Money, async () => ...);
+
+// After
+new MetricView("Sales", Icons.Money, ctx => ctx.UseQuery(...));
+```
+
+### EffectTrigger.OnMount
+
+`EffectTrigger.AfterInit` renamed to `EffectTrigger.OnMount`.
+
+### UseStatic to UseRef
+
+`UseStatic` renamed to `UseRef` and now returns `IState<T>`.
+
+```csharp
+// Before
+var svc = UseStatic(() => new Service());
+
+// After
+var svcRef = UseRef(() => new Service());
+var svc = svcRef.Value;
 ```
 
 ## Other improvements
