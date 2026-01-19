@@ -594,7 +594,7 @@ export const typography: Record<string, string> = {
   // UI variants
   label: 'text-large-label font-medium leading-none flex items-center',
   block: 'flex items-center min-w-0',
-  metric: 'text-4xl font-medium',
+  display: 'text-4xl font-medium',
 
   // Lists
   ul: 'list-disc ml-6',

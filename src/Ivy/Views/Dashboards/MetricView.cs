@@ -1,4 +1,4 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
 using Ivy.Shared;
@@ -65,7 +65,7 @@ public class MetricView(
                                 : Text.P(x.TrendComparedToPreviousPeriod.Value.ToString("P1")).Small().Color(Colors.Destructive)
                             : null));
 
-        object? content = Text.Metric(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip);
+        object? content = Text.Display(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip);
 
         return new Card(
                 content: content,

@@ -25,7 +25,7 @@ public enum TextVariant
     Success,
     Label,
     Strong,
-    Metric,
+    Display,
     //Invalid values. Only used in Text helper.
     Code,
     Markdown,
