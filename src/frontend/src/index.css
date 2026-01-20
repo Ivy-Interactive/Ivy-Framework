@@ -17,6 +17,7 @@
 
     /* Additional variables not in design system yet */
     --toolbox: #38363a;
+    --input-surface: color-mix(in srgb, var(--secondary) 20%, transparent);
     --spacing: 0.27rem;
     --radius: 0.5rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
@@ -37,6 +38,7 @@
   .dark {
     /* Additional dark theme overrides not in design system yet */
     --toolbox: #edeaf1;
+    --input-surface: color-mix(in srgb, var(--secondary) 50%, transparent);
   }
 
   @theme inline {
