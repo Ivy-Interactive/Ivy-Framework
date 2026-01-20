@@ -8,10 +8,7 @@ import { createPrismTheme } from '@/lib/prismTheme';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Scales } from '@/types/scale';
-import {
-  codeContainerVariants,
-  codeCopyButtonVariants,
-} from '@/components/ui/code-variants';
+import { codeCopyButtonVariants } from '@/components/ui/code-variants';
 
 interface CodeWidgetProps {
   id: string;
@@ -131,7 +128,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       : { ...getWidth(width) };
 
     return (
-      <div className={cn('relative', codeContainerVariants({ scale }))}>
+      <div className="relative" style={containerStyles}>
         {showCopyButton && (
           <MemoizedCopyButton textToCopy={content} scale={scale} />
         )}
