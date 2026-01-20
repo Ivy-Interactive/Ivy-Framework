@@ -127,22 +127,21 @@ public class EffectDemo : ViewBase
 {
     public override object? Build()
     {
-        var count = UseState(0);
-        var client = UseService<IClientProvider>();
-        
-        // Run on mount
-        UseEffect(() => {
-            client.Toast("Component mounted!");
-        }, EffectTrigger.OnMount());
-        
-        // Run when count changes
-        UseEffect(() => {
-            Console.WriteLine($"Count is now: {count.Value}");
-        }, count);
-        
-        return Layout.Vertical()
-            | Text.P($"Count: {count.Value}")
-            | new Button("Increment", _ => count.Set(count.Value + 1));
+        var message = UseState("Initialized");
+        var trigger = UseState(0);
+
+        // Effect runs when trigger changes
+        UseEffect(async () =>
+        {
+            message.Set("Loading...");
+            await Task.Delay(2000); // Simulate API call
+            message.Set("Data loaded!");
+        }, trigger);
+
+        return Layout.Vertical(
+            Text.P(message.Value).Large(),
+            new Button("Reload Data", _ => trigger.Set(trigger.Value + 1))
+        );
     }
 }
 ```
