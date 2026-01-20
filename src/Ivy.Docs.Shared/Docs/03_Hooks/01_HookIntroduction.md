@@ -25,25 +25,11 @@ public class HooksDemo : ViewBase
 {
     public override object? Build()
     {
-        // State management
-        var count = UseState(0);
         var name = UseState("World");
         
-        // Side effects
-        UseEffect(() => {
-            Console.WriteLine($"Count changed to: {count.Value}");
-        }, count);
-        
-        // Service access
-        var client = UseService<IClientProvider>();
-        
         return Layout.Vertical()
-            | Text.H3($"Hello, {name.Value}!")
-            | Text.P($"Count: {count.Value}")
-            | Layout.Horizontal()
-                | new Button("Increment", _ => count.Set(count.Value + 1))
-                | new Button("Greet", _ => client.Toast($"Hello, {name.Value}!"))
-            | name.ToTextInput().Placeholder("Enter your name");
+            | name.ToTextInput().Placeholder("Enter your name")
+            | Text.P($"Hello, {name.Value}!").Large();
     }
 }
 ```
