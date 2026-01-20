@@ -138,10 +138,9 @@ public class EffectDemo : ViewBase
             message.Set("Data loaded!");
         }, trigger);
 
-        return Layout.Vertical(
-            Text.P(message.Value).Large(),
-            new Button("Reload Data", _ => trigger.Set(trigger.Value + 1))
-        );
+        return Layout.Vertical()
+            | new Button("Reload Data", _ => trigger.Set(trigger.Value + 1))
+            | Text.P(message.Value).Large();
     }
 }
 ```
@@ -160,28 +159,29 @@ See [UseEffect](./Core/04_UseEffect.md) for detailed documentation.
 Manage complex state logic with reducers for predictable state updates:
 
 ```csharp demo-tabs
-public class ReducerDemo : ViewBase
+public class BasicReducerDemo : ViewBase
 {
-    private record CounterState(int Count);
-    
-    private CounterState CounterReducer(CounterState state, string action) => action switch
+    // Reducer function
+    private int CounterReducer(int state, string action) => action switch
     {
-        "increment" => state with { Count = state.Count + 1 },
-        "decrement" => state with { Count = state.Count - 1 },
-        "reset" => new CounterState(0),
+        "increment" => state + 1,
+        "decrement" => state - 1,
+        "reset" => 0,
         _ => state
     };
-    
+
     public override object? Build()
     {
-        var (state, dispatch) = UseReducer(CounterReducer, new CounterState(0));
-        
-        return Layout.Vertical().Gap(2)
-            | Text.H3($"Count: {state.Count}")
-            | Layout.Horizontal()
-                | new Button("Increment", _ => dispatch("increment"))
-                | new Button("Decrement", _ => dispatch("decrement"))
-                | new Button("Reset", _ => dispatch("reset"));
+        var (count, dispatch) = this.UseReducer(CounterReducer, 0);
+
+        return Layout.Vertical(
+            Text.P($"Count: {count}").Large(),
+            Layout.Horizontal(
+                new Button("-", _ => dispatch("decrement")),
+                new Button("Reset", _ => dispatch("reset")),
+                new Button("+", _ => dispatch("increment"))
+            )
+        );
     }
 }
 ```
