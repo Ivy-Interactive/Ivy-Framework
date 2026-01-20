@@ -600,7 +600,7 @@ export const typography: Record<string, string> = {
   ol: 'list-decimal ml-6',
 
   // Links
-  a: 'text-primary underline brightness-90 hover:brightness-100',
+  a: 'text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100',
 
   // Blockquote
   blockquote: 'border-l-2 pl-6 italic',

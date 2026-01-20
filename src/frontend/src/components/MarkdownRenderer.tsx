@@ -459,7 +459,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           return (
             <a
               {...props}
-              className="text-primary underline brightness-90 hover:brightness-100"
+              className="text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100"
               href={hrefForNavigation}
               target={isExternalLink ? '_blank' : undefined}
               rel={isExternalLink ? 'noopener noreferrer' : undefined}

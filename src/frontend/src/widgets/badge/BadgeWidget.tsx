@@ -27,16 +27,13 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   variant = 'Primary',
   scale = Scales.Medium,
 }) => {
-  let badgeClasses = 'badge-text-primary';
   let iconSize: number = 4;
 
   switch (scale) {
     case Scales.Small:
-      badgeClasses = 'badge-text-small';
       iconSize = 3;
       break;
     case Scales.Large:
-      badgeClasses = 'badge-text-large';
       iconSize = 5;
       break;
     default:
@@ -77,10 +74,29 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
     }
   };
 
+  const hasIcon = icon && icon !== 'None';
+
   return (
     <Badge
       variant={getBadgeVariant(variant)}
-      className={cn('w-min whitespace-nowrap gap-1', badgeClasses)}
+      scale={scale.toLowerCase() as 'small' | 'medium' | 'large'}
+      className={cn(
+        'w-min whitespace-nowrap gap-1',
+        hasIcon &&
+          iconPosition === 'Left' &&
+          (scale === Scales.Small
+            ? 'pl-1'
+            : scale === Scales.Large
+              ? 'pl-2'
+              : 'pl-1.5'),
+        hasIcon &&
+          iconPosition === 'Right' &&
+          (scale === Scales.Small
+            ? 'pr-1'
+            : scale === Scales.Large
+              ? 'pr-2'
+              : 'pr-1.5')
+      )}
     >
       {iconPosition === 'Left' && icon && icon !== 'None' && (
         <Icon style={iconStyles} name={icon} />
