@@ -83,6 +83,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
       className={cn(
         'w-min whitespace-nowrap gap-1',
         hasIcon &&
+          title &&
           iconPosition === 'Left' &&
           (scale === Scales.Small
             ? 'pl-1'
@@ -90,6 +91,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
               ? 'pl-2'
               : 'pl-1.5'),
         hasIcon &&
+          title &&
           iconPosition === 'Right' &&
           (scale === Scales.Small
             ? 'pr-1'
