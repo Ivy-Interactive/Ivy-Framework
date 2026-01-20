@@ -702,25 +702,29 @@ See [UseAlert](./Core/24_UseAlert.md) for detailed documentation.
 Create side panel interfaces with blade navigation:
 
 ```csharp demo-tabs
-public class RootBladeView : ViewBase
+public class BladeNavigationDemo : ViewBase
+{
+    public override object? Build()
+    {
+        return UseBlades(() => new NavigationRootView(), "Home");
+    }
+}
+
+public class NavigationRootView : ViewBase
 {
     public override object? Build()
     {
         var blades = UseContext<IBladeService>();
         var index = blades.GetIndex(this);
-        
-        return Layout.Vertical()
-            | Text.P($"Blade level {index}")
-            | new Button("Push Next Blade", _ => blades.Push(this, new RootBladeView(), $"Level {index + 1}"))
-            | (index > 0 ? new Button("Pop", _ => blades.Pop()) : null);
-    }
-}
 
-public class BladesDemo : ViewBase
-{
-    public override object? Build()
-    {
-        return UseBlades(() => new RootBladeView(), "Home");
+        return Layout.Horizontal().Height(Size.Units(50))
+        | (Layout.Vertical()
+            | Text.Block($"This is blade level {index}")
+            | new Button($"Push Blade {index + 1}", onClick: _ =>
+                blades.Push(this, new NavigationRootView(), $"Level {index + 1}"))
+            | new Button($"Push Wide Blade", onClick: _ =>
+                blades.Push(this, new NavigationRootView(), $"Wide Level {index + 1}", width: Size.Units(100)))
+            | (index > 0 ? new Button("Go Back", onClick: _ => blades.Pop()) : null));
     }
 }
 ```
