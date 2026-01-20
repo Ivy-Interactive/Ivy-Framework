@@ -80,6 +80,19 @@ The logic works as follows:
 
 You can override the automatic generation using the `id` or `path` parameters, though sticking to conventions is recommended for consistency.
 
+## Page Title
+
+The framework automatically updates the browser page title to reflect your current application route.
+
+When you define an app using the `[App]` attribute, the framework uses its `title` property to set the browser page title:
+
+```csharp
+[App(title: "Dashboard")]
+public class DashboardApp : ViewBase { /* ... */ }
+```
+
+If no title is specified, the framework generates one from the class name (e.g., `DashboardApp` -> "Dashboard").
+
 ## Best Practices
 
 * **Suffix with `App`**: It's common convention to name your app classes ending with `App` (e.g., `ProductsApp`), though the framework will automatically make the title readable (e.g., "Products").
