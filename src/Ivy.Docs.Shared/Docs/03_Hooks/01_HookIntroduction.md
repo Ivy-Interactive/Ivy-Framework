@@ -74,17 +74,37 @@ public class StateDemo : ViewBase
     public override object? Build()
     {
         var count = UseState(0);
-        var text = UseState("");
-        var active = UseState(false);
-        
-        return Layout.Vertical().Gap(4)
-            | Text.H3($"Count: {count.Value}")
-            | Layout.Horizontal()
-                | new Button("+", _ => count.Set(count.Value + 1))
-                | new Button("-", _ => count.Set(count.Value - 1))
-            | text.ToTextInput().Placeholder("Enter text...")
-            | Text.P($"You typed: {text.Value}")
-            | active.ToSwitchInput().Label("Toggle switch");
+        var text = UseState("Hello");
+        var items = UseState(() => new List<string> { "Item 1", "Item 2" });
+
+        return Layout.Vertical(
+            Text.P("State Management Demo").Large(),
+
+            // Number state updates
+            Layout.Horizontal(
+                new Button($"Count: {count.Value}", _ => count.Set(count.Value + 1)),
+                new Button("Reset", _ => count.Set(0))
+            ),
+
+            // String state updates
+            Layout.Horizontal(
+                text.ToTextInput("Enter text"),
+                new Button("Clear", _ => text.Set("")),
+                new Button("Uppercase", _ => text.Set(text.Value.ToUpper()))
+            ),
+
+            // Collection state updates
+            Layout.Horizontal(
+                new Button("Add Item", _ => {
+                    var newItems = new List<string>(items.Value) { $"Item {items.Value.Count + 1}" };
+                    items.Set(newItems);
+                }),
+                new Button("Clear", _ => items.Set(new List<string>()))
+            ),
+
+            Text.Literal($"Text: {text.Value}"),
+            Text.Literal($"Items: {string.Join(", ", items.Value)}")
+        );
     }
 }
 ```
