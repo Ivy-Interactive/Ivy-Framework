@@ -16,8 +16,6 @@ searchHints:
 Discover the powerful functions that let you "hook into" Ivy state and lifecycle features - Hooks enable you to use state and side effects in your [Views](../../01_Onboarding/02_Concepts/02_Views.md) without writing class components.
 </Ingress>
 
-Hooks are the foundation of stateful logic in Ivy applications. They allow you to manage state, perform side effects, access services, handle data fetching, and build complex interactive UIs - all from functional [views](../../01_Onboarding/02_Concepts/02_Views.md).
-
 ## Basic usage
 
 Ivy provides a comprehensive set of hooks organized into several categories. All hooks follow the naming convention of starting with `Use` followed by an uppercase letter, and they must be called at the top level of your view's `Build` method:
@@ -472,41 +470,41 @@ Create reactive signals for cross-component communication:
 ```csharp demo-tabs
 public class CounterSignal : AbstractSignal<int, string> { }
 
-public class SignalReceiver : ViewBase
+public class SignalExample : ViewBase
+{
+    public override object? Build()
+    {
+        var signal = CreateSignal<CounterSignal, int, string>();
+        var output = UseState("");
+
+        async ValueTask OnClick(Event<Button> _)
+        {
+            var results = await signal.Send(1);
+            output.Set(string.Join(", ", results));
+        }
+
+        return Layout.Vertical(
+            new Button("Send Signal", OnClick),
+            new ChildReceiver(),
+            output.Value
+        );
+    }
+}
+
+public class ChildReceiver : ViewBase
 {
     public override object? Build()
     {
         var signal = UseSignal<CounterSignal, int, string>();
         var counter = UseState(0);
-        
-        UseEffect(() => signal.Receive(val =>
-        {
-            counter.Set(counter.Value + val);
-            return $"Received: {val}, total: {counter.Value}";
-        }));
-        
-        return Text.P($"Counter: {counter.Value}");
-    }
-}
 
-public class SignalDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var signal = CreateSignal<CounterSignal, int, string>();
-        var results = UseState<List<string>>(new List<string>());
-        
-        async ValueTask SendSignal(int value)
+        UseEffect(() => signal.Receive(input =>
         {
-            var received = await signal.Send(value);
-            results.Set(received.ToList());
-        }
-        
-        return Layout.Vertical()
-            | new SignalReceiver()
-            | new Button("Emit 42", _ => SendSignal(42))
-            | new Button("Emit 100", _ => SendSignal(100))
-            | (results.Value.Any() ? Text.P($"Results: {string.Join(", ", results.Value)}") : null);
+            counter.Set(counter.Value + input);
+            return $"Child received: {input}, total: {counter.Value}";
+        }));
+
+        return new Card($"Counter: {counter.Value}");
     }
 }
 ```
