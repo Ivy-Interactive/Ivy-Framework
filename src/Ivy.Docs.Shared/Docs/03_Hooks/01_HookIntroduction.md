@@ -646,12 +646,7 @@ public class NavigationDemo : ViewBase
     public override object? Build()
     {
         var navigation = UseNavigation();
-        
-        return Layout.Vertical().Gap(2)
-            | Layout.Horizontal()
-                | new Button("Navigate by URI", _ => navigation.Navigate("app://hooks/core/usestate"))
-                | new Button("Navigate by Type", _ => navigation.Navigate(typeof(NavigationDemo)))
-                | new Button("Open External", _ => navigation.Navigate("https://docs.ivy.app"));
+        return new Button("Open External URL", _ => navigation.Navigate("https://docs.ivy.app"));
     }
 }
 ```
