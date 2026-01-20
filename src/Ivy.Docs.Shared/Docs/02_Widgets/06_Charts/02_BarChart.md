@@ -10,6 +10,10 @@ searchHints:
 
 # BarChart
 
+<Ingress>
+Compare values across categories with rectangular bars of proportional heights.
+</Ingress>
+
 `BarChart`s compare values across categories. The sample below shows a stacked bar
 chart with two series; sales of Desktop and Mobile in the first quarter of a year.
 
@@ -40,40 +44,6 @@ public class BarChartBasic : ViewBase
 Although it will be shown in this document how to draw bar charts using
 the `BarChart` type, the recommended way to easily draw Bar Charts is using `ToBarChart` function.
 
-## Changing Colors
-
-There are two different color schemes supported; namely `Default` and `Rainbow`. The following
-demo shows how the rainbow color scheme works.
-
-```csharp demo-below
-public class RainbowBarChartBasic : ViewBase 
-{    
-    
-    public override object? Build()
-    {
-       var data = new[]
-        {
-            new { Month = "Jan", Desktop = 186, Mobile = 100, Tablet = 75, Laptop = 120, Smartwatch = 45, Gaming = 90, IoT = 30 },
-            new { Month = "Feb", Desktop = 305, Mobile = 200, Tablet = 110, Laptop = 180, Smartwatch = 65, Gaming = 140, IoT = 50 },
-            new { Month = "Mar", Desktop = 237, Mobile = 300, Tablet = 95, Laptop = 160, Smartwatch = 80, Gaming = 110, IoT = 40 },
-        };
-
-        return Layout.Vertical()
-                    | new BarChart(data,
-                        new Bar("Desktop").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Mobile").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Tablet").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Laptop").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Smartwatch").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Gaming").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("IoT").LegendType(LegendTypes.Square))
-                        .ColorScheme(ColorScheme.Default)
-                        .Tooltip()
-                        .Legend();
-                        
-    }
-}    
-```
 
 ## Filling with custom colors
 

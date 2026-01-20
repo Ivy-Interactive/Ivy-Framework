@@ -33,7 +33,7 @@
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@glideapps/glide-data-grid": "6.0.4-alpha24",
-    "@ivy-interactive/ivy-design-system": "1.1.17",
+    "@ivy-interactive/ivy-design-system": "1.1.18",
     "@microsoft/signalr": "9.0.6",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-alert-dialog": "1.1.15",

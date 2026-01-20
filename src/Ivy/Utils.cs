@@ -109,17 +109,10 @@ public static class Utils
 
     public static bool IsPortInUse(int port)
     {
-        try
-        {
-            using var listener = new TcpListener(IPAddress.Loopback, port);
-            listener.Start();
-            listener.Stop();
-            return false;
-        }
-        catch (SocketException)
-        {
-            return true;
-        }
+        // Check active TCP listeners using the system's network information
+        var ipGlobalProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
+        var listeners = ipGlobalProperties.GetActiveTcpListeners();
+        return listeners.Any(endpoint => endpoint.Port == port);
     }
 
     public static ExpandoObject[] ToExpando(this IEnumerable<IDictionary<string, object>> records) =>

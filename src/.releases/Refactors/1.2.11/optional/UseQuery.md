@@ -1,4 +1,4 @@
-# UseQuery Pattern Migration - v1.2.6
+# UseQuery Pattern Migration - v1.2.11
 
 ## Summary
 
@@ -8,7 +8,8 @@ This guide describes how to migrate from the legacy `UseEffect` + `UseState` dat
 
 ### Data Fetching: UseEffect + UseState → UseQuery
 
-**Before (v1.2.5 and earlier):**
+**Before (v1.2.10 and earlier):**
+
 ```csharp
 var product = UseState<Product?>();
 
@@ -21,7 +22,8 @@ UseEffect(async () =>
 if (product.Value == null) return null;
 ```
 
-**After (v1.2.6+):**
+**After (v1.2.11+):**
+
 ```csharp
 var productQuery = UseQuery(
     key: (nameof(ProductDetailsBlade), productId),
@@ -53,21 +55,25 @@ if (productQuery.Value == null) return new Callout("Product not found.").Variant
 Search for these patterns:
 
 ### Pattern 1: UseEffect with EffectTrigger.AfterInit for data fetching
+
 ```regex
 UseEffect\s*\(\s*async\s*\(\s*\)\s*=>\s*\{[\s\S]*?EffectTrigger\.AfterInit\(\)
 ```
 
 ### Pattern 2: UseState for nullable entity storage
+
 ```regex
 UseState<\w+\?>\s*\(\s*\)
 ```
 
 ### Pattern 3: Null check for loading state
+
 ```regex
 if\s*\(\s*\w+\.Value\s*==\s*null\s*\)\s*return\s*null;
 ```
 
 ### Pattern 4: Auto-save pattern in create/edit dialogs
+
 ```regex
 UseEffect\s*\(\s*\(\s*\)\s*=>\s*\{[\s\S]*?\},\s*\[\s*\w+\s*\]\s*\)
 ```
@@ -77,6 +83,7 @@ UseEffect\s*\(\s*\(\s*\)\s*=>\s*\{[\s\S]*?\},\s*\[\s*\w+\s*\]\s*\)
 ### Replace UseEffect + UseState with UseQuery
 
 **Before:**
+
 ```csharp
 public override object? Build()
 {
@@ -99,6 +106,7 @@ public override object? Build()
 ```
 
 **After:**
+
 ```csharp
 public override object? Build()
 {
@@ -127,9 +135,11 @@ public override object? Build()
     // ... rest of component
 }
 ```
+
 ### Replace Auto-Save Pattern with HandleSubmit
 
 **Before (auto-save on state change):**
+
 ```csharp
 var product = UseState(() => factory.CreateDbContext().Products.First(e => e.Id == id)!);
 
@@ -149,6 +159,7 @@ return product
 ```
 
 **After (explicit submit handler):**
+
 ```csharp
 var productQuery = UseQuery(
     key: (typeof(Product), id),
@@ -185,6 +196,7 @@ async Task OnSubmit(Product? request)
 Create dialogs also use the auto-save pattern and need to be migrated to `HandleSubmit`.
 
 **Before (auto-save on state change):**
+
 ```csharp
 public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : ViewBase
 {
@@ -214,6 +226,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
 ```
 
 **After (explicit submit handler):**
+
 ```csharp
 public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken) : ViewBase
 {
@@ -248,6 +261,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
 ### Replace FilteredListView with UseQuery + Manual List
 
 **Before:**
+
 ```csharp
 return new FilteredListView<ProductListRecord>(
     fetchRecords: (filter) => FetchProducts(factory, filter),
@@ -264,6 +278,7 @@ private async Task<ProductListRecord[]> FetchProducts(IvyAgentExamplesContextFac
 ```
 
 **After:**
+
 ```csharp
 var filter = UseState("");
 var throttledFilter = UseState("");
@@ -303,6 +318,7 @@ public static QueryResult<ProductListRecord[]> UseProductListRecords(IViewContex
 ### Refresh Pattern: RefreshToken → RevalidateByTag
 
 **Before:**
+
 ```csharp
 UseEffect(() =>
 {
@@ -315,6 +331,7 @@ UseEffect(() =>
 ```
 
 **After:**
+
 ```csharp
 UseEffect(() =>
 {
@@ -334,6 +351,7 @@ queryService.RevalidateByTag(typeof(ProductListRecord[]));
 ## UseQuery API Reference
 
 ### Basic Signature
+
 ```csharp
 QueryResult<T> UseQuery<T, TKey>(
     TKey key,
@@ -345,20 +363,24 @@ QueryResult<T> UseQuery<T, TKey>(
 ```
 
 ### QueryResult<T> Properties
+
 - `T? Value` - The fetched data (null while loading on first fetch)
 - `bool Loading` - True while fetching
 - `Exception? Error` - Any error that occurred
 - `QueryMutator Mutator` - Methods to control the query
 
 ### QueryMutator Methods
+
 - `Revalidate()` - Refetch the data
 - `SetData(T value)` - Optimistically update the cached data
 
 ### QueryOptions Properties
+
 - `KeepPrevious = true` - Keep showing previous data while refetching (avoid flash)
 - `RevalidateOnInit = false` - Don't refetch if cached data exists
 
 ### Tags for Cache Invalidation
+
 ```csharp
 // Single entity
 tags: [(typeof(Product), productId)]
@@ -445,6 +467,7 @@ This pattern ensures the blade tab shows the entity name (e.g., "Acme Corp") ins
 ### Private Record Types and Cross-Component Invalidation
 
 If you define a list record as a **private nested type** inside a blade class:
+
 ```csharp
 public class ProductListBlade : ViewBase
 {
@@ -459,6 +482,7 @@ You **cannot** use `typeof(ProductListRecord[])` as a tag from other components 
 **Solutions:**
 
 1. **Use entity types for cross-component tags** (recommended):
+
 ```csharp
 // In ProductListBlade - use entity type for the list tag
 tags: [typeof(Product[])]
@@ -467,7 +491,8 @@ tags: [typeof(Product[])]
 queryService.RevalidateByTag(typeof(Product[]));
 ```
 
-2. **Or define the record at namespace level** (if you need the specific record type):
+1. **Or define the record at namespace level** (if you need the specific record type):
+
 ```csharp
 namespace MyApp.Views;
 
@@ -482,10 +507,12 @@ public class ProductListBlade : ViewBase
 ### IQueryService Must Be Injected
 
 When using `queryService.RevalidateByTag()`, you must first inject the service:
+
 ```csharp
 var queryService = UseService<IQueryService>();
 queryService.RevalidateByTag(typeof(Product[]));
 ```
+
 ## Required Usings
 
 ```csharp
@@ -493,6 +520,7 @@ using Ivy.Hooks;
 ```
 
 For throttled filter inputs (requires `System.Reactive` package):
+
 ```csharp
 using System.Reactive.Linq;
 ```
@@ -500,6 +528,7 @@ using System.Reactive.Linq;
 ## Verification
 
 After refactoring, run:
+
 ```bash
 dotnet build
 ```

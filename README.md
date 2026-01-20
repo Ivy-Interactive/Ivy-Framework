@@ -1,39 +1,70 @@
-![logo](https://cdn.ivy.app/logo_green_w200.png)
+![logo](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/assets/logo_green_w200.png)
 
-# Build Internal Applications with AI and Pure C\#
+[![NuGet](https://img.shields.io/nuget/v/Ivy?style=flat)](https://www.nuget.org/packages/Ivy)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Ivy?style=flat)](https://www.nuget.org/packages/Ivy)
+[![License](https://img.shields.io/github/license/Ivy-Interactive/Ivy-Framework?style=flat)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/Ivy-Interactive/Ivy-Framework/backend-checks-linux.yml?style=flat&label=CI)](https://github.com/Ivy-Interactive/Ivy-Framework/actions/workflows/backend-checks-linux.yml)
+[![website](https://img.shields.io/badge/website-ivy.app-green?style=flat)](https://ivy.app)
+[![codespaces](https://img.shields.io/badge/codespaces-try-blue?style=flat&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Devcontainer&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=EuropeWest)
+[![AGENTS.md](https://img.shields.io/badge/AGENTS.md-copy-purple?style=flat)](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/AGENTS.md)
 
-Ivy - The ultimate framework for building internal tools with LLM code generation by unifying front-end and back-end into a single C# codebase. With Ivy, you can build robust internal tools and dashboards using C# and AI assistance based on your existing database.
+# Build Full-Stack Applications in Pure C\#
 
-[Documentation](https://docs.ivy.app) | [Samples](https://samples.ivy.app) | [Current Sprint](https://github.com/orgs/Ivy-Interactive/projects/8) | [Roadmap](https://github.com/orgs/Ivy-Interactive/projects/7) | [Examples](https://github.com/Ivy-Interactive/Ivy-Examples)
+Ivy is a modern C# framework that lets you build reactive full-stack web applications entirely in pure C# - using familiar React-style components, hooks, and declarative patterns.
+No frontend/backend split, no HTML/CSS/JS - just write type-safe C# code and ship beautiful, production-ready internal tools at lightning speed.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Devcontainer&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=EuropeWest)
+[Quick Start](https://docs.ivy.app/onboarding/getting-started/introduction) &nbsp;&nbsp;•&nbsp;&nbsp; [Docs](https://docs.ivy.app) &nbsp;&nbsp;•&nbsp;&nbsp; [Samples](https://samples.ivy.app) &nbsp;&nbsp;•&nbsp;&nbsp; [Examples](https://github.com/Ivy-Interactive/Ivy-Examples) &nbsp;&nbsp;•&nbsp;&nbsp; [Current Sprint](https://github.com/orgs/Ivy-Interactive/projects/8) &nbsp;&nbsp;•&nbsp;&nbsp; [Roadmap](https://github.com/orgs/Ivy-Interactive/projects/7)
 
-<https://github.com/user-attachments/assets/ba2bf5a5-8dc7-4501-9072-6af7483be4f7>
+## Simple Example
 
-The code should be familiar to React developers. Views → Components, Build → Render, Widgets → Element.
+Ivy takes a lot of inspiration from frameworks like React. If you know React, you'll feel right at home. Here's a simple counter app built with Ivy:
 
-![3g829iF9gmsQUX](https://github.com/user-attachments/assets/c475d90f-4cca-4e46-8a8e-4ee3f2545751)
+```csharp
+public class SimpleCounterApp : ViewBase
+{
+   public override object? Build()
+   {
+       var count = UseState(0);
+       
+       UseEffect(() =>
+       {
+           Console.WriteLine($"Count changed to: {count.Value}");
+       }, [count]);
+
+       return Layout.Vertical(
+           Text.Block($"Count: {count.Value}"),
+           new Button("Increment", onClick: _ => count.Set(count.Value + 1))
+       );
+   }
+}
+```
 
 ## Features
 
-- 🛠️ **CLI**: Init new projects, add data providers, generate apps using AI, and manage deployments.
-- 💡 **Authentication**: Integrations with Supabase, Auth0, Clerk, Microsoft Entra (more is coming)
-- 🗄️ **Databases**: Easy integration with SQL Server, Postgres, Supabase, MariaDB, MySQL, Airtable, Oracle, Google Spanner, Clickhouse, Snowflake, and BigQuery.
-- 🤖 **LLM Code Agent**: Generate an entire back office application based on your database schema.
-- 🕵️ **Secrets Management**
-- 🚀 **Container Deployment**: Easily deploy to Azure, AWS, or Google Cloud or Sliplane.
-- 🔥 Full support for **Hot-Reloading** with maintained state as much as possible (suck on that Blazor).
-- 🧩 **Dependency Injection**
-- 📍 **State Management**: State is managed on the server, making this very secure.
-- 🧱 **Building Blocks**: Extensive set of widgets to build any app. An external widget framework is coming soon, where you can integrate any React, Angular, or Vue component.
-- 🧱 **External Widget Framework**:
-- 🔢 **Data Tables**: Sort, filter, and paginate data. (coming soon)
+- 🧩 **Rich Widget Library:** Extensive set of pre-built widgets to build any app. If you need more, an external widget framework is coming soon, where you can integrate any React, Angular, or Vue component.
+- 🔌 **External Widget Framework:** Easily integrate any third-party React component.
+- 🪝 **Hooks:** Familiar React-style hooks for state management, side effects, and lifecycle events.
+- 📝 **Forms**: Create complex CRUD forms with validation and data binding.
+- 📊 **Data Tables**: Sort, filter, and paginate data.
+- 📈 **Charts/Dashboards**: Build interactive charts and dashboards with ease.
+- 🔥 **Hot-Reloading**: Full support for hot-reloading with maintained state as much as possible.
+- 🤖 **LLM Code-Generation Compatibility**: Designed to maximize compatibility with LLM code generation tools.
 
-We optimise for the 3 X:s - UX (love your end users), DX (let Ivy love you) - LX (minimise LLMs mistakes)
+Ivy maintains state on the server and sends updates over WebSocket. The frontend consists of a pre-built React-based rendering engine. With Ivy, you never need to touch any HTML, CSS, or JavaScript. Only if you want to add your own widgets.
 
-Ivy maintains state on the server and sends updates over WebSocket. The frontend consists of a pre-built React-based rendering engine. With Ivy, you never need to touch any HTML, CSS, or JavaScript. Only if you want to add you’re own widgets.
+## Tools
 
-The whole framework is built around strict enterprise security constraints. As the state is fully maintained on the BE, we can minimise the risk of secrets leakage. This is a major problem with prototype tools like Lovable/vo/Bolt. All authentication integrations are handcrafted and audited.
+The Ivy.Console CLI provides a suite of tools to streamline your development workflow:
+
+- 🛠️ **Project Initialization**: Quickly set up new Ivy projects with predefined templates.
+- 🤖 **AI-Powered App Generation**: Generate applications using AI based on your specifications.
+- 🔐 **Authentication Integrations**: Built-in support for popular authentication providers like Supabase, Auth0, Clerk, and Microsoft Entra.
+- 🗄️ **Database Integrations**: Easy integration with SQL Server, Postgres, Supabase, MariaDB, MySQL, Airtable, Oracle, Google Spanner, Clickhouse, Snowflake, and BigQuery.
+- 🚀 **Deployment Management**: Manage deployments to Azure, AWS, Google Cloud, or Sliplane with ease.
+- 🔑 **Secrets Management**: Securely manage sensitive information within your applications.
+- 🧠 **MCP**: Teach any coding agent to use Ivy Framework for building full-stack applications.
+
+**[See Demo Video](https://www.youtube.com/watch?v=krH7sBLjUrM)** →
 
 ## Usage
 
@@ -58,18 +89,14 @@ Make sure you have the [.NET 10 SDK installed](https://dotnet.microsoft.com/en-u
 3. **Run**:
 
    ```bash
-   dotnet watch
+   ivy run --browse
    ```
 
 4. **Open** [http://localhost:5010](http://localhost:5010) in your browser.
 
-You can also run `ivy samples` to see all the components that Ivy offers and `ivy docs` for documentation.  
-
-Additional instructions in our [documentation](https://docs.ivy.app). 
+You can also run `ivy samples` to see all the components that Ivy offers and `ivy docs` for documentation.
 
 ## Want to help build Ivy Framework?
 
-Check out our [Internal Developer Wiki](https://github.com/Ivy-Interactive/Ivy-Framework/wiki).
-
-
-
+- [Contribution Guidelines](CONTRIBUTING.md)  
+- [Internal Developer Wiki](https://github.com/Ivy-Interactive/Ivy-Framework/wiki)

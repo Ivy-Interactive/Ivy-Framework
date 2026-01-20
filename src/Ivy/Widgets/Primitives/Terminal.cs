@@ -1,6 +1,6 @@
 using Ivy.Core;
 
-namespace Ivy.Widgets.Internal;
+namespace Ivy;
 
 public record TerminalLine(string Content, bool IsCommand = false, string Prompt = ">");
 
