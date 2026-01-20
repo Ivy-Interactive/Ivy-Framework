@@ -58,7 +58,7 @@ public class TodoItem(Todo todo, Action deleteTodo, Action toggleTodo) : ViewBas
                 {
                     toggleTodo();
                 }),
-                todo.Done ? Text.Muted(todo.Title).StrikeThrough().Width(Size.Grow()) : Text.Literal(todo.Title),
+                todo.Done ? Text.Muted(todo.Title).StrikeThrough().Width(Size.Grow()) : Text.Literal(todo.Title).Width(Size.Grow()),
                 new Button(null, _ =>
                 {
                     deleteTodo();

@@ -121,7 +121,7 @@ public class TodoItem(Todo todo, Action deleteTodo, Action toggleTodo) : ViewBas
               })
               | (todo.Done
                   ? Text.Muted(todo.Title).StrikeThrough().Width(Size.Grow())
-                  : Text.Literal(todo.Title))
+                  : Text.Literal(todo.Title).Width(Size.Grow()))
               | new Button(null, _ =>
                   {
                       deleteTodo();
