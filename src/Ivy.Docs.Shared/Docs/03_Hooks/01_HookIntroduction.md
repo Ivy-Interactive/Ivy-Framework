@@ -319,19 +319,21 @@ See [UseRef](./Core/08_UseRef.md) for detailed documentation.
 
 Share values across component trees without prop drilling. Type-safe context access follows a provider/consumer pattern where parent components create context and child components consume it.
 
-```csharp demo-tabs
+```csharp demo-below
+public record AppSettings(string Theme, int FontSize);
+
 public class ContextProvider : ViewBase
 {
     public override object? Build()
     {
-        var count = UseState(0);
-        
-        // Create context for child components
-        CreateContext(() => count.Value);
+        // Create context for child components - shared without prop drilling
+        CreateContext(() => new AppSettings("dark", 14));
         
         return Layout.Vertical()
-            | Text.P($"Parent count: {count.Value}")
-            | new Button("Increment", _ => count.Set(count.Value + 1))
+            | Text.P("Parent Component").Bold()
+            | Text.P("Settings configured in context")
+            | new Separator()
+            | Text.P("Child Component").Bold()
             | new ChildView();
     }
 }
@@ -340,8 +342,11 @@ public class ChildView : ViewBase
 {
     public override object? Build()
     {
-        var count = UseContext<int>();
-        return Text.P($"Count from context: {count}");
+        // Access context from parent - no props needed!
+        var settings = UseContext<AppSettings>();
+        return Layout.Vertical()
+            | Text.P($"Theme: {settings.Theme}")
+            | Text.P($"Font Size: {settings.FontSize}px");
     }
 }
 ```
