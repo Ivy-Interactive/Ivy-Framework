@@ -235,14 +235,31 @@ public class CallbackDemo : ViewBase
     public override object? Build()
     {
         var count = UseState(0);
+        var multiplier = UseState(2);
         
-        var handleClick = UseMemo(() => (Action)(() => {
+        // Memoized callback - only recreates when count changes
+        var handleIncrement = UseMemo(() => (Action)(() => 
+        {
             count.Set(count.Value + 1);
         }), count);
         
+        // Stable callback with no dependencies - never changes
+        var handleReset = UseMemo(() => (Action)(() => 
+        {
+            count.Set(0);
+        }));
+        
         return Layout.Vertical()
-            | Text.P($"Count: {count.Value}")
-            | new Button("Increment", _ => handleClick());
+            | Text.P($"Count: {count.Value} × {multiplier.Value} = {count.Value * multiplier.Value}")
+            | multiplier.ToNumberInput()
+                .Min(1)
+                .Max(10)
+                .Variant(NumberInputs.Slider)
+                .WithField()
+                .Label("Multiplier")
+            | (Layout.Horizontal()
+                | new Button("Increment", _ => handleIncrement())
+                | new Button("Reset", _ => handleReset()));
     }
 }
 ```
