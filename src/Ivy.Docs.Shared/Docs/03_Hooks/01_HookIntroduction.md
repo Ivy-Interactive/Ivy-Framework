@@ -378,7 +378,7 @@ public class UserProfileView : ViewBase
         }
         
         return Layout.Vertical()
-            | Text.H3($"User Profile: {args.UserId}")
+            | Text.P($"User Profile: {args.UserId}").Large()
             | Text.P($"Active Tab: {args.Tab}")
             | Text.P($"Received: UserId={args.UserId}, Tab={args.Tab}").Small();
     }
@@ -405,25 +405,27 @@ flowchart TB
 Automatic caching and revalidation with loading and error states. Background data synchronization keeps your data fresh. Supports optimistic updates and follows an SWR-inspired API pattern.
 
 ```csharp demo-tabs
-public class QueryDemo : ViewBase
+public class BasicQueryView : ViewBase
 {
     public override object? Build()
     {
         var query = UseQuery(
-            key: "user-data",
-            fetcher: async ct => {
+            key: "user-profile",
+            fetcher: async ct =>
+            {
                 await Task.Delay(1000, ct);
                 return new { Name = "Alice", Email = "alice@example.com" };
-            }
-        );
-        
-        if (query.Loading) return Text.P("Loading...");
-        if (query.Error != null) return Text.P($"Error: {query.Error.Message}");
-        
+            });
+
+        if (query.Loading) return "Loading...";
+
         return Layout.Vertical()
-            | Text.P($"Name: {query.Value?.Name}")
-            | Text.P($"Email: {query.Value?.Email}")
-            | new Button("Refetch", _ => query.Mutator.Revalidate());
+            | query //query has a Build extension that produces a debug view
+            | query.Value?.Name
+            | query.Value?.Email
+            | (Layout.Horizontal()
+                | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Primary)
+                | new Button("Invalidate", _ => query.Mutator.Invalidate()).Variant(ButtonVariant.Primary));
     }
 }
 ```
