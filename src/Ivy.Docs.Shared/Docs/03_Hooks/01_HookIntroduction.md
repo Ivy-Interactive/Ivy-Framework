@@ -540,18 +540,14 @@ flowchart TB
 
 Access any registered service from the dependency injection container with type-safe service resolution. Services have scoped lifetime within the component tree and integrate seamlessly with your DI container.
 
-```csharp demo-tabs
+```csharp demo-below
 public class ServiceDemo : ViewBase
 {
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        var count = UseState(0);
         
-        return Layout.Vertical()
-            | Text.P($"Count: {count.Value}")
-            | new Button("Increment", _ => count.Set(count.Value + 1))
-            | new Button("Show Toast", _ => client.Toast($"Count is {count.Value}"));
+        return new Button("Show Toast", _ => client.Toast("Hello from UseService!"));
     }
 }
 ```
