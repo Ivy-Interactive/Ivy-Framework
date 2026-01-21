@@ -7,6 +7,7 @@ searchHints:
   - search
   - deeplink
   - metadata
+  - title
 ---
 
 # Apps & The `[App]` Attribute
@@ -79,6 +80,19 @@ The logic works as follows:
 ### Customizing Routes
 
 You can override the automatic generation using the `id` or `path` parameters, though sticking to conventions is recommended for consistency.
+
+## Page Title
+
+The framework automatically updates the browser page title to reflect your current application route.
+
+When you define an app using the `[App]` attribute, the framework uses its `title` property to set the browser page title:
+
+```csharp
+[App(title: "Dashboard")]
+public class DashboardApp : ViewBase { /* ... */ }
+```
+
+If no title is specified, the framework generates one from the class name (e.g., `DashboardApp` -> "Dashboard").
 
 ## Best Practices
 

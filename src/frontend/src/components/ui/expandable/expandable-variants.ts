@@ -5,9 +5,9 @@ export const expandableTriggerVariants = cva(
   {
     variants: {
       scale: {
-        Small: 'h-7 px-2 py-1 gap-2',
-        Medium: 'h-9 px-3 py-2 gap-3',
-        Large: 'h-11 px-4 py-3 gap-4',
+        Small: 'h-10 px-2 py-1 gap-2',
+        Medium: 'h-12 px-3 py-2 gap-3',
+        Large: 'h-14 px-4 py-3 gap-4',
       },
     },
     defaultVariants: {

@@ -1,28 +1,29 @@
-﻿All Ivy documentation pages are listed on: https://docs.ivy.app/sitemap.xml. 
+All Ivy documentation pages are listed on: <https://docs.ivy.app/sitemap.xml>.
 Add ".md" to the end of any URL to go directly to the Markdown version of the doc.
 
 # Introduction to the Ivy Framework for LLMs
 
-- Ivy is a declarative full-stack UI framework that allows developers to build user interfaces using a component-based approach very similar to React. 
+- Ivy is a declarative full-stack UI framework that allows developers to build user interfaces using a component-based approach very similar to React.
 - In Ivy you only write one application in pure C# and we don't have a BE and FE distinction.
-- UI rendering is handled by Ivy. 
+- UI rendering is handled by Ivy.
 - When programming in Ivy you focus on building the logical structure of your application using a large set of pre-built widgets and views - you rarely need to specify any styling - Ivy just makes it look good by default.
 
-Terminology: 
+Terminology:
+
 - "Views" are the main building blocks of the UI, similar to React components.
 - "Hooks" are functions that allow views to manage state and side effects.
 - "Widgets" are the UI elements that make up the views. e.g., Button, TextBlock, StackPanel...
 - "Apps" are the top-level views that represent entire applications.
 
-A view is defined as a class that inherits from `ViewBase` and implements a `Build` method. The `Build` method returns either another view or a widget. 
+A view is defined as a class that inherits from `ViewBase` and implements a `Build` method. The `Build` method returns either another view or a widget.
 
-Widgets can have multiple children, but views can only return a single object (widget or view). To return multiple widgets from a view, you can use a `Fragment` use the Layout helpers. See below. 
+Widgets can have multiple children, but views can only return a single object (widget or view). To return multiple widgets from a view, you can use a `Fragment` use the Layout helpers. See below.
 
 public class MyView : ViewBase
 {
   public override object? Build()
   {
-    var count = UseState(0);    
+    var count = UseState(0);
     return Layout.Vertical()
         | new Text($"Count: {count.Value}")
         | new Button("Increment", () => count.Set(count.Value + 1));
@@ -59,7 +60,7 @@ public class MyApp : ViewBase
 
 - Use Layout.Vertical() or Layout.Horizontal() to create stack layouts.
 - Layout.Grid()
-— Layout.Wrap() 
+— Layout.Wrap()
 - Add Children: Pipe child elements using the | operator to arrange them top-to-bottom (vertical) or left-to-right (horizontal).
 - Layouts can be customized with methods like .Gap(int number) to set spacing between children. Use .Left(), .Center(), or .Right() methods to control alignment.
 - The number in Gap(int number) works the same as in Tailwind CSS spacing scale (e.g., 1 = 0.25rem, 2 = 0.5rem, etc.).
@@ -76,15 +77,15 @@ Layout.Vertical().Align(Align.Center)
     | Text.Label("Header")
     | (Layout.Horizontal()
         | new Button("Previous")
-        | new Button("Next")); //NOTE: Parentheses are used to group the horizontal layout - THIS IS REQUIRED 
-        
+        | new Button("Next")); //NOTE: Parentheses are used to group the horizontal layout - THIS IS REQUIRED
+
 Grids:
 
 Layout.Grid()
   .Columns(2)
-  .Rows(2) 
-  .Gap(4)   
-  .Padding(8) 
+  .Rows(2)
+  .Gap(4)
+  .Padding(8)
     | Text.Block("Cell 1")
     | Text.Block("Cell 2")
     ...
@@ -137,7 +138,7 @@ new TextInput().Default()
 ### UseState
 
 var nameState = UseState("World");
-var iconsState = this.UseState<Icons[]>);
+var iconsState = this.UseState<Icons[]>();
 
 If you don't specify a value, default(T) is used.
 
@@ -168,14 +169,14 @@ UseRef
 UseContext
 UseReducer
 UseQuery
-UseSignal 
+UseSignal
 
 ## Inputs
 
-Ivy has several Input widgets for handling user input. There are rarely used directly - instead we use 
+Ivy has several Input widgets for handling user input. There are rarely used directly - instead we use
 extension methods on IState<T> to bind state to inputs.
 
-var userNameState = UseState(""); 
+var userNameState = UseState("");
 var input = userNameState.ToTextInput().Placeholder("Enter your name");
 
 ToTextInput()
@@ -209,7 +210,7 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 [Forms](https://docs.ivy.app/onboarding/concepts/forms.md)
 [DataTable](https://docs.ivy.app/widgets/advanced/data-table.md)
 [Table](https://docs.ivy.app/widgets/common/table.md)
-[Details](https://docs.ivy.app/widgets/common/details.md) - Display structured label-value pairs 
+[Details](https://docs.ivy.app/widgets/common/details.md) - Display structured label-value pairs
 [Services](https://docs.ivy.app/onboarding/concepts/services.md)
 [Program.cs](https://docs.ivy.app/onboarding/concepts/program.md)
 [Colors](https://docs.ivy.app/api-reference/ivy-shared/colors.md)
@@ -220,6 +221,3 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 [Downloads](https://docs.ivy.app/onboarding/concepts/downloads.md)
 [Uploads](https://docs.ivy.app/widgets/inputs/file.md)
 [Icons](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/src/Ivy/Shared/Icons.cs)
-
-
-

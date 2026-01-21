@@ -14,7 +14,7 @@ Refresh tokens provide a mechanism to manually trigger UI updates and effect exe
 
 ## Basic Usage
 
-The `UseRefreshToken` hook creates a token that can be manually refreshed to trigger [effects](../../03_Hooks/Core/04_UseEffect.md):
+The `UseRefreshToken` hook creates a token that can be manually refreshed to trigger [effects](../../03_Hooks/02_Core/04_UseEffect.md):
 
 ```csharp demo-below
 public class BasicRefreshExample : ViewBase
@@ -146,6 +146,6 @@ UseEffect(() =>
 
 ## See Also
 
-- [Effects](../../03_Hooks/Core/04_UseEffect.md) - Learn about the UseEffect hook
-- [State Management](../../03_Hooks/Core/03_UseState.md) - Managing component state
+- [Effects](../../03_Hooks/02_Core/04_UseEffect.md) - Learn about the UseEffect hook
+- [State Management](../../03_Hooks/02_Core/03_UseState.md) - Managing component state
 - [Signals](./10_UseSignal.md) - Cross-component communication
