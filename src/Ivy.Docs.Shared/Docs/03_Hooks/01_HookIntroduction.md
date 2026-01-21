@@ -49,7 +49,7 @@ Ivy ships with a comprehensive set of hooks organized by purpose:
 | **Forms**                    | [UseForm](./Core/22_UseForm.md)                                                                                                             |
 | **Files**                    | [UseUpload](./Core/18_UseUpload.md), [UseDownload](./Core/15_UseDownload.md)                                                              |
 
-### Core Hooks
+## Core Hooks
 
 Core hooks provide the fundamental building blocks for state management and side effects in your views.
 
@@ -64,9 +64,9 @@ flowchart TB
     D --> D1[UseReducer]
 ```
 
-#### UseState
+### UseState
 
-Manage local component state that triggers re-renders when updated:
+Type-safe state management with `IState<T>`. Automatically triggers re-renders on state changes. Supports any type including primitives, objects, and collections. Supports lazy initialization with factory functions.
 
 ```csharp demo-tabs
 public class StateDemo : ViewBase
@@ -109,18 +109,11 @@ public class StateDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Type-safe state management with `IState<T>`
-- Automatic re-renders on state changes
-- Support for any type (primitives, objects, collections)
-- Lazy initialization with factory functions
-
 See [UseState](./Core/03_UseState.md) for detailed documentation.
 
-#### UseEffect
+### UseEffect
 
-Perform side effects with dependency tracking, similar to React's useEffect:
+Runs effects on mount, state changes, or every render. Supports cleanup functions for resource management. Async effect support with `Task.Delay` and dependency tracking for optimal performance.
 
 ```csharp demo-tabs
 public class EffectDemo : ViewBase
@@ -145,18 +138,11 @@ public class EffectDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Run effects on mount, state changes, or every render
-- Cleanup functions for resource management
-- Async effect support
-- Dependency tracking for optimal performance
-
 See [UseEffect](./Core/04_UseEffect.md) for detailed documentation.
 
-#### UseReducer
+### UseReducer
 
-Manage complex state logic with reducers for predictable state updates:
+Centralized state update logic in a single reducer function. Predictable state transitions with type-safe action dispatching. Ideal for complex state machines and applications with many state transitions.
 
 ```csharp demo-tabs
 public class BasicReducerDemo : ViewBase
@@ -186,16 +172,9 @@ public class BasicReducerDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Centralized state update logic
-- Predictable state transitions
-- Ideal for complex state machines
-- Type-safe action dispatching
-
 See [UseReducer](./Core/07_UseReducer.md) for detailed documentation.
 
-### Performance Hooks
+## Performance Hooks
 
 Optimize rendering performance with memoization hooks:
 
@@ -208,9 +187,9 @@ flowchart LR
     C --> C1[Memoize Functions]
 ```
 
-#### UseMemo
+### UseMemo
 
-Memoize expensive calculations to avoid recomputation on every render:
+Recomputes only when dependencies change, reducing unnecessary calculations and improving render performance. Type-safe dependency tracking ensures optimal memoization behavior.
 
 ```csharp demo-tabs
 public class MemoDemo : ViewBase
@@ -233,18 +212,11 @@ public class MemoDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Recompute only when dependencies change
-- Reduce unnecessary calculations
-- Improve render performance
-- Type-safe dependency tracking
-
 See [UseMemo](./Core/05_UseMemo.md) for detailed documentation.
 
-#### UseCallback
+### UseCallback
 
-Memoize callback functions to prevent unnecessary re-renders:
+Stable function references prevent unnecessary child component re-renders. Dependency-based memoization optimizes component composition and ensures callbacks have stable references when dependencies haven't changed.
 
 ```csharp demo-tabs
 public class CallbackDemo : ViewBase
@@ -264,29 +236,27 @@ public class CallbackDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Stable function references
-- Prevent child component re-renders
-- Optimize component composition
-- Dependency-based memoization
-
 See [UseCallback](./Core/06_UseCallback.md) for detailed documentation.
 
-### References & Context
-
-Access DOM-like references, share context, and read view arguments:
+## References & Context
 
 ```mermaid
-flowchart TB
-    A[References & Context] --> B[UseRef]
-    A --> C[UseContext]
-    A --> D[UseArgs]
+mindmap
+  root((References))
+    UseRef
+      No Re-renders
+      Mutable
+    UseContext
+      Share Data
+      Component Tree
+    UseArgs
+      Navigation
+      Route Params
 ```
 
-#### UseRef
+### UseRef
 
-Store mutable values that don't trigger re-renders:
+Store mutable values that persist across re-renders without triggering updates. Perfect for storing component instance values, accessing previous values, and imperative API access.
 
 ```csharp demo-tabs
 public class RefDemo : ViewBase
@@ -308,18 +278,11 @@ public class RefDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Mutable values without re-renders
-- Store component instance values
-- Access previous values
-- Imperative API access
-
 See [UseRef](./Core/08_UseRef.md) for detailed documentation.
 
-#### UseContext
+### UseContext
 
-Access shared context values across component trees:
+Share values across component trees without prop drilling. Type-safe context access follows a provider/consumer pattern where parent components create context and child components consume it.
 
 ```csharp demo-tabs
 public class ContextProvider : ViewBase
@@ -348,18 +311,11 @@ public class ChildView : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Share values across components
-- Avoid prop drilling
-- Type-safe context access
-- Provider/consumer pattern
-
 See [UseContext](./Core/12_UseContext.md) for detailed documentation.
 
-#### UseArgs
+### UseArgs
 
-Read arguments passed to views:
+Access view arguments passed during navigation with type-safe argument reading. Arguments are automatically serialized and deserialized as JSON. Supports tuple arguments and optional argument handling.
 
 ```csharp demo-tabs
 public record ArgsDemoArgs(string Message, int Count);
@@ -377,33 +333,28 @@ public class ArgsDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Access view arguments
-- Type-safe argument reading
-- Tuple argument support
-- Optional argument handling
-
 See [UseArgs](./Core/13_UseArgs.md) for detailed documentation.
 
-### Data Fetching
-
-Fetch, cache, and synchronize server data with powerful data fetching hooks:
+## Data Fetching
 
 ```mermaid
-flowchart TB
-    A[Data Fetching] --> B[UseQuery]
-    A --> C[UseMutation]
-    A --> D[UseSignal]
-    
-    B --> B1[Fetch & Cache]
-    C --> C1[Post & Update]
-    D --> D1[Reactive Signals]
+mindmap
+  root((Data Fetching))
+    UseQuery
+      Cache
+      Revalidate
+      SWR
+    UseMutation
+      Update
+      Invalidate
+    UseSignal
+      Broadcast
+      Communication
 ```
 
-#### UseQuery
+### UseQuery
 
-Fetch and cache asynchronous data with automatic revalidation:
+Automatic caching and revalidation with loading and error states. Background data synchronization keeps your data fresh. Supports optimistic updates and follows an SWR-inspired API pattern.
 
 ```csharp demo-tabs
 public class QueryDemo : ViewBase
@@ -429,19 +380,11 @@ public class QueryDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Automatic caching and revalidation
-- Loading and error states
-- Background data synchronization
-- Optimistic updates support
-- SWR-inspired API
-
 See [UseQuery](./Core/09_UseQuery.md) for detailed documentation.
 
-#### UseMutation
+### UseMutation
 
-Control query caches and perform optimistic updates:
+Control query caches from any component with `Revalidate()` to refresh data and `Invalidate()` to clear cache. Supports optimistic updates and automatic query invalidation with type-safe mutations.
 
 ```csharp demo-tabs
 public class MutationDemo : ViewBase
@@ -458,19 +401,11 @@ public class MutationDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Handle mutation operations
-- Loading and error states
-- Optimistic updates
-- Automatic query invalidation
-- Type-safe mutations
-
 See [UseMutation](./Core/14_UseMutation.md) for detailed documentation.
 
-#### UseSignal
+### UseSignal
 
-Create reactive signals for cross-component communication:
+Cross-component communication with event-like behavior. Type-safe signal emission and subscription management enable one-to-many and request-response patterns across your application.
 
 ```csharp demo-tabs
 public class CounterSignal : AbstractSignal<int, string> { }
@@ -514,29 +449,27 @@ public class ChildReceiver : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Cross-component communication
-- Event-like behavior
-- Type-safe signal emission
-- Subscription management
-
 See [UseSignal](./Core/10_UseSignal.md) for detailed documentation.
 
-### Services & Dependencies
-
-Integrate with dependency injection and external services:
+## Services & Dependencies
 
 ```mermaid
-flowchart TB
-    A[Services & Dependencies] --> B[UseService]
-    A --> C[UseRefreshToken]
-    A --> D[UseWebhook]
+mindmap
+  root((Services))
+    UseService
+      DI Container
+      Type-Safe
+    UseRefreshToken
+      Manual Refresh
+      Effects
+    UseWebhook
+      HTTP Endpoint
+      External
 ```
 
-#### UseService
+### UseService
 
-Access services from the dependency injection container:
+Access any registered service from the dependency injection container with type-safe service resolution. Services have scoped lifetime within the component tree and integrate seamlessly with your DI container.
 
 ```csharp demo-tabs
 public class ServiceDemo : ViewBase
@@ -546,10 +479,6 @@ public class ServiceDemo : ViewBase
         var client = UseService<IClientProvider>();
         var count = UseState(0);
         
-        UseEffect(() => {
-            Console.WriteLine($"Count changed to {count.Value}");
-        }, count);
-        
         return Layout.Vertical()
             | Text.P($"Count: {count.Value}")
             | new Button("Increment", _ => count.Set(count.Value + 1))
@@ -558,18 +487,11 @@ public class ServiceDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Access any registered service
-- Type-safe service resolution
-- Scoped service lifetime
-- Integration with DI container
-
 See [UseService](./Core/11_UseService.md) for detailed documentation.
 
-#### UseRefreshToken
+### UseRefreshToken
 
-Manually trigger UI updates and effect executions:
+Manually trigger UI updates and effect executions. The refresh token changes on each refresh, triggering dependent effects to run again. Perfect for refresh buttons, manual data reloading, and triggering reactive updates on demand.
 
 ```csharp demo-tabs
 public class RefreshTokenDemo : ViewBase
@@ -590,18 +512,11 @@ public class RefreshTokenDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Automatic token refresh
-- Token expiration handling
-- Secure token management
-- Integration with HTTP clients
-
 See [UseRefreshToken](./Core/16_UseRefreshToken.md) for detailed documentation.
 
-#### UseWebhook
+### UseWebhook
 
-Create HTTP endpoints for external systems:
+Create HTTP endpoints that external systems can call. The webhook handler receives HTTP requests and can update component state, making it ideal for integrating with third-party services, payment processors, and webhook providers.
 
 ```csharp demo-tabs
 public class WebhookDemo : ViewBase
@@ -620,30 +535,30 @@ public class WebhookDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Real-time webhook subscriptions
-- Event-driven updates
-- Automatic connection management
-- Type-safe event handling
-
 See [UseWebhook](./Core/19_UseWebhook.md) for detailed documentation.
 
-### UI & Interaction
-
-Build interactive UIs with navigation, alerts, blades, and triggers:
+## UI & Interaction
 
 ```mermaid
-flowchart TB
-    A[UI & Interaction] --> B[UseNavigation]
-    A --> C[UseAlert]
-    A --> D[UseBlades]
-    A --> E[UseTrigger]
+mindmap
+  root((UI Hooks))
+    UseNavigation
+      Route
+      Type-Safe
+    UseAlert
+      Dialog
+      Modal
+    UseBlades
+      Side Panel
+      Stack
+    UseTrigger
+      Conditional
+      Modal
 ```
 
-#### UseNavigation
+### UseNavigation
 
-Handle navigation and routing in your application:
+Programmatic navigation between apps using type-safe navigation with app classes or URI-based navigation for dynamic scenarios. Supports navigation arguments and external URL navigation.
 
 ```csharp demo-tabs
 public class NavigationDemo : ViewBase
@@ -656,18 +571,11 @@ public class NavigationDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Programmatic navigation
-- History management
-- Route parameter access
-- Type-safe routing
-
 See [UseNavigation](./Core/23_UseNavigation.md) for detailed documentation.
 
-#### UseAlert
+### UseAlert
 
-Display alert dialogs to users:
+Display modal alert dialogs for confirmations and user feedback. Supports alert dialogs, confirmation dialogs, and input prompts with async dialog handling for user interactions.
 
 ```csharp demo-tabs
 public class AlertDemo : ViewBase
@@ -686,18 +594,11 @@ public class AlertDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Alert dialogs
-- Confirmation dialogs
-- Input prompts
-- Async dialog handling
-
 See [UseAlert](./Core/24_UseAlert.md) for detailed documentation.
 
-#### UseBlades
+### UseBlades
 
-Create side panel interfaces with blade navigation:
+Create side panel interfaces with blade navigation. Manage blade stacks with push and pop operations. Context-aware blades share state through the blade service context.
 
 ```csharp demo-tabs
 public class BladeNavigationDemo : ViewBase
@@ -727,18 +628,11 @@ public class NavigationRootView : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Side panel navigation
-- Blade stack management
-- Push/pop navigation
-- Context-aware blades
-
 See [UseBlades](./Core/21_UseBlades.md) for detailed documentation.
 
-#### UseTrigger
+### UseTrigger
 
-Create triggerable components for modals and dialogs:
+Conditionally render components based on trigger state. Perfect for modals, dialogs, and other conditional UI elements. The hook manages visibility state internally and provides a callback to show/hide components programmatically.
 
 ```csharp demo-tabs
 public class SimpleTriggerExample : ViewBase
@@ -765,29 +659,20 @@ public class ModalDialog(IState<bool> isOpen) : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Externally triggerable actions
-- Trigger counting
-- Reset capability
-- Integration with events
-
 See [UseTrigger](./Core/17_UseTrigger.md) for detailed documentation.
 
 ### Forms
 
-Handle complex form state and validation:
-
 ```mermaid
-flowchart LR
-    A[UseForm] --> B[Form Builder]
+graph LR
+    A[UseForm] --> B[Builder]
     A --> C[Validation]
-    A --> D[Submission]
+    A --> D[Submit]
 ```
 
-#### UseForm
+### UseForm
 
-Manage form state, validation, and submission:
+Comprehensive form state management with built-in validation. Type-safe form builders enable custom layouts and support loading and error states during form submission.
 
 ```csharp demo-tabs
 public record UserModel(string Name, string Email, int Age);
@@ -807,7 +692,6 @@ public class FormDemo : ViewBase
                 Console.WriteLine($"Submitted: {user.Value.Name}, {user.Value.Email}, {user.Value.Age}");
             }
         }
-        
         return Layout.Vertical().Gap(4)
             | formView
             | validationView
@@ -819,29 +703,24 @@ public class FormDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- Comprehensive form state management
-- Built-in validation
-- Type-safe form builders
-- Custom layouts support
-- Loading and error states
-
 See [UseForm](./Core/22_UseForm.md) for detailed documentation.
 
 ### Files
 
-Handle file uploads and downloads:
-
 ```mermaid
-flowchart LR
-    A[Files] --> B[UseUpload]
-    A --> C[UseDownload]
+mindmap
+  root((Files))
+    UseUpload
+      Progress
+      Handler
+    UseDownload
+      Factory
+      On-Demand
 ```
 
-#### UseUpload
+### UseUpload
 
-Handle file uploads with progress tracking:
+File selection and upload with progress tracking. Supports multiple files and provides type-safe upload handlers for processing file streams. Automatically updates state as files are uploaded.
 
 ```csharp demo-tabs
 public class UploadDemo : ViewBase
@@ -858,18 +737,11 @@ public class UploadDemo : ViewBase
 }
 ```
 
-**Key Features:**
-
-- File selection and upload
-- Progress tracking
-- Multiple file support
-- Type-safe upload handlers
-
 See [UseUpload](./Core/18_UseUpload.md) for detailed documentation.
 
-#### UseDownload
+### UseDownload
 
-Trigger file downloads:
+Generate file downloads on-demand with custom file names and MIME types. Support for various content types with browser download integration. Files are generated dynamically when the download link is accessed.
 
 ```csharp demo-tabs
 public class DownloadDemo : ViewBase
@@ -883,30 +755,13 @@ public class DownloadDemo : ViewBase
             fileName: "hello.txt"
         );
         
-        var jsonContent = UseState("""{"name": "Ivy", "version": "1.0"}""");
-        var jsonUrl = UseDownload(
-            factory: () => System.Text.Encoding.UTF8.GetBytes(jsonContent.Value),
-            mimeType: "application/json",
-            fileName: "data.json"
-        );
-        
         return Layout.Vertical()
             | (downloadUrl.Value != null 
                 ? new Button("Download File").Url(downloadUrl.Value) 
-                : Text.P("Preparing download..."))
-            | (jsonUrl.Value != null 
-                ? new Button("Download JSON").Url(jsonUrl.Value) 
                 : Text.P("Preparing download..."));
     }
 }
 ```
-
-**Key Features:**
-
-- Programmatic file downloads
-- Custom file names and types
-- Support for various content types
-- Browser download integration
 
 See [UseDownload](./Core/15_UseDownload.md) for detailed documentation.
 
