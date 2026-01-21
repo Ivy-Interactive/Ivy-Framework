@@ -7,6 +7,7 @@ searchHints:
   - search
   - deeplink
   - metadata
+  - title
 ---
 
 # Apps & The `[App]` Attribute
