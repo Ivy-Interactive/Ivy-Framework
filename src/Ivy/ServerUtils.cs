@@ -37,11 +37,7 @@ public static class ServerUtils
             Silent = parser.GetValue(parsedArgs, "silent", false),
             Describe = parser.GetValue(parsedArgs, "describe", false)
         };
-#if DEBUG
-        serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", true) };
-#else
         serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", false) };
-#endif
         return serverArgs;
     }
 }

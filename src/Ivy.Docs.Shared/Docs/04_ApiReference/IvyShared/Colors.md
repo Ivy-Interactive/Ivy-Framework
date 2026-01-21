@@ -32,6 +32,7 @@ public class AllColorsView : ViewBase
                     .Height(10)
                     .Color(color).BorderRadius(BorderRadius.Rounded)
                     .Padding(3)
+                    .ContentAlign(Align.Center)
             )
         );
     }
@@ -54,6 +55,7 @@ public class NeutralColorsView : ViewBase
                     .Height(10)
                     .Color(color).BorderRadius(BorderRadius.Rounded)
                     .Padding(3)
+                    .ContentAlign(Align.Center)
             )
         );
     }
@@ -80,6 +82,7 @@ public class ChromaticColorsView : ViewBase
                     .Height(10)
                     .Color(color).BorderRadius(BorderRadius.Rounded)
                     .Padding(3)
+                    .ContentAlign(Align.Center)
             )
         );
     }
@@ -102,6 +105,7 @@ public class SemanticColorsView : ViewBase
                     .Height(10)
                     .Color(color).BorderRadius(BorderRadius.Rounded)
                     .Padding(3)
+                    .ContentAlign(Align.Center)
             )
         );
     }
@@ -130,6 +134,7 @@ public class ColorsOnBackgroundsView : ViewBase
                         .Height(10)
                         .Color(color).BorderRadius(BorderRadius.Rounded)
                         .Padding(3)
+                        .ContentAlign(Align.Center)
                 )
             );
         }
@@ -161,10 +166,10 @@ public class StatusIndicatorsView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical(
-            new Box("Success").Color(Colors.Success).Padding(5).BorderRadius(BorderRadius.Rounded),
-            new Box("Warning").Color(Colors.Warning).Padding(5).BorderRadius(BorderRadius.Rounded),
-            new Box("Error").Color(Colors.Destructive).Padding(5).BorderRadius(BorderRadius.Rounded),
-            new Box("Info").Color(Colors.Info).Padding(5).BorderRadius(BorderRadius.Rounded)
+            new Box("Success").Color(Colors.Success).Padding(5).BorderRadius(BorderRadius.Rounded).ContentAlign(Align.Center),
+            new Box("Warning").Color(Colors.Warning).Padding(5).BorderRadius(BorderRadius.Rounded).ContentAlign(Align.Center),
+            new Box("Error").Color(Colors.Destructive).Padding(5).BorderRadius(BorderRadius.Rounded).ContentAlign(Align.Center),
+            new Box("Info").Color(Colors.Info).Padding(5).BorderRadius(BorderRadius.Rounded).ContentAlign(Align.Center)
         ).Gap(5);
     }
 }
@@ -205,5 +210,6 @@ Colors[] colors = Enum.GetValues<Colors>();
 // Using colors with widgets
 new Box("Content")
     .Color(Colors.Primary)
-    .Background(Colors.Secondary);
+    .Background(Colors.Secondary)
+    .ContentAlign(Align.Center);
 ```

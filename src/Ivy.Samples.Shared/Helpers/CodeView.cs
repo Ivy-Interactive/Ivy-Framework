@@ -24,6 +24,7 @@ public class CodeView(Type type) : ViewBase
             }
         }
 
-        return new Code(code, Languages.Csharp);
+        return new Code(code, Languages.Csharp)
+            .Height(Size.Full());
     }
 }

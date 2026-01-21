@@ -88,26 +88,38 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       data-disabled={disabled}
       role="details"
     >
-      <CollapsibleTrigger
-        disabled={false}
-        className={cn(expandableTriggerVariants({ scale }), 'relative')}
-        onClick={handleTriggerClick}
-        data-collapsible-trigger
-      >
-        <div className={expandableHeaderVariants({ scale })} role="summary">
-          {slots?.Header}
-        </div>
-        <span
-          className={expandableChevronContainerVariants({ scale })}
-          aria-hidden="true"
+      <CollapsibleTrigger asChild>
+        <div
+          className={cn(
+            expandableTriggerVariants({ scale }),
+            'relative cursor-pointer'
+          )}
+          onClick={handleTriggerClick}
+          data-collapsible-trigger
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (!disabled) setIsOpen(prev => !prev);
+            }
+          }}
         >
-          <ChevronRight
-            className={cn(
-              expandableChevronVariants({ scale }),
-              isOpen ? 'rotate-90' : 'rotate-0'
-            )}
-          />
-        </span>
+          <div className={expandableHeaderVariants({ scale })} role="summary">
+            {slots?.Header}
+          </div>
+          <span
+            className={expandableChevronContainerVariants({ scale })}
+            aria-hidden="true"
+          >
+            <ChevronRight
+              className={cn(
+                expandableChevronVariants({ scale }),
+                isOpen ? 'rotate-90' : 'rotate-0'
+              )}
+            />
+          </span>
+        </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
         <div className={expandableContentVariants({ scale })}>

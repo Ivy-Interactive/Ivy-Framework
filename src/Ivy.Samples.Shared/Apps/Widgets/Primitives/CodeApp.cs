@@ -7,16 +7,13 @@ public class CodeApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var variants = CreateLanguageVariants();
-        var options = CreateOptionsVariants();
-
         return Layout.Vertical()
                | Text.H1("Code")
-               | Text.H2("Language Variants")
-               | variants
-               | Text.H2("Options")
-               | options
-               ;
+               | Layout.Tabs(
+                   new Tab("Variants", CreateLanguageVariants()),
+                   new Tab("Options", CreateOptionsVariants()),
+                   new Tab("Scale API", CreateScaleVariants())
+               ).Variant(TabsVariant.Content);
     }
 
     private object CreateLanguageVariants()
@@ -136,6 +133,25 @@ public class CodeApp : SampleBase
                 }
                 """,
 
+            [Languages.Yaml] = """
+                fibonacci:
+                  sequence:
+                    - 0
+                    - 1
+                    - 1
+                    - 2
+                    - 3
+                    - 5
+                    - 8
+                    - 13
+                    - 21
+                    - 34
+                  metadata:
+                    description: First 10 Fibonacci numbers
+                    generated: 2024-01-15T10:30:00Z
+                    algorithm: recursive
+                """,
+
             [Languages.Dbml] = """
                 // Database schema for Fibonacci application
                 Project fibonacci_app {
@@ -177,14 +193,14 @@ public class CodeApp : SampleBase
         {
             cards.Add(
                 Layout.Vertical()
+                    | Text.Label(language.ToString()).Bold()
                     | new Code(code, language)
                     .ShowCopyButton(true)
                     .Height(Size.Units(60))
             );
         }
 
-        // Arrange cards in a grid with 2 columns (adjust as needed)
-        return Layout.Grid().Columns(2) | cards.ToArray();
+        return Layout.Grid().Columns(2).Gap(4) | cards.ToArray();
     }
 
     private object CreateOptionsVariants()
@@ -222,7 +238,31 @@ public class CodeApp : SampleBase
                 | new Code(sampleCode, Languages.Csharp).ShowBorder(false)
         };
 
-        var variants = Layout.Grid().Columns(2) | optionBlocks;
+        var variants = Layout.Grid().Columns(2).Gap(4) | optionBlocks;
         return variants;
+    }
+
+    private object CreateScaleVariants()
+    {
+        var sampleCode = """
+            public class ScaleDemo
+            {
+                public void Hello()
+                {
+                    Console.WriteLine("Testing Scale API");
+                }
+            }
+            """;
+
+        return Layout.Vertical().Gap(6)
+            | Layout.Vertical().Gap(2)
+                | Text.H3("Small Scale")
+                | new Code(sampleCode, Languages.Csharp).Small()
+            | Layout.Vertical().Gap(2)
+                | Text.H3("Medium Scale (Default)")
+                | new Code(sampleCode, Languages.Csharp)
+            | Layout.Vertical().Gap(2)
+                | Text.H3("Large Scale")
+                | new Code(sampleCode, Languages.Csharp).Large();
     }
 }
