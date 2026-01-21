@@ -35,16 +35,22 @@ public class BasicEffectView : ViewBase
 {
     public override object? Build()
     {
-        var message = UseState("Loading...");
+        var message = UseState("Click the button to load data");
+        var loadTrigger = UseState(0);
         
-        // Effect runs once after component initializes
+        // Effect runs when loadTrigger state changes
         UseEffect(async () =>
         {
+            if (loadTrigger.Value == 0) return; // Skip initial render
+            
+            message.Set("Loading...");
             await Task.Delay(2000); // Simulate API call
             message.Set("Data loaded!");
-        });
+        }, loadTrigger);
         
-        return Text.P(message.Value);
+        return Layout.Vertical()
+            | new Button("Load Data", () => loadTrigger.Set(loadTrigger.Value + 1))
+            | Text.P(message.Value);
     }
 }
 ```
