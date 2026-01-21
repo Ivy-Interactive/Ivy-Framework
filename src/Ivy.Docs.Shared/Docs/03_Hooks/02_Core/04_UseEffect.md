@@ -178,26 +178,13 @@ UseEffect(() => { /* ... */ }, EffectTrigger.OnBuild());
 UseEffect(() => { /* ... */ }, EffectTrigger.OnStateChange(myState));
 ```
 
-### Effect Execution Order
-
-```mermaid
-graph TD
-    A[Effect Processing] --> B["1. OnStateChange Priority"]
-    B --> C["2. OnBuild Priority"]
-    C --> D["3. OnMount Priority"]
-
-    B --> B1[OnStateChange triggers]
-    C --> C1[OnBuild triggers]
-    D --> D1[OnMount triggers - Default]
-```
-
 ## Common Patterns
 
 ### Data Fetching
 
 Use `UseEffect` to fetch data from APIs or external services. The effect can be triggered by user interactions, state changes, or component initialization. Manage loading states to provide feedback during async operations.
 
-```csharp demo-below
+```csharp demo-tabs
 public class DataFetchView : ViewBase
 {
     public override object? Build()
@@ -229,14 +216,10 @@ public class DataFetchView : ViewBase
             | new Button("Fetch Data", () => loadTrigger.Set(loadTrigger.Value + 1))
             | (loading.Value 
                 ? Text.P("Loading data...") 
-                : Layout.Vertical(
+                : Layout.Horizontal(
                     data.Value?.Select(item => 
-                        new Card(
-                            Layout.Vertical()
-                                | Text.H4(item.Name)
-                                | Text.P(item.Description)
-                        )
-                    ) ?? Enumerable.Empty<Card>()
+                        new Button($"{item.Name}: {item.Description}")
+                    ) ?? Enumerable.Empty<Button>()
                 ));
     }
 }
@@ -250,36 +233,62 @@ You do not need to manually catch exceptions in UseEffect. Ivy has a built-in ex
 
 ### Cleanup Operations
 
-```csharp
+Return an `IDisposable` from `UseEffect` to perform cleanup when dependencies change or the component unmounts. This is essential for releasing resources like timers, subscriptions, or connections to prevent memory leaks.
+
+```csharp demo-tabs
 public class SubscriptionView : ViewBase
 {
     public override object? Build()
     {
-        var messages = UseState<List<string>>(new List<string>());
+        var message = UseState("Stopped");
+        var isActive = UseState(false);
+        var previousResource = UseRef<IDisposable?>(() => null);
         
         UseEffect(() =>
         {
-            // Subscribe to external service
-            var subscription = MessageService.Subscribe(message =>
+            if (!isActive.Value)
             {
-                var currentMessages = messages.Value;
-                var newMessages = currentMessages.ToList();
-                newMessages.Add(message);
-                messages.Set(newMessages);
-            });
+                var hadResource = previousResource.Value != null;
+                previousResource.Value?.Dispose();
+                previousResource.Value = null;
+                if (!hadResource) message.Set("Stopped");
+                return System.Reactive.Disposables.Disposable.Empty;
+            }
             
-            // Return subscription for automatic cleanup
-            return subscription;
-        });
+            previousResource.Value?.Dispose();
+            message.Set("Running");
+            
+            var resource = new SafeDisposable(() => message.Set("Cleaned up"));
+            previousResource.Value = resource;
+            return resource;
+        }, isActive);
         
-        return Layout.Vertical(
-            messages.Value.Select(Text.P)
-        );
+        return Layout.Vertical()
+            | new Button(isActive.Value ? "Stop" : "Start", 
+                () => isActive.Set(!isActive.Value))
+            | Text.P($"Status: {message.Value}");
+    }
+    
+    private class SafeDisposable : IDisposable
+    {
+        private readonly Action _onDispose;
+        private bool _isDisposed;
+        
+        public SafeDisposable(Action onDispose) => _onDispose = onDispose;
+        
+        public void Dispose()
+        {
+            if (_isDisposed) return;
+            _isDisposed = true;
+            _onDispose();
+        }
     }
 }
 ```
 
 ### Conditional Effects
+
+Effects can be conditionally executed based on state values. Check conditions inside the effect and return early or conditionally create resources. This pattern is useful for enabling/disabling features or fetching data only when certain conditions are met.
 
 ```csharp demo-tabs
 public class ConditionalEffectView : ViewBase
