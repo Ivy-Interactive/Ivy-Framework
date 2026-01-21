@@ -303,12 +303,12 @@ public class RefDemo : ViewBase
             | Text.P($"Previous: {previous?.ToString() ?? "None"}")
             | Text.P($"Change: {delta:+0;-0;+0}")
             | (Layout.Horizontal()
-                | new Button("+1", _ => count.Set(count.Value + 1))
+                | new Button("-1", _ => count.Set(count.Value - 1))
                 | new Button("Reset", _ => {
                     count.Set(0);
                     previousCount.Value = null;
                 })
-                | new Button("-1", _ => count.Set(count.Value -1)));
+                | new Button("+1", _ => count.Set(count.Value +1)));
     }
 }
 ```
