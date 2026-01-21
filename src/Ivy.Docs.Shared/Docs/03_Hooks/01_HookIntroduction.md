@@ -195,18 +195,30 @@ public class MemoDemo : ViewBase
 {
     public override object? Build()
     {
-        var items = UseState(new[] { 1, 2, 3, 4, 5 });
-        var filter = UseState("");
+        var number = UseState(0);
+        var renderCount = UseRef(0);
         
-        var filteredItems = UseMemo(() => 
-            items.Value.Where(x => x.ToString().Contains(filter.Value)).ToArray(),
-            items, filter
-        );
+        // Increment render counter on every build (UseRef doesn't trigger re-renders)
+        renderCount.Value++;
         
-        return Layout.Vertical().Gap(2)
-            | filter.ToTextInput().Placeholder("Filter numbers...")
-            | Text.P($"Filtered count: {filteredItems.Length}")
-            | Layout.Vertical(filteredItems.Select(x => Text.P(x.ToString())).ToArray());
+        // Memoized expensive calculation - only recomputes when number changes
+        var squared = UseMemo(() => 
+        {
+            // Simulate expensive computation
+            var result = number.Value * number.Value;
+            return result;
+        }, number.Value);
+        
+        return Layout.Vertical()
+            | Text.P("Move the slider - the square only recomputes when the number changes")
+            | number.ToNumberInput()
+                .Min(0)
+                .Max(20)
+                .Variant(NumberInputs.Slider)
+                .WithField()
+                .Label($"Number: {number.Value}")
+            | Text.P($"{number.Value}² = {squared}")
+            | Text.P($"Component rendered {renderCount.Value} times");
     }
 }
 ```
