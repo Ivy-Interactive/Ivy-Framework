@@ -357,18 +357,30 @@ See [UseContext](./Core/12_UseContext.md) for detailed documentation.
 
 Access view arguments passed during navigation with type-safe argument reading. Arguments are automatically serialized and deserialized as JSON. Supports tuple arguments and optional argument handling.
 
-```csharp demo-tabs
-public record ArgsDemoArgs(string Message, int Count);
+```csharp demo-below
+public record UserProfileArgs(int UserId, string Tab = "overview");
 
-public class ArgsDemo : ViewBase
+// Example: Component receives arguments from navigation
+public class UserProfileView : ViewBase
 {
     public override object? Build()
     {
-        var args = UseArgs<ArgsDemoArgs>();
+        // Retrieve arguments passed during navigation
+        // Returns null if no arguments were provided
+        var args = UseArgs<UserProfileArgs>();
+        
+        if (args == null)
+        {
+            return Layout.Vertical()
+                | Text.P("No arguments received")
+                | Text.P("This component expects navigation arguments.").Small()
+                | Text.P("Example: navigation.Navigate(typeof(UserProfileView), new UserProfileArgs(123, \"details\"))").Small();
+        }
         
         return Layout.Vertical()
-            | Text.P($"Message: {args?.Message ?? "No message"}")
-            | Text.P($"Count: {args?.Count ?? 0}");
+            | Text.H3($"User Profile: {args.UserId}")
+            | Text.P($"Active Tab: {args.Tab}")
+            | Text.P($"Received: UserId={args.UserId}, Tab={args.Tab}").Small();
     }
 }
 ```
