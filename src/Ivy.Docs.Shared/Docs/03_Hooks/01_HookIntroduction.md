@@ -404,7 +404,7 @@ flowchart TB
 
 Automatic caching and revalidation with loading and error states. Background data synchronization keeps your data fresh. Supports optimistic updates and follows an SWR-inspired API pattern.
 
-```csharp demo-tabs
+```csharp demo-below
 public class BasicQueryView : ViewBase
 {
     public override object? Build()
@@ -436,17 +436,31 @@ See [UseQuery](./Core/09_UseQuery.md) for detailed documentation.
 
 Control query caches from any component with `Revalidate()` to refresh data and `Invalidate()` to clear cache. Supports optimistic updates and automatic query invalidation with type-safe mutations.
 
-```csharp demo-tabs
+```csharp demo-below
 public class MutationDemo : ViewBase
 {
     public override object? Build()
     {
-        // Control a query cache
-        var mutator = UseMutation("user-data");
+        // Display query data
+        var query = UseQuery(
+            key: "counter",
+            fetcher: async ct =>
+            {
+                await Task.Delay(500, ct);
+                return Random.Shared.Next(1, 100);
+            });
         
-        return Layout.Vertical().Gap(2)
-            | new Button("Refresh", _ => mutator.Revalidate())
-            | new Button("Clear Cache", _ => mutator.Invalidate());
+        // Control the query cache from this component
+        var mutator = UseMutation("counter");
+        
+        if (query.Loading) return Text.P("Loading...");
+        
+        return Layout.Vertical()
+            | Text.P($"Value: {query.Value}").Large()
+            | (query.Validating ? Text.P("Updating...").Small() : null)
+            | (Layout.Horizontal()
+                | new Button("Revalidate", _ => mutator.Revalidate()).Variant(ButtonVariant.Primary)
+                | new Button("Invalidate", _ => mutator.Invalidate()).Variant(ButtonVariant.Outline));
     }
 }
 ```
