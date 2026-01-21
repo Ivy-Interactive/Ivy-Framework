@@ -472,43 +472,51 @@ See [UseMutation](./Core/14_UseMutation.md) for detailed documentation.
 Cross-component communication with event-like behavior. Type-safe signal emission and subscription management enable one-to-many and request-response patterns across your application.
 
 ```csharp demo-tabs
-public class CounterSignal : AbstractSignal<int, string> { }
+public class BroadcastSignal : AbstractSignal<string, Unit> { }
 
-public class SignalExample : ViewBase
+public class OneToManyDemo : ViewBase
 {
     public override object? Build()
     {
-        var signal = CreateSignal<CounterSignal, int, string>();
-        var output = UseState("");
+        var signal = CreateSignal<BroadcastSignal, string, Unit>();
+        var message = UseState("");
+        var receiver1Message = UseState("");
+        var receiver2Message = UseState("");
+        var receiver3Message = UseState("");
 
-        async ValueTask OnClick(Event<Button> _)
+        async ValueTask BroadcastMessage(Event<Button> _)
         {
-            var results = await signal.Send(1);
-            output.Set(string.Join(", ", results));
+            if (!string.IsNullOrWhiteSpace(message.Value))
+            {
+                await signal.Send(message.Value);
+                message.Set("");
+            }
         }
 
-        return Layout.Vertical(
-            new Button("Send Signal", OnClick),
-            new ChildReceiver(),
-            output.Value
-        );
-    }
-}
+        // Set up signal receiver
+        var receiver = UseSignal<BroadcastSignal, string, Unit>();
 
-public class ChildReceiver : ViewBase
-{
-    public override object? Build()
-    {
-        var signal = UseSignal<CounterSignal, int, string>();
-        var counter = UseState(0);
-
-        UseEffect(() => signal.Receive(input =>
+        // Process incoming messages
+        UseEffect(() => receiver.Receive(message =>
         {
-            counter.Set(counter.Value + input);
-            return $"Child received: {input}, total: {counter.Value}";
+            // Each receiver processes the same message differently
+            receiver1Message.Set($"Logged: {message}");
+            receiver2Message.Set($"Analyzed: {message.Length} characters");
+            receiver3Message.Set($"Stats: {message.Split(' ').Length} words");
+            return new Unit();
         }));
 
-        return new Card($"Counter: {counter.Value}");
+        return Layout.Vertical(
+            Layout.Horizontal(
+                message.ToTextInput("Broadcast Message"),
+                new Button("Send", BroadcastMessage)
+            ),
+            Layout.Horizontal(
+                new Card(Text.Block(receiver1Message.Value)),
+                new Card(Text.Block(receiver2Message.Value)),
+                new Card(Text.Block(receiver3Message.Value))
+            )
+        );
     }
 }
 ```
