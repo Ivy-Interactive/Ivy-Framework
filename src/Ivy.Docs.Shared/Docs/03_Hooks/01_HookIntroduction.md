@@ -588,14 +588,24 @@ public class WebhookDemo : ViewBase
 {
     public override object? Build()
     {
-        var counter = UseState(0);
-        var webhook = UseWebhook(_ => {
-            counter.Set(counter.Value + 1);
+        var callCount = UseState(0);
+        var lastCalled = UseState(() => (DateTime?)null);
+        
+        var webhook = UseWebhook(_ =>
+        {
+            callCount.Set(callCount.Value + 1);
+            lastCalled.Set(DateTime.Now);
         });
         
         return Layout.Vertical()
-            | Text.P($"Webhook called {counter.Value} times")
-            | Text.Code(webhook.GetUri().ToString());
+            | Text.P("Webhook Endpoint").Bold()
+            | Text.Code(webhook.GetUri().ToString())
+            | Text.P("Call this URL from external systems to trigger the handler").Small()
+            | new Separator()
+            | Text.P($"Called: {callCount.Value} times").Large()
+            | (lastCalled.Value.HasValue 
+                ? Text.P($"Last called: {lastCalled.Value.Value:HH:mm:ss}").Small()
+                : Text.P("No calls yet").Small());
     }
 }
 ```
