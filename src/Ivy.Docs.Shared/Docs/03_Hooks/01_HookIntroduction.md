@@ -179,12 +179,11 @@ See [UseReducer](./Core/07_UseReducer.md) for detailed documentation.
 Optimize rendering performance with memoization hooks:
 
 ```mermaid
-flowchart LR
-    A[Performance Hooks] --> B[UseMemo]
-    A --> C[UseCallback]
+flowchart TB
+    A[Performance Hooks] --> B[Memoization]
     
-    B --> B1[Memoize Values]
-    C --> C1[Memoize Functions]
+    B --> B1[UseMemo]
+    B --> B2[UseCallback]
 ```
 
 ### UseMemo
@@ -241,17 +240,14 @@ See [UseCallback](./Core/06_UseCallback.md) for detailed documentation.
 ## References & Context
 
 ```mermaid
-mindmap
-  root((References))
-    UseRef
-      No Re-renders
-      Mutable
-    UseContext
-      Share Data
-      Component Tree
-    UseArgs
-      Navigation
-      Route Params
+flowchart TB
+    A[References & Context] --> B[References]
+    A --> C[Context]
+    A --> D[Navigation]
+    
+    B --> B1[UseRef]
+    C --> C1[UseContext]
+    D --> D1[UseArgs]
 ```
 
 ### UseRef
@@ -338,18 +334,14 @@ See [UseArgs](./Core/13_UseArgs.md) for detailed documentation.
 ## Data Fetching
 
 ```mermaid
-mindmap
-  root((Data Fetching))
-    UseQuery
-      Cache
-      Revalidate
-      SWR
-    UseMutation
-      Update
-      Invalidate
-    UseSignal
-      Broadcast
-      Communication
+flowchart TB
+    A[Data Fetching] --> B[Fetching]
+    A --> C[Cache Control]
+    A --> D[Communication]
+    
+    B --> B1[UseQuery]
+    C --> C1[UseMutation]
+    D --> D1[UseSignal]
 ```
 
 ### UseQuery
@@ -454,17 +446,14 @@ See [UseSignal](./Core/10_UseSignal.md) for detailed documentation.
 ## Services & Dependencies
 
 ```mermaid
-mindmap
-  root((Services))
-    UseService
-      DI Container
-      Type-Safe
-    UseRefreshToken
-      Manual Refresh
-      Effects
-    UseWebhook
-      HTTP Endpoint
-      External
+flowchart TB
+    A[Services & Dependencies] --> B[Services]
+    A --> C[Triggers]
+    A --> D[Webhooks]
+    
+    B --> B1[UseService]
+    C --> C1[UseRefreshToken]
+    D --> D1[UseWebhook]
 ```
 
 ### UseService
@@ -540,20 +529,17 @@ See [UseWebhook](./Core/19_UseWebhook.md) for detailed documentation.
 ## UI & Interaction
 
 ```mermaid
-mindmap
-  root((UI Hooks))
-    UseNavigation
-      Route
-      Type-Safe
-    UseAlert
-      Dialog
-      Modal
-    UseBlades
-      Side Panel
-      Stack
-    UseTrigger
-      Conditional
-      Modal
+flowchart TB
+    A[UI & Interaction] --> B[Navigation]
+    A --> C[Dialogs]
+    A --> D[Layouts]
+    A --> E[Forms]
+    
+    B --> B1[UseNavigation]
+    C --> C1[UseAlert]
+    C --> C2[UseTrigger]
+    D --> D1[UseBlades]
+    E --> E1[UseForm]
 ```
 
 ### UseNavigation
@@ -708,14 +694,11 @@ See [UseForm](./Core/22_UseForm.md) for detailed documentation.
 ### Files
 
 ```mermaid
-mindmap
-  root((Files))
-    UseUpload
-      Progress
-      Handler
-    UseDownload
-      Factory
-      On-Demand
+flowchart TB
+    A[Files] --> B[File Handling]
+    
+    B --> B1[UseUpload]
+    B --> B2[UseDownload]
 ```
 
 ### UseUpload
