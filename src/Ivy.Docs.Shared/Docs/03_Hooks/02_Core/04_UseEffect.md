@@ -195,20 +195,21 @@ graph TD
 
 ### Data Fetching
 
-<Callout type="Info">
-You do not need to manually catch exceptions in UseEffect. Ivy has a built-in exception handling pipeline that automatically catches exceptions from effects and displays them to users via error notifications and console logging. The system wraps effect exceptions in `EffectException` and routes them through registered exception handlers.
-</Callout>
+Use `UseEffect` to fetch data from APIs or external services. The effect can be triggered by user interactions, state changes, or component initialization. Manage loading states to provide feedback during async operations.
 
-```csharp demo-tabs
+```csharp demo-below
 public class DataFetchView : ViewBase
 {
     public override object? Build()
     {
         var data = UseState<List<Item>?>();
-        var loading = UseState(true);
+        var loading = UseState(false);
+        var loadTrigger = UseState(0);
         
         UseEffect(async () =>
         {
+            if (loadTrigger.Value == 0) return; // Skip initial render
+            
             loading.Set(true);
             
             // Simulate API call - exceptions automatically handled by Ivy
@@ -222,25 +223,30 @@ public class DataFetchView : ViewBase
             
             data.Set(items);
             loading.Set(false);
-        });
+        }, loadTrigger);
         
-        if (loading.Value)
-            return Text.P("Loading data...");
-            
-        return Layout.Vertical(
-            data.Value?.Select(item => 
-                new Card(
-                    Layout.Vertical()
-                        | Text.H4(item.Name)
-                        | Text.P(item.Description)
-                )
-            ) ?? Enumerable.Empty<Card>()
-        );
+        return Layout.Vertical()
+            | new Button("Fetch Data", () => loadTrigger.Set(loadTrigger.Value + 1))
+            | (loading.Value 
+                ? Text.P("Loading data...") 
+                : Layout.Vertical(
+                    data.Value?.Select(item => 
+                        new Card(
+                            Layout.Vertical()
+                                | Text.H4(item.Name)
+                                | Text.P(item.Description)
+                        )
+                    ) ?? Enumerable.Empty<Card>()
+                ));
     }
 }
 
 public record Item(string Name, string Description);
 ```
+
+<Callout type="Info">
+You do not need to manually catch exceptions in UseEffect. Ivy has a built-in exception handling pipeline that automatically catches exceptions from effects and displays them to users via error notifications and console logging. The system wraps effect exceptions in `EffectException` and routes them through registered exception handlers.
+</Callout>
 
 ### Cleanup Operations
 
