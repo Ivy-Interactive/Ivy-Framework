@@ -286,19 +286,29 @@ Store mutable values that persist across re-renders without triggering updates. 
 ```csharp demo-tabs
 public class RefDemo : ViewBase
 {
-    private class Counter { public int Value = 0; }
-    
     public override object? Build()
     {
         var count = UseState(0);
-        var renderCount = UseRef(() => new Counter());
+        var previousCount = UseRef(() => (int?)null);
         
-        renderCount.Value.Value++;
+        // Store previous value before it changes
+        var previous = previousCount.Value;
+        var delta = previous.HasValue ? count.Value - previous.Value : 0;
+        
+        // Update ref for next render (doesn't trigger re-render)
+        previousCount.Value = count.Value;
         
         return Layout.Vertical()
-            | Text.P($"Count: {count.Value}")
-            | Text.P($"Renders: {renderCount.Value.Value}")
-            | new Button("Increment", _ => count.Set(count.Value + 1));
+            | Text.P($"Current: {count.Value}")
+            | Text.P($"Previous: {previous?.ToString() ?? "None"}")
+            | Text.P($"Change: {delta:+0;-0;+0}")
+            | (Layout.Horizontal()
+                | new Button("+1", _ => count.Set(count.Value + 1))
+                | new Button("Reset", _ => {
+                    count.Set(0);
+                    previousCount.Value = null;
+                })
+                | new Button("-1", _ => count.Set(count.Value -1)));
     }
 }
 ```
