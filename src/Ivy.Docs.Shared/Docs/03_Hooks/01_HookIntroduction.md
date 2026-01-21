@@ -632,7 +632,7 @@ flowchart TB
 
 Programmatic navigation between apps using type-safe navigation with app classes or URI-based navigation for dynamic scenarios. Supports navigation arguments and external URL navigation.
 
-```csharp demo-tabs
+```csharp demo-below
 public class NavigationDemo : ViewBase
 {
     public override object? Build()
@@ -649,17 +649,18 @@ See [UseNavigation](./Core/23_UseNavigation.md) for detailed documentation.
 
 Display modal alert dialogs for confirmations and user feedback. Supports alert dialogs, confirmation dialogs, and input prompts with async dialog handling for user interactions.
 
-```csharp demo-tabs
+```csharp demo-below
 public class AlertDemo : ViewBase
 {
     public override object? Build()
     {
         var (alertView, showAlert) = UseAlert();
+        var client = UseService<IClientProvider>();
         
         return Layout.Vertical().Gap(2)
             | new Button("Show Alert", _ => 
                 showAlert("Are you sure you want to continue?", result => {
-                    Console.WriteLine($"User selected: {result}");
+                    client.Toast($"User selected: {result}");
                 }, "Alert Title"))
             | alertView;
     }
@@ -706,7 +707,7 @@ See [UseBlades](./Core/21_UseBlades.md) for detailed documentation.
 
 Conditionally render components based on trigger state. Perfect for modals, dialogs, and other conditional UI elements. The hook manages visibility state internally and provides a callback to show/hide components programmatically.
 
-```csharp demo-tabs
+```csharp demo-below
 public class SimpleTriggerExample : ViewBase
 {
     public override object? Build()
@@ -732,15 +733,6 @@ public class ModalDialog(IState<bool> isOpen) : ViewBase
 ```
 
 See [UseTrigger](./Core/17_UseTrigger.md) for detailed documentation.
-
-### Forms
-
-```mermaid
-graph LR
-    A[UseForm] --> B[Builder]
-    A --> C[Validation]
-    A --> D[Submit]
-```
 
 ### UseForm
 
@@ -776,16 +768,6 @@ public class FormDemo : ViewBase
 ```
 
 See [UseForm](./Core/22_UseForm.md) for detailed documentation.
-
-### Files
-
-```mermaid
-flowchart TB
-    A[Files] --> B[File Handling]
-    
-    B --> B1[UseUpload]
-    B --> B2[UseDownload]
-```
 
 ### UseUpload
 
@@ -833,22 +815,6 @@ public class DownloadDemo : ViewBase
 ```
 
 See [UseDownload](./Core/15_UseDownload.md) for detailed documentation.
-
-## Best Practices
-
-1. **Call Hooks at Top Level** - Always call hooks at the top level of your `Build` method, never inside loops, conditions, or nested functions. See [Rules of Hooks](./02_RulesOfHooks.md) for details.
-
-2. **Use Appropriate Hooks** - Choose the right hook for your use case:
-   - `UseState` for simple local state
-   - `UseReducer` for complex state logic
-   - `UseQuery` for server data fetching
-   - `UseMemo`/`UseCallback` for performance optimization
-
-3. **Handle Loading States** - Always handle loading and error states when using async hooks like `UseQuery` and `UseMutation`.
-
-4. **Clean Up Effects** - Return cleanup functions from `UseEffect` to prevent memory leaks and cancel ongoing operations.
-
-5. **Custom Hooks** - Extract reusable hook logic into custom hooks following the `UseX` naming convention.
 
 ## Creating Custom Hooks
 
