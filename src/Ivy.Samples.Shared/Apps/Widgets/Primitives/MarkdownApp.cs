@@ -3,9 +3,9 @@ using Ivy.Shared;
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.FileText, searchHints: ["formatting", "markup", "markdown", "md", "text", "content"])]
-public class MarkdownApp : ViewBase
+public class MarkdownApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         //          var markdown = 
         //              """
