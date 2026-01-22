@@ -208,7 +208,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             var initialAppId = args.NavigationAppId ?? settings.DefaultAppId;
             if (!string.IsNullOrWhiteSpace(initialAppId))
             {
-                OpenApp(new NavigateArgs(initialAppId), replaceHistory: true);
+                var appArgs = args.GetArgs<object>();
+                OpenApp(new NavigateArgs(initialAppId, appArgs), replaceHistory: true);
             }
             else
             {
