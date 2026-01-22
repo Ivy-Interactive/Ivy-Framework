@@ -34,7 +34,7 @@ Key characteristics of `UseRef`:
 
 ## Basic Usage
 
-```csharp demo-tabs
+```csharp demo-below
 public class BasicRefDemo : ViewBase
 {
     class Counter { public int Value = 0; }
@@ -47,11 +47,10 @@ public class BasicRefDemo : ViewBase
         // Increment without triggering re-render
         renderCount.Value.Value++;
         
-        return Layout.Vertical(
-            Text.P($"This component has rendered {renderCount.Value.Value} times"),
-            Text.P("(Note: The count increments on each render, but doesn't trigger re-renders)").Small(),
-            new Button("Force Re-render", _ => forceUpdate.Set(forceUpdate.Value + 1))
-        );
+        return Layout.Vertical()
+            | new Button("Force Re-render", _ => forceUpdate.Set(forceUpdate.Value + 1))
+            | Text.P($"This component has rendered {renderCount.Value.Value} times")
+            | Text.P("(Note: The count increments on each render, but doesn't trigger re-renders)").Small();
     }
 }
 ```
@@ -117,135 +116,6 @@ var count = UseRef(0); // Won't trigger re-render!
 // Bad: Computed value - use UseMemo instead
 var total = UseRef(items.Sum()); // Won't update when items change!
 ```
-
-## Common Pitfalls and Solutions
-
-### Ref Troubleshooting Guide
-
-```mermaid
-flowchart TD
-    A["UseRef not working as expected?"] --> B{Check your implementation}
-    
-    B --> C["UI not updating?"]
-    B --> D["Value not persisting?"]
-    B --> E["Memory leaks?"]
-    B --> F["Using for reactive state?"]
-    
-    C --> C1["UseRef doesn't trigger re-renders<br/>Use [UseState](./03_UseState.md) for UI updates<br/>Mutate then manually update state"]
-    D --> D1["Check initialization<br/>Verify factory function<br/> Ensure value is stored"]
-    E --> E1["Clean up in [UseEffect](./04_UseEffect.md)<br/>Dispose timers/subscriptions<br/>Set to null on unmount"]
-    F --> F1["Use [UseState](./03_UseState.md) instead<br/>Ref is for non-reactive values<br/>Check if value affects rendering"]
-    
-    C1 --> G["Problem solved?"]
-    D1 --> G
-    E1 --> G
-    F1 --> G
-    
-    G -->|Yes| H["Great! Your ref values are working correctly"]
-    G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
-```
-
-### Using for Reactive State
-
-**Problem**: Using `UseRef` for values that should trigger re-renders
-
-```csharp
-// Wrong: Ref value won't trigger re-render
-var count = UseRef(0);
-return new Button($"Count: {count.Value}", _ => count.Value++); // UI won't update!
-```
-
-**Solution**: Use [`UseState`](./03_UseState.md) for reactive values
-
-```csharp
-// Correct: Use UseState for reactive values
-var count = UseState(0);
-return new Button($"Count: {count.Value}", _ => count.Set(count.Value + 1));
-```
-
-### Forgetting Cleanup
-
-**Problem**: Not cleaning up resources stored in `UseRef`
-
-```csharp
-// Wrong: No cleanup, potential memory leak
-var timer = UseRef(() => new Timer(_ => { }, null, 0, 1000));
-```
-
-**Solution**: Clean up in [`UseEffect`](./04_UseEffect.md)
-
-```csharp
-// Correct: Clean up in effect
-var timer = UseRef<Timer?>(null);
-UseEffect(() => {
-    timer.Value = new Timer(_ => { }, null, 0, 1000);
-    return () => timer.Value?.Dispose();
-});
-```
-
-### Mutating Without Manual Updates
-
-**Problem**: Mutating ref values and expecting UI to update
-
-```csharp
-// Wrong: UI won't update automatically
-var data = UseRef(() => new List<string>());
-data.Value.Add("new item"); // UI doesn't update!
-```
-
-**Solution**: Manually trigger update or use [`UseState`](./03_UseState.md)
-
-```csharp
-// Option 1: Use UseState if you need reactivity
-var data = UseState(() => new List<string>());
-data.Set(data.Value.Append("new item").ToList());
-
-// Option 2: Mutate ref, then update reactive state
-var data = UseRef(() => new List<string>());
-var updateTrigger = UseState(0);
-data.Value.Add("new item");
-updateTrigger.Set(updateTrigger.Value + 1); // Force re-render
-```
-
-### Not Initializing Properly
-
-**Problem**: Not using factory functions for expensive initialization
-
-```csharp
-// Less efficient: Creates object on every render check
-var expensive = UseRef(new ExpensiveObject());
-```
-
-**Solution**: Use factory function for expensive initialization
-
-```csharp
-// Better: Factory function only called once
-var expensive = UseRef(() => new ExpensiveObject());
-```
-
-### Confusing with [`UseMemo`](./05_UseMemo.md)
-
-**Problem**: Using `UseRef` when [`UseMemo`](./05_UseMemo.md) is more appropriate
-
-```csharp
-// Wrong: UseRef for computed values
-var data = UseRef(() => ProcessItems(items.Value));
-```
-
-**Solution**: Use [`UseMemo`](./05_UseMemo.md) for computed values
-
-```csharp
-// Correct: UseMemo recomputes when dependencies change
-var data = UseMemo(() => ProcessItems(items.Value), items);
-```
-
-## Best Practices
-
-- **Use for Non-Reactive Values** - Only use `UseRef` for values that don't affect rendering
-- **Clean Up Resources** - Always clean up timers, subscriptions, and other resources in [`UseEffect`](./04_UseEffect.md)
-- **Initialize with Factory Function** - Use factory functions for expensive initialization
-- **Avoid for UI [State](./03_UseState.md)** - Never use `UseRef` for values that should trigger re-renders (use [`UseState`](./03_UseState.md))
-- **Document Mutations** - Clearly document when and why ref values are mutated
 
 ## See Also
 

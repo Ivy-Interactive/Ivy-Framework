@@ -29,6 +29,36 @@ Key benefits of `UseReducer`:
 - **Action-Based Updates** - State changes are explicit and traceable through actions
 - **Testability** - Pure reducer functions are easy to test in isolation
 
+### Basic Usage
+
+```csharp demo-below
+public class BasicReducerDemo : ViewBase
+{
+    // Reducer function
+    private int CounterReducer(int state, string action) => action switch
+    {
+        "increment" => state + 1,
+        "decrement" => state - 1,
+        "reset" => 0,
+        _ => state
+    };
+    
+    public override object? Build()
+    {
+        var (count, dispatch) = this.UseReducer(CounterReducer, 0);
+        
+        return Layout.Vertical(
+            Text.H3($"Count: {count}"),
+            Layout.Horizontal(
+                new Button("-", _ => dispatch("decrement")),
+                new Button("Reset", _ => dispatch("reset")),
+                new Button("+", _ => dispatch("increment"))
+            )
+        );
+    }
+}
+```
+
 <Callout type="Tip">
 `UseReducer` is ideal when you have complex [state](./03_UseState.md) logic involving multiple sub-values, when the next state depends on the previous one, or when you want to centralize state update logic in one place.
 </Callout>
@@ -89,36 +119,6 @@ sequenceDiagram
     UR->>S: Get current state
     S-->>UR: Return updated state
     UR-->>C: Return (newState, dispatch)
-```
-
-### Basic Usage
-
-```csharp demo-below
-public class BasicReducerDemo : ViewBase
-{
-    // Reducer function
-    private int CounterReducer(int state, string action) => action switch
-    {
-        "increment" => state + 1,
-        "decrement" => state - 1,
-        "reset" => 0,
-        _ => state
-    };
-    
-    public override object? Build()
-    {
-        var (count, dispatch) = this.UseReducer(CounterReducer, 0);
-        
-        return Layout.Vertical(
-            Text.H3($"Count: {count}"),
-            Layout.Horizontal(
-                new Button("-", _ => dispatch("decrement")),
-                new Button("Reset", _ => dispatch("reset")),
-                new Button("+", _ => dispatch("increment"))
-            )
-        );
-    }
-}
 ```
 
 ### Use Cases
