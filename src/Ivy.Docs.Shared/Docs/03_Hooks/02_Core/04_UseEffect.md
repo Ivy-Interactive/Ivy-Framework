@@ -110,51 +110,6 @@ UseEffect(async () =>
 
 Effects can be triggered by different events using trigger parameters:
 
-### State Dependencies
-
-Effects can depend on [state](./03_UseState.md) changes:
-
-```csharp demo-below
-public class DependentEffectView : ViewBase
-{
-    public override object? Build()
-    {
-        var count = UseState(0);
-        var log = UseState<List<string>>(new List<string>());
-        
-        // Effect runs when state changes
-        UseEffect(() =>
-        {
-            var currentLog = log.Value;
-            var newLog = currentLog.ToList();
-            newLog.Add($"Count changed to: {count.Value}");
-            if (newLog.Count > 3) newLog = newLog.TakeLast(3).ToList();
-            log.Set(newLog);
-        }, count); // Dependency on count state
-        
-        return Layout.Vertical()
-            | new Button($"Count: {count.Value}", 
-                onClick: _ => count.Set(count.Value + 1))
-            | Layout.Vertical(log.Value.Select(e => Text.P(e).Small()));
-    }
-}
-```
-
-### Multiple Dependencies
-
-Effects can depend on multiple state variables:
-
-```csharp
-UseEffect(() =>
-{
-    // Runs when either firstName or lastName changes
-    var fullName = $"{firstName.Value} {lastName.Value}";
-    // Handle full name...
-}, firstName, lastName);
-```
-
-### Built-in Triggers
-
 ```mermaid
 graph LR
     A[UseEffect] --> B[OnMount - Default]
@@ -176,6 +131,60 @@ UseEffect(() => { /* ... */ }, EffectTrigger.OnBuild());
 
 // OnStateChange - runs when state changes
 UseEffect(() => { /* ... */ }, EffectTrigger.OnStateChange(myState));
+```
+
+### State Dependencies
+
+Effects can depend on [state](./03_UseState.md) changes:
+
+```csharp demo-tabs
+public class DependentEffectView : ViewBase
+{
+    public override object? Build()
+    {
+        var count = UseState(0);
+        var message = UseState("Count: 0");
+        
+        UseEffect(() =>
+        {
+            message.Set($"Count changed to: {count.Value}");
+        }, count);
+        
+        return Layout.Vertical()
+            | new Button($"Count: {count.Value}", 
+                () => count.Set(count.Value + 1))
+            | Text.P(message.Value);
+    }
+}
+```
+
+### Multiple Dependencies
+
+Effects can depend on multiple state variables:
+
+```csharp demo-tabs
+public class MultipleDepsView : ViewBase
+{
+    public override object? Build()
+    {
+        var firstName = UseState("John");
+        var lastName = UseState("Doe");
+        var fullName = UseState("");
+        
+        UseEffect(() =>
+        {
+            fullName.Set($"{firstName.Value} {lastName.Value}");
+        }, firstName, lastName);
+        
+        return Layout.Vertical()
+            | (Layout.Horizontal()
+                | new Button($"First: {firstName.Value}", 
+                    () => firstName.Set(firstName.Value == "John" ? "Jane" : "John"))
+                | new Button($"Last: {lastName.Value}", 
+                    () => lastName.Set(lastName.Value == "Doe" ? "Smith" : "Doe")))
+            | Text.P($"Full name: {fullName.Value}");
+    }
+}
 ```
 
 ## Common Patterns
@@ -288,7 +297,7 @@ public class SubscriptionView : ViewBase
 
 ### Conditional Effects
 
-Effects can be conditionally executed based on state values. Check conditions inside the effect and return early or conditionally create resources. This pattern is useful for enabling/disabling features or fetching data only when certain conditions are met.
+Effects can be conditionally executed based on state values. Check conditions inside the effect and return early or conditionally create resources.
 
 ```csharp demo-tabs
 public class ConditionalEffectView : ViewBase
@@ -323,68 +332,6 @@ public class ConditionalEffectView : ViewBase
         return $"Data fetched at {DateTime.Now:HH:mm:ss}";
     }
 }
-```
-
-## Common Pitfalls
-
-### Forgetting Dependencies
-
-```csharp
-// Wrong: Missing dependency
-var multiplier = UseState(2);
-UseEffect(() =>
-{
-    var result = count.Value * multiplier.Value; // Uses multiplier but not in deps
-    // ...
-}, count); // Missing multiplier dependency
-
-// Correct: Include all state dependencies
-UseEffect(() =>
-{
-    var result = count.Value * multiplier.Value;
-    // ...
-}, count, multiplier);
-```
-
-### Stale Closures
-
-```csharp
-// Wrong: Captures stale state
-UseEffect(() =>
-{
-    var timer = new Timer(_ =>
-    {
-        // This captures the initial value of count!
-        Console.WriteLine(count.Value);
-    }, null, 1000, 1000);
-    return timer;
-}); // No dependencies - effect only runs once
-
-// Correct: Update dependencies or use current state values
-UseEffect(() =>
-{
-    var timer = new Timer(_ =>
-    {
-        Console.WriteLine(count.Value); // Will see current value
-    }, null, 1000, 1000);
-    return timer;
-}, count); // Re-create timer when state changes
-```
-
-### Not Awaiting Async Operations
-
-```csharp
-// Wrong: Fire-and-forget async
-UseEffect(() =>
-{
-    DoAsyncWork(); // No await - operation may not complete
-});
-
-// Correct: Proper async handling
-UseEffect(async () =>
-{
-    await DoAsyncWork(); // Properly await the operation
-});
 ```
 
 ## See Also
