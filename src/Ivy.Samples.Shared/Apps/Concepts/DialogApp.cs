@@ -102,7 +102,7 @@ public class CreateDialogExample : ViewBase
                    .Builder(e => e.Name, e => e.ToTextInput().Placeholder("Enter item name"))
                    .Builder(e => e.Description, e => e.ToTextAreaInput().Placeholder("Enter description"))
                    .Builder(e => e.Category, e => e.ToTextInput().Placeholder("Enter category"))
-                   .ToDialog(isOpen, title: "Create New Item", description: "Fill in the details below to create a new item.", submitTitle: "Create", width: Size.Units(400));
+                   .ToDialog(isOpen, title: "Create New Item", description: "Fill in the details below to create a new item.", submitTitle: "Create", width: Size.Units(200));
     }
 }
 
