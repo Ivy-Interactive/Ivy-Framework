@@ -3,9 +3,9 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
 [App(icon: Icons.Grid3x3, searchHints: ["layout", "vertical", "horizontal", "stack", "arrangement", "flexbox"])]
-public class StackLayoutApp : ViewBase
+public class StackLayoutApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         var squareBox = new Box().Width(5).Height(5);
         var tallBox = new Box().Width(5).Height(7);
