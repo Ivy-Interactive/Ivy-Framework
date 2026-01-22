@@ -3,9 +3,9 @@ using Ivy.Shared;
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
 [App(icon: Icons.LayoutTemplate, path: ["Widgets", "Layouts"], searchHints: ["navigation", "panels", "pages", "switcher", "tabbed", "sections"])]
-public class TabsApp : ViewBase
+public class TabsApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         var selectedIndex = UseState<int?>();
         var client = UseService<IClientProvider>();
