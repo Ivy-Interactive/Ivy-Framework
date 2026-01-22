@@ -50,7 +50,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
         _columnOrderBySelector = Expression.Lambda<Func<TModel, object?>>(
             Expression.Convert(orderBySelector.Body, typeof(object)),
             orderBySelector.Parameters);
-        
+
         _columnOrderDescending = descending;
         return this;
     }
@@ -60,7 +60,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
         _cardOrderBySelector = Expression.Lambda<Func<TModel, object?>>(
             Expression.Convert(orderBySelector.Body, typeof(object)),
             orderBySelector.Parameters);
-        
+
         _cardOrderDescending = descending;
         return this;
     }
