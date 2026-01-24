@@ -49,10 +49,6 @@ public class BasicQueryView : ViewBase
 }
 ```
 
-## Keys
-
-Keys can be any serializable value, such as strings, numbers, or complex objects like tuples. You can also use a key factory function.
-
 ## Query Result
 
 `UseQuery` returns a `QueryResult<T>` with the following properties:
@@ -185,9 +181,7 @@ public class MutationView : ViewBase
             return Text.Literal("Loading...");
 
         return Layout.Vertical()
-            | Text.Literal($"Value: {query.Value}")
-            | (query.Validating ? Text.Muted("Syncing...") : null!)
-            | Layout.Horizontal()
+            | (Layout.Horizontal()
                 | new Button("+10 (Optimistic)", _ =>
                     query.Mutator.Mutate(query.Value + 10, revalidate: true))
                     .Variant(ButtonVariant.Primary)
@@ -195,7 +189,9 @@ public class MutationView : ViewBase
                     query.Mutator.Mutate(999, revalidate: false))
                     .Variant(ButtonVariant.Secondary)
                 | new Button("Refresh", _ => query.Mutator.Revalidate())
-                    .Variant(ButtonVariant.Outline);
+                    .Variant(ButtonVariant.Outline))
+                | Text.Literal($"Value: {query.Value}")
+                | (query.Validating ? Text.Muted("Syncing...") : null!);
     }
 }
 ```

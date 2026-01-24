@@ -29,7 +29,7 @@ Key benefits of `UseReducer`:
 - **Action-Based Updates** - State changes are explicit and traceable through actions
 - **Testability** - Pure reducer functions are easy to test in isolation
 
-### Basic Usage
+## Basic Usage
 
 ```csharp demo-below
 public class BasicReducerDemo : ViewBase
