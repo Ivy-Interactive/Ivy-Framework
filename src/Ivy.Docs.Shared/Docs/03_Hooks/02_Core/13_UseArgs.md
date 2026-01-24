@@ -69,6 +69,22 @@ var receivedArgs = UseArgs<UserProfileArgs>();
 // Returns: UserProfileArgs { UserId = 123, Tab = "details" }
 ```
 
+### Serialization Errors Handling
+
+If arguments fail to serialize, ensure all properties are serializable and avoid circular references:
+
+```csharp
+// Good: All properties serialize
+public record GoodArgs(string Name, int Count);
+
+// Bad: Non-serializable property
+public record BadArgs(string Name, Action Callback);
+
+// Bad: Circular reference
+public class Parent { public Child Child { get; set; } }
+public class Child { public Parent Parent { get; set; } }
+```
+
 ## When to Use Args
 
 | Use Args For | Use State/Context Instead For |
@@ -77,8 +93,6 @@ var receivedArgs = UseArgs<UserProfileArgs>();
 | Deep Linking (URL parameters) | Shared Component Data |
 | Component Initialization | Complex Objects (circular refs) |
 | Simple Data Transfer | Real-time Updates |
-
-## Common Patterns
 
 ### Default Arguments
 
@@ -129,22 +143,6 @@ public class MainView : ViewBase
         };
     }
 }
-```
-
-### Serialization Errors Handling
-
-If arguments fail to serialize, ensure all properties are serializable and avoid circular references:
-
-```csharp
-// Good: All properties serialize
-public record GoodArgs(string Name, int Count);
-
-// Bad: Non-serializable property
-public record BadArgs(string Name, Action Callback);
-
-// Bad: Circular reference
-public class Parent { public Child Child { get; set; } }
-public class Child { public Parent Parent { get; set; } }
 ```
 
 ## Best Practices
