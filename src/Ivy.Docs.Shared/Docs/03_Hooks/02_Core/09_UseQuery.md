@@ -154,6 +154,46 @@ public class DependentQueryView : ViewBase
 }
 ```
 
+## Tag-Based Invalidation
+
+Assign tags to queries for bulk invalidation (using [UseService](./11_UseService.md)). Tags are serializable the same way as keys.
+
+```csharp demo-below
+public class TaggedQueriesView : ViewBase
+{
+    public override object? Build()
+    {
+        var queryService = UseService<IQueryService>();
+
+        var users = UseQuery(
+            key: "dashboard/users",
+            fetcher: async ct =>
+            {
+                await Task.Delay(500, ct);
+                return $"Users: {Random.Shared.Next(100, 500)}";
+            },
+            tags: ["dashboard", "users"]);
+
+        var orders = UseQuery(
+            key: "dashboard/orders",
+            fetcher: async ct =>
+            {
+                await Task.Delay(500, ct);
+                return $"Orders: {Random.Shared.Next(50, 200)}";
+            },
+            tags: ["dashboard", "orders"]);
+
+        return Layout.Vertical()
+            | Text.Literal(users.Loading ? "Loading..." : users.Value ?? "")
+            | Text.Literal(orders.Loading ? "Loading..." : orders.Value ?? "")
+            | (Layout.Horizontal()
+                | new Button("Refresh All", _ => queryService.RevalidateByTag("dashboard"))
+                | new Button("Invalidate All", _ => queryService.InvalidateByTag("dashboard"))
+            );
+    }
+}
+```
+
 ## Mutations
 
 The `Mutator` provides methods to update cached data:
@@ -198,10 +238,10 @@ public class MutationView : ViewBase
 
 ### Cross-Component Mutations
 
-Use `UseMutation` to control a query from a different component:
+Use `UseMutation` to control a query by key (e.g. from another component):
 
 ```csharp demo-below
-public class SharedDataDisplay : ViewBase
+public class UseMutationView : ViewBase
 {
     public override object? Build()
     {
@@ -212,70 +252,28 @@ public class SharedDataDisplay : ViewBase
                 await Task.Delay(500, ct);
                 return $"Data: {Guid.NewGuid().ToString()[..8]}";
             });
-
-        return Layout.Horizontal()
-            | Text.Literal(query.Loading ? "Loading..." : query.Value ?? "")
-            | (query.Validating ? Text.Muted(" (updating...)") : null!);
-    }
-}
-
-public class SharedDataControls : ViewBase
-{
-    public override object? Build()
-    {
         var mutator = UseMutation("shared-data");
 
-        return Layout.Horizontal()
-            | new Button("Revalidate", _ => mutator.Revalidate())
-                .Variant(ButtonVariant.Outline)
-            | new Button("Invalidate", _ => mutator.Invalidate())
-                .Variant(ButtonVariant.Destructive);
-    }
-}
-```
-
-## Tag-Based Invalidation
-
-Assign tags to queries for bulk invalidation (using [UseService](./11_UseService.md)). Tags are serializable the same way as keys.
-
-```csharp demo-below
-public class TaggedQueriesView : ViewBase
-{
-    public override object? Build()
-    {
-        var queryService = UseService<IQueryService>();
-
-        var users = UseQuery(
-            key: "dashboard/users",
-            fetcher: async ct =>
-            {
-                await Task.Delay(500, ct);
-                return $"Users: {Random.Shared.Next(100, 500)}";
-            },
-            tags: ["dashboard", "users"]);
-
-        var orders = UseQuery(
-            key: "dashboard/orders",
-            fetcher: async ct =>
-            {
-                await Task.Delay(500, ct);
-                return $"Orders: {Random.Shared.Next(50, 200)}";
-            },
-            tags: ["dashboard", "orders"]);
-
         return Layout.Vertical()
-            | Text.Literal(users.Loading ? "Loading..." : users.Value ?? "")
-            | Text.Literal(orders.Loading ? "Loading..." : orders.Value ?? "")
             | (Layout.Horizontal()
-                | new Button("Refresh All", _ => queryService.RevalidateByTag("dashboard"))
-                | new Button("Invalidate All", _ => queryService.InvalidateByTag("dashboard"))
-            );
+                | Text.Literal(query.Loading ? "Loading..." : query.Value ?? "")
+                | (query.Validating ? Text.Muted(" (updating...)") : null!))
+            | (Layout.Horizontal()
+                | new Button("Revalidate", _ => mutator.Revalidate())
+                    .Variant(ButtonVariant.Outline)
+                | new Button("Invalidate", _ => mutator.Invalidate())
+                    .Variant(ButtonVariant.Destructive));
     }
 }
 ```
 
-## Polling
+## Examples
 
+<Details>
+<Summary>
+Polling
+</Summary>
+<Body>
 Automatically revalidate at intervals with `RefreshInterval`:
 
 ```csharp demo-below
@@ -307,8 +305,14 @@ public class PollingView : ViewBase
 }
 ```
 
-## Pagination
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Pagination
+</Summary>
+<Body>
 Use `KeepPrevious` to show previous page data while loading the next (managed by [UseState](./03_UseState.md)):
 
 ```csharp demo-below
@@ -346,7 +350,14 @@ public class PaginatedView : ViewBase
 }
 ```
 
-## Pre-Populated Data
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Pre-Populated Data
+</Summary>
+<Body>
 
 Skip initial fetch when you already have data (e.g., from a list view):
 
@@ -404,7 +415,14 @@ public class ProductDetailView(Product initialProduct) : ViewBase
 }
 ```
 
-## Error Handling
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Error Handling
+</Summary>
+<Body>
 
 Errors are captured in the `Error` property:
 
@@ -441,3 +459,6 @@ public class ErrorHandlingView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
