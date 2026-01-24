@@ -13,8 +13,8 @@ public class DialogApp : SampleBase
                | Text.H1("Dialog")
                | Text.P("Modal windows with Header, Body, and Footer sections. Each example demonstrates different use cases.")
                | Layout.Grid().Columns(3).Gap(4)
-                   | new DeleteDialogExample()
                    | new CreateDialogExample()
+                   | new DeleteDialogExample()
                    | new ExitCommentDialogExample();
     }
 }
