@@ -27,15 +27,20 @@ The service system in Ivy supports:
 
 ## Basic Usage
 
-Here's a simple example of using a service:
+Use the `UseService<T>()` hook to access registered services in your views:
 
-```csharp
-public class MyView : ViewBase
+```csharp demo-below
+public class ServiceExampleView : ViewBase
 {
     public override object? Build()
     {
-        var myService = UseService<IMyService>();
-        return myService.GetData();
+        var client = UseService<IClientProvider>();
+        var message = UseState("Hello from service!");
+        
+        return Layout.Vertical()
+            | Text.P(message.Value)
+            | new Button("Show Toast", 
+                onClick: _ => client.Toast(message.Value, "Service Demo"));
     }
 }
 ```
@@ -183,53 +188,27 @@ public class LoggingServiceMiddleware : IServiceMiddleware
 
 <Details>
 <Summary>
-Authentication Service
+Simple Service Usage
 </Summary>
 <Body>
 
-```csharp
-public interface IAuthService
+Use a service to display notifications or interact with client features:
+
+```csharp demo-below
+public class SimpleServiceView : ViewBase
 {
-    Task<bool> ValidateCredentialsAsync(string username, string password);
-    Task<string> GenerateTokenAsync(User user);
-    Task<User?> GetCurrentUserAsync();
-}
-
-public class AuthService : IAuthService
-{
-    private readonly IUserRepository _userRepository;
-    private readonly ITokenService _tokenService;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public AuthService(
-        IUserRepository userRepository,
-        ITokenService tokenService,
-        IHttpContextAccessor httpContextAccessor)
+    public override object? Build()
     {
-        _userRepository = userRepository;
-        _tokenService = tokenService;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
-    public async Task<bool> ValidateCredentialsAsync(string username, string password)
-    {
-        var user = await _userRepository.GetByUsernameAsync(username);
-        if (user == null) return false;
+        var client = UseService<IClientProvider>();
+        var count = UseState(0);
         
-        return await _userRepository.ValidatePasswordAsync(user, password);
-    }
-
-    public async Task<string> GenerateTokenAsync(User user)
-    {
-        return await _tokenService.GenerateTokenAsync(user);
-    }
-
-    public async Task<User?> GetCurrentUserAsync()
-    {
-        var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null) return null;
-        
-        return await _userRepository.GetByIdAsync(userId);
+        return Layout.Vertical()
+            | Text.P($"Button clicked {count.Value} times")
+            | new Button("Show Toast", onClick: _ => 
+            {
+                count.Set(count.Value + 1);
+                client.Toast($"Notification #{count.Value}", "Service Demo");
+            });
     }
 }
 ```
@@ -239,75 +218,37 @@ public class AuthService : IAuthService
 
 <Details>
 <Summary>
-Caching Service
+Using Multiple Services
 </Summary>
 <Body>
 
-```csharp
-public interface ICacheService
+Access multiple services in a single view to combine their functionality:
+
+```csharp demo-below
+public class MultiServiceView : ViewBase
 {
-    Task<T?> GetAsync<T>(string key);
-    Task SetAsync<T>(string key, T value, TimeSpan? expiry = null);
-    Task RemoveAsync(string key);
-}
-
-public class CacheService : ICacheService
-{
-    private readonly IDistributedCache _cache;
-    private readonly ILogger<CacheService> _logger;
-
-    public CacheService(
-        IDistributedCache cache,
-        ILogger<CacheService> logger)
+    public override object? Build()
     {
-        _cache = cache;
-        _logger = logger;
-    }
-
-    public async Task<T?> GetAsync<T>(string key)
-    {
-        try
-        {
-            var data = await _cache.GetAsync(key);
-            if (data == null) return default;
-            
-            return JsonSerializer.Deserialize<T>(data);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting cache for key: {Key}", key);
-            return default;
-        }
-    }
-
-    public async Task SetAsync<T>(string key, T value, TimeSpan? expiry = null)
-    {
-        try
-        {
-            var options = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = expiry
-            };
-            
-            var data = JsonSerializer.SerializeToUtf8Bytes(value);
-            await _cache.SetAsync(key, data, options);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error setting cache for key: {Key}", key);
-        }
-    }
-
-    public async Task RemoveAsync(string key)
-    {
-        try
-        {
-            await _cache.RemoveAsync(key);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error removing cache for key: {Key}", key);
-        }
+        var client = UseService<IClientProvider>();
+        var message = UseState("Ready");
+        var count = UseState(0);
+        
+        return Layout.Vertical()
+            | Text.P($"Last action: {message.Value}")
+            | Text.P($"Total actions: {count.Value}")
+            | (Layout.Horizontal()
+                | new Button("Action 1", onClick: _ => 
+                {
+                    count.Set(count.Value + 1);
+                    client.Toast("Action 1 executed", "Service Demo");
+                    message.Set("Action 1 completed");
+                })
+                | new Button("Action 2", onClick: _ => 
+                {
+                    count.Set(count.Value + 1);
+                    client.Toast("Action 2 executed", "Service Demo");
+                    message.Set("Action 2 completed");
+                }));
     }
 }
 ```
