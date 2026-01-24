@@ -38,8 +38,6 @@ var args = UseArgs<UserArgs>();
 
 ## How Args Work
 
-### Argument Flow
-
 ```mermaid
 sequenceDiagram
     participant S as Source Component
@@ -86,7 +84,7 @@ var receivedArgs = UseArgs<UserProfileArgs>();
 
 Provide default behavior when args are null:
 
-```csharp
+```csharp demo-below
 public record ProductListArgs(string? Category = null, string? SortBy = null, int Page = 1);
 
 public class ArgsDefaultDemo : ViewBase
@@ -113,7 +111,7 @@ public class ArgsDefaultDemo : ViewBase
 
 Use arguments to determine which view to render:
 
-```csharp
+```csharp demo-below
 public record AppArgs(string? View = null, int? UserId = null);
 
 public class MainView : ViewBase
