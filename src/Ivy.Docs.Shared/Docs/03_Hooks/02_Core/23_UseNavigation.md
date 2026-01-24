@@ -25,17 +25,16 @@ The `UseNavigation` [hook](../02_RulesOfHooks.md) enables programmatic navigatio
 
 ## Basic Usage
 
-```csharp
-var navigator = UseNavigation();
-
-// Navigate by URI
-navigator.Navigate("app://hooks/core/usestate");
-
-// Navigate by type
-navigator.Navigate(typeof(MyApp));
-
-// Navigate with arguments
-navigator.Navigate(typeof(MyApp), new MyArgs(123));
+```csharp demo-below
+public class NavigationExampleView : ViewBase
+{
+    public override object? Build()
+    {
+        var navigator = UseNavigation();
+        return new Button("Open Ivy Docs", 
+            onClick: _ => navigator.Navigate("https://docs.ivy.app"));
+    }
+}
 ```
 
 ## How Navigation Works
@@ -51,53 +50,63 @@ flowchart LR
     E --> G
 ```
 
-## Common Patterns
+### Type-Safe Navigation
+
+Navigate to apps using their class types for compile-time safety:
+
+```csharp demo-below
+public class TypeSafeNavigationView : ViewBase
+{
+    public override object? Build()
+    {
+        var navigator = UseNavigation();
+        
+        return new Button("Navigate to UseService", onClick: _ => 
+            {
+                navigator.Navigate(typeof(Ivy.Docs.Shared.Apps.Hooks.Core.UseServiceApp));
+            });
+    }
+}
+```
 
 ### Navigation with Arguments
 
 Pass data to target apps using strongly-typed arguments:
 
-```csharp
-public record UserArgs(int UserId, string Tab = "overview");
+```csharp demo-below
+public record UserProfileArgs(int UserId, string Tab = "overview");
 
-// Navigate with arguments
-var navigator = UseNavigation();
-navigator.Navigate(typeof(TargetApp), new UserArgs(123, "settings"));
-
-// Receive in target app
-var args = UseArgs<UserArgs>();
-```
-
-### External URL Navigation
-
-Open external websites and resources:
-
-```csharp
-var navigator = UseNavigation();
-
-navigator.Navigate("https://docs.ivy.app");
-navigator.Navigate("mailto:support@example.com");
-``` 
-
-## Troubleshooting
-
-### App Not Found
-
-Ensure your app has the `[App]` attribute:
-
-```csharp
-// Solution: Add [App] attribute
-[App(icon: Icons.LayoutDashboard)]
-public class MyApp : ViewBase { }
-```
-
-### Arguments Not Received
-
-Ensure argument types match exactly between source and target:
-
-```csharp
-// Source: navigator.Navigate(typeof(TargetApp), new MyArgs("value"));
-// Target: var args = UseArgs<MyArgs>(); // Same type
+public class NavigationWithArgsView : ViewBase
+{
+    public override object? Build()
+    {
+        var args = UseArgs<UserProfileArgs>();
+        var navigator = UseNavigation();
+        
+        // If we received arguments, show the target view
+        if (args != null)
+        {
+            return Layout.Vertical()
+                | Text.H3("Received Arguments:")
+                | Text.P($"UserId: {args.UserId}")
+                | Text.P($"Tab: {args.Tab}")
+                | new Button("Back", onClick: _ => navigator.Navigate(typeof(Ivy.Docs.Shared.Apps.Hooks.Core.UseNavigationApp)));
+        }
+        
+        // Otherwise, show the navigation source
+        var userId = UseState(123);
+        var tab = UseState("settings");
+        
+        return Layout.Vertical()
+            | Text.P($"Navigate with UserId: {userId.Value}, Tab: {tab.Value}")
+            | new Button("Navigate with Arguments", onClick: _ => 
+            {
+                navigator.Navigate(typeof(Ivy.Docs.Shared.Apps.Hooks.Core.UseNavigationApp), 
+                    new UserProfileArgs(userId.Value, tab.Value));
+            })
+            | Text.P("Target app receives: var args = UseArgs<UserProfileArgs>();");
+    }
+}
 ```
 
 ## Best Practices
