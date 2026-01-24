@@ -274,13 +274,14 @@ public class UseMutationView : ViewBase
 Polling
 </Summary>
 <Body>
-Automatically revalidate at intervals with `RefreshInterval`:
+Use `RefreshInterval` to revalidate at intervals, or trigger revalidation manually on a timer. This example uses manual `Revalidate()` every 5 seconds for 30 seconds after you click the button, so the UI updates and no permanent polling runs.
 
 ```csharp demo-below
 public class PollingView : ViewBase
 {
     public override object? Build()
     {
+        var pollingEnabled = UseState(false);
         var liveData = UseQuery(
             key: "live-data",
             fetcher: async ct =>
@@ -291,16 +292,33 @@ public class PollingView : ViewBase
                     Value = Random.Shared.Next(100, 999),
                     Timestamp = DateTime.Now
                 };
-            },
-            options: new QueryOptions
-            {
-                RefreshInterval = TimeSpan.FromSeconds(5)
             });
+
+        UseEffect(() =>
+        {
+            if (!pollingEnabled.Value) return new CancellationTokenSource();
+            var cts = new CancellationTokenSource();
+            var endAt = DateTime.UtcNow.AddSeconds(30);
+            _ = Task.Run(async () =>
+            {
+                while (!cts.Token.IsCancellationRequested && DateTime.UtcNow < endAt)
+                {
+                    liveData.Mutator.Revalidate();
+                    await Task.Delay(TimeSpan.FromSeconds(5), cts.Token);
+                }
+                if (!cts.Token.IsCancellationRequested)
+                    pollingEnabled.Set(false);
+            });
+            return cts;
+        }, pollingEnabled);
 
         return Layout.Vertical()
             | Text.Literal($"Value: {liveData.Value?.Value}")
             | Text.Muted($"Updated: {liveData.Value?.Timestamp:HH:mm:ss}")
-            | (liveData.Validating ? Text.Muted("Refreshing...") : null!);
+            | (liveData.Validating ? Text.Muted("Refreshing...") : null!)
+            | new Button(
+                pollingEnabled.Value ? "Stop polling" : "Start polling (5s × 30s)",
+                _ => pollingEnabled.Set(!pollingEnabled.Value));
     }
 }
 ```
@@ -313,11 +331,14 @@ public class PollingView : ViewBase
 Pagination
 </Summary>
 <Body>
-Use `KeepPrevious` to show previous page data while loading the next (managed by [UseState](./03_UseState.md)):
+Use `KeepPrevious` to show previous page data while loading the next. Combine [UseQuery](./09_UseQuery.md) with the [Pagination](../../02_Widgets/03_Common/09_Pagination.md) widget:
 
 ```csharp demo-below
 public class PaginatedView : ViewBase
 {
+    private const int PageSize = 5;
+    private const int TotalPages = 10;
+
     public override object? Build()
     {
         var page = UseState(1);
@@ -327,25 +348,17 @@ public class PaginatedView : ViewBase
             fetcher: async ct =>
             {
                 await Task.Delay(800, ct);
-                var start = (page.Value - 1) * 5;
-                return Enumerable.Range(start + 1, 5)
-                    .Select(i => $"Item {i}")
+                var start = (page.Value - 1) * PageSize;
+                return Enumerable.Range(start + 1, PageSize)
+                    .Select(i => i.ToString())
                     .ToList();
             },
             options: new QueryOptions { KeepPrevious = true });
 
         return Layout.Vertical()
-            | items
             | (items.Previous ? Text.Muted("Loading next page...") : null!)
-            | Layout.Vertical(items.Value?.Select(Text.Literal) ?? [])
-            | (Layout.Horizontal()
-                | new Button("Previous", _ => page.Set(p => Math.Max(1, p - 1)))
-                    .Disabled(page.Value <= 1)
-                    .Variant(ButtonVariant.Primary)
-                | new Button("Next", _ => page.Set(p => p + 1))
-                    .Variant(ButtonVariant.Primary) 
-                | Text.Muted($"Page {page.Value}")
-            );
+            | Layout.Horizontal(items.Value?.Select(Text.Literal) ?? [])
+            | new Pagination(page.Value, TotalPages, p => page.Set(p.Value));
     }
 }
 ```
