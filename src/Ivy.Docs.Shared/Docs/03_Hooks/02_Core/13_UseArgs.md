@@ -131,13 +131,9 @@ public class MainView : ViewBase
 }
 ```
 
-## Troubleshooting
+### Serialization Errors Handling
 
-### Serialization Errors
-
-If arguments fail to serialize, ensure:
-
-**All properties are serializable**:
+If arguments fail to serialize, ensure all properties are serializable and avoid circular references:
 
 ```csharp
 // Good: All properties serialize
@@ -145,11 +141,7 @@ public record GoodArgs(string Name, int Count);
 
 // Bad: Non-serializable property
 public record BadArgs(string Name, Action Callback);
-```
 
-**No circular references**:
-
-```csharp
 // Bad: Circular reference
 public class Parent { public Child Child { get; set; } }
 public class Child { public Parent Parent { get; set; } }
