@@ -80,12 +80,29 @@ sequenceDiagram
 
 For handlers that don't need to return a response:
 
-```csharp
-var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
+```csharp demo-below
+public class SimpleActionHandlerExample : ViewBase
 {
-    // Process the request
-    // Update state, log, etc.
-});
+    public override object? Build()
+    {
+        var counter = UseState(0);
+        var lastCall = UseState<DateTime?>();
+        
+        var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
+        {
+            // Process the request - update state, log, etc.
+            counter.Set(counter.Value + 1);
+            lastCall.Set(DateTime.UtcNow);
+        });
+        
+        return Layout.Vertical()
+            | Text.P($"Webhook called {counter.Value} times")
+            | (lastCall.Value != null 
+                ? Text.P($"Last call: {lastCall.Value:HH:mm:ss}")
+                : Text.P("No calls yet"))
+            | Text.Code(webhook.GetUri().ToString());
+    }
+}
 ```
 
 ### Async Handler
@@ -116,14 +133,46 @@ public class AsyncWebhookExample : ViewBase
 
 For handlers that need to return custom HTTP responses:
 
-```csharp
-var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
+```csharp demo-below
+public class CustomResponseHandlerExample : ViewBase
 {
-    // Process request
-    return new Microsoft.AspNetCore.Mvc.OkObjectResult(new { message = "Success" });
-    // Or: return new Microsoft.AspNetCore.Mvc.BadRequestResult();
-    // Or: return new Microsoft.AspNetCore.Mvc.JsonResult(new { error = "Invalid" });
-});
+    public override object? Build()
+    {
+        var responseStatus = UseState("No request received");
+        var responseCode = UseState(200);
+        
+        var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
+        {
+            // Check query parameter to demonstrate different responses
+            var action = request.Query["action"].ToString();
+            
+            if (action == "success")
+            {
+                responseStatus.Set("Success response sent");
+                responseCode.Set(200);
+                return new Microsoft.AspNetCore.Mvc.OkObjectResult(new { message = "Success", status = "ok" });
+            }
+            else if (action == "error")
+            {
+                responseStatus.Set("Error response sent");
+                responseCode.Set(400);
+                return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new { error = "Invalid request" });
+            }
+            else
+            {
+                responseStatus.Set("Default success response");
+                responseCode.Set(200);
+                return new Microsoft.AspNetCore.Mvc.OkObjectResult(new { message = "Request processed" });
+            }
+        });
+        
+        return Layout.Vertical()
+            | Text.P($"Response Status: {responseStatus.Value}")
+            | Text.P($"HTTP Code: {responseCode.Value}")
+            | Text.P("Try adding ?action=success or ?action=error to the URL")
+            | Text.Code(webhook.GetUri().ToString());
+    }
+}
 ```
 
 ## WebhookEndpoint Properties
