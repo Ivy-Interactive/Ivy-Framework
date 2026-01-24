@@ -93,7 +93,7 @@ Return values can be any type, including complex objects like records or classes
 | `IsRefreshed` | `bool` | `true` if the token has been refreshed at least once |
 | `ReturnValue` | `object?` | The value passed to the last `Refresh()` call |
 
-## Refresh Tokens vs [Event Handlers](./07_EventHandlers.md)
+## Refresh Tokens vs [Event Handlers](../../01_Onboarding/02_Concepts/05_EventHandlers.md)
 
 | Feature | Event Handlers | Refresh Tokens |
 |---------|---------------|----------------|
