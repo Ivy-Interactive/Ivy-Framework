@@ -4,7 +4,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from 'lucide-react';
-import { DayButton, DayPicker, useDayPicker, getDefaultClassNames } from 'react-day-picker';
+import {
+  DayButton,
+  DayPicker,
+  useDayPicker,
+  getDefaultClassNames,
+} from 'react-day-picker';
 import { parse } from 'date-fns';
 
 import { cn } from '@/lib/utils';
@@ -173,7 +178,12 @@ export function Calendar({
             </td>
           );
         },
-        CaptionLabel: (props: any) => <MonthYearInput displayMonth={props.displayMonth} title={props.children} />,
+        CaptionLabel: (props: any) => (
+          <MonthYearInput
+            displayMonth={props.displayMonth}
+            title={props.children}
+          />
+        ),
         ...components,
       }}
       {...props}
@@ -181,7 +191,13 @@ export function Calendar({
   );
 }
 
-function MonthYearInput({ displayMonth, title }: { displayMonth?: Date; title?: React.ReactNode }) {
+function MonthYearInput({
+  displayMonth,
+  title,
+}: {
+  displayMonth?: Date;
+  title?: React.ReactNode;
+}) {
   const [monthStr, setMonthStr] = React.useState('');
   const [yearStr, setYearStr] = React.useState('');
   const { goToMonth } = useDayPicker();
@@ -215,7 +231,8 @@ function MonthYearInput({ displayMonth, title }: { displayMonth?: Date; title?: 
     }
   };
 
-  const inputClass = "w-6 text-center bg-transparent border-none outline-none focus:bg-accent rounded text-sm p-0 m-0";
+  const inputClass =
+    'w-6 text-center bg-transparent border-none outline-none focus:bg-accent rounded text-sm p-0 m-0';
 
   return (
     <div
@@ -225,7 +242,9 @@ function MonthYearInput({ displayMonth, title }: { displayMonth?: Date; title?: 
     >
       <input
         value={monthStr}
-        onChange={e => setMonthStr(e.target.value.replace(/\D/g, '').slice(0, 2))}
+        onChange={e =>
+          setMonthStr(e.target.value.replace(/\D/g, '').slice(0, 2))
+        }
         onBlur={handleCommit}
         onKeyDown={onKeyDown}
         className={inputClass}
@@ -234,10 +253,12 @@ function MonthYearInput({ displayMonth, title }: { displayMonth?: Date; title?: 
       <span className="text-muted-foreground text-xs">/</span>
       <input
         value={yearStr}
-        onChange={e => setYearStr(e.target.value.replace(/\D/g, '').slice(0, 4))}
+        onChange={e =>
+          setYearStr(e.target.value.replace(/\D/g, '').slice(0, 4))
+        }
         onBlur={handleCommit}
         onKeyDown={onKeyDown}
-        className={cn(inputClass, "w-10")}
+        className={cn(inputClass, 'w-10')}
         placeholder="YYYY"
       />
     </div>
