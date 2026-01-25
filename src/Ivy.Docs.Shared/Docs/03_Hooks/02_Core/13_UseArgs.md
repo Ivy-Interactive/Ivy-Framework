@@ -18,7 +18,7 @@ The `UseArgs` [hook](../02_RulesOfHooks.md) provides access to arguments passed 
 
 The `UseArgs` [hook](../02_RulesOfHooks.md) allows you to access component arguments:
 
-- **Navigation Arguments** - Retrieve arguments passed during [navigation](./23_UseNavigation.md)
+- **Navigation Arguments** - Retrieve arguments passed during [navigation](../../../01_Onboarding/02_Concepts/09_Navigation.md)
 - **Type Safety** - Strongly typed argument access with compile-time checking
 - **JSON Serialization** - Arguments are automatically serialized and deserialized
 - **Optional Arguments** - Returns null if arguments are not available
@@ -167,7 +167,7 @@ public class Child { public Parent Parent { get; set; } }
 
 ## See Also
 
-- [Navigation](./23_UseNavigation.md) - Programmatic navigation between components
+- [Navigation](../../../01_Onboarding/02_Concepts/09_Navigation.md) - Programmatic navigation between components
 - [State](./03_UseState.md) - Component state management
 - [Context](./12_UseContext.md) - Component-scoped data sharing
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
