@@ -297,29 +297,37 @@ Complex Data Filtering
 </Summary>
 <Body>
 
-```csharp
-public class DataFilterView : ViewBase
+```csharp demo-below
+public record FilterItem(int Id, string Name);
+
+public class DataFilterDemoView : ViewBase
 {
     public override object? Build()
     {
-        var data = UseState(new List<Item>());
+        var data = UseState(new List<FilterItem>
+        {
+            new(1, "Laptop"),
+            new(2, "Mouse"),
+            new(3, "Keyboard"),
+            new(4, "Monitor"),
+            new(5, "Headphones")
+        });
         var filter = UseState("");
+        var filteredData = UseMemo(() =>
+            data.Value
+                .Where(item => item.Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase))
+                .ToList(),
+            data.Value, filter.Value);
 
-        // Memoize filtered results
-        var filteredData = UseMemo(() => 
-            data.Value.Where(item => 
-                item.Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase)
-            ).ToList(),
-            data, filter
-        );
-        
-        return Layout.Vertical(
-            new TextInput("Filter", value: filter.Value, onChange: v => filter.Set(v)),
-            new Table(filteredData)
-        );
+        var items = filteredData.Count == 0
+            ? new object[] { Text.P("No matches.").Muted() }
+            : filteredData.Select(i => Text.Block(i.Name)).ToArray();
+
+        return Layout.Vertical()
+            | filter.ToTextInput().Placeholder("Filter by name")
+            | Layout.Vertical(items);
     }
 }
-
 ```
 
 </Body>
@@ -331,26 +339,26 @@ Computed Properties
 </Summary>
 <Body>
 
-```csharp
-public class DashboardView : ViewBase
+```csharp demo-below
+public record DemoSale(decimal Amount);
+
+public class StatsDemoView : ViewBase
 {
     public override object? Build()
     {
-        var sales = UseState(new List<Sale>());
-        
-        // Memoize computed statistics
+        var sales = UseState(new List<DemoSale> { new(100m), new(250m), new(75m) });
         var stats = UseMemo(() => new
         {
             Total = sales.Value.Sum(s => s.Amount),
-            Average = sales.Value.Average(s => s.Amount),
+            Average = sales.Value.Count > 0 ? sales.Value.Average(s => s.Amount) : 0m,
             Count = sales.Value.Count
-        }, sales);
-        
-        return Layout.Vertical(
-            Text.Inline($"Total Sales: ${stats.Total:N2}"),
-            Text.Inline($"Average Sale: ${stats.Average:N2}"),
-            Text.Inline($"Number of Sales: {stats.Count}")
-        );
+        }, sales.Value);
+
+        return Layout.Vertical()
+            | Text.P($"Total: ${stats.Total:N2}")
+            | Text.P($"Average: ${stats.Average:N2}")
+            | Text.P($"Count: {stats.Count}")
+            | new Button("Add sale", onClick: _ => sales.Set(sales.Value.Append(new DemoSale((Random.Shared.Next(1, 50) * 10))).ToList()));
     }
 }
 ```
