@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Ivy.Samples.Shared.Apps.Demos;
 
 [App(icon: Icons.ChartArea, searchHints: ["charts", "metrics", "visualization", "analytics", "reporting", "kpi"])]
-public class DashboardApp : ViewBase
+public class DashboardApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         return Layout.Vertical() | (Layout.Grid().Columns(4)
                                     | new MetricView("Total Sales", Icons.DollarSign, ctx => UseStaticMetric(ctx, new MetricRecord("$84,250", 0.21, 0.21, "$800,000")))

@@ -49,10 +49,6 @@ public class BasicQueryView : ViewBase
 }
 ```
 
-## Keys
-
-Keys can be any serializable value, such as strings, numbers, or complex objects like tuples. You can also use a key factory function.
-
 ## Query Result
 
 `UseQuery` returns a `QueryResult<T>` with the following properties:
@@ -158,86 +154,6 @@ public class DependentQueryView : ViewBase
 }
 ```
 
-## Mutations
-
-The `Mutator` provides methods to update cached data:
-
-| Method | Description |
-|--------|-------------|
-| `Mutate(value, revalidate)` | Update cache with new value |
-| `Revalidate()` | Trigger background revalidation |
-| `Invalidate()` | Clear cache and refetch |
-
-```csharp demo-below
-public class MutationView : ViewBase
-{
-    public override object? Build()
-    {
-        var query = UseQuery(
-            key: "counter",
-            fetcher: async ct =>
-            {
-                await Task.Delay(500, ct);
-                return Random.Shared.Next(1, 100);
-            });
-
-        if (query.Loading)
-            return Text.Literal("Loading...");
-
-        return Layout.Vertical()
-            | Text.Literal($"Value: {query.Value}")
-            | (query.Validating ? Text.Muted("Syncing...") : null!)
-            | Layout.Horizontal()
-                | new Button("+10 (Optimistic)", _ =>
-                    query.Mutator.Mutate(query.Value + 10, revalidate: true))
-                    .Variant(ButtonVariant.Primary)
-                | new Button("Set 999", _ =>
-                    query.Mutator.Mutate(999, revalidate: false))
-                    .Variant(ButtonVariant.Secondary)
-                | new Button("Refresh", _ => query.Mutator.Revalidate())
-                    .Variant(ButtonVariant.Outline);
-    }
-}
-```
-
-### Cross-Component Mutations
-
-Use `UseMutation` to control a query from a different component:
-
-```csharp demo-below
-public class SharedDataDisplay : ViewBase
-{
-    public override object? Build()
-    {
-        var query = UseQuery(
-            key: "shared-data",
-            fetcher: async ct =>
-            {
-                await Task.Delay(500, ct);
-                return $"Data: {Guid.NewGuid().ToString()[..8]}";
-            });
-
-        return Layout.Horizontal()
-            | Text.Literal(query.Loading ? "Loading..." : query.Value ?? "")
-            | (query.Validating ? Text.Muted(" (updating...)") : null!);
-    }
-}
-
-public class SharedDataControls : ViewBase
-{
-    public override object? Build()
-    {
-        var mutator = UseMutation("shared-data");
-
-        return Layout.Horizontal()
-            | new Button("Revalidate", _ => mutator.Revalidate())
-                .Variant(ButtonVariant.Outline)
-            | new Button("Invalidate", _ => mutator.Invalidate())
-                .Variant(ButtonVariant.Destructive);
-    }
-}
-```
-
 ## Tag-Based Invalidation
 
 Assign tags to queries for bulk invalidation (using [UseService](./11_UseService.md)). Tags are serializable the same way as keys.
@@ -278,15 +194,94 @@ public class TaggedQueriesView : ViewBase
 }
 ```
 
-## Polling
+## Mutations
 
-Automatically revalidate at intervals with `RefreshInterval`:
+The `Mutator` provides methods to update cached data:
+
+| Method | Description |
+|--------|-------------|
+| `Mutate(value, revalidate)` | Update cache with new value |
+| `Revalidate()` | Trigger background revalidation |
+| `Invalidate()` | Clear cache and refetch |
+
+```csharp demo-below
+public class MutationView : ViewBase
+{
+    public override object? Build()
+    {
+        var query = UseQuery(
+            key: "counter",
+            fetcher: async ct =>
+            {
+                await Task.Delay(500, ct);
+                return Random.Shared.Next(1, 100);
+            });
+
+        if (query.Loading)
+            return Text.Literal("Loading...");
+
+        return Layout.Vertical()
+            | (Layout.Horizontal()
+                | new Button("+10 (Optimistic)", _ =>
+                    query.Mutator.Mutate(query.Value + 10, revalidate: true))
+                    .Variant(ButtonVariant.Primary)
+                | new Button("Set 999", _ =>
+                    query.Mutator.Mutate(999, revalidate: false))
+                    .Variant(ButtonVariant.Secondary)
+                | new Button("Refresh", _ => query.Mutator.Revalidate())
+                    .Variant(ButtonVariant.Outline))
+                | Text.Literal($"Value: {query.Value}")
+                | (query.Validating ? Text.Muted("Syncing...") : null!);
+    }
+}
+```
+
+### Cross-Component Mutations
+
+Use `UseMutation` to control a query by key (e.g. from another component):
+
+```csharp demo-below
+public class UseMutationView : ViewBase
+{
+    public override object? Build()
+    {
+        var query = UseQuery(
+            key: "shared-data",
+            fetcher: async ct =>
+            {
+                await Task.Delay(500, ct);
+                return $"Data: {Guid.NewGuid().ToString()[..8]}";
+            });
+        var mutator = UseMutation("shared-data");
+
+        return Layout.Vertical()
+            | (Layout.Horizontal()
+                | Text.Literal(query.Loading ? "Loading..." : query.Value ?? "")
+                | (query.Validating ? Text.Muted(" (updating...)") : null!))
+            | (Layout.Horizontal()
+                | new Button("Revalidate", _ => mutator.Revalidate())
+                    .Variant(ButtonVariant.Outline)
+                | new Button("Invalidate", _ => mutator.Invalidate())
+                    .Variant(ButtonVariant.Destructive));
+    }
+}
+```
+
+## Examples
+
+<Details>
+<Summary>
+Polling
+</Summary>
+<Body>
+Use `RefreshInterval` to revalidate at intervals, or trigger revalidation manually on a timer. This example uses manual `Revalidate()` every 5 seconds for 30 seconds after you click the button, so the UI updates and no permanent polling runs.
 
 ```csharp demo-below
 public class PollingView : ViewBase
 {
     public override object? Build()
     {
+        var pollingEnabled = UseState(false);
         var liveData = UseQuery(
             key: "live-data",
             fetcher: async ct =>
@@ -297,27 +292,53 @@ public class PollingView : ViewBase
                     Value = Random.Shared.Next(100, 999),
                     Timestamp = DateTime.Now
                 };
-            },
-            options: new QueryOptions
-            {
-                RefreshInterval = TimeSpan.FromSeconds(5)
             });
+
+        UseEffect(() =>
+        {
+            if (!pollingEnabled.Value) return new CancellationTokenSource();
+            var cts = new CancellationTokenSource();
+            var endAt = DateTime.UtcNow.AddSeconds(30);
+            _ = Task.Run(async () =>
+            {
+                while (!cts.Token.IsCancellationRequested && DateTime.UtcNow < endAt)
+                {
+                    liveData.Mutator.Revalidate();
+                    await Task.Delay(TimeSpan.FromSeconds(5), cts.Token);
+                }
+                if (!cts.Token.IsCancellationRequested)
+                    pollingEnabled.Set(false);
+            });
+            return cts;
+        }, pollingEnabled);
 
         return Layout.Vertical()
             | Text.Literal($"Value: {liveData.Value?.Value}")
             | Text.Muted($"Updated: {liveData.Value?.Timestamp:HH:mm:ss}")
-            | (liveData.Validating ? Text.Muted("Refreshing...") : null!);
+            | (liveData.Validating ? Text.Muted("Refreshing...") : null!)
+            | new Button(
+                pollingEnabled.Value ? "Stop polling" : "Start polling (5s × 30s)",
+                _ => pollingEnabled.Set(!pollingEnabled.Value));
     }
 }
 ```
 
-## Pagination
+</Body>
+</Details>
 
-Use `KeepPrevious` to show previous page data while loading the next (managed by [UseState](./03_UseState.md)):
+<Details>
+<Summary>
+Pagination
+</Summary>
+<Body>
+Use `KeepPrevious` to show previous page data while loading the next. Combine [UseQuery](./09_UseQuery.md) with the [Pagination](../../02_Widgets/03_Common/09_Pagination.md) widget:
 
 ```csharp demo-below
 public class PaginatedView : ViewBase
 {
+    private const int PageSize = 5;
+    private const int TotalPages = 10;
+
     public override object? Build()
     {
         var page = UseState(1);
@@ -327,30 +348,29 @@ public class PaginatedView : ViewBase
             fetcher: async ct =>
             {
                 await Task.Delay(800, ct);
-                var start = (page.Value - 1) * 5;
-                return Enumerable.Range(start + 1, 5)
-                    .Select(i => $"Item {i}")
+                var start = (page.Value - 1) * PageSize;
+                return Enumerable.Range(start + 1, PageSize)
+                    .Select(i => i.ToString())
                     .ToList();
             },
             options: new QueryOptions { KeepPrevious = true });
 
         return Layout.Vertical()
-            | items
             | (items.Previous ? Text.Muted("Loading next page...") : null!)
-            | Layout.Vertical(items.Value?.Select(Text.Literal) ?? [])
-            | (Layout.Horizontal()
-                | new Button("Previous", _ => page.Set(p => Math.Max(1, p - 1)))
-                    .Disabled(page.Value <= 1)
-                    .Variant(ButtonVariant.Primary)
-                | new Button("Next", _ => page.Set(p => p + 1))
-                    .Variant(ButtonVariant.Primary) 
-                | Text.Muted($"Page {page.Value}")
-            );
+            | Layout.Horizontal(items.Value?.Select(Text.Literal) ?? [])
+            | new Pagination(page.Value, TotalPages, p => page.Set(p.Value));
     }
 }
 ```
 
-## Pre-Populated Data
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Pre-Populated Data
+</Summary>
+<Body>
 
 Skip initial fetch when you already have data (e.g., from a list view):
 
@@ -408,7 +428,14 @@ public class ProductDetailView(Product initialProduct) : ViewBase
 }
 ```
 
-## Error Handling
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Error Handling
+</Summary>
+<Body>
 
 Errors are captured in the `Error` property:
 
@@ -445,3 +472,6 @@ public class ErrorHandlingView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>

@@ -3,9 +3,9 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
 [App(icon: Icons.Grid3x3, searchHints: ["layout", "grid", "columns", "rows", "responsive", "arrangement"])]
-public class GridLayoutApp : ViewBase
+public class GridLayoutApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         var withoutValue = UseState((string?)null);
         var withValue = UseState("Hello");

@@ -72,31 +72,6 @@ sequenceDiagram
     Endpoint-->>External: HTTP Response
 ```
 
-### Flow Explanation
-
-1. **Component Initialization**: When your component calls `UseWebhook`, the hook generates a unique identifier (GUID) for this specific webhook instance.
-
-2. **Handler Registration**: The handler function you provide is registered with the webhook registry service, associating it with the generated ID. This registration happens in a [UseEffect](./04_UseEffect.md) that runs on component mount.
-
-3. **Endpoint Creation**: A `WebhookEndpoint` is created containing:
-   - The unique ID
-   - The base URL constructed from the current request scheme and host
-   - The full URL follows the pattern: `{scheme}://{host}/ivy/webhook/{id}`
-
-4. **External Call**: When an external system makes an HTTP request to the webhook URL, the request is routed to the `WebhookController`.
-
-5. **Handler Execution**: The controller looks up the handler by ID and executes it with the incoming `Microsoft.AspNetCore.Http.HttpRequest`. Your handler can:
-   - Read request body, headers, query parameters
-   - Update component state
-   - Perform async operations
-   - Return custom HTTP responses
-
-6. **State Updates**: If your handler updates component state (e.g., `counter.Set()`), the component automatically re-renders to reflect the changes.
-
-7. **Response**: The handler's return value (or default `OkResult` for action handlers) is sent back to the external system as the HTTP response.
-
-8. **Cleanup**: When the component unmounts, the webhook handler is automatically unregistered and cleaned up.
-
 ## Handler Types
 
 `UseWebhook` supports multiple handler signatures for different use cases:
@@ -105,12 +80,29 @@ sequenceDiagram
 
 For handlers that don't need to return a response:
 
-```csharp
-var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
+```csharp demo-below
+public class SimpleActionHandlerExample : ViewBase
 {
-    // Process the request
-    // Update state, log, etc.
-});
+    public override object? Build()
+    {
+        var counter = UseState(0);
+        var lastCall = UseState<DateTime?>();
+        
+        var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
+        {
+            // Process the request - update state, log, etc.
+            counter.Set(counter.Value + 1);
+            lastCall.Set(DateTime.UtcNow);
+        });
+        
+        return Layout.Vertical()
+            | Text.P($"Webhook called {counter.Value} times")
+            | (lastCall.Value != null 
+                ? Text.P($"Last call: {lastCall.Value:HH:mm:ss}")
+                : Text.P("No calls yet"))
+            | Text.Code(webhook.GetUri().ToString());
+    }
+}
 ```
 
 ### Async Handler
@@ -141,14 +133,46 @@ public class AsyncWebhookExample : ViewBase
 
 For handlers that need to return custom HTTP responses:
 
-```csharp
-var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
+```csharp demo-below
+public class CustomResponseHandlerExample : ViewBase
 {
-    // Process request
-    return new Microsoft.AspNetCore.Mvc.OkObjectResult(new { message = "Success" });
-    // Or: return new Microsoft.AspNetCore.Mvc.BadRequestResult();
-    // Or: return new Microsoft.AspNetCore.Mvc.JsonResult(new { error = "Invalid" });
-});
+    public override object? Build()
+    {
+        var responseStatus = UseState("No request received");
+        var responseCode = UseState(200);
+        
+        var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
+        {
+            // Check query parameter to demonstrate different responses
+            var action = request.Query["action"].ToString();
+            
+            if (action == "success")
+            {
+                responseStatus.Set("Success response sent");
+                responseCode.Set(200);
+                return new Microsoft.AspNetCore.Mvc.OkObjectResult(new { message = "Success", status = "ok" });
+            }
+            else if (action == "error")
+            {
+                responseStatus.Set("Error response sent");
+                responseCode.Set(400);
+                return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new { error = "Invalid request" });
+            }
+            else
+            {
+                responseStatus.Set("Default success response");
+                responseCode.Set(200);
+                return new Microsoft.AspNetCore.Mvc.OkObjectResult(new { message = "Request processed" });
+            }
+        });
+        
+        return Layout.Vertical()
+            | Text.P($"Response Status: {responseStatus.Value}")
+            | Text.P($"HTTP Code: {responseCode.Value}")
+            | Text.P("Try adding ?action=success or ?action=error to the URL")
+            | Text.Code(webhook.GetUri().ToString());
+    }
+}
 ```
 
 ## WebhookEndpoint Properties
@@ -165,9 +189,29 @@ var webhook = UseWebhook(_ => { });
 var url = webhook.GetUri(); // Full URL: https://example.com/ivy/webhook/{id}
 ```
 
+## Best Practices
+
+- **Always handle errors** - Use try-catch blocks and return appropriate error responses
+- **Validate request authenticity** - Verify signatures or tokens for sensitive operations
+- **Use async handlers for I/O** - Use async when reading bodies or making database calls
+- **Return appropriate HTTP responses** - Use proper status codes (OkResult, BadRequestResult, etc.)
+- **Update state safely** - State updates from handlers are automatically thread-safe
+- **Keep handlers fast** - Complete quickly and queue heavy work for background processing
+- **Log important events** - Log calls, results, and errors for debugging and auditing
+- **Cleanup is automatic** - Webhooks are automatically unregistered when components unmount
+
+## See Also
+
+- [State Management](./03_UseState.md) - Update state from webhook handlers
+- [Effects](./04_UseEffect.md) - Perform side effects in response to webhook calls
+
 ## Examples
 
-### Payment Webhook Handler
+<Details>
+<Summary>
+Payment Webhook Handler
+</Summary>
+<Body>
 
 Handle payment callbacks from a payment processor:
 
@@ -181,17 +225,34 @@ public class PaymentWebhookView : ViewBase
         
         var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
         {
-            using var reader = new StreamReader(request.Body);
-            var json = await reader.ReadToEndAsync();
-            
             try
             {
-                var payment = System.Text.Json.JsonSerializer.Deserialize<Payment>(json);
-                if (payment != null)
+                Payment? payment = null;
+                
+                // Check if request has a body
+                if (request.ContentLength > 0)
                 {
-                    payments.Set(payments.Value.Add(payment));
-                    lastPayment.Set(payment);
+                    using var reader = new StreamReader(request.Body);
+                    var json = await reader.ReadToEndAsync();
+                    
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        payment = System.Text.Json.JsonSerializer.Deserialize<Payment>(json);
+                    }
                 }
+                
+                // For demo purposes: if no body, create a sample payment
+                if (payment == null)
+                {
+                    payment = new Payment(
+                        Amount: new Random().Next(10, 500),
+                        Status: "completed",
+                        Timestamp: DateTime.UtcNow
+                    );
+                }
+                
+                payments.Set(payments.Value.Add(payment));
+                lastPayment.Set(payment);
                 
                 return new Microsoft.AspNetCore.Mvc.OkObjectResult(new { status = "received" });
             }
@@ -221,7 +282,14 @@ public class PaymentWebhookView : ViewBase
 public record Payment(decimal Amount, string Status, DateTime Timestamp);
 ```
 
-### OAuth Callback Handler
+</Body>
+</Details>
+
+<Details>
+<Summary>
+OAuth Callback Handler
+</Summary>
+<Body>
 
 Handle OAuth authorization callbacks:
 
@@ -239,6 +307,13 @@ public class OAuthCallbackView : ViewBase
             // Extract OAuth callback parameters
             var code = request.Query["code"].ToString();
             var state = request.Query["state"].ToString();
+            
+            // For demo purposes: if no query params, create sample values
+            if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(state))
+            {
+                code = "demo_auth_code_12345";
+                state = "demo_state_abc";
+            }
             
             authCode.Set(code);
             authState.Set(state);
@@ -266,7 +341,14 @@ public class OAuthCallbackView : ViewBase
 }
 ```
 
-### External API Integration
+</Body>
+</Details>
+
+<Details>
+<Summary>
+External API Integration
+</Summary>
+<Body>
 
 Create a webhook endpoint for external services to send data:
 
@@ -280,13 +362,34 @@ public class ExternalIntegrationView : ViewBase
         
         var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
         {
-            // Read request body
-            using var reader = new StreamReader(request.Body);
-            var body = await reader.ReadToEndAsync();
+            string body;
+            string eventType;
+            string signature;
+            
+            // Read request body if present
+            if (request.ContentLength > 0)
+            {
+                using var reader = new StreamReader(request.Body);
+                body = await reader.ReadToEndAsync();
+            }
+            else
+            {
+                body = string.Empty;
+            }
             
             // Extract custom headers
-            var eventType = request.Headers["X-Event-Type"].ToString();
-            var signature = request.Headers["X-Signature"].ToString();
+            eventType = request.Headers["X-Event-Type"].ToString();
+            signature = request.Headers["X-Signature"].ToString();
+            
+            // For demo purposes: if no data, create sample event
+            if (string.IsNullOrEmpty(eventType) && string.IsNullOrEmpty(body))
+            {
+                var eventTypes = new[] { "user.created", "order.completed", "payment.processed", "notification.sent" };
+                var random = new Random();
+                eventType = eventTypes[random.Next(eventTypes.Length)];
+                body = $"{{\"id\": \"{Guid.NewGuid()}\", \"action\": \"{eventType}\", \"timestamp\": \"{DateTime.UtcNow:O}\"}}";
+                signature = $"sha256={Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(signature + body)).Substring(0, 16)}";
+            }
             
             // Validate signature (in production, verify this!)
             var eventData = new WebhookEvent(
@@ -323,195 +426,5 @@ public class ExternalIntegrationView : ViewBase
 public record WebhookEvent(string Type, string Body, DateTime Timestamp, string Signature);
 ```
 
-## Best Practices
-
-### Always Handle Errors
-
-Webhook handlers should always handle exceptions gracefully:
-
-```csharp
-// Good: Error handling
-var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    try
-    {
-        // Process request
-        await ProcessWebhook(request);
-        return new Microsoft.AspNetCore.Mvc.OkResult();
-    }
-    catch (Exception ex)
-    {
-        // Log error
-        Console.WriteLine($"Webhook error: {ex.Message}");
-        return new Microsoft.AspNetCore.Mvc.StatusCodeResult(500);
-    }
-});
-
-// Bad: No error handling
-var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    await ProcessWebhook(request); // Can throw unhandled exceptions
-    return new Microsoft.AspNetCore.Mvc.OkResult();
-});
-```
-
-### Validate Request Authenticity
-
-For sensitive operations, always verify request authenticity:
-
-```csharp
-var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    // Verify signature header
-    var signature = request.Headers["X-Signature"].ToString();
-    var expectedSignature = ComputeSignature(request.Body);
-    
-    if (signature != expectedSignature)
-    {
-        return new Microsoft.AspNetCore.Mvc.UnauthorizedResult();
-    }
-    
-    // Process verified request
-    await ProcessRequest(request);
-    return new Microsoft.AspNetCore.Mvc.OkResult();
-});
-```
-
-### Use Async Handlers for I/O Operations
-
-Always use async handlers when performing I/O operations:
-
-```csharp
-// Good: Async for I/O
-var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    using var reader = new StreamReader(request.Body);
-    var body = await reader.ReadToEndAsync();
-    
-    // Async database call
-    await SaveToDatabase(body);
-    
-    return new Microsoft.AspNetCore.Mvc.OkResult();
-});
-
-// Bad: Blocking I/O
-var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    using var reader = new StreamReader(request.Body);
-    var body = reader.ReadToEnd(); // Blocks thread
-    SaveToDatabase(body).Wait(); // Blocks thread
-    
-    return new Microsoft.AspNetCore.Mvc.OkResult();
-});
-```
-
-### Return Appropriate HTTP Responses
-
-Return appropriate HTTP status codes based on the operation result:
-
-```csharp
-var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    if (!IsValidRequest(request))
-    {
-        return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(
-            new { error = "Invalid request" }
-        );
-    }
-    
-    if (ProcessRequest(request))
-    {
-        return new Microsoft.AspNetCore.Mvc.OkObjectResult(
-            new { status = "success" }
-        );
-    }
-    
-    return new Microsoft.AspNetCore.Mvc.StatusCodeResult(500);
-});
-```
-
-### Update State Safely
-
-When updating component state from webhook handlers, ensure thread safety:
-
-```csharp
-var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    // State updates are automatically thread-safe
-    counter.Set(counter.Value + 1);
-    lastMessage.Set($"Received: {request.Query["message"]}");
-    
-    return new Microsoft.AspNetCore.Mvc.OkResult();
-});
-```
-
-### Keep Handlers Fast
-
-Webhook handlers should complete quickly to avoid timeouts:
-
-```csharp
-// Good: Fast handler, defer heavy work
-var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    // Quick validation
-    if (!IsValid(request))
-        return new Microsoft.AspNetCore.Mvc.BadRequestResult();
-    
-    // Queue heavy processing for background task
-    _backgroundQueue.Enqueue(() => ProcessHeavyWork(request));
-    
-    // Return immediately
-    return new Microsoft.AspNetCore.Mvc.OkResult();
-});
-
-// Bad: Slow handler
-var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    // Heavy processing blocks response
-    await ProcessHeavyWork(request); // Takes 30 seconds
-    return new Microsoft.AspNetCore.Mvc.OkResult();
-});
-```
-
-### Log Important Events
-
-Log webhook calls for debugging and auditing:
-
-```csharp
-var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
-{
-    var logger = UseService<ILogger<MyView>>();
-    
-    logger.LogInformation("Webhook called: {Method} {Path}", 
-        request.Method, request.Path);
-    
-    try
-    {
-        await ProcessRequest(request);
-        logger.LogInformation("Webhook processed successfully");
-        return new Microsoft.AspNetCore.Mvc.OkResult();
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Webhook processing failed");
-        return new Microsoft.AspNetCore.Mvc.StatusCodeResult(500);
-    }
-});
-```
-
-### Cleanup is Automatic
-
-Webhooks are automatically cleaned up when components unmount, so you don't need to manually unregister them:
-
-```csharp
-// Good: Automatic cleanup
-var webhook = UseWebhook(_ => { });
-// When component unmounts, webhook is automatically unregistered
-
-// No manual cleanup needed - Ivy handles it!
-```
-
-## See Also
-
-- [State Management](./03_UseState.md) - Update state from webhook handlers
-- [Effects](./04_UseEffect.md) - Perform side effects in response to webhook calls
+</Body>
+</Details>

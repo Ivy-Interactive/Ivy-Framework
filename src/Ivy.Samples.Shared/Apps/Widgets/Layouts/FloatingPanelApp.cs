@@ -3,9 +3,9 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
 [App(icon: Icons.Toilet, searchHints: ["overlay", "modal", "popup", "floating", "dialog", "window"])]
-public class FloatingPanelApp : ViewBase
+public class FloatingPanelApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         return new Fragment()
                | Text.H1("Floating Panel")

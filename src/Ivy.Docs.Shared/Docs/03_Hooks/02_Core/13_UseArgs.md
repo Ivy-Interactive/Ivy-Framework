@@ -38,8 +38,6 @@ var args = UseArgs<UserArgs>();
 
 ## How Args Work
 
-### Argument Flow
-
 ```mermaid
 sequenceDiagram
     participant S as Source Component
@@ -71,6 +69,22 @@ var receivedArgs = UseArgs<UserProfileArgs>();
 // Returns: UserProfileArgs { UserId = 123, Tab = "details" }
 ```
 
+### Serialization Errors Handling
+
+If arguments fail to serialize, ensure all properties are serializable and avoid circular references:
+
+```csharp
+// Good: All properties serialize
+public record GoodArgs(string Name, int Count);
+
+// Bad: Non-serializable property
+public record BadArgs(string Name, Action Callback);
+
+// Bad: Circular reference
+public class Parent { public Child Child { get; set; } }
+public class Child { public Parent Parent { get; set; } }
+```
+
 ## When to Use Args
 
 | Use Args For | Use State/Context Instead For |
@@ -80,13 +94,11 @@ var receivedArgs = UseArgs<UserProfileArgs>();
 | Component Initialization | Complex Objects (circular refs) |
 | Simple Data Transfer | Real-time Updates |
 
-## Common Patterns
-
 ### Default Arguments
 
 Provide default behavior when args are null:
 
-```csharp
+```csharp demo-below
 public record ProductListArgs(string? Category = null, string? SortBy = null, int Page = 1);
 
 public class ArgsDefaultDemo : ViewBase
@@ -113,7 +125,7 @@ public class ArgsDefaultDemo : ViewBase
 
 Use arguments to determine which view to render:
 
-```csharp
+```csharp demo-below
 public record AppArgs(string? View = null, int? UserId = null);
 
 public class MainView : ViewBase
@@ -131,30 +143,6 @@ public class MainView : ViewBase
         };
     }
 }
-```
-
-## Troubleshooting
-
-### Serialization Errors
-
-If arguments fail to serialize, ensure:
-
-**All properties are serializable**:
-
-```csharp
-// Good: All properties serialize
-public record GoodArgs(string Name, int Count);
-
-// Bad: Non-serializable property
-public record BadArgs(string Name, Action Callback);
-```
-
-**No circular references**:
-
-```csharp
-// Bad: Circular reference
-public class Parent { public Child Child { get; set; } }
-public class Child { public Parent Parent { get; set; } }
 ```
 
 ## Best Practices
