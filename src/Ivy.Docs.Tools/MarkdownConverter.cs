@@ -275,21 +275,20 @@ public static partial class MarkdownConverter
 
                 if (!isInsideDetailsBlock && hBlock.Inline != null)
                 {
-                    string rawHeadingMarkdown = markdownContent.Substring(hBlock.Span.Start, hBlock.Span.Length).Trim();
+                    var headingText = new StringBuilder();
+                    foreach (var inline in hBlock.Inline.Descendants())
+                    {
+                        if (inline is LiteralInline literal)
+                        {
+                            headingText.Append(literal.Content.ToString());
+                        }
+                    }
 
                     sectionBuilder.AppendLine();
-                    sectionBuilder.AppendLine(rawHeadingMarkdown);
+                    sectionBuilder.AppendLine($"{new string('#', hBlock.Level)} {headingText.ToString().Trim()}");
 
                     if (headings != null)
                     {
-                        var headingText = new StringBuilder();
-                        foreach (var inline in hBlock.Inline.Descendants())
-                        {
-                            if (inline is LiteralInline literal)
-                            {
-                                headingText.Append(literal.Content.ToString());
-                            }
-                        }
                         var text = headingText.ToString().Trim();
                         var id = GenerateHeadingId(text);
                         headings.Add((id, text, hBlock.Level));
