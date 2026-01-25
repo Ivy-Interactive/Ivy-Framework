@@ -287,6 +287,17 @@ public static partial class MarkdownConverter
                     sectionBuilder.AppendLine();
                     sectionBuilder.AppendLine($"{new string('#', hBlock.Level)} {headingText.ToString().Trim()}");
 
+                    // Extract heading for TOC if not inside details/demo block (which are handled recursively or separately and shouldn't appear in main TOC usually unless properly implemented)
+                    // Note: We are currently inside HandleBlocks which iterates over top-level blocks or nested blocks.
+                    // If isNestedContent is true, it means we are inside a custom block (like Details), so we might NOT want to add to main headings list?
+                    // The requirement is to avoid "leaked headings from demo-below elements".
+                    // Demo-below elements are handled in HandleDemoCodeBlock which generates a Box with content.
+                    // Regular headings are HeadingBlock.
+
+                    // IF we are processing the main document (headings != null), we add the heading.
+                    // If we are inside a nested block (like Details body), headings might be passed or null depending on intent.
+                    // For now, let's assume we only collect top level headings or headings where 'headings' list is provided.
+
                     if (headings != null)
                     {
                         var text = headingText.ToString().Trim();
