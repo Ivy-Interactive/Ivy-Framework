@@ -71,7 +71,7 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
 
   return (
     <div className="grid grid-cols-6 gap-1 p-1">
-      {colorNames.map((colorName) => {
+      {colorNames.map(colorName => {
         const isSelected = normalizedSelected === colorName;
         const cssVar = enumColorsToCssVar[colorName];
 
@@ -84,7 +84,9 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
             className={cn(
               'w-6 h-6 rounded border-2 transition-all flex items-center justify-center',
               'hover:scale-110 hover:z-10',
-              isSelected ? 'border-foreground ring-2 ring-foreground/30' : 'border-transparent',
+              isSelected
+                ? 'border-foreground ring-2 ring-foreground/30'
+                : 'border-transparent',
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
             )}
             style={{ backgroundColor: cssVar }}
@@ -95,7 +97,9 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
               <Check
                 className={cn(
                   'w-4 h-4',
-                  ['white', 'yellow', 'lime', 'amber', 'cyan'].includes(colorName)
+                  ['white', 'yellow', 'lime', 'amber', 'cyan'].includes(
+                    colorName
+                  )
                     ? 'text-black'
                     : 'text-white'
                 )}
@@ -274,8 +278,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             value={getDisplayColor()}
             onChange={handleColorChange}
             disabled={disabled}
-            className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-              } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+            className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
+              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
           />
         </div>
       </div>
@@ -291,8 +296,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           value={getDisplayColor()}
           onChange={handleColorChange}
           disabled={disabled}
-          className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+          className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
+            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+          } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
         />
       </div>
       <div className="relative">
