@@ -28,6 +28,36 @@ The `UseCallback` [hook](../02_RulesOfHooks.md) provides a way to optimize callb
 `UseCallback` memoizes the function reference itself, while [`UseMemo`](./05_UseMemo.md) memoizes the result of calling a function. The memoized callback is only executed when you invoke it.
 </Callout>
 
+## Basic Usage
+
+```csharp
+public class ParentView : ViewBase
+{
+    public override object? Build()
+    {
+        var count = UseState(0);
+        var multiplier = UseState(2);
+        
+        // Memoize the callback to prevent child re-renders
+        var handleIncrement = UseCallback(() => 
+        {
+            count.Set(count.Value + 1);
+        }, count); // Only recreate when count changes
+        
+        var handleReset = UseCallback(() => 
+        {
+            count.Set(0);
+        }); // No dependencies - callback never changes
+        
+        return Layout.Vertical(
+            Text.Inline($"Count: {count.Value}"),
+            new ChildComponent(handleIncrement, handleReset),
+            new NumberInput("Multiplier", multiplier.Value, v => multiplier.Set(v))
+        );
+    }
+}
+```
+
 ## When to Use UseCallback
 
 ```mermaid
@@ -49,8 +79,6 @@ flowchart TD
     I --> M[" Handler created once<br/> Less memory churn<br/> Faster renders"]
     J --> N[" List items optimized<br/> Better scrolling<br/> Smoother UI"]
 ```
-
-## UseCallback Hook
 
 The `UseCallback` [hook](../02_RulesOfHooks.md) memoizes callback functions and only recreates them when their [state](./03_UseState.md) dependencies change.
 
@@ -91,55 +119,66 @@ sequenceDiagram
     CB-->>C: Return new callback function
 ```
 
-### Basic Usage
+### Memory vs Speed Trade-offs
+
+- **Function References**: `UseCallback` stores function references in memory. Consider the number of memoized callbacks:
 
 ```csharp
-public class ParentView : ViewBase
-{
-    public override object? Build()
-    {
-        var count = UseState(0);
-        var multiplier = UseState(2);
-        
-        // Memoize the callback to prevent child re-renders
-        var handleIncrement = UseCallback(() => 
-        {
-            count.Set(count.Value + 1);
-        }, count); // Only recreate when count changes
-        
-        var handleReset = UseCallback(() => 
-        {
-            count.Set(0);
-        }); // No dependencies - callback never changes
-        
-        return Layout.Vertical(
-            Text.Inline($"Count: {count.Value}"),
-            new ChildComponent(handleIncrement, handleReset),
-            new NumberInput("Multiplier", multiplier.Value, v => multiplier.Set(v))
-        );
-    }
-}
+// Good: Small number of memoized callbacks
+var handleClick = UseCallback(() => DoSomething(), []);
+var handleSubmit = UseCallback(() => SubmitForm(), formData);
+
+// Caution: Many memoized callbacks might consume memory
+// Consider if all are necessary
 ```
 
-### Use Cases
+- **[State](./03_UseState.md) Dependency Stability**: If state dependencies change frequently, callbacks will be recreated often, reducing the effectiveness of memoization:
 
-Use `UseCallback` when:
+```csharp
+// Bad: Dependency changes on every render
+var config = new { threshold: 100 };
+var handleAction = UseCallback(() => DoAction(config), config);
 
-- **Passing callbacks to [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md)** - Prevents unnecessary re-renders when the callback reference is stable
-- **Callbacks are dependencies of other [hooks](../02_RulesOfHooks.md)** - Ensures stable references for [`UseEffect`](./04_UseEffect.md) and other [hooks](../02_RulesOfHooks.md)
-- **Event handlers with expensive setup** - Avoids recreating handlers on every render
-- **Callbacks in lists** - Optimizes performance when rendering many [components](../../../01_Onboarding/02_Concepts/02_Views.md) with callbacks
+// Good: Stable dependency
+var threshold = UseState(100);
+var handleAction = UseCallback(() => DoAction(threshold.Value), threshold);
+```
 
-### Best Practices
+- **Callback Complexity**: Simple callbacks may not benefit from memoization:
+
+```csharp
+// Unnecessary memoization for simple callback
+var handleClick = UseCallback(() => count.Set(count.Value + 1), count);
+
+// Consider direct inline for simple cases
+// Or memoize only if passed to many child components
+```
+
+## Best Practices
 
 - **Dependency Array**: Always specify the [state](./03_UseState.md) dependencies that should trigger callback recreation
 - **Stable References**: Only include state values that actually affect the callback's behavior
 - **Avoid Over-Memoization**: Don't memoize simple callbacks that don't cause performance issues
 - **Combine with IMemoized**: Use `UseCallback` together with `IMemoized` [components](../../../01_Onboarding/02_Concepts/02_Views.md) for maximum optimization
 
-### Examples
+## See Also
 
-#### Preventing Child Re-renders
+- [Memoization](./05_UseMemo.md) - Caching computed values with UseMemo
+- [UseMemo](./05_UseMemo.md) - Memoizing function resultss
+- [Effects](./04_UseEffect.md) - Performing side effects with stable dependencies
+- [State Management](./03_UseState.md) - Managing component state
+- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [UseRef](./08_UseRef.md) - Storing stable references
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+- [Widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) - Building UI components
+
+## Examples
+
+<Details>
+<Summary>
+Preventing Child Re-renders
+</Summary>
+<Body>
 
 ```csharp
 public class TodoListView : ViewBase
@@ -181,7 +220,14 @@ public class TodoListView : ViewBase
 }
 ```
 
-#### Stable Dependencies for [Effects](./04_UseEffect.md)
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Stable Dependencies for Effects
+</Summary>
+<Body>
 
 ```csharp
 public class DataFetcherView : ViewBase
@@ -221,64 +267,5 @@ public class DataFetcherView : ViewBase
 }
 ```
 
-## Performance Considerations
-
-### Memory vs Speed Trade-offs
-
-- **Function References**: `UseCallback` stores function references in memory. Consider the number of memoized callbacks:
-
-```csharp
-// Good: Small number of memoized callbacks
-var handleClick = UseCallback(() => DoSomething(), []);
-var handleSubmit = UseCallback(() => SubmitForm(), formData);
-
-// Caution: Many memoized callbacks might consume memory
-// Consider if all are necessary
-```
-
-- **[State](./03_UseState.md) Dependency Stability**: If state dependencies change frequently, callbacks will be recreated often, reducing the effectiveness of memoization:
-
-```csharp
-// Bad: Dependency changes on every render
-var config = new { threshold: 100 };
-var handleAction = UseCallback(() => DoAction(config), config);
-
-// Good: Stable dependency
-var threshold = UseState(100);
-var handleAction = UseCallback(() => DoAction(threshold.Value), threshold);
-```
-
-- **Callback Complexity**: Simple callbacks may not benefit from memoization:
-
-```csharp
-// Unnecessary memoization for simple callback
-var handleClick = UseCallback(() => count.Set(count.Value + 1), count);
-
-// Consider direct inline for simple cases
-// Or memoize only if passed to many child components
-```
-
-### When NOT to Use UseCallback
-
-- **Simple callbacks**: Don't memoize trivial callbacks that don't cause performance issues
-- **Frequently changing [state](./03_UseState.md) dependencies**: If state dependencies change often, memoization provides no benefit
-- **Single-use callbacks**: If a callback is only used once and not passed to [children](../../../01_Onboarding/02_Concepts/03_Widgets.md), memoization may be unnecessary
-
-```csharp
-// Unnecessary memoization
-var handleClick = UseCallback(() => Console.WriteLine("Clicked"), []);
-
-// Just use directly
-var handleClick = () => Console.WriteLine("Clicked");
-```
-
-## See Also
-
-- [Memoization](./05_UseMemo.md) - Caching computed values with UseMemo
-- [UseMemo](./05_UseMemo.md) - Memoizing function resultss
-- [Effects](./04_UseEffect.md) - Performing side effects with stable dependencies
-- [State Management](./03_UseState.md) - Managing component state
-- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
-- [UseRef](./08_UseRef.md) - Storing stable references
-- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
-- [Widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) - Building UI components
+</Body>
+</Details>
