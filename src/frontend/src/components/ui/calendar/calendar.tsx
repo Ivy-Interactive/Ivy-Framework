@@ -178,7 +178,10 @@ export function Calendar({
             </td>
           );
         },
-        CaptionLabel: (props: any) => (
+        CaptionLabel: (props: {
+          displayMonth?: Date;
+          children?: React.ReactNode;
+        }) => (
           <MonthYearInput
             displayMonth={props.displayMonth}
             title={props.children}
