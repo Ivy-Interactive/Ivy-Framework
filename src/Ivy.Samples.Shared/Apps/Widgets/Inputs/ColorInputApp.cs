@@ -66,12 +66,14 @@ public class ColorInputVariants : ViewBase
 {
     public override object Build()
     {
-        var textState = UseState("#381ff4");
+        var textState = UseState("red");
         var pickerState = UseState("#dd5860");
         var bothState = UseState("#6637d1");
+        var swatchState = UseState("blue");
         var nullTextState = UseState((string?)null);
         var nullPickerState = UseState((string?)null);
         var nullBothState = UseState((string?)null);
+        var nullSwatchState = UseState((string?)null);
 
         return Layout.Grid().Columns(6)
             | Text.InlineCode("")
@@ -100,7 +102,14 @@ public class ColorInputVariants : ViewBase
             | bothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Invalid("Invalid color")
             | bothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
             | nullBothState.ToColorInput().Variant(ColorInputs.TextAndPicker)
-            | nullBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Invalid("Invalid color");
+            | nullBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Invalid("Invalid color")
+
+            | Text.InlineCode("Swatch")
+            | swatchState.ToColorInput().Variant(ColorInputs.Swatch)
+            | swatchState.ToColorInput().Variant(ColorInputs.Swatch).Invalid("Invalid color")
+            | swatchState.ToColorInput().Variant(ColorInputs.Swatch).Disabled()
+            | nullSwatchState.ToColorInput().Variant(ColorInputs.Swatch)
+            | nullSwatchState.ToColorInput().Variant(ColorInputs.Swatch).Invalid("Invalid color");
     }
 }
 

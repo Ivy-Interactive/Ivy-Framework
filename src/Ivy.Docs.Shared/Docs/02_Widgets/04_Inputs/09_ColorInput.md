@@ -54,24 +54,45 @@ var colorInputFull = new ColorInput(
 
 ## Variants
 
-`ColorInput` has three variants. `ColorInputs.Text` variant should be used to let users enter color hex codes
-manually. `ColorInputs.TextAndPicker` variant should be used in most cases as it allows users to
-select the color and copy the selected color in the textbox. This is also the default variant.
-Sometimes, it may be necessary to just use the color picker. In such situations `ColorInputs.Picker`
-should be used.
+`ColorInput` has four variants:
 
-The following code shows all these three variants in action.
+| Variant | Description |
+|---------|-------------|
+| `ColorInputs.Text` | Text input for entering hex codes manually |
+| `ColorInputs.Picker` | Color picker only |
+| `ColorInputs.TextAndPicker` | Text input with color picker (default) |
+| `ColorInputs.Swatch` | Grid of predefined colors from `Colors` enum |
+
+The following code shows all variants in action:
 
 ```csharp demo-below
 public class ColorVariantsDemo : ViewBase
 {
     public override object? Build()
     {    
-        var colorState = UseState("#ff0000");
+        var colorState = UseState("red");
         return Layout.Grid().Columns(2).ColumnWidths(Size.Units(30), null)
             | Text.P("Just Text").Small() | colorState.ToColorInput().Variant(ColorInputs.Text)
             | Text.P("Just Picker").Small() | colorState.ToColorInput().Variant(ColorInputs.Picker)
-            | Text.P("Text and Picker").Small() | colorState.ToColorInput().Variant(ColorInputs.TextAndPicker);
+            | Text.P("Text and Picker").Small() | colorState.ToColorInput().Variant(ColorInputs.TextAndPicker)
+            | Text.P("Swatch").Small() | colorState.ToColorInput().Variant(ColorInputs.Swatch);
+    }   
+}
+```
+
+### Swatch Variant
+
+The `Swatch` variant displays a grid of predefined colors from the `Colors` enum. This is useful when you want users to select from a specific set of theme-aware colors rather than arbitrary hex values.
+
+```csharp demo-below
+public class ColorSwatchDemo : ViewBase
+{
+    public override object? Build()
+    {    
+        var colorState = UseState(Colors.Blue);
+        return Layout.Vertical()
+            | colorState.ToColorInput().Variant(ColorInputs.Swatch)
+            | Text.P($"Selected: {colorState.Value}");
     }   
 }
 ```

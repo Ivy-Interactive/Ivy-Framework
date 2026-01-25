@@ -2,7 +2,7 @@ import { useEventHandler } from '@/components/event-handler';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
-import { X } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import React from 'react';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -20,7 +20,7 @@ interface ColorInputWidgetProps {
   placeholder?: string;
   nullable?: boolean;
   events?: string[];
-  variant?: 'Text' | 'Picker' | 'TextAndPicker';
+  variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch';
   scale?: Scales;
 }
 
@@ -53,6 +53,59 @@ const enumColorsToCssVar: Record<string, string> = {
   primary: 'var(--color-primary)',
   secondary: 'var(--color-secondary)',
   destructive: 'var(--color-destructive)',
+};
+
+interface ColorSwatchGridProps {
+  selectedColor: string | null;
+  onColorSelect: (colorName: string) => void;
+  disabled?: boolean;
+}
+
+const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
+  selectedColor,
+  onColorSelect,
+  disabled = false,
+}) => {
+  const colorNames = Object.keys(enumColorsToCssVar);
+  const normalizedSelected = selectedColor?.toLowerCase();
+
+  return (
+    <div className="grid grid-cols-6 gap-1 p-1">
+      {colorNames.map((colorName) => {
+        const isSelected = normalizedSelected === colorName;
+        const cssVar = enumColorsToCssVar[colorName];
+
+        return (
+          <button
+            key={colorName}
+            type="button"
+            disabled={disabled}
+            onClick={() => onColorSelect(colorName)}
+            className={cn(
+              'w-6 h-6 rounded border-2 transition-all flex items-center justify-center',
+              'hover:scale-110 hover:z-10',
+              isSelected ? 'border-foreground ring-2 ring-foreground/30' : 'border-transparent',
+              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            )}
+            style={{ backgroundColor: cssVar }}
+            title={colorName}
+            aria-label={colorName}
+          >
+            {isSelected && (
+              <Check
+                className={cn(
+                  'w-4 h-4',
+                  ['white', 'yellow', 'lime', 'amber', 'cyan'].includes(colorName)
+                    ? 'text-black'
+                    : 'text-white'
+                )}
+              />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
 };
 
 export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
@@ -195,6 +248,23 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     );
   }
 
+  if (variant === 'Swatch') {
+    const handleSwatchSelect = (colorName: string) => {
+      eventHandler('OnChange', id, [colorName]);
+    };
+
+    return (
+      <div className="flex items-center space-x-2">
+        <ColorSwatchGrid
+          selectedColor={value}
+          onColorSelect={handleSwatchSelect}
+          disabled={disabled}
+        />
+        {invalid && <InvalidIcon message={invalid} />}
+      </div>
+    );
+  }
+
   if (variant === 'Picker') {
     return (
       <div className="flex items-center space-x-2">
@@ -204,9 +274,8 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             value={getDisplayColor()}
             onChange={handleColorChange}
             disabled={disabled}
-            className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
-              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+            className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
           />
         </div>
       </div>
@@ -222,9 +291,8 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           value={getDisplayColor()}
           onChange={handleColorChange}
           disabled={disabled}
-          className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
-            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-          } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+          className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
         />
       </div>
       <div className="relative">
