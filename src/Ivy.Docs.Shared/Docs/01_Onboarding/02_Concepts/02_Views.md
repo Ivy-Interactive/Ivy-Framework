@@ -62,7 +62,7 @@ public class FlexibleContentView : ViewBase
 
 ### State Management with Hooks
 
-Views use React-like hooks for state management. The most common hook is `UseState()`:
+Views use React-like hooks for state management. The most common hook is [UseState()](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp demo-tabs
 public class CounterView : ViewBase
@@ -105,7 +105,7 @@ var cache = UseState(new Dictionary<string, object>(), buildOnChange: false);
 
 ## Service Injection
 
-Views can access application services using the `UseService<T>()` hook:
+Views can access application services using the [UseService<T>()](../../03_Hooks/02_Core/11_UseService.md) hook:
 
 ```csharp demo
 new Button("Show Toast",
