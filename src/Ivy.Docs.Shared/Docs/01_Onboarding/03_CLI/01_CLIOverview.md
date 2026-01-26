@@ -17,9 +17,9 @@ Streamline your Ivy development workflow with powerful CLI tools for project ini
 
 Ivy CLI is a powerful tool designed to streamline the development of Ivy projects. It provides:
 
-- **Database Integration**: Connect to multiple database providers (SQL Server, PostgreSQL, MySQL, SQLite, and more)
-- **Authentication**: Add authentication providers (Auth0, Supabase, Authelia, Basic Auth)
-- **Deployment**: Deploy to cloud platforms (AWS, Azure, GCP)
+- **Database Integration**: Connect to multiple database providers (SQL Server, PostgreSQL, MySQL, SQLite, and more). See [Database Overview](05_DatabaseIntegration/01_DatabaseOverview.md) and [Connections](../02_Concepts/26_Connections.md).
+- **Authentication**: Add [authentication](04_Authentication/01_AuthenticationOverview.md) providers (Auth0, Supabase, Authelia, Basic Auth)
+- **Deployment**: [Deploy](06_Deployment/01_DeploymentOverview.md) to cloud platforms (AWS, Azure, GCP)
 - **Project Management**: Initialize and manage Ivy projects with ease
 
 ## Quick Start
@@ -82,6 +82,8 @@ YourProject/
 ├── .ivy/                   # Ivy-specific configuration, only created by Ivy CLI when necessary
 └── .gitignore              # Git ignore file
 ```
+
+See [Program](../02_Concepts/01_Program.md) for the entry point, [Apps](../02_Concepts/10_Apps.md) for application UI code, and [Connections](../02_Concepts/26_Connections.md) for database connections.
 
 ## Getting Help
 

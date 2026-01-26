@@ -44,7 +44,7 @@ For additional authentication methods (OAuth, SSO, etc.) and all connection opti
 
 > **Note**: `Snowflake.Data` is Snowflake's official ADO.NET driver, used by Ivy.
 
-Your connection string will be stored in .NET user secrets.
+Your connection string will be stored in [.NET user secrets](../../02_Concepts/14_Secrets.md).
 
 See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 

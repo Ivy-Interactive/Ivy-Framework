@@ -41,7 +41,7 @@ A connection string will be automatically generated as:
 Data Source=data.db
 ```
 
-Unlike other providers, SQLite doesn't store this connection string in .NET user secrets. Instead, it is included directly in the generated DbContextFactory source file.
+Unlike other providers, SQLite doesn't store this connection string in [.NET user secrets](../../02_Concepts/14_Secrets.md). Instead, it is included directly in the generated DbContextFactory source file.
 
 See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
