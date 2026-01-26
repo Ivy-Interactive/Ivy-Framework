@@ -68,7 +68,7 @@ public class FeedbackDemo : ViewBase
 }    
 ```
 
-## [Event Handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md)
+## Event Handling
 
 The following example shows how change events can be handled for `FeedbackInput`s.
 

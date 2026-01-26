@@ -131,7 +131,7 @@ Use `UseReducer` when:
 - **Centralized State Logic** - When you want to centralize all state update logic in one place
 - **Better Testability** - When you need to test state logic in isolation
 
-### UseReducer vs [`UseState`](./03_UseState.md)
+### UseReducer vs UseState
 
 Choose between `UseReducer` and [`UseState`](./03_UseState.md) based on complexity:
 
