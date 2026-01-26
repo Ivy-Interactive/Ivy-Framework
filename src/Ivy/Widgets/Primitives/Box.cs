@@ -49,6 +49,8 @@ public static class BoxExtensions
 
     public static Box BorderColor(this Box box, string color) => box with { BorderColor = color };
 
+    public static Box BorderColor(this Box box, Colors color) => box with { BorderColor = color.ToString() };
+
     public static Box Padding(this Box box, int padding) => box with { Padding = new(padding) };
 
     public static Box Padding(this Box box, Thickness padding) => box with { Padding = padding };

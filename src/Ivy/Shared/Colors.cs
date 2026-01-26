@@ -36,7 +36,5 @@ public enum Colors
     Success,
     Warning,
     Info,
-    Muted,
-    Card
-
+    Muted
 }

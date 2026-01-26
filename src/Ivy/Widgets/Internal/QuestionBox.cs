@@ -12,6 +12,6 @@ public class QuestionBox(string? title = null, object? content = null) : ViewBas
             Layout.Vertical().Gap(5)
             | (title != null ? Layout.Horizontal().Align(Align.TopLeft) | Text.Label(title) : null)
             | content
-        ).Padding(4).BorderThickness(1).BorderColor("#3c3c3c").Color(Colors.Card);
+        ).Padding(4).BorderThickness(1);
     }
 }
