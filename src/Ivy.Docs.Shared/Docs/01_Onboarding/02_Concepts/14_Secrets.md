@@ -78,11 +78,11 @@ public class ConfigurationService : IHaveSecrets
 
 ## Database Connections with Built-in Secrets Declaration
 
-[Database connections](../../01_Onboarding/03_CLI/03_DatabaseIntegration/01_DatabaseOverview.md) automatically declare their required secrets when generated through the [Ivy CLI](../../01_Onboarding/03_CLI/_Index.md). This integration ensures that your database connection strings are automatically included in secrets validation.
+[Database connections](../03_CLI/05_DatabaseIntegration/01_DatabaseOverview.md) automatically declare their required secrets when generated through the [Ivy CLI](../03_CLI/_Index.md). This integration ensures that your database [connection](./26_Connections.md) strings are automatically included in secrets validation.
 
 ### Generated Connection Classes
 
-When you generate a [database connection](../../01_Onboarding/03_CLI/03_DatabaseIntegration/01_DatabaseOverview.md) using the Ivy CLI, the generated connection class implements both `IConnection` and `IHaveSecrets`:
+When you generate a [database connection](../03_CLI/05_DatabaseIntegration/01_DatabaseOverview.md) using the Ivy CLI, the generated connection class implements both `IConnection` and `IHaveSecrets`:
 
 ```csharp
 public class MyDatabaseConnection : IConnection, IHaveSecrets

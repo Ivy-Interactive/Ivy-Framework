@@ -10,11 +10,11 @@ searchHints:
 
 # Volume
 
-Ivy provides a standardized way to manage [application](./15_Apps.md) data storage through the `IVolume` interface and `FolderVolume` implementation. This ensures consistent file path handling and proper directory structure for your [application's](./15_Apps.md) data files.
+Ivy provides a standardized way to manage [application](./10_Apps.md) data storage through the `IVolume` interface and `FolderVolume` implementation. This ensures consistent file path handling and proper directory structure for your application's data files.
 
 ## Basic Usage
 
-Configure a volume for your application during [server startup](./01_Program.md):
+Configure a volume for your application during [server](./01_Program.md) startup:
 
 ```csharp
 using Ivy.Services;
@@ -46,10 +46,10 @@ public interface IVolume
 The Volume Management system in Ivy provides:
 
 - **Automatic directory creation**: Parent directories are created automatically when you request a path
-- **Namespace isolation**: Files are organized under `Ivy/{YourAppName}/` to prevent conflicts between [applications](./15_Apps.md)
+- **Namespace isolation**: Files are organized under `Ivy/{YourAppName}/` to prevent conflicts between [applications](./10_Apps.md)
 - **Fallback to local app data**: If the configured root directory doesn't exist, it falls back to the system's local application data folder
 - **Clean path composition**: Use params array for path parts instead of manual string concatenation
-- **Dependency injection support**: Volumes are registered as [services](../../03_Hooks/02_Core/11_UseService.md) and can be injected into your [application components](./02_Views.md)
+- **Dependency injection support**: Volumes are registered as [services](../../03_Hooks/02_Core/11_UseService.md) and can be injected into your [views](./02_Views.md)
 
 ## FolderVolume Implementation
 
