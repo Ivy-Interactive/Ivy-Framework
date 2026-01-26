@@ -18,9 +18,9 @@ Ivy Connections provide a unified abstraction for integrating external data sour
 
 A **Connection** in Ivy represents any external resource your application communicates with:
 
-- **Databases** — SQL Server, PostgreSQL, MySQL, SQLite, etc.
+- **[Databases](../03_CLI/05_DatabaseIntegration/01_DatabaseOverview.md)** — [SQL Server](../03_CLI/05_DatabaseIntegration/02_SqlServer.md), [PostgreSQL](../03_CLI/05_DatabaseIntegration/02_PostgreSql.md), [MySQL](../03_CLI/05_DatabaseIntegration/02_MySql.md), [SQLite](../03_CLI/05_DatabaseIntegration/02_SQLite.md), etc.
 - **Third-party APIs** — Payment gateways, messaging services, analytics
-- **Cloud services** — AWS, Azure, Google Cloud
+- **[Cloud services](../03_CLI/06_Deployment/01_DeploymentOverview.md)** — [AWS](../03_CLI/06_Deployment/02_AWS.md), [Azure](../03_CLI/06_Deployment/03_Azure.md), [Google Cloud](../03_CLI/06_Deployment/04_GCP.md)
 - **Custom internal services** — Microservices, legacy systems
 
 Connections implement the `IConnection` interface, which provides a standardized way to:
