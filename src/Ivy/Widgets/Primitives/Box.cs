@@ -16,13 +16,13 @@ public record Box : WidgetBase<Box>
 
     [Prop] public Colors? Color { get; set; } = null;
 
-    [Prop] public Thickness BorderThickness { get; set; } = new(1);
-
+    [Prop] public Colors? BorderColor { get; set; } = null;    
+    
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
     [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.Solid;
 
-    [Prop] public string? BorderColor { get; set; }
+    [Prop] public Thickness BorderThickness { get; set; } = new(1);
 
     [Prop] public Thickness Padding { get; set; } = new(2);
 
@@ -31,6 +31,8 @@ public record Box : WidgetBase<Box>
     [Prop] public Align? ContentAlign { get; set; } = Align.TopLeft;
 
     [Prop] public float? Opacity { get; set; }
+
+    [Prop] public float? BorderOpacity { get; set; }
 }
 
 public static class BoxExtensions
@@ -39,6 +41,10 @@ public static class BoxExtensions
 
     public static Box Color(this Box box, Colors color, float opacity) => box with { Color = color, Opacity = (1.0f - opacity) * 100 };
 
+    public static Box BorderColor(this Box box, Colors color) => box with { BorderColor = color };
+
+    public static Box BorderColor(this Box box, Colors color, float opacity) => box with { BorderColor = color, BorderOpacity = (1.0f - opacity) * 100 };
+
     public static Box BorderThickness(this Box box, int thickness) => box with { BorderThickness = new(thickness) };
 
     public static Box BorderThickness(this Box box, Thickness thickness) => box with { BorderThickness = thickness };
@@ -46,10 +52,6 @@ public static class BoxExtensions
     public static Box BorderRadius(this Box box, BorderRadius radius) => box with { BorderRadius = radius };
 
     public static Box BorderStyle(this Box box, BorderStyle style) => box with { BorderStyle = style };
-
-    public static Box BorderColor(this Box box, string color) => box with { BorderColor = color };
-
-    public static Box BorderColor(this Box box, Colors color) => box with { BorderColor = color.ToString() };
 
     public static Box Padding(this Box box, int padding) => box with { Padding = new(padding) };
 

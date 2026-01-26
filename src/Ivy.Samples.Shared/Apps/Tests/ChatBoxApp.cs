@@ -12,7 +12,7 @@ public class SingleAnswerQuestion(string question, Action<bool>? onAnswer = null
             | new Button(yesText, () => onAnswer?.Invoke(true)).Small().Icon(Icons.Waypoints)
             | new Button(noText, () => onAnswer?.Invoke(false)).Outline().Small();
 
-        return new QuestionBox(question, buttons);
+        return new ChatBox(question, buttons);
     }
 }
 
@@ -30,12 +30,12 @@ public class MultipleAnswerQuestion<T>(string question, IEnumerable<IAnyOption> 
 
         var radioList = selected.ToSelectInput(options).List();
 
-        return new QuestionBox(question, radioList);
+        return new ChatBox(question, radioList);
     }
 }
 
 [App(icon: Icons.MessageSquare, path: ["Tests"])]
-public class QuestionBoxApp : SampleBase
+public class ChatBoxApp : SampleBase
 {
     protected override object? BuildSample()
     {
@@ -52,16 +52,16 @@ public class QuestionBoxApp : SampleBase
         };
 
         return Layout.Vertical().Gap(6)
-            | Text.H1("QuestionBox")
-            | Text.P("QuestionBox is a reusable container with a title and custom content.")
+            | Text.H1("ChatBox")
+            | Text.P("ChatBox is a reusable container with a title and custom content.")
 
             | Text.H2("With Text Input")
-            | new QuestionBox(
+            | new ChatBox(
                 "What is your name?",
                 name.ToTextInput().Placeholder("Enter your name..."))
 
             | Text.H2("With Custom Buttons")
-            | new QuestionBox(
+            | new ChatBox(
                 "Choose an action:",
                 Layout.Horizontal().Gap(2)
                 | new Button("Save", () => { }).Primary().Small()
@@ -69,9 +69,9 @@ public class QuestionBoxApp : SampleBase
                 | new Button("Delete", () => { }).Destructive().Small())
 
             | Text.H2("Without Title")
-            | new QuestionBox(
+            | new ChatBox(
                 content: Layout.Vertical().Gap(2)
-                | Text.P("This QuestionBox has no title, only content.")
+                | Text.P("This ChatBox has no title, only content.")
                 | new Button("Got it!", () => { }).Outline().Small())
 
             | Text.H2("SingleAnswerQuestion")
