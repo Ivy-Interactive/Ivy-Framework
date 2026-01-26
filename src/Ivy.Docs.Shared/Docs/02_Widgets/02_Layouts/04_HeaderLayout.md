@@ -11,7 +11,7 @@ searchHints:
 # HeaderLayout
 
 <Ingress>
-HeaderLayout provides a fixed header area above scrollable content, perfect for toolbars, [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md), and persistent controls that should remain visible while users scroll through content.
+HeaderLayout provides a fixed header area above scrollable content, perfect for toolbars, [navigation](../../01_Onboarding/02_Concepts/09_Navigation.md), and persistent controls that should remain visible while users scroll through content.
 </Ingress>
 
 The `HeaderLayout` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates a layout with a fixed header section at the top and a scrollable content area below. Perfect for applications that need persistent navigation, toolbars, or status information while allowing the main content to scroll independently.
@@ -41,7 +41,7 @@ public class BasicHeaderExample : ViewBase
 ## Common Use Cases
 
 <Callout Type="tip">
-For [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md) that handle their own scrolling (like Kanban boards), use `.Scroll(Scroll.None)` to disable the HeaderLayout's ScrollArea wrapper. Height is automatically set to `Size.Full()` when scroll is disabled.
+For [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md) that handle their own scrolling (like Kanban boards), use `.Scroll(Scroll.None)` to disable the HeaderLayout's ScrollArea wrapper. Height is automatically set to [Size.Full()](../../04_ApiReference/IvyShared/Size.md) when scroll is disabled.
 </Callout>
 
 ### Toolbar with Actions

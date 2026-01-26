@@ -11,7 +11,7 @@ searchHints:
 # WrapLayout
 
 <Ingress>
-Create flexible, responsive [layouts](../../01_Onboarding/02_Concepts/02_Views.md) that automatically wrap content to new lines when horizontal space runs out, perfect for tags, buttons, and card grids.
+Create flexible, responsive [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) that automatically wrap content to new lines when horizontal space runs out, perfect for tags, buttons, and card grids.
 </Ingress>
 
 The `WrapLayout` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) arranges child elements in rows that automatically wrap to the next line when they reach the end of the available horizontal space. It's perfect for creating responsive layouts like tag lists, button groups, or card grids that adapt to different screen sizes.
@@ -29,7 +29,7 @@ new WrapLayout([
 ])
 ```
 
-The `WrapLayout` also works effectively with [badge components](../../02_Widgets/03_Common/02_Badge.md):
+The `WrapLayout` also works effectively with [badge components](../03_Common/02_Badge.md):
 
 ```csharp demo-tabs ivy-bg
 new WrapLayout([
@@ -69,7 +69,7 @@ Layout.Vertical()
 
 ### Padding
 
-Add internal spacing around the entire wrap layout:
+Add internal spacing around the entire wrap layout using [Thickness](../../04_ApiReference/IvyShared/Thickness.md):
 
 ```csharp demo-tabs ivy-bg
 new WrapLayout([
@@ -81,7 +81,7 @@ new WrapLayout([
 
 ### Margin
 
-Add external spacing around the wrap layout:
+Add external spacing around the wrap layout with [Thickness](../../04_ApiReference/IvyShared/Thickness.md):
 
 ```csharp demo-tabs ivy-bg
 new WrapLayout([
