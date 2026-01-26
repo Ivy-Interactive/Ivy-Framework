@@ -81,7 +81,7 @@ public class SimpleDialogExample : ViewBase
 
 ## Forms in Dialogs
 
-Use the `ToDialog()` extension method to display forms in dialogs:
+Use the `ToDialog()` extension method to display [forms](../../01_Onboarding/02_Concepts/08_Forms.md) in dialogs:
 
 ```csharp demo-below
 public class FormDialogExample : ViewBase
@@ -115,4 +115,3 @@ public class FormDialogExample : ViewBase
 ```
 
 <WidgetDocs Type="Ivy.Dialog" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Dialogs/Dialog.cs"/>
-

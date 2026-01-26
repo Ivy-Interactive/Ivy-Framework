@@ -39,7 +39,7 @@ Layout.Vertical()
 
 ### With Icons
 
-Use tooltips to explain the meaning of icons, especially in toolbars or [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md) (using icon-only buttons):
+Use tooltips to explain the meaning of icons, especially in toolbars or [navigation](../../01_Onboarding/02_Concepts/09_Navigation.md) (using icon-only buttons):
 
 ```csharp demo-tabs
 Layout.Horizontal()

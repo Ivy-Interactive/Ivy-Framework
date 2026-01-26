@@ -11,7 +11,7 @@ searchHints:
 # Details
 
 <Ingress>
-Display structured label-value pairs from models with automatic formatting using the [ToDetails()](../../01_Onboarding/02_Concepts/12_ContentBuilders.md) extension method.
+Display structured label-value pairs from models with automatic formatting using the [ToDetails()](../../01_Onboarding/02_Concepts/07_ContentBuilders.md) extension method.
 </Ingress>
 
 `Detail` [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md) display label and value pairs. They are usually generated from a model using ToDetails().
@@ -77,7 +77,7 @@ new { Id = "ABC-123", Name = "John Doe" }
 
 ### Links
 
-Convert values to clickable [links](../../01_Onboarding/02_Concepts/14_Navigation.md). Automatically transform URLs, email addresses, or any text into clickable links that users can interact with:
+Convert values to clickable [links](../../01_Onboarding/02_Concepts/09_Navigation.md). Automatically transform URLs, email addresses, or any text into clickable links that users can interact with:
 
 ```csharp demo-tabs
 new { Name = "John Doe", Website = "https://example.com" }
