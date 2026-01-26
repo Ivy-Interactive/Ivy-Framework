@@ -84,7 +84,7 @@ public class MultiSelectDemo : ViewBase
 }
 ```
 
-## [Event Handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md)
+## Event Handling
 
 Handle change events and create dynamic option lists that respond to user selections:
 

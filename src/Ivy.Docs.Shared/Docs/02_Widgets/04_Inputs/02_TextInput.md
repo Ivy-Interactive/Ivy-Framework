@@ -177,7 +177,7 @@ public class URLEnterDemo: ViewBase
 }
 ```
 
-## [Event Handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md)
+## Event Handling
 
 Use the `OnChange` callback to react to text input changes. The callback receives an event with the current value.
 

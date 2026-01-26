@@ -14,7 +14,7 @@ searchHints:
 Display images with automatic loading, responsive sizing, and proper accessibility features for rich visual content.
 </Ingress>
 
-The `Image` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays images in your [app](../../01_Onboarding/02_Concepts/15_Apps.md).
+The `Image` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays images in your [app](../../01_Onboarding/02_Concepts/10_Apps.md).
 
 ```csharp demo-below
 new Image("https://api.images.cat/150/150")

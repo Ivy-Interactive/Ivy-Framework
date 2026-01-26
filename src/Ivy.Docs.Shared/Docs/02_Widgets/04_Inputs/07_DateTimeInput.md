@@ -81,7 +81,7 @@ public class DateTimeVariantsDemo : ViewBase
 - `TimeOnly` and `TimeOnly?`
 - `string` (for ISO format)
 
-## [Event Handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md)
+## Event Handling
 
 `DateTimeInput` can handle change and blur events:
 

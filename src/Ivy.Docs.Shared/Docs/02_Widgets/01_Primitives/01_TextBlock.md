@@ -68,7 +68,7 @@ public class CodeVariantsDemo : ViewBase
 
 ## Text Modifiers
 
-Text elements can be customized with various modifiers:
+Text elements can be customized with various modifiers. Use [Colors](../../04_ApiReference/IvyShared/Colors.md) for the `Color()` modifier and [Size](../../04_ApiReference/IvyShared/Size.md) for `Width()`:
 
 ```csharp demo-tabs
 public class TextModifiersDemo : ViewBase
@@ -193,8 +193,8 @@ The TextBuilder class provides several modifiers for customizing text appearance
 | `Bold()` | Apply bold styling | `Text.P("Bold text").Bold()` |
 | `Italic()` | Apply italic styling | `Text.P("Italic text").Italic()` |
 | `Muted()` | Apply muted/disabled styling | `Text.P("Muted text").Muted()` |
-| `Color()` | Set text color | `Text.P("Red text").Color(Colors.Destructive)` |
-| `Width()` | Set text width | `Text.P("Fixed width").Width(Size.Units(200))` |
+| `Color()` | Set text [color](../../04_ApiReference/IvyShared/Colors.md) | `Text.P("Red text").Color(Colors.Destructive)` |
+| `Width()` | Set text width with [Size](../../04_ApiReference/IvyShared/Size.md) | `Text.P("Fixed width").Width(Size.Units(200))` |
 | `StrikeThrough()` | Add strikethrough | `Text.P("Crossed out").StrikeThrough()` |
 | `NoWrap()` | Prevent wrapping | `Text.P("Single line").NoWrap()` |
 | `Overflow()` | Handle overflow | `Text.P("Long text").Overflow(Overflow.Clip)` |
