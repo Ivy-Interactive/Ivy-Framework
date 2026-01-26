@@ -22,6 +22,8 @@ public record Box : WidgetBase<Box>
 
     [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.Solid;
 
+    [Prop] public string? BorderColor { get; set; }
+
     [Prop] public Thickness Padding { get; set; } = new(2);
 
     [Prop] public Thickness Margin { get; set; } = new(0);
@@ -44,6 +46,8 @@ public static class BoxExtensions
     public static Box BorderRadius(this Box box, BorderRadius radius) => box with { BorderRadius = radius };
 
     public static Box BorderStyle(this Box box, BorderStyle style) => box with { BorderStyle = style };
+
+    public static Box BorderColor(this Box box, string color) => box with { BorderColor = color };
 
     public static Box Padding(this Box box, int padding) => box with { Padding = new(padding) };
 
