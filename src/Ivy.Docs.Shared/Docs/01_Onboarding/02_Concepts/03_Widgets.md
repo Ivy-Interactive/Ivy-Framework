@@ -47,7 +47,7 @@ Ivy ships with a comprehensive set of strongly-typed widgets:
 
 ### Common Widgets
 
-The common widgets category offers you the opportunity to work with essential UI elements including badges, blades, buttons, cards, details implementations, dropdown menus, expandable sections, lists, progress bars, tables, and tooltips. Each widget is designed with Ivy's signature approach to simplicity and functionality.
+The common widgets category offers you the opportunity to work with essential UI elements including [badges](../../02_Widgets/03_Common/02_Badge.md), [blades](../../02_Widgets/03_Common/12_Blades.md), [buttons](../../02_Widgets/03_Common/01_Button.md), [cards](../../02_Widgets/03_Common/04_Card.md), [details](../../02_Widgets/03_Common/05_Details.md) implementations, [dropdown menus](../../02_Widgets/03_Common/11_DropDownMenu.md), [expandable](../../02_Widgets/03_Common/06_Expandable.md) sections, [lists](../../02_Widgets/03_Common/07_List.md), [progress](../../02_Widgets/03_Common/10_Progress.md) bars, [tables](../../02_Widgets/03_Common/08_Table.md), and [tooltips](../../02_Widgets/03_Common/03_Tooltip.md). Each widget is designed with Ivy's signature approach to simplicity and functionality.
 
 ```mermaid
 flowchart TB
@@ -130,7 +130,7 @@ public class CommonWidgetsDemo : ViewBase
 
 ### Input Widgets
 
-We also provide our users with various input methods to capture user data. Users can work with simple input types such as boolean inputs, feedback forms, text inputs, number inputs, date ranges, and date-time pickers. Additionally, we offer specialized features including Ivy's color palette system and our implementation of code highlighting. We introduce our file input implementations, read-only statements, and provide the ability to work with complex structures like async select operations in a simple, intuitive way.
+We also provide our users with various input methods to capture user data. Users can work with simple input types such as [boolean inputs](../../02_Widgets/04_Inputs/04_BoolInput.md), [feedback](../../02_Widgets/04_Inputs/13_FeedbackInput.md) forms, [text inputs](../../02_Widgets/04_Inputs/02_TextInput.md), [number inputs](../../02_Widgets/04_Inputs/03_NumberInput.md), [date ranges](../../02_Widgets/04_Inputs/08_DateRangeInput.md), and [date-time pickers](../../02_Widgets/04_Inputs/07_DateTimeInput.md). Additionally, we offer specialized features including Ivy's [color](../../02_Widgets/04_Inputs/09_ColorInput.md) palette system and our implementation of [code](../../02_Widgets/04_Inputs/11_CodeInput.md) highlighting. We introduce our [file input](../../02_Widgets/04_Inputs/10_FileInput.md) implementations, [read-only](../../02_Widgets/04_Inputs/14_ReadOnlyInput.md) statements, and provide the ability to work with complex structures like [async select](../../02_Widgets/04_Inputs/06_AsyncSelectInput.md) operations in a simple, intuitive way.
 
 ```mermaid
 graph BT
@@ -232,7 +232,7 @@ public class InputWidgetsDemo : ViewBase
 
 ### Primitives
 
-Ivy also provides a special experience when working with primitive widgets. We make complex tasks simpler through our implementation of boxes, callouts, error displays, and text blocks. You can easily add avatars, icons, images, spacers, and separators to enhance your interfaces. We also provide our own implementations of JSON, XML, HTML, and code rendering capabilities.
+Ivy also provides a special experience when working with [primitive](../../02_Widgets/01_Primitives/_Index.md) widgets. We make complex tasks simpler through our implementation of [boxes](../../02_Widgets/01_Primitives/04_Box.md), [callouts](../../02_Widgets/01_Primitives/12_Callout.md), [error](../../02_Widgets/01_Primitives/13_Error.md) displays, and [text blocks](../../02_Widgets/01_Primitives/01_TextBlock.md). You can easily add [avatars](../../02_Widgets/01_Primitives/08_Avatar.md), [icons](../../02_Widgets/01_Primitives/02_Icon.md), [images](../../02_Widgets/01_Primitives/03_Image.md), [spacers](../../02_Widgets/01_Primitives/06_Spacer.md), and [separators](../../02_Widgets/01_Primitives/07_Separator.md) to enhance your interfaces. We also provide our own implementations of [JSON](../../02_Widgets/01_Primitives/17_Json.md), [XML](../../02_Widgets/01_Primitives/16_Xml.md), [HTML](../../02_Widgets/01_Primitives/15_Html.md), and [code](../../02_Widgets/01_Primitives/10_Code.md) rendering capabilities.
 
 ```mermaid
 flowchart LR
