@@ -13,7 +13,7 @@ searchHints:
 # FeedbackInput
 
 <Ingress>
-Collect user feedback with combined rating and comment inputs, perfect for surveys, reviews, and [feedback forms](../../01_Onboarding/02_Concepts/13_Forms.md).
+Collect user feedback with combined rating and comment inputs, perfect for surveys, reviews, and [feedback forms](../../01_Onboarding/02_Concepts/08_Forms.md).
 </Ingress>
 
 The `FeedbackInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a specialized input for collecting user feedback. It typically includes rating options and a text field for comments, making it ideal for surveys, reviews, and feedback forms.

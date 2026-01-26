@@ -13,10 +13,10 @@ searchHints:
 # ColorInput
 
 <Ingress>
-Select colors visually with an intuitive color picker [interface](../../01_Onboarding/02_Concepts/02_Views.md) that returns values suitable for [styling](../../01_Onboarding/02_Concepts/02_Views.md) and [theming](../../01_Onboarding/02_Concepts/17_Theming.md) applications.
+Select colors visually with an intuitive color picker [interface](../../01_Onboarding/02_Concepts/02_Views.md) that returns values suitable for [styling](../../01_Onboarding/02_Concepts/02_Views.md) and [theming](../../01_Onboarding/02_Concepts/12_Theming.md) applications.
 </Ingress>
 
-The `ColorInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a color picker interface for selecting color values. It allows users to visually choose colors and returns the selected color in a format suitable for use in styles and [themes](../../01_Onboarding/02_Concepts/17_Theming.md).
+The `ColorInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a color picker interface for selecting color values. It allows users to visually choose colors and returns the selected color in a format suitable for use in styles and [themes](../../01_Onboarding/02_Concepts/12_Theming.md).
 
 ## Basic Usage
 
