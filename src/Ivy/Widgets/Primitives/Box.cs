@@ -19,11 +19,13 @@ public record Box : WidgetBase<Box>
 
     [Prop] public Colors? Color { get; set; } = null;
 
-    [Prop] public Thickness BorderThickness { get; set; } = new(1);
-
+    [Prop] public Colors? BorderColor { get; set; } = null;    
+    
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
     [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.Solid;
+
+    [Prop] public Thickness BorderThickness { get; set; } = new(1);
 
     [Prop] public Thickness Padding { get; set; } = new(2);
 
@@ -33,9 +35,7 @@ public record Box : WidgetBase<Box>
 
     [Prop] public float? Opacity { get; set; }
 
-    [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
-
-    [Event] public EventHandler<Event<Box>>? OnClick { get; set; }
+    [Prop] public float? BorderOpacity { get; set; }
 }
 
 public static class BoxExtensions
@@ -43,6 +43,10 @@ public static class BoxExtensions
     public static Box Color(this Box box, Colors color) => box with { Color = color };
 
     public static Box Color(this Box box, Colors color, float opacity) => box with { Color = color, Opacity = (1.0f - opacity) * 100 };
+
+    public static Box BorderColor(this Box box, Colors color) => box with { BorderColor = color };
+
+    public static Box BorderColor(this Box box, Colors color, float opacity) => box with { BorderColor = color, BorderOpacity = (1.0f - opacity) * 100 };
 
     public static Box BorderThickness(this Box box, int thickness) => box with { BorderThickness = new(thickness) };
 
@@ -80,45 +84,5 @@ public static class BoxExtensions
             Color = null,
             ContentAlign = Align.Left
         }.Width(Size.Full()).Height(Size.Full());
-    }
-
-    public static Box Hover(this Box box, CardHoverVariant variant) => box with { HoverVariant = variant };
-
-    private static CardHoverVariant HoverVariantWithClick(this Box box) => box.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : box.HoverVariant;
-
-    public static Box OnClick(this Box box, Func<Event<Box>, ValueTask> onClick)
-    {
-        return box with
-        {
-            HoverVariant = box.HoverVariantWithClick(),
-            OnClick = new(onClick)
-        };
-    }
-
-    public static Box OnClick(this Box box, Action<Event<Box>> onClick)
-    {
-        return box with
-        {
-            HoverVariant = box.HoverVariantWithClick(),
-            OnClick = new(onClick.ToValueTask())
-        };
-    }
-
-    public static Box OnClick(this Box box, Action onClick)
-    {
-        return box with
-        {
-            HoverVariant = box.HoverVariantWithClick(),
-            OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; })
-        };
-    }
-
-    public static Box OnClick(this Box box, Func<ValueTask> onClick)
-    {
-        return box with
-        {
-            HoverVariant = box.HoverVariantWithClick(),
-            OnClick = new(_ => onClick())
-        };
     }
 }
