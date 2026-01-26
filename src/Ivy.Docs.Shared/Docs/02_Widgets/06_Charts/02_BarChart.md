@@ -14,7 +14,7 @@ searchHints:
 Compare values across categories with rectangular bars of proportional heights.
 </Ingress>
 
-`BarChart`s compare values across categories. The sample below shows a stacked bar
+`BarChart`s compare values across categories. Build chart [views](../../01_Onboarding/02_Concepts/02_Views.md) inside [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) and use [state](../../03_Hooks/02_Core/03_UseState.md) for dynamic data. See [Charts](../../01_Onboarding/02_Concepts/18_Charts.md) for an overview of Ivy chart widgets. The sample below shows a stacked bar
 chart with two series; sales of Desktop and Mobile in the first quarter of a year.
 
 ```csharp demo-below
@@ -47,7 +47,7 @@ the `BarChart` type, the recommended way to easily draw Bar Charts is using `ToB
 
 ## Filling with custom colors
 
-Here instead of using a preset `ColorScheme`, a particular bar can also be filled using a custom color.
+Here instead of using a preset `ColorScheme`, a particular bar can also be filled using a custom [Colors](../../04_ApiReference/IvyShared/Colors.md) value.
 
 ```csharp demo-below
 
@@ -83,7 +83,7 @@ public class RainbowBarChartBasic : ViewBase
 ```
 
 There are several functions used in this example. `Fill` is used to fill a bar chart
-with a specific color. The `LegendType` function is used to configure the legend
+with a specific [Colors](../../04_ApiReference/IvyShared/Colors.md) value. The `LegendType` function is used to configure the legend
 to use squares. Using the `Name` function, the name of a bar can be renamed. Like
 here is done for the `Blueberry` column.
 
