@@ -416,5 +416,3 @@ test-results/
 .claude/commands/
 .claude/hooks/
 
-# Cursor
-.cursor/
