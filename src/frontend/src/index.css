@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import '@ivy-interactive/ivy-design-system/css/fonts';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-scheme: light;
 }
