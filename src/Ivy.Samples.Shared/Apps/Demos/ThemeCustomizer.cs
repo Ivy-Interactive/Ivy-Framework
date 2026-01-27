@@ -1,5 +1,6 @@
 using Ivy.Shared;
 using Ivy.Themes;
+using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
@@ -76,6 +77,10 @@ public class ThemeCustomizer : SampleBase
                 },
                 Icon = Icons.Sparkles
             }
+            // Interactive preview form that reacts to the current theme
+            | Text.H2("Interactive Preview")
+            | Text.Block("Common form elements below use the active theme tokens for colors, borders and accents.")
+            | new InteractiveThemePreview(currentTheme.Value)
 
             // Theme preview with actual colors
             | Text.H2("Color Preview")
@@ -159,6 +164,185 @@ public class ThemeCustomizer : SampleBase
     });", Languages.Csharp)
             )
         ;
+    }
+
+    /// <summary>
+    /// Compact demo form that visually reacts to the currently selected theme.
+    /// </summary>
+    private class InteractiveThemePreview(Theme theme) : ViewBase
+    {
+        private readonly Theme _theme = theme;
+
+        public override object Build()
+        {
+            var client = UseService<IClientProvider>();
+
+            // Payment form model (left column)
+            var payment = UseState(() => new PaymentModel(
+                NameOnCard: "John Doe",
+                CardNumber: "1234 5678 9012 3456",
+                Cvv: "123",
+                Month: "MM",
+                Year: "YYYY",
+                BillingAddress: "",
+                SameAsShipping: true,
+                Comments: string.Empty
+            ));
+
+            var price = UseState(500);
+
+            // Right column – environment / status
+            var environment = UseState("kubernetes");
+            var heardFrom = UseState("social");
+            var agreeTerms = UseState(true);
+
+            var themeIcon = GetThemeIcon(_theme.Name);
+            var statusVariant = GetStatusVariant(_theme.Name);
+
+            var light = _theme.Colors.Light;
+
+            // Build Ivy Form from the payment state
+            var paymentForm = payment.ToForm("Submit payment")
+                .Clear()
+                .Add(m => m.NameOnCard)
+                .Add(m => m.CardNumber)
+                .PlaceHorizontal(m => m.Cvv, m => m.Month, m => m.Year)
+                .Add(m => m.BillingAddress)
+                .Add(m => m.SameAsShipping)
+                .Add(m => m.Comments)
+                .Label(m => m.NameOnCard, "Name on card")
+                .Label(m => m.CardNumber, "Card number")
+                .Label(m => m.Cvv, "CVV")
+                .Label(m => m.Month, "Month")
+                .Label(m => m.Year, "Year")
+                .Label(m => m.BillingAddress, "Billing address")
+                .Label(m => m.SameAsShipping, "Same as shipping address")
+                .Label(m => m.Comments, "Comments")
+                .Builder(m => m.Comments, s => s.ToTextAreaInput())
+                .Required(m => m.NameOnCard, m => m.CardNumber, m => m.Cvv);
+
+            UseEffect(() =>
+            {
+                if (!string.IsNullOrWhiteSpace(payment.Value.NameOnCard) &&
+                    !string.IsNullOrWhiteSpace(payment.Value.CardNumber))
+                {
+                    client.Toast($"Payment form submitted for {payment.Value.NameOnCard}", "Form");
+                }
+            }, payment);
+
+            var firstColumn =
+                new Card(
+                    Layout.Vertical()
+                        | Text.H3("Payment Method")
+                        | Text.P("All transactions are secure and encrypted.").Small()
+                        | paymentForm
+                ).Title("Payment")
+                 .BorderColor(Colors.Muted);
+
+            var secondColumn =
+                new Card(
+                    Layout.Vertical()
+                        | Text.H3("Compute Environment")
+                        | Text.P("Select the compute environment for this project.").Small()
+                        | Text.H4("Price range")
+                        | price.ToNumberInput().Min(0).Max(2000).Step(50)
+                        | Text.P($"Estimated monthly budget: ${price.Value}").Small()
+                ).Title("Environment")
+                 .BorderColor(Colors.Primary);
+
+            var thirdColumn =
+                new Card(
+                    Layout.Vertical()
+                        | Text.H3("Status & Actions")
+                        | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon)
+                        | Text.P("Badges, buttons and toggles below pick up primary and accent colors from the active theme.").Small()
+                        | Layout.Vertical()
+                            | Text.Block("How did you hear about us?")
+                            | heardFrom.ToSelectInput(new[]
+                            {
+                                new Option<string>("Social Media", "social"),
+                                new Option<string>("Search Engine", "search"),
+                                new Option<string>("Referral", "referral"),
+                                new Option<string>("Other", "other")
+                            })
+                        | Layout.Horizontal(
+                            Layout.Horizontal()
+                                | agreeTerms.ToBoolInput(),
+                            Text.Block("I agree to the terms and conditions")
+                        )
+                        | Layout.Horizontal()
+                            .Align(Align.Right)
+                            | new Button("Submit")
+                            {
+                                OnClick = _ =>
+                                {
+                                    client.Toast($"Submitted preview using '{_theme.Name}' theme.", "Preview");
+                                    return ValueTask.CompletedTask;
+                                },
+                                Icon = themeIcon
+                            }.Primary()
+                            | new Button("Cancel")
+                            {
+                                Icon = Icons.X
+                            }.Variant(ButtonVariant.Secondary)
+                ).Title("Summary")
+                 .BorderColor(Colors.Primary);
+
+            var fourthColumn =
+                new Card(
+                    Layout.Vertical()
+                        | Text.H3("Theme Details")
+                        | new Badge(_theme.Name, statusVariant, themeIcon)
+                        | Text.P("Key tokens from the active light palette:").Small()
+                        | Text.Block($"Primary: {light.Primary}")
+                        | Text.Block($"Background: {light.Background}")
+                        | Text.Block($"Accent: {light.Accent}")
+                ).Title("Theme details")
+                 .BorderColor(Colors.Info);
+
+            return Layout.Grid()
+                .Columns(4)
+                .Gap(6)
+                | firstColumn
+                | secondColumn
+                | thirdColumn
+                | fourthColumn;
+        }
+
+        private record PaymentModel(
+            string NameOnCard,
+            string CardNumber,
+            string Cvv,
+            string Month,
+            string Year,
+            string BillingAddress,
+            bool SameAsShipping,
+            string Comments
+        );
+
+        private static Icons GetThemeIcon(string themeName)
+        {
+            return themeName.ToLowerInvariant() switch
+            {
+                "ocean" => Icons.Waves,
+                "forest" => Icons.TreePine,
+                "sunset" => Icons.Sunset,
+                "midnight" => Icons.Moon,
+                _ => Icons.Palette
+            };
+        }
+
+        private static BadgeVariant GetStatusVariant(string themeName)
+        {
+            return themeName.ToLowerInvariant() switch
+            {
+                "ocean" => BadgeVariant.Info,
+                "forest" => BadgeVariant.Success,
+                "sunset" => BadgeVariant.Warning,
+                "midnight" => BadgeVariant.Secondary,
+                _ => BadgeVariant.Primary
+            };
+        }
     }
 
     private class ColorPreview(string label, string? bgColor, string? fgColor) : ViewBase
