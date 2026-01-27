@@ -136,7 +136,7 @@ public static class ColorInputExtensions
         var type = state.GetStateType();
         var underlyingType = System.Nullable.GetUnderlyingType(type) ?? type;
         var effectiveVariant = variant ?? (underlyingType == typeof(Colors) ? ColorInputs.Swatch : ColorInputs.TextAndPicker);
-        
+
         Type genericType = typeof(ColorInput<>).MakeGenericType(type);
         ColorInputBase input = (ColorInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, effectiveVariant)!;
         input.Nullable = type.IsNullableType();
