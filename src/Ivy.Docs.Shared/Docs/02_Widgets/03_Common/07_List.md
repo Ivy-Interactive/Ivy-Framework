@@ -14,7 +14,7 @@ searchHints:
 Display collections of items in organized, styled lists with customizable formatting and interactive [elements](../../01_Onboarding/02_Concepts/03_Widgets.md).
 </Ingress>
 
-The `List` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a container designed to render collections of items in a vertical layout. It works seamlessly with `ListItem` components to create interactive, searchable, and customizable lists that are perfect for [navigation menus](../../01_Onboarding/02_Concepts/14_Navigation.md), data displays, and [user interfaces](../../01_Onboarding/02_Concepts/02_Views.md).
+The `List` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a container designed to render collections of items in a vertical layout. It works seamlessly with `ListItem` components to create interactive, searchable, and customizable lists that are perfect for [navigation menus](../../01_Onboarding/02_Concepts/09_Navigation.md), data displays, and [user interfaces](../../01_Onboarding/02_Concepts/02_Views.md).
 
 ## Basic Usage
 

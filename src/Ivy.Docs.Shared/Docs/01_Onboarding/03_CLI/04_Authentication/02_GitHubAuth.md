@@ -41,7 +41,7 @@ After creating your OAuth App, you'll see the application's settings page. Copy 
 - **Client Secret**: Click "Generate a new client secret" to create one, then copy it immediately (you won't be able to see it again)
 - **Redirect Uri**: The authorization callback URL you configured during OAuth App creation (e.g., `http://localhost:5010/ivy/webhook` for local development or `https://your-domain.com/ivy/webhook` for production)
 
-> **Important**: Store your Client Secret securely. The Client Secret is sensitive and won't be retrievable from GitHub after creation - if you lose it, you'll need to generate a new one. Use .NET user secrets for local development and environment variables or secure key management for production. Never commit secrets to version control.
+> **Important**: Store your Client Secret securely. The Client Secret is sensitive and won't be retrievable from GitHub after creation - if you lose it, you'll need to generate a new one. Use [.NET user secrets](../../02_Concepts/14_Secrets.md) for local development and environment variables or secure key management for production. Never commit secrets to version control.
 
 ## Adding Authentication
 
@@ -49,7 +49,7 @@ To set up GitHub Authentication with Ivy, you need to manually configure it in y
 
 ### Manual Configuration
 
-**1: Register the HttpClient factory in your `Program.cs`**:
+**1: Register the HttpClient factory in your [Program.cs](../../02_Concepts/01_Program.md)**:
 
 ```csharp
 var server = new Server();
@@ -76,7 +76,7 @@ server.UseAuth<GitHubAuthProvider>(c => c.UseGitHub());
 await server.RunAsync();
 ```
 
-**3: Add configuration via .NET user secrets or environment variables. See [Configuration Parameters](#configuration-parameters) below for detailed instructions.**
+**3: Add configuration via [.NET user secrets](../../02_Concepts/14_Secrets.md) or environment variables. See [Configuration Parameters](#configuration-parameters) below for detailed instructions.**
 
 ### Configuration Parameters
 

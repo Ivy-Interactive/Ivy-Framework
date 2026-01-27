@@ -18,15 +18,15 @@ Ivy Connections provide a unified abstraction for integrating external data sour
 
 A **Connection** in Ivy represents any external resource your application communicates with:
 
-- **Databases** — SQL Server, PostgreSQL, MySQL, SQLite, etc.
+- **[Databases](../03_CLI/05_DatabaseIntegration/01_DatabaseOverview.md)** — [SQL Server](../03_CLI/05_DatabaseIntegration/02_SqlServer.md), [PostgreSQL](../03_CLI/05_DatabaseIntegration/02_PostgreSql.md), [MySQL](../03_CLI/05_DatabaseIntegration/02_MySql.md), [SQLite](../03_CLI/05_DatabaseIntegration/02_SQLite.md), etc.
 - **Third-party APIs** — Payment gateways, messaging services, analytics
-- **Cloud services** — AWS, Azure, Google Cloud
+- **[Cloud services](../03_CLI/06_Deployment/01_DeploymentOverview.md)** — [AWS](../03_CLI/06_Deployment/02_AWS.md), [Azure](../03_CLI/06_Deployment/03_Azure.md), [Google Cloud](../03_CLI/06_Deployment/04_GCP.md)
 - **Custom internal services** — Microservices, legacy systems
 
 Connections implement the `IConnection` interface, which provides a standardized way to:
-- Register required services in the DI container
+- Register required services in the [DI container](./01_Program.md)
 - Expose metadata about the connection (name, type, entities)
-- Integrate with Ivy's secrets management
+- Integrate with Ivy's [secrets management](./14_Secrets.md)
 
 ## The IConnection Interface
 
@@ -53,7 +53,7 @@ public record ConnectionEntity(string Singular, string Plural);
 | `GetName` | Returns the connection's display name |
 | `GetConnectionType` | Returns the type of connection (e.g., "Database", "API") |
 | `GetEntities` | Returns available entities (tables, resources) |
-| `RegisterServices` | Registers required services in the DI container |
+| `RegisterServices` | Registers required services in the [DI container](./01_Program.md) |
 
 ## Connection Types
 
@@ -65,7 +65,7 @@ Database connections are the most common type. They are automatically generated 
 >ivy db add --provider Postgres --name MyDatabase
 ```
 
-This generates a connection class that implements `IConnection` along with Entity Framework context and entities. See the [Database Integration Guide](../03_CLI/05_DatabaseIntegration/01_DatabaseOverview.md) for details.
+This generates a connection class that implements [IConnection](#the-iconnection-interface) along with Entity Framework context and entities. See the [Database Integration Guide](../03_CLI/05_DatabaseIntegration/01_DatabaseOverview.md) for details.
 
 ### API Connections
 
@@ -105,7 +105,7 @@ public class StripeConnection : IConnection, IHaveSecrets
 
 ## Connection Secrets
 
-Connections often require sensitive configuration like API keys or connection strings. Implement `IHaveSecrets` alongside `IConnection` to declare required secrets:
+Connections often require sensitive configuration like API keys or connection strings. Implement [IHaveSecrets](./14_Secrets.md) alongside `IConnection` to declare required secrets:
 
 ```csharp
 public class MyApiConnection : IConnection, IHaveSecrets
@@ -120,13 +120,13 @@ public class MyApiConnection : IConnection, IHaveSecrets
 }
 ```
 
-This integrates with Ivy's [secrets management](./20_Secrets.md) for compile-time validation.
+This integrates with Ivy's [secrets management](./14_Secrets.md) for compile-time validation.
 
 ## Registering Connections
 
 ### Automatic Registration
 
-Register all connections from your assembly automatically:
+Register all connections from your assembly automatically on the [Server](./01_Program.md):
 
 ```csharp
 var server = new Server();
@@ -138,7 +138,7 @@ This scans the entry assembly for all classes implementing `IConnection` and cal
 
 ### Manual Registration
 
-For more control, register connections manually:
+For more control, register connections manually with your [Server](./01_Program.md):
 
 ```csharp
 var server = new Server();
@@ -151,7 +151,7 @@ await server.RunAsync();
 
 ## Using Connection Services
 
-After registration, use connection services in your views:
+After registration, use connection services in your [views](./02_Views.md):
 
 ```csharp
 public class PaymentView : ViewBase
@@ -165,5 +165,7 @@ public class PaymentView : ViewBase
     }
 }
 ```
+
+The example uses [UseService](../../03_Hooks/02_Core/11_UseService.md) to resolve the connection's registered service and a [DataTable](../../02_Widgets/07_Advanced/01_DataTable.md) to display the data.
 
 

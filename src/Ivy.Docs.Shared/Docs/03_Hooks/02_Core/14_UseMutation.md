@@ -11,12 +11,12 @@ searchHints:
 # UseMutation
 
 <Ingress>
-The `UseMutation` [hook](../02_RulesOfHooks.md) provides a way to control [query](./09_UseQuery.md) caches from different components, enabling optimistic updates, cache invalidation, and cross-component data synchronization.
+The `UseMutation` [hook](../01_RulesOfHooks.md) provides a way to control [query](./09_UseQuery.md) caches from different components, enabling optimistic updates, cache invalidation, and cross-component data synchronization.
 </Ingress>
 
 ## Overview
 
-The `UseMutation` [hook](../02_RulesOfHooks.md) enables you to control [query](./09_UseQuery.md) caches from any component:
+The `UseMutation` [hook](../01_RulesOfHooks.md) enables you to control [query](./09_UseQuery.md) caches from any component:
 
 - **Cross-Component Control** - Control queries from components that don't use `UseQuery`
 - **Optimistic Updates** - Update cache immediately before server confirmation

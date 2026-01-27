@@ -15,19 +15,19 @@ searchHints:
 # Navigation
 
 <Ingress>
-The UseNavigation hook provides a powerful way to navigate between apps and [external URLs](./19_Clients.md) in Ivy [applications](./15_Apps.md), enabling seamless user experiences and [deep linking](./14_Navigation.md) capabilities.
+The UseNavigation hook provides a powerful way to navigate between [apps](./10_Apps.md) and [external URLs](./13_Clients.md) in Ivy [applications](./10_Apps.md), enabling seamless user experiences and [deep linking](#navigation-with-arguments) capabilities.
 </Ingress>
 
 ## Overview
 
 Navigation in Ivy is handled through the `UseNavigation()` hook, which returns an `INavigator` interface. This hook enables:
 
-- **App-to-App Navigation** - Navigate between different Ivy apps within your application
+- **App-to-App Navigation** - Navigate between different Ivy [apps](./10_Apps.md) within your application
 - **External URL Navigation** - Open external URLs and resources
-- **Deep Linking** - Navigate to specific apps with deep linking parameters and arguments
+- **Deep Linking** - Navigate to specific apps with deep linking parameters and [arguments](../../03_Hooks/02_Core/13_UseArgs.md)
 - **Type-Safe Navigation** - Navigate using strongly-typed app classes
 
-The navigation system is built on top of Ivy's [signal system](../../03_Hooks/02_Core/10_UseSignal.md) and integrates seamlessly with the [Chrome framework](./16_Chrome.md) for managing app lifecycle and routing.
+The navigation system is built on top of Ivy's [signal system](../../03_Hooks/02_Core/10_UseSignal.md) and integrates seamlessly with the [Chrome](./11_Chrome.md) framework for managing app lifecycle and routing.
 
 ## How UseNavigation Works
 
@@ -48,6 +48,8 @@ flowchart TD
 ## Basic Usage
 
 ### Getting the Navigator
+
+Get the navigator in any [view](./02_Views.md) and use it with [Button](../../02_Widgets/03_Common/01_Button.md) or other widgets:
 
 ```csharp
 [App(icon: Icons.Navigation)]
@@ -83,7 +85,7 @@ public interface INavigator
 
 ### Type-Safe Navigation
 
-Navigate to apps using their class types for compile-time safety:
+Navigate to [apps](./10_Apps.md) using their class types for compile-time safety:
 
 ```csharp
 public class DashboardApp : ViewBase
@@ -108,7 +110,7 @@ public class DashboardApp : ViewBase
 
 ### Navigation with Arguments
 
-Pass data to target apps using strongly-typed arguments:
+Pass data to target apps using strongly-typed arguments. Receive them in the target app with [UseArgs](../../03_Hooks/02_Core/13_UseArgs.md):
 
 ```csharp
 public record UserProfileArgs(int UserId, string Tab = "overview");
@@ -180,7 +182,7 @@ var goBack = UseBackNavigation();
 
 ### Integration with Chrome Settings
 
-Navigation behavior can be configured through Chrome settings:
+Navigation behavior can be configured through [Chrome](./11_Chrome.md) settings in your [Program](./01_Program.md):
 
 ```csharp
 public class Program
@@ -220,7 +222,7 @@ navigator.Navigate($"app://user-profile?userId={userId}");
 
 ### Master-Detail Navigation
 
-Navigate from list views to detail views:
+Navigate from list views to detail views using a [Table](../../02_Widgets/03_Common/08_Table.md):
 
 ```csharp
 return new Table<Item>(items)
@@ -232,7 +234,7 @@ return new Table<Item>(items)
 
 ### Conditional Navigation
 
-Navigate based on user permissions or state:
+Navigate based on user permissions or [state](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp
 var handleNavigation = UseCallback(() =>
@@ -246,7 +248,7 @@ var handleNavigation = UseCallback(() =>
 
 ### Memoized Navigation Callbacks
 
-Use `UseCallback` to prevent unnecessary re-renders:
+Use [UseCallback](../../03_Hooks/02_Core/06_UseCallback.md) to prevent unnecessary re-renders:
 
 ```csharp
 var navigateToUser = UseCallback((int userId) =>
@@ -259,7 +261,7 @@ var navigateToUser = UseCallback((int userId) =>
 
 ### App Not Found Error
 
-Ensure your app has the `[App]` attribute:
+Ensure your app has the [App](./10_Apps.md) attribute:
 
 ```csharp
 [App(icon: Icons.LayoutDashboard)]
@@ -286,16 +288,16 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 
 ## Performance Considerations
 
-- **Memoize Navigation Callbacks**: Use `UseCallback` for navigation handlers to prevent unnecessary re-renders
+- **Memoize Navigation Callbacks**: Use [UseCallback](../../03_Hooks/02_Core/06_UseCallback.md) for navigation handlers to prevent unnecessary re-renders
 - **Lazy App Loading**: Apps are loaded on-demand when navigated to
-- **State Cleanup**: Navigation automatically handles cleanup of previous app [state management](../../03_Hooks/02_Core/03_UseState.md)
-- **Memory Management**: The [Chrome](./16_Chrome.md) system manages app lifecycle and memory usage
+- **State Cleanup**: Navigation automatically handles cleanup of previous app [state](../../03_Hooks/02_Core/03_UseState.md)
+- **Memory Management**: The [Chrome](./11_Chrome.md) system manages app lifecycle and memory usage
 
 ## UseNavigation
 
 The `UseNavigation` hook enables programmatic navigation:
 
-- **Type-Safe Navigation** - Navigate to apps using strongly-typed app classes
+- **Type-Safe Navigation** - Navigate to [apps](./10_Apps.md) using strongly-typed app classes
 - **URI-Based Navigation** - Navigate using URI strings for dynamic scenarios
 - **Navigation Arguments** - Pass data to target apps during navigation
 - **External URL Navigation** - Open external websites and resources
@@ -332,7 +334,7 @@ flowchart LR
 
 #### Navigation with Arguments
 
-Pass data to target apps using strongly-typed arguments:
+Pass data to target apps using strongly-typed arguments. Receive them with [UseArgs](../../03_Hooks/02_Core/13_UseArgs.md) in the target app:
 
 ```csharp
 public record UserArgs(int UserId, string Tab = "overview");
@@ -358,7 +360,7 @@ navigator.Navigate("mailto:support@example.com");
 
 ### Troubleshooting
 
-**App Not Found**: Ensure your app has the `[App]` attribute:
+**App Not Found**: Ensure your app has the [App](./10_Apps.md) attribute:
 
 ```csharp
 [App(icon: Icons.LayoutDashboard)]
@@ -377,11 +379,13 @@ public class MyApp : ViewBase { }
 - **Prefer type-safe navigation** - Use `Navigate(typeof(MyApp))` when target is known at compile time
 - **Use records for arguments** - Pass data with strongly-typed argument objects
 - **Include protocol for external URLs** - Always use `https://` or `mailto:` for external links
-- **Ensure apps have [App] attribute** - Target apps must be decorated with `[App]`
+- **Ensure apps have [App](./10_Apps.md) attribute** - Target apps must be decorated with `[App]`
 
 ## See Also
 
-- [Chrome Settings](./16_Chrome.md)
-- [App Arguments](./02_Views.md)
+- [Chrome](./11_Chrome.md)
+- [Apps](./10_Apps.md)
+- [UseArgs](../../03_Hooks/02_Core/13_UseArgs.md)
+- [Views](./02_Views.md)
 - [Signals](../../03_Hooks/02_Core/10_UseSignal.md)
 - [State Management](../../03_Hooks/02_Core/03_UseState.md)

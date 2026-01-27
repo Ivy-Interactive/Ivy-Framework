@@ -11,7 +11,7 @@ searchHints:
 # AsyncSelectInput
 
 <Ingress>
-Create dropdown selectors that load options asynchronously from [APIs](../../03_Hooks/02_Core/11_UseService.md) or [databases](../../01_Onboarding/02_Concepts/01_Program.md), perfect for large datasets and on-demand loading.
+Create dropdown selectors that load options asynchronously from [APIs](../../03_Hooks/02_Core/11_UseService.md) or [databases](../../01_Onboarding/02_Concepts/26_Connections.md), perfect for large datasets and on-demand loading.
 </Ingress>
 
 The `AsyncSelectInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a select dropdown that loads options asynchronously. It's useful for scenarios where options need to be fetched from an [API](../../03_Hooks/02_Core/11_UseService.md) or when the list of options is large and should be loaded on-demand.

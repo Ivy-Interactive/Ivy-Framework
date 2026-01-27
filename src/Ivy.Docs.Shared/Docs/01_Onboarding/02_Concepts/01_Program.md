@@ -11,7 +11,7 @@ searchHints:
 # Program
 
 <Ingress>
-Configure and bootstrap your Ivy [application](./15_Apps.md) with [dependency injection](../../03_Hooks/02_Core/11_UseService.md), [services](../../03_Hooks/02_Core/11_UseService.md), and middleware for production-ready deployment.
+Configure and bootstrap your Ivy [application](./10_Apps.md) with dependency injection, [services](../../03_Hooks/02_Core/11_UseService.md), and middleware for production-ready deployment.
 </Ingress>
 
 The `Program.cs` file is the entry point for your Ivy application. It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other sevices..
@@ -107,12 +107,12 @@ server.UseHotReload();
 
 This automatically refreshes the browser when C# code changes during development.
 
-For more information about configuring the application chrome (sidebar, header, footer), see [Chrome Configuration](./16_Chrome.md).
+For more information about configuring the application chrome (sidebar, header, footer), see [Chrome](./11_Chrome.md).
 
 ## Authentication
 
 <Callout Type="tip">
-Use the `ivy auth add` command to automatically configure authentication providers in your project. This [CLI](../../01_Onboarding/03_CLI/_Index.md) command will update your `Program.cs` and manage [secrets](./20_Secrets.md) for you. See the [Authentication CLI documentation](../03_CLI/04_Authentication/01_AuthenticationOverview.md) for details.
+Use the `ivy auth add` command to automatically configure authentication providers in your project. This [CLI](../03_CLI/_Index.md) command will update your `Program.cs` and manage [secrets](./14_Secrets.md) for you. See the [Authentication CLI documentation](../03_CLI/04_Authentication/01_AuthenticationOverview.md) for details.
 </Callout>
 
 Ivy supports various authentication providers:
@@ -291,7 +291,7 @@ await server.RunAsync();
 
 ## Advanced Configuration
 
-### Custom [Content Builder](./12_ContentBuilders.md)
+### Custom Content Builder
 
 Configure a custom content builder to handle specialized content rendering and processing.
 

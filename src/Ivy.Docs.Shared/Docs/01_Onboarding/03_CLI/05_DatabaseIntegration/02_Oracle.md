@@ -39,7 +39,7 @@ Specifically, your connection string should contain the following information, i
 
 For all connection options, see the [Oracle documentation](https://docs.oracle.com/en/database/oracle/oracle-database/19/odpnt/ConnectionConnectionString.html#GUID-DF4ED9A3-1AAF-445D-AEEF-016E6CD5A0C0__BABBAGJJ).
 
-Your connection string will be stored in .NET user secrets.
+Your connection string will be stored in [.NET user secrets](../../02_Concepts/14_Secrets.md).
 
 See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 

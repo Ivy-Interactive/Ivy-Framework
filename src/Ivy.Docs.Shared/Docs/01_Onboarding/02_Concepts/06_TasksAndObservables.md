@@ -11,14 +11,14 @@ searchHints:
 # Tasks and Observables
 
 <Ingress>
-Handle asynchronous operations and reactive data streams with Tasks and Observables for responsive [application](./15_Apps.md) behavior.
+Handle asynchronous operations and reactive data streams with Tasks and Observables for responsive [application](./10_Apps.md) behavior.
 </Ingress>
 
 Ivy provides powerful abstractions for working with asynchronous operations and reactive data streams. **Tasks** handle one-time asynchronous operations, while **Observables** manage continuous data streams that automatically update the UI when data changes.
 
 ## Basic Task Usage
 
-Tasks represent asynchronous operations that complete once and return a result. Ivy provides `TaskView<T>` to automatically handle loading states and display results.
+Tasks represent asynchronous operations that complete once and return a result. Ivy provides `TaskView<T>` to automatically handle loading states and display results. See [UseState](../../03_Hooks/02_Core/03_UseState.md) and [UseEffect](../../03_Hooks/02_Core/04_UseEffect.md) for reactive state patterns.
 
 ```csharp demo-below
 public class TaskExample : ViewBase
@@ -38,7 +38,7 @@ public class TaskExample : ViewBase
 
 ## Basic Observable Usage
 
-Ivy's `ObservableView<T>` automatically subscribes and updates the UI as new values arrive. This example shows how to create a simple observable that emits the current time every second.
+Ivy's `ObservableView<T>` automatically subscribes and updates the UI as new values arrive. This example uses [UseRef](../../03_Hooks/02_Core/08_UseRef.md) to hold the observable and [UseState](../../03_Hooks/02_Core/03_UseState.md) to control it.
 
 ```csharp demo-below
 public class TimeBasedObservableExample : ViewBase

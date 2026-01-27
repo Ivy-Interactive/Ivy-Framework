@@ -11,7 +11,7 @@ searchHints:
 # SelectInput
 
 <Ingress>
-Create dropdown [menus](../../01_Onboarding/02_Concepts/14_Navigation.md) with single or multiple selection capabilities, option grouping, and custom rendering for user choices.
+Create dropdown [menus](../../01_Onboarding/02_Concepts/09_Navigation.md) with single or multiple selection capabilities, option grouping, and custom rendering for user choices.
 </Ingress>
 
 The `SelectInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a dropdown menu for selecting items from a predefined list of options. It supports single
@@ -19,7 +19,7 @@ and multiple selections, option grouping, and custom rendering of option items.
 
 ## Basic Usage
 
-Here's a simple example of a `SelectInput` with a few options:
+Here's a simple example of a `SelectInput` with a few options. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width(Size.Full())` to make the select fill available space:
 
 ```csharp demo-below
 public class SelectVariantDemo : ViewBase
@@ -84,7 +84,7 @@ public class MultiSelectDemo : ViewBase
 }
 ```
 
-## [Event Handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md)
+## Event Handling
 
 Handle change events and create dynamic option lists that respond to user selections:
 

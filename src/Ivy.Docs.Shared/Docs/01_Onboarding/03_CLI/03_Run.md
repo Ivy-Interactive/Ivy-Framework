@@ -14,7 +14,7 @@ searchHints:
 Run your Ivy application locally with hot reload and automatic rebuilds.
 </Ingress>
 
-The `ivy run` command is your primary development tool. It starts your project in a live environment that monitors your source code, automatically applying changes or rebuilding as needed. Under the hood, it leverages `dotnet watch` to ensure your development loop is fast and uninterrupted.
+The `ivy run` command is your primary development tool. It starts your project in a live environment that monitors your source code, automatically applying changes or rebuilding as needed. Under the hood, it leverages `dotnet watch` to ensure your development loop is fast and uninterrupted. See [Program](../02_Concepts/01_Program.md) for server and startup configuration.
 
 ## Basic Usage
 
@@ -32,7 +32,7 @@ You can also run the command with various options to customize its behavior:
 | :--- | :--- | :--- |
 | `--port <PORT>` | Specify a custom port (default: 5010). | `ivy run --port 8080` |
 | `--browse` | Open default browser on start. | `ivy run --browse` |
-| `--app <NAME>` | Run a specific app in a multi-app project. | `ivy run --app Admin` |
+| `--app <NAME>` | Run a specific [app](../02_Concepts/10_Apps.md) in a multi-app project. | `ivy run --app Admin` |
 | `--describe` | Show application metadata without starting. | `ivy run --describe` |
 | `--verbose` | Enable detailed logging for debugging. | `ivy run --verbose` |
 | `--silent` | Start without the welcome banner. | `ivy run --silent` |
@@ -82,7 +82,7 @@ Ivy is running on http://localhost:5010
 >ivy run --port 5010 --i-kill-for-this-port
 ```
 
-**Run a specific app (for multi-app solutions):**
+**Run a specific [app](../02_Concepts/10_Apps.md) (for multi-app solutions):**
 ```terminal
 >ivy run --app Dashboard
 ```

@@ -13,12 +13,12 @@ searchHints:
 # DropDownMenu
 
 <Ingress>
-Create interactive dropdown menus with customizable options, actions, and styling for [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md) and user choices. DropDownMenu provides a flexible way to display hierarchical menus with various item types including checkboxes, radio buttons, separators, and nested submenus.
+Create interactive dropdown menus with customizable options, actions, and styling for [navigation](../../01_Onboarding/02_Concepts/09_Navigation.md) and user choices. DropDownMenu provides a flexible way to display hierarchical menus with various item types including checkboxes, radio buttons, separators, and nested submenus.
 </Ingress>
 
 ## Basic Usage
 
-Here's a simple example of a `DropDownMenu` that shows a [toast message](../../01_Onboarding/02_Concepts/19_Clients.md) when an item is selected:
+Here's a simple example of a `DropDownMenu` that shows a [toast message](../../01_Onboarding/02_Concepts/13_Clients.md) when an item is selected:
 
 ```csharp demo-below
 new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
