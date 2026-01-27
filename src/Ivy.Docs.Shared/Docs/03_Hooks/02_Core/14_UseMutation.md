@@ -40,7 +40,7 @@ sequenceDiagram
     Q-->>C: UI updates with server data
 ```
 
-## API
+### Methods
 
 The hook returns a `QueryMutator` object. Use the typed generic version for optimistic updates.
 
@@ -52,91 +52,11 @@ var mutator = UseMutation<User, string>("user-profile");
 var mutator = UseMutation("user-profile");
 ```
 
-### Methods
-
 | Method | Description | Usage |
 |--------|-------------|-------|
 | `Mutate(value, revalidate)` | Updates cache immediately with `value`. If `revalidate` is true, triggers a background fetch after. | Optimistic UI updates (e.g., Like button). |
 | `Revalidate()` | Triggers a background refresh. Keeps showing stale data until new data arrives. | Non-destructive updates (e.g., Edit form save). |
 | `Invalidate()` | Clears the cache and forces a refetch. UI enters "switching" or "loading" state. | Destructive operations (e.g., Delete item). |
-
-## Examples
-
-### Optimistic Updates
-
-Update the UI immediately while the server processes the request.
-
-```csharp
-public class LikeButton : ViewBase
-{
-    public override object? Build()
-    {
-        var postId = 123;
-        // Typed mutator is required for Mutate()
-        var mutator = UseMutation<Post, int>($"post-{postId}");
-        var query = UseQuery($"post-{postId}", ...);
-
-        return new Button("Like", _ => 
-        {
-            var current = query.Value;
-            var optimized = current with { Likes = current.Likes + 1, IsLiked = true };
-
-            // 1. Update UI immediately
-            mutator.Mutate(optimized, revalidate: true);
-
-            // 2. Perform actual API call
-            _ = Api.LikePost(postId); 
-        });
-    }
-}
-```
-
-### Form Submission
-
-Update data locally then sync with server.
-
-```csharp
-public class UserForm : ViewBase
-{
-    public override object? Build()
-    {
-        var name = UseState("");
-        var mutator = UseMutation<User, string>("user-profile");
-
-        return Layout.Vertical(
-            name.ToTextInput("Name"),
-            new Button("Save", async _ => 
-            {
-                // Optimistic update
-                mutator.Mutate(new User { Name = name.Value }, revalidate: true);
-                
-                // Actual save
-                await Api.SaveUser(name.Value);
-            })
-        );
-    }
-}
-```
-
-### Shared Control (Cross-Component)
-
-Control a query from a completely separate component (e.g., a header button controlling a list).
-
-```csharp
-public class RefreshHeader : ViewBase
-{
-    public override object? Build()
-    {
-        // No UseQuery here, just the mutator
-        var mutator = UseMutation("dashboard-stats");
-
-        return Layout.Horizontal(
-            new Button("Refresh", _ => mutator.Revalidate()),
-            new Button("Force Reload", _ => mutator.Invalidate())
-        );
-    }
-}
-```
 
 ## Query Scopes
 
@@ -163,3 +83,156 @@ public class RefreshHeader : ViewBase
 
 - [UseQuery](./09_UseQuery.md)
 - [Rules of Hooks](../02_RulesOfHooks.md)
+
+### Examples
+
+<Details>
+<Summary>
+Like Button
+</Summary>
+<Body>
+
+Update the UI immediately while the server processes the request.
+
+```csharp demo-tabs
+public class LikeButton : ViewBase
+{
+    public record Post(int Likes, bool IsLiked);
+
+    public override object? Build()
+    {
+        var postId = 123;
+        var mutator = UseMutation<Post, string>($"post-{postId}");
+        
+        var query = UseQuery(
+            key: $"post-{postId}", 
+            fetcher: async ct => 
+            { 
+                await Task.Delay(500); 
+                return new Post(10, false); 
+            });
+
+        return new Button($"Like ({query.Value?.Likes ?? 0})", _ => 
+        {
+            if (query.Value is not {} current) return;
+            
+            var isLiked = current.IsLiked;
+            var optimized = current with 
+            { 
+                Likes = isLiked ? current.Likes - 1 : current.Likes + 1, 
+                IsLiked = !isLiked 
+            };
+
+            mutator.Mutate(optimized, revalidate: false);
+        }).Variant(query.Value?.IsLiked == true ? ButtonVariant.Primary : ButtonVariant.Outline);
+    }
+}
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Form Submission
+</Summary>
+<Body>
+
+Update data locally then sync with server.
+
+```csharp demo-tabs
+public class UserForm : ViewBase
+{
+    public record User(string Name);
+
+    public override object? Build()
+    {
+        var name = UseState("");
+        var mutator = UseMutation<User, string>("user-profile");
+        
+        var query = UseQuery("user-profile", async ct => 
+        {
+            await Task.Delay(100);
+            return new User("Guest");
+        });
+
+        return Layout.Vertical(
+            Text.Literal($"Current Profile: {query.Value?.Name ?? "Loading..."}"),
+            Layout.Horizontal(
+                name.ToTextInput("Enter Name"),
+                new Button("Save", async _ => 
+                {
+                    if (string.IsNullOrEmpty(name.Value)) return;
+
+                    mutator.Mutate(new User(name.Value), revalidate: false);
+                    
+                    name.Set("");
+                    
+                    await Task.CompletedTask;
+                })
+            )
+        );
+    }
+}
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Shared Control (Cross-Component)
+</Summary>
+<Body>
+
+Control a query from a completely separate component (e.g., a header button controlling a list).
+
+```csharp demo-tabs
+public class SharedControlDemo : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical(
+            new RefreshHeader(),
+            new Separator(),
+            new StatsDisplay()
+        );
+    }
+}
+
+public class RefreshHeader : ViewBase
+{
+    public override object? Build()
+    {
+        var mutator = UseMutation("dashboard-stats");
+
+        return Layout.Horizontal(
+            new Button("Refresh (Revalidate)", _ => mutator.Revalidate()),
+            new Button("Force Reload (Invalidate)", _ => mutator.Invalidate())
+        );
+    }
+}
+
+public class StatsDisplay : ViewBase
+{
+    public override object? Build()
+    {
+        var query = UseQuery("dashboard-stats", async ct =>
+        {
+            await Task.Delay(1000);
+            return $"Stats Updated: {DateTime.Now:HH:mm:ss}";
+        });
+
+        if (query.Loading) return Text.Literal("Loading new stats...");
+        
+        return Layout.Vertical(
+            Text.H4("Dashboard Stats"),
+            Text.Literal(query.Value ?? ""),
+            query.Validating ? Text.Muted("Refreshing in background...") : null
+        );
+    }
+}
+```
+
+</Body>
+</Details>
