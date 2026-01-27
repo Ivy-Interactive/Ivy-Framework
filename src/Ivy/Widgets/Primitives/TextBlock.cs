@@ -42,7 +42,7 @@ public record TextBlock : WidgetBase<TextBlock>
 {
     internal TextBlock(string content = "", TextVariant variant = TextVariant.Literal, Size? width = null,
         bool strikeThrough = false, Colors? color = null, bool noWrap = false, Overflow? overflow = null,
-        bool bold = false, bool italic = false, bool muted = false)
+        bool bold = false, bool italic = false, bool muted = false, Shared.WordBreak? wordBreak = null)
     {
         Content = content;
         Variant = variant;
@@ -54,6 +54,7 @@ public record TextBlock : WidgetBase<TextBlock>
         Bold = bold;
         Italic = italic;
         Muted = muted;
+        WordBreak = wordBreak;
     }
 
     internal TextBlock()
@@ -77,4 +78,6 @@ public record TextBlock : WidgetBase<TextBlock>
     [Prop] public bool Italic { get; set; }
 
     [Prop] public bool Muted { get; set; }
+
+    [Prop] public Shared.WordBreak? WordBreak { get; set; }
 }

@@ -1,4 +1,11 @@
-import { getColor, getOverflow, getWidth, Overflow } from '@/lib/styles';
+import {
+  getColor,
+  getOverflow,
+  getWidth,
+  Overflow,
+  getWordBreak,
+  WordBreak,
+} from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import { typography } from '../../lib/styles';
@@ -41,6 +48,7 @@ interface TextBlockWidgetProps {
   color: string;
   noWrap?: boolean;
   overflow?: Overflow;
+  wordBreak?: WordBreak;
   bold?: boolean;
   italic?: boolean;
   muted?: boolean;
@@ -201,6 +209,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   strikeThrough,
   noWrap,
   overflow,
+  wordBreak,
   bold,
   italic,
   muted,
@@ -210,6 +219,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
     ...getWidth(width),
     ...getColor(color, 'color', 'background'),
     ...getOverflow(overflow),
+    ...getWordBreak(wordBreak),
   };
 
   const scaleClasses: Record<string, string> = {
