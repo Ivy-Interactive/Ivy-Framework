@@ -154,6 +154,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
           <Button
             disabled={disabled}
             variant="outline"
+            data-slot="calendar"
             className={cn(
               dateTimeInputVariants({ scale }),
               !date && 'text-muted-foreground',
