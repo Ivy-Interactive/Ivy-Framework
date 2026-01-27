@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - colors
   - palette
@@ -10,11 +10,11 @@ searchHints:
 
 # Colors
 
-Ivy provides predefined colors with light/dark theme support.
+Ivy provides predefined colors with light/dark [theme](../../../01_Onboarding/02_Concepts/12_Theming.md) support.
 
 The system includes neutral (Black, White, grayscale), chromatic (Red to Rose spectrum), and semantic (Primary, Secondary, Destructive, Success, Warning, Info) colors.
 
-All colors meet WCAG accessibility standards and automatically adapt to light/dark themes.
+All colors meet WCAG accessibility standards and automatically adapt to light/dark themes. Use them with [widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) such as [Box](../../../02_Widgets/01_Primitives/04_Box.md) (`.Color()`, `.Background()`) and [Button](../../../02_Widgets/03_Common/01_Button.md) variants.
 
 ### All Colors
 
@@ -201,7 +201,7 @@ public class ButtonColorsView : ViewBase
 
 ## Technical Implementation
 
-Colors are defined as an enum in `Ivy.Shared.Colors` and map to CSS custom properties that automatically adapt to the current theme. Each color includes variants for different states and theme modes.
+Colors are defined as an enum in `Ivy.Shared.Colors` and map to CSS custom properties that automatically adapt to the current theme. Use [Align](Align.md) with `.ContentAlign()` when centering content inside colored elements. Each color includes variants for different states and theme modes.
 
 ```csharp
 // Get all available colors dynamically

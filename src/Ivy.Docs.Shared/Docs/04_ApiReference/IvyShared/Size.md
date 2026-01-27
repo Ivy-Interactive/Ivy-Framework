@@ -12,11 +12,11 @@ searchHints:
 
 `Size` represents width or height values used throughout the framework. You can
 create sizes in pixels, rems, fractions or special values such as `Full` or
-`Auto`.
+`Auto`. Use it with [layouts](../../../01_Onboarding/02_Concepts/04_Layout.md) and [widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) to set dimensions. For padding and margins use [Thickness](Thickness.md).
 
 ## Basic Usage
 
-The most common way to use Size is with widgets to set their dimensions:
+The most common way to use Size is with widgets (e.g. [Box](../../../02_Widgets/01_Primitives/04_Box.md), [Card](../../../02_Widgets/03_Common/04_Card.md)) to set their dimensions:
 
 ```csharp demo-tabs
 Layout.Horizontal()

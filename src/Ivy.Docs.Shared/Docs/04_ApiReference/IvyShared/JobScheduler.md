@@ -13,7 +13,7 @@ searchHints:
 Coordinate complex async work with declarative job graphs, dependency-aware scheduling, and built-in UI status reporting.
 </Ingress>
 
-The `JobScheduler` in `Ivy.Helpers` orchestrates asynchronous jobs, resolves dependencies, and exposes real-time state via reactive updates. Pair it with `JobSchedulerExtensions.ToView()` to render a hierarchical job monitor.
+The `JobScheduler` in `Ivy.Helpers` orchestrates asynchronous jobs, resolves dependencies, and exposes real-time state via reactive updates. Use [UseRef](../../../03_Hooks/02_Core/08_UseRef.md) to hold the scheduler instance, [UseRefreshToken](../../../03_Hooks/02_Core/16_UseRefreshToken.md) and [UseEffect](../../../03_Hooks/02_Core/04_UseEffect.md) to refresh the UI on job updates, and pair it with `JobSchedulerExtensions.ToView()` to render a hierarchical job monitor in your [layout](../../../01_Onboarding/02_Concepts/04_Layout.md).
 
 ## Basic Usage
 
@@ -324,7 +324,7 @@ public class MultipleChildrenDemo : ViewBase
 | `JobBuilder.Build()` | Builds and registers the job with the scheduler. |
 | `Job.SetDisplay(object? display)` | Attaches custom status UI to the job. |
 | `JobScheduler.AddChild(Job parent, Job child)` | Links dynamic child work to a parent job. |
-| `JobSchedulerExtensions.ToView()` | Renders the scheduler state using Ivy components. |
+| `JobSchedulerExtensions.ToView()` | Renders the scheduler state using Ivy [widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md). |
 | `JobScheduler.RunAsync(CancellationToken?)` | Starts scheduling and waits until all jobs settle. |
 | `JobScheduler.CancelAll()` | Requests cancellation on all running jobs. |
 | `JobScheduler.AllCompleted()` | Returns `true` when every job is `Finished`. |
