@@ -42,6 +42,7 @@ public record ServerArgs
     public string? MetaDescription { get; set; } = null;
     public Assembly? AssetAssembly { get; set; } = null;
     public bool FindAvailablePort { get; set; } = false;
+    public bool EnableDevTools { get; set; } = false;
 }
 
 public class Server
@@ -321,17 +322,25 @@ public class Server
 
 #if (DEBUG)
         // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
-        _ = Task.Factory.StartNew(() =>
+        // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
+        if (!Console.IsInputRedirected && !_args.Silent)
         {
-            while (!cts.Token.IsCancellationRequested)
+            _ = Task.Factory.StartNew(() =>
             {
-                var key = Console.ReadKey(intercept: true);
-                if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
+                try
                 {
-                    sessionStore.Dump();
+                    while (!cts.Token.IsCancellationRequested)
+                    {
+                        var key = Console.ReadKey(intercept: true);
+                        if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
+                        {
+                            sessionStore.Dump();
+                        }
+                    }
                 }
-            }
-        }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                catch (Exception) { } // Eat all exceptions to prevent crash
+            }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
 #endif
 
 
@@ -660,6 +669,11 @@ public static class WebApplicationExtensions
                     var ivyLicensePublicKeyTag =
                         $"<meta name=\"ivy-license-public-key\" content=\"{ivyLicensePublicKey}\" />";
                     html = html.Replace("</head>", $"  {ivyLicensePublicKeyTag}\n</head>");
+                }
+                if (serverArgs.EnableDevTools)
+                {
+                    var ivyEnableDevToolsTag = $"<meta name=\"ivy-enable-dev-tools\" content=\"true\" />";
+                    html = html.Replace("</head>", $"  {ivyEnableDevToolsTag}\n</head>");
                 }
 #endif
 
