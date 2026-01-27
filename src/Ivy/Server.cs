@@ -326,17 +326,25 @@ public class Server
 
 #if (DEBUG)
         // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
-        _ = Task.Factory.StartNew(() =>
+        // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
+        if (!Console.IsInputRedirected && !_args.Silent)
         {
-            while (!cts.Token.IsCancellationRequested)
+            _ = Task.Factory.StartNew(() =>
             {
-                var key = Console.ReadKey(intercept: true);
-                if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
+                try
                 {
-                    sessionStore.Dump();
+                    while (!cts.Token.IsCancellationRequested)
+                    {
+                        var key = Console.ReadKey(intercept: true);
+                        if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
+                        {
+                            sessionStore.Dump();
+                        }
+                    }
                 }
-            }
-        }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                catch (Exception) { } // Eat all exceptions to prevent crash
+            }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
 #endif
 
         if (Utils.IsPortInUse(_args.Port))
@@ -671,7 +679,7 @@ public static class WebApplicationExtensions
                     var ivyEnableDevToolsTag = $"<meta name=\"ivy-enable-dev-tools\" content=\"true\" />";
                     html = html.Replace("</head>", $"  {ivyEnableDevToolsTag}\n</head>");
                 }
-                
+
 #endif
                 //Inject Meta Title and Description
                 if (!string.IsNullOrEmpty(serverArgs.MetaDescription))
