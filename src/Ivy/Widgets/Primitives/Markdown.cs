@@ -28,6 +28,8 @@ public record Markdown : WidgetBase<Markdown>
 
     [Prop] public string Content { get; set; } = string.Empty;
 
+    [Prop] public Shared.WordBreak? WordBreak { get; set; }
+
     [Event] public Func<Event<Markdown, string>, ValueTask>? OnLinkClick { get; set; }
 }
 
