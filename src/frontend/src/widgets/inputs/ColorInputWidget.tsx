@@ -282,8 +282,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             value={getDisplayColor()}
             onChange={handleColorChange}
             disabled={disabled}
-            className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-              } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+            className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
+              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
           />
         </div>
       </div>
@@ -299,8 +300,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           value={getDisplayColor()}
           onChange={handleColorChange}
           disabled={disabled}
-          className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+          className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
+            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+          } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
         />
       </div>
       <div className="relative">
