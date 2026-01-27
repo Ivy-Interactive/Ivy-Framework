@@ -92,10 +92,11 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         <div
           className={cn(
             expandableTriggerVariants({ scale }),
-            'relative cursor-pointer'
+            'relative cursor-pointer data-[disabled=true]:cursor-not-allowed'
           )}
           onClick={handleTriggerClick}
           data-collapsible-trigger
+          data-disabled={disabled}
           role="button"
           tabIndex={disabled ? -1 : 0}
           onKeyDown={e => {
