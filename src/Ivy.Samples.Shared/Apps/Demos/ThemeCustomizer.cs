@@ -1,6 +1,9 @@
 using Ivy.Shared;
 using Ivy.Themes;
 using Ivy.Views.Forms;
+using Ivy.Hooks;
+using Ivy.Samples.Shared.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
@@ -191,15 +194,62 @@ public class ThemeCustomizer : SampleBase
 
             var price = UseState(500);
 
-            // Right column – environment / status
+            // Environment / settings / chat preview
             var environment = UseState("kubernetes");
             var heardFrom = UseState("social");
             var agreeTerms = UseState(true);
+            var darkMode = UseState(false);
+            var emailNotifications = UseState(true);
+            var marketingOptIn = UseState(false);
+            var themeSatisfaction = UseState(4); // 1–5 stars
+            var uxSatisfaction = UseState((int?)null);
+
+            // Select input demo state
+            var colorSelectState = UseState(Colors.Red);
+            var colorListState = UseState(Array.Empty<Colors>());
+            var colorToggleState = UseState(Array.Empty<Colors>());
+            var colorOptions = typeof(Colors).ToOptions();
+            var demoColorOptions = colorOptions.Take(5).ToArray();
+
+            var paginationPage = UseState(1);
+            const int totalPages = 5;
+
+            // Text input demo state
+            var passwordText = UseState("");
+            var notesText = UseState("");
+            var searchText = UseState("");
+            var domain = UseState("ivy.app");
+            var email = UseState("");
+            var selectedCategory = UseState<string?>("Primary");
+            var badgeVariant = UseState(new[] { "Success", "Warning", "Info" });
+            var buttonVariant = UseState(new[] { "Primary" });
 
             var themeIcon = GetThemeIcon(_theme.Name);
             var statusVariant = GetStatusVariant(_theme.Name);
 
             var light = _theme.Colors.Light;
+
+            // Chat messages for environment preview
+            var chatMessages = UseState(ImmutableArray.Create<ChatMessage>(
+                new ChatMessage(ChatSender.Assistant,
+                    $"You're previewing the '{_theme.Name}' theme. Type a message to see how chat looks in this theme.")
+            ));
+
+            ValueTask OnChatSend(Event<Chat, string> e)
+            {
+                var trimmed = e.Value.Trim();
+                if (string.IsNullOrEmpty(trimmed))
+                {
+                    return ValueTask.CompletedTask;
+                }
+
+                var withUser = chatMessages.Value.Add(new ChatMessage(ChatSender.User, trimmed));
+                var withAssistant = withUser.Add(
+                    new ChatMessage(ChatSender.Assistant, $"You said: {trimmed}")
+                );
+                chatMessages.Set(withAssistant);
+                return ValueTask.CompletedTask;
+            }
 
             // Build Ivy Form from the payment state
             var paymentForm = payment.ToForm("Submit payment")
@@ -218,7 +268,8 @@ public class ThemeCustomizer : SampleBase
                 .Label(m => m.BillingAddress, "Billing address")
                 .Label(m => m.SameAsShipping, "Same as shipping address")
                 .Label(m => m.Comments, "Comments")
-                .Builder(m => m.Comments, s => s.ToTextAreaInput())
+                .Builder(m => m.Cvv, s => s.ToPasswordInput().Placeholder("CVV"))
+                .Builder(m => m.Comments, s => s.ToTextAreaInput().Placeholder("Add any additional comments"))
                 .Required(m => m.NameOnCard, m => m.CardNumber, m => m.Cvv);
 
             UseEffect(() =>
@@ -230,32 +281,141 @@ public class ThemeCustomizer : SampleBase
                 }
             }, payment);
 
-            var firstColumn =
-                new Card(
+            QueryResult<Option<string>[]> QueryCategories(IViewContext context, string query)
+            {
+                var categories = new[] { "Primary", "Secondary", "Outline", "Destructive", "Success", "Warning", "Info" };
+                return context.UseQuery<Option<string>[], (string, string)>(
+                    key: (nameof(QueryCategories), query),
+                    fetcher: ct => Task.FromResult(categories
+                        .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
+                        .Select(c => new Option<string>(c))
+                        .ToArray()));
+            }
+
+            QueryResult<Option<string>?> LookupCategory(IViewContext context, string? category)
+            {
+                return context.UseQuery<Option<string>?, (string, string?)>(
+                    key: (nameof(LookupCategory), category),
+                    fetcher: ct => Task.FromResult(category != null ? new Option<string>(category) : null));
+            }
+
+            Button CreateLoadingButton(string name, ButtonVariant variant) =>
+                new Button(name, variant: variant)
+                {
+                    OnClick = _ =>
+                    {
+                        client.Toast($"{name} button clicked", "Action");
+                        return ValueTask.CompletedTask;
+                    }
+                }.Width(Size.Full());
+
+            var firstColumn = Layout.Vertical()
+                | new Card(
                     Layout.Vertical()
-                        | Text.H3("Payment Method")
-                        | Text.P("All transactions are secure and encrypted.").Small()
-                        | paymentForm
-                ).Title("Payment")
-                 .BorderColor(Colors.Muted);
+                        | paymentForm).Height(Size.Fit())
+                | new Card(Layout.Vertical()
+                    | Text.Block("Category Selector").Bold()
+                    | Text.P("Select a category to see the corresponding action button.").Small()
+                    | selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, placeholder: "Select Category")
+                    | (selectedCategory.Value switch
+                    {
+                        "Primary" => CreateLoadingButton("Primary", ButtonVariant.Primary),
+                        "Secondary" => CreateLoadingButton("Secondary", ButtonVariant.Secondary),
+                        "Outline" => CreateLoadingButton("Outline", ButtonVariant.Outline),
+                        "Destructive" => CreateLoadingButton("Destructive", ButtonVariant.Destructive),
+                        "Success" => CreateLoadingButton("Success", ButtonVariant.Success),
+                        "Warning" => CreateLoadingButton("Warning", ButtonVariant.Warning),
+                        "Info" => CreateLoadingButton("Info", ButtonVariant.Info),
+                        _ => CreateLoadingButton("Primary", ButtonVariant.Primary)
+                    }));
 
             var secondColumn =
-                new Card(
-                    Layout.Vertical()
-                        | Text.H3("Compute Environment")
-                        | Text.P("Select the compute environment for this project.").Small()
-                        | Text.H4("Price range")
-                        | price.ToNumberInput().Min(0).Max(2000).Step(50)
+                    Layout.Vertical().Gap(5)
+                        | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
+                        | Text.Block("Price range").Bold()
                         | Text.P($"Estimated monthly budget: ${price.Value}").Small()
-                ).Title("Environment")
-                 .BorderColor(Colors.Primary);
+                        | price.ToSliderInput().Min(0).Max(2000).Step(50)
+                        | (Layout.Horizontal().Height(Size.Fit())
+                            | CreateLoadingButton("Primary", ButtonVariant.Primary).Loading()
+                            | CreateLoadingButton("Secondary", ButtonVariant.Secondary).Loading()
+                            | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
+                        | domain.ToTextInput().Prefix("https://")
+                        | new Card(
+                            Layout.Vertical().Gap(3)
+                                | Text.Block("Badge Variant Selector").Bold()
+                                | Text.P("Select one or multiple badge variants to see them displayed below.").Small()
+                                | badgeVariant.ToSelectInput(new[]
+                                {
+                                    new Option<string>("Primary", "Primary"),
+                                    new Option<string>("Destructive", "Destructive"),
+                                    new Option<string>("Secondary", "Secondary"),
+                                    new Option<string>("Outline", "Outline"),
+                                    new Option<string>("Success", "Success"),
+                                    new Option<string>("Warning", "Warning"),
+                                    new Option<string>("Info", "Info")
+                                }).Variant(SelectInputs.Toggle)
+                                | Text.Block("Selected badges:").Small()
+                                | (Layout.Horizontal().Gap(2).Align(Align.Center)
+                                    | badgeVariant.Value.Select(variant => variant switch
+                                    {
+                                        "Primary" => new Badge("Primary").Primary(),
+                                        "Destructive" => new Badge("Destructive").Destructive(),
+                                        "Secondary" => new Badge("Secondary").Secondary(),
+                                        "Outline" => new Badge("Outline").Outline(),
+                                        "Success" => new Badge("Success").Success(),
+                                        "Warning" => new Badge("Warning").Warning(),
+                                        "Info" => new Badge("Info").Info(),
+                                        _ => new Badge("Primary").Primary()
+                                    }).ToArray())).Height(Size.Fit())
+                        | email.ToTextInput()
+                            .Placeholder("Email (Ctrl+E)")
+                            .ShortcutKey("Ctrl+E")
+                            .Variant(TextInputs.Email)
+                        | (Layout.Grid().Columns(2).Gap(3).Width(Size.Full())
+                            | (Layout.Vertical()
+                                | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars))
+                            | (Layout.Vertical().Align(Align.Right)
+                                | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs)));
+                        
 
-            var thirdColumn =
-                new Card(
-                    Layout.Vertical()
+            var thirdColumn = new Card(Layout.Vertical()
+                        | Layout.Vertical().Gap(2)
+                            | new Chat(chatMessages.Value.ToArray(), OnChatSend)
+                                .Height(Size.Px(330))
                         | Text.H3("Status & Actions")
-                        | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon)
+                        | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary()
                         | Text.P("Badges, buttons and toggles below pick up primary and accent colors from the active theme.").Small()
+                        
+                        | Text.Block("Feedback inputs").Bold()
+                        | Text.Block("Theme rating (stars)")
+                        | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars)
+                        | Text.Block("UX thumbs up/down")
+                        | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs)
+                        | Text.Block("Select input variants").Small()
+                        | Layout.Grid().Columns(3).Gap(3).Width(Size.Full())
+                            | Layout.Vertical()
+                                | Text.InlineCode("SelectInputs.List")
+                                | colorListState.ToSelectInput(demoColorOptions).Variant(SelectInputs.List)
+                        | Text.Block("Text input variants").Small()
+                        | Layout.Grid().Columns(3).Gap(3).Width(Size.Full())
+                            | Layout.Vertical()
+                                | Text.InlineCode("TextInputs.Search")
+                                | searchText.ToSearchInput().Placeholder("Search in settings")
+                        | Text.Block("Pagination").Small()
+                        | Layout.Vertical().Gap(2)
+                            | new Pagination(paginationPage.Value, totalPages, e =>
+                            {
+                                paginationPage.Set(e.Value);
+                                return ValueTask.CompletedTask;
+                            })
+                            | Text.P($"Current page: {paginationPage.Value} of {totalPages}").Small()
+                        | Text.Block("Theme actions menu").Small()
+                        | new DropDownMenu(
+                            @evt => client.Toast("Selected: " + @evt.Value, "Theme Action"),
+                            new Button("Theme Actions").Secondary().Icon(Icons.Settings),
+                            MenuItem.Default("Reset to Default").Tag("reset"),
+                            MenuItem.Default("Apply Ocean").Tag("ocean"),
+                            MenuItem.Default("Apply Midnight").Tag("midnight"))
                         | Layout.Vertical()
                             | Text.Block("How did you hear about us?")
                             | heardFrom.ToSelectInput(new[]
@@ -267,10 +427,10 @@ public class ThemeCustomizer : SampleBase
                             })
                         | Layout.Horizontal(
                             Layout.Horizontal()
-                                | agreeTerms.ToBoolInput(),
-                            Text.Block("I agree to the terms and conditions")
+                                | agreeTerms.ToBoolInput()
+                                | Text.Block("I agree to the terms and conditions")
                         )
-                        | Layout.Horizontal()
+                        | (Layout.Horizontal()
                             .Align(Align.Right)
                             | new Button("Submit")
                             {
@@ -284,29 +444,32 @@ public class ThemeCustomizer : SampleBase
                             | new Button("Cancel")
                             {
                                 Icon = Icons.X
-                            }.Variant(ButtonVariant.Secondary)
-                ).Title("Summary")
-                 .BorderColor(Colors.Primary);
+                            }.Variant(ButtonVariant.Secondary))).Height(Size.Fit());
 
             var fourthColumn =
                 new Card(
-                    Layout.Vertical()
+                    content: Layout.Vertical()
                         | Text.H3("Theme Details")
                         | new Badge(_theme.Name, statusVariant, themeIcon)
                         | Text.P("Key tokens from the active light palette:").Small()
                         | Text.Block($"Primary: {light.Primary}")
                         | Text.Block($"Background: {light.Background}")
-                        | Text.Block($"Accent: {light.Accent}")
-                ).Title("Theme details")
-                 .BorderColor(Colors.Info);
+                        | Text.Block($"Accent: {light.Accent}"),
+                    header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Theme details").WithLayout().Grow()
+                ).BorderRadius(BorderRadius.Rounded)
+                 .BorderColor(Colors.Info)
+                 .Height(Size.Full())
+                 .HandleClick(_ =>
+                 {
+                     client.Toast($"Clicked '{_theme.Name}' details card.");
+                 });
 
-            return Layout.Grid()
-                .Columns(4)
-                .Gap(6)
+            return Layout.Horizontal()
                 | firstColumn
                 | secondColumn
-                | thirdColumn
-                | fourthColumn;
+                | thirdColumn;
+                // | fourthColumn;
         }
 
         private record PaymentModel(
