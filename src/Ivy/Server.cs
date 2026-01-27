@@ -406,10 +406,6 @@ public class Server
         }
 
         builder.WebHost.UseUrls($"http://*:{_args.Port}");
-        builder.WebHost.ConfigureKestrel(serverOptions =>
-        {
-            serverOptions.Limits.MaxRequestBodySize = null;
-        });
 
         builder.Services.AddSignalR(options =>
         {
@@ -423,10 +419,6 @@ public class Server
         builder.Services.AddControllers()
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();
-        builder.Services.Configure<FormOptions>(options =>
-        {
-            options.MultipartBodyLengthLimit = long.MaxValue;
-        });
         builder.Services.AddGrpc();
         builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
         builder.Services.AddSingleton(_contentBuilder ?? new DefaultContentBuilder());
