@@ -23,10 +23,6 @@ Context [hooks](../02_RulesOfHooks.md) provide a way to share data and services 
 - **Hierarchical Resolution** - Context values can be resolved from parent components
 - **Lifecycle Management** - Context values are automatically disposed when the component is disposed
 
-<Callout type="Tip">
-Context is different from [services](./11_UseService.md). Services are registered globally in your application, while context is scoped to a specific component and its children. Use context for component-specific data and services for application-wide functionality.
-</Callout>
-
 ## Basic Usage
 
 Use `CreateContext` to create a context value and `UseContext` to retrieve it:
@@ -53,9 +49,11 @@ public class SettingsConsumer : ViewBase
 }
 ```
 
-## How Context Works
+<Callout type="Tip">
+Context is different from [services](./11_UseService.md). Services are registered globally in your application, while context is scoped to a specific component and its children. Use context for component-specific data and services for application-wide functionality.
+</Callout>
 
-### Context Resolution Flow
+## How Context Works
 
 ```mermaid
 sequenceDiagram
@@ -77,18 +75,27 @@ sequenceDiagram
 
 Context values are scoped to the component where they are created:
 
-```csharp
+```csharp demo-below
+public class AppUserContext
+{
+    public string UserId { get; set; } = "";
+}
+
+public class SectionConfig
+{
+    public string Title { get; set; } = "";
+}
+
 public class AppView : ViewBase
 {
     public override object? Build()
     {
-        // Context created here
-        var userContext = CreateContext(() => new UserContext { UserId = "123" });
+        // Context created here - available to all children
+        CreateContext(() => new AppUserContext { UserId = "123" });
         
-        return Layout.Vertical(
-            new SectionView(),  // Can access userContext
-            new AnotherView()   // Can also access userContext
-        );
+        return Layout.Vertical()
+            | new SectionView()  // Can access userContext
+            | new AnotherView(); // Can also access userContext
     }
 }
 
@@ -96,10 +103,10 @@ public class SectionView : ViewBase
 {
     public override object? Build()
     {
-        var user = UseContext<UserContext>(); // Works - found in parent
+        var user = UseContext<AppUserContext>(); // Works - found in parent
         
         // Create a new context for this section's children
-        var sectionConfig = CreateContext(() => new SectionConfig { Title = "Settings" });
+        CreateContext(() => new SectionConfig { Title = "Settings" });
         
         return new NestedView(); // Can access both userContext and sectionConfig
     }
@@ -109,10 +116,20 @@ public class NestedView : ViewBase
 {
     public override object? Build()
     {
-        var user = UseContext<UserContext>();        // Works - found in ancestor
+        var user = UseContext<AppUserContext>();        // Works - found in ancestor
         var config = UseContext<SectionConfig>();    // Works - found in parent
         
-        return Text.Literal($"{config.Title} for {user.UserId}");
+        return Text.P($"{config.Title} for User {user.UserId}");
+    }
+}
+
+public class AnotherView : ViewBase
+{
+    public override object? Build()
+    {
+        var user = UseContext<AppUserContext>(); // Works - found in ancestor
+        
+        return Text.P($"Another view - User: {user.UserId}");
     }
 }
 ```
@@ -131,30 +148,45 @@ public class NestedView : ViewBase
 
 Context values that implement `IDisposable` are automatically disposed when the component is disposed:
 
-```csharp
-public class ResourceContext : IDisposable
+```csharp demo-below
+public class DisposableResource : IDisposable
 {
-    private readonly FileStream _fileStream;
+    public string ResourceId { get; set; } = "";
+    public bool IsDisposed { get; private set; }
     
-    public ResourceContext(string filePath)
+    public DisposableResource(string id)
     {
-        _fileStream = new FileStream(filePath, FileMode.Open);
+        ResourceId = id;
     }
     
     public void Dispose()
     {
-        _fileStream?.Dispose();
+        IsDisposed = true;
     }
 }
 
-public class FileView : ViewBase
+public class ResourceView : ViewBase
 {
     public override object? Build()
     {
-        // ResourceContext will be automatically disposed when FileView is disposed
-        var resource = CreateContext(() => new ResourceContext("data.txt"));
+        // ResourceContext will be automatically disposed when ResourceView is disposed
+        CreateContext(() => new DisposableResource("resource-123"));
+        var resource = UseContext<DisposableResource>();
         
-        return new FileContentView();
+        return Layout.Vertical()
+            | Text.P($"Resource ID: {resource.ResourceId}")
+            | Text.P($"Disposed: {resource.IsDisposed}")
+            | new ResourceConsumer();
+    }
+}
+
+public class ResourceConsumer : ViewBase
+{
+    public override object? Build()
+    {
+        var resource = UseContext<DisposableResource>();
+        
+        return Text.P($"Using resource: {resource.ResourceId}");
     }
 }
 ```
@@ -165,20 +197,36 @@ public class FileView : ViewBase
 
 Create a provider component that sets up context for its children:
 
-```csharp
+```csharp demo-below
+public class ThemeContext
+{
+    public string PrimaryColor { get; set; } = "blue";
+    public string SecondaryColor { get; set; } = "gray";
+}
+
 public class ThemeProvider : ViewBase
 {
-    private readonly ThemeContext _theme;
-    
-    public ThemeProvider(ThemeContext theme)
-    {
-        _theme = theme;
-    }
-    
     public override object? Build()
     {
-        CreateContext(() => _theme);
-        return Children; // Render children passed to this component
+        // Create theme context for children
+        CreateContext(() => new ThemeContext 
+        { 
+            PrimaryColor = "blue", 
+            SecondaryColor = "gray" 
+        });
+        return new ThemedContent();
+    }
+}
+
+public class ThemedContent : ViewBase
+{
+    public override object? Build()
+    {
+        var theme = UseContext<ThemeContext>();
+        
+        return Layout.Vertical()
+            | Text.P($"Primary Color: {theme.PrimaryColor}")
+            | Text.P($"Secondary Color: {theme.SecondaryColor}");
     }
 }
 ```
@@ -187,13 +235,25 @@ public class ThemeProvider : ViewBase
 
 Use factory functions for lazy initialization:
 
-```csharp
+```csharp demo-below
+public class MemoryCache
+{
+    public int ItemCount { get; set; }
+    public bool IsInitialized { get; set; }
+    
+    public void Initialize()
+    {
+        IsInitialized = true;
+        ItemCount = 0;
+    }
+}
+
 public class DataView : ViewBase
 {
     public override object? Build()
     {
         // Context is only created when first accessed
-        var cache = CreateContext(() => 
+        CreateContext(() => 
         {
             var c = new MemoryCache();
             c.Initialize();
@@ -203,13 +263,31 @@ public class DataView : ViewBase
         return new DataListView();
     }
 }
+
+public class DataListView : ViewBase
+{
+    public override object? Build()
+    {
+        var cache = UseContext<MemoryCache>();
+        
+        return Layout.Vertical()
+            | Text.P($"Cache initialized: {cache.IsInitialized}")
+            | Text.P($"Items in cache: {cache.ItemCount}");
+    }
+}
 ```
 
 ### Conditional Context
 
 Create context conditionally based on state:
 
-```csharp
+```csharp demo-below
+public class AuthUserContext
+{
+    public string UserId { get; set; } = "";
+    public string UserName { get; set; } = "";
+}
+
 public class ConditionalView : ViewBase
 {
     public override object? Build()
@@ -218,61 +296,33 @@ public class ConditionalView : ViewBase
         
         if (isAuthenticated.Value)
         {
-            var user = UseService<IUserService>().GetCurrentUser();
-            CreateContext(() => new UserContext 
+            CreateContext(() => new AuthUserContext 
             { 
-                UserId = user.Id,
-                UserName = user.Name 
+                UserId = "123",
+                UserName = "John Doe"
             });
         }
         
-        return isAuthenticated.Value 
-            ? new AuthenticatedView() 
-            : new LoginView();
+        return Layout.Vertical()
+            | new Button($"{(isAuthenticated.Value ? "Logout" : "Login")}", 
+                onClick: _ => isAuthenticated.Set(!isAuthenticated.Value))
+            | (isAuthenticated.Value 
+                ? new ConditionalAuthView() 
+                : Text.P("Please login"));
     }
 }
-```
 
-## Troubleshooting
-
-### Context Not Found Error
-
-If `UseContext` throws an exception, the context wasn't created in a parent component:
-
-```csharp
-// Error: Context not found
-public class ChildView : ViewBase
+public class ConditionalAuthView : ViewBase
 {
     public override object? Build()
     {
-        var theme = UseContext<ThemeContext>(); // Throws InvalidOperationException
-        return Text.Literal(theme.PrimaryColor);
+        var user = UseContext<AuthUserContext>();
+        
+        return Layout.Vertical()
+            | Text.P($"Welcome, {user.UserName}!")
+            | Text.P($"User ID: {user.UserId}");
     }
 }
-
-// Solution: Create context in parent
-public class ParentView : ViewBase
-{
-    public override object? Build()
-    {
-        CreateContext(() => new ThemeContext { PrimaryColor = "blue" });
-        return new ChildView();
-    }
-}
-```
-
-### Context Value Changes
-
-Context values are created once per component. If you need reactive updates, use [state](./03_UseState.md) instead:
-
-```csharp
-// Context value doesn't update reactively
-var config = CreateContext(() => new Config { Value = 10 });
-// Changing config.Value won't trigger re-renders
-
-// Use state for reactive updates
-var config = UseState(new Config { Value = 10 });
-// Changing config.Value will trigger re-renders
 ```
 
 ## Best Practices
@@ -301,26 +351,14 @@ User Context
 ```csharp demo-below
 public class UserContext
 {
-    public string UserId { get; set; } = "";
     public string UserName { get; set; } = "";
-    public List<string> Permissions { get; set; } = new();
-    
-    public bool HasPermission(string permission)
-    {
-        return Permissions.Contains(permission);
-    }
 }
 
 public class AuthenticatedView : ViewBase
 {
     public override object? Build()
     {
-        CreateContext(() => new UserContext
-        {
-            UserId = "123",
-            UserName = "John Doe",
-            Permissions = new List<string> { "settings:edit", "profile:view" }
-        });
+        CreateContext(() => new UserContext { UserName = "John Doe" });
         
         return Layout.Vertical()
             | new UserProfileView()
@@ -333,10 +371,7 @@ public class UserProfileView : ViewBase
     public override object? Build()
     {
         var user = UseContext<UserContext>();
-        
-        return Layout.Vertical()
-            | Text.H3($"Welcome, {user.UserName}!")
-            | Text.Block($"User ID: {user.UserId}");
+        return Text.P($"Welcome, {user.UserName}!");
     }
 }
 
@@ -345,15 +380,7 @@ public class UserSettingsView : ViewBase
     public override object? Build()
     {
         var user = UseContext<UserContext>();
-        
-        if (!user.HasPermission("settings:edit"))
-        {
-            return Text.Block("You don't have permission to edit settings.");
-        }
-        
-        return Layout.Vertical()
-            | Text.Block("Settings Form")
-            | Text.P($"Editing settings for {user.UserName}").Small();
+        return Text.P($"Settings for {user.UserName}");
     }
 }
 ```
@@ -367,70 +394,69 @@ Component-Scoped Service
 </Summary>
 <Body>
 
-```csharp
-public interface IDataCache
+```csharp demo-below
+public class ScopedMemoryCache : IDisposable
 {
-    void Set<T>(string key, T value);
-    T? Get<T>(string key);
-    void Clear();
+    private readonly Dictionary<string, string> _cache = new();
+    
+    public void Set(string key, string value) => _cache[key] = value;
+    public string? Get(string key) => _cache.TryGetValue(key, out var value) ? value : null;
+    public void Clear() => _cache.Clear();
+    public int Count => _cache.Count;
+    public void Dispose() => _cache.Clear();
 }
 
-public class MemoryCache : IDataCache, IDisposable
-{
-    private readonly Dictionary<string, object> _cache = new();
-    
-    public void Set<T>(string key, T value)
-    {
-        _cache[key] = value!;
-    }
-    
-    public T? Get<T>(string key)
-    {
-        return _cache.TryGetValue(key, out var value) ? (T?)value : default;
-    }
-    
-    public void Clear()
-    {
-        _cache.Clear();
-    }
-    
-    public void Dispose()
-    {
-        _cache.Clear();
-    }
-}
-
-public class DataView : ViewBase
+public class CacheDataView : ViewBase
 {
     public override object? Build()
     {
-        // Create a cache scoped to this component and its children
-        var cache = CreateContext(() => new MemoryCache());
+        CreateContext(() => new ScopedMemoryCache());
+        var refreshState = UseState(0);
+        CreateContext(() => refreshState);
         
-        return Layout.Vertical(
-            new DataListView(),
-            new DataDetailView()
-        );
+        return Layout.Vertical()
+            | new CacheDataListView()
+            | new CacheDataDetailView();
     }
 }
 
-public class DataListView : ViewBase
+public class CacheDataListView : ViewBase
 {
     public override object? Build()
     {
-        var cache = UseContext<IDataCache>();
+        var cache = UseContext<ScopedMemoryCache>();
+        var refreshState = UseContext<IState<int>>();
+        var _ = refreshState.Value;
         
-        var cachedData = cache.Get<List<Data>>("dataList");
-        if (cachedData == null)
-        {
-            cachedData = LoadDataFromDatabase();
-            cache.Set("dataList", cachedData);
-        }
+        var data = cache.Get("data") ?? "No data";
         
-        return new Table(cachedData);
+        return Layout.Vertical()
+            | Text.P($"Cached: {data}")
+            | Text.P($"Entries: {cache.Count}")
+            | new Button("Set Data", onClick: _ => 
+            {
+                cache.Set("data", "Sample Data");
+                refreshState.Set(refreshState.Value + 1);
+            });
     }
-    
-    private List<Data> LoadDataFromDatabase() => new();
+}
+
+public class CacheDataDetailView : ViewBase
+{
+    public override object? Build()
+    {
+        var cache = UseContext<ScopedMemoryCache>();
+        var refreshState = UseContext<IState<int>>();
+        var _ = refreshState.Value;
+        
+        return Layout.Vertical()
+            | Text.P($"Cache entries: {cache.Count}")
+            | new Button("Clear Cache", onClick: _ => 
+            {
+                cache.Clear();
+                refreshState.Set(refreshState.Value + 1);
+            });
+    }
 }
 ```
 

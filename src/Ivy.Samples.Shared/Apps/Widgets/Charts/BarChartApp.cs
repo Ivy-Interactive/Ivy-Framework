@@ -4,9 +4,9 @@ using Ivy.Shared;
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
 [App(icon: Icons.ChartBarStacked, searchHints: ["visualization", "graph", "analytics", "data", "comparison", "statistics"])]
-public class BarChartApp : ViewBase
+public class BarChartApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         return Layout.Grid().Columns(3)
             | new BarChart0()

@@ -28,6 +28,7 @@ public static partial class MarkdownConverter
         public bool GroupExpanded { get; set; } = false;
         public List<string>? SearchHints { get; set; }
         public List<string>? Imports { get; set; }
+        public string? Description { get; set; }
     }
 
     static AppMeta ParseYamlAppMeta(string yaml)

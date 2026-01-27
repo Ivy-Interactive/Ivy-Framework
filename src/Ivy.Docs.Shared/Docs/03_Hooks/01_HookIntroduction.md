@@ -45,9 +45,9 @@ Ivy ships with a comprehensive set of hooks organized by purpose:
 | **References & Context**     | [UseRef](./Core/08_UseRef.md), [UseContext](./Core/12_UseContext.md), [UseArgs](./Core/13_UseArgs.md)                                     |
 | **Data Fetching**            | [UseQuery](./Core/09_UseQuery.md), [UseMutation](./Core/14_UseMutation.md), [UseSignal](./Core/10_UseSignal.md)                           |
 | **Services & Dependencies**  | [UseService](./Core/11_UseService.md), [UseRefreshToken](./Core/16_UseRefreshToken.md), [UseWebhook](./Core/19_UseWebhook.md)            |
-| **UI & Interaction**         | [UseNavigation](./Core/23_UseNavigation.md), [UseAlert](./Core/24_UseAlert.md), [UseBlades](./Core/21_UseBlades.md), [UseTrigger](./Core/17_UseTrigger.md)  |
-| **Forms**                    | [UseForm](./Core/22_UseForm.md)                                                                                                             |
-| **Files**                    | [UseUpload](./Core/18_UseUpload.md), [UseDownload](./Core/15_UseDownload.md)                                                              |
+| **UI & Interaction**         | [UseNavigation](../../01_Onboarding/02_Concepts/09_Navigation.md), [UseAlert](../../01_Onboarding/02_Concepts/17_Alerts.md), [UseBlades](../../02_Widgets/03_Common/12_Blades.md), [UseTrigger](./Core/17_UseTrigger.md)  |
+| **Forms**                    | [UseForm](../../01_Onboarding/02_Concepts/08_Forms.md)                                                                                                             |
+| **Files**                    | [UseUpload](../../02_Widgets/04_Inputs/10_FileInput.md), [UseDownload](./Core/15_UseDownload.md)                                                              |
 
 ## Core Hooks
 
@@ -643,7 +643,7 @@ public class NavigationDemo : ViewBase
 }
 ```
 
-See [UseNavigation](./Core/23_UseNavigation.md) for detailed documentation.
+See [Navigation](../../01_Onboarding/02_Concepts/09_Navigation.md) for detailed documentation.
 
 ### UseAlert
 
@@ -667,7 +667,7 @@ public class AlertDemo : ViewBase
 }
 ```
 
-See [UseAlert](./Core/24_UseAlert.md) for detailed documentation.
+See [Alerts](../../01_Onboarding/02_Concepts/17_Alerts.md) for detailed documentation.
 
 ### UseBlades
 
@@ -701,7 +701,7 @@ public class NavigationRootView : ViewBase
 }
 ```
 
-See [UseBlades](./Core/21_UseBlades.md) for detailed documentation.
+See [Blades](../../02_Widgets/03_Common/12_Blades.md) for detailed documentation.
 
 ### UseTrigger
 
@@ -767,7 +767,7 @@ public class FormDemo : ViewBase
 }
 ```
 
-See [UseForm](./Core/22_UseForm.md) for detailed documentation.
+See [Forms](../../01_Onboarding/02_Concepts/08_Forms.md) for detailed documentation.
 
 ### UseUpload
 
@@ -788,7 +788,7 @@ public class UploadDemo : ViewBase
 }
 ```
 
-See [UseUpload](./Core/18_UseUpload.md) for detailed documentation.
+See [FileInput](../../02_Widgets/04_Inputs/10_FileInput.md) for detailed documentation.
 
 ### UseDownload
 

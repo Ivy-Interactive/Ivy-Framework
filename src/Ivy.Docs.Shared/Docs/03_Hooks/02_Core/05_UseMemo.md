@@ -25,6 +25,28 @@ Memoization in Ivy provides several powerful tools to optimize performance:
 
 These [hooks](../02_RulesOfHooks.md) work similarly to their React counterparts (`useMemo`, `useCallback`) but are designed specifically for Ivy's architecture.
 
+## Basic Usage
+
+```csharp demo-below
+public class ExpensiveCalculationView : ViewBase
+{
+    public override object? Build()
+    {
+        var input = UseState(0);
+        
+        // Memoize the result of an expensive calculation
+        var result = UseMemo(() => 
+        {
+            return input.Value * input.Value;
+        }, input.Value); // Only recompute when input changes
+        
+        return Layout.Vertical()
+            | input.ToNumberInput().Placeholder("Number")
+            | Text.P($"Result: {result}");
+    }
+}
+```
+
 ## Choosing the Right Memoization Approach
 
 ```mermaid
@@ -43,8 +65,6 @@ flowchart TD
     G --> J["Prevent child re-renders<br/>• Event handlers<br/>• Stable function references<br/>• Effect dependencies"]
     H --> K["Component-level optimization<br/>• List items<br/>• Heavy UI components<br/>• Custom widgets"]
 ```
-
-## UseMemo Hook
 
 The `UseMemo` [hook](../02_RulesOfHooks.md) caches the result of a computation and only recomputes it when its [state](./03_UseState.md) dependencies change.
 
@@ -87,31 +107,6 @@ sequenceDiagram
     M-->>C: Return new computed value
 ```
 
-### Basic Usage
-
-```csharp
-public class ExpensiveCalculationView : ViewBase
-{
-    public override object? Build()
-    {
-        var input = UseState(0);
-        
-        // Memoize the result of an expensive calculation
-        var result = UseMemo(() => 
-        {
-            // Simulate expensive calculation
-            Thread.Sleep(1000);
-            return input.Value * input.Value;
-        }, input.Value); // Only recompute when input changes
-        
-        return Layout.Vertical(
-            Text.Inline("Number", value: input.Value, onChange: v => input.Set(v)),
-            Text.Inline($"Result: {result}")
-        );
-    }
-}
-```
-
 ### When to Use Memoization
 
 Use memoization when:
@@ -120,67 +115,6 @@ Use memoization when:
 - You want to prevent unnecessary re-renders of [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md)
 - You're dealing with complex data transformations that depend on [state](./03_UseState.md) changes
 - You need stable function references for [`UseEffect`](./04_UseEffect.md) dependencies
-
-### Best Practices
-
-- **Dependency Array**: Always specify the [state](./03_UseState.md) dependencies that should trigger a recomputation
-- **Expensive Operations**: Only memoize truly expensive operations
-- **Clean Dependencies**: Keep the dependency array minimal and focused on state values
-- **Avoid Side Effects**: Memoized functions should be pure and not have side effects (use [UseEffect](./04_UseEffect.md) for side effects)
-
-### Examples
-
-#### Complex Data Filtering
-
-```csharp
-public class DataFilterView : ViewBase
-{
-    public override object? Build()
-    {
-        var data = UseState(new List<Item>());
-        var filter = UseState("");
-        
-        // Memoize filtered results
-        var filteredData = UseMemo(() => 
-            data.Value.Where(item => 
-                item.Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase)
-            ).ToList(),
-            data, filter
-        );
-        
-        return Layout.Vertical(
-            new TextInput("Filter", value: filter.Value, onChange: v => filter.Set(v)),
-            new Table(filteredData)
-        );
-    }
-}
-```
-
-#### Computed Properties
-
-```csharp
-public class DashboardView : ViewBase
-{
-    public override object? Build()
-    {
-        var sales = UseState(new List<Sale>());
-        
-        // Memoize computed statistics
-        var stats = UseMemo(() => new
-        {
-            Total = sales.Value.Sum(s => s.Amount),
-            Average = sales.Value.Average(s => s.Amount),
-            Count = sales.Value.Count
-        }, sales);
-        
-        return Layout.Vertical(
-            Text.Inline($"Total Sales: ${stats.Total:N2}"),
-            Text.Inline($"Average Sale: ${stats.Average:N2}"),
-            Text.Inline($"Number of Sales: {stats.Count}")
-        );
-    }
-}
-```
 
 ## Component Memoization with IMemoized
 
@@ -229,107 +163,40 @@ sequenceDiagram
     WT->>WT: Update TreeNode with new hash
 ```
 
-### Basic Implementation
+### IMemoized Basic Usage
 
-```csharp
-public class ExpensiveComponent : ViewBase, IMemoized
+```csharp demo-below
+public class MemoizedDemoView : ViewBase
+{
+    public override object? Build()
+    {
+        var count = UseState(0);
+        return Layout.Vertical()
+            | new ExpensiveMemoComponent("Demo", count.Value)
+            | new Button("Increment", onClick: _ => count.Set(count.Value + 1));
+    }
+}
+
+public class ExpensiveMemoComponent : ViewBase, IMemoized
 {
     private readonly string _title;
     private readonly int _value;
     private readonly DateTime _timestamp;
-    
-    public ExpensiveComponent(string title, int value, DateTime timestamp)
+
+    public ExpensiveMemoComponent(string title, int value, DateTime? timestamp = null)
     {
         _title = title;
         _value = value;
-        _timestamp = timestamp;
+        _timestamp = timestamp ?? DateTime.Now;
     }
-    
-    // Define which values should trigger a re-render
-    public object[] GetMemoValues()
-    {
-        return [_title, _value]; // Exclude _timestamp from memoization
-    }
-    
-    public override object? Build()
-    {
-        // Expensive rendering logic here
-        Thread.Sleep(100); // Simulate expensive operation
-        
-        return Layout.Vertical(
-            Text.Heading(_title),
-            Text.Block($"Value: {_value}"),
-            Text.P($"Rendered at: {DateTime.Now}").Small()
-        );
-    }
-}
-```
 
-### Real-World Example: List Items
+    public object[] GetMemoValues() => [_title, _value];
 
-```csharp
-public class ProductListView : ViewBase
-{
-    public override object? Build()
-    {
-        var products = UseState(GetProducts());
-        var sortBy = UseState("name");
-        
-        var sortedProducts = UseMemo(() => 
-            products.Value.OrderBy(p => sortBy.Value switch
-            {
-                "name" => p.Name,
-                "price" => p.Price.ToString(),
-                _ => p.Id.ToString()
-            }).ToList(),
-            products, sortBy
-        );
-        
-        return Layout.Vertical(
-            new Select("Sort by", sortBy.Value, 
-                new[] { "name", "price", "id" }, 
-                v => sortBy.Set(v)
-            ),
-            Layout.Vertical(
-                sortedProducts.Select((product, index) => 
-                    new ProductItem(product, index).Key(product.Id)
-                )
-            )
-        );
-    }
-}
-
-public class ProductItem : ViewBase, IMemoized
-{
-    private readonly Product _product;
-    private readonly int _index;
-    
-    public ProductItem(Product product, int index)
-    {
-        _product = product;
-        _index = index;
-    }
-    
-    public object[] GetMemoValues()
-    {
-        // Only re-render if product data or position changes
-        return [_product.Id, _product.Name, _product.Price, _index];
-    }
-    
-    public override object? Build()
-    {
-        // This component will only re-render when memoized values change
-        return new Card(
-            Layout.Horizontal(
-                new Avatar(_product.ImageUrl),
-                Layout.Vertical(
-                    Text.Heading(_product.Name),
-                    Text.Block($"${_product.Price:N2}"),
-                    Text.P($"Position: {_index + 1}").Small()
-                )
-            )
-        );
-    }
+    public override object? Build() =>
+        Layout.Vertical()
+            | Text.H2(_title)
+            | Text.Block($"Value: {_value}")
+            | Text.P($"Rendered at: {_timestamp:HH:mm:ss}");
 }
 ```
 
@@ -366,85 +233,7 @@ stateDiagram-v2
 - **Use with .Key()** - Always provide a stable key when rendering memoized components in lists
 - **Keep it simple** - Only memoize components with expensive rendering logic
 
-## Performance Considerations
-
-### Memory vs Speed Trade-offs
-
-- **Memory Usage**: Memoization caches values in memory. Consider the size of cached [state](./03_UseState.md) data:
-
-- **Cache Invalidation**: If state dependencies change too often or are unstable, cached results will be invalidated frequently, reducing the effectiveness of memoization. Ensure dependencies are stable and don't change unnecessarily:
-
-- **Dependency Granularity**: Use specific state dependencies rather than entire objects:
-
-```csharp
-// Good: Small computed value
-var total = UseMemo(() => items.Value.Sum(x => x.Price), items);
-
-// Caution: Large object that might consume significant memory
-var processedData = UseMemo(() => 
-    items.Value.Select(ProcessLargeItem).ToList(), items);
-```
-
-```csharp
-// Bad: Object created on every render
-var config = new { threshold: 100 };
-var filtered = UseMemo(() => FilterItems(items.Value, config), items, config);
-
-// Good: Stable dependency
-var threshold = UseState(100);
-var filtered = UseMemo(() => 
-    FilterItems(items.Value, threshold.Value), items, threshold);
-```
-
-```csharp
-// Less efficient: Depends on entire user object
-var greeting = UseMemo(() => $"Hello, {user.Value.Name}!", user);
-
-// More efficient: Depends only on the name
-var userName = user.Value.Name;
-var greeting = UseMemo(() => $"Hello, {userName}!", userName);
-```
-
-### When NOT to Memoize
-
-- **Simple computations**: Don't memoize trivial operations
-- **Frequently changing [state](./03_UseState.md) dependencies**: If state dependencies change often, memoization provides no benefit
-- **Small component trees**: In simple [views](../../../01_Onboarding/02_Concepts/02_Views.md), the overhead might outweigh benefits
-
-```csharp
-// Unnecessary memoization
-var doubled = UseMemo(() => count.Value * 2, count);
-
-// Just compute directly
-var doubled = count.Value * 2;
-```
-
 ## Common Pitfalls and Solutions
-
-### Memoization Troubleshooting Guide
-
-```mermaid
-flowchart TD
-    A["Memoization not working as expected?"] --> B{Check your implementation}
-    
-    B --> C["Dependencies changing unexpectedly?"]
-    B --> D["Performance not improving?"]
-    B --> E["Memory usage too high?"]
-    B --> F["Components still re-rendering?"]
-    
-    C --> C1["Use stable references<br/>Avoid creating objects in deps<br/>Use [UseRef](./08_UseRef.md) for constants"]
-    D --> D1["Profile before optimizing<br/>Only memoize expensive operations<br/> Check if deps change frequently"]
-    E --> E1["Reduce cached data size<br/>Use specific dependencies<br/> Consider conditional memoization"]
-    F --> F1["Implement IMemoized correctly<br/>Provide stable keys<br/> Check GetMemoValues()"]
-    
-    C1 --> G["Problem solved?"]
-    D1 --> G
-    E1 --> G
-    F1 --> G
-    
-    G -->|Yes| H["Great! Your memoization is working"]
-    G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
-```
 
 ### Unstable Dependencies
 
@@ -461,71 +250,6 @@ var result = UseMemo(() => ProcessData(data.Value), data.Value, new[] { "option1
 // Good: Stable dependency
 var options = UseRef(new[] { "option1", "option2" });
 var result = UseMemo(() => ProcessData(data.Value), data.Value, options);
-```
-
-### Missing Dependencies
-
-**Problem**: Not including all values used in the memoized function
-
-```csharp
-// Bad: Missing 'multiplier' dependency
-var result = UseMemo(() => items.Value.Sum(x => x.Price * multiplier.Value), items);
-```
-
-**Solution**: Include all dependencies
-
-```csharp
-// Good: All dependencies included
-var result = UseMemo(() => items.Value.Sum(x => x.Price * multiplier.Value), items, multiplier);
-```
-
-### Over-Memoization
-
-**Problem**: Memoizing everything without considering the cost
-
-```csharp
-// Bad: Unnecessary memoization of simple operations
-var isEven = UseMemo(() => count.Value % 2 == 0, count);
-var doubled = UseMemo(() => count.Value * 2, count);
-var greeting = UseMemo(() => $"Hello {name.Value}", name);
-```
-
-**Solution**: Only memoize expensive operations
-
-```csharp
-// Good: Direct computation for simple operations
-var isEven = count.Value % 2 == 0;
-var doubled = count.Value * 2;
-var greeting = $"Hello {name.Value}";
-
-// Memoize only when necessary
-var expensiveResult = UseMemo(() => 
-    items.Value.Where(x => x.IsActive)
-             .GroupBy(x => x.Category)
-             .ToDictionary(g => g.Key, g => g.ToList()), 
-    items);
-```
-
-### Incorrect IMemoized Implementation
-
-**Problem**: Including volatile values in `GetMemoValues()`
-
-```csharp
-// Bad: Including timestamp that changes on every render
-public object[] GetMemoValues()
-{
-    return [_id, _name, DateTime.Now]; // DateTime.Now always changes!
-}
-```
-
-**Solution**: Only include values that affect the UI
-
-```csharp
-// Good: Only include relevant, stable values
-public object[] GetMemoValues()
-{
-    return [_id, _name, _isActive]; // Only UI-affecting properties
-}
 ```
 
 ### Callback Dependencies Issues
@@ -548,25 +272,12 @@ var handleDataAction = UseCallback(() => DoSomethingWithData(data.Value), data);
 var handleFilterAction = UseCallback(() => ApplyFilter(filter.Value), filter);
 ```
 
-### Forgetting Keys in Lists
+## Best Practices
 
-**Problem**: Not providing stable keys for memoized list items
-
-```csharp
-// Bad: No keys, memoization won't work properly
-return Layout.Vertical(
-    items.Value.Select(item => new ItemComponent(item)) // Missing .Key()
-);
-```
-
-**Solution**: Always provide stable keys
-
-```csharp
-// Good: Stable keys enable proper memoization
-return Layout.Vertical(
-    items.Value.Select(item => new ItemComponent(item).Key(item.Id))
-);
-```
+- **Dependency Array**: Always specify the [state](./03_UseState.md) dependencies that should trigger a recomputation
+- **Expensive Operations**: Only memoize truly expensive operations
+- **Clean Dependencies**: Keep the dependency array minimal and focused on state values
+- **Avoid Side Effects**: Memoized functions should be pure and not have side effects (use [UseEffect](./04_UseEffect.md) for side effects)
 
 ## See Also
 
@@ -577,3 +288,151 @@ return Layout.Vertical(
 - [UseRef](./08_UseRef.md) - Storing stable references
 - [Signals](./10_UseSignal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+
+## Examples
+
+<Details>
+<Summary>
+Complex Data Filtering
+</Summary>
+<Body>
+
+```csharp demo-below
+public record FilterItem(int Id, string Name);
+
+public class DataFilterDemoView : ViewBase
+{
+    public override object? Build()
+    {
+        var data = UseState(new List<FilterItem>
+        {
+            new(1, "Laptop"),
+            new(2, "Mouse"),
+            new(3, "Keyboard"),
+            new(4, "Monitor"),
+            new(5, "Headphones")
+        });
+        var filter = UseState("");
+        var filteredData = UseMemo(() =>
+            data.Value
+                .Where(item => item.Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase))
+                .ToList(),
+            data.Value, filter.Value);
+
+        var items = filteredData.Count == 0
+            ? new object[] { Text.P("No matches.").Muted() }
+            : filteredData.Select(i => Text.Block(i.Name)).ToArray();
+
+        return Layout.Vertical()
+            | filter.ToTextInput().Placeholder("Filter by name")
+            | Layout.Vertical(items);
+    }
+}
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Computed Properties
+</Summary>
+<Body>
+
+```csharp demo-below
+public record DemoSale(decimal Amount);
+
+public class StatsDemoView : ViewBase
+{
+    public override object? Build()
+    {
+        var sales = UseState(new List<DemoSale> { new(100m), new(250m), new(75m) });
+        var stats = UseMemo(() => new
+        {
+            Total = sales.Value.Sum(s => s.Amount),
+            Average = sales.Value.Count > 0 ? sales.Value.Average(s => s.Amount) : 0m,
+            Count = sales.Value.Count
+        }, sales.Value);
+
+        return Layout.Vertical()
+            | Text.P($"Total: ${stats.Total:N2}")
+            | Text.P($"Average: ${stats.Average:N2}")
+            | Text.P($"Count: {stats.Count}")
+            | new Button("Add sale", onClick: _ => sales.Set(sales.Value.Append(new DemoSale((Random.Shared.Next(1, 50) * 10))).ToList()));
+    }
+}
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+IMemoized In List Items
+</Summary>
+<Body>
+
+```csharp demo-below
+public record ListProduct(int Id, string Name, decimal Price);
+
+public class ProductListDemoView : ViewBase
+{
+    public override object? Build()
+    {
+        var products = UseState(new List<ListProduct>
+        {
+            new(1, "Laptop", 999m),
+            new(2, "Mouse", 29.99m),
+            new(3, "Keyboard", 79m),
+            new(4, "Monitor", 299m),
+            new(5, "Headphones", 149m)
+        });
+        var sortBy = UseState("name");
+        var sortOptions = new IAnyOption[]
+        {
+            new Option<string>("Name", "name"),
+            new Option<string>("Price", "price"),
+            new Option<string>("Id", "id")
+        };
+        var sortedProducts = UseMemo(() =>
+            (sortBy.Value switch
+            {
+                "name" => products.Value.OrderBy(p => p.Name),
+                "price" => products.Value.OrderBy(p => p.Price),
+                _ => products.Value.OrderBy(p => p.Id)
+            }).ToList(),
+            products.Value, sortBy.Value);
+
+        var items = sortedProducts.Select((p, i) => new ProductListCard(p, i).Key(p.Id)).ToArray();
+        return Layout.Vertical()
+            | sortBy.ToSelectInput(sortOptions).Placeholder("Sort by")
+            | Layout.Vertical(items);
+    }
+}
+
+public class ProductListCard : ViewBase, IMemoized
+{
+    private readonly ListProduct _product;
+    private readonly int _index;
+
+    public ProductListCard(ListProduct product, int index)
+    {
+        _product = product;
+        _index = index;
+    }
+
+    public object[] GetMemoValues() => [_product.Id, _product.Name, _product.Price, _index];
+
+    public override object? Build() =>
+        new Card(
+            Layout.Horizontal()
+                | new Avatar(_product.Name.Length > 0 ? _product.Name[0].ToString() : "?", null)
+                | (Layout.Vertical()
+                    | Text.H2(_product.Name)
+                    | Text.Block($"${_product.Price:N2}")
+                    | Text.P($"Position: {_index + 1}").Small()));
+}
+```
+
+</Body>
+</Details>

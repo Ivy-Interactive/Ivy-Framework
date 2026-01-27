@@ -29,6 +29,36 @@ Key benefits of `UseReducer`:
 - **Action-Based Updates** - State changes are explicit and traceable through actions
 - **Testability** - Pure reducer functions are easy to test in isolation
 
+## Basic Usage
+
+```csharp demo-below
+public class BasicReducerDemo : ViewBase
+{
+    // Reducer function
+    private int CounterReducer(int state, string action) => action switch
+    {
+        "increment" => state + 1,
+        "decrement" => state - 1,
+        "reset" => 0,
+        _ => state
+    };
+    
+    public override object? Build()
+    {
+        var (count, dispatch) = this.UseReducer(CounterReducer, 0);
+        
+        return Layout.Vertical(
+            Text.H3($"Count: {count}"),
+            Layout.Horizontal(
+                new Button("-", _ => dispatch("decrement")),
+                new Button("Reset", _ => dispatch("reset")),
+                new Button("+", _ => dispatch("increment"))
+            )
+        );
+    }
+}
+```
+
 <Callout type="Tip">
 `UseReducer` is ideal when you have complex [state](./03_UseState.md) logic involving multiple sub-values, when the next state depends on the previous one, or when you want to centralize state update logic in one place.
 </Callout>
@@ -54,10 +84,6 @@ flowchart TD
     I --> M["Pure reducer function<br/>Easier to reason about<br/>Better testability"]
     J --> N["Centralized logic<br/>Easier to maintain<br/>Better debugging"]
 ```
-
-## UseReducer Hook
-
-The `UseReducer` [hook](../02_RulesOfHooks.md) manages [state](./03_UseState.md) through a reducer function that takes the current [state](./03_UseState.md) and an action, returning the new [state](./03_UseState.md).
 
 <Callout type="Tip">
 Reducers should be pure functions - they should not have side effects and should return a new [state](./03_UseState.md) object rather than mutating the existing one. Use [`UseEffect`](./04_UseEffect.md) for side effects.
@@ -95,36 +121,6 @@ sequenceDiagram
     UR-->>C: Return (newState, dispatch)
 ```
 
-### Basic Usage
-
-```csharp demo-tabs
-public class BasicReducerDemo : ViewBase
-{
-    // Reducer function
-    private int CounterReducer(int state, string action) => action switch
-    {
-        "increment" => state + 1,
-        "decrement" => state - 1,
-        "reset" => 0,
-        _ => state
-    };
-    
-    public override object? Build()
-    {
-        var (count, dispatch) = this.UseReducer(CounterReducer, 0);
-        
-        return Layout.Vertical(
-            Text.H3($"Count: {count}"),
-            Layout.Horizontal(
-                new Button("-", _ => dispatch("decrement")),
-                new Button("Reset", _ => dispatch("reset")),
-                new Button("+", _ => dispatch("increment"))
-            )
-        );
-    }
-}
-```
-
 ### Use Cases
 
 Use `UseReducer` when:
@@ -155,9 +151,22 @@ Choose between `UseReducer` and [`UseState`](./03_UseState.md) based on complexi
 - **Type Safety** - Use strongly-typed actions and [state](./03_UseState.md) for better compile-time safety
 - **Extract Complex Logic** - Move complex reducer logic into separate functions for clarity and use [`UseMemo`](./05_UseMemo.md) for expensive computations
 
+## See Also
+
+- [State Management](./03_UseState.md) - Simple state management with UseState
+- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
+- [Effects](./04_UseEffect.md) - Side effects and async operations
+- [Memoization](./05_UseMemo.md) - Performance optimization with UseMemo
+- [Callbacks](./06_UseCallback.md) - Memoized callback functions with UseCallback
+- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+
 ### Examples
 
-#### Shopping Cart with Interdependent State
+<Details>
+<Summary>
+Shopping Cart with Interdependent State
+</Summary>
+<Body>
 
 This example demonstrates why reducers are powerful - multiple interdependent values (items, subtotal, tax, discount, total) that must stay in sync. With `UseState`, you'd need to update each value separately and risk inconsistencies.
 
@@ -251,7 +260,14 @@ public class ShoppingCartDemo : ViewBase
 }
 ```
 
-#### Game State with Multiple Interdependent Values
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Game State with Multiple Interdependent Values
+</Summary>
+<Body>
 
 This example shows a game state where actions affect multiple values simultaneously - perfect for demonstrating reducer's centralized state management.
 
@@ -301,302 +317,5 @@ public class GameStateDemo : ViewBase
 }
 ```
 
-## Performance Considerations
-
-### State Update Efficiency
-
-- **Immutable Updates**: Creating new [state](./03_UseState.md) objects has a small overhead, but enables better change detection and prevents bugs:
-
-```csharp
-// Good: Immutable update with records
-record State(List<int> Items);
-private State Reducer(State state, string action) => action switch
-{
-    "add" => state with { Items = state.Items.Append(1).ToList() },
-    _ => state
-};
-
-// Consider: For very large lists, consider more efficient update strategies
-```
-
-- **Reducer Complexity**: Keep reducer logic simple and fast. Move complex computations outside the reducer:
-
-```csharp
-// Good: Simple reducer, complex logic outside
-private State Reducer(State state, Action action) => action switch
-{
-    "update" => state with { Data = action.Data },
-    _ => state
-};
-
-// Bad: Complex computation in reducer
-private State Reducer(State state, Action action) => action switch
-{
-    "process" => state with { 
-        ProcessedData = state.RawData.SelectMany(/* complex transformation */).ToList() 
-    },
-    _ => state
-};
-```
-
-- **Action Object Creation**: Consider the overhead of creating action objects:
-
-```csharp
-// Good: Simple action types
-dispatch("increment");
-dispatch(("add", item));
-
-// Consider: For high-frequency updates, use value types or simple types
-```
-
-### When NOT to Use UseReducer
-
-- **Simple [State](./03_UseState.md)**: Don't use `UseReducer` for simple state that can be managed with [`UseState`](./03_UseState.md)
-- **Independent Values**: If state values are independent, [`UseState`](./03_UseState.md) is more appropriate
-- **No Complex Logic**: If state updates are straightforward, `UseReducer` adds unnecessary complexity
-
-```csharp
-// Unnecessary: Simple state doesn't need reducer
-var (count, dispatch) = UseReducer((s, a) => a == "inc" ? s + 1 : s, 0);
-
-// Better: Use UseState for simple cases
-var count = UseState(0);
-```
-
-## Common Pitfalls and Solutions
-
-### Reducer Troubleshooting Guide
-
-```mermaid
-flowchart TD
-    A["UseReducer not working as expected?"] --> B{Check your implementation}
-    
-    B --> C["State not updating?"]
-    B --> D["Unexpected state values?"]
-    B --> E["Performance issues?"]
-    B --> F["Side effects in reducer?"]
-    
-    C --> C1["Check reducer returns new state<br/>Verify dispatch is called<br/>Ensure action is handled"]
-    D --> D1["Check for state mutations<br/>Verify action types match<br/>Review reducer logic"]
-    E --> E1["Keep reducers simple<br/>Move complex logic outside<br/>Consider [memoization](./05_UseMemo.md)"]
-    F --> F1["Remove side effects<br/> Use UseEffect for side effects<br/> Keep reducer pure"]
-    
-    C1 --> G["Problem solved?"]
-    D1 --> G
-    E1 --> G
-    F1 --> G
-    
-    G -->|Yes| H["Great! Your reducer is working correctly"]
-    G -->|No| I["Consider alternative approaches<br/>or seek help in community"]
-```
-
-### Mutating [State](./03_UseState.md)
-
-**Problem**: Mutating [state](./03_UseState.md) directly instead of returning new [state](./03_UseState.md)
-
-```csharp
-// Wrong: Mutating state directly
-private State Reducer(State state, Action action)
-{
-    if (action == "add")
-{
-    state.Items.Add(newItem); // Mutation!
-        return state;
-    }
-    return state;
-}
-```
-
-**Solution**: Always return new [state](./03_UseState.md) objects
-
-```csharp
-// Correct: Return new state
-private State Reducer(State state, Action action) => action switch
-{
-    "add" => state with { Items = state.Items.Append(newItem).ToList() },
-    _ => state
-};
-```
-
-### Side Effects in Reducer
-
-**Problem**: Performing side effects inside the reducer function. Reducers should be pure - use [`UseEffect`](./04_UseEffect.md) for side effects.
-
-```csharp
-// Wrong: Side effects in reducer
-private State Reducer(State state, Action action)
-{
-    if (action == "save")
-    {
-        SaveToDatabase(state); // Side effect!
-        return state;
-    }
-    return state;
-}
-```
-
-**Solution**: Use [`UseEffect`](./04_UseEffect.md) for side effects
-
-```csharp
-// Correct: Pure reducer
-private State Reducer(State state, Action action) => action switch
-{
-    "save" => state with { ShouldSave = true },
-    _ => state
-};
-
-// Handle side effects in component
-UseEffect(() => 
-{
-    if (state.Value.ShouldSave)
-    {
-        SaveToDatabase(state.Value);
-        dispatch(("saved", null));
-    }
-}, state.Value.ShouldSave);
-```
-
-### Not Handling All Actions
-
-**Problem**: Missing default case or not handling all action types
-
-```csharp
-// Wrong: No default case
-private State Reducer(State state, Action action) => action switch
-{
-    "increment" => state with { Count = state.Count + 1 },
-    "decrement" => state with { Count = state.Count - 1 }
-    // Missing default case!
-};
-```
-
-**Solution**: Always include a default case
-
-```csharp
-// Correct: Default case handles unknown actions
-private State Reducer(State state, Action action) => action switch
-{
-    "increment" => state with { Count = state.Count + 1 },
-    "decrement" => state with { Count = state.Count - 1 },
-    _ => state // Return current state for unknown actions
-};
-```
-
-### Complex Logic in Reducer
-
-**Problem**: Putting too much complex logic inside the reducer. Consider using [`UseMemo`](./05_UseMemo.md) for expensive computations.
-
-```csharp
-// Wrong: Complex computation in reducer
-private State Reducer(State state, Action action) => action switch
-{
-    "process" => state with 
-    { 
-        Result = state.Data
-            .Where(x => x.IsValid)
-            .GroupBy(x => x.Category)
-            .Select(g => new { Category = g.Key, Count = g.Count(), Total = g.Sum(x => x.Value) })
-            .OrderByDescending(x => x.Total)
-            .Take(10)
-            .ToList()
-    },
-    _ => state
-};
-```
-
-**Solution**: Extract complex logic to separate functions
-
-```csharp
-// Correct: Extract complex logic
-private List<ProcessedItem> ProcessData(List<DataItem> data)
-{
-    return data
-        .Where(x => x.IsValid)
-        .GroupBy(x => x.Category)
-        .Select(g => new ProcessedItem(g.Key, g.Count(), g.Sum(x => x.Value)))
-        .OrderByDescending(x => x.Total)
-        .Take(10)
-        .ToList();
-}
-
-private State Reducer(State state, Action action) => action switch
-{
-    "process" => state with { Result = ProcessData(state.Data) },
-    _ => state
-};
-```
-
-### Forgetting to Update Related [State](./03_UseState.md)
-
-**Problem**: Updating one part of [state](./03_UseState.md) but forgetting related parts
-
-```csharp
-// Wrong: Incomplete state update
-private State Reducer(State state, Action action) => action switch
-{
-    "addItem" => state with { Items = state.Items.Append(newItem).ToList() },
-    // Forgot to update count!
-    _ => state
-};
-```
-
-**Solution**: Update all related [state](./03_UseState.md) properties
-
-```csharp
-// Correct: Update all related state
-private State Reducer(State state, Action action) => action switch
-{
-    "addItem" => state with 
-    { 
-        Items = state.Items.Append(newItem).ToList(),
-        Count = state.Count + 1,
-        LastUpdated = DateTime.Now
-    },
-    _ => state
-};
-```
-
-### Using Wrong Action Types
-
-**Problem**: Dispatching actions that don't match the reducer's expected types
-
-```csharp
-// Wrong: Action type mismatch
-var (state, dispatch) = UseReducer(Reducer, initialState);
-dispatch(123); // Reducer expects string actions!
-
-private State Reducer(State state, string action) => action switch
-{
-    "increment" => state with { Count = state.Count + 1 },
-    _ => state
-};
-```
-
-**Solution**: Use strongly-typed actions
-
-```csharp
-// Correct: Strongly-typed actions
-record IncrementAction();
-record DecrementAction();
-record AddItemAction(string Item);
-
-var (state, dispatch) = UseReducer(Reducer, initialState);
-dispatch(new IncrementAction());
-
-private State Reducer(State state, object action) => action switch
-{
-    IncrementAction => state with { Count = state.Count + 1 },
-    DecrementAction => state with { Count = state.Count - 1 },
-    AddItemAction a => state with { Items = state.Items.Append(a.Item).ToList() },
-    _ => state
-};
-```
-
-## See Also
-
-- [State Management](./03_UseState.md) - Simple state management with UseState
-- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
-- [Effects](./04_UseEffect.md) - Side effects and async operations
-- [Memoization](./05_UseMemo.md) - Performance optimization with UseMemo
-- [Callbacks](./06_UseCallback.md) - Memoized callback functions with UseCallback
-- [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+</Body>
+</Details>

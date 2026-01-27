@@ -35,16 +35,22 @@ public class BasicEffectView : ViewBase
 {
     public override object? Build()
     {
-        var message = UseState("Loading...");
+        var message = UseState("Click the button to load data");
+        var loadTrigger = UseState(0);
         
-        // Effect runs once after component initializes
+        // Effect runs when loadTrigger state changes
         UseEffect(async () =>
         {
+            if (loadTrigger.Value == 0) return; // Skip initial render
+            
+            message.Set("Loading...");
             await Task.Delay(2000); // Simulate API call
             message.Set("Data loaded!");
-        });
+        }, loadTrigger);
         
-        return Text.P(message.Value);
+        return Layout.Vertical()
+            | new Button("Load Data", () => loadTrigger.Set(loadTrigger.Value + 1))
+            | Text.P(message.Value);
     }
 }
 ```
@@ -104,51 +110,6 @@ UseEffect(async () =>
 
 Effects can be triggered by different events using trigger parameters:
 
-### State Dependencies
-
-Effects can depend on [state](./03_UseState.md) changes:
-
-```csharp demo-below
-public class DependentEffectView : ViewBase
-{
-    public override object? Build()
-    {
-        var count = UseState(0);
-        var log = UseState<List<string>>(new List<string>());
-        
-        // Effect runs when state changes
-        UseEffect(() =>
-        {
-            var currentLog = log.Value;
-            var newLog = currentLog.ToList();
-            newLog.Add($"Count changed to: {count.Value}");
-            if (newLog.Count > 3) newLog = newLog.TakeLast(3).ToList();
-            log.Set(newLog);
-        }, count); // Dependency on count state
-        
-        return Layout.Vertical()
-            | new Button($"Count: {count.Value}", 
-                onClick: _ => count.Set(count.Value + 1))
-            | Layout.Vertical(log.Value.Select(e => Text.P(e).Small()));
-    }
-}
-```
-
-### Multiple Dependencies
-
-Effects can depend on multiple state variables:
-
-```csharp
-UseEffect(() =>
-{
-    // Runs when either firstName or lastName changes
-    var fullName = $"{firstName.Value} {lastName.Value}";
-    // Handle full name...
-}, firstName, lastName);
-```
-
-### Built-in Triggers
-
 ```mermaid
 graph LR
     A[UseEffect] --> B[OnMount - Default]
@@ -172,26 +133,65 @@ UseEffect(() => { /* ... */ }, EffectTrigger.OnBuild());
 UseEffect(() => { /* ... */ }, EffectTrigger.OnStateChange(myState));
 ```
 
-### Effect Execution Order
+### State Dependencies
 
-```mermaid
-graph TD
-    A[Effect Processing] --> B["1. OnStateChange Priority"]
-    B --> C["2. OnBuild Priority"]
-    C --> D["3. OnMount Priority"]
+Effects can depend on [state](./03_UseState.md) changes:
 
-    B --> B1[OnStateChange triggers]
-    C --> C1[OnBuild triggers]
-    D --> D1[OnMount triggers - Default]
+```csharp demo-tabs
+public class DependentEffectView : ViewBase
+{
+    public override object? Build()
+    {
+        var count = UseState(0);
+        var message = UseState("Count: 0");
+        
+        UseEffect(() =>
+        {
+            message.Set($"Count changed to: {count.Value}");
+        }, count);
+        
+        return Layout.Vertical()
+            | new Button($"Count: {count.Value}", 
+                () => count.Set(count.Value + 1))
+            | Text.P(message.Value);
+    }
+}
+```
+
+### Multiple Dependencies
+
+Effects can depend on multiple state variables:
+
+```csharp demo-tabs
+public class MultipleDepsView : ViewBase
+{
+    public override object? Build()
+    {
+        var firstName = UseState("John");
+        var lastName = UseState("Doe");
+        var fullName = UseState("");
+        
+        UseEffect(() =>
+        {
+            fullName.Set($"{firstName.Value} {lastName.Value}");
+        }, firstName, lastName);
+        
+        return Layout.Vertical()
+            | (Layout.Horizontal()
+                | new Button($"First: {firstName.Value}", 
+                    () => firstName.Set(firstName.Value == "John" ? "Jane" : "John"))
+                | new Button($"Last: {lastName.Value}", 
+                    () => lastName.Set(lastName.Value == "Doe" ? "Smith" : "Doe")))
+            | Text.P($"Full name: {fullName.Value}");
+    }
+}
 ```
 
 ## Common Patterns
 
 ### Data Fetching
 
-<Callout type="Info">
-You do not need to manually catch exceptions in UseEffect. Ivy has a built-in exception handling pipeline that automatically catches exceptions from effects and displays them to users via error notifications and console logging. The system wraps effect exceptions in `EffectException` and routes them through registered exception handlers.
-</Callout>
+Use `UseEffect` to fetch data from APIs or external services. The effect can be triggered by user interactions, state changes, or component initialization. Manage loading states to provide feedback during async operations.
 
 ```csharp demo-tabs
 public class DataFetchView : ViewBase
@@ -199,10 +199,13 @@ public class DataFetchView : ViewBase
     public override object? Build()
     {
         var data = UseState<List<Item>?>();
-        var loading = UseState(true);
+        var loading = UseState(false);
+        var loadTrigger = UseState(0);
         
         UseEffect(async () =>
         {
+            if (loadTrigger.Value == 0) return; // Skip initial render
+            
             loading.Set(true);
             
             // Simulate API call - exceptions automatically handled by Ivy
@@ -216,58 +219,85 @@ public class DataFetchView : ViewBase
             
             data.Set(items);
             loading.Set(false);
-        });
+        }, loadTrigger);
         
-        if (loading.Value)
-            return Text.P("Loading data...");
-            
-        return Layout.Vertical(
-            data.Value?.Select(item => 
-                new Card(
-                    Layout.Vertical()
-                        | Text.H4(item.Name)
-                        | Text.P(item.Description)
-                )
-            ) ?? Enumerable.Empty<Card>()
-        );
+        return Layout.Vertical()
+            | new Button("Fetch Data", () => loadTrigger.Set(loadTrigger.Value + 1))
+            | (loading.Value 
+                ? Text.P("Loading data...") 
+                : Layout.Horizontal(
+                    data.Value?.Select(item => 
+                        new Button($"{item.Name}: {item.Description}")
+                    ) ?? Enumerable.Empty<Button>()
+                ));
     }
 }
 
 public record Item(string Name, string Description);
 ```
 
+<Callout type="Info">
+You do not need to manually catch exceptions in UseEffect. Ivy has a built-in exception handling pipeline that automatically catches exceptions from effects and displays them to users via error notifications and console logging. The system wraps effect exceptions in `EffectException` and routes them through registered exception handlers.
+</Callout>
+
 ### Cleanup Operations
 
-```csharp
+Return an `IDisposable` from `UseEffect` to perform cleanup when dependencies change or the component unmounts. This is essential for releasing resources like timers, subscriptions, or connections to prevent memory leaks.
+
+```csharp demo-tabs
 public class SubscriptionView : ViewBase
 {
     public override object? Build()
     {
-        var messages = UseState<List<string>>(new List<string>());
+        var message = UseState("Stopped");
+        var isActive = UseState(false);
+        var previousResource = UseRef<IDisposable?>(() => null);
         
         UseEffect(() =>
         {
-            // Subscribe to external service
-            var subscription = MessageService.Subscribe(message =>
+            if (!isActive.Value)
             {
-                var currentMessages = messages.Value;
-                var newMessages = currentMessages.ToList();
-                newMessages.Add(message);
-                messages.Set(newMessages);
-            });
+                var hadResource = previousResource.Value != null;
+                previousResource.Value?.Dispose();
+                previousResource.Value = null;
+                if (!hadResource) message.Set("Stopped");
+                return System.Reactive.Disposables.Disposable.Empty;
+            }
             
-            // Return subscription for automatic cleanup
-            return subscription;
-        });
+            previousResource.Value?.Dispose();
+            message.Set("Running");
+            
+            var resource = new SafeDisposable(() => message.Set("Cleaned up"));
+            previousResource.Value = resource;
+            return resource;
+        }, isActive);
         
-        return Layout.Vertical(
-            messages.Value.Select(Text.P)
-        );
+        return Layout.Vertical()
+            | new Button(isActive.Value ? "Stop" : "Start", 
+                () => isActive.Set(!isActive.Value))
+            | Text.P($"Status: {message.Value}");
+    }
+    
+    private class SafeDisposable : IDisposable
+    {
+        private readonly Action _onDispose;
+        private bool _isDisposed;
+        
+        public SafeDisposable(Action onDispose) => _onDispose = onDispose;
+        
+        public void Dispose()
+        {
+            if (_isDisposed) return;
+            _isDisposed = true;
+            _onDispose();
+        }
     }
 }
 ```
 
 ### Conditional Effects
+
+Effects can be conditionally executed based on state values. Check conditions inside the effect and return early or conditionally create resources.
 
 ```csharp demo-tabs
 public class ConditionalEffectView : ViewBase
@@ -302,68 +332,6 @@ public class ConditionalEffectView : ViewBase
         return $"Data fetched at {DateTime.Now:HH:mm:ss}";
     }
 }
-```
-
-## Common Pitfalls
-
-### Forgetting Dependencies
-
-```csharp
-// Wrong: Missing dependency
-var multiplier = UseState(2);
-UseEffect(() =>
-{
-    var result = count.Value * multiplier.Value; // Uses multiplier but not in deps
-    // ...
-}, count); // Missing multiplier dependency
-
-// Correct: Include all state dependencies
-UseEffect(() =>
-{
-    var result = count.Value * multiplier.Value;
-    // ...
-}, count, multiplier);
-```
-
-### Stale Closures
-
-```csharp
-// Wrong: Captures stale state
-UseEffect(() =>
-{
-    var timer = new Timer(_ =>
-    {
-        // This captures the initial value of count!
-        Console.WriteLine(count.Value);
-    }, null, 1000, 1000);
-    return timer;
-}); // No dependencies - effect only runs once
-
-// Correct: Update dependencies or use current state values
-UseEffect(() =>
-{
-    var timer = new Timer(_ =>
-    {
-        Console.WriteLine(count.Value); // Will see current value
-    }, null, 1000, 1000);
-    return timer;
-}, count); // Re-create timer when state changes
-```
-
-### Not Awaiting Async Operations
-
-```csharp
-// Wrong: Fire-and-forget async
-UseEffect(() =>
-{
-    DoAsyncWork(); // No await - operation may not complete
-});
-
-// Correct: Proper async handling
-UseEffect(async () =>
-{
-    await DoAsyncWork(); // Properly await the operation
-});
 ```
 
 ## See Also
