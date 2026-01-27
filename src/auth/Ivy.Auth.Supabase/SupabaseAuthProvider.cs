@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using Ivy.Hooks;
@@ -127,32 +127,24 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(_pkceCodeVerifier))
+        var code = request.Query["code"];
+
+        var error = request.Query["error"];
+        var errorCode = request.Query["error_code"];
+        var errorDescription = request.Query["error_description"];
+        if (error.Count > 0 || errorCode.Count > 0 || errorDescription.Count > 0)
         {
-            throw new InvalidOperationException("PKCE code verifier is not set. OAuth flow was not properly initiated.");
-        }
-
-        var code = request.Query["code"].ToString();
-
-        if (string.IsNullOrWhiteSpace(code))
-        {
-            var error = request.Query["error"].ToString();
-            var errorCode = request.Query["error_code"].ToString();
-            var errorDescription = request.Query["error_description"].ToString();
-
             throw new SupabaseOAuthException(error, errorCode, errorDescription);
         }
+        else if (code.Count == 0)
+        {
+            throw new Exception("Received no recognized query parameters from Supabase.");
+        }
 
-        try
-        {
-            var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier, code)
-                .WaitAsync(cancellationToken);
-            return MakeAuthToken(session);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to exchange authorization code: {ex.Message}", ex);
-        }
+        var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString())
+            .WaitAsync(cancellationToken);
+        var authToken = MakeAuthToken(session);
+        return authToken;
     }
 
     public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
