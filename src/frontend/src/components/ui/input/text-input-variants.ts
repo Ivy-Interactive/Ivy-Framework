@@ -48,9 +48,9 @@ export const xIconVariants = cva(
   {
     variants: {
       scale: {
-        Small: 'h-3 w-3',
-        Medium: 'h-4 w-4',
-        Large: 'h-5 w-5',
+        Small: 'top-2 h-3 w-3',
+        Medium: 'top-2.5 h-4 w-4',
+        Large: 'top-3 h-5 w-5',
       },
     },
     defaultVariants: {
