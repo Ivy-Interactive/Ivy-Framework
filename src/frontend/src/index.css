@@ -444,19 +444,6 @@ ivy-widget {
   }
 }
 
-/* Input background styling - dark theme only */
-@layer base {
-  .dark input,
-  .dark textarea,
-  .dark select {
-    background-color: color-mix(
-      in srgb,
-      var(--black) 10%,
-      var(--background) 10%
-    );
-  }
-}
-
 /* Remove autofill background color */
 @layer base {
   input:-webkit-autofill,
