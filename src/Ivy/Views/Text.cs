@@ -205,7 +205,10 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         switch (variant)
         {
             case TextVariant.Code:
-                return new Code(content, codeLanguage);
+                return new Code(content, codeLanguage)
+                {
+                    WordBreak = _wordBreak
+                };
             case TextVariant.Markdown:
                 return new Markdown(content)
                 {
