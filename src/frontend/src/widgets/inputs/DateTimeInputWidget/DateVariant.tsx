@@ -58,6 +58,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
             variant="outline"
             className={cn(
               dateTimeInputVariants({ scale }),
+              'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed',
