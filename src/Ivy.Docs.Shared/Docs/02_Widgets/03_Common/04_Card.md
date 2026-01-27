@@ -66,6 +66,7 @@ For dashboard applications, Ivy provides the specialized `MetricView` component 
 ```csharp demo-below
 new MetricView(
     "Revenue",
+    Icons.DollarSign,
     ctx => ctx.UseQuery(
         key: "revenue",
         fetcher: () => Task.FromResult(new MetricRecord(
@@ -74,8 +75,7 @@ new MetricView(
             0.85, // 85% of goal
             "Target: $150,000"
         ))
-    ),
-    Icons.DollarSign
+    )
 )
 ```
 

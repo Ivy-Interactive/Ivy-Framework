@@ -13,8 +13,8 @@ public record MetricRecord(
 
 public class MetricView(
     string title,
-    Func<IViewContext, QueryResult<MetricRecord>> useMetricData,
-    Icons? icon = null
+    Icons? icon,
+    Func<IViewContext, QueryResult<MetricRecord>> useMetricData
 ) : ViewBase
 {
     public override object? Build()
