@@ -25,7 +25,6 @@ Here's a simple example of a metric view showing total sales with a trend indica
 ```csharp demo-below
 new MetricView(
     "Total Sales",
-    Icons.DollarSign,
     ctx => ctx.UseQuery(
         key: "total-sales",
         fetcher: () => Task.FromResult(new MetricRecord(
@@ -34,7 +33,8 @@ new MetricView(
             0.21,           // 21% of goal achieved
             "$800,000"      // Goal target
         ))
-    )
+    ),
+    Icons.DollarSign
 )
 ```
 
@@ -49,7 +49,6 @@ Trend Arrows: Green up arrow for positive trends, red down arrow for negative tr
 ```csharp demo-tabs
 new MetricView(
     "Stock Price",
-    Icons.CircleDollarSign,
     ctx => ctx.UseQuery(
         key: "stock-price",
         fetcher: () => Task.FromResult(new MetricRecord(
@@ -58,7 +57,8 @@ new MetricView(
             0.45,
             "$95.00 target"
         ))
-    )
+    ),
+    Icons.CircleDollarSign
 )
 ```
 
@@ -72,14 +72,14 @@ MetricRecord takes four parameters: MetricFormatted (string) for the value, Tren
 
 ```csharp demo-tabs
 Layout.Grid().Columns(2)
-    | new MetricView("Total Sales", Icons.DollarSign,
-        ctx => ctx.UseQuery(key: "sales", fetcher: () => Task.FromResult(new MetricRecord("$84,250", 0.21, 0.21, "$800,000"))))
-    | new MetricView("Post Engagement", Icons.Heart,
-        ctx => ctx.UseQuery(key: "engagement", fetcher: () => Task.FromResult(new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%"))))
-    | new MetricView("User Comments", Icons.UserCheck,
-        ctx => ctx.UseQuery(key: "comments", fetcher: () => Task.FromResult(new MetricRecord("2.25", 0.381, 0.90, "2.50"))))
-    | new MetricView("System Health", Icons.Activity,
-        ctx => ctx.UseQuery(key: "health", fetcher: () => Task.FromResult(new MetricRecord("99.9%", null, 0.99, "100% uptime"))))
+    | new MetricView("Total Sales",
+        ctx => ctx.UseQuery(key: "sales", fetcher: () => Task.FromResult(new MetricRecord("$84,250", 0.21, 0.21, "$800,000"))), Icons.DollarSign)
+    | new MetricView("Post Engagement",
+        ctx => ctx.UseQuery(key: "engagement", fetcher: () => Task.FromResult(new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%"))), Icons.Heart)
+    | new MetricView("User Comments",
+        ctx => ctx.UseQuery(key: "comments", fetcher: () => Task.FromResult(new MetricRecord("2.25", 0.381, 0.90, "2.50"))), Icons.UserCheck)
+    | new MetricView("System Health",
+        ctx => ctx.UseQuery(key: "health", fetcher: () => Task.FromResult(new MetricRecord("99.9%", null, 0.99, "100% uptime"))), Icons.Activity)
 ```
 
 ### Async Data Loading
@@ -89,14 +89,14 @@ The MetricView uses [UseQuery](../../03_Hooks/02_Core/09_UseQuery.md) hooks for 
 ```csharp demo-tabs
 new MetricView(
     "Database Query",
-    Icons.Database,
     ctx => ctx.UseQuery(
         key: "db-query",
         fetcher: async ct => {
             await Task.Delay(1000, ct); // Simulate API call
             return new MetricRecord("1,247 records", 0.125, 0.75, "1,500 records");
         }
-    )
+    ),
+    Icons.Database
 )
 ```
 
@@ -107,14 +107,14 @@ When the data fetching fails, the MetricView automatically displays an error sta
 ```csharp demo-tabs
 new MetricView(
     "Failed Metric",
-    Icons.TriangleAlert,
     ctx => ctx.UseQuery<MetricRecord, string>(
         key: "failing-metric",
         fetcher: async ct => {
             await Task.Delay(500, ct);
             throw new Exception("Failed to load metric data");
         }
-    )
+    ),
+    Icons.TriangleAlert
 )
 ```
 
@@ -230,10 +230,10 @@ public class ECommerceDashboard : ViewBase
         return Layout.Vertical().Gap(4)
             | Text.H2("E-Commerce Dashboard")
             | (Layout.Grid().Columns(2).Gap(3)
-                | new MetricView("Total Revenue", Icons.DollarSign, UseRevenueMetric)
-                | new MetricView("Total Orders", Icons.ShoppingCart, UseOrdersMetric)
-                | new MetricView("Conversion Rate", Icons.TrendingUp, UseConversionMetric)
-                | new MetricView("Avg Order Value", Icons.CreditCard, UseAverageOrderValue)
+                | new MetricView("Total Revenue", UseRevenueMetric, Icons.DollarSign)
+                | new MetricView("Total Orders", UseOrdersMetric, Icons.ShoppingCart)
+                | new MetricView("Conversion Rate", UseConversionMetric, Icons.TrendingUp)
+                | new MetricView("Avg Order Value", UseAverageOrderValue, Icons.CreditCard)
             );
     }
 }
@@ -338,10 +338,10 @@ public class SaaSDashboard : ViewBase
             | Text.H2("SaaS Metrics Dashboard")
             | Text.Muted("Real-time business metrics and KPIs")
             | (Layout.Grid().Columns(2).Gap(3)
-                | new MetricView("Monthly Recurring Revenue", Icons.DollarSign, UseMrrMetric)
-                | new MetricView("Active Users", Icons.Users, UseActiveUsersMetric)
-                | new MetricView("Churn Rate", Icons.UserMinus, UseChurnRateMetric)
-                | new MetricView("Customer LTV", Icons.Gem, UseLtvMetric)
+                | new MetricView("Monthly Recurring Revenue", UseMrrMetric, Icons.DollarSign)
+                | new MetricView("Active Users", UseActiveUsersMetric, Icons.Users)
+                | new MetricView("Churn Rate", UseChurnRateMetric, Icons.UserMinus)
+                | new MetricView("Customer LTV", UseLtvMetric, Icons.Gem)
             );
     }
 }
