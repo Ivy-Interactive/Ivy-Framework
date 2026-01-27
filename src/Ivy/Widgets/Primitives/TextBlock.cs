@@ -23,9 +23,6 @@ public enum TextVariant
     Danger,
     Warning,
     Success,
-    Label,
-    Strong,
-    Display,
     //Invalid values. Only used in Text helper.
     Code,
     Markdown,
@@ -33,6 +30,8 @@ public enum TextVariant
     Xml,
     Html,
     Latex,
+    Label,
+    Strong
 }
 
 /// <summary>
