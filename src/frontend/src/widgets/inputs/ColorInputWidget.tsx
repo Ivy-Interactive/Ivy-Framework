@@ -53,6 +53,10 @@ const enumColorsToCssVar: Record<string, string> = {
   primary: 'var(--color-primary)',
   secondary: 'var(--color-secondary)',
   destructive: 'var(--color-destructive)',
+  success: 'var(--color-success)',
+  warning: 'var(--color-warning)',
+  info: 'var(--color-info)',
+  muted: 'var(--color-muted)',
 };
 
 interface ColorSwatchGridProps {
@@ -82,7 +86,7 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
             disabled={disabled}
             onClick={() => onColorSelect(colorName)}
             className={cn(
-              'w-6 h-6 rounded border-2 transition-all flex items-center justify-center',
+              'w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center',
               'hover:scale-110 hover:z-10',
               isSelected
                 ? 'border-foreground ring-2 ring-foreground/30'
@@ -278,9 +282,8 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             value={getDisplayColor()}
             onChange={handleColorChange}
             disabled={disabled}
-            className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
-              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+            className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
           />
         </div>
       </div>
@@ -296,9 +299,8 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           value={getDisplayColor()}
           onChange={handleColorChange}
           disabled={disabled}
-          className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
-            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-          } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+          className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
         />
       </div>
       <div className="relative">
