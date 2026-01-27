@@ -64,7 +64,7 @@ public class Program
 
 ### Service Descriptions
 
-Services can provide custom descriptions by implementing the `IDescribableService` interface. Use `ServerDescriptionReader` to read environment-specific service descriptions from your [application](../../../01_Onboarding/02_Concepts/15_Apps.md).
+Services can provide custom descriptions by implementing the `IDescribableService` interface. Use `ServerDescriptionReader` to read environment-specific service descriptions from your [application](../../../01_Onboarding/02_Concepts/10_Apps.md).
 
 ```csharp
 // Implement IDescribableService for custom service descriptions
