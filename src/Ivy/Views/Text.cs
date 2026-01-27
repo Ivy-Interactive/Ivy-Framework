@@ -197,6 +197,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _bold;
     private bool _italic;
     private bool _muted;
+    private Shared.WordBreak? _wordBreak;
     private Scale? _scale;
 
     public override object? Build()
@@ -218,7 +219,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
             default:
                 {
                     var text = new TextBlock(
-                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted)
+                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted, _wordBreak)
                     {
                         Scale = _scale
                     };
@@ -272,6 +273,12 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     public TextBuilder Overflow(Overflow overflow)
     {
         _overflow = overflow;
+        return this;
+    }
+
+    public TextBuilder WordBreak(Shared.WordBreak wordBreak)
+    {
+        _wordBreak = wordBreak;
         return this;
     }
 
