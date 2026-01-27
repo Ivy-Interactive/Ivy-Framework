@@ -100,6 +100,7 @@ const CodeBlock = memo(
   ({
     className,
     children,
+    inline,
     hasCodeBlocks,
     hasMermaid,
     wordBreak,
@@ -127,7 +128,7 @@ const CodeBlock = memo(
     const shouldWrap = effectiveWordBreak !== 'Normal';
     const whiteSpaceStyle = shouldWrap ? { whiteSpace: 'pre-wrap' } : {};
 
-    if (match && hasCodeBlocks) {
+    if (!inline && match && hasCodeBlocks) {
       // Handle Mermaid diagrams
       if (isMermaid && hasMermaid) {
         return (
@@ -222,7 +223,15 @@ const CodeBlock = memo(
       );
     }
 
-    return <code className={cn(typography.code, className)}>{children}</code>;
+    // Apply styles to fallback blocks (no language) if it's a block (!inline)
+    const fallbackStyles =
+      !inline && shouldWrap ? { ...whiteSpaceStyle, ...breakStyles } : {};
+
+    return (
+      <code className={cn(typography.code, className)} style={fallbackStyles}>
+        {children}
+      </code>
+    );
   }
 );
 
@@ -444,15 +453,18 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   // Memoize code component separately (depends on contentFeatures.hasCodeBlocks and hasMermaid)
   const codeComponent = useMemo(
     () => ({
-      code: memo((props: React.ComponentProps<'code'>) => (
-        <CodeBlock
-          className={props.className}
-          children={props.children || ''}
-          hasCodeBlocks={contentFeatures.hasCodeBlocks}
-          hasMermaid={contentFeatures.hasMermaid}
-          wordBreak={wordBreak}
-        />
-      )),
+      code: memo(
+        (props: React.ComponentProps<'code'> & { inline?: boolean }) => (
+          <CodeBlock
+            className={props.className}
+            children={props.children || ''}
+            inline={props.inline}
+            hasCodeBlocks={contentFeatures.hasCodeBlocks}
+            hasMermaid={contentFeatures.hasMermaid}
+            wordBreak={wordBreak}
+          />
+        )
+      ),
     }),
     [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid, wordBreak]
   );
