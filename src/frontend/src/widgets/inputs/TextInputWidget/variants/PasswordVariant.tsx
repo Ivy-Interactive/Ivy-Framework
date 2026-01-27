@@ -90,7 +90,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
       style={styles}
       ref={containerRef}
     >
-      <div className="rounded-md border border-input shadow-sm dark:bg-white/5 dark:border-white/10">
+      <div className="rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
         <Input
           ref={elementRef}
           id={props.id}

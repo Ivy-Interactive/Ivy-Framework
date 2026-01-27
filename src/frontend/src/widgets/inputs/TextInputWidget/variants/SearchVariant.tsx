@@ -102,7 +102,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   return (
     <div className="relative w-full select-none" style={styles}>
       <Search className={searchIconVariants({ scale })} />
-      <div className="rounded-md border border-input shadow-sm dark:bg-white/5 dark:border-white/10">
+      <div className="rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
         <Input
           ref={mergedRef}
           id={props.id}
