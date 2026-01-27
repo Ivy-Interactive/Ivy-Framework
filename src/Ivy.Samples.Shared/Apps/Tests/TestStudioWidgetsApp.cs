@@ -35,7 +35,7 @@ public class MultipleAnswerQuestion<T>(string question, IEnumerable<IAnyOption> 
 }
 
 [App(icon: Icons.MessageSquare, path: ["Tests"])]
-public class ChatBoxApp : SampleBase
+public class TestStudioWidgetsApp : SampleBase
 {
     protected override object? BuildSample()
     {
@@ -52,15 +52,29 @@ public class ChatBoxApp : SampleBase
         };
 
         return Layout.Vertical().Gap(6)
-            | Text.H1("ChatBox")
+            | Text.H1("Studio Widgets")
+
+            | Text.H2("FloatingBox")
+            | Text.P("A subtle dark-tinted container with transparent border.")
+            | new FloatingBox(
+                Layout.Horizontal().Gap(1).Align(Align.Center)
+                | (Layout.Horizontal().Gap(1).Grow()
+                    | Icons.Citrus.ToButton().BorderRadius(BorderRadius.Full)
+                    | Icons.Waypoints.ToButton().BorderRadius(BorderRadius.Full).Ghost()
+                    | Icons.Code.ToButton().BorderRadius(BorderRadius.Full).Ghost())
+                | (Layout.Horizontal().Gap(2).Align(Align.Right)
+                    | new Button("Action")
+                    | new Avatar("JD")))  
+
+            | Text.H2("ChatBox")
             | Text.P("ChatBox is a reusable container with a title and custom content.")
 
-            | Text.H2("With Text Input")
+            | Text.H3("With Text Input")
             | new ChatBox(
                 "What is your name?",
                 name.ToTextInput().Placeholder("Enter your name..."))
 
-            | Text.H2("With Custom Buttons")
+            | Text.H3("With Custom Buttons")
             | new ChatBox(
                 "Choose an action:",
                 Layout.Horizontal().Gap(2)
@@ -68,13 +82,13 @@ public class ChatBoxApp : SampleBase
                 | new Button("Export", () => { }).Secondary().Small()
                 | new Button("Delete", () => { }).Destructive().Small())
 
-            | Text.H2("Without Title")
+            | Text.H3("Without Title")
             | new ChatBox(
                 content: Layout.Vertical().Gap(2)
                 | Text.P("This ChatBox has no title, only content.")
                 | new Button("Got it!", () => { }).Outline().Small())
 
-            | Text.H2("SingleAnswerQuestion")
+            | Text.H3("SingleAnswerQuestion")
             | new SingleAnswerQuestion(
                 "Create Database Connection?",
                 value => answer.Set(value),
@@ -84,7 +98,7 @@ public class ChatBoxApp : SampleBase
                 ? Text.Label($"You answered: {(answer.Value == true ? "Connect" : "Cancel")}")
                 : null)
 
-            | Text.H2("MultipleAnswerQuestion")
+            | Text.H3("MultipleAnswerQuestion")
             | new MultipleAnswerQuestion<string>(
                 "Which database do you want to use?",
                 dbOptions,
