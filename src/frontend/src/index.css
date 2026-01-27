@@ -7,11 +7,6 @@
 
 /* Hardcoded CSS variables removed - now using Ivy Design System flat CSS imports above */
 
-/* Custom element for widget inspector */
-ivy-widget {
-  display: contents;
-}
-
 /* Additional theme customization variables */
 @layer base {
   :root {
@@ -402,8 +397,7 @@ ivy-widget {
   }
 }
 
-:has(> DIV.remove-parent-padding),
-:has(> ivy-widget > DIV.remove-parent-padding) {
+:has(> DIV.remove-parent-padding) {
   padding: 0 !important;
 }
 

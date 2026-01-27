@@ -65,7 +65,10 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
 
   return (
     <div className="relative w-full select-none">
-      <div className="rounded-md border border-input shadow-sm dark:bg-white/5 dark:border-white/10" style={styles}>
+      <div
+        className="rounded-md border border-input shadow-sm dark:bg-white/5 dark:border-white/10"
+        style={styles}
+      >
         <Textarea
           ref={elementRef as React.RefObject<HTMLTextAreaElement>}
           id={props.id}
