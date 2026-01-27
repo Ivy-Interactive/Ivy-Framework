@@ -444,50 +444,6 @@ ivy-widget {
   }
 }
 
-/* Input background styling - dark theme only */
-@layer base {
-  .dark input,
-  .dark textarea,
-  .dark select {
-    background-color: color-mix(
-      in srgb,
-      var(--black) 15%,
-      var(--background) 10%
-    );
-  }
-
-  /* SelectTrigger (dropdown), DateRange button - same bg color-mix */
-  .dark button[role='combobox'],
-  .dark button[data-slot='calendar'] {
-    background-color: color-mix(
-      in srgb,
-      var(--black) 15%,
-      var(--background) 10%
-    ) !important;
-  }
-
-  .dark button[role='combobox']:hover,
-  .dark button[data-slot='calendar']:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--black) 8%,
-      var(--background) 10%
-    ) !important;
-  }
-
-  /* Checkbox and Radio - border color with 60% opacity (like BorderColor(Colors.Neutral, 0.6f)) */
-  .dark button[role='checkbox'],
-  .dark button[role='radio'] {
-    border-color: color-mix(in srgb, var(--neutral) 60%, transparent) !important;
-  }
-
-  /* When checked, match border to primary color */
-  .dark button[role='checkbox'][data-state='checked'],
-  .dark button[role='radio'][data-state='checked'] {
-    border-color: var(--primary) !important;
-  }
-}
-
 /* Remove autofill background color */
 @layer base {
   input:-webkit-autofill,
