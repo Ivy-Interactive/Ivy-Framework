@@ -154,6 +154,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
           <Button
             disabled={disabled}
             variant="outline"
+            data-slot="calendar"
             className={cn(
               dateTimeInputVariants({ scale }),
               'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',

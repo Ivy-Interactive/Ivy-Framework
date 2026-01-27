@@ -7,6 +7,11 @@
 
 /* Hardcoded CSS variables removed - now using Ivy Design System flat CSS imports above */
 
+/* Custom element for widget inspector */
+ivy-widget {
+  display: contents;
+}
+
 /* Additional theme customization variables */
 @layer base {
   :root {
@@ -19,24 +24,27 @@
     --toolbox: #38363a;
     --spacing: 0.27rem;
     --radius: 0.5rem;
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-md:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-    --shadow-lg:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-    --shadow-xl:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-2xs: 0 1px 2px 0 hsl(0 0% 0% / 0.03);
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.03);
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.04);
+    --shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 2px 4px 0 hsl(0 0% 0% / 0.05);
+    --shadow-lg: 0 4px 6px 0 hsl(0 0% 0% / 0.05);
+    --shadow-xl: 0 6px 10px 0 hsl(0 0% 0% / 0.05);
+    --shadow-2xl: 0 8px 14px 0 hsl(0 0% 0% / 0.08);
   }
 
   .dark {
     /* Additional dark theme overrides not in design system yet */
     --toolbox: #edeaf1;
+    --shadow-2xs: none;
+    --shadow-xs: none;
+    --shadow-sm: none;
+    --shadow: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-xl: none;
+    --shadow-2xl: none;
   }
 
   @theme inline {
@@ -394,7 +402,8 @@
   }
 }
 
-:has(> DIV.remove-parent-padding) {
+:has(> DIV.remove-parent-padding),
+:has(> ivy-widget > DIV.remove-parent-padding) {
   padding: 0 !important;
 }
 
@@ -432,6 +441,50 @@
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+  }
+}
+
+/* Input background styling - dark theme only */
+@layer base {
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background-color: color-mix(
+      in srgb,
+      var(--black) 15%,
+      var(--background) 10%
+    );
+  }
+
+  /* SelectTrigger (dropdown), DateRange button - same bg color-mix */
+  .dark button[role='combobox'],
+  .dark button[data-slot='calendar'] {
+    background-color: color-mix(
+      in srgb,
+      var(--black) 15%,
+      var(--background) 10%
+    ) !important;
+  }
+
+  .dark button[role='combobox']:hover,
+  .dark button[data-slot='calendar']:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--black) 8%,
+      var(--background) 10%
+    ) !important;
+  }
+
+  /* Checkbox and Radio - border color with 60% opacity (like BorderColor(Colors.Neutral, 0.6f)) */
+  .dark button[role='checkbox'],
+  .dark button[role='radio'] {
+    border-color: color-mix(in srgb, var(--neutral) 60%, transparent) !important;
+  }
+
+  /* When checked, match border to primary color */
+  .dark button[role='checkbox'][data-state='checked'],
+  .dark button[role='radio'][data-state='checked'] {
+    border-color: var(--primary) !important;
   }
 }
 
