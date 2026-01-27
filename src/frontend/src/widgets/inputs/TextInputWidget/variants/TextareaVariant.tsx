@@ -5,7 +5,7 @@ import { getWidth, getHeight, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
 import {
-  textInputSizeVariants,
+  textAreaSizeVariants,
   xIconVariants,
 } from '@/components/ui/input/text-input-variants';
 import { TextInputWidgetProps } from '../types';
@@ -78,7 +78,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         onFocus={onFocus}
         onPaste={handlePaste}
         className={cn(
-          textInputSizeVariants({ scale }),
+          textAreaSizeVariants({ scale }),
           props.invalid && inputStyles.invalidInput,
           (props.invalid || showClear) && 'pr-8',
           props.shortcutKey &&

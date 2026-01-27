@@ -14,6 +14,20 @@ export const textInputSizeVariants = cva('w-full', {
   },
 });
 
+// Size variants for Textarea (minimum height and padding scale; no fixed height)
+export const textAreaSizeVariants = cva('w-full', {
+  variants: {
+    scale: {
+      Small: 'min-h-[52px] py-2 px-2 text-xs',
+      Medium: 'min-h-[60px] py-2 px-3 text-sm',
+      Large: 'min-h-[72px] py-3 px-4 text-base',
+    },
+  },
+  defaultVariants: {
+    scale: 'Medium',
+  },
+});
+
 // Size variants for search icon
 export const searchIconVariants = cva('absolute text-muted-foreground', {
   variants: {
