@@ -6,18 +6,21 @@ import {
   subscribeToContentOverride,
 } from '@/widgets/widgetRenderer';
 
+import { WordBreak } from '@/lib/styles';
 import { Scales } from '@/types/scale';
 
 interface MarkdownWidgetProps {
   id: string;
   content: string;
   scale?: Scales;
+  wordBreak?: WordBreak;
 }
 
 const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   id,
   content = '',
   scale = Scales.Medium,
+  wordBreak,
 }) => {
   const eventHandler = useEventHandler();
   const [, forceUpdate] = useState(0);
@@ -67,6 +70,7 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
         key={id}
         content={displayContent}
         onLinkClick={handleLinkClick}
+        wordBreak={wordBreak}
       />
     </div>
   );

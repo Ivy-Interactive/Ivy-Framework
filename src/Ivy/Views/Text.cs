@@ -207,7 +207,10 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
             case TextVariant.Code:
                 return new Code(content, codeLanguage);
             case TextVariant.Markdown:
-                return new Markdown(content);
+                return new Markdown(content)
+                {
+                    WordBreak = _wordBreak
+                };
             case TextVariant.Json:
                 return new Json(content);
             case TextVariant.Xml:
