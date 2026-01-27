@@ -81,7 +81,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           onFocus={onFocus}
           onPaste={handlePaste}
           className={cn(
-            textInputSizeVariants({ scale }),
+            textAreaSizeVariants({ scale }),
             'border-0 shadow-none dark:bg-transparent h-full',
             props.invalid && inputStyles.invalidInput,
             (props.invalid || showClear) && 'pr-8',
