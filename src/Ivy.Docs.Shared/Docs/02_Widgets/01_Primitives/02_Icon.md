@@ -59,7 +59,7 @@ public class LucideIconsView : ViewBase
 
 ## Colors
 
-You can customize the color of the icons using the `Color` parameter.
+You can customize the color of the icons using the [`Color`](../../04_ApiReference/IvyShared/Colors.md) parameter.
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -72,7 +72,7 @@ Layout.Horizontal()
 
 ## Sizes
 
-You can also customize the size of the icons using the `Size` parameter.
+You can also customize the size of the icons using the [`Size`](../../04_ApiReference/IvyShared/Size.md) parameter.
 
 ```csharp demo-tabs
 Layout.Horizontal()

@@ -150,8 +150,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             variant="outline"
             disabled={disabled}
             data-testid={dataTestId}
+            data-slot="calendar"
             className={cn(
               dateRangeInputVariants({ scale }),
+              'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && 'border-destructive focus-visible:ring-destructive',
               showClear && invalid

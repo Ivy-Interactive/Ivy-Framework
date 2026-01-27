@@ -14,7 +14,8 @@ public enum ColorInputs
 {
     Text,
     Picker,
-    TextAndPicker
+    TextAndPicker,
+    Swatch
 }
 
 public interface IAnyColorInput : IAnyInput
@@ -130,11 +131,14 @@ public static class ColorInputExtensions
         return "Invalid color format";
     }
 
-    public static ColorInputBase ToColorInput(this IAnyState state, string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
+    public static ColorInputBase ToColorInput(this IAnyState state, string? placeholder = null, bool disabled = false, ColorInputs? variant = null)
     {
         var type = state.GetStateType();
+        var underlyingType = System.Nullable.GetUnderlyingType(type) ?? type;
+        var effectiveVariant = variant ?? (underlyingType == typeof(Colors) ? ColorInputs.Swatch : ColorInputs.TextAndPicker);
+
         Type genericType = typeof(ColorInput<>).MakeGenericType(type);
-        ColorInputBase input = (ColorInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
+        ColorInputBase input = (ColorInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, effectiveVariant)!;
         input.Nullable = type.IsNullableType();
 
         var currentValue = state.As<object>().Value?.ToString();

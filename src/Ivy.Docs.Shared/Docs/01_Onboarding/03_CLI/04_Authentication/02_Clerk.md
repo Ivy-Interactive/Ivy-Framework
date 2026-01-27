@@ -163,12 +163,12 @@ You will be prompted to provide the following Clerk configuration:
 - **Publishable Key**: Your Clerk publishable key (starts with `pk_test_` or `pk_live_`)
 - **Secret Key**: Your Clerk secret key (starts with `sk_test_` or `sk_live_`)
 
-Your credentials will be stored securely in .NET user secrets.
+Your credentials will be stored securely in [.NET user secrets](../../02_Concepts/14_Secrets.md).
 
 Ivy then finishes configuring your application automatically:
 
 1. Adds the `Ivy.Auth.Clerk` package to your project
-2. Adds `server.UseAuth<ClerkAuthProvider>()` to your `Program.cs`
+2. Adds `server.UseAuth<ClerkAuthProvider>()` to your [Program.cs](../../02_Concepts/01_Program.md)
 3. Adds `Ivy.Auth.Clerk` to your global usings
 
 ### Advanced Configuration
@@ -185,9 +185,9 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Clerk auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
+When deploying an Ivy project without using `ivy deploy`, your local [.NET user secrets](../../02_Concepts/14_Secrets.md) are not automatically transferred. In that case, you can configure Clerk auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
-> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
+> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **[.NET user secrets](../../02_Concepts/14_Secrets.md) over environment variables**.
 
 For more information, see [Authentication Overview](01_AuthenticationOverview.md).
 

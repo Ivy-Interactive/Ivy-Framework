@@ -7,12 +7,9 @@ namespace Ivy.Views;
 
 public static class Text
 {
-    public static TextBuilder Literal(string content)
-    {
-        return new TextBuilder(content, TextVariant.Literal);
-    }
+    public static TextBlock Literal(string content) => new(content, TextVariant.Literal);
 
-    public static TextBuilder Literal(IAnyState state) => Literal(state.ToString() ?? "");
+    public static TextBlock Literal(IAnyState state) => new(state.ToString() ?? "", TextVariant.Literal);
 
     public static TextBuilder H1(string content)
     {
@@ -315,3 +312,5 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
 
     public TextBuilder Large() => Scale(Ivy.Shared.Scale.Large);
 }
+
+

@@ -14,7 +14,7 @@ searchHints:
 Capture dates and times with intuitive picker [interfaces](../../01_Onboarding/02_Concepts/02_Views.md) supporting calendar selection, time input, and combined date-time entry.
 </Ingress>
 
-The `DateTimeInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a comprehensive date and time picker interface with support for different variants. It allows users to select dates from a calendar, times from a time selector, or both date and time together, making it ideal for scheduling, event creation, and [form](../../01_Onboarding/02_Concepts/13_Forms.md) inputs.
+The `DateTimeInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a comprehensive date and time picker interface with support for different variants. It allows users to select dates from a calendar, times from a time selector, or both date and time together, making it ideal for scheduling, event creation, and [form](../../01_Onboarding/02_Concepts/08_Forms.md) inputs.
 
 ## Basic Usage
 
@@ -81,7 +81,7 @@ public class DateTimeVariantsDemo : ViewBase
 - `TimeOnly` and `TimeOnly?`
 - `string` (for ISO format)
 
-## [Event Handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md)
+## Event Handling
 
 `DateTimeInput` can handle change and blur events:
 

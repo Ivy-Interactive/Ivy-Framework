@@ -12,7 +12,7 @@ searchHints:
 
 # TabsLayout
 
-The TabsLayout [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates a tabbed [interface](../../01_Onboarding/02_Concepts/02_Views.md) that allows users to switch between different content sections. It supports both traditional tabs and content-based variants, with features such as closable tabs, [badges](../../02_Widgets/03_Common/02_Badge.md), [icons](../../02_Widgets/01_Primitives/02_Icon.md), and drag-and-drop reordering.
+The TabsLayout [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates a tabbed [interface](../../01_Onboarding/02_Concepts/02_Views.md) that allows users to switch between different content sections. It supports both traditional tabs and content-based variants, with features such as closable tabs, [badges](../03_Common/02_Badge.md), [icons](../01_Primitives/02_Icon.md), and drag-and-drop reordering.
 
 ## Basic Usage
 
@@ -65,7 +65,7 @@ new TabsLayout(null, null, null, null, 0,
 - `onReorder`: Enables drag-and-drop tab reordering
 - `selectedIndex`: Sets the initially selected tab
 
-This example demonstrates how to handle all available events. The event handlers receive the tab index and can perform custom actions such as logging, [state](../../03_Hooks/Core/03_UseState.md) updates, or API calls.
+This example demonstrates how to handle all available events. The event handlers receive the tab index and can perform custom actions such as logging, [state](../../03_Hooks/02_Core/03_UseState.md) updates, or API calls.
 
 ```csharp demo-tabs
 new TabsLayout(

@@ -90,36 +90,38 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
       style={styles}
       ref={containerRef}
     >
-      <Input
-        ref={elementRef}
-        id={props.id}
-        placeholder={props.placeholder}
-        value={props.value}
-        type={showPassword ? 'text' : 'password'}
-        disabled={props.disabled}
-        maxLength={props.maxLength}
-        onChange={handleChange}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        onKeyDown={handleKeyDown}
-        onPaste={handlePaste}
-        className={cn(
-          textInputSizeVariants({ scale }),
-          props.invalid && inputStyles.invalidInput,
-          props.invalid || showClear ? 'pr-14' : 'pr-8',
-          hasLastPass && 'pr-3',
-          props.shortcutKey &&
-            !hasLastPass &&
-            !hasValue &&
-            !showClear &&
-            !props.invalid &&
-            'pr-24',
-          showClear && props.invalid && !hasLastPass && 'pr-20',
-          !hasValue && props.nullable && 'placeholder:text-muted-foreground'
-        )}
-        data-testid={props['data-testid']}
-      />
-      {/* Icons container: password toggle, clear (if nullable), shortcut (if any), then invalid (if any) */}
+      <div className="rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
+        <Input
+          ref={elementRef}
+          id={props.id}
+          placeholder={props.placeholder}
+          value={props.value}
+          type={showPassword ? 'text' : 'password'}
+          disabled={props.disabled}
+          maxLength={props.maxLength}
+          onChange={handleChange}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
+          className={cn(
+            textInputSizeVariants({ scale }),
+            'border-0 shadow-none dark:bg-transparent',
+            props.invalid && inputStyles.invalidInput,
+            props.invalid || showClear ? 'pr-14' : 'pr-8',
+            hasLastPass && 'pr-3',
+            props.shortcutKey &&
+              !hasLastPass &&
+              !hasValue &&
+              !showClear &&
+              !props.invalid &&
+              'pr-24',
+            showClear && props.invalid && !hasLastPass && 'pr-20',
+            !hasValue && props.nullable && 'placeholder:text-muted-foreground'
+          )}
+          data-testid={props['data-testid']}
+        />
+      </div>
       {!hasLastPass && (
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 pointer-events-none h-6">
           <div className="pointer-events-auto flex items-center h-6">

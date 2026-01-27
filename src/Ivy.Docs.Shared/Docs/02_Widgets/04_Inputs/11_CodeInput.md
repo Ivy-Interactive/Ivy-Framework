@@ -12,7 +12,7 @@ searchHints:
 # CodeInput
 
 <Ingress>
-Edit code with syntax highlighting, line numbers, and formatting support for multiple programming languages in a specialized input [field](01_Field.md).
+Edit code with syntax highlighting, line numbers, and formatting support for multiple programming languages in a specialized input [field](01_Field.md). Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width()` and `.Height()` to control dimensions.
 </Ingress>
 
 The `CodeInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a specialized text input field for entering and editing code with syntax highlighting.
@@ -188,36 +188,3 @@ public class CodeInputWithValidation : ViewBase
 ```
 
 <WidgetDocs Type="Ivy.CodeInput" ExtensionTypes="Ivy.CodeInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/CodeInput.cs"/>
-
-## Examples
-
-<Details>
-<Summary>
-DBML Editor with Live Preview
-</Summary>
-<Body>
-
-```csharp demo-tabs
-public class DBMLEditorDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var sampleDbml = @"Table users {
-                            id integer [primary key]
-                            username varchar
-                            role varchar
-                            created_at timestamp
-                    }";
-        var dbml = UseState(sampleDbml);
-        return Layout.Horizontal().RemoveParentPadding().Height(Size.Screen())
-                | dbml.ToCodeInput()
-                    .Width(Size.Units(50))
-                    .Height(Size.Auto())
-                    .Language(Languages.Dbml)
-                | new DbmlCanvas(dbml.Value).Width(Size.Grow());
-   }
-}
-```
-
-</Body>
-</Details>

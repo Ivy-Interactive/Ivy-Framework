@@ -52,7 +52,7 @@ const _getWantedWidth = (width?: string): React.CSSProperties => {
     case 'auto':
       return { width: 'auto' };
     case 'grow':
-      return { flexGrow: parseFloat(value) || 1 };
+      return { flexGrow: parseFloat(value) || 1, minWidth: 0 };
     case 'shrink':
       return { flexShrink: parseFloat(value) || 1 };
     default:
@@ -382,6 +382,11 @@ export const getOverflow = (overflow?: Overflow): React.CSSProperties => {
   };
 };
 
+export const gridCellOverflow = {
+  ellipsis:
+    '[&>*]:min-w-0 [&>*]:truncate hover:[&>*]:overflow-visible hover:[&>*]:whitespace-normal hover:[&>*]:absolute hover:[&>*]:z-10',
+};
+
 export type Orientation = 'Horizontal' | 'Vertical';
 
 export type Align =
@@ -594,14 +599,14 @@ export const typography: Record<string, string> = {
   // UI variants
   label: 'text-large-label font-medium leading-none flex items-center',
   block: 'flex items-center min-w-0',
-  display: 'text-4xl font-medium',
+  display: 'text-3xl font-medium',
 
   // Lists
   ul: 'list-disc ml-6',
   ol: 'list-decimal ml-6',
 
   // Links
-  a: 'text-primary underline brightness-90 hover:brightness-100',
+  a: 'text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100',
 
   // Blockquote
   blockquote: 'border-l-2 pl-6 italic',

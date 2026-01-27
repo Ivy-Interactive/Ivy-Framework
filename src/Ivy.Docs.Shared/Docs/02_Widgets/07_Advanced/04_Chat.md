@@ -11,15 +11,15 @@ searchHints:
 
 # Chat
 
-The `Chat` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) renders a conversation between a user and an assistant.
+The `Chat` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) renders a conversation between a user and an assistant. Use it inside [views](../../01_Onboarding/02_Concepts/02_Views.md) and [layouts](../../01_Onboarding/02_Concepts/04_Layout.md).
 
-Messages are supplied as `ChatMessage` objects and new messages are sent through the `OnSend` event.
+Messages are supplied as `ChatMessage` objects and new messages are sent through the `OnSend` [event](../../01_Onboarding/02_Concepts/05_EventHandlers.md).
 
 ## Basic Chat
 
 A simple chat with an echo bot that repeats user messages.
 
-This demonstrates the fundamental usage of the Chat widget with basic message handling and [state management](../../03_Hooks/Core/03_UseState.md).
+This demonstrates the fundamental usage of the Chat widget with basic message handling and [state management](../../03_Hooks/02_Core/03_UseState.md).
 
 ```csharp demo-tabs
 public class BasicChatDemo : ViewBase

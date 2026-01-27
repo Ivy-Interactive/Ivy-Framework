@@ -49,7 +49,7 @@ A Spanner database is uniquely identified by three components:
 - **Instance ID**
 - **Database ID**
 
-Once these components have been selected, by either method above, a connection string of the following format is generated and stored in .NET user secrets:
+Once these components have been selected, by either method above, a connection string of the following format is generated and stored in [.NET user secrets](../../02_Concepts/14_Secrets.md):
 
 ```text
 Data Source=projects/{projectId}/instances/{instanceId}/databases/{databaseId}

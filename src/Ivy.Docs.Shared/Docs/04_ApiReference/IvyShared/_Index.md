@@ -1,3 +1,3 @@
-﻿---
+---
 title: Ivy.Shared
 ---

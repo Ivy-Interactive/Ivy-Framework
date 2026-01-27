@@ -2,12 +2,11 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Ivy?style=flat)](https://www.nuget.org/packages/Ivy)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Ivy?style=flat)](https://www.nuget.org/packages/Ivy)
-[![Discord](https://img.shields.io/discord/1392844390963089499?style=flat&label=Discord)](https://discord.gg/CffzHm66BW)
 [![License](https://img.shields.io/github/license/Ivy-Interactive/Ivy-Framework?style=flat)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/Ivy-Interactive/Ivy-Framework/backend-checks-linux.yml?style=flat&label=CI)](https://github.com/Ivy-Interactive/Ivy-Framework/actions/workflows/backend-checks-linux.yml)
 [![website](https://img.shields.io/badge/website-ivy.app-green?style=flat)](https://ivy.app)
 [![codespaces](https://img.shields.io/badge/codespaces-try-blue?style=flat&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Devcontainer&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=EuropeWest)
-[![llms.txt](https://img.shields.io/badge/llms.txt-copy-purple?style=flat)](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/llms.txt)
+[![AGENTS.md](https://img.shields.io/badge/AGENTS.md-copy-purple?style=flat)](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/AGENTS.md)
 
 # Build Full-Stack Applications in Pure C\#
 
@@ -42,14 +41,19 @@ public class SimpleCounterApp : ViewBase
 
 ## Features
 
-- 🧩 **Rich Widget Library:** Extensive set of pre-built widgets to build any app. If you need more, an external widget framework is coming soon, where you can integrate any React, Angular, or Vue component.
-- 🔌 **External Widget Framework:** Easily integrate any third-party React component.
-- 🪝 **Hooks:** Familiar React-style hooks for state management, side effects, and lifecycle events.
-- 📝 **Forms**: Create complex CRUD forms with validation and data binding.
-- 📊 **Data Tables**: Sort, filter, and paginate data.
-- 📈 **Charts/Dashboards**: Build interactive charts and dashboards with ease.
-- 🔥 **Hot-Reloading**: Full support for hot-reloading with maintained state as much as possible.
-- 🤖 **LLM Code-Generation Compatibility**: Designed to maximize compatibility with LLM code generation tools.
+### ⚙️ Architecture
+- **Rich Widget Library:** Extensive set of pre-built widgets to build any app. If you need more, an external widget framework is coming soon, where you can integrate any React, Angular, or Vue component.
+- **External Widget Framework:** Easily integrate any third-party React component.
+- **Hooks:** Familiar React-style hooks for state management, side effects, and lifecycle events.
+
+### 🎨 UI Components
+- **Forms:** Create complex CRUD forms with validation and data binding.
+- **Data Tables:** Sort, filter, and paginate data.
+- **Charts/Dashboards:** Build interactive charts and dashboards with ease.
+
+### ⚡ Developer Experience
+- **Hot-Reloading:** Full support for hot-reloading with maintained state as much as possible.
+- **LLM Code-Generation Compatibility:** Designed to maximize compatibility with LLM code generation tools.
 
 Ivy maintains state on the server and sends updates over WebSocket. The frontend consists of a pre-built React-based rendering engine. With Ivy, you never need to touch any HTML, CSS, or JavaScript. Only if you want to add your own widgets.
 
@@ -57,13 +61,18 @@ Ivy maintains state on the server and sends updates over WebSocket. The frontend
 
 The Ivy.Console CLI provides a suite of tools to streamline your development workflow:
 
-- 🛠️ **Project Initialization**: Quickly set up new Ivy projects with predefined templates.
-- 🤖 **AI-Powered App Generation**: Generate applications using AI based on your specifications.
-- 🔐 **Authentication Integrations**: Built-in support for popular authentication providers like Supabase, Auth0, Clerk, and Microsoft Entra.
-- 🗄️ **Database Integrations**: Easy integration with SQL Server, Postgres, Supabase, MariaDB, MySQL, Airtable, Oracle, Google Spanner, Clickhouse, Snowflake, and BigQuery.
-- 🚀 **Deployment Management**: Manage deployments to Azure, AWS, Google Cloud, or Sliplane with ease.
-- 🔑 **Secrets Management**: Securely manage sensitive information within your applications.
-- 🧠 **MCP**: Teach any coding agent to use Ivy Framework for building full-stack applications.
+### 🚀 Getting Started
+- **Project Initialization:** Quickly set up new Ivy projects with predefined templates.
+- **AI-Powered App Generation:** Generate applications using AI based on your specifications.
+- **MCP:** Teach any coding agent to use Ivy Framework for building full-stack applications.
+
+### 🔌 Integrations
+- **Authentication:** Built-in support for popular authentication providers like Supabase, Auth0, Clerk, and Microsoft Entra.
+- **Database:** Easy integration with SQL Server, Postgres, Supabase, MariaDB, MySQL, Airtable, Oracle, Google Spanner, Clickhouse, Snowflake, and BigQuery.
+
+### 📦 Production
+- **Deployment Management:** Manage deployments to Azure, AWS, Google Cloud, or Sliplane with ease.
+- **Secrets Management:** Securely manage sensitive information within your applications.
 
 **[See Demo Video](https://www.youtube.com/watch?v=krH7sBLjUrM)** →
 
@@ -101,5 +110,3 @@ You can also run `ivy samples` to see all the components that Ivy offers and `iv
 
 - [Contribution Guidelines](CONTRIBUTING.md)  
 - [Internal Developer Wiki](https://github.com/Ivy-Interactive/Ivy-Framework/wiki)
-
-

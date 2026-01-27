@@ -3,9 +3,9 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
 [App(icon: Icons.LayoutPanelTop, searchHints: ["split", "resizable", "panels", "divider", "adjustable", "layout"])]
-public class ResizeablePanelGroupApp : ViewBase
+public class ResizeablePanelGroupApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         return new ResizeablePanelGroup(
             new ResizeablePanel(25, "Left"),

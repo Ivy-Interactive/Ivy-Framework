@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - icons
   - lucide
@@ -10,7 +10,7 @@ searchHints:
 
 # Icons
 
-Ivy use the [Lucide](https://lucide.dev/icons/) icon library.
+Ivy uses the [Lucide](https://lucide.dev/icons/) icon library. Icons are used in [views](../../../01_Onboarding/02_Concepts/02_Views.md) with [state](../../../03_Hooks/02_Core/03_UseState.md) and [effects](../../../03_Hooks/02_Core/04_UseEffect.md) for search; use [UseService](../../../03_Hooks/02_Core/11_UseService.md) for clipboard and toasts.
 
 ```csharp demo-tabs
 public class SearchIconsView : ViewBase

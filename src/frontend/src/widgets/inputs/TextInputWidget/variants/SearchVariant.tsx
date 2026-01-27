@@ -101,43 +101,40 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" style={styles}>
-      {/* Search Icon */}
       <Search className={searchIconVariants({ scale })} />
-
-      {/* Search Input */}
-      <Input
-        ref={mergedRef}
-        id={props.id}
-        type="search"
-        placeholder={props.placeholder}
-        value={props.value}
-        disabled={props.disabled}
-        maxLength={props.maxLength}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        onFocus={onFocus}
-        onKeyDown={handleKeyDown}
-        onPaste={handlePaste}
-        autoComplete="off"
-        className={cn(
-          textInputSizeVariants({ scale }),
-          'pl-8 cursor-pointer',
-          props.invalid && inputStyles.invalidInput,
-          (props.invalid || showClear) && 'pr-8',
-          props.shortcutKey &&
-            !isFocused &&
-            !hasValue &&
-            !showClear &&
-            !props.invalid &&
-            'pr-16',
-          showClear && props.invalid && 'pr-16',
-          !hasValue && props.nullable && 'placeholder:text-muted-foreground',
-          // Hide browser's default search input X icon
-          '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden'
-        )}
-        data-testid={props['data-testid']}
-      />
-      {/* Icons container: clear (if any), shortcut (if any), then invalid (if any) */}
+      <div className="rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
+        <Input
+          ref={mergedRef}
+          id={props.id}
+          type="search"
+          placeholder={props.placeholder}
+          value={props.value}
+          disabled={props.disabled}
+          maxLength={props.maxLength}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onFocus={onFocus}
+          onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
+          autoComplete="off"
+          className={cn(
+            textInputSizeVariants({ scale }),
+            'pl-8 cursor-pointer border-0 shadow-none dark:bg-transparent',
+            props.invalid && inputStyles.invalidInput,
+            (props.invalid || showClear) && 'pr-8',
+            props.shortcutKey &&
+              !isFocused &&
+              !hasValue &&
+              !showClear &&
+              !props.invalid &&
+              'pr-16',
+            showClear && props.invalid && 'pr-16',
+            !hasValue && props.nullable && 'placeholder:text-muted-foreground',
+            '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden'
+          )}
+          data-testid={props['data-testid']}
+        />
+      </div>
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
         {hasValue && !props.disabled && (
           <button

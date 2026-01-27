@@ -13,8 +13,8 @@ public record MetricRecord(
 
 public class MetricView(
     string title,
-    Icons? icon,
-    Func<IViewContext, QueryResult<MetricRecord>> useMetricData
+    Func<IViewContext, QueryResult<MetricRecord>> useMetricData,
+    Icons? icon = null
 ) : ViewBase
 {
     public override object? Build()
@@ -53,8 +53,10 @@ public class MetricView(
                 .Goal(x.GoalFormatted)
             : null;
 
-        object? header = Layout.Horizontal().Align(Align.Center)
-                    | Text.H4(title).WithLayout().Grow()
+        return new Card(
+                content: Text.Display(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip),
+                header: Layout.Horizontal().Align(Align.Center)
+                    | Text.H4(title).NoWrap().Overflow(Overflow.Ellipsis).Width(Size.Grow())
                     | (Layout.Horizontal().Align(Align.Right).Gap(1).Width(Size.Fit())
                         | (x.TrendComparedToPreviousPeriod != null ? x.TrendComparedToPreviousPeriod >= 0
                                 ? Icons.TrendingUp.ToIcon().Color(Colors.Success).Small()
@@ -63,13 +65,8 @@ public class MetricView(
                         | (x.TrendComparedToPreviousPeriod != null ? x.TrendComparedToPreviousPeriod >= 0
                                 ? Text.P(x.TrendComparedToPreviousPeriod.Value.ToString("P1")).Small().Color(Colors.Success)
                                 : Text.P(x.TrendComparedToPreviousPeriod.Value.ToString("P1")).Small().Color(Colors.Destructive)
-                            : null));
-
-        object? content = Text.Display(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip);
-
-        return new Card(
-                content: content,
-                header: header,
+                            : null)
+                        | (icon?.ToIcon().Color(Colors.Gray))),
                 footer: footer
         ).Height(Size.Full());
     }

@@ -231,7 +231,7 @@ const NumberVariant = memo(
     );
 
     return (
-      <div className="relative w-full flex-1">
+      <div className="relative w-full flex-1 rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
         <NumberInput
           min={min}
           max={max}
@@ -243,9 +243,8 @@ const NumberVariant = memo(
           scale={scale}
           onChange={handleNumberChange}
           className={cn(
+            'border-0 shadow-none',
             invalid && inputStyles.invalidInput,
-            // Add padding for icon container - match TextInput behavior
-            // pr-8 for single icon (either clear or invalid), pr-16 for both
             (invalid || (nullable && value !== null && !disabled)) && 'pr-8',
             nullable && value !== null && !disabled && invalid && 'pr-16'
           )}

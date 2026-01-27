@@ -65,34 +65,38 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
 
   return (
     <div className="relative w-full select-none">
-      <Textarea
+      <div
+        className="rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10"
         style={styles}
-        ref={elementRef as React.RefObject<HTMLTextAreaElement>}
-        id={props.id}
-        placeholder={props.placeholder}
-        value={props.value}
-        disabled={props.disabled}
-        maxLength={props.maxLength}
-        onChange={handleChange}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        onPaste={handlePaste}
-        className={cn(
-          textInputSizeVariants({ scale }),
-          props.invalid && inputStyles.invalidInput,
-          (props.invalid || showClear) && 'pr-8',
-          props.shortcutKey &&
-            !isFocused &&
-            !hasValue &&
-            !showClear &&
-            !props.invalid &&
-            'pr-16',
-          showClear && props.invalid && 'pr-16',
-          !hasValue && props.nullable && 'placeholder:text-muted-foreground'
-        )}
-        data-testid={props['data-testid']}
-      />
-      {/* Icons container: clear (if any), shortcut (if any), then invalid (if any) */}
+      >
+        <Textarea
+          ref={elementRef as React.RefObject<HTMLTextAreaElement>}
+          id={props.id}
+          placeholder={props.placeholder}
+          value={props.value}
+          disabled={props.disabled}
+          maxLength={props.maxLength}
+          onChange={handleChange}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          onPaste={handlePaste}
+          className={cn(
+            textInputSizeVariants({ scale }),
+            'border-0 shadow-none dark:bg-transparent h-full',
+            props.invalid && inputStyles.invalidInput,
+            (props.invalid || showClear) && 'pr-8',
+            props.shortcutKey &&
+              !isFocused &&
+              !hasValue &&
+              !showClear &&
+              !props.invalid &&
+              'pr-16',
+            showClear && props.invalid && 'pr-16',
+            !hasValue && props.nullable && 'placeholder:text-muted-foreground'
+          )}
+          data-testid={props['data-testid']}
+        />
+      </div>
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
         {showClear && (
           <button

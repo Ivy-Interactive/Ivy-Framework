@@ -6,19 +6,24 @@ searchHints:
   - drawer
   - stack
   - master-detail
+  - blades
+  - useblades
+  - side-panel
+  - slide-out
+  - panel
 ---
 
 # Blades
 
 <Ingress>
-Create stacked [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md) experiences where new [views](../../01_Onboarding/02_Concepts/02_Views.md) slide in from the right, managed through a blade controller for intuitive drill-down interfaces.
+Create stacked [navigation](../../01_Onboarding/02_Concepts/09_Navigation.md) experiences where new [views](../../01_Onboarding/02_Concepts/02_Views.md) slide in from the right, managed through a blade controller for intuitive drill-down interfaces.
 </Ingress>
 
 `Blade`s provide a stacked navigation pattern where new views slide in from the right. Use the `UseBlades` extension to create a root blade and manage a stack of blades through `IBladeService`. Perfect for master-detail [interfaces](../../01_Onboarding/02_Concepts/02_Views.md), wizards, and hierarchical navigation.
 
 ## Usage
 
-Create a blade container with a root view and use `IBladeService` to push and pop blades.
+Create a blade container with a root view and use `IBladeService` to push and pop blades. Use [Size](../../04_ApiReference/IvyShared/Size.md) for blade `width` (e.g. `Size.Units(100)`).
 
 ```csharp demo-tabs
 public class BladeNavigationDemo : ViewBase
@@ -110,7 +115,7 @@ public class ProductDetailView(string productName) : ViewBase
 
 ## Refresh Tokens
 
-You can use [Refresh Tokens](../../../03_Hooks/Core/16_UseRefreshToken.md) to trigger updates in parent blades when returning from a child blade. This is common for "save and close" workflows.
+You can use [Refresh Tokens](../../../03_Hooks/02_Core/16_UseRefreshToken.md) to trigger updates in parent blades when returning from a child blade. This is common for "save and close" workflows.
 
 ```csharp demo-tabs
 public class BladeRefreshDemo : ViewBase
@@ -204,5 +209,22 @@ public class BladeWithError : ViewBase
     }
 }
 ```
+
+## UseBlades
+
+The `UseBlades` hook creates a blade service context and initializes a root blade. It returns a `BladesView` that manages the blade stack and provides navigation through the `IBladeService` context.
+
+```mermaid
+graph LR
+    A[UseBlades Hook] --> B[Create Blade Service]
+    B --> C[Initialize Root Blade]
+    C --> D[Create Context]
+    D --> E[Return BladesView]
+```
+
+<Callout Type="info">
+In most cases, you'll use `UseBlades()` directly in your views. The hook manages the blade stack and provides `IBladeService` through context for pushing and popping blades.
+</Callout>
+
 
 <WidgetDocs Type="Ivy.Blade" ExtensionTypes="Ivy.Views.Blades.UseBladesExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Views/Blades/UseBlades.cs"/>

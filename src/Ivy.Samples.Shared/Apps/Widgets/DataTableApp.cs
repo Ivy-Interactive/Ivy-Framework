@@ -2,7 +2,7 @@ using Ivy.Samples.Shared.Apps;
 using Ivy.Shared;
 using Ivy.Views.DataTables;
 
-namespace Ivy.Samples.Apps.Widgets;
+namespace Ivy.Samples.Shared.Apps.Widgets;
 
 /// <summary>
 /// Comprehensive DataTable test with all column types

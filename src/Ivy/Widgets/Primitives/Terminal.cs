@@ -9,7 +9,7 @@ public record TerminalLine(string Content, bool IsCommand = false, string Prompt
 /// </summary>
 public record Terminal : WidgetBase<Terminal>
 {
-    internal Terminal() { }
+    public Terminal() { }
 
     [Prop] public TerminalLine[] Lines { get; init; } = [];
 

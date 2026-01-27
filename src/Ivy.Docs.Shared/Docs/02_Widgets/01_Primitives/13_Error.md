@@ -14,7 +14,7 @@ searchHints:
 Display error states consistently with standardized messaging, optional details, and recovery options for better user experience.
 </Ingress>
 
-The `Error` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a standardized way to display error states in your [app](../../01_Onboarding/02_Concepts/15_Apps.md). It's designed to communicate that something went wrong and optionally provide details and recovery options.
+The `Error` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a standardized way to display error states in your [app](../../01_Onboarding/02_Concepts/10_Apps.md). It's designed to communicate that something went wrong and optionally provide details and recovery options.
 
 ## Basic Usage
 
@@ -145,7 +145,7 @@ public class TextErrorExamplesView : ViewBase
 }
 ```
 
-Display [validation errors](../../01_Onboarding/02_Concepts/13_Forms.md) using the `Invalid` property on [form inputs](../../01_Onboarding/02_Concepts/03_Widgets.md):
+Display [validation errors](../../01_Onboarding/02_Concepts/08_Forms.md) using the `Invalid` property on [form inputs](../../01_Onboarding/02_Concepts/08_Forms.md):
 
 ```csharp demo-tabs
 public class FormValidationErrorExamplesView : ViewBase

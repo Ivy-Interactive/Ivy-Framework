@@ -53,7 +53,7 @@ Specifically, your connection string should contain the following information, i
 
 For all connection options, see the [SqlConnection.ConnectionString documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.data.sqlclient.sqlconnection.connectionstring).
 
-Your connection string will be stored in .NET user secrets.
+Your connection string will be stored in [.NET user secrets](../../02_Concepts/14_Secrets.md).
 
 See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 

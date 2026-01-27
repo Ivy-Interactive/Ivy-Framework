@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="../../../Ivy/Directory.Build.props" Condition="Exists('../../../Ivy/Directory.Build.props')" />
   
@@ -33,7 +33,8 @@
 
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="" />
-    <None Include="../../llms.txt" Pack="true" PackagePath="" />
+    <EmbeddedResource Include="../../AGENTS.md" Link="AGENTS.md" />
+    <None Include="../../AGENTS.md" Pack="true" PackagePath="" />
     <None Include="../Ivy.Docs.Shared/Generated/**/*.md" Pack="true" PackagePath="docs/generated" />
   </ItemGroup>
 
@@ -72,7 +73,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.1" />
     <PackageReference Include="Ivy.SystemTextJson.JsonDiffPatch" Version="2.0.4" />
-    <PackageReference Include="Ivy.DesignSystem" Version="1.1.11" />
+    <PackageReference Include="Ivy.DesignSystem" Version="1.1.18" />
   </ItemGroup>
 
   <ItemGroup>

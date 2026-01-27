@@ -177,9 +177,9 @@ public class URLEnterDemo: ViewBase
 }
 ```
 
-## [Event Handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md)
+## Event Handling
 
-Use the `OnChange` callback to react to text input changes. The callback receives an event with the current value.
+Use the [`OnChange`](../../01_Onboarding/02_Concepts/05_EventHandlers.md) callback to react to text input changes. The callback receives an event with the current value.
 
 ```csharp demo-tabs
 public class EventsDemoApp : ViewBase
@@ -197,7 +197,7 @@ public class EventsDemoApp : ViewBase
 
 ## Styling
 
-`TextInput` can be styled to provide visual feedback to users about the input state.
+`TextInput` can be styled to provide visual feedback to users about the input state. Use `.Invalid()` for [validation](../../01_Onboarding/02_Concepts/08_Forms.md) error messages.
 
 ```csharp demo-below
 public class TextInputStylingDemo : ViewBase
