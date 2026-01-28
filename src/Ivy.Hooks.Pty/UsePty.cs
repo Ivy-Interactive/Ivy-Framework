@@ -154,7 +154,7 @@ public static class UsePtyExtensions
             Rows = options.Rows,
             Cwd = cwd,
             App = app,
-            CommandLine = commandLine,
+            CommandLine = commandLine[1..],
             Environment = env
         };
 
