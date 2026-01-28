@@ -665,7 +665,7 @@ public static class WebApplicationExtensions
                     var ivyEnableDevToolsTag = $"<meta name=\"ivy-enable-dev-tools\" content=\"true\" />";
                     html = html.Replace("</head>", $"  {ivyEnableDevToolsTag}\n</head>");
                 }
-                
+
 #endif
                 //Inject Meta Title and Description
                 if (!string.IsNullOrEmpty(serverArgs.MetaDescription))
