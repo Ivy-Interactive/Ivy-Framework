@@ -22,23 +22,6 @@ The `UseMutation` [hook](../01_RulesOfHooks.md) provides a way to control [query
 - **Cross-Component Control**: Trigger updates from components that don't consume the data.
 - **Background Revalidation**: Refresh data without clearing the current cache.
 
-### Mutation Flow
-
-```mermaid
-sequenceDiagram
-    participant C as Component
-    participant M as UseMutation
-    participant Q as Query Cache
-    participant S as Server
-    
-    Note over C,S: Optimistic Update
-    C->>M: Mutate(newValue)
-    M->>Q: Update cache immediately
-    Q-->>C: UI updates instantly
-    M->>S: Revalidate in background
-    S-->>Q: Return confirmed data
-    Q-->>C: UI updates with server data
-```
 
 ## Basic Usage
 
@@ -66,6 +49,25 @@ public class LikeButton : ViewBase
     }
 }
 ```
+
+## Mutation Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Component
+    participant M as UseMutation
+    participant Q as Query Cache
+    participant S as Server
+    
+    Note over C,S: Optimistic Update
+    C->>M: Mutate(newValue)
+    M->>Q: Update cache immediately
+    Q-->>C: UI updates instantly
+    M->>S: Revalidate in background
+    S-->>Q: Return confirmed data
+    Q-->>C: UI updates with server data
+```
+
 
 ## Methods
 
