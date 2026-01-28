@@ -184,6 +184,9 @@ public class SsrMarkdownMiddleware
         if (string.IsNullOrEmpty(input))
             return input;
 
+        if (input.Equals("cli", StringComparison.OrdinalIgnoreCase))
+            return "CLI";
+
         var parts = input.Split(['-', '_'], StringSplitOptions.RemoveEmptyEntries);
         var result = new StringBuilder();
 
