@@ -13,8 +13,7 @@ public class ThemeCustomizer : SampleBase
     {
         var selectedPreset = UseState("default");
         var currentTheme = UseState(Theme.Default);
-        var showJson = UseState(false);
-        var showCode = UseState(false);
+        var isExportOpen = UseState(false);
         var client = UseService<IClientProvider>();
         var themeService = UseService<IThemeService>();
 
@@ -46,48 +45,35 @@ public class ThemeCustomizer : SampleBase
             }
         }
 
-        return Layout.Vertical()
-            | Text.H1("Theme Customizer")
-            | Text.Block("Customize and apply themes dynamically to your Ivy application.")
-            | new Card(
-                Layout.Vertical()
-                    | Text.Block("🎨 Live Theme Application")
-                    | Text.P("Select a preset and click 'Apply Selected Theme' to see changes instantly - no page refresh needed!").Small()
-            ).BorderColor(Colors.Primary)
+        var presetsSection =
+            Layout.Vertical()
+                | new Button($"Theme: {currentTheme.Value.Name}")
+                    .Primary()
+                    .Icon(GetThemeIcon(currentTheme.Value.Name), Align.Right)
+                    .WithDropDown(
+                        presets
+                            .Select(kv =>
+                                MenuItem.Default(kv.Value.Name)
+                                    .HandleSelect(() =>
+                                    {
+                                        selectedPreset.Set(kv.Key);
+                                        currentTheme.Set(kv.Value);
+                                        ApplyTheme();
+                                    })
+                            )
+                            .ToArray()
+                    );
 
-            // Preset selector
-            | Text.H2("Theme Presets")
-            | Layout.Horizontal(
-                Text.Block("Select Theme"),
-                selectedPreset.ToSelectInput(
-                    presets.Select(kv => new Option<string>(kv.Value.Name, kv.Key))
-                )
-            )
+        var previewSection =
+            Layout.Vertical()
+                | Text.H2("Interactive Preview")
+                | Text.Block("Common form elements below use the active theme tokens for colors, borders and accents.")
+                | new InteractiveThemePreview(currentTheme.Value);
 
-            // Apply button
-            | new Button("Apply Selected Theme")
-            {
-                OnClick = _ =>
-                {
-                    // Update current theme from selected preset first
-                    if (presets.TryGetValue(selectedPreset.Value, out var theme))
-                    {
-                        currentTheme.Set(theme);
-                    }
-                    ApplyTheme();
-                    return ValueTask.CompletedTask;
-                },
-                Icon = Icons.Sparkles
-            }
-            // Interactive preview form that reacts to the current theme
-            | Text.H2("Interactive Preview")
-            | Text.Block("Common form elements below use the active theme tokens for colors, borders and accents.")
-            | new InteractiveThemePreview(currentTheme.Value)
-
-            // Theme preview with actual colors
+        var colorsSection =
+            Layout.Vertical()
             | Text.H2("Color Preview")
             | Layout.Horizontal(
-                // Light theme colors
                 new Card(
                     Layout.Grid().Columns(1)
                         | new ColorPreview("Primary", currentTheme.Value.Colors.Light.Primary, currentTheme.Value.Colors.Light.PrimaryForeground)
@@ -99,7 +85,6 @@ public class ThemeCustomizer : SampleBase
                         | new ColorPreview("Muted", currentTheme.Value.Colors.Light.Muted, currentTheme.Value.Colors.Light.MutedForeground)
                         | new ColorPreview("Accent", currentTheme.Value.Colors.Light.Accent, currentTheme.Value.Colors.Light.AccentForeground)
                 ).Title("Light Theme"),
-                // Dark theme colors  
                 new Card(
                     Layout.Grid().Columns(1)
                         | new ColorPreview("Primary", currentTheme.Value.Colors.Dark.Primary, currentTheme.Value.Colors.Dark.PrimaryForeground)
@@ -111,47 +96,65 @@ public class ThemeCustomizer : SampleBase
                         | new ColorPreview("Muted", currentTheme.Value.Colors.Dark.Muted, currentTheme.Value.Colors.Dark.MutedForeground)
                         | new ColorPreview("Accent", currentTheme.Value.Colors.Dark.Accent, currentTheme.Value.Colors.Dark.AccentForeground)
                 ).Title("Dark Theme")
-            )
+                );
 
-            // Export options
-            | Text.H2("Export Options")
-            | Layout.Horizontal(
-                new Button("Show C# Code")
-                {
-                    OnClick = _ =>
-                    {
-                        showCode.Set(!showCode.Value);
-                        showJson.Set(false);
-                        return ValueTask.CompletedTask;
-                    }
-                },
-                new Button("Show JSON")
-                {
-                    OnClick = _ =>
-                    {
-                        showJson.Set(!showJson.Value);
-                        showCode.Set(false);
-                        return ValueTask.CompletedTask;
-                    }
-                }.Variant(ButtonVariant.Secondary),
-                                new Button("Copy to Clipboard")
-                                {
-                                    OnClick = _ =>
-                                    {
-                                        var content = showCode.Value
-                                            ? GenerateCSharpCode(currentTheme.Value)
-                                            : System.Text.Json.JsonSerializer.Serialize(currentTheme.Value, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-                                        client.CopyToClipboard(content);
-                                        client.Toast("Theme configuration copied to clipboard!");
-                                        return ValueTask.CompletedTask;
-                                    }
-                                }.Variant(ButtonVariant.Outline)
-            )
+        var exportSection =
+            Layout.Vertical()
+            | new Button()
+                .Outline()
+                .Icon(Icons.Settings)
+                .HandleClick(() => isExportOpen.Set(true))
+                .Primary()
+            | (isExportOpen.Value
+                ? new Dialog(
+                    _ => isExportOpen.Set(false),
+                    new DialogHeader("Export Theme Configuration"),
+                    new DialogBody(
+                        Layout.Tabs(
+                            new Tab(
+                                "C#",
+                                Layout.Vertical().Gap(3)
+                                    | Text.P("Copy this C# configuration into your server setup.").Small()
+                                    | new Code(GenerateCSharpCode(currentTheme.Value), Languages.Csharp)
+                                    | new Button("Copy C# Code")
+                                        .Primary()
+                                        .Icon(Icons.ClipboardCopy, Align.Right)
+                                        .HandleClick(() =>
+                                        {
+                                            client.CopyToClipboard(GenerateCSharpCode(currentTheme.Value));
+                                            client.Toast("C# theme configuration copied to clipboard!", "Export");
+                                        })
+                            ).Icon(Icons.Code),
+                            new Tab(
+                                "JSON",
+                                Layout.Vertical().Gap(3)
+                                    | Text.P("Use this JSON to persist or share the theme.").Small()
+                                    | new Code(System.Text.Json.JsonSerializer.Serialize(
+                                            currentTheme.Value,
+                                            new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
+                                        Languages.Json)
+                                    | new Button("Copy JSON")
+                                        .Primary()
+                                        .Icon(Icons.ClipboardCopy, Align.Right)
+                                        .HandleClick(() =>
+                                        {
+                                            var json = System.Text.Json.JsonSerializer.Serialize(
+                                                currentTheme.Value,
+                                                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                                            client.CopyToClipboard(json);
+                                            client.Toast("JSON theme configuration copied to clipboard!", "Export");
+                                        })
+                            ).Icon(Icons.FileBraces)
+                        )
+                    ),
+                    new DialogFooter(
+                        new Button("Close", _ => isExportOpen.Set(false), variant: ButtonVariant.Secondary)
+                    )
+                ).Width(Size.Units(150))
+                : null);
 
-            | (showCode.Value ? new Code(GenerateCSharpCode(currentTheme.Value), Languages.Csharp) : null)
-            | (showJson.Value ? new Code(System.Text.Json.JsonSerializer.Serialize(currentTheme.Value, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }), Languages.Json) : null)
-
-            // Usage instructions
+        var usageSection =
+            Layout.Vertical()
             | Text.H2("Usage")
             | new Card(
                 Layout.Vertical()
@@ -164,8 +167,24 @@ public class ThemeCustomizer : SampleBase
     {
         // Your theme configuration here
     });", Languages.Csharp)
-            )
-        ;
+                );
+
+        return Layout.Vertical().Gap(4)
+            | Text.H1("Theme Customizer")
+            | Text.P("Experiment with different presets, preview UI elements, and export theme configuration for your app.")
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.H3("Live theme application")
+                    | Text.P("Choose a preset and apply it to see the entire preview update instantly, without reloading the page.").Small()
+            ).BorderColor(Colors.Primary)
+            | (Layout.Horizontal().Gap(3)
+                | presetsSection.Width(Size.Fit())
+                | exportSection.Width(Size.Fit()))
+            | Layout.Tabs(
+                new Tab("Preview", previewSection).Icon(Icons.LayoutPanelLeft),
+                new Tab("Colors", colorsSection).Icon(Icons.Palette),
+                new Tab("Usage", usageSection).Icon(Icons.BookOpen)
+            );
     }
 
     /// <summary>
@@ -443,30 +462,30 @@ public class ThemeCustomizer : SampleBase
             bool SameAsShipping,
             string Comments
         );
+    }
 
-        private static Icons GetThemeIcon(string themeName)
+    private static Icons GetThemeIcon(string themeName)
+    {
+        return themeName.ToLowerInvariant() switch
         {
-            return themeName.ToLowerInvariant() switch
-            {
-                "ocean" => Icons.Waves,
-                "forest" => Icons.TreePine,
-                "sunset" => Icons.Sunset,
-                "midnight" => Icons.Moon,
-                _ => Icons.Palette
-            };
-        }
+            "ocean" => Icons.Waves,
+            "forest" => Icons.TreePine,
+            "sunset" => Icons.Sunset,
+            "midnight" => Icons.Moon,
+            _ => Icons.Palette
+        };
+    }
 
-        private static BadgeVariant GetStatusVariant(string themeName)
+    private static BadgeVariant GetStatusVariant(string themeName)
+    {
+        return themeName.ToLowerInvariant() switch
         {
-            return themeName.ToLowerInvariant() switch
-            {
-                "ocean" => BadgeVariant.Info,
-                "forest" => BadgeVariant.Success,
-                "sunset" => BadgeVariant.Warning,
-                "midnight" => BadgeVariant.Secondary,
-                _ => BadgeVariant.Primary
-            };
-        }
+            "ocean" => BadgeVariant.Info,
+            "forest" => BadgeVariant.Success,
+            "sunset" => BadgeVariant.Warning,
+            "midnight" => BadgeVariant.Secondary,
+            _ => BadgeVariant.Primary
+        };
     }
 
     private class ColorPreview(string label, string? bgColor, string? fgColor) : ViewBase
