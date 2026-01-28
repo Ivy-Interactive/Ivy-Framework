@@ -46,7 +46,7 @@ public class ThemeCustomizer : SampleBase
         }
 
         var presetsSection =
-            Layout.Vertical()
+                Layout.Vertical()
                 | new Button($"Theme: {currentTheme.Value.Name}")
                     .Primary()
                     .Icon(GetThemeIcon(currentTheme.Value.Name), Align.Right)
@@ -58,7 +58,7 @@ public class ThemeCustomizer : SampleBase
                                     {
                                         selectedPreset.Set(kv.Key);
                                         currentTheme.Set(kv.Value);
-                                        ApplyTheme();
+                    ApplyTheme();
                                     })
                             )
                             .ToArray()
@@ -97,6 +97,12 @@ public class ThemeCustomizer : SampleBase
                         | new ColorPreview("Accent", currentTheme.Value.Colors.Dark.Accent, currentTheme.Value.Colors.Dark.AccentForeground)
                 ).Title("Dark Theme")
                 );
+
+        var dashboardSection =
+            Layout.Vertical()
+                | Text.H2("Dashboard Preview")
+                | Text.P("This dashboard layout shows how charts and metrics adapt to the active theme.")
+                | new DashboardApp();
 
         var exportSection =
             Layout.Vertical()
@@ -181,9 +187,10 @@ public class ThemeCustomizer : SampleBase
                 | presetsSection.Width(Size.Fit())
                 | exportSection.Width(Size.Fit()))
             | Layout.Tabs(
-                new Tab("Preview", previewSection).Icon(Icons.LayoutPanelLeft),
-                new Tab("Colors", colorsSection).Icon(Icons.Palette),
-                new Tab("Usage", usageSection).Icon(Icons.BookOpen)
+                new Tab("Elements Preview", previewSection).Icon(Icons.LayoutPanelLeft),
+                new Tab("Dashboard Preview", dashboardSection).Icon(Icons.LayoutDashboard),
+                new Tab("Color Preview", colorsSection).Icon(Icons.Palette),
+                new Tab("Usage Instructions", usageSection).Icon(Icons.BookOpen)
             );
     }
 
