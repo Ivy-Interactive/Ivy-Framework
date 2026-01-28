@@ -182,10 +182,16 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
 {
     public override object? Build()
     {
+        if (fieldViews == null || fieldViews.Length == 0)
+        {
+            return new Form(Layout.Vertical());
+        }
+
         object RenderRow(IFormFieldView[] fs)
         {
+            if (fs == null || fs.Length == 0) return Layout.Vertical();
             if (fs.Length != 1) return Layout.Horizontal(fs.Cast<object>().ToArray());
-            var field = fs.First();
+            var field = fs[0];
             return field;
         }
 

@@ -12,7 +12,7 @@ using AppContext = Ivy.Apps.AppContext;
 
 namespace Ivy.Auth;
 
-[App()]
+[App(icon: Icons.Lock, path: ["Demos"], searchHints: ["authentication", "login", "oauth", "password", "email", "auth", "security", "sign-in"])]
 public class DefaultAuthApp : ViewBase
 {
     public override object Build()
@@ -22,30 +22,56 @@ public class DefaultAuthApp : ViewBase
         var serverArgs = UseService<ServerArgs>();
         var appName = serverArgs.MetaTitle.NullIfEmpty()?.Trim() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
-        var options = auth.GetAuthOptions();
+        // Check if authentication is configured
+        if (auth == null)
+        {
+            return Layout.Horizontal().Align(Align.Center).Height(Size.Screen())
+                | (new Card(
+                    Layout.Vertical().Gap(6).Padding(2)
+                    | new IvyLogo()
+                    | Text.H2($"Welcome to {appName}!")
+                    | new Callout("Authentication is not configured for this application. To use authentication, configure an auth provider in your Program.cs using `server.UseAuth<T>()`.")
+                        .Variant(CalloutVariant.Info)
+                  )
+                  .Width(Size.Units(120).Max(500))
+                );
+        }
+
+        var options = auth.GetAuthOptions() ?? Array.Empty<AuthOption>();
 
         var renderedOptions = new List<object>();
 
-        if (options.Any(e => e.Flow == AuthFlow.EmailPassword))
+        if (options.Length > 0 && options.Any(e => e.Flow == AuthFlow.EmailPassword))
         {
             renderedOptions.Add(new PasswordEmailFlowView(errorMessage));
         }
 
-        if (options.Any(e => e.Flow == AuthFlow.OAuth))
+        if (options.Length > 0 && options.Any(e => e.Flow == AuthFlow.OAuth))
         {
             var oAuthOptions = options.Where(e => e.Flow == AuthFlow.OAuth).ToList();
-            renderedOptions.Add(Layout.Vertical() | oAuthOptions.Select(e => new OAuthFlowView(e)));
+            if (oAuthOptions.Count > 0)
+            {
+                renderedOptions.Add(Layout.Vertical() | oAuthOptions.Select(e => new OAuthFlowView(e)));
+            }
         }
 
-        var flows = renderedOptions
-            .SelectMany(x => new[] { x, new Separator("OR") })
-            .Take(Math.Max(renderedOptions.Count * 2 - 1, 0))
-            .ToArray();
-
-        var flowsLayout = renderedOptions.Count > 0
-            ? Layout.Vertical().Gap(6)
-                | flows
-            : null;
+        object? flowsLayout = null;
+        if (renderedOptions != null && renderedOptions.Count > 0)
+        {
+            var flows = new List<object>();
+            for (int i = 0; i < renderedOptions.Count; i++)
+            {
+                flows.Add(renderedOptions[i]);
+                if (i < renderedOptions.Count - 1)
+                {
+                    flows.Add(new Separator("OR"));
+                }
+            }
+            if (flows.Count > 0)
+            {
+                flowsLayout = Layout.Vertical().Gap(6) | flows.ToArray();
+            }
+        }
 
         return
             Layout.Horizontal().Align(Align.Center).Height(Size.Screen())
@@ -75,41 +101,35 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         var auth = UseService<IAuthService>();
         var client = UseService<IClientProvider>();
 
-        var formBuilder = credentials.ToForm("Login")
-            .Required(m => m.User, m => m.Password)
-            .Label(m => m.User, "User")
-            .Label(m => m.Password, "Password")
-            .Builder(m => m.User, state => state.ToTextInput())
-            .Builder(m => m.Password, state => state.ToPasswordInput());
-
-        var (submitForm, formView, _, submitting) = formBuilder.UseForm(this.Context);
-
-        var isBusy = loading.Value || submitting;
-
-        async ValueTask HandleSubmit()
+        async Task HandleLoginAsync(LoginFormModel model)
         {
-            if (isBusy)
+            if (auth == null)
             {
+                errorMessage.Set("Authentication service is not available.");
                 return;
             }
 
-            var isValid = await submitForm(); // FormBuilder runs validation and updates field errors
-            if (!isValid)
+            if (model == null)
             {
+                errorMessage.Set("Invalid form data.");
                 return;
             }
 
-            await HandleLoginAsync();
-        }
-
-        async ValueTask HandleLoginAsync()
-        {
             try
             {
                 loading.Set(true);
                 errorMessage.Set((string?)null);
 
-                await auth.LoginAsync(credentials.Value.User, credentials.Value.Password);
+                var username = model.User ?? string.Empty;
+                var password = model.Password ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                {
+                    errorMessage.Set("Username and password are required.");
+                    return;
+                }
+
+                await auth.LoginAsync(username, password);
 
                 if (auth.GetCurrentToken() == null)
                 {
@@ -126,10 +146,22 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             }
         }
 
+        var formBuilder = credentials.ToForm("Login")
+            .Required(m => m.User, m => m.Password)
+            .Label(m => m.User, "User")
+            .Label(m => m.Password, "Password")
+            .Builder(m => m.User, state => state.ToTextInput())
+            .Builder(m => m.Password, state => state.ToPasswordInput())
+            .HandleSubmit(HandleLoginAsync);
+
+        var (submitForm, formView, _, submitting) = formBuilder.UseForm(this.Context);
+
+        var isBusy = loading.Value || submitting;
+
         return Layout.Vertical().Gap(12)
                | formView
                | new Button("Login")
-                   .HandleClick(HandleSubmit)
+                   .HandleClick(async _ => await submitForm())
                    .Loading(isBusy)
                    .Disabled(isBusy)
                    .Scale(formBuilder._scale)

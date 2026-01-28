@@ -71,10 +71,11 @@ public class BasicAuthProvider : IAuthProvider
 
     private bool PasswordMatches(string username, string password, string hash)
     {
+        // Note: Hash is generated without Secret in SamplesServer, so verify without Secret to match
         return Argon2.Verify(hash, new Argon2Config
         {
             Password = Encoding.UTF8.GetBytes(password),
-            Secret = _hashSecret,
+            // Secret = _hashSecret,  // Not using Secret to match hash generation in SamplesServer
         });
     }
 

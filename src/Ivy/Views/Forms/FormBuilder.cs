@@ -309,7 +309,11 @@ public class FormBuilder<TModel> : ViewBase
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
-        return _fields[name];
+        if (!_fields.TryGetValue(name, out var fieldValue))
+        {
+            throw new InvalidOperationException($"Field '{name}' not found in form builder. Make sure the field exists in the model.");
+        }
+        return fieldValue;
     }
 
     private Expression<Func<TModel, object>> CreateSelector(string name)
@@ -342,7 +346,7 @@ public class FormBuilder<TModel> : ViewBase
                     e.Description,
                     e.Required,
                     new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
-                    e.Validators.ToArray(),
+                    e.Validators?.ToArray() ?? Array.Empty<Func<object?, (bool, string)>>(),
                     _validationStrategy,
                     _scale,
                     e.Help,
@@ -355,7 +359,7 @@ public class FormBuilder<TModel> : ViewBase
         async Task<bool> OnSubmit()
         {
             var results = await validationSignal.Send(new Unit());
-            if (results.All(e => e))
+            if (results == null || results.Length == 0 || results.All(e => e))
             {
                 if (_onSubmit != null)
                 {
@@ -369,10 +373,14 @@ public class FormBuilder<TModel> : ViewBase
             return false;
         }
 
-        var bindings = fields.Select(e => e.Bind(currentModel)).ToArray();
+        var bindings = fields.Length > 0 
+            ? fields.Select(e => e.Bind(currentModel)).ToArray()
+            : Array.Empty<(IFormFieldView fieldView, IDisposable disposable)>();
         context.TrackDisposable(bindings.Select(e => e.disposable));
 
-        var fieldViews = bindings.Select(e => e.fieldView).ToArray();
+        var fieldViews = bindings.Length > 0
+            ? bindings.Select(e => e.fieldView).ToArray()
+            : Array.Empty<IFormFieldView>();
 
         async ValueTask HandleSubmitEvent(Event<Form> _)
         {
