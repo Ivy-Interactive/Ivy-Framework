@@ -1,9 +1,8 @@
 using Ivy.Shared;
 using Ivy.Themes;
-using Ivy.Views.Forms;
 using Ivy.Hooks;
 using Ivy.Samples.Shared.Helpers;
-using Microsoft.EntityFrameworkCore;
+using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
@@ -194,22 +193,10 @@ public class ThemeCustomizer : SampleBase
 
             var price = UseState(500);
 
-            // Environment / settings / chat preview
-            var environment = UseState("kubernetes");
-            var heardFrom = UseState("social");
+            // Settings / chat preview
             var agreeTerms = UseState(true);
-            var darkMode = UseState(false);
-            var emailNotifications = UseState(true);
-            var marketingOptIn = UseState(false);
             var themeSatisfaction = UseState(4); // 1–5 stars
             var uxSatisfaction = UseState((int?)null);
-
-            // Select input demo state
-            var colorSelectState = UseState(Colors.Red);
-            var colorListState = UseState(Array.Empty<Colors>());
-            var colorToggleState = UseState(Array.Empty<Colors>());
-            var colorOptions = typeof(Colors).ToOptions();
-            var demoColorOptions = colorOptions.Take(5).ToArray();
 
             var paginationPage = UseState(1);
             const int totalPages = 5;
@@ -223,11 +210,13 @@ public class ThemeCustomizer : SampleBase
             var selectedCategory = UseState<string?>("Primary");
             var badgeVariant = UseState(new[] { "Success", "Warning", "Info" });
             var buttonVariant = UseState(new[] { "Primary" });
+            var disableButtons = UseState(false);
+            var disableInputs = UseState(false);
+            var dateTimeState = UseState(DateTime.Now);
+            var dateRangeState = UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
 
             var themeIcon = GetThemeIcon(_theme.Name);
             var statusVariant = GetStatusVariant(_theme.Name);
-
-            var light = _theme.Colors.Light;
 
             // Chat messages for environment preview
             var chatMessages = UseState(ImmutableArray.Create<ChatMessage>(
@@ -253,6 +242,7 @@ public class ThemeCustomizer : SampleBase
 
             // Build Ivy Form from the payment state
             var paymentForm = payment.ToForm("Submit payment")
+                .SubmitBuilder(isLoading => new Button("Submit payment").Loading(isLoading).Disabled(isLoading || disableButtons.Value))
                 .Clear()
                 .Add(m => m.NameOnCard)
                 .Add(m => m.CardNumber)
@@ -268,8 +258,14 @@ public class ThemeCustomizer : SampleBase
                 .Label(m => m.BillingAddress, "Billing address")
                 .Label(m => m.SameAsShipping, "Same as shipping address")
                 .Label(m => m.Comments, "Comments")
-                .Builder(m => m.Cvv, s => s.ToPasswordInput().Placeholder("CVV"))
-                .Builder(m => m.Comments, s => s.ToTextAreaInput().Placeholder("Add any additional comments"))
+                .Builder(m => m.Cvv, s => s.ToPasswordInput().Placeholder("CVV").Disabled(disableInputs.Value))
+                .Builder(m => m.Comments, s => s.ToTextAreaInput().Placeholder("Add any additional comments").Disabled(disableInputs.Value))
+                .Builder(m => m.NameOnCard, s => s.ToTextInput().Disabled(disableInputs.Value))
+                .Builder(m => m.CardNumber, s => s.ToTextInput().Disabled(disableInputs.Value))
+                .Builder(m => m.Month, s => s.ToTextInput().Disabled(disableInputs.Value))
+                .Builder(m => m.Year, s => s.ToTextInput().Disabled(disableInputs.Value))
+                .Builder(m => m.BillingAddress, s => s.ToTextInput().Disabled(disableInputs.Value))
+                .Builder(m => m.SameAsShipping, s => s.ToBoolInput().Disabled(disableInputs.Value))
                 .Required(m => m.NameOnCard, m => m.CardNumber, m => m.Cvv);
 
             UseEffect(() =>
@@ -307,7 +303,7 @@ public class ThemeCustomizer : SampleBase
                         client.Toast($"{name} button clicked", "Action");
                         return ValueTask.CompletedTask;
                     }
-                }.Width(Size.Full());
+                }.Width(Size.Full()).Disabled(disableButtons.Value);
 
             var firstColumn = Layout.Vertical()
                 | new Card(
@@ -316,7 +312,7 @@ public class ThemeCustomizer : SampleBase
                 | new Card(Layout.Vertical()
                     | Text.Block("Category Selector").Bold()
                     | Text.P("Select a category to see the corresponding action button.").Small()
-                    | selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, placeholder: "Select Category")
+                    | selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, placeholder: "Select Category").Disabled(disableInputs.Value)
                     | (selectedCategory.Value switch
                     {
                         "Primary" => CreateLoadingButton("Primary", ButtonVariant.Primary),
@@ -327,19 +323,26 @@ public class ThemeCustomizer : SampleBase
                         "Warning" => CreateLoadingButton("Warning", ButtonVariant.Warning),
                         "Info" => CreateLoadingButton("Info", ButtonVariant.Info),
                         _ => CreateLoadingButton("Primary", ButtonVariant.Primary)
-                    }));
+                    }))
+                    | (Layout.Vertical().Align(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary());
 
             var secondColumn =
                     Layout.Vertical().Gap(5)
                         | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
                         | Text.Block("Price range").Bold()
                         | Text.P($"Estimated monthly budget: ${price.Value}").Small()
-                        | price.ToSliderInput().Min(0).Max(2000).Step(50)
+                        | price.ToSliderInput().Min(0).Max(2000).Step(50).Disabled(disableInputs.Value)
                         | (Layout.Horizontal().Height(Size.Fit())
                             | CreateLoadingButton("Primary", ButtonVariant.Primary).Loading()
                             | CreateLoadingButton("Secondary", ButtonVariant.Secondary).Loading()
                             | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
-                        | domain.ToTextInput().Prefix("https://")
+                        | domain.ToTextInput().Prefix("https://").Disabled(disableInputs.Value)
+                        | dateTimeState.ToDateTimeInput()
+                            .Format("dd/MM/yyyy HH:mm:ss")
+                            .Disabled(disableInputs.Value)
+                            .WithField()
+                            .Label("DateTime")
+                            .Height(Size.Fit())
                         | new Card(
                             Layout.Vertical().Gap(3)
                                 | Text.Block("Badge Variant Selector").Bold()
@@ -353,7 +356,7 @@ public class ThemeCustomizer : SampleBase
                                     new Option<string>("Success", "Success"),
                                     new Option<string>("Warning", "Warning"),
                                     new Option<string>("Info", "Info")
-                                }).Variant(SelectInputs.Toggle)
+                                }).Variant(SelectInputs.Toggle).Disabled(disableInputs.Value)
                                 | Text.Block("Selected badges:").Small()
                                 | (Layout.Horizontal().Gap(2).Align(Align.Center)
                                     | badgeVariant.Value.Select(variant => variant switch
@@ -371,105 +374,63 @@ public class ThemeCustomizer : SampleBase
                             .Placeholder("Email (Ctrl+E)")
                             .ShortcutKey("Ctrl+E")
                             .Variant(TextInputs.Email)
+                            .Disabled(disableInputs.Value)
                         | (Layout.Grid().Columns(2).Gap(3).Width(Size.Full())
                             | (Layout.Vertical()
-                                | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars))
+                                | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars).Disabled(disableInputs.Value))
                             | (Layout.Vertical().Align(Align.Right)
-                                | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs)));
+                                | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Disabled(disableInputs.Value)));
                         
 
-            var thirdColumn = new Card(Layout.Vertical()
-                        | Layout.Vertical().Gap(2)
-                            | new Chat(chatMessages.Value.ToArray(), OnChatSend)
-                                .Height(Size.Px(330))
-                        | Text.H3("Status & Actions")
-                        | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary()
-                        | Text.P("Badges, buttons and toggles below pick up primary and accent colors from the active theme.").Small()
-                        
-                        | Text.Block("Feedback inputs").Bold()
-                        | Text.Block("Theme rating (stars)")
-                        | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars)
-                        | Text.Block("UX thumbs up/down")
-                        | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs)
-                        | Text.Block("Select input variants").Small()
-                        | Layout.Grid().Columns(3).Gap(3).Width(Size.Full())
-                            | Layout.Vertical()
-                                | Text.InlineCode("SelectInputs.List")
-                                | colorListState.ToSelectInput(demoColorOptions).Variant(SelectInputs.List)
-                        | Text.Block("Text input variants").Small()
-                        | Layout.Grid().Columns(3).Gap(3).Width(Size.Full())
-                            | Layout.Vertical()
-                                | Text.InlineCode("TextInputs.Search")
-                                | searchText.ToSearchInput().Placeholder("Search in settings")
-                        | Text.Block("Pagination").Small()
-                        | Layout.Vertical().Gap(2)
-                            | new Pagination(paginationPage.Value, totalPages, e =>
-                            {
-                                paginationPage.Set(e.Value);
-                                return ValueTask.CompletedTask;
-                            })
-                            | Text.P($"Current page: {paginationPage.Value} of {totalPages}").Small()
-                        | Text.Block("Theme actions menu").Small()
-                        | new DropDownMenu(
-                            @evt => client.Toast("Selected: " + @evt.Value, "Theme Action"),
-                            new Button("Theme Actions").Secondary().Icon(Icons.Settings),
-                            MenuItem.Default("Reset to Default").Tag("reset"),
-                            MenuItem.Default("Apply Ocean").Tag("ocean"),
-                            MenuItem.Default("Apply Midnight").Tag("midnight"))
-                        | Layout.Vertical()
-                            | Text.Block("How did you hear about us?")
-                            | heardFrom.ToSelectInput(new[]
-                            {
-                                new Option<string>("Social Media", "social"),
-                                new Option<string>("Search Engine", "search"),
-                                new Option<string>("Referral", "referral"),
-                                new Option<string>("Other", "other")
-                            })
-                        | Layout.Horizontal(
-                            Layout.Horizontal()
-                                | agreeTerms.ToBoolInput()
-                                | Text.Block("I agree to the terms and conditions")
-                        )
-                        | (Layout.Horizontal()
-                            .Align(Align.Right)
-                            | new Button("Submit")
-                            {
-                                OnClick = _ =>
+            var thirdColumn = Layout.Vertical()
+                        | new Card((Layout.Vertical() | new Chat(chatMessages.Value.ToArray(), OnChatSend).Height(Size.Px(330))).Height(Size.Fit()))
+
+                        | (Layout.Horizontal().Height(Size.Fit())
+                            | (Layout.Vertical().Gap(2) | new Box((Layout.Horizontal()
+                                    | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all buttons"))
+                                    | disableButtons.ToSwitchInput())))
+                            | (Layout.Vertical().Gap(2) | new Box((Layout.Horizontal()
+                                | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all inputs"))
+                                | disableInputs.ToSwitchInput()))))
+                        | searchText.ToSearchInput().Placeholder("Search in settings").Disabled(disableInputs.Value)
+                        | dateRangeState.ToDateRangeInput()
+                            .Disabled(disableInputs.Value)
+                            .WithField()
+                            .Label($"Date Range ({(dateRangeState.Value.to - dateRangeState.Value.from).Days} days)")
+                            .Height(Size.Fit())
+                        | new Box(
+                            Layout.Vertical().Align(Align.Center)
+                            | Text.Block("Pagination demo").Bold()
+                                | GetPaginationContent(paginationPage.Value, totalPages)
+                                | new Pagination(paginationPage.Value, totalPages, e =>
                                 {
-                                    client.Toast($"Submitted preview using '{_theme.Name}' theme.", "Preview");
+                                    paginationPage.Set(e.Value);
                                     return ValueTask.CompletedTask;
-                                },
-                                Icon = themeIcon
-                            }.Primary()
-                            | new Button("Cancel")
-                            {
-                                Icon = Icons.X
-                            }.Variant(ButtonVariant.Secondary))).Height(Size.Fit());
+                                }).Disabled(disableInputs.Value)
+                        )
+                        |new Box((Layout.Horizontal().Height(Size.Fit())
+                            | agreeTerms.ToBoolInput().Disabled(disableInputs.Value)
+                            | Text.Block("I agree to the terms and conditions")))
+                       ;
 
-            var fourthColumn =
+            static object GetPaginationContent(int page, int total) =>
                 new Card(
-                    content: Layout.Vertical()
-                        | Text.H3("Theme Details")
-                        | new Badge(_theme.Name, statusVariant, themeIcon)
-                        | Text.P("Key tokens from the active light palette:").Small()
-                        | Text.Block($"Primary: {light.Primary}")
-                        | Text.Block($"Background: {light.Background}")
-                        | Text.Block($"Accent: {light.Accent}"),
-                    header: Layout.Horizontal().Align(Align.Center)
-                        | Text.H4("Theme details").WithLayout().Grow()
-                ).BorderRadius(BorderRadius.Rounded)
-                 .BorderColor(Colors.Info)
-                 .Height(Size.Full())
-                 .HandleClick(_ =>
-                 {
-                     client.Toast($"Clicked '{_theme.Name}' details card.");
-                 });
+                    Layout.Vertical().Align(Align.Center).Gap(2)
+                        | Text.Block("Theme insight").Small()
+                        | Text.P(page switch
+                        {
+                            1 => "Discover how primary and accent colors shape the whole experience.",
+                            2 => "Badges, borders and subtle shadows adapt instantly to your theme.",
+                            3 => "Form controls, switches and sliders stay readable in every palette.",
+                            4 => "Try a different theme and see how this card transforms.",
+                            _ => "You’ve reached the end of the tour — tweak settings and explore freely."
+                        }).Small()
+                ).Height(Size.Fit());
 
             return Layout.Horizontal()
                 | firstColumn
                 | secondColumn
                 | thirdColumn;
-                // | fourthColumn;
         }
 
         private record PaymentModel(
