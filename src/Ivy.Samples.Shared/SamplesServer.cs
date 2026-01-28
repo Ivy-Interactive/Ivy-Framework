@@ -13,13 +13,13 @@ public static class SamplesServer
     public static async Task RunAsync(ServerArgs? args = null)
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
-        
+
         var hashSecretBytes = Encoding.UTF8.GetBytes("test-hash-secret-for-samples-12345");
         var hashSecret = Convert.ToBase64String(hashSecretBytes);
         var jwtSecret = Convert.ToBase64String(Encoding.UTF8.GetBytes("test-jwt-secret-for-samples-1234567890123456"));
-        
+
         var passwordHash = Argon2.Hash("password");
-        
+
         var verifyConfig = new Argon2Config
         {
             Password = Encoding.UTF8.GetBytes("password"),
@@ -28,18 +28,18 @@ public static class SamplesServer
         {
             throw new Exception("Generated hash does not verify correctly!");
         }
-        
+
         Environment.SetEnvironmentVariable("BasicAuth__HashSecret", hashSecret);
         Environment.SetEnvironmentVariable("BasicAuth__JwtSecret", jwtSecret);
         Environment.SetEnvironmentVariable("BasicAuth__JwtIssuer", "ivy-samples");
         Environment.SetEnvironmentVariable("BasicAuth__JwtAudience", "ivy-samples-app");
         Environment.SetEnvironmentVariable("BasicAuth__Users", $"admin:{passwordHash}");
-        
+
         var server = new Server(args);
         server.UseHotReload();
         server.AddAppsFromAssembly(typeof(SamplesServer).Assembly);
         server.AddAppsFromAssembly(typeof(DefaultAuthApp).Assembly);
-        
+
         server.Services.AddSingleton<BasicAuthProvider>();
         server.Services.AddSingleton<IAuthProvider, BasicAuthProvider>(s => s.GetRequiredService<BasicAuthProvider>());
 

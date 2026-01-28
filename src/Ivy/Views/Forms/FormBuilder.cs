@@ -373,7 +373,7 @@ public class FormBuilder<TModel> : ViewBase
             return false;
         }
 
-        var bindings = fields.Length > 0 
+        var bindings = fields.Length > 0
             ? fields.Select(e => e.Bind(currentModel)).ToArray()
             : Array.Empty<(IFormFieldView fieldView, IDisposable disposable)>();
         context.TrackDisposable(bindings.Select(e => e.disposable));
