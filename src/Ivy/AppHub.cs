@@ -79,9 +79,9 @@ public class AppHub(
                 requestScheme = forwardedProto.ToString();
             }
 
-            if (server.AuthProviderType != null)
+            var authProvider = server.ServiceProvider!.GetService<IAuthProvider>();
+            if (authProvider != null)
             {
-                var authProvider = server.ServiceProvider!.GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
 #if DEBUG
                 authProvider = new CheckedAuthProvider(authProvider);
 #endif
@@ -93,41 +93,45 @@ public class AppHub(
                 await TimeoutHelper.WithTimeoutAsync(
                     ct => authProvider.InitializeAsync(authSession, requestScheme, request.Host.Value!, ct),
                     Context.ConnectionAborted);
-                if (authSession.HasChangedSince(oldSession))
+
+                if (server.AuthProviderType != null && authSession.HasChangedSince(oldSession))
                 {
-                    authService.SetAuthCookies(reloadPage: false);
+                    authService.SetAuthCookies(reloadPage: false, triggerMachineReload: false);
                 }
 
                 appServices.AddSingleton<IAuthService>(s => authService);
 
-                oldSession = authSession.TakeSnapshot();
-                try
+                if (server.AuthProviderType != null)
                 {
-                    if (!string.IsNullOrEmpty(oldSession.AuthToken?.AccessToken))
+                    oldSession = authSession.TakeSnapshot();
+                    try
                     {
-                        var isValid = await TimeoutHelper.WithTimeoutAsync(
-                            ct => authProvider.ValidateAccessTokenAsync(authSession, ct),
-                            Context.ConnectionAborted);
-
-                        if (!isValid)
+                        if (!string.IsNullOrEmpty(oldSession.AuthToken?.AccessToken))
                         {
-                            await authService.RefreshAccessTokenAsync(Context.ConnectionAborted);
+                            var isValid = await TimeoutHelper.WithTimeoutAsync(
+                                ct => authProvider.ValidateAccessTokenAsync(authSession, ct),
+                                Context.ConnectionAborted);
+
+                            if (!isValid)
+                            {
+                                await authService.RefreshAccessTokenAsync(Context.ConnectionAborted);
+                            }
+                        }
+                        else
+                        {
+                            authSession.AuthToken = null;
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
+                        logger.LogWarning(ex, "Auth validation or refresh failed during connection setup.");
                         authSession.AuthToken = null;
                     }
-                }
-                catch (Exception ex)
-                {
-                    logger.LogWarning(ex, "Auth validation or refresh failed during connection setup.");
-                    authSession.AuthToken = null;
-                }
 
-                if (authSession.AuthToken == null && parentId != null)
-                {
-                    await authService.LogoutAsync(Context.ConnectionAborted);
+                    if (authSession.AuthToken == null && parentId != null)
+                    {
+                        await authService.LogoutAsync(Context.ConnectionAborted);
+                    }
                 }
             }
 
