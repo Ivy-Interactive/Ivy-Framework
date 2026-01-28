@@ -82,7 +82,7 @@ public class AdvancedStackLayoutExample : ViewBase
 StackLayout is the foundation for most other layout widgets. Understanding its properties will help you master more complex layout systems.
 </Callout>
 
-<WidgetDocs Type="Ivy.StackLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/StackLayout.cs"/>
+<WidgetDocs Type="Ivy.StackLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/StackLayout.cs"/>
 
 ## Examples
 

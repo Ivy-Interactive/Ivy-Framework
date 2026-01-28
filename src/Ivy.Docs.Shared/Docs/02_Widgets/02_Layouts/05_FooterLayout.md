@@ -114,7 +114,7 @@ public class SheetWithFooterExample : ViewBase
 Use FooterLayout for multi-step forms, long questionnaires, and data entry interfaces.
 </Callout>
 
-<WidgetDocs Type="Ivy.FooterLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/FooterLayout.cs"/>
+<WidgetDocs Type="Ivy.FooterLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/FooterLayout.cs"/>
 
 ## Examples
 

@@ -593,4 +593,4 @@ public class ConfiguredUploadExample : ViewBase
 | `MaxFileSize`| `long?`        | Maximum file size in bytes                                       |
 | `MaxFiles`   | `int?`         | Maximum number of files (for multiple file uploads)              |
 
-<WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/FileInput.cs"/>
+<WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/FileInput.cs"/>

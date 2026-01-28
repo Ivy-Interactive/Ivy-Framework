@@ -344,7 +344,7 @@ Layout.Wrap().Gap(4).Align(Align.Center)
         .Duration(0.6)
 ```
 
-<WidgetDocs Type="Ivy.Animation" ExtensionTypes="Ivy.AnimationExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Effects/Animation.cs"/>
+<WidgetDocs Type="Ivy.Animation" ExtensionTypes="Ivy.AnimationExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Effects/Animation.cs"/>
 
 ## Examples
 

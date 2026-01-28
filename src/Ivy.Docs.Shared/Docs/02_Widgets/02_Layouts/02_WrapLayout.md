@@ -110,7 +110,7 @@ Layout.Vertical()
 ], gap: 6, padding: new Thickness(4), margin: new Thickness(4))
 ```
 
-<WidgetDocs Type="Ivy.WrapLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/WrapLayout.cs"/>
+<WidgetDocs Type="Ivy.WrapLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/WrapLayout.cs"/>
 
 ## Examples
 

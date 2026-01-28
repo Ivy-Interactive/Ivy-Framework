@@ -44,7 +44,7 @@ public class BasicAreaChart : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.AreaChart" ExtensionTypes="Ivy.AreaChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Charts/AreaChart.cs"/>
+<WidgetDocs Type="Ivy.AreaChart" ExtensionTypes="Ivy.AreaChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Charts/AreaChart.cs"/>
 
 ## Examples
 

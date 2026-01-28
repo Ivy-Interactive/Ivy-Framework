@@ -257,4 +257,4 @@ public class FormHeaderExample : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.HeaderLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/HeaderLayout.cs"/>
+<WidgetDocs Type="Ivy.HeaderLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/HeaderLayout.cs"/>

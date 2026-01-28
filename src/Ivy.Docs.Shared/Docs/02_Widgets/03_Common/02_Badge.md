@@ -74,7 +74,7 @@ Layout.Vertical().Gap(4)
         | new Badge(null, icon:Icons.X, variant:BadgeVariant.Destructive))
 ```
 
-<WidgetDocs Type="Ivy.Badge" ExtensionTypes="Ivy.BadgeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Badge.cs"/>
+<WidgetDocs Type="Ivy.Badge" ExtensionTypes="Ivy.BadgeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Badge.cs"/>
 
 ## Examples
 

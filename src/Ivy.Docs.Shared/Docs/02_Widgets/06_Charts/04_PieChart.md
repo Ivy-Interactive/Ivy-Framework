@@ -253,4 +253,4 @@ public class DrillDownDemo : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.PieChart" ExtensionTypes="Ivy.PieChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Charts/PieChart.cs"/>
+<WidgetDocs Type="Ivy.PieChart" ExtensionTypes="Ivy.PieChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Charts/PieChart.cs"/>

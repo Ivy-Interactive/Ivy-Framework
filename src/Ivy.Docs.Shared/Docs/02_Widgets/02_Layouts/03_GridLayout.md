@@ -269,4 +269,4 @@ Layout.Vertical()
 | GridColumnSpan(int) | Span child across multiple columns |
 | GridRowSpan(int) | Span child across multiple rows |
 
-<WidgetDocs Type="Ivy.GridLayout" ExtensionTypes="Ivy.GridExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/GridLayout.cs"/>
+<WidgetDocs Type="Ivy.GridLayout" ExtensionTypes="Ivy.GridExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/GridLayout.cs"/>
