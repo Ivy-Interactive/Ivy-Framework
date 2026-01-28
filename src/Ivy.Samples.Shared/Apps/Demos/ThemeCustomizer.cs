@@ -50,10 +50,10 @@ public class ThemeCustomizer : SampleBase
                 MenuItem.Default(kv.Value.Name)
                     .HandleSelect(() =>
                 {
-                        selectedPreset.Set(kv.Key);
-                        currentTheme.Set(kv.Value);
+                    selectedPreset.Set(kv.Key);
+                    currentTheme.Set(kv.Value);
                     ApplyTheme();
-                    }))
+                }))
             .ToArray();
 
         var presetsSection =
