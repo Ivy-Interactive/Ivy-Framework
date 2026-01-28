@@ -19,6 +19,7 @@ public class SsrMarkdownMiddleware
     private readonly RequestDelegate _next;
     private static readonly Assembly Assembly = typeof(SsrMarkdownMiddleware).Assembly;
     private static readonly string ResourcePrefix = "Ivy.Docs.Shared.Generated.";
+    private static readonly string[] ManifestResourceNames = Assembly.GetManifestResourceNames();
     private static readonly ConcurrentDictionary<string, string> ContentCache = new();
 
     public SsrMarkdownMiddleware(RequestDelegate next)
@@ -163,7 +164,10 @@ public class SsrMarkdownMiddleware
         return ContentCache.GetOrAdd(appId, id =>
         {
             var resourceName = ConvertAppIdToResourceName(id);
-            using var stream = Assembly.GetManifestResourceStream(resourceName);
+            var resolvedName =
+                ManifestResourceNames.FirstOrDefault(r => r.Equals(resourceName, StringComparison.OrdinalIgnoreCase)) ??
+                resourceName;
+            using var stream = Assembly.GetManifestResourceStream(resolvedName);
             if (stream == null)
                 return null!;
 
@@ -183,9 +187,6 @@ public class SsrMarkdownMiddleware
     {
         if (string.IsNullOrEmpty(input))
             return input;
-
-        if (input.Equals("cli", StringComparison.OrdinalIgnoreCase))
-            return "CLI";
 
         var parts = input.Split(['-', '_'], StringSplitOptions.RemoveEmptyEntries);
         var result = new StringBuilder();
