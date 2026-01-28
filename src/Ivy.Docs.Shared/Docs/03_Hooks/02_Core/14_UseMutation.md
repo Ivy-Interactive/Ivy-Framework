@@ -40,7 +40,34 @@ sequenceDiagram
     Q-->>C: UI updates with server data
 ```
 
-### Methods
+## Basic Usage
+
+Update the UI immediately while the server processes the request.
+
+```csharp demo-below
+public class LikeButton : ViewBase
+{
+    public record Post(int Likes, bool IsLiked);
+
+    public override object? Build()
+    {
+        var mutator = UseMutation<Post, string>("post-123");
+        var query = UseQuery("post-123", _ => Task.FromResult(new Post(10, false)));
+        var current = query.Value ?? new Post(0, false);
+
+        return new Button($"Like ({current.Likes})", _ => 
+        {
+            if (query.Value is not {} p) return;
+            mutator.Mutate(p with { 
+                Likes = p.IsLiked ? p.Likes - 1 : p.Likes + 1, 
+                IsLiked = !p.IsLiked 
+            }, revalidate: false);
+        }).Variant(current.IsLiked ? ButtonVariant.Primary : ButtonVariant.Outline);
+    }
+}
+```
+
+## Methods
 
 The hook returns a `QueryMutator` object. Use the typed generic version for optimistic updates.
 
@@ -57,6 +84,8 @@ var mutator = UseMutation("user-profile");
 | `Mutate(value, revalidate)` | Updates cache immediately with `value`. If `revalidate` is true, triggers a background fetch after. | Optimistic UI updates (e.g., Like button). |
 | `Revalidate()` | Triggers a background refresh. Keeps showing stale data until new data arrives. | Non-destructive updates (e.g., Edit form save). |
 | `Invalidate()` | Clears the cache and forces a refetch. UI enters "switching" or "loading" state. | Destructive operations (e.g., Delete item). |
+
+
 
 ## Query Scopes
 
@@ -84,53 +113,7 @@ var mutator = UseMutation("user-profile");
 - [UseQuery](./09_UseQuery.md)
 - [Rules of Hooks](../02_RulesOfHooks.md)
 
-### Examples
-
-<Details>
-<Summary>
-Like Button
-</Summary>
-<Body>
-
-Update the UI immediately while the server processes the request.
-
-```csharp demo-tabs
-public class LikeButton : ViewBase
-{
-    public record Post(int Likes, bool IsLiked);
-
-    public override object? Build()
-    {
-        var postId = 123;
-        var mutator = UseMutation<Post, string>($"post-{postId}");
-        
-        var query = UseQuery(
-            key: $"post-{postId}", 
-            fetcher: async ct => 
-            { 
-                await Task.Delay(500); 
-                return new Post(10, false); 
-            });
-
-        return new Button($"Like ({query.Value?.Likes ?? 0})", _ => 
-        {
-            if (query.Value is not {} current) return;
-            
-            var isLiked = current.IsLiked;
-            var optimized = current with 
-            { 
-                Likes = isLiked ? current.Likes - 1 : current.Likes + 1, 
-                IsLiked = !isLiked 
-            };
-
-            mutator.Mutate(optimized, revalidate: false);
-        }).Variant(query.Value?.IsLiked == true ? ButtonVariant.Primary : ButtonVariant.Outline);
-    }
-}
-```
-
-</Body>
-</Details>
+## Examples
 
 <Details>
 <Summary>
