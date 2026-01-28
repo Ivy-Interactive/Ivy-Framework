@@ -185,6 +185,13 @@ public static class Text
     }
 
     public static TextBuilder Latex(IAnyState state) => Latex(state.ToString() ?? "");
+
+    public static TextBuilder Display(string content)
+    {
+        return new TextBuilder(content, TextVariant.Display);
+    }
+
+    public static TextBuilder Display(IAnyState state) => Display(state.ToString() ?? "");
 }
 
 public class TextBuilder(string content, TextVariant variant, Languages codeLanguage = Languages.Csharp) : ViewBase, IStateless

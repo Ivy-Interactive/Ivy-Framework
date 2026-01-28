@@ -597,6 +597,7 @@ export const typography: Record<string, string> = {
   success: 'text-large-body text-green font-semibold',
 
   // UI variants
+  display: 'text-3xl font-medium',
   label: 'text-large-label font-medium leading-none flex items-center',
   block: 'flex items-center min-w-0',
 

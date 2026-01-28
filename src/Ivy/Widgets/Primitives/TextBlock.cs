@@ -31,7 +31,8 @@ public enum TextVariant
     Html,
     Latex,
     Label,
-    Strong
+    Strong,
+    Display
 }
 
 /// <summary>

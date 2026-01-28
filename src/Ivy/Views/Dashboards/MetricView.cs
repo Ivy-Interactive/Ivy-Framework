@@ -1,4 +1,4 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
 using Ivy.Shared;
@@ -54,7 +54,7 @@ public class MetricView(
             : null;
 
         return new Card(
-                content: Text.P(x.MetricFormatted).Large().NoWrap().Overflow(Overflow.Clip),
+                content: Text.Display(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip),
                 header: Layout.Horizontal().Align(Align.Center)
                     | Text.H4(title).NoWrap().Overflow(Overflow.Ellipsis).Width(Size.Grow())
                     | (Layout.Horizontal().Align(Align.Right).Gap(1).Width(Size.Fit())
