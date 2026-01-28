@@ -45,24 +45,23 @@ public class ThemeCustomizer : SampleBase
             }
         }
 
+        var presetItems = presets
+            .Select(kv =>
+                MenuItem.Default(kv.Value.Name)
+                    .HandleSelect(() =>
+                    {
+                        selectedPreset.Set(kv.Key);
+                        currentTheme.Set(kv.Value);
+                        ApplyTheme();
+                    }))
+            .ToArray();
+
         var presetsSection =
-                Layout.Vertical()
+            Layout.Vertical()
                 | new Button($"Theme: {currentTheme.Value.Name}")
                     .Primary()
                     .Icon(GetThemeIcon(currentTheme.Value.Name), Align.Right)
-                    .WithDropDown(
-                        presets
-                            .Select(kv =>
-                                MenuItem.Default(kv.Value.Name)
-                                    .HandleSelect(() =>
-                                    {
-                                        selectedPreset.Set(kv.Key);
-                                        currentTheme.Set(kv.Value);
-                    ApplyTheme();
-                                    })
-                            )
-                            .ToArray()
-                    );
+                    .WithDropDown(presetItems);
 
         var previewSection =
             Layout.Vertical()
