@@ -30,8 +30,7 @@ type TextBlockVariant =
   | 'Warning'
   | 'Success'
   | 'Label'
-  | 'Strong'
-  | 'Display';
+  | 'Strong';
 
 interface TextBlockWidgetProps {
   content: string;
@@ -185,11 +184,6 @@ const variantMap: VariantMap = {
     <strong className={cn(typography.strong, className)} style={style}>
       {children}
     </strong>
-  ),
-  Display: ({ children, className, style }) => (
-    <span className={cn(typography.display, className)} style={style}>
-      {children}
-    </span>
   ),
 };
 

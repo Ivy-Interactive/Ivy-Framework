@@ -1,4 +1,4 @@
-using Ivy.Charts;
+﻿using Ivy.Charts;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
 using Ivy.Shared;
