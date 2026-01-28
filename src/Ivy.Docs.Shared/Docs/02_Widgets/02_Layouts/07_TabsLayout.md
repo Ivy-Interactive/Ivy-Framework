@@ -12,7 +12,7 @@ searchHints:
 
 # TabsLayout
 
-The TabsLayout [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates a tabbed [interface](../../01_Onboarding/02_Concepts/02_Views.md) that allows users to switch between different content sections. It supports both traditional tabs and content-based variants, with features such as closable tabs, [badges](../../02_Widgets/03_Common/02_Badge.md), [icons](../../02_Widgets/01_Primitives/02_Icon.md), and drag-and-drop reordering.
+The TabsLayout [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates a tabbed [interface](../../01_Onboarding/02_Concepts/02_Views.md) that allows users to switch between different content sections. It supports both traditional tabs and content-based variants, with features such as closable tabs, [badges](../03_Common/02_Badge.md), [icons](../01_Primitives/02_Icon.md), and drag-and-drop reordering.
 
 ## Basic Usage
 

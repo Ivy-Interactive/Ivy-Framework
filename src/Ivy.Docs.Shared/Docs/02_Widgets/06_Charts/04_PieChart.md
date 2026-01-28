@@ -14,7 +14,7 @@ searchHints:
 Represent parts of a whole with pie and donut charts, supporting custom labels and drill-down interactions.
 </Ingress>
 
-`PieChart`s represent parts of a whole. Each slice is drawn from the provided data.
+`PieChart`s represent parts of a whole. Build chart [views](../../01_Onboarding/02_Concepts/02_Views.md) inside [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) and use [state](../../03_Hooks/02_Core/03_UseState.md) for dynamic data. See [Charts](../../01_Onboarding/02_Concepts/18_Charts.md) for an overview of Ivy chart widgets. Each slice is drawn from the provided data.
 
 The following example showcases a sample case where possible sale data from a store is listed.
 The pie chart shows these data.
@@ -114,7 +114,7 @@ public class DonutChartWithCustomLabelsView : ViewBase
 }
 ```
 
-The legend can be placed in any of the nine positions by altering the values of the alignment enums.
+The legend can be placed in any of the nine positions by altering the values of the [Align](../../04_ApiReference/IvyShared/Align.md) enums.
 Also, by default, the inner and outer radius is same resulting in a circle. However, as
 can be seen in this example, these values can be altered to create a custom donut. The function
 `Tooltip` makes sure that the labels show up on mouse hover. The `Animated` function makes a nice animation
@@ -123,7 +123,7 @@ when users hover on that specific part of the pie chart.
 ### Drill down chart
 
 The following example shows how these combinations of charts can be used in a realistic example
-for showing how populated some countries are.
+for showing how populated some countries are. It uses [UseState](../../03_Hooks/02_Core/03_UseState.md) and [ToSelectInput](../../01_Onboarding/02_Concepts/08_Forms.md) to let users pick a country and see the corresponding drill-down pie.
 
 ```csharp demo-tabs
 

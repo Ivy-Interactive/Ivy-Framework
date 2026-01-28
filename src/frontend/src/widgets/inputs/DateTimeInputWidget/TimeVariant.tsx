@@ -106,7 +106,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     <div className="relative w-full select-none" data-testid={dataTestId}>
       <div
         className={cn(
-          'relative flex items-center rounded-md border border-input shadow-sm focus-within:ring-1 focus-within:ring-ring',
+          'relative flex items-center rounded-md border border-input bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring dark:bg-white/5 dark:border-white/10',
           invalid && inputStyles.invalidInput
         )}
       >

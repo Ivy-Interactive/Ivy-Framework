@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - init
   - create
@@ -14,7 +14,7 @@ searchHints:
 Quickly scaffold new Ivy projects with the necessary structure, configuration files, and boilerplate code using the init command.
 </Ingress>
 
-The `ivy init` command creates a new Ivy project with the necessary structure and configuration files to get you started quickly.
+The `ivy init` command creates a new Ivy project with the necessary structure and configuration files to get you started quickly. See [Program](../02_Concepts/01_Program.md) for how the generated entry point runs your app.
 
 ## Basic Usage
 
@@ -72,7 +72,7 @@ Ivy will suggest a namespace based on your current folder name. You can accept t
 
 ### Project Structure
 
-After running `ivy init`, your project will have the following structure:
+After running `ivy init`, your project will have the following structure. The generated [Program.cs](../02_Concepts/01_Program.md) is the application entry point.
 
 ```text
 YourProject/
@@ -87,7 +87,7 @@ YourProject/
 
 ### Program.cs
 
-The main entry point for your Ivy project:
+The main [entry point](../02_Concepts/01_Program.md) for your Ivy project:
 
 ```csharp
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
@@ -105,6 +105,8 @@ var chromeSettings = new ChromeSettings().UseTabs(preventDuplicates: true);
 server.UseChrome(chromeSettings);
 await server.RunAsync();
 ```
+
+The template configures [Chrome](../02_Concepts/11_Chrome.md) for the browser UI.
 
 ### GlobalUsings.cs
 
@@ -174,10 +176,10 @@ Invalid 'invalid-namespace' namespace. Please enter a valid namespace.
 
 After initializing your project:
 
-1. **Add a database connection**: `ivy db add`
-2. **Add authentication**: `ivy auth add`
-3. **Create an app**: `ivy app create`
-4. **Deploy your project**: `ivy deploy`
+1. **Add a database connection**: `ivy db add` — see [Database Overview](05_DatabaseIntegration/01_DatabaseOverview.md)
+2. **Add authentication**: `ivy auth add` — see [Authentication Overview](04_Authentication/01_AuthenticationOverview.md)
+3. **Create an app**: `ivy app create` — see [Apps](../02_Concepts/10_Apps.md)
+4. **Deploy your project**: `ivy deploy` — see [Deployment Overview](06_Deployment/01_DeploymentOverview.md)
 
 ## Examples
 
@@ -224,7 +226,7 @@ After initializing your project:
 
 **Git Issues** - If Git is not installed or configured, Ivy will still create the project but may skip some Git-related operations.
 
-**Build Errors** - If you encounter build errors, you can use the `ivy fix` command to automatically resolve common issues. The default timeout is 360 seconds (6 minutes).
+**Build Errors** - If you encounter build errors, you can use the `ivy fix` command to automatically resolve common issues. See also [Program](../02_Concepts/01_Program.md) for startup and configuration. The default timeout is 360 seconds (6 minutes).
 
 ```terminal
 >ivy fix
@@ -269,7 +271,7 @@ Telemetry Upload Details: When telemetry upload is enabled, the `ivy fix` comman
 
 ### Creating Apps
 
-Create new apps using AI assistance. The default timeout is 360 seconds (6 minutes).
+Create new [apps](../02_Concepts/10_Apps.md) using AI assistance. The default timeout is 360 seconds (6 minutes).
 
 ```terminal
 >ivy app create MyApp

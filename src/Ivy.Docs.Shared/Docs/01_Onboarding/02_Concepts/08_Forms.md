@@ -21,12 +21,12 @@ Build robust forms with built-in [state management](../../03_Hooks/02_Core/03_Us
 </Ingress>
 
 <Callout Type="important">
-Do not manually create form layouts. Always use `.ToForm()` on your state objects for type safety, automatic state management, and built-in validation.
+Do not manually create form layouts. Always use `.ToForm()` on your [state](../../03_Hooks/02_Core/03_UseState.md) objects for type safety, automatic state management, and built-in validation.
 </Callout>
 
 ## Basic Usage
 
-The simplest way to create a form is to call `.ToForm()` on a state object. The FormBuilder automatically scaffolds appropriate input fields based on your model's property types, providing automatic state management and validation.
+The simplest way to create a form is to call `.ToForm()` on a [state](../../03_Hooks/02_Core/03_UseState.md) object. The FormBuilder automatically scaffolds appropriate input [fields](../../02_Widgets/04_Inputs/01_Field.md) based on your model's property types, providing automatic state management and validation.
 
 ```csharp demo-tabs
 public class BasicFormExample : ViewBase
@@ -52,21 +52,21 @@ The FormBuilder automatically maps C# types to appropriate [input widgets](./03_
 
 | C# Type | Generated Input | Notes |
 |---------|----------------|-------|
-| `string` | `TextInput` | Can be customized to email, password, textarea, etc. |
-| `bool`, `bool?` | `BoolInput` | Checkbox or toggle |
-| `int`, `decimal`, `double` | `NumberInput` | Number input with validation |
-| `DateTime`, `DateOnly` | `DateTimeInput` | Date/time picker |
-| `Enum` | `SelectInput` | Dropdown with enum values |
-| `List<Enum>` | `SelectInput` with multiple selection | Multi-select dropdown |
-| Properties ending in "Id" | `ReadOnlyInput` | Typically for system-generated IDs |
-| Properties ending in "Email" | `TextInput` with email validation | Email-specific input |
-| Properties ending in "Password" | `PasswordInput` | Hidden text input |
+| `string` | [TextInput](../../02_Widgets/04_Inputs/02_TextInput.md) | Can be customized to email, password, textarea, etc. |
+| `bool`, `bool?` | [BoolInput](../../02_Widgets/04_Inputs/04_BoolInput.md) | Checkbox or toggle |
+| `int`, `decimal`, `double` | [NumberInput](../../02_Widgets/04_Inputs/03_NumberInput.md) | Number input with validation |
+| `DateTime`, `DateOnly` | [DateTimeInput](../../02_Widgets/04_Inputs/07_DateTimeInput.md) | Date/time picker |
+| `Enum` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) | Dropdown with enum values |
+| `List<Enum>` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) with multiple selection | Multi-select dropdown |
+| Properties ending in "Id" | [ReadOnlyInput](../../02_Widgets/04_Inputs/14_ReadOnlyInput.md) | Typically for system-generated IDs |
+| Properties ending in "Email" | [TextInput](../../02_Widgets/04_Inputs/02_TextInput.md) with email validation | Email-specific input |
+| Properties ending in "Password" | PasswordInput | Hidden text input |
 
 ## Field Configuration
 
 ### Custom Labels and Descriptions
 
-Use `.Label()`, `.Description()`, and `.Help()` to customize field appearance and provide help text.
+Use `.Label()`, `.Description()`, and `.Help()` to customize [field](../../02_Widgets/04_Inputs/01_Field.md) appearance and provide help text.
 
 ```csharp demo-tabs
 public class ConfiguredFormExample : ViewBase
@@ -101,7 +101,7 @@ public class ConfiguredFormExample : ViewBase
 
 ### Custom Input Builders
 
-Use `.Builder()` to specify custom input types for specific fields.
+Use `.Builder()` to specify custom input types for specific [fields](../../02_Widgets/04_Inputs/01_Field.md).
 
 ```csharp demo-tabs
 public class CustomInputsExample : ViewBase
@@ -137,7 +137,7 @@ public class CustomInputsExample : ViewBase
 
 ### Required Fields
 
-Mark fields as required using `.Required()` or rely on automatic detection from non-nullable types.
+Mark [fields](../../02_Widgets/04_Inputs/01_Field.md) as required using `.Required()` or rely on automatic detection from non-nullable types.
 
 ```csharp demo-tabs
 public class RequiredFieldsExample : ViewBase
@@ -171,7 +171,7 @@ public class RequiredFieldsExample : ViewBase
 
 ### Field Placement
 
-Control field placement using `.Place()` and `.PlaceHorizontal()` methods for custom layouts.
+Control [field](../../02_Widgets/04_Inputs/01_Field.md) placement using `.Place()` and `.PlaceHorizontal()` methods for custom [layouts](./04_Layout.md).
 
 ```csharp demo-tabs
 public class LayoutControlExample : ViewBase
@@ -203,7 +203,7 @@ public class LayoutControlExample : ViewBase
 
 ### Grouped Fields
 
-Organize related fields into logical groups using `.Group()`.
+Organize related [fields](../../02_Widgets/04_Inputs/01_Field.md) into logical groups using `.Group()`.
 
 ```csharp demo-tabs
 public class GroupedFieldsExample : ViewBase
@@ -243,7 +243,7 @@ public class GroupedFieldsExample : ViewBase
 
 ### Field Ordering and Removal
 
-Control which fields are shown and in what order using `.Clear()`, `.Add()`, and `.Remove()`.
+Control which [fields](../../02_Widgets/04_Inputs/01_Field.md) are shown and in what order using `.Clear()`, `.Add()`, and `.Remove()`.
 
 ```csharp demo-tabs
 public class FieldManagementExample : ViewBase
@@ -379,7 +379,7 @@ public class ValidationExample : ViewBase
 
 ### Display Attributes
 
-The `[Display]` attribute provides powerful control over how fields appear in your forms without requiring additional configuration code.
+The `[Display]` attribute provides powerful control over how [fields](../../02_Widgets/04_Inputs/01_Field.md) appear in your forms without requiring additional configuration code.
 
 ```csharp demo-tabs
 public class DisplayAttributeExample : ViewBase
@@ -446,11 +446,11 @@ public class DisplayAttributeExample : ViewBase
 
 The `[Display]` attribute supports these properties:
 
-- **Name**: Custom field label (overrides automatic label generation)
+- **Name**: Custom [field](../../02_Widgets/04_Inputs/01_Field.md) label (overrides automatic label generation)
 - **Description**: Help text shown below the field
 - **Order**: Field ordering (lower numbers appear first)
 - **GroupName**: Groups related fields together
-- **Prompt**: Placeholder text for input fields
+- **Prompt**: Placeholder text for input [fields](../../02_Widgets/04_Inputs/01_Field.md)
 
 ### Programmatic Validation
 
@@ -490,7 +490,7 @@ public class ProgrammaticValidationExample : ViewBase
 
 **Programmatic Validation Methods:**
 
-- `.Required(params Expression<Func<TModel, object>>[] fields)` - Mark fields as required
+- `.Required(params Expression<Func<TModel, object>>[] fields)` - Mark [fields](../../02_Widgets/04_Inputs/01_Field.md) as required
 - `.Validate<T>(Expression<Func<TModel, object>> field, Func<T, (bool, string)> validator)` - Add custom validation with custom error message
 
 ### Validation Examples
@@ -567,7 +567,7 @@ public class MultipleValidatorsExample : ViewBase
 
 ### Basic Form Submission
 
-Forms automatically handle submission when the user presses Enter or clicks the built-in submit button. When a form is submitted successfully, it updates the model state, which triggers any `UseEffect` watching that state.
+Forms automatically handle submission when the user presses Enter or clicks the built-in submit button. When a form is submitted successfully, it updates the model state, which triggers any [UseEffect](../../03_Hooks/02_Core/04_UseEffect.md) watching that state.
 
 ```csharp demo-tabs
 public class FormSubmissionExample : ViewBase
@@ -595,7 +595,7 @@ public class FormSubmissionExample : ViewBase
 
 ### Form Submission with State Updates
 
-React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully, triggering [state changes](../../03_Hooks/02_Core/03_UseState.md) and UI updates.
+React to form submission by watching the model state with [UseEffect](../../03_Hooks/02_Core/04_UseEffect.md). The form automatically updates the state when submitted successfully, triggering [state changes](../../03_Hooks/02_Core/03_UseState.md) and UI updates.
 
 ```csharp demo-tabs
 public class FormStatesExample : ViewBase
@@ -680,7 +680,7 @@ This example works because it uses the form's internal state management. The for
 
 ### Conditional Fields
 
-Show or hide fields based on other field values using `.Visible()`.
+Show or hide [fields](../../02_Widgets/04_Inputs/01_Field.md) based on other field values using `.Visible()`.
 
 ```csharp demo-tabs
 public class ConditionalFieldsExample : ViewBase
@@ -717,7 +717,7 @@ public class ConditionalFieldsExample : ViewBase
 
 ### Dynamic Field Configuration
 
-Configure fields based on runtime conditions.
+Configure [fields](../../02_Widgets/04_Inputs/01_Field.md) based on runtime conditions.
 
 ```csharp demo-tabs
 public class DynamicConfigurationExample : ViewBase
@@ -787,7 +787,7 @@ public class SheetFormExample : ViewBase
 
 ### Dialog Forms
 
-Open forms in modal [dialogs](./23_Alerts.md) using `.ToDialog()`.
+Open forms in modal [dialogs](../../02_Widgets/03_Common/15_Dialog.md) using `.ToDialog()`.
 
 ```csharp demo-tabs
 public class DialogFormExample : ViewBase
@@ -833,12 +833,12 @@ return model.ToForm()
 ```
 
 <Callout Type="warning">
-Avoid manually creating form layouts. Always use `.ToForm()` on your state objects for better state management, validation, and type safety.
+Avoid manually creating form layouts. Always use `.ToForm()` on your [state](../../03_Hooks/02_Core/03_UseState.md) objects for better state management, validation, and type safety.
 </Callout>
 
 ## UseForm
 
-The `UseForm` hook returns a tuple containing form submission handler, form view, validation view, and loading state. It enables manual control over form rendering and submission, which is useful for custom layouts, dialogs, and sheets where the form builder's default layout isn't suitable.
+The `UseForm` hook returns a tuple containing form submission handler, form view, validation view, and loading state. It enables manual control over form rendering and submission, which is useful for custom [layouts](./04_Layout.md), [dialogs](../../02_Widgets/03_Common/15_Dialog.md), and [sheets](../../02_Widgets/07_Advanced/02_Sheet.md) where the form builder's default layout isn't suitable.
 
 ```mermaid
 graph LR
@@ -851,12 +851,12 @@ graph LR
 ```
 
 <Callout Type="info">
-In most cases, you'll use `.ToForm()` directly on your state objects for automatic form rendering. Use the `UseForm` hook when you need custom layouts, want to place the form in dialogs/sheets, or need manual control over form submission.
+In most cases, you'll use `.ToForm()` directly on your [state](../../03_Hooks/02_Core/03_UseState.md) objects for automatic form rendering. Use the `UseForm` hook when you need custom [layouts](./04_Layout.md), want to place the form in [dialogs](../../02_Widgets/03_Common/15_Dialog.md)/[sheets](../../02_Widgets/07_Advanced/02_Sheet.md), or need manual control over form submission.
 </Callout>
 
 ### Basic Usage
 
-Use `UseForm` when you need manual control over form rendering and submission, such as in dialogs or sheets.
+Use `UseForm` when you need manual control over form rendering and submission, such as in [dialogs](../../02_Widgets/03_Common/15_Dialog.md) or [sheets](../../02_Widgets/07_Advanced/02_Sheet.md).
 
 ```csharp demo-tabs
 public class UseFormHookExample : ViewBase
@@ -897,7 +897,7 @@ public class UseFormHookExample : ViewBase
 Forms with Data Tables
 </Summary>
 <Body>
-Combine forms with data tables for CRUD operations.
+Combine forms with [data tables](../../02_Widgets/07_Advanced/01_DataTable.md) for CRUD operations.
 
 ```csharp demo-tabs
 public class CrudFormExample : ViewBase

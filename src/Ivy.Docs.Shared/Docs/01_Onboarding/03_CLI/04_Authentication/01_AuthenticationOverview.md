@@ -28,7 +28,7 @@ If you run this command without additional options, Ivy will guide you through a
 
 1. **Select a Provider**: Choose from the available authentication providers
 2. **Configure the Provider**: Enter the necessary configuration details (for example, domain and client ID for Auth0, or project URL and API key for Supabase)
-3. **Project Setup**: Ivy updates your `Program.cs` and stores sensitive values in .NET user secrets, so your project is ready to use authentication.
+3. **Project Setup**: Ivy updates your [Program.cs](../../02_Concepts/01_Program.md) and stores sensitive values in [.NET user secrets](../../02_Concepts/14_Secrets.md), so your project is ready to use authentication.
 
 ### Command Options
 
@@ -54,7 +54,7 @@ Available providers: `Auth0`, `Clerk`, `Supabase`, `MicrosoftEntra`, `Authelia`,
 
 ### How Ivy Updates Program.cs
 
-Ivy automatically updates your `Program.cs` to configure authentication. Here are a few examples of code that it may add:
+Ivy automatically updates your [Program.cs](../../02_Concepts/01_Program.md) to configure authentication. Here are a few examples of code that it may add:
 
 **Basic Auth**
 
@@ -74,7 +74,7 @@ server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle().UseApple
 server.UseAuth<SupabaseAuthProvider>(c => c.UseEmailPassword().UseGoogle().UseGithub());
 ```
 
-Before making any changes to your `Program.cs`, Ivy checks whether an authentication provider is already configured.
+Before making any changes to your Program.cs, Ivy checks whether an authentication provider is already configured.
 - If you selected a **different provider** than what is already configured, Ivy will ask you to confirm before overwriting the existing configuration.
 - If you selected the **same provider**, Ivy reuses the existing configuration as defaults for your new setup.
 
@@ -82,7 +82,7 @@ Before making any changes to your `Program.cs`, Ivy checks whether an authentica
 
 ### Security and Secrets Management
 
-Ivy automatically configures .NET user secrets for secure authentication configuration. To view configured secrets:
+Ivy automatically configures [.NET user secrets](../../02_Concepts/14_Secrets.md) for secure authentication configuration. To view configured secrets:
 
 ```terminal
 >dotnet user-secrets list
@@ -111,7 +111,7 @@ Instead of .NET user secrets, you can also use environment variables to store au
 >export Auth0__Namespace="https://ivy.app/"
 ```
 
-If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets.
+If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in [user secrets](../../02_Concepts/14_Secrets.md).
 
 ## Authentication Flow
 
@@ -132,6 +132,8 @@ If configuration is present in both .NET user secrets and environment variables,
 4. If valid, Ivy establishes an authenticated session for the user.
 
 ## Using IAuthService in Views
+
+Use [UseService](../../02_Concepts/01_Program.md) to obtain `IAuthService` in your [views](../../02_Concepts/02_Views.md):
 
 ```csharp
 var auth = UseService<IAuthService>();
@@ -200,7 +202,7 @@ server.UseAuth<BasicAuthProvider>(viewFactory: () => new MyCustomLoginApp());
 
 **Token Validation Issues** - Check that your JWT tokens are properly signed, verify audience and issuer claims, and ensure your system clock is set correctly.
 
-**Configuration Issues** - Ensure authentication settings are properly stored in user secrets (or verify environment variables are correctly set), and check that your `Program.cs` includes the necessary authentication config.
+**Configuration Issues** - Ensure authentication settings are properly stored in [user secrets](../../02_Concepts/14_Secrets.md) (or verify environment variables are correctly set), and check that your [Program.cs](../../02_Concepts/01_Program.md) includes the necessary authentication config.
 
 ### Related Commands
 

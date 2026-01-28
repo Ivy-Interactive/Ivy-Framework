@@ -10,7 +10,7 @@ searchHints:
 
 # Align
 
-`Align` specifies alignment options for UI elements across the Ivy framework. It is commonly used for aligning content within other widgets such as in `Layout.Horizontal` or `Layout.Vertical`.
+`Align` specifies alignment options for UI elements across the Ivy framework. It is commonly used for aligning content within [layouts](../../../01_Onboarding/02_Concepts/04_Layout.md) such as `Layout.Horizontal` or `Layout.Vertical`, and in [widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) like [Box](../../../02_Widgets/01_Primitives/04_Box.md) via `ContentAlign`.
 
 ```csharp demo-tabs 
 public class AlignView : ViewBase

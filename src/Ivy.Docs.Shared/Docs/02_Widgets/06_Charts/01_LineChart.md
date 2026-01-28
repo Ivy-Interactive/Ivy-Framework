@@ -14,7 +14,7 @@ searchHints:
 Visualize trends and changes over time with interactive line charts that support multiple data series and customizable styling.
 </Ingress>
 
-Line charts show trends over a period of time. The example below renders desktop
+Line charts show trends over a period of time. Build chart [views](../../01_Onboarding/02_Concepts/02_Views.md) inside [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) and use [state](../../03_Hooks/02_Core/03_UseState.md) for dynamic data. See [Charts](../../01_Onboarding/02_Concepts/18_Charts.md) for an overview of Ivy chart widgets. The example below renders desktop
 and mobile sales figures.
 
 ```csharp demo-tabs
@@ -86,7 +86,6 @@ public class LineStylesDemo: ViewBase
     }
 }
 ```
-
 
 ## Changing Line Widths
 

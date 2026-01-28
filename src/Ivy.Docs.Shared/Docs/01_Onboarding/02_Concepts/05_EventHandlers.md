@@ -56,24 +56,24 @@ The `OnBlur` event handler is available on all input widgets that implement the 
 
 | Input Widget | Description |
 |--------------|-------------|
-| `TextInput` | Text, password, email, search, and textarea inputs |
-| `NumberInput` | Number and slider inputs |
-| `SelectInput` | Dropdown select inputs |
-| `AsyncSelectInput` | Async dropdown inputs with server-side data |
-| `BoolInput` | Checkbox and switch inputs |
-| `DateTimeInput` | Date and time picker inputs |
-| `DateRangeInput` | Date range picker inputs |
-| `FileInput` | File upload inputs |
-| `ColorInput` | Color picker inputs |
-| `CodeInput` | Code editor inputs |
-| `FeedbackInput` | Star rating and feedback inputs |
-| `ReadOnlyInput` | Read-only display inputs |
+| [TextInput](../../02_Widgets/04_Inputs/02_TextInput.md) | Text, password, email, search, and textarea inputs |
+| [NumberInput](../../02_Widgets/04_Inputs/03_NumberInput.md) | Number and slider inputs |
+| [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) | Dropdown select inputs |
+| [AsyncSelectInput](../../02_Widgets/04_Inputs/06_AsyncSelectInput.md) | Async dropdown inputs with server-side data |
+| [BoolInput](../../02_Widgets/04_Inputs/04_BoolInput.md) | Checkbox and switch inputs |
+| [DateTimeInput](../../02_Widgets/04_Inputs/07_DateTimeInput.md) | Date and time picker inputs |
+| [DateRangeInput](../../02_Widgets/04_Inputs/08_DateRangeInput.md) | Date range picker inputs |
+| [FileInput](../../02_Widgets/04_Inputs/10_FileInput.md) | File upload inputs |
+| [ColorInput](../../02_Widgets/04_Inputs/09_ColorInput.md) | Color picker inputs |
+| [CodeInput](../../02_Widgets/04_Inputs/11_CodeInput.md) | Code editor inputs |
+| [FeedbackInput](../../02_Widgets/04_Inputs/13_FeedbackInput.md) | Star rating and feedback inputs |
+| [ReadOnlyInput](../../02_Widgets/04_Inputs/14_ReadOnlyInput.md) | Read-only display inputs |
 
 ## Common Patterns
 
 ### Validation Pattern
 
-Validate fields when the user finishes editing using validation patterns:
+Validate [fields](../../02_Widgets/04_Inputs/01_Field.md) when the user finishes editing using validation patterns:
 
 ```csharp demo-tabs
 public class ValidationBlurExample : ViewBase

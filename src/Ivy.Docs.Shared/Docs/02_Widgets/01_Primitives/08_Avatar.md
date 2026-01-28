@@ -16,7 +16,7 @@ Display user or entity representations with automatic fallbacks from images to i
 
 `Avatars` are graphical representations of users or entities. They display an image if available or fall back to initials or a placeholder when no image is provided.
 
-To create a new avatar, it is recommended to use a [layout](../../01_Onboarding/02_Concepts/02_Views.md).
+To create a new avatar, it is recommended to use a [layout](../../01_Onboarding/02_Concepts/04_Layout.md).
 
 Make sure to define a name and supply a `url` to fetch the image.
 
@@ -75,7 +75,7 @@ public class IvyTeamDemo : ViewBase
 
 ### Integration with Other Widgets
 
-Avatars can be integrated into other [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md), including [cards](../03_Common/04_Card.md), add [buttons](../03_Common/01_Button.md), and more.
+Avatars can be integrated into other [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md), including [cards](../03_Common/04_Card.md), add [buttons](../03_Common/01_Button.md), and more. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width()` and `.Height()` when customizing dimensions.
 
 ```csharp demo-tabs
 public class AvatarAsFoodIcon : ViewBase

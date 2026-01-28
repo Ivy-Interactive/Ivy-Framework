@@ -14,7 +14,7 @@ searchHints:
 Connect your Ivy application to various databases with automatic Entity Framework configuration for SQL Server, PostgreSQL, MySQL, SQLite, and more.
 </Ingress>
 
-The `ivy db` commands allow you to add and manage database connections in your Ivy project. Ivy supports a wide range of database providers and automatically generates the necessary Entity Framework configurations.
+The `ivy db` commands allow you to add and manage [database connections](../../02_Concepts/26_Connections.md) in your Ivy project. Ivy supports a wide range of database providers and automatically generates the necessary Entity Framework configurations.
 
 ## Adding a Database Connection
 
@@ -120,13 +120,13 @@ Ivy supports the following database providers. Click on any provider for detaile
 
 Ivy automatically configures:
 
-- **Connection strings** stored securely using .NET User Secrets
+- **Connection strings** stored securely using [.NET User Secrets](../../02_Concepts/14_Secrets.md)
 - **Entity Framework Core** with the appropriate provider, and generated context and entity classes
-- **Ivy connection** to facilitate communication between Ivy apps and the database provider
+- **Ivy [connection](../../02_Concepts/26_Connections.md)** to facilitate communication between Ivy apps and the database provider
 
 ### Security and Secrets Management
 
-Ivy automatically configures .NET User Secrets for secure connection string storage:
+Ivy automatically configures [.NET User Secrets](../../02_Concepts/14_Secrets.md) for secure connection string storage:
 
 ```terminal
 >dotnet user-secrets list
@@ -276,7 +276,7 @@ You can add multiple database connections to a single project:
 
 **Entity Framework Issues** - Ensure required NuGet packages are installed, verify .NET EF tools are installed: `dotnet tool install -g dotnet-ef`, and check for conflicting Entity Framework versions.
 
-**Authentication Issues** - Ensure you're logged in: `ivy login` and verify your Ivy account has the necessary permissions.
+**Authentication Issues** - Ensure you're logged in: `ivy login` and verify your Ivy account has the necessary permissions. See [Connections](../../02_Concepts/26_Connections.md) for how Ivy uses connection classes in your app.
 
 ## Examples
 

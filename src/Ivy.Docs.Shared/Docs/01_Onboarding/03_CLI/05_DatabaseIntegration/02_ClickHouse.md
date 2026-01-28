@@ -41,7 +41,7 @@ Specifically, your connection string should contain the following information, i
 - **Database**: The name of the database you wish to connect to.
 - **Username** and **Password**: The credentials used to authenticate to the server. These may be omitted in simple cases, e.g., running a local unsecured instance during development.
 
-Your connection string will be stored in .NET user secrets.
+Your connection string will be stored in [.NET user secrets](../../02_Concepts/14_Secrets.md).
 
 See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 

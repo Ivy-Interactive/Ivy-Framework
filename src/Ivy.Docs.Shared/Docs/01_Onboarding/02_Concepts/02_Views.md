@@ -12,7 +12,7 @@ searchHints:
 
 # Views
 
-Understand how Views work as the core building blocks of Ivy [apps](./15_Apps.md), similar to React components but written entirely in C#.
+Understand how Views work as the core building blocks of Ivy [apps](./10_Apps.md), similar to React components but written entirely in C#.
 
 Views are the fundamental building blocks of Ivy apps. They are similar to React components, providing a way to encapsulate UI logic and [state management](../../03_Hooks/02_Core/03_UseState.md) in a reusable way. Every view inherits from `ViewBase` and implements a `Build()` method that returns the UI structure.
 
@@ -38,9 +38,9 @@ All views inherit from the abstract `ViewBase` class, which provides:
 
 The `Build()` method is the heart of every view. It can return:
 
-- [Widgets](./03_Widgets.md) (Button, Card, Text, etc.)
+- [Widgets](./03_Widgets.md) ([Button](../../02_Widgets/03_Common/01_Button.md), [Card](../../02_Widgets/03_Common/04_Card.md), Text, etc.)
 - Other Views (for composition)
-- Layouts (to arrange multiple elements)
+- [Layouts](./04_Layout.md) (to arrange multiple elements)
 - Primitive types (strings, numbers)
 - Collections (arrays, lists)
 - `null` (to render nothing)
@@ -62,7 +62,7 @@ public class FlexibleContentView : ViewBase
 
 ### State Management with Hooks
 
-Views use React-like hooks for state management. The most common hook is `UseState()`:
+Views use React-like hooks for state management. The most common hook is [UseState()](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp demo-tabs
 public class CounterView : ViewBase
@@ -105,7 +105,7 @@ var cache = UseState(new Dictionary<string, object>(), buildOnChange: false);
 
 ## Service Injection
 
-Views can access application services using the `UseService<T>()` hook:
+Views can access application services using the [UseService<T>()](../../03_Hooks/02_Core/11_UseService.md) hook:
 
 ```csharp demo
 new Button("Show Toast",
@@ -182,9 +182,9 @@ public class MyApp : ViewBase
 
 The `[App]` attribute supports several properties:
 
-- `icon`: [Icon](./15_Apps.md) to display in [navigation](./14_Navigation.md)
+- `icon`: [Icon](../../02_Widgets/01_Primitives/02_Icon.md) to display in [navigation](./09_Navigation.md)
 - `title`: Display name (defaults to class name)
-- `path`: [Navigation](./14_Navigation.md) path array for hierarchical organization
+- `path`: [Navigation](./09_Navigation.md) path array for hierarchical organization
 - `isVisible`: Whether to show in navigation
 - `searchHints`: Alternative keywords for search discoverability
 - `order`: Sort order within group

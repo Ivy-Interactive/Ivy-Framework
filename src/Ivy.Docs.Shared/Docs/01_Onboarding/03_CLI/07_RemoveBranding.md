@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - branding
   - license
@@ -14,7 +14,7 @@ searchHints:
 Remove Ivy branding from your deployed projects with a valid Ivy Pro or Team subscription.
 </Ingress>
 
-The `ivy remove-branding` command allows users with a paid subscription to remove Ivy branding from their projects. This command configures the necessary license token in your project's .NET user secrets, which must then be included in your deployment environment.
+The `ivy remove-branding` command allows users with a paid subscription to remove Ivy branding from their projects. This command configures the necessary license token in your project's [.NET user secrets](../02_Concepts/14_Secrets.md), which must then be included in your deployment environment.
 
 ## Prerequisites
 
@@ -59,11 +59,11 @@ The `Ivy:License` configuration value must be included in your deployment enviro
 
 ### Cloud Deployment
 
-When using `ivy deploy` to simplify deployment, the license configuration will be automatically included in your deployment if it has been configured in your .NET user secrets.
+When using [ivy deploy](06_Deployment/01_DeploymentOverview.md) to simplify deployment, the license configuration will be automatically included in your deployment if it has been configured in your [.NET user secrets](../02_Concepts/14_Secrets.md).
 
 ### Manual Deployment
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure your Ivy license by setting the environment variable or .NET user secret below.
+When deploying an Ivy project without using [ivy deploy](06_Deployment/01_DeploymentOverview.md), your local [.NET user secrets](../02_Concepts/14_Secrets.md) are not automatically transferred. In that case, you can configure your Ivy license by setting the environment variable or .NET user secret below.
 
 ```bash
 # Environment variable
@@ -73,7 +73,7 @@ Ivy__License=your-unique-license-token
 Ivy:License=your-unique-license-token
 ```
 
-> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
+> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **[.NET user secrets](../02_Concepts/14_Secrets.md) over environment variables**.
 
 To retrieve your license token, run `ivy remove-branding` locally, then look for `Ivy:License` in your user secrets. See [Check User Secrets](#check-user-secrets) below for more information.
 

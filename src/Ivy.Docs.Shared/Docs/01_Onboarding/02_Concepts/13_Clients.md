@@ -16,7 +16,7 @@ Bridge server-side C# code with client-side React components for seamless browse
 
 ## Overview
 
-The `IClientProvider` interface is the main entry point for client-side interactions. It's available through dependency injection using the `UseService` hook:
+The `IClientProvider` interface is the main entry point for client-side interactions. It's available through dependency injection using the [UseService](../../03_Hooks/02_Core/11_UseService.md) hook:
 
 ```csharp
 var client = UseService<IClientProvider>();
@@ -24,7 +24,7 @@ var client = UseService<IClientProvider>();
 
 ## Common Use Cases
 
-You can show [toasts](./23_Alerts.md):
+You can show [toasts](./17_Alerts.md):
 
 ```csharp
 // Simple toast
@@ -34,7 +34,7 @@ client.Toast("Operation successful!");
 client.Toast("Data saved", "Success");
 ```
 
-You can [navigate](./14_Navigation.md) to different pages within the app:
+You can [navigate](./09_Navigation.md) to different pages within the app:
 
 ```csharp
 // Navigate to different pages within the app
@@ -81,7 +81,7 @@ client.CopyToClipboard("Copied to clipboard!");
 client.Toast("Text copied!");
 ```
 
-You can set the [theme mode](./17_Theming.md) and apply custom CSS:
+You can set the [theme mode](./12_Theming.md) and apply custom CSS:
 
 ```csharp
 // Set theme mode
@@ -107,10 +107,10 @@ client.ApplyTheme(customCss);
 
 Ivy automatically handles UI refreshes in most cases. You typically **don't need** to manually refresh the UI:
 
-- **[Form Submissions](./13_Forms.md)**: When forms are submitted successfully, the UI automatically updates
-- **State Changes**: When [state](../../03_Hooks/02_Core/03_UseState.md) values change, the UI automatically re-renders
-- **Sheet Dismissal**: [Sheets](../../02_Widgets/07_Advanced/02_Sheet.md) are automatically closed by the framework when forms are submitted successfully
-- **Navigation**: Page [navigation](./14_Navigation.md) automatically refreshes the UI
+- **[Form](./08_Forms.md) submissions**: When forms are submitted successfully, the UI automatically updates
+- **State changes**: When [state](../../03_Hooks/02_Core/03_UseState.md) values change, the UI automatically re-renders
+- **Sheet dismissal**: [Sheets](../../02_Widgets/07_Advanced/02_Sheet.md) are automatically closed by the framework when forms are submitted successfully
+- **Navigation**: Page [navigation](./09_Navigation.md) automatically refreshes the UI
 
 **Do this instead** - Let the framework handle it:
 
@@ -239,7 +239,7 @@ public class FileOperationsApp : ViewBase
 
 <Details>
 <Summary>
-[Navigation](./14_Navigation.md) and URL Management
+Navigation and URL Management
 </Summary>
 <Body>
 
@@ -282,7 +282,7 @@ public class ClientNavigationApp : ViewBase
 
 ## See Also
 
-- [Forms](./13_Forms.md)
+- [Forms](./08_Forms.md)
 - [State Management](../../03_Hooks/02_Core/03_UseState.md)
 - [Effects](../../03_Hooks/02_Core/04_UseEffect.md)
-- [Alerts & Notifications](./23_Alerts.md)
+- [Alerts & Notifications](./17_Alerts.md)

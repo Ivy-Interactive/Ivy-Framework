@@ -11,7 +11,7 @@ searchHints:
 # FloatingPanel
 
 <Ingress>
-Create fixed-position [UI](../../01_Onboarding/02_Concepts/02_Views.md) elements that remain visible and accessible regardless of scroll position, perfect for [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md) buttons, action panels, and floating controls.
+Create fixed-position [UI](../../01_Onboarding/02_Concepts/02_Views.md) elements that remain visible and accessible regardless of scroll position, perfect for [navigation](../../01_Onboarding/02_Concepts/09_Navigation.md) buttons, action panels, and floating controls.
 </Ingress>
 
 The `FloatingPanel` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) positions its content at a fixed location on the screen, making it ideal for elements that should remain accessible while users scroll through content. It's commonly used for navigation buttons, action panels, and floating controls that need to stay visible.
@@ -48,7 +48,7 @@ Floating panels automatically use a high z-index (50) to ensure they appear abov
 
 ## Alignment Options
 
-The `FloatingPanel` supports nine different alignment positions to place content exactly where you need it:
+The `FloatingPanel` supports nine different [Align](../../04_ApiReference/IvyShared/Align.md) positions to place content exactly where you need it:
 
 ### Corner Positions
 

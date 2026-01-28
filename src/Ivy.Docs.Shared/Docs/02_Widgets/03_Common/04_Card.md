@@ -16,11 +16,11 @@ searchHints:
 Organize content in visually grouped containers with headers, footers, and actions to create structured, professional [layouts](../02_Layouts/_Index.md).
 </Ingress>
 
-The `Card` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a versatile container used to group related content and actions in Ivy [apps](../../01_Onboarding/02_Concepts/15_Apps.md). It can hold text, buttons, charts, and other [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md), making it a fundamental [building block](../../01_Onboarding/02_Concepts/02_Views.md) for creating structured layouts.
+The `Card` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a versatile container used to group related content and actions in Ivy [apps](../../01_Onboarding/02_Concepts/10_Apps.md). It can hold text, buttons, charts, and other [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md), making it a fundamental [building block](../../01_Onboarding/02_Concepts/02_Views.md) for creating structured layouts.
 
 ## Basic Usage
 
-Here's a simple example of a card containing text and a button that shows a [toast message](../../01_Onboarding/02_Concepts/19_Clients.md) when clicked.
+Here's a simple example of a card containing text and a button that shows a [toast message](../../01_Onboarding/02_Concepts/13_Clients.md) when clicked. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width()` to control card width.
 
 ```csharp demo-below
 new Card(
@@ -44,7 +44,7 @@ new Card(
 
 ## Border Customization
 
-Cards support the same border functionality as [Box widgets](../01_Primitives/04_Box.md), allowing you to customize the appearance while maintaining the default card styling when no border properties are specified.
+Cards support the same border functionality as [Box widgets](../01_Primitives/04_Box.md), allowing you to customize the appearance with [Colors](../../04_ApiReference/IvyShared/Colors.md) and border options while maintaining the default card styling when no border properties are specified.
 
 ```csharp demo-below
 new Card(
@@ -61,7 +61,7 @@ new Card(
 
 ## Dashboard Metrics
 
-For dashboard applications, Ivy provides the specialized `MetricView` component that extends Card functionality with KPI-specific features like trend indicators and goal tracking. It uses [UseQuery](../../../03_Hooks/02_Core/09_UseQuery.md) hooks for data fetching.
+For dashboard applications, Ivy provides the specialized `MetricView` component that extends Card functionality with KPI-specific features like trend indicators and goal tracking. It uses [UseQuery](../../03_Hooks/02_Core/09_UseQuery.md) hooks for data fetching.
 
 ```csharp demo-below
 new MetricView(

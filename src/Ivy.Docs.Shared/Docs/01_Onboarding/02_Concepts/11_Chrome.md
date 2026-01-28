@@ -16,10 +16,10 @@ searchHints:
 # Chrome Configuration
 
 <Ingress>
-Configure the application chrome ([sidebar](../../02_Widgets/02_Layouts/06_SidebarLayout.md), header, footer) using ChromeSettings to customize [navigation](./14_Navigation.md), branding, and layout behavior.
+Configure the application chrome ([sidebar](../../02_Widgets/02_Layouts/06_SidebarLayout.md), header, footer) using ChromeSettings to customize [navigation](./09_Navigation.md), branding, and layout behavior.
 </Ingress>
 
-You can add custom elements to both the header and footer sections of the sidebar using `ChromeSettings`:
+You can add custom elements to both the header and footer sections of the sidebar using `ChromeSettings`. The example uses [Layout](./04_Layout.md), [Button](../../02_Widgets/03_Common/01_Button.md), and [Text](../../02_Widgets/01_Primitives/01_TextBlock.md) widgets:
 
 ```csharp
 var chromeSettings = new ChromeSettings()
@@ -63,7 +63,7 @@ Use `server.UseDefaultApp(typeof(AppName))` instead of `UseChrome()` for single-
 
 Configure a dedicated background *app* that appears when no other tabs are open. Perfect for welcome screens, dashboards or branded imagery.
 
-The **Wallpaper** is just another [Ivy application](./15_Apps.md) rendered full-screen by the Chrome host whenever the tab area is empty. This keeps your UI visually engaging instead of showing an empty canvas.
+The **Wallpaper** is just another [app](./10_Apps.md) rendered full-screen by the Chrome host whenever the tab area is empty. This keeps your UI visually engaging instead of showing an empty canvas.
 
 ### Configuration
 
@@ -78,8 +78,8 @@ var chromeSettings = ChromeSettings.Default()
 chromeSettings = chromeSettings.WallpaperApp<WelcomeScreenApp>();
 ```
 
-1. Implement a normal Ivy app (derive from [Views](./02_Views.md)).
-2. Register it like any other [app](./15_Apps.md) (`server.AddApp<WelcomeScreenApp>()`).
+1. Implement a normal Ivy app (derive from [ViewBase](./02_Views.md)).
+2. Register it like any other [app](./10_Apps.md) (`server.AddApp<WelcomeScreenApp>()`).
 3. Reference it in `ChromeSettings` with one of the helpers above.
 
 ### Full Example

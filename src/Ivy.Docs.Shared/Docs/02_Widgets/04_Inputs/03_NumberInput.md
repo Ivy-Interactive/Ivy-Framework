@@ -200,7 +200,7 @@ public class FormatStyleDemos : ViewBase
 
 ```
 
-## [Event Handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md)
+## Event Handling
 
 `NumberInput`s can handle change and blur events:
 

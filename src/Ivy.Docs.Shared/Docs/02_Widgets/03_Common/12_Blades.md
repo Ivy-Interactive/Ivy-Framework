@@ -16,14 +16,14 @@ searchHints:
 # Blades
 
 <Ingress>
-Create stacked [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md) experiences where new [views](../../01_Onboarding/02_Concepts/02_Views.md) slide in from the right, managed through a blade controller for intuitive drill-down interfaces.
+Create stacked [navigation](../../01_Onboarding/02_Concepts/09_Navigation.md) experiences where new [views](../../01_Onboarding/02_Concepts/02_Views.md) slide in from the right, managed through a blade controller for intuitive drill-down interfaces.
 </Ingress>
 
 `Blade`s provide a stacked navigation pattern where new views slide in from the right. Use the `UseBlades` extension to create a root blade and manage a stack of blades through `IBladeService`. Perfect for master-detail [interfaces](../../01_Onboarding/02_Concepts/02_Views.md), wizards, and hierarchical navigation.
 
 ## Usage
 
-Create a blade container with a root view and use `IBladeService` to push and pop blades.
+Create a blade container with a root view and use `IBladeService` to push and pop blades. Use [Size](../../04_ApiReference/IvyShared/Size.md) for blade `width` (e.g. `Size.Units(100)`).
 
 ```csharp demo-tabs
 public class BladeNavigationDemo : ViewBase

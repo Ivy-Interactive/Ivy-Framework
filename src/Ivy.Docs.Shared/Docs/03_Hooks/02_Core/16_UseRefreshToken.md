@@ -14,7 +14,7 @@ Refresh tokens provide a mechanism to manually trigger UI updates and effect exe
 
 ## Basic Usage
 
-The `UseRefreshToken` hook creates a token that can be manually refreshed to trigger [effects](../../03_Hooks/02_Core/04_UseEffect.md):
+The `UseRefreshToken` hook creates a token that can be manually refreshed to trigger [effects](./04_UseEffect.md):
 
 ```csharp demo-below
 public class BasicRefreshExample : ViewBase
@@ -93,7 +93,7 @@ Return values can be any type, including complex objects like records or classes
 | `IsRefreshed` | `bool` | `true` if the token has been refreshed at least once |
 | `ReturnValue` | `object?` | The value passed to the last `Refresh()` call |
 
-## Refresh Tokens vs [Event Handlers](./07_EventHandlers.md)
+## Refresh Tokens vs Event Handlers
 
 | Feature | Event Handlers | Refresh Tokens |
 |---------|---------------|----------------|

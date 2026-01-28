@@ -17,7 +17,7 @@ export const expandableTriggerVariants = cva(
 );
 
 export const expandableHeaderVariants = cva(
-  'flex-1 min-w-0 pointer-events-none [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_[role="button"]]:pointer-events-auto [&_[role="switch"]]:pointer-events-auto [&_[role="checkbox"]]:pointer-events-auto [&_a[href]]:pointer-events-auto [&_button]:cursor-pointer [&_input]:cursor-default [&_[role="switch"]]:cursor-pointer [&_[role="checkbox"]]:cursor-pointer',
+  'flex-1 min-w-0 pointer-events-none [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_[role="button"]]:pointer-events-auto [&_[role="switch"]]:pointer-events-auto [&_[role="checkbox"]]:pointer-events-auto [&_a[href]]:pointer-events-auto [&_button]:cursor-pointer [&_input]:cursor-default [&_[role="switch"]]:cursor-pointer [&_[role="checkbox"]]:cursor-pointer [&_button]:text-foreground [&_[role="switch"]]:text-foreground [&_input]:text-foreground',
   {
     variants: {
       scale: {
