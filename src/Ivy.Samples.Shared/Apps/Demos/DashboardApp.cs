@@ -1,4 +1,4 @@
-using Ivy.Charts;
+﻿using Ivy.Charts;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
 using Ivy.Shared;
@@ -14,16 +14,16 @@ public class DashboardApp : SampleBase
     protected override object? BuildSample()
     {
         return Layout.Vertical() | (Layout.Grid().Columns(4)
-                                    | new MetricView("Total Sales", ctx => UseStaticMetric(ctx, new MetricRecord("$84,250", 0.21, 0.21, "$800,000")))
-                                    | new MetricView("Very Long Revenue Number", ctx => UseStaticMetric(ctx, new MetricRecord("$123,456,789.99", 12.345, 0.85, "$100,000,000")))
-                                    | new MetricView("Post Engagement Rate", ctx => UseStaticMetric(ctx, new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%")))
-                                    | new MetricView("Total Comments per Author", ctx => UseStaticMetric(ctx, new MetricRecord("2.25", 0.381, 0.90, "2.50")))
+                                    | new MetricView("Total Sales", Icons.DollarSign, ctx => UseStaticMetric(ctx, new MetricRecord("$84,250", 0.21, 0.21, "$800,000")))
+                                    | new MetricView("Very Long Revenue Number", Icons.DollarSign, ctx => UseStaticMetric(ctx, new MetricRecord("$123,456,789.99", 12.345, 0.85, "$100,000,000")))
+                                    | new MetricView("Post Engagement Rate", Icons.Activity, ctx => UseStaticMetric(ctx, new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%")))
+                                    | new MetricView("Total Comments per Author", Icons.UserCheck, ctx => UseStaticMetric(ctx, new MetricRecord("2.25", 0.381, 0.90, "2.50")))
                                     )
                                  | (Layout.Grid().Columns(4)
-                                    | new MetricView("Total Comments per Author in This Period", ctx => UseStaticMetric(ctx, new MetricRecord("2.25", 0.381, 0.90, "2.50")))
-                                    | new MetricView("User Engagement", ctx => UseStaticMetric(ctx, new MetricRecord("1,247", 0.125, 0.75, "1,500 users")))
-                                    | new MetricView("Task Progress", ctx => UseStaticMetric(ctx, new MetricRecord("87%", null, 0.87, "100% completion")), Icons.Check)
-                                    | new MetricView("System Health", ctx => UseStaticMetric(ctx, new MetricRecord("99.9%", null, 0.99, "100% uptime")), Icons.Activity)
+                                    | new MetricView("Total Comments per Author in This Period", Icons.MessageCircle, ctx => UseStaticMetric(ctx, new MetricRecord("2.25", 0.381, 0.90, "2.50")))
+                                    | new MetricView("User Engagement", Icons.Users, ctx => UseStaticMetric(ctx, new MetricRecord("1,247", 0.125, 0.75, "1,500 users")))
+                                    | new MetricView("Task Progress", Icons.Check, ctx => UseStaticMetric(ctx, new MetricRecord("87%", null, 0.87, "100% completion")))
+                                    | new MetricView("System Health", Icons.Activity, ctx => UseStaticMetric(ctx, new MetricRecord("99.9%", null, 0.99, "100% uptime")))
                                     )
 
                                  | (Layout.Grid().Columns(4)
@@ -34,21 +34,21 @@ public class DashboardApp : SampleBase
                                     )
 
                                  | (Layout.Grid().Columns(4)
-                                    | new MetricView("Revenue Growth", ctx => UseStaticMetric(ctx, new MetricRecord("$45,230", 0.183, 0.65, "$70,000 target")))
-                                    | new MetricView("Social Engagement", ctx => UseStaticMetric(ctx, new MetricRecord("2,847", null, null, null)), Icons.Star)
-                                    | new MetricView("Progress Variations", ctx => UseStaticMetric(ctx, new MetricRecord("70%", null, 0.70, "100%")), Icons.Star)
-                                    | new MetricView("Layout Testing", ctx => UseStaticMetric(ctx, new MetricRecord("4.8", null, 0.96, "5.0 rating")), Icons.LayoutDashboard)
+                                    | new MetricView("Revenue Growth", Icons.TrendingUp, ctx => UseStaticMetric(ctx, new MetricRecord("$45,230", 0.183, 0.65, "$70,000 target")))
+                                    | new MetricView("Social Engagement", Icons.Star, ctx => UseStaticMetric(ctx, new MetricRecord("2,847", null, null, null)))
+                                    | new MetricView("Progress Variations", Icons.Star, ctx => UseStaticMetric(ctx, new MetricRecord("70%", null, 0.70, "100%")))
+                                    | new MetricView("Layout Testing", Icons.LayoutDashboard, ctx => UseStaticMetric(ctx, new MetricRecord("4.8", null, 0.96, "5.0 rating")))
                                     )
 
                                  | (Layout.Grid().Columns(2)
-                                    | new MetricView("Download Analytics", ctx => UseStaticMetric(ctx, new MetricRecord("2,090", 0.25, 0.78, "2,500 total")))
-                                    | new MetricView("Global Distribution", ctx => UseStaticMetric(ctx, new MetricRecord("47", null, 0.85, "50 countries")), Icons.Globe)
+                                    | new MetricView("Download Analytics", Icons.Download, ctx => UseStaticMetric(ctx, new MetricRecord("2,090", 0.25, 0.78, "2,500 total")))
+                                    | new MetricView("Global Distribution", Icons.Globe, ctx => UseStaticMetric(ctx, new MetricRecord("47", null, 0.85, "50 countries")))
                                     )
 
                                  | (Layout.Grid().Columns(3)
-                                    | new MetricView("Text Spacing Demo", ctx => UseStaticMetric(ctx, new MetricRecord("Compact", null, 0.60, "Tight spacing")), Icons.Type)
-                                    | new MetricView("Zero Spacing", ctx => UseStaticMetric(ctx, new MetricRecord("Dense", null, 0.75, "Dense layout")), Icons.Zap)
-                                    | new MetricView("Spacing Control", ctx => UseStaticMetric(ctx, new MetricRecord("Custom", null, 0.90, "Custom control")), Icons.Settings)
+                                    | new MetricView("Text Spacing Demo", Icons.Type, ctx => UseStaticMetric(ctx, new MetricRecord("Compact", null, 0.60, "Tight spacing")))
+                                    | new MetricView("Zero Spacing", Icons.Zap, ctx => UseStaticMetric(ctx, new MetricRecord("Dense", null, 0.75, "Dense layout")))
+                                    | new MetricView("Spacing Control", Icons.Settings, ctx => UseStaticMetric(ctx, new MetricRecord("Custom", null, 0.90, "Custom control")))
                                     )
 
             ;

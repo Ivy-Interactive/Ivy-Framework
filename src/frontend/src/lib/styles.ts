@@ -589,9 +589,9 @@ export const typography: Record<string, string> = {
   // Size variants
   large: 'text-lg font-semibold',
   small: 'text-large-body font-medium leading-none',
+  muted: 'text-base text-muted-foreground',
 
   // Semantic variants
-  muted: 'text-base text-muted-foreground',
   danger: 'text-large-body text-destructive font-semibold',
   warning: 'text-large-body text-amber font-semibold',
   success: 'text-large-body text-green font-semibold',
@@ -599,7 +599,6 @@ export const typography: Record<string, string> = {
   // UI variants
   label: 'text-large-label font-medium leading-none flex items-center',
   block: 'flex items-center min-w-0',
-  display: 'text-3xl font-medium',
 
   // Lists
   ul: 'list-disc ml-6',
