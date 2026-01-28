@@ -49,10 +49,10 @@ public class ThemeCustomizer : SampleBase
             .Select(kv =>
                 MenuItem.Default(kv.Value.Name)
                     .HandleSelect(() =>
-                    {
+                {
                         selectedPreset.Set(kv.Key);
                         currentTheme.Set(kv.Value);
-                        ApplyTheme();
+                    ApplyTheme();
                     }))
             .ToArray();
 
