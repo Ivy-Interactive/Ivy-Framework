@@ -87,7 +87,7 @@ with a specific [Colors](../../04_ApiReference/IvyShared/Colors.md) value. The `
 to use squares. Using the `Name` function, the name of a bar can be renamed. Like
 here is done for the `Blueberry` column.
 
-<WidgetDocs Type="Ivy.BarChart" ExtensionTypes="Ivy.BarChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Charts/BarChart.cs"/>
+<WidgetDocs Type="Ivy.BarChart" ExtensionTypes="Ivy.BarChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Charts/BarChart.cs"/>
 
 ## Examples
 

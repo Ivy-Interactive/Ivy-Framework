@@ -255,4 +255,4 @@ public class SidebarMenuAdvancedExample : ViewBase
 }
 ```
 
- <WidgetDocs Type="Ivy.SidebarLayout" ExtensionTypes="Ivy.SidebarLayoutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/SidebarLayout.cs"/>
+ <WidgetDocs Type="Ivy.SidebarLayout" ExtensionTypes="Ivy.SidebarLayoutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/SidebarLayout.cs"/>

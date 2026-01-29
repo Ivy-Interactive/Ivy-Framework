@@ -210,9 +210,8 @@ public static class Utils
     public static string? SplitPascalCase(string? input)
     {
         if (input == null) return null;
-        //string[] words = Regex.Matches(input, "([A-Z]+(?![a-z])|[A-Z][a-z]+|[0-9]+|[a-z]+)")
-        string[] words = Regex.Matches(input, "([A-Z]+[a-z]+|[0-9]+|[a-z]+|[A-Z]+)")
-            //.OfType<Match>()
+        string[] words = Regex
+            .Matches(input, "([A-Z]+[a-z]+|[0-9]+|[a-z]+|[A-Z]+)")
             .Select(m => m.Value)
             .ToArray();
         return string.Join(" ", words);
@@ -240,7 +239,10 @@ public static class Utils
             .Replace('_', '-')
             .Replace(' ', '-');
 
-        var normalized = Regex.Replace(withWordBoundaries, "-{2,}", "-").Trim('-').ToLowerInvariant();
+        var normalized = Regex
+            .Replace(withWordBoundaries, "-{2,}", "-")
+            .Trim('-')
+            .ToLowerInvariant();
 
         if (hadUnderscore)
         {
@@ -260,18 +262,31 @@ public static class Utils
             input = input[..^3];
         }
 
+        // Check if this is a hook
+        bool isHook = input.Length >= 4 &&
+                      input.StartsWith("Use", StringComparison.Ordinal) &&
+                      char.IsUpper(input[3]);
+
         StringBuilder sb = new();
 
         for (int i = 0; i < input.Length; i++)
         {
             if (char.IsUpper(input[i]) && i > 0)
             {
-                bool prevIsUpper = char.IsUpper(input[i - 1]);
-                bool nextIsLower = (i + 1 < input.Length) && char.IsLower(input[i + 1]);
-
-                if (input[i - 1] != ' ' && (!prevIsUpper || nextIsLower))
+                // For hooks, don't add space between "Use" and the next word
+                if (isHook && i == 3)
                 {
-                    sb.Append(' ');
+                    // Skip adding space after "Use"
+                }
+                else
+                {
+                    bool prevIsUpper = char.IsUpper(input[i - 1]);
+                    bool nextIsLower = (i + 1 < input.Length) && char.IsLower(input[i + 1]);
+
+                    if (input[i - 1] != ' ' && (!prevIsUpper || nextIsLower))
+                    {
+                        sb.Append(' ');
+                    }
                 }
             }
 

@@ -95,6 +95,8 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         ...getWidth(width),
         ...getHeight(height),
         margin: 0,
+        wordBreak: 'normal',
+        overflowWrap: 'break-word',
         fontSize: currentScale.fontSize,
         padding: currentScale.padding,
         lineHeight: currentScale.lineHeight,
@@ -127,6 +129,8 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         }
       : { ...getWidth(width) };
 
+    const shouldWrap = true;
+
     return (
       <div className="relative" style={containerStyles}>
         {showCopyButton && (
@@ -155,11 +159,13 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
               style={dynamicTheme}
               showLineNumbers={showLineNumbers}
               wrapLines={true}
+              wrapLongLines={shouldWrap}
               key={highlighterKey}
               codeTagProps={{
                 style: {
                   fontSize: styles.fontSize,
                   lineHeight: styles.lineHeight,
+                  ...styles, // Propagate break styles to the inner code tag as well
                 },
               }}
             >

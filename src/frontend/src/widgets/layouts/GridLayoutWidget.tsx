@@ -5,7 +5,6 @@ import {
   getWidth,
   getHeight,
   convertSizeToGridValue,
-  gridCellOverflow,
 } from '../../lib/styles';
 
 interface GridLayoutWidgetProps {
@@ -55,7 +54,7 @@ const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
   return (
     <div
       style={styles}
-      className={`relative flex items-center h-full w-full min-w-0 ${gridCellOverflow.ellipsis} ${className}`}
+      className={`relative flex items-center h-full w-full min-w-0 ${className}`}
     >
       {children}
     </div>

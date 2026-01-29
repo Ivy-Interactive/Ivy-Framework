@@ -112,7 +112,7 @@ public class LineWidthDemo : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.LineChart" ExtensionTypes="Ivy.LineChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Charts/LineChart.cs"/>
+<WidgetDocs Type="Ivy.LineChart" ExtensionTypes="Ivy.LineChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Charts/LineChart.cs"/>
 
 ## Example
 

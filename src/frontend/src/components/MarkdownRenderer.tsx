@@ -98,6 +98,7 @@ const CodeBlock = memo(
   ({
     className,
     children,
+    inline,
     hasCodeBlocks,
     hasMermaid,
   }: {
@@ -116,7 +117,10 @@ const CodeBlock = memo(
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
     const typography = useTypography();
 
-    if (match && hasCodeBlocks) {
+    const shouldWrap = true;
+    const whiteSpaceStyle = shouldWrap ? { whiteSpace: 'pre-wrap' } : {};
+
+    if (!inline && match && hasCodeBlocks) {
       // Handle Mermaid diagrams
       if (isMermaid && hasMermaid) {
         return (
@@ -148,7 +152,13 @@ const CodeBlock = memo(
               <CopyToClipboardButton textToCopy={cleanContent} />
             </div>
             <ScrollArea className="w-full">
-              <pre className="p-4 bg-muted rounded-md font-mono text-sm">
+              <pre
+                className={cn(
+                  'p-4 bg-muted rounded-md font-mono text-sm',
+                  shouldWrap && 'whitespace-pre-wrap break-all'
+                )}
+                style={shouldWrap ? {} : { overflowX: 'auto' }}
+              >
                 {lines.map((line, index) => (
                   <div key={index} className="flex">
                     <span className="text-muted-foreground select-none pointer-events-none mr-2">
@@ -168,7 +178,13 @@ const CodeBlock = memo(
         <Suspense
           fallback={
             <ScrollArea className="w-full border border-border rounded-md">
-              <pre className="p-4 bg-muted rounded-md font-mono text-sm">
+              <pre
+                className={cn(
+                  'p-4 bg-muted rounded-md font-mono text-sm',
+                  shouldWrap && 'whitespace-pre-wrap break-all'
+                )}
+                style={shouldWrap ? {} : { overflowX: 'auto' }}
+              >
                 {content}
               </pre>
               <ScrollBar orientation="horizontal" />
@@ -183,7 +199,13 @@ const CodeBlock = memo(
               <SyntaxHighlighter
                 language={match[1]}
                 style={dynamicTheme}
-                customStyle={{ margin: 0 }}
+                customStyle={{
+                  margin: 0,
+                  ...whiteSpaceStyle,
+                  wordBreak: 'normal',
+                  overflowWrap: 'break-word',
+                }}
+                wrapLongLines={shouldWrap}
               >
                 {content}
               </SyntaxHighlighter>
@@ -194,7 +216,21 @@ const CodeBlock = memo(
       );
     }
 
-    return <code className={cn(typography.code, className)}>{children}</code>;
+    // Apply styles to fallback blocks (no language) if it's a block (!inline)
+    const fallbackStyles =
+      !inline && shouldWrap
+        ? {
+            ...whiteSpaceStyle,
+            wordBreak: 'normal' as const,
+            overflowWrap: 'break-word' as const,
+          }
+        : {};
+
+    return (
+      <code className={cn(typography.code, className)} style={fallbackStyles}>
+        {children}
+      </code>
+    );
   }
 );
 
@@ -415,14 +451,17 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   // Memoize code component separately (depends on contentFeatures.hasCodeBlocks and hasMermaid)
   const codeComponent = useMemo(
     () => ({
-      code: memo((props: React.ComponentProps<'code'>) => (
-        <CodeBlock
-          className={props.className}
-          children={props.children || ''}
-          hasCodeBlocks={contentFeatures.hasCodeBlocks}
-          hasMermaid={contentFeatures.hasMermaid}
-        />
-      )),
+      code: memo(
+        (props: React.ComponentProps<'code'> & { inline?: boolean }) => (
+          <CodeBlock
+            className={props.className}
+            children={props.children || ''}
+            inline={props.inline}
+            hasCodeBlocks={contentFeatures.hasCodeBlocks}
+            hasMermaid={contentFeatures.hasMermaid}
+          />
+        )
+      ),
     }),
     [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid]
   );

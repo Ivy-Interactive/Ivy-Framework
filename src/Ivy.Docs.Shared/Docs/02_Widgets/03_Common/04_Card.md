@@ -81,4 +81,4 @@ new MetricView(
 
 The `MetricView` uses UseQuery hooks for data loading, which automatically handles loading states, error handling, and caching. It also displays trend arrows with color-coded indicators for performance tracking. See the [MetricView documentation](13_MetricView.md) for more details.
 
-<WidgetDocs Type="Ivy.Card" ExtensionTypes="Ivy.CardExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Card.cs"/>
+<WidgetDocs Type="Ivy.Card" ExtensionTypes="Ivy.CardExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Card.cs"/>

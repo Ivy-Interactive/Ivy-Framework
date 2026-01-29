@@ -36,4 +36,4 @@ new Image("https://example.com/image.jpg");  // External URL
 new Image("/ivy/images/logo.png");           // Local file
 ```
 
-<WidgetDocs Type="Ivy.Image" ExtensionTypes="Ivy.ImageExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Image.cs"/>
+<WidgetDocs Type="Ivy.Image" ExtensionTypes="Ivy.ImageExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Image.cs"/>

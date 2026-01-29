@@ -362,4 +362,4 @@ public class StylingDemo : ViewBase
 AsyncSelectInput automatically handles loading states and provides a smooth user [experience](../../01_Onboarding/02_Concepts/02_Views.md). The query function is called as the user types, and the lookup function is called when displaying the selected value.
 </Callout>
 
-<WidgetDocs Type="Ivy.AsyncSelectInput" ExtensionTypes="Ivy.AsyncSelectInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/AsyncSelectInput.cs"/>
+<WidgetDocs Type="Ivy.AsyncSelectInput" ExtensionTypes="Ivy.AsyncSelectInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/AsyncSelectInput.cs"/>

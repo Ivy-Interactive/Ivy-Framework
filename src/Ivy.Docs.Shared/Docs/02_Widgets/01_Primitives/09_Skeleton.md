@@ -95,4 +95,4 @@ public class ProductCardView : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Skeleton" ExtensionTypes="Ivy.SkeletonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Skeleton.cs"/>
+<WidgetDocs Type="Ivy.Skeleton" ExtensionTypes="Ivy.SkeletonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Skeleton.cs"/>

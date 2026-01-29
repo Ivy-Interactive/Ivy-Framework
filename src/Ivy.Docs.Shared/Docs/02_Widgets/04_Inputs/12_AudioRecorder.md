@@ -154,4 +154,4 @@ public class AudioRecorderDisabledDemo : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.AudioRecorder" ExtensionTypes="Ivy.AudioRecorderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/AudioRecorder.cs"/>
+<WidgetDocs Type="Ivy.AudioRecorder" ExtensionTypes="Ivy.AudioRecorderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/AudioRecorder.cs"/>

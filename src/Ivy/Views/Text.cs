@@ -204,6 +204,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _bold;
     private bool _italic;
     private bool _muted;
+
     private Scale? _scale;
 
     public override object? Build()
@@ -281,6 +282,8 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         _overflow = overflow;
         return this;
     }
+
+
 
     public TextBuilder Bold(bool value = true)
     {

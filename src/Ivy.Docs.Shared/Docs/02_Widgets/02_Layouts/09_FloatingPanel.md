@@ -326,7 +326,7 @@ public class ActionPanelView : ViewBase
 Ensure floating panels don't interfere with content readability and provide clear visual hierarchy. Use appropriate contrast and sizing for interactive elements.
 </Callout>
 
-<WidgetDocs Type="Ivy.FloatingPanel" ExtensionTypes="Ivy.FloatingLayerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/FloatingPanel.cs"/>
+<WidgetDocs Type="Ivy.FloatingPanel" ExtensionTypes="Ivy.FloatingLayerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/FloatingPanel.cs"/>
 
 ## Examples
 

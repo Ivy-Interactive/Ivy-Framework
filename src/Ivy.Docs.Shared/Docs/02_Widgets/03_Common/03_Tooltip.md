@@ -176,4 +176,4 @@ Layout.Vertical()
     | new Badge("Status").WithTooltip("Current status is clearly indicated for all users")
 ```
 
-<WidgetDocs Type="Ivy.Tooltip" ExtensionTypes="Ivy.TooltipExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Tooltip.cs"/>
+<WidgetDocs Type="Ivy.Tooltip" ExtensionTypes="Ivy.TooltipExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Tooltip.cs"/>

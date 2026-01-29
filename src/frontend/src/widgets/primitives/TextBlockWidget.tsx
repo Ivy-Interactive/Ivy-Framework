@@ -210,6 +210,8 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
     ...getWidth(width),
     ...getColor(color, 'color', 'background'),
     ...getOverflow(overflow),
+    wordBreak: 'normal',
+    overflowWrap: 'break-word',
   };
 
   const scaleClasses: Record<string, string> = {

@@ -202,9 +202,6 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               onSelect={handleDateSelect}
               initialFocus
               scale={scale}
-              captionLayout="dropdown"
-              fromYear={1900}
-              toYear={2100}
             />
             <div className="flex items-center gap-2">
               <Clock

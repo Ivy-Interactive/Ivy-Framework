@@ -386,7 +386,6 @@ export const gridCellOverflow = {
   ellipsis:
     '[&>*]:min-w-0 [&>*]:truncate hover:[&>*]:overflow-visible hover:[&>*]:whitespace-normal hover:[&>*]:absolute hover:[&>*]:z-10',
 };
-
 export type Orientation = 'Horizontal' | 'Vertical';
 
 export type Align =

@@ -381,4 +381,4 @@ public class UserContentView : ViewBase
 - You need JavaScript functionality
 - Simple text formatting would suffice (use [Text widget](01_TextBlock.md))
 
-<WidgetDocs Type="Ivy.Html" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Html.cs"/>
+<WidgetDocs Type="Ivy.Html" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Html.cs"/>

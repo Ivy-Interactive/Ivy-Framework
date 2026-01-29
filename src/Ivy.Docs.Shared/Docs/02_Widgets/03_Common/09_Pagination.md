@@ -56,4 +56,4 @@ public class PaginationConfigurationApp : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Pagination" ExtensionTypes="Ivy.PaginationExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Pagination.cs"/>
+<WidgetDocs Type="Ivy.Pagination" ExtensionTypes="Ivy.PaginationExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Pagination.cs"/>

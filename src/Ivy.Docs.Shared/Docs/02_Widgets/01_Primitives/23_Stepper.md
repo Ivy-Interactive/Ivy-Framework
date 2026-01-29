@@ -115,4 +115,4 @@ public class StepperDynamicStatesDemo : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Stepper" ExtensionTypes="Ivy.StepperExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Stepper.cs"/>
+<WidgetDocs Type="Ivy.Stepper" ExtensionTypes="Ivy.StepperExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Stepper.cs"/>

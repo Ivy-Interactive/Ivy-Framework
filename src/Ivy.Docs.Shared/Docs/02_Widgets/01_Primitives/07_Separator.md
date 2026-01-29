@@ -82,4 +82,4 @@ public class ProfileDetailView : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Separator" ExtensionTypes="Ivy.SeparatorExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Separator.cs"/>
+<WidgetDocs Type="Ivy.Separator" ExtensionTypes="Ivy.SeparatorExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Separator.cs"/>

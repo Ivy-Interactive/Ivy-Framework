@@ -105,4 +105,4 @@ public class MixedInputsDemo : ViewBase
 Use `Field` whenever you want **consistent form layout** across your application with labels, description and required asterisk.
 </Callout>
 
-<WidgetDocs Type="Ivy.Field" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/Field.cs"/>
+<WidgetDocs Type="Ivy.Field" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/Field.cs"/>

@@ -47,6 +47,7 @@ public record Code : WidgetBase<Code>
     [Prop] public bool ShowCopyButton { get; set; } = true;
 
     [Prop] public bool ShowBorder { get; set; } = true;
+
 }
 
 public static class CodeExtensions
@@ -75,4 +76,5 @@ public static class CodeExtensions
     {
         return code with { ShowBorder = showBorder };
     }
+
 }
