@@ -16,16 +16,19 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
   width = 'Full',
   scale = Scales.Medium,
 }) => {
-  const styles = getWidth(width);
+  const widthStyles = getWidth(width);
 
-  const isFullWidth = styles.width === '100%';
-  const isFixedWidth = Boolean(width && styles.width && !isFullWidth);
+  const isFullWidth = widthStyles.width === '100%';
+  const isFixedSize = Boolean(width && widthStyles.width) && !isFullWidth;
 
-  const tableStyles: React.CSSProperties = isFixedWidth
+  const tableStyles: React.CSSProperties = isFixedSize
     ? (Object.fromEntries(
-        Object.entries(styles).filter(([k]) => k !== 'maxWidth')
+        Object.entries(widthStyles).filter(([key]) => key !== 'maxWidth')
       ) as React.CSSProperties)
-    : { ...styles, maxWidth: isFullWidth ? '100%' : styles.maxWidth };
+    : {
+        ...widthStyles,
+        maxWidth: isFullWidth ? '100%' : widthStyles.maxWidth,
+      };
 
   return (
     <Table
