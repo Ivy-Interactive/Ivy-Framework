@@ -53,7 +53,6 @@ public record TextBlock : WidgetBase<TextBlock>
         Bold = bold;
         Italic = italic;
         Muted = muted;
-        Muted = muted;
     }
 
     internal TextBlock()
