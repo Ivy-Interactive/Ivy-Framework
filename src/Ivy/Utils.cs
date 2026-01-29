@@ -210,9 +210,8 @@ public static class Utils
     public static string? SplitPascalCase(string? input)
     {
         if (input == null) return null;
-        //string[] words = Regex.Matches(input, "([A-Z]+(?![a-z])|[A-Z][a-z]+|[0-9]+|[a-z]+)")
-        string[] words = Regex.Matches(input, "([A-Z]+[a-z]+|[0-9]+|[a-z]+|[A-Z]+)")
-            //.OfType<Match>()
+        string[] words = Regex
+            .Matches(input, "([A-Z]+[a-z]+|[0-9]+|[a-z]+|[A-Z]+)")
             .Select(m => m.Value)
             .ToArray();
         return string.Join(" ", words);
@@ -240,7 +239,10 @@ public static class Utils
             .Replace('_', '-')
             .Replace(' ', '-');
 
-        var normalized = Regex.Replace(withWordBoundaries, "-{2,}", "-").Trim('-').ToLowerInvariant();
+        var normalized = Regex
+            .Replace(withWordBoundaries, "-{2,}", "-")
+            .Trim('-')
+            .ToLowerInvariant();
 
         if (hadUnderscore)
         {
@@ -261,8 +263,8 @@ public static class Utils
         }
 
         // Check if this is a hook
-        bool isHook = input.Length >= 4 && 
-                      input.StartsWith("Use", StringComparison.Ordinal) && 
+        bool isHook = input.Length >= 4 &&
+                      input.StartsWith("Use", StringComparison.Ordinal) &&
                       char.IsUpper(input[3]);
 
         StringBuilder sb = new();
