@@ -51,7 +51,7 @@ Layout.Vertical().Gap(4)
         .AddOutput("nothing to commit, working tree clean")
 ```
 
-<WidgetDocs Type="Ivy.Terminal" ExtensionType="Ivy.TerminalExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Terminal.cs"/>
+<WidgetDocs Type="Ivy.Terminal" ExtensionTypes="Ivy.TerminalExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Terminal.cs"/>
 
 ## Examples
 
