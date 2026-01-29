@@ -13,30 +13,19 @@ interface TableWidgetProps {
 
 export const TableWidget: React.FC<TableWidgetProps> = ({
   children,
-  width,
+  width = 'Full',
   scale = Scales.Medium,
 }) => {
-  const widthStyles = getWidth(width);
+  const styles = getWidth(width);
 
-  // For Full() width, use fixed layout and ensure maxWidth to prevent horizontal scroll
-  // For fixed widths (Units, Px, Rem), remove maxWidth to allow expansion if needed
-  const isFullWidth = width?.includes('Full');
-  const isFixedWidth =
-    width &&
-    (width.includes('Units:') ||
-      width.includes('Px:') ||
-      width.includes('Rem:'));
+  const isFullWidth = styles.width === '100%';
+  const isFixedWidth = Boolean(width && styles.width && !isFullWidth);
 
-  // For fixed widths, create new object without maxWidth property
-  const tableStyles = isFixedWidth
+  const tableStyles: React.CSSProperties = isFixedWidth
     ? (Object.fromEntries(
-        Object.entries(widthStyles).filter(([key]) => key !== 'maxWidth')
+        Object.entries(styles).filter(([k]) => k !== 'maxWidth')
       ) as React.CSSProperties)
-    : {
-        ...widthStyles,
-        // Ensure Full() width tables don't exceed container
-        maxWidth: isFullWidth ? '100%' : widthStyles.maxWidth,
-      };
+    : { ...styles, maxWidth: isFullWidth ? '100%' : styles.maxWidth };
 
   return (
     <Table
@@ -44,8 +33,6 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
       className={cn('w-full caption-bottom')}
       style={{
         ...tableStyles,
-        // Use fixed layout for Full() width to respect width constraints and prevent overflow
-        // Use auto layout for fixed widths to allow natural sizing
         tableLayout: isFullWidth ? 'fixed' : 'auto',
       }}
     >
