@@ -5,7 +5,6 @@ import {
   getWidth,
   getHeight,
   convertSizeToGridValue,
-
 } from '../../lib/styles';
 
 interface GridLayoutWidgetProps {
