@@ -41,12 +41,6 @@ const getTextAlign = (align: Align): React.CSSProperties => {
   }
 };
 
-// Type guard to check if content is a string or number (primitives that can be displayed in tooltips)
-const isStringContent = (
-  content: React.ReactNode
-): content is string | number =>
-  typeof content === 'string' || typeof content === 'number';
-
 export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   children,
   isHeader,
@@ -90,7 +84,9 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   const shouldTruncate = width || isHeader;
 
   // Only show tooltip for string/number children to avoid "[object Object]" issues
-  const shouldShowTooltip = !multiLine && isStringContent(children);
+  const shouldShowTooltip =
+    !multiLine &&
+    (typeof children === 'string' || typeof children === 'number');
 
   const cellClasses = cn('border-border force-text-inherit', {
     'header-cell bg-muted font-semibold': isHeader,
