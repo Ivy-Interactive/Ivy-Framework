@@ -3,6 +3,7 @@ using Ivy.Themes;
 using Ivy.Hooks;
 using Ivy.Samples.Shared.Helpers;
 using Ivy.Views.Forms;
+using Ivy;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
@@ -11,186 +12,324 @@ public class ThemeCustomizer : SampleBase
 {
     protected override object? BuildSample()
     {
-        var selectedPreset = UseState("default");
         var currentTheme = UseState(Theme.Default);
         var isExportOpen = UseState(false);
         var client = UseService<IClientProvider>();
         var themeService = UseService<IThemeService>();
+        var selectedMode = UseState("light"); // "light" or "dark"
+
+        // Individual color states for live editing
+        var editingTheme = UseState(CloneTheme(Theme.Default));
+
+        // UseQuery handles theme application reactively with built-in state management
+        var themeQuery = UseQuery(
+            key: editingTheme.Value,
+            fetcher: async ct =>
+            {
+                // Small delay to debounce rapid changes during sliding/typing
+                await Task.Delay(20, ct);
+
+                themeService.SetTheme(editingTheme.Value);
+                var css = themeService.GenerateThemeCss();
+                client.ApplyTheme(css);
+                return true;
+            });
+
+        void LoadPreset(Theme preset)
+        {
+            editingTheme.Set(CloneTheme(preset));
+            client.Toast($"Loaded {preset.Name} theme", "Theme");
+        }
 
         var presets = new Dictionary<string, Theme>
         {
-            ["default"] = Theme.Default,
-            ["ocean"] = GetOceanTheme(),
-            ["forest"] = GetForestTheme(),
-            ["sunset"] = GetSunsetTheme(),
-            ["midnight"] = GetMidnightTheme()
+            ["Default"] = Theme.Default,
+            ["Ocean"] = GetOceanTheme(),
+            ["Forest"] = GetForestTheme(),
+            ["Sunset"] = GetSunsetTheme(),
+            ["Midnight"] = GetMidnightTheme()
         };
 
-        void ApplyTheme()
-        {
-            try
-            {
-                // Apply theme directly to the service
-                themeService.SetTheme(currentTheme.Value);
+        // Sidebar Content (Presets, Mode, Colors)
+        var editorContent = new ThemeSidebarContent(editingTheme, selectedMode, presets, LoadPreset);
 
-                // Generate and apply the CSS to the frontend immediately
-                var css = themeService.GenerateThemeCss();
-                client.ApplyTheme(css);
+        // Sidebar Header
+        var sidebarHeader = Layout.Vertical().Gap(1).Padding(2)
+            | (Layout.Horizontal().Align(Align.Center).Gap(2)
+                | Text.H2("Theme Editor")
+                | (themeQuery.Validating ? Text.P("Updating...").Small().Muted() : null))
+            | Text.P("Customize your theme").Small().Muted();
 
-                client.Toast("Theme applied successfully!", "Success");
-            }
-            catch (Exception ex)
-            {
-                client.Toast($"Error: {ex.Message}", "Error");
-            }
-        }
-
-        var presetItems = presets
-            .Select(kv =>
-                MenuItem.Default(kv.Value.Name)
-                    .HandleSelect(() =>
-                {
-                    selectedPreset.Set(kv.Key);
-                    currentTheme.Set(kv.Value);
-                    ApplyTheme();
-                }))
-            .ToArray();
-
-        var presetsSection =
-            Layout.Vertical()
-                | new Button($"Theme: {currentTheme.Value.Name}")
-                    .Primary()
-                    .Icon(GetThemeIcon(currentTheme.Value.Name), Align.Right)
-                    .WithDropDown(presetItems);
-
-        var previewSection =
-            Layout.Vertical()
-                | Text.H2("Interactive Preview")
-                | Text.Block("Common form elements below use the active theme tokens for colors, borders and accents.")
-                | new InteractiveThemePreview(currentTheme.Value);
-
-        var colorsSection =
-            Layout.Vertical()
-            | Text.H2("Color Preview")
-            | Layout.Horizontal(
-                new Card(
-                    Layout.Grid().Columns(1)
-                        | new ColorPreview("Primary", currentTheme.Value.Colors.Light.Primary, currentTheme.Value.Colors.Light.PrimaryForeground)
-                        | new ColorPreview("Secondary", currentTheme.Value.Colors.Light.Secondary, currentTheme.Value.Colors.Light.SecondaryForeground)
-                        | new ColorPreview("Success", currentTheme.Value.Colors.Light.Success, currentTheme.Value.Colors.Light.SuccessForeground)
-                        | new ColorPreview("Destructive", currentTheme.Value.Colors.Light.Destructive, currentTheme.Value.Colors.Light.DestructiveForeground)
-                        | new ColorPreview("Warning", currentTheme.Value.Colors.Light.Warning, currentTheme.Value.Colors.Light.WarningForeground)
-                        | new ColorPreview("Info", currentTheme.Value.Colors.Light.Info, currentTheme.Value.Colors.Light.InfoForeground)
-                        | new ColorPreview("Muted", currentTheme.Value.Colors.Light.Muted, currentTheme.Value.Colors.Light.MutedForeground)
-                        | new ColorPreview("Accent", currentTheme.Value.Colors.Light.Accent, currentTheme.Value.Colors.Light.AccentForeground)
-                ).Title("Light Theme"),
-                new Card(
-                    Layout.Grid().Columns(1)
-                        | new ColorPreview("Primary", currentTheme.Value.Colors.Dark.Primary, currentTheme.Value.Colors.Dark.PrimaryForeground)
-                        | new ColorPreview("Secondary", currentTheme.Value.Colors.Dark.Secondary, currentTheme.Value.Colors.Dark.SecondaryForeground)
-                        | new ColorPreview("Success", currentTheme.Value.Colors.Dark.Success, currentTheme.Value.Colors.Dark.SuccessForeground)
-                        | new ColorPreview("Destructive", currentTheme.Value.Colors.Dark.Destructive, currentTheme.Value.Colors.Dark.DestructiveForeground)
-                        | new ColorPreview("Warning", currentTheme.Value.Colors.Dark.Warning, currentTheme.Value.Colors.Dark.WarningForeground)
-                        | new ColorPreview("Info", currentTheme.Value.Colors.Dark.Info, currentTheme.Value.Colors.Dark.InfoForeground)
-                        | new ColorPreview("Muted", currentTheme.Value.Colors.Dark.Muted, currentTheme.Value.Colors.Dark.MutedForeground)
-                        | new ColorPreview("Accent", currentTheme.Value.Colors.Dark.Accent, currentTheme.Value.Colors.Dark.AccentForeground)
-                ).Title("Dark Theme")
-                );
-
-        var dashboardSection =
-            Layout.Vertical()
-                | Text.H2("Dashboard Preview")
-                | Text.P("This dashboard layout shows how charts and metrics adapt to the active theme.")
-                | new DashboardApp();
-
-        var exportSection =
-            Layout.Vertical()
-            | new Button()
-                .Outline()
-                .Icon(Icons.Settings)
-                .HandleClick(() => isExportOpen.Set(true))
+        // Sidebar Footer
+        var sidebarFooter = Layout.Vertical().Padding(2)
+            | new Button("Export Configuration")
                 .Primary()
-            | (isExportOpen.Value
-                ? new Dialog(
-                    _ => isExportOpen.Set(false),
-                    new DialogHeader("Export Theme Configuration"),
-                    new DialogBody(
-                        Layout.Tabs(
-                            new Tab(
-                                "C#",
-                                Layout.Vertical().Gap(3)
-                                    | Text.P("Copy this C# configuration into your server setup.").Small()
-                                    | new Code(GenerateCSharpCode(currentTheme.Value), Languages.Csharp)
-                                    | new Button("Copy C# Code")
-                                        .Primary()
-                                        .Icon(Icons.ClipboardCopy, Align.Right)
-                                        .HandleClick(() =>
-                                        {
-                                            client.CopyToClipboard(GenerateCSharpCode(currentTheme.Value));
-                                            client.Toast("C# theme configuration copied to clipboard!", "Export");
-                                        })
-                            ).Icon(Icons.Code),
-                            new Tab(
-                                "JSON",
-                                Layout.Vertical().Gap(3)
-                                    | Text.P("Use this JSON to persist or share the theme.").Small()
-                                    | new Code(System.Text.Json.JsonSerializer.Serialize(
-                                            currentTheme.Value,
-                                            new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
-                                        Languages.Json)
-                                    | new Button("Copy JSON")
-                                        .Primary()
-                                        .Icon(Icons.ClipboardCopy, Align.Right)
-                                        .HandleClick(() =>
-                                        {
-                                            var json = System.Text.Json.JsonSerializer.Serialize(
-                                                currentTheme.Value,
-                                                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-                                            client.CopyToClipboard(json);
-                                            client.Toast("JSON theme configuration copied to clipboard!", "Export");
-                                        })
-                            ).Icon(Icons.FileBraces)
-                        )
-                    ),
-                    new DialogFooter(
-                        new Button("Close", _ => isExportOpen.Set(false), variant: ButtonVariant.Secondary)
+                .Icon(Icons.Download)
+                .HandleClick(() => isExportOpen.Set(true));
+
+        // Right side - Live Preview
+        var previewPanel = new LivePreviewPanel(editingTheme.Value);
+
+        // Export dialog
+        var exportDialog = isExportOpen.Value
+            ? new Dialog(
+                _ => isExportOpen.Set(false),
+                new DialogHeader("Export Theme Configuration"),
+                new DialogBody(
+                    Layout.Tabs(
+                        new Tab(
+                            "C#",
+                            Layout.Vertical().Gap(3)
+                                | Text.P("Copy this C# configuration into your server setup.").Small()
+                                | new Code(GenerateCSharpCode(editingTheme.Value), Languages.Csharp)
+                                | new Button("Copy C# Code")
+                                    .Primary()
+                                    .Icon(Icons.ClipboardCopy, Align.Right)
+                                    .HandleClick(() =>
+                                    {
+                                        client.CopyToClipboard(GenerateCSharpCode(editingTheme.Value));
+                                        client.Toast("C# theme configuration copied to clipboard!", "Export");
+                                    })
+                        ).Icon(Icons.Code),
+                        new Tab(
+                            "JSON",
+                            Layout.Vertical().Gap(3)
+                                | Text.P("Use this JSON to persist or share the theme.").Small()
+                                | new Code(System.Text.Json.JsonSerializer.Serialize(
+                                        editingTheme.Value,
+                                        new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
+                                    Languages.Json)
+                                | new Button("Copy JSON")
+                                    .Primary()
+                                    .Icon(Icons.ClipboardCopy, Align.Right)
+                                    .HandleClick(() =>
+                                    {
+                                        var json = System.Text.Json.JsonSerializer.Serialize(
+                                            editingTheme.Value,
+                                            new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                                        client.CopyToClipboard(json);
+                                        client.Toast("JSON theme configuration copied to clipboard!", "Export");
+                                    })
+                        ).Icon(Icons.FileBraces)
                     )
-                ).Width(Size.Units(150))
-                : null);
+                ),
+                new DialogFooter(
+                    new Button("Close", _ => isExportOpen.Set(false), variant: ButtonVariant.Secondary)
+                )
+            ).Width(Size.Units(150))
+            : null;
 
-        var usageSection =
-            Layout.Vertical()
-            | Text.H2("Usage")
-            | new Card(
-                Layout.Vertical()
-                    | Text.H3("Dynamic Theme Application")
-                    | Text.Block("Click 'Apply Selected Theme' to instantly apply the theme with live CSS updates - no server restart required!")
-                    | Text.H3("Server Configuration")
-                    | Text.Block("You can also configure themes at server startup:")
-                    | new Code(@"var server = new Server()
-    .UseTheme(theme => 
+        return Layout.Vertical().Height(Size.Full())
+            | new SidebarLayout(
+                mainContent: previewPanel,
+                sidebarContent: editorContent,
+                sidebarHeader: sidebarHeader,
+                sidebarFooter: sidebarFooter,
+                width: Size.Px(380)
+            )
+            | exportDialog;
+    }
+
+    private static Theme CloneTheme(Theme source)
     {
-        // Your theme configuration here
-    });", Languages.Csharp)
-                );
+        return new Theme
+        {
+            Name = source.Name,
+            FontFamily = source.FontFamily,
+            FontSize = source.FontSize,
+            BorderRadius = source.BorderRadius,
+            Colors = new ThemeColorScheme
+            {
+                Light = CloneThemeColors(source.Colors.Light),
+                Dark = CloneThemeColors(source.Colors.Dark)
+            }
+        };
+    }
 
-        return Layout.Vertical().Gap(4)
-            | Text.H1("Theme Customizer")
-            | Text.P("Experiment with different presets, preview UI elements, and export theme configuration for your app.")
-            | new Card(
-                Layout.Vertical().Gap(2)
-                    | Text.H3("Live theme application")
-                    | Text.P("Choose a preset and apply it to see the entire preview update instantly, without reloading the page.").Small()
-            ).BorderColor(Colors.Primary)
-            | (Layout.Horizontal().Gap(3)
-                | presetsSection.Width(Size.Fit())
-                | exportSection.Width(Size.Fit()))
-            | Layout.Tabs(
-                new Tab("Elements Preview", previewSection).Icon(Icons.LayoutPanelLeft),
-                new Tab("Dashboard Preview", dashboardSection).Icon(Icons.LayoutDashboard),
-                new Tab("Color Preview", colorsSection).Icon(Icons.Palette),
-                new Tab("Usage Instructions", usageSection).Icon(Icons.BookOpen)
-            );
+    private static ThemeColors CloneThemeColors(ThemeColors source)
+    {
+        return new ThemeColors
+        {
+            Primary = source.Primary,
+            PrimaryForeground = source.PrimaryForeground,
+            Secondary = source.Secondary,
+            SecondaryForeground = source.SecondaryForeground,
+            Background = source.Background,
+            Foreground = source.Foreground,
+            Destructive = source.Destructive,
+            DestructiveForeground = source.DestructiveForeground,
+            Success = source.Success,
+            SuccessForeground = source.SuccessForeground,
+            Warning = source.Warning,
+            WarningForeground = source.WarningForeground,
+            Info = source.Info,
+            InfoForeground = source.InfoForeground,
+            Border = source.Border,
+            Input = source.Input,
+            Ring = source.Ring,
+            Muted = source.Muted,
+            MutedForeground = source.MutedForeground,
+            Accent = source.Accent,
+            AccentForeground = source.AccentForeground,
+            Card = source.Card,
+            CardForeground = source.CardForeground,
+            Popover = source.Popover,
+            PopoverForeground = source.PopoverForeground
+        };
+    }
+
+    /// <summary>
+    /// Sidebar content with presets, mode toggle, and color editors
+    /// </summary>
+    private class ThemeSidebarContent(
+        IState<Theme> editingTheme,
+        IState<string> selectedMode,
+        Dictionary<string, Theme> presets,
+        Action<Theme> loadPreset) : ViewBase
+    {
+        public override object Build()
+        {
+            var currentColors = selectedMode.Value == "light" 
+                ? editingTheme.Value.Colors.Light 
+                : editingTheme.Value.Colors.Dark;
+
+            void UpdateColor(Action<ThemeColors> updater)
+            {
+                var newTheme = CloneTheme(editingTheme.Value);
+                var colors = selectedMode.Value == "light" ? newTheme.Colors.Light : newTheme.Colors.Dark;
+                updater(colors);
+                editingTheme.Set(newTheme);
+            }
+
+            var presetButtons = presets.Select(kv =>
+                new Button(kv.Key)
+                    .Outline()
+                    .Icon(GetThemeIcon(kv.Value.Name))
+                    .HandleClick(() => loadPreset(kv.Value))
+            ).ToArray();
+
+            return Layout.Vertical().Gap(3).Padding(4)
+                // Preset selector
+                | Text.H3("Presets").Small()
+                | (Layout.Grid().Columns(2).Gap(2) | presetButtons)
+                
+                | new Separator()
+                
+                // Mode toggle
+                | Text.H3("Editing Mode").Small()
+                | (Layout.Horizontal().Gap(2)
+                    | new Button("Light")
+                        .Variant(selectedMode.Value == "light" ? ButtonVariant.Primary : ButtonVariant.Outline)
+                        .Icon(Icons.Sun)
+                        .HandleClick(() => selectedMode.Set("light"))
+                    | new Button("Dark")
+                        .Variant(selectedMode.Value == "dark" ? ButtonVariant.Primary : ButtonVariant.Outline)
+                        .Icon(Icons.Moon)
+                        .HandleClick(() => selectedMode.Set("dark")))
+                
+                | new Separator()
+                
+                // Color editors
+                | Text.H3($"{(selectedMode.Value == "light" ? "Light" : "Dark")} Theme Colors").Small()
+                | new ColorEditor("Primary", currentColors.Primary, c => UpdateColor(colors => colors.Primary = c))
+                | new ColorEditor("Primary Foreground", currentColors.PrimaryForeground, c => UpdateColor(colors => colors.PrimaryForeground = c))
+                | new ColorEditor("Secondary", currentColors.Secondary, c => UpdateColor(colors => colors.Secondary = c))
+                | new ColorEditor("Secondary Foreground", currentColors.SecondaryForeground, c => UpdateColor(colors => colors.SecondaryForeground = c))
+                | new ColorEditor("Background", currentColors.Background, c => UpdateColor(colors => colors.Background = c))
+                | new ColorEditor("Foreground", currentColors.Foreground, c => UpdateColor(colors => colors.Foreground = c))
+                | new ColorEditor("Success", currentColors.Success, c => UpdateColor(colors => colors.Success = c))
+                | new ColorEditor("Success Foreground", currentColors.SuccessForeground, c => UpdateColor(colors => colors.SuccessForeground = c))
+                | new ColorEditor("Destructive", currentColors.Destructive, c => UpdateColor(colors => colors.Destructive = c))
+                | new ColorEditor("Destructive Foreground", currentColors.DestructiveForeground, c => UpdateColor(colors => colors.DestructiveForeground = c))
+                | new ColorEditor("Warning", currentColors.Warning, c => UpdateColor(colors => colors.Warning = c))
+                | new ColorEditor("Warning Foreground", currentColors.WarningForeground, c => UpdateColor(colors => colors.WarningForeground = c))
+                | new ColorEditor("Info", currentColors.Info, c => UpdateColor(colors => colors.Info = c))
+                | new ColorEditor("Info Foreground", currentColors.InfoForeground, c => UpdateColor(colors => colors.InfoForeground = c))
+                | new ColorEditor("Muted", currentColors.Muted, c => UpdateColor(colors => colors.Muted = c))
+                | new ColorEditor("Muted Foreground", currentColors.MutedForeground, c => UpdateColor(colors => colors.MutedForeground = c))
+                | new ColorEditor("Accent", currentColors.Accent, c => UpdateColor(colors => colors.Accent = c))
+                | new ColorEditor("Accent Foreground", currentColors.AccentForeground, c => UpdateColor(colors => colors.AccentForeground = c))
+                | new ColorEditor("Border", currentColors.Border, c => UpdateColor(colors => colors.Border = c))
+                | new ColorEditor("Input", currentColors.Input, c => UpdateColor(colors => colors.Input = c))
+                | new ColorEditor("Ring", currentColors.Ring, c => UpdateColor(colors => colors.Ring = c))
+                | new ColorEditor("Card", currentColors.Card, c => UpdateColor(colors => colors.Card = c))
+                | new ColorEditor("Card Foreground", currentColors.CardForeground, c => UpdateColor(colors => colors.CardForeground = c))
+                | new ColorEditor("Popover", currentColors.Popover, c => UpdateColor(colors => colors.Popover = c))
+                | new ColorEditor("Popover Foreground", currentColors.PopoverForeground, c => UpdateColor(colors => colors.PopoverForeground = c));
+        }
+    }
+
+    /// <summary>
+    /// Color editor component with label and color picker
+    /// </summary>
+    private class ColorEditor(string label, string? color, Action<string> onChange) : ViewBase
+    {
+        public override object Build()
+        {
+            var colorState = UseState(color ?? "#000000");
+
+            UseEffect(() =>
+            {
+                onChange(colorState.Value);
+            }, colorState);
+
+            return Layout.Horizontal().Gap(2).Align(Align.Center)
+                | Text.P(label).Small().Width(Size.Px(180))
+                | colorState.ToColorInput()
+                    .Variant(ColorInputs.TextAndPicker)
+                    .Width(Size.Full());
+        }
+    }
+
+    /// <summary>
+    /// Right panel showing live preview of the theme
+    /// </summary>
+    private class LivePreviewPanel(Theme theme) : ViewBase
+    {
+        public override object Build()
+        {
+            return Layout.Vertical().Gap(4).Padding(4)
+                    | Text.H2("Live Preview")
+                    | Text.P("See your theme changes in real-time").Small().Muted()
+                    
+                    | Layout.Tabs(
+                        new Tab("Components", new InteractiveThemePreview(theme)).Icon(Icons.LayoutPanelLeft),
+                        new Tab("Dashboard", new DashboardApp()).Icon(Icons.LayoutDashboard),
+                        new Tab("Colors", new ColorPalettePreview(theme)).Icon(Icons.Palette)
+                    );
+        }
+    }
+
+    /// <summary>
+    /// Shows color palette for both light and dark modes
+    /// </summary>
+    private class ColorPalettePreview(Theme theme) : ViewBase
+    {
+        public override object Build()
+        {
+            return Layout.Vertical().Gap(4)
+                | Text.H3("Light Theme Colors")
+                | (Layout.Grid().Columns(2).Gap(3)
+                    | new ColorPreview("Primary", theme.Colors.Light.Primary, theme.Colors.Light.PrimaryForeground)
+                    | new ColorPreview("Secondary", theme.Colors.Light.Secondary, theme.Colors.Light.SecondaryForeground)
+                    | new ColorPreview("Success", theme.Colors.Light.Success, theme.Colors.Light.SuccessForeground)
+                    | new ColorPreview("Destructive", theme.Colors.Light.Destructive, theme.Colors.Light.DestructiveForeground)
+                    | new ColorPreview("Warning", theme.Colors.Light.Warning, theme.Colors.Light.WarningForeground)
+                    | new ColorPreview("Info", theme.Colors.Light.Info, theme.Colors.Light.InfoForeground)
+                    | new ColorPreview("Muted", theme.Colors.Light.Muted, theme.Colors.Light.MutedForeground)
+                    | new ColorPreview("Accent", theme.Colors.Light.Accent, theme.Colors.Light.AccentForeground))
+                
+                | Text.H3("Dark Theme Colors")
+                | (Layout.Grid().Columns(2).Gap(3)
+                    | new ColorPreview("Primary", theme.Colors.Dark.Primary, theme.Colors.Dark.PrimaryForeground)
+                    | new ColorPreview("Secondary", theme.Colors.Dark.Secondary, theme.Colors.Dark.SecondaryForeground)
+                    | new ColorPreview("Success", theme.Colors.Dark.Success, theme.Colors.Dark.SuccessForeground)
+                    | new ColorPreview("Destructive", theme.Colors.Dark.Destructive, theme.Colors.Dark.DestructiveForeground)
+                    | new ColorPreview("Warning", theme.Colors.Dark.Warning, theme.Colors.Dark.WarningForeground)
+                    | new ColorPreview("Info", theme.Colors.Dark.Info, theme.Colors.Dark.InfoForeground)
+                    | new ColorPreview("Muted", theme.Colors.Dark.Muted, theme.Colors.Dark.MutedForeground)
+                    | new ColorPreview("Accent", theme.Colors.Dark.Accent, theme.Colors.Dark.AccentForeground));
+        }
     }
 
     /// <summary>
