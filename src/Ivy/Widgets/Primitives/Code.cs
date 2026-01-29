@@ -48,7 +48,6 @@ public record Code : WidgetBase<Code>
 
     [Prop] public bool ShowBorder { get; set; } = true;
 
-    [Prop] public WordBreak? WordBreak { get; set; }
 }
 
 public static class CodeExtensions
@@ -78,8 +77,4 @@ public static class CodeExtensions
         return code with { ShowBorder = showBorder };
     }
 
-    public static Code WordBreak(this Code code, WordBreak wordBreak)
-    {
-        return code with { WordBreak = wordBreak };
-    }
 }

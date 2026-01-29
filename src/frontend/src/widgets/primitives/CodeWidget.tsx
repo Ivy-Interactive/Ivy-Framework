@@ -1,5 +1,5 @@
 import CopyToClipboardButton from '@/components/CopyToClipboardButton';
-import { getHeight, getWidth, WordBreak, getWordBreak } from '@/lib/styles';
+import { getHeight, getWidth } from '@/lib/styles';
 import React, { CSSProperties, useMemo, memo, lazy, Suspense } from 'react';
 const SyntaxHighlighter = lazy(() =>
   import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
@@ -20,7 +20,6 @@ interface CodeWidgetProps {
   width?: string;
   height?: string;
   scale?: Scales;
-  wordBreak?: WordBreak;
 }
 
 const languageMap: Record<string, string> = {
@@ -67,7 +66,6 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     width = 'Full',
     height = 'MaxContent,,Px:800',
     scale = Scales.Medium,
-    wordBreak,
   }) => {
     const styles = useMemo<CSSProperties>(() => {
       const scaleStyles: Record<
@@ -92,13 +90,13 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       };
 
       const currentScale = scaleStyles[scale];
-      const breakStyles = wordBreak ? getWordBreak(wordBreak) : {};
 
       const baseStyles: CSSProperties = {
         ...getWidth(width),
         ...getHeight(height),
-        ...breakStyles,
         margin: 0,
+        wordBreak: 'normal',
+        overflowWrap: 'break-word',
         fontSize: currentScale.fontSize,
         padding: currentScale.padding,
         lineHeight: currentScale.lineHeight,
@@ -111,12 +109,12 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       }
 
       return baseStyles;
-    }, [width, height, showBorder, scale, wordBreak]);
+    }, [width, height, showBorder, scale]);
 
     const highlighterKey = useMemo(
       () =>
-        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${wordBreak}`,
-      [id, language, showLineNumbers, showBorder, wordBreak]
+        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}`,
+      [id, language, showLineNumbers, showBorder]
     );
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
@@ -131,9 +129,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         }
       : { ...getWidth(width) };
 
-    // Determine if we should enable wrapLongLines based on wordBreak or default
-    const shouldWrap =
-      wordBreak && wordBreak !== 'Normal' && wordBreak !== 'KeepAll';
+    const shouldWrap = true;
 
     return (
       <div className="relative" style={containerStyles}>

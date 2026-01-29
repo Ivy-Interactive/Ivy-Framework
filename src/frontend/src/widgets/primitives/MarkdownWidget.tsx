@@ -2,21 +2,18 @@ import { useEventHandler } from '@/components/event-handler';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import React, { useCallback } from 'react';
 
-import { WordBreak } from '@/lib/styles';
 import { Scales } from '@/types/scale';
 
 interface MarkdownWidgetProps {
   id: string;
   content: string;
   scale?: Scales;
-  wordBreak?: WordBreak;
 }
 
 const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   id,
   content = '',
   scale = Scales.Medium,
-  wordBreak,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -48,6 +45,8 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
     display: 'flex',
     flexDirection: 'column',
     gap: '1rem',
+    wordBreak: 'normal',
+    overflowWrap: 'break-word',
     ...getScaleStyle(scale),
   };
 
@@ -57,7 +56,6 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
         key={id}
         content={content}
         onLinkClick={handleLinkClick}
-        wordBreak={wordBreak}
       />
     </div>
   );
