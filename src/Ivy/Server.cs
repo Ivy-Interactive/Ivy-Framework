@@ -41,12 +41,7 @@ public record ServerArgs
     public string? MetaTitle { get; set; } = null;
     public string? MetaDescription { get; set; } = null;
     public Assembly? AssetAssembly { get; set; } = null;
-    public bool EnableDevTools { get; set; } = false;
-#if DEBUG
-    public bool FindAvailablePort { get; set; } = true;
-#else
     public bool FindAvailablePort { get; set; } = false;
-#endif
 }
 
 public class Server
@@ -326,26 +321,19 @@ public class Server
 
 #if (DEBUG)
         // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
-        // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
-        if (!Console.IsInputRedirected && !_args.Silent)
+        _ = Task.Factory.StartNew(() =>
         {
-            _ = Task.Factory.StartNew(() =>
+            while (!cts.Token.IsCancellationRequested)
             {
-                try
+                var key = Console.ReadKey(intercept: true);
+                if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
                 {
-                    while (!cts.Token.IsCancellationRequested)
-                    {
-                        var key = Console.ReadKey(intercept: true);
-                        if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
-                        {
-                            sessionStore.Dump();
-                        }
-                    }
+                    sessionStore.Dump();
                 }
-                catch (Exception) { } // Eat all exceptions to prevent crash
-            }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        }
+            }
+        }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 #endif
+
 
         if (Utils.IsPortInUse(_args.Port))
         {
@@ -378,7 +366,7 @@ public class Server
             }
             else
             {
-                Console.WriteLine($@"Port {_args.Port} is already in use on this machine.");
+                Console.WriteLine($@"[31mPort {_args.Port} is already in use on this machine.[0m");
 
                 Console.WriteLine(
                     "Specify a different port using '--port <number>', '--find-available-port', or '--i-kill-for-this-port' to just take it.");
@@ -673,14 +661,8 @@ public static class WebApplicationExtensions
                         $"<meta name=\"ivy-license-public-key\" content=\"{ivyLicensePublicKey}\" />";
                     html = html.Replace("</head>", $"  {ivyLicensePublicKeyTag}\n</head>");
                 }
-
-                if (serverArgs.EnableDevTools)
-                {
-                    var ivyEnableDevToolsTag = $"<meta name=\"ivy-enable-dev-tools\" content=\"true\" />";
-                    html = html.Replace("</head>", $"  {ivyEnableDevToolsTag}\n</head>");
-                }
-
 #endif
+
                 //Inject Meta Title and Description
                 if (!string.IsNullOrEmpty(serverArgs.MetaDescription))
                 {
