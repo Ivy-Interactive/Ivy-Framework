@@ -64,7 +64,7 @@ public class TestStudioWidgetsApp : SampleBase
                     | Icons.Code.ToButton().BorderRadius(BorderRadius.Full).Ghost())
                 | (Layout.Horizontal().Gap(2).Align(Align.Right)
                     | new Button("Action")
-                    | new Avatar("JD")))  
+                    | new Avatar("JD")))
 
             | Text.H2("ChatBox")
             | Text.P("ChatBox is a reusable container with a title and custom content.")

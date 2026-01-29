@@ -19,8 +19,8 @@ public record Box : WidgetBase<Box>
 
     [Prop] public Colors? Color { get; set; } = null;
 
-    [Prop] public Colors? BorderColor { get; set; } = null;    
-    
+    [Prop] public Colors? BorderColor { get; set; } = null;
+
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
     [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.Solid;
