@@ -32,7 +32,6 @@ import { useTypography } from '@/contexts/TypographyContext';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { CustomEmoji } from './custom-emojis/CustomEmoji';
 import { remarkCustomEmojiPlugin } from './custom-emojis/remarkCustomEmojiPlugin';
-import { WordBreak, getWordBreak } from '@/lib/styles';
 
 const SyntaxHighlighter = lazy(() =>
   import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
@@ -44,7 +43,6 @@ const MermaidRenderer = lazy(() => import('./MermaidRenderer'));
 interface MarkdownRendererProps {
   content: string;
   onLinkClick?: (url: string) => void;
-  wordBreak?: WordBreak;
 }
 
 const ImageOverlay = ({
@@ -103,14 +101,12 @@ const CodeBlock = memo(
     inline,
     hasCodeBlocks,
     hasMermaid,
-    wordBreak,
   }: {
     className?: string;
     children: React.ReactNode;
     inline?: boolean;
     hasCodeBlocks: boolean;
     hasMermaid: boolean;
-    wordBreak?: WordBreak;
   }) => {
     const match = /language-(\w+)/.exec(className || '');
     const content = String(children).replace(/\n$/, '');
@@ -121,11 +117,7 @@ const CodeBlock = memo(
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
     const typography = useTypography();
 
-    // "Smart Default": If wordBreak is undefined, default to BreakAll/Wrapping for code blocks
-    // This allows users to opt-out by explicitly setting Normal, but ensures text wraps by default (fixing overflow issues)
-    const effectiveWordBreak = wordBreak ?? 'BreakAll';
-    const breakStyles = getWordBreak(effectiveWordBreak);
-    const shouldWrap = effectiveWordBreak !== 'Normal';
+    const shouldWrap = true;
     const whiteSpaceStyle = shouldWrap ? { whiteSpace: 'pre-wrap' } : {};
 
     if (!inline && match && hasCodeBlocks) {
@@ -210,7 +202,8 @@ const CodeBlock = memo(
                 customStyle={{
                   margin: 0,
                   ...whiteSpaceStyle,
-                  ...breakStyles,
+                  wordBreak: 'normal',
+                  overflowWrap: 'break-word',
                 }}
                 wrapLongLines={shouldWrap}
               >
@@ -225,7 +218,13 @@ const CodeBlock = memo(
 
     // Apply styles to fallback blocks (no language) if it's a block (!inline)
     const fallbackStyles =
-      !inline && shouldWrap ? { ...whiteSpaceStyle, ...breakStyles } : {};
+      !inline && shouldWrap
+        ? {
+            ...whiteSpaceStyle,
+            wordBreak: 'normal' as const,
+            overflowWrap: 'break-word' as const,
+          }
+        : {};
 
     return (
       <code className={cn(typography.code, className)} style={fallbackStyles}>
@@ -238,7 +237,6 @@ const CodeBlock = memo(
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   content,
   onLinkClick,
-  wordBreak,
 }) => {
   const typography = useTypography();
   const contentFeatures = useMemo(
@@ -461,12 +459,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             inline={props.inline}
             hasCodeBlocks={contentFeatures.hasCodeBlocks}
             hasMermaid={contentFeatures.hasMermaid}
-            wordBreak={wordBreak}
           />
         )
       ),
     }),
-    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid, wordBreak]
+    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid]
   );
 
   // Memoize link component separately (depends on handleLinkClick)
