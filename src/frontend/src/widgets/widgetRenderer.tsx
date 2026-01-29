@@ -36,7 +36,10 @@ export const clearWidgetContentOverride = (widgetId: string) => {
   }
 };
 
-export const subscribeToContentOverride = (widgetId: string, listener: () => void) => {
+export const subscribeToContentOverride = (
+  widgetId: string,
+  listener: () => void
+) => {
   if (!contentListeners.has(widgetId)) {
     contentListeners.set(widgetId, new Set());
   }
@@ -183,7 +186,9 @@ const MemoizedWidget = memo(
 
     // Store raw content for text-editable widgets
     const isTextEditable = TEXT_EDITABLE_TYPES.includes(node.type);
-    const rawContent = isTextEditable ? (node.props.content as string) || (node.props.text as string) || '' : undefined;
+    const rawContent = isTextEditable
+      ? (node.props.content as string) || (node.props.text as string) || ''
+      : undefined;
 
     const content = (
       <ivy-widget id={node.id} type={node.type} data-content={rawContent}>

@@ -32,7 +32,9 @@
   background: var(--devtools-bg);
   border: 1px solid var(--devtools-border);
   border-radius: var(--radius);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .ivy-devtools-btn {
@@ -173,7 +175,9 @@
   background: var(--devtools-bg);
   border: 1px solid var(--devtools-border);
   border-radius: var(--radius);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 4px 8px rgba(0, 0, 0, 0.15);
   padding: 12px;
   width: 300px;
   font-family: var(--font-sans);
@@ -350,5 +354,7 @@
   background: white !important;
   color: black !important;
   z-index: 100001 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }

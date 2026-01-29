@@ -22,7 +22,9 @@ export const useStream = <T = unknown>(
 ): void => {
   const subscribeToStream = useStreamSubscriber();
   const callbackRef = useRef(onData);
-  callbackRef.current = onData;
+  useEffect(() => {
+    callbackRef.current = onData;
+  });
 
   useEffect(() => {
     if (!streamId) return;

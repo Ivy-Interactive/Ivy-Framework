@@ -83,7 +83,8 @@ export const ResizeablePanelGroupWidget: React.FC<
             node?: { props?: { defaultSize?: number } };
             defaultSize?: number;
           };
-          const defaultSize = props.node?.props?.defaultSize ?? props.defaultSize;
+          const defaultSize =
+            props.node?.props?.defaultSize ?? props.defaultSize;
 
           return (
             <React.Fragment key={index}>

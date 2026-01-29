@@ -26,12 +26,13 @@ export function App() {
   const parentId = getParentId();
   const chrome = getChromeParam();
 
-  const { connection, widgetTree, eventHandler, subscribeToStream, disconnected } = useBackend(
-    appId,
-    appArgs,
-    parentId,
-    chrome
-  );
+  const {
+    connection,
+    widgetTree,
+    eventHandler,
+    subscribeToStream,
+    disconnected,
+  } = useBackend(appId, appArgs, parentId, chrome);
   const [removeBranding, setRemoveBranding] = useState(true);
 
   useEffect(() => {

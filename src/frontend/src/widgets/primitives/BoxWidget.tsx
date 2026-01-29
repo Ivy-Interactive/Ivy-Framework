@@ -49,7 +49,6 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   borderOpacity,
   className,
 }) => {
-
   const styles: React.CSSProperties = {
     // Layout and spacing should always apply
     ...getPadding(padding),

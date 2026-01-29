@@ -74,10 +74,7 @@ type StreamDataMessage = {
 };
 
 type StreamHandler = (data: unknown) => void;
-type StreamSubscriber = (
-  streamId: string,
-  onData: StreamHandler
-) => () => void;
+type StreamSubscriber = (streamId: string, onData: StreamHandler) => () => void;
 
 const widgetTreeToXml = (node: WidgetNode) => {
   const tagName = node.type.replace('Ivy.', '');
@@ -920,9 +917,11 @@ export const useBackend = (
     (streamId: string, onData: StreamHandler) => {
       streamRegistryRef.current.set(streamId, onData);
       // Notify backend that we're subscribed so it can flush any buffered data
-      latestConnectionRef.current?.invoke('StreamSubscribe', streamId).catch(err => {
-        logger.error('Failed to notify stream subscription:', err);
-      });
+      latestConnectionRef.current
+        ?.invoke('StreamSubscribe', streamId)
+        .catch(err => {
+          logger.error('Failed to notify stream subscription:', err);
+        });
       return () => {
         streamRegistryRef.current.delete(streamId);
       };
