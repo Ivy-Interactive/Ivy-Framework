@@ -152,7 +152,7 @@ const MultipleSelector = React.forwardRef<
                     type="button"
                     tabIndex={-1}
                     aria-label="Remove"
-                    className="ml-1 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center justify-center h-6 self-center leading-none"
+                    className="ml-1 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center justify-center h-3 self-center leading-none"
                     onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
