@@ -122,9 +122,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         description: 'Fetching markdown from server...',
       });
 
-      const content = await fetchMarkdown();
+      const rawContent = await fetchMarkdown();
 
-      if (!content.trim()) {
+      if (!rawContent.trim()) {
         toast({
           title: 'Download Failed',
           description: 'No content found to download',
@@ -133,6 +133,7 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         return;
       }
 
+      const content = stripMarkdownLinks(rawContent);
       // Create and download the file
       const blob = new Blob([content], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
