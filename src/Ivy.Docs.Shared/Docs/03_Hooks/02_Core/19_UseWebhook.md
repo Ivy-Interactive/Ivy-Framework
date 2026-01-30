@@ -6,6 +6,8 @@ searchHints:
   - api-endpoint
   - external-callback
   - http-handler
+imports:
+  - Ivy.Core.Hooks
 ---
 
 # UseWebhook
@@ -14,9 +16,17 @@ searchHints:
 The `UseWebhook` [hook](../01_RulesOfHooks.md) creates HTTP endpoints that can be called from external systems, enabling integration with third-party services, webhooks, and external callbacks.
 </Ingress>
 
+## Overview
+
+`UseWebhook` allows your components to define and handle HTTP endpoints dynamically. It is essential for:
+
+- **Third-Party Integrations**: Receiving webhooks from Stripe, Slack, GitHub, etc.
+- **Asynchronous Workflows**: Triggering background jobs or state updates from external events.
+- **Custom Callbacks**: Handling OAuth redirects or verification steps.
+
 ## Basic Usage
 
-The `UseWebhook` hook takes a request handler and returns a `WebhookEndpoint` containing the URL that external systems can call:
+The hook returns a `WebhookEndpoint` object which contains the `Id` (GUID) and the full `BaseUrl`. You can use `.GetUri()` to retrieve the complete, absolute URL to provide to external systems.
 
 ```csharp demo-below
 public class BasicWebhookExample : ViewBase
@@ -72,68 +82,46 @@ sequenceDiagram
     Endpoint-->>External: HTTP Response
 ```
 
-## Handler Types
+## Handler Signatures
 
-`UseWebhook` supports multiple handler signatures for different use cases:
+`UseWebhook` supports multiple delegate signatures to handle different scenarios, from simple void actions to complex async responses.
 
-### Simple Action Handler
+| Handler Signature | Usage |
+|-------------------|-------|
+| `Action` | Simple notification, no request data needed. |
+| `Action<HttpRequest>` | Access request data (headers, query), no custom response. |
+| `Func<Task>` | Async operation, no request data needed. |
+| `Func<HttpRequest, Task>` | Async operation with request data access (e.g., reading body). |
+| `Func<IActionResult>` | Return custom HTTP response (JSON, status codes). |
+| `Func<HttpRequest, IActionResult>` | Access request data and return custom response. |
+| `Func<HttpRequest, Task<IActionResult>>` | Full control: Async processing with custom response. |
 
-For handlers that don't need to return a response:
+## Best Practices
 
-```csharp demo-below
-public class SimpleActionHandlerExample : ViewBase
-{
-    public override object? Build()
-    {
-        var counter = UseState(0);
-        var lastCall = UseState<DateTime?>();
-        
-        var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
-        {
-            // Process the request - update state, log, etc.
-            counter.Set(counter.Value + 1);
-            lastCall.Set(DateTime.UtcNow);
-        });
-        
-        return Layout.Vertical()
-            | Text.P($"Webhook called {counter.Value} times")
-            | (lastCall.Value != null 
-                ? Text.P($"Last call: {lastCall.Value:HH:mm:ss}")
-                : Text.P("No calls yet"))
-            | Text.Code(webhook.GetUri().ToString());
-    }
-}
-```
+- **Always handle errors** - Use try-catch blocks and return appropriate error responses
+- **Validate request authenticity** - Verify signatures or tokens for sensitive operations
+- **Use async handlers for I/O** - Use async when reading bodies or making database calls
+- **Return appropriate HTTP responses** - Use proper status codes (OkResult, BadRequestResult, etc.)
+- **Update state safely** - State updates from handlers are automatically thread-safe
+- **Keep handlers fast** - Complete quickly and queue heavy work for background processing
+- **Cleanup is automatic** - Webhooks are automatically unregistered when components unmount
 
-### Async Handler
+## See Also
 
-For handlers that perform async operations:
+- [State Management](./03_UseState.md) - Update state from webhook handlers
+- [Effects](./04_UseEffect.md) - Perform side effects in response to webhook calls
 
-```csharp demo-below
-public class AsyncWebhookExample : ViewBase
-{
-    public override object? Build()
-    {
-        var lastMessage = UseState("No webhook called yet");
-        var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
-        {
-            using var reader = new StreamReader(request.Body);
-            var body = await reader.ReadToEndAsync();
-            lastMessage.Set($"Received: {body}");
-        });
-        
-        return Layout.Vertical()
-            | Text.P(lastMessage.Value)
-            | Text.Code(webhook.GetUri().ToString());
-    }
-}
-```
+## Examples
 
-### Custom Response Handler
+<Details>
+<Summary>
+Custom Response & Query Parameters
+</Summary>
+<Body>
 
-For handlers that need to return custom HTTP responses:
+This example demonstrates how to access query parameters from the `HttpRequest` and how to return different `IActionResult` responses based on logic.
 
-```csharp demo-below
+```csharp demo-tabs
 public class CustomResponseHandlerExample : ViewBase
 {
     public override object? Build()
@@ -175,184 +163,18 @@ public class CustomResponseHandlerExample : ViewBase
 }
 ```
 
-## WebhookEndpoint Properties
-
-| Property  | Type     | Description                                    |
-| --------- | -------- | ---------------------------------------------- |
-| `Id`      | `string` | Unique identifier for the webhook              |
-| `BaseUrl` | `string` | Base URL for the webhook endpoint              |
-
-The `WebhookEndpoint` provides a `GetUri()` method to get the full webhook URL:
-
-```csharp
-var webhook = UseWebhook(_ => { });
-var url = webhook.GetUri(); // Full URL: https://example.com/ivy/webhook/{id}
-```
-
-## Best Practices
-
-- **Always handle errors** - Use try-catch blocks and return appropriate error responses
-- **Validate request authenticity** - Verify signatures or tokens for sensitive operations
-- **Use async handlers for I/O** - Use async when reading bodies or making database calls
-- **Return appropriate HTTP responses** - Use proper status codes (OkResult, BadRequestResult, etc.)
-- **Update state safely** - State updates from handlers are automatically thread-safe
-- **Keep handlers fast** - Complete quickly and queue heavy work for background processing
-- **Log important events** - Log calls, results, and errors for debugging and auditing
-- **Cleanup is automatic** - Webhooks are automatically unregistered when components unmount
-
-## See Also
-
-- [State Management](./03_UseState.md) - Update state from webhook handlers
-- [Effects](./04_UseEffect.md) - Perform side effects in response to webhook calls
-
-## Examples
-
-<Details>
-<Summary>
-Payment Webhook Handler
-</Summary>
-<Body>
-
-Handle payment callbacks from a payment processor:
-
-```csharp demo-below
-public class PaymentWebhookView : ViewBase
-{
-    public override object? Build()
-    {
-        var payments = UseState(ImmutableArray.Create<Payment>());
-        var lastPayment = UseState<Payment?>();
-        
-        var webhook = UseWebhook(async (Microsoft.AspNetCore.Http.HttpRequest request) =>
-        {
-            try
-            {
-                Payment? payment = null;
-                
-                // Check if request has a body
-                if (request.ContentLength > 0)
-                {
-                    using var reader = new StreamReader(request.Body);
-                    var json = await reader.ReadToEndAsync();
-                    
-                    if (!string.IsNullOrWhiteSpace(json))
-                    {
-                        payment = System.Text.Json.JsonSerializer.Deserialize<Payment>(json);
-                    }
-                }
-                
-                // For demo purposes: if no body, create a sample payment
-                if (payment == null)
-                {
-                    payment = new Payment(
-                        Amount: new Random().Next(10, 500),
-                        Status: "completed",
-                        Timestamp: DateTime.UtcNow
-                    );
-                }
-                
-                payments.Set(payments.Value.Add(payment));
-                lastPayment.Set(payment);
-                
-                return new Microsoft.AspNetCore.Mvc.OkObjectResult(new { status = "received" });
-            }
-            catch (Exception ex)
-            {
-                return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new { error = ex.Message });
-            }
-        });
-        
-        return Layout.Vertical()
-            | Text.H2("Payment Webhook")
-            | Text.Code(webhook.GetUri().ToString())
-            | Text.H3("Last Payment")
-            | (lastPayment.Value != null
-                ? Layout.Vertical(
-                    Text.P($"Amount: ${lastPayment.Value.Amount:F2}"),
-                    Text.P($"Status: {lastPayment.Value.Status}"),
-                    Text.P($"Date: {lastPayment.Value.Timestamp}")
-                  )
-                : Text.P("No payments received yet"))
-            | Text.H3("All Payments")
-            | payments.Value.ToTable()
-                .Builder(e => e.Amount, e => e.Func((decimal x) => $"${x:F2}"));
-    }
-}
-
-public record Payment(decimal Amount, string Status, DateTime Timestamp);
-```
-
 </Body>
 </Details>
 
 <Details>
 <Summary>
-OAuth Callback Handler
+External API Integration (Async & Body Reading)
 </Summary>
 <Body>
 
-Handle OAuth authorization callbacks:
+This example shows a robust integration scenario including reading the request body asynchronously and validating custom headers.
 
-```csharp demo-below
-public class OAuthCallbackView : ViewBase
-{
-    public override object? Build()
-    {
-        var authCode = UseState<string?>();
-        var authState = UseState<string?>();
-        var isAuthenticated = UseState(false);
-        
-        var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
-        {
-            // Extract OAuth callback parameters
-            var code = request.Query["code"].ToString();
-            var state = request.Query["state"].ToString();
-            
-            // For demo purposes: if no query params, create sample values
-            if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(state))
-            {
-                code = "demo_auth_code_12345";
-                state = "demo_state_abc";
-            }
-            
-            authCode.Set(code);
-            authState.Set(state);
-            
-            // In a real app, you'd exchange the code for tokens here
-            if (!string.IsNullOrEmpty(code))
-            {
-                isAuthenticated.Set(true);
-            }
-            
-            return new Microsoft.AspNetCore.Mvc.OkObjectResult(new { message = "Authorization received" });
-        });
-        
-        return Layout.Vertical()
-            | Text.H2("OAuth Callback")
-            | Text.Code(webhook.GetUri().ToString())
-            | (isAuthenticated.Value
-                ? Layout.Vertical(
-                    Text.Success("Authentication successful!"),
-                    Text.P($"Code: {authCode.Value}"),
-                    Text.P($"State: {authState.Value}")
-                  )
-                : Text.P("Waiting for OAuth callback..."));
-    }
-}
-```
-
-</Body>
-</Details>
-
-<Details>
-<Summary>
-External API Integration
-</Summary>
-<Body>
-
-Create a webhook endpoint for external services to send data:
-
-```csharp demo-below
+```csharp demo-tabs
 public class ExternalIntegrationView : ViewBase
 {
     public override object? Build()
