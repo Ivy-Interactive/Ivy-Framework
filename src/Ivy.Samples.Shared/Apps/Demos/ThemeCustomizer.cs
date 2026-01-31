@@ -58,10 +58,11 @@ public class ThemeCustomizer : SampleBase
 
         // Sidebar Footer
         var sidebarFooter = Layout.Vertical().Padding(2)
-            | new Button("Export Configuration")
+            | new Button("Copy Configuration")
                 .Primary()
-                .Icon(Icons.Download)
-                .HandleClick(() => isExportOpen.Set(true));
+                .Icon(Icons.Copy)
+                .HandleClick(() => isExportOpen.Set(true))
+                .Width(Size.Full());
 
         // Right side - Live Preview
         var previewPanel = new LivePreviewPanel(editingTheme.Value);
@@ -190,6 +191,8 @@ public class ThemeCustomizer : SampleBase
                 ? editingTheme.Value.Colors.Light 
                 : editingTheme.Value.Colors.Dark;
 
+            var selectedPreset = UseState(editingTheme.Value.Name);
+
             void UpdateColor(Action<ThemeColors> updater)
             {
                 var newTheme = CloneTheme(editingTheme.Value);
@@ -198,22 +201,27 @@ public class ThemeCustomizer : SampleBase
                 editingTheme.Set(newTheme);
             }
 
-            var presetButtons = presets.Select(kv =>
-                new Button(kv.Key)
-                    .Outline()
-                    .Icon(GetThemeIcon(kv.Value.Name))
-                    .HandleClick(() => loadPreset(kv.Value))
-            ).ToArray();
+            var presetOptions = presets.Select(kv => new Option<string>(kv.Key, kv.Key)).ToArray();
 
-            return Layout.Vertical().Gap(3).Padding(4)
-                // Preset selector
-                | Text.H3("Presets").Small()
-                | (Layout.Grid().Columns(2).Gap(2) | presetButtons)
+            return Layout.Vertical().Gap(2).Padding(1)
+                | Text.H3("Theme Preset").Small()
+                | new SelectInput<string>(
+                    value: selectedPreset.Value,
+                    onChange: e =>
+                    {
+                        selectedPreset.Set(e.Value);
+                        if (presets.TryGetValue(e.Value, out var preset))
+                        {
+                            loadPreset(preset);
+                        }
+                    },
+                    options: presetOptions
+                )
                 
                 | new Separator()
                 
                 // Mode toggle
-                | Text.H3("Editing Mode").Small()
+                | Text.H3("Theme Mode").Small()
                 | (Layout.Horizontal().Gap(2)
                     | new Button("Light")
                         .Variant(selectedMode.Value == "light" ? ButtonVariant.Primary : ButtonVariant.Outline)
@@ -223,6 +231,7 @@ public class ThemeCustomizer : SampleBase
                             selectedMode.Set("light");
                             client.SetThemeMode(ThemeMode.Light);
                         })
+                        .Width(Size.Full())
                     | new Button("Dark")
                         .Variant(selectedMode.Value == "dark" ? ButtonVariant.Primary : ButtonVariant.Outline)
                         .Icon(Icons.Moon)
@@ -230,37 +239,51 @@ public class ThemeCustomizer : SampleBase
                         {
                             selectedMode.Set("dark");
                             client.SetThemeMode(ThemeMode.Dark);
-                        }))
+                        })
+                        .Width(Size.Full()))
                 
-                | new Separator()
+                // Main Colors
+                | new Expandable(
+                    "Main Colors",
+                    Layout.Vertical().Gap(2)
+                        | new ColorEditor("Primary", currentColors.Primary, c => UpdateColor(colors => colors.Primary = c))
+                        | new ColorEditor("Primary Foreground", currentColors.PrimaryForeground, c => UpdateColor(colors => colors.PrimaryForeground = c))
+                        | new ColorEditor("Secondary", currentColors.Secondary, c => UpdateColor(colors => colors.Secondary = c))
+                        | new ColorEditor("Secondary Foreground", currentColors.SecondaryForeground, c => UpdateColor(colors => colors.SecondaryForeground = c))
+                        | new ColorEditor("Background", currentColors.Background, c => UpdateColor(colors => colors.Background = c))
+                        | new ColorEditor("Foreground", currentColors.Foreground, c => UpdateColor(colors => colors.Foreground = c))
+                ).Open()
                 
-                // Color editors
-                | Text.H3($"{(selectedMode.Value == "light" ? "Light" : "Dark")} Theme Colors").Small()
-                | new ColorEditor("Primary", currentColors.Primary, c => UpdateColor(colors => colors.Primary = c))
-                | new ColorEditor("Primary Foreground", currentColors.PrimaryForeground, c => UpdateColor(colors => colors.PrimaryForeground = c))
-                | new ColorEditor("Secondary", currentColors.Secondary, c => UpdateColor(colors => colors.Secondary = c))
-                | new ColorEditor("Secondary Foreground", currentColors.SecondaryForeground, c => UpdateColor(colors => colors.SecondaryForeground = c))
-                | new ColorEditor("Background", currentColors.Background, c => UpdateColor(colors => colors.Background = c))
-                | new ColorEditor("Foreground", currentColors.Foreground, c => UpdateColor(colors => colors.Foreground = c))
-                | new ColorEditor("Success", currentColors.Success, c => UpdateColor(colors => colors.Success = c))
-                | new ColorEditor("Success Foreground", currentColors.SuccessForeground, c => UpdateColor(colors => colors.SuccessForeground = c))
-                | new ColorEditor("Destructive", currentColors.Destructive, c => UpdateColor(colors => colors.Destructive = c))
-                | new ColorEditor("Destructive Foreground", currentColors.DestructiveForeground, c => UpdateColor(colors => colors.DestructiveForeground = c))
-                | new ColorEditor("Warning", currentColors.Warning, c => UpdateColor(colors => colors.Warning = c))
-                | new ColorEditor("Warning Foreground", currentColors.WarningForeground, c => UpdateColor(colors => colors.WarningForeground = c))
-                | new ColorEditor("Info", currentColors.Info, c => UpdateColor(colors => colors.Info = c))
-                | new ColorEditor("Info Foreground", currentColors.InfoForeground, c => UpdateColor(colors => colors.InfoForeground = c))
-                | new ColorEditor("Muted", currentColors.Muted, c => UpdateColor(colors => colors.Muted = c))
-                | new ColorEditor("Muted Foreground", currentColors.MutedForeground, c => UpdateColor(colors => colors.MutedForeground = c))
-                | new ColorEditor("Accent", currentColors.Accent, c => UpdateColor(colors => colors.Accent = c))
-                | new ColorEditor("Accent Foreground", currentColors.AccentForeground, c => UpdateColor(colors => colors.AccentForeground = c))
-                | new ColorEditor("Border", currentColors.Border, c => UpdateColor(colors => colors.Border = c))
-                | new ColorEditor("Input", currentColors.Input, c => UpdateColor(colors => colors.Input = c))
-                | new ColorEditor("Ring", currentColors.Ring, c => UpdateColor(colors => colors.Ring = c))
-                | new ColorEditor("Card", currentColors.Card, c => UpdateColor(colors => colors.Card = c))
-                | new ColorEditor("Card Foreground", currentColors.CardForeground, c => UpdateColor(colors => colors.CardForeground = c))
-                | new ColorEditor("Popover", currentColors.Popover, c => UpdateColor(colors => colors.Popover = c))
-                | new ColorEditor("Popover Foreground", currentColors.PopoverForeground, c => UpdateColor(colors => colors.PopoverForeground = c));
+                // Semantic Colors
+                | new Expandable(
+                    "Semantic Colors",
+                    Layout.Vertical().Gap(2)
+                        | new ColorEditor("Success", currentColors.Success, c => UpdateColor(colors => colors.Success = c))
+                        | new ColorEditor("Success Foreground", currentColors.SuccessForeground, c => UpdateColor(colors => colors.SuccessForeground = c))
+                        | new ColorEditor("Destructive", currentColors.Destructive, c => UpdateColor(colors => colors.Destructive = c))
+                        | new ColorEditor("Destructive Foreground", currentColors.DestructiveForeground, c => UpdateColor(colors => colors.DestructiveForeground = c))
+                        | new ColorEditor("Warning", currentColors.Warning, c => UpdateColor(colors => colors.Warning = c))
+                        | new ColorEditor("Warning Foreground", currentColors.WarningForeground, c => UpdateColor(colors => colors.WarningForeground = c))
+                        | new ColorEditor("Info", currentColors.Info, c => UpdateColor(colors => colors.Info = c))
+                        | new ColorEditor("Info Foreground", currentColors.InfoForeground, c => UpdateColor(colors => colors.InfoForeground = c))
+                ).Open()
+                
+                // UI Element Colors
+                | new Expandable(
+                    "UI Element Colors",
+                    Layout.Vertical().Gap(2)
+                        | new ColorEditor("Muted", currentColors.Muted, c => UpdateColor(colors => colors.Muted = c))
+                        | new ColorEditor("Muted Foreground", currentColors.MutedForeground, c => UpdateColor(colors => colors.MutedForeground = c))
+                        | new ColorEditor("Accent", currentColors.Accent, c => UpdateColor(colors => colors.Accent = c))
+                        | new ColorEditor("Accent Foreground", currentColors.AccentForeground, c => UpdateColor(colors => colors.AccentForeground = c))
+                        | new ColorEditor("Border", currentColors.Border, c => UpdateColor(colors => colors.Border = c))
+                        | new ColorEditor("Input", currentColors.Input, c => UpdateColor(colors => colors.Input = c))
+                        | new ColorEditor("Ring", currentColors.Ring, c => UpdateColor(colors => colors.Ring = c))
+                        | new ColorEditor("Card", currentColors.Card, c => UpdateColor(colors => colors.Card = c))
+                        | new ColorEditor("Card Foreground", currentColors.CardForeground, c => UpdateColor(colors => colors.CardForeground = c))
+                        | new ColorEditor("Popover", currentColors.Popover, c => UpdateColor(colors => colors.Popover = c))
+                        | new ColorEditor("Popover Foreground", currentColors.PopoverForeground, c => UpdateColor(colors => colors.PopoverForeground = c))
+                ).Open();
         }
     }
 
