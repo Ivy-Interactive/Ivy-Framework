@@ -187,6 +187,7 @@ public class ThemeCustomizer : SampleBase
     {
         public override object Build()
         {
+            var client = UseService<IClientProvider>();
             var currentColors = selectedMode.Value == "light" 
                 ? editingTheme.Value.Colors.Light 
                 : editingTheme.Value.Colors.Dark;
@@ -219,11 +220,19 @@ public class ThemeCustomizer : SampleBase
                     | new Button("Light")
                         .Variant(selectedMode.Value == "light" ? ButtonVariant.Primary : ButtonVariant.Outline)
                         .Icon(Icons.Sun)
-                        .HandleClick(() => selectedMode.Set("light"))
+                        .HandleClick(() => 
+                        {
+                            selectedMode.Set("light");
+                            client.SetThemeMode(ThemeMode.Light);
+                        })
                     | new Button("Dark")
                         .Variant(selectedMode.Value == "dark" ? ButtonVariant.Primary : ButtonVariant.Outline)
                         .Icon(Icons.Moon)
-                        .HandleClick(() => selectedMode.Set("dark")))
+                        .HandleClick(() => 
+                        {
+                            selectedMode.Set("dark");
+                            client.SetThemeMode(ThemeMode.Dark);
+                        }))
                 
                 | new Separator()
                 
