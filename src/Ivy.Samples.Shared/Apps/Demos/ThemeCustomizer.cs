@@ -814,7 +814,10 @@ var server = new Server()
                 Popover = ""{darkColors.Popover}"",
                 PopoverForeground = ""{darkColors.PopoverForeground}""
             }}
-        }};
+        }}
+        theme.FontFamily = ""{theme.FontFamily}"";
+        theme.FontSize = ""{theme.FontSize}"";
+        theme.BorderRadius = ""{theme.BorderRadius}"";
     }});";
     }
 
