@@ -16,7 +16,7 @@ The `UseWebhook` [hook](../02_RulesOfHooks.md) creates HTTP endpoints that can b
 
 ## Basic Usage
 
-The `UseWebhook` hook takes a request handler and returns a `WebhookEndpoint` containing the URL that external systems can call:
+The `UseWebhook` hook takes a request handler and returns a `CallbackEndpoint` containing the URL that external systems can call:
 
 ```csharp demo-below
 public class BasicWebhookExample : ViewBase
@@ -42,14 +42,14 @@ The `UseWebhook` hook:
 
 1. **Generates a Unique ID**: Creates a unique identifier for the webhook endpoint
 2. **Registers the Handler**: Registers your request handler with the webhook registry
-3. **Returns Webhook Endpoint**: Provides a `WebhookEndpoint` with the URL that external systems can call
+3. **Returns Callback Endpoint**: Provides a `CallbackEndpoint` with the URL that external systems can call
 
 ```mermaid
 sequenceDiagram
     participant Component as View Component
     participant Hook as UseWebhook Hook
     participant Registry as Webhook Registry
-    participant Endpoint as WebhookEndpoint
+    participant Endpoint as CallbackEndpoint
     participant External as External System
     participant Handler as Request Handler
     participant State as Component State
@@ -58,7 +58,7 @@ sequenceDiagram
     Hook->>Hook: Generate Unique ID (Guid)
     Hook->>Registry: Register(id, handler)
     Registry-->>Hook: Handler registered
-    Hook->>Endpoint: Create WebhookEndpoint(id, baseUrl)
+    Hook->>Endpoint: Create CallbackEndpoint(id, baseUrl)
     Endpoint-->>Component: Return endpoint URL
     
     Note over Component,Endpoint: Component renders with webhook URL
@@ -78,7 +78,7 @@ sequenceDiagram
 
 2. **Handler Registration**: The handler function you provide is registered with the webhook registry service, associating it with the generated ID. This registration happens in a [UseEffect](./04_UseEffect.md) that runs on component mount.
 
-3. **Endpoint Creation**: A `WebhookEndpoint` is created containing:
+3. **Endpoint Creation**: A `CallbackEndpoint` is created containing:
    - The unique ID
    - The base URL constructed from the current request scheme and host
    - The full URL follows the pattern: `{scheme}://{host}/ivy/webhook/{id}`
@@ -151,7 +151,7 @@ var webhook = UseWebhook((Microsoft.AspNetCore.Http.HttpRequest request) =>
 });
 ```
 
-## WebhookEndpoint Properties
+## CallbackEndpoint Properties
 
 | Property  | Type     | Description                                    |
 | --------- | -------- | ---------------------------------------------- |
