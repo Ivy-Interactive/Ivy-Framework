@@ -160,7 +160,7 @@ public class BasicAuthProvider : IAuthProvider
         return Task.FromResult<AuthToken?>(newToken);
     }
 
-    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

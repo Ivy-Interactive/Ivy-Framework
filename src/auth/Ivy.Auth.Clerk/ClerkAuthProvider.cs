@@ -214,7 +214,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_origin))
         {

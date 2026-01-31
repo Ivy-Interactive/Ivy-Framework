@@ -62,7 +62,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
     public Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
-        _baseUrl = WebhookEndpoint.BuildBaseUrl(requestScheme, requestHost);
+        _baseUrl = CallbackEndpoint.BuildBaseUrl(requestScheme, requestHost);
         return Task.CompletedTask;
     }
 
@@ -98,7 +98,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
     public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
         => throw new InvalidOperationException("Microsoft Entra login with email/password is not supported");
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken)
     {
         _codeVerifier = GenerateCodeVerifier();
         var codeChallenge = GenerateCodeChallenge(_codeVerifier);

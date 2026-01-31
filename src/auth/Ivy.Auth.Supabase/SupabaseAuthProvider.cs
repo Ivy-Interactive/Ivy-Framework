@@ -72,7 +72,7 @@ public class SupabaseAuthProvider : IAuthProvider
         return authToken;
     }
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken)
     {
         var provider = option.Id switch
         {

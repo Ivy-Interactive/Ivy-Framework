@@ -59,7 +59,7 @@ public class AuthController() : Controller
         }
         var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
         var callbackBaseUrl = $"{scheme}://{host}/ivy/auth/oauth-callback";
-        var callback = new WebhookEndpoint(callbackId, callbackBaseUrl);
+        var callback = new CallbackEndpoint(callbackId, callbackBaseUrl);
 
         try
         {

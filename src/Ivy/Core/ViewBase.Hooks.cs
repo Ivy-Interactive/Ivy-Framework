@@ -155,16 +155,16 @@ public abstract partial class ViewBase
     protected IState<UploadContext> UseUpload(IUploadHandler handler, string? defaultContentType = null, string? defaultFileName = null) =>
         this.Context.UseUpload(handler, defaultContentType, defaultFileName);
 
-    protected WebhookEndpoint UseWebhook(Func<HttpRequest, IActionResult> handler) =>
+    protected CallbackEndpoint UseWebhook(Func<HttpRequest, IActionResult> handler) =>
         this.Context.UseWebhook(handler);
 
-    protected WebhookEndpoint UseWebhook(Action<HttpRequest> handler) =>
+    protected CallbackEndpoint UseWebhook(Action<HttpRequest> handler) =>
         this.Context.UseWebhook(handler);
 
-    protected WebhookEndpoint UseWebhook(Func<HttpRequest, Task<IActionResult>> handler) =>
+    protected CallbackEndpoint UseWebhook(Func<HttpRequest, Task<IActionResult>> handler) =>
         this.Context.UseWebhook(handler);
 
-    protected WebhookEndpoint UseWebhook(Func<HttpRequest, Task> handler) =>
+    protected CallbackEndpoint UseWebhook(Func<HttpRequest, Task> handler) =>
         this.Context.UseWebhook(handler);
 
     protected DataTableConnection? UseDataTable(IQueryable queryable) =>
