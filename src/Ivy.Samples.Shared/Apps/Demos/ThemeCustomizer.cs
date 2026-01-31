@@ -26,12 +26,10 @@ public class ThemeCustomizer : SampleBase
             key: editingTheme.Value,
             fetcher: async ct =>
             {
-                // Small delay to debounce rapid changes during sliding/typing
-                await Task.Delay(20, ct);
-
                 themeService.SetTheme(editingTheme.Value);
                 var css = themeService.GenerateThemeCss();
                 client.ApplyTheme(css);
+                await Task.CompletedTask;
                 return true;
             });
 
@@ -275,16 +273,31 @@ public class ThemeCustomizer : SampleBase
         {
             var colorState = UseState(color ?? "#000000");
 
-            UseEffect(() =>
-            {
-                onChange(colorState.Value);
-            }, colorState);
+            // Sync internal state when the color prop changes using UseQuery
+            UseQuery(
+                key: color,
+                fetcher: async ct =>
+                {
+                    if (color != null && colorState.Value != color)
+                    {
+                        colorState.Set(color);
+                    }
+                    await Task.CompletedTask;
+                    return true;
+                },
+                options: new QueryOptions { RevalidateOnMount = true });
 
             return Layout.Horizontal().Gap(2).Align(Align.Center)
                 | Text.P(label).Small().Width(Size.Px(180))
-                | colorState.ToColorInput()
-                    .Variant(ColorInputs.TextAndPicker)
-                    .Width(Size.Full());
+                | new ColorInput(
+                    value: colorState.Value,
+                    onChange: e =>
+                    {
+                        colorState.Set(e.Value);
+                        onChange(e.Value);
+                    },
+                    variant: ColorInputs.TextAndPicker
+                );
         }
     }
 
