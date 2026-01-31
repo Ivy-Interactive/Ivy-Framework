@@ -286,10 +286,10 @@ public class ThemeCustomizer : SampleBase
     {
         public override object Build()
         {
-            return Layout.Vertical().Gap(4).Padding(4)
+            return Layout.Vertical().Gap(1).Padding(2)
                     | Text.H2("Live Preview")
                     | Text.P("See your theme changes in real-time").Small().Muted()
-                    
+                    | new Spacer().Height(Size.Units(5))
                     | Layout.Tabs(
                         new Tab("Components", new InteractiveThemePreview(theme)).Icon(Icons.LayoutPanelLeft),
                         new Tab("Dashboard", new DashboardApp()).Icon(Icons.LayoutDashboard),
