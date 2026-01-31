@@ -201,6 +201,13 @@ public class ThemeCustomizer : SampleBase
                 editingTheme.Set(newTheme);
             }
 
+            void UpdateThemeProperty(Action<Theme> updater)
+            {
+                var newTheme = CloneTheme(editingTheme.Value);
+                updater(newTheme);
+                editingTheme.Set(newTheme);
+            }
+
             var presetOptions = presets.Select(kv => new Option<string>(kv.Key, kv.Key)).ToArray();
 
             return Layout.Vertical().Gap(2).Padding(1)
@@ -241,6 +248,35 @@ public class ThemeCustomizer : SampleBase
                             client.SetThemeMode(ThemeMode.Dark);
                         })
                         .Width(Size.Full()))
+                
+                | new Separator()
+                
+                // Typography & Layout
+                | new Expandable(
+                    "Typography & Layout",
+                    Layout.Vertical().Gap(2)
+                        | (Layout.Horizontal().Gap(2).Align(Align.Center)
+                            | Text.P("Font Family").Small().Width(Size.Px(180))
+                            | new TextInput(
+                                value: editingTheme.Value.FontFamily ?? "",
+                                onChange: e => UpdateThemeProperty(t => t.FontFamily = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
+                                placeholder: "e.g., Inter, system-ui, sans-serif"
+                            ))
+                        | (Layout.Horizontal().Gap(2).Align(Align.Center)
+                            | Text.P("Font Size").Small().Width(Size.Px(180))
+                            | new TextInput(
+                                value: editingTheme.Value.FontSize ?? "",
+                                onChange: e => UpdateThemeProperty(t => t.FontSize = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
+                                placeholder: "e.g., 16px, 1rem"
+                            ))
+                        | (Layout.Horizontal().Gap(2).Align(Align.Center)
+                            | Text.P("Border Radius").Small().Width(Size.Px(180))
+                            | new TextInput(
+                                value: editingTheme.Value.BorderRadius ?? "",
+                                onChange: e => UpdateThemeProperty(t => t.BorderRadius = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
+                                placeholder: "e.g., 0.5rem, 8px"
+                            ))
+                )
                 
                 // Main Colors
                 | new Expandable(
@@ -792,6 +828,9 @@ var server = new Server()
     private static Theme GetOceanTheme() => new()
     {
         Name = "Ocean",
+        FontFamily = "Geist",
+        FontSize = "14px",
+        BorderRadius = "0.5rem",
         Colors = new ThemeColorScheme
         {
             Light = new ThemeColors
@@ -856,6 +895,9 @@ var server = new Server()
     private static Theme GetForestTheme() => new()
     {
         Name = "Forest",
+        FontFamily = "Geist",
+        FontSize = "14px",
+        BorderRadius = "0.5rem",
         Colors = new ThemeColorScheme
         {
             Light = new ThemeColors
@@ -920,6 +962,9 @@ var server = new Server()
     private static Theme GetSunsetTheme() => new()
     {
         Name = "Sunset",
+        FontFamily = "Geist",
+        FontSize = "14px",
+        BorderRadius = "0.5rem",
         Colors = new ThemeColorScheme
         {
             Light = new ThemeColors
@@ -984,6 +1029,9 @@ var server = new Server()
     private static Theme GetMidnightTheme() => new()
     {
         Name = "Midnight",
+        FontFamily = "Geist",
+        FontSize = "14px",
+        BorderRadius = "0.5rem",
         Colors = new ThemeColorScheme
         {
             Light = new ThemeColors

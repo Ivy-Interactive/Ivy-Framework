@@ -20,7 +20,10 @@ public class Theme
     public static Theme Default => new()
     {
         Name = "Default",
-        Colors = ThemeColorScheme.Default
+        Colors = ThemeColorScheme.Default,
+        FontFamily = "Geist",
+        FontSize = "16px",
+        BorderRadius = "0.5rem"
     };
 }
 
