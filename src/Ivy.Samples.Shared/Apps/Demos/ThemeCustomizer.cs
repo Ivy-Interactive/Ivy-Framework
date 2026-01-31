@@ -826,7 +826,7 @@ var server = new Server()
     {
         Name = "Ocean",
         FontFamily = "Geist",
-        FontSize = "14px",
+        FontSize = "16px",
         BorderRadius = "0.5rem",
         Colors = new ThemeColorScheme
         {
@@ -893,7 +893,7 @@ var server = new Server()
     {
         Name = "Forest",
         FontFamily = "Geist",
-        FontSize = "14px",
+        FontSize = "16px",
         BorderRadius = "0.5rem",
         Colors = new ThemeColorScheme
         {
@@ -960,7 +960,7 @@ var server = new Server()
     {
         Name = "Sunset",
         FontFamily = "Geist",
-        FontSize = "14px",
+        FontSize = "16px",
         BorderRadius = "0.5rem",
         Colors = new ThemeColorScheme
         {
@@ -1027,7 +1027,7 @@ var server = new Server()
     {
         Name = "Midnight",
         FontFamily = "Geist",
-        FontSize = "14px",
+        FontSize = "16px",
         BorderRadius = "0.5rem",
         Colors = new ThemeColorScheme
         {
