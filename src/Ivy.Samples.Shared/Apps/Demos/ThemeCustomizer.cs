@@ -255,27 +255,21 @@ public class ThemeCustomizer : SampleBase
                 | new Expandable(
                     "Typography & Layout",
                     Layout.Vertical().Gap(2)
-                        | (Layout.Horizontal().Gap(2).Align(Align.Center)
-                            | Text.P("Font Family").Small().Width(Size.Px(180))
-                            | new TextInput(
-                                value: editingTheme.Value.FontFamily ?? "",
-                                onChange: e => UpdateThemeProperty(t => t.FontFamily = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
-                                placeholder: "e.g., Inter, system-ui, sans-serif"
-                            ))
-                        | (Layout.Horizontal().Gap(2).Align(Align.Center)
-                            | Text.P("Font Size").Small().Width(Size.Px(180))
-                            | new TextInput(
-                                value: editingTheme.Value.FontSize ?? "",
-                                onChange: e => UpdateThemeProperty(t => t.FontSize = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
-                                placeholder: "e.g., 16px, 1rem"
-                            ))
-                        | (Layout.Horizontal().Gap(2).Align(Align.Center)
-                            | Text.P("Border Radius").Small().Width(Size.Px(180))
-                            | new TextInput(
-                                value: editingTheme.Value.BorderRadius ?? "",
-                                onChange: e => UpdateThemeProperty(t => t.BorderRadius = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
-                                placeholder: "e.g., 0.5rem, 8px"
-                            ))
+                        | new TextInput(
+                            value: editingTheme.Value.FontFamily ?? "",
+                            onChange: e => UpdateThemeProperty(t => t.FontFamily = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
+                            placeholder: "e.g., Inter, system-ui, sans-serif"
+                        ).WithField().Label("Font Family")
+                        | new TextInput(
+                            value: editingTheme.Value.FontSize ?? "",
+                            onChange: e => UpdateThemeProperty(t => t.FontSize = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
+                            placeholder: "e.g., 16px, 1rem"
+                        ).WithField().Label("Font Size")
+                        | new TextInput(
+                            value: editingTheme.Value.BorderRadius ?? "",
+                            onChange: e => UpdateThemeProperty(t => t.BorderRadius = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
+                            placeholder: "e.g., 0.5rem, 8px"
+                        ).WithField().Label("Border Radius")
                 )
                 
                 // Main Colors
