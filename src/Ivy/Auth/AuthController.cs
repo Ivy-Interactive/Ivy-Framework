@@ -75,8 +75,10 @@ public class AuthController() : Controller
     }
 
     [Route("ivy/auth/oauth-callback")]
+    [Route("ivy/auth/oauth-callback/{callbackId}")]
     [HttpGet]
     public async Task<IActionResult> OAuthCallback(
+        string? callbackId,
         [FromQuery] string? code,
         [FromQuery] string? state,
         [FromQuery] string? error,
@@ -85,28 +87,24 @@ public class AuthController() : Controller
         [FromServices] IAuthProvider authProvider,
         [FromServices] ILogger<AuthController> logger)
     {
+        var effectiveId = callbackId ?? state;
+
         if (!string.IsNullOrEmpty(error))
         {
             logger.LogWarning("OAuth callback error: {Error} - {Description}", error, errorDescription);
             return BadRequest($"OAuth error: {error}");
         }
 
-        if (string.IsNullOrEmpty(state))
+        if (string.IsNullOrEmpty(effectiveId))
         {
-            logger.LogWarning("OAuth callback failed: Missing state parameter");
-            return BadRequest("Invalid OAuth callback: missing state");
+            logger.LogWarning("OAuth callback failed: Missing callback identifier (neither callbackId path nor state query)");
+            return BadRequest("Invalid OAuth callback: missing callback identifier");
         }
 
-        if (string.IsNullOrEmpty(code))
-        {
-            logger.LogWarning("OAuth callback failed: Missing code parameter");
-            return BadRequest("Invalid OAuth callback: missing authorization code");
-        }
-
-        var pending = registry.GetAndRemove(state);
+        var pending = registry.GetAndRemove(effectiveId);
         if (pending == null)
         {
-            logger.LogWarning("OAuth callback failed: Invalid or expired state '{State}'", state);
+            logger.LogWarning("OAuth callback failed: Invalid or expired callback id '{CallbackId}'", effectiveId);
             return BadRequest("Invalid or expired OAuth state. Please try logging in again.");
         }
 
