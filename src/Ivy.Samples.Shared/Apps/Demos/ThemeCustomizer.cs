@@ -55,9 +55,7 @@ public class ThemeCustomizer : SampleBase
 
         // Sidebar Header
         var sidebarHeader = Layout.Vertical().Gap(1).Padding(2)
-            | (Layout.Horizontal().Align(Align.Center).Gap(2)
-                | Text.H2("Theme Editor")
-                | (themeQuery.Validating ? Text.P("Updating...").Small().Muted() : null))
+            | Text.H2("Theme Editor")
             | Text.P("Customize your theme").Small().Muted();
 
         // Sidebar Footer
@@ -119,15 +117,15 @@ public class ThemeCustomizer : SampleBase
             ).Width(Size.Units(150))
             : null;
 
-        return Layout.Vertical().Height(Size.Full())
-            | new SidebarLayout(
-                mainContent: previewPanel,
+        return new SidebarLayout(
+                mainContent: Layout.Vertical().Gap(0)
+                    | previewPanel
+                    | exportDialog,
                 sidebarContent: editorContent,
                 sidebarHeader: sidebarHeader,
                 sidebarFooter: sidebarFooter,
                 width: Size.Px(380)
-            )
-            | exportDialog;
+            ).Height(Size.Full());
     }
 
     private static Theme CloneTheme(Theme source)
