@@ -187,8 +187,8 @@ public class ThemeCustomizer : SampleBase
         public override object Build()
         {
             var client = UseService<IClientProvider>();
-            var currentColors = selectedMode.Value == "light" 
-                ? editingTheme.Value.Colors.Light 
+            var currentColors = selectedMode.Value == "light"
+                ? editingTheme.Value.Colors.Light
                 : editingTheme.Value.Colors.Dark;
 
             var selectedPreset = UseState(editingTheme.Value.Name);
@@ -224,16 +224,16 @@ public class ThemeCustomizer : SampleBase
                     },
                     options: presetOptions
                 )
-                
+
                 | new Separator()
-                
+
                 // Mode toggle
                 | Text.H3("Theme Mode").Small()
                 | (Layout.Horizontal().Gap(2)
                     | new Button("Light")
                         .Variant(selectedMode.Value == "light" ? ButtonVariant.Primary : ButtonVariant.Outline)
                         .Icon(Icons.Sun)
-                        .HandleClick(() => 
+                        .HandleClick(() =>
                         {
                             selectedMode.Set("light");
                             client.SetThemeMode(ThemeMode.Light);
@@ -242,15 +242,15 @@ public class ThemeCustomizer : SampleBase
                     | new Button("Dark")
                         .Variant(selectedMode.Value == "dark" ? ButtonVariant.Primary : ButtonVariant.Outline)
                         .Icon(Icons.Moon)
-                        .HandleClick(() => 
+                        .HandleClick(() =>
                         {
                             selectedMode.Set("dark");
                             client.SetThemeMode(ThemeMode.Dark);
                         })
                         .Width(Size.Full()))
-                
+
                 | new Separator()
-                
+
                 // Typography & Layout
                 | new Expandable(
                     "Typography & Layout",
@@ -271,7 +271,7 @@ public class ThemeCustomizer : SampleBase
                             placeholder: "e.g., 0.5rem, 8px"
                         ).WithField().Label("Border Radius")
                 )
-                
+
                 // Main Colors
                 | new Expandable(
                     "Main Colors",
@@ -283,7 +283,7 @@ public class ThemeCustomizer : SampleBase
                         | new ColorEditor("Background", currentColors.Background, c => UpdateColor(colors => colors.Background = c))
                         | new ColorEditor("Foreground", currentColors.Foreground, c => UpdateColor(colors => colors.Foreground = c))
                 ).Open()
-                
+
                 // Semantic Colors
                 | new Expandable(
                     "Semantic Colors",
@@ -297,7 +297,7 @@ public class ThemeCustomizer : SampleBase
                         | new ColorEditor("Info", currentColors.Info, c => UpdateColor(colors => colors.Info = c))
                         | new ColorEditor("Info Foreground", currentColors.InfoForeground, c => UpdateColor(colors => colors.InfoForeground = c))
                 ).Open()
-                
+
                 // UI Element Colors
                 | new Expandable(
                     "UI Element Colors",
@@ -391,7 +391,7 @@ public class ThemeCustomizer : SampleBase
                     | new ColorPreview("Info", theme.Colors.Light.Info, theme.Colors.Light.InfoForeground)
                     | new ColorPreview("Muted", theme.Colors.Light.Muted, theme.Colors.Light.MutedForeground)
                     | new ColorPreview("Accent", theme.Colors.Light.Accent, theme.Colors.Light.AccentForeground))
-                
+
                 | Text.H3("Dark Theme Colors")
                 | (Layout.Grid().Columns(2).Gap(3)
                     | new ColorPreview("Primary", theme.Colors.Dark.Primary, theme.Colors.Dark.PrimaryForeground)
