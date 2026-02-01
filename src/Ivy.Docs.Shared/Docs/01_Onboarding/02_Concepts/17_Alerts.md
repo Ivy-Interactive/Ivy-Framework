@@ -6,6 +6,9 @@ searchHints:
   - modal
   - confirm
   - message
+  - alert
+  - usealert
+  - show-alert
 ---
 
 # Alerts & Notifications
@@ -23,7 +26,7 @@ Ivy provides two main types of alerts:
 
 ## Dialog Alerts
 
-Dialog alerts are modal windows that require [user interaction](./07_EventHandlers.md). They're perfect for confirmations, important messages, or collecting user decisions.
+Dialog alerts are modal windows that require [user interaction](./05_EventHandlers.md). They're perfect for confirmations, important messages, or collecting user decisions.
 
 ### Basic Dialog Alert
 
@@ -169,6 +172,46 @@ public class FormSubmissionDemo : ViewBase
             ).Disabled(isSubmitting.Value),
             alertView
         );
+    }
+}
+```
+
+## UseAlert
+
+The [UseAlert](./17_Alerts.md) hook returns a tuple containing an alert view and a show alert delegate. It manages alert state and provides a programmatic way to trigger modal dialog alerts with customizable button sets and callbacks.
+
+```mermaid
+graph LR
+    A[UseAlert Hook] --> B[Create Alert State]
+    B --> C[Create Alert View]  
+    C --> D[Create Show Delegate]
+    D --> E[Return Alert View]
+    E --> F[Return Show Delegate]
+```
+
+<Callout Type="info">
+The `UseAlert` hook returns an alert view that should be included in your component's render output, and a delegate function that can be called to show alerts programmatically.
+</Callout>
+
+### Basic Usage
+
+Use `UseAlert` to create modal dialog alerts for confirmations and user feedback.
+
+```csharp demo-tabs
+public class AlertExample : ViewBase
+{
+    public override object? Build()
+    {
+        var (alertView, showAlert) = UseAlert();
+        var client = UseService<IClientProvider>();
+
+        return Layout.Vertical()
+            | new Button("Show Alert", onClick: _ =>
+                showAlert("Are you sure you want to continue?", result =>
+                {
+                    client.Toast($"You selected: {result}");
+                }, "Alert Title"))
+            | alertView;
     }
 }
 ```

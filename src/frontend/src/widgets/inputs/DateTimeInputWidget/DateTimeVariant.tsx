@@ -154,8 +154,10 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
           <Button
             disabled={disabled}
             variant="outline"
+            data-slot="calendar"
             className={cn(
               dateTimeInputVariants({ scale }),
+              'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed',
@@ -200,9 +202,6 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               onSelect={handleDateSelect}
               initialFocus
               scale={scale}
-              captionLayout="dropdown"
-              fromYear={1900}
-              toYear={2100}
             />
             <div className="flex items-center gap-2">
               <Clock

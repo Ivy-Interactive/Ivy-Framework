@@ -10,7 +10,7 @@ interface CardSizeClasses {
 }
 
 const baseHeaderClasses =
-  'items-center [&>*]:w-full [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!min-h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!flex-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center';
+  'items-center [&>*]:w-full [&>*]:min-w-0 [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!min-h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!leading-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center [&_:is(h1,h2,h3,h4,h5,h6)]:!min-w-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!truncate';
 
 const baseContentClasses = 'break-words whitespace-normal';
 

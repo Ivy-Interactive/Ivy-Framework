@@ -14,7 +14,7 @@ searchHints:
 Create elegant loading placeholders that mimic your content structure to improve perceived performance during data loading.
 </Ingress>
 
-The `Skeleton` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates placeholder loading indicators that mimic the shape of your content. It improves perceived performance by showing users the layout of the page while data is loading.
+The `Skeleton` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates placeholder loading indicators that mimic the shape of your content. It improves perceived performance by showing users the layout of the page while data is loading. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Height()` and `.Width()` to match your content layout.
 
 ```csharp demo-tabs
 public class ProductCardView : ViewBase
@@ -95,4 +95,4 @@ public class ProductCardView : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Skeleton" ExtensionTypes="Ivy.SkeletonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Skeleton.cs"/>
+<WidgetDocs Type="Ivy.Skeleton" ExtensionTypes="Ivy.SkeletonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Skeleton.cs"/>

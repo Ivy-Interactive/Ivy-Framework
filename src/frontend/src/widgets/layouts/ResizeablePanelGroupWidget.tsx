@@ -78,8 +78,15 @@ export const ResizeablePanelGroupWidget: React.FC<
     >
       {panelWidgets.map((panelWidget, index) => {
         if (React.isValidElement(panelWidget)) {
-          const { defaultSize } =
-            panelWidget.props as ResizeablePanelWidgetProps;
+          // Check if this is a MemoizedWidget wrapping a ResizeablePanel
+          const memoizedProps = panelWidget.props as {
+            node?: { props?: { defaultSize?: number } };
+          };
+          const directProps = panelWidget.props as ResizeablePanelWidgetProps;
+
+          // Get defaultSize from either MemoizedWidget's node.props or direct props
+          const defaultSize =
+            memoizedProps.node?.props?.defaultSize ?? directProps.defaultSize;
 
           return (
             <React.Fragment key={index}>

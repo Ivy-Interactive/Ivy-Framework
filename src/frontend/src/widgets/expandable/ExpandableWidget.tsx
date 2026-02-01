@@ -54,7 +54,6 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   };
 
   const handleTriggerClick = (e: React.MouseEvent) => {
-    // If clicking on an interactive element, stop propagation so it doesn't toggle
     const target = e.target as HTMLElement;
     const isInteractiveElement =
       target.closest('button:not([data-collapsible-trigger])') ||
@@ -67,9 +66,9 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
 
     if (isInteractiveElement) {
       e.stopPropagation();
+      return;
     }
 
-    // Prevent toggle if disabled
     if (disabled) {
       e.preventDefault();
       e.stopPropagation();
@@ -82,32 +81,54 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       open={isOpen}
       onOpenChange={handleOpenChange}
       className={cn(
-        'w-full rounded-md border border-border shadow-sm data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50',
+        'w-full rounded-md border border-border shadow-sm data-[disabled=true]:cursor-not-allowed',
         'p-0'
       )}
       data-disabled={disabled}
       role="details"
     >
-      <CollapsibleTrigger
-        disabled={false}
-        className={cn(expandableTriggerVariants({ scale }), 'relative')}
-        onClick={handleTriggerClick}
-        data-collapsible-trigger
-      >
-        <div className={expandableHeaderVariants({ scale })} role="summary">
-          {slots?.Header}
-        </div>
-        <span
-          className={expandableChevronContainerVariants({ scale })}
-          aria-hidden="true"
+      <CollapsibleTrigger asChild>
+        <div
+          className={cn(
+            expandableTriggerVariants({ scale }),
+            'relative cursor-pointer data-[disabled=true]:cursor-not-allowed'
+          )}
+          onClick={handleTriggerClick}
+          data-collapsible-trigger
+          data-disabled={disabled}
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (!disabled) setIsOpen(prev => !prev);
+            }
+          }}
         >
-          <ChevronRight
+          <div
             className={cn(
-              expandableChevronVariants({ scale }),
-              isOpen ? 'rotate-90' : 'rotate-0'
+              expandableHeaderVariants({ scale }),
+              disabled && 'text-muted-foreground'
             )}
-          />
-        </span>
+            role="summary"
+          >
+            {slots?.Header}
+          </div>
+          <span
+            className={cn(
+              expandableChevronContainerVariants({ scale }),
+              disabled && 'opacity-50'
+            )}
+            aria-hidden="true"
+          >
+            <ChevronRight
+              className={cn(
+                expandableChevronVariants({ scale }),
+                isOpen ? 'rotate-90' : 'rotate-0'
+              )}
+            />
+          </span>
+        </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
         <div className={expandableContentVariants({ scale })}>

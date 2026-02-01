@@ -5,7 +5,7 @@ import { getWidth, getHeight, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
 import {
-  textInputSizeVariants,
+  textAreaSizeVariants,
   xIconVariants,
 } from '@/components/ui/input/text-input-variants';
 import { TextInputWidgetProps } from '../types';
@@ -65,56 +65,60 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
 
   return (
     <div className="relative w-full select-none">
-      <Textarea
+      <div
+        className="rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10"
         style={styles}
-        ref={elementRef as React.RefObject<HTMLTextAreaElement>}
-        id={props.id}
-        placeholder={props.placeholder}
-        value={props.value}
-        disabled={props.disabled}
-        maxLength={props.maxLength}
-        onChange={handleChange}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        onPaste={handlePaste}
-        className={cn(
-          textInputSizeVariants({ scale }),
-          props.invalid && inputStyles.invalidInput,
-          (props.invalid || showClear) && 'pr-8',
-          props.shortcutKey &&
-            !isFocused &&
-            !hasValue &&
-            !showClear &&
-            !props.invalid &&
-            'pr-16',
-          showClear && props.invalid && 'pr-16',
-          !hasValue && props.nullable && 'placeholder:text-muted-foreground'
-        )}
-        data-testid={props['data-testid']}
-      />
-      {/* Icons container: clear (if any), shortcut (if any), then invalid (if any) */}
-      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
+      >
+        <Textarea
+          ref={elementRef as React.RefObject<HTMLTextAreaElement>}
+          id={props.id}
+          placeholder={props.placeholder}
+          value={props.value}
+          disabled={props.disabled}
+          maxLength={props.maxLength}
+          onChange={handleChange}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          onPaste={handlePaste}
+          className={cn(
+            textAreaSizeVariants({ scale }),
+            'border-0 shadow-none dark:bg-transparent h-full',
+            props.invalid && inputStyles.invalidInput,
+            (props.invalid || showClear) && 'pr-8',
+            props.shortcutKey &&
+              !isFocused &&
+              !hasValue &&
+              !showClear &&
+              !props.invalid &&
+              'pr-16',
+            showClear && props.invalid && 'pr-16',
+            !hasValue && props.nullable && 'placeholder:text-muted-foreground'
+          )}
+          data-testid={props['data-testid']}
+        />
+      </div>
+      <div className="absolute right-2.5 top-2 flex items-start gap-2 pointer-events-none z-10">
         {showClear && (
           <button
             type="button"
             tabIndex={-1}
             aria-label="Clear text"
             onClick={onClear}
-            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
+            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center"
             style={{ pointerEvents: 'auto' }}
           >
             <X className={xIconVariants({ scale })} />
           </button>
         )}
         {props.shortcutKey && !isFocused && !hasValue && (
-          <div className="pointer-events-auto flex items-center h-6">
+          <div className="pointer-events-auto flex items-center">
             <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-md">
               {shortcutDisplay}
             </kbd>
           </div>
         )}
         {props.invalid && (
-          <div className="flex items-center h-6">
+          <div className="flex items-center">
             <InvalidIcon message={props.invalid} />
           </div>
         )}

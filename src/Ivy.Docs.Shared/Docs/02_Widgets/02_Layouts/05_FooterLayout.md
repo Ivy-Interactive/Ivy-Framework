@@ -11,7 +11,7 @@ searchHints:
 # FooterLayout
 
 <Ingress>
-FooterLayout creates a layout with a fixed footer at the bottom and scrollable content above it. It's perfect for [forms](../../01_Onboarding/02_Concepts/13_Forms.md), sheets, and any [interface](../../01_Onboarding/02_Concepts/02_Views.md) where you need persistent action buttons or information while allowing the main content to scroll independently.
+FooterLayout creates a layout with a fixed footer at the bottom and scrollable content above it. It's perfect for [forms](../../01_Onboarding/02_Concepts/08_Forms.md), sheets, and any [interface](../../01_Onboarding/02_Concepts/02_Views.md) where you need persistent action buttons or information while allowing the main content to scroll independently.
 </Ingress>
 
 The `FooterLayout` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is designed to keep important actions or information visible at the bottom of the view while allowing the main content to scroll freely above it. This pattern is commonly used in forms, modal dialogs, and sheet [interfaces](../../01_Onboarding/02_Concepts/02_Views.md) where users need constant access to primary actions.
@@ -42,7 +42,7 @@ public class BasicFooterExample : ViewBase
 
 ## Form with Footer Actions
 
-A common use case is creating forms with persistent action buttons:
+A common use case is creating forms with persistent action buttons. Use [Align](../../04_ApiReference/IvyShared/Align.md) for footer button alignment (e.g. `Align.Right`):
 
 ```csharp demo-tabs
 public class FormWithFooterExample : ViewBase
@@ -114,7 +114,7 @@ public class SheetWithFooterExample : ViewBase
 Use FooterLayout for multi-step forms, long questionnaires, and data entry interfaces.
 </Callout>
 
-<WidgetDocs Type="Ivy.FooterLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/FooterLayout.cs"/>
+<WidgetDocs Type="Ivy.FooterLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/FooterLayout.cs"/>
 
 ## Examples
 

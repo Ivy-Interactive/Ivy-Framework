@@ -87,7 +87,12 @@ public class BadgeApp : SampleBase
                    new Badge(icon: Icons.Check, variant: BadgeVariant.Secondary),
                    new Badge(icon: Icons.CircleCheck, variant: BadgeVariant.Success),
                    new Badge(icon: Icons.CircleAlert, variant: BadgeVariant.Warning),
-                   new Badge(icon: Icons.Info, variant: BadgeVariant.Info)
+                   new Badge(icon: Icons.Info, variant: BadgeVariant.Info),
+                   new Badge("1"),
+                   new Badge("2", variant: BadgeVariant.Destructive),
+                   new Badge("3", variant: BadgeVariant.Outline),
+                   new Badge("10", variant: BadgeVariant.Secondary),
+                   new Badge("99+", variant: BadgeVariant.Success)
                )
             ;
     }

@@ -13,14 +13,14 @@ searchHints:
 # Button
 
 <Ingress>
-Create interactive buttons with multiple variants, states, sizes, and styling options for triggering actions in your Ivy [applications](../../01_Onboarding/02_Concepts/15_Apps.md).
+Create interactive buttons with multiple variants, states, sizes, and styling options for triggering actions in your Ivy [applications](../../01_Onboarding/02_Concepts/10_Apps.md).
 </Ingress>
 
-The `Button` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is one of the most fundamental interactive elements in Ivy. It allows users to [trigger actions](../../01_Onboarding/02_Concepts/07_EventHandlers.md) and [navigate](../../01_Onboarding/02_Concepts/14_Navigation.md) through your project.
+The `Button` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is one of the most fundamental interactive elements in Ivy. It allows users to [trigger actions](../../01_Onboarding/02_Concepts/07_EventHandlers.md) and [navigate](../../01_Onboarding/02_Concepts/09_Navigation.md) through your project.
 
 ## Basic Usage
 
-Here's a simple example of a button that shows a [toast message](../../01_Onboarding/02_Concepts/19_Clients.md) when clicked:
+Here's a simple example of a button that shows a [toast message](../../01_Onboarding/02_Concepts/13_Clients.md) when clicked:
 
 ```csharp
 var client = UseService<IClientProvider>();
@@ -33,7 +33,7 @@ new Button("Click Me", onClick: _ => client.Toast("Hello!"))
 
 ## Semantic Variants
 
-The Button widget includes three new contextual variants to help communicate different types of actions to users: [Success, Warning, and Info](../../01_Onboarding/02_Concepts/17_Theming.md). These variants complement the existing Primary, Secondary, Destructive, Outline, Ghost, and Link options.
+The Button widget includes three new contextual variants to help communicate different types of actions to users: [Success, Warning, and Info](../../01_Onboarding/02_Concepts/12_Theming.md). These variants complement the existing Primary, Secondary, Destructive, Outline, Ghost, and Link options.
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -44,7 +44,7 @@ Layout.Horizontal()
 
 ## Styling & Configuration
 
-Buttons offer extensive styling options including standard variants, states, border radius, and icon integration.
+Buttons offer extensive styling options including standard variants, states, border radius, and icon integration. Use [Align](../../04_ApiReference/IvyShared/Align.md) for icon position (e.g. `Align.Right`).
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
@@ -75,10 +75,10 @@ Layout.Vertical().Gap(4)
 
 ## Buttons with URLs
 
-Buttons can act as links by providing a [URL](../../01_Onboarding/02_Concepts/14_Navigation.md). When a button has a URL, clicking it will navigate to that URL in a new tab instead of triggering an `onClick` event.
+Buttons can act as links by providing a [URL](../../01_Onboarding/02_Concepts/09_Navigation.md). When a button has a URL, clicking it will navigate to that URL in a new tab instead of triggering an `onClick` event.
 
 <Callout Type="tip">
-Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/14_Navigation.md) like "Copy Link" and "Open in New Tab", providing a better user experience than programmatic navigation.
+Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/09_Navigation.md) like "Copy Link" and "Open in New Tab", providing a better user experience than programmatic navigation.
 </Callout>
 
 ```csharp demo-tabs
@@ -92,4 +92,4 @@ Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
 ```
 
-<WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Button.cs"/>
+<WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Button.cs"/>

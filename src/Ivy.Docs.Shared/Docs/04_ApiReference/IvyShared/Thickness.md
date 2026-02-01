@@ -12,7 +12,7 @@ searchHints:
 
 # Thickness
 
-`Thickness` is a value type that represents spacing values for the four sides of a rectangular area. It's commonly used for padding, margins, borders, and offsets in Ivy Framework widgets and layouts.
+`Thickness` is a value type that represents spacing values for the four sides of a rectangular area. It's commonly used for padding, margins, borders, and offsets in Ivy [widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) and [layouts](../../../01_Onboarding/02_Concepts/04_Layout.md). See [Size](Size.md) for width/height dimensions.
 
 ## Base usage
 
@@ -143,7 +143,7 @@ Layout.Vertical()
 
 ### Box Widget
 
-A single element can use padding, margin, and border thickness at the same time to precisely control layout and appearance.
+A single [Box](../../../02_Widgets/01_Primitives/04_Box.md) element can use padding, margin, and border thickness at the same time to precisely control layout and appearance.
 
 ```csharp demo-tabs 
 new Box("Content")

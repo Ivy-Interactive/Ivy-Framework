@@ -19,6 +19,7 @@ public class MarkdownMiddleware
     private readonly RequestDelegate _next;
     private static readonly Assembly Assembly = typeof(MarkdownMiddleware).Assembly;
     private static readonly string ResourcePrefix = "Ivy.Docs.Shared.Generated.";
+    private static readonly string[] ManifestResourceNames = Assembly.GetManifestResourceNames();
     private static readonly ConcurrentDictionary<string, byte[]?> ContentCache = new();
 
     public MarkdownMiddleware(RequestDelegate next)
@@ -66,7 +67,9 @@ public class MarkdownMiddleware
     {
         return ContentCache.GetOrAdd(resourceName, name =>
         {
-            using var stream = Assembly.GetManifestResourceStream(name);
+            var resolvedName =
+                ManifestResourceNames.FirstOrDefault(r => r.Equals(name, StringComparison.OrdinalIgnoreCase)) ?? name;
+            using var stream = Assembly.GetManifestResourceStream(resolvedName);
             if (stream == null)
                 return null;
 

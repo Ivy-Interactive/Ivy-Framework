@@ -3,9 +3,9 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Effects;
 
 [App(icon: Icons.PartyPopper, searchHints: ["celebration", "particles", "animation", "effects", "visual", "party"])]
-public class ConfettiApp : ViewBase
+public class ConfettiApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         var client = UseService<IClientProvider>();
 

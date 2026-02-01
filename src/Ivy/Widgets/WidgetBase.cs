@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Ivy.Core;
 using Ivy.Shared;
@@ -17,9 +18,9 @@ public abstract record WidgetBase<T> : AbstractWidget where T : WidgetBase<T>
 
     [Prop] public Scale? Scale { get; set; }
 
-    [Prop] public bool Visible { get; set; } = true;
+    [Prop, ScaffoldColumn(false)] public bool Visible { get; set; } = true;
 
-    [Prop] public string? TestId { get; set; }
+    [Prop, ScaffoldColumn(false)] public string? TestId { get; set; }
 }
 
 public static class WidgetBaseExtensions

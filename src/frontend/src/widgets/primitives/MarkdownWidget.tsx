@@ -45,6 +45,8 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
     display: 'flex',
     flexDirection: 'column',
     gap: '1rem',
+    wordBreak: 'normal',
+    overflowWrap: 'break-word',
     ...getScaleStyle(scale),
   };
 

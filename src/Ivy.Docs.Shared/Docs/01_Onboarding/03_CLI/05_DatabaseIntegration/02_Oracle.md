@@ -39,7 +39,7 @@ Specifically, your connection string should contain the following information, i
 
 For all connection options, see the [Oracle documentation](https://docs.oracle.com/en/database/oracle/oracle-database/19/odpnt/ConnectionConnectionString.html#GUID-DF4ED9A3-1AAF-445D-AEEF-016E6CD5A0C0__BABBAGJJ).
 
-Your connection string will be stored in .NET user secrets.
+Your connection string will be stored in [.NET user secrets](../../02_Concepts/14_Secrets.md).
 
 See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
@@ -80,6 +80,6 @@ For detailed troubleshooting, refer to [Oracle Database Error Messages](https://
 - [Database Overview](01_DatabaseOverview.md)
 - [SQL Server Provider](02_SqlServer.md)
 - [PostgreSQL Provider](02_PostgreSql.md)
-- [Enterprise Features](../../../03_Hooks/Core/11_UseService.md)
+- [Enterprise Features](../../../03_Hooks/02_Core/11_UseService.md)
 - [Official Oracle Database Documentation](https://docs.oracle.com/en/database/oracle/oracle-database/index.html)
 - [Oracle.EntityFrameworkCore Package](https://docs.oracle.com/en/database/oracle/oracle-data-access-components/19.3/odpnt/ODPEFCore.html)

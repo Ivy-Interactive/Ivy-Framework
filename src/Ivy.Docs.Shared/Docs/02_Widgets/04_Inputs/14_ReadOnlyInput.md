@@ -11,7 +11,7 @@ searchHints:
 # ReadOnlyInput
 
 <Ingress>
-Display [form](../../01_Onboarding/02_Concepts/13_Forms.md) data in a consistent input-like style that maintains visual coherence while preventing user modification.
+Display [form](../../01_Onboarding/02_Concepts/08_Forms.md) data in a consistent input-like style that maintains visual coherence while preventing user modification.
 </Ingress>
 
 The `ReadOnlyInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays data in an input-like format that cannot be edited by the user. It's useful for showing form values in a consistent style with other [inputs](../../01_Onboarding/02_Concepts/03_Widgets.md), while preventing modification.
@@ -32,7 +32,7 @@ public class ReadOnlyDemo : ViewBase
 }    
 ```
 
-<WidgetDocs Type="Ivy.ReadOnlyInput" ExtensionTypes="Ivy.ReadOnlyInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/ReadOnlyInput.cs"/>
+<WidgetDocs Type="Ivy.ReadOnlyInput" ExtensionTypes="Ivy.ReadOnlyInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/ReadOnlyInput.cs"/>
 
 ## Examples
 

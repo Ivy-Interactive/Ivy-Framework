@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Ivy.Samples.Shared.Apps.Demos.Database;
 
 [App(icon: Icons.Database, searchHints: ["crud", "management", "list", "details", "forms", "entity"])]
-public class ProductsApp : ViewBase
+public class ProductsApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         return UseBlades(() => new ProductsListBlade(), "Search", Size.Units(75));
     }

@@ -77,6 +77,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
     return await response.text();
   };
 
+  const stripMarkdownLinks = (markdown: string): string =>
+    markdown.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+
   const copyTextContent = async () => {
     try {
       toast({
@@ -84,9 +87,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         description: 'Fetching markdown from server...',
       });
 
-      const content = await fetchMarkdown();
+      const rawContent = await fetchMarkdown();
 
-      if (!content.trim()) {
+      if (!rawContent.trim()) {
         toast({
           title: 'Copy Failed',
           description: 'No content found to copy',
@@ -95,6 +98,7 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         return;
       }
 
+      const content = stripMarkdownLinks(rawContent);
       await navigator.clipboard.writeText(content);
       toast({
         title: 'Copied!',
@@ -118,9 +122,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         description: 'Fetching markdown from server...',
       });
 
-      const content = await fetchMarkdown();
+      const rawContent = await fetchMarkdown();
 
-      if (!content.trim()) {
+      if (!rawContent.trim()) {
         toast({
           title: 'Download Failed',
           description: 'No content found to download',
@@ -129,6 +133,7 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         return;
       }
 
+      const content = stripMarkdownLinks(rawContent);
       // Create and download the file
       const blob = new Blob([content], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);

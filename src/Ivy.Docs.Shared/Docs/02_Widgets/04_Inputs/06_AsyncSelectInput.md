@@ -11,10 +11,10 @@ searchHints:
 # AsyncSelectInput
 
 <Ingress>
-Create dropdown selectors that load options asynchronously from [APIs](../../03_Hooks/Core/11_UseService.md) or [databases](../../01_Onboarding/02_Concepts/01_Program.md), perfect for large datasets and on-demand loading.
+Create dropdown selectors that load options asynchronously from [APIs](../../03_Hooks/02_Core/11_UseService.md) or [databases](../../01_Onboarding/02_Concepts/26_Connections.md), perfect for large datasets and on-demand loading.
 </Ingress>
 
-The `AsyncSelectInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a select dropdown that loads options asynchronously. It's useful for scenarios where options need to be fetched from an [API](../../03_Hooks/Core/11_UseService.md) or when the list of options is large and should be loaded on-demand.
+The `AsyncSelectInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a select dropdown that loads options asynchronously. It's useful for scenarios where options need to be fetched from an [API](../../03_Hooks/02_Core/11_UseService.md) or when the list of options is large and should be loaded on-demand.
 
 ## Basic Usage
 
@@ -362,4 +362,4 @@ public class StylingDemo : ViewBase
 AsyncSelectInput automatically handles loading states and provides a smooth user [experience](../../01_Onboarding/02_Concepts/02_Views.md). The query function is called as the user types, and the lookup function is called when displaying the selected value.
 </Callout>
 
-<WidgetDocs Type="Ivy.AsyncSelectInput" ExtensionTypes="Ivy.AsyncSelectInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/AsyncSelectInput.cs"/>
+<WidgetDocs Type="Ivy.AsyncSelectInput" ExtensionTypes="Ivy.AsyncSelectInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/AsyncSelectInput.cs"/>

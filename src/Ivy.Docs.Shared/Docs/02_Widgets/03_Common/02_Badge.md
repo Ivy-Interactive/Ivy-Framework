@@ -28,7 +28,7 @@ new Badge("Primary")
 
 ## Variants
 
-Badges come in several variants to suit different use cases and [visual hierarchies](../../01_Onboarding/02_Concepts/17_Theming.md).
+Badges come in several variants to suit different use cases and [visual hierarchies](../../01_Onboarding/02_Concepts/12_Theming.md).
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -55,7 +55,7 @@ Layout.Horizontal()
 
 ### Icons
 
-`Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../01_Primitives/02_Icon.md) for more details.
+`Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../01_Primitives/02_Icon.md) for more details. Use [Align](../../04_ApiReference/IvyShared/Align.md) for icon position (e.g. `Align.Right`).
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
@@ -74,7 +74,7 @@ Layout.Vertical().Gap(4)
         | new Badge(null, icon:Icons.X, variant:BadgeVariant.Destructive))
 ```
 
-<WidgetDocs Type="Ivy.Badge" ExtensionTypes="Ivy.BadgeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Badge.cs"/>
+<WidgetDocs Type="Ivy.Badge" ExtensionTypes="Ivy.BadgeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Badge.cs"/>
 
 ## Examples
 

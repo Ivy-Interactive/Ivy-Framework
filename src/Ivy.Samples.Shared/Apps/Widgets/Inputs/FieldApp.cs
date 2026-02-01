@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ivy.Samples.Shared.Apps.Demos;
+namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
 [App(icon: Icons.TextSelect, title: "Field Input ", path: ["Widgets", "Inputs"], searchHints: ["label", "wrapper", "form-field", "input", "description", "help"])]
 public class FieldApp : SampleBase

@@ -210,7 +210,7 @@ You will be prompted to provide the following Auth0 configuration:
 - **Client Secret**: Your Auth0 application's client secret
 - **Audience**: API identifier for securing API access
 
-Your credentials will be stored securely in .NET user secrets. You will then be prompted to choose one or more authentication options to support, from the following list:
+Your credentials will be stored securely in [.NET user secrets](../../02_Concepts/14_Secrets.md). You will then be prompted to choose one or more authentication options to support, from the following list:
 
 - **E-mail and password**
 - **Google**
@@ -224,7 +224,7 @@ Your credentials will be stored securely in .NET user secrets. You will then be 
 Ivy then finishes configuring your application automatically:
 
 1. Adds the `Ivy.Auth.Auth0` package to your project.
-2. Dynamically generates and adds the appropriate `UseAuth<Auth0AuthProvider>()` call to your `Program.cs` based on your selected options (e.g., if you select Email/Password and Google, it generates: `server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle());`).
+2. Dynamically generates and adds the appropriate `UseAuth<Auth0AuthProvider>()` call to your [Program.cs](../../02_Concepts/01_Program.md) based on your selected options (e.g., if you select Email/Password and Google, it generates: `server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle());`).
 3. Adds `Ivy.Auth.Auth0` to your global usings.
 
 ### Advanced Configuration
@@ -241,9 +241,9 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
+When deploying an Ivy project without using `ivy deploy`, your local [.NET user secrets](../../02_Concepts/14_Secrets.md) are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
-> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
+> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **[.NET user secrets](../../02_Concepts/14_Secrets.md) over environment variables**.
 
 For more information, see [Authentication Overview](01_AuthenticationOverview.md).
 

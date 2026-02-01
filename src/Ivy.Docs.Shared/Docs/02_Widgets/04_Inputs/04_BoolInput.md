@@ -11,7 +11,7 @@ searchHints:
 # BoolInput
 
 <Ingress>
-Handle boolean input with elegant checkboxes, switches, and toggles for true/false values in [forms](../../01_Onboarding/02_Concepts/13_Forms.md) and [interfaces](../../01_Onboarding/02_Concepts/02_Views.md).
+Handle boolean input with elegant checkboxes, switches, and toggles for true/false values in [forms](../../01_Onboarding/02_Concepts/08_Forms.md) and [interfaces](../../01_Onboarding/02_Concepts/02_Views.md).
 </Ingress>
 
 The `BoolInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a checkbox, switch and toggle for boolean (true/false) input values. It allows users to easily switch between two states in a form or configuration interface.
@@ -49,7 +49,7 @@ var nullableInput = new BoolInput<bool?>(); // For nullable boolean
 var intInput = new BoolInput<int>(); // For integer-based boolean (0/1)
 ```
 
-**Using extension methods from [state](../../03_Hooks/Core/03_UseState.md):**
+**Using extension methods from [state](../../03_Hooks/02_Core/03_UseState.md):**
 
 ```csharp
 var state = UseState(false);
@@ -185,7 +185,7 @@ public class SingleToggleDemo : ViewBase
 BoolInput also supports integer-based boolean values (0 = false, 1 = true) for compatibility with legacy systems. Simply use `UseState(0)` or `UseState(1)` with standard extension methods like `ToBoolInput()`, `ToSwitchInput()`, or `ToToggleInput()`.
 </Callout>
 
-<WidgetDocs Type="Ivy.BoolInput" ExtensionTypes="Ivy.BoolInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/BoolInput.cs"/>
+<WidgetDocs Type="Ivy.BoolInput" ExtensionTypes="Ivy.BoolInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/BoolInput.cs"/>
 
 ## Examples
 

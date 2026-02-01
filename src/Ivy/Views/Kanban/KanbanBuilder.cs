@@ -8,17 +8,17 @@ namespace Ivy.Views.Kanban;
 
 public class KanbanBuilder<TModel, TGroupKey>(
     IEnumerable<TModel> records,
-    Func<TModel, TGroupKey> groupBySelector,
-    Func<TModel, object?>? cardIdSelector = null,
-    Func<TModel, object?>? cardOrderSelector = null)
+    Expression<Func<TModel, TGroupKey>> groupBySelector,
+    Expression<Func<TModel, object?>>? cardIdSelector = null,
+    Expression<Func<TModel, object?>>? cardOrderSelector = null)
     : ViewBase, IStateless
     where TGroupKey : notnull
 {
     private readonly BuilderFactory<TModel> _builderFactory = new();
     private IBuilder<TModel>? _cardBuilder;
-    private Func<TModel, object?>? _columnOrderBySelector;
+    private Expression<Func<TModel, object?>>? _columnOrderBySelector;
     private bool _columnOrderDescending;
-    private Func<TModel, object?>? _cardOrderBySelector;
+    private Expression<Func<TModel, object?>>? _cardOrderBySelector;
     private bool _cardOrderDescending;
     private Func<TModel, object>? _customCardRenderer;
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
@@ -47,16 +47,20 @@ public class KanbanBuilder<TModel, TGroupKey>(
 
     public KanbanBuilder<TModel, TGroupKey> ColumnOrder<TOrderKey>(Expression<Func<TModel, TOrderKey>> orderBySelector, bool descending = false)
     {
-        var compiled = orderBySelector.Compile();
-        _columnOrderBySelector = item => compiled(item);
+        _columnOrderBySelector = Expression.Lambda<Func<TModel, object?>>(
+            Expression.Convert(orderBySelector.Body, typeof(object)),
+            orderBySelector.Parameters);
+
         _columnOrderDescending = descending;
         return this;
     }
 
     public KanbanBuilder<TModel, TGroupKey> CardOrder<TOrderKey>(Expression<Func<TModel, TOrderKey>> orderBySelector, bool descending = false)
     {
-        var compiled = orderBySelector.Compile();
-        _cardOrderBySelector = item => compiled(item);
+        _cardOrderBySelector = Expression.Lambda<Func<TModel, object?>>(
+            Expression.Convert(orderBySelector.Body, typeof(object)),
+            orderBySelector.Parameters);
+
         _cardOrderDescending = descending;
         return this;
     }
@@ -110,30 +114,34 @@ public class KanbanBuilder<TModel, TGroupKey>(
             return _empty ?? new Fragment();
         }
 
-        var grouped = records.GroupBy(groupBySelector);
+        var groupByFunc = groupBySelector.Compile();
+        var grouped = records.GroupBy(groupByFunc);
 
         IEnumerable<IGrouping<TGroupKey, TModel>> orderedGroups;
         if (_columnOrderBySelector != null)
         {
+            var columnOrderFunc = _columnOrderBySelector.Compile();
             orderedGroups = _columnOrderDescending
-                ? grouped.OrderByDescending(g => _columnOrderBySelector(g.First()))
-                : grouped.OrderBy(g => _columnOrderBySelector(g.First()));
+                ? grouped.OrderByDescending(g => columnOrderFunc(g.First()))
+                : grouped.OrderBy(g => columnOrderFunc(g.First()));
         }
         else
         {
             orderedGroups = grouped;
         }
 
+        var cardOrderFunc = _cardOrderBySelector?.Compile();
+
         var itemsWithGroupKey = orderedGroups.SelectMany(group =>
         {
             var groupKey = group.Key;
             IEnumerable<TModel> itemsInGroup;
 
-            if (_cardOrderBySelector != null)
+            if (cardOrderFunc != null)
             {
                 itemsInGroup = _cardOrderDescending
-                    ? group.OrderByDescending(_cardOrderBySelector)
-                    : group.OrderBy(_cardOrderBySelector);
+                    ? group.OrderByDescending(cardOrderFunc)
+                    : group.OrderBy(cardOrderFunc);
             }
             else
             {
@@ -142,6 +150,9 @@ public class KanbanBuilder<TModel, TGroupKey>(
 
             return itemsInGroup.Select(item => new { Item = item, GroupKey = groupKey });
         });
+
+        var cardIdFunc = cardIdSelector?.Compile();
+        var cardOrderSelectorFunc = cardOrderSelector?.Compile();
 
         var cards = itemsWithGroupKey.Select(itemWithKey =>
         {
@@ -165,11 +176,11 @@ public class KanbanBuilder<TModel, TGroupKey>(
 
             var card = new KanbanCard(content);
 
-            var cardId = cardIdSelector?.Invoke(item);
+            var cardId = cardIdFunc?.Invoke(item);
             if (cardId != null)
                 card = card with { CardId = cardId };
 
-            var priority = cardOrderSelector?.Invoke(item);
+            var priority = cardOrderSelectorFunc?.Invoke(item);
             if (priority != null)
                 card = card with { Priority = priority };
 

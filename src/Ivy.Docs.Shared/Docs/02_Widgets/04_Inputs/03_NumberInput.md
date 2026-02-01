@@ -200,7 +200,7 @@ public class FormatStyleDemos : ViewBase
 
 ```
 
-## [Event Handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md)
+## Event Handling
 
 `NumberInput`s can handle change and blur events:
 
@@ -215,7 +215,7 @@ new NumberInput<int>(onChangedState.Value, e =>
 });
 ```
 
-<WidgetDocs Type="Ivy.NumberInput" ExtensionTypes="Ivy.NumberInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/NumberInput.cs"/>
+<WidgetDocs Type="Ivy.NumberInput" ExtensionTypes="Ivy.NumberInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/NumberInput.cs"/>
 
 ## Examples
 

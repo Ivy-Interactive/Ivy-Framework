@@ -54,7 +54,7 @@ const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
   return (
     <div
       style={styles}
-      className={`flex items-center h-full w-full ${className}`}
+      className={`relative flex items-center h-full w-full min-w-0 ${className}`}
     >
       {children}
     </div>

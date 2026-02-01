@@ -44,7 +44,7 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
         ? 'text-sm'
         : 'text-xs';
 
-  const gapClass = 'gap-1';
+  const gapClass = 'gap-2';
 
   const styles: React.CSSProperties = {
     ...getWidth(width),

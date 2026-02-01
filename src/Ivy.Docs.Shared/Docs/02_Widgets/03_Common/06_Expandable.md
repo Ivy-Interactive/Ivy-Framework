@@ -11,7 +11,7 @@ searchHints:
 # Expandable
 
 <Ingress>
-Create collapsible content sections that users can expand and collapse to maintain clean, organized [layouts](../../01_Onboarding/02_Concepts/02_Views.md).
+Create collapsible content sections that users can expand and collapse to maintain clean, organized [layouts](../../01_Onboarding/02_Concepts/04_Layout.md).
 </Ingress>
 
 The `Expandable` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) allows you to hide and show content interactively, providing a clean and organized way to present information. It's perfect for organizing content into collapsible sections, FAQs, or any scenario where you want to reduce visual clutter.
@@ -53,7 +53,7 @@ Layout.Vertical().Gap(2)
     | new Expandable("Open", "This expandable is open").Open()
 ```
 
-<WidgetDocs Type="Ivy.Expandable" ExtensionTypes="Ivy.ExpandableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Expandable.cs"/>
+<WidgetDocs Type="Ivy.Expandable" ExtensionTypes="Ivy.ExpandableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Expandable.cs"/>
 
 ## Examples
 
@@ -62,7 +62,7 @@ Layout.Vertical().Gap(2)
 Form Sections
 </Summary>
 <Body>
-Organize [forms](../../01_Onboarding/02_Concepts/13_Forms.md) into logical, collapsible sections.
+Organize [forms](../../01_Onboarding/02_Concepts/08_Forms.md) into logical, collapsible sections.
 
 ```csharp demo-tabs
 public class SimpleFormExample : ViewBase

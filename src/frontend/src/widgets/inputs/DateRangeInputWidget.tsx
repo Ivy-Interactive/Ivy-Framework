@@ -10,9 +10,12 @@ import {
 import { cn } from '@/lib/utils';
 import { CalendarIcon, X } from 'lucide-react';
 import {
+  addMonths,
   endOfMonth,
   endOfYear,
   format,
+  isBefore,
+  isSameMonth,
   startOfMonth,
   startOfYear,
   subDays,
@@ -133,8 +136,25 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
     to: parseDate(value?.item2),
   };
 
-  const [month, setMonth] = useState(today);
+  const [leftMonth, setLeftMonth] = useState(today);
+  const [rightMonth, setRightMonth] = useState(addMonths(today, 1));
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleLeftMonthChange = (newLeft: Date) => {
+    setLeftMonth(newLeft);
+    if (isBefore(rightMonth, newLeft) || isSameMonth(rightMonth, newLeft)) {
+      setRightMonth(addMonths(newLeft, 1));
+    }
+  };
+
+  const handleRightMonthChange = (newRight: Date) => {
+    if (isBefore(newRight, leftMonth) || isSameMonth(newRight, leftMonth)) {
+      setLeftMonth(subMonths(leftMonth, 1));
+      setRightMonth(newRight);
+    } else {
+      setRightMonth(newRight);
+    }
+  };
 
   // Use custom format if provided, otherwise use default
   const displayFormat = formatProp || 'LLL dd, y';
@@ -150,8 +170,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             variant="outline"
             disabled={disabled}
             data-testid={dataTestId}
+            data-slot="calendar"
             className={cn(
               dateRangeInputVariants({ scale }),
+              'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && 'border-destructive focus-visible:ring-destructive',
               showClear && invalid
@@ -205,7 +227,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                           from: today,
                           to: today,
                         });
-                        setMonth(today);
+                        setLeftMonth(today);
+                        setRightMonth(addMonths(today, 1));
                         setIsOpen(false);
                       }}
                     >
@@ -220,7 +243,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       )}
                       onClick={() => {
                         handleChange(yesterday);
-                        setMonth(yesterday.to);
+                        setLeftMonth(yesterday.from);
+                        setRightMonth(addMonths(yesterday.from, 1));
                         setIsOpen(false);
                       }}
                     >
@@ -235,7 +259,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       )}
                       onClick={() => {
                         handleChange(last7Days);
-                        setMonth(last7Days.to);
+                        setLeftMonth(last7Days.from);
+                        setRightMonth(last7Days.to);
                         setIsOpen(false);
                       }}
                     >
@@ -250,7 +275,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       )}
                       onClick={() => {
                         handleChange(last30Days);
-                        setMonth(last30Days.to);
+                        setLeftMonth(last30Days.from);
+                        setRightMonth(last30Days.to);
                         setIsOpen(false);
                       }}
                     >
@@ -265,7 +291,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       )}
                       onClick={() => {
                         handleChange(monthToDate);
-                        setMonth(monthToDate.to);
+                        setLeftMonth(monthToDate.from);
+                        setRightMonth(monthToDate.to);
                         setIsOpen(false);
                       }}
                     >
@@ -280,7 +307,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       )}
                       onClick={() => {
                         handleChange(lastMonth);
-                        setMonth(lastMonth.to);
+                        setLeftMonth(lastMonth.from);
+                        setRightMonth(lastMonth.to);
                         setIsOpen(false);
                       }}
                     >
@@ -295,7 +323,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       )}
                       onClick={() => {
                         handleChange(yearToDate);
-                        setMonth(yearToDate.to);
+                        setLeftMonth(yearToDate.from);
+                        setRightMonth(yearToDate.to);
                         setIsOpen(false);
                       }}
                     >
@@ -310,7 +339,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       )}
                       onClick={() => {
                         handleChange(lastYear);
-                        setMonth(lastYear.to);
+                        setLeftMonth(lastYear.from);
+                        setRightMonth(lastYear.to);
                         setIsOpen(false);
                       }}
                     >
@@ -323,20 +353,23 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                 <Calendar
                   mode="range"
                   selected={date}
-                  onSelect={newDate => {
-                    if (newDate) {
-                      handleChange(newDate);
-                    }
-                  }}
-                  month={month}
-                  onMonthChange={setMonth}
-                  numberOfMonths={2}
+                  onSelect={newDate => newDate && handleChange(newDate)}
+                  month={leftMonth}
+                  onMonthChange={handleLeftMonthChange}
                   className="p-2 bg-background"
                   disabled={[{ after: today }]}
                   scale={scale}
-                  captionLayout="dropdown"
-                  fromYear={1900}
-                  toYear={2100}
+                />
+
+                <Calendar
+                  mode="range"
+                  selected={date}
+                  onSelect={newDate => newDate && handleChange(newDate)}
+                  month={rightMonth}
+                  onMonthChange={handleRightMonthChange}
+                  className="p-2 bg-background"
+                  disabled={[{ after: today }]}
+                  scale={scale}
                 />
               </div>
             </div>

@@ -7,6 +7,7 @@ searchHints:
   - search
   - deeplink
   - metadata
+  - title
 ---
 
 # Apps & The `[App]` Attribute
@@ -22,7 +23,7 @@ In Ivy, an "App" is a self-contained unit of functionality, typically represente
 This attribute provides essential metadata that the framework uses to:
 
 1. **Generate Routes**: Automatically creates URL routes for navigation.
-2. **Generate UI**: Populates [navigation](./14_Navigation.md) menus, search results, and window titles.
+2. **Generate UI**: Populates [navigation](./09_Navigation.md) menus, search results, and window titles.
 3. **Configure Behavior**: Controls visibility, ordering, and searchability.
 
 ## The `[App]` Attribute
@@ -80,8 +81,21 @@ The logic works as follows:
 
 You can override the automatic generation using the `id` or `path` parameters, though sticking to conventions is recommended for consistency.
 
+## Page Title
+
+The framework automatically updates the browser page title to reflect your current application route.
+
+When you define an app using the `[App]` attribute, the framework uses its `title` property to set the browser page title:
+
+```csharp
+[App(title: "Dashboard")]
+public class DashboardApp : ViewBase { /* ... */ }
+```
+
+If no title is specified, the framework generates one from the class name (e.g., `DashboardApp` -> "Dashboard").
+
 ## Best Practices
 
 * **Suffix with `App`**: It's common convention to name your app classes ending with `App` (e.g., `ProductsApp`), though the framework will automatically make the title readable (e.g., "Products").
-* **Use `searchHints`**: Add synonyms for your app's functionality to make it easier for users to find via the [Command Palette](./14_Navigation.md) (Cmd/Ctrl+K).
+* **Use `searchHints`**: Add synonyms for your app's functionality to make it easier for users to find via the [Command Palette](./09_Navigation.md) (Cmd/Ctrl+K).
 * **Organize with Namespaces**: Use namespaces to group related apps. This automatically creates a structured hierarchy in your navigation menu.

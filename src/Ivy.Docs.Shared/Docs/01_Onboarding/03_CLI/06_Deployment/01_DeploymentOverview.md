@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - deployment
   - cloud
@@ -14,7 +14,7 @@ searchHints:
 Deploy your Ivy applications to cloud platforms with automated containerization, infrastructure setup, and configuration management.
 </Ingress>
 
-The `ivy deploy` command allows you to deploy your Ivy project to various cloud platforms. Ivy supports multiple deployment providers and automatically handles the deployment process including containerization, configuration, and infrastructure setup.
+The `ivy deploy` command allows you to deploy your Ivy project to various cloud platforms. Ivy supports multiple deployment providers and automatically handles the deployment process including containerization, configuration, and infrastructure setup. Your [Program.cs](../../02_Concepts/01_Program.md) and [secrets](../../02_Concepts/14_Secrets.md) are applied in the deployed environment.
 
 ## Supported Deployment Providers
 
@@ -133,7 +133,7 @@ ASPNETCORE_ENVIRONMENT="Production"
 
 ### Security and Configuration
 
-**Secrets Management** - Ivy handles secrets securely during deployment: connection strings stored as environment variables, authentication secrets configured securely, and API keys managed through cloud provider secrets.
+**Secrets Management** - Ivy handles [secrets](../../02_Concepts/14_Secrets.md) securely during deployment: connection strings stored as environment variables, authentication secrets configured securely, and API keys managed through cloud provider secrets.
 
 **Network Security** - Ivy configures network security: automatic SSL/TLS configuration, appropriate firewall rules, and network isolation (where applicable).
 

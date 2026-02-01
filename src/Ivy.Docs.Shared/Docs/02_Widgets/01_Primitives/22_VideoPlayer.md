@@ -95,4 +95,4 @@ new VideoPlayer("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
     .Controls(false)
 ```
 
-<WidgetDocs Type="Ivy.VideoPlayer" ExtensionTypes="Ivy.VideoPlayerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/VideoPlayer.cs"/>
+<WidgetDocs Type="Ivy.VideoPlayer" ExtensionTypes="Ivy.VideoPlayerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/VideoPlayer.cs"/>
