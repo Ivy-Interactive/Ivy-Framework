@@ -17,7 +17,6 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
   scale = Scales.Medium,
 }) => {
   const widthStyles = getWidth(width || 'Full');
-  const isFull = widthStyles.width === '100%';
 
   return (
     <Table
@@ -25,8 +24,9 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
       className={cn('w-full caption-bottom')}
       style={{
         ...widthStyles,
-        tableLayout: isFull ? 'fixed' : 'auto',
-        ...(isFull && { maxWidth: '100%' }),
+        ...(widthStyles.width === '100%'
+          ? { maxWidth: '100%', tableLayout: 'fixed' as const }
+          : { tableLayout: 'auto' as const }),
       }}
     >
       <TableBody>{children}</TableBody>
