@@ -540,9 +540,9 @@ public class ThemeCustomizer : SampleBase
                 {
                     OnClick = _ =>
                     {
-                            client.Toast($"{name} button clicked", "Action");
-                            return ValueTask.CompletedTask;
-                        }
+                        client.Toast($"{name} button clicked", "Action");
+                        return ValueTask.CompletedTask;
+                    }
                 }.Width(Size.Full()).Disabled(disableButtons.Value);
 
             static object GetPaginationContent(int page, int total) =>
