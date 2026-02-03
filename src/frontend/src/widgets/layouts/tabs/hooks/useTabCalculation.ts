@@ -40,7 +40,7 @@ export function useTabCalculation(
     const elementComputedStyle = getComputedStyle(referenceElement);
     const elementPadding =
       parseFloat(elementComputedStyle.paddingLeft) +
-        parseFloat(elementComputedStyle.paddingRight) || 0;
+      parseFloat(elementComputedStyle.paddingRight) || 0;
     const dropdownButtonWidth = 40;
     let availableWidth = referenceElement.clientWidth - elementPadding;
 
