@@ -321,7 +321,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                         // Active tab styling (overrides inactive)
                         'data-[state=active]:bg-background data-[state=active]:hover:bg-card',
                         (variant as string) === 'Content' &&
-                        'border-b-2 border-b-transparent data-[state=active]:border-b-primary'
+                          'border-b-2 border-b-transparent data-[state=active]:border-b-primary'
                       )}
                     >
                       {renderTabContent(tabWidget)}

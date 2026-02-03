@@ -32,7 +32,7 @@ interface TabsDropdownMenuProps {
 /**
  * Dropdown menu component for displaying hidden tabs when they overflow.
  * Supports drag-and-drop reordering within the dropdown.
- * 
+ *
  * Returns an object with trigger button and menu content to allow flexible placement.
  */
 export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
@@ -48,45 +48,46 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
   handleTabSelect,
   isUserInitiatedChangeRef,
 }) => {
-  const menuContent = hiddenTabs.length > 0 ? (
-    <DropdownMenuContent align="end">
-      <DndContext
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-        sensors={sensors}
-      >
-        <SortableContext items={tabOrder}>
-          <div className="flex flex-col gap-1 w-48">
-            {orderedTabWidgets.map(tabWidget => {
-              if (!React.isValidElement(tabWidget)) return null;
-              const props = getTabProps(tabWidget);
-              if (!props?.id) return null;
-              const { title, id } = props;
+  const menuContent =
+    hiddenTabs.length > 0 ? (
+      <DropdownMenuContent align="end">
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+          sensors={sensors}
+        >
+          <SortableContext items={tabOrder}>
+            <div className="flex flex-col gap-1 w-48">
+              {orderedTabWidgets.map(tabWidget => {
+                if (!React.isValidElement(tabWidget)) return null;
+                const props = getTabProps(tabWidget);
+                if (!props?.id) return null;
+                const { title, id } = props;
 
-              // Only render tabs that are hidden
-              if (!hiddenTabs.includes(id)) return null;
+                // Only render tabs that are hidden
+                if (!hiddenTabs.includes(id)) return null;
 
-              return (
-                <SortableDropdownMenuItem
-                  key={id}
-                  id={id}
-                  onClick={() => {
-                    // Mark as user-initiated to prevent flicker
-                    isUserInitiatedChangeRef.current = true;
-                    handleTabSelect(id);
-                  }}
-                  isActive={activeTabId === id}
-                  showClose={showClose}
-                >
-                  {title}
-                </SortableDropdownMenuItem>
-              );
-            })}
-          </div>
-        </SortableContext>
-      </DndContext>
-    </DropdownMenuContent>
-  ) : null;
+                return (
+                  <SortableDropdownMenuItem
+                    key={id}
+                    id={id}
+                    onClick={() => {
+                      // Mark as user-initiated to prevent flicker
+                      isUserInitiatedChangeRef.current = true;
+                      handleTabSelect(id);
+                    }}
+                    isActive={activeTabId === id}
+                    showClose={showClose}
+                  >
+                    {title}
+                  </SortableDropdownMenuItem>
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </DropdownMenuContent>
+    ) : null;
 
   return (
     <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>

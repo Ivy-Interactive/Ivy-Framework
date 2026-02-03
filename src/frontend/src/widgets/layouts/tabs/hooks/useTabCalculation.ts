@@ -36,11 +36,13 @@ export function useTabCalculation(
     if (dropdownOpen) return;
 
     // Use tabsList width in TabsVariant, container width in ContentVariant
-    const referenceElement = tabsList.classList.contains('w-full') ? tabsList : container;
+    const referenceElement = tabsList.classList.contains('w-full')
+      ? tabsList
+      : container;
     const elementComputedStyle = getComputedStyle(referenceElement);
     const elementPadding =
       parseFloat(elementComputedStyle.paddingLeft) +
-      parseFloat(elementComputedStyle.paddingRight) || 0;
+        parseFloat(elementComputedStyle.paddingRight) || 0;
     const dropdownButtonWidth = 40;
     let availableWidth = referenceElement.clientWidth - elementPadding;
 
