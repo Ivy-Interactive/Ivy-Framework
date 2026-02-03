@@ -224,6 +224,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             disabled={disabled}
             className={cn(
               colorInputVariants({ scale }),
+              'border-none shadow-none focus-visible:ring-0',
               invalid && inputStyles.invalidInput,
               (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
             )}
@@ -282,9 +283,12 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             value={getDisplayColor()}
             onChange={handleColorChange}
             disabled={disabled}
-            className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
-              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+            className={cn(
+              colorInputPickerVariants({ scale }),
+              'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
+              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+              invalid && inputStyles.invalidInput
+            )}
           />
         </div>
       </div>
@@ -300,9 +304,12 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           value={getDisplayColor()}
           onChange={handleColorChange}
           disabled={disabled}
-          className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
-            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-          } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+          className={cn(
+            colorInputPickerVariants({ scale }),
+            'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
+            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+            invalid && inputStyles.invalidInput
+          )}
         />
       </div>
       <div className="relative">
@@ -316,6 +323,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           disabled={disabled}
           className={cn(
             colorInputVariants({ scale }),
+            'border-none shadow-none focus-visible:ring-0',
             invalid && inputStyles.invalidInput,
             (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
           )}
