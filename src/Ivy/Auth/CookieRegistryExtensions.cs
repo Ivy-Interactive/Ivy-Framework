@@ -8,12 +8,6 @@ namespace Ivy.Auth;
 
 public static class CookieRegistryExtensions
 {
-    /// <summary>
-    /// Configure cookie options for authentication cookies.
-    /// Set this in Program.cs before calling RunAsync() to customize cookie behavior.
-    /// Example: CookieRegistryExtensions.ConfigureCookieOptions = options => options.Expires = DateTimeOffset.UtcNow.AddDays(30);
-    /// </summary>
-    public static Action<CookieOptions>? ConfigureCookieOptions { get; set; }
 
     public static IActionResult? WriteCookiesToResponse(this Controller controller, AppSessionStore sessionStore, CookieJarId cookieJarId, string intent, out CookieJar cookies)
     {
@@ -113,7 +107,7 @@ public static class CookieRegistryExtensions
         };
 
         // Apply custom configuration if provided
-        ConfigureCookieOptions?.Invoke(cookieOptions);
+        Server.ConfigureAuthCookieOptions?.Invoke(cookieOptions);
 
         return cookieOptions;
     }

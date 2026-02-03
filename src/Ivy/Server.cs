@@ -53,7 +53,7 @@ public class Server
     public IConfiguration Configuration { get; private set; } = ServerUtils.GetConfiguration();
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
-
+    public static Action<CookieOptions>? ConfigureAuthCookieOptions { get; set; }
     private IContentBuilder? _contentBuilder;
     private bool _useHotReload;
     private bool _useHttpRedirection;
