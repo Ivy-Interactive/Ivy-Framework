@@ -156,17 +156,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     private Size CalculateSmartDefaultWidth(TableBuilderColumn column) =>
         Size.Units(CalculateColumnWidth(column));
 
-    private Size CalculateSmartTableWidth()
-    {
-        var visibleColumns = _columns.Values.Where(e => !e.Removed).ToList();
-        if (!visibleColumns.Any()) return Size.Units(100);
-
-        var totalWidth = visibleColumns.Sum(CalculateColumnWidth);
-        var calculatedWidth = Math.Max(100, Math.Min(400, totalWidth));
-
-        return Size.Units(calculatedWidth);
-    }
-
     public TableBuilder<TModel> Width(Size width)
     {
         _width = width;
@@ -342,7 +331,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
         Table RenderTable(TableRow[] tableRows)
         {
-            var tableWidth = _width ?? CalculateSmartTableWidth();
+            var tableWidth = _width ?? Size.Full();
             var table = new Table(tableRows).Width(tableWidth).Scale(_scale);
             return table;
         }

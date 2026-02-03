@@ -13,30 +13,20 @@ interface TableWidgetProps {
 
 export const TableWidget: React.FC<TableWidgetProps> = ({
   children,
-  width = 'Full',
+  width,
   scale = Scales.Medium,
 }) => {
-  const widthStyles = getWidth(width);
-
-  const isFullWidth = widthStyles.width === '100%';
-  const isFixedSize = Boolean(width && widthStyles.width) && !isFullWidth;
-
-  const tableStyles: React.CSSProperties = isFixedSize
-    ? (Object.fromEntries(
-        Object.entries(widthStyles).filter(([key]) => key !== 'maxWidth')
-      ) as React.CSSProperties)
-    : {
-        ...widthStyles,
-        maxWidth: isFullWidth ? '100%' : widthStyles.maxWidth,
-      };
+  const widthStyles = getWidth(width || 'Full');
+  const isFull = widthStyles.width === '100%';
 
   return (
     <Table
       scale={scale}
       className={cn('w-full caption-bottom')}
       style={{
-        ...tableStyles,
-        tableLayout: isFullWidth ? 'fixed' : 'auto',
+        ...widthStyles,
+        tableLayout: isFull ? 'fixed' : 'auto',
+        ...(isFull && { maxWidth: '100%' }),
       }}
     >
       <TableBody>{children}</TableBody>

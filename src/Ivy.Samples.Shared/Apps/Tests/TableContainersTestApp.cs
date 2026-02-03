@@ -6,7 +6,7 @@ using Ivy.Views.Tables;
 
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Table, path: ["Tests"], searchHints: ["table", "blade", "sheet", "card", "container", "width"])]
+[App(icon: Icons.Table, path: ["Tests"], searchHints: ["table", "blade", "sheet", "card", "box", "container", "width"])]
 public class TableContainersTestApp : SampleBase
 {
     protected override object? BuildSample()
@@ -14,7 +14,8 @@ public class TableContainersTestApp : SampleBase
         return Layout.Tabs(
             new Tab("Blades", new BladesTest()),
             new Tab("Sheets", new SheetsTest()),
-            new Tab("Cards", new CardsTest())
+            new Tab("Cards", new CardsTest()),
+            new Tab("Boxes", new BoxesTest())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -269,6 +270,57 @@ public class CardsTest : ViewBase
                         | Text.Label("Table with Width(Size.Fit())")
                         | GetSampleData().ToTable().Width(Size.Fit())
                 ).Title("Card: Table with Fit")
+            ).Gap(4);
+    }
+}
+
+// Long text for box width tests
+internal static class BoxTestContent
+{
+    public const string LongText =
+        "This is a long paragraph inside a box to test how width behaves. " +
+        "Fixed widths (Units, Px) constrain the box; Fit sizes to content.";
+}
+
+// Test boxes with long text: default, Full, fixed, Fit
+public class BoxesTest : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical()
+            | Text.H3("Boxes with Long Text")
+            | Text.P("Testing box width behavior: default, Full, fixed (Units/Px), Fit")
+
+            | Layout.Vertical(
+                new Card(
+                    content: Layout.Vertical()
+                        | Text.Label("Box with no explicit width (default)")
+                        | new Box(Text.P(BoxTestContent.LongText)).Color(Colors.Primary)
+                ).Title("Card: Box with No Width"),
+
+                new Card(
+                    content: Layout.Vertical()
+                        | Text.Label("Box with Width(Size.Full())")
+                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Full()).Color(Colors.Primary)
+                ).Title("Card: Box with Full Width"),
+
+                new Card(
+                    content: Layout.Vertical()
+                        | Text.Label("Box with Width(Size.Units(80))")
+                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Units(80)).Color(Colors.Primary)
+                ).Title("Card: Box with Units(80)"),
+
+                new Card(
+                    content: Layout.Vertical()
+                        | Text.Label("Box with Width(Size.Px(400))")
+                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Px(400)).Color(Colors.Primary)
+                ).Title("Card: Box with Px(400)"),
+
+                new Card(
+                    content: Layout.Vertical()
+                        | Text.Label("Box with Width(Size.Fit())")
+                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Fit()).Color(Colors.Primary)
+                ).Title("Card: Box with Fit")
             ).Gap(4);
     }
 }
