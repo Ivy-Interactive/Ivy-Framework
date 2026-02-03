@@ -13,7 +13,7 @@ searchHints:
 # GridLayout
 
 <Ingress>
-Create responsive two-dimensional grid layouts with precise control over positioning, spacing, and spanning for complex [UI](../../01_Onboarding/02_Concepts/02_Views.md) arrangements.
+Create responsive two-dimensional grid layouts with precise control over positioning, spacing, and spanning for complex [UI](../../01_Onboarding/02_Concepts/04_Layout.md) arrangements.
 </Ingress>
 
 The `GridLayout` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) arranges child elements in a two-dimensional grid system with precise control over positioning, spacing, and spanning. It provides both automatic flow and explicit positioning for flexible grid layouts.
@@ -257,8 +257,8 @@ Layout.Vertical()
 | Gap | int | 4 | Space between grid items |
 | Padding | int | 0 | Padding around the grid |
 | AutoFlow | AutoFlow? | null | How items are automatically placed |
-| Width | Size? | null | Grid container width |
-| Height | Size? | null | Grid container height |
+| Width | [Size](../../04_ApiReference/IvyShared/Size.md)? | null | Grid container width |
+| Height | [Size](../../04_ApiReference/IvyShared/Size.md)? | null | Grid container height |
 
 ### Child Positioning Extensions
 
@@ -269,4 +269,4 @@ Layout.Vertical()
 | GridColumnSpan(int) | Span child across multiple columns |
 | GridRowSpan(int) | Span child across multiple rows |
 
-<WidgetDocs Type="Ivy.GridLayout" ExtensionTypes="Ivy.GridExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/GridLayout.cs"/>
+<WidgetDocs Type="Ivy.GridLayout" ExtensionTypes="Ivy.GridExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/GridLayout.cs"/>

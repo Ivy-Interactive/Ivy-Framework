@@ -41,11 +41,7 @@ public record ServerArgs
     public string? MetaTitle { get; set; } = null;
     public string? MetaDescription { get; set; } = null;
     public Assembly? AssetAssembly { get; set; } = null;
-#if DEBUG
-    public bool FindAvailablePort { get; set; } = true;
-#else
     public bool FindAvailablePort { get; set; } = false;
-#endif
 }
 
 public class Server
@@ -336,6 +332,8 @@ public class Server
                 }
             }
         }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+#endif
+
 
         if (Utils.IsPortInUse(_args.Port))
         {
@@ -357,13 +355,13 @@ public class Server
 
                 if (attemptCount >= maxAttempts)
                 {
-                    Console.WriteLine($@"[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.[0m");
+                    Console.WriteLine($"\x1b[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.\x1b[0m");
                     return;
                 }
 
                 if (_args.Port != originalPort)
                 {
-                    Console.WriteLine($@"[33mPort {originalPort} is in use. Using port {_args.Port} instead.[0m");
+                    Console.WriteLine($"\x1b[33mPort {originalPort} is in use. Using port {_args.Port} instead.\x1b[0m");
                 }
             }
             else
@@ -371,12 +369,12 @@ public class Server
                 Console.WriteLine($@"[31mPort {_args.Port} is already in use on this machine.[0m");
 
                 Console.WriteLine(
-                    @"Specify a different port using '--port <number>' or '--i-kill-for-this-port' to just take it.");
+                    "Specify a different port using '--port <number>', '--find-available-port', or '--i-kill-for-this-port' to just take it.");
 
                 return;
             }
         }
-#endif
+
         if (!string.IsNullOrEmpty(_args.DefaultAppId))
         {
             DefaultAppId = _args.DefaultAppId;
@@ -463,6 +461,12 @@ public class Server
         builder.Logging.AddConsole();
 
         builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
+
+        // Suppress hosting startup errors when not verbose (we handle IOException with a friendly message)
+        if (!_args.Verbose)
+        {
+            builder.Logging.AddFilter("Microsoft.Extensions.Hosting.Internal.Host", LogLevel.None);
+        }
 
         var app = builder.Build();
         ServiceProvider = app.Services;

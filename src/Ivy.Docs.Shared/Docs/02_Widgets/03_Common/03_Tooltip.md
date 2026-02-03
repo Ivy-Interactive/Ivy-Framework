@@ -39,7 +39,7 @@ Layout.Vertical()
 
 ### With Icons
 
-Use tooltips to explain the meaning of icons, especially in toolbars or [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md) (using icon-only buttons):
+Use tooltips to explain the meaning of icons, especially in toolbars or [navigation](../../01_Onboarding/02_Concepts/09_Navigation.md) (using icon-only buttons):
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -176,4 +176,4 @@ Layout.Vertical()
     | new Badge("Status").WithTooltip("Current status is clearly indicated for all users")
 ```
 
-<WidgetDocs Type="Ivy.Tooltip" ExtensionTypes="Ivy.TooltipExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Tooltip.cs"/>
+<WidgetDocs Type="Ivy.Tooltip" ExtensionTypes="Ivy.TooltipExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Tooltip.cs"/>

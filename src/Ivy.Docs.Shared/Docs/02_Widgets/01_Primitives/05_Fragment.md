@@ -35,7 +35,7 @@ public class BasicFragmentView : ViewBase
 
 ### Conditional Rendering
 
-Fragment is excellent for conditional rendering, allowing you to show or hide content based on [state](../../03_Hooks/Core/03_UseState.md):
+Fragment is excellent for conditional rendering, allowing you to show or hide content based on [state](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp demo-tabs
 public class ConditionalRenderingView : ViewBase
@@ -123,7 +123,7 @@ public class MultipleElementsView : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Fragment" ExtensionTypes="Ivy.FragmentExtensions"  SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Fragment.cs"/>
+<WidgetDocs Type="Ivy.Fragment" ExtensionTypes="Ivy.FragmentExtensions"  SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Fragment.cs"/>
 
 ## Examples
 

@@ -3,9 +3,9 @@
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 [App(icon: Icons.Bug, searchHints: ["errors", "exceptions", "debugging", "crashes", "failure", "handling"])]
-public class ExceptionHandlingApp : ViewBase
+public class ExceptionHandlingApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         UseEffect(() => throw new Exception("This is an unhandled exception."));
 

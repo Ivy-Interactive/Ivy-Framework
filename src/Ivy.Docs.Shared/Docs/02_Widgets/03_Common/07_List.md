@@ -14,7 +14,7 @@ searchHints:
 Display collections of items in organized, styled lists with customizable formatting and interactive [elements](../../01_Onboarding/02_Concepts/03_Widgets.md).
 </Ingress>
 
-The `List` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a container designed to render collections of items in a vertical layout. It works seamlessly with `ListItem` components to create interactive, searchable, and customizable lists that are perfect for [navigation menus](../../01_Onboarding/02_Concepts/14_Navigation.md), data displays, and [user interfaces](../../01_Onboarding/02_Concepts/02_Views.md).
+The `List` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a container designed to render collections of items in a vertical layout. It works seamlessly with `ListItem` components to create interactive, searchable, and customizable lists that are perfect for [navigation menus](../../01_Onboarding/02_Concepts/09_Navigation.md), data displays, and [user interfaces](../../01_Onboarding/02_Concepts/02_Views.md).
 
 ## Basic Usage
 
@@ -101,7 +101,7 @@ public class InteractiveListDemo : ViewBase
 
 ### Dynamic Content
 
-Create lists from dynamic data sources using [UseState](../../03_Hooks/Core/03_UseState.md).
+Create lists from dynamic data sources using [UseState](../../03_Hooks/02_Core/03_UseState.md).
 
 ```csharp demo-tabs
 public class DynamicListDemo : ViewBase
@@ -165,7 +165,7 @@ public class SearchableListDemo : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.List" ExtensionTypes="Ivy.WidgetBaseExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Lists/List.cs"/>
+<WidgetDocs Type="Ivy.List" ExtensionTypes="Ivy.WidgetBaseExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Lists/List.cs"/>
 
 ## Examples
 

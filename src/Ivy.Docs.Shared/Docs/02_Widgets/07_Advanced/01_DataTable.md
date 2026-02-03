@@ -33,7 +33,7 @@ searchHints:
 Display and interact with large datasets using high-performance data tables with sorting, filtering, [pagination](../03_Common/09_Pagination.md), and real-time updates powered by Apache Arrow.
 </Ingress>
 
-The `DataTable` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a powerful, high-performance solution for displaying tabular data. Built on Apache Arrow for optimal performance with large datasets, it supports automatic type detection, sorting, filtering, column grouping, and customization.
+The `DataTable` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a powerful, high-performance solution for displaying tabular data. Use it inside [views](../../01_Onboarding/02_Concepts/02_Views.md) and [layouts](../../01_Onboarding/02_Concepts/04_Layout.md), with [state](../../03_Hooks/02_Core/03_UseState.md) for dynamic data or row actions. Built on Apache Arrow for optimal performance with large datasets, it supports automatic type detection, sorting, filtering, column grouping, and customization.
 
 ## Basic Usage
 
@@ -76,8 +76,8 @@ sampleUsers.ToDataTable()
 **Column customization methods:**
 
 - **Header** - Set custom column header text
-- **Width** - Set column width using `Size.Px()`, `Size.Percent()`, etc.
-- **Align** - Control text alignment (Left, Right, Center)
+- **Width** - Set column width using [Size](../../04_ApiReference/IvyShared/Size.md) (e.g. `Size.Px()`, `Size.Percent()`).
+- **Align** - Control text alignment ([Align](../../04_ApiReference/IvyShared/Align.md): Left, Right, Center)
 - **Icon** - Add an icon to the column header
 - **Help** - Add tooltip help text to the column header
 - **Sortable** - Enable or disable sorting for specific columns
@@ -138,7 +138,7 @@ sampleUsers.ToDataTable()
 
 ## Row Actions
 
-Add contextual actions to each row using `RowActions()` and handle them via `HandleRowAction()`. Actions are rendered as icons or buttons that appear when hovering over a row. Row actions support both simple menu items and nested dropdown menus.
+Add contextual actions to each row using `RowActions()` and handle them via `HandleRowAction()`. Actions are rendered as icons or [buttons](../03_Common/01_Button.md) that appear when hovering over a row. Row actions support both simple menu items and nested [dropdown menus](../03_Common/11_DropDownMenu.md).
 
 Use `RowActions()` to define one or more `MenuItem` objects. Each menu item can have an icon, label, tooltip, and tag. For nested menus, use `.Children()` to create a dropdown menu with sub-items. For example, you can create individual action buttons like edit, delete, or view, as well as a menu button with a dropdown containing additional actions like archive, export, or share.
 
@@ -157,7 +157,7 @@ Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
 
 ## Cell Click Events
 
-Enable single- and double-click handlers for any cell by setting `EnableCellClickEvents = true` in the table configuration and wiring up `.OnCellClick()` and `.OnCellActivated()` delegates.
+Enable single- and double-click handlers for any cell by setting `EnableCellClickEvents = true` in the table configuration and wiring up `.OnCellClick()` and `.OnCellActivated()` delegates. See [event handling](../../01_Onboarding/02_Concepts/05_EventHandlers.md) for patterns.
 
 The `OnCellClick()` handler is triggered on a single click, while `OnCellActivated()` is triggered on a double-click. Both handlers receive an `Event<DataTable, CellClickEventArgs>` containing:
 
@@ -311,4 +311,4 @@ sampleUsers.ToDataTable()
 </Body>
 </Details>
 
-<WidgetDocs Type="Ivy.DataTable" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/DataTables/DataTable.cs"/>
+<WidgetDocs Type="Ivy.DataTable" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/DataTables/DataTable.cs"/>

@@ -32,11 +32,11 @@ searchHints:
 Visualize and manage workflows with interactive kanban boards featuring drag-and-drop cards, customizable columns, and real-time updates for agile project management.
 </Ingress>
 
-The `Kanban` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a powerful way to organize and track items through different stages of a workflow. It automatically groups data into columns and supports drag-and-drop interactions, making it perfect for task management, project tracking, and workflow visualization.
+The `Kanban` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a powerful way to organize and track items through different stages of a workflow. Build boards inside [views](../../01_Onboarding/02_Concepts/02_Views.md) and [layouts](../../01_Onboarding/02_Concepts/04_Layout.md), and use [state](../../03_Hooks/02_Core/03_UseState.md) to persist card moves. It automatically groups data into columns and supports drag-and-drop interactions, making it perfect for task management, project tracking, and workflow visualization.
 
 ## Basic Usage
 
-Create a Kanban board from any collection using the `.ToKanban()` extension method. You must provide a `.CardBuilder()` to specify how cards are rendered:
+Create a Kanban board from any collection using the `.ToKanban()` extension method. You must provide a `.CardBuilder()` to specify how [cards](../03_Common/04_Card.md) are rendered:
 
 ```csharp demo-below
 tasks.ToKanban(
@@ -228,7 +228,7 @@ Use `.CardOrder()` to control how cards are sorted within each column. This is s
 
 ## Width and Column Sizing
 
-The kanban widget supports the standard `.Width()` and `.Height()` methods inherited from `WidgetBase` to control the size of the entire kanban board. Additionally, you can use `.ColumnWidth()` to set the same width for all columns, which enables horizontal scrolling when columns exceed the container width:
+The kanban widget supports the standard `.Width()` and `.Height()` methods (using [Size](../../04_ApiReference/IvyShared/Size.md)) to control the size of the entire board. Additionally, you can use `.ColumnWidth()` to set the same width for all columns, which enables horizontal scrolling when columns exceed the container width:
 
 ```csharp demo-tabs
 public class KanbanWithColumnWidthExample : ViewBase
@@ -405,4 +405,4 @@ public class SimpleStatusBoard : ViewBase
 </Body>
 </Details>
 
-<WidgetDocs Type="Ivy.Kanban" ExtensionTypes="Ivy.KanbanColumnExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Kanban/Kanban.cs"/>
+<WidgetDocs Type="Ivy.Kanban" ExtensionTypes="Ivy.KanbanColumnExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Kanban/Kanban.cs"/>

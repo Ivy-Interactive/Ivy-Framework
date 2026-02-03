@@ -10,7 +10,11 @@ searchHints:
 
 # BarChart
 
-`BarChart`s compare values across categories. The sample below shows a stacked bar
+<Ingress>
+Compare values across categories with rectangular bars of proportional heights.
+</Ingress>
+
+`BarChart`s compare values across categories. Build chart [views](../../01_Onboarding/02_Concepts/02_Views.md) inside [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) and use [state](../../03_Hooks/02_Core/03_UseState.md) for dynamic data. See [Charts](../../01_Onboarding/02_Concepts/18_Charts.md) for an overview of Ivy chart widgets. The sample below shows a stacked bar
 chart with two series; sales of Desktop and Mobile in the first quarter of a year.
 
 ```csharp demo-below
@@ -40,44 +44,10 @@ public class BarChartBasic : ViewBase
 Although it will be shown in this document how to draw bar charts using
 the `BarChart` type, the recommended way to easily draw Bar Charts is using `ToBarChart` function.
 
-## Changing Colors
-
-There are two different color schemes supported; namely `Default` and `Rainbow`. The following
-demo shows how the rainbow color scheme works.
-
-```csharp demo-below
-public class RainbowBarChartBasic : ViewBase 
-{    
-    
-    public override object? Build()
-    {
-       var data = new[]
-        {
-            new { Month = "Jan", Desktop = 186, Mobile = 100, Tablet = 75, Laptop = 120, Smartwatch = 45, Gaming = 90, IoT = 30 },
-            new { Month = "Feb", Desktop = 305, Mobile = 200, Tablet = 110, Laptop = 180, Smartwatch = 65, Gaming = 140, IoT = 50 },
-            new { Month = "Mar", Desktop = 237, Mobile = 300, Tablet = 95, Laptop = 160, Smartwatch = 80, Gaming = 110, IoT = 40 },
-        };
-
-        return Layout.Vertical()
-                    | new BarChart(data,
-                        new Bar("Desktop").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Mobile").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Tablet").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Laptop").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Smartwatch").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("Gaming").LegendType(LegendTypes.Square))
-                        .Bar(new Bar("IoT").LegendType(LegendTypes.Square))
-                        .ColorScheme(ColorScheme.Default)
-                        .Tooltip()
-                        .Legend();
-                        
-    }
-}    
-```
 
 ## Filling with custom colors
 
-Here instead of using a preset `ColorScheme`, a particular bar can also be filled using a custom color.
+Here instead of using a preset `ColorScheme`, a particular bar can also be filled using a custom [Colors](../../04_ApiReference/IvyShared/Colors.md) value.
 
 ```csharp demo-below
 
@@ -113,11 +83,11 @@ public class RainbowBarChartBasic : ViewBase
 ```
 
 There are several functions used in this example. `Fill` is used to fill a bar chart
-with a specific color. The `LegendType` function is used to configure the legend
+with a specific [Colors](../../04_ApiReference/IvyShared/Colors.md) value. The `LegendType` function is used to configure the legend
 to use squares. Using the `Name` function, the name of a bar can be renamed. Like
 here is done for the `Blueberry` column.
 
-<WidgetDocs Type="Ivy.BarChart" ExtensionTypes="Ivy.BarChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Charts/BarChart.cs"/>
+<WidgetDocs Type="Ivy.BarChart" ExtensionTypes="Ivy.BarChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Charts/BarChart.cs"/>
 
 ## Examples
 

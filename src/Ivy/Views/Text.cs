@@ -7,12 +7,9 @@ namespace Ivy.Views;
 
 public static class Text
 {
-    public static TextBuilder Literal(string content)
-    {
-        return new TextBuilder(content, TextVariant.Literal);
-    }
+    public static TextBlock Literal(string content) => new(content, TextVariant.Literal);
 
-    public static TextBuilder Literal(IAnyState state) => Literal(state.ToString() ?? "");
+    public static TextBlock Literal(IAnyState state) => new(state.ToString() ?? "", TextVariant.Literal);
 
     public static TextBuilder H1(string content)
     {
@@ -188,6 +185,13 @@ public static class Text
     }
 
     public static TextBuilder Latex(IAnyState state) => Latex(state.ToString() ?? "");
+
+    public static TextBuilder Display(string content)
+    {
+        return new TextBuilder(content, TextVariant.Display);
+    }
+
+    public static TextBuilder Display(IAnyState state) => Display(state.ToString() ?? "");
 }
 
 public class TextBuilder(string content, TextVariant variant, Languages codeLanguage = Languages.Csharp) : ViewBase, IStateless
@@ -200,6 +204,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _bold;
     private bool _italic;
     private bool _muted;
+
     private Scale? _scale;
 
     public override object? Build()
@@ -278,6 +283,8 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
+
+
     public TextBuilder Bold(bool value = true)
     {
         _bold = value;
@@ -308,3 +315,5 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
 
     public TextBuilder Large() => Scale(Ivy.Shared.Scale.Large);
 }
+
+

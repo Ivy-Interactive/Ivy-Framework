@@ -14,8 +14,8 @@ public static class KanbanExtensions
     {
         return new KanbanBuilder<TModel, TGroupKey>(
             records,
-            groupBySelector.Compile(),
-            idSelector.Compile(),
-            orderSelector.Compile());
+            groupBySelector,
+            idSelector,
+            orderSelector);
     }
 }

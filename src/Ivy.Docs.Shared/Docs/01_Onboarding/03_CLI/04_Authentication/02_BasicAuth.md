@@ -32,9 +32,9 @@ You will be prompted to provide user credentials in the following format:
 user1:password1; user2:password2; ...
 ```
 
-Your provided passwords will be hashed, salted and peppered using the argon2id algorithm, and stored securely in .NET user secrets, along with some necessary automatically-generated secret values. Ivy then finishes configuring your application automatically:
+Your provided passwords will be hashed, salted and peppered using the argon2id algorithm, and stored securely in [.NET user secrets](../../02_Concepts/14_Secrets.md), along with some necessary automatically-generated secret values. Ivy then finishes configuring your application automatically:
 
-1. Adds `server.UseAuth<BasicAuthProvider>()` to your `Program.cs`.
+1. Adds `server.UseAuth<BasicAuthProvider>()` to your [Program.cs](../../02_Concepts/01_Program.md).
 2. Adds `Ivy.Auth` to your global usings.
 
 ### Advanced Configuration
@@ -51,9 +51,9 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
+When deploying an Ivy project without using `ivy deploy`, your local [.NET user secrets](../../02_Concepts/14_Secrets.md) are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
-> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
+> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **[.NET user secrets](../../02_Concepts/14_Secrets.md) over environment variables**.
 
 For more information, see [Authentication Overview](01_AuthenticationOverview.md).
 
@@ -88,6 +88,8 @@ Key features of the Basic Auth provider:
 
 The `BasicAuthProvider` uses JWT-based refresh tokens for improved security. Access tokens expire after **15 minutes**, while refresh tokens are valid for **24 hours** and allow users to stay logged in for up to **365 days** as long as they are refreshed before expiring. This reduces vulnerability windows while maintaining user convenience through automatic session extension.
 
+Use [UseService](../../02_Concepts/01_Program.md) to obtain the auth provider in your views:
+
 ```csharp
 var authProvider = UseService<IAuthProvider>();
 
@@ -119,7 +121,7 @@ var newToken = await authProvider.RefreshAccessTokenAsync(authToken, cancellatio
 
 **Missing Configuration**
 
-- Verify the Basic Auth provider is properly configured in your `Program.cs`
+- Verify the Basic Auth provider is properly configured in your [Program.cs](../../02_Concepts/01_Program.md)
 - Check that user secrets or environment variables are set and accessible to your application
 
 **Token Issues**

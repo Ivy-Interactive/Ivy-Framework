@@ -4,7 +4,13 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from 'lucide-react';
-import { DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker';
+import {
+  DayButton,
+  DayPicker,
+  useDayPicker,
+  getDefaultClassNames,
+} from 'react-day-picker';
+import { parse } from 'date-fns';
 
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -56,17 +62,19 @@ export function Calendar({
         ),
         month: cn('flex flex-col w-full gap-4', defaultClassNames.month),
         nav: cn(
-          'flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between',
+          'flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between pointer-events-none',
           defaultClassNames.nav
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
           calendarButtonVariants({ scale }),
+          'pointer-events-auto',
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
           calendarButtonVariants({ scale }),
+          'pointer-events-auto',
           defaultClassNames.button_next
         ),
         month_caption: cn(
@@ -170,10 +178,93 @@ export function Calendar({
             </td>
           );
         },
+        CaptionLabel: (props: {
+          displayMonth?: Date;
+          children?: React.ReactNode;
+        }) => (
+          <MonthYearInput
+            displayMonth={props.displayMonth}
+            title={props.children}
+          />
+        ),
         ...components,
       }}
       {...props}
     />
+  );
+}
+
+function MonthYearInput({
+  displayMonth,
+  title,
+}: {
+  displayMonth?: Date;
+  title?: React.ReactNode;
+}) {
+  const [monthStr, setMonthStr] = React.useState('');
+  const [yearStr, setYearStr] = React.useState('');
+  const { goToMonth } = useDayPicker();
+
+  React.useEffect(() => {
+    if (displayMonth) {
+      setMonthStr(String(displayMonth.getMonth() + 1));
+      setYearStr(String(displayMonth.getFullYear()));
+    } else if (typeof title === 'string') {
+      const parsed = parse(title, 'MMMM yyyy', new Date());
+      if (!isNaN(parsed.getTime())) {
+        setMonthStr(String(parsed.getMonth() + 1));
+        setYearStr(String(parsed.getFullYear()));
+      }
+    }
+  }, [displayMonth, title]);
+
+  const handleCommit = () => {
+    const m = parseInt(monthStr, 10);
+    const y = parseInt(yearStr, 10);
+    if (!isNaN(m) && !isNaN(y) && m >= 1 && m <= 12 && y >= 1900 && y <= 2100) {
+      goToMonth(new Date(y, m - 1, 1));
+    }
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCommit();
+      (e.target as HTMLElement).blur();
+    }
+  };
+
+  const inputClass =
+    'w-6 text-center bg-transparent border-none outline-none focus:bg-accent rounded text-sm p-0 m-0';
+
+  return (
+    <div
+      className="flex items-center border border-input rounded-md px-1 py-0.5 gap-0.5 bg-background pointer-events-auto mx-auto w-fit"
+      onMouseDown={e => e.stopPropagation()}
+      onClick={e => e.stopPropagation()}
+    >
+      <input
+        value={monthStr}
+        onChange={e =>
+          setMonthStr(e.target.value.replace(/\D/g, '').slice(0, 2))
+        }
+        onBlur={handleCommit}
+        onKeyDown={onKeyDown}
+        className={inputClass}
+        placeholder="M"
+      />
+      <span className="text-muted-foreground text-xs">/</span>
+      <input
+        value={yearStr}
+        onChange={e =>
+          setYearStr(e.target.value.replace(/\D/g, '').slice(0, 4))
+        }
+        onBlur={handleCommit}
+        onKeyDown={onKeyDown}
+        className={cn(inputClass, 'w-10')}
+        placeholder="YYYY"
+      />
+    </div>
   );
 }
 

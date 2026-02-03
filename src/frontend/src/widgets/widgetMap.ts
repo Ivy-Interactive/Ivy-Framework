@@ -114,6 +114,9 @@ export const widgetMap = {
   'Ivy.AudioPlayer': AudioPlayerWidget,
   'Ivy.VideoPlayer': VideoPlayerWidget,
   'Ivy.Stepper': React.lazy(() => import('@/widgets/primitives/StepperWidget')),
+  'Ivy.Terminal': React.lazy(
+    () => import('@/widgets/primitives/TerminalWidget')
+  ),
 
   // Widgets
   'Ivy.Article': ArticleWidget,
@@ -219,12 +222,6 @@ export const widgetMap = {
 
   // Internal
 
-  'Ivy.Widgets.Internal.DbmlCanvas': React.lazy(
-    () => import('@/widgets/internal/DbmlCanvasWidget')
-  ),
-  'Ivy.Widgets.Internal.Terminal': React.lazy(
-    () => import('@/widgets/internal/TerminalWidget')
-  ),
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')
   ),

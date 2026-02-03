@@ -11,12 +11,12 @@ searchHints:
 # Prompts
 
 <Ingress>
-Interact with users and gather input using Ivy's [alert system](./23_Alerts.md) and [dialog system](./23_Alerts.md).
+Interact with users and gather input using Ivy's [alert](./17_Alerts.md) and [dialog](../../02_Widgets/03_Common/15_Dialog.md) system.
 </Ingress>
 
 ## Basic Usage
 
-Here's a simple example of showing a confirmation alert:
+Here's a simple example using [UseAlert](./17_Alerts.md), [Layout](./04_Layout.md), and [Button](../../02_Widgets/03_Common/01_Button.md) to show a confirmation alert:
 
 ```csharp demo-below
 public class BasicPromptView : ViewBase
@@ -59,7 +59,7 @@ flowchart LR
 
 ### Text Input Prompts
 
-Collect text input from users using dialogs with [forms](./13_Forms.md):
+Collect text input from users using dialogs with [forms](./08_Forms.md):
 
 ```csharp demo-tabs
 public record RenameRequest

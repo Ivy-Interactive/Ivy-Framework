@@ -1,4 +1,4 @@
-﻿using Ivy.Shared;
+using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -49,10 +49,27 @@ public class CodeInputApp : SampleBase
             </html>
             """);
 
+        var yamlCode = UseState(
+            """
+            name: my-app
+            version: 1.0.0
+            services:
+              web:
+                image: nginx:latest
+                ports:
+                  - "80:80"
+              database:
+                image: postgres:15
+                environment:
+                  POSTGRES_USER: admin
+                  POSTGRES_PASSWORD: secret
+            """);
+
         var emptyCsharpState = UseState("");
         var emptyJsonState = UseState("");
         var emptySqlState = UseState("");
         var emptyHtmlState = UseState("");
+        var emptyYamlState = UseState("");
 
         var cardCode = UseState(
             """
@@ -90,6 +107,11 @@ public class CodeInputApp : SampleBase
                | htmlCode.ToCodeInput().Language(Languages.Html)
                | htmlCode.ToCodeInput().Language(Languages.Html).Disabled()
                | htmlCode.ToCodeInput().Language(Languages.Html).Invalid("Invalid HTML")
+
+               | Text.InlineCode("YAML")
+               | yamlCode.ToCodeInput().Language(Languages.Yaml)
+               | yamlCode.ToCodeInput().Language(Languages.Yaml).Disabled()
+               | yamlCode.ToCodeInput().Language(Languages.Yaml).Invalid("Invalid YAML")
             ;
 
         var secondGrid = Layout.Grid().Columns(4)
@@ -117,6 +139,11 @@ public class CodeInputApp : SampleBase
                | htmlCode.ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
                | emptyHtmlState.ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
                | htmlCode.ToCodeInput().Language(Languages.Html).ShowCopyButton()
+
+               | Text.InlineCode("YAML")
+               | yamlCode.ToCodeInput().Language(Languages.Yaml).Placeholder("Enter YAML here...")
+               | emptyYamlState.ToCodeInput().Language(Languages.Yaml).Placeholder("Enter YAML here...")
+               | yamlCode.ToCodeInput().Language(Languages.Yaml).ShowCopyButton()
             ;
 
         var thirdGrid = Layout.Grid().Columns(4)
@@ -142,6 +169,11 @@ public class CodeInputApp : SampleBase
 
                | Text.InlineCode("HTML")
                | htmlCode.ToCodeInput().Language(Languages.Html).Invalid("Invalid HTML").ShowCopyButton()
+               | null!
+               | null!
+
+               | Text.InlineCode("YAML")
+               | yamlCode.ToCodeInput().Language(Languages.Yaml).Invalid("Invalid YAML").ShowCopyButton()
                | null!
                | null!
             ;
@@ -171,6 +203,11 @@ public class CodeInputApp : SampleBase
                | htmlCode.ToCodeInput().Language(Languages.Html).Small()
                | htmlCode.ToCodeInput().Language(Languages.Html)
                | htmlCode.ToCodeInput().Language(Languages.Html).Large()
+
+               | Text.InlineCode("YAML")
+               | yamlCode.ToCodeInput().Language(Languages.Yaml).Small()
+               | yamlCode.ToCodeInput().Language(Languages.Yaml)
+               | yamlCode.ToCodeInput().Language(Languages.Yaml).Large()
             ;
 
         var dataBinding = new CodeInputDataBindings();

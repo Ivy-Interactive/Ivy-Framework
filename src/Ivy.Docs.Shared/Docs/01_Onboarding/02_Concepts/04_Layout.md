@@ -17,7 +17,7 @@ searchHints:
 The Layout static class provides a fluent API for creating common layout compositions with minimal code, serving as the primary entry point for building [UI structures](./02_Views.md) in Ivy.
 </Ingress>
 
-The Layout class offers convenient factory methods that return pre-configured layout views. Instead of manually instantiating layout widgets, you can use Layout.Vertical(), Layout.Horizontal(), and other methods to quickly compose your UI with a clean, fluent syntax.
+The Layout class offers convenient factory methods that return pre-configured layout [views](./02_Views.md). Instead of manually instantiating layout [widgets](./03_Widgets.md), you can use Layout.Vertical(), Layout.Horizontal(), and other methods to quickly compose your UI with a clean, fluent syntax.
 
 ## Basic Usage
 
@@ -110,7 +110,7 @@ Layout.Vertical().Gap(4)
 
 ## Combining with Other Layouts
 
-The Layout methods integrate seamlessly with specialized layout widgets:
+The Layout methods integrate seamlessly with specialized layout [widgets](../../02_Widgets/02_Layouts/_Index.md) and [Card](../../02_Widgets/03_Common/04_Card.md):
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)

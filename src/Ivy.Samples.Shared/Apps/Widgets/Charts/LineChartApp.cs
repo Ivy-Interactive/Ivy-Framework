@@ -5,9 +5,9 @@ using Ivy.Views.Charts;
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
 [App(icon: Icons.ChartLine, searchHints: ["visualization", "graph", "analytics", "data", "trends", "statistics"])]
-public class LineChartApp : ViewBase
+public class LineChartApp : SampleBase
 {
-    public override object? Build()
+    protected override object? BuildSample()
     {
         return Layout.Grid().Columns(3)
             | new LineChart0View()

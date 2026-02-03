@@ -19,7 +19,7 @@ The `Table` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a layout 
 ## Basic Usage
 
 There is a recommended way to create tables from data arrays.
-The [ToTable()](../../01_Onboarding/02_Concepts/12_ContentBuilders.md) extension method automatically converts collections into formatted tables.
+The [ToTable()](../../01_Onboarding/02_Concepts/07_ContentBuilders.md) extension method automatically converts collections into formatted tables.
 
 ```csharp demo-tabs
 public class BasicRowTable : ViewBase
@@ -48,9 +48,9 @@ public class BasicRowTable : ViewBase
 
 ### Custom Column Builders
 
-**Width(Size.Full())** - sets the overall table width
+**Width([Size](../../04_ApiReference/IvyShared/Size.md).Full())** - sets the overall table width
 
-**ColumnWidth(p => p.ColumnName, Size.Units())** – sets the column width
+**ColumnWidth(p => p.ColumnName, Size.Units())** – sets the column width with [Size](../../04_ApiReference/IvyShared/Size.md)
 
 **ColumnWidth(p => p.ColumnName, Size.Fraction())** – sets the column width as a fraction (percentage) of available space
 
@@ -58,7 +58,7 @@ Long text in cells automatically gets truncated with ellipsis (...) and shows fu
 
 **Header(p => p.ColumnName)** is used to show custom header text of the table
 
-**Align(p => p.ColumnName, Align.Left|Center|Right)** - sets the alignment for both the header and data cells in the selected column. The alignment applies to the content within cells, not the entire column structure.
+**Align(p => p.ColumnName, [Align](../../04_ApiReference/IvyShared/Align.md).Left|Center|Right)** - sets the alignment for both the header and data cells in the selected column. The alignment applies to the content within cells, not the entire column structure.
 
 **Order(p => p.ColumnNameFirst, p.ColumnNameSecond, p.ColumnNameThird, ...)** - is used to order columns in a specific way
 
@@ -414,4 +414,4 @@ public class TableIntegrationExample : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Table" ExtensionTypes="Ivy.Views.Tables.TableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Tables/Table.cs"/>
+<WidgetDocs Type="Ivy.Table" ExtensionTypes="Ivy.Views.Tables.TableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Tables/Table.cs"/>

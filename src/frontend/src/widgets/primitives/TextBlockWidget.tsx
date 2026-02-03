@@ -30,7 +30,8 @@ type TextBlockVariant =
   | 'Warning'
   | 'Success'
   | 'Label'
-  | 'Strong';
+  | 'Strong'
+  | 'Display';
 
 interface TextBlockWidgetProps {
   content: string;
@@ -185,6 +186,11 @@ const variantMap: VariantMap = {
       {children}
     </strong>
   ),
+  Display: ({ children, className, style }) => (
+    <div className={cn(typography.display, className)} style={style}>
+      {children}
+    </div>
+  ),
 };
 
 export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
@@ -204,6 +210,8 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
     ...getWidth(width),
     ...getColor(color, 'color', 'background'),
     ...getOverflow(overflow),
+    wordBreak: 'normal',
+    overflowWrap: 'break-word',
   };
 
   const scaleClasses: Record<string, string> = {

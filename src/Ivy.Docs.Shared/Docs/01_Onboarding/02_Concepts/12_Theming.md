@@ -11,7 +11,7 @@ searchHints:
 # Theming
 
 <Ingress>
-Customize your Ivy [application's](./15_Apps.md) visual appearance with flexible theming support including light/dark modes, custom color schemes, typography, and dynamic theme switching.
+Customize your Ivy [application's](./10_Apps.md) visual appearance with flexible theming support including light/dark modes, custom color schemes, typography, and dynamic theme switching.
 </Ingress>
 
 ## Overview
@@ -87,7 +87,7 @@ graph LR
 
 ### Server Configuration (Experimental)
 
-The `UseTheme()` method is available for [server-level](./01_Program.md) theme configuration
+The `UseTheme()` method is available for [server](./01_Program.md)-level theme configuration
 
 ```csharp
 var server = new Server()
@@ -157,7 +157,7 @@ var server = new Server()
 
 ### Runtime Theme Changes
 
-Use `IThemeService` to modify themes dynamically. The `ApplyTheme()` method applies CSS custom properties generated from theme [configurations](./01_Program.md):
+Use [UseService](../../03_Hooks/02_Core/11_UseService.md) to get `IThemeService` and modify themes dynamically. The `ApplyTheme()` method applies CSS custom properties generated from the theme:
 
 ```csharp
 [App(icon: Icons.Brush)]

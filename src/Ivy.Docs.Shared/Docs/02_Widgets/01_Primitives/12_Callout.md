@@ -11,7 +11,7 @@ searchHints:
 # Callout
 
 <Ingress>
-Create attention-grabbing [components](../../01_Onboarding/02_Concepts/03_Widgets.md) to highlight important information, warnings, tips, and success messages. Callouts come in different [variants](../../01_Onboarding/02_Concepts/17_Theming.md) including info, warning, error, and success, with customizable icons and styling.
+Create attention-grabbing [components](../../01_Onboarding/02_Concepts/03_Widgets.md) to highlight important information, warnings, tips, and success messages. Callouts come in different [variants](../../01_Onboarding/02_Concepts/12_Theming.md) including info, warning, error, and success, with customizable icons and styling.
 </Ingress>
 
 The `Callout` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays prominent, styled information boxes that draw attention to important content. They're perfect for user guidance, system messages, warnings, and success confirmations. Each variant has distinct visual styling and appropriate icons to help users quickly understand the message type.
@@ -180,7 +180,7 @@ public class ComplexContentCalloutView : ViewBase
 
 ### Form Integration
 
-Use callouts to contain [forms](../../01_Onboarding/02_Concepts/13_Forms.md) and provide context:
+Use callouts to contain [forms](../../01_Onboarding/02_Concepts/08_Forms.md) and provide context:
 
 ```csharp demo-tabs
 public record LoginModel(string Email = "", string Password = "");
@@ -212,7 +212,7 @@ public class FormCalloutView : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Callout" ExtensionTypes="Ivy.CalloutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Callout.cs"/>
+<WidgetDocs Type="Ivy.Callout" ExtensionTypes="Ivy.CalloutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Callout.cs"/>
 
 ## Examples
 

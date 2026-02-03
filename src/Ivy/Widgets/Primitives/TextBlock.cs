@@ -31,7 +31,8 @@ public enum TextVariant
     Html,
     Latex,
     Label,
-    Strong
+    Strong,
+    Display
 }
 
 /// <summary>
@@ -76,4 +77,5 @@ public record TextBlock : WidgetBase<TextBlock>
     [Prop] public bool Italic { get; set; }
 
     [Prop] public bool Muted { get; set; }
+
 }

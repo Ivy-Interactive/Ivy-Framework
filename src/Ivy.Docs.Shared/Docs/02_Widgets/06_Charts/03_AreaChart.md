@@ -10,7 +10,11 @@ searchHints:
 
 # AreaChart
 
-`AreaChart`s display quantitative data over time. Multiple series can be stacked
+<Ingress>
+Display quantitative data over time with filled areas that can be stacked with different colors.
+</Ingress>
+
+`AreaChart`s display quantitative data over time. Build chart [views](../../01_Onboarding/02_Concepts/02_Views.md) inside [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) and use [state](../../03_Hooks/02_Core/03_UseState.md) for dynamic data. See [Charts](../../01_Onboarding/02_Concepts/18_Charts.md) for an overview of Ivy chart widgets. Multiple series can be stacked
 with different colors.
 
 ```csharp demo-below
@@ -40,7 +44,7 @@ public class BasicAreaChart : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.AreaChart" ExtensionTypes="Ivy.AreaChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Charts/AreaChart.cs"/>
+<WidgetDocs Type="Ivy.AreaChart" ExtensionTypes="Ivy.AreaChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Charts/AreaChart.cs"/>
 
 ## Examples
 
@@ -90,9 +94,9 @@ public class Covid19Demo : ViewBase
 Migrations to Europe
 </Summary>
 <Body>
-In the previous example, solid colors have been used. However, the colors can be transparent
+In the previous example, solid [Colors](../../04_ApiReference/IvyShared/Colors.md) have been used. However, the colors can be transparent
 and the opacity can be controlled using the function `FillOpacity`. In the following example
-`Fill` (Used to fill an area with a color) and `FillOpacity` are used to show area charts
+`Fill` (used to fill an area with a [Colors](../../04_ApiReference/IvyShared/Colors.md) value) and `FillOpacity` are used to show area charts
 that obviously fall behind other ones to show that they are indeed present.
 
 ```csharp demo-below

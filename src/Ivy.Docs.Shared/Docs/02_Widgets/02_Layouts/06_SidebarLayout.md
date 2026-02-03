@@ -11,7 +11,7 @@ searchHints:
 # SidebarLayout
 
 <Ingress>
-SidebarLayout provides a flexible sidebar [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md) layout with a main content area and collapsible sidebar. It supports header and footer sections, responsive behavior, and can be configured as the main application sidebar with toggle functionality.
+SidebarLayout provides a flexible sidebar [navigation](../../01_Onboarding/02_Concepts/09_Navigation.md) layout with a main content area and collapsible sidebar. It supports header and footer sections, responsive behavior, and can be configured as the main application sidebar with toggle functionality.
 </Ingress>
 
 Sidebars are essential navigation [components](../../01_Onboarding/02_Concepts/03_Widgets.md) in modern applications, providing users with quick access to different sections while keeping the main content area uncluttered. They can be used for primary navigation, contextual tools, or supplementary information display.
@@ -255,4 +255,4 @@ public class SidebarMenuAdvancedExample : ViewBase
 }
 ```
 
- <WidgetDocs Type="Ivy.SidebarLayout" ExtensionTypes="Ivy.SidebarLayoutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/SidebarLayout.cs"/>
+ <WidgetDocs Type="Ivy.SidebarLayout" ExtensionTypes="Ivy.SidebarLayoutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/SidebarLayout.cs"/>

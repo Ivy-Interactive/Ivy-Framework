@@ -72,7 +72,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
     <div className="relative w-full select-none" style={styles}>
       <div
         className={cn(
-          'relative flex items-stretch rounded-md border border-input bg-transparent shadow-sm transition-colors',
+          'relative flex items-stretch rounded-md border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10',
           isFocused && 'outline-none ring-1 ring-ring',
           props.invalid && 'border-destructive',
           props.disabled && 'cursor-not-allowed opacity-50'
@@ -113,7 +113,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
               !hasValue &&
                 props.nullable &&
                 'placeholder:text-muted-foreground',
-              'border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
+              'border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent',
               prefixContent && 'rounded-l-none',
               suffixContent && 'rounded-r-none',
               !hasAffixes && 'rounded-md'

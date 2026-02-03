@@ -313,6 +313,7 @@ export const useBackend = (
 
   // Use a ref that gets updated with the latest connection so we always have it in the callback
   const latestConnectionRef = useRef(connection);
+  const isStoppingRef = useRef(false);
   useEffect(() => {
     latestConnectionRef.current = connection;
   }, [connection]);
@@ -697,6 +698,7 @@ export const useBackend = (
       connection &&
       connection.state === signalR.HubConnectionState.Disconnected
     ) {
+      isStoppingRef.current = false;
       connection
         .start()
         .then(() => {
@@ -807,6 +809,7 @@ export const useBackend = (
           });
 
           connection.onreconnecting(() => {
+            if (isStoppingRef.current) return;
             logger.warn(`[${connection.connectionId}] Reconnecting`);
             setDisconnected(true);
           });
@@ -817,6 +820,7 @@ export const useBackend = (
           });
 
           connection.onclose(() => {
+            if (isStoppingRef.current) return;
             logger.warn(`[${connection.connectionId}] Closed`);
             setDisconnected(true);
           });
@@ -826,6 +830,8 @@ export const useBackend = (
         });
 
       return () => {
+        isStoppingRef.current = true;
+
         connection.off('Refresh');
         connection.off('Update');
         connection.off('Toast');

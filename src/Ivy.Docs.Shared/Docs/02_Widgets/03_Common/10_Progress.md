@@ -13,10 +13,10 @@ searchHints:
 # Progress
 
 <Ingress>
-Show task completion status with customizable progress bars that support dynamic updates and multiple [color variants](../../01_Onboarding/02_Concepts/17_Theming.md).
+Show task completion status with customizable progress bars that support dynamic updates and multiple [color variants](../../01_Onboarding/02_Concepts/12_Theming.md).
 </Ingress>
 
-The `Progress` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is used to visually represent the completion status of a task or process. It displays a visual progress bar that can be customized with different color variants and can be bound to [state](../../03_Hooks/Core/03_UseState.md) for dynamic updates.
+The `Progress` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is used to visually represent the completion status of a task or process. It displays a visual progress bar that can be customized with different color variants and can be bound to [state](../../03_Hooks/02_Core/03_UseState.md) for dynamic updates.
 
 ## Example
 
@@ -41,4 +41,4 @@ public class ProgressDemo : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Progress" ExtensionTypes="Ivy.ProgressExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Progress.cs"/>
+<WidgetDocs Type="Ivy.Progress" ExtensionTypes="Ivy.ProgressExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Progress.cs"/>

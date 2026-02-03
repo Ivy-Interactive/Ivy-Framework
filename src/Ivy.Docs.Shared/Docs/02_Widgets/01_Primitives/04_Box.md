@@ -11,7 +11,7 @@ searchHints:
 # Box
 
 <Ingress>
-Create versatile container elements with customizable borders, colors, and padding for grouping content and structuring [layouts](../../01_Onboarding/02_Concepts/02_Views.md).
+Create versatile container elements with customizable borders, colors, and padding for grouping content and structuring [layouts](../../01_Onboarding/02_Concepts/04_Layout.md).
 </Ingress>
 
 The `Box` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a versatile container element that provides customizable borders, colors, padding, margins, and content alignment. It's perfect for visually grouping related content, creating distinct sections in your [UI](../../01_Onboarding/02_Concepts/02_Views.md), and building [card](../03_Common/04_Card.md)-based layouts.
@@ -54,7 +54,7 @@ public class BorderStyleExamplesView : ViewBase
 
 ### Border Thickness
 
-Control the width of borders using the `BorderThickness` property. You can specify a single value for uniform thickness or use the `Thickness` class for more precise control.
+Control the width of borders using the `BorderThickness` property. You can specify a single value for uniform thickness or use the [Thickness](../../04_ApiReference/IvyShared/Thickness.md) class for more precise control.
 
 ```csharp demo-tabs
 public class BorderThicknessExamplesView : ViewBase
@@ -124,7 +124,7 @@ public class SpacingExamplesView : ViewBase
 
 ### Advanced Spacing
 
-Use the `Thickness` class for more precise control over padding on different sides. This allows you to specify different spacing values for left, top, right, and bottom edges.
+Use the [Thickness](../../04_ApiReference/IvyShared/Thickness.md) class for more precise control over padding on different sides. This allows you to specify different spacing values for left, top, right, and bottom edges.
 
 ```csharp demo-tabs
 public class AdvancedSpacingView : ViewBase
@@ -164,9 +164,9 @@ public class ColorExamplesView : ViewBase
 }
 ```
 
-For more colors, look at the [Ivy Colors page](../../03_ApiReference/IvyShared/Colors.md)
+For more colors, see the [Colors](../../04_ApiReference/IvyShared/Colors.md) reference.
 
-<WidgetDocs Type="Ivy.Box" ExtensionTypes="Ivy.BoxExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Box.cs"/>
+<WidgetDocs Type="Ivy.Box" ExtensionTypes="Ivy.BoxExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Box.cs"/>
 
 ## Examples
 

@@ -52,7 +52,7 @@ public class FlexibleSpacerView : ViewBase
 ```
 
 <Callout Type="tip">
-The `Spacer().Width(Size.Grow())` pattern is essential for creating responsive layouts. It makes the spacer take up all available horizontal space, effectively pushing elements to opposite sides.
+The `Spacer().Width(Size.Grow())` pattern is essential for creating responsive layouts. It makes the spacer take up all available horizontal space, effectively pushing elements to opposite sides. See [Size](../../04_ApiReference/IvyShared/Size.md) for `Size.Grow()` and other sizing options.
 Without `Size.Grow()`, the spacer would only take up minimal space, and elements wouldn't be pushed to the edges.
 </Callout>
 
@@ -109,7 +109,7 @@ public class HeightSpacerView : ViewBase
 ```
 
 <Callout Type="info">
-When using `Spacer().Height()` or `Spacer().Width()`, the values represent units in the Ivy Framework's spacing system, not pixels. The framework automatically converts these units to appropriate spacing based on the current [theme](../../01_Onboarding/02_Concepts/17_Theming.md) and design system.
+When using `Spacer().Height()` or `Spacer().Width()`, the values represent units in the Ivy Framework's spacing system, not pixels. The framework automatically converts these units to appropriate spacing based on the current [theme](../../01_Onboarding/02_Concepts/12_Theming.md) and design system.
 </Callout>
 
 ### Form Layout with Spacing
@@ -147,7 +147,7 @@ public class FormSpacerView : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Spacer" ExtensionTypes="Ivy.SpacerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Spacer.cs"/>
+<WidgetDocs Type="Ivy.Spacer" ExtensionTypes="Ivy.SpacerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Spacer.cs"/>
 
 ## Examples
 

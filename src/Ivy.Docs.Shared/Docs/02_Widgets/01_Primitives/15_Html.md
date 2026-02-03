@@ -14,7 +14,7 @@ searchHints:
 Render raw HTML content directly in your Ivy application for external content integration, formatted text, and custom markup control.
 </Ingress>
 
-The `Html` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) allows you to render raw HTML content in your [Ivy app](../../01_Onboarding/02_Concepts/15_Apps.md). This is useful when you need to include content from external sources, display formatted text, or when you want direct control over the markup.
+The `Html` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) allows you to render raw HTML content in your [Ivy app](../../01_Onboarding/02_Concepts/10_Apps.md). This is useful when you need to include content from external sources, display formatted text, or when you want direct control over the markup.
 
 ## Basic Usage
 
@@ -381,4 +381,4 @@ public class UserContentView : ViewBase
 - You need JavaScript functionality
 - Simple text formatting would suffice (use [Text widget](01_TextBlock.md))
 
-<WidgetDocs Type="Ivy.Html" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Html.cs"/>
+<WidgetDocs Type="Ivy.Html" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Html.cs"/>

@@ -52,7 +52,7 @@ const _getWantedWidth = (width?: string): React.CSSProperties => {
     case 'auto':
       return { width: 'auto' };
     case 'grow':
-      return { flexGrow: parseFloat(value) || 1 };
+      return { flexGrow: parseFloat(value) || 1, minWidth: 0 };
     case 'shrink':
       return { flexShrink: parseFloat(value) || 1 };
     default:
@@ -382,6 +382,10 @@ export const getOverflow = (overflow?: Overflow): React.CSSProperties => {
   };
 };
 
+export const gridCellOverflow = {
+  ellipsis:
+    '[&>*:not(:has(*))]:min-w-0 [&>*:not(:has(*))]:overflow-hidden [&>*:not(:has(*))]:text-ellipsis [&>*:not(:has(*))]:whitespace-nowrap hover:[&>*:not(:has(*))]:overflow-visible hover:[&>*:not(:has(*))]:whitespace-normal hover:[&>*:not(:has(*))]:relative hover:[&>*:not(:has(*))]:z-10',
+};
 export type Orientation = 'Horizontal' | 'Vertical';
 
 export type Align =
@@ -592,6 +596,7 @@ export const typography: Record<string, string> = {
   success: 'text-large-body text-green font-semibold',
 
   // UI variants
+  display: 'text-3xl font-medium',
   label: 'text-large-label font-medium leading-none flex items-center',
   block: 'flex items-center min-w-0',
 
@@ -600,7 +605,7 @@ export const typography: Record<string, string> = {
   ol: 'list-decimal ml-6',
 
   // Links
-  a: 'text-primary underline brightness-90 hover:brightness-100',
+  a: 'text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100',
 
   // Blockquote
   blockquote: 'border-l-2 pl-6 italic',

@@ -11,7 +11,7 @@ searchHints:
 # ResizeablePanelGroup
 
 <Ingress>
-Create flexible, resizable layouts with draggable handles that allow users to dynamically adjust panel sizes in your applications.
+Create flexible, resizable [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) with draggable handles that allow users to dynamically adjust panel sizes in your applications.
 </Ingress>
 
 The `ResizeablePanelGroup` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates layouts with multiple panels separated by draggable handles, allowing users to resize sections interactively. Panels can be arranged horizontally or vertically and support nesting for complex layouts.
@@ -281,7 +281,7 @@ public class NestedLayoutView : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.ResizeablePanelGroup" ExtensionTypes="Ivy.ResizeablePanelsExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/ResizeablePanelGroup.cs"/>
+<WidgetDocs Type="Ivy.ResizeablePanelGroup" ExtensionTypes="Ivy.ResizeablePanelsExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/ResizeablePanelGroup.cs"/>
 
 ## Examples
 
