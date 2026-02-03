@@ -181,20 +181,17 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
             );
           })}
           {addButtonText && (
-            <div className="flex items-center ml-2">
-              <button
-                onClick={() => safeEvent('OnAddButtonClick', [0])}
-                className="px-3 py-1.5 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:muted-foreground rounded-[6px] flex items-center justify-center aspect-square border-none"
-              >
-                <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
-                  {addButtonText}
-                </div>
-              </button>
-            </div>
+            <button
+              onClick={() => safeEvent('OnAddButtonClick', [0])}
+              className="px-3 py-1.5 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:muted-foreground rounded-[6px] flex items-center justify-center aspect-square border-none ml-2"
+            >
+              <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
+                {addButtonText}
+              </div>
+            </button>
           )}
+          {dropdownMenu}
         </div>
-
-        {dropdownMenu}
       </div>
       <div className="flex-1 overflow-hidden">
         {orderedTabWidgets.map(tabWidget => {
@@ -332,22 +329,19 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                   );
                 })}
                 {addButtonText && (
-                  <div className="flex items-center ml-2">
-                    <button
-                      onClick={() => safeEvent('OnAddButtonClick', [0])}
-                      className="py-2 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:bg-gray-200/20 rounded-[6px] flex-shrink-0 flex items-center justify-center aspect-square px-3 border-none"
-                    >
-                      <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
-                        {addButtonText}
-                      </div>
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => safeEvent('OnAddButtonClick', [0])}
+                    className="py-2 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:bg-gray-200/20 rounded-[6px] flex-shrink-0 flex items-center justify-center aspect-square px-3 border-none ml-2"
+                  >
+                    <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
+                      {addButtonText}
+                    </div>
+                  </button>
                 )}
+                {dropdownMenu}
               </TabsList>
             </SortableContext>
           </DndContext>
-
-          {dropdownMenu}
         </div>
       </div>
 
