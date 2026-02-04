@@ -32,9 +32,37 @@ interface IconProps {
   style?: React.CSSProperties;
 }
 
+const IvyCornerIcon = ({ size, color, style, className }: IconProps) => (
+  <svg
+    width={size || 24}
+    height={size || 24}
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={style}
+    className={className}
+  >
+    <path
+      d="M11 1H1V11C6.47368 11 11 6.47368 11 1Z"
+      fill={color || 'currentColor'}
+    />
+  </svg>
+);
+
 const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
   if (name === 'None') {
     return <Folder className="invisible" size={size} />;
+  }
+
+  if (name === 'IvyCorner') {
+    return (
+      <IvyCornerIcon
+        size={size}
+        color={color}
+        style={style}
+        className={cn(className)}
+      />
+    );
   }
 
   // Handle react-icons

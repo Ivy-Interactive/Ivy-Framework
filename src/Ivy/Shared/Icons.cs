@@ -28,6 +28,7 @@ public enum Icons
     Spotify, //<FaSpotify />
     Notion, //<FaNotion />
     XTwitter, //<FaXTwitter />
+    IvyCorner,
 
     // Lucide Icons (1000+ scalable vector icons):
     AArrowDown,
