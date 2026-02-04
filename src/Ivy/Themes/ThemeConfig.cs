@@ -15,6 +15,8 @@ public class Theme
 
     public string? FontSize { get; set; }
 
+    public string? BorderRadius { get; set; }
+
     public string? BorderRadiusSm { get; set; }
 
     public string? BorderRadiusMd { get; set; }
@@ -29,6 +31,7 @@ public class Theme
         Colors = ThemeColorScheme.Default,
         FontFamily = "Geist",
         FontSize = "16px",
+        BorderRadius = "0.5rem",
         BorderRadiusSm = IvyFrameworkBorderRadiusTokens.BorderRadius.Sm,
         BorderRadiusMd = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
         BorderRadiusLg = IvyFrameworkBorderRadiusTokens.BorderRadius.Lg,
