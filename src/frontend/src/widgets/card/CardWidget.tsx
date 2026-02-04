@@ -4,16 +4,7 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
-import {
-  getHeight,
-  getWidth,
-  getBorderRadius,
-  getBorderStyle,
-  getBorderThickness,
-  getColor,
-  BorderRadius,
-  BorderStyle,
-} from '@/lib/styles';
+import { getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import React, { useCallback } from 'react';
@@ -25,10 +16,6 @@ interface CardWidgetProps {
   events: string[];
   width?: string;
   height?: string;
-  borderThickness?: string;
-  borderRadius?: BorderRadius;
-  borderStyle?: BorderStyle;
-  borderColor?: string;
   hoverVariant?: 'None' | 'Pointer' | 'PointerAndTranslate';
   scale?: Scales;
   'data-testid'?: string;
@@ -44,10 +31,6 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   events = [],
   width = 'Full',
   height,
-  borderThickness,
-  borderRadius,
-  borderStyle,
-  borderColor,
   hoverVariant = 'None',
   scale = Scales.Medium,
   slots,
@@ -59,10 +42,6 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   const styles = {
     ...getWidth(width),
     ...getHeight(height),
-    ...(borderStyle && getBorderStyle(borderStyle)),
-    ...(borderThickness && getBorderThickness(borderThickness)),
-    ...(borderRadius && getBorderRadius(borderRadius)),
-    ...(borderColor && getColor(borderColor, 'borderColor', 'background')),
   };
 
   const footerIsEmpty = !slots?.Footer || slots.Footer.length === 0;
