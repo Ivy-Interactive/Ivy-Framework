@@ -29,10 +29,10 @@ public class Theme
         Colors = ThemeColorScheme.Default,
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadiusSm = IvyFrameworkBorderRadiusTokens.Sm,
-        BorderRadiusMd = IvyFrameworkBorderRadiusTokens.Md,
-        BorderRadiusLg = IvyFrameworkBorderRadiusTokens.Lg,
-        BorderRadiusXl = IvyFrameworkBorderRadiusTokens.Xl
+        BorderRadiusSm = IvyFrameworkBorderRadiusTokens.BorderRadius.Sm,
+        BorderRadiusMd = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
+        BorderRadiusLg = IvyFrameworkBorderRadiusTokens.BorderRadius.Lg,
+        BorderRadiusXl = IvyFrameworkBorderRadiusTokens.BorderRadius.Xl
     };
 }
 
