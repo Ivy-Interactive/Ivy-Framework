@@ -445,15 +445,17 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
                 }
               }}
             >
-              <div className="flex w-full items-center gap-2 min-w-0">
-                <Icon name={item.icon} size={16} className="shrink-0" />
-                <span className="text-sm truncate">{item.label}</span>
-              </div>
               {item.path && (
-                <span className="text-xs text-muted-foreground truncate w-full pl-6">
+                <span className="text-xs text-muted-foreground truncate w-full">
                   {item.path}
                 </span>
               )}
+              <div className="flex w-full items-center gap-2 min-w-0">
+                <Icon name={item.icon} size={16} className="shrink-0" />
+                <span className="text-sm truncate font-medium">
+                  {item.label}
+                </span>
+              </div>
             </button>
           </li>
         );
