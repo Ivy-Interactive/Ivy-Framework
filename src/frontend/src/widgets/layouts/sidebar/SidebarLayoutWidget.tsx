@@ -426,9 +426,9 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         return (
           <li key={item.tag}>
             <button
-              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left ${
+              className={`flex w-full rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer min-h-8 text-left ${
                 isActive ? 'bg-accent text-accent-foreground' : ''
-              }`}
+              } ${item.path ? 'flex-col items-start gap-0.5' : 'items-center gap-2'}`}
               tabIndex={-1} // Not focusable
               onClick={() => {
                 if (item.tag) {
@@ -445,8 +445,15 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
                 }
               }}
             >
-              <Icon name={item.icon} size={16} />
-              <span className="text-sm">{item.label}</span>
+              <div className="flex w-full items-center gap-2 min-w-0">
+                <Icon name={item.icon} size={16} className="shrink-0" />
+                <span className="text-sm truncate">{item.label}</span>
+              </div>
+              {item.path && (
+                <span className="text-xs text-muted-foreground truncate w-full pl-6">
+                  {item.path}
+                </span>
+              )}
             </button>
           </li>
         );
