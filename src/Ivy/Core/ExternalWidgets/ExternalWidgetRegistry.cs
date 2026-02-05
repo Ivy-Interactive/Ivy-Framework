@@ -155,6 +155,9 @@ public class ExternalWidgetRegistry
 
         foreach (var assembly in loadedAssemblies)
         {
+            if (!ReferencesIvy(assembly))
+                continue;
+
             ScanAssemblySafe(assembly, scannedAssemblies);
         }
 
