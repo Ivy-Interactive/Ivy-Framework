@@ -142,7 +142,7 @@ public class Server
         foreach (var type in connections)
         {
             var connection = (IConnection)Activator.CreateInstance(type)!;
-            connection.RegisterServices(this.Services);
+            connection.RegisterServices(this);
         }
     }
 

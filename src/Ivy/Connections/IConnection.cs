@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Ivy.Connections;
 
 public interface IConnection
@@ -9,7 +7,7 @@ public interface IConnection
     public string GetName();
     public string GetConnectionType();
     public ConnectionEntity[] GetEntities();
-    public void RegisterServices(IServiceCollection services);
+    public void RegisterServices(Server server);
     public Task<(bool ok, string? message)> TestConnection();
 }
 
