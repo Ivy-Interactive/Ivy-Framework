@@ -26,9 +26,9 @@ public class BasicResizeablePanelView : ViewBase
     public override object? Build()
     {
         return new ResizeablePanelGroup(
-            new ResizeablePanel(30, 
+            new ResizeablePanel(Size.Fraction(0.3f), 
                 new Card("Left Panel")),
-            new ResizeablePanel(70, 
+            new ResizeablePanel(Size.Fraction(0.7f), 
                 new Card("Right Panel"))
         );
     }
@@ -47,7 +47,7 @@ public class HorizontalResizeableView : ViewBase
     public override object? Build()
     {
         return new ResizeablePanelGroup(
-            new ResizeablePanel(25, 
+            new ResizeablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Sidebar")
@@ -55,7 +55,7 @@ public class HorizontalResizeableView : ViewBase
                         | Text.Block("• Home")
                         | Text.Block("• Settings")
                 )),
-            new ResizeablePanel(50, 
+            new ResizeablePanel(Size.Fraction(0.5f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Main Content")
@@ -63,7 +63,7 @@ public class HorizontalResizeableView : ViewBase
                         | Text.Block("where the main application content")
                         | Text.Block("would be displayed.")
                 )),
-            new ResizeablePanel(25, 
+            new ResizeablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Info Panel")
@@ -86,13 +86,13 @@ public class VerticalResizeableView : ViewBase
     public override object? Build()
     {
         return new ResizeablePanelGroup(
-            new ResizeablePanel(30, 
+            new ResizeablePanel(Size.Fraction(0.3f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Header Section")
                         | Text.Block("Navigation and branding")
                 )),
-            new ResizeablePanel(40, 
+            new ResizeablePanel(Size.Fraction(0.4f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Main Content")
@@ -100,7 +100,7 @@ public class VerticalResizeableView : ViewBase
                         | Text.Block("your primary content would be displayed.")
                         | Text.Block("It takes up the majority of the space.")
                 )),
-            new ResizeablePanel(30, 
+            new ResizeablePanel(Size.Fraction(0.3f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Footer Section")
@@ -123,20 +123,20 @@ public class DefaultSizesView : ViewBase
     public override object? Build()
     {
         return new ResizeablePanelGroup(
-            new ResizeablePanel(20, 
+            new ResizeablePanel(Size.Fraction(0.2f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("20% Panel")
                         | Text.Block("Small panel")
                 )),
-            new ResizeablePanel(60, 
+            new ResizeablePanel(Size.Fraction(0.6f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("60% Panel")
                         | Text.Block("Large main panel")
                         | Text.Block("with more content space")
                 )),
-            new ResizeablePanel(20, 
+            new ResizeablePanel(Size.Fraction(0.2f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("20% Panel")
@@ -157,7 +157,7 @@ public class AutoSizingView : ViewBase
     public override object? Build()
     {
         return new ResizeablePanelGroup(
-            new ResizeablePanel(25, 
+            new ResizeablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Fixed 25%")
@@ -197,13 +197,13 @@ public class HandleVisibilityView : ViewBase
         return Layout.Vertical().Gap(4)
             | new Box(Text.Block("With Handles (Default)")).Padding(2)
             | new ResizeablePanelGroup(
-                new ResizeablePanel(50, 
+                new ResizeablePanel(Size.Fraction(0.5f), 
                     new Card(
                         Layout.Vertical()
                             | Text.Label("Panel A")
                             | Text.Block("Resizable panel")
                     )),
-                new ResizeablePanel(50, 
+                new ResizeablePanel(Size.Fraction(0.5f), 
                     new Card(
                         Layout.Vertical()
                             | Text.Label("Panel B")
@@ -212,13 +212,13 @@ public class HandleVisibilityView : ViewBase
             ).ShowHandle(true).Height(Size.Units(50))
             | new Box(Text.Block("Without Handles")).Padding(2)
             | new ResizeablePanelGroup(
-                new ResizeablePanel(50, 
+                new ResizeablePanel(Size.Fraction(0.5f), 
                     new Card(
                         Layout.Vertical()
                             | Text.Label("Panel A")
                             | Text.Block("Fixed panel")
                     )),
-                new ResizeablePanel(50, 
+                new ResizeablePanel(Size.Fraction(0.5f), 
                     new Card(
                         Layout.Vertical()
                             | Text.Label("Panel B")
@@ -239,7 +239,7 @@ public class NestedLayoutView : ViewBase
     public override object? Build()
     {
         return new ResizeablePanelGroup(
-            new ResizeablePanel(25, 
+            new ResizeablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Sidebar")
@@ -248,9 +248,9 @@ public class NestedLayoutView : ViewBase
                         | Text.Block("• Reports")
                         | Text.Block("• Settings")
                 )),
-            new ResizeablePanel(75,
+            new ResizeablePanel(Size.Fraction(0.75f),
                 new ResizeablePanelGroup(
-                    new ResizeablePanel(60, 
+                    new ResizeablePanel(Size.Fraction(0.6f), 
                         new Card(
                             Layout.Vertical()
                                 | Text.Label("Main Content")
@@ -258,16 +258,16 @@ public class NestedLayoutView : ViewBase
                                 | Text.Block("This is where the main")
                                 | Text.Block("application content is displayed.")
                         )),
-                    new ResizeablePanel(40,
+                    new ResizeablePanel(Size.Fraction(0.4f),
                         new ResizeablePanelGroup(
-                            new ResizeablePanel(50, 
+                            new ResizeablePanel(Size.Fraction(0.5f), 
                                 new Card(
                                     Layout.Vertical()
                                         | Text.Label("Top Right")
                                         | Text.Block("Quick stats")
                                         | Text.Block("or tools")
                                 )),
-                            new ResizeablePanel(50, 
+                            new ResizeablePanel(Size.Fraction(0.5f), 
                                 new Card(
                                     Layout.Vertical()
                                         | Text.Label("Bottom Right")
@@ -299,7 +299,7 @@ public class MultiDirectionalResizingView : ViewBase
     {
         return new ResizeablePanelGroup(
             // Left panel - File browser
-            new ResizeablePanel(25, 
+            new ResizeablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("File Browser")
@@ -312,10 +312,10 @@ public class MultiDirectionalResizingView : ViewBase
                 ).Title("Files")
             ),
             // Center area - Split editor and console
-            new ResizeablePanel(50,
+            new ResizeablePanel(Size.Fraction(0.5f),
                 new ResizeablePanelGroup(
                     // Top - Code editor
-                    new ResizeablePanel(70, 
+                    new ResizeablePanel(Size.Fraction(0.7f), 
                         new Card(
                             Layout.Vertical()
                                 | Text.Label("Code Editor")
@@ -323,7 +323,7 @@ public class MultiDirectionalResizingView : ViewBase
                         ).Title("main.cs")
                     ),
                     // Bottom - Console/Output
-                    new ResizeablePanel(70,
+                    new ResizeablePanel(Size.Fraction(0.7f),
                         new Card(
                             Layout.Vertical()
                                 | Text.Label("Console Output")
@@ -336,7 +336,7 @@ public class MultiDirectionalResizingView : ViewBase
                     )
                 ).Vertical().Height(Size.Units(190))),
             // Right panel - Properties and tools
-            new ResizeablePanel(25,
+            new ResizeablePanel(Size.Fraction(0.25f),
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Properties")

@@ -42,10 +42,10 @@ public static class ResizeablePanelsExtensions
 /// </summary>
 public record ResizeablePanel : WidgetBase<ResizeablePanel>
 {
-    public ResizeablePanel(int? defaultSize, params object[] children) : base(children)
+    public ResizeablePanel(Size? defaultSize, params object[] children) : base(children)
     {
         DefaultSize = defaultSize;
     }
 
-    [Prop] public int? DefaultSize { get; init; }
+    [Prop] public Size? DefaultSize { get; init; }
 }

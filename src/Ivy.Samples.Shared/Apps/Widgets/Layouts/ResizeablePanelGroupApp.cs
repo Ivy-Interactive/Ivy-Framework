@@ -8,11 +8,11 @@ public class ResizeablePanelGroupApp : SampleBase
     protected override object? BuildSample()
     {
         return new ResizeablePanelGroup(
-            new ResizeablePanel(25, "Left"),
-            new ResizeablePanel(75,
+            new ResizeablePanel(Size.Fraction(0.25f), "Left"),
+            new ResizeablePanel(Size.Fraction(0.75f),
                 new ResizeablePanelGroup(
-                    new ResizeablePanel(50, "Top"),
-                    new ResizeablePanel(50, "Bottom")
+                    new ResizeablePanel(Size.Fraction(0.5f), "Top"),
+                    new ResizeablePanel(Size.Fraction(0.5f), "Bottom")
             ).Vertical())
         ).Horizontal().Height(Size.Screen());
     }
