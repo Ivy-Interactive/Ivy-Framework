@@ -10,6 +10,7 @@ public interface IConnection
     public string GetConnectionType();
     public ConnectionEntity[] GetEntities();
     public void RegisterServices(IServiceCollection services);
+    public Task<(bool ok, string? message)> TestConnection();
 }
 
 public record ConnectionEntity(string Singular, string Plural);
