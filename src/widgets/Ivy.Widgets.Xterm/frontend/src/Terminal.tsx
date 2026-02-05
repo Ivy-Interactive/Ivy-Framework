@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useCallback } from 'react';
-import { Terminal as XTerm } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import { WebLinksAddon } from '@xterm/addon-web-links';
-import { ClipboardAddon } from '@xterm/addon-clipboard';
-import { Unicode11Addon } from '@xterm/addon-unicode11';
-import xtermStyles from '@xterm/xterm/css/xterm.css?inline';
-import { EventHandler, StreamSubscriber } from './types';
-import { getWidth, getHeight } from './styles';
+import React, { useEffect, useRef, useCallback } from "react";
+import { Terminal as XTerm } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+import { ClipboardAddon } from "@xterm/addon-clipboard";
+import { Unicode11Addon } from "@xterm/addon-unicode11";
+import xtermStyles from "@xterm/xterm/css/xterm.css?inline";
+import { EventHandler, StreamSubscriber } from "./types";
+import { getWidth, getHeight } from "./styles";
 
-type CursorStyle = 'Block' | 'Underline' | 'Bar';
+type CursorStyle = "Block" | "Underline" | "Bar";
 
 interface TerminalTheme {
   background?: string;
@@ -56,45 +56,45 @@ interface TerminalProps {
 }
 
 const defaultTheme: TerminalTheme = {
-  background: '#000000',
-  foreground: '#d4d4d4',
-  cursor: '#aeafad',
-  cursorAccent: '#000000',
-  selection: 'rgba(255, 255, 255, 0.3)',
-  black: '#000000',
-  red: '#cd3131',
-  green: '#0dbc79',
-  yellow: '#e5e510',
-  blue: '#2472c8',
-  magenta: '#bc3fbc',
-  cyan: '#11a8cd',
-  white: '#e5e5e5',
-  brightBlack: '#666666',
-  brightRed: '#f14c4c',
-  brightGreen: '#23d18b',
-  brightYellow: '#f5f543',
-  brightBlue: '#3b8eea',
-  brightMagenta: '#d670d6',
-  brightCyan: '#29b8db',
-  brightWhite: '#ffffff',
+  background: "#000000",
+  foreground: "#d4d4d4",
+  cursor: "#aeafad",
+  cursorAccent: "#000000",
+  selection: "rgba(255, 255, 255, 0.3)",
+  black: "#000000",
+  red: "#cd3131",
+  green: "#0dbc79",
+  yellow: "#e5e510",
+  blue: "#2472c8",
+  magenta: "#bc3fbc",
+  cyan: "#11a8cd",
+  white: "#e5e5e5",
+  brightBlack: "#666666",
+  brightRed: "#f14c4c",
+  brightGreen: "#23d18b",
+  brightYellow: "#f5f543",
+  brightBlue: "#3b8eea",
+  brightMagenta: "#d670d6",
+  brightCyan: "#29b8db",
+  brightWhite: "#ffffff",
 };
 
-const mapCursorStyle = (style?: CursorStyle): 'block' | 'underline' | 'bar' => {
+const mapCursorStyle = (style?: CursorStyle): "block" | "underline" | "bar" => {
   switch (style) {
-    case 'Underline':
-      return 'underline';
-    case 'Bar':
-      return 'bar';
-    case 'Block':
+    case "Underline":
+      return "underline";
+    case "Bar":
+      return "bar";
+    case "Block":
     default:
-      return 'block';
+      return "block";
   }
 };
 
 export const Terminal: React.FC<TerminalProps> = ({
   id,
-  width = 'Full',
-  height = 'Full',
+  width = "Full",
+  height = "Full",
   events = [],
   eventHandler,
   subscribeToStream,
@@ -103,7 +103,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   fontFamily = "Geist Mono, Menlo, Monaco, 'Courier New', monospace, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji'",
   lineHeight = 1.0,
   cursorBlink = true,
-  cursorStyle = 'Block',
+  cursorStyle = "Block",
   scrollback = 1000,
   theme,
   initialContent,
@@ -119,7 +119,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   const initialContentWrittenRef = useRef(false);
   const terminalReadyRef = useRef(false);
 
-  const isReadOnly = closed || !events.includes('OnInput');
+  const isReadOnly = closed || !events.includes("OnInput");
 
   // Use refs to keep callbacks stable and avoid terminal recreation
   const isReadOnlyRef = useRef(isReadOnly);
@@ -135,8 +135,13 @@ export const Terminal: React.FC<TerminalProps> = ({
 
   const handleData = useCallback(
     (data: string) => {
-      if (!isReadOnlyRef.current) {
-        eventHandlerRef.current('OnInput', id, [data]);
+      if (
+        !isReadOnlyRef.current &&
+        typeof eventHandlerRef.current === "function"
+      ) {
+        try {
+          eventHandlerRef.current("OnInput", id, [data]);
+        } catch {}
       }
     },
     [id]
@@ -144,8 +149,15 @@ export const Terminal: React.FC<TerminalProps> = ({
 
   const handleResize = useCallback(
     (size: { cols: number; rows: number }) => {
-      if (eventsRef.current.includes('OnResize')) {
-        eventHandlerRef.current('OnResize', id, [{ cols: size.cols, rows: size.rows }]);
+      if (
+        eventsRef.current.includes("OnResize") &&
+        typeof eventHandlerRef.current === "function"
+      ) {
+        try {
+          eventHandlerRef.current("OnResize", id, [
+            { cols: size.cols, rows: size.rows },
+          ]);
+        } catch {}
       }
     },
     [id]
@@ -156,11 +168,14 @@ export const Terminal: React.FC<TerminalProps> = ({
       // Only activate link if CTRL is held
       if (!event.ctrlKey) return;
 
-      if (eventsRef.current.includes('OnLinkClick')) {
-        eventHandlerRef.current('OnLinkClick', id, [uri]);
+      if (
+        eventsRef.current.includes("OnLinkClick") &&
+        typeof eventHandlerRef.current === "function"
+      ) {
+        eventHandlerRef.current("OnLinkClick", id, [uri]);
       } else {
         // Default behavior: open link in new tab
-        window.open(uri, '_blank', 'noopener,noreferrer');
+        window.open(uri, "_blank", "noopener,noreferrer");
       }
     },
     [id]
@@ -172,11 +187,13 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     // Create shadow root if it doesn't exist
     if (!shadowRootRef.current) {
-      shadowRootRef.current = hostRef.current.attachShadow({ mode: 'open' });
+      shadowRootRef.current = hostRef.current.attachShadow({ mode: "open" });
 
       // Inject xterm styles into shadow root
-      const styleEl = document.createElement('style');
-      styleEl.textContent = xtermStyles + `
+      const styleEl = document.createElement("style");
+      styleEl.textContent =
+        xtermStyles +
+        `
         :host {
           display: block;
           width: 100%;
@@ -193,8 +210,8 @@ export const Terminal: React.FC<TerminalProps> = ({
       shadowRootRef.current.appendChild(styleEl);
 
       // Create terminal container inside shadow root
-      const container = document.createElement('div');
-      container.className = 'terminal-container';
+      const container = document.createElement("div");
+      container.className = "terminal-container";
       shadowRootRef.current.appendChild(container);
       terminalContainerRef.current = container;
     }
@@ -203,7 +220,7 @@ export const Terminal: React.FC<TerminalProps> = ({
     if (!container) return;
 
     // Clear any existing terminal content and reset state
-    container.innerHTML = '';
+    container.innerHTML = "";
     initialContentWrittenRef.current = false;
     terminalReadyRef.current = false;
 
@@ -226,13 +243,13 @@ export const Terminal: React.FC<TerminalProps> = ({
     // Load Unicode11 addon for emoji support
     const unicode11Addon = new Unicode11Addon();
     term.loadAddon(unicode11Addon);
-    term.unicode.activeVersion = '11';
+    term.unicode.activeVersion = "11";
 
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
 
     // Create tooltip element for link hover
-    const tooltip = document.createElement('div');
+    const tooltip = document.createElement("div");
     tooltip.style.cssText = `
       position: fixed;
       background: #f5f5f5;
@@ -247,18 +264,18 @@ export const Terminal: React.FC<TerminalProps> = ({
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       border: 1px solid #e0e0e0;
     `;
-    tooltip.textContent = 'Ctrl+Click to Follow Link';
+    tooltip.textContent = "Ctrl+Click to Follow Link";
     document.body.appendChild(tooltip);
 
     // Load WebLinks addon with custom handler and hover
     const webLinksAddon = new WebLinksAddon(handleLinkClick, {
       hover: (event: MouseEvent, _uri: string) => {
-        tooltip.style.display = 'block';
+        tooltip.style.display = "block";
         tooltip.style.left = `${event.clientX + 10}px`;
         tooltip.style.top = `${event.clientY + 10}px`;
       },
       leave: () => {
-        tooltip.style.display = 'none';
+        tooltip.style.display = "none";
       },
     });
     term.loadAddon(webLinksAddon);
@@ -273,7 +290,7 @@ export const Terminal: React.FC<TerminalProps> = ({
     const handlePaste = (e: ClipboardEvent) => {
       if (!allowClipboardRef.current || term.options.disableStdin) return;
       e.preventDefault();
-      const text = e.clipboardData?.getData('text');
+      const text = e.clipboardData?.getData("text");
       if (text) {
         term.paste(text);
       }
@@ -282,7 +299,7 @@ export const Terminal: React.FC<TerminalProps> = ({
     // Keyboard-based paste handler (Ctrl+V / Cmd+V) using Clipboard API
     const handleKeyDown = async (e: KeyboardEvent) => {
       if (!allowClipboardRef.current || term.options.disableStdin) return;
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault();
         try {
           const text = await navigator.clipboard.readText();
@@ -295,8 +312,8 @@ export const Terminal: React.FC<TerminalProps> = ({
       }
     };
 
-    container.addEventListener('paste', handlePaste);
-    container.addEventListener('keydown', handleKeyDown);
+    container.addEventListener("paste", handlePaste);
+    container.addEventListener("keydown", handleKeyDown);
 
     let disposed = false;
 
@@ -334,7 +351,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       }
     };
 
-    window.addEventListener('resize', handleWindowResize);
+    window.addEventListener("resize", handleWindowResize);
 
     const resizeObserver = new ResizeObserver(() => {
       if (!cols && !rows && terminalReadyRef.current && fitAddonRef.current) {
@@ -347,9 +364,9 @@ export const Terminal: React.FC<TerminalProps> = ({
     return () => {
       disposed = true;
       terminalReadyRef.current = false;
-      window.removeEventListener('resize', handleWindowResize);
-      container.removeEventListener('paste', handlePaste);
-      container.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("resize", handleWindowResize);
+      container.removeEventListener("paste", handlePaste);
+      container.removeEventListener("keydown", handleKeyDown);
       resizeObserver.disconnect();
 
       // Remove tooltip
@@ -357,19 +374,21 @@ export const Terminal: React.FC<TerminalProps> = ({
 
       term.dispose();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, stream?.id]);
 
   // Handle closed/readonly state changes without recreating terminal
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.options.disableStdin = isReadOnly;
-      terminalRef.current.options.cursorBlink = isReadOnly ? false : cursorBlinkRef.current;
+      terminalRef.current.options.cursorBlink = isReadOnly
+        ? false
+        : cursorBlinkRef.current;
       // Hide/show cursor using ANSI escape sequences
       if (isReadOnly) {
-        terminalRef.current.write('\x1b[?25l'); // Hide cursor
+        terminalRef.current.write("\x1b[?25l"); // Hide cursor
       } else {
-        terminalRef.current.write('\x1b[?25h'); // Show cursor
+        terminalRef.current.write("\x1b[?25h"); // Show cursor
       }
     }
   }, [isReadOnly]);
@@ -379,7 +398,7 @@ export const Terminal: React.FC<TerminalProps> = ({
     if (!stream?.id || !subscribeToStream) return;
 
     const unsubscribe = subscribeToStream(stream.id, (data) => {
-      if (terminalRef.current && typeof data === 'string') {
+      if (terminalRef.current && typeof data === "string") {
         try {
           // Decode base64 to binary string, then to UTF-8
           const binaryString = atob(data);
@@ -387,24 +406,26 @@ export const Terminal: React.FC<TerminalProps> = ({
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
-          const text = new TextDecoder('utf-8').decode(bytes);
+          const text = new TextDecoder("utf-8").decode(bytes);
           // Debug: log first chunk to verify encoding
           if (bytes.length > 0 && bytes.length < 100) {
-            console.log('[Terminal] base64 decoded:', {
+            console.log("[Terminal] base64 decoded:", {
               rawLength: data.length,
               decodedLength: bytes.length,
               firstBytes: Array.from(bytes.slice(0, 20)),
-              text: text.slice(0, 50)
+              text: text.slice(0, 50),
             });
           }
           terminalRef.current.write(text);
         } catch (e) {
           // Fallback for non-base64 data
-          console.warn('[Terminal] base64 decode failed, using raw data:', e, { data: data.slice(0, 50) });
+          console.warn("[Terminal] base64 decode failed, using raw data:", e, {
+            data: data.slice(0, 50),
+          });
           terminalRef.current.write(data);
         }
       } else {
-        console.warn('[Terminal] unexpected data type:', typeof data, data);
+        console.warn("[Terminal] unexpected data type:", typeof data, data);
       }
     });
 
@@ -414,7 +435,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   const style: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    overflow: 'hidden',
+    overflow: "hidden",
   };
 
   return <div ref={hostRef} style={style} />;
