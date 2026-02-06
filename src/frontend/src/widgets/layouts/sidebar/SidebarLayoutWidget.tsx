@@ -432,13 +432,17 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       const flatIdx = flatItems.findIndex(
         flatItem => flatItem.tag === item.tag
       );
-      const isActive = searchActive && flatIdx === selectedIndex;
+      const isHovered = searchActive && flatIdx === selectedIndex;
+      const isActivePage = item.tag === activeTag;
       return (
         <li key={item.tag}>
           <button
-            className={`flex w-full rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer min-h-8 text-left ${
-              isActive ? 'bg-accent text-accent-foreground' : ''
-            } ${showPath && item.path ? 'flex-col items-start gap-1' : 'items-center gap-2'}`}
+            className={cn(
+              "flex w-full rounded-lg p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left",
+              showPath && item.path ? 'flex-col items-start gap-1' : 'items-center gap-2',
+              isHovered && !isActivePage && "bg-accent/30",
+              isActivePage && "bg-accent text-accent-foreground hover:bg-accent"
+            )}
             tabIndex={-1}
             onClick={() => {
               if (item.tag) {
@@ -516,46 +520,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           </div>
         );
       } else {
-        const flatIdx = flatItems.findIndex(
-          flatItem => flatItem.tag === item.tag
-        );
-        const isActive = searchActive && flatIdx === selectedIndex;
-        return (
-          <li key={item.tag}>
-            <button
-              className={`flex w-full rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer min-h-8 text-left ${
-                isActive ? 'bg-accent text-accent-foreground' : ''
-              } ${item.path ? 'flex-col items-start gap-1' : 'items-center gap-2'}`}
-              tabIndex={-1} // Not focusable
-              onClick={() => {
-                if (item.tag) {
-                  if (searchActive && flatIdx !== -1) {
-                    setSelectedIndex(flatIdx);
-                  }
-                  eventHandler('OnSelect', id, [item.tag]);
-                }
-              }}
-              onMouseDown={e => onCtrlRightMouseClick(e, item)}
-              onMouseEnter={() => {
-                if (searchActive) {
-                  setSelectedIndex(flatIdx);
-                }
-              }}
-            >
-              {item.path && (
-                <span className="text-xs text-muted-foreground truncate w-full">
-                  {item.path}
-                </span>
-              )}
-              <div className="flex w-full items-center gap-2 min-w-0">
-                <Icon name={item.icon} size={16} className="shrink-0" />
-                <span className="text-sm truncate font-medium">
-                  {item.label}
-                </span>
-              </div>
-            </button>
-          </li>
-        );
+        return renderResultItem(item, true);
       }
     });
   };
