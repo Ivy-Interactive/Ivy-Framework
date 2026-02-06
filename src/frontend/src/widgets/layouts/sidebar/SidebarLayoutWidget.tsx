@@ -408,6 +408,8 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   const prevSearchActiveRef = React.useRef(searchActive);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
+  const prevActiveTagRef = useRef(activeTag);
   
   // Register only the sidebar menu container with useFocusable
   const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
@@ -448,22 +450,30 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     const path = findPathToTag(items, activeTag);
     
     if (path && path.length > 0) {
-      // Expand all parent sections
+      // Always expand parent sections
       setExpandedSections(new Set(path));
 
-      // Wait for the DOM to update, then scroll to the active item
-      // Use a longer timeout to ensure collapsibles have fully expanded
-      setTimeout(() => {
-        const activeElement = containerRef.current?.querySelector(`[data-menu-item="${activeTag}"]`);
-        if (activeElement) {
-          activeElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'nearest'
-          });
-        }
-      }, 300); // Match the collapsible animation duration
+      // Only scroll to center on initial mount or when URL changes externally
+      // (not when user clicks menu items)
+      if (isInitialMount.current) {
+        // Wait for the DOM to update, then scroll to the active item
+        // Use a longer timeout to ensure collapsibles have fully expanded
+        setTimeout(() => {
+          const activeElement = containerRef.current?.querySelector(`[data-menu-item="${activeTag}"]`);
+          if (activeElement) {
+            activeElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'nearest'
+            });
+          }
+        }, 300); // Match the collapsible animation duration
+        
+        isInitialMount.current = false;
+      }
     }
+    
+    prevActiveTagRef.current = activeTag;
   }, [activeTag, items, searchActive, findPathToTag]);
 
   const handleExpandChange = useCallback((label: string, expanded: boolean) => {
