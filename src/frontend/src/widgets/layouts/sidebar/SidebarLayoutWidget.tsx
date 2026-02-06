@@ -126,8 +126,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+        className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
         style={{ width: sidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
@@ -215,7 +216,15 @@ const CollapsibleMenuItem: React.FC<{
   activeTag?: string | null;
   expandedSections: Set<string>;
   onExpandChange: (label: string, expanded: boolean) => void;
-}> = ({ item, eventHandler, widgetId, level, activeTag, expandedSections, onExpandChange }) => {
+}> = ({
+  item,
+  eventHandler,
+  widgetId,
+  level,
+  activeTag,
+  expandedSections,
+  onExpandChange,
+}) => {
   const [isOpen, setIsOpen] = useState(item.expanded ?? false);
   const itemRef = useRef<HTMLLIElement>(null);
 
@@ -248,12 +257,16 @@ const CollapsibleMenuItem: React.FC<{
   if (!!item.children && item.children!.length > 0) {
     return (
       <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
-        <li className="relative" ref={itemRef} data-menu-item={item.tag || item.label}>
+        <li
+          className="relative"
+          ref={itemRef}
+          data-menu-item={item.tag || item.label}
+        >
           <CollapsibleTrigger asChild>
             <button
               className={cn(
-                "group flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-accent text-accent-foreground"
+                'group flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                isActive && 'bg-accent text-accent-foreground'
               )}
               onClick={() => {
                 // For items with children, toggle the collapsible state
@@ -288,11 +301,15 @@ const CollapsibleMenuItem: React.FC<{
     );
   } else {
     return (
-      <li key={item.label} ref={itemRef} data-menu-item={item.tag || item.label}>
+      <li
+        key={item.label}
+        ref={itemRef}
+        data-menu-item={item.tag || item.label}
+      >
         <button
           className={cn(
-            "flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-            isActive && "bg-accent text-accent-foreground"
+            'flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+            isActive && 'bg-accent text-accent-foreground'
           )}
           onClick={() => onItemClick(item)}
           onMouseDown={e => onCtrlRightMouseClick(e, item)}
@@ -312,7 +329,7 @@ const renderMenuItems = (
   level: number,
   activeTag?: string | null,
   expandedSections: Set<string> = new Set(),
-  onExpandChange: (label: string, expanded: boolean) => void = () => { }
+  onExpandChange: (label: string, expanded: boolean) => void = () => {}
 ) => {
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -336,7 +353,15 @@ const renderMenuItems = (
             </h4>
             <ul className="space-y-1">
               {item.children &&
-                renderMenuItems(item.children!, eventHandler, widgetId, 1, activeTag, expandedSections, onExpandChange)}
+                renderMenuItems(
+                  item.children!,
+                  eventHandler,
+                  widgetId,
+                  1,
+                  activeTag,
+                  expandedSections,
+                  onExpandChange
+                )}
             </ul>
           </div>
         );
@@ -364,8 +389,8 @@ const renderMenuItems = (
           <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
-                "flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-accent text-accent-foreground"
+                'flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                isActive && 'bg-accent text-accent-foreground'
               )}
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
@@ -380,8 +405,8 @@ const renderMenuItems = (
           <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
-                "flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-accent text-accent-foreground"
+                'flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                isActive && 'bg-accent text-accent-foreground'
               )}
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
@@ -405,7 +430,9 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const prevSearchActiveRef = React.useRef(searchActive);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set()
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
   const prevActiveTagRef = useRef(activeTag);
@@ -426,20 +453,30 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   }, [searchActive]);
 
   // Helper function to find the path to an item with a specific tag
-  const findPathToTag = useCallback((items: MenuItem[], targetTag: string, path: string[] = []): string[] | null => {
-    for (const item of items) {
-      if (item.tag === targetTag) {
-        return path;
-      }
-      if (item.children && item.children.length > 0) {
-        const result = findPathToTag(item.children, targetTag, [...path, item.label]);
-        if (result) {
-          return result;
+  const findPathToTag = useCallback(
+    (
+      items: MenuItem[],
+      targetTag: string,
+      path: string[] = []
+    ): string[] | null => {
+      for (const item of items) {
+        if (item.tag === targetTag) {
+          return path;
+        }
+        if (item.children && item.children.length > 0) {
+          const result = findPathToTag(item.children, targetTag, [
+            ...path,
+            item.label,
+          ]);
+          if (result) {
+            return result;
+          }
         }
       }
-    }
-    return null;
-  }, []);
+      return null;
+    },
+    []
+  );
 
   // Expand sections and scroll to active item when activeTag changes
   useEffect(() => {
@@ -458,12 +495,14 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         // Wait for the DOM to update, then scroll to the active item
         // Use a longer timeout to ensure collapsibles have fully expanded
         setTimeout(() => {
-          const activeElement = containerRef.current?.querySelector(`[data-menu-item="${activeTag}"]`);
+          const activeElement = containerRef.current?.querySelector(
+            `[data-menu-item="${activeTag}"]`
+          );
           if (activeElement) {
             activeElement.scrollIntoView({
               behavior: 'smooth',
               block: 'center',
-              inline: 'nearest'
+              inline: 'nearest',
             });
           }
         }, 300); // Match the collapsible animation duration
@@ -525,10 +564,12 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         <li key={item.tag}>
           <button
             className={cn(
-              "flex w-full rounded-lg p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left",
-              showPath && item.path ? 'flex-col items-start gap-1' : 'items-center gap-2',
-              isHovered && !isActivePage && "bg-accent/30",
-              isActivePage && "bg-accent text-accent-foreground hover:bg-accent"
+              'flex w-full rounded-lg p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left',
+              showPath && item.path
+                ? 'flex-col items-start gap-1'
+                : 'items-center gap-2',
+              isHovered && !isActivePage && 'bg-accent/30',
+              isActivePage && 'bg-accent text-accent-foreground hover:bg-accent'
             )}
             tabIndex={-1}
             onClick={() => {
@@ -638,7 +679,15 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           </div>
         )
       ) : (
-        renderMenuItems(items, eventHandler, id, 0, activeTag, expandedSections, handleExpandChange)
+        renderMenuItems(
+          items,
+          eventHandler,
+          id,
+          0,
+          activeTag,
+          expandedSections,
+          handleExpandChange
+        )
       )}
     </div>
   );
