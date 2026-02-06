@@ -188,6 +188,10 @@ interface SidebarMenuWidgetProps {
 }
 
 type FlatMenuItem = MenuItem & { isGroup?: boolean };
+
+// Animation duration for collapsible sections (in milliseconds)
+const COLLAPSIBLE_ANIMATION_DURATION = 300;
+
 const flattenMenuItems = (
   items: MenuItem[],
   parentExpanded = true
@@ -226,17 +230,16 @@ const CollapsibleMenuItem: React.FC<{
   onExpandChange,
 }) => {
   // Derive the open state from expandedSections or item.expanded
-  // This avoids calling setState in useEffect
   const shouldBeOpen =
     expandedSections.has(item.label) || (item.expanded ?? false);
   const [isOpen, setIsOpen] = useState(shouldBeOpen);
   const itemRef = useRef<HTMLLIElement>(null);
 
   // Sync local state with derived state when expandedSections changes
-  // Use direct comparison to avoid unnecessary updates
-  if (shouldBeOpen !== isOpen) {
+  // Using useEffect to avoid setState during render
+  useEffect(() => {
     setIsOpen(shouldBeOpen);
-  }
+  }, [shouldBeOpen]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -257,7 +260,7 @@ const CollapsibleMenuItem: React.FC<{
 
   const isActive = item.tag === activeTag;
 
-  if (!!item.children && item.children!.length > 0) {
+  if (item.children && item.children.length > 0) {
     return (
       <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
         <li
@@ -498,17 +501,21 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         // Wait for the DOM to update, then scroll to the active item
         // Use a longer timeout to ensure collapsibles have fully expanded
         setTimeout(() => {
-          const activeElement = containerRef.current?.querySelector(
-            `[data-menu-item="${activeTag}"]`
-          );
-          if (activeElement) {
-            activeElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center',
-              inline: 'nearest',
-            });
+          try {
+            const activeElement = containerRef.current?.querySelector(
+              `[data-menu-item="${activeTag}"]`
+            );
+            if (activeElement) {
+              activeElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'nearest',
+              });
+            }
+          } catch (error) {
+            console.warn('Failed to scroll to active menu item:', error);
           }
-        }, 300); // Match the collapsible animation duration
+        }, COLLAPSIBLE_ANIMATION_DURATION);
 
         isInitialMount.current = false;
       }
