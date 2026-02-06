@@ -8,14 +8,40 @@ public class IconInputApp : SampleBase
     protected override object? BuildSample()
     {
         return Layout.Vertical()
-               | Text.H2("Size Variants")
-               | new IconInputSizeVariants()
-               | Text.H1("IconInput")
+               | Text.H1("Icon Input")
+               | Layout.Tabs(
+                   new Tab("Variants", new IconInputVariants()),
+                   new Tab("Size Variants", new IconInputSizeVariants()),
+                   new Tab("Data Binding", new IconInputDataBindings())
+               ).Variant(TabsVariant.Content);
+    }
+}
+
+public class IconInputVariants : ViewBase
+{
+    public override object Build()
+    {
+        var defaultState = UseState<Icons>(Icons.Check);
+        var invalidState = UseState<Icons>(Icons.CircleAlert);
+        var nullableState = UseState<Icons?>(Icons.Search);
+        var disabledState = UseState<Icons>(Icons.Settings);
+
+        return Layout.Vertical()
                | Text.H2("Variants")
-               | new IconInputVariants()
-               | Text.H2("Data Binding")
-               | new IconInputDataBindings()
-            ;
+               | Text.P("Demonstrate different visual states of icon inputs: default, invalid, nullable, and disabled.")
+               | Layout.Vertical().Gap(4)
+                  | (Layout.Horizontal().Gap(4)
+                     | Text.InlineCode("Default").NoWrap()
+                     | defaultState.ToIconInput())
+                  | (Layout.Horizontal().Gap(4)
+                     | Text.InlineCode("Invalid").NoWrap()
+                     | invalidState.ToIconInput().Invalid("Please select an icon"))
+                  | (Layout.Horizontal().Gap(4)
+                     | Text.InlineCode("Nullable").NoWrap()
+                     | nullableState.ToIconInput().Nullable())
+                  | (Layout.Horizontal().Gap(4)
+                     | Text.InlineCode("Disabled").NoWrap()
+                     | disabledState.ToIconInput().Disabled());
     }
 }
 
@@ -27,46 +53,22 @@ public class IconInputSizeVariants : ViewBase
         var mediumState = UseState<Icons>(Icons.Heart);
         var largeState = UseState<Icons>(Icons.Bell);
 
-        return Layout.Grid().Columns(3)
-            | Text.InlineCode("Size")
-            | Text.InlineCode("IconInput")
-            | Text.InlineCode("Selected")
-
-            | Text.InlineCode("Small")
-            | smallState.ToIconInput().Scale(Scale.Small)
-            | Layout.Horizontal() | new Icon(smallState.Value)
-
-            | Text.InlineCode("Medium")
-            | mediumState.ToIconInput().Scale(Scale.Medium)
-            | Layout.Horizontal() | new Icon(mediumState.Value)
-
-            | Text.InlineCode("Large")
-            | largeState.ToIconInput().Scale(Scale.Large)
-            | Layout.Horizontal() | new Icon(largeState.Value);
-    }
-}
-
-public class IconInputVariants : ViewBase
-{
-    public override object Build()
-    {
-        var defaultState = UseState<Icons>(Icons.Check);
-        var nullableState = UseState<Icons?>(Icons.Search);
-        var disabledState = UseState<Icons>(Icons.Settings);
-        var invalidState = UseState<Icons>(Icons.CircleAlert);
-
-        return Layout.Grid().Columns(4)
-            | Text.InlineCode("")
-            | Text.InlineCode("Default")
-            | Text.InlineCode("Nullable")
-            | Text.InlineCode("Disabled / Invalid")
-
-            | Text.InlineCode("IconInput")
-            | defaultState.ToIconInput()
-            | nullableState.ToIconInput().Nullable()
-            | Layout.Vertical()
-                | disabledState.ToIconInput().Disabled()
-                | invalidState.ToIconInput().Invalid("Please select an icon");
+        return Layout.Vertical()
+               | Text.H2("Size Variants")
+               | Text.P("Icon inputs support different sizes: Small, Medium (default), and Large.")
+               | Layout.Vertical().Gap(4)
+                  | (Layout.Horizontal().Gap(4)
+                     | Text.InlineCode("Small").NoWrap()
+                     | smallState.ToIconInput().Scale(Scale.Small)
+                     | new Icon(smallState.Value))
+                  | (Layout.Horizontal().Gap(4)
+                     | Text.InlineCode("Medium").NoWrap()
+                     | mediumState.ToIconInput().Scale(Scale.Medium)
+                     | new Icon(mediumState.Value))
+                  | (Layout.Horizontal().Gap(4)
+                     | Text.InlineCode("Large").NoWrap()
+                     | largeState.ToIconInput().Scale(Scale.Large)
+                     | new Icon(largeState.Value));
     }
 }
 
@@ -82,18 +84,16 @@ public class IconInputDataBindings : ViewBase
             : Text.InlineCode("null");
 
         return Layout.Vertical()
-            | Layout.Grid().Columns(3)
-                | Text.InlineCode("Type")
-                | Text.InlineCode("Input")
-                | Text.InlineCode("Live Preview")
-
-                | Text.InlineCode("Icons")
-                | iconsState.ToIconInput().Placeholder("Pick an icon")
-                | Layout.Horizontal().Gap(2) | new Icon(iconsState.Value) | Text.Block(iconsState.Value.ToString())
-
-                | Text.InlineCode("Icons?")
-                | nullableIconsState.ToIconInput().Placeholder("Pick an icon (nullable)")
-                | livePreview
-            ;
+               | Text.H2("Data Binding")
+               | Text.P("Icon inputs support Icons (non-nullable) and Icons? (nullable) state types. The selected value updates in real time.")
+               | Layout.Vertical().Gap(4)
+                  | (Layout.Horizontal().Gap(4)
+                     | Text.InlineCode("Icons").NoWrap()
+                     | iconsState.ToIconInput().Placeholder("Pick an icon")
+                     | Layout.Horizontal().Gap(2) | new Icon(iconsState.Value) | Text.Block(iconsState.Value.ToString()))
+                  | (Layout.Horizontal().Gap(4)
+                     | Text.InlineCode("Icons?").NoWrap()
+                     | nullableIconsState.ToIconInput().Placeholder("Pick an icon (nullable)")
+                     | livePreview);
     }
 }
