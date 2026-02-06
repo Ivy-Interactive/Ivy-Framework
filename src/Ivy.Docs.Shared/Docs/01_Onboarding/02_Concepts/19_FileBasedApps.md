@@ -17,12 +17,7 @@ Run an Ivy app from a single `.cs` file—no project scaffolding, no `ivy init`,
 
 Usually you create Ivy apps with [ivy init](../03_CLI/02_Init.md) and run them with [ivy run](../03_CLI/03_Run.md). **File-based apps** let you write one file and run it with `dotnet run YourFile.cs`, without any other project files.
 
-## Prerequisites
-
-- **.NET 10** or later (single-file `dotnet run` is supported from .NET 10).
-- Ivy NuGet package (referenced via a file-level directive in the script).
-
-## Minimal Example
+## Basic Usage
 
 Create a file, for example `HelloApp.cs`:
 
@@ -59,6 +54,11 @@ dotnet run HelloApp.cs
 
 The app starts (by default on port 5010). Open the URL shown in the terminal to see your app.
 
+## Prerequisites
+
+- **.NET 10** or later (single-file `dotnet run` is supported from .NET 10).
+- Ivy NuGet package (referenced via a file-level directive in the script).
+
 ## File-Level Directive: Package
 
 At the top of the file, use the **package** directive so the file can use Ivy without a `.csproj`:
@@ -72,15 +72,23 @@ At the top of the file, use the **package** directive so the file can use Ivy wi
 
 ## Usings
 
-Include the namespaces you use in the file. For a typical small Ivy app:
+Include the namespaces you use in the file. Common ones:
 
-| Namespace   | Use for |
-|------------|---------|
-| `Ivy`      | `Server`, server configuration and `RunAsync()`. |
-| `Ivy.Views`| `ViewBase`, `Layout`, and built-in widgets (`Card`, `Text`, `Button`, etc.). |
+| Namespace | Use for |
+|-----------|---------|
+| `Ivy` | `Server`, server configuration and `RunAsync()`. |
 | `Ivy.Apps` | The `[App]` attribute for your app class. |
+| `Ivy.Views` | `ViewBase`, `Layout`, and built-in widgets (`Card`, `Text`, `Button`, etc.). |
+| `Ivy.Core` | Core Ivy types. |
+| `Ivy.Core.Hooks` | Hooks (`UseState`, `UseEffect`, `UseMemo`, etc.). |
+| `Ivy.Chrome` | Chrome, sidebar, and layout configuration. |
+| `Ivy.Helpers` | Helper utilities. |
+| `Ivy.Services` | `UseService`, service registration and resolution. |
+| `Ivy.Client` | Client and API usage. |
+| `Ivy.Auth` | Authentication providers. |
+| `Ivy.Widgets.Inputs` | Input widgets (`TextInput`, `SelectInput`, etc.). |
 
-Example:
+Example (minimal for a simple app):
 
 ```csharp
 using Ivy;
