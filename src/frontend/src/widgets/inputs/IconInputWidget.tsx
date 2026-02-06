@@ -17,13 +17,13 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { Scales } from '@/types/scale';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
 
-// Lucide icon names (PascalCase) - filter to valid icon component keys
+// Lucide icon names (PascalCase) - React components are typeof 'object', not 'function'
 const LUCIDE_ICON_NAMES = (Object.keys(icons) as string[]).filter(
   name =>
     typeof name === 'string' &&
     name.length > 0 &&
     /^[A-Z]/.test(name) &&
-    typeof (icons as Record<string, unknown>)[name] === 'function'
+    (icons as Record<string, unknown>)[name] != null
 );
 
 interface IconInputWidgetProps {
