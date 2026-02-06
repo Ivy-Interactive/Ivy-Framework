@@ -1,5 +1,12 @@
 # Ivy Framework Weekly Notes - Week of 2026-02-06
 
+> [!NOTE]
+> We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
+
+This release mostly brings a bunch of bugfixes across all of the widgets. We also had improved a lot the documentation, improving developer onboarding experience.
+
+A lot of attention went into how widgets look when placed next to each other, with theming customization in mind.
+
 ## LLM Framework Documentation
 
 Added comprehensive framework documentation specifically designed for AI assistants and LLMs working with Ivy. The new `AGENTS.md` guide provides a complete introduction to the framework, including:
