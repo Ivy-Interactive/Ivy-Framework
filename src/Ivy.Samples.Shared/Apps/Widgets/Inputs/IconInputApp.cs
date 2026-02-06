@@ -79,21 +79,21 @@ public class IconInputDataBindings : ViewBase
         var iconsState = UseState<Icons>(Icons.ChevronDown);
         var nullableIconsState = UseState<Icons?>(Icons.User);
 
-        object livePreview = nullableIconsState.Value.HasValue
-            ? Layout.Horizontal().Gap(2) | new Icon(nullableIconsState.Value!.Value) | Text.Block(nullableIconsState.Value.ToString()!)
-            : Text.InlineCode("null");
-
         return Layout.Vertical()
                | Text.H2("Data Binding")
                | Text.P("Icon inputs support Icons (non-nullable) and Icons? (nullable) state types. The selected value updates in real time.")
-               | Layout.Vertical().Gap(6)
-                  | (Layout.Horizontal().Gap(6)
-                     | Text.InlineCode("Icons")
-                     | iconsState.ToIconInput().Placeholder("Pick an icon")
-                     | Layout.Horizontal().Gap(2) | new Icon(iconsState.Value) | Text.Block(iconsState.Value.ToString()))
-                  | (Layout.Horizontal().Gap(6)
-                     | Text.InlineCode("Icons?")
-                     | nullableIconsState.ToIconInput().Placeholder("Pick an icon (nullable)")
-                     | livePreview);
+               | Layout.Grid().Columns(3).Gap(6)
+                  | Text.InlineCode("Icons")
+                  | iconsState.ToIconInput().Placeholder("Pick an icon")
+                  | (Layout.Horizontal().Gap(2)
+                     | new Icon(iconsState.Value)
+                     | Text.Block(iconsState.Value.ToString()))
+                  | Text.InlineCode("Icons?")
+                  | nullableIconsState.ToIconInput().Placeholder("Pick an icon (nullable)")
+                  | (nullableIconsState.Value.HasValue
+                     ? Layout.Horizontal().Gap(2)
+                        | new Icon(nullableIconsState.Value!.Value)
+                        | Text.Block(nullableIconsState.Value.ToString()!)
+                     : Text.InlineCode("null"));
     }
 }
