@@ -24,7 +24,8 @@ public record MenuItem(
     bool Expanded = false,
     string? Tooltip = null,
     Action<MenuItem>? OnSelect = null,
-    string[]? SearchHints = null)
+    string[]? SearchHints = null,
+    string? Path = null)
 {
 
     public static MenuItem Separator() => new(Variant: MenuItemVariant.Separator);
@@ -72,6 +73,32 @@ public static class MenuItemExtensions
                 {
                     yield return child;
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Flattens the menu tree and yields leaf items along with their folder path (parent labels).
+    /// Path is the concatenated labels of ancestors, e.g. "Widgets / Primitives" for an item under Primitives within Widgets.
+    /// </summary>
+    public static IEnumerable<(MenuItem Item, string Path)> FlattenWithPath(this IEnumerable<MenuItem> menuItems, string parentPath = "")
+    {
+        foreach (var item in menuItems)
+        {
+            var currentPath = string.IsNullOrEmpty(parentPath)
+                ? (item.Label ?? "")
+                : $"{parentPath} / {item.Label}";
+
+            if (item.Children is { Length: > 0 })
+            {
+                foreach (var (child, path) in item.Children.FlattenWithPath(currentPath))
+                {
+                    yield return (child, path);
+                }
+            }
+            else
+            {
+                yield return (item, parentPath);
             }
         }
     }
@@ -157,5 +184,10 @@ public static class MenuItemExtensions
     public static MenuItem SearchHints(this MenuItem menuItem, string[] searchHints)
     {
         return menuItem with { SearchHints = searchHints };
+    }
+
+    public static MenuItem Path(this MenuItem menuItem, string? path)
+    {
+        return menuItem with { Path = path };
     }
 }

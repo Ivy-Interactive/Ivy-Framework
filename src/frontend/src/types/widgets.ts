@@ -24,6 +24,7 @@ export interface MenuItem {
   disabled: boolean;
   shortcut?: string;
   expanded: boolean;
+  path?: string;
 }
 
 export interface InternalLink {

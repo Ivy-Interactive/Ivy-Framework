@@ -138,7 +138,8 @@ public static class TextInputExtensions
         var type = state.GetStateType();
         Type genericType = typeof(TextInput<>).MakeGenericType(type);
         TextInputBase input = (TextInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
-        input.Nullable = type.IsNullableType();
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
         return input;
     }
 
