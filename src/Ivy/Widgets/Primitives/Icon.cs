@@ -39,6 +39,11 @@ public static class IconExtensions
         return icon with { Width = Size.Units(4), Height = Size.Units(4) };
     }
 
+    public static Icon Medium(this Icon icon)
+    {
+        return icon with { Width = Size.Units(6), Height = Size.Units(6) };
+    }
+
     public static Icon Large(this Icon icon)
     {
         return icon with { Width = Size.Units(12), Height = Size.Units(12) };

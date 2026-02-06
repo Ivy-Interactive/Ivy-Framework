@@ -15,6 +15,19 @@ import { X, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Scales } from '@/types/scale';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
+import {
+  iconInputTriggerVariants,
+  iconInputIconVariants,
+  iconInputTextVariants,
+  iconInputPopoverVariants,
+  iconInputPopoverScrollVariants,
+  iconInputPopoverHeaderVariants,
+  iconInputPopoverFooterVariants,
+  iconInputGridVariants,
+  iconInputSearchIconVariants,
+  iconInputSearchInputVariants,
+  iconInputEmptyStateVariants,
+} from '@/components/ui/input/icon-input-variants';
 
 // Lucide icon names (PascalCase) - React components are typeof 'object', not 'function'
 const LUCIDE_ICON_NAMES = (Object.keys(icons) as string[]).filter(
@@ -37,7 +50,6 @@ interface IconInputWidgetProps {
 }
 
 const ICONS_PER_ROW = 8;
-const POPOVER_HEIGHT = 280;
 
 export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   id,
@@ -88,56 +100,59 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             type="button"
             variant="outline"
             disabled={disabled}
-            size={
-              scale === Scales.Small
-                ? 'sm'
-                : scale === Scales.Large
-                  ? 'lg'
-                  : 'default'
-            }
             className={cn(
-              'min-w-[120px] justify-start font-normal',
+              iconInputTriggerVariants({ scale }),
               !hasValue && 'text-muted-foreground',
               invalid && inputStyles.invalidInput
             )}
           >
             {hasValue ? (
               <span className="flex items-center gap-2">
-                <Icon name={value} size={18} className="shrink-0" />
-                <span className="truncate">{value}</span>
+                <Icon
+                  name={value}
+                  className={cn('shrink-0', iconInputIconVariants({ scale }))}
+                />
+                <span
+                  className={cn('truncate', iconInputTextVariants({ scale }))}
+                >
+                  {value}
+                </span>
               </span>
             ) : (
-              placeholder
+              <span className={cn(iconInputTextVariants({ scale }))}>
+                {placeholder}
+              </span>
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[320px] p-0"
+          className={cn(iconInputPopoverVariants({ scale }))}
           align="start"
           onOpenAutoFocus={e => e.preventDefault()}
         >
-          <div className="p-2 border-b">
+          <div className={cn(iconInputPopoverHeaderVariants({ scale }))}>
             <div className="relative">
               <Search
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+                className={cn(iconInputSearchIconVariants({ scale }))}
                 strokeWidth={2}
               />
               <Input
                 placeholder="Search icons..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-8 h-9"
+                scale={scale}
+                className={iconInputSearchInputVariants({ scale })}
               />
             </div>
           </div>
-          <div className="overflow-auto" style={{ height: POPOVER_HEIGHT }}>
+          <div className={iconInputPopoverScrollVariants({ scale })}>
             {filteredIcons.length === 0 ? (
-              <div className="flex items-center justify-center h-24 text-muted-foreground text-sm">
+              <div className={iconInputEmptyStateVariants({ scale })}>
                 No icons found
               </div>
             ) : (
               <div
-                className="grid gap-1 p-2"
+                className={cn(iconInputGridVariants({ scale }))}
                 style={{
                   gridTemplateColumns: `repeat(${ICONS_PER_ROW}, minmax(0, 1fr))`,
                 }}
@@ -156,7 +171,13 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
                       )}
                       title={iconName}
                     >
-                      <Icon name={iconName} size={20} className="shrink-0" />
+                      <Icon
+                        name={iconName}
+                        className={cn(
+                          'shrink-0',
+                          iconInputIconVariants({ scale })
+                        )}
+                      />
                     </button>
                   );
                 })}
@@ -164,12 +185,15 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             )}
           </div>
           {nullable && (
-            <div className="p-2 border-t">
+            <div className={cn(iconInputPopoverFooterVariants({ scale }))}>
               <Button
                 type="button"
                 variant="ghost"
-                size="sm"
-                className="w-full justify-center text-muted-foreground"
+                size={scale === Scales.Large ? 'default' : 'sm'}
+                className={cn(
+                  'w-full justify-center text-muted-foreground',
+                  iconInputTextVariants({ scale })
+                )}
                 onClick={() => {
                   eventHandler('OnChange', id, [null]);
                   setOpen(false);
