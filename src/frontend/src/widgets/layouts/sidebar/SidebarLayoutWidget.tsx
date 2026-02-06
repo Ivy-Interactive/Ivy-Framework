@@ -451,15 +451,20 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     return items.map(item => {
       if (item.children && item.children.length > 0) {
         const children = item.children;
-        const groups = Object.entries(
-          children.reduce<Record<string, MenuItem[]>>((acc, child) => {
+        const groupsMap = children.reduce<Record<string, MenuItem[]>>(
+          (acc, child) => {
             const path = child.path ?? '';
             (acc[path] ??= []).push(child);
             return acc;
-          }, {})
-        ).sort(([a], [b]) =>
-          a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)
+          },
+          {}
         );
+        const groups = Object.entries(groupsMap);
+        const groupsOrdered = groups.sort(([pathA], [pathB]) => {
+          if (!pathA) return 1;
+          if (!pathB) return -1;
+          return 0;
+        });
 
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
@@ -467,7 +472,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
               {item.label}
             </h4>
             <ul className="space-y-1">
-              {groups.map(([path, pathItems], index) => (
+              {groupsOrdered.map(([path, pathItems], index) => (
                 <React.Fragment key={path || '__none__'}>
                   {index > 0 && (
                     <li className="list-none py-2" aria-hidden>
