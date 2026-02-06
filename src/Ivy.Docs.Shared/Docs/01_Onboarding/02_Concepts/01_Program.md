@@ -14,7 +14,11 @@ searchHints:
 Configure and bootstrap your Ivy [application](./10_Apps.md) with dependency injection, [services](../../03_Hooks/02_Core/11_UseService.md), and middleware for production-ready deployment.
 </Ingress>
 
-The `Program.cs` file is the entry point for your Ivy application. It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other sevices..
+The `Program.cs` file is the entry point for your Ivy application. It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other services.
+
+<Callout Type="tip">
+Want to try Ivy without a full project? You can run a [file-based app](./19_FileBasedApps.md) from a single `.cs` file using `dotnet run YourFile.cs`.
+</Callout>
 
 ## Basic Structure
 
