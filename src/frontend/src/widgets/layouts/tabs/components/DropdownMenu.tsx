@@ -32,6 +32,8 @@ interface TabsDropdownMenuProps {
 /**
  * Dropdown menu component for displaying hidden tabs when they overflow.
  * Supports drag-and-drop reordering within the dropdown.
+ *
+ * Returns an object with trigger button and menu content to allow flexible placement.
  */
 export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
   dropdownOpen,
@@ -46,6 +48,47 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
   handleTabSelect,
   isUserInitiatedChangeRef,
 }) => {
+  const menuContent =
+    hiddenTabs.length > 0 ? (
+      <DropdownMenuContent align="end">
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+          sensors={sensors}
+        >
+          <SortableContext items={tabOrder}>
+            <div className="flex flex-col gap-1 w-48">
+              {orderedTabWidgets.map(tabWidget => {
+                if (!React.isValidElement(tabWidget)) return null;
+                const props = getTabProps(tabWidget);
+                if (!props?.id) return null;
+                const { title, id } = props;
+
+                // Only render tabs that are hidden
+                if (!hiddenTabs.includes(id)) return null;
+
+                return (
+                  <SortableDropdownMenuItem
+                    key={id}
+                    id={id}
+                    onClick={() => {
+                      // Mark as user-initiated to prevent flicker
+                      isUserInitiatedChangeRef.current = true;
+                      handleTabSelect(id);
+                    }}
+                    isActive={activeTabId === id}
+                    showClose={showClose}
+                  >
+                    {title}
+                  </SortableDropdownMenuItem>
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </DropdownMenuContent>
+    ) : null;
+
   return (
     <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <DropdownMenuTrigger asChild>
@@ -53,7 +96,7 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
           variant="ghost"
           size="icon"
           className={cn(
-            'absolute right-0 top-1/2 -translate-y-1/2 h-7 w-7 bg-transparent z-10 mr-3 transition-opacity',
+            'h-7 w-7 bg-transparent transition-opacity flex-shrink-0 flex items-center justify-center ml-2',
             hiddenTabs.length > 0
               ? 'opacity-100'
               : 'opacity-0 pointer-events-none'
@@ -63,45 +106,7 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
           <ChevronDown className="w-5 h-5" />
         </Button>
       </DropdownMenuTrigger>
-      {hiddenTabs.length > 0 && (
-        <DropdownMenuContent align="end">
-          <DndContext
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-            sensors={sensors}
-          >
-            <SortableContext items={tabOrder}>
-              <div className="flex flex-col gap-1 w-48">
-                {orderedTabWidgets.map(tabWidget => {
-                  if (!React.isValidElement(tabWidget)) return null;
-                  const props = getTabProps(tabWidget);
-                  if (!props?.id) return null;
-                  const { title, id } = props;
-
-                  // Only render tabs that are hidden
-                  if (!hiddenTabs.includes(id)) return null;
-
-                  return (
-                    <SortableDropdownMenuItem
-                      key={id}
-                      id={id}
-                      onClick={() => {
-                        // Mark as user-initiated to prevent flicker
-                        isUserInitiatedChangeRef.current = true;
-                        handleTabSelect(id);
-                      }}
-                      isActive={activeTabId === id}
-                      showClose={showClose}
-                    >
-                      {title}
-                    </SortableDropdownMenuItem>
-                  );
-                })}
-              </div>
-            </SortableContext>
-          </DndContext>
-        </DropdownMenuContent>
-      )}
+      {menuContent}
     </DropdownMenu>
   );
 };

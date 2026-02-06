@@ -34,13 +34,7 @@ public record Card : WidgetBase<Card>
     internal object? Description { get; set; }
     internal object? Icon { get; set; }
 
-    [Prop] public Thickness? BorderThickness { get; set; }
 
-    [Prop] public BorderRadius? BorderRadius { get; set; }
-
-    [Prop] public BorderStyle? BorderStyle { get; set; }
-
-    [Prop] public Colors? BorderColor { get; set; }
 
     [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
 
@@ -105,15 +99,6 @@ public static class CardExtensions
         return card.Header(card.Title, card.Description, icon);
     }
 
-    public static Card BorderThickness(this Card card, int thickness) => card with { BorderThickness = new(thickness) };
-
-    public static Card BorderThickness(this Card card, Thickness thickness) => card with { BorderThickness = thickness };
-
-    public static Card BorderRadius(this Card card, BorderRadius radius) => card with { BorderRadius = radius };
-
-    public static Card BorderStyle(this Card card, BorderStyle style) => card with { BorderStyle = style };
-
-    public static Card BorderColor(this Card card, Colors color) => card with { BorderColor = color };
 
     public static Card Hover(this Card card, CardHoverVariant variant) => card with { HoverVariant = variant };
 

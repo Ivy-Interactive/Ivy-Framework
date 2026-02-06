@@ -16,25 +16,6 @@ public class CardApp : SampleBase
                     | Text.H4("Card App").WithLayout().Grow()
         ).TestId("card-app");
 
-        var card2 = new Card(
-            content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc",
-            header: Layout.Horizontal().Align(Align.Center)
-                    | Text.H4("Card with Border").WithLayout().Grow()
-        ).BorderThickness(3)
-         .BorderStyle(BorderStyle.Dashed)
-         .BorderColor(Colors.Primary)
-         .BorderRadius(BorderRadius.Rounded)
-         .TestId("card-border");
-
-        var card3 = new Card(
-            content: "This card demonstrates the border color fix with a thick red border.",
-            header: Layout.Horizontal().Align(Align.Center)
-                    | Text.H4("Border Color Test").WithLayout().Grow()
-        ).BorderThickness(4)
-         .BorderStyle(BorderStyle.Solid)
-         .BorderColor(Colors.Red)
-         .BorderRadius(BorderRadius.Rounded)
-         .TestId("card-border-color");
 
         var card4 = new Card(
             content: "This card demonstrates OnClick handlers.",
@@ -72,10 +53,8 @@ public class CardApp : SampleBase
         return Layout.Vertical()
          | Text.H1("Card")
          | Text.H2("Basic Examples")
-         | (Layout.Grid().Columns(4)
+         | (Layout.Grid().Columns(2)
             | card1
-            | card2
-            | card3
             | card4
             )
          | (Layout.Grid().Columns(4)

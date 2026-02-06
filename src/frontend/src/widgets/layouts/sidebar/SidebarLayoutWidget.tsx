@@ -20,6 +20,7 @@ import { sidebarMenuRef } from './sidebar-refs';
 import { useEventHandler } from '@/components/event-handler';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
+import { Separator } from '@/components/ui/separator';
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -398,7 +399,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     [searchActive, flatItems, selectedIndex, eventHandler, id]
   );
 
-  const renderMenuItemsWithHighlight = (items: MenuItem[], level: number) => {
+  const renderMenuItemsWithHighlight = (items: MenuItem[]) => {
     const onCtrlRightMouseClick = (e: React.MouseEvent, item: MenuItem) => {
       if (e.ctrlKey && e.button === 2 && !!item.tag) {
         e.preventDefault();
@@ -406,15 +407,90 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       }
     };
 
+    const renderResultItem = (item: MenuItem, showPath: boolean) => {
+      const flatIdx = flatItems.findIndex(
+        flatItem => flatItem.tag === item.tag
+      );
+      const isActive = searchActive && flatIdx === selectedIndex;
+      return (
+        <li key={item.tag}>
+          <button
+            className={`flex w-full rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer min-h-8 text-left ${
+              isActive ? 'bg-accent text-accent-foreground' : ''
+            } ${showPath && item.path ? 'flex-col items-start gap-1' : 'items-center gap-2'}`}
+            tabIndex={-1}
+            onClick={() => {
+              if (item.tag) {
+                if (searchActive && flatIdx !== -1) {
+                  setSelectedIndex(flatIdx);
+                }
+                eventHandler('OnSelect', id, [item.tag]);
+              }
+            }}
+            onMouseDown={e => onCtrlRightMouseClick(e, item)}
+            onMouseEnter={() => {
+              if (searchActive) {
+                setSelectedIndex(flatIdx);
+              }
+            }}
+          >
+            {showPath && item.path && (
+              <span className="text-xs text-muted-foreground truncate w-full">
+                {item.path}
+              </span>
+            )}
+            <div className="flex w-full items-center gap-2 min-w-0">
+              <Icon name={item.icon} size={16} className="shrink-0" />
+              <span className="text-sm truncate font-medium">{item.label}</span>
+            </div>
+          </button>
+        </li>
+      );
+    };
+
     return items.map(item => {
       if (item.children && item.children.length > 0) {
+        const children = item.children;
+        const groupsMap = children.reduce<Record<string, MenuItem[]>>(
+          (acc, child) => {
+            const path = child.path ?? '';
+            (acc[path] ??= []).push(child);
+            return acc;
+          },
+          {}
+        );
+        const groups = Object.entries(groupsMap);
+        const groupsOrdered = groups.sort(([pathA], [pathB]) => {
+          if (!pathA) return 1;
+          if (!pathB) return -1;
+          return 0;
+        });
+
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
             <h4 className="sticky top-0 z-10 bg-background px-2 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">
-              {renderMenuItemsWithHighlight(item.children, level + 1)}
+              {groupsOrdered.map(([path, pathItems], index) => (
+                <React.Fragment key={path || '__none__'}>
+                  {index > 0 && (
+                    <li className="list-none py-2" aria-hidden>
+                      <Separator orientation="horizontal" />
+                    </li>
+                  )}
+                  <li className="list-none">
+                    {path && (
+                      <div className="px-2 pt-2 pb-1 text-xs text-muted-foreground truncate">
+                        {path}
+                      </div>
+                    )}
+                    <ul className="space-y-1">
+                      {pathItems.map(child => renderResultItem(child, false))}
+                    </ul>
+                  </li>
+                </React.Fragment>
+              ))}
             </ul>
           </div>
         );
@@ -426,9 +502,9 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         return (
           <li key={item.tag}>
             <button
-              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left ${
+              className={`flex w-full rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer min-h-8 text-left ${
                 isActive ? 'bg-accent text-accent-foreground' : ''
-              }`}
+              } ${item.path ? 'flex-col items-start gap-1' : 'items-center gap-2'}`}
               tabIndex={-1} // Not focusable
               onClick={() => {
                 if (item.tag) {
@@ -445,8 +521,17 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
                 }
               }}
             >
-              <Icon name={item.icon} size={16} />
-              <span className="text-sm">{item.label}</span>
+              {item.path && (
+                <span className="text-xs text-muted-foreground truncate w-full">
+                  {item.path}
+                </span>
+              )}
+              <div className="flex w-full items-center gap-2 min-w-0">
+                <Icon name={item.icon} size={16} className="shrink-0" />
+                <span className="text-sm truncate font-medium">
+                  {item.label}
+                </span>
+              </div>
             </button>
           </li>
         );
@@ -472,7 +557,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     >
       {searchActive ? (
         flatItems.length > 0 ? (
-          renderMenuItemsWithHighlight(items, 0)
+          renderMenuItemsWithHighlight(items)
         ) : (
           <div className="flex items-center justify-center p-4 text-descriptive text-muted-foreground">
             No results found

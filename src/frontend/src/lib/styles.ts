@@ -384,7 +384,7 @@ export const getOverflow = (overflow?: Overflow): React.CSSProperties => {
 
 export const gridCellOverflow = {
   ellipsis:
-    '[&>*]:min-w-0 [&>*]:truncate hover:[&>*]:overflow-visible hover:[&>*]:whitespace-normal hover:[&>*]:absolute hover:[&>*]:z-10',
+    '[&>*:not(:has(*))]:min-w-0 [&>*:not(:has(*))]:overflow-hidden [&>*:not(:has(*))]:text-ellipsis [&>*:not(:has(*))]:whitespace-nowrap hover:[&>*:not(:has(*))]:overflow-visible hover:[&>*:not(:has(*))]:whitespace-normal hover:[&>*:not(:has(*))]:relative hover:[&>*:not(:has(*))]:z-10',
 };
 export type Orientation = 'Horizontal' | 'Vertical';
 

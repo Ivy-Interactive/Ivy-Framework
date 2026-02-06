@@ -8,6 +8,7 @@ namespace Ivy.Auth;
 
 public static class CookieRegistryExtensions
 {
+
     public static IActionResult? WriteCookiesToResponse(this Controller controller, AppSessionStore sessionStore, CookieJarId cookieJarId, string intent, out CookieJar cookies)
     {
         if (!sessionStore.TryRemoveCookies(cookieJarId, intent, out cookies))
@@ -50,15 +51,7 @@ public static class CookieRegistryExtensions
         }
         else
         {
-            var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = isProduction, // Enable Secure flag in production
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTimeOffset.UtcNow.AddYears(1),
-                Path = "/",
-            };
+            var cookieOptions = CreateAuthCookieOptions();
 
             var tokenJson = JsonSerializer.Serialize(authToken, JsonHelper.DefaultOptions);
 
@@ -95,17 +88,27 @@ public static class CookieRegistryExtensions
         }
         else
         {
-            var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = isProduction, // Enable Secure flag in production
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTimeOffset.UtcNow.AddYears(1),
-                Path = "/",
-            };
+            var cookieOptions = CreateAuthCookieOptions();
 
             cookies.Append("auth_session_data", authSessionData, cookieOptions);
         }
+    }
+
+    private static CookieOptions CreateAuthCookieOptions()
+    {
+        var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = isProduction,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTimeOffset.UtcNow.AddYears(1),
+            Path = "/",
+        };
+
+        // Apply custom configuration if provided
+        Server.ConfigureAuthCookieOptions?.Invoke(cookieOptions);
+
+        return cookieOptions;
     }
 }

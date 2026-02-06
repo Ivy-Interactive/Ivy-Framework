@@ -184,22 +184,36 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             )}
           >
             <CalendarIcon
-              className={cn('mr-2', dateRangeInputIconVariants({ scale }))}
+              className={cn(
+                'mr-2 shrink-0',
+                dateRangeInputIconVariants({ scale })
+              )}
             />
             {date?.from ? (
               date.to ? (
-                <span className={dateRangeInputTextVariants({ scale })}>
+                <span
+                  className={cn(
+                    'truncate',
+                    dateRangeInputTextVariants({ scale })
+                  )}
+                >
                   {format(date.from, displayFormat)} -{' '}
                   {format(date.to, displayFormat)}
                 </span>
               ) : (
-                <span className={dateRangeInputTextVariants({ scale })}>
+                <span
+                  className={cn(
+                    'truncate',
+                    dateRangeInputTextVariants({ scale })
+                  )}
+                >
                   {format(date.from, displayFormat)}
                 </span>
               )
             ) : (
               <span
                 className={cn(
+                  'truncate',
                   dateRangeInputTextVariants({ scale }),
                   'text-muted-foreground'
                 )}

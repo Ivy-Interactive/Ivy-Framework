@@ -35,28 +35,42 @@ export function useTabCalculation(
     // Don't recalculate when dropdown is open to prevent infinite loops
     if (dropdownOpen) return;
 
-    // Get the actual available width for tabs
-    const containerComputedStyle = getComputedStyle(container);
-    const containerPadding =
-      parseFloat(containerComputedStyle.paddingLeft) +
-        parseFloat(containerComputedStyle.paddingRight) || 0;
-    const dropdownButtonWidth = 40; // Space for dropdown button only when needed
-    let availableWidth = container.clientWidth - containerPadding;
+    // Use tabsList width in TabsVariant, container width in ContentVariant
+    const referenceElement = tabsList.classList.contains('w-full')
+      ? tabsList
+      : container;
+    const elementComputedStyle = getComputedStyle(referenceElement);
+    const elementPadding =
+      parseFloat(elementComputedStyle.paddingLeft) +
+        parseFloat(elementComputedStyle.paddingRight) || 0;
+    const dropdownButtonWidth = 40;
+    let availableWidth = referenceElement.clientWidth - elementPadding;
 
     const newVisibleTabs: string[] = [];
     const newHiddenTabs: string[] = [];
     let currentWidth = 0;
 
-    // Get actual tab measurements from the DOM
+    // Measure rendered tabs from DOM
     const measurements = measureTabsFromDOM(tabsList);
-
-    // Store measurements for future use
     tabMeasurementsRef.current = measurements;
 
-    // Try to fit all tabs first
-    let totalRequiredWidth = 0;
+    // Calculate width of non-tab elements (add button, dropdown)
+    let nonTabElementsWidth = 0;
+    const allChildren = Array.from(tabsList.children);
+    allChildren.forEach(child => {
+      if (child instanceof HTMLElement && !child.hasAttribute('role')) {
+        const rect = child.getBoundingClientRect();
+        const styles = window.getComputedStyle(child);
+        const marginLeft = parseFloat(styles.marginLeft) || 0;
+        const marginRight = parseFloat(styles.marginRight) || 0;
+        nonTabElementsWidth += rect.width + marginLeft + marginRight;
+      }
+    });
 
-    // Estimate widths for tabs that haven't been measured yet
+    availableWidth -= nonTabElementsWidth;
+
+    // Calculate total width needed for all tabs
+    let totalRequiredWidth = 0;
     const estimatedWidths = estimateUnrenderedTabWidths(
       tabOrder,
       tabWidgetsRef.current as React.ReactElement<TabWidgetProps>[],
@@ -65,20 +79,17 @@ export function useTabCalculation(
       variant
     );
 
-    // Calculate total required width
     for (const tabId of tabOrder) {
       const tabWidth =
         measurements.get(tabId) || estimatedWidths.get(tabId) || 0;
       totalRequiredWidth += tabWidth;
     }
 
-    // Check if we need the dropdown button
+    // Reserve space for dropdown if needed
     const needsDropdown = totalRequiredWidth > availableWidth;
     if (needsDropdown) {
       availableWidth -= dropdownButtonWidth;
     }
-
-    // Second pass: determine which tabs fit
     for (const tabId of tabOrder) {
       const tabWidth =
         measurements.get(tabId) || estimatedWidths.get(tabId) || 0;

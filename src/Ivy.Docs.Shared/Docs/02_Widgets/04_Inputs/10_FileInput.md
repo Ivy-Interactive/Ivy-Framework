@@ -497,6 +497,30 @@ public class FileInputEventHandlersDemo : ViewBase
 }
 ```
 
+## Large File Uploads
+
+By default, the server limits file uploads to 30 MB. To allow larger file uploads, configure the server limits in your [Program.cs](../../01_Onboarding/02_Concepts/01_Program.md):
+
+```csharp
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
+
+// Remove file size limits for large uploads
+server.UseWebApplicationBuilder(builder =>
+{
+    // Remove Kestrel request body size limit
+    builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = null);
+    
+    // Remove multipart form body length limit
+    builder.Services.Configure<FormOptions>(o => 
+        o.MultipartBodyLengthLimit = long.MaxValue);
+});
+```
+
+<Callout Type="warning">
+Removing file size limits allows unlimited uploads. Always configure `.MaxFileSize()` on your upload context to enforce reasonable limits per upload.
+</Callout>
+
 ## Best Practices
 
 1. **Choose the Right Content Type**: Use `byte[]` for binary files, `string` for text files
@@ -558,6 +582,7 @@ var upload = UseUpload(MemoryStreamUploadHandler.Create(fileState))
 ### Upload Handlers
 
 The most common handler is `MemoryStreamUploadHandler`, which automatically:
+
 - Reads the file stream into memory
 - Updates your state with file data
 - Tracks upload progress

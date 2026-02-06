@@ -83,20 +83,19 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   // Don't apply to data cells without widths - they need to size naturally
   const shouldTruncate = width || isHeader;
 
-  // Only show tooltip for string children to avoid "[object Object]" issues
-  const shouldShowTooltip = !multiLine && typeof children === 'string';
+  // Only show tooltip for string/number children to avoid "[object Object]" issues
+  const shouldShowTooltip =
+    !multiLine &&
+    (typeof children === 'string' || typeof children === 'number');
+
+  const cellClasses = cn('border-border force-text-inherit', {
+    'header-cell bg-muted font-semibold': isHeader,
+    'footer-cell bg-muted font-semibold': isFooter,
+    'max-w-0 overflow-hidden': shouldTruncate,
+  });
 
   return (
-    <TableCell
-      className={cn(
-        isHeader && 'header-cell bg-muted font-semibold',
-        isFooter && 'footer-cell bg-muted font-semibold',
-        'border-border force-text-inherit',
-        // Apply max-w-0 overflow-hidden for truncation
-        shouldTruncate && 'max-w-0 overflow-hidden'
-      )}
-      style={cellStyles}
-    >
+    <TableCell className={cellClasses} style={cellStyles}>
       {shouldShowTooltip ? (
         <TooltipProvider>
           <Tooltip>

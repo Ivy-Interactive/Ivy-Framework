@@ -40,7 +40,7 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
     public Type[] SupportedStateTypes() => [
         typeof(string),
         typeof(Colors), typeof(Colors?)
-        ];
+    ];
 }
 
 public record ColorInput<TColor> : ColorInputBase, IInput<TColor>

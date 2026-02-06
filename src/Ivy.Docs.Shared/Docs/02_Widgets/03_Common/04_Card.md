@@ -42,22 +42,6 @@ new Card(
  .Width(Size.Units(100))
 ```
 
-## Border Customization
-
-Cards support the same border functionality as [Box widgets](../01_Primitives/04_Box.md), allowing you to customize the appearance with [Colors](../../04_ApiReference/IvyShared/Colors.md) and border options while maintaining the default card styling when no border properties are specified.
-
-```csharp demo-below
-new Card(
-    "This card has a custom border with dashed style and primary color.",
-    new Button("Action", _ => client.Toast("Button clicked!"))
-).Title("Custom Border Card")
- .Description("Demonstrating border customization")
- .BorderThickness(3)
- .BorderStyle(BorderStyle.Dashed)
- .BorderColor(Colors.Primary)
- .BorderRadius(BorderRadius.Rounded)
- .Width(Size.Units(100))
-```
 
 ## Dashboard Metrics
 

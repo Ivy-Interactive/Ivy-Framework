@@ -63,13 +63,13 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
             else
             {
-                var result = appRepository.GetMenuItems().Flatten()
-                    .Where(item => item.Children == null || item.Children.Length == 0) // Only include leaf nodes (actual apps)
-                    .Select(item => new { Item = item, Score = ChromeUtils.ItemMatchScore(item, search.Value) })
+                var result = appRepository.GetMenuItems()
+                    .FlattenWithPath()
+                    .Select(x => new { x.Item, x.Path, Score = ChromeUtils.ItemMatchScore(x.Item, search.Value) })
                     .Where(x => x.Score > 0)
                     .OrderByDescending(x => x.Score)
                     .ThenBy(x => x.Item.Label)
-                    .Select(x => x.Item)
+                    .Select(x => x.Item with { Path = string.IsNullOrEmpty(x.Path) ? null : x.Path })
                     .ToArray();
 
                 if (result.Length > 0)

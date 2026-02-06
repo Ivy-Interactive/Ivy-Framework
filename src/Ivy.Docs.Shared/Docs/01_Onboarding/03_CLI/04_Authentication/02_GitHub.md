@@ -1,4 +1,5 @@
 ---
+title: GitHub
 searchHints:
   - github
   - authentication
