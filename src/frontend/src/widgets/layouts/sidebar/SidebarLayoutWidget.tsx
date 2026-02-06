@@ -225,15 +225,18 @@ const CollapsibleMenuItem: React.FC<{
   expandedSections,
   onExpandChange,
 }) => {
-  const [isOpen, setIsOpen] = useState(item.expanded ?? false);
+  // Derive the open state from expandedSections or item.expanded
+  // This avoids calling setState in useEffect
+  const shouldBeOpen =
+    expandedSections.has(item.label) || (item.expanded ?? false);
+  const [isOpen, setIsOpen] = useState(shouldBeOpen);
   const itemRef = useRef<HTMLLIElement>(null);
 
-  // Sync with parent-controlled expansion state
-  useEffect(() => {
-    if (expandedSections.has(item.label)) {
-      setIsOpen(true);
-    }
-  }, [expandedSections, item.label]);
+  // Sync local state with derived state when expandedSections changes
+  // Use direct comparison to avoid unnecessary updates
+  if (shouldBeOpen !== isOpen) {
+    setIsOpen(shouldBeOpen);
+  }
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
