@@ -18,7 +18,7 @@ import { MenuItem, WidgetEventHandlerType } from '@/types/widgets';
 import { useFocusable } from '@/hooks/use-focus-management';
 import { sidebarMenuRef } from './sidebar-refs';
 import { useEventHandler } from '@/components/event-handler';
-import { cn } from '@/lib/utils';
+import { cn, getAppId } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { Separator } from '@/components/ui/separator';
 
@@ -184,7 +184,6 @@ interface SidebarMenuWidgetProps {
   id: string;
   items: MenuItem[];
   searchActive?: boolean;
-  activeTag?: string | null;
 }
 
 type FlatMenuItem = MenuItem & { isGroup?: boolean };
@@ -431,7 +430,6 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   id,
   items = [],
   searchActive = false,
-  activeTag,
 }) => {
   const eventHandler = useEventHandler();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -441,6 +439,9 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
+  
+  // Get active tag from URL instead of props
+  const activeTag = getAppId();
   const prevActiveTagRef = useRef(activeTag);
 
   // Register only the sidebar menu container with useFocusable
