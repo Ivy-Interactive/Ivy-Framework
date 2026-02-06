@@ -439,7 +439,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
-  
+
   // Get active tag from URL instead of props
   const activeTag = getAppId();
   const prevActiveTagRef = useRef(activeTag);
