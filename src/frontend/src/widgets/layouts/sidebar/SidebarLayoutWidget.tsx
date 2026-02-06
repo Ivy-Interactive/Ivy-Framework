@@ -214,8 +214,23 @@ const CollapsibleMenuItem: React.FC<{
   widgetId: string;
   level: number;
   activeTag?: string | null;
-}> = ({ item, eventHandler, widgetId, level, activeTag }) => {
+  expandedSections: Set<string>;
+  onExpandChange: (label: string, expanded: boolean) => void;
+}> = ({ item, eventHandler, widgetId, level, activeTag, expandedSections, onExpandChange }) => {
   const [isOpen, setIsOpen] = useState(item.expanded ?? false);
+  const itemRef = useRef<HTMLLIElement>(null);
+
+  // Sync with parent-controlled expansion state
+  useEffect(() => {
+    if (expandedSections.has(item.label)) {
+      setIsOpen(true);
+    }
+  }, [expandedSections, item.label]);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    onExpandChange(item.label, open);
+  };
 
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -233,8 +248,8 @@ const CollapsibleMenuItem: React.FC<{
   
   if (!!item.children && item.children!.length > 0) {
     return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <li className="relative">
+      <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
+        <li className="relative" ref={itemRef} data-menu-item={item.tag || item.label}>
           <CollapsibleTrigger asChild>
             <button
               className={cn(
@@ -263,7 +278,9 @@ const CollapsibleMenuItem: React.FC<{
                   eventHandler,
                   widgetId,
                   level + 1,
-                  activeTag
+                  activeTag,
+                  expandedSections,
+                  onExpandChange
                 )}
             </ul>
           </CollapsibleContent>
@@ -272,7 +289,7 @@ const CollapsibleMenuItem: React.FC<{
     );
   } else {
     return (
-      <li key={item.label}>
+      <li key={item.label} ref={itemRef} data-menu-item={item.tag || item.label}>
         <button
           className={cn(
             "flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
@@ -294,7 +311,9 @@ const renderMenuItems = (
   eventHandler: WidgetEventHandlerType,
   widgetId: string,
   level: number,
-  activeTag?: string | null
+  activeTag?: string | null,
+  expandedSections: Set<string> = new Set(),
+  onExpandChange: (label: string, expanded: boolean) => void = () => {}
 ) => {
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -318,7 +337,7 @@ const renderMenuItems = (
             </h4>
             <ul className="space-y-1">
               {item.children &&
-                renderMenuItems(item.children!, eventHandler, widgetId, 1, activeTag)}
+                renderMenuItems(item.children!, eventHandler, widgetId, 1, activeTag, expandedSections, onExpandChange)}
             </ul>
           </div>
         );
@@ -331,6 +350,8 @@ const renderMenuItems = (
             widgetId={widgetId}
             level={level}
             activeTag={activeTag}
+            expandedSections={expandedSections}
+            onExpandChange={onExpandChange}
           />
         );
       }
@@ -341,7 +362,7 @@ const renderMenuItems = (
       const isActive = item.tag === activeTag;
       if (level === 1) {
         return (
-          <li key={item.tag}>
+          <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
                 "flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
@@ -357,7 +378,7 @@ const renderMenuItems = (
         );
       } else {
         return (
-          <li key={item.tag}>
+          <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
                 "flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
@@ -385,6 +406,9 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const prevSearchActiveRef = React.useRef(searchActive);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   // Register only the sidebar menu container with useFocusable
   const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
 
@@ -399,6 +423,60 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     }
     prevSearchActiveRef.current = searchActive;
   }, [searchActive]);
+
+  // Helper function to find the path to an item with a specific tag
+  const findPathToTag = useCallback((items: MenuItem[], targetTag: string, path: string[] = []): string[] | null => {
+    for (const item of items) {
+      if (item.tag === targetTag) {
+        return path;
+      }
+      if (item.children && item.children.length > 0) {
+        const result = findPathToTag(item.children, targetTag, [...path, item.label]);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    return null;
+  }, []);
+
+  // Expand sections and scroll to active item when activeTag changes
+  useEffect(() => {
+    if (!activeTag || searchActive) return;
+
+    // Find the path to the active item
+    const path = findPathToTag(items, activeTag);
+    
+    if (path && path.length > 0) {
+      // Expand all parent sections
+      setExpandedSections(new Set(path));
+
+      // Wait for the DOM to update, then scroll to the active item
+      // Use a longer timeout to ensure collapsibles have fully expanded
+      setTimeout(() => {
+        const activeElement = containerRef.current?.querySelector(`[data-menu-item="${activeTag}"]`);
+        if (activeElement) {
+          activeElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+          });
+        }
+      }, 300); // Match the collapsible animation duration
+    }
+  }, [activeTag, items, searchActive, findPathToTag]);
+
+  const handleExpandChange = useCallback((label: string, expanded: boolean) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (expanded) {
+        next.add(label);
+      } else {
+        next.delete(label);
+      }
+      return next;
+    });
+  }, []);
 
   const handleMenuKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -532,6 +610,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         (
           sidebarMenuRef as React.MutableRefObject<HTMLDivElement | null>
         ).current = el;
+        containerRef.current = el;
       }}
       tabIndex={0}
       onFocus={() => {
@@ -550,7 +629,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           </div>
         )
       ) : (
-        renderMenuItems(items, eventHandler, id, 0, activeTag)
+        renderMenuItems(items, eventHandler, id, 0, activeTag, expandedSections, handleExpandChange)
       )}
     </div>
   );
