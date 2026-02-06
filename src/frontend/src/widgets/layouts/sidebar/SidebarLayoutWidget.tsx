@@ -126,9 +126,8 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
         style={{ width: sidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
@@ -245,7 +244,7 @@ const CollapsibleMenuItem: React.FC<{
   };
 
   const isActive = item.tag === activeTag;
-  
+
   if (!!item.children && item.children!.length > 0) {
     return (
       <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
@@ -313,7 +312,7 @@ const renderMenuItems = (
   level: number,
   activeTag?: string | null,
   expandedSections: Set<string> = new Set(),
-  onExpandChange: (label: string, expanded: boolean) => void = () => {}
+  onExpandChange: (label: string, expanded: boolean) => void = () => { }
 ) => {
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -410,7 +409,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
   const prevActiveTagRef = useRef(activeTag);
-  
+
   // Register only the sidebar menu container with useFocusable
   const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
 
@@ -448,7 +447,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
 
     // Find the path to the active item
     const path = findPathToTag(items, activeTag);
-    
+
     if (path && path.length > 0) {
       // Always expand parent sections
       setExpandedSections(new Set(path));
@@ -468,11 +467,11 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
             });
           }
         }, 300); // Match the collapsible animation duration
-        
+
         isInitialMount.current = false;
       }
     }
-    
+
     prevActiveTagRef.current = activeTag;
   }, [activeTag, items, searchActive, findPathToTag]);
 
