@@ -76,7 +76,7 @@ public record Button : WidgetBase<Button>
 
     [Prop] public string? Url { get; set; }
 
-    [Prop] public LinkTarget Target { get; set; } = LinkTarget.Blank;
+    [Prop] public LinkTarget Target { get; set; } = LinkTarget.Self;
 
     [Prop] public bool Disabled { get; set; }
 
@@ -203,4 +203,7 @@ public static class ButtonExtensions
 
     [RelatedTo(nameof(Button.Target))]
     public static Button Target(this Button button, LinkTarget target) => button with { Target = target };
+
+    [RelatedTo(nameof(Button.Target))]
+    public static Button OpenInNewTab(this Button button) => button with { Target = LinkTarget.Blank };
 }
