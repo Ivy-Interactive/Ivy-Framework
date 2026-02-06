@@ -58,7 +58,7 @@ public class AuthController() : Controller
             scheme = forwardedProto.ToString();
         }
         var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
-        var callbackBaseUrl = $"{scheme}://{host}/ivy/auth/oauth-callback";
+        var callbackBaseUrl = $"{scheme}://{host}/ivy/auth/callback";
         var callback = new CallbackEndpoint(callbackId, callbackBaseUrl);
 
         try
@@ -74,8 +74,8 @@ public class AuthController() : Controller
         }
     }
 
-    [Route("ivy/auth/oauth-callback")]
-    [Route("ivy/auth/oauth-callback/{callbackId}")]
+    [Route("ivy/auth/callback")]
+    [Route("ivy/auth/callback/{callbackId}")]
     [HttpGet]
     public async Task<IActionResult> OAuthCallback(
         string? callbackId,

@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Ivy.Auth;
 using Ivy.Chrome;
 using Ivy.Core;
 using Ivy.Core.Hooks;

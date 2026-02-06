@@ -1,5 +1,4 @@
-﻿using Ivy.Hooks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace Ivy.Auth;
 
@@ -28,3 +27,17 @@ public interface IAuthProvider
 
     Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
 }
+
+public record CallbackEndpoint(string Id, string BaseUrl)
+{
+    public CallbackEndpoint(string id, string scheme, string host) : this(id, BuildBaseUrl(scheme, host))
+    {
+    }
+
+    public static string BuildBaseUrl(string scheme, string host) => $"{scheme}://{host}/ivy/webhook";
+
+    public Uri GetUri(bool includeIdInPath = true) => includeIdInPath
+        ? new Uri($"{BaseUrl}/{Id}")
+        : new Uri(BaseUrl);
+}
+

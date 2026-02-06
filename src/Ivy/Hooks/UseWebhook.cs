@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Ivy.Apps;
+using Ivy.Auth;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Microsoft.AspNetCore.Http;
@@ -41,21 +42,6 @@ public static class UseWebhookExtensions
 
         return new CallbackEndpoint(webhookId.Value, args.Scheme, args.Host);
     }
-}
-
-public record CallbackEndpoint(string Id, string BaseUrl)
-{
-    public CallbackEndpoint(string id, string scheme, string host) : this(id, BuildBaseUrl(scheme, host))
-    {
-    }
-
-    public static string BuildBaseUrl(string scheme, string host) => $"{scheme}://{host}/ivy/webhook";
-
-    public static string BuildBaseUrl(string scheme, string host, string path) => $"{scheme}://{host}{path}";
-
-    public Uri GetUri(bool includeIdInPath = true) => includeIdInPath
-        ? new Uri($"{BaseUrl}/{Id}")
-        : new Uri(BaseUrl);
 }
 
 public interface IWebhookRegistry

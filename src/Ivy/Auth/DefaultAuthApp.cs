@@ -147,8 +147,6 @@ public class OAuthFlowView(AuthOption option) : ViewBase
 
         var state = this.UseState(() => registry.RegisterPending(args.ConnectionId, option.Id ?? ""));
 
-        var callbackUrl = $"{args.Scheme}://{args.Host}/ivy/auth/oauth-callback";
-
         var oauthUriBuilder = new UriBuilder($"{args.Scheme}://{args.Host}/ivy/auth/oauth-login")
         {
             Query = $"optionId={Uri.EscapeDataString(option.Id ?? "")}&callbackId={Uri.EscapeDataString(state.Value)}&connectionId={Uri.EscapeDataString(args.ConnectionId)}"
