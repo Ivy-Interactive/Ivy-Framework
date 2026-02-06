@@ -370,13 +370,22 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         }
 
         var searchInput = search.ToSearchInput().ShortcutKey("CTRL+K").TestId("sidebar-search");
+        
+        // Get the active app ID for highlighting in the sidebar
+        var activeAppId = settings.Navigation == ChromeNavigation.Pages 
+            ? currentApp.Value?.AppId 
+            : (selectedIndex.Value.HasValue && tabs.Value.Length > selectedIndex.Value 
+                ? tabs.Value[selectedIndex.Value.Value].AppId 
+                : null);
+        
         var sidebarMenu = new SidebarMenu(
             OnMenuSelect,
             menuItems.Value
         )
         {
             OnCtrlRightClickSelect = OnCtrlRightClickSelect,
-            SearchActive = !string.IsNullOrWhiteSpace(search.Value)
+            SearchActive = !string.IsNullOrWhiteSpace(search.Value),
+            ActiveTag = activeAppId
         };
 
         var commonMenuItems = new[]

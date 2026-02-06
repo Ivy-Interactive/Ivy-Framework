@@ -55,6 +55,8 @@ public record SidebarMenu : WidgetBase<SidebarLayout>
 
     [Prop] public bool SearchActive { get; set; } = false;
 
+    [Prop] public string? ActiveTag { get; set; }
+
     [Prop] public MenuItem[] Items { get; set; }
 
     [Event] public Func<Event<SidebarMenu, object>, ValueTask> OnSelect { get; set; }

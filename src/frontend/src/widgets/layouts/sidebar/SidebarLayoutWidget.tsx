@@ -183,6 +183,7 @@ interface SidebarMenuWidgetProps {
   id: string;
   items: MenuItem[];
   searchActive?: boolean;
+  activeTag?: string | null;
 }
 
 type FlatMenuItem = MenuItem & { isGroup?: boolean };
@@ -211,7 +212,8 @@ const CollapsibleMenuItem: React.FC<{
   eventHandler: WidgetEventHandlerType;
   widgetId: string;
   level: number;
-}> = ({ item, eventHandler, widgetId, level }) => {
+  activeTag?: string | null;
+}> = ({ item, eventHandler, widgetId, level, activeTag }) => {
   const [isOpen, setIsOpen] = useState(item.expanded ?? false);
 
   const onItemClick = (item: MenuItem) => {
@@ -226,13 +228,18 @@ const CollapsibleMenuItem: React.FC<{
     }
   };
 
+  const isActive = item.tag === activeTag;
+  
   if (!!item.children && item.children!.length > 0) {
     return (
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <li className="relative">
           <CollapsibleTrigger asChild>
             <button
-              className="group flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
+              className={cn(
+                "group flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
+                isActive && "bg-accent text-accent-foreground"
+              )}
               onClick={() => {
                 // For items with children, toggle the collapsible state
                 // Only try to navigate if the item has a tag
@@ -254,7 +261,8 @@ const CollapsibleMenuItem: React.FC<{
                   item.children!,
                   eventHandler,
                   widgetId,
-                  level + 1
+                  level + 1,
+                  activeTag
                 )}
             </ul>
           </CollapsibleContent>
@@ -265,7 +273,10 @@ const CollapsibleMenuItem: React.FC<{
     return (
       <li key={item.label}>
         <button
-          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
+          className={cn(
+            "flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
+            isActive && "bg-accent text-accent-foreground"
+          )}
           onClick={() => onItemClick(item)}
           onMouseDown={e => onCtrlRightMouseClick(e, item)}
         >
@@ -281,7 +292,8 @@ const renderMenuItems = (
   items: MenuItem[],
   eventHandler: WidgetEventHandlerType,
   widgetId: string,
-  level: number
+  level: number,
+  activeTag?: string | null
 ) => {
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -305,7 +317,7 @@ const renderMenuItems = (
             </h4>
             <ul className="space-y-1">
               {item.children &&
-                renderMenuItems(item.children!, eventHandler, widgetId, 1)}
+                renderMenuItems(item.children!, eventHandler, widgetId, 1, activeTag)}
             </ul>
           </div>
         );
@@ -317,6 +329,7 @@ const renderMenuItems = (
             eventHandler={eventHandler}
             widgetId={widgetId}
             level={level}
+            activeTag={activeTag}
           />
         );
       }
@@ -324,11 +337,15 @@ const renderMenuItems = (
       if (level === 0) {
         return <></>;
       }
+      const isActive = item.tag === activeTag;
       if (level === 1) {
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
+              className={cn(
+                "flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
+                isActive && "bg-accent text-accent-foreground"
+              )}
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -341,7 +358,10 @@ const renderMenuItems = (
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
+              className={cn(
+                "flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
+                isActive && "bg-accent text-accent-foreground"
+              )}
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -359,6 +379,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   id,
   items = [],
   searchActive = false,
+  activeTag,
 }) => {
   const eventHandler = useEventHandler();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -479,7 +500,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           </div>
         )
       ) : (
-        renderMenuItems(items, eventHandler, id, 0)
+        renderMenuItems(items, eventHandler, id, 0, activeTag)
       )}
     </div>
   );
