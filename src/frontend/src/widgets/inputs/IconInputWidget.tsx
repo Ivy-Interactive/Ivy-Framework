@@ -1,4 +1,10 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { inputStyles } from '@/lib/styles';
@@ -7,6 +13,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/Icon';
@@ -92,6 +104,63 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
 
   const hasValue = value != null && value !== '' && value !== 'None';
 
+  const valueTextRef = useRef<HTMLSpanElement>(null);
+  const [isEllipsed, setIsEllipsed] = useState(false);
+
+  useEffect(() => {
+    if (!hasValue || !value) {
+      requestAnimationFrame(() => setIsEllipsed(false));
+      return;
+    }
+
+    const checkEllipsis = () => {
+      if (!valueTextRef.current) return;
+      setIsEllipsed(
+        valueTextRef.current.scrollWidth > valueTextRef.current.clientWidth
+      );
+    };
+
+    requestAnimationFrame(checkEllipsis);
+
+    let resizeTimeout: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(checkEllipsis, 150);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [hasValue, value]);
+
+  const valueTextSpan = hasValue ? (
+    <span
+      ref={valueTextRef}
+      className={cn(
+        'min-w-0 overflow-hidden text-ellipsis whitespace-nowrap',
+        iconInputTextVariants({ scale })
+      )}
+    >
+      {value}
+    </span>
+  ) : null;
+
+  const wrappedValueText =
+    isEllipsed && value ? (
+      <TooltipProvider>
+        <Tooltip delayDuration={300}>
+          <TooltipTrigger asChild>{valueTextSpan}</TooltipTrigger>
+          <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+            <div className="whitespace-pre-wrap wrap-break-word">{value}</div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    ) : (
+      valueTextSpan
+    );
+
   return (
     <div className="flex items-center gap-2 min-w-0">
       <Popover open={open} onOpenChange={handleOpenChange}>
@@ -107,16 +176,12 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             )}
           >
             {hasValue ? (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 min-w-0">
                 <Icon
                   name={value}
                   className={cn('shrink-0', iconInputIconVariants({ scale }))}
                 />
-                <span
-                  className={cn('truncate', iconInputTextVariants({ scale }))}
-                >
-                  {value}
-                </span>
+                {wrappedValueText}
               </span>
             ) : (
               <span className={cn(iconInputTextVariants({ scale }))}>
