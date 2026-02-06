@@ -417,7 +417,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           <button
             className={`flex w-full rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer min-h-8 text-left ${
               isActive ? 'bg-accent text-accent-foreground' : ''
-            } ${showPath && item.path ? 'flex-col items-start gap-0.5' : 'items-center gap-2'}`}
+            } ${showPath && item.path ? 'flex-col items-start gap-1' : 'items-center gap-2'}`}
             tabIndex={-1}
             onClick={() => {
               if (item.tag) {
@@ -481,11 +481,11 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
                   )}
                   <li className="list-none">
                     {path && (
-                      <div className="px-2 pt-2 pb-0.5 text-xs text-muted-foreground truncate">
+                      <div className="px-2 pt-2 pb-1 text-xs text-muted-foreground truncate">
                         {path}
                       </div>
                     )}
-                    <ul className="space-y-0.5">
+                    <ul className="space-y-1">
                       {pathItems.map(child => renderResultItem(child, false))}
                     </ul>
                   </li>
@@ -504,7 +504,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
             <button
               className={`flex w-full rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer min-h-8 text-left ${
                 isActive ? 'bg-accent text-accent-foreground' : ''
-              } ${item.path ? 'flex-col items-start gap-0.5' : 'items-center gap-2'}`}
+              } ${item.path ? 'flex-col items-start gap-1' : 'items-center gap-2'}`}
               tabIndex={-1} // Not focusable
               onClick={() => {
                 if (item.tag) {
