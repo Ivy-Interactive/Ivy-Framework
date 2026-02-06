@@ -13,7 +13,6 @@ import Icon from '@/components/Icon';
 import { icons } from 'lucide-react';
 import { X, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import { Scales } from '@/types/scale';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
 
@@ -38,7 +37,6 @@ interface IconInputWidgetProps {
 }
 
 const ICONS_PER_ROW = 8;
-const ICON_CELL_SIZE = 36;
 const POPOVER_HEIGHT = 280;
 
 export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
@@ -60,25 +58,6 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
     const q = search.toLowerCase().trim();
     return LUCIDE_ICON_NAMES.filter(name => name.toLowerCase().includes(q));
   }, [search]);
-
-  const rowCount = Math.ceil(filteredIcons.length / ICONS_PER_ROW);
-  const rows = useMemo(() => {
-    const result: string[][] = [];
-    for (let i = 0; i < rowCount; i++) {
-      result.push(
-        filteredIcons.slice(i * ICONS_PER_ROW, (i + 1) * ICONS_PER_ROW)
-      );
-    }
-    return result;
-  }, [filteredIcons, rowCount]);
-
-  const parentRef = React.useRef<HTMLDivElement>(null);
-  const virtualizer = useVirtualizer({
-    count: rowCount,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => ICON_CELL_SIZE + 4,
-    overscan: 3,
-  });
 
   const handleSelect = useCallback(
     (iconName: string) => {
@@ -151,57 +130,34 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
               />
             </div>
           </div>
-          <div
-            ref={parentRef}
-            className="overflow-auto"
-            style={{ height: POPOVER_HEIGHT }}
-          >
+          <div className="overflow-auto" style={{ height: POPOVER_HEIGHT }}>
             {filteredIcons.length === 0 ? (
               <div className="flex items-center justify-center h-24 text-muted-foreground text-sm">
                 No icons found
               </div>
             ) : (
               <div
+                className="grid gap-1 p-2"
                 style={{
-                  height: `${virtualizer.getTotalSize()}px`,
-                  width: '100%',
-                  position: 'relative',
+                  gridTemplateColumns: `repeat(${ICONS_PER_ROW}, minmax(0, 1fr))`,
                 }}
               >
-                {virtualizer.getVirtualItems().map(virtualRow => {
-                  const rowIcons = rows[virtualRow.index] || [];
+                {filteredIcons.map(iconName => {
+                  const isSelected = value === iconName;
                   return (
-                    <div
-                      key={virtualRow.key}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: `${virtualRow.size}px`,
-                        transform: `translateY(${virtualRow.start}px)`,
-                      }}
-                      className="flex items-center gap-1 px-2"
+                    <button
+                      key={iconName}
+                      type="button"
+                      onClick={() => handleSelect(iconName)}
+                      className={cn(
+                        'flex items-center justify-center aspect-square min-w-0 rounded-md',
+                        'hover:bg-accent transition-colors',
+                        isSelected && 'bg-primary text-primary-foreground'
+                      )}
+                      title={iconName}
                     >
-                      {rowIcons.map(iconName => {
-                        const isSelected = value === iconName;
-                        return (
-                          <button
-                            key={iconName}
-                            type="button"
-                            onClick={() => handleSelect(iconName)}
-                            className={cn(
-                              'flex items-center justify-center w-9 h-9 rounded-md shrink-0',
-                              'hover:bg-accent transition-colors',
-                              isSelected && 'bg-primary text-primary-foreground'
-                            )}
-                            title={iconName}
-                          >
-                            <Icon name={iconName} size={20} />
-                          </button>
-                        );
-                      })}
-                    </div>
+                      <Icon name={iconName} size={20} className="shrink-0" />
+                    </button>
                   );
                 })}
               </div>
