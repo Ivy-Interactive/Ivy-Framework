@@ -162,7 +162,7 @@ const MultipleSelector = React.forwardRef<
                   className={cn(
                     badgeVariants({ scale }),
                     invalid &&
-                    'bg-destructive/10 border-destructive text-destructive'
+                      'bg-destructive/10 border-destructive text-destructive'
                   )}
                 >
                   {option.label}
@@ -279,7 +279,12 @@ const MultipleSelector = React.forwardRef<
                     >
                       <span>{option.label}</span>
                       {selected && (
-                        <X className={cn(xIconVariants({ scale }), 'text-muted-foreground hover:text-foreground')} />
+                        <X
+                          className={cn(
+                            xIconVariants({ scale }),
+                            'text-muted-foreground hover:text-foreground'
+                          )}
+                        />
                       )}
                     </CommandItem>
                   );
@@ -293,7 +298,6 @@ const MultipleSelector = React.forwardRef<
             </div>
           )}
         </div>
-
       </Command>
     );
   }
