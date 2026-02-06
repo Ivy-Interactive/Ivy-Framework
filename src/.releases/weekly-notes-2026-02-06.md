@@ -76,7 +76,7 @@ var colorState = UseState(Colors.Blue);
 colorState.ToColorInput()  // Automatically uses Swatch variant
 
 // Or explicitly set the variant
-var colorState = UseState("red");
+var colorState = UseState(Colors.Red);
 colorState.ToColorInput().Variant(ColorInputs.Swatch)
 ```
 
@@ -95,14 +95,6 @@ Tables now default to `Size.Full()` width instead of a calculated smart width. P
 The `Text.Literal()` method has been streamlined and now returns a `TextBlock` directly instead of a `TextBuilder`. This means you can no longer chain styling methods like `.Bold()`, `.Italic()`, or `.Color()` on literal text.
 
 ## Bug Fixes
-
-### Navigation State Preservation on Reconnect
-
-Fixed an issue where navigation arguments were lost when the application reconnected after a disconnection. The framework now properly preserves and restores all navigation state when reconnecting:
-
-- **App Arguments Restoration**: When navigating to an app after reconnection, the framework now passes along any app arguments that were present before the disconnection
-- **State Continuity**: Users will no longer lose their navigation context when experiencing temporary connection issues
-- **Intentional Disconnect Handling**: The disconnect modal is now suppressed when the connection is intentionally closed (e.g., during cleanup), preventing misleading error messages/
 
 ### MetricView API
 
