@@ -40,6 +40,9 @@ public static class InputExtensions
             { } t when t == typeof(Colors) => new ColorInput<T>(state, placeholder, disabled),
             { } t when t == typeof(Colors?) => new ColorInput<T>(state, placeholder, disabled),
 
+            { } t when t == typeof(Icons) => new IconInput<T>(state, placeholder, disabled),
+            { } t when t == typeof(Icons?) => new IconInput<T>(state, placeholder, disabled),
+
             _ => throw new InvalidOperationException($"Invalid state type: {state.GetType()} for ToInput conversion.")
         };
     }

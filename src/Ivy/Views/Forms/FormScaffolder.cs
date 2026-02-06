@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Ivy.Core.Hooks;
 using Ivy.Services;
+using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
@@ -125,6 +126,11 @@ internal static class FormScaffolder
 
                 return input;
             };
+        }
+
+        if (nonNullableType == typeof(Icons))
+        {
+            return (state) => state.ToIconInput();
         }
 
         if (nonNullableType.IsEnum)

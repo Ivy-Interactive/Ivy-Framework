@@ -5,6 +5,7 @@ export { NumberInputWidget } from './NumberInputWidget';
 export { SelectInputWidget } from './SelectInputWidget';
 export { ReadOnlyInputWidget } from './ReadOnlyInputWidget';
 export { ColorInputWidget } from './ColorInputWidget';
+export { IconInputWidget } from './IconInputWidget';
 export { FeedbackInputWidget } from './FeedbackInputWidget';
 export { AsyncSelectInputWidget } from './AsyncSelectInputWidget';
 export { DateRangeInputWidget } from './DateRangeInputWidget';
