@@ -55,7 +55,7 @@ The app starts (by default on port 5010). Open the URL shown in the terminal to 
 
 ## Prerequisites
 
-- [**.NET 10** or later](https://dotnet.microsoft.com/download/dotnet/10.0) (single-file `dotnet run` is supported from .NET 10).
+- [**.NET 10** or later](https://dotnet.microsoft.com/download/dotnet/10.0) (single-file `dotnet run` is supported from .NET 10). See [Enhanced file-based apps](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/sdk#enhanced-file-based-apps-with-publish-support-and-native-aot) in the Microsoft documentation.
 - [Ivy NuGet package](https://www.nuget.org/packages/Ivy) (referenced via a file-level directive in the script).
 
 ## File-Level Directive: Package
