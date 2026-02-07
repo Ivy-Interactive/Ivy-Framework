@@ -61,8 +61,6 @@ public static partial class MarkdownConverter
             }
         }
 
-        Console.WriteLine("Converting {0} to {1}", absolutePath, outputFile);
-
         var pipeline = new MarkdownPipelineBuilder()
             .UseAdvancedExtensions()
             .UsePreciseSourceLocation()
@@ -356,7 +354,6 @@ public static partial class MarkdownConverter
         catch (System.Xml.XmlException)
         {
             // If it's not valid XML, skip it (probably a standard HTML element)
-            Console.WriteLine($"Skipping non-XML HTML block: {htmlContent[..Math.Min(50, htmlContent.Length)]}...");
             return;
         }
 

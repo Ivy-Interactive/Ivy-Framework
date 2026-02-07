@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Xml.Linq;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Ivy.Docs.Tools;
@@ -32,40 +33,59 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         var projectFile = GetProjectFile(inputFolder);
         var rootNamespace = GetRootNamespace(projectFile);
 
-        var tasks = Directory.GetFiles(inputFolder, pattern, SearchOption.AllDirectories).Select(async absoluteInputPath =>
-        {
-            var (order, name) = Utils.GetOrderFromFileName(absoluteInputPath);
+        var files = Directory.GetFiles(inputFolder, pattern, SearchOption.AllDirectories);
 
-            if (name == "_Index")
+        await AnsiConsole.Progress()
+            .AutoClear(false)
+            .Columns(
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn { CompletedStyle = new Style(Color.Green), RemainingStyle = new Style(Color.Grey) },
+                new PercentageColumn()
+            )
+            .StartAsync(async ctx =>
             {
-                (order, _) = Utils.GetOrderFromFileName(Path.GetFileName(Path.GetDirectoryName(absoluteInputPath))!);
-            }
-            string relativeInputPath = Path.GetRelativePath(inputFolder, absoluteInputPath);
-            string relativeOutputPath = Utils.GetRelativeFolderWithoutOrder(inputFolder, absoluteInputPath);
+                var progressTask = ctx.AddTask($"[green]Converting {files.Length} files[/]");
+                progressTask.MaxValue = files.Length;
 
-            string folder = Path.GetFullPath(Path.Combine(outputFolder, relativeOutputPath));
+                await Parallel.ForEachAsync(files, cancellationToken, async (absoluteInputPath, ct) =>
+                {
+                    var (order, name) = Utils.GetOrderFromFileName(absoluteInputPath);
 
-            Directory.CreateDirectory(folder);
+                    if (name == "_Index")
+                    {
+                        (order, _) = Utils.GetOrderFromFileName(Path.GetFileName(Path.GetDirectoryName(absoluteInputPath))!);
+                    }
+                    string relativeInputPath = Path.GetRelativePath(inputFolder, absoluteInputPath);
+                    string relativeOutputPath = Utils.GetRelativeFolderWithoutOrder(inputFolder, absoluteInputPath);
 
-            string ivyOutput = Path.Combine(folder, $"{name}.g.cs");
-            string llmMarkdownOutput = Path.Combine(folder, $"{name}.md");
+                    string folder = Path.GetFullPath(Path.Combine(outputFolder, relativeOutputPath));
 
-            var namespaceSuffix = relativeOutputPath
-                .Replace(Path.DirectorySeparatorChar, '.')
-                .Replace(Path.AltDirectorySeparatorChar, '.').Trim('.');
+                    Directory.CreateDirectory(folder);
 
-            if (namespaceSuffix.StartsWith("Generated."))
-                namespaceSuffix = namespaceSuffix.Substring("Generated.".Length);
+                    string ivyOutput = Path.Combine(folder, $"{name}.g.cs");
+                    string llmMarkdownOutput = Path.Combine(folder, $"{name}.md");
 
-            string @namespace = string.IsNullOrEmpty(namespaceSuffix)
-                ? $"{rootNamespace}.Apps"
-                : $"{rootNamespace}.Apps.{namespaceSuffix}";
+                    var namespaceSuffix = relativeOutputPath
+                        .Replace(Path.DirectorySeparatorChar, '.')
+                        .Replace(Path.AltDirectorySeparatorChar, '.').Trim('.');
 
-            await MarkdownConverter.ConvertAsync(name, relativeInputPath, absoluteInputPath, ivyOutput, @namespace, settings.SkipIfNotChanged, order);
-            await GenerateLlmMarkdownAsync(absoluteInputPath, llmMarkdownOutput, settings.SkipIfNotChanged);
-        });
+                    if (namespaceSuffix.StartsWith("Generated."))
+                        namespaceSuffix = namespaceSuffix.Substring("Generated.".Length);
 
-        await Task.WhenAll(tasks);
+                    string @namespace = string.IsNullOrEmpty(namespaceSuffix)
+                        ? $"{rootNamespace}.Apps"
+                        : $"{rootNamespace}.Apps.{namespaceSuffix}";
+
+                    await Task.WhenAll(
+                        MarkdownConverter.ConvertAsync(name, relativeInputPath, absoluteInputPath, ivyOutput, @namespace, settings.SkipIfNotChanged, order),
+                        GenerateLlmMarkdownAsync(absoluteInputPath, llmMarkdownOutput, settings.SkipIfNotChanged)
+                    );
+
+                    progressTask.Increment(1);
+                });
+            });
+
+        AnsiConsole.MarkupLine($"[green]✓ Done! Converted {files.Length} files.[/]");
 
         return 0;
     }
@@ -105,8 +125,6 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 return;
             }
         }
-
-        Console.WriteLine("Generating {0}", outputFile);
 
         string outputContent = await LlmMarkdownGenerator.GenerateAsync(markdownContent, inputFile);
 
