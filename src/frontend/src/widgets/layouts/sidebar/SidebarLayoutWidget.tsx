@@ -137,7 +137,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           </div>
         )}
         {slots?.SidebarContent && (
-          <div className="flex-1 min-h-0 min-w-0 overflow-hidden pr-2">
+          <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
             <ScrollArea className="h-full w-full">
               <div className="p-2 space-y-2">{slots.SidebarContent}</div>
             </ScrollArea>
@@ -186,7 +186,6 @@ interface SidebarMenuWidgetProps {
   searchActive?: boolean;
 }
 
-/** Builds flat list of selectable items in the exact same order as search results are rendered (by path groups). */
 const getFlatItemsInSearchRenderOrder = (items: MenuItem[]): MenuItem[] => {
   const result: MenuItem[] = [];
   for (const item of items) {
@@ -387,7 +386,6 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     prevSearchActiveRef.current = searchActive;
   }, [searchActive]);
 
-  // Scroll the focused search result into view only when outside the sidebar viewport
   useEffect(() => {
     if (!searchActive || flatItems.length === 0) return;
     const el = menuContainerRef.current?.querySelector<HTMLElement>(
