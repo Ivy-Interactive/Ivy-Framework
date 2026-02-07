@@ -64,19 +64,23 @@ var colorState = UseState(Colors.Red);
 colorState.ToColorInput().Variant(ColorInputs.Swatch)
 ```
 
+<img width="391" height="342" alt="image" src="https://github.com/user-attachments/assets/e39424af-af6e-4353-83e5-c08221e8e26d" />
+
 ### Terminal Widget
 
 The `Terminal` widget has been promoted from internal API to a public primitive widget. You can now use it to display terminal-like output in your applications.
 
 ```csharp
 new Terminal()
-    .Lines(new[]
-    {
-        new TerminalLine("$ npm install", IsCommand: true),
-        new TerminalLine("Installing packages..."),
-        new TerminalLine("Done!")
-    })
+    .Title("Installation")
+    .AddCommand("dotnet tool install -g Ivy.Console")
+    .AddOutput("You can use the following command to install Ivy globally.")
+    .ShowCopyButton(true);
 ```
+<img width="2052" height="216" alt="image" src="https://github.com/user-attachments/assets/5ecbc225-1765-436e-8a53-72cf1ced2ef2" />
+
+
+
 
 ## Breaking Changes
 
