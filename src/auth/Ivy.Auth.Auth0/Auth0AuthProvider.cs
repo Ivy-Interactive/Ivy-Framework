@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Security.Claims;
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
-using Ivy.Hooks;
+using Ivy.Core;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
