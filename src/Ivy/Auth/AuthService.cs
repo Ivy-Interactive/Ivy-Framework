@@ -1,7 +1,6 @@
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Helpers;
-using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 
 namespace Ivy.Auth;

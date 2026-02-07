@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using Ivy.Apps;
-using Ivy.Auth;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Microsoft.AspNetCore.Http;
