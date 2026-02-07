@@ -424,9 +424,9 @@ public class LayoutWidgetsDemo : ViewBase
             ).Title("FloatingPanel").Description("Fixed position overlay").Height(Size.Units(60))
             | new Card(
                 new ResizeablePanelGroup(
-                    new ResizeablePanel(40,
+                    new ResizeablePanel(Size.Fraction(0.4f),
                         new Card("Left")),
-                    new ResizeablePanel(60,
+                    new ResizeablePanel(Size.Fraction(0.6f),
                         new Card("Right"))
                 )
             ).Title("ResizeablePanelGroup").Description("Resizable panels").Height(Size.Units(60));

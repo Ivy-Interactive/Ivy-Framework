@@ -183,6 +183,42 @@ public class AutoSizingView : ViewBase
 }
 ```
 
+### Min/Max Constraints
+
+Panels can have minimum and maximum size constraints to limit how small or large they can be resized:
+
+```csharp demo-tabs
+public class MinMaxSizingView : ViewBase
+{
+    public override object? Build()
+    {
+        return new ResizeablePanelGroup(
+            new ResizeablePanel(
+                Size.Fraction(0.3f).Min(0.15f).Max(0.5f), 
+                new Card(
+                    Layout.Vertical()
+                        | Text.Label("Constrained Panel")
+                        | Text.Block("Default: 30%")
+                        | Text.Block("Min: 15%, Max: 50%")
+                        | Text.Block("Try resizing!")
+                )),
+            new ResizeablePanel(
+                Size.Fraction(0.7f).Min(0.5f).Max(0.85f), 
+                new Card(
+                    Layout.Vertical()
+                        | Text.Label("Main Content")
+                        | Text.Block("Default: 70%")
+                        | Text.Block("Min: 50%, Max: 85%")
+                ))
+        );
+    }
+}
+```
+
+<Callout Type="info">
+Use `.Min()` and `.Max()` extension methods to set size constraints. Only `Size.Fraction()` is supported for resizeable panels.
+</Callout>
+
 ## Handle Visibility
 
 ### Show/Hide Resize Handles

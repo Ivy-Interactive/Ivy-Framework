@@ -106,8 +106,8 @@ export const ResizeablePanelGroupWidget: React.FC<
                 defaultSize={
                   defaultSize ?? Math.floor(100 / panelWidgets.length)
                 }
-                minSize={minSize}
-                maxSize={maxSize}
+                {...(minSize !== undefined && { minSize })}
+                {...(maxSize !== undefined && { maxSize })}
                 className="h-full"
               >
                 {panelWidget}
