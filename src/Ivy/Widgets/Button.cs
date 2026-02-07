@@ -205,5 +205,5 @@ public static class ButtonExtensions
     public static Button Target(this Button button, LinkTarget target) => button with { Target = target };
 
     [RelatedTo(nameof(Button.Target))]
-    public static Button OpenInNewTab(this Button button) => button with { Target = LinkTarget.Blank };
+    public static Button OpenInNewTab(this Button button, bool openInNewTab = true) => button with { Target = openInNewTab ? LinkTarget.Blank : LinkTarget.Self };
 }

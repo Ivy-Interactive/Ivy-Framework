@@ -1,6 +1,7 @@
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Helpers;
 using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -85,6 +86,7 @@ public class AuthController() : Controller
         [FromQuery(Name = "error_description")] string? errorDescription,
         [FromServices] IOAuthCallbackRegistry registry,
         [FromServices] IAuthProvider authProvider,
+        [FromServices] AppSessionStore sessionStore,
         [FromServices] ILogger<AuthController> logger)
     {
         var effectiveId = callbackId ?? state;
@@ -110,7 +112,15 @@ public class AuthController() : Controller
 
         try
         {
-            var tempSession = new AuthSession(new HttpClientHandler());
+            // Get the session and its HttpMessageHandler using the connectionId from the pending callback
+            if (!sessionStore.Sessions.TryGetValue(pending.ConnectionId, out var appSession))
+            {
+                logger.LogWarning("OAuth callback failed: Session not found for connection {ConnectionId}", pending.ConnectionId);
+                return BadRequest("Authentication error: app session expired");
+            }
+
+            var httpMessageHandler = appSession.AppServices.GetRequiredService<HttpMessageHandler>();
+            var tempSession = AuthHelper.GetAuthSession(HttpContext, httpMessageHandler);
 
             var token = await authProvider.HandleOAuthCallbackAsync(tempSession, HttpContext.Request);
 

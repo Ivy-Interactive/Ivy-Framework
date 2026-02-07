@@ -144,6 +144,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
     {
         var args = this.UseService<AppContext>();
         var registry = this.UseService<IOAuthCallbackRegistry>();
+        var auth = this.UseService<IAuthProvider>();
 
         var state = this.UseState(() => registry.RegisterPending(args.ConnectionId, option.Id ?? ""));
 
@@ -156,6 +157,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
             .Icon(option.Icon)
             .Width(Size.Full())
             .Url(oauthUriBuilder.ToString())
-            .Target(LinkTarget.Self);
+            .Target(LinkTarget.Self)
+            .OpenInNewTab(auth.OpenOAuthLoginInNewTab);
     }
 }
