@@ -1,3 +1,4 @@
-import React from 'react';
-
-export const sidebarMenuRef = React.createRef<HTMLDivElement>();
+/** Shared ref for the sidebar menu root (assign in callback ref, no cast needed). */
+export const sidebarMenuRef: { current: HTMLDivElement | null } = {
+  current: null,
+};
