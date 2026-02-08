@@ -22,9 +22,7 @@ public static class UseDataTableExtensions
         if (!hasRun.Value && connection.Value == null)
         {
             var (cleanup, _connection) = dataTableService.AddQueryable(queryable, idSelector);
-            
             _connection.SetClientNotifier(clientNotifier);
-            
             connection.Set(_connection);
             hasRun.Set(true);
 

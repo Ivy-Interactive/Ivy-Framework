@@ -800,8 +800,12 @@ export const useBackend = (
           });
 
           connection.on('DataTableRefresh', (sourceId: string) => {
-            logger.debug(`[${connection.connectionId}] DataTableRefresh`, { sourceId });
-            window.dispatchEvent(new CustomEvent('ivy:datatable:refresh', { detail: sourceId }));
+            logger.debug(`[${connection.connectionId}] DataTableRefresh`, {
+              sourceId,
+            });
+            window.dispatchEvent(
+              new CustomEvent('ivy:datatable:refresh', { detail: sourceId })
+            );
           });
 
           connection.on('HttpRequest', message => {
