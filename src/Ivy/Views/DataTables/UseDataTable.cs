@@ -16,11 +16,15 @@ public static class UseDataTableExtensions
         var connection = context.UseState<DataTableConnection?>(buildOnChange: false);
         var hasRun = context.UseState(false, buildOnChange: false);
         var dataTableService = context.UseService<IDataTableService>();
+        var clientNotifier = context.UseService<IClientNotifier>();
 
         // Only create connection once - check hasRun flag
         if (!hasRun.Value && connection.Value == null)
         {
             var (cleanup, _connection) = dataTableService.AddQueryable(queryable, idSelector);
+            
+            _connection.SetClientNotifier(clientNotifier);
+            
             connection.Set(_connection);
             hasRun.Set(true);
 
@@ -28,6 +32,6 @@ public static class UseDataTableExtensions
             context.UseEffect(() => cleanup, []);
         }
 
-        return connection.Value!;
+        return connection.Value;
     }
 }
