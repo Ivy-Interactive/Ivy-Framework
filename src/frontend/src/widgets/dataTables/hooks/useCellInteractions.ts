@@ -42,7 +42,6 @@ export const useCellInteractions = ({
 
       // Handle Ctrl+Click or Cmd+Click on custom link cells
       if (
-        (args.ctrlKey || args.metaKey) &&
         cellContent.kind === GridCellKind.Custom &&
         (cellContent.data as { kind?: string })?.kind === 'link-cell'
       ) {
