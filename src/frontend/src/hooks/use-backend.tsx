@@ -799,6 +799,11 @@ export const useBackend = (
             window.location.reload();
           });
 
+          connection.on('DataTableRefresh', (sourceId: string) => {
+            logger.debug(`[${connection.connectionId}] DataTableRefresh`, { sourceId });
+            window.dispatchEvent(new CustomEvent('ivy:datatable:refresh', { detail: sourceId }));
+          });
+
           connection.on('HttpRequest', message => {
             logger.debug(`[${connection.connectionId}] HttpRequest`, {
               requestId: message.requestId,
@@ -839,6 +844,7 @@ export const useBackend = (
         connection.off('CopyToClipboard');
         connection.off('HotReload');
         connection.off('ReloadPage');
+        connection.off('DataTableRefresh');
         connection.off('HttpRequest');
         connection.off('SetAuthCookies');
         connection.off('SetRootAppId');

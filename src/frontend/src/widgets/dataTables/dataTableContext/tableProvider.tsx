@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import * as arrow from 'apache-arrow';
 import { Filter } from '@/services/grpcTableService';
 import { TableContext } from './tableContext';
@@ -17,9 +17,10 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   config,
   editable = false,
 }) => {
-  const [visibleRows, setVisibleRows] = React.useState(0);
-  const [error, setError] = React.useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = React.useState<Filter | null>(null);
+  const [visibleRows, setVisibleRows] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<Filter | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const arrowTableRef = useRef<arrow.Table | null>(null);
   const { allowColumnResizing, allowSorting } = config;
@@ -48,9 +49,23 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const connectionKey = `${connection.connectionId}-${connection.sourceId}`;
 
   // Reset column widths when connection changes
-  React.useEffect(() => {
+  useEffect(() => {
     resetColumnWidths();
   }, [connectionKey, resetColumnWidths]);
+
+  useEffect(() => {
+    const handleRefresh = (event: Event) => {
+      const sourceId = (event as CustomEvent<string>).detail;
+      if (sourceId === connection.sourceId) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
+    window.addEventListener('ivy:datatable:refresh', handleRefresh);
+    return () => {
+      window.removeEventListener('ivy:datatable:refresh', handleRefresh);
+    };
+  }, [connection.sourceId]);
 
   // Data loading
   const { isLoading, hasMore, loadMoreData } = useDataLoading({
@@ -67,6 +82,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     initializeColumnOrder,
     initializeColumnWidths,
     initializeSortFromColumns,
+    refreshTrigger,
   });
 
   // Row data accessor
