@@ -45,7 +45,6 @@ interface ButtonWidgetProps {
   foreground?: string;
   loading?: boolean;
   url?: string;
-  target?: 'Blank' | 'Self';
   width?: string;
   children?: React.ReactNode;
   borderRadius?: BorderRadius;
@@ -98,7 +97,6 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   tooltip,
   foreground,
   url,
-  target = 'Self',
   loading = false,
   width,
   children,
@@ -279,10 +277,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
               href={validatedHref}
               {...(isDownloadUrl || isMailto
                 ? {}
-                : {
-                    target: target === 'Self' ? '_self' : '_blank',
-                    rel: target === 'Self' ? undefined : 'noopener noreferrer',
-                  })}
+                : { target: '_blank', rel: 'noopener noreferrer' })}
             >
               {buttonContent}
             </a>
@@ -331,10 +326,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           href={validatedHref}
           {...(isDownloadUrl || isMailto
             ? {}
-            : {
-                target: target === 'Self' ? '_self' : '_blank',
-                rel: target === 'Self' ? undefined : 'noopener noreferrer',
-              })}
+            : { target: '_blank', rel: 'noopener noreferrer' })}
         >
           {buttonContent}
         </a>

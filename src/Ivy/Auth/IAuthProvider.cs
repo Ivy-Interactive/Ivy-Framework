@@ -1,4 +1,4 @@
-﻿using Ivy.Core;
+﻿using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 
 namespace Ivy.Auth;
@@ -22,11 +22,9 @@ public interface IAuthProvider
 
     AuthOption[] GetAuthOptions();
 
-    Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken = default);
+    Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
 
     Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default);
 
     Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
-
-    bool OpenOAuthLoginInNewTab => false;
 }

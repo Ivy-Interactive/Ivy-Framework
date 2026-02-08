@@ -42,7 +42,7 @@ public static class CookieRegistryExtensions
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken)
+    private static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken)
     {
         if (string.IsNullOrEmpty(authToken?.AccessToken))
         {

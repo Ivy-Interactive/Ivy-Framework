@@ -1,6 +1,7 @@
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Helpers;
+using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 
 namespace Ivy.Auth;
@@ -22,7 +23,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
         return token;
     }
 
-    public async Task<Uri> GetOAuthUriAsync(AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken)
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         var oldSession = authSession.TakeSnapshot();
 

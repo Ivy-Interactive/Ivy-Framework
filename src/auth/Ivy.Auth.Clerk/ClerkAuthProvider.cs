@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
-using Ivy.Core;
+using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -30,8 +30,6 @@ public class ClerkAuthProvider : IAuthProvider
     private DateTime _signingKeysLastFetched = DateTime.MinValue;
     private readonly bool _isProduction;
     private string? _origin = null;
-
-    public static bool OpenOAuthLoginInNewTab => true;
 
     private static (bool IsProduction, string Key) ParseKey(string name, string type, string key)
     {
@@ -216,7 +214,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken = default)
+    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_origin))
         {

@@ -26,12 +26,6 @@ public enum ButtonVariant
     Ai,
 }
 
-public enum LinkTarget
-{
-    Blank,
-    Self,
-}
-
 /// <summary>
 /// An interactive element for triggering actions or navigation.
 /// </summary>
@@ -75,8 +69,6 @@ public record Button : WidgetBase<Button>
     [Prop] public Colors? Foreground { get; set; }
 
     [Prop] public string? Url { get; set; }
-
-    [Prop] public LinkTarget Target { get; set; } = LinkTarget.Self;
 
     [Prop] public bool Disabled { get; set; }
 
@@ -200,10 +192,4 @@ public static class ButtonExtensions
     public static Button Ai(this Button button) => button.Variant(ButtonVariant.Ai);
 
     public static Button BorderRadius(this Button button, BorderRadius radius) => button with { BorderRadius = radius };
-
-    [RelatedTo(nameof(Button.Target))]
-    public static Button Target(this Button button, LinkTarget target) => button with { Target = target };
-
-    [RelatedTo(nameof(Button.Target))]
-    public static Button OpenInNewTab(this Button button, bool openInNewTab = true) => button with { Target = openInNewTab ? LinkTarget.Blank : LinkTarget.Self };
 }

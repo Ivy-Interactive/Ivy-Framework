@@ -1,5 +1,5 @@
 #if DEBUG
-using Ivy.Core;
+using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 
 namespace Ivy.Auth;
@@ -84,7 +84,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
     public AuthOption[] GetAuthOptions()
         => _innerAuthProvider.GetAuthOptions();
 
-    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken = default)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)

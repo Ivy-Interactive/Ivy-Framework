@@ -75,7 +75,7 @@ Layout.Vertical().Gap(4)
 
 ## Buttons with URLs
 
-Buttons can act as links by providing a [URL](../../01_Onboarding/02_Concepts/09_Navigation.md). When a button has a URL, clicking it will navigate to that URL in the same tab by default. Use `.OpenInNewTab()` to override this behavior.
+Buttons can act as links by providing a [URL](../../01_Onboarding/02_Concepts/09_Navigation.md). When a button has a URL, clicking it will navigate to that URL in a new tab instead of triggering an `onClick` event.
 
 <Callout Type="tip">
 Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/09_Navigation.md) like "Copy Link" and "Open in New Tab", providing a better user experience than programmatic navigation.
@@ -87,7 +87,6 @@ Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
         | new Button("External Link", variant: ButtonVariant.Secondary)
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
-            .OpenInNewTab()
             .Icon(Icons.ExternalLink, Align.Right)
         | new Button("Link Style", variant: ButtonVariant.Link)
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")

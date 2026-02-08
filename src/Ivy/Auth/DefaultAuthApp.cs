@@ -143,21 +143,20 @@ public class OAuthFlowView(AuthOption option) : ViewBase
     public override object? Build()
     {
         var args = this.UseService<AppContext>();
-        var registry = this.UseService<IOAuthCallbackRegistry>();
-        var auth = this.UseService<IAuthProvider>();
+        var auth = this.UseService<IAuthService>();
 
-        var state = this.UseState(() => registry.RegisterPending(args.ConnectionId, option.Id ?? ""));
+        var callback = this.UseWebhook(async (request) =>
+        {
+            var token = await auth.HandleOAuthCallbackAsync(request);
+            return new RedirectResult("/");
+        });
 
+        // Redirect to our OAuth login endpoint, which will in turn redirect to the provider's OAuth URL.
+        // This is done to evade Safari's pop-up blocking feature.
         var oauthUriBuilder = new UriBuilder($"{args.Scheme}://{args.Host}/ivy/auth/oauth-login")
         {
-            Query = $"optionId={Uri.EscapeDataString(option.Id ?? "")}&callbackId={Uri.EscapeDataString(state.Value)}&connectionId={Uri.EscapeDataString(args.ConnectionId)}"
+            Query = $"optionId={Uri.EscapeDataString(option.Id ?? "")}&callbackId={Uri.EscapeDataString(callback.Id)}&connectionId={Uri.EscapeDataString(args.ConnectionId)}"
         };
-        return new Button(option.Name)
-            .Secondary()
-            .Icon(option.Icon)
-            .Width(Size.Full())
-            .Url(oauthUriBuilder.ToString())
-            .Target(LinkTarget.Self)
-            .OpenInNewTab(auth.OpenOAuthLoginInNewTab);
+        return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).Url(oauthUriBuilder.ToString());
     }
 }
