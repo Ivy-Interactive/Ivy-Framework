@@ -7,7 +7,6 @@ import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
 import { DataTableEditor } from './dataTableEditor';
 import { DataTableHeader } from './DataTableHeader';
-import { DataTableFooter } from './DataTableFooter';
 import { DataTableOption } from './DataTableOption';
 import { DataTableFilterOption } from './options/DataTableFilterOption';
 import { Filter as FilterIcon } from 'lucide-react';
@@ -94,7 +93,6 @@ export const DataTable: React.FC<TableProps> = ({
             widgetId={id}
             hasOptions={finalConfig.allowFiltering}
             rowActions={rowActions}
-            footer={<DataTableFooter />}
           />
         </TableLayout>
       </TableProvider>
