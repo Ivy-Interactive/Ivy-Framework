@@ -127,10 +127,10 @@ const VariantComponents = {
 
       const content = (
         <div
-          className="flex items-start gap-2"
+          className={cn('flex gap-2', description ? 'items-start' : 'items-center')}
           onClick={e => e.stopPropagation()}
         >
-          <div className="mt-1.5">{withTooltip(checkboxElement, invalid)}</div>
+          <div className={cn(description && 'mt-1.5')}>{withTooltip(checkboxElement, invalid)}</div>
           <InputLabel
             id={id}
             label={label}
@@ -170,10 +170,10 @@ const VariantComponents = {
 
       const content = (
         <div
-          className="flex items-start gap-2"
+          className={cn('flex gap-2', description ? 'items-start' : 'items-center')}
           onClick={e => e.stopPropagation()}
         >
-          <div className="mt-1.5">{withTooltip(switchElement, invalid)}</div>
+          <div className={cn(description && 'mt-1.5')}>{withTooltip(switchElement, invalid)}</div>
           <InputLabel
             id={id}
             label={label}
@@ -217,10 +217,10 @@ const VariantComponents = {
 
       const content = (
         <div
-          className="flex items-start space-x-2"
+          className={cn('flex space-x-2', description ? 'items-start' : 'items-center')}
           onClick={e => e.stopPropagation()}
         >
-          <div className="mt-1.5">{withTooltip(toggleElement, invalid)}</div>
+          <div className={cn(description && 'mt-1.5')}>{withTooltip(toggleElement, invalid)}</div>
           <InputLabel
             id={id}
             label={label}
