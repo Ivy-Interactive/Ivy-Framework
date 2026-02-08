@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Ivy.Auth;
-using Ivy.Hooks;
+using Ivy.Core;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -43,7 +43,7 @@ public class GitHubAuthProvider : IAuthProvider
     }
 
     /// <summary>Generate OAuth authorization URI</summary>
-    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken = default)
     {
         var callbackUri = callback.GetUri(includeIdInPath: false);
 

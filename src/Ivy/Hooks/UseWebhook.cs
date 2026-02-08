@@ -12,26 +12,26 @@ public static class UseWebhookExtensions
 {
     // Synchronous
 
-    public static WebhookEndpoint UseWebhook(this IViewContext context, Action<HttpRequest> handler) =>
+    public static CallbackEndpoint UseWebhook(this IViewContext context, Action<HttpRequest> handler) =>
         context.UseWebhook(e =>
         {
             handler(e);
             return Task.CompletedTask;
         });
 
-    public static WebhookEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, IActionResult> handler) =>
+    public static CallbackEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, IActionResult> handler) =>
         context.UseWebhook(e => Task.FromResult(handler(e)));
 
     // Asynchronous
 
-    public static WebhookEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, Task> handler) =>
+    public static CallbackEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, Task> handler) =>
         context.UseWebhook(async e =>
         {
             await handler(e);
             return new OkResult();
         });
 
-    public static WebhookEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, Task<IActionResult>> handler)
+    public static CallbackEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, Task<IActionResult>> handler)
     {
         var webhookId = context.UseState(() => Guid.NewGuid().ToString(), false);
         var webhookController = context.UseService<IWebhookRegistry>();
@@ -39,21 +39,8 @@ public static class UseWebhookExtensions
 
         context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.OnMount()]);
 
-        return new WebhookEndpoint(webhookId.Value, args.Scheme, args.Host);
+        return new CallbackEndpoint(webhookId.Value, args.Scheme, args.Host);
     }
-}
-
-public record WebhookEndpoint(string Id, string BaseUrl)
-{
-    public WebhookEndpoint(string id, string scheme, string host) : this(id, BuildBaseUrl(scheme, host))
-    {
-    }
-
-    public static string BuildBaseUrl(string scheme, string host) => $"{scheme}://{host}/ivy/webhook";
-
-    public Uri GetUri(bool includeIdInPath = true) => includeIdInPath
-        ? new Uri($"{BaseUrl}/{Id}")
-        : new Uri(BaseUrl);
 }
 
 public interface IWebhookRegistry

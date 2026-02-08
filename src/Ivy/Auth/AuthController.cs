@@ -1,6 +1,7 @@
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Helpers;
 using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -51,14 +52,15 @@ public class AuthController() : Controller
             return BadRequest("Authentication error");
         }
 
-        // Construct the webhook endpoint
+        // Construct the OAuth callback endpoint
         var scheme = HttpContext.Request.Scheme;
         if (HttpContext.Request.Headers.TryGetValue("X-Forwarded-Proto", out var forwardedProto))
         {
             scheme = forwardedProto.ToString();
         }
         var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
-        var callback = new WebhookEndpoint(callbackId, scheme, host);
+        var callbackBaseUrl = $"{scheme}://{host}/ivy/auth/callback";
+        var callback = new CallbackEndpoint(callbackId, callbackBaseUrl);
 
         try
         {
@@ -70,6 +72,77 @@ public class AuthController() : Controller
         {
             logger.LogError(ex, "OAuth login failed: Error initiating OAuth for option '{OptionId}' on connection {ConnectionId}", optionId, connectionId);
             return BadRequest("Authentication error");
+        }
+    }
+
+    [Route("ivy/auth/callback")]
+    [Route("ivy/auth/callback/{callbackId}")]
+    [HttpGet]
+    public async Task<IActionResult> OAuthCallback(
+        string? callbackId,
+        [FromQuery] string? code,
+        [FromQuery] string? state,
+        [FromQuery] string? error,
+        [FromQuery(Name = "error_description")] string? errorDescription,
+        [FromServices] IOAuthCallbackRegistry registry,
+        [FromServices] IAuthProvider authProvider,
+        [FromServices] AppSessionStore sessionStore,
+        [FromServices] ILogger<AuthController> logger)
+    {
+        var effectiveId = callbackId ?? state;
+
+        if (!string.IsNullOrEmpty(error))
+        {
+            logger.LogWarning("OAuth callback error: {Error} - {Description}", error, errorDescription);
+            return BadRequest($"OAuth error: {error}");
+        }
+
+        if (string.IsNullOrEmpty(effectiveId))
+        {
+            logger.LogWarning("OAuth callback failed: Missing callback identifier (neither callbackId path nor state query)");
+            return BadRequest("Invalid OAuth callback: missing callback identifier");
+        }
+
+        var pending = registry.GetAndRemove(effectiveId);
+        if (pending == null)
+        {
+            logger.LogWarning("OAuth callback failed: Invalid or expired callback id '{CallbackId}'", effectiveId);
+            return BadRequest("Invalid or expired OAuth state. Please try logging in again.");
+        }
+
+        try
+        {
+            // Get the session and its HttpMessageHandler using the connectionId from the pending callback
+            if (!sessionStore.Sessions.TryGetValue(pending.ConnectionId, out var appSession))
+            {
+                logger.LogWarning("OAuth callback failed: Session not found for connection {ConnectionId}", pending.ConnectionId);
+                return BadRequest("Authentication error: app session expired");
+            }
+
+            var httpMessageHandler = appSession.AppServices.GetRequiredService<HttpMessageHandler>();
+            var tempSession = AuthHelper.GetAuthSession(HttpContext, httpMessageHandler);
+
+            var token = await authProvider.HandleOAuthCallbackAsync(tempSession, HttpContext.Request);
+
+            if (token == null)
+            {
+                logger.LogWarning("OAuth callback failed: No token returned");
+                return BadRequest("Authentication failed: no token received");
+            }
+
+            logger.LogInformation("OAuth callback successful, setting auth cookies");
+
+            // Use CookieJar to ensure consistent cookie handling (including splitting for large tokens)
+            var cookies = new CookieJar();
+            cookies.AddCookiesForAuthToken(token);
+            cookies.WriteToResponse(Response);
+
+            return Redirect("/");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "OAuth callback failed: Error processing callback");
+            return BadRequest($"Authentication error: {ex.Message}");
         }
     }
 

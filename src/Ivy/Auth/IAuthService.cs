@@ -1,4 +1,4 @@
-using Ivy.Hooks;
+using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 
 namespace Ivy.Auth;
@@ -7,7 +7,7 @@ public interface IAuthService
 {
     Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
 
-    Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
+    Task<Uri> GetOAuthUriAsync(AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken = default);
 
     Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken = default);
 

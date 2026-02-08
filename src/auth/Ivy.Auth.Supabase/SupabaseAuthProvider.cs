@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Security.Claims;
 using System.Text;
-using Ivy.Hooks;
+using Ivy.Core;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -72,7 +72,7 @@ public class SupabaseAuthProvider : IAuthProvider
         return authToken;
     }
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken)
     {
         var provider = option.Id switch
         {

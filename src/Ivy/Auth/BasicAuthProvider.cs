@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
-using Ivy.Hooks;
+using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -160,7 +160,7 @@ public class BasicAuthProvider : IAuthProvider
         return Task.FromResult<AuthToken?>(newToken);
     }
 
-    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

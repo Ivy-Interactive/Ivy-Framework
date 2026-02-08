@@ -29,7 +29,7 @@ Before using GitHub authentication with Ivy, you'll need to create a GitHub OAut
 3. Fill in the application details:
    - **Application name**: Your application name (e.g., "My Ivy Application")
    - **Homepage URL**: Your application URL (e.g., `http://localhost:5010` for local development or `https://your-app.com` for production)
-   - **Authorization callback URL**: Your application's webhook endpoint (e.g., `http://localhost:5010/ivy/webhook` for local development or `https://your-app.com/ivy/webhook` for production)
+   - **Authorization callback URL**: Your application's callback endpoint (e.g., `http://localhost:5010/ivy/auth/callback` for local development or `https://your-app.com/ivy/auth/callback` for production)
 4. **Click "Register application"**
 
 > **Note**: The Authorization callback URL must match your application's webhook endpoint. For local development, this is typically `http://localhost:PORT/ivy/webhook` where PORT is your application's port.
