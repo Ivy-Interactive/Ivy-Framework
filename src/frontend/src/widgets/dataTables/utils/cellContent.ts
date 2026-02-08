@@ -284,6 +284,7 @@ export function createLinkCell(
     copyData: url,
     allowOverlay: false,
     readonly: true,
+    cursor: 'pointer',
   };
 }
 

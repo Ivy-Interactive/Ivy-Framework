@@ -60,6 +60,7 @@ interface MultipleSelectorProps {
   emptyIndicator?: React.ReactNode;
   invalid?: boolean;
   scale?: Scales;
+  maxVisibleBadges?: number;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -79,10 +80,12 @@ const MultipleSelector = React.forwardRef<
       emptyIndicator,
       invalid = false,
       scale = Scales.Medium,
+      maxVisibleBadges = 2,
     },
     ref
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
+    const containerRef = React.useRef<HTMLSpanElement>(null);
     const [open, setOpen] = React.useState(false);
     const [inputValue, setInputValue] = React.useState('');
 
@@ -111,8 +114,20 @@ const MultipleSelector = React.forwardRef<
       [value, handleUnselect]
     );
 
-    const selectables = defaultOptions.filter(
-      option => !value.find(item => item.value === option.value)
+    const isSelected = React.useCallback(
+      (option: Option) => value.some(item => item.value === option.value),
+      [value]
+    );
+
+    const toggleOption = React.useCallback(
+      (option: Option) => {
+        if (isSelected(option)) {
+          handleUnselect(option);
+        } else {
+          onValueChange?.([...value, option]);
+        }
+      },
+      [isSelected, handleUnselect, onValueChange, value]
     );
 
     return (
@@ -136,8 +151,11 @@ const MultipleSelector = React.forwardRef<
                 : undefined
             )}
           >
-            <span className="flex gap-1 flex-wrap items-center flex-1 min-w-0">
-              {value.map(option => (
+            <span
+              ref={containerRef}
+              className="flex gap-1 items-center flex-1 min-w-0 overflow-hidden"
+            >
+              {value.slice(0, maxVisibleBadges).map(option => (
                 <Badge
                   key={option.value}
                   variant="secondary"
@@ -152,7 +170,7 @@ const MultipleSelector = React.forwardRef<
                     type="button"
                     tabIndex={-1}
                     aria-label="Remove"
-                    className="ml-1 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center justify-center h-6 self-center leading-none"
+                    className="ml-1 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center justify-center h-3 self-center leading-none"
                     onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -169,11 +187,27 @@ const MultipleSelector = React.forwardRef<
                   </button>
                 </Badge>
               ))}
+              {value.length > maxVisibleBadges && (
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    badgeVariants({ scale }),
+                    'bg-muted text-muted-foreground'
+                  )}
+                >
+                  +{value.length - maxVisibleBadges}
+                </Badge>
+              )}
               <CommandPrimitive.Input
                 ref={inputRef}
                 value={inputValue}
                 onValueChange={setInputValue}
-                onBlur={() => setOpen(false)}
+                onBlur={() => {
+                  setOpen(false);
+                  if (containerRef.current) {
+                    containerRef.current.scrollLeft = 0;
+                  }
+                }}
                 onFocus={() => setOpen(true)}
                 placeholder={
                   hidePlaceholderWhenSelected && value.length > 0
@@ -187,7 +221,7 @@ const MultipleSelector = React.forwardRef<
             </span>
             <ChevronDown
               className={cn(
-                'h-4 w-4 opacity-50 shrink-0 cursor-pointer',
+                'h-4 w-4 ml-2 opacity-50 shrink-0 cursor-pointer',
                 disabled && 'cursor-not-allowed opacity-50'
               )}
               onClick={e => {
@@ -221,44 +255,49 @@ const MultipleSelector = React.forwardRef<
               aria-label="Toggle dropdown"
             />
           </div>
-          {open && (
-            <>
-              {selectables.length > 0 && (
-                <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
-                  <CommandGroup className="h-full overflow-auto max-h-[300px]">
-                    {selectables.map(option => {
-                      return (
-                        <CommandItem
-                          key={option.value}
-                          onMouseDown={e => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                          onSelect={() => {
-                            setInputValue('');
-                            onValueChange?.([...value, option]);
-                          }}
-                          className={menuItemVariants({ scale })}
-                          disabled={option.disable}
-                        >
-                          {option.label}
-                        </CommandItem>
-                      );
-                    })}
-                  </CommandGroup>
-                </div>
-              )}
-              {selectables.length === 0 && emptyIndicator && (
-                <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none p-2">
-                  {emptyIndicator}
-                </div>
-              )}
-            </>
+          {open && defaultOptions.length > 0 && (
+            <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+              <CommandGroup className="h-full overflow-auto max-h-[300px]">
+                {defaultOptions.map(option => {
+                  const selected = isSelected(option);
+                  return (
+                    <CommandItem
+                      key={option.value}
+                      onMouseDown={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onSelect={() => {
+                        setInputValue('');
+                        toggleOption(option);
+                      }}
+                      className={cn(
+                        menuItemVariants({ scale }),
+                        'flex items-center justify-between'
+                      )}
+                      disabled={option.disable}
+                    >
+                      <span>{option.label}</span>
+                      {selected && (
+                        <X
+                          className={cn(
+                            xIconVariants({ scale }),
+                            'text-muted-foreground hover:text-foreground'
+                          )}
+                        />
+                      )}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </div>
+          )}
+          {open && defaultOptions.length === 0 && emptyIndicator && (
+            <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none p-2">
+              {emptyIndicator}
+            </div>
           )}
         </div>
-        {selectables.length === 0 && emptyIndicator && open && (
-          <div className="mt-2">{emptyIndicator}</div>
-        )}
       </Command>
     );
   }

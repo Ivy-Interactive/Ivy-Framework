@@ -1,0 +1,114 @@
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using Ivy.Core;
+using Ivy.Core.Helpers;
+using Ivy.Core.Hooks;
+using Ivy.Shared;
+using Ivy.Widgets.Inputs;
+
+// ReSharper disable once CheckNamespace
+namespace Ivy;
+
+/// <summary>
+/// An input field for selecting an icon from the Ivy icon set (Lucide icons).
+/// </summary>
+public abstract record IconInputBase : WidgetBase<IconInputBase>, IAnyInput
+{
+    [Prop] public bool Disabled { get; set; }
+
+    [Prop] public string? Invalid { get; set; }
+
+    [Prop] public string? Placeholder { get; set; }
+
+    [Prop] public bool Nullable { get; set; }
+
+    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+
+    public Type[] SupportedStateTypes() => [typeof(Icons), typeof(Icons?)];
+}
+
+public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
+{
+    [OverloadResolutionPriority(1)]
+    public IconInput(IAnyState state, string? placeholder = null, bool disabled = false)
+        : this(placeholder, disabled)
+    {
+        var typedState = state.As<TIcon>();
+        var value = typedState.Value;
+        Value = value;
+        OnChange = e =>
+        {
+            typedState.Set(e.Value);
+            return ValueTask.CompletedTask;
+        };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public IconInput(TIcon value, Func<Event<IInput<TIcon>, TIcon>, ValueTask> onChange, string? placeholder = null, bool disabled = false)
+        : this(placeholder, disabled)
+    {
+        OnChange = onChange;
+        Value = value;
+    }
+
+    public IconInput(TIcon value, Action<Event<IInput<TIcon>, TIcon>> onChange, string? placeholder = null, bool disabled = false)
+        : this(placeholder, disabled)
+    {
+        OnChange = e =>
+        {
+            onChange(e);
+            return ValueTask.CompletedTask;
+        };
+        Value = value;
+    }
+
+    public IconInput(string? placeholder = null, bool disabled = false)
+    {
+        Disabled = disabled;
+        Placeholder = placeholder ?? "Select an icon";
+    }
+
+    internal IconInput() { }
+
+    [Prop] public TIcon Value { get; } = default!;
+
+    [Event] public Func<Event<IInput<TIcon>, TIcon>, ValueTask>? OnChange { get; }
+}
+
+public static class IconInputExtensions
+{
+    public static IconInputBase ToIconInput(this IAnyState state, string? placeholder = null, bool disabled = false)
+    {
+        var type = state.GetStateType();
+        var genericType = typeof(IconInput<>).MakeGenericType(type);
+        var input = (IconInputBase)Activator.CreateInstance(genericType, state, placeholder ?? "Select an icon", disabled)!;
+        input.Nullable = type.IsNullableType();
+        return input;
+    }
+
+    public static IconInputBase Placeholder(this IconInputBase widget, string placeholder) =>
+        widget with { Placeholder = placeholder };
+
+    public static IconInputBase Disabled(this IconInputBase widget, bool disabled = true) =>
+        widget with { Disabled = disabled };
+
+    public static IconInputBase Invalid(this IconInputBase widget, string? invalid) =>
+        widget with { Invalid = invalid };
+
+    public static IconInputBase Nullable(this IconInputBase widget, bool? nullable = true) =>
+        widget with { Nullable = nullable ?? true };
+
+    [OverloadResolutionPriority(1)]
+    public static IconInputBase HandleBlur(this IconInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur) =>
+        widget with { OnBlur = onBlur };
+
+    public static IconInputBase HandleBlur(this IconInputBase widget, Action<Event<IAnyInput>> onBlur) =>
+        widget.HandleBlur(onBlur.ToValueTask());
+
+    public static IconInputBase HandleBlur(this IconInputBase widget, Action onBlur) =>
+        widget.HandleBlur(_ =>
+        {
+            onBlur();
+            return ValueTask.CompletedTask;
+        });
+}

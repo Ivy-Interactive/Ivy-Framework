@@ -18,7 +18,7 @@ import { MenuItem, WidgetEventHandlerType } from '@/types/widgets';
 import { useFocusable } from '@/hooks/use-focus-management';
 import { sidebarMenuRef } from './sidebar-refs';
 import { useEventHandler } from '@/components/event-handler';
-import { cn } from '@/lib/utils';
+import { cn, getAppId } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { Separator } from '@/components/ui/separator';
 
@@ -187,6 +187,10 @@ interface SidebarMenuWidgetProps {
 }
 
 type FlatMenuItem = MenuItem & { isGroup?: boolean };
+
+// Animation duration for collapsible sections (in milliseconds)
+const COLLAPSIBLE_ANIMATION_DURATION = 300;
+
 const flattenMenuItems = (
   items: MenuItem[],
   parentExpanded = true
@@ -212,8 +216,34 @@ const CollapsibleMenuItem: React.FC<{
   eventHandler: WidgetEventHandlerType;
   widgetId: string;
   level: number;
-}> = ({ item, eventHandler, widgetId, level }) => {
-  const [isOpen, setIsOpen] = useState(item.expanded ?? false);
+  activeTag?: string | null;
+  expandedSections: Set<string>;
+  onExpandChange: (label: string, expanded: boolean) => void;
+}> = ({
+  item,
+  eventHandler,
+  widgetId,
+  level,
+  activeTag,
+  expandedSections,
+  onExpandChange,
+}) => {
+  // Derive the open state from expandedSections or item.expanded
+  const shouldBeOpen =
+    expandedSections.has(item.label) || (item.expanded ?? false);
+  const [isOpen, setIsOpen] = useState(shouldBeOpen);
+  const itemRef = useRef<HTMLLIElement>(null);
+
+  // Sync local state with derived state when expandedSections changes
+  // Using useEffect to avoid setState during render
+  useEffect(() => {
+    setIsOpen(shouldBeOpen);
+  }, [shouldBeOpen]);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    onExpandChange(item.label, open);
+  };
 
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -227,13 +257,22 @@ const CollapsibleMenuItem: React.FC<{
     }
   };
 
-  if (!!item.children && item.children!.length > 0) {
+  const isActive = item.tag === activeTag;
+
+  if (item.children && item.children.length > 0) {
     return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <li className="relative">
+      <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
+        <li
+          className="relative"
+          ref={itemRef}
+          data-menu-item={item.tag || item.label}
+        >
           <CollapsibleTrigger asChild>
             <button
-              className="group flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
+              className={cn(
+                'group flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                isActive && 'bg-accent text-accent-foreground'
+              )}
               onClick={() => {
                 // For items with children, toggle the collapsible state
                 // Only try to navigate if the item has a tag
@@ -255,7 +294,10 @@ const CollapsibleMenuItem: React.FC<{
                   item.children!,
                   eventHandler,
                   widgetId,
-                  level + 1
+                  level + 1,
+                  activeTag,
+                  expandedSections,
+                  onExpandChange
                 )}
             </ul>
           </CollapsibleContent>
@@ -264,9 +306,16 @@ const CollapsibleMenuItem: React.FC<{
     );
   } else {
     return (
-      <li key={item.label}>
+      <li
+        key={item.label}
+        ref={itemRef}
+        data-menu-item={item.tag || item.label}
+      >
         <button
-          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
+          className={cn(
+            'flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+            isActive && 'bg-accent text-accent-foreground'
+          )}
           onClick={() => onItemClick(item)}
           onMouseDown={e => onCtrlRightMouseClick(e, item)}
         >
@@ -282,7 +331,10 @@ const renderMenuItems = (
   items: MenuItem[],
   eventHandler: WidgetEventHandlerType,
   widgetId: string,
-  level: number
+  level: number,
+  activeTag?: string | null,
+  expandedSections: Set<string> = new Set(),
+  onExpandChange: (label: string, expanded: boolean) => void = () => {}
 ) => {
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -306,7 +358,15 @@ const renderMenuItems = (
             </h4>
             <ul className="space-y-1">
               {item.children &&
-                renderMenuItems(item.children!, eventHandler, widgetId, 1)}
+                renderMenuItems(
+                  item.children!,
+                  eventHandler,
+                  widgetId,
+                  1,
+                  activeTag,
+                  expandedSections,
+                  onExpandChange
+                )}
             </ul>
           </div>
         );
@@ -318,6 +378,9 @@ const renderMenuItems = (
             eventHandler={eventHandler}
             widgetId={widgetId}
             level={level}
+            activeTag={activeTag}
+            expandedSections={expandedSections}
+            onExpandChange={onExpandChange}
           />
         );
       }
@@ -325,11 +388,15 @@ const renderMenuItems = (
       if (level === 0) {
         return <></>;
       }
+      const isActive = item.tag === activeTag;
       if (level === 1) {
         return (
-          <li key={item.tag}>
+          <li key={item.tag} data-menu-item={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
+              className={cn(
+                'flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                isActive && 'bg-accent text-accent-foreground'
+              )}
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -340,9 +407,12 @@ const renderMenuItems = (
         );
       } else {
         return (
-          <li key={item.tag}>
+          <li key={item.tag} data-menu-item={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
+              className={cn(
+                'flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                isActive && 'bg-accent text-accent-foreground'
+              )}
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -364,6 +434,16 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const prevSearchActiveRef = React.useRef(searchActive);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set()
+  );
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
+
+  // Get active tag from URL instead of props
+  const activeTag = getAppId();
+  const prevActiveTagRef = useRef(activeTag);
+
   // Register only the sidebar menu container with useFocusable
   const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
 
@@ -378,6 +458,84 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     }
     prevSearchActiveRef.current = searchActive;
   }, [searchActive]);
+
+  // Helper function to find the path to an item with a specific tag
+  const findPathToTag = useCallback(
+    (
+      items: MenuItem[],
+      targetTag: string,
+      path: string[] = []
+    ): string[] | null => {
+      for (const item of items) {
+        if (item.tag === targetTag) {
+          return path;
+        }
+        if (item.children && item.children.length > 0) {
+          const result = findPathToTag(item.children, targetTag, [
+            ...path,
+            item.label,
+          ]);
+          if (result) {
+            return result;
+          }
+        }
+      }
+      return null;
+    },
+    []
+  );
+
+  // Expand sections and scroll to active item when activeTag changes
+  useEffect(() => {
+    if (!activeTag || searchActive) return;
+
+    // Find the path to the active item
+    const path = findPathToTag(items, activeTag);
+
+    if (path && path.length > 0) {
+      // Always expand parent sections
+      setExpandedSections(new Set(path));
+
+      // Only scroll to center on initial mount or when URL changes externally
+      // (not when user clicks menu items)
+      if (isInitialMount.current) {
+        // Wait for the DOM to update, then scroll to the active item
+        // Use a longer timeout to ensure collapsibles have fully expanded
+        setTimeout(() => {
+          try {
+            const activeElement = containerRef.current?.querySelector(
+              `[data-menu-item="${activeTag}"]`
+            );
+            if (activeElement) {
+              activeElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'nearest',
+              });
+            }
+          } catch (error) {
+            console.warn('Failed to scroll to active menu item:', error);
+          }
+        }, COLLAPSIBLE_ANIMATION_DURATION);
+
+        isInitialMount.current = false;
+      }
+    }
+
+    prevActiveTagRef.current = activeTag;
+  }, [activeTag, items, searchActive, findPathToTag]);
+
+  const handleExpandChange = useCallback((label: string, expanded: boolean) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (expanded) {
+        next.add(label);
+      } else {
+        next.delete(label);
+      }
+      return next;
+    });
+  }, []);
 
   const handleMenuKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -411,13 +569,19 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       const flatIdx = flatItems.findIndex(
         flatItem => flatItem.tag === item.tag
       );
-      const isActive = searchActive && flatIdx === selectedIndex;
+      const isHovered = searchActive && flatIdx === selectedIndex;
+      const isActivePage = item.tag === activeTag;
       return (
         <li key={item.tag}>
           <button
-            className={`flex w-full rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer min-h-8 text-left ${
-              isActive ? 'bg-accent text-accent-foreground' : ''
-            } ${showPath && item.path ? 'flex-col items-start gap-1' : 'items-center gap-2'}`}
+            className={cn(
+              'flex w-full rounded-lg p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left',
+              showPath && item.path
+                ? 'flex-col items-start gap-1'
+                : 'items-center gap-2',
+              isHovered && !isActivePage && 'bg-accent/30',
+              isActivePage && 'bg-accent text-accent-foreground hover:bg-accent'
+            )}
             tabIndex={-1}
             onClick={() => {
               if (item.tag) {
@@ -495,46 +659,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           </div>
         );
       } else {
-        const flatIdx = flatItems.findIndex(
-          flatItem => flatItem.tag === item.tag
-        );
-        const isActive = searchActive && flatIdx === selectedIndex;
-        return (
-          <li key={item.tag}>
-            <button
-              className={`flex w-full rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer min-h-8 text-left ${
-                isActive ? 'bg-accent text-accent-foreground' : ''
-              } ${item.path ? 'flex-col items-start gap-1' : 'items-center gap-2'}`}
-              tabIndex={-1} // Not focusable
-              onClick={() => {
-                if (item.tag) {
-                  if (searchActive && flatIdx !== -1) {
-                    setSelectedIndex(flatIdx);
-                  }
-                  eventHandler('OnSelect', id, [item.tag]);
-                }
-              }}
-              onMouseDown={e => onCtrlRightMouseClick(e, item)}
-              onMouseEnter={() => {
-                if (searchActive) {
-                  setSelectedIndex(flatIdx);
-                }
-              }}
-            >
-              {item.path && (
-                <span className="text-xs text-muted-foreground truncate w-full">
-                  {item.path}
-                </span>
-              )}
-              <div className="flex w-full items-center gap-2 min-w-0">
-                <Icon name={item.icon} size={16} className="shrink-0" />
-                <span className="text-sm truncate font-medium">
-                  {item.label}
-                </span>
-              </div>
-            </button>
-          </li>
-        );
+        return renderResultItem(item, true);
       }
     });
   };
@@ -546,6 +671,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         (
           sidebarMenuRef as React.MutableRefObject<HTMLDivElement | null>
         ).current = el;
+        containerRef.current = el;
       }}
       tabIndex={0}
       onFocus={() => {
@@ -564,7 +690,15 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           </div>
         )
       ) : (
-        renderMenuItems(items, eventHandler, id, 0)
+        renderMenuItems(
+          items,
+          eventHandler,
+          id,
+          0,
+          activeTag,
+          expandedSections,
+          handleExpandChange
+        )
       )}
     </div>
   );
