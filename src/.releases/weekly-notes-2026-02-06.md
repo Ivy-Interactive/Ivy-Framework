@@ -22,22 +22,6 @@ Added comprehensive framework documentation specifically designed for AI assista
 
 This documentation serves as a quick reference for AI-assisted development and includes all essential patterns and APIs needed to work effectively with Ivy.
 
-## New Widgets
-
-### Terminal Widget
-
-The `Terminal` widget has been promoted from internal API to a public primitive widget. You can now use it to display terminal-like output in your applications.
-
-```csharp
-new Terminal()
-    .Lines(new[]
-    {
-        new TerminalLine("$ npm install", IsCommand: true),
-        new TerminalLine("Installing packages..."),
-        new TerminalLine("Done!")
-    })
-```
-
 ## New Features
 
 ### Configurable Authentication Cookie Options
@@ -79,6 +63,24 @@ colorState.ToColorInput()  // Automatically uses Swatch variant
 var colorState = UseState(Colors.Red);
 colorState.ToColorInput().Variant(ColorInputs.Swatch)
 ```
+
+<img width="391" height="342" alt="image" src="https://github.com/user-attachments/assets/e39424af-af6e-4353-83e5-c08221e8e26d" />
+
+### Terminal Widget
+
+The `Terminal` widget has been promoted from internal API to a public primitive widget. You can now use it to display terminal-like output in your applications.
+
+```csharp
+new Terminal()
+    .Title("Installation")
+    .AddCommand("dotnet tool install -g Ivy.Console")
+    .AddOutput("You can use the following command to install Ivy globally.")
+    .ShowCopyButton(true);
+```
+<img width="2052" height="216" alt="image" src="https://github.com/user-attachments/assets/5ecbc225-1765-436e-8a53-72cf1ced2ef2" />
+
+
+
 
 ## Breaking Changes
 
