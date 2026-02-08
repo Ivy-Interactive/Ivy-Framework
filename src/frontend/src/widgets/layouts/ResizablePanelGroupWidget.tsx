@@ -7,31 +7,31 @@ import {
 import { camelCase, cn } from '@/lib/utils';
 import { getHeight, getWidth } from '@/lib/styles';
 
-interface ResizeablePanelWidgetProps {
+interface ResizablePanelWidgetProps {
   children: React.ReactNode[];
   defaultSize?: string | number;
   id?: string;
 }
 
-export const ResizeablePanelWidget: React.FC<ResizeablePanelWidgetProps> = ({
+export const ResizablePanelWidget: React.FC<ResizablePanelWidgetProps> = ({
   children,
 }) => {
   return <div className="h-full w-full p-4">{children}</div>;
 };
 
-ResizeablePanelWidget.displayName = 'ResizeablePanelWidget';
+ResizablePanelWidget.displayName = 'ResizablePanelWidget';
 
-interface ResizeablePanelGroupWidgetProps {
+interface ResizablePanelGroupWidgetProps {
   id: string;
-  children: React.ReactElement<ResizeablePanelWidgetProps>[];
+  children: React.ReactElement<ResizablePanelWidgetProps>[];
   showHandle?: boolean;
   direction?: 'Horizontal' | 'Vertical';
   width?: string;
   height?: string;
 }
 
-export const ResizeablePanelGroupWidget: React.FC<
-  ResizeablePanelGroupWidgetProps
+export const ResizablePanelGroupWidget: React.FC<
+  ResizablePanelGroupWidgetProps
 > = ({
   id,
   children,
@@ -40,86 +40,86 @@ export const ResizeablePanelGroupWidget: React.FC<
   width = 'Full',
   height = 'Full',
 }) => {
-  const panelWidgets = React.Children.toArray(children).filter(child => {
-    if (!React.isValidElement(child)) return false;
+    const panelWidgets = React.Children.toArray(children).filter(child => {
+      if (!React.isValidElement(child)) return false;
 
-    // Direct component check
-    if (
-      typeof child.type === 'function' &&
-      (child.type as { displayName?: string })?.displayName ===
-        'ResizeablePanelWidget'
-    ) {
-      return true;
-    }
+      // Direct component check
+      if (
+        typeof child.type === 'function' &&
+        (child.type as { displayName?: string })?.displayName ===
+        'ResizablePanelWidget'
+      ) {
+        return true;
+      }
 
-    // MemoizedWidget check - look at node.type prop
-    const props = child.props as { node?: { type?: string } };
-    if (props.node?.type === 'Ivy.ResizeablePanel') {
-      return true;
-    }
+      // MemoizedWidget check - look at node.type prop
+      const props = child.props as { node?: { type?: string } };
+      if (props.node?.type === 'Ivy.ResizablePanel') {
+        return true;
+      }
 
-    return false;
-  });
+      return false;
+    });
 
-  if (panelWidgets.length === 0)
-    return <div className="remove-parent-padding"></div>;
+    if (panelWidgets.length === 0)
+      return <div className="remove-parent-padding"></div>;
 
-  const style = {
-    ...getWidth(width),
-    ...getHeight(height),
+    const style = {
+      ...getWidth(width),
+      ...getHeight(height),
+    };
+
+    return (
+      <ResizablePanelGroup
+        style={style}
+        direction={camelCase(direction) as 'horizontal' | 'vertical'}
+        className="remove-parent-padding"
+        id={id}
+      >
+        {panelWidgets.map((panelWidget, index) => {
+          if (React.isValidElement(panelWidget)) {
+            // Check if this is a MemoizedWidget wrapping a ResizablePanel
+            const memoizedProps = panelWidget.props as {
+              node?: { props?: { defaultSize?: string | number } };
+            };
+            const directProps = panelWidget.props as ResizablePanelWidgetProps;
+
+            // Get defaultSize from either MemoizedWidget's node.props or direct props
+            const defaultSizeProp =
+              memoizedProps.node?.props?.defaultSize ?? directProps.defaultSize;
+
+            const { defaultSize, minSize, maxSize } =
+              parseSizeString(defaultSizeProp);
+
+            return (
+              <React.Fragment key={index}>
+                {index > 0 && showHandle && (
+                  <ResizableHandle
+                    withHandle={showHandle}
+                    className={cn(
+                      'border',
+                      direction === 'Horizontal' ? 'border-r' : 'border-t'
+                    )}
+                  />
+                )}
+                <ResizablePanel
+                  defaultSize={
+                    defaultSize ?? Math.floor(100 / panelWidgets.length)
+                  }
+                  {...(minSize !== undefined && { minSize })}
+                  {...(maxSize !== undefined && { maxSize })}
+                  className="h-full"
+                >
+                  {panelWidget}
+                </ResizablePanel>
+              </React.Fragment>
+            );
+          }
+          return null;
+        })}
+      </ResizablePanelGroup>
+    );
   };
-
-  return (
-    <ResizablePanelGroup
-      style={style}
-      direction={camelCase(direction) as 'horizontal' | 'vertical'}
-      className="remove-parent-padding"
-      id={id}
-    >
-      {panelWidgets.map((panelWidget, index) => {
-        if (React.isValidElement(panelWidget)) {
-          // Check if this is a MemoizedWidget wrapping a ResizeablePanel
-          const memoizedProps = panelWidget.props as {
-            node?: { props?: { defaultSize?: string | number } };
-          };
-          const directProps = panelWidget.props as ResizeablePanelWidgetProps;
-
-          // Get defaultSize from either MemoizedWidget's node.props or direct props
-          const defaultSizeProp =
-            memoizedProps.node?.props?.defaultSize ?? directProps.defaultSize;
-
-          const { defaultSize, minSize, maxSize } =
-            parseSizeString(defaultSizeProp);
-
-          return (
-            <React.Fragment key={index}>
-              {index > 0 && showHandle && (
-                <ResizableHandle
-                  withHandle={showHandle}
-                  className={cn(
-                    'border',
-                    direction === 'Horizontal' ? 'border-r' : 'border-t'
-                  )}
-                />
-              )}
-              <ResizablePanel
-                defaultSize={
-                  defaultSize ?? Math.floor(100 / panelWidgets.length)
-                }
-                {...(minSize !== undefined && { minSize })}
-                {...(maxSize !== undefined && { maxSize })}
-                className="h-full"
-              >
-                {panelWidget}
-              </ResizablePanel>
-            </React.Fragment>
-          );
-        }
-        return null;
-      })}
-    </ResizablePanelGroup>
-  );
-};
 
 function parseSizeString(size?: string | number): {
   defaultSize?: number;
