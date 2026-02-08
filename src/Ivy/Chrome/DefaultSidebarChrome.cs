@@ -370,6 +370,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         }
 
         var searchInput = search.ToSearchInput().ShortcutKey("CTRL+K").TestId("sidebar-search");
+
         var sidebarMenu = new SidebarMenu(
             OnMenuSelect,
             menuItems.Value

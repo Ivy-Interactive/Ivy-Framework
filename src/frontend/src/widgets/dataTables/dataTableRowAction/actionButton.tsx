@@ -36,6 +36,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       aria-label={action.label || actionId}
+      title={action.tooltip}
       type="button"
     >
       {action.icon && (

@@ -152,7 +152,7 @@ Use `HandleRowAction()` to respond to row action menu selections. The handler re
 The handler can access both properties: `args.Id` to identify the row and `args.Tag` to determine which action was selected. This is particularly useful when handling nested menu items, as each child menu item can have its own tag.
 
 <Callout Type="tip">
-Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Users can open the link with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + click or via the context menu. External links (http/https) open in a new focused tab, while relative URLs navigate in the same tab.
+Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Click on a link to open it. External links (http/https) open in a new focused tab, while relative URLs navigate in the same tab.
 </Callout>
 
 ## Cell Click Events

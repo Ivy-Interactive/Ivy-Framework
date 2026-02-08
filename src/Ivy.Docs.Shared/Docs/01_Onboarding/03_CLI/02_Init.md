@@ -54,10 +54,58 @@ This command will:
 >ivy init --verbose
 ```
 
-`--helloworld` or `--hello` - Include a simple demo app in the new project to help you get started.
+`--hello` - Include a simple demo app in the new project to help you get started.
 
 ```terminal
->ivy init --helloworld
+>ivy init --hello
+```
+
+`--script` - Create a simple Ivy script file instead of a full project. Perfect for quick prototyping or single-file applications.
+
+```terminal
+>ivy init --script
+```
+
+`--template <TEMPLATE>` or `-t <TEMPLATE>` - Use a specific template for the new project.
+
+```terminal
+>ivy init --template my-template
+```
+
+`--select-template` - Interactively select a template from available options.
+
+```terminal
+>ivy init --select-template
+```
+
+`--cursor` - Install Cursor MCP integration after project creation.
+
+```terminal
+>ivy init --cursor
+```
+
+`--claude` - Install Claude Code MCP integration after project creation.
+
+```terminal
+>ivy init --claude
+```
+
+`--ignore-git` - Skip Git checks and commit during initialization.
+
+```terminal
+>ivy init --ignore-git
+```
+
+`--prerelease` - Include prerelease versions when fetching the latest Ivy version.
+
+```terminal
+>ivy init --prerelease
+```
+
+`--yes-to-all` - Skip all prompts and use default values. Useful for automated scripts.
+
+```terminal
+>ivy init --yes-to-all
 ```
 
 ### Interactive Mode
