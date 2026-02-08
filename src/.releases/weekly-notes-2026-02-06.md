@@ -3,9 +3,7 @@
 > [!NOTE]
 > We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
 
-This release mostly brings a bunch of bugfixes across all of the widgets. We also had improved a lot the documentation, improving developer onboarding experience.
-
-A lot of attention went into how widgets look when placed next to each other, with theming customization in mind.
+This release brings a new `IconInput` widget. It also includes a lot of bugfixes and improvements in existing UI of widgets, with a focus on theming and layout.
 
 ## LLM Framework Documentation
 
@@ -77,10 +75,19 @@ new Terminal()
     .AddOutput("You can use the following command to install Ivy globally.")
     .ShowCopyButton(true);
 ```
+
 <img width="2052" height="216" alt="image" src="https://github.com/user-attachments/assets/5ecbc225-1765-436e-8a53-72cf1ced2ef2" />
 
+### IconInput Widget
 
+We added a new `IconInput` widget that allows users to select an icon from the Ivy icon set (Lucide icons). It provides a searchable dropdown of available icons.
 
+```csharp
+// Bind to an icon state
+var iconState = UseState(Icons.Heart);
+iconState.ToIconInput()
+    .Placeholder("Select an icon");
+```
 
 ## Breaking Changes
 
