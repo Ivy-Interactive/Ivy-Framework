@@ -31,7 +31,7 @@ export const useCellInteractions = ({
 
   // Handle cell single-clicks (for backend events and link navigation)
   const handleCellClicked = useCallback(
-    (cell: Item, _args: GridMouseEventArgs) => {
+    (cell: Item, { }: GridMouseEventArgs) => {
       const [, row] = cell;
       // Prevent interactions with empty filler rows
       if (row >= visibleRows) {
@@ -40,7 +40,7 @@ export const useCellInteractions = ({
 
       const cellContent = getCellContent(cell);
 
-      // Handle Ctrl+Click or Cmd+Click on custom link cells
+      // Handle click on custom link cells
       if (
         cellContent.kind === GridCellKind.Custom &&
         (cellContent.data as { kind?: string })?.kind === 'link-cell'
