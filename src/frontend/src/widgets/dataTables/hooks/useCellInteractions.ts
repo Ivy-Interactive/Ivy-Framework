@@ -31,7 +31,7 @@ export const useCellInteractions = ({
 
   // Handle cell single-clicks (for backend events and link navigation)
   const handleCellClicked = useCallback(
-    (cell: Item, {}: GridMouseEventArgs) => {
+    (cell: Item, { button: _ }: GridMouseEventArgs) => {
       const [, row] = cell;
       // Prevent interactions with empty filler rows
       if (row >= visibleRows) {
