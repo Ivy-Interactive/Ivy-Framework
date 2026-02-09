@@ -131,10 +131,9 @@
     --text-small-label: 12px;
 
     /* Spacing */
-    --radius-sm: var(--radius-sm);
-    --radius-md: var(--radius-md);
-    --radius-lg: var(--radius-lg);
-    --radius-xl: var(--radius-xl);
+    --radius-boxes: var(--radius-boxes);
+    --radius-fields: var(--radius-fields);
+    --radius-selectors: var(--radius-selectors);
     --font-sans: var(--font-sans);
     --font-mono: var(--font-mono);
     --font-serif: var(--font-serif);

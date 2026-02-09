@@ -17,13 +17,11 @@ public class Theme
 
     public string? BorderRadius { get; set; }
 
-    public string? BorderRadiusSm { get; set; }
+    public string? BorderRadiusBoxes { get; set; }
 
-    public string? BorderRadiusMd { get; set; }
+    public string? BorderRadiusFields { get; set; }
 
-    public string? BorderRadiusLg { get; set; }
-
-    public string? BorderRadiusXl { get; set; }
+    public string? BorderRadiusSelectors { get; set; }
 
     public static Theme Default => new()
     {
@@ -32,10 +30,9 @@ public class Theme
         FontFamily = "Geist",
         FontSize = "16px",
         BorderRadius = "0.5rem",
-        BorderRadiusSm = IvyFrameworkBorderRadiusTokens.BorderRadius.Sm,
-        BorderRadiusMd = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
-        BorderRadiusLg = IvyFrameworkBorderRadiusTokens.BorderRadius.Lg,
-        BorderRadiusXl = IvyFrameworkBorderRadiusTokens.BorderRadius.Xl
+        BorderRadiusBoxes = IvyFrameworkBorderRadiusTokens.BorderRadius.Lg,
+        BorderRadiusFields = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
+        BorderRadiusSelectors = IvyFrameworkBorderRadiusTokens.BorderRadius.Md
     };
 }
 
