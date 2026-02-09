@@ -393,6 +393,24 @@
   }
 }
 
+/* Semantic border radius utility classes */
+@layer utilities {
+  /* For large container components: Card, Sheet, Dialog, Alert, Modal */
+  .rounded-box {
+    border-radius: var(--radius-boxes);
+  }
+
+  /* For input field components: Button, Input, TextArea, Select */
+  .rounded-field {
+    border-radius: var(--radius-fields);
+  }
+
+  /* For small selector components: Badge, Checkbox, Toggle, Radio */
+  .rounded-selector {
+    border-radius: var(--radius-selectors);
+  }
+}
+
 :has(> DIV.remove-parent-padding) {
   padding: 0 !important;
 }
