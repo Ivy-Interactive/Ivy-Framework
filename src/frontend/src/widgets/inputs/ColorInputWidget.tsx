@@ -195,7 +195,7 @@ const ThemeColorGrid: React.FC<{
             key={`${r}-${c}`}
             type="button"
             className={cn(
-              "w-5 h-5 rounded-sm hover:scale-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5",
+              "w-7 h-7 rounded-full hover:scale-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5",
               isSelected && "ring-1 ring-offset-1 ring-black/50 z-20 scale-110"
             )}
             style={{ backgroundColor: hexColor }}
@@ -293,7 +293,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       h /= 6;
     }
 
-    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+    return { h: Number((h * 360).toFixed(1)), s: Number((s * 100).toFixed(1)), l: Number((l * 100).toFixed(1)) };
   };
 
   // Helper to convert HSL object to hex
@@ -308,12 +308,35 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     return `#${f(0)}${f(8)}${f(4)}`;
   };
 
+
+
+  // Helper to convert hex to RGB object
+  const hexToRgb = (hex: string) => {
+    let cleanHex = hex.replace('#', '');
+    if (cleanHex.length === 3) {
+      cleanHex = cleanHex.split('').map(c => c + c).join('');
+    }
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return { r, g, b };
+  };
+
+  // Helper to convert RGB object to hex
+  const rgbToHex = (r: number, g: number, b: number) => {
+    const toHex = (n: number) => Math.round(n).toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  };
+
   const [hslValues, setHslValues] = React.useState({ h: 0, s: 0, l: 0 });
+  const [rgbValues, setRgbValues] = React.useState({ r: 0, g: 0, b: 0 });
 
   React.useEffect(() => {
     if (activeTab === 'picker') {
       const hsl = hexToHsl(getDisplayColor());
       setHslValues(hsl);
+      const rgb = hexToRgb(getDisplayColor());
+      setRgbValues(rgb);
     }
   }, [displayValue, activeTab]);
 
@@ -321,6 +344,13 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     const newHsl = { ...hslValues, [type]: value };
     setHslValues(newHsl);
     const newHex = hslToHex(newHsl.h, newHsl.s, newHsl.l);
+    eventHandler('OnChange', id, [newHex]);
+  };
+
+  const handleRgbSliderChange = (type: 'r' | 'g' | 'b', value: number) => {
+    const newRgb = { ...rgbValues, [type]: value };
+    setRgbValues(newRgb);
+    const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
     eventHandler('OnChange', id, [newHex]);
   };
 
@@ -595,7 +625,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-3" align="start">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[460px]">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[600px]">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium px-1">
                   Choose a color for {placeholder || 'this item'}
@@ -618,63 +648,129 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
               </TabsContent>
 
               <TabsContent value="picker" className="mt-0">
-                <div className="h-[238px] p-2 flex flex-col justify-center gap-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-medium">
-                      <span>Hue</span>
-                      <span>{hslValues.h}°</span>
-                    </div>
-                    <div className="relative px-1">
-                      <div className="absolute inset-0 h-2 rounded-full bg-gradient-to-r from-[hsl(0,100%,50%)] via-[hsl(60,100%,50%)] via-[hsl(120,100%,50%)] via-[hsl(180,100%,50%)] via-[hsl(240,100%,50%)] via-[hsl(300,100%,50%)] to-[hsl(360,100%,50%)] opacity-50 pointer-events-none" />
-                      <Slider
-                        value={[hslValues.h]}
-                        max={360}
-                        step={1}
-                        onValueChange={(vals) => handleSliderChange('h', vals[0])}
-                        className="[&>.bg-primary]:bg-transparent"
-                      />
-                    </div>
-                  </div>
+                <div className="h-[297px] p-2 flex flex-col justify-center gap-6">
+                  {colorFormat === 'HSL' ? (
+                    <>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span>Hue</span>
+                          <span>{hslValues.h.toFixed(1)}°</span>
+                        </div>
+                        <div className="relative px-1">
+                          <div className="absolute inset-0 h-4 rounded-full bg-gradient-to-r from-[hsl(0,100%,50%)] via-[hsl(60,100%,50%)] via-[hsl(120,100%,50%)] via-[hsl(180,100%,50%)] via-[hsl(240,100%,50%)] via-[hsl(300,100%,50%)] to-[hsl(360,100%,50%)] opacity-50 pointer-events-none" />
+                          <Slider
+                            value={[hslValues.h]}
+                            max={360}
+                            step={0.1}
+                            onValueChange={(vals) => handleSliderChange('h', vals[0])}
+                            className="[&>.bg-primary]:bg-transparent"
+                          />
+                        </div>
+                      </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-medium">
-                      <span>Saturation</span>
-                      <span>{hslValues.s}%</span>
-                    </div>
-                    <div className="relative px-1">
-                      <div
-                        className="absolute inset-0 h-2 rounded-full pointer-events-none opacity-50"
-                        style={{ background: `linear-gradient(to right, hsl(${hslValues.h}, 0%, ${hslValues.l}%), hsl(${hslValues.h}, 100%, ${hslValues.l}%))` }}
-                      />
-                      <Slider
-                        value={[hslValues.s]}
-                        max={100}
-                        step={1}
-                        onValueChange={(vals) => handleSliderChange('s', vals[0])}
-                        className="[&>.bg-primary]:bg-transparent"
-                      />
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span>Saturation</span>
+                          <span>{hslValues.s.toFixed(1)}%</span>
+                        </div>
+                        <div className="relative px-1">
+                          <div
+                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
+                            style={{ background: `linear-gradient(to right, hsl(${hslValues.h}, 0%, ${hslValues.l}%), hsl(${hslValues.h}, 100%, ${hslValues.l}%))` }}
+                          />
+                          <Slider
+                            value={[hslValues.s]}
+                            max={100}
+                            step={0.1}
+                            onValueChange={(vals) => handleSliderChange('s', vals[0])}
+                            className="[&>.bg-primary]:bg-transparent"
+                          />
+                        </div>
+                      </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-medium">
-                      <span>Lightness</span>
-                      <span>{hslValues.l}%</span>
-                    </div>
-                    <div className="relative px-1">
-                      <div
-                        className="absolute inset-0 h-2 rounded-full pointer-events-none opacity-50"
-                        style={{ background: `linear-gradient(to right, hsl(${hslValues.h}, ${hslValues.s}%, 0%), hsl(${hslValues.h}, ${hslValues.s}%, 50%), hsl(${hslValues.h}, ${hslValues.s}%, 100%))` }}
-                      />
-                      <Slider
-                        value={[hslValues.l]}
-                        max={100}
-                        step={1}
-                        onValueChange={(vals) => handleSliderChange('l', vals[0])}
-                        className="[&>.bg-primary]:bg-transparent"
-                      />
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span>Lightness</span>
+                          <span>{hslValues.l.toFixed(1)}%</span>
+                        </div>
+                        <div className="relative px-1">
+                          <div
+                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
+                            style={{ background: `linear-gradient(to right, hsl(${hslValues.h}, ${hslValues.s}%, 0%), hsl(${hslValues.h}, ${hslValues.s}%, 50%), hsl(${hslValues.h}, ${hslValues.s}%, 100%))` }}
+                          />
+                          <Slider
+                            value={[hslValues.l]}
+                            max={100}
+                            step={0.1}
+                            onValueChange={(vals) => handleSliderChange('l', vals[0])}
+                            className="[&>.bg-primary]:bg-transparent"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span>Red</span>
+                          <span>{colorFormat === 'HEX' ? rgbValues.r.toString(16).toUpperCase().padStart(2, '0') : rgbValues.r}</span>
+                        </div>
+                        <div className="relative px-1">
+                          <div
+                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
+                            style={{ background: `linear-gradient(to right, rgb(0, ${rgbValues.g}, ${rgbValues.b}), rgb(255, ${rgbValues.g}, ${rgbValues.b}))` }}
+                          />
+                          <Slider
+                            value={[rgbValues.r]}
+                            max={255}
+                            step={1}
+                            onValueChange={(vals) => handleRgbSliderChange('r', vals[0])}
+                            className="[&>.bg-primary]:bg-transparent"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span>Green</span>
+                          <span>{colorFormat === 'HEX' ? rgbValues.g.toString(16).toUpperCase().padStart(2, '0') : rgbValues.g}</span>
+                        </div>
+                        <div className="relative px-1">
+                          <div
+                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
+                            style={{ background: `linear-gradient(to right, rgb(${rgbValues.r}, 0, ${rgbValues.b}), rgb(${rgbValues.r}, 255, ${rgbValues.b}))` }}
+                          />
+                          <Slider
+                            value={[rgbValues.g]}
+                            max={255}
+                            step={1}
+                            onValueChange={(vals) => handleRgbSliderChange('g', vals[0])}
+                            className="[&>.bg-primary]:bg-transparent"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span>Blue</span>
+                          <span>{colorFormat === 'HEX' ? rgbValues.b.toString(16).toUpperCase().padStart(2, '0') : rgbValues.b}</span>
+                        </div>
+                        <div className="relative px-1">
+                          <div
+                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
+                            style={{ background: `linear-gradient(to right, rgb(${rgbValues.r}, ${rgbValues.g}, 0), rgb(${rgbValues.r}, ${rgbValues.g}, 255))` }}
+                          />
+                          <Slider
+                            value={[rgbValues.b]}
+                            max={255}
+                            step={1}
+                            onValueChange={(vals) => handleRgbSliderChange('b', vals[0])}
+                            className="[&>.bg-primary]:bg-transparent"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
                 {renderFooter()}
               </TabsContent>
