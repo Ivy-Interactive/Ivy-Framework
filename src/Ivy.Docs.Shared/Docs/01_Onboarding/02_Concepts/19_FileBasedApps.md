@@ -21,6 +21,12 @@ Usually you create Ivy apps with [ivy init](../03_CLI/02_Init.md) and run them w
 
 Create a file, for example `HelloApp.cs`:
 
+```terminal
+ivy init --script
+```
+
+You will receive a file-based app that you can populate with your own context as needed.
+
 ```csharp
 #: package Ivy@*
 
