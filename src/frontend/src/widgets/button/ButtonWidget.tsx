@@ -14,11 +14,7 @@ import {
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
-import {
-  BorderRadius,
-  getColor,
-  getWidth,
-} from '@/lib/styles';
+import { BorderRadius, getColor, getWidth } from '@/lib/styles';
 import { Scales } from '@/types/scale';
 
 const ButtonWithTooltip = withTooltip(Button);
