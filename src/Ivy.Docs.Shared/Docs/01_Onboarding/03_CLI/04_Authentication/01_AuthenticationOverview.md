@@ -188,6 +188,32 @@ For complete control over the login experience, you can replace the entire login
 server.UseAuth<BasicAuthProvider>(viewFactory: () => new MyCustomLoginApp());
 ```
 
+## Customizing Authentication Cookies
+
+Ivy allows you to customize authentication cookie settings globally from your [Program.cs](../../02_Concepts/01_Program.md) using the `Server.ConfigureAuthCookieOptions` static property. This enables you to override default cookie settings (such as expiration time, SameSite policy, Secure flag, etc.) based on your application's specific security requirements.
+
+### Default Cookie Settings
+
+By default, Ivy authentication cookies are configured with:
+- **HttpOnly**: `true` (prevents JavaScript access)
+- **Secure**: `true` in production, `false` in development (requires HTTPS)
+- **SameSite**: `Lax` (provides CSRF protection while allowing cross-site navigation)
+- **Expires**: 1 year from creation
+- **Path**: `/` (available site-wide)
+
+### Customizing Cookie Options
+
+To override these defaults, set `Server.ConfigureAuthCookieOptions` in your `Program.cs` before calling `server.RunAsync()`:
+
+```csharp
+Server.ConfigureAuthCookieOptions = options => 
+{
+    options.Expires = DateTimeOffset.UtcNow.AddDays(30);
+};
+```
+
+> **Note**: Custom configuration is applied after Ivy sets the default values, allowing you to override any setting. It's recommended to keep `HttpOnly = true` for security.
+
 ## Best Practices
 
 **Security** - Always use HTTPS in production, store sensitive configuration in user secrets or environment variables, regularly rotate client secrets, use strong passwords for Basic Auth, and implement proper session management.

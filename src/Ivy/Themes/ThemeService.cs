@@ -151,15 +151,20 @@ public class ThemeService : IThemeService
 
     private void AppendOtherThemeProperties(StringBuilder sb)
     {
-        // Apply other theme properties only to :root
         if (!string.IsNullOrEmpty(_currentTheme.FontFamily))
             sb.AppendLine($"  --font-sans: {_currentTheme.FontFamily};");
 
         if (!string.IsNullOrEmpty(_currentTheme.FontSize))
             sb.AppendLine($"  --text-body: {_currentTheme.FontSize};");
 
-        if (!string.IsNullOrEmpty(_currentTheme.BorderRadius))
-            sb.AppendLine($"  --radius: {_currentTheme.BorderRadius};");
+        if (!string.IsNullOrEmpty(_currentTheme.BorderRadiusBoxes))
+            sb.AppendLine($"  --radius-boxes: {_currentTheme.BorderRadiusBoxes};");
+
+        if (!string.IsNullOrEmpty(_currentTheme.BorderRadiusFields))
+            sb.AppendLine($"  --radius-fields: {_currentTheme.BorderRadiusFields};");
+
+        if (!string.IsNullOrEmpty(_currentTheme.BorderRadiusSelectors))
+            sb.AppendLine($"  --radius-selectors: {_currentTheme.BorderRadiusSelectors};");
     }
 
     private void AppendColorVariable(StringBuilder sb, string variableName, string? colorValue)

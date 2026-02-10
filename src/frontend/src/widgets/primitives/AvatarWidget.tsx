@@ -18,7 +18,7 @@ export const AvatarWidget: React.FC<AvatarWidgetProps> = ({
   fallback,
 }) => {
   const displayFallback =
-    fallback.length === 2 ? fallback : getInitials(fallback);
+    fallback?.length === 2 ? fallback : getInitials(fallback || '');
   return (
     <Avatar>
       <AvatarImage src={image} title={fallback} />

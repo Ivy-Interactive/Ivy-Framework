@@ -2,7 +2,7 @@ import { cva } from 'class-variance-authority';
 
 // Size variants for FileInput
 export const fileInputVariants = cva(
-  'relative rounded-md border-dashed transition-colors',
+  'relative rounded-field border-dashed transition-colors',
   {
     variants: {
       scale: {

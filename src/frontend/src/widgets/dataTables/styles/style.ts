@@ -37,14 +37,14 @@ export const tableStyles = {
       height: '100%',
       width: '100%',
       border: '1px solid var(--border)',
-      borderRadius: 'var(--radius)',
+      borderRadius: 'var(--radius-boxes)',
       overflow: 'hidden',
     },
     gridContainerWithOptions: {
       height: '100%',
       width: '100%',
       border: '1px solid var(--border)',
-      borderRadius: 'var(--radius)',
+      borderRadius: 'var(--radius-boxes)',
       overflow: 'hidden',
     },
     footer: {
@@ -88,7 +88,7 @@ export const tableStyles = {
       .cm-tooltip-autocomplete {
         background: var(--popover) !important;
         border: 1px solid var(--border) !important;
-        border-radius: calc(var(--radius) - 2px) !important;
+        border-radius: calc(var(--radius-boxes) - 2px) !important;
         box-shadow: var(--shadow-md) !important;
         padding: 4px !important;
         font-family: var(--font-mono) !important;
@@ -106,7 +106,7 @@ export const tableStyles = {
       .cm-tooltip-autocomplete > ul > li {
         padding: 6px 8px !important;
         margin: 2px 0 !important;
-        border-radius: calc(var(--radius) - 4px) !important;
+        border-radius: calc(var(--radius-boxes) - 4px) !important;
         cursor: pointer !important;
         color: var(--foreground) !important;
         transition: background-color 0.15s ease-in-out !important;
@@ -141,7 +141,7 @@ export const tableStyles = {
       .cm-completionInfo {
         background: var(--popover) !important;
         border: 1px solid var(--border) !important;
-        border-radius: calc(var(--radius) - 2px) !important;
+        border-radius: calc(var(--radius-boxes) - 2px) !important;
         padding: 8px !important;
         color: var(--foreground) !important;
         font-size: 13px !important;

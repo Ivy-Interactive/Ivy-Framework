@@ -7,7 +7,7 @@ export { TabsLayoutWidget } from './tabs/TabsLayoutWidget';
 export { TabWidget } from './tabs/TabWidget';
 export { SidebarLayoutWidget, SidebarMenuWidget } from './sidebar';
 export {
-  ResizeablePanelWidget,
-  ResizeablePanelGroupWidget,
-} from './ResizeablePanelGroupWidget';
+  ResizablePanelWidget,
+  ResizablePanelGroupWidget,
+} from './ResizablePanelGroupWidget';
 export { FloatingPanelWidget } from './FloatingPanelWidget';

@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 export const expandableTriggerVariants = cva(
-  'w-full flex justify-between items-center cursor-pointer hover:bg-accent/50 rounded-sm transition-colors disabled:cursor-not-allowed disabled:hover:bg-transparent overflow-hidden box-border shrink-0',
+  'w-full flex justify-between items-center cursor-pointer hover:bg-accent/50 rounded-box transition-colors disabled:cursor-not-allowed disabled:hover:bg-transparent overflow-hidden box-border shrink-0',
   {
     variants: {
       scale: {

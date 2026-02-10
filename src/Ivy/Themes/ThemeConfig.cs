@@ -15,7 +15,11 @@ public class Theme
 
     public string? FontSize { get; set; }
 
-    public string? BorderRadius { get; set; }
+    public string? BorderRadiusBoxes { get; set; }
+
+    public string? BorderRadiusFields { get; set; }
+
+    public string? BorderRadiusSelectors { get; set; }
 
     public static Theme Default => new()
     {
@@ -23,7 +27,9 @@ public class Theme
         Colors = ThemeColorScheme.Default,
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadius = "0.5rem"
+        BorderRadiusBoxes = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
+        BorderRadiusFields = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
+        BorderRadiusSelectors = IvyFrameworkBorderRadiusTokens.BorderRadius.Md
     };
 }
 

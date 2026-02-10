@@ -66,7 +66,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   return (
     <div className="relative w-full select-none">
       <div
-        className="rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10"
+        className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10"
         style={styles}
       >
         <Textarea
@@ -112,7 +112,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         )}
         {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center">
-            <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-md">
+            <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-field">
               {shortcutDisplay}
             </kbd>
           </div>

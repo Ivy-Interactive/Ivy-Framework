@@ -40,7 +40,7 @@ Ivy ships with a comprehensive set of strongly-typed widgets:
 | Common | [Button](../../02_Widgets/03_Common/01_Button.md), [Badge](../../02_Widgets/03_Common/02_Badge.md), [Progress](../../02_Widgets/03_Common/10_Progress.md), [Table](../../02_Widgets/03_Common/08_Table.md), [Card](../../02_Widgets/03_Common/04_Card.md), [Tooltip](../../02_Widgets/03_Common/03_Tooltip.md), [Expandable](../../02_Widgets/03_Common/06_Expandable.md), [Blades](../../02_Widgets/03_Common/12_Blades.md), [Details](../../02_Widgets/03_Common/05_Details.md), [DropDownMenu](../../02_Widgets/03_Common/11_DropDownMenu.md), [List](../../02_Widgets/03_Common/07_List.md)... |
 | Inputs | [TextInput](../../02_Widgets/04_Inputs/02_TextInput.md), [NumberInput](../../02_Widgets/04_Inputs/03_NumberInput.md), [BoolInput](../../02_Widgets/04_Inputs/04_BoolInput.md), [DateTimeInput](../../02_Widgets/04_Inputs/07_DateTimeInput.md), [FileInput](../../02_Widgets/04_Inputs/10_FileInput.md), [Feedback](../../02_Widgets/04_Inputs/13_FeedbackInput.md), [DateRange](../../02_Widgets/04_Inputs/08_DateRangeInput.md), [Color](../../02_Widgets/04_Inputs/09_ColorInput.md), [CodeInput](../../02_Widgets/04_Inputs/11_CodeInput.md), [ReadOnly](../../02_Widgets/04_Inputs/14_ReadOnlyInput.md), [AsyncSelect](../../02_Widgets/04_Inputs/06_AsyncSelectInput.md)... |
 | Primitives | [Text](../../02_Widgets/01_Primitives/01_TextBlock.md), [Icon](../../02_Widgets/01_Primitives/02_Icon.md), [Image](../../02_Widgets/01_Primitives/03_Image.md), [Markdown](../../02_Widgets/01_Primitives/14_Markdown.md), [Json](../../02_Widgets/01_Primitives/17_Json.md), [Code](../../02_Widgets/01_Primitives/10_Code.md), [Avatar](../../02_Widgets/01_Primitives/08_Avatar.md), [Box](../../02_Widgets/01_Primitives/04_Box.md), [Callout](../../02_Widgets/01_Primitives/12_Callout.md), [Error](../../02_Widgets/01_Primitives/13_Error.md), [Spacer](../../02_Widgets/01_Primitives/06_Spacer.md), [Separator](../../02_Widgets/01_Primitives/07_Separator.md), [Xml](../../02_Widgets/01_Primitives/16_Xml.md), [Html](../../02_Widgets/01_Primitives/15_Html.md)... |
-| Layouts | [GridLayout](../../02_Widgets/02_Layouts/03_GridLayout.md), [TabsLayout](../../02_Widgets/02_Layouts/07_TabsLayout.md), [SidebarLayout](../../02_Widgets/02_Layouts/06_SidebarLayout.md), [FloatingPanel](../../02_Widgets/02_Layouts/09_FloatingPanel.md), [ResizeablePanelGroup](../../02_Widgets/02_Layouts/08_ResizeablePanelGroup.md), [Header](../../02_Widgets/02_Layouts/04_HeaderLayout.md), [Footer](../../02_Widgets/02_Layouts/05_FooterLayout.md), [Wrap](../../02_Widgets/02_Layouts/02_WrapLayout.md)... |
+| Layouts | [GridLayout](../../02_Widgets/02_Layouts/03_GridLayout.md), [TabsLayout](../../02_Widgets/02_Layouts/07_TabsLayout.md), [SidebarLayout](../../02_Widgets/02_Layouts/06_SidebarLayout.md), [FloatingPanel](../../02_Widgets/02_Layouts/09_FloatingPanel.md), [ResizablePanelGroup](../../02_Widgets/02_Layouts/08_ResizablePanelGroup.md), [Header](../../02_Widgets/02_Layouts/04_HeaderLayout.md), [Footer](../../02_Widgets/02_Layouts/05_FooterLayout.md), [Wrap](../../02_Widgets/02_Layouts/02_WrapLayout.md)... |
 | Effects | [Animation](../../02_Widgets/05_Effects/Animation.md), [Confetti](../../02_Widgets/05_Effects/Confetti.md)... |
 | Charts | [LineChart](../../02_Widgets/06_Charts/01_LineChart.md), [BarChart](../../02_Widgets/06_Charts/02_BarChart.md), [PieChart](../../02_Widgets/06_Charts/04_PieChart.md), [AreaChart](../../02_Widgets/06_Charts/03_AreaChart.md)... |
 | Advanced | [Sheet](../../02_Widgets/07_Advanced/02_Sheet.md), [Chat](../../02_Widgets/07_Advanced/04_Chat.md)... |
@@ -338,7 +338,7 @@ graph LR
     B --> B3[Vertical]
     
     C --> C1[Floating Panel]
-    C --> C2[Resizeable Panel Group]
+    C --> C2[Resizable Panel Group]
     C --> C3[Sidebar]
     C --> C4[Tabs]
     
@@ -423,13 +423,13 @@ public class LayoutWidgetsDemo : ViewBase
                 ) : null)
             ).Title("FloatingPanel").Description("Fixed position overlay").Height(Size.Units(60))
             | new Card(
-                new ResizeablePanelGroup(
-                    new ResizeablePanel(40,
+                new ResizablePanelGroup(
+                    new ResizablePanel(Size.Fraction(0.4f),
                         new Card("Left")),
-                    new ResizeablePanel(60,
+                    new ResizablePanel(Size.Fraction(0.6f),
                         new Card("Right"))
                 )
-            ).Title("ResizeablePanelGroup").Description("Resizable panels").Height(Size.Units(60));
+            ).Title("ResizablePanelGroup").Description("Resizable panels").Height(Size.Units(60));
         
         return Layout.Vertical().Gap(4)
             | twoColumnExamples

@@ -39,6 +39,7 @@ const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
         {...props}
         onMouseDown={handleMouseDown}
         aria-label={action.label || actionId}
+        title={action.tooltip}
         type="button"
       >
         {action.icon && (

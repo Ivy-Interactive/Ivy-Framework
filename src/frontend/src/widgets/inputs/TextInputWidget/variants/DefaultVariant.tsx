@@ -72,7 +72,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
     <div className="relative w-full select-none" style={styles}>
       <div
         className={cn(
-          'relative flex items-stretch rounded-md border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10',
+          'relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10',
           isFocused && 'outline-none ring-1 ring-ring',
           props.invalid && 'border-destructive',
           props.disabled && 'cursor-not-allowed opacity-50'
@@ -80,7 +80,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
       >
         {/* Prefix with background and separator */}
         {prefixContent && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-l-md">
+          <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
             {prefixContent}
           </div>
         )}
@@ -116,7 +116,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
               'border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent',
               prefixContent && 'rounded-l-none',
               suffixContent && 'rounded-r-none',
-              !hasAffixes && 'rounded-md'
+              !hasAffixes && 'rounded-field'
             )}
             data-testid={props['data-testid']}
           />
@@ -130,7 +130,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                 !showClear &&
                 !props.invalid && (
                   <div className="pointer-events-auto flex items-center h-6">
-                    <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-md">
+                    <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-selector">
                       {shortcutDisplay}
                     </kbd>
                   </div>
@@ -158,7 +158,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 
         {/* Suffix with background and separator */}
         {suffixContent && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-r-md">
+          <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
             {suffixContent}
           </div>
         )}

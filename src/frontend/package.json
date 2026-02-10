@@ -135,6 +135,7 @@
   "overrides": {
     "@swc/helpers": "0.5.17",
     "dompurify": "3.3.0",
+    "lodash-es": "4.17.23",
     "remark-mermaid-plugin": {
       "mermaid": "11.12.1"
     }

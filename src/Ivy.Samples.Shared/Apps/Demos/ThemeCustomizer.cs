@@ -134,7 +134,9 @@ public class ThemeCustomizer : SampleBase
             Name = source.Name,
             FontFamily = source.FontFamily,
             FontSize = source.FontSize,
-            BorderRadius = source.BorderRadius,
+            BorderRadiusBoxes = source.BorderRadiusBoxes,
+            BorderRadiusFields = source.BorderRadiusFields,
+            BorderRadiusSelectors = source.BorderRadiusSelectors,
             Colors = new ThemeColorScheme
             {
                 Light = CloneThemeColors(source.Colors.Light),
@@ -225,9 +227,7 @@ public class ThemeCustomizer : SampleBase
                     },
                     options: presetOptions
                 )
-
                 | new Separator()
-
                 // Mode toggle
                 | Text.H3("Theme Mode").Small()
                 | (Layout.Horizontal()
@@ -310,11 +310,11 @@ public class ThemeCustomizer : SampleBase
                             onChange: e => UpdateThemeProperty(t => t.FontSize = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
                             placeholder: "e.g., 16px, 1rem"
                         ).WithField().Label("Font Size")
-                        | new TextInput(
-                            value: editingTheme.Value.BorderRadius ?? "",
-                            onChange: e => UpdateThemeProperty(t => t.BorderRadius = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
-                            placeholder: "e.g., 0.5rem, 8px"
-                        ).WithField().Label("Border Radius")
+                        | new Separator()
+                        | new BorderRadiusSelector(
+                            editingTheme,
+                            UpdateThemeProperty
+                        )
                 );
 
         }
@@ -354,6 +354,100 @@ public class ThemeCustomizer : SampleBase
                     },
                     variant: ColorInputs.TextAndPicker
                 );
+        }
+    }
+
+    /// <summary>
+    /// Border radius selector with visual preview boxes
+    /// </summary>
+    private class BorderRadiusSelector(IState<Theme> editingTheme, Action<Action<Theme>> updateThemeProperty) : ViewBase
+    {
+        // Constants for consistent sizing
+        private const int PreviewSize = 35;
+        private const int CardSize = 60;
+        private const int SvgViewBox = 32;
+
+        // Available border radius options: (cssValue, pxRadius)
+        private static readonly (string Value, int Pixels)[] RadiusOptions =
+        [
+            ("0px", 0),
+            ("0.5rem", 8),
+            ("1rem", 16),
+            ("1.5rem", 24),
+            ("2rem", 32)
+        ];
+
+        public override object Build()
+        {
+            return Layout.Vertical().Gap(3)
+                | Text.Block("Radius").Small().Bold()
+                | BuildRadiusCategory(
+                    "Boxes",
+                    "card, modal, alert",
+                    editingTheme.Value.BorderRadiusBoxes,
+                    value => updateThemeProperty(t => t.BorderRadiusBoxes = value))
+                | BuildRadiusCategory(
+                    "Fields",
+                    "button, input, select, tab",
+                    editingTheme.Value.BorderRadiusFields,
+                    value => updateThemeProperty(t => t.BorderRadiusFields = value))
+                | BuildRadiusCategory(
+                    "Selectors",
+                    "checkbox, toggle, badge",
+                    editingTheme.Value.BorderRadiusSelectors,
+                    value => updateThemeProperty(t => t.BorderRadiusSelectors = value));
+        }
+
+        private static object BuildRadiusCategory(
+            string title,
+            string subtitle,
+            string? currentValue,
+            Action<string?> onUpdate)
+        {
+            var options = Layout.Horizontal().Gap(2);
+            foreach (var (value, pixels) in RadiusOptions)
+            {
+                options = options | CreateOption(value, pixels, currentValue, onUpdate);
+            }
+
+            return Layout.Vertical()
+                | Text.Block(title).Bold().Small()
+                | Text.Block(subtitle).Muted().Italic()
+                | options;
+        }
+
+        private static object CreateOption(
+            string remValue,
+            int pxRadius,
+            string? currentValue,
+            Action<string?> onUpdate)
+        {
+            // Normalize both values to compare (treat null/empty as "0px")
+            var normalizedCurrent = string.IsNullOrWhiteSpace(currentValue) ? "0px" : currentValue;
+            var normalizedOption = remValue == "0px" ? "0px" : remValue;
+            var isSelected = normalizedCurrent == normalizedOption;
+            var fillColor = isSelected ? "var(--primary)" : "var(--secondary)";
+
+            // Allow rectangle to be larger than viewbox to support large radii without capping
+            // If rect is 32x32, max radius is 16. If rect is 64x64, max radius is 32.
+            var rectSize = SvgViewBox * 2;
+
+            // ViewBox shows the top-left 32x32 area
+            // Radii: 0, 8, 16, 24, 32 will now be visually distinct
+            var svgContent = $@"<svg width='100%' height='100%' viewBox='0 0 {SvgViewBox} {SvgViewBox}' xmlns='http://www.w3.org/2000/svg'>
+                <rect width='{rectSize}' height='{rectSize}' rx='{pxRadius}' fill='{fillColor}' />
+            </svg>";
+
+            return new Card(
+                    Layout.Center()
+                        | new Svg(svgContent)
+                            .Width(Size.Px(PreviewSize))
+                            .Height(Size.Px(PreviewSize))
+                )
+                .Width(Size.Px(CardSize))
+                .Height(Size.Px(CardSize))
+                .HandleClick(() => onUpdate(remValue == "0px" ? null : remValue))
+                .WithTooltip($"{remValue} ({pxRadius}px)");
         }
     }
 
@@ -819,7 +913,9 @@ var server = new Server()
         }}
         theme.FontFamily = ""{theme.FontFamily}"";
         theme.FontSize = ""{theme.FontSize}"";
-        theme.BorderRadius = ""{theme.BorderRadius}"";
+        theme.BorderRadiusBoxes = ""{theme.BorderRadiusBoxes}"";
+        theme.BorderRadiusFields = ""{theme.BorderRadiusFields}"";
+        theme.BorderRadiusSelectors = ""{theme.BorderRadiusSelectors}""; 
     }});";
     }
 
@@ -829,7 +925,9 @@ var server = new Server()
         Name = "Ocean",
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadius = "0.5rem",
+        BorderRadiusBoxes = Theme.Default.BorderRadiusBoxes,
+        BorderRadiusFields = Theme.Default.BorderRadiusFields,
+        BorderRadiusSelectors = Theme.Default.BorderRadiusSelectors,
         Colors = new ThemeColorScheme
         {
             Light = new ThemeColors
@@ -896,7 +994,9 @@ var server = new Server()
         Name = "Forest",
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadius = "0.5rem",
+        BorderRadiusBoxes = Theme.Default.BorderRadiusBoxes,
+        BorderRadiusFields = Theme.Default.BorderRadiusFields,
+        BorderRadiusSelectors = Theme.Default.BorderRadiusSelectors,
         Colors = new ThemeColorScheme
         {
             Light = new ThemeColors
@@ -963,7 +1063,9 @@ var server = new Server()
         Name = "Sunset",
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadius = "0.5rem",
+        BorderRadiusBoxes = Theme.Default.BorderRadiusBoxes,
+        BorderRadiusFields = Theme.Default.BorderRadiusFields,
+        BorderRadiusSelectors = Theme.Default.BorderRadiusSelectors,
         Colors = new ThemeColorScheme
         {
             Light = new ThemeColors
@@ -1030,7 +1132,9 @@ var server = new Server()
         Name = "Midnight",
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadius = "0.5rem",
+        BorderRadiusBoxes = Theme.Default.BorderRadiusBoxes,
+        BorderRadiusFields = Theme.Default.BorderRadiusFields,
+        BorderRadiusSelectors = Theme.Default.BorderRadiusSelectors,
         Colors = new ThemeColorScheme
         {
             Light = new ThemeColors

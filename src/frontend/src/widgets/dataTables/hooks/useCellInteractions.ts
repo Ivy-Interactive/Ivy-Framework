@@ -1,10 +1,5 @@
 import { useCallback } from 'react';
-import {
-  GridCell,
-  GridCellKind,
-  GridMouseEventArgs,
-  Item,
-} from '@glideapps/glide-data-grid';
+import { GridCell, GridCellKind, Item } from '@glideapps/glide-data-grid';
 import { useEventHandler } from '@/components/event-handler';
 import { validateLinkUrl, validateRedirectUrl } from '@/lib/url';
 import { DataColumn } from '../types/types';
@@ -31,7 +26,7 @@ export const useCellInteractions = ({
 
   // Handle cell single-clicks (for backend events and link navigation)
   const handleCellClicked = useCallback(
-    (cell: Item, args: GridMouseEventArgs) => {
+    (cell: Item) => {
       const [, row] = cell;
       // Prevent interactions with empty filler rows
       if (row >= visibleRows) {
@@ -40,9 +35,8 @@ export const useCellInteractions = ({
 
       const cellContent = getCellContent(cell);
 
-      // Handle Ctrl+Click or Cmd+Click on custom link cells
+      // Handle click on custom link cells
       if (
-        (args.ctrlKey || args.metaKey) &&
         cellContent.kind === GridCellKind.Custom &&
         (cellContent.data as { kind?: string })?.kind === 'link-cell'
       ) {

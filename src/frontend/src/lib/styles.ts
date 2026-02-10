@@ -297,9 +297,41 @@ export const getBorderThickness = (
 
 export type BorderRadius = 'None' | 'Rounded' | 'Full';
 
+// Border radius helpers backed by theme CSS variables.
+// These match the three semantic buckets we expose from the backend theme:
+// boxes (cards, sheets), fields (inputs, buttons) and selectors (badges, toggles).
+
+export const getBoxRadius = (): React.CSSProperties => ({
+  borderRadius: 'var(--radius-boxes)',
+});
+
+export const getFieldRadius = (): React.CSSProperties => ({
+  borderRadius: 'var(--radius-fields)',
+});
+
+export const getSelectorRadius = (): React.CSSProperties => ({
+  borderRadius: 'var(--radius-selectors)',
+});
+
+// Back‑compat helper used by older widgets.
+// Prefer passing useSemanticRadius when possible so we stay aligned with the theme tokens.
 export const getBorderRadius = (
-  borderRadius?: BorderRadius
+  borderRadius?: BorderRadius,
+  useSemanticRadius?: 'box' | 'field' | 'selector'
 ): React.CSSProperties => {
+  // If semantic radius is specified, use CSS variable
+  if (useSemanticRadius) {
+    switch (useSemanticRadius) {
+      case 'box':
+        return getBoxRadius();
+      case 'field':
+        return getFieldRadius();
+      case 'selector':
+        return getSelectorRadius();
+    }
+  }
+
+  // Legacy behavior: use hardcoded values
   if (!borderRadius) return {};
   return {
     borderRadius:
