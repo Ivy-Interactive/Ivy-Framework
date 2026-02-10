@@ -16,6 +16,7 @@ public enum ColorInputs
   Picker,
   TextAndPicker,
   Swatch,
+  Foreground,
   ThemePicker
 }
 

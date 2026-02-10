@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/input/color-input-variants';
 import { Scales } from '@/types/scale';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
-import { Slider } from '@/components/ui/slider';
+// unused Slider import removed
 import {
   Popover,
   PopoverContent,
@@ -25,21 +25,20 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  // Select imports removed as they are no longer used
 } from '@/components/ui/select';
+import * as SliderPrimitive from '@radix-ui/react-slider';
+
 interface ColorInputWidgetProps {
   id: string;
   value: string | null;
+
   disabled?: boolean;
   invalid?: string;
   placeholder?: string;
   nullable?: boolean;
   events?: string[];
-  variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch' | 'ThemePicker';
+  variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch' | 'Foreground' | 'ThemePicker';
   scale?: Scales;
 }
 
@@ -139,9 +138,149 @@ const ThemeColorGrid: React.FC<{
   onSelect: (color: string) => void;
   selectedColor: string | null;
 }> = ({ onSelect, selectedColor }) => {
-  // Generate 200 colors (10 rows x 20 columns)
-  const rows = 10;
+  // Generate 160 colors (8 rows x 20 columns)
+  const rows = 8;
   const cols = 20;
+
+  // Theme color mappings
+  const THEME_COLOR_MAPPINGS = [
+    { label: 'P', var: '--primary' },
+    { label: 'PF', var: '--primary-foreground' },
+    { label: 'S', var: '--secondary' },
+    { label: 'SF', var: '--secondary-foreground' },
+    { label: 'Su', var: '--success' },
+    { label: 'SuF', var: '--success-foreground' },
+    { label: 'D', var: '--destructive' },
+    { label: 'DF', var: '--destructive-foreground' },
+    { label: 'W', var: '--warning' },
+    { label: 'WF', var: '--warning-foreground' },
+    { label: 'I', var: '--info' },
+    { label: 'IF', var: '--info-foreground' },
+    { label: 'M', var: '--muted' },
+    { label: 'MF', var: '--muted-foreground' },
+    { label: 'A', var: '--accent' },
+    { label: 'AF', var: '--accent-foreground' },
+    { label: 'Po', var: '--popover' },
+    { label: 'PoF', var: '--popover-foreground' },
+    { label: 'Ca', var: '--card' },
+    { label: 'CaF', var: '--card-foreground' },
+    { label: 'Bg', var: '--background' },
+    { label: 'Fg', var: '--foreground' },
+    { label: 'In', var: '--input' },
+    { label: 'Bo', var: '--border' },
+    { label: 'Ri', var: '--ring' },
+  ];
+
+  const [resolvedThemeColors, setResolvedThemeColors] = React.useState<Record<string, string[]>>({});
+
+  // Helper to convert any CSS color string to Hex
+  const colorToHex = (color: string): string | null => {
+    if (!color) return null;
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) return null;
+    ctx.fillStyle = color;
+    return ctx.fillStyle;
+  };
+
+  const updateThemeColors = React.useCallback(() => {
+    if (typeof window === 'undefined') return;
+
+    const computedStyle = getComputedStyle(document.documentElement);
+    const newMappings: Record<string, string[]> = {};
+
+    THEME_COLOR_MAPPINGS.forEach(mapping => {
+      // Get the value of the CSS variable
+      let colorValue = computedStyle.getPropertyValue(mapping.var).trim();
+
+      // Handle Tailwind's space-separated HSL channels (e.g., "222.2 47.4% 11.2%")
+      // Check if it looks like numbers/percentages separated by spaces
+      if (/^[\d.]+\s+[\d.]+%?\s+[\d.]+%?/.test(colorValue)) {
+        colorValue = `hsl(${colorValue})`;
+      }
+
+      let hex = colorToHex(colorValue);
+
+      if (hex) {
+        const normalizedHex = hex.toLowerCase();
+        if (!newMappings[normalizedHex]) {
+          newMappings[normalizedHex] = [];
+        }
+        newMappings[normalizedHex].push(mapping.label);
+      }
+    });
+    setResolvedThemeColors(newMappings);
+  }, []);
+
+  React.useEffect(() => {
+    // Initial load with retries to handle async style injection
+    updateThemeColors();
+    const retryTimers = [100, 300, 500, 1000].map(delay =>
+      setTimeout(updateThemeColors, delay)
+    );
+
+    if (typeof window === 'undefined') {
+      retryTimers.forEach(clearTimeout);
+      return;
+    }
+
+    // Observe changes to the html element (for class/style) and head (for style tag injection)
+    const observer = new MutationObserver((mutations) => {
+      let shouldUpdate = false;
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+          shouldUpdate = true;
+          break;
+        }
+        if (mutation.type === 'childList') {
+          // Check if a style tag was added/removed to head
+          for (const node of mutation.addedNodes) {
+            if (node.nodeName === 'STYLE') {
+              shouldUpdate = true;
+              break;
+            }
+          }
+          if (!shouldUpdate) {
+            for (const node of mutation.removedNodes) {
+              if (node.nodeName === 'STYLE') {
+                shouldUpdate = true;
+                break;
+              }
+            }
+          }
+        }
+        if (shouldUpdate) break;
+      }
+
+      if (shouldUpdate) {
+        // Small delay to ensure styles are computed by browser
+        setTimeout(updateThemeColors, 10);
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
+
+    observer.observe(document.head, {
+      childList: true
+    });
+
+    return () => {
+      observer.disconnect();
+      retryTimers.forEach(clearTimeout);
+    };
+  }, [updateThemeColors]);
+
+  // Helper to determine contrast color for the labels
+  const getContrastColor = (hex: string): string => {
+    if (!hex || !hex.startsWith('#')) return '#000000';
+    const r = parseInt(hex.substring(1, 3), 16);
+    const g = parseInt(hex.substring(3, 5), 16);
+    const b = parseInt(hex.substring(5, 7), 16);
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return (yiq >= 128) ? '#000000' : '#FFFFFF';
+  };
 
   const renderGrid = () => {
     const grid = [];
@@ -154,7 +293,7 @@ const ThemeColorGrid: React.FC<{
         const lightness = 95 - (r / (rows - 1)) * 90;
         const saturation = 85;
 
-        // Simple HSL to Hex manually to avoid dependencies
+        // Simple HSL to Hex
         const h = hue;
         const s = saturation;
         const l = lightness;
@@ -188,33 +327,82 @@ const ThemeColorGrid: React.FC<{
         };
 
         const hexColor = `#${toHex(rVal)}${toHex(gVal)}${toHex(bVal)}`;
-        const isSelected = selectedColor?.toLowerCase() === hexColor.toLowerCase();
+        const normalizedHex = hexColor.toLowerCase();
+        const isSelected = selectedColor?.toLowerCase() === normalizedHex;
+
+        // Check for theme color match
+        const themeLabels = resolvedThemeColors[normalizedHex];
+        let label = null;
+        if (themeLabels && themeLabels.length > 0) {
+          label = themeLabels[0];
+          if (themeLabels.length > 1) {
+            label += '+';
+          }
+        }
 
         rowColors.push(
           <button
             key={`${r}-${c}`}
             type="button"
             className={cn(
-              "w-7 h-7 rounded-full hover:scale-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5",
+              "w-7 h-7 shrink-0 rounded-full hover:scale-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5 relative flex items-center justify-center",
               isSelected && "ring-1 ring-offset-1 ring-black/50 z-20 scale-110"
             )}
             style={{ backgroundColor: hexColor }}
             onClick={() => onSelect(hexColor)}
             title={hexColor}
-          />
+          >
+            {label && (
+              <span
+                style={{
+                  color: getContrastColor(hexColor),
+                  // Add text shadow for better visibility on mid-tone colors
+                  textShadow: getContrastColor(hexColor) === '#FFFFFF' ? '0 1px 2px rgba(0,0,0,0.5)' : '0 1px 1px rgba(255,255,255,0.5)'
+                }}
+                className="text-[10px] font-black leading-none pointer-events-none select-none z-10"
+              >
+                {label}
+              </span>
+            )}
+          </button>
         );
       }
-      grid.push(<div key={r} className="flex gap-px">{rowColors}</div>);
+      grid.push(
+        <div key={r} className="flex gap-1 justify-center">
+          {rowColors}
+        </div>
+      );
     }
+
     return grid;
   };
 
   return (
-    <div className="flex flex-col gap-px p-1 bg-background rounded-md shadow-sm">
+    <div className="flex flex-col gap-1 p-6 h-[300px] w-full items-center justify-center bg-background rounded-md shadow-sm">
       {renderGrid()}
     </div>
   );
 };
+
+const ColorSlider = React.forwardRef<
+  React.ElementRef<typeof SliderPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <SliderPrimitive.Root
+    ref={ref}
+    className={cn(
+      'relative flex w-full touch-none select-none items-center',
+      className
+    )}
+    {...props}
+  >
+    <SliderPrimitive.Track className="relative h-6 w-full grow overflow-hidden rounded-full cursor-pointer">
+      <SliderPrimitive.Range className="absolute h-full bg-transparent" />
+    </SliderPrimitive.Track>
+    <SliderPrimitive.Thumb className="block h-6 w-6 rounded-full border-2 border-white bg-transparent shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing hover:bg-white/10" />
+  </SliderPrimitive.Root>
+));
+ColorSlider.displayName = SliderPrimitive.Root.displayName;
 
 export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   id,
@@ -232,12 +420,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   const displayValue = value ?? '';
   const inputValue = value ?? '';
   const [activeTab, setActiveTab] = React.useState('palette');
-  const [colorFormat, setColorFormat] = React.useState<'HEX' | 'RGB' | 'HSL'>('HEX');
+  // Enforce HEX mode only as per requirement
+  const [colorFormat] = React.useState<'HEX'>('HEX');
   const [localInputValue, setLocalInputValue] = React.useState('');
 
   // Helper to convert hex to other formats
   const formatColor = (hex: string, format: 'HEX' | 'RGB' | 'HSL'): string => {
-    if (!hex || hex === '#000000') return format === 'HEX' ? '#000000' : format === 'RGB' ? 'rgb(0, 0, 0)' : 'hsl(0, 0%, 0%)';
+    if (!hex || hex === '#000000') return '#000000'; // Default to Hex format only
+
     const cleanHex = hex.replace('#', '');
     const r = parseInt(cleanHex.substring(0, 2), 16);
     const g = parseInt(cleanHex.substring(2, 4), 16);
@@ -268,45 +458,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     return hex;
   };
 
-  // Helper to convert hex to HSL object
-  const hexToHsl = (hex: string) => {
-    let cleanHex = hex.replace('#', '');
-    if (cleanHex.length === 3) {
-      cleanHex = cleanHex.split('').map(c => c + c).join('');
-    }
-    const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
-    const g = parseInt(cleanHex.substring(2, 4), 16) / 255;
-    const b = parseInt(cleanHex.substring(4, 6), 16) / 255;
+  // hexToHsl removed as unused
 
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0, s = 0, l = (max + min) / 2;
-
-    if (max !== min) {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-      }
-      h /= 6;
-    }
-
-    return { h: Number((h * 360).toFixed(1)), s: Number((s * 100).toFixed(1)), l: Number((l * 100).toFixed(1)) };
-  };
-
-  // Helper to convert HSL object to hex
-  const hslToHex = (h: number, s: number, l: number) => {
-    l /= 100;
-    const a = s * Math.min(l, 1 - l) / 100;
-    const f = (n: number) => {
-      const k = (n + h / 30) % 12;
-      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-      return Math.round(255 * color).toString(16).padStart(2, '0');
-    };
-    return `#${f(0)}${f(8)}${f(4)}`;
-  };
+  // hslToHex removed as unused
 
 
 
@@ -328,24 +482,17 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
 
-  const [hslValues, setHslValues] = React.useState({ h: 0, s: 0, l: 0 });
   const [rgbValues, setRgbValues] = React.useState({ r: 0, g: 0, b: 0 });
 
   React.useEffect(() => {
     if (activeTab === 'picker') {
-      const hsl = hexToHsl(getDisplayColor());
-      setHslValues(hsl);
+      // HSL update removed
       const rgb = hexToRgb(getDisplayColor());
       setRgbValues(rgb);
     }
   }, [displayValue, activeTab]);
 
-  const handleSliderChange = (type: 'h' | 's' | 'l', value: number) => {
-    const newHsl = { ...hslValues, [type]: value };
-    setHslValues(newHsl);
-    const newHex = hslToHex(newHsl.h, newHsl.s, newHsl.l);
-    eventHandler('OnChange', id, [newHex]);
-  };
+  // handleSliderChange removed as HSL sliders are no longer used
 
   const handleRgbSliderChange = (type: 'r' | 'g' | 'b', value: number) => {
     const newRgb = { ...rgbValues, [type]: value };
@@ -356,19 +503,10 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
 
   const renderFooter = () => (
     <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
-      <Select
-        value={colorFormat}
-        onValueChange={(val: 'HEX' | 'RGB' | 'HSL') => setColorFormat(val)}
-      >
-        <SelectTrigger className="w-[80px] h-8 text-xs">
-          <SelectValue placeholder="Format" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="HEX">HEX</SelectItem>
-          <SelectItem value="RGB">RGB</SelectItem>
-          <SelectItem value="HSL">HSL</SelectItem>
-        </SelectContent>
-      </Select>
+      {/* Format selection removed - HEX only forced */}
+      <div className="w-[80px] h-8 flex items-center justify-center text-xs font-medium text-muted-foreground border rounded bg-muted/50">
+        HEX
+      </div>
       <Input
         value={localInputValue}
         onChange={handleLocalInputChange}
@@ -599,7 +737,20 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     );
   }
 
-  if (variant === 'ThemePicker') {
+  // Helper to determine contrast color for the "A"
+  const getContrastColor = (hex: string): string => {
+    if (!hex || !hex.startsWith('#')) return '#000000';
+    const r = parseInt(hex.substring(1, 3), 16);
+    const g = parseInt(hex.substring(3, 5), 16);
+    const b = parseInt(hex.substring(5, 7), 16);
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return (yiq >= 128) ? '#000000' : '#FFFFFF';
+  };
+
+  if (variant === 'ThemePicker' || variant === 'Foreground') {
+    const isForeground = variant === 'Foreground' || (placeholder && placeholder.toLowerCase().includes('foreground'));
+    const contrastColor = getContrastColor(getDisplayColor());
+
     return (
       <div className="flex items-center space-x-2">
         <Popover>
@@ -609,7 +760,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
               disabled={disabled}
               className={cn(
                 colorInputPickerVariants({ scale }),
-                'p-0 rounded-md shadow-none focus:outline-none ring-offset-1 ring-1 transition-all',
+                'p-0 rounded-md shadow-none focus:outline-none ring-offset-1 ring-1 transition-all relative',
                 // Dynamic double border based on luminance
                 // Light background (color): Inner white, Outer black
                 // Dark background (color): Inner black, Outer white
@@ -622,10 +773,15 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
               style={{ backgroundColor: getDisplayColor() }}
             >
               <span className="sr-only">Pick a color</span>
+              {isForeground && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span style={{ color: contrastColor }} className="font-bold text-sm">F</span>
+                </div>
+              )}
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-3" align="start">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[600px]">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[740px]">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium px-1">
                   Choose a color for {placeholder || 'this item'}
@@ -648,129 +804,69 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
               </TabsContent>
 
               <TabsContent value="picker" className="mt-0">
-                <div className="h-[297px] p-2 flex flex-col justify-center gap-6">
-                  {colorFormat === 'HSL' ? (
-                    <>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span>Hue</span>
-                          <span>{hslValues.h.toFixed(1)}°</span>
-                        </div>
-                        <div className="relative px-1">
-                          <div className="absolute inset-0 h-4 rounded-full bg-gradient-to-r from-[hsl(0,100%,50%)] via-[hsl(60,100%,50%)] via-[hsl(120,100%,50%)] via-[hsl(180,100%,50%)] via-[hsl(240,100%,50%)] via-[hsl(300,100%,50%)] to-[hsl(360,100%,50%)] opacity-50 pointer-events-none" />
-                          <Slider
-                            value={[hslValues.h]}
-                            max={360}
-                            step={0.1}
-                            onValueChange={(vals) => handleSliderChange('h', vals[0])}
-                            className="[&>.bg-primary]:bg-transparent"
-                          />
-                        </div>
+                <div className="h-[300px] p-6 flex flex-col justify-center gap-6">
+                  {/* HSL logic removed, rendering only RGB sliders with HEX values */}
+                  <>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-medium">
+                        <span>Red</span>
+                        <span>{rgbValues.r.toString(16).toUpperCase().padStart(2, '0')}</span>
                       </div>
+                      <div className="relative px-1">
+                        <div
+                          className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
+                          style={{ background: `linear-gradient(to right, rgb(0, ${rgbValues.g}, ${rgbValues.b}), rgb(255, ${rgbValues.g}, ${rgbValues.b}))` }}
+                        />
+                        <ColorSlider
+                          value={[rgbValues.r]}
+                          max={255}
+                          step={1}
+                          onValueChange={(vals) => handleRgbSliderChange('r', vals[0])}
+                          className=""
+                        />
+                      </div>
+                    </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span>Saturation</span>
-                          <span>{hslValues.s.toFixed(1)}%</span>
-                        </div>
-                        <div className="relative px-1">
-                          <div
-                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
-                            style={{ background: `linear-gradient(to right, hsl(${hslValues.h}, 0%, ${hslValues.l}%), hsl(${hslValues.h}, 100%, ${hslValues.l}%))` }}
-                          />
-                          <Slider
-                            value={[hslValues.s]}
-                            max={100}
-                            step={0.1}
-                            onValueChange={(vals) => handleSliderChange('s', vals[0])}
-                            className="[&>.bg-primary]:bg-transparent"
-                          />
-                        </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-medium">
+                        <span>Green</span>
+                        <span>{rgbValues.g.toString(16).toUpperCase().padStart(2, '0')}</span>
                       </div>
+                      <div className="relative px-1">
+                        <div
+                          className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
+                          style={{ background: `linear-gradient(to right, rgb(${rgbValues.r}, 0, ${rgbValues.b}), rgb(${rgbValues.r}, 255, ${rgbValues.b}))` }}
+                        />
+                        <ColorSlider
+                          value={[rgbValues.g]}
+                          max={255}
+                          step={1}
+                          onValueChange={(vals) => handleRgbSliderChange('g', vals[0])}
+                          className=""
+                        />
+                      </div>
+                    </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span>Lightness</span>
-                          <span>{hslValues.l.toFixed(1)}%</span>
-                        </div>
-                        <div className="relative px-1">
-                          <div
-                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
-                            style={{ background: `linear-gradient(to right, hsl(${hslValues.h}, ${hslValues.s}%, 0%), hsl(${hslValues.h}, ${hslValues.s}%, 50%), hsl(${hslValues.h}, ${hslValues.s}%, 100%))` }}
-                          />
-                          <Slider
-                            value={[hslValues.l]}
-                            max={100}
-                            step={0.1}
-                            onValueChange={(vals) => handleSliderChange('l', vals[0])}
-                            className="[&>.bg-primary]:bg-transparent"
-                          />
-                        </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-medium">
+                        <span>Blue</span>
+                        <span>{rgbValues.b.toString(16).toUpperCase().padStart(2, '0')}</span>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span>Red</span>
-                          <span>{colorFormat === 'HEX' ? rgbValues.r.toString(16).toUpperCase().padStart(2, '0') : rgbValues.r}</span>
-                        </div>
-                        <div className="relative px-1">
-                          <div
-                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
-                            style={{ background: `linear-gradient(to right, rgb(0, ${rgbValues.g}, ${rgbValues.b}), rgb(255, ${rgbValues.g}, ${rgbValues.b}))` }}
-                          />
-                          <Slider
-                            value={[rgbValues.r]}
-                            max={255}
-                            step={1}
-                            onValueChange={(vals) => handleRgbSliderChange('r', vals[0])}
-                            className="[&>.bg-primary]:bg-transparent"
-                          />
-                        </div>
+                      <div className="relative px-1">
+                        <div
+                          className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
+                          style={{ background: `linear-gradient(to right, rgb(${rgbValues.r}, ${rgbValues.g}, 0), rgb(${rgbValues.r}, ${rgbValues.g}, 255))` }}
+                        />
+                        <ColorSlider
+                          value={[rgbValues.b]}
+                          max={255}
+                          step={1}
+                          onValueChange={(vals) => handleRgbSliderChange('b', vals[0])}
+                          className=""
+                        />
                       </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span>Green</span>
-                          <span>{colorFormat === 'HEX' ? rgbValues.g.toString(16).toUpperCase().padStart(2, '0') : rgbValues.g}</span>
-                        </div>
-                        <div className="relative px-1">
-                          <div
-                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
-                            style={{ background: `linear-gradient(to right, rgb(${rgbValues.r}, 0, ${rgbValues.b}), rgb(${rgbValues.r}, 255, ${rgbValues.b}))` }}
-                          />
-                          <Slider
-                            value={[rgbValues.g]}
-                            max={255}
-                            step={1}
-                            onValueChange={(vals) => handleRgbSliderChange('g', vals[0])}
-                            className="[&>.bg-primary]:bg-transparent"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span>Blue</span>
-                          <span>{colorFormat === 'HEX' ? rgbValues.b.toString(16).toUpperCase().padStart(2, '0') : rgbValues.b}</span>
-                        </div>
-                        <div className="relative px-1">
-                          <div
-                            className="absolute inset-0 h-4 rounded-full pointer-events-none opacity-50"
-                            style={{ background: `linear-gradient(to right, rgb(${rgbValues.r}, ${rgbValues.g}, 0), rgb(${rgbValues.r}, ${rgbValues.g}, 255))` }}
-                          />
-                          <Slider
-                            value={[rgbValues.b]}
-                            max={255}
-                            step={1}
-                            onValueChange={(vals) => handleRgbSliderChange('b', vals[0])}
-                            className="[&>.bg-primary]:bg-transparent"
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
+                    </div>
+                  </>
                 </div>
                 {renderFooter()}
               </TabsContent>
