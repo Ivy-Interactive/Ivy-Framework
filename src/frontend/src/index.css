@@ -171,6 +171,16 @@
   [data-sidebar='sidebar'] svg[fill='currentColor'] {
     color: var(--primary);
   }
+
+  /*
+   * Textarea resizer: native position (no wrapper), two-line grip via SVG, theme color.
+   * Same approach as common solutions: style ::-webkit-resizer with custom background-image
+   * and color so the grip stays in the browser's corner and respects theme.
+   */
+  textarea.ivy-textarea::-webkit-resizer {
+    color: var(--background);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cline x1='2' y1='14' x2='14' y2='2' stroke='currentColor' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='6' y1='14' x2='14' y2='6' stroke='currentColor' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
 }
 
 @keyframes accordion-down {
