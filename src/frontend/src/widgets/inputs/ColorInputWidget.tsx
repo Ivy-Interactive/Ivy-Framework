@@ -200,7 +200,7 @@ const ThemeColorGrid: React.FC<{
         colorValue = `hsl(${colorValue})`;
       }
 
-      let hex = colorToHex(colorValue);
+      const hex = colorToHex(colorValue);
 
       if (hex) {
         const normalizedHex = hex.toLowerCase();
