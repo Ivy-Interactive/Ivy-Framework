@@ -313,7 +313,6 @@ public class ThemeCustomizer : SampleBase
                             placeholder: "e.g., 16px, 1rem"
                         ).WithField().Label("Font Size")
                         | new Separator()
-                        | Text.Block("Border Radius (semantic)").Small().Muted()
                         | new BorderRadiusSelector(
                             editingTheme,
                             UpdateThemeProperty
@@ -382,19 +381,18 @@ public class ThemeCustomizer : SampleBase
 
         public override object Build()
         {
-            return Layout.Vertical()
+            return Layout.Vertical().Gap(3)
+                | Text.Block("Radius").Small().Bold()
                 | BuildRadiusCategory(
                     "Boxes",
                     "card, modal, alert",
                     editingTheme.Value.BorderRadiusBoxes,
                     value => updateThemeProperty(t => t.BorderRadiusBoxes = value))
-                | new Separator()
                 | BuildRadiusCategory(
                     "Fields",
                     "button, input, select, tab",
                     editingTheme.Value.BorderRadiusFields,
                     value => updateThemeProperty(t => t.BorderRadiusFields = value))
-                | new Separator()
                 | BuildRadiusCategory(
                     "Selectors",
                     "checkbox, toggle, badge",
@@ -416,7 +414,7 @@ public class ThemeCustomizer : SampleBase
 
             return Layout.Vertical()
                 | Text.Block(title).Bold().Small()
-                | Text.Block(subtitle).Small().Muted()
+                | Text.Block(subtitle).Muted().Italic()
                 | options;
         }
 
