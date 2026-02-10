@@ -59,7 +59,7 @@ const TabsList = React.forwardRef<
       <TabsPrimitive.List
         ref={ref as React.Ref<React.ElementRef<typeof TabsPrimitive.List>>}
         className={cn(
-          'inline-flex h-9 items-center justify-center rounded-lg bg-muted dark:bg-background p-1 text-muted-foreground',
+          'inline-flex h-9 items-center justify-center rounded-box bg-muted dark:bg-background p-1 text-muted-foreground',
           className
         )}
         role="tablist"
@@ -72,7 +72,7 @@ const TabsList = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
+        'inline-flex h-9 items-center justify-center rounded-box bg-muted p-1 text-muted-foreground',
         className
       )}
       role="tablist"

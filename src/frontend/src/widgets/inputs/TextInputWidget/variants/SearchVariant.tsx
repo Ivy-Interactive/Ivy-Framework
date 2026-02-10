@@ -102,7 +102,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   return (
     <div className="relative w-full select-none" style={styles}>
       <Search className={searchIconVariants({ scale })} />
-      <div className="rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
+      <div className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
         <Input
           ref={mergedRef}
           id={props.id}
@@ -150,7 +150,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
         {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-4">
-            <kbd className="text-xs text-foreground bg-muted border border-border rounded-sm px-1 py-0.25">
+            <kbd className="text-xs text-foreground bg-muted border border-border rounded-selector px-1 py-0.25">
               {shortcutDisplay}
             </kbd>
           </div>

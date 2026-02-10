@@ -256,7 +256,7 @@ const MultipleSelector = React.forwardRef<
             />
           </div>
           {open && defaultOptions.length > 0 && (
-            <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+            <div className="absolute w-full z-50 top-full mt-1 rounded-box border bg-popover text-popover-foreground shadow-md outline-none animate-in">
               <CommandGroup className="h-full overflow-auto max-h-[300px]">
                 {defaultOptions.map(option => {
                   const selected = isSelected(option);
@@ -293,7 +293,7 @@ const MultipleSelector = React.forwardRef<
             </div>
           )}
           {open && defaultOptions.length === 0 && emptyIndicator && (
-            <div className="absolute w-full z-50 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md outline-none p-2">
+            <div className="absolute w-full z-50 top-full mt-1 rounded-box border bg-popover text-popover-foreground shadow-md outline-none p-2">
               {emptyIndicator}
             </div>
           )}

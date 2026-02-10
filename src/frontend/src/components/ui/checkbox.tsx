@@ -69,7 +69,7 @@ const Checkbox = React.forwardRef<
       }
     };
 
-    const baseClass = `peer ${getSizeClasses(scale)} shrink-0 rounded-sm border border-border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary dark:border-white/10`;
+    const baseClass = `peer ${getSizeClasses(scale)} shrink-0 rounded-selector border border-border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary dark:border-white/10`;
     const finalClass = className?.includes('bg-red-50')
       ? baseClass.replace('data-[state=checked]:bg-primary', '')
       : baseClass;

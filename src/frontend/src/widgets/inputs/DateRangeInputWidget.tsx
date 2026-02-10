@@ -224,7 +224,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <div className="rounded-lg border border-border">
+          <div className="rounded-box border border-border">
             <div className="flex max-sm:flex-col">
               <div className="relative border-border py-4 max-sm:order-1 max-sm:border-t sm:w-32">
                 <div className="h-full border-border sm:border-e">

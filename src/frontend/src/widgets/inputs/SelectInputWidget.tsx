@@ -35,7 +35,7 @@ import { cva } from 'class-variance-authority';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
 // variants for SelectInputWidget container
 const selectContainerVariants = cva(
-  'relative border border-input bg-transparent rounded-md shadow-sm focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
+  'relative border border-input bg-transparent rounded-box shadow-sm focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
   {
     variants: {
       scale: {
