@@ -30,12 +30,13 @@ public static class UsePtyExtensions
         this IViewContext context,
         string[] commandLine,
         string? workingDirectory = null,
-        PtyOptions? options = null)
+        PtyOptions? options = null,
+        IWriteStream<byte[]>? existingStream = null)
     {
         options ??= new PtyOptions();
         var cwd = workingDirectory ?? options.WorkingDirectory;
 
-        var stream = context.UseStream<byte[]>();
+        var stream = existingStream ?? context.UseStream<byte[]>();
         var closed = context.UseState(false);
         var exitCode = context.UseState<int?>(() => null);
         var pty = context.UseRef<IPtyConnection?>(() => null);
