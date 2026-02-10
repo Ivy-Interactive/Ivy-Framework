@@ -134,7 +134,6 @@ public class ThemeCustomizer : SampleBase
             Name = source.Name,
             FontFamily = source.FontFamily,
             FontSize = source.FontSize,
-            BorderRadius = source.BorderRadius,
             BorderRadiusBoxes = source.BorderRadiusBoxes,
             BorderRadiusFields = source.BorderRadiusFields,
             BorderRadiusSelectors = source.BorderRadiusSelectors,
@@ -313,11 +312,6 @@ public class ThemeCustomizer : SampleBase
                             onChange: e => UpdateThemeProperty(t => t.FontSize = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
                             placeholder: "e.g., 16px, 1rem"
                         ).WithField().Label("Font Size")
-                        | new TextInput(
-                            value: editingTheme.Value.BorderRadius ?? "",
-                            onChange: e => UpdateThemeProperty(t => t.BorderRadius = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
-                            placeholder: "e.g., 0.5rem, 8px"
-                        ).WithField().Label("Border Radius (legacy)")
                         | new Separator()
                         | Text.Block("Border Radius (semantic)").Small().Muted()
                         | new BorderRadiusSelector(
@@ -923,7 +917,6 @@ var server = new Server()
         }}
         theme.FontFamily = ""{theme.FontFamily}"";
         theme.FontSize = ""{theme.FontSize}"";
-        theme.BorderRadius = ""{theme.BorderRadius}"";
         theme.BorderRadiusBoxes = ""{theme.BorderRadiusBoxes}"";
         theme.BorderRadiusFields = ""{theme.BorderRadiusFields}"";
         theme.BorderRadiusSelectors = ""{theme.BorderRadiusSelectors}""; 
@@ -936,7 +929,6 @@ var server = new Server()
         Name = "Ocean",
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadius = "0.5rem",
         BorderRadiusBoxes = Theme.Default.BorderRadiusBoxes,
         BorderRadiusFields = Theme.Default.BorderRadiusFields,
         BorderRadiusSelectors = Theme.Default.BorderRadiusSelectors,
@@ -1006,7 +998,6 @@ var server = new Server()
         Name = "Forest",
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadius = "0.5rem",
         BorderRadiusBoxes = Theme.Default.BorderRadiusBoxes,
         BorderRadiusFields = Theme.Default.BorderRadiusFields,
         BorderRadiusSelectors = Theme.Default.BorderRadiusSelectors,
@@ -1076,7 +1067,6 @@ var server = new Server()
         Name = "Sunset",
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadius = "0.5rem",
         BorderRadiusBoxes = Theme.Default.BorderRadiusBoxes,
         BorderRadiusFields = Theme.Default.BorderRadiusFields,
         BorderRadiusSelectors = Theme.Default.BorderRadiusSelectors,
@@ -1146,7 +1136,6 @@ var server = new Server()
         Name = "Midnight",
         FontFamily = "Geist",
         FontSize = "16px",
-        BorderRadius = "0.5rem",
         BorderRadiusBoxes = Theme.Default.BorderRadiusBoxes,
         BorderRadiusFields = Theme.Default.BorderRadiusFields,
         BorderRadiusSelectors = Theme.Default.BorderRadiusSelectors,
