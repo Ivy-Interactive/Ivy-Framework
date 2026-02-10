@@ -2,7 +2,7 @@ import { cva } from 'class-variance-authority';
 
 // Size variants for AudioRecorderWidget
 export const audioRecorderVariants = cva(
-  'relative rounded-md border-dashed transition-colors border-muted-foreground/25',
+  'relative rounded-field border-dashed transition-colors border-muted-foreground/25',
   {
     variants: {
       scale: {

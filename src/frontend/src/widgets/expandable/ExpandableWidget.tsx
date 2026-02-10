@@ -81,7 +81,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       open={isOpen}
       onOpenChange={handleOpenChange}
       className={cn(
-        'w-full rounded-md border border-border shadow-sm data-[disabled=true]:cursor-not-allowed',
+        'w-full rounded-box border border-border shadow-sm data-[disabled=true]:cursor-not-allowed',
         'p-0'
       )}
       data-disabled={disabled}

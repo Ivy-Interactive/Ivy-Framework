@@ -231,7 +231,7 @@ const NumberVariant = memo(
     );
 
     return (
-      <div className="relative w-full flex-1 rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
+      <div className="relative w-full flex-1 rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
         <NumberInput
           min={min}
           max={max}

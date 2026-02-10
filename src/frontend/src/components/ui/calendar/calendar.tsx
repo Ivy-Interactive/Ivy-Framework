@@ -123,7 +123,7 @@ export function Calendar({
         range_middle: cn('rounded-none', defaultClassNames.range_middle),
         range_end: cn('rounded-r-md bg-accent', defaultClassNames.range_end),
         today: cn(
-          'bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none',
+          'bg-accent text-accent-foreground rounded-field data-[selected=true]:rounded-none',
           defaultClassNames.today
         ),
         outside: cn(
@@ -239,7 +239,7 @@ function MonthYearInput({
 
   return (
     <div
-      className="flex items-center border border-input rounded-md px-1 py-0.5 gap-0.5 bg-background pointer-events-auto mx-auto w-fit"
+      className="flex items-center border border-input rounded-field px-1 py-0.5 gap-0.5 bg-background pointer-events-auto mx-auto w-fit"
       onMouseDown={e => e.stopPropagation()}
       onClick={e => e.stopPropagation()}
     >

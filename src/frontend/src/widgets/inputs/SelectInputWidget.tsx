@@ -35,7 +35,7 @@ import { cva } from 'class-variance-authority';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
 // variants for SelectInputWidget container
 const selectContainerVariants = cva(
-  'relative border border-input bg-transparent rounded-md shadow-sm focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
+  'relative border border-input bg-transparent rounded-box shadow-sm focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
   {
     variants: {
       scale: {
@@ -615,7 +615,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        'relative w-full border border-input bg-transparent rounded-md shadow-sm px-3 py-2 focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
+        'relative w-full border border-input bg-transparent rounded-box shadow-sm px-3 py-2 focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
         invalid && 'border-destructive focus-within:ring-destructive'
       )}
       style={styles}

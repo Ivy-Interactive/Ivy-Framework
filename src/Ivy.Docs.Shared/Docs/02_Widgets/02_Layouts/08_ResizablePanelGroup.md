@@ -8,27 +8,27 @@ searchHints:
   - layout
 ---
 
-# ResizeablePanelGroup
+# ResizablePanelGroup
 
 <Ingress>
 Create flexible, resizable [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) with draggable handles that allow users to dynamically adjust panel sizes in your applications.
 </Ingress>
 
-The `ResizeablePanelGroup` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates layouts with multiple panels separated by draggable handles, allowing users to resize sections interactively. Panels can be arranged horizontally or vertically and support nesting for complex layouts.
+The `ResizablePanelGroup` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates layouts with multiple panels separated by draggable handles, allowing users to resize sections interactively. Panels can be arranged horizontally or vertically and support nesting for complex layouts.
 
 ## Basic Usage
 
 The simplest resizable panel group consists of two or more panels arranged horizontally:
 
 ```csharp demo-below
-public class BasicResizeablePanelView : ViewBase
+public class BasicResizablePanelView : ViewBase
 {
     public override object? Build()
     {
-        return new ResizeablePanelGroup(
-            new ResizeablePanel(30, 
+        return new ResizablePanelGroup(
+            new ResizablePanel(Size.Fraction(0.3f), 
                 new Card("Left Panel")),
-            new ResizeablePanel(70, 
+            new ResizablePanel(Size.Fraction(0.7f), 
                 new Card("Right Panel"))
         );
     }
@@ -42,12 +42,12 @@ public class BasicResizeablePanelView : ViewBase
 Panels are arranged side by side with vertical drag handles:
 
 ```csharp demo-tabs
-public class HorizontalResizeableView : ViewBase
+public class HorizontalResizableView : ViewBase
 {
     public override object? Build()
     {
-        return new ResizeablePanelGroup(
-            new ResizeablePanel(25, 
+        return new ResizablePanelGroup(
+            new ResizablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Sidebar")
@@ -55,7 +55,7 @@ public class HorizontalResizeableView : ViewBase
                         | Text.Block("• Home")
                         | Text.Block("• Settings")
                 )),
-            new ResizeablePanel(50, 
+            new ResizablePanel(Size.Fraction(0.5f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Main Content")
@@ -63,7 +63,7 @@ public class HorizontalResizeableView : ViewBase
                         | Text.Block("where the main application content")
                         | Text.Block("would be displayed.")
                 )),
-            new ResizeablePanel(25, 
+            new ResizablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Info Panel")
@@ -81,18 +81,18 @@ public class HorizontalResizeableView : ViewBase
 Panels are stacked vertically with horizontal drag handles:
 
 ```csharp demo-tabs
-public class VerticalResizeableView : ViewBase
+public class VerticalResizableView : ViewBase
 {
     public override object? Build()
     {
-        return new ResizeablePanelGroup(
-            new ResizeablePanel(30, 
+        return new ResizablePanelGroup(
+            new ResizablePanel(Size.Fraction(0.3f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Header Section")
                         | Text.Block("Navigation and branding")
                 )),
-            new ResizeablePanel(40, 
+            new ResizablePanel(Size.Fraction(0.4f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Main Content")
@@ -100,7 +100,7 @@ public class VerticalResizeableView : ViewBase
                         | Text.Block("your primary content would be displayed.")
                         | Text.Block("It takes up the majority of the space.")
                 )),
-            new ResizeablePanel(30, 
+            new ResizablePanel(Size.Fraction(0.3f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Footer Section")
@@ -122,21 +122,21 @@ public class DefaultSizesView : ViewBase
 {
     public override object? Build()
     {
-        return new ResizeablePanelGroup(
-            new ResizeablePanel(20, 
+        return new ResizablePanelGroup(
+            new ResizablePanel(Size.Fraction(0.2f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("20% Panel")
                         | Text.Block("Small panel")
                 )),
-            new ResizeablePanel(60, 
+            new ResizablePanel(Size.Fraction(0.6f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("60% Panel")
                         | Text.Block("Large main panel")
                         | Text.Block("with more content space")
                 )),
-            new ResizeablePanel(20, 
+            new ResizablePanel(Size.Fraction(0.2f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("20% Panel")
@@ -156,22 +156,22 @@ public class AutoSizingView : ViewBase
 {
     public override object? Build()
     {
-        return new ResizeablePanelGroup(
-            new ResizeablePanel(25, 
+        return new ResizablePanelGroup(
+            new ResizablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Fixed 25%")
                         | Text.Block("This panel has")
                         | Text.Block("a fixed size")
                 )),
-            new ResizeablePanel(null, 
+            new ResizablePanel(null, 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Auto Size")
                         | Text.Block("This panel automatically")
                         | Text.Block("sizes to available space")
                 )),
-            new ResizeablePanel(null, 
+            new ResizablePanel(null, 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Auto Size")
@@ -182,6 +182,42 @@ public class AutoSizingView : ViewBase
     }
 }
 ```
+
+### Min/Max Constraints
+
+Panels can have minimum and maximum size constraints to limit how small or large they can be resized:
+
+```csharp demo-tabs
+public class MinMaxSizingView : ViewBase
+{
+    public override object? Build()
+    {
+        return new ResizablePanelGroup(
+            new ResizablePanel(
+                Size.Fraction(0.3f).Min(0.15f).Max(0.5f), 
+                new Card(
+                    Layout.Vertical()
+                        | Text.Label("Constrained Panel")
+                        | Text.Block("Default: 30%")
+                        | Text.Block("Min: 15%, Max: 50%")
+                        | Text.Block("Try resizing!")
+                )),
+            new ResizablePanel(
+                Size.Fraction(0.7f).Min(0.5f).Max(0.85f), 
+                new Card(
+                    Layout.Vertical()
+                        | Text.Label("Main Content")
+                        | Text.Block("Default: 70%")
+                        | Text.Block("Min: 50%, Max: 85%")
+                ))
+        );
+    }
+}
+```
+
+<Callout Type="info">
+Use `.Min()` and `.Max()` extension methods to set size constraints. Only `Size.Fraction()` is supported for resizeable panels.
+</Callout>
 
 ## Handle Visibility
 
@@ -196,14 +232,14 @@ public class HandleVisibilityView : ViewBase
     {
         return Layout.Vertical().Gap(4)
             | new Box(Text.Block("With Handles (Default)")).Padding(2)
-            | new ResizeablePanelGroup(
-                new ResizeablePanel(50, 
+            | new ResizablePanelGroup(
+                new ResizablePanel(Size.Fraction(0.5f), 
                     new Card(
                         Layout.Vertical()
                             | Text.Label("Panel A")
                             | Text.Block("Resizable panel")
                     )),
-                new ResizeablePanel(50, 
+                new ResizablePanel(Size.Fraction(0.5f), 
                     new Card(
                         Layout.Vertical()
                             | Text.Label("Panel B")
@@ -211,14 +247,14 @@ public class HandleVisibilityView : ViewBase
                     ))
             ).ShowHandle(true).Height(Size.Units(50))
             | new Box(Text.Block("Without Handles")).Padding(2)
-            | new ResizeablePanelGroup(
-                new ResizeablePanel(50, 
+            | new ResizablePanelGroup(
+                new ResizablePanel(Size.Fraction(0.5f), 
                     new Card(
                         Layout.Vertical()
                             | Text.Label("Panel A")
                             | Text.Block("Fixed panel")
                     )),
-                new ResizeablePanel(50, 
+                new ResizablePanel(Size.Fraction(0.5f), 
                     new Card(
                         Layout.Vertical()
                             | Text.Label("Panel B")
@@ -231,15 +267,15 @@ public class HandleVisibilityView : ViewBase
 
 ## Nested Layouts
 
-Create complex layouts by nesting ResizeablePanelGroups:
+Create complex layouts by nesting ResizablePanelGroups:
 
 ```csharp demo-tabs
 public class NestedLayoutView : ViewBase
 {
     public override object? Build()
     {
-        return new ResizeablePanelGroup(
-            new ResizeablePanel(25, 
+        return new ResizablePanelGroup(
+            new ResizablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Sidebar")
@@ -248,9 +284,9 @@ public class NestedLayoutView : ViewBase
                         | Text.Block("• Reports")
                         | Text.Block("• Settings")
                 )),
-            new ResizeablePanel(75,
-                new ResizeablePanelGroup(
-                    new ResizeablePanel(60, 
+            new ResizablePanel(Size.Fraction(0.75f),
+                new ResizablePanelGroup(
+                    new ResizablePanel(Size.Fraction(0.6f), 
                         new Card(
                             Layout.Vertical()
                                 | Text.Label("Main Content")
@@ -258,16 +294,16 @@ public class NestedLayoutView : ViewBase
                                 | Text.Block("This is where the main")
                                 | Text.Block("application content is displayed.")
                         )),
-                    new ResizeablePanel(40,
-                        new ResizeablePanelGroup(
-                            new ResizeablePanel(50, 
+                    new ResizablePanel(Size.Fraction(0.4f),
+                        new ResizablePanelGroup(
+                            new ResizablePanel(Size.Fraction(0.5f), 
                                 new Card(
                                     Layout.Vertical()
                                         | Text.Label("Top Right")
                                         | Text.Block("Quick stats")
                                         | Text.Block("or tools")
                                 )),
-                            new ResizeablePanel(50, 
+                            new ResizablePanel(Size.Fraction(0.5f), 
                                 new Card(
                                     Layout.Vertical()
                                         | Text.Label("Bottom Right")
@@ -281,7 +317,7 @@ public class NestedLayoutView : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.ResizeablePanelGroup" ExtensionTypes="Ivy.ResizeablePanelsExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/ResizeablePanelGroup.cs"/>
+<WidgetDocs Type="Ivy.ResizablePanelGroup" ExtensionTypes="Ivy.ResizablePanelsExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/ResizablePanelGroup.cs"/>
 
 ## Examples
 
@@ -297,9 +333,9 @@ public class MultiDirectionalResizingView : ViewBase
 {
     public override object? Build()
     {
-        return new ResizeablePanelGroup(
+        return new ResizablePanelGroup(
             // Left panel - File browser
-            new ResizeablePanel(25, 
+            new ResizablePanel(Size.Fraction(0.25f), 
                 new Card(
                     Layout.Vertical()
                         | Text.Label("File Browser")
@@ -312,18 +348,18 @@ public class MultiDirectionalResizingView : ViewBase
                 ).Title("Files")
             ),
             // Center area - Split editor and console
-            new ResizeablePanel(50,
-                new ResizeablePanelGroup(
+            new ResizablePanel(Size.Fraction(0.5f),
+                new ResizablePanelGroup(
                     // Top - Code editor
-                    new ResizeablePanel(70, 
+                    new ResizablePanel(Size.Fraction(0.7f), 
                         new Card(
                             Layout.Vertical()
                                 | Text.Label("Code Editor")
-                                | Text.Code("public class ResizeableExample\n{\n    public void DemoResize()\n    {\n        // Drag handles to resize!\n        Console.WriteLine(\"Resizing works!\");\n    }\n}", Languages.Csharp)
+                                | Text.Code("public class ResizableExample\n{\n    public void DemoResize()\n    {\n        // Drag handles to resize!\n        Console.WriteLine(\"Resizing works!\");\n    }\n}", Languages.Csharp)
                         ).Title("main.cs")
                     ),
                     // Bottom - Console/Output
-                    new ResizeablePanel(70,
+                    new ResizablePanel(Size.Fraction(0.7f),
                         new Card(
                             Layout.Vertical()
                                 | Text.Label("Console Output")
@@ -336,11 +372,11 @@ public class MultiDirectionalResizingView : ViewBase
                     )
                 ).Vertical().Height(Size.Units(190))),
             // Right panel - Properties and tools
-            new ResizeablePanel(25,
+            new ResizablePanel(Size.Fraction(0.25f),
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Properties")
-                        | Text.Block("Selected: ResizeablePanel")
+                        | Text.Block("Selected: ResizablePanel")
                         | Text.Block("Default Size: 25%")
                         | Text.Block("Direction: Horizontal")
                         | Text.Block("Show Handle: true")

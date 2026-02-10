@@ -90,7 +90,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
       style={styles}
       ref={containerRef}
     >
-      <div className="rounded-md border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
+      <div className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
         <Input
           ref={elementRef}
           id={props.id}
@@ -150,7 +150,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           )}
           {props.shortcutKey && !hasValue && !showClear && !props.invalid && (
             <div className="pointer-events-auto flex items-center h-6">
-              <kbd className="ml-2 px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-md">
+              <kbd className="ml-2 px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-field">
                 {shortcutDisplay}
               </kbd>
             </div>

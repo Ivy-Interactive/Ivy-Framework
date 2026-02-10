@@ -163,7 +163,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         {showToggleButton && mainAppSidebar && (
           <button
             onClick={handleManualToggle}
-            className="absolute top-0 left-1 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
+            className="absolute top-0 left-1 z-50 p-2 rounded-selector bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
             style={{ marginTop: '3px' }}
             aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
           >
@@ -275,7 +275,7 @@ const CollapsibleMenuItem: React.FC<{
           <CollapsibleTrigger asChild>
             <button
               className={cn(
-                'group flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                'group flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
                 isActive && 'bg-accent text-accent-foreground'
               )}
               onClick={() => {
@@ -318,7 +318,7 @@ const CollapsibleMenuItem: React.FC<{
       >
         <button
           className={cn(
-            'flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+            'flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
             isActive && 'bg-accent text-accent-foreground'
           )}
           onClick={() => onItemClick(item)}
@@ -399,7 +399,7 @@ const renderMenuItems = (
           <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
-                'flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                'flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
                 isActive && 'bg-accent text-accent-foreground'
               )}
               onClick={() => onItemClick(item)}
@@ -415,7 +415,7 @@ const renderMenuItems = (
           <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
-                'flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                'flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
                 isActive && 'bg-accent text-accent-foreground'
               )}
               onClick={() => onItemClick(item)}
@@ -622,7 +622,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           <button
             {...(flatIdx >= 0 && { 'data-sidebar-result-index': flatIdx })}
             className={cn(
-              'flex w-full rounded-lg p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left',
+              'flex w-full rounded-selector p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left',
               showPath && item.path
                 ? 'flex-col items-start gap-1'
                 : 'items-center gap-2',

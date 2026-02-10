@@ -129,7 +129,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         ref={containerRef}
         className={cn(
           'inline-flex items-center mb-3',
-          'border rounded-md',
+          'border rounded-field',
           'bg-transparent border-input',
           'transition-all duration-300 ease-in-out',
           className
@@ -139,7 +139,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
           className={cn(
             'inline-flex items-center justify-center text-sm font-medium',
             'h-9 w-9 gap-2 cursor-pointer flex-shrink-0',
-            'bg-transparent rounded-l-md',
+            'bg-transparent rounded-l-[var(--radius-fields)]',
             'transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
             expanded
               ? 'bg-accent hover:bg-accent hover:text-accent-foreground'
@@ -185,7 +185,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         ref={containerRef}
         className={cn(
           'inline-flex items-center mb-3',
-          'border rounded-md',
+          'border rounded-field',
           'transition-all duration-300 ease-in-out',
           'bg-transparent',
           expanded ? 'border-input' : 'border-input hover:bg-accent',
@@ -235,7 +235,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
       ref={containerRef}
       className={cn(
         'inline-flex flex-col mb-3',
-        'border rounded-md',
+        'border rounded-field',
         'transition-all duration-300 ease-in-out',
         'bg-transparent',
         expanded ? 'border-input' : 'border-input hover:bg-accent',

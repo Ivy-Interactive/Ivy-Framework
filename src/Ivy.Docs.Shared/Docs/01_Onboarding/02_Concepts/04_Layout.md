@@ -159,5 +159,5 @@ The Layout class provides the following factory methods:
 | [HeaderLayout](../../02_Widgets/02_Layouts/04_HeaderLayout.md) | Page layout with a fixed header section |
 | [FooterLayout](../../02_Widgets/02_Layouts/05_FooterLayout.md) | Page layout with a fixed footer section |
 | [FloatingPanel](../../02_Widgets/02_Layouts/09_FloatingPanel.md) | Overlay panels that float above the main content |
-| [ResizeablePanelGroup](../../02_Widgets/02_Layouts/08_ResizeablePanelGroup.md) | Split panels that users can resize by dragging |
+| [ResizablePanelGroup](../../02_Widgets/02_Layouts/08_ResizablePanelGroup.md) | Split panels that users can resize by dragging |
 
