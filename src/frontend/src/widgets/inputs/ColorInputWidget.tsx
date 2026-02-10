@@ -18,15 +18,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import {
-  // Select imports removed as they are no longer used
-} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {} from // Select imports removed as they are no longer used
+'@/components/ui/select';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 
 interface ColorInputWidgetProps {
@@ -38,7 +32,13 @@ interface ColorInputWidgetProps {
   placeholder?: string;
   nullable?: boolean;
   events?: string[];
-  variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch' | 'Foreground' | 'ThemePicker';
+  variant?:
+    | 'Text'
+    | 'Picker'
+    | 'TextAndPicker'
+    | 'Swatch'
+    | 'Foreground'
+    | 'ThemePicker';
   scale?: Scales;
 }
 
@@ -171,7 +171,9 @@ const ThemeColorGrid: React.FC<{
     { label: 'Ri', var: '--ring' },
   ];
 
-  const [resolvedThemeColors, setResolvedThemeColors] = React.useState<Record<string, string[]>>({});
+  const [resolvedThemeColors, setResolvedThemeColors] = React.useState<
+    Record<string, string[]>
+  >({});
 
   // Helper to convert any CSS color string to Hex
   const colorToHex = (color: string): string | null => {
@@ -224,10 +226,14 @@ const ThemeColorGrid: React.FC<{
     }
 
     // Observe changes to the html element (for class/style) and head (for style tag injection)
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(mutations => {
       let shouldUpdate = false;
       for (const mutation of mutations) {
-        if (mutation.type === 'attributes' && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+        if (
+          mutation.type === 'attributes' &&
+          (mutation.attributeName === 'style' ||
+            mutation.attributeName === 'class')
+        ) {
           shouldUpdate = true;
           break;
         }
@@ -259,11 +265,11 @@ const ThemeColorGrid: React.FC<{
 
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['style', 'class']
+      attributeFilter: ['style', 'class'],
     });
 
     observer.observe(document.head, {
-      childList: true
+      childList: true,
     });
 
     return () => {
@@ -278,8 +284,8 @@ const ThemeColorGrid: React.FC<{
     const r = parseInt(hex.substring(1, 3), 16);
     const g = parseInt(hex.substring(3, 5), 16);
     const b = parseInt(hex.substring(5, 7), 16);
-    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-    return (yiq >= 128) ? '#000000' : '#FFFFFF';
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    return yiq >= 128 ? '#000000' : '#FFFFFF';
   };
 
   const renderGrid = () => {
@@ -313,13 +319,15 @@ const ThemeColorGrid: React.FC<{
           return p;
         };
 
-        const q = lDecimal < 0.5 ? lDecimal * (1 + sDecimal) : lDecimal + sDecimal - lDecimal * sDecimal;
+        const q =
+          lDecimal < 0.5
+            ? lDecimal * (1 + sDecimal)
+            : lDecimal + sDecimal - lDecimal * sDecimal;
         const p = 2 * lDecimal - q;
 
         rVal = hue2rgb(p, q, hDecimal + 1 / 3);
         gVal = hue2rgb(p, q, hDecimal);
         bVal = hue2rgb(p, q, hDecimal - 1 / 3);
-
 
         const toHex = (x: number) => {
           const hex = Math.round(x * 255).toString(16);
@@ -345,8 +353,8 @@ const ThemeColorGrid: React.FC<{
             key={`${r}-${c}`}
             type="button"
             className={cn(
-              "w-7 h-7 shrink-0 rounded-full hover:scale-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5 relative flex items-center justify-center",
-              isSelected && "ring-1 ring-offset-1 ring-black/50 z-20 scale-110"
+              'w-7 h-7 shrink-0 rounded-full hover:scale-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5 relative flex items-center justify-center',
+              isSelected && 'ring-1 ring-offset-1 ring-black/50 z-20 scale-110'
             )}
             style={{ backgroundColor: hexColor }}
             onClick={() => onSelect(hexColor)}
@@ -357,7 +365,10 @@ const ThemeColorGrid: React.FC<{
                 style={{
                   color: getContrastColor(hexColor),
                   // Add text shadow for better visibility on mid-tone colors
-                  textShadow: getContrastColor(hexColor) === '#FFFFFF' ? '0 1px 2px rgba(0,0,0,0.5)' : '0 1px 1px rgba(255,255,255,0.5)'
+                  textShadow:
+                    getContrastColor(hexColor) === '#FFFFFF'
+                      ? '0 1px 2px rgba(0,0,0,0.5)'
+                      : '0 1px 1px rgba(255,255,255,0.5)',
                 }}
                 className="text-[10px] font-black leading-none pointer-events-none select-none z-10"
               >
@@ -441,15 +452,23 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       const bNorm = b / 255;
       const max = Math.max(rNorm, gNorm, bNorm);
       const min = Math.min(rNorm, gNorm, bNorm);
-      let h = 0, s = 0, l = (max + min) / 2;
+      let h = 0,
+        s = 0,
+        l = (max + min) / 2;
 
       if (max !== min) {
         const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
-          case rNorm: h = (gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0); break;
-          case gNorm: h = (bNorm - rNorm) / d + 2; break;
-          case bNorm: h = (rNorm - gNorm) / d + 4; break;
+          case rNorm:
+            h = (gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0);
+            break;
+          case gNorm:
+            h = (bNorm - rNorm) / d + 2;
+            break;
+          case bNorm:
+            h = (rNorm - gNorm) / d + 4;
+            break;
         }
         h /= 6;
       }
@@ -462,13 +481,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
 
   // hslToHex removed as unused
 
-
-
   // Helper to convert hex to RGB object
   const hexToRgb = (hex: string) => {
     let cleanHex = hex.replace('#', '');
     if (cleanHex.length === 3) {
-      cleanHex = cleanHex.split('').map(c => c + c).join('');
+      cleanHex = cleanHex
+        .split('')
+        .map(c => c + c)
+        .join('');
     }
     const r = parseInt(cleanHex.substring(0, 2), 16);
     const g = parseInt(cleanHex.substring(2, 4), 16);
@@ -522,7 +542,10 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   const getLuminance = (hex: string): number => {
     let cleanHex = hex.replace('#', '');
     if (cleanHex.length === 3) {
-      cleanHex = cleanHex.split('').map(c => c + c).join('');
+      cleanHex = cleanHex
+        .split('')
+        .map(c => c + c)
+        .join('');
     }
     const r = parseInt(cleanHex.substring(0, 2), 16);
     const g = parseInt(cleanHex.substring(2, 4), 16);
@@ -597,7 +620,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       const b = parseInt(rgbMatch[3]);
       return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
-    const hslMatch = colorValue.match(/hsla?\((\d+),\s*(\d+)%?,\s*(\d+)%?(?:,\s*[\d.]+)?\)/);
+    const hslMatch = colorValue.match(
+      /hsla?\((\d+),\s*(\d+)%?,\s*(\d+)%?(?:,\s*[\d.]+)?\)/
+    );
     if (hslMatch) {
       const h = parseInt(hslMatch[1]) / 360;
       const s = parseInt(hslMatch[2]) / 100;
@@ -743,12 +768,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     const r = parseInt(hex.substring(1, 3), 16);
     const g = parseInt(hex.substring(3, 5), 16);
     const b = parseInt(hex.substring(5, 7), 16);
-    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-    return (yiq >= 128) ? '#000000' : '#FFFFFF';
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    return yiq >= 128 ? '#000000' : '#FFFFFF';
   };
 
   if (variant === 'ThemePicker' || variant === 'Foreground') {
-    const isForeground = variant === 'Foreground' || (placeholder && placeholder.toLowerCase().includes('foreground'));
+    const isForeground =
+      variant === 'Foreground' ||
+      (placeholder && placeholder.toLowerCase().includes('foreground'));
     const contrastColor = getContrastColor(getDisplayColor());
 
     return (
@@ -775,27 +802,40 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
               <span className="sr-only">Pick a color</span>
               {isForeground && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span style={{ color: contrastColor }} className="font-bold text-sm">F</span>
+                  <span
+                    style={{ color: contrastColor }}
+                    className="font-bold text-sm"
+                  >
+                    F
+                  </span>
                 </div>
               )}
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-3" align="start">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[740px]">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-[740px]"
+            >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium px-1">
                   Choose a color for {placeholder || 'this item'}
                 </span>
                 <TabsList className="h-7">
-                  <TabsTrigger value="palette" className="h-5 px-2 text-xs">Palette</TabsTrigger>
-                  <TabsTrigger value="picker" className="h-5 px-2 text-xs">Picker</TabsTrigger>
+                  <TabsTrigger value="palette" className="h-5 px-2 text-xs">
+                    Palette
+                  </TabsTrigger>
+                  <TabsTrigger value="picker" className="h-5 px-2 text-xs">
+                    Picker
+                  </TabsTrigger>
                 </TabsList>
               </div>
 
               <TabsContent value="palette" className="mt-0">
                 <ThemeColorGrid
                   selectedColor={getDisplayColor()}
-                  onSelect={(color) => {
+                  onSelect={color => {
                     eventHandler('OnChange', id, [color]);
                   }}
                 />
@@ -810,18 +850,27 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs font-medium">
                         <span>Red</span>
-                        <span>{rgbValues.r.toString(16).toUpperCase().padStart(2, '0')}</span>
+                        <span>
+                          {rgbValues.r
+                            .toString(16)
+                            .toUpperCase()
+                            .padStart(2, '0')}
+                        </span>
                       </div>
                       <div className="relative px-1">
                         <div
                           className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
-                          style={{ background: `linear-gradient(to right, rgb(0, ${rgbValues.g}, ${rgbValues.b}), rgb(255, ${rgbValues.g}, ${rgbValues.b}))` }}
+                          style={{
+                            background: `linear-gradient(to right, rgb(0, ${rgbValues.g}, ${rgbValues.b}), rgb(255, ${rgbValues.g}, ${rgbValues.b}))`,
+                          }}
                         />
                         <ColorSlider
                           value={[rgbValues.r]}
                           max={255}
                           step={1}
-                          onValueChange={(vals) => handleRgbSliderChange('r', vals[0])}
+                          onValueChange={vals =>
+                            handleRgbSliderChange('r', vals[0])
+                          }
                           className=""
                         />
                       </div>
@@ -830,18 +879,27 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs font-medium">
                         <span>Green</span>
-                        <span>{rgbValues.g.toString(16).toUpperCase().padStart(2, '0')}</span>
+                        <span>
+                          {rgbValues.g
+                            .toString(16)
+                            .toUpperCase()
+                            .padStart(2, '0')}
+                        </span>
                       </div>
                       <div className="relative px-1">
                         <div
                           className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
-                          style={{ background: `linear-gradient(to right, rgb(${rgbValues.r}, 0, ${rgbValues.b}), rgb(${rgbValues.r}, 255, ${rgbValues.b}))` }}
+                          style={{
+                            background: `linear-gradient(to right, rgb(${rgbValues.r}, 0, ${rgbValues.b}), rgb(${rgbValues.r}, 255, ${rgbValues.b}))`,
+                          }}
                         />
                         <ColorSlider
                           value={[rgbValues.g]}
                           max={255}
                           step={1}
-                          onValueChange={(vals) => handleRgbSliderChange('g', vals[0])}
+                          onValueChange={vals =>
+                            handleRgbSliderChange('g', vals[0])
+                          }
                           className=""
                         />
                       </div>
@@ -850,18 +908,27 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs font-medium">
                         <span>Blue</span>
-                        <span>{rgbValues.b.toString(16).toUpperCase().padStart(2, '0')}</span>
+                        <span>
+                          {rgbValues.b
+                            .toString(16)
+                            .toUpperCase()
+                            .padStart(2, '0')}
+                        </span>
                       </div>
                       <div className="relative px-1">
                         <div
                           className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
-                          style={{ background: `linear-gradient(to right, rgb(${rgbValues.r}, ${rgbValues.g}, 0), rgb(${rgbValues.r}, ${rgbValues.g}, 255))` }}
+                          style={{
+                            background: `linear-gradient(to right, rgb(${rgbValues.r}, ${rgbValues.g}, 0), rgb(${rgbValues.r}, ${rgbValues.g}, 255))`,
+                          }}
                         />
                         <ColorSlider
                           value={[rgbValues.b]}
                           max={255}
                           step={1}
-                          onValueChange={(vals) => handleRgbSliderChange('b', vals[0])}
+                          onValueChange={vals =>
+                            handleRgbSliderChange('b', vals[0])
+                          }
                           className=""
                         />
                       </div>
