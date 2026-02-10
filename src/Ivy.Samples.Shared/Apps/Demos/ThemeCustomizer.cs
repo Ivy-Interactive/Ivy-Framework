@@ -449,14 +449,15 @@ public class ThemeCustomizer : SampleBase
             </svg>";
 
             return new Card(
-                Layout.Center()
-                    | new Svg(svgContent)
-                        .Width(Size.Px(PreviewSize))
-                        .Height(Size.Px(PreviewSize))
-            )
-            .Width(Size.Px(CardSize))
-            .Height(Size.Px(CardSize))
-            .HandleClick(() => onUpdate(remValue == "0px" ? null : remValue));
+                    Layout.Center()
+                        | new Svg(svgContent)
+                            .Width(Size.Px(PreviewSize))
+                            .Height(Size.Px(PreviewSize))
+                )
+                .Width(Size.Px(CardSize))
+                .Height(Size.Px(CardSize))
+                .HandleClick(() => onUpdate(remValue == "0px" ? null : remValue))
+                .WithTooltip($"{remValue} ({pxRadius}px)");
         }
     }
 
