@@ -227,9 +227,7 @@ public class ThemeCustomizer : SampleBase
                     },
                     options: presetOptions
                 )
-
                 | new Separator()
-
                 // Mode toggle
                 | Text.H3("Theme Mode").Small()
                 | (Layout.Horizontal()
@@ -429,11 +427,11 @@ public class ThemeCustomizer : SampleBase
             var normalizedOption = remValue == "0px" ? "0px" : remValue;
             var isSelected = normalizedCurrent == normalizedOption;
             var fillColor = isSelected ? "var(--primary)" : "var(--secondary)";
-            
+
             // Allow rectangle to be larger than viewbox to support large radii without capping
             // If rect is 32x32, max radius is 16. If rect is 64x64, max radius is 32.
-            var rectSize = SvgViewBox * 2; 
-            
+            var rectSize = SvgViewBox * 2;
+
             // ViewBox shows the top-left 32x32 area
             // Radii: 0, 8, 16, 24, 32 will now be visually distinct
             var svgContent = $@"<svg width='100%' height='100%' viewBox='0 0 {SvgViewBox} {SvgViewBox}' xmlns='http://www.w3.org/2000/svg'>
