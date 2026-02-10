@@ -304,13 +304,29 @@ const ThemeColorGrid: React.FC<{
         const s = saturation;
         const l = lightness;
 
-        const hDecimal = h / 360;
-        const sDecimal = s / 100;
-        const lDecimal = l / 100;
+        const hNorm = h / 360;
+        const sNorm = s / 100;
+        const lNorm = l / 100;
+        let rVal, gVal, bVal;
 
-        const rVal = hue2rgb(p, q, hDecimal + 1 / 3);
-        const gVal = hue2rgb(p, q, hDecimal);
-        const bVal = hue2rgb(p, q, hDecimal - 1 / 3);
+        if (sNorm === 0) {
+          rVal = gVal = bVal = lNorm;
+        } else {
+          const hue2rgb = (p: number, q: number, t: number) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+          };
+          const q =
+            lNorm < 0.5 ? lNorm * (1 + sNorm) : lNorm + sNorm - lNorm * sNorm;
+          const p = 2 * lNorm - q;
+          rVal = hue2rgb(p, q, hNorm + 1 / 3);
+          gVal = hue2rgb(p, q, hNorm);
+          bVal = hue2rgb(p, q, hNorm - 1 / 3);
+        }
 
         const toHex = (x: number) => {
           const hex = Math.round(x * 255).toString(16);
