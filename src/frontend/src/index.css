@@ -179,8 +179,8 @@
   .ivy-textarea-wrapper::after {
     content: '';
     position: absolute;
-    bottom: 2px;
-    right: 0px;
+    bottom: 4px;
+    right: 2px;
     width: 2px;
     height: 1px;
     background: var(--muted-foreground);
@@ -191,8 +191,8 @@
   }
   .ivy-textarea-wrapper::after {
     width: 8px;
-    bottom: 6px;
-    right: 0px;
+    bottom: 8px;
+    right: 2px;
   }
   .ivy-textarea-wrapper:has(.resize-none)::before,
   .ivy-textarea-wrapper:has(.resize-none)::after {
