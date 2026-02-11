@@ -5,6 +5,14 @@ namespace Ivy.Chrome;
 
 public static class ChromeUtils
 {
+    private static string NormalizeForSearch(string s)
+    {
+        if (string.IsNullOrEmpty(s))
+            return "";
+        var normalized = Regex.Replace(s, @"[\s\-_]+", "");
+        return normalized.ToLowerInvariant();
+    }
+
     private static bool IsWordMatch(string tag, string searchString)
     {
         var words = Regex.Split(tag, @"[-_\s]+");
@@ -23,13 +31,23 @@ public static class ChromeUtils
     public static int ItemMatchScore(MenuItem item, string searchString)
     {
         var label = item.Label ?? "";
+        var normalizedLabel = NormalizeForSearch(label);
+        var normalizedSearch = NormalizeForSearch(searchString);
 
         // Exact match gets highest priority (score 5)
         if (string.Equals(label, searchString, StringComparison.OrdinalIgnoreCase))
             return 5;
 
+        // Normalized exact match (score 5)
+        if (normalizedSearch.Length > 0 && normalizedLabel == normalizedSearch)
+            return 5;
+
         // Label starts with search string (score 4)
         if (label.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+            return 4;
+
+        // Normalized label starts with normalized search (score 4)
+        if (normalizedSearch.Length > 0 && normalizedLabel.StartsWith(normalizedSearch))
             return 4;
 
         // Label contains search as whole word - e.g. "Layout" in "Footer Layout" (score 3)
@@ -40,8 +58,14 @@ public static class ChromeUtils
         if (label.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return 2;
 
-        // Search hints match gets lowest priority (score 1)
-        if (item.SearchHints?.Any(tag => IsWordMatch(tag, searchString)) == true)
+        // Normalized label contains normalized search: "datatables" matches "Data Table" (score 2)
+        if (normalizedSearch.Length > 0 && normalizedLabel.Contains(normalizedSearch))
+            return 2;
+
+        // Search hints match (also check normalized form)
+        if (item.SearchHints?.Any(tag =>
+            IsWordMatch(tag, searchString) ||
+            (normalizedSearch.Length > 0 && NormalizeForSearch(tag).Contains(normalizedSearch))) == true)
             return 1;
 
         // No match
