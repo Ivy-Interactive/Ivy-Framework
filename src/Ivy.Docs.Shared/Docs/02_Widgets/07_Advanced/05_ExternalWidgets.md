@@ -70,7 +70,9 @@ public record MyWidget : WidgetBase<MyWidget>
 - **ExportName** — Name of the React component export the loader should use.
 - **GlobalName** — Must match the Vite library `name` (and the global variable the IIFE assigns). Use the full namespace with dots replaced by underscores (e.g. `MyProject_Widgets_MyWidget`).
 
+<Callout Type="info">
 Use `[Prop]` for data and `[Event]` for callbacks. You can add extension methods for a fluent API (e.g. `.Label("...")`, `.HandleClick(...)`).
+</Callout>
 
 ## Frontend (Vite Library)
 
@@ -113,7 +115,9 @@ export default defineConfig({
 });
 ```
 
+<Callout Type="info">
 Using `fileName: () => 'ExternalWidget.js'` avoids Vite adding suffixes like `.iife.js`, so the path matches what you put in `[ExternalWidget]`.
+</Callout>
 
 ### Entry point
 
@@ -227,7 +231,9 @@ In the `.csproj`:
 </Target>
 ```
 
-Use **forward slashes** in paths (`frontend/dist/**/*`) for cross-platform builds.
+<Callout Type="info">
+Use forward slashes in paths (`frontend/dist/**/*`) for cross-platform builds.
+</Callout>
 
 ### Integrated pattern (inside host app)
 
