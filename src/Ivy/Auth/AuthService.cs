@@ -22,7 +22,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
         return token;
     }
 
-    public async Task<Uri> GetOAuthUriAsync(AuthOption option, CallbackEndpoint callback, CancellationToken cancellationToken)
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         var oldSession = authSession.TakeSnapshot();
 

@@ -1,8 +1,8 @@
 namespace Ivy.Core;
 
-public record CallbackEndpoint(string Id, string BaseUrl)
+public record WebhookEndpoint(string Id, string BaseUrl)
 {
-    public CallbackEndpoint(string id, string scheme, string host) : this(id, BuildBaseUrl(scheme, host))
+    public WebhookEndpoint(string id, string scheme, string host) : this(id, BuildBaseUrl(scheme, host))
     {
     }
 
