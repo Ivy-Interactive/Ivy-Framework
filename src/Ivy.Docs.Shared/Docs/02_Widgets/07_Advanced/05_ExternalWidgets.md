@@ -225,30 +225,19 @@ In the `.csproj`:
   <Exec Command="npm install" WorkingDirectory="frontend" />
   <Exec Command="npm run build" WorkingDirectory="frontend" />
 </Target>
-
-<ItemGroup>
-  <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
-</ItemGroup>
 ```
 
 Use **forward slashes** in paths (`frontend/dist/**/*`) for cross-platform builds.
 
 ### Integrated pattern (inside host app)
 
-When the widget lives inside the host (e.g. `HostApp/Widgets/MyWidget/`), the host must **not** compile the widget’s C# or include its sources. Exclude the widget folder so only the widget project builds it:
+When the widget lives inside the host (e.g. `HostApp/Widgets/MyWidget/`), add a `<ProjectReference>` to the widget project.
 
 ```xml
-<!-- HostApp.csproj -->
-<PropertyGroup>
-  <DefaultItemExcludes>$(DefaultItemExcludes);Widgets/MyWidget/**</DefaultItemExcludes>
-</PropertyGroup>
-
 <ItemGroup>
   <ProjectReference Include="Widgets/MyWidget/MyWidget.csproj" />
 </ItemGroup>
 ```
-
-Otherwise you get duplicate type errors and conflicting resources.
 
 ### Multiple widgets in one bundle
 
@@ -287,8 +276,22 @@ Ivy’s standard host (e.g. [Chrome](https://docs.ivy.app/onboarding/concepts/pr
 | ----- | ------------- |
 | **Script resource not found** | Path in `[ExternalWidget]` must match the embedded path (project-relative, e.g. `frontend/dist/ExternalWidget.js`). Resource name is assembly name + path with `/` → `.`. After changing `fileName` in Vite, run `dotnet clean` then `dotnet build`. |
 | **Global not found** | `GlobalName` in C# must equal Vite `build.lib.name`. In `src/index.ts`, assign the export to `window[GlobalName]`. Use `jsxRuntime: 'classic'` so the bundle uses the global React. |
-| **Duplicate type / CS0579** | Widget project is under the host and the host is compiling its files. Exclude the widget directory in the host's `.csproj` with `DefaultItemExcludes` or `Compile Remove`. |
+| **Duplicate type / CS0579** | Widget project is under the host and the host is compiling its files. Exclude the widget directory in the host's `.csproj` so only the widget project builds it (see below). |
 | **Invalid hook call / multiple React** | Widget must not bundle React when the host provides it. Keep `react` and `react-dom` in `external` and `globals` in Vite, and use `jsxRuntime: 'classic'`. |
 | **Wrong filename (.iife.js)** | Set `fileName: () => 'ExternalWidget.js'` in `vite.config.ts` so the output name has no extra suffix. |
 
-For more detail on resource naming, nesting pitfalls, migration from internal widgets, and self-contained builds (bundling React inside the widget), refer to your project’s external widget guide or the Ivy Framework repository.
+**Excluding the widget folder (integrated pattern):** When the widget project lives inside the host directory, exclude it from the host’s compilation so the host does not compile the widget’s sources. In the host’s `.csproj`:
+
+```xml
+<PropertyGroup>
+  <DefaultItemExcludes>$(DefaultItemExcludes);Widgets/MyWidget/**</DefaultItemExcludes>
+</PropertyGroup>
+
+<ItemGroup>
+  <ProjectReference Include="Widgets/MyWidget/MyWidget.csproj" />
+</ItemGroup>
+```
+
+Alternatively use explicit removes: `<Compile Remove="Widgets/MyWidget/**/*.cs" />` and `<None Remove="Widgets/MyWidget/**/*" />`.
+
+For more detail on resource naming, migration from internal widgets, and self-contained builds (bundling React inside the widget), refer to your project’s external widget guide or the Ivy Framework repository.
