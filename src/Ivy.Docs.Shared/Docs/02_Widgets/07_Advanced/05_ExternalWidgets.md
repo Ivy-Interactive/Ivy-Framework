@@ -11,22 +11,22 @@ searchHints:
 # External Widgets
 
 <Ingress>
-External widgets let you extend the Ivy Framework with custom React components built and bundled separately from the core framework. Use them for domain-specific UI (e.g. diagrams, charts, or rich editors) without coupling that code to the framework backend.
+External [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md) let you extend the Ivy Framework with custom React components built and bundled separately from the core framework. Use them for domain-specific UI (e.g. diagrams, charts, or rich editors) without coupling that code to the framework backend.
 </Ingress>
 
-The pattern has three parts: a **C# proxy** (a [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) record with `[ExternalWidget]`), a **React component** (your UI), and a **build pipeline** that compiles the frontend and embeds the assets into the assembly.
+The pattern has three parts: a **C# proxy** (a widget record with `[ExternalWidget]`), a **React component** (your UI), and a **build pipeline** that compiles the frontend and embeds the assets into the widget assembly.
 
 ## Architecture Overview
 
-1. **C# proxy** — A record inheriting from `WidgetBase<T>` with `[ExternalWidget]`, defining [props](../../01_Onboarding/02_Concepts/03_Widgets.md) and [events](../../01_Onboarding/02_Concepts/07_EventHandlers.md).
+1. **C# proxy** — A record inheriting from `WidgetBase<T>` with `[ExternalWidget]`, defining [props](../../01_Onboarding/02_Concepts/03_Widgets.md) and [events](../../01_Onboarding/02_Concepts/05_EventHandlers.md).
 2. **React component** — The actual UI, built with standard React and tooling (e.g. Vite).
 3. **Build pipeline** — MSBuild runs the frontend build and embeds the output (JS/CSS) as resources in the widget assembly.
 
-The host app loads the script and CSS from embedded resources and renders your component, passing props and wiring events back to C#.
+The host [app](../../01_Onboarding/02_Concepts/10_Apps.md) loads the script and CSS from embedded resources and renders your component, passing props and wiring events back to C#.
 
 ## Scaffolding with the CLI
 
-You can generate a new external widget with the Ivy CLI so namespace, names, and build match the framework:
+You can generate a new external widget with the Ivy [CLI](../../01_Onboarding/03_CLI/01_CLIOverview.md) so namespace, names, and build match the framework:
 
 ```terminal
 ivy widget
@@ -36,7 +36,7 @@ Widget: MyWidget
 
 ## C# Backend
 
-Create a record that inherits from `WidgetBase<T>` and mark it with `[ExternalWidget]`. The attribute tells the framework where to find the bundled script and (optionally) CSS, and which export/global name to use.
+Create a record that inherits from `WidgetBase<T>` and mark it with `[ExternalWidget]`. The attribute tells the framework where to find the bundled script and (optionally) CSS, and which export/global name to use. See Widgets and Event handlers for the basics.
 
 ```csharp
 using Ivy.Core;
@@ -121,7 +121,7 @@ Using `fileName: () => 'ExternalWidget.js'` avoids Vite adding suffixes like `.i
 
 ### Entry point
 
-Export your component and assign it to `window` under the same name as `build.lib.name` so the IIFE loader can find it.
+Export your widget component and assign it to `window` under the same name as `build.lib.name` so the IIFE loader can find it.
 
 ```typescript
 // src/index.ts
@@ -191,7 +191,7 @@ export const MyWidget: React.FC<MyWidgetProps> = ({
 };
 ```
 
-Use Ivy theme variables (`--primary`, `--background`, `--foreground`, `--border`, etc.) so the widget matches the host app. Size props use Ivy’s format (e.g. `Full`, `Units:80`); you can parse them in the component or in a small helper.
+Use Ivy theme variables ([Colors](../../04_ApiReference/IvyShared/Colors.md): `--primary`, `--background`, `--foreground`, `--border`, etc.) so the widget matches the host app ([Theming](../../01_Onboarding/02_Concepts/12_Theming.md)). Size props use Ivy’s [Size](../../04_ApiReference/IvyShared/Size.md) format (e.g. `Full`, `Units:80`); you can parse them in the component or in a small helper.
 
 ## Project structure and build
 
@@ -237,7 +237,7 @@ Use forward slashes in paths (`frontend/dist/**/*`) for cross-platform builds.
 
 ### Integrated pattern (inside host app)
 
-When the widget lives inside the host (e.g. `HostApp/Widgets/MyWidget/`), add a `<ProjectReference>` to the widget project.
+When the widget lives inside the host app (e.g. `HostApp/Widgets/MyWidget/`), add a `<ProjectReference>` to the widget project.
 
 ```xml
 <ItemGroup>
@@ -265,7 +265,7 @@ Then in C# use the same `GlobalName` for each widget and different `ExportName` 
 
 ## Host requirements
 
-External widgets that externalize React expect the host to provide React (and ReactDOM) on the global object.
+External widgets that externalize React expect the host app to provide React (and ReactDOM) on the global object.
 
 The host’s entry point should set:
 
@@ -274,7 +274,7 @@ The host’s entry point should set:
 (window as any).ReactDOM = ReactDOM; // or createRoot etc.
 ```
 
-Ivy’s standard host (e.g. [Chrome](https://docs.ivy.app/onboarding/concepts/program.md)) does this. If you see “Global not found” or React-related errors, ensure the host exposes these globals before any external widget script runs.
+Ivy’s standard host (e.g. [Chrome](../../01_Onboarding/02_Concepts/11_Chrome.md)) does this. If you see “Global not found” or React-related errors, ensure the host app exposes these globals before any external widget script runs.
 
 ## Troubleshooting
 
@@ -282,11 +282,11 @@ Ivy’s standard host (e.g. [Chrome](https://docs.ivy.app/onboarding/concepts/pr
 | ----- | ------------- |
 | **Script resource not found** | Path in `[ExternalWidget]` must match the embedded path (project-relative, e.g. `frontend/dist/ExternalWidget.js`). Resource name is assembly name + path with `/` → `.`. After changing `fileName` in Vite, run `dotnet clean` then `dotnet build`. |
 | **Global not found** | `GlobalName` in C# must equal Vite `build.lib.name`. In `src/index.ts`, assign the export to `window[GlobalName]`. Use `jsxRuntime: 'classic'` so the bundle uses the global React. |
-| **Duplicate type / CS0579** | Widget project is under the host and the host is compiling its files. Exclude the widget directory in the host's `.csproj` so only the widget project builds it (see below). |
+| **Duplicate type / CS0579** | Widget project is under the host app and the host is compiling its files. Exclude the widget directory in the host's `.csproj` so only the widget project builds it (see below). |
 | **Invalid hook call / multiple React** | Widget must not bundle React when the host provides it. Keep `react` and `react-dom` in `external` and `globals` in Vite, and use `jsxRuntime: 'classic'`. |
 | **Wrong filename (.iife.js)** | Set `fileName: () => 'ExternalWidget.js'` in `vite.config.ts` so the output name has no extra suffix. |
 
-**Excluding the widget folder (integrated pattern):** When the widget project lives inside the host directory, exclude it from the host’s compilation so the host does not compile the widget’s sources. In the host’s `.csproj`:
+**Excluding the widget folder (integrated pattern):** When the widget project lives inside the host app directory, exclude it from the host’s compilation so the host does not compile the widget’s sources. In the host’s `.csproj`:
 
 ```xml
 <PropertyGroup>
@@ -299,5 +299,3 @@ Ivy’s standard host (e.g. [Chrome](https://docs.ivy.app/onboarding/concepts/pr
 ```
 
 Alternatively use explicit removes: `<Compile Remove="Widgets/MyWidget/**/*.cs" />` and `<None Remove="Widgets/MyWidget/**/*" />`.
-
-For more detail on resource naming, migration from internal widgets, and self-contained builds (bundling React inside the widget), refer to your project’s external widget guide or the Ivy Framework repository.
