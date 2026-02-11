@@ -139,36 +139,48 @@ Ivy passes props (including `id`, `width`, `height`, `onIvyEvent`, `events`) and
 
 ```typescript
 // src/MyWidget.tsx
-import React from 'react';
+import React from "react";
+import { IvyEventHandler } from "./types";
+import { getWidth, getHeight } from "./styles";
 
 interface MyWidgetProps {
   id: string;
   width?: string;
   height?: string;
-  onIvyEvent: (eventName: string, widgetId: string, args: unknown[]) => void;
+  onIvyEvent: IvyEventHandler;
   events?: string[];
   label?: string;
 }
 
 export const MyWidget: React.FC<MyWidgetProps> = ({
   id,
+  width = "Full",
+  height = "Full",
   onIvyEvent,
   events = [],
   label,
 }) => {
   const handleClick = () => {
-    if (events?.includes('OnClick')) {
-      onIvyEvent('OnClick', id, []);
+    if (events.includes("OnClick")) {
+      onIvyEvent("OnClick", id, []);
     }
   };
 
+  const style: React.CSSProperties = {
+    ...getWidth(width),
+    ...getHeight(height),
+  };
+
   return (
-    <div className="p-4 border rounded-lg bg-[var(--background)] text-[var(--foreground)] border-[var(--border)]">
+    <div
+      style={style}
+      className="p-4 border rounded-lg bg-[var(--background)] text-[var(--foreground)] border-[var(--border)]"
+    >
       <button
         onClick={handleClick}
-        className="px-4 py-2 rounded bg-[var(--primary)] text-white hover:opacity-90"
+        className="px-4 py-2 rounded transition-colors bg-[var(--primary)] text-white hover:opacity-90"
       >
-        {label ?? 'Click me'}
+        {label ?? "Click me"}
       </button>
     </div>
   );
