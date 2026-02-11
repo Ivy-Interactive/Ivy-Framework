@@ -67,11 +67,11 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     height = 'MaxContent,,Px:800',
     scale = Scales.Medium,
   }) => {
-    const styles = useMemo<CSSProperties>(() => {
-      const scaleStyles: Record<
-        Scales,
-        { fontSize: string; padding: string; lineHeight: string }
-      > = {
+    const scaleStyles: Record<
+      Scales,
+      { fontSize: string; padding: string; lineHeight: string }
+    > = useMemo(
+      () => ({
         [Scales.Small]: {
           fontSize: '0.75rem',
           padding: '0.5rem',
@@ -87,11 +87,15 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
           padding: '1rem',
           lineHeight: '1.6',
         },
-      };
+      }),
+      []
+    );
 
-      const currentScale = scaleStyles[scale];
+    const currentScale = scaleStyles[scale];
 
-      const baseStyles: CSSProperties = {
+    /** Pre (container): padding, dimensions, typography. Padding here applies to all lines. */
+    const preStyle = useMemo<CSSProperties>(() => {
+      const style: CSSProperties = {
         ...getWidth(width),
         ...getHeight(height),
         margin: 0,
@@ -101,15 +105,25 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         padding: currentScale.padding,
         lineHeight: currentScale.lineHeight,
       };
-
       if (!showBorder) {
-        baseStyles.border = 'none';
-        baseStyles.padding = '0';
-        baseStyles.borderRadius = '0';
+        style.border = 'none';
+        style.padding = '0';
+        style.borderRadius = '0';
       }
+      return style;
+    }, [width, height, showBorder, currentScale]);
 
-      return baseStyles;
-    }, [width, height, showBorder, scale]);
+    /** Code (inner): typography and line layout only. No padding so all lines align. */
+    const codeTagStyle = useMemo<CSSProperties>(
+      () => ({
+        margin: 0,
+        wordBreak: 'normal',
+        overflowWrap: 'break-word',
+        fontSize: currentScale.fontSize,
+        lineHeight: currentScale.lineHeight,
+      }),
+      [currentScale]
+    );
 
     const highlighterKey = useMemo(
       () =>
@@ -147,7 +161,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
             fallback={
               <pre
                 className={cn('p-4 bg-muted rounded-md font-mono text-sm')}
-                style={isFull ? { ...styles, height: 'auto' } : styles}
+                style={isFull ? { ...preStyle, height: 'auto' } : preStyle}
               >
                 {content}
               </pre>
@@ -155,19 +169,13 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
           >
             <SyntaxHighlighter
               language={mapLanguageToPrism(language)}
-              customStyle={isFull ? { ...styles, height: 'auto' } : styles}
+              customStyle={isFull ? { ...preStyle, height: 'auto' } : preStyle}
               style={dynamicTheme}
               showLineNumbers={showLineNumbers}
               wrapLines={true}
               wrapLongLines={shouldWrap}
               key={highlighterKey}
-              codeTagProps={{
-                style: {
-                  fontSize: styles.fontSize,
-                  lineHeight: styles.lineHeight,
-                  ...styles, // Propagate break styles to the inner code tag as well
-                },
-              }}
+              codeTagProps={{ style: codeTagStyle }}
             >
               {content}
             </SyntaxHighlighter>
