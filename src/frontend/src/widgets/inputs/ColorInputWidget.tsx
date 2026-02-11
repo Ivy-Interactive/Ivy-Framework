@@ -32,14 +32,9 @@ interface ColorInputWidgetProps {
   placeholder?: string;
   nullable?: boolean;
   events?: string[];
-  variant?:
-    | 'Text'
-    | 'Picker'
-    | 'TextAndPicker'
-    | 'Swatch'
-    | 'Foreground'
-    | 'ThemePicker';
+  variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch' | 'ThemePicker';
   scale?: Scales;
+  foreground?: boolean;
 }
 
 // Hoisted color map for backend Colors enum
@@ -424,6 +419,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   events = [],
   variant = 'TextAndPicker',
   scale = Scales.Medium,
+  foreground = false,
 }) => {
   const eventHandler = useEventHandler();
   // Use derived state for display and input values
@@ -620,21 +616,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     </div>
   );
 
-  const getLuminance = (hex: string): number => {
-    let cleanHex = hex.replace('#', '');
-    if (cleanHex.length === 3) {
-      cleanHex = cleanHex
-        .split('')
-        .map(c => c + c)
-        .join('');
-    }
-    const r = parseInt(cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.substring(4, 6), 16);
-    // Standard luminance formula
-    return 0.299 * r + 0.587 * g + 0.114 * b;
-  };
-
   React.useEffect(() => {
     setLocalInputValue(formatColor(getDisplayColor(), colorFormat));
   }, [displayValue, colorFormat]);
@@ -771,9 +752,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     return yiq >= 128 ? '#000000' : '#FFFFFF';
   };
 
-  if (variant === 'ThemePicker' || variant === 'Foreground') {
+  if (variant === 'ThemePicker') {
     const isForeground =
-      variant === 'Foreground' ||
+      foreground ||
       (placeholder && placeholder.toLowerCase().includes('foreground'));
     const contrastColor = getContrastColor(getDisplayColor());
 
@@ -787,12 +768,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
               className={cn(
                 colorInputPickerVariants({ scale }),
                 'p-0 rounded-md shadow-none focus:outline-none ring-offset-1 ring-1 transition-all relative',
-                // Dynamic double border based on luminance
-                // Light background (color): Inner white, Outer black
-                // Dark background (color): Inner black, Outer white
-                getLuminance(getDisplayColor()) > 128
-                  ? 'ring-offset-white ring-black/10'
-                  : 'ring-offset-black/5 ring-white/20',
+                'ring-offset-white ring-black',
                 disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
                 invalid && inputStyles.invalidInput
               )}
@@ -803,9 +779,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <span
                     style={{ color: contrastColor }}
-                    className="font-bold text-sm"
+                    className="font-extrabold text-lg"
                   >
-                    F
+                    A
                   </span>
                 </div>
               )}

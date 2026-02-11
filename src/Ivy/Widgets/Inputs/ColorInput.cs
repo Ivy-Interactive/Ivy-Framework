@@ -16,7 +16,6 @@ public enum ColorInputs
     Picker,
     TextAndPicker,
     Swatch,
-    Foreground,
     ThemePicker
 }
 
@@ -34,6 +33,8 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public bool Nullable { get; set; }
+
+    [Prop] public bool? Foreground { get; set; }
 
     [Prop] public ColorInputs Variant { get; set; } = ColorInputs.TextAndPicker;
 
@@ -176,6 +177,11 @@ public static class ColorInputExtensions
     public static ColorInputBase Variant(this ColorInputBase widget, ColorInputs variant)
     {
         return widget with { Variant = variant };
+    }
+
+    public static ColorInputBase Foreground(this ColorInputBase widget, bool? foreground = true)
+    {
+        return widget with { Foreground = foreground };
     }
 
     [OverloadResolutionPriority(1)]
