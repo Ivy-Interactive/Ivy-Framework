@@ -14,8 +14,6 @@ searchHints:
 External [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md) let you extend the Ivy Framework with custom React components built and bundled separately from the core framework. Use them for domain-specific UI (e.g. diagrams, charts, or rich editors) without coupling that code to the framework backend.
 </Ingress>
 
-The pattern has three parts: a **C# proxy** (a widget record with `[ExternalWidget]`), a **React component** (your UI), and a **build pipeline** that compiles the frontend and embeds the assets into the widget assembly.
-
 ## Architecture Overview
 
 1. **C# proxy** — A record inheriting from `WidgetBase<T>` with `[ExternalWidget]`, defining [props](../../01_Onboarding/02_Concepts/03_Widgets.md) and [events](../../01_Onboarding/02_Concepts/05_EventHandlers.md).
