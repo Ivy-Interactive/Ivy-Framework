@@ -34,7 +34,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
         {
             constructorSection = Layout.Vertical().Gap(2)
                                  | Text.H3("Constructors")
-                                 | constructors.ToTable().Width(Size.Full());
+                                 | constructors.ToTable().Small().Width(Size.Full());
         }
 
         object? supportedTypesSection = null;
@@ -84,7 +84,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
                     | Text.H3("Supported Types")
                     | new Table(
                         new[] { headerRow }.Concat(dataRows).ToArray()
-                    ).Width(Size.Full());
+                    ).Small().Width(Size.Full());
             }
         }
 
@@ -97,7 +97,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
 
         var propertySection = Layout.Vertical().Gap(2)
                               | Text.H3("Properties")
-                              | properties.ToTable().Width(Size.Full())
+                              | properties.ToTable().Small().Width(Size.Full())
                                   .ColumnWidth(p => p.Setters, Size.Fraction(0.4f))
             ;
 
@@ -113,7 +113,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
         {
             eventSection = Layout.Vertical().Gap(2)
                            | Text.H3("Events")
-                           | events.ToTable().Width(Size.Full())
+                           | events.ToTable().Small().Width(Size.Full())
                 ;
         }
 
