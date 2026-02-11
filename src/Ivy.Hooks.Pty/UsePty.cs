@@ -139,12 +139,14 @@ public static class UsePtyExtensions
         env["TERM"] = "xterm-256color";
         env["COLORTERM"] = "truecolor";
 
-        // Override with user-specified vars
         if (options.Environment != null)
         {
             foreach (var (key, value) in options.Environment)
             {
-                env[key] = value;
+                if (string.IsNullOrEmpty(value))
+                    env.Remove(key);
+                else
+                    env[key] = value;
             }
         }
 
@@ -192,7 +194,6 @@ public static class UsePtyExtensions
                 catch (OperationCanceledException) { }
                 catch
                 {
-                    // Ignore read errors
                 }
                 finally
                 {
