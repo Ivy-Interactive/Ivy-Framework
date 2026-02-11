@@ -22,7 +22,7 @@ Usually you create Ivy apps with [ivy init](../03_CLI/02_Init.md) and run them w
 Create a file, for example `HelloApp.cs`:
 
 ```terminal
-ivy init --script
+> ivy init --script
 ```
 
 You will receive a file-based app that you can populate with your own context as needed.
@@ -54,7 +54,7 @@ class HelloApp : ViewBase
 Run it from the same directory:
 
 ```terminal
-dotnet run HelloApp.cs
+> dotnet run HelloApp.cs
 ```
 
 The app starts (by default on port 5010). Open the URL shown in the terminal to see your app.
@@ -107,7 +107,7 @@ If you use only certain widgets or types, you might need extra namespaces (for e
 From the directory that contains your `.cs` file:
 
 ```terminal
-dotnet run HelloApp.cs
+> dotnet run HelloApp.cs
 ```
 
 If you need a specific port or other server settings, configure the `Server` in code (for example via `ServerArgs` as in [Program](./01_Program.md)) or use environment variables (e.g. `PORT`) if your setup supports them.
