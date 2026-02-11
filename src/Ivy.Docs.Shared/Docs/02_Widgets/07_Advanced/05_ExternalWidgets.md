@@ -24,6 +24,16 @@ The pattern has three parts: a **C# proxy** (a [widget](../../01_Onboarding/02_C
 
 The host app loads the script and CSS from embedded resources and renders your component, passing props and wiring events back to C#.
 
+## Scaffolding with the CLI
+
+You can generate a new external widget with the Ivy CLI so namespace, names, and build match the framework:
+
+```terminal
+ivy widget
+Namespace: ExternalWidget
+Widget: MyWidget
+```
+
 ## C# Backend
 
 Create a record that inherits from `WidgetBase<T>` and mark it with `[ExternalWidget]`. The attribute tells the framework where to find the bundled script and (optionally) CSS, and which export/global name to use.
@@ -277,18 +287,6 @@ The host’s entry point should set:
 ```
 
 Ivy’s standard host (e.g. [Chrome](https://docs.ivy.app/onboarding/concepts/program.md)) does this. If you see “Global not found” or React-related errors, ensure the host exposes these globals before any external widget script runs.
-
-## Scaffolding with the CLI
-
-You can generate a new external widget with the Ivy CLI so namespace, names, and build match the framework:
-
-```terminal
-ivy widget
-Namespace: ExternalWidget
-Widget: MyWidget
-```
-
-Place the generated project in the right folder (e.g. under `Widgets/MyWidget/`) and, if it lives inside a host, add the host’s exclusion for that folder as above.
 
 ## Troubleshooting
 
