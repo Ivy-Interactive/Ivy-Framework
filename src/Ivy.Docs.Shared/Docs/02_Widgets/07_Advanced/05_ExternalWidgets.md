@@ -282,12 +282,10 @@ Ivy’s standard host (e.g. [Chrome](https://docs.ivy.app/onboarding/concepts/pr
 
 You can generate a new external widget with the Ivy CLI so namespace, names, and build match the framework:
 
-```bash
-dotnet ivy-local.dll widget init \
-  --namespace MyProject.Widgets.MyWidget \
-  --widget MyWidget \
-  --yes-to-all \
-  --local-source
+```terminal
+ivy widget
+Namespace: ExternalWidget
+Widget: MyWidget
 ```
 
 Place the generated project in the right folder (e.g. under `Widgets/MyWidget/`) and, if it lives inside a host, add the host’s exclusion for that folder as above.
