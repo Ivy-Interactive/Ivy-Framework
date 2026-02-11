@@ -359,7 +359,7 @@ public class Server
                     return;
                 }
 
-                if (_args.Port != originalPort)
+                if (_args.Port != originalPort && !_args.Silent)
                 {
                     Console.WriteLine($"\x1b[33mPort {originalPort} is in use. Using port {_args.Port} instead.\x1b[0m");
                 }
