@@ -115,25 +115,6 @@ export default defineConfig({
 
 Using `fileName: () => 'ExternalWidget.js'` avoids Vite adding suffixes like `.iife.js`, so the path matches what you put in `[ExternalWidget]`.
 
-### package.json
-
-Keep React on the host: use `peerDependencies` (and `devDependencies` for build/IDE). Do not put `react`/`react-dom` in `dependencies`.
-
-```json
-{
-  "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
-  },
-  "devDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@vitejs/plugin-react": "^4.3.0",
-    "vite": "^5.0.0"
-  }
-}
-```
-
 ### Entry point
 
 Export your component and assign it to `window` under the same name as `build.lib.name` so the IIFE loader can find it.
