@@ -13,7 +13,6 @@ import {
 import { Scales } from '@/types/scale';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
 
-
 interface ColorInputWidgetProps {
   id: string;
   value: string | null;
@@ -462,7 +461,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     const yiq = (r * 299 + g * 587 + b * 114) / 1000;
     return yiq >= 128 ? '#000000' : '#FFFFFF';
   };
-
 
   // Default: TextAndPicker
   return (

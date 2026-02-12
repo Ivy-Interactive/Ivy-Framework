@@ -227,7 +227,9 @@ export const widgetMap = {
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')
   ),
-  'Ivy.Widgets.Internal.ThemeColorPicker': React.lazy(
-    () => import('@/widgets/internal/ThemeColorPickerWidget').then(m => ({ default: m.ThemeColorPickerWidget }))
+  'Ivy.Widgets.Internal.ThemeColorPicker': React.lazy(() =>
+    import('@/widgets/internal/ThemeColorPickerWidget').then(m => ({
+      default: m.ThemeColorPickerWidget,
+    }))
   ),
 };

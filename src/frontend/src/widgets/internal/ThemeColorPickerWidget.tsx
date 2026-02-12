@@ -5,9 +5,7 @@ import { Check } from 'lucide-react';
 import React from 'react';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
-import {
-  colorInputPickerVariants,
-} from '@/components/ui/input/color-input-variants';
+import { colorInputPickerVariants } from '@/components/ui/input/color-input-variants';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Popover,
@@ -325,9 +323,9 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   const [colorFormat] = React.useState<'HEX'>('HEX');
 
   const getDisplayColor = (): string => {
-      if (!displayValue) return '#000000';
-      // Basic check, assume hex if starts with #
-      return displayValue.startsWith('#') ? displayValue : '#000000';
+    if (!displayValue) return '#000000';
+    // Basic check, assume hex if starts with #
+    return displayValue.startsWith('#') ? displayValue : '#000000';
   };
 
   // Helper to determine contrast color for the "A"
@@ -344,8 +342,8 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     const newValue = e.target.value;
     eventHandler('OnChange', id, [newValue]);
   };
-  
-    // Helper to convert hex to RGB object
+
+  // Helper to convert hex to RGB object
   const hexToRgb = (hex: string) => {
     let cleanHex = hex.replace('#', '');
     if (cleanHex.length === 3) {
@@ -365,7 +363,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     const toHex = (n: number) => Math.round(n).toString(16).padStart(2, '0');
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
-  
+
   const [rgbValues, setRgbValues] = React.useState({ r: 0, g: 0, b: 0 });
 
   React.useEffect(() => {
@@ -381,7 +379,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
     eventHandler('OnChange', id, [newHex]);
   };
-  
+
   const renderFooter = () => (
     <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
       <div className="w-[80px] h-8 flex items-center justify-center text-xs font-medium text-muted-foreground border rounded bg-muted/50">
@@ -398,8 +396,8 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
       />
     </div>
   );
-  
-    // Helper to convert hex to other formats
+
+  // Helper to convert hex to other formats
   const formatColor = (hex: string, format: 'HEX' | 'RGB' | 'HSL'): string => {
     // simplified for brevity as we forced HEX
     return hex;
@@ -414,173 +412,172 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     const val = e.target.value;
     // Simple validation for 6-digit hex
     if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-        eventHandler('OnChange', id, [val]);
+      eventHandler('OnChange', id, [val]);
     }
   };
 
+  const isForeground =
+    foreground ||
+    (placeholder && placeholder.toLowerCase().includes('foreground'));
+  const contrastColor = getContrastColor(getDisplayColor());
 
-    const isForeground =
-      foreground ||
-      (placeholder && placeholder.toLowerCase().includes('foreground'));
-    const contrastColor = getContrastColor(getDisplayColor());
-
-    return (
-      <div className="flex items-center space-x-2">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              disabled={disabled}
-              className={cn(
-                colorInputPickerVariants({ scale }),
-                'p-0 rounded-md shadow-none focus:outline-none ring-offset-1 ring-1 transition-all relative',
-                'ring-offset-white ring-black',
-                disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-                invalid && inputStyles.invalidInput
-              )}
-              style={{ backgroundColor: getDisplayColor() }}
-            >
-              <span className="sr-only">Pick a color</span>
-              {isForeground && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span
-                    style={{ color: contrastColor }}
-                    className="font-extrabold text-lg"
-                  >
-                    A
-                  </span>
-                </div>
-              )}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-3" align="start">
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-[740px]"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium px-1">
-                  Choose a color for {placeholder || 'this item'}
+  return (
+    <div className="flex items-center space-x-2">
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            disabled={disabled}
+            className={cn(
+              colorInputPickerVariants({ scale }),
+              'p-0 rounded-md shadow-none focus:outline-none ring-offset-1 ring-1 transition-all relative',
+              'ring-offset-white ring-black',
+              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+              invalid && inputStyles.invalidInput
+            )}
+            style={{ backgroundColor: getDisplayColor() }}
+          >
+            <span className="sr-only">Pick a color</span>
+            {isForeground && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span
+                  style={{ color: contrastColor }}
+                  className="font-extrabold text-lg"
+                >
+                  A
                 </span>
-                <TabsList className="h-7">
-                  <TabsTrigger value="palette" className="h-5 px-2 text-xs">
-                    Palette
-                  </TabsTrigger>
-                  <TabsTrigger value="picker" className="h-5 px-2 text-xs">
-                    Picker
-                  </TabsTrigger>
-                </TabsList>
               </div>
+            )}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-3" align="start">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-[740px]"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium px-1">
+                Choose a color for {placeholder || 'this item'}
+              </span>
+              <TabsList className="h-7">
+                <TabsTrigger value="palette" className="h-5 px-2 text-xs">
+                  Palette
+                </TabsTrigger>
+                <TabsTrigger value="picker" className="h-5 px-2 text-xs">
+                  Picker
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-              <TabsContent value="palette" className="mt-0">
-                <ThemeColorGrid
-                  selectedColor={getDisplayColor()}
-                  onSelect={color => {
-                    eventHandler('OnChange', id, [color]);
-                  }}
-                />
+            <TabsContent value="palette" className="mt-0">
+              <ThemeColorGrid
+                selectedColor={getDisplayColor()}
+                onSelect={color => {
+                  eventHandler('OnChange', id, [color]);
+                }}
+              />
 
-                {renderFooter()}
-              </TabsContent>
+              {renderFooter()}
+            </TabsContent>
 
-              <TabsContent value="picker" className="mt-0">
-                <div className="h-[300px] p-6 flex flex-col justify-center gap-6">
-                  {/* RGB Sliders */}
-                  <>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-medium">
-                        <span>Red</span>
-                        <span>
-                          {rgbValues.r
-                            .toString(16)
-                            .toUpperCase()
-                            .padStart(2, '0')}
-                        </span>
-                      </div>
-                      <div className="relative px-1">
-                        <div
-                          className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
-                          style={{
-                            background: `linear-gradient(to right, rgb(0, ${rgbValues.g}, ${rgbValues.b}), rgb(255, ${rgbValues.g}, ${rgbValues.b}))`,
-                          }}
-                        />
-                        <ColorSlider
-                          value={[rgbValues.r]}
-                          max={255}
-                          step={1}
-                          onValueChange={vals =>
-                            handleRgbSliderChange('r', vals[0])
-                          }
-                          className=""
-                        />
-                      </div>
+            <TabsContent value="picker" className="mt-0">
+              <div className="h-[300px] p-6 flex flex-col justify-center gap-6">
+                {/* RGB Sliders */}
+                <>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-medium">
+                      <span>Red</span>
+                      <span>
+                        {rgbValues.r
+                          .toString(16)
+                          .toUpperCase()
+                          .padStart(2, '0')}
+                      </span>
                     </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-medium">
-                        <span>Green</span>
-                        <span>
-                          {rgbValues.g
-                            .toString(16)
-                            .toUpperCase()
-                            .padStart(2, '0')}
-                        </span>
-                      </div>
-                      <div className="relative px-1">
-                        <div
-                          className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
-                          style={{
-                            background: `linear-gradient(to right, rgb(${rgbValues.r}, 0, ${rgbValues.b}), rgb(${rgbValues.r}, 255, ${rgbValues.b}))`,
-                          }}
-                        />
-                        <ColorSlider
-                          value={[rgbValues.g]}
-                          max={255}
-                          step={1}
-                          onValueChange={vals =>
-                            handleRgbSliderChange('g', vals[0])
-                          }
-                          className=""
-                        />
-                      </div>
+                    <div className="relative px-1">
+                      <div
+                        className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
+                        style={{
+                          background: `linear-gradient(to right, rgb(0, ${rgbValues.g}, ${rgbValues.b}), rgb(255, ${rgbValues.g}, ${rgbValues.b}))`,
+                        }}
+                      />
+                      <ColorSlider
+                        value={[rgbValues.r]}
+                        max={255}
+                        step={1}
+                        onValueChange={vals =>
+                          handleRgbSliderChange('r', vals[0])
+                        }
+                        className=""
+                      />
                     </div>
+                  </div>
 
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-medium">
-                        <span>Blue</span>
-                        <span>
-                          {rgbValues.b
-                            .toString(16)
-                            .toUpperCase()
-                            .padStart(2, '0')}
-                        </span>
-                      </div>
-                      <div className="relative px-1">
-                        <div
-                          className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
-                          style={{
-                            background: `linear-gradient(to right, rgb(${rgbValues.r}, ${rgbValues.g}, 0), rgb(${rgbValues.r}, ${rgbValues.g}, 255))`,
-                          }}
-                        />
-                        <ColorSlider
-                          value={[rgbValues.b]}
-                          max={255}
-                          step={1}
-                          onValueChange={vals =>
-                            handleRgbSliderChange('b', vals[0])
-                          }
-                          className=""
-                        />
-                      </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-medium">
+                      <span>Green</span>
+                      <span>
+                        {rgbValues.g
+                          .toString(16)
+                          .toUpperCase()
+                          .padStart(2, '0')}
+                      </span>
                     </div>
-                  </>
-                </div>
-                {renderFooter()}
-              </TabsContent>
-            </Tabs>
-          </PopoverContent>
-        </Popover>
-      </div>
-    );
+                    <div className="relative px-1">
+                      <div
+                        className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
+                        style={{
+                          background: `linear-gradient(to right, rgb(${rgbValues.r}, 0, ${rgbValues.b}), rgb(${rgbValues.r}, 255, ${rgbValues.b}))`,
+                        }}
+                      />
+                      <ColorSlider
+                        value={[rgbValues.g]}
+                        max={255}
+                        step={1}
+                        onValueChange={vals =>
+                          handleRgbSliderChange('g', vals[0])
+                        }
+                        className=""
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-medium">
+                      <span>Blue</span>
+                      <span>
+                        {rgbValues.b
+                          .toString(16)
+                          .toUpperCase()
+                          .padStart(2, '0')}
+                      </span>
+                    </div>
+                    <div className="relative px-1">
+                      <div
+                        className="absolute inset-0 h-6 rounded-full pointer-events-none opacity-50"
+                        style={{
+                          background: `linear-gradient(to right, rgb(${rgbValues.r}, ${rgbValues.g}, 0), rgb(${rgbValues.r}, ${rgbValues.g}, 255))`,
+                        }}
+                      />
+                      <ColorSlider
+                        value={[rgbValues.b]}
+                        max={255}
+                        step={1}
+                        onValueChange={vals =>
+                          handleRgbSliderChange('b', vals[0])
+                        }
+                        className=""
+                      />
+                    </div>
+                  </div>
+                </>
+              </div>
+              {renderFooter()}
+            </TabsContent>
+          </Tabs>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
 };
