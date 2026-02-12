@@ -1,0 +1,34 @@
+/* Textarea resizer: custom grip same as native (two diagonal lines), only color is theme var(--border). */
+@layer base {
+  textarea.ivy-textarea::-webkit-resizer {
+    appearance: none;
+    background: transparent;
+  }
+  .ivy-textarea-wrapper {
+    position: relative;
+    overflow: visible;
+  }
+  .ivy-textarea-wrapper::before,
+  .ivy-textarea-wrapper::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    right: 2px;
+    width: 2px;
+    height: 1px;
+    background: var(--muted-foreground);
+    transform: rotate(-45deg);
+    transform-origin: bottom right;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .ivy-textarea-wrapper::after {
+    width: 8px;
+    bottom: 8px;
+    right: 2px;
+  }
+  .ivy-textarea-wrapper:has(.resize-none)::before,
+  .ivy-textarea-wrapper:has(.resize-none)::after {
+    display: none;
+  }
+}
