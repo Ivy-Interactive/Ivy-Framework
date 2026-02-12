@@ -47,14 +47,16 @@ export const useCellInteractions = ({
           ) {
             return content.data;
           } else if ('data' in content) {
-            const cellData = (content as unknown as { data: any }).data;
+            const cellData = (content as unknown as { data: unknown }).data;
 
             if (
               cellData &&
               typeof cellData === 'object' &&
-              cellData.kind === 'link-cell'
+              'kind' in cellData &&
+              (cellData as { kind: string }).kind === 'link-cell' &&
+              'url' in cellData
             ) {
-              return cellData.url;
+              return (cellData as unknown as { url: string }).url;
             } else {
               return cellData;
             }
