@@ -129,16 +129,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   events = [],
   variant = 'TextAndPicker',
   scale = Scales.Medium,
-  foreground = false,
 }) => {
   const eventHandler = useEventHandler();
   // Use derived state for display and input values
   const displayValue = value ?? '';
   const inputValue = value ?? '';
-  const [activeTab, setActiveTab] = React.useState('palette');
-  // Enforce HEX mode only as per requirement
-  const [colorFormat] = React.useState<'HEX'>('HEX');
-  const [localInputValue, setLocalInputValue] = React.useState('');
 
   const getThemeColorHex = (cssVar: string): string | undefined => {
     if (typeof window === 'undefined') return undefined;
@@ -220,124 +215,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     const hexValue = convertToHex(displayValue);
     if (hexValue.startsWith('var(')) return '#000000';
     return hexValue.startsWith('#') ? hexValue : '#000000';
-  };
-
-  // Helper to convert hex to other formats
-  const formatColor = (hex: string, format: 'HEX' | 'RGB' | 'HSL'): string => {
-    if (!hex || hex === '#000000') return '#000000'; // Default to Hex format only
-
-    const cleanHex = hex.replace('#', '');
-    const r = parseInt(cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.substring(4, 6), 16);
-
-    if (format === 'HEX') return hex;
-    if (format === 'RGB') return `rgb(${r}, ${g}, ${b})`;
-    if (format === 'HSL') {
-      const rNorm = r / 255;
-      const gNorm = g / 255;
-      const bNorm = b / 255;
-      const max = Math.max(rNorm, gNorm, bNorm);
-      const min = Math.min(rNorm, gNorm, bNorm);
-      let h = 0,
-        s = 0;
-      const l = (max + min) / 2;
-
-      if (max !== min) {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-          case rNorm:
-            h = (gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0);
-            break;
-          case gNorm:
-            h = (bNorm - rNorm) / d + 2;
-            break;
-          case bNorm:
-            h = (rNorm - gNorm) / d + 4;
-            break;
-        }
-        h /= 6;
-      }
-      return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
-    }
-    return hex;
-  };
-
-  // hexToHsl removed as unused
-
-  // hslToHex removed as unused
-
-  // Helper to convert hex to RGB object
-  const hexToRgb = (hex: string) => {
-    let cleanHex = hex.replace('#', '');
-    if (cleanHex.length === 3) {
-      cleanHex = cleanHex
-        .split('')
-        .map(c => c + c)
-        .join('');
-    }
-    const r = parseInt(cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.substring(4, 6), 16);
-    return { r, g, b };
-  };
-
-  // Helper to convert RGB object to hex
-  const rgbToHex = (r: number, g: number, b: number) => {
-    const toHex = (n: number) => Math.round(n).toString(16).padStart(2, '0');
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-  };
-
-  const [rgbValues, setRgbValues] = React.useState({ r: 0, g: 0, b: 0 });
-
-  React.useEffect(() => {
-    if (activeTab === 'picker') {
-      // HSL update removed
-      const rgb = hexToRgb(getDisplayColor());
-      setRgbValues(rgb);
-    }
-  }, [displayValue, activeTab]);
-
-  // handleSliderChange removed as HSL sliders are no longer used
-
-  const handleRgbSliderChange = (type: 'r' | 'g' | 'b', value: number) => {
-    const newRgb = { ...rgbValues, [type]: value };
-    setRgbValues(newRgb);
-    const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
-    eventHandler('OnChange', id, [newHex]);
-  };
-
-  const renderFooter = () => (
-    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
-      {/* Format selection removed - HEX only forced */}
-      <div className="w-[80px] h-8 flex items-center justify-center text-xs font-medium text-muted-foreground border rounded bg-muted/50">
-        HEX
-      </div>
-      <Input
-        value={localInputValue}
-        onChange={handleLocalInputChange}
-        className="h-8 text-xs font-mono"
-      />
-      <div
-        className="w-8 h-8 rounded-md border border-input shadow-sm shrink-0"
-        style={{ backgroundColor: getDisplayColor() }}
-      />
-    </div>
-  );
-
-  React.useEffect(() => {
-    setLocalInputValue(formatColor(getDisplayColor(), colorFormat));
-  }, [displayValue, colorFormat]);
-
-  const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalInputValue(e.target.value);
-    // Try to parse and update parent if valid
-    // For now, only simple sync if valid hex, or use existing convertToHex
-    const converted = convertToHex(e.target.value);
-    if (converted && converted !== '#000000' && converted !== displayValue) {
-      eventHandler('OnChange', id, [converted]);
-    }
   };
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -451,16 +328,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       </div>
     );
   }
-
-  // Helper to determine contrast color for the "A"
-  const getContrastColor = (hex: string): string => {
-    if (!hex || !hex.startsWith('#')) return '#000000';
-    const r = parseInt(hex.substring(1, 3), 16);
-    const g = parseInt(hex.substring(3, 5), 16);
-    const b = parseInt(hex.substring(5, 7), 16);
-    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-    return yiq >= 128 ? '#000000' : '#FFFFFF';
-  };
 
   // Default: TextAndPicker
   return (

@@ -1,9 +1,7 @@
 import { useEventHandler } from '@/components/event-handler';
 import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
-import { Check } from 'lucide-react';
 import React from 'react';
-import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { colorInputPickerVariants } from '@/components/ui/input/color-input-variants';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -338,11 +336,6 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     return yiq >= 128 ? '#000000' : '#FFFFFF';
   };
 
-  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    eventHandler('OnChange', id, [newValue]);
-  };
-
   // Helper to convert hex to RGB object
   const hexToRgb = (hex: string) => {
     let cleanHex = hex.replace('#', '');
@@ -398,13 +391,13 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   );
 
   // Helper to convert hex to other formats
-  const formatColor = (hex: string, format: 'HEX' | 'RGB' | 'HSL'): string => {
+  const formatColor = (hex: string): string => {
     // simplified for brevity as we forced HEX
     return hex;
   };
 
   React.useEffect(() => {
-    setLocalInputValue(formatColor(getDisplayColor(), colorFormat));
+    setLocalInputValue(formatColor(getDisplayColor()));
   }, [displayValue, colorFormat]);
 
   const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
