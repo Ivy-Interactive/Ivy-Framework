@@ -295,12 +295,12 @@ public class DataTableBuilder<TModel>(
             configuration = configuration with { IdColumnName = _idColumnName };
         }
 
-        // Wire up cell actions to OnCellActivated
-        var onCellActivated = _onCellActivated;
+        // Wire up cell actions to OnCellClick
+        var onCellClick = _onCellClick;
         if (_cellActions.Count > 0)
         {
-            var originalHandler = _onCellActivated;
-            onCellActivated = async e =>
+            var originalHandler = _onCellClick;
+            onCellClick = async e =>
             {
                 var args = e.Value;
                 if (_cellActions.TryGetValue(args.ColumnName, out var action))
@@ -323,7 +323,7 @@ public class DataTableBuilder<TModel>(
             idSelectorForView = obj => _idSelectorFunc((TModel)obj);
         }
 
-        return new DataTableView(queryable1, width, _height, columns, configuration, _onCellClick, onCellActivated,
+        return new DataTableView(queryable1, width, _height, columns, configuration, onCellClick, _onCellActivated,
             _menuItemRowActions, _onRowAction, idSelectorForView);
     }
 
