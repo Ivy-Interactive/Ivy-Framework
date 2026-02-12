@@ -29,6 +29,10 @@ public static class UseDataTableExtensions
             // Store cleanup for later
             context.UseEffect(() => cleanup, []);
         }
+        else if (connection.Value != null)
+        {
+            _ = connection.Value.NotifyChange();
+        }
 
         return connection.Value;
     }

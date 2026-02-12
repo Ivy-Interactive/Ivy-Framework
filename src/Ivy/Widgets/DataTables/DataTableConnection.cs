@@ -10,7 +10,7 @@ public record DataTableConnection(int Port, string Path, string ConnectionId, st
         _clientNotifier = notifier;
     }
 
-    public async Task NotifyChange()
+    internal async Task NotifyChange()
     {
         if (_clientNotifier != null)
         {
