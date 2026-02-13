@@ -1,12 +1,12 @@
 ![logo](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/assets/logo_green_w200.png)
 
-[![NuGet](https://img.shields.io/nuget/v/Ivy?style=flat)](https://www.nuget.org/packages/Ivy)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/Ivy?style=flat)](https://www.nuget.org/packages/Ivy)
-[![License](https://img.shields.io/github/license/Ivy-Interactive/Ivy-Framework?style=flat)](LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/Ivy-Interactive/Ivy-Framework/backend-checks-linux.yml?style=flat&label=CI)](https://github.com/Ivy-Interactive/Ivy-Framework/actions/workflows/backend-checks-linux.yml)
-[![website](https://img.shields.io/badge/website-ivy.app-green?style=flat)](https://ivy.app)
-[![codespaces](https://img.shields.io/badge/codespaces-try-blue?style=flat&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Devcontainer&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=EuropeWest)
-[![AGENTS.md](https://img.shields.io/badge/AGENTS.md-copy-purple?style=flat)](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/AGENTS.md)
+<a href="https://www.nuget.org/packages/Ivy" target="_blank" rel="noopener noreferrer">![NuGet](https://img.shields.io/nuget/v/Ivy?style=flat)</a>
+<a href="https://www.nuget.org/packages/Ivy" target="_blank" rel="noopener noreferrer">![NuGet Downloads](https://img.shields.io/nuget/dt/Ivy?style=flat)</a>
+<a href="LICENSE" target="_blank" rel="noopener noreferrer">![License](https://img.shields.io/github/license/Ivy-Interactive/Ivy-Framework?style=flat)</a>
+<a href="https://github.com/Ivy-Interactive/Ivy-Framework/actions/workflows/backend-checks-linux.yml" target="_blank" rel="noopener noreferrer">![CI](https://img.shields.io/github/actions/workflow/status/Ivy-Interactive/Ivy-Framework/backend-checks-linux.yml?style=flat&label=CI)</a>
+<a href="https://ivy.app" target="_blank" rel="noopener noreferrer">![website](https://img.shields.io/badge/website-ivy.app-green?style=flat)</a>
+<a href="https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Devcontainer&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=EuropeWest" target="_blank" rel="noopener noreferrer">![codespaces](https://img.shields.io/badge/codespaces-try-blue?style=flat&logo=github)</a>
+<a href="https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/AGENTS.md" target="_blank" rel="noopener noreferrer">![AGENTS.md](https://img.shields.io/badge/AGENTS.md-copy-purple?style=flat)</a>
 
 # Build Full-Stack Applications in Pure C\#
 
