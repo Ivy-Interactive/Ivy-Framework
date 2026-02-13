@@ -184,12 +184,7 @@ const VariantComponents = {
           )}
           onClick={e => e.stopPropagation()}
         >
-          <div
-            className={cn(
-              description && 'mt-1.5',
-              'flex shrink-0 items-center justify-center self-stretch'
-            )}
-          >
+          <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(switchElement, invalid)}
           </div>
           <InputLabel
@@ -242,12 +237,7 @@ const VariantComponents = {
           )}
           onClick={e => e.stopPropagation()}
         >
-          <div
-            className={cn(
-              description && 'mt-1.5',
-              'flex shrink-0 items-center justify-center self-stretch'
-            )}
-          >
+          <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(toggleElement, invalid)}
           </div>
           <InputLabel
