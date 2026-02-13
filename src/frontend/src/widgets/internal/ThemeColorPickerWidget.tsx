@@ -55,98 +55,6 @@ const THEME_COLOR_MAPPINGS = [
   { label: 'Ri', var: '--ring' },
 ];
 
-// Helper to convert any CSS color string to Hex
-const colorToHex = (color: string): string | null => {
-  if (!color) return null;
-  // Handle Tailwind's space-separated HSL channels (e.g., "222.2 47.4% 11.2%")
-  if (/^[\d.]+\s+[\d.]+%?\s+[\d.]+%?/.test(color)) {
-    return colorToHex(`hsl(${color})`);
-  }
-  const ctx = document.createElement('canvas').getContext('2d');
-  if (!ctx) return null;
-  ctx.fillStyle = color;
-  return ctx.fillStyle;
-};
-
-// Hook to observe a CSS variable's value
-const useThemeColor = (cssVar: string | undefined): string | undefined => {
-  const [value, setValue] = React.useState<string | undefined>(undefined);
-
-  const updateColor = React.useCallback(() => {
-    if (typeof window === 'undefined' || !cssVar) {
-      setValue(undefined);
-      return;
-    }
-    const computedStyle = getComputedStyle(document.documentElement);
-    const colorValue = computedStyle.getPropertyValue(cssVar).trim();
-    const hex = colorToHex(colorValue);
-    if (hex) setValue(hex);
-  }, [cssVar]);
-
-  React.useEffect(() => {
-    updateColor();
-    const retryTimers = [100, 300, 500, 1000].map(delay =>
-      setTimeout(updateColor, delay)
-    );
-
-    if (typeof window === 'undefined') {
-      retryTimers.forEach(clearTimeout);
-      return;
-    }
-
-    const observer = new MutationObserver(mutations => {
-      let shouldUpdate = false;
-      for (const mutation of mutations) {
-        if (
-          mutation.type === 'attributes' &&
-          (mutation.attributeName === 'style' ||
-            mutation.attributeName === 'class')
-        ) {
-          shouldUpdate = true;
-          break;
-        }
-        if (mutation.type === 'childList') {
-          for (const node of mutation.addedNodes) {
-            if (node.nodeName === 'STYLE') {
-              shouldUpdate = true;
-              break;
-            }
-          }
-          if (!shouldUpdate) {
-            for (const node of mutation.removedNodes) {
-              if (node.nodeName === 'STYLE') {
-                shouldUpdate = true;
-                break;
-              }
-            }
-          }
-        }
-        if (shouldUpdate) break;
-      }
-
-      if (shouldUpdate) {
-        setTimeout(updateColor, 10);
-      }
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['style', 'class'],
-    });
-
-    observer.observe(document.head, {
-      childList: true,
-    });
-
-    return () => {
-      observer.disconnect();
-      retryTimers.forEach(clearTimeout);
-    };
-  }, [updateColor]);
-
-  return value;
-};
-
 const ThemeColorGrid: React.FC<{
   onSelect: (color: string) => void;
   selectedColor: string | null;
@@ -154,9 +62,6 @@ const ThemeColorGrid: React.FC<{
   // Generate 160 colors (8 rows x 20 columns)
   const rows = 8;
   const cols = 20;
-
-  // Theme color mappings
-  // THEME_COLOR_MAPPINGS used from outer scope
 
   const [resolvedThemeColors, setResolvedThemeColors] = React.useState<
     Record<string, string[]>
@@ -410,11 +315,11 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   const [localInputValue, setLocalInputValue] = React.useState('');
   const [colorFormat] = React.useState<'HEX'>('HEX');
 
-  const getDisplayColor = (): string => {
+  const getDisplayColor = React.useCallback((): string => {
     if (!displayValue) return '#000000';
     // Basic check, assume hex if starts with #
     return displayValue.startsWith('#') ? displayValue : '#000000';
-  };
+  }, [displayValue]);
 
 
   // Helper to convert hex to RGB object
@@ -445,7 +350,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
       const rgb = hexToRgb(getDisplayColor());
       setRgbValues(rgb);
     }
-  }, [displayValue, activeTab]);
+  }, [displayValue, activeTab, getDisplayColor]);
 
   const handleRgbSliderChange = (type: 'r' | 'g' | 'b', value: number) => {
     const newRgb = { ...rgbValues, [type]: value };
@@ -488,7 +393,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
 
   React.useEffect(() => {
     setLocalInputValue(formatColor(getDisplayColor()));
-  }, [displayValue, colorFormat]);
+  }, [displayValue, colorFormat, getDisplayColor, formatColor]);
 
   const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalInputValue(e.target.value);
@@ -533,19 +438,32 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
               invalid && inputStyles.invalidInput
             )}
-            style={{ backgroundColor: effectiveBackgroundColor }}
+            style={{
+              backgroundColor:
+                isForeground &&
+                  placeholder?.toLowerCase().endsWith('foreground') &&
+                  placeholder.toLowerCase() !== 'foreground'
+                  ? `var(--${placeholder.toLowerCase().replace(' foreground', '')})`
+                  : placeholder?.toLowerCase() === 'foreground'
+                    ? 'var(--background)'
+                    : getDisplayColor(),
+            }}
           >
             <span className="sr-only">Pick a color</span>
             {isForeground && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
-                  style={{ color: getDisplayColor() }}
-                  className={cn(
-                    'font-extrabold leading-none',
-                    scale === Scales.Small && 'text-xl',
-                    scale === Scales.Medium && 'text-2xl',
-                    scale === Scales.Large && 'text-4xl'
-                  )}
+                  style={{
+                    color:
+                      (placeholder?.toLowerCase().endsWith('foreground') &&
+                        placeholder.toLowerCase() !== 'foreground') ||
+                        placeholder?.toLowerCase() === 'foreground'
+                        ? getDisplayColor()
+                        : contrastColor,
+                    fontSize: '20px',
+                    lineHeight: '1',
+                  }}
+                  className="font-extrabold"
                 >
                   A
                 </span>
