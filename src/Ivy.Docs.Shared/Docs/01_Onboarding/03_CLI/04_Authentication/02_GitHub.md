@@ -61,9 +61,6 @@ server.Services.AddHttpClient("GitHubAuth", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/vnd.github+json");
     client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
 });
-
-// Ensure IConfiguration is registered
-server.Services.AddSingleton(server.Configuration);
 ```
 
 **2: Configure the GitHub Auth Provider**:

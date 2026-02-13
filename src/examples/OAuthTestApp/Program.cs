@@ -12,8 +12,6 @@ server.Services.AddHttpClient("GitHubAuth", client =>
     client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
 });
 
-server.Services.AddSingleton(server.Configuration);
-
 server.UseAuth<GitHubAuthProvider>(c => c.UseGitHub());
 
 server.AddAppsFromAssembly();
