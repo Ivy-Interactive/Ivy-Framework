@@ -1,5 +1,19 @@
 import { cva } from 'class-variance-authority';
 
+// Row min-height variants - matches TextInput heights for consistent form field alignment
+export const boolInputRowMinHeightVariants = cva('', {
+  variants: {
+    scale: {
+      Small: 'min-h-7',
+      Medium: 'min-h-9',
+      Large: 'min-h-11',
+    },
+  },
+  defaultVariants: {
+    scale: 'Medium',
+  },
+});
+
 // Size variants for BoolInput components
 export const boolInputSizeVariants = {
   Small: 'text-xs',

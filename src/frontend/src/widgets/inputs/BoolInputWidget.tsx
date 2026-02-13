@@ -17,6 +17,7 @@ import { Scales } from '@/types/scale';
 import {
   labelSizeVariants,
   descriptionSizeVariants,
+  boolInputRowMinHeightVariants,
 } from '@/components/ui/input/bool-input-variants';
 
 type VariantType = 'Checkbox' | 'Switch' | 'Toggle';
@@ -128,12 +129,13 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            'flex gap-2',
-            description ? 'items-start' : 'items-center'
+            'flex gap-2 items-center',
+            boolInputRowMinHeightVariants({ scale }),
+            description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
         >
-          <div className={cn(description && 'mt-1.5')}>
+          <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(checkboxElement, invalid)}
           </div>
           <InputLabel
@@ -176,12 +178,18 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            'flex gap-2',
-            description ? 'items-start' : 'items-center'
+            'flex gap-2 items-center',
+            boolInputRowMinHeightVariants({ scale }),
+            description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
         >
-          <div className={cn(description && 'mt-1.5')}>
+          <div
+            className={cn(
+              description && 'mt-1.5',
+              'flex shrink-0 items-center justify-center self-stretch'
+            )}
+          >
             {withTooltip(switchElement, invalid)}
           </div>
           <InputLabel
@@ -228,12 +236,18 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            'flex space-x-2',
-            description ? 'items-start' : 'items-center'
+            'flex space-x-2 items-center',
+            boolInputRowMinHeightVariants({ scale }),
+            description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
         >
-          <div className={cn(description && 'mt-1.5')}>
+          <div
+            className={cn(
+              description && 'mt-1.5',
+              'flex shrink-0 items-center justify-center self-stretch'
+            )}
+          >
             {withTooltip(toggleElement, invalid)}
           </div>
           <InputLabel
