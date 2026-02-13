@@ -398,7 +398,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
 
   React.useEffect(() => {
     setLocalInputValue(formatColor(getDisplayColor()));
-  }, [displayValue, colorFormat, getDisplayColor]);
+  }, [displayValue, colorFormat, getDisplayColor, formatColor]);
 
   const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalInputValue(e.target.value);
