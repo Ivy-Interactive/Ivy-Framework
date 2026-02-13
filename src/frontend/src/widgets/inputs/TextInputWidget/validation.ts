@@ -1,8 +1,3 @@
-/**
- * Client-side validation for TextInput variants. Mirrors backend Ivy.Validation.Validators
- * so the input shows invalid state on blur (email @ and ., tel 7–15 digits, url http/https, password min length).
- */
-
 export type TextInputVariantForValidation =
   | 'email'
   | 'tel'
