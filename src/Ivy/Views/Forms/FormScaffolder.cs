@@ -3,6 +3,7 @@ using System.Reflection;
 using Ivy.Core.Hooks;
 using Ivy.Services;
 using Ivy.Shared;
+using Ivy.Validation;
 using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
@@ -296,6 +297,11 @@ internal static class FormScaffolder
         if (field.IsUrl())
         {
             validators.Add(Validators.CreateUrlValidator(field.Name));
+        }
+
+        if (field.IsPassword())
+        {
+            validators.Add(Validators.CreatePasswordValidator(field.Name));
         }
 
         return validators;

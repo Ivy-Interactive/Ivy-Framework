@@ -1,5 +1,5 @@
 using Ivy;
-using Ivy.Views.Forms;
+using Ivy.Validation;
 
 namespace Ivy.Test;
 
@@ -114,7 +114,8 @@ public class ValidatorsTests
     [InlineData(TextInputs.Email)]
     [InlineData(TextInputs.Tel)]
     [InlineData(TextInputs.Url)]
-    public void ForVariant_EmailTelUrl_ReturnsValidator(TextInputs variant)
+    [InlineData(TextInputs.Password)]
+    public void ForVariant_EmailTelUrlPassword_ReturnsValidator(TextInputs variant)
     {
         var validator = Validators.ForVariant(variant, "Field");
         Assert.NotNull(validator);
@@ -123,11 +124,22 @@ public class ValidatorsTests
     [Theory]
     [InlineData(TextInputs.Text)]
     [InlineData(TextInputs.Textarea)]
-    [InlineData(TextInputs.Password)]
     [InlineData(TextInputs.Search)]
-    public void ForVariant_TextPasswordSearch_ReturnsNull(TextInputs variant)
+    public void ForVariant_TextTextareaSearch_ReturnsNull(TextInputs variant)
     {
         var validator = Validators.ForVariant(variant, "Field");
         Assert.Null(validator);
+    }
+
+    [Theory]
+    [InlineData(null, true)]
+    [InlineData("", true)]
+    [InlineData("short", false)]
+    [InlineData("longenough", true)]
+    public void CreatePasswordValidator_ValidatesMinLength(object? value, bool expectValid)
+    {
+        var validator = Validators.CreatePasswordValidator("Password", 8);
+        var (valid, _) = validator(value);
+        Assert.Equal(expectValid, valid);
     }
 }

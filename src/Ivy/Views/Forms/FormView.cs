@@ -1,10 +1,14 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Ivy;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
 using Ivy.Shared;
+using Ivy.Validation;
 using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
@@ -57,27 +61,16 @@ public class FormFieldView(
 {
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
 
-    private bool Validate<T>(T value, IState<string> invalid)
+    private IState<Func<object?, (bool, string)>[]?>? _effectiveValidatorsRef;
+
+    private bool Validate<T>(T value, IState<string> invalid, IAnyInput input)
     {
         if (!visible()) return true;
 
-        if (validators != null)
-        {
-
-            var isValid = true;
-            var message = string.Empty;
-            foreach (var validator in validators)
-            {
-                (isValid, message) = validator(value);
-                if (!isValid)
-                {
-                    break;
-                }
-            }
-            invalid?.Set(isValid ? null! : message);
-            return isValid;
-        }
-        return true;
+        var existing = _effectiveValidatorsRef?.Value;
+        var (isValid, errorMessage) = Validators.RunValidation(value, input, label, validators);
+        invalid?.Set(isValid ? null! : errorMessage ?? "");
+        return isValid;
     }
 
     public override object? Build()
@@ -88,6 +81,11 @@ public class FormFieldView(
         var validationReceiver = UseSignal<FormValidateSignal, Unit, bool>();
         var updateReceiver = UseSignal<FormUpdateSignal, Unit, Unit>();
         var visibleState = UseState(visible);
+
+        _effectiveValidatorsRef = Context.UseRef<Func<object?, (bool, string)>[]?>(validators);
+
+        var input = inputFactory(inputState, Context);
+        _effectiveValidatorsRef.Set(Validators.GetEffectiveValidators(input, label, validators));
 
         UseEffect(() =>
         {
@@ -100,7 +98,7 @@ public class FormFieldView(
                 validationReceiver.Receive(_ =>
                 {
                     var value = inputState.As<object>().Value;
-                    return Validate(value, invalidState);
+                    return Validate(value, invalidState, input);
                 })
             );
         });
@@ -110,24 +108,23 @@ public class FormFieldView(
             var value = inputState.As<object>().Value;
             if (blurOnceState.Value)
             {
-                Validate(value, invalidState);
+                Validate(value, invalidState, input);
             }
             bindingState.As<object>().Set(value);
             updateSender.Send(new Unit());
-        }, [inputState, blurOnceState]);
+        }, inputState, blurOnceState);
 
         void OnBlur(Event<IAnyInput> _)
         {
             blurOnceState.Set(true);
         }
 
-        var input = inputFactory(inputState, Context).Invalid(invalidState.Value);
+        input = input.Invalid(invalidState.Value);
         if (validationStrategy == FormValidationStrategy.OnBlur)
         {
-            input.HandleBlur(OnBlur);
+            input = input.HandleBlur(OnBlur);
         }
 
-        // Set placeholder if the input supports it
         if (!string.IsNullOrEmpty(placeholder))
         {
             input.Placeholder = placeholder;

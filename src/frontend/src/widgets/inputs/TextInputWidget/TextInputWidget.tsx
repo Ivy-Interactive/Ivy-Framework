@@ -3,6 +3,7 @@ import { useEventHandler } from '@/components/event-handler';
 import { Scales } from '@/types/scale';
 import { TextInputWidgetProps, TextInputVariant } from './types';
 import { useSyncServerValue, useShortcutKey } from './hooks';
+import { hasVariantValidation, validateTextInputVariant } from './validation';
 import {
   DefaultVariant,
   TextareaVariant,
@@ -32,6 +33,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   // Normalize null/undefined to empty string for display (HTML inputs can't have null values)
   const [localValue, setLocalValue] = useState(value ?? '');
   const [isFocused, setIsFocused] = useState(false);
+  const [localInvalid, setLocalInvalid] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
   // Wrapper to normalize null/undefined to empty string for useSyncServerValue
@@ -54,6 +56,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
       setLocalValue(e.target.value);
+      setLocalInvalid(null);
       if (events.includes('OnChange'))
         eventHandler('OnChange', id, [e.target.value]);
     },
@@ -62,8 +65,13 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
+    const variantKey = variant.toLowerCase();
+    if (hasVariantValidation(variantKey)) {
+      const message = validateTextInputVariant(variantKey, localValue);
+      setLocalInvalid(message);
+    }
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
-  }, [eventHandler, id, events]);
+  }, [eventHandler, id, events, variant, localValue]);
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
@@ -84,13 +92,15 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     [eventHandler, id, events, disabled, nullable]
   );
 
+  const effectiveInvalid = invalid || localInvalid || undefined;
+
   const commonProps = useMemo(
     () => ({
       id,
       placeholder,
       value: localValue,
       disabled,
-      invalid,
+      invalid: effectiveInvalid,
       nullable,
       width,
       height,
@@ -107,7 +117,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       placeholder,
       localValue,
       disabled,
-      invalid,
+      effectiveInvalid,
       nullable,
       events,
       width,
