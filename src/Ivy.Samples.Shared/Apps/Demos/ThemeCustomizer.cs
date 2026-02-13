@@ -462,11 +462,10 @@ public class ThemeCustomizer : SampleBase
             return Layout.Vertical()
                     | Text.H2("Live Preview")
                     | Text.P("See your theme changes in real-time").Small().Muted()
-                    | new Spacer().Height(Size.Units(4))
                     | Layout.Tabs(
                         new Tab("Components", new InteractiveThemePreview(theme)).Icon(Icons.LayoutPanelLeft),
-                        new Tab("Dashboard", new DashboardApp()).Icon(Icons.LayoutDashboard),
-                        new Tab("Colors", new ColorPalettePreview(theme)).Icon(Icons.Palette)
+                        new Tab("Dashboard", new DashboardApp()).Icon(Icons.LayoutDashboard)
+                    // new Tab("Colors", new ColorPalettePreview(theme)).Icon(Icons.Palette)
                     );
         }
     }
