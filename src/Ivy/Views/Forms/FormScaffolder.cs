@@ -283,10 +283,19 @@ internal static class FormScaffolder
             validators.AddRange(FormHelpers.GetValidators(field.FieldInfo));
         }
 
-        var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
-        if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
+        if (field.IsEmail())
         {
             validators.Add(Validators.CreateEmailValidator(field.Name));
+        }
+
+        if (field.IsPhone())
+        {
+            validators.Add(Validators.CreateTelValidator(field.Name));
+        }
+
+        if (field.IsUrl())
+        {
+            validators.Add(Validators.CreateUrlValidator(field.Name));
         }
 
         return validators;
