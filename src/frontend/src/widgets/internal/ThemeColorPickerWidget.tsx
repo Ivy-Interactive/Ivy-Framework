@@ -25,6 +25,35 @@ interface ThemeColorPickerWidgetProps {
   foreground?: boolean;
 }
 
+// Theme color mappings
+const THEME_COLOR_MAPPINGS = [
+  { label: 'P', var: '--primary' },
+  { label: 'PF', var: '--primary-foreground' },
+  { label: 'S', var: '--secondary' },
+  { label: 'SF', var: '--secondary-foreground' },
+  { label: 'Su', var: '--success' },
+  { label: 'SuF', var: '--success-foreground' },
+  { label: 'D', var: '--destructive' },
+  { label: 'DF', var: '--destructive-foreground' },
+  { label: 'W', var: '--warning' },
+  { label: 'WF', var: '--warning-foreground' },
+  { label: 'I', var: '--info' },
+  { label: 'IF', var: '--info-foreground' },
+  { label: 'M', var: '--muted' },
+  { label: 'MF', var: '--muted-foreground' },
+  { label: 'A', var: '--accent' },
+  { label: 'AF', var: '--accent-foreground' },
+  { label: 'Po', var: '--popover' },
+  { label: 'PoF', var: '--popover-foreground' },
+  { label: 'Ca', var: '--card' },
+  { label: 'CaF', var: '--card-foreground' },
+  { label: 'Bg', var: '--background' },
+  { label: 'Fg', var: '--foreground' },
+  { label: 'In', var: '--input' },
+  { label: 'Bo', var: '--border' },
+  { label: 'Ri', var: '--ring' },
+];
+
 const ThemeColorGrid: React.FC<{
   onSelect: (color: string) => void;
   selectedColor: string | null;
@@ -32,35 +61,6 @@ const ThemeColorGrid: React.FC<{
   // Generate 160 colors (8 rows x 20 columns)
   const rows = 8;
   const cols = 20;
-
-  // Theme color mappings
-  const THEME_COLOR_MAPPINGS = [
-    { label: 'P', var: '--primary' },
-    { label: 'PF', var: '--primary-foreground' },
-    { label: 'S', var: '--secondary' },
-    { label: 'SF', var: '--secondary-foreground' },
-    { label: 'Su', var: '--success' },
-    { label: 'SuF', var: '--success-foreground' },
-    { label: 'D', var: '--destructive' },
-    { label: 'DF', var: '--destructive-foreground' },
-    { label: 'W', var: '--warning' },
-    { label: 'WF', var: '--warning-foreground' },
-    { label: 'I', var: '--info' },
-    { label: 'IF', var: '--info-foreground' },
-    { label: 'M', var: '--muted' },
-    { label: 'MF', var: '--muted-foreground' },
-    { label: 'A', var: '--accent' },
-    { label: 'AF', var: '--accent-foreground' },
-    { label: 'Po', var: '--popover' },
-    { label: 'PoF', var: '--popover-foreground' },
-    { label: 'Ca', var: '--card' },
-    { label: 'CaF', var: '--card-foreground' },
-    { label: 'Bg', var: '--background' },
-    { label: 'Fg', var: '--foreground' },
-    { label: 'In', var: '--input' },
-    { label: 'Bo', var: '--border' },
-    { label: 'Ri', var: '--ring' },
-  ];
 
   const [resolvedThemeColors, setResolvedThemeColors] = React.useState<
     Record<string, string[]>
@@ -320,11 +320,11 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   const [localInputValue, setLocalInputValue] = React.useState('');
   const [colorFormat] = React.useState<'HEX'>('HEX');
 
-  const getDisplayColor = (): string => {
+  const getDisplayColor = React.useCallback((): string => {
     if (!displayValue) return '#000000';
     // Basic check, assume hex if starts with #
     return displayValue.startsWith('#') ? displayValue : '#000000';
-  };
+  }, [displayValue]);
 
   // Helper to determine contrast color for the "A"
   const getContrastColor = (hex: string): string => {
@@ -364,7 +364,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
       const rgb = hexToRgb(getDisplayColor());
       setRgbValues(rgb);
     }
-  }, [displayValue, activeTab]);
+  }, [displayValue, activeTab, getDisplayColor]);
 
   const handleRgbSliderChange = (type: 'r' | 'g' | 'b', value: number) => {
     const newRgb = { ...rgbValues, [type]: value };
@@ -398,7 +398,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
 
   React.useEffect(() => {
     setLocalInputValue(formatColor(getDisplayColor()));
-  }, [displayValue, colorFormat]);
+  }, [displayValue, colorFormat, getDisplayColor]);
 
   const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalInputValue(e.target.value);
@@ -428,14 +428,32 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
               invalid && inputStyles.invalidInput
             )}
-            style={{ backgroundColor: getDisplayColor() }}
+            style={{
+              backgroundColor:
+                isForeground &&
+                placeholder?.toLowerCase().endsWith('foreground') &&
+                placeholder.toLowerCase() !== 'foreground'
+                  ? `var(--${placeholder.toLowerCase().replace(' foreground', '')})`
+                  : placeholder?.toLowerCase() === 'foreground'
+                    ? 'var(--background)'
+                    : getDisplayColor(),
+            }}
           >
             <span className="sr-only">Pick a color</span>
             {isForeground && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
-                  style={{ color: contrastColor }}
-                  className="font-extrabold text-lg"
+                  style={{
+                    color:
+                      (placeholder?.toLowerCase().endsWith('foreground') &&
+                        placeholder.toLowerCase() !== 'foreground') ||
+                      placeholder?.toLowerCase() === 'foreground'
+                        ? getDisplayColor()
+                        : contrastColor,
+                    fontSize: '20px',
+                    lineHeight: '1',
+                  }}
+                  className="font-extrabold"
                 >
                   A
                 </span>
