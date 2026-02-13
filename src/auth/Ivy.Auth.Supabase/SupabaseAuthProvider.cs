@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text;
 using Ivy.Core;
 using Ivy.Shared;

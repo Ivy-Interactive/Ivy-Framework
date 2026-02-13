@@ -1,6 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Reflection;
 using Ivy.Core;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +9,6 @@ using System.Text;
 using System.Security.Claims;
 using Microsoft.AspNetCore.WebUtilities;
 using Ivy.Auth.Clerk.ApiClient.Models;
-using Ivy.Auth.Clerk.ApiClient.Responses;
 
 namespace Ivy.Auth.Clerk;
 
@@ -32,7 +30,7 @@ public class ClerkAuthProvider : IAuthProvider
     private readonly bool _isProduction;
     private string? _origin = null;
 
-    public bool OpenOAuthLoginInNewTab => true;
+    public static bool OpenOAuthLoginInNewTab => true;
 
     private static (bool IsProduction, string Key) ParseKey(string name, string type, string key)
     {
@@ -46,11 +44,6 @@ public class ClerkAuthProvider : IAuthProvider
 
     public ClerkAuthProvider(IConfiguration configuration)
     {
-        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Clerk:UserAgent");
-
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
-
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
         var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
 
@@ -74,6 +67,8 @@ public class ClerkAuthProvider : IAuthProvider
         {
             throw new Exception("Clerk:PublishableKey contains an invalid base64 string", ex);
         }
+
+        _httpClient = new HttpClient();
     }
 
     private FrontendApiClient MakeFrontendApiClient(IAuthSession authSession)
@@ -87,36 +82,6 @@ public class ClerkAuthProvider : IAuthProvider
         return activeSessions.FirstOrDefault(session => session.Id == client.LastActiveSessionId)
             ?? activeSessions.FirstOrDefault();
     }
-
-    private async Task<AuthToken?> TryRestoreExistingSessionAsync(IAuthSession authSession, ClerkCredentials credentials, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var frontendClient = MakeFrontendApiClient(authSession);
-            var activeSession = await GetActiveSession(frontendClient, credentials, cancellationToken);
-            if (activeSession == null)
-            {
-                return null;
-            }
-
-            await frontendClient.TouchSessionAsync(activeSession.Id, credentials, cancellationToken);
-            var newToken = await frontendClient.CreateSessionTokenAsync(activeSession.Id, credentials, cancellationToken);
-
-            if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: true, cancellationToken) == null)
-            {
-                return null;
-            }
-
-            return new AuthToken(newToken.Jwt!);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    private static bool IsSessionExistsError(ClerkException ex)
-        => ex.Errors?.Any(e => e.Code == "session_exists") == true;
 
     private async Task<ClerkSession?> GetActiveSession(FrontendApiClient frontendClient, ClerkCredentials credentials, CancellationToken cancellationToken)
     {
@@ -223,22 +188,7 @@ public class ClerkAuthProvider : IAuthProvider
             var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
             var frontendClient = MakeFrontendApiClient(authSession);
 
-            ClerkSignInResponse signInResponse;
-            try
-            {
-                signInResponse = await frontendClient.CreatePasswordSignInAsync(credentials, email, password, cancellationToken);
-            }
-            catch (ClerkException ex) when (IsSessionExistsError(ex))
-            {
-                var restoredToken = await TryRestoreExistingSessionAsync(authSession, credentials, cancellationToken);
-                if (restoredToken != null)
-                {
-                    return restoredToken;
-                }
-
-                await frontendClient.RemoveAllSessionsAsync(credentials, cancellationToken);
-                signInResponse = await frontendClient.CreatePasswordSignInAsync(credentials, email, password, cancellationToken);
-            }
+            var signInResponse = await frontendClient.CreatePasswordSignInAsync(credentials, email, password, cancellationToken);
 
             if (signInResponse.Response?.CreatedSessionId is not { } sessionId)
             {
@@ -281,17 +231,7 @@ public class ClerkAuthProvider : IAuthProvider
 
         var redirectUrl = callback.GetUri(includeIdInPath: true).ToString();
         var frontendClient = MakeFrontendApiClient(authSession);
-
-        ClerkSignInResponse signInResponse;
-        try
-        {
-            signInResponse = await frontendClient.CreateSignInAsync(credentials, _origin, strategy, redirectUrl, null, cancellationToken);
-        }
-        catch (ClerkException ex) when (IsSessionExistsError(ex))
-        {
-            await frontendClient.RemoveAllSessionsAsync(credentials, cancellationToken);
-            signInResponse = await frontendClient.CreateSignInAsync(credentials, _origin, strategy, redirectUrl, null, cancellationToken);
-        }
+        var signInResponse = await frontendClient.CreateSignInAsync(credentials, _origin, strategy, redirectUrl, null, cancellationToken);
 
         var firstFactorVerificationResponse = await frontendClient.PrepareFirstFactorVerificationAsync(credentials, _origin, signInResponse.Response!.Id, strategy, redirectUrl, null, cancellationToken);
 

@@ -1,5 +1,4 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Reflection;
 using System.Security.Claims;
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;

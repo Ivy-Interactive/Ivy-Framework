@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+
 namespace Ivy.Connections;
 
 public interface IConnection
@@ -8,7 +10,7 @@ public interface IConnection
     public string GetConnectionType();
     public ConnectionEntity[] GetEntities();
     public void RegisterServices(Server server);
-    public Task<(bool ok, string? message)> TestConnection();
+    public Task<(bool ok, string? message)> TestConnection(IConfiguration config);
 }
 
 public record ConnectionEntity(string Singular, string Plural);
