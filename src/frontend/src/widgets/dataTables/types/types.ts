@@ -1,4 +1,6 @@
 import { MenuItem } from '@/types/widgets';
+import { Align } from '@/lib/styles';
+export type { Align };
 
 export interface DataRow {
   values: (string | number | boolean | Date | string[] | null)[];
@@ -19,12 +21,6 @@ export enum SortDirection {
   Ascending = 'Ascending',
   Descending = 'Descending',
   None = 'None',
-}
-
-export enum Align {
-  Left = 'Left',
-  Center = 'Center',
-  Right = 'Right',
 }
 
 export interface DataColumn {

@@ -5,7 +5,7 @@
  */
 
 import type { DataTableConfig, DataColumn } from './types/types';
-import { SortDirection, Align, SelectionModes } from './types/types';
+import { SortDirection, SelectionModes } from './types/types';
 import { applyDefaults } from '@/lib/utils';
 
 // DataTableColumn defaults (DataTableColumn.cs)
@@ -14,7 +14,7 @@ export const DATA_COLUMN_DEFAULTS: Partial<DataColumn> = {
   sortable: true,
   sortDirection: SortDirection.None,
   filterable: true,
-  align: Align.Left,
+  align: 'Left',
   order: 0,
   icon: null,
   help: null,
