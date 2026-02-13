@@ -38,9 +38,11 @@ public static class FormHelpers
                         DisplayName = propertyInfo.Name
                     };
                     var result = capturedAttr.GetValidationResult(value, validationContext);
-                    return result == ValidationResult.Success
+                    // GetValidationResult returns null on success (per DataAnnotations contract)
+                    var isValid = result == null || result == ValidationResult.Success;
+                    return isValid
                         ? (true, "")
-                        : (false, result?.ErrorMessage ?? "Validation failed");
+                        : (false, result!.ErrorMessage ?? "Validation failed");
                 }
                 catch
                 {
@@ -72,16 +74,16 @@ public static class FormHelpers
             {
                 try
                 {
-
                     var validationContext = new ValidationContext(new { })
                     {
                         MemberName = fieldInfo.Name,
                         DisplayName = fieldInfo.Name
                     };
                     var result = capturedAttr.GetValidationResult(value, validationContext);
-                    return result == ValidationResult.Success
+                    var isValid = result == null || result == ValidationResult.Success;
+                    return isValid
                         ? (true, "")
-                        : (false, result?.ErrorMessage ?? "Validation failed");
+                        : (false, result!.ErrorMessage ?? "Validation failed");
                 }
                 catch
                 {
