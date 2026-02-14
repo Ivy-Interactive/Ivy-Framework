@@ -34,20 +34,18 @@ public class FieldApp : SampleBase
                 .Description("Your full name")
                 .Required()
 
-                // Using .WithField() shortcut with help text
-                | emailState.ToTextInput()
-                    .Placeholder("Enter your email")
-                    .WithField()
+                // Using .WithField(state) — BE validation on blur for Email variant (no HandleBlur)
+                | emailState.ToEmailInput("Enter your email")
+                    .WithField(emailState)
                     .Label("Email")
                     .Description("Required for contact")
                     .Help("We will never share your email with third parties")
                     .Required()
 
-                // Password field, disabled if name is empty, with help text
-                | passwordState.ToPasswordInput()
-                    .Placeholder("Enter password")
+                // Password field — BE validation on blur; disabled if name is empty
+                | passwordState.ToPasswordInput("Enter password")
                     .Disabled(string.IsNullOrWhiteSpace(nameState.Value))
-                    .WithField()
+                    .WithField(passwordState)
                     .Label("Password")
                     .Description("At least 8 characters")
                     .Help("Use a mix of letters, numbers, and symbols for better security")
