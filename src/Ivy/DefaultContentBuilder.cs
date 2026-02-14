@@ -12,6 +12,7 @@ using Ivy.Helpers;
 using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.Tables;
+using Ivy.Widgets.Inputs;
 
 namespace Ivy;
 
@@ -59,6 +60,12 @@ public class DefaultContentBuilder : IContentBuilder
         if (content is Exception e)
         {
             return new ErrorView(e);
+        }
+
+        if (content is TextInputBase tb && !tb.FromValidatedView && tb.BoundState != null &&
+            tb.Variant is TextInputs.Email or TextInputs.Password or TextInputs.Tel or TextInputs.Url)
+        {
+            return new ValidatedTextInputView(tb.BoundState, tb.Variant, tb.Placeholder, tb.Disabled);
         }
 
         if (content is IWidget widget)
