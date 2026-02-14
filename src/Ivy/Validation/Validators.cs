@@ -8,8 +8,7 @@ using Ivy.Widgets.Inputs;
 namespace Ivy.Validation;
 
 /// <summary>
-/// Shared validation for forms, TextInput, and Field. Use this module so email, tel, url, and password
-/// are validated the same way everywhere (backend-only; validation runs on blur via ValidatedTextInputView or FormFieldView).
+/// Shared validation for forms. Email, tel, url, and password are validated on blur and submit via FormFieldView.
 /// </summary>
 public static class Validators
 {

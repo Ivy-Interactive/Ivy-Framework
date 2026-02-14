@@ -5,7 +5,6 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Shared;
-using Ivy.Validation;
 using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
@@ -206,7 +205,4 @@ public static class TextInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
-
-    public static Func<object?, (bool, string)>? GetVariantValidator(this TextInputBase input, string? label = null)
-        => Validators.ForVariant(input.Variant, label ?? "");
 }
