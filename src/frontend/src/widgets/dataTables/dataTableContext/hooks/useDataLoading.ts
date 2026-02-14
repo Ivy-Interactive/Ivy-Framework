@@ -151,7 +151,6 @@ export const useDataLoading = ({
     initializeColumnWidths,
     initializeSortFromColumns,
     arrowTableRef,
-    arrowTableRef,
   ]);
 
   // Load more data
