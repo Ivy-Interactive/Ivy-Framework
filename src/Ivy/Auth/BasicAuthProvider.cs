@@ -184,10 +184,7 @@ public class BasicAuthProvider : IAuthProvider
         return Task.FromResult<UserInfo?>(new UserInfo(user, user, null, null));
     }
 
-    public AuthOption[] GetAuthOptions()
-    {
-        return [new AuthOption(AuthFlow.EmailPassword)];
-    }
+    public AuthOption[] GetAuthOptions() => [new AuthOption(AuthFlow.EmailPassword)];
 
     public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {

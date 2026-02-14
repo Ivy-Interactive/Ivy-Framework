@@ -100,7 +100,7 @@ You will be prompted to provide the following Microsoft Entra configuration:
 Your credentials will be stored securely in [.NET user secrets](../../02_Concepts/14_Secrets.md). Ivy then finishes configuring your application automatically:
 
 1. Adds the `Ivy.Auth.MicrosoftEntra` package to your project.
-2. Adds `server.UseAuth<MicrosoftEntraAuthProvider>(c => c.UseMicrosoftEntra());` to your [Program.cs](../../02_Concepts/01_Program.md).
+2. Adds `server.UseAuth<MicrosoftEntraAuthProvider>();` to your [Program.cs](../../02_Concepts/01_Program.md).
 3. Adds `Ivy.Auth.MicrosoftEntra` to your global usings.
 
 ### Advanced Configuration

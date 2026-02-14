@@ -21,7 +21,6 @@ public class GitHubAuthProvider : IAuthProvider
     private readonly string _clientId;
     private readonly string _clientSecret;
     private readonly string _redirectUri;
-    private readonly List<AuthOption> _authOptions = new();
 
     /// <summary>Initialize GitHub auth provider</summary>
     public GitHubAuthProvider(IConfiguration configuration)
@@ -214,10 +213,7 @@ public class GitHubAuthProvider : IAuthProvider
     }
 
     /// <summary>Get auth options</summary>
-    public AuthOption[] GetAuthOptions()
-    {
-        return _authOptions.ToArray();
-    }
+    public AuthOption[] GetAuthOptions() => [new AuthOption(AuthFlow.OAuth, "GitHub", "github", Icons.Github)];
 
     /// <summary>No expiration - returns null</summary>
     public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
@@ -226,9 +222,10 @@ public class GitHubAuthProvider : IAuthProvider
     }
 
     /// <summary>Add GitHub auth option</summary>
+    [Obsolete("GitHub OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public GitHubAuthProvider UseGitHub()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitHub", "github", Icons.Github));
+        // No-op: GitHub OAuth is already added in the constructor
         return this;
     }
 
