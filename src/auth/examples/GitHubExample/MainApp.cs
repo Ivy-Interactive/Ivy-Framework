@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OAuthTestApp;
 
-[App(id: "oauth-test-app", title: "GitHub OAuth Test")]
+[App(id: "auth-test", title: "Auth Test")]
 public class MainApp : ViewBase
 {
     public override object? Build()
