@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import * as arrow from 'apache-arrow';
 import { Filter } from '@/services/grpcTableService';
 import { TableContext } from './tableContext';
@@ -30,7 +30,6 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     setColumns,
     columnWidths,
     columnOrder,
-    resetColumnWidths,
     initializeColumnOrder,
     initializeColumnWidths,
     handleColumnResize,
@@ -44,13 +43,6 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const { activeSort, handleSort, initializeSortFromColumns } = useSorting({
     allowSorting: allowSorting ?? true,
   });
-
-  const connectionKey = `${connection.connectionId}-${connection.sourceId}`;
-
-  // Reset column widths when connection changes
-  useEffect(() => {
-    resetColumnWidths();
-  }, [connectionKey, resetColumnWidths]);
 
   // Data loading
   const { isLoading, hasMore, loadMoreData } = useDataLoading({

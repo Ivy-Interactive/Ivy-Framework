@@ -38,7 +38,6 @@ describe('tableDataFetcher', () => {
     path: '/test',
     connectionId: 'conn-123',
     sourceId: 'source-456',
-    version: 0,
   };
 
   const mockColumns = [
@@ -280,7 +279,6 @@ describe('tableDataFetcher', () => {
       const customConnection: DataTableConnection = {
         ...mockConnection,
         port: 9999,
-        version: 0,
       };
 
       const mockResult = {

@@ -23,7 +23,7 @@ public class DataTableConnectionService(IQueryableRegistry queryableRegistry, Se
 
         var cleanup = queryableRegistry.AddCleanup(sourceId, Disposable.Empty);
 
-        var connection = new DataTableConnection(serverArgs.Port, "/datatable.DataTableService/Query", connectionId, sourceId, 0);
+        var connection = new DataTableConnection(serverArgs.Port, "/datatable.DataTableService/Query", connectionId, sourceId);
 
         return (cleanup, connection);
     }
