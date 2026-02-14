@@ -24,7 +24,7 @@ public class MainApp : ViewBase
 
         if (userInfo.Value is null)
         {
-             return Text.P("Loading user data...");
+            return Text.P("Loading user data...");
         }
 
         var user = userInfo.Value;
