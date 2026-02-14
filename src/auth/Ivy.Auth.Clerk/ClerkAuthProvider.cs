@@ -45,7 +45,10 @@ public class ClerkAuthProvider : IAuthProvider
 
     public ClerkAuthProvider(IConfiguration configuration)
     {
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Clerk:UserAgent");
+
         _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
 
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
         var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");

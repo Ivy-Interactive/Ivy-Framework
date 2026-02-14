@@ -26,8 +26,10 @@ public class GitHubAuthProvider : IAuthProvider
     /// <summary>Initialize GitHub auth provider</summary>
     public GitHubAuthProvider(IConfiguration configuration)
     {
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "GitHub:UserAgent");
+
         _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", "Ivy-Framework");
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
 
         _clientId = configuration.GetValue<string>("GitHub:ClientId") ?? throw new InvalidOperationException(
             "Missing required configuration: 'GitHub:ClientId'. Please set this value in your environment variables or user secrets. See the README setup steps for instructions.");

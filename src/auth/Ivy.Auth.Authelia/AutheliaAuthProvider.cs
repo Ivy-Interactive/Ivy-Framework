@@ -23,9 +23,12 @@ public class AutheliaAuthProvider : IAuthProvider
     {
         _baseUrl = configuration.GetValue<string>("Authelia:Url")
             ?? throw new Exception("Authelia:Url is required");
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Authelia:UserAgent");
+
         _cookieContainer = new CookieContainer();
         var handler = new HttpClientHandler { CookieContainer = _cookieContainer };
         _httpClient = new HttpClient(handler) { BaseAddress = new Uri(_baseUrl) };
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
     }
 
     public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string username, string password, CancellationToken cancellationToken)

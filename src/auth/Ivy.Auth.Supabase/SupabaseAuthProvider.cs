@@ -54,7 +54,10 @@ public class SupabaseAuthProvider : IAuthProvider
         };
 
         _client = new global::Supabase.Client(url, apiKey, options);
+
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Supabase:UserAgent");
         _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
 
         // Setup JWKS URL
         _issuer = new Uri(new Uri(url), "auth/v1").ToString();

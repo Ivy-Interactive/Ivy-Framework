@@ -1,7 +1,21 @@
 ﻿using Ivy.Core;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace Ivy.Auth;
+
+public static class AuthProviderHelpers
+{
+    /// <summary>
+    /// Gets the User-Agent string to use for HTTP requests from auth providers.
+    /// Checks configuration for a custom value, otherwise uses Ivy-Framework/{version}.
+    /// </summary>
+    public static string GetUserAgent(IConfiguration configuration, string configKey)
+    {
+        var ivyVersion = typeof(IAuthProvider).Assembly.GetName().Version?.ToString() ?? "1.0.0";
+        return configuration.GetValue<string>(configKey) ?? $"Ivy-Framework/{ivyVersion}";
+    }
+}
 
 public interface IAuthProvider
 {

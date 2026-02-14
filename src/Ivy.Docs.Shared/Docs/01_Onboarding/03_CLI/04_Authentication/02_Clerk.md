@@ -197,6 +197,7 @@ The following parameters are supported via connection string, environment variab
 
 - **Clerk:SecretKey**: Required. Your Clerk secret key (starts with `sk_test_` or `sk_live_`).
 - **Clerk:PublishableKey**: Required. Your Clerk publishable key (starts with `pk_test_` or `pk_live_`).
+- **Clerk:UserAgent**: Optional. Custom User-Agent header for HTTP requests. Defaults to `Ivy-Framework/{version}` where version is the Ivy assembly version.
 
 ## Authentication Flow
 

@@ -67,11 +67,12 @@ await server.RunAsync();
 
 ### Configuration Parameters
 
-Configure the following required parameters using .NET user secrets (recommended for development) or environment variables (recommended for production):
+Configure the following parameters using .NET user secrets (recommended for development) or environment variables (recommended for production):
 
 - **GitHub:ClientId**: Required. Your GitHub OAuth App's Client ID.
 - **GitHub:ClientSecret**: Required. Your GitHub OAuth App's Client Secret.
 - **GitHub:RedirectUri**: Required. The authorization callback URL that matches your GitHub OAuth App settings.
+- **GitHub:UserAgent**: Optional. Custom User-Agent header for GitHub API requests. Defaults to `Ivy-Framework/{version}` where version is the Ivy assembly version.
 
 **Using .NET User Secrets (Development):**
 
@@ -79,6 +80,7 @@ Configure the following required parameters using .NET user secrets (recommended
 >dotnet user-secrets set "GitHub:ClientId" "your_client_id"
 >dotnet user-secrets set "GitHub:ClientSecret" "your_client_secret"
 >dotnet user-secrets set "GitHub:RedirectUri" "your_redirect_uri"
+>dotnet user-secrets set "GitHub:UserAgent" "MyApp/1.0"
 ```
 
 **Using Environment Variables (Production):**
@@ -87,6 +89,7 @@ Configure the following required parameters using .NET user secrets (recommended
 $env:GitHub__ClientId="your_client_id"
 $env:GitHub__ClientSecret="your_client_secret"
 $env:GitHub__RedirectUri="your_redirect_uri"
+$env:GitHub__UserAgent="MyApp/1.0"
 ```
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**. Never commit secrets to version control.
