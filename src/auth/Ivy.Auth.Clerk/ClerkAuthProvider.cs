@@ -45,6 +45,8 @@ public class ClerkAuthProvider : IAuthProvider
 
     public ClerkAuthProvider(IConfiguration configuration)
     {
+        _httpClient = new HttpClient();
+
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
         var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
 
@@ -68,8 +70,6 @@ public class ClerkAuthProvider : IAuthProvider
         {
             throw new Exception("Clerk:PublishableKey contains an invalid base64 string", ex);
         }
-
-        _httpClient = new HttpClient();
     }
 
     private FrontendApiClient MakeFrontendApiClient(IAuthSession authSession)

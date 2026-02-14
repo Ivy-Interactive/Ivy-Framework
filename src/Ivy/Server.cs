@@ -196,20 +196,6 @@ public class Server
 
     public Server UseAuth<T>(Action<T>? config = null, Func<ViewBase>? viewFactory = null) where T : class, IAuthProvider
     {
-        // Call static ConfigureServices method if it exists (convention-based)
-        var configureServicesMethod = typeof(T).GetMethod(
-            "ConfigureServices",
-            BindingFlags.Public | BindingFlags.Static,
-            null,
-            [typeof(IServiceCollection)],
-            null
-        );
-
-        if (configureServicesMethod != null)
-        {
-            configureServicesMethod.Invoke(null, [Services]);
-        }
-
         Services.AddSingleton<T>();
         Services.AddSingleton<IAuthProvider, T>(s =>
         {
