@@ -31,7 +31,7 @@ public class ClerkAuthProvider : IAuthProvider
     private readonly bool _isProduction;
     private string? _origin = null;
 
-    public static bool OpenOAuthLoginInNewTab => true;
+    public bool OpenOAuthLoginInNewTab => true;
 
     private static (bool IsProduction, string Key) ParseKey(string name, string type, string key)
     {
