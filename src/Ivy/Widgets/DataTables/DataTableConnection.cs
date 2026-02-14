@@ -1,4 +1,4 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public record DataTableConnection(int Port, string Path, string ConnectionId, string SourceId, int Version = 0);
+public record DataTableConnection(int Port, string Path, string ConnectionId, string SourceId);
