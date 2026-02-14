@@ -13,6 +13,7 @@ using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.Tables;
 using Ivy.Widgets.Inputs;
+using Ivy.Widgets.Inputs.Validated;
 
 namespace Ivy;
 
