@@ -15,6 +15,7 @@ public static class UseDataTableExtensions
         // DON'T trigger rebuild when connection changes - we handle it manually
         var connection = context.UseState<DataTableConnection?>(buildOnChange: false);
         var hasRun = context.UseState(false, buildOnChange: false);
+        var version = context.UseState(0);
 
         var dataTableService = context.UseService<IDataTableService>();
 
@@ -30,7 +31,8 @@ public static class UseDataTableExtensions
         }
         else if (hasRun.Value && connection.Value != null)
         {
-            return connection.Value with { };
+            version.Set(v => v + 1);
+            return connection.Value with { Version = version.Value };
         }
 
         return connection.Value;
