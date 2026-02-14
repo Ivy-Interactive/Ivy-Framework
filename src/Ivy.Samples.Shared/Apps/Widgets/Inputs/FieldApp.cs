@@ -34,16 +34,18 @@ public class FieldApp : SampleBase
                 .Description("Your full name")
                 .Required()
 
-                // Email with Field
-                | emailState.ToEmailInput("Enter your email")
+                // Using .WithField() shortcut with help text
+                | emailState.ToTextInput()
+                    .Placeholder("Enter your email")
                     .WithField()
                     .Label("Email")
                     .Description("Required for contact")
                     .Help("We will never share your email with third parties")
                     .Required()
 
-                // Password field — disabled if name is empty
-                | passwordState.ToPasswordInput("Enter password")
+                // Password field, disabled if name is empty, with help text
+                | passwordState.ToPasswordInput()
+                    .Placeholder("Enter password")
                     .Disabled(string.IsNullOrWhiteSpace(nameState.Value))
                     .WithField()
                     .Label("Password")

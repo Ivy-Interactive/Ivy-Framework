@@ -1,24 +1,11 @@
 using Ivy.Core;
-using Ivy.Core.Helpers;
-using Ivy.Core.Hooks;
-using Ivy.Hooks;
 using Ivy.Shared;
-using Ivy.Widgets;
 using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Fluent API for Field (Label, Description, Required, Help).</summary>
-public interface IFieldOptions
-{
-    IFieldOptions Label(string label);
-    IFieldOptions Description(string description);
-    IFieldOptions Required(bool required = true);
-    IFieldOptions Help(string help);
-}
-
-public record Field : WidgetBase<Field>, IFieldOptions
+public record Field : WidgetBase<Field>
 {
     public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium) : base([input])
     {
@@ -59,11 +46,6 @@ public record Field : WidgetBase<Field>, IFieldOptions
     {
         throw new NotSupportedException("Field does not support children.");
     }
-
-    IFieldOptions IFieldOptions.Label(string label) => this with { Label = label };
-    IFieldOptions IFieldOptions.Description(string description) => this with { Description = description };
-    IFieldOptions IFieldOptions.Required(bool required) => this with { Required = required };
-    IFieldOptions IFieldOptions.Help(string help) => this with { Help = help };
 }
 
 public static class FieldExtensions
@@ -78,4 +60,3 @@ public static class FieldExtensions
 
     public static Field WithField(this IAnyInput input) => new Field(input);
 }
-
