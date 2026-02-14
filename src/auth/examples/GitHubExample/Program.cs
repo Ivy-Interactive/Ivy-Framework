@@ -12,7 +12,7 @@ server.AddAppsFromAssembly();
 
 var settings = new ChromeSettings()
     .UseTabs(preventDuplicates: true)
-    .DefaultApp<OAuthTestApp.MainApp>();
+    .DefaultApp<GitHubExample.MainApp>();
 
 server.UseChrome(settings);
 

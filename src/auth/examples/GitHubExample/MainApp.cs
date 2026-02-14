@@ -6,7 +6,7 @@ using Ivy.Widgets;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Mvc;
 
-namespace OAuthTestApp;
+namespace GitHubExample;
 
 [App(id: "auth-test", title: "Auth Test")]
 public class MainApp : ViewBase
