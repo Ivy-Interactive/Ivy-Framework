@@ -53,6 +53,7 @@ interface CheckboxVariantProps extends BaseVariantProps {
 }
 
 interface SwitchVariantProps extends BaseVariantProps {
+  icon?: string;
   onCheckedChange: (checked: boolean) => void;
 }
 
@@ -158,6 +159,7 @@ const VariantComponents = {
       disabled,
       invalid,
       scale = Scales.Medium,
+      icon,
       onCheckedChange,
       'data-testid': dataTestId,
     }: SwitchVariantProps) => {
@@ -168,6 +170,7 @@ const VariantComponents = {
           onCheckedChange={onCheckedChange}
           disabled={disabled}
           scale={scale}
+          icon={icon}
           className={cn(invalid && inputStyles.invalid)}
           data-testid={dataTestId}
         />
