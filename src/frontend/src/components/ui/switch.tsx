@@ -9,9 +9,9 @@ import { switchVariants, switchThumbVariants } from './input/switch-variants';
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> &
-  VariantProps<typeof switchVariants> & {
-    icon?: string;
-  }
+    VariantProps<typeof switchVariants> & {
+      icon?: string;
+    }
 >(({ className, scale, icon, ...props }, ref) => {
   const baseClass = switchVariants({ scale });
   const finalClass = className?.includes('bg-red-50')
