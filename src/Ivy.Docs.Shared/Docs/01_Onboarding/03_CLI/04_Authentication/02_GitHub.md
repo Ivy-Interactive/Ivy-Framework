@@ -50,23 +50,12 @@ To set up GitHub Authentication with Ivy, you need to manually configure it in y
 
 ### Manual Configuration
 
-**1: Register the HttpClient factory in your [Program.cs](../../02_Concepts/01_Program.md)**:
-
-```csharp
-var server = new Server();
-
-server.Services.AddHttpClient("GitHubAuth", client =>
-{
-    client.DefaultRequestHeaders.Add("User-Agent", "Ivy-Framework");
-    client.DefaultRequestHeaders.Add("Accept", "application/vnd.github+json");
-    client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
-});
-```
-
-**2: Configure the GitHub Auth Provider**:
+**1: Configure the GitHub Auth Provider**:
 
 ```csharp
 using Ivy.Auth.GitHub;
+
+var server = new Server();
 
 // Configure GitHub Auth Provider - UseAuth will create the provider via DI
 server.UseAuth<GitHubAuthProvider>(c => c.UseGitHub());
@@ -74,7 +63,7 @@ server.UseAuth<GitHubAuthProvider>(c => c.UseGitHub());
 await server.RunAsync();
 ```
 
-**3: Add configuration via [.NET user secrets](../../02_Concepts/14_Secrets.md) or environment variables. See [Configuration Parameters](#configuration-parameters) below for detailed instructions.**
+**2: Add configuration via [.NET user secrets](../../02_Concepts/14_Secrets.md) or environment variables. See [Configuration Parameters](#configuration-parameters) below for detailed instructions.**
 
 ### Configuration Parameters
 

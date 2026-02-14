@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 namespace Ivy.Auth.GitHub;
 
 /// <summary>GitHub OAuth exception</summary>
@@ -23,10 +24,19 @@ public class GitHubAuthProvider : IAuthProvider
     private readonly string _redirectUri;
     private readonly List<AuthOption> _authOptions = new();
 
-    /// <summary>Initialize GitHub auth provider</summary>
-    public GitHubAuthProvider(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    /// <summary>Configure services - called by Server.UseAuth</summary>
+    public static void ConfigureServices(IServiceCollection services)
     {
-        _httpClient = httpClientFactory.CreateClient("GitHubAuth");
+        services.AddHttpClient("GitHubAuth", client =>
+        {
+            client.DefaultRequestHeaders.Add("User-Agent", "Ivy-Framework");
+        }).AddAsKeyed();
+    }
+
+    /// <summary>Initialize GitHub auth provider</summary>
+    public GitHubAuthProvider([FromKeyedServices("GitHubAuth")] HttpClient httpClient, IConfiguration configuration)
+    {
+        _httpClient = httpClient;
 
         _clientId = configuration.GetValue<string>("GitHub:ClientId") ?? throw new InvalidOperationException(
             "Missing required configuration: 'GitHub:ClientId'. Please set this value in your environment variables or user secrets. See the README setup steps for instructions.");
@@ -242,7 +252,6 @@ public class GitHubAuthProvider : IAuthProvider
         using var request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
         request.Content = requestBody;
         request.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-        request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
 
