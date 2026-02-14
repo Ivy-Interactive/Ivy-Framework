@@ -142,10 +142,10 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
             .ExecuteAsync(cancellationToken);
 
         var accountId = result.Account.HomeAccountId!.Identifier;
+        authSession.AuthSessionData = accountId;
         return new AuthToken(
             result.IdToken,
-            GetCurrentRefreshToken(accountId),
-            accountId
+            GetCurrentRefreshToken(accountId)
         );
     }
 
@@ -167,8 +167,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         }
 
         if (app is not IByRefreshToken refresher
-            || token.Tag is not JsonElement tag
-            || tag.GetString() is not string accountId
+            || authSession.AuthSessionData is not string accountId
             || accountId.Length <= 0)
         {
             return null;
@@ -201,8 +200,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
                 return new AuthToken(
                     result.IdToken,
-                    GetCurrentRefreshToken(accountId),
-                    accountId
+                    GetCurrentRefreshToken(accountId)
                 );
             }
             else
@@ -222,8 +220,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
                 return new AuthToken(
                     result.IdToken,
-                    GetCurrentRefreshToken(accountId),
-                    accountId
+                    GetCurrentRefreshToken(accountId)
                 );
             }
         }
