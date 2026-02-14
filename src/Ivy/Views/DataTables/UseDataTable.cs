@@ -24,7 +24,6 @@ public static class UseDataTableExtensions
             cleanup.Value?.Dispose();
 
             var (newCleanup, newConnection) = dataTableService.AddQueryable(queryable, idSelector);
-            
             connection.Set(newConnection);
             lastQueryable.Set(queryable);
             cleanup.Set(newCleanup);
