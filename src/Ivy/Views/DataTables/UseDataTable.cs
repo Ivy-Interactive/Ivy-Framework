@@ -15,23 +15,24 @@ public static class UseDataTableExtensions
         // DON'T trigger rebuild when connection changes - we handle it manually
         var connection = context.UseState<DataTableConnection?>(buildOnChange: false);
         var hasRun = context.UseState(false, buildOnChange: false);
+        var version = context.UseState(0, buildOnChange: false);
+
         var dataTableService = context.UseService<IDataTableService>();
-        var clientNotifier = context.UseService<IClientNotifier>();
 
         // Only create connection once - check hasRun flag
         if (!hasRun.Value && connection.Value == null)
         {
             var (cleanup, _connection) = dataTableService.AddQueryable(queryable, idSelector);
-            _connection.SetClientNotifier(clientNotifier);
             connection.Set(_connection);
             hasRun.Set(true);
 
             // Store cleanup for later
             context.UseEffect(() => cleanup, []);
         }
-        else if (connection.Value != null)
+        else if (hasRun.Value && connection.Value != null)
         {
-            _ = connection.Value.NotifyChange();
+            version.Set(v => v + 1);
+            return connection.Value with { Version = version.Value };
         }
 
         return connection.Value;

@@ -20,7 +20,6 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const [visibleRows, setVisibleRows] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<Filter | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const arrowTableRef = useRef<arrow.Table | null>(null);
   const { allowColumnResizing, allowSorting } = config;
@@ -53,20 +52,6 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     resetColumnWidths();
   }, [connectionKey, resetColumnWidths]);
 
-  useEffect(() => {
-    const handleRefresh = (event: Event) => {
-      const sourceId = (event as CustomEvent<string>).detail;
-      if (sourceId === connection.sourceId) {
-        setRefreshTrigger(prev => prev + 1);
-      }
-    };
-
-    window.addEventListener('ivy:datatable:refresh', handleRefresh);
-    return () => {
-      window.removeEventListener('ivy:datatable:refresh', handleRefresh);
-    };
-  }, [connection.sourceId]);
-
   // Data loading
   const { isLoading, hasMore, loadMoreData } = useDataLoading({
     connection,
@@ -82,7 +67,6 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     initializeColumnOrder,
     initializeColumnWidths,
     initializeSortFromColumns,
-    refreshTrigger,
   });
 
   // Row data accessor

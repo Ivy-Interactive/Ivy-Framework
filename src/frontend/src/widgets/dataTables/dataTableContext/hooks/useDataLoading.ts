@@ -23,7 +23,6 @@ interface UseDataLoadingProps {
   initializeColumnOrder: (columns: DataColumn[]) => void;
   initializeColumnWidths: (columns: DataColumn[]) => void;
   initializeSortFromColumns: (columns: DataColumn[]) => boolean;
-  refreshTrigger?: number;
 }
 
 /**
@@ -43,7 +42,6 @@ export const useDataLoading = ({
   initializeColumnOrder,
   initializeColumnWidths,
   initializeSortFromColumns,
-  refreshTrigger,
 }: UseDataLoadingProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMoreState] = useState(true);
@@ -153,7 +151,7 @@ export const useDataLoading = ({
     initializeColumnWidths,
     initializeSortFromColumns,
     arrowTableRef,
-    refreshTrigger,
+    arrowTableRef,
   ]);
 
   // Load more data
