@@ -5,12 +5,11 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>GitHubExample</RootNamespace>
+    <RootNamespace>BasicAuthExample</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Ivy\Ivy.csproj" />
-    <ProjectReference Include="..\..\Ivy.Auth.GitHub\Ivy.Auth.GitHub.csproj" />
   </ItemGroup>
 
 </Project>
