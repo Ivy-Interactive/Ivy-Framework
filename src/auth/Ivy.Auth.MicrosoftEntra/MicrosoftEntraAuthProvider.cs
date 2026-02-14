@@ -288,11 +288,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
     }
 
     [Obsolete("Microsoft Entra OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
-    public MicrosoftEntraAuthProvider UseMicrosoftEntra()
-    {
-        // No-op: Microsoft Entra OAuth is already added in the constructor
-        return this;
-    }
+    public MicrosoftEntraAuthProvider UseMicrosoftEntra() => this;
 
     private static string GenerateCodeVerifier()
     {

@@ -223,11 +223,7 @@ public class GitHubAuthProvider : IAuthProvider
 
     /// <summary>Add GitHub auth option</summary>
     [Obsolete("GitHub OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
-    public GitHubAuthProvider UseGitHub()
-    {
-        // No-op: GitHub OAuth is already added in the constructor
-        return this;
-    }
+    public GitHubAuthProvider UseGitHub() => this;
 
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)
     {
