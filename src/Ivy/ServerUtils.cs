@@ -36,10 +36,12 @@ public static class ServerUtils
             DefaultAppId = parser.GetValue<string?>(parsedArgs, "app", null),
             Silent = parser.GetValue(parsedArgs, "silent", false),
             Describe = parser.GetValue(parsedArgs, "describe", false),
+            DescribeConnection = parser.GetValue<string?>(parsedArgs, "describe-connection", null),
+            TestConnection = parser.GetValue<string?>(parsedArgs, "test-connection", null),
             EnableDevTools = parser.GetValue(parsedArgs, "enable-dev-tools", false),
         };
         serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", false) };
-        if (serverArgs.Describe)
+        if (serverArgs.Describe || serverArgs.DescribeConnection != null || serverArgs.TestConnection != null)
         {
             serverArgs = serverArgs with { FindAvailablePort = true, Silent = true };
         }

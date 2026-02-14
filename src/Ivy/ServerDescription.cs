@@ -173,6 +173,41 @@ public class ServerDescription
         return description;
     }
 
+    public static IConnection? FindConnection(Server server, IServiceProvider serviceProvider, string name)
+    {
+        // Check registered IConnection services first
+        var connections = serviceProvider.GetServices<IConnection>();
+        var match = connections.FirstOrDefault(c =>
+            string.Equals(c.GetName(), name, StringComparison.OrdinalIgnoreCase));
+        if (match != null) return match;
+
+        // Fall back to assembly scanning
+        var assembly = Assembly.GetEntryAssembly();
+        if (assembly == null) return null;
+
+        var connectionTypes = assembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IConnection).IsAssignableFrom(t));
+
+        foreach (var type in connectionTypes)
+        {
+            if (connections.Any(c => c.GetType() == type))
+                continue;
+
+            try
+            {
+                var connection = (IConnection)Activator.CreateInstance(type)!;
+                if (string.Equals(connection.GetName(), name, StringComparison.OrdinalIgnoreCase))
+                    return connection;
+            }
+            catch
+            {
+                // Skip connections that can't be instantiated
+            }
+        }
+
+        return null;
+    }
+
     public string ToYaml()
     {
         var serializer = new SerializerBuilder()
