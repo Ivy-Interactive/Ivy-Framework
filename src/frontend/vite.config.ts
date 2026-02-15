@@ -71,7 +71,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss(), injectMeta(mode)] as Plugin[],
   server: {
     proxy: {
-      '^/.*\\.md$': {
+      '^/(.*\\.md|llms\\.txt)$': {
         target: process.env.IVY_HOST || 'http://localhost:5010',
         changeOrigin: true,
       },
