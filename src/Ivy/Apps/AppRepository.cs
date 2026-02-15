@@ -185,7 +185,8 @@ public class AppRepository : IAppRepository
             ? Apps.GetValueOrDefault(id)
             : null;
 
-        return app ?? Apps.Values.FirstOrDefault(x => !AppIds.ShouldNotBeAutoDefaultApps.Contains(x.Id))
+        var serviceableApp = app ?? Apps.Values.FirstOrDefault(x => !AppIds.ShouldNotBeAutoDefaultApps.Contains(x.Id));
+        return serviceableApp ?? Apps.GetValueOrDefault(AppIds.NoAppsRegistered)
             ?? throw new InvalidOperationException("No serviceable apps are registered on this server.");
     }
 

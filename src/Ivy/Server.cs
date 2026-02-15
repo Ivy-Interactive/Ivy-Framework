@@ -90,6 +90,7 @@ public class Server
     private void AddDefaultApps()
     {
         UseErrorNotFound<NotFoundApp>();
+        UseNoAppsRegistered<NoAppsRegisteredApp>();
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
@@ -233,6 +234,24 @@ public class Server
         {
             Id = AppIds.ErrorNotFound,
             Title = "App Not Found",
+            ViewFactory = viewFactory,
+            Path = [],
+            IsVisible = false
+        });
+        return this;
+    }
+
+    public Server UseNoAppsRegistered<T>() where T : ViewBase
+    {
+        return UseNoAppsRegistered((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+    }
+
+    public Server UseNoAppsRegistered(Func<ViewBase>? viewFactory = null)
+    {
+        AddApp(new AppDescriptor
+        {
+            Id = AppIds.NoAppsRegistered,
+            Title = "No Apps",
             ViewFactory = viewFactory,
             Path = [],
             IsVisible = false

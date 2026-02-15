@@ -137,6 +137,19 @@ public class AppRouter(Server server)
     {
         var resolvedApp = server.AppRepository.GetAppOrDefault(navigationAppId);
 
+        if (resolvedApp.Id == AppIds.NoAppsRegistered)
+        {
+            var scopedRepository = new ScopedAppRepository(server.AppRepository, navigationAppId, resolvedApp);
+            return new AppRouteResult(
+                appId ?? AppIds.Default,
+                navigationAppId,
+                resolvedApp,
+                scopedRepository,
+                chrome,
+                503
+            );
+        }
+
         if (resolvedApp.Id != navigationAppId)
         {
             var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.ErrorNotFound);
@@ -183,6 +196,18 @@ public class AppRouter(Server server)
     private AppRouteResult ResolveExplicitApp(string appId, bool chrome)
     {
         var resolvedApp = server.AppRepository.GetAppOrDefault(appId);
+
+        if (resolvedApp.Id == AppIds.NoAppsRegistered)
+        {
+            return new AppRouteResult(
+                appId,
+                null,
+                resolvedApp,
+                server.AppRepository,
+                chrome,
+                503
+            );
+        }
 
         if (resolvedApp.Id != appId)
         {
