@@ -26,6 +26,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   prefix,
   suffix,
   maxLength,
+  rows,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -100,6 +101,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       prefix,
       suffix,
       maxLength,
+      rows,
       'data-testid': dataTestId,
     }),
     [
@@ -117,6 +119,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       prefix,
       suffix,
       maxLength,
+      rows,
       dataTestId,
     ]
   );
