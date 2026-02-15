@@ -69,10 +69,6 @@ server.Services.AddSingleton<IMyService, MyService>();
 // In a view
 var myService = UseService<IMyService>();
 
-## Connections
-
-Connections are Ivy's abstraction for integrating external data sources (databases, APIs, auth providers).
-
 ## Common Widgets
 
 [Button](https://docs.ivy.app/widgets/common/button.md)
