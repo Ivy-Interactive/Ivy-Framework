@@ -16,19 +16,18 @@ public class ThemeCustomizer : SampleBase
         var currentTheme = UseState(Theme.Default);
         var isExportOpen = UseState(false);
         var client = UseService<IClientProvider>();
-        var themeService = UseService<IThemeService>();
         var selectedMode = UseState("light"); // "light" or "dark"
 
         // Individual color states for live editing
         var editingTheme = UseState(CloneTheme(Theme.Default));
 
-        // UseQuery handles theme application reactively with built-in state management
         var themeQuery = UseQuery(
             key: editingTheme.Value,
             fetcher: async ct =>
             {
-                themeService.SetTheme(editingTheme.Value);
-                var css = themeService.GenerateThemeCss();
+                var localThemeService = new ThemeService();
+                localThemeService.SetTheme(editingTheme.Value);
+                var css = localThemeService.GenerateThemeCss();
                 client.ApplyTheme(css);
                 await Task.CompletedTask;
                 return true;
