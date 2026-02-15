@@ -162,6 +162,8 @@ public class BoolInputApp : SampleBase
                | Text.H1("BoolInput")
                | Text.H2("Sizes")
                | new BoolInputSizes()
+               | Text.H2("Icons")
+               | new BoolInputIcons()
                | Text.H2("Variants")
                | variants
                | Text.H2("Data Binding")
@@ -359,4 +361,40 @@ public class BoolInputSizes : ViewBase
     }
 
 
+}
+
+public class BoolInputIcons : ViewBase
+{
+    public override object Build()
+    {
+        var trueState = UseState(true);
+
+        return Layout.Grid().Columns(4)
+               | Text.InlineCode("Description")
+               | Text.InlineCode("Sun")
+               | Text.InlineCode("Moon")
+               | Text.InlineCode("Star")
+
+               | Text.InlineCode("BoolInputs.Switch")
+               | trueState
+                   .ToSwitchInput(Icons.Sun)
+                   .Label("Label")
+               | trueState
+                   .ToSwitchInput(Icons.Moon)
+                   .Label("Label")
+               | trueState
+                   .ToSwitchInput(Icons.Star)
+                   .Label("Label")
+
+               | Text.InlineCode("BoolInputs.Toggle")
+               | trueState
+                   .ToToggleInput(Icons.Sun)
+                   .Label("Label")
+               | trueState
+                   .ToToggleInput(Icons.Moon)
+                   .Label("Label")
+               | trueState
+                   .ToToggleInput(Icons.Star)
+                   .Label("Label");
+    }
 }
