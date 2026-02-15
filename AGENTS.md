@@ -78,7 +78,7 @@ var myService = UseService<IMyService>();
 [Progress](https://docs.ivy.app/widgets/common/progress.md)
 [Expandable](https://docs.ivy.app/widgets/common/expandable.md)
 [Tooltip](https://docs.ivy.app/widgets/common/tooltip.md)
-[DropDownMenu](https://docs.ivy.app/widgets/common/drop-down-menu)
+[DropDownMenu](https://docs.ivy.app/widgets/common/drop-down-menu.md)
 [Table](https://docs.ivy.app/widgets/common/table.md)
 [List](https://docs.ivy.app/widgets/common/list.md)
 [Details](https://docs.ivy.app/widgets/common/details.md)
@@ -192,12 +192,18 @@ void UseEffect(Func<Task<IDisposable>> asyncEffectWithCleanup, IEffectTriggers o
 - IState<T> is automatically converted to EffectTrigger.OnStateChange
 - If no triggers are provided, the effect trigger is assumed to be OnMount.
 
-### Other Hooks
-
-UseRef
-UseContext
-UseQuery
-UseSignal
+[UseRef](https://docs.ivy.app/hooks/core/use-ref.md)
+[UseContext](https://docs.ivy.app/hooks/core/use-context.md)
+[UseQuery](https://docs.ivy.app/hooks/core/use-query.md)
+[UseMutation](https://docs.ivy.app/hooks/core/use-mutation.md)
+[UseSignal](https://docs.ivy.app/hooks/core/use-signal.md)
+[UseService](https://docs.ivy.app/hooks/core/use-service.md)
+[UseArgs](https://docs.ivy.app/hooks/core/use-args.md)
+[UseDownload](https://docs.ivy.app/hooks/core/use-download.md)
+[UseRefreshToken](https://docs.ivy.app/hooks/core/use-refresh-token.md)
+[UseTrigger](https://docs.ivy.app/hooks/core/use-trigger.md)
+[UseWebhook](https://docs.ivy.app/hooks/core/use-webhook.md)
+[UseAlert](https://docs.ivy.app/onboarding/concepts/alerts.md)
 
 ## Inputs
 
@@ -207,23 +213,20 @@ extension methods on IState<T> to bind state to inputs.
 var userNameState = UseState("");
 var input = userNameState.ToTextInput().Placeholder("Enter your name");
 
-ToTextInput()
-ToTextAreaInput()
-ToPasswordInput()
-ToNumberInput()
-ToBoolInput()
-ToSelectInput(IEnumerable<IAnyOption>)
-ToCodeInput(Language)
-ToColorInput()
-ToDateTimeInput()
-ToDateRangeInput()
-ToFeedbackInput()
-...
-
 Most inputs have extension methods for common configurations:
 userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your name");
 
-Use IvyQuestion tool to get the signature for each input type.
+[TextInput](https://docs.ivy.app/widgets/inputs/text-input.md)
+[NumberInput](https://docs.ivy.app/widgets/inputs/number-input.md)
+[BoolInput](https://docs.ivy.app/widgets/inputs/bool-input.md)
+[SelectInput](https://docs.ivy.app/widgets/inputs/select-input.md)
+[AsyncSelectInput](https://docs.ivy.app/widgets/inputs/async-select-input.md)
+[DateTimeInput](https://docs.ivy.app/widgets/inputs/date-time-input.md)
+[DateRangeInput](https://docs.ivy.app/widgets/inputs/date-range-input.md)
+[ColorInput](https://docs.ivy.app/widgets/inputs/color-input.md)
+[CodeInput](https://docs.ivy.app/widgets/inputs/code-input.md)
+[FeedbackInput](https://docs.ivy.app/widgets/inputs/feedback-input.md)
+[FileInput](https://docs.ivy.app/widgets/inputs/file-input.md)
 
 ## Best Practices
 
@@ -232,7 +235,7 @@ Use IvyQuestion tool to get the signature for each input type.
 1. **Keep Views Pure** - Views should be pure functions of their props and state
 2. **Use Hooks Correctly** - Call hooks at the top level, never in loops or conditions  
 3. **Minimize State** - Derive computed values instead of storing them
-4. **Handle Loading States** - Always consider loading and error states -> UseQuery
+4. **Handle Loading States** - Always consider loading and error states (UseQuery)
 5. **Leverage Type Safety** - Use strongly-typed widgets and state
 6. **Component Composition** - Build complex UIs from simple, reusable views
 
@@ -246,8 +249,5 @@ Use IvyQuestion tool to get the signature for each input type.
 [Colors](https://docs.ivy.app/api-reference/ivy-shared/colors.md)
 [Size](https://docs.ivy.app/api-reference/ivy-shared/size.md)
 [Align](https://docs.ivy.app/api-reference/ivy-shared/align.md)
-[UseAlert](https://docs.ivy.app/onboarding/concepts/alerts.md)
-[RefreshTokens](https://docs.ivy.app/onboarding/concepts/refresh-tokens.md)
-[Downloads](https://docs.ivy.app/onboarding/concepts/downloads.md)
-[Uploads](https://docs.ivy.app/widgets/inputs/file.md)
+[Downloads](https://docs.ivy.app/hooks/core/use-download.md)
 [Icons](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/src/Ivy/Shared/Icons.cs)
