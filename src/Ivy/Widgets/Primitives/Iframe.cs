@@ -24,4 +24,6 @@ public record Iframe : WidgetBase<Iframe>
     [Prop] public string Src { get; set; } = null!;
 
     [Prop] public long? RefreshToken { get; }
+
+    [Prop] public bool AllowJavaScript { get; set; }
 }

@@ -7,6 +7,7 @@ interface IframeWidgetProps {
   width?: string;
   height?: string;
   refreshToken?: number;
+  allowJavaScript?: boolean;
 }
 
 export const IframeWidget: React.FC<IframeWidgetProps> = ({
@@ -15,6 +16,7 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
   width = 'Full',
   height = 'Full',
   refreshToken,
+  allowJavaScript = false,
 }) => {
   const [iframeKey, setIframeKey] = useState(id);
 
@@ -28,5 +30,15 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
     setIframeKey(`${id}-${refreshToken}`);
   }, [refreshToken, id]);
 
-  return <iframe src={src} key={iframeKey} style={styles} />;
+  const sandbox = [
+    'allow-forms',
+    'allow-modals',
+    'allow-popups',
+    'allow-same-origin',
+    allowJavaScript ? 'allow-scripts' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return <iframe src={src} key={iframeKey} style={styles} sandbox={sandbox} />;
 };
