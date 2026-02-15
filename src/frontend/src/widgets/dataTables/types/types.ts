@@ -45,10 +45,10 @@ export interface DataColumn {
 }
 
 export interface DataTableConnection {
-  connectionId: string;
-  sourceId: string;
   port: number;
   path: string;
+  connectionId: string;
+  sourceId: string;
 }
 
 export interface DataTableConfig {
