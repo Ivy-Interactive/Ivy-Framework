@@ -116,8 +116,9 @@ export function DevTools() {
     return () => window.removeEventListener('message', handler);
   }, []);
 
-  const [highlightedWidget, setHighlightedWidget] =
-    useState<WidgetInfo | null>(null);
+  const [highlightedWidget, setHighlightedWidget] = useState<WidgetInfo | null>(
+    null
+  );
   const [widgetStack, setWidgetStack] = useState<HTMLElement[]>([]);
 
   const [dialogWidget, setDialogWidget] = useState<WidgetInfo | null>(null);
@@ -203,6 +204,7 @@ export function DevTools() {
             dialogWidget.element,
             dialogWidget.type
           ),
+          forward,
         },
       ];
 
