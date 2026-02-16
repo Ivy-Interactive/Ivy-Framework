@@ -64,7 +64,7 @@ public class AutheliaAuthProvider : IAuthProvider
     {
         // Authelia session tokens cannot be refreshed - validate and return null if invalid
         var isValid = await ValidateAccessTokenAsync(authSession, cancellationToken);
-        return isValid ? authSession.AuthToken : null;
+        return isValid && authSession.AccessToken != null ? new AuthToken(authSession.AccessToken) : null;
     }
 
     public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
@@ -81,7 +81,7 @@ public class AutheliaAuthProvider : IAuthProvider
     {
         // Send a request with the session cookie to /api/user/info.
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
-        request.Headers.Add("Cookie", $"authelia_session={authSession.AuthToken?.AccessToken}");
+        request.Headers.Add("Cookie", $"authelia_session={authSession.AccessToken}");
         var response = await _httpClient.SendAsync(request, cancellationToken);
         return response.IsSuccessStatusCode;
     }
@@ -89,7 +89,7 @@ public class AutheliaAuthProvider : IAuthProvider
     public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
-        request.Headers.Add("Cookie", $"authelia_session={authSession.AuthToken?.AccessToken}");
+        request.Headers.Add("Cookie", $"authelia_session={authSession.AccessToken}");
         var response = await _httpClient.SendAsync(request, cancellationToken);
         if (!response.IsSuccessStatusCode)
             return null;

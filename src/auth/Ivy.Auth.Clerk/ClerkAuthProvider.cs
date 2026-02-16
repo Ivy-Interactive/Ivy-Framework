@@ -116,14 +116,14 @@ public class ClerkAuthProvider : IAuthProvider
 
         if (_isProduction)
         {
-            if (!includeSessionToken || await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) == null)
+            if (!includeSessionToken || await ValidateToken(authSession.AccessToken, lenientLifetimeValidation: false, cancellationToken) == null)
             {
                 if (await GetActiveSession(frontendClient, credentials, cancellationToken) is { } session)
                 {
                     credentials.Session = session;
                     if (includeSessionToken)
                     {
-                        authSession.AuthToken = new AuthToken(session.LastActiveToken.Jwt);
+                        authSession.AccessToken = session.LastActiveToken.Jwt;
                     }
                 }
             }
@@ -146,7 +146,7 @@ public class ClerkAuthProvider : IAuthProvider
 
         if (includeSessionToken && credentials.SessionToken == null)
         {
-            credentials.SessionToken = authSession.AuthToken?.AccessToken;
+            credentials.SessionToken = authSession.AccessToken;
         }
 
         return credentials;
@@ -276,7 +276,7 @@ public class ClerkAuthProvider : IAuthProvider
     public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
-        var jwt = authSession.AuthToken?.AccessToken;
+        var jwt = authSession.AccessToken;
 
         try
         {
@@ -300,10 +300,9 @@ public class ClerkAuthProvider : IAuthProvider
     {
         try
         {
-            var token = authSession.AuthToken;
             var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
 
-            var (principal, _) = await ValidateToken(token?.AccessToken, lenientLifetimeValidation: true, cancellationToken)
+            var (principal, _) = await ValidateToken(authSession.AccessToken, lenientLifetimeValidation: true, cancellationToken)
                 ?? throw new Exception("Failed to validate access token during token refresh.");
 
             if (principal.FindFirst("sid")?.Value is not { } sessionId)
@@ -319,6 +318,7 @@ public class ClerkAuthProvider : IAuthProvider
             }
             else
             {
+                authSession.AccessToken = newToken.Jwt;
                 return new AuthToken(newToken.Jwt!);
             }
         }
@@ -330,12 +330,12 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        return (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken)) is not null;
+        return (await ValidateToken(authSession.AccessToken, lenientLifetimeValidation: false, cancellationToken)) is not null;
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) is not var (claims, _))
+        if (await ValidateToken(authSession.AccessToken, lenientLifetimeValidation: false, cancellationToken) is not var (claims, _))
         {
             return null;
         }
@@ -352,7 +352,7 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: true, cancellationToken) is var (_, lifetime))
+        if (await ValidateToken(authSession.AccessToken, lenientLifetimeValidation: true, cancellationToken) is var (_, lifetime))
         {
             return lifetime;
         }

@@ -13,12 +13,14 @@ public static class AuthSessionExtensions
     public static AuthSessionSnapshot TakeSnapshot(this IAuthSession authSession)
         => new()
         {
-            AuthToken = authSession.AuthToken,
+            AccessToken = authSession.AccessToken,
+            RefreshToken = authSession.RefreshToken,
             AuthSessionData = authSession.AuthSessionData,
         };
 
     public static bool HasChangedSince(this IAuthSession authSession, AuthSessionSnapshot snapshot)
-        => authSession.AuthToken != snapshot.AuthToken ||
+        => authSession.AccessToken != snapshot.AccessToken ||
+           authSession.RefreshToken != snapshot.RefreshToken ||
            authSession.AuthSessionData != snapshot.AuthSessionData;
 
     public static T? GetAuthSessionData<T>(this IAuthSession authSession)

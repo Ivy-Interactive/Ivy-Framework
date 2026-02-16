@@ -62,7 +62,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
     public Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(authSession.AuthToken?.AccessToken))
+        if (string.IsNullOrEmpty(authSession.AccessToken))
         {
             authSession.AuthSessionData = null;
         }
@@ -148,6 +148,8 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
         var accountId = result.Account.HomeAccountId!.Identifier;
         authSession.AuthSessionData = accountId;
+        authSession.AccessToken = result.IdToken;
+        authSession.RefreshToken = GetCurrentRefreshToken(accountId);
         return new AuthToken(
             result.IdToken,
             GetCurrentRefreshToken(accountId)
@@ -167,11 +169,6 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
     {
         var app = GetApp();
 
-        if (authSession.AuthToken is not { } token)
-        {
-            return null;
-        }
-
         if (app is not IByRefreshToken refresher
             || authSession.AuthSessionData is not string accountId
             || accountId.Length <= 0)
@@ -179,7 +176,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
             return null;
         }
 
-        if (token.RefreshToken == null)
+        if (authSession.RefreshToken == null)
         {
             return null;
         }
@@ -204,6 +201,8 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                     return null;
                 }
 
+                authSession.AccessToken = result.IdToken;
+                authSession.RefreshToken = GetCurrentRefreshToken(accountId);
                 return new AuthToken(
                     result.IdToken,
                     GetCurrentRefreshToken(accountId)
@@ -211,7 +210,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
             }
             else
             {
-                var result = await refresher.AcquireTokenByRefreshToken(_scopes, token.RefreshToken)
+                var result = await refresher.AcquireTokenByRefreshToken(_scopes, authSession.RefreshToken)
                     .ExecuteAsync(cancellationToken);
 
                 if (result == null)
@@ -224,6 +223,8 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                     throw new Exception("account ID does not match");
                 }
 
+                authSession.AccessToken = result.IdToken;
+                authSession.RefreshToken = GetCurrentRefreshToken(accountId);
                 return new AuthToken(
                     result.IdToken,
                     GetCurrentRefreshToken(accountId)
@@ -238,12 +239,12 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
     public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        return await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not null;
+        return await VerifyToken(authSession.AccessToken, cancellationToken) is not null;
     }
 
     public Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (authSession.AuthToken?.AccessToken is not { } idToken)
+        if (authSession.AccessToken is not { } idToken)
         {
             return Task.FromResult<UserInfo?>(null);
         }
@@ -284,7 +285,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
     public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (authSession.AuthToken?.AccessToken is not { } accessToken)
+        if (authSession.AccessToken is not { } accessToken)
         {
             return null;
         }

@@ -3,7 +3,8 @@ namespace Ivy.Auth;
 
 public enum AuthSessionProperty
 {
-    AuthToken,
+    AccessToken,
+    RefreshToken,
     AuthSessionData
 }
 
@@ -25,8 +26,11 @@ public class CheckedAuthSessionBuilder(IAuthSession innerAuthSession)
         return this;
     }
 
-    public CheckedAuthSessionBuilder WithTokenAccess(AuthSessionAccessMode accessMode)
-        => WithAccessMode(AuthSessionProperty.AuthToken, accessMode);
+    public CheckedAuthSessionBuilder WithAccessTokenAccess(AuthSessionAccessMode accessMode)
+        => WithAccessMode(AuthSessionProperty.AccessToken, accessMode);
+
+    public CheckedAuthSessionBuilder WithRefreshTokenAccess(AuthSessionAccessMode accessMode)
+        => WithAccessMode(AuthSessionProperty.RefreshToken, accessMode);
 
     public CheckedAuthSessionBuilder WithSessionDataAccess(AuthSessionAccessMode accessMode)
         => WithAccessMode(AuthSessionProperty.AuthSessionData, accessMode);
@@ -58,17 +62,31 @@ public readonly struct CheckedAuthSession(IAuthSession innerAuthSession, Diction
         }
     }
 
-    public readonly AuthToken? AuthToken
+    public readonly string? AccessToken
     {
         get
         {
-            CheckRead(AuthSessionProperty.AuthToken);
-            return _innerAuthSession.AuthToken;
+            CheckRead(AuthSessionProperty.AccessToken);
+            return _innerAuthSession.AccessToken;
         }
         set
         {
-            CheckWrite(AuthSessionProperty.AuthToken);
-            _innerAuthSession.AuthToken = value;
+            CheckWrite(AuthSessionProperty.AccessToken);
+            _innerAuthSession.AccessToken = value;
+        }
+    }
+
+    public readonly string? RefreshToken
+    {
+        get
+        {
+            CheckRead(AuthSessionProperty.RefreshToken);
+            return _innerAuthSession.RefreshToken;
+        }
+        set
+        {
+            CheckWrite(AuthSessionProperty.RefreshToken);
+            _innerAuthSession.RefreshToken = value;
         }
     }
 

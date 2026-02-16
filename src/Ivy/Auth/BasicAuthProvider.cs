@@ -128,13 +128,13 @@ public class BasicAuthProvider : IAuthProvider
     public Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         // Check that refresh token is provided
-        if (string.IsNullOrEmpty(authSession.AuthToken?.RefreshToken))
+        if (string.IsNullOrEmpty(authSession.RefreshToken))
         {
             return Task.FromResult<AuthToken?>(null);
         }
 
         // Validate refresh token
-        if (ValidateToken(authSession.AuthToken.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
+        if (ValidateToken(authSession.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
         {
             return Task.FromResult<AuthToken?>(null);
         }
@@ -157,6 +157,8 @@ public class BasicAuthProvider : IAuthProvider
         }
 
         var newToken = CreateToken(user, now, authTime);
+        authSession.AccessToken = newToken.AccessToken;
+        authSession.RefreshToken = newToken.RefreshToken;
         return Task.FromResult<AuthToken?>(newToken);
     }
 
@@ -171,7 +173,7 @@ public class BasicAuthProvider : IAuthProvider
     }
 
     public Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    => Task.FromResult(ValidateAccessToken(authSession.AuthToken?.AccessToken));
+    => Task.FromResult(ValidateAccessToken(authSession.AccessToken));
 
     private bool ValidateAccessToken(string? token)
     {
@@ -180,7 +182,7 @@ public class BasicAuthProvider : IAuthProvider
 
     public Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (ValidateToken(authSession.AuthToken?.AccessToken, _audience, "access") is not var (principal, _) ||
+        if (ValidateToken(authSession.AccessToken, _audience, "access") is not var (principal, _) ||
             principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
         {
             return Task.FromResult<UserInfo?>(null);
@@ -196,7 +198,7 @@ public class BasicAuthProvider : IAuthProvider
 
     public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (ValidateToken(authSession.AuthToken?.AccessToken, _audience, "access") is var (_, expiration))
+        if (ValidateToken(authSession.AccessToken, _audience, "access") is var (_, expiration))
         {
             return Task.FromResult<TokenLifetime?>(new TokenLifetime(expiration));
         }

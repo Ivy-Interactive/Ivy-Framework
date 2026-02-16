@@ -29,7 +29,9 @@ public static class SessionHelpers
 
             if (resetTokenAndReload)
             {
-                authService.GetAuthSession().AuthToken = null;
+                var authSession = authService.GetAuthSession();
+                authSession.AccessToken = null;
+                authSession.RefreshToken = null;
                 authService.SetAuthTokenCookies(reloadPage: true, triggerMachineReload: triggerMachineReload);
             }
 

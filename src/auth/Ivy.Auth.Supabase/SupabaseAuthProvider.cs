@@ -163,16 +163,21 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (authSession.AuthToken is not { } token || token.RefreshToken == null)
+        if (authSession.AccessToken == null || authSession.RefreshToken == null)
         {
             return null;
         }
 
         try
         {
-            var session = await _client.Auth.SetSession(token.AccessToken, token.RefreshToken, forceAccessTokenRefresh: true)
+            var session = await _client.Auth.SetSession(authSession.AccessToken, authSession.RefreshToken, forceAccessTokenRefresh: true)
                 .WaitAsync(cancellationToken);
             var authToken = MakeAuthToken(session);
+            if (authToken != null)
+            {
+                authSession.AccessToken = authToken.AccessToken;
+                authSession.RefreshToken = authToken.RefreshToken;
+            }
             return authToken;
         }
         catch (Exception)
@@ -183,12 +188,12 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        return await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not null;
+        return await VerifyToken(authSession.AccessToken, cancellationToken) is not null;
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
+        if (await VerifyToken(authSession.AccessToken, cancellationToken) is not var (claims, _))
         {
             return null;
         }
@@ -240,7 +245,7 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is var (_, expiration))
+        if (await VerifyToken(authSession.AccessToken, cancellationToken) is var (_, expiration))
         {
             return new TokenLifetime(expiration);
         }

@@ -114,7 +114,7 @@ public static class AuthHelper
 
     private static async Task ValidateAuth(IServiceProvider serviceProvider, AuthSession authSession, CancellationToken cancellationToken)
     {
-        if (authSession.AuthToken == null || string.IsNullOrEmpty(authSession.AuthToken.AccessToken))
+        if (string.IsNullOrEmpty(authSession.AccessToken))
         {
             throw new MissingAuthTokenException();
         }
@@ -197,7 +197,10 @@ public static class AuthHelper
                 token = token with { RefreshToken = extRefreshTokenValue };
             }
 
-            return new(httpMessageHandler, token, authSessionDataValue);
+            var authSession = new AuthSession(httpMessageHandler, authSessionData: authSessionDataValue);
+            authSession.AccessToken = token.AccessToken;
+            authSession.RefreshToken = token.RefreshToken;
+            return authSession;
         }
         catch (Exception)
         {

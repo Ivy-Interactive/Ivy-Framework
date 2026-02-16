@@ -118,7 +118,7 @@ public class GitHubAuthProvider : IAuthProvider
     /// <summary>Validate access token via GitHub API</summary>
     public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        var token = authSession.AuthToken?.AccessToken;
+        var token = authSession.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
             return false;
 
@@ -141,7 +141,7 @@ public class GitHubAuthProvider : IAuthProvider
     /// <summary>Get user info from GitHub API</summary>
     public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        var token = authSession.AuthToken?.AccessToken;
+        var token = authSession.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
             return null;
 

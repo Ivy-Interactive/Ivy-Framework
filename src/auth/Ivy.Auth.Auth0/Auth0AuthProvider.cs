@@ -144,7 +144,7 @@ public class Auth0AuthProvider : IAuthProvider
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (authSession.AuthToken is not { } token || token.RefreshToken == null)
+        if (authSession.RefreshToken == null)
         {
             return null;
         }
@@ -155,11 +155,13 @@ public class Auth0AuthProvider : IAuthProvider
             {
                 ClientId = _clientId,
                 ClientSecret = _clientSecret,
-                RefreshToken = token.RefreshToken
+                RefreshToken = authSession.RefreshToken
             };
 
             var response = await _authClient.GetTokenAsync(request, cancellationToken);
-            return new AuthToken(response.AccessToken, response.RefreshToken ?? token.RefreshToken);
+            authSession.AccessToken = response.AccessToken;
+            authSession.RefreshToken = response.RefreshToken ?? authSession.RefreshToken;
+            return new AuthToken(response.AccessToken, response.RefreshToken ?? authSession.RefreshToken);
         }
         catch (Exception)
         {
@@ -206,12 +208,12 @@ public class Auth0AuthProvider : IAuthProvider
 
     public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        return (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken)) is not null;
+        return (await VerifyToken(authSession.AccessToken, cancellationToken)) is not null;
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
+        if (await VerifyToken(authSession.AccessToken, cancellationToken) is not var (claims, _))
         {
             return null;
         }
@@ -230,7 +232,7 @@ public class Auth0AuthProvider : IAuthProvider
 
     public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (authSession.AuthToken?.AccessToken is not { } accessToken)
+        if (authSession.AccessToken is not { } accessToken)
         {
             return null;
         }

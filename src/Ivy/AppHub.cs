@@ -103,7 +103,7 @@ public class AppHub(
                 oldSession = authSession.TakeSnapshot();
                 try
                 {
-                    if (!string.IsNullOrEmpty(oldSession.AuthToken?.AccessToken))
+                    if (!string.IsNullOrEmpty(oldSession.AccessToken))
                     {
                         var isValid = await TimeoutHelper.WithTimeoutAsync(
                             ct => authProvider.ValidateAccessTokenAsync(authSession, ct),
@@ -116,16 +116,18 @@ public class AppHub(
                     }
                     else
                     {
-                        authSession.AuthToken = null;
+                        authSession.AccessToken = null;
+                        authSession.RefreshToken = null;
                     }
                 }
                 catch (Exception ex)
                 {
                     logger.LogWarning(ex, "Auth validation or refresh failed during connection setup.");
-                    authSession.AuthToken = null;
+                    authSession.AccessToken = null;
+                    authSession.RefreshToken = null;
                 }
 
-                if (authSession.AuthToken == null && parentId != null)
+                if (authSession.AccessToken == null && parentId != null)
                 {
                     await authService.LogoutAsync(Context.ConnectionAborted);
                 }
@@ -359,13 +361,13 @@ public class AppHub(
                 {
                     case AuthRefreshState.Initial:
                         logger.LogInformation("AuthRefreshLoop: Initialized for {ConnectionId}.", connectionId);
-                        state = authSession.AuthToken == null
+                        state = authSession.AccessToken == null
                             ? AuthRefreshState.HasNoToken
                             : AuthRefreshState.HasToken;
                         break;
 
                     case AuthRefreshState.HasNoToken:
-                        if (authSession.AuthToken != null)
+                        if (authSession.AccessToken != null)
                         {
                             state = AuthRefreshState.HasToken;
                         }
@@ -378,7 +380,7 @@ public class AppHub(
 
                     case AuthRefreshState.HasToken:
                         {
-                            if (authSession.AuthToken == null)
+                            if (authSession.AccessToken == null)
                             {
                                 logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}.", connectionId);
                                 await AbandonConnection(connectionId, resetTokenAndReload: true);
@@ -437,14 +439,14 @@ public class AppHub(
                         {
                             var oldSession = authSession.TakeSnapshot();
                             await authService.RefreshAccessTokenAsync(cancellationToken);
-                            if (state == AuthRefreshState.TokenInvalid && authSession.AuthToken == oldSession.AuthToken)
+                            if (state == AuthRefreshState.TokenInvalid && authSession.AccessToken == oldSession.AccessToken && authSession.RefreshToken == oldSession.RefreshToken)
                             {
                                 // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).
                                 // It is still good to handle it here to avoid an infinite loop.
                                 logger.LogError("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
                                 await authService.LogoutAsync(cancellationToken);
                             }
-                            if (authSession.AuthToken == null)
+                            if (authSession.AccessToken == null)
                             {
                                 logger.LogError("AuthRefreshLoop: Token refresh failed for {ConnectionId}, aborting connection.", connectionId);
                                 // Setting the token and reloading will have already happened above if null.
