@@ -49,37 +49,22 @@ public static class CookieRegistryExtensions
     {
         if (string.IsNullOrEmpty(authToken?.AccessToken))
         {
-            cookies.Delete("auth_token");
-            cookies.Delete("auth_ext_refresh_token");
+            cookies.Delete("auth_access_token");
+            cookies.Delete("auth_refresh_token");
         }
         else
         {
             var cookieOptions = CreateAuthCookieOptions();
+            cookies.Append("auth_access_token", authToken.AccessToken, cookieOptions);
 
-            var tokenJson = JsonSerializer.Serialize(authToken, JsonHelper.DefaultOptions);
-
-            // Calculate url-encoded token length
-            var tokenJsonLength = WebUtility.UrlEncode(tokenJson).Length;
-            var refreshTokenLength = authToken.RefreshToken != null
-                ? WebUtility.UrlEncode(authToken.RefreshToken).Length
-                : 0;
-
-            // If the token is too big, try putting the refresh token into its own cookie.
-            // I'm not trying to be overly precise here.
-            const int CookieSizeLimit = 4000;
-
-            if (tokenJsonLength > CookieSizeLimit && tokenJsonLength - refreshTokenLength < CookieSizeLimit)
+            if (string.IsNullOrEmpty(authToken.RefreshToken))
             {
-                var refreshToken = authToken.RefreshToken!; // non-nullness implied by condition above
-                var modifiedToken = authToken with { RefreshToken = null };
-                tokenJson = JsonSerializer.Serialize(modifiedToken, JsonHelper.DefaultOptions);
-                cookies.Append("auth_ext_refresh_token", refreshToken, cookieOptions);
+                cookies.Delete("auth_refresh_token");
             }
             else
             {
-                cookies.Delete("auth_ext_refresh_token");
+                cookies.Append("auth_refresh_token", authToken.RefreshToken, cookieOptions);
             }
-            cookies.Append("auth_token", tokenJson, cookieOptions);
         }
     }
 

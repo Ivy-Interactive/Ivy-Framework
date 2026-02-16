@@ -15,13 +15,13 @@ namespace Ivy.Helpers;
 public static class AuthHelper
 {
     public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
-    => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
-        ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
+    => GetAuthCookies(context) is (var accessToken, var refreshToken, var authSessionData)
+        ? GetAuthSession(accessToken, refreshToken, authSessionData, httpMessageHandler)
         : new AuthSession(httpMessageHandler);
 
     public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
-    => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
-        ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
+    => GetAuthCookies(context) is (var accessToken, var refreshToken, var authSessionData)
+        ? GetAuthSession(accessToken, refreshToken, authSessionData, httpMessageHandler)
         : new AuthSession(httpMessageHandler);
 
     public static async Task ValidateAuthIfRequired(Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
@@ -141,16 +141,16 @@ public static class AuthHelper
         }
     }
 
-    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(HttpContext context)
+    private static (string? AccessToken, string? RefreshToken, string? AuthSessionData) GetAuthCookies(HttpContext context)
     {
         var cookies = context.Request.Cookies;
-        var authTokenValue = cookies["auth_token"].NullIfEmpty();
-        var extRefreshTokenValue = cookies["auth_ext_refresh_token"].NullIfEmpty();
+        var accessToken = cookies["auth_access_token"].NullIfEmpty();
+        var refreshToken = cookies["auth_refresh_token"].NullIfEmpty();
         var authSessionDataValue = cookies["auth_session_data"].NullIfEmpty();
-        return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
+        return (accessToken, refreshToken, authSessionDataValue);
     }
 
-    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(ServerCallContext context)
+    private static (string? AccessToken, string? RefreshToken, string? AuthSessionData) GetAuthCookies(ServerCallContext context)
     {
         var cookies = context.RequestHeaders.GetValue("cookie") ?? string.Empty;
         if (string.IsNullOrEmpty(cookies))
@@ -169,42 +169,20 @@ public static class AuthHelper
                 : null;
         }
 
-        var authTokenValue = GetCookie("auth_token");
-        var extRefreshTokenValue = GetCookie("auth_ext_refresh_token");
+        var accessToken = GetCookie("auth_access_token");
+        var refreshToken = GetCookie("auth_refresh_token");
         var authSessionDataValue = GetCookie("auth_session_data");
 
-        return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
+        return (accessToken, refreshToken, authSessionDataValue);
     }
 
-    private static AuthSession GetAuthSession(string? authTokenValue, string? extRefreshTokenValue, string? authSessionDataValue, HttpMessageHandler httpMessageHandler)
+    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? authSessionDataValue, HttpMessageHandler httpMessageHandler)
     {
-        if (authTokenValue == null)
-        {
-            return new(httpMessageHandler, authSessionData: authSessionDataValue);
-        }
-
-        try
-        {
-            var token = JsonSerializer.Deserialize<AuthToken>(authTokenValue, JsonHelper.DefaultOptions);
-            if (token == null)
-            {
-                return new(httpMessageHandler, authSessionData: authSessionDataValue);
-            }
-
-            // Check if refresh token is in a separate cookie
-            if (token.RefreshToken == null)
-            {
-                token = token with { RefreshToken = extRefreshTokenValue };
-            }
-
-            var authSession = new AuthSession(httpMessageHandler, authSessionData: authSessionDataValue);
-            authSession.AccessToken = token.AccessToken;
-            authSession.RefreshToken = token.RefreshToken;
-            return authSession;
-        }
-        catch (Exception)
-        {
-            return new(httpMessageHandler, authSessionData: authSessionDataValue);
-        }
+        return new AuthSession(
+            httpMessageHandler,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            authSessionData: authSessionDataValue
+        );
     }
 }
