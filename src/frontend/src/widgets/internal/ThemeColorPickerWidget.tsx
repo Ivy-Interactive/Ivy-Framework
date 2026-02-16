@@ -55,8 +55,6 @@ const THEME_COLOR_MAPPINGS = [
   { label: 'Ri', var: '--ring' },
 ];
 
-<<<<<<< HEAD
-=======
 // Helper to convert any CSS color string to Hex
 const colorToHex = (color: string): string | null => {
   if (!color) return null;
@@ -148,8 +146,6 @@ const useThemeColor = (cssVar: string | undefined): string | undefined => {
 
   return value;
 };
-
->>>>>>> 3aebccae (init)
 const ThemeColorGrid: React.FC<{
   onSelect: (color: string) => void;
   selectedColor: string | null;
@@ -158,12 +154,7 @@ const ThemeColorGrid: React.FC<{
   const rows = 8;
   const cols = 20;
 
-<<<<<<< HEAD
-=======
-  // Theme color mappings
   // THEME_COLOR_MAPPINGS used from outer scope
-
->>>>>>> 3aebccae (init)
   const [resolvedThemeColors, setResolvedThemeColors] = React.useState<
     Record<string, string[]>
   >({});
@@ -539,38 +530,12 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
               invalid && inputStyles.invalidInput
             )}
-<<<<<<< HEAD
-            style={{
-              backgroundColor:
-                isForeground &&
-                  placeholder?.toLowerCase().endsWith('foreground') &&
-                  placeholder.toLowerCase() !== 'foreground'
-                  ? `var(--${placeholder.toLowerCase().replace(' foreground', '')})`
-                  : placeholder?.toLowerCase() === 'foreground'
-                    ? 'var(--background)'
-                    : getDisplayColor(),
-            }}
-=======
             style={{ backgroundColor: effectiveBackgroundColor }}
->>>>>>> 3aebccae (init)
           >
             <span className="sr-only">Pick a color</span>
             {isForeground && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
-<<<<<<< HEAD
-                  style={{
-                    color:
-                      (placeholder?.toLowerCase().endsWith('foreground') &&
-                        placeholder.toLowerCase() !== 'foreground') ||
-                        placeholder?.toLowerCase() === 'foreground'
-                        ? getDisplayColor()
-                        : contrastColor,
-                    fontSize: '20px',
-                    lineHeight: '1',
-                  }}
-                  className="font-extrabold"
-=======
                   style={{ color: getDisplayColor() }}
                   className={cn(
                     'font-extrabold leading-none',
@@ -578,7 +543,6 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
                     scale === Scales.Medium && 'text-2xl',
                     scale === Scales.Large && 'text-4xl'
                   )}
->>>>>>> 3aebccae (init)
                 >
                   A
                 </span>
