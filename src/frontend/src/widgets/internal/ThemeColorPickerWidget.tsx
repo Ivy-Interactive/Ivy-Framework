@@ -413,7 +413,6 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     return displayValue.startsWith('#') ? displayValue : '#000000';
   }, [displayValue]);
 
-
   // Helper to convert hex to RGB object
   const hexToRgb = (hex: string) => {
     let cleanHex = hex.replace('#', '');
