@@ -39,7 +39,7 @@ public static class UseWebhookExtensions
 
         context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.OnMount()]);
 
-        return new WebhookEndpoint(webhookId.Value, args.Scheme, args.Host);
+        return WebhookEndpoint.CreateWebhook(webhookId.Value, args.Scheme, args.Host);
     }
 }
 

@@ -59,8 +59,7 @@ public class AuthController() : Controller
             scheme = forwardedProto.ToString();
         }
         var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
-        var callbackBaseUrl = $"{scheme}://{host}/ivy/auth/callback";
-        var callback = new WebhookEndpoint(callbackId, callbackBaseUrl);
+        var callback = WebhookEndpoint.CreateAuthCallback(callbackId, scheme, host);
 
         try
         {
@@ -112,14 +111,18 @@ public class AuthController() : Controller
 
         try
         {
+            HttpMessageHandler httpMessageHandler;
             // Get the session and its HttpMessageHandler using the connectionId from the pending callback
-            if (!sessionStore.Sessions.TryGetValue(pending.ConnectionId, out var appSession))
+            if (sessionStore.Sessions.TryGetValue(pending.ConnectionId, out var appSession))
             {
-                logger.LogWarning("OAuth callback failed: Session not found for connection {ConnectionId}", pending.ConnectionId);
-                return BadRequest("Authentication error: app session expired");
+                httpMessageHandler = appSession.AppServices.GetRequiredService<HttpMessageHandler>();
+            }
+            else
+            {
+                logger.LogWarning("OAuth callback: session not found for connection {ConnectionId}. This will prevent the Clerk auth provider from working correctly. All other providers are unaffected.", pending.ConnectionId);
+                httpMessageHandler = new HttpClientHandler();
             }
 
-            var httpMessageHandler = appSession.AppServices.GetRequiredService<HttpMessageHandler>();
             var tempSession = AuthHelper.GetAuthSession(HttpContext, httpMessageHandler);
 
             var token = await authProvider.HandleOAuthCallbackAsync(tempSession, HttpContext.Request);
