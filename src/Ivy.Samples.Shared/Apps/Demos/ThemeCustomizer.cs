@@ -460,14 +460,17 @@ public class ThemeCustomizer : SampleBase
 
     public override object Build()
     {
-      return Layout.Vertical()
-              | Text.H2("Live Preview")
-              | Text.P("See your theme changes in real-time").Small().Muted()
-              | Layout.Tabs(
-                  new Tab("Components", new InteractiveThemePreview(theme)).Icon(Icons.LayoutPanelLeft),
-                  new Tab("Dashboard", new DashboardApp()).Icon(Icons.LayoutDashboard),
-                  new Tab("Colors", new ColorPalettePreview(theme)).Icon(Icons.Palette)
-              );
+        public override object Build()
+        {
+            return Layout.Vertical()
+                    | Text.H2("Live Preview")
+                    | Text.P("See your theme changes in real-time").Small().Muted()
+                    | Layout.Tabs(
+                        new Tab("Components", new InteractiveThemePreview(theme)).Icon(Icons.LayoutPanelLeft),
+                        new Tab("Dashboard", new DashboardApp()).Icon(Icons.LayoutDashboard)
+                    // new Tab("Colors", new ColorPalettePreview(theme)).Icon(Icons.Palette)
+                    );
+        }
     }
   }
 

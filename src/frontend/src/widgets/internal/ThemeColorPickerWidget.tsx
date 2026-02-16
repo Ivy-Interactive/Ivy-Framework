@@ -154,7 +154,6 @@ const ThemeColorGrid: React.FC<{
   const rows = 8;
   const cols = 20;
 
-  // THEME_COLOR_MAPPINGS used from outer scope
   const [resolvedThemeColors, setResolvedThemeColors] = React.useState<
     Record<string, string[]>
   >({});
@@ -413,6 +412,16 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     return displayValue.startsWith('#') ? displayValue : '#000000';
   }, [displayValue]);
 
+  // Helper to determine contrast color for the "A"
+  const getContrastColor = (hex: string): string => {
+    if (!hex || !hex.startsWith('#')) return '#000000';
+    const r = parseInt(hex.substring(1, 3), 16);
+    const g = parseInt(hex.substring(3, 5), 16);
+    const b = parseInt(hex.substring(5, 7), 16);
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    return yiq >= 128 ? '#000000' : '#FFFFFF';
+  };
+
   // Helper to convert hex to RGB object
   const hexToRgb = (hex: string) => {
     let cleanHex = hex.replace('#', '');
@@ -529,19 +538,32 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
               invalid && inputStyles.invalidInput
             )}
-            style={{ backgroundColor: effectiveBackgroundColor }}
+            style={{
+              backgroundColor:
+                isForeground &&
+                placeholder?.toLowerCase().endsWith('foreground') &&
+                placeholder.toLowerCase() !== 'foreground'
+                  ? `var(--${placeholder.toLowerCase().replace(' foreground', '')})`
+                  : placeholder?.toLowerCase() === 'foreground'
+                    ? 'var(--background)'
+                    : getDisplayColor(),
+            }}
           >
             <span className="sr-only">Pick a color</span>
             {isForeground && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
-                  style={{ color: getDisplayColor() }}
-                  className={cn(
-                    'font-extrabold leading-none',
-                    scale === Scales.Small && 'text-xl',
-                    scale === Scales.Medium && 'text-2xl',
-                    scale === Scales.Large && 'text-4xl'
-                  )}
+                  style={{
+                    color:
+                      (placeholder?.toLowerCase().endsWith('foreground') &&
+                        placeholder.toLowerCase() !== 'foreground') ||
+                      placeholder?.toLowerCase() === 'foreground'
+                        ? getDisplayColor()
+                        : contrastColor,
+                    fontSize: '20px',
+                    lineHeight: '1',
+                  }}
+                  className="font-extrabold"
                 >
                   A
                 </span>
