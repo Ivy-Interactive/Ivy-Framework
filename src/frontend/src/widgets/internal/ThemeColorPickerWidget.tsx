@@ -55,6 +55,101 @@ const THEME_COLOR_MAPPINGS = [
   { label: 'Ri', var: '--ring' },
 ];
 
+<<<<<<< HEAD
+=======
+// Helper to convert any CSS color string to Hex
+const colorToHex = (color: string): string | null => {
+  if (!color) return null;
+  // Handle Tailwind's space-separated HSL channels (e.g., "222.2 47.4% 11.2%")
+  if (/^[\d.]+\s+[\d.]+%?\s+[\d.]+%?/.test(color)) {
+    return colorToHex(`hsl(${color})`);
+  }
+  const ctx = document.createElement('canvas').getContext('2d');
+  if (!ctx) return null;
+  ctx.fillStyle = color;
+  return ctx.fillStyle;
+};
+
+// Hook to observe a CSS variable's value
+const useThemeColor = (cssVar: string | undefined): string | undefined => {
+  const [value, setValue] = React.useState<string | undefined>(undefined);
+
+  const updateColor = React.useCallback(() => {
+    if (typeof window === 'undefined' || !cssVar) {
+      setValue(undefined);
+      return;
+    }
+    const computedStyle = getComputedStyle(document.documentElement);
+    const colorValue = computedStyle.getPropertyValue(cssVar).trim();
+    const hex = colorToHex(colorValue);
+    if (hex) setValue(hex);
+  }, [cssVar]);
+
+  React.useEffect(() => {
+    updateColor();
+    const retryTimers = [100, 300, 500, 1000].map(delay =>
+      setTimeout(updateColor, delay)
+    );
+
+    if (typeof window === 'undefined') {
+      retryTimers.forEach(clearTimeout);
+      return;
+    }
+
+    const observer = new MutationObserver(mutations => {
+      let shouldUpdate = false;
+      for (const mutation of mutations) {
+        if (
+          mutation.type === 'attributes' &&
+          (mutation.attributeName === 'style' ||
+            mutation.attributeName === 'class')
+        ) {
+          shouldUpdate = true;
+          break;
+        }
+        if (mutation.type === 'childList') {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeName === 'STYLE') {
+              shouldUpdate = true;
+              break;
+            }
+          }
+          if (!shouldUpdate) {
+            for (const node of mutation.removedNodes) {
+              if (node.nodeName === 'STYLE') {
+                shouldUpdate = true;
+                break;
+              }
+            }
+          }
+        }
+        if (shouldUpdate) break;
+      }
+
+      if (shouldUpdate) {
+        setTimeout(updateColor, 10);
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+    });
+
+    observer.observe(document.head, {
+      childList: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      retryTimers.forEach(clearTimeout);
+    };
+  }, [updateColor]);
+
+  return value;
+};
+
+>>>>>>> 3aebccae (init)
 const ThemeColorGrid: React.FC<{
   onSelect: (color: string) => void;
   selectedColor: string | null;
@@ -63,6 +158,12 @@ const ThemeColorGrid: React.FC<{
   const rows = 8;
   const cols = 20;
 
+<<<<<<< HEAD
+=======
+  // Theme color mappings
+  // THEME_COLOR_MAPPINGS used from outer scope
+
+>>>>>>> 3aebccae (init)
   const [resolvedThemeColors, setResolvedThemeColors] = React.useState<
     Record<string, string[]>
   >({});
@@ -438,6 +539,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
               invalid && inputStyles.invalidInput
             )}
+<<<<<<< HEAD
             style={{
               backgroundColor:
                 isForeground &&
@@ -448,11 +550,15 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
                     ? 'var(--background)'
                     : getDisplayColor(),
             }}
+=======
+            style={{ backgroundColor: effectiveBackgroundColor }}
+>>>>>>> 3aebccae (init)
           >
             <span className="sr-only">Pick a color</span>
             {isForeground && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
+<<<<<<< HEAD
                   style={{
                     color:
                       (placeholder?.toLowerCase().endsWith('foreground') &&
@@ -464,6 +570,15 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
                     lineHeight: '1',
                   }}
                   className="font-extrabold"
+=======
+                  style={{ color: getDisplayColor() }}
+                  className={cn(
+                    'font-extrabold leading-none',
+                    scale === Scales.Small && 'text-xl',
+                    scale === Scales.Medium && 'text-2xl',
+                    scale === Scales.Large && 'text-4xl'
+                  )}
+>>>>>>> 3aebccae (init)
                 >
                   A
                 </span>
