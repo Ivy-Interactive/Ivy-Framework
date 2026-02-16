@@ -412,6 +412,12 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     return displayValue.startsWith('#') ? displayValue : '#000000';
   }, [displayValue]);
 
+  // Helper to convert hex to other formats
+  const formatColor = React.useCallback((hex: string): string => {
+    // simplified for brevity as we forced HEX
+    return hex;
+  }, []);
+
   // Helper to determine contrast color for the "A"
   const getContrastColor = (hex: string): string => {
     if (!hex || !hex.startsWith('#')) return '#000000';
@@ -485,12 +491,6 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     </div>
   );
 
-  // Helper to convert hex to other formats
-  const formatColor = (hex: string): string => {
-    // simplified for brevity as we forced HEX
-    return hex;
-  };
-
   React.useEffect(() => {
     setLocalInputValue(formatColor(getDisplayColor()));
   }, [displayValue, colorFormat, getDisplayColor, formatColor]);
@@ -559,7 +559,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
                         placeholder.toLowerCase() !== 'foreground') ||
                       placeholder?.toLowerCase() === 'foreground'
                         ? getDisplayColor()
-                        : contrastColor,
+                        : getContrastColor(effectiveBackgroundColor),
                     fontSize: '20px',
                     lineHeight: '1',
                   }}
