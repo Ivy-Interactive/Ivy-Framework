@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/popover';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { Scales } from '@/types/scale';
+import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 
 interface ThemeColorPickerWidgetProps {
   id: string;
@@ -382,6 +383,10 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
         value={localInputValue}
         onChange={handleLocalInputChange}
         className="h-8 text-xs font-mono"
+      />
+      <CopyToClipboardButton
+        textToCopy={localInputValue}
+        className="h-8 w-8 px-0"
       />
       <div
         className="w-8 h-8 rounded-md border border-input shadow-sm shrink-0"

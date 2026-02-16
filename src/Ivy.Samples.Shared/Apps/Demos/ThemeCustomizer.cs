@@ -287,13 +287,13 @@ public class ThemeCustomizer : SampleBase
                             | new ThemeColorPicker(currentColors.MutedForeground ?? "#000000", e => UpdateColor(c => c.MutedForeground = e.Value), placeholder: "Muted Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Muted Foreground: {currentColors.MutedForeground ?? "#000000"}")
                             | new ThemeColorPicker(currentColors.Accent ?? "#000000", e => UpdateColor(c => c.Accent = e.Value), placeholder: "Accent").WithField().Medium().Description("Accent").WithTooltip($"Accent: {currentColors.Accent ?? "#000000"}")
                             | new ThemeColorPicker(currentColors.AccentForeground ?? "#000000", e => UpdateColor(c => c.AccentForeground = e.Value), placeholder: "Accent Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Accent Foreground: {currentColors.AccentForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Border ?? "#000000", e => UpdateColor(c => c.Border = e.Value), placeholder: "Border").WithField().Medium().Description("Border").WithTooltip($"Border: {currentColors.Border ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Input ?? "#000000", e => UpdateColor(c => c.Input = e.Value), placeholder: "Input").WithField().Medium().Description("Input").WithTooltip($"Input: {currentColors.Input ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Ring ?? "#000000", e => UpdateColor(c => c.Ring = e.Value), placeholder: "Ring").WithField().Medium().Description("Ring").WithTooltip($"Ring: {currentColors.Ring ?? "#000000"}")
                             | new ThemeColorPicker(currentColors.Card ?? "#000000", e => UpdateColor(c => c.Card = e.Value), placeholder: "Card").WithField().Medium().Description("Card").WithTooltip($"Card: {currentColors.Card ?? "#000000"}")
                             | new ThemeColorPicker(currentColors.CardForeground ?? "#000000", e => UpdateColor(c => c.CardForeground = e.Value), placeholder: "Card Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Card Foreground: {currentColors.CardForeground ?? "#000000"}")
                             | new ThemeColorPicker(currentColors.Popover ?? "#000000", e => UpdateColor(c => c.Popover = e.Value), placeholder: "Popover").WithField().Medium().Description("Popover").WithTooltip($"Popover: {currentColors.Popover ?? "#000000"}")
                             | new ThemeColorPicker(currentColors.PopoverForeground ?? "#000000", e => UpdateColor(c => c.PopoverForeground = e.Value), placeholder: "Popover Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Popover Foreground: {currentColors.PopoverForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Border ?? "#000000", e => UpdateColor(c => c.Border = e.Value), placeholder: "Border").WithField().Medium().Description("Border").WithTooltip($"Border: {currentColors.Border ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Input ?? "#000000", e => UpdateColor(c => c.Input = e.Value), placeholder: "Input").WithField().Medium().Description("Input").WithTooltip($"Input: {currentColors.Input ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Ring ?? "#000000", e => UpdateColor(c => c.Ring = e.Value), placeholder: "Ring").WithField().Medium().Description("Ring").WithTooltip($"Ring: {currentColors.Ring ?? "#000000"}")
       )
                 ).Height(Size.Fit()).Open()
 
@@ -634,9 +634,9 @@ public class ThemeCustomizer : SampleBase
                 {
                     OnClick = _ =>
                     {
-                        client.Toast($"{name} button clicked", "Action");
-                        return ValueTask.CompletedTask;
-                    }
+                            client.Toast($"{name} button clicked", "Action");
+                            return ValueTask.CompletedTask;
+                        }
                 }.Width(Size.Full()).Disabled(disableButtons.Value);
 
             static object GetPaginationContent(int page, int total) =>
@@ -673,26 +673,10 @@ public class ThemeCustomizer : SampleBase
                             "Warning" => CreateLoadingButton("Warning", ButtonVariant.Warning),
                             "Info" => CreateLoadingButton("Info", ButtonVariant.Info),
                             _ => CreateLoadingButton("Primary", ButtonVariant.Primary)
-                        }))
-                    | (Layout.Vertical().Align(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary());
+                        }));
 
             object BuildSecondColumn() =>
                 Layout.Vertical()
-                    | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
-                    | Text.Block("Price range").Bold()
-                    | Text.P($"Estimated monthly budget: ${price.Value}").Small()
-                    | price.ToSliderInput().Min(0).Max(2000).Step(50).Disabled(disableInputs.Value)
-                    | (Layout.Horizontal().Height(Size.Fit())
-                        | CreateLoadingButton("Primary", ButtonVariant.Primary).Loading()
-                        | CreateLoadingButton("Secondary", ButtonVariant.Secondary).Loading()
-                        | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
-                    | domain.ToTextInput().Prefix("https://").Disabled(disableInputs.Value)
-                    | dateTimeState.ToDateTimeInput()
-                        .Format("dd/MM/yyyy HH:mm:ss")
-                        .Disabled(disableInputs.Value)
-                        .WithField()
-                        .Label("DateTime")
-                        .Height(Size.Fit())
                     | new Card(
                         Layout.Vertical()
                             | Text.Block("Badge Variant Selector").Bold()
@@ -720,34 +704,7 @@ public class ThemeCustomizer : SampleBase
                                     "Info" => new Badge("Info").Info(),
                                     _ => new Badge("Primary").Primary()
                                 }).ToArray())).Height(Size.Fit())
-                    | email.ToTextInput()
-                        .Placeholder("Email (Ctrl+E)")
-                        .ShortcutKey("Ctrl+E")
-                        .Variant(TextInputs.Email)
-                        .Disabled(disableInputs.Value)
-                    | (Layout.Grid().Width(Size.Full())
-                        | (Layout.Vertical()
-                            | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars).Disabled(disableInputs.Value))
-                        | (Layout.Vertical().Align(Align.Right)
-                            | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Disabled(disableInputs.Value)));
-
-            object BuildThirdColumn() =>
-                Layout.Vertical()
-                    | new Card((Layout.Vertical() | new Chat(chatMessages.Value.ToArray(), OnChatSend).Height(Size.Px(330))).Height(Size.Fit()))
-                    | (Layout.Horizontal().Height(Size.Fit())
-                        | (Layout.Vertical() | new Box((Layout.Horizontal()
-                                | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all buttons"))
-                                | disableButtons.ToSwitchInput())))
-                        | (Layout.Vertical() | new Box((Layout.Horizontal()
-                            | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all inputs"))
-                            | disableInputs.ToSwitchInput()))))
-                    | searchText.ToSearchInput().Placeholder("Search in settings").Disabled(disableInputs.Value)
-                    | dateRangeState.ToDateRangeInput()
-                        .Disabled(disableInputs.Value)
-                        .WithField()
-                        .Label($"Date Range ({(dateRangeState.Value.to - dateRangeState.Value.from).Days} days)")
-                        .Height(Size.Fit())
-                    | new Box(
+                     | new Box(
                         Layout.Vertical().Align(Align.Center)
                         | Text.Block("Pagination demo").Bold()
                             | GetPaginationContent(paginationPage.Value, totalPages)
@@ -757,9 +714,58 @@ public class ThemeCustomizer : SampleBase
                                 return ValueTask.CompletedTask;
                             }).Disabled(disableInputs.Value)
                     )
-                    | new Box((Layout.Horizontal().Height(Size.Fit())
-                        | agreeTerms.ToBoolInput().Disabled(disableInputs.Value)
-                        | Text.Block("I agree to the terms and conditions")));
+                    | new Card(Layout.Vertical()
+                        | Text.Block("Buttons & Actions").Bold()
+                        | (Layout.Horizontal().Height(Size.Fit())
+                            | CreateLoadingButton("Primary", ButtonVariant.Primary).Loading()
+                            | CreateLoadingButton("Secondary", ButtonVariant.Secondary).Loading()
+                            | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
+                        | (Layout.Grid().Width(Size.Full())
+                            | (Layout.Vertical()
+                                | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars).Disabled(disableInputs.Value))
+                            | (Layout.Vertical().Align(Align.Right)
+                                | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Disabled(disableInputs.Value)))
+                        | new Box((Layout.Horizontal().Height(Size.Fit())
+                            | agreeTerms.ToBoolInput().Disabled(disableInputs.Value)
+                            | Text.Block("I agree to the terms and conditions")))
+                        | (Layout.Vertical().Align(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary())
+                        | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
+                    );
+
+            object BuildThirdColumn() =>
+                Layout.Vertical()
+                    | new Card((Layout.Vertical() | new Chat(chatMessages.Value.ToArray(), OnChatSend).Height(Size.Px(330))).Height(Size.Fit()))
+                    | new Card(Layout.Vertical()
+                        | Text.Block("Inputs").Bold()
+                        | searchText.ToSearchInput().Placeholder("Search in settings").Disabled(disableInputs.Value)
+                        | dateRangeState.ToDateRangeInput()
+                            .Disabled(disableInputs.Value)
+                            .WithField()
+                            .Label($"Date Range ({(dateRangeState.Value.to - dateRangeState.Value.from).Days} days)")
+                            .Height(Size.Fit())
+                        | dateTimeState.ToDateTimeInput()
+                            .Format("dd/MM/yyyy HH:mm:ss")
+                            .Disabled(disableInputs.Value)
+                            .WithField()
+                            .Label("DateTime")
+                            .Height(Size.Fit())
+                        | domain.ToTextInput().Prefix("https://").Disabled(disableInputs.Value)
+                        | email.ToTextInput()
+                            .Placeholder("Email (Ctrl+E)")
+                            .ShortcutKey("Ctrl+E")
+                            .Variant(TextInputs.Email)
+                            .Disabled(disableInputs.Value)
+                        | Text.Block("Price range").Bold()
+                        | Text.P($"Estimated monthly budget: ${price.Value}").Small()
+                        | price.ToSliderInput().Min(0).Max(2000).Step(50).Disabled(disableInputs.Value)
+                        | (Layout.Horizontal().Height(Size.Fit())
+                            | (Layout.Vertical() | new Box((Layout.Horizontal()
+                                    | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all buttons"))
+                                    | disableButtons.ToSwitchInput())))
+                            | (Layout.Vertical() | new Box((Layout.Horizontal()
+                                | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all inputs"))
+                                | disableInputs.ToSwitchInput()))))
+                    );
 
             // --- Layout -------------------------------------------------------
             return Layout.Horizontal()
