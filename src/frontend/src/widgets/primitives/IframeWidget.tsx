@@ -9,6 +9,8 @@ interface IframeWidgetProps {
   height?: string;
   refreshToken?: number;
   events?: string[];
+  outboundMessageType?: string;
+  outboundMessageToken?: string;
 }
 
 export const IframeWidget: React.FC<IframeWidgetProps> = ({
@@ -18,6 +20,8 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
   height = 'Full',
   refreshToken,
   events = [],
+  outboundMessageType,
+  outboundMessageToken,
 }) => {
   const [iframeKey, setIframeKey] = useState(id);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -50,6 +54,14 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [handleMessage]);
+
+  useEffect(() => {
+    if (!outboundMessageType || outboundMessageToken == null) return;
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: outboundMessageType, token: outboundMessageToken },
+      '*'
+    );
+  }, [outboundMessageType, outboundMessageToken]);
 
   return <iframe ref={iframeRef} src={src} key={iframeKey} style={styles} />;
 };

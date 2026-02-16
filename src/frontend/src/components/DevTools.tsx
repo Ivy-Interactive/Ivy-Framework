@@ -9,17 +9,10 @@ import {
   setWidgetContentOverride,
   clearWidgetContentOverride,
 } from '@/widgets/widgetRenderer';
-import { LuTrash2, LuTextCursor, LuCheck } from 'react-icons/lu';
+import { LuTrash2, LuTextCursor, LuSend, LuPlus } from 'react-icons/lu';
 import { FaMagic } from 'react-icons/fa';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
-// Types
-type DevToolMode = 'off' | 'modify' | 'delete' | 'text-edit';
+type DialogAction = 'modify' | 'delete' | 'text-edit';
 
 interface WidgetInfo {
   id: string;
@@ -29,32 +22,16 @@ interface WidgetInfo {
   callSite?: CallSite;
 }
 
-interface ChangeRequest {
-  id: string;
-  index: number;
-  widgetId: string;
-  widgetType: string;
-  prompt: string;
-  bounds: DOMRect;
-  callSite?: CallSite;
-  action: 'modify' | 'delete' | 'text-edit';
-  currentContent?: string;
-}
-
-// Constants
 const TEXT_EDITABLE_TYPES = ['Ivy.TextBlock', 'Ivy.Markdown'];
 
-// Utility functions
 function getWidgetBounds(wrapperElement: HTMLElement): DOMRect {
   const children = wrapperElement.children;
-  if (children.length === 0) {
-    return new DOMRect(0, 0, 0, 0);
-  }
+  if (children.length === 0) return new DOMRect(0, 0, 0, 0);
 
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
 
   for (let i = 0; i < children.length; i++) {
     const rect = children[i].getBoundingClientRect();
@@ -65,10 +42,7 @@ function getWidgetBounds(wrapperElement: HTMLElement): DOMRect {
     maxY = Math.max(maxY, rect.bottom);
   }
 
-  if (minX === Infinity) {
-    return new DOMRect(0, 0, 0, 0);
-  }
-
+  if (minX === Infinity) return new DOMRect(0, 0, 0, 0);
   return new DOMRect(minX, minY, maxX - minX, maxY - minY);
 }
 
@@ -76,10 +50,12 @@ function formatWidgetType(type: string): string {
   return type.replace(/^Ivy\./, '');
 }
 
-function getPopoverPosition(bounds: DOMRect, offsetHeight = 240) {
+function getDialogPosition(clickPos: { x: number; y: number }) {
+  const dialogWidth = 320;
+  const dialogHeight = 280;
   return {
-    top: Math.min(bounds.top, window.innerHeight - offsetHeight),
-    left: Math.min(bounds.right + 10, window.innerWidth - 320),
+    top: Math.min(clickPos.y + 8, window.innerHeight - dialogHeight),
+    left: Math.min(clickPos.x, window.innerWidth - dialogWidth),
   };
 }
 
@@ -92,19 +68,18 @@ function getTextContent(
     element.getAttribute('data-content') || element.textContent || '';
   if (!content) return undefined;
   const trimmed = content.trim();
-  if (trimmed.length > 50) {
+  if (trimmed.length > 50)
     return trimmed.substring(0, 50).trim() + ' (truncated)';
-  }
   return trimmed;
 }
 
-// Sub-components
-interface MicButtonProps {
+function MicButton({
+  listening,
+  onClick,
+}: {
   listening: boolean;
   onClick: () => void;
-}
-
-function MicButton({ listening, onClick }: MicButtonProps) {
+}) {
   return (
     <button
       onClick={onClick}
@@ -128,159 +103,30 @@ function MicButton({ listening, onClick }: MicButtonProps) {
   );
 }
 
-interface ToolbarButtonProps {
-  icon: React.ReactNode;
-  tooltip: string;
-  isActive: boolean;
-  activeClass: string;
-  onClick: () => void;
-}
-
-function ToolbarButton({
-  icon,
-  tooltip,
-  isActive,
-  activeClass,
-  onClick,
-}: ToolbarButtonProps) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          onClick={onClick}
-          className={`ivy-devtools-icon-btn ${isActive ? activeClass : 'ivy-devtools-btn-muted'}`}
-        >
-          {icon}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" className="ivy-devtools-tooltip">
-        {tooltip}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-interface DevToolsPopoverProps {
-  widget: WidgetInfo;
-  value: string;
-  transcript: string;
-  listening: boolean;
-  isEditing: boolean;
-  placeholder: string;
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
-  browserSupportsSpeechRecognition: boolean;
-  onChange: (value: string) => void;
-  onCancel: () => void;
-  onDelete: () => void;
-  onDone: () => void;
-  onToggleDictation: () => void;
-}
-
-function DevToolsPopover({
-  widget,
-  value,
-  transcript,
-  listening,
-  isEditing,
-  placeholder,
-  textareaRef,
-  browserSupportsSpeechRecognition,
-  onChange,
-  onCancel,
-  onDelete,
-  onDone,
-  onToggleDictation,
-}: DevToolsPopoverProps) {
-  const position = getPopoverPosition(widget.bounds);
-  const displayValue = listening
-    ? value + (transcript ? ' ' + transcript : '')
-    : value;
-
-  return (
-    <div className="ivy-devtools ivy-devtools-popover" style={position}>
-      <div className="ivy-devtools-popover-header">
-        <span className="ivy-devtools-popover-type">
-          {formatWidgetType(widget.type)}
-        </span>
-        {widget.callSite?.filePath && (
-          <span className="ivy-devtools-callsite-muted">
-            {widget.callSite.filePath.split(/[/\\]/).pop()}:
-            {widget.callSite.lineNumber}
-          </span>
-        )}
-      </div>
-      <div className="ivy-devtools-textarea-wrapper">
-        <textarea
-          ref={textareaRef}
-          value={displayValue}
-          onChange={e => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="ivy-devtools-textarea"
-          readOnly={listening}
-        />
-        {browserSupportsSpeechRecognition && (
-          <MicButton listening={listening} onClick={onToggleDictation} />
-        )}
-      </div>
-      <div className="ivy-devtools-popover-actions">
-        {isEditing ? (
-          <button
-            onClick={onDelete}
-            className="ivy-devtools-btn ivy-devtools-btn-destructive"
-          >
-            Delete
-          </button>
-        ) : (
-          <button
-            onClick={onCancel}
-            className="ivy-devtools-btn ivy-devtools-btn-muted"
-          >
-            Cancel
-          </button>
-        )}
-        <button
-          onClick={onDone}
-          className="ivy-devtools-btn ivy-devtools-btn-primary"
-        >
-          Done
-        </button>
-      </div>
-      <div className="ivy-devtools-popover-hint">
-        Ctrl+Enter to save · Esc to {isEditing ? 'delete' : 'cancel'} ·
-        Ctrl+Space to dictate
-      </div>
-    </div>
-  );
-}
-
-// Main component
 export function DevTools() {
-  // Core state
-  const [mode, setMode] = useState<DevToolMode>('off');
-  const [highlightedWidget, setHighlightedWidget] = useState<WidgetInfo | null>(
-    null
-  );
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'DEVTOOLS_SET_ENABLED') {
+        setEnabled(e.data.token === 'true');
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const [highlightedWidget, setHighlightedWidget] =
+    useState<WidgetInfo | null>(null);
   const [widgetStack, setWidgetStack] = useState<HTMLElement[]>([]);
 
-  // Modify mode state
-  const [selectedWidget, setSelectedWidget] = useState<WidgetInfo | null>(null);
-  const [popoverText, setPopoverText] = useState('');
+  const [dialogWidget, setDialogWidget] = useState<WidgetInfo | null>(null);
+  const [dialogAction, setDialogAction] = useState<DialogAction>('modify');
+  const [dialogText, setDialogText] = useState('');
+  const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
 
-  // Text-edit mode state
-  const [textEditWidget, setTextEditWidget] = useState<WidgetInfo | null>(null);
-  const [textEditValue, setTextEditValue] = useState('');
-  const [originalTextValue, setOriginalTextValue] = useState('');
-
-  // Change requests state
-  const [changeRequests, setChangeRequests] = useState<ChangeRequest[]>([]);
-  const [editingRequestId, setEditingRequestId] = useState<string | null>(null);
-  const [nextIndex, setNextIndex] = useState(1);
-
-  // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const textEditRef = useRef<HTMLTextAreaElement>(null);
 
-  // Speech recognition
   const {
     transcript,
     listening,
@@ -288,7 +134,6 @@ export function DevTools() {
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
 
-  // Helper functions
   const getWidgetInfo = useCallback((element: HTMLElement): WidgetInfo => {
     const widgetId = element.getAttribute('id')!;
     const widgetType = element.getAttribute('type')!;
@@ -297,31 +142,30 @@ export function DevTools() {
     return { id: widgetId, type: widgetType, element, bounds, callSite };
   }, []);
 
-  const resetModeState = useCallback(() => {
-    setHighlightedWidget(null);
-    setWidgetStack([]);
-    setSelectedWidget(null);
-    setTextEditWidget(null);
-  }, []);
-
-  const stopDictation = useCallback(() => {
+  const closeDialog = useCallback(() => {
     if (listening) {
       SpeechRecognition.stopListening();
       resetTranscript();
     }
-  }, [listening, resetTranscript]);
+    if (dialogWidget && dialogAction === 'text-edit') {
+      clearWidgetContentOverride(dialogWidget.id);
+    }
+    setDialogWidget(null);
+    setDialogText('');
+    setDialogAction('modify');
+    setHighlightedWidget(null);
+  }, [listening, resetTranscript, dialogWidget, dialogAction]);
 
   const toggleDictation = useCallback(() => {
     if (listening) {
       SpeechRecognition.stopListening();
       if (transcript) {
-        if (textEditWidget) {
-          const newValue =
-            (textEditValue ? textEditValue + ' ' : '') + transcript;
-          setTextEditValue(newValue);
-          setWidgetContentOverride(textEditWidget.id, newValue);
-        } else {
-          setPopoverText(prev => (prev ? prev + ' ' : '') + transcript);
+        setDialogText(prev => (prev ? prev + ' ' : '') + transcript);
+        if (dialogAction === 'text-edit' && dialogWidget) {
+          setDialogText(prev => {
+            setWidgetContentOverride(dialogWidget.id, prev);
+            return prev;
+          });
         }
         resetTranscript();
       }
@@ -329,25 +173,98 @@ export function DevTools() {
       resetTranscript();
       SpeechRecognition.startListening({ continuous: true });
     }
-  }, [listening, transcript, resetTranscript, textEditWidget, textEditValue]);
+  }, [listening, transcript, resetTranscript, dialogAction, dialogWidget]);
 
-  // Mode toggle handler
-  const handleModeToggle = useCallback(
-    (newMode: DevToolMode) => {
-      if (mode === newMode) {
-        setMode('off');
-      } else {
-        setMode(newMode);
+  const postChange = useCallback(
+    (forward: boolean) => {
+      if (!dialogWidget) return;
+      if (listening) SpeechRecognition.stopListening();
+      const finalText = dialogText + (transcript ? ' ' + transcript : '');
+      resetTranscript();
+
+      const prompt =
+        dialogAction === 'delete'
+          ? finalText.trim() || 'Delete this widget'
+          : finalText.trim();
+
+      if (!prompt) {
+        closeDialog();
+        return;
       }
-      resetModeState();
+
+      const payload = [
+        {
+          widgetId: dialogWidget.id,
+          widgetType: dialogWidget.type,
+          prompt,
+          callSite: dialogWidget.callSite,
+          action: dialogAction,
+          currentContent: getTextContent(
+            dialogWidget.element,
+            dialogWidget.type
+          ),
+        },
+      ];
+
+      window.parent.postMessage(
+        { type: 'DEVTOOLS_APPLY_CHANGES', payload, forward },
+        '*'
+      );
+      closeDialog();
     },
-    [mode, resetModeState]
+    [
+      dialogWidget,
+      dialogAction,
+      dialogText,
+      listening,
+      transcript,
+      resetTranscript,
+      closeDialog,
+    ]
   );
 
-  // Event handlers
+  const handleAdd = useCallback(() => postChange(false), [postChange]);
+  const handleSend = useCallback(() => postChange(true), [postChange]);
+
+  const handleActionChange = useCallback(
+    (action: DialogAction) => {
+      if (!dialogWidget) return;
+
+      if (dialogAction === 'text-edit' && action !== 'text-edit') {
+        clearWidgetContentOverride(dialogWidget.id);
+      }
+
+      if (action === 'text-edit') {
+        const text =
+          dialogWidget.element.getAttribute('data-content') ||
+          dialogWidget.element.textContent ||
+          '';
+        setDialogText(text);
+        setWidgetContentOverride(dialogWidget.id, text);
+      } else if (dialogAction === action) {
+        return;
+      } else {
+        setDialogText('');
+      }
+
+      setDialogAction(action);
+    },
+    [dialogWidget, dialogAction]
+  );
+
+  const handleTextChange = useCallback(
+    (value: string) => {
+      setDialogText(value);
+      if (dialogAction === 'text-edit' && dialogWidget) {
+        setWidgetContentOverride(dialogWidget.id, value);
+      }
+    },
+    [dialogAction, dialogWidget]
+  );
+
   const handleMouseOver = useCallback(
     (e: MouseEvent) => {
-      if (mode === 'off' || selectedWidget || textEditWidget) return;
+      if (dialogWidget) return;
 
       const target = e.target as HTMLElement;
       if (target.closest('.ivy-devtools')) return;
@@ -361,16 +278,6 @@ export function DevTools() {
         return;
       }
 
-      // In text-edit mode, only highlight text-editable widgets
-      if (mode === 'text-edit') {
-        const widgetType = widgetWrapper.getAttribute('type');
-        if (!widgetType || !TEXT_EDITABLE_TYPES.includes(widgetType)) {
-          setHighlightedWidget(null);
-          setWidgetStack([]);
-          return;
-        }
-      }
-
       const stack: HTMLElement[] = [];
       let current: HTMLElement | null = widgetWrapper;
       while (current) {
@@ -382,12 +289,12 @@ export function DevTools() {
       setWidgetStack(stack);
       setHighlightedWidget(getWidgetInfo(widgetWrapper));
     },
-    [mode, selectedWidget, textEditWidget, getWidgetInfo]
+    [dialogWidget, getWidgetInfo]
   );
 
   const handleWheel = useCallback(
     (e: WheelEvent) => {
-      if (mode === 'off' || widgetStack.length === 0 || selectedWidget) return;
+      if (widgetStack.length === 0 || dialogWidget) return;
 
       const target = e.target as HTMLElement;
       if (target.closest('.ivy-devtools')) return;
@@ -409,12 +316,12 @@ export function DevTools() {
         setHighlightedWidget(getWidgetInfo(widgetStack[newIndex]));
       }
     },
-    [mode, widgetStack, highlightedWidget, selectedWidget, getWidgetInfo]
+    [widgetStack, highlightedWidget, dialogWidget, getWidgetInfo]
   );
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
-      if (mode === 'off' || selectedWidget || textEditWidget) return;
+      if (dialogWidget) return;
 
       const target = e.target as HTMLElement;
       if (target.closest('.ivy-devtools')) return;
@@ -424,250 +331,29 @@ export function DevTools() {
 
       if (!highlightedWidget) return;
 
-      if (mode === 'modify') {
-        setSelectedWidget(highlightedWidget);
-        setPopoverText('');
-        setEditingRequestId(null);
-        resetTranscript();
-        setTimeout(() => textareaRef.current?.focus(), 0);
-      } else if (mode === 'delete') {
-        const newRequest: ChangeRequest = {
-          id: crypto.randomUUID(),
-          index: nextIndex,
-          widgetId: highlightedWidget.id,
-          widgetType: highlightedWidget.type,
-          prompt: 'Delete this widget',
-          bounds: highlightedWidget.bounds,
-          callSite: highlightedWidget.callSite,
-          action: 'delete',
-          currentContent: getTextContent(
-            highlightedWidget.element,
-            highlightedWidget.type
-          ),
-        };
-        setChangeRequests(prev => [...prev, newRequest]);
-        setNextIndex(prev => prev + 1);
-      } else if (mode === 'text-edit') {
-        const text =
-          highlightedWidget.element.getAttribute('data-content') ||
-          highlightedWidget.element.textContent ||
-          '';
-        setTextEditWidget(highlightedWidget);
-        setTextEditValue(text);
-        setOriginalTextValue(text);
-        resetTranscript();
-        setTimeout(() => {
-          if (textEditRef.current) {
-            textEditRef.current.focus();
-            textEditRef.current.setSelectionRange(text.length, text.length);
-          }
-        }, 0);
-      }
+      setClickPosition({ x: e.clientX, y: e.clientY });
+      setDialogWidget(highlightedWidget);
+      setDialogAction('modify');
+      setDialogText('');
+      resetTranscript();
+      setTimeout(() => textareaRef.current?.focus(), 0);
     },
-    [
-      mode,
-      highlightedWidget,
-      selectedWidget,
-      textEditWidget,
-      resetTranscript,
-      nextIndex,
-    ]
+    [highlightedWidget, dialogWidget, resetTranscript]
   );
 
-  // Modify popover handlers
-  const handleModifyCancel = useCallback(() => {
-    stopDictation();
-    setSelectedWidget(null);
-    setPopoverText('');
-    setEditingRequestId(null);
-    setHighlightedWidget(null);
-  }, [stopDictation]);
-
-  const handleModifyDelete = useCallback(() => {
-    stopDictation();
-    if (editingRequestId) {
-      setChangeRequests(prev => prev.filter(r => r.id !== editingRequestId));
-    }
-    setSelectedWidget(null);
-    setPopoverText('');
-    setEditingRequestId(null);
-    setHighlightedWidget(null);
-  }, [editingRequestId, stopDictation]);
-
-  const handleModifyDone = useCallback(() => {
-    if (listening) {
-      SpeechRecognition.stopListening();
-    }
-    const finalText = popoverText + (transcript ? ' ' + transcript : '');
-    resetTranscript();
-
-    if (selectedWidget && finalText.trim()) {
-      if (editingRequestId) {
-        setChangeRequests(prev =>
-          prev.map(r =>
-            r.id === editingRequestId
-              ? {
-                  ...r,
-                  prompt: finalText.trim(),
-                  bounds: selectedWidget.bounds,
-                }
-              : r
-          )
-        );
-      } else {
-        const newRequest: ChangeRequest = {
-          id: crypto.randomUUID(),
-          index: nextIndex,
-          widgetId: selectedWidget.id,
-          widgetType: selectedWidget.type,
-          prompt: finalText.trim(),
-          bounds: selectedWidget.bounds,
-          callSite: selectedWidget.callSite,
-          action: 'modify',
-          currentContent: getTextContent(
-            selectedWidget.element,
-            selectedWidget.type
-          ),
-        };
-        setChangeRequests(prev => [...prev, newRequest]);
-        setNextIndex(prev => prev + 1);
-      }
-    }
-    setSelectedWidget(null);
-    setPopoverText('');
-    setEditingRequestId(null);
-    setHighlightedWidget(null);
-  }, [
-    selectedWidget,
-    popoverText,
-    editingRequestId,
-    nextIndex,
-    listening,
-    transcript,
-    resetTranscript,
-  ]);
-
-  // Text-edit popover handlers
-  const handleTextEditChange = useCallback(
-    (newValue: string) => {
-      setTextEditValue(newValue);
-      if (textEditWidget) {
-        setWidgetContentOverride(textEditWidget.id, newValue);
-      }
-    },
-    [textEditWidget]
-  );
-
-  const handleTextEditCancel = useCallback(() => {
-    stopDictation();
-    if (textEditWidget) {
-      clearWidgetContentOverride(textEditWidget.id);
-    }
-    setTextEditWidget(null);
-    setTextEditValue('');
-    setOriginalTextValue('');
-    setEditingRequestId(null);
-    setHighlightedWidget(null);
-  }, [textEditWidget, stopDictation]);
-
-  const handleTextEditDelete = useCallback(() => {
-    stopDictation();
-    if (textEditWidget) {
-      clearWidgetContentOverride(textEditWidget.id);
-    }
-    if (editingRequestId) {
-      setChangeRequests(prev => prev.filter(r => r.id !== editingRequestId));
-    }
-    setTextEditWidget(null);
-    setTextEditValue('');
-    setOriginalTextValue('');
-    setEditingRequestId(null);
-    setHighlightedWidget(null);
-  }, [textEditWidget, editingRequestId, stopDictation]);
-
-  const handleTextEditDone = useCallback(() => {
-    if (listening) {
-      SpeechRecognition.stopListening();
-    }
-    const finalText = textEditValue + (transcript ? ' ' + transcript : '');
-    resetTranscript();
-
-    if (textEditWidget && finalText !== originalTextValue) {
-      setWidgetContentOverride(textEditWidget.id, finalText);
-
-      if (editingRequestId) {
-        setChangeRequests(prev =>
-          prev.map(r =>
-            r.id === editingRequestId
-              ? { ...r, prompt: finalText, bounds: textEditWidget.bounds }
-              : r
-          )
-        );
-      } else {
-        const newRequest: ChangeRequest = {
-          id: crypto.randomUUID(),
-          index: nextIndex,
-          widgetId: textEditWidget.id,
-          widgetType: textEditWidget.type,
-          prompt: finalText,
-          bounds: textEditWidget.bounds,
-          callSite: textEditWidget.callSite,
-          action: 'text-edit',
-          currentContent: getTextContent(
-            textEditWidget.element,
-            textEditWidget.type
-          ),
-        };
-        setChangeRequests(prev => [...prev, newRequest]);
-        setNextIndex(prev => prev + 1);
-      }
-    }
-    setTextEditWidget(null);
-    setTextEditValue('');
-    setOriginalTextValue('');
-    setEditingRequestId(null);
-    setHighlightedWidget(null);
-  }, [
-    textEditWidget,
-    textEditValue,
-    originalTextValue,
-    nextIndex,
-    editingRequestId,
-    listening,
-    transcript,
-    resetTranscript,
-  ]);
-
-  // Keyboard handler
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (textEditWidget) {
-          if (editingRequestId) {
-            handleTextEditDelete();
-          } else {
-            handleTextEditCancel();
-          }
-        } else if (selectedWidget) {
-          if (editingRequestId) {
-            handleModifyDelete();
-          } else {
-            handleModifyCancel();
-          }
-        } else if (mode !== 'off') {
-          setMode('off');
-          resetModeState();
-        }
+      if (e.key === 'Escape' && dialogWidget) {
+        closeDialog();
       }
-      if (e.key === 'Enter' && e.ctrlKey) {
+      if (e.key === 'Enter' && e.ctrlKey && dialogWidget) {
         e.preventDefault();
-        if (selectedWidget) handleModifyDone();
-        else if (textEditWidget) handleTextEditDone();
+        handleAdd();
       }
       if (
         e.key === ' ' &&
         e.ctrlKey &&
-        (selectedWidget || textEditWidget) &&
+        dialogWidget &&
         browserSupportsSpeechRecognition
       ) {
         e.preventDefault();
@@ -675,94 +361,18 @@ export function DevTools() {
       }
     },
     [
-      mode,
-      selectedWidget,
-      textEditWidget,
-      editingRequestId,
-      resetModeState,
-      handleModifyCancel,
-      handleModifyDelete,
-      handleModifyDone,
-      handleTextEditCancel,
-      handleTextEditDelete,
-      handleTextEditDone,
+      dialogWidget,
+      closeDialog,
+      handleAdd,
       browserSupportsSpeechRecognition,
       toggleDictation,
     ]
   );
 
-  // Marker click handler
-  const handleMarkerClick = useCallback(
-    (request: ChangeRequest) => {
-      if (request.action === 'delete') {
-        setChangeRequests(prev => prev.filter(r => r.id !== request.id));
-        return;
-      }
-
-      const element = document.querySelector(
-        `ivy-widget[id="${request.widgetId}"]`
-      ) as HTMLElement | null;
-      if (!element) return;
-
-      const widgetInfo = getWidgetInfo(element);
-
-      if (request.action === 'text-edit') {
-        const originalContent = element.getAttribute('data-content') || '';
-        setTextEditWidget(widgetInfo);
-        setTextEditValue(request.prompt);
-        setOriginalTextValue(originalContent);
-        setEditingRequestId(request.id);
-        resetTranscript();
-        setTimeout(() => {
-          if (textEditRef.current) {
-            textEditRef.current.focus();
-            textEditRef.current.setSelectionRange(
-              request.prompt.length,
-              request.prompt.length
-            );
-          }
-        }, 0);
-      } else {
-        setSelectedWidget(widgetInfo);
-        setPopoverText(request.prompt);
-        setEditingRequestId(request.id);
-        resetTranscript();
-        setTimeout(() => {
-          if (textareaRef.current) {
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(
-              request.prompt.length,
-              request.prompt.length
-            );
-          }
-        }, 0);
-      }
-    },
-    [getWidgetInfo, resetTranscript]
-  );
-
-  // Apply changes handler
-  const handleApplyChanges = useCallback(() => {
-    const payload = changeRequests.map(
-      ({ widgetId, widgetType, prompt, callSite, action, currentContent }) => ({
-        widgetId,
-        widgetType,
-        prompt,
-        callSite,
-        action,
-        currentContent,
-      })
-    );
-    window.parent.postMessage({ type: 'DEVTOOLS_APPLY_CHANGES', payload }, '*');
-    setChangeRequests([]);
-    setNextIndex(1);
-    setMode('off');
-    resetModeState();
-  }, [changeRequests, resetModeState]);
-
-  // Event listeners effect
   useEffect(() => {
-    if (mode !== 'off' && !selectedWidget && !textEditWidget) {
+    if (!enabled) return;
+
+    if (!dialogWidget) {
       document.addEventListener('mouseover', handleMouseOver, true);
       document.addEventListener('click', handleClick, true);
       document.addEventListener('wheel', handleWheel, {
@@ -782,30 +392,22 @@ export function DevTools() {
       document.body.style.cursor = '';
     };
   }, [
-    mode,
-    selectedWidget,
-    textEditWidget,
+    enabled,
+    dialogWidget,
     handleMouseOver,
     handleClick,
     handleKeyDown,
     handleWheel,
   ]);
 
-  // Highlight overlay effect
   useEffect(() => {
-    if (!highlightedWidget || selectedWidget || textEditWidget) return;
+    if (!enabled || !highlightedWidget || dialogWidget) return;
 
     const { bounds, type } = highlightedWidget;
     if (bounds.width === 0 && bounds.height === 0) return;
 
     const overlay = document.createElement('div');
-    overlay.className = `ivy-devtools ivy-devtools-overlay ${
-      mode === 'delete'
-        ? 'ivy-devtools-overlay-delete'
-        : mode === 'text-edit'
-          ? 'ivy-devtools-overlay-text-edit'
-          : ''
-    }`;
+    overlay.className = 'ivy-devtools ivy-devtools-overlay';
     Object.assign(overlay.style, {
       top: `${bounds.top}px`,
       left: `${bounds.left}px`,
@@ -814,119 +416,98 @@ export function DevTools() {
     });
 
     const label = document.createElement('div');
-    label.className = `ivy-devtools-label ${
-      mode === 'delete'
-        ? 'ivy-devtools-label-delete'
-        : mode === 'text-edit'
-          ? 'ivy-devtools-label-text-edit'
-          : ''
-    }`;
+    label.className = 'ivy-devtools-label';
     label.innerHTML = `<div class="ivy-devtools-label-type">${formatWidgetType(type)}</div>`;
     overlay.appendChild(label);
     document.body.appendChild(overlay);
 
     return () => overlay.remove();
-  }, [highlightedWidget, selectedWidget, textEditWidget, mode]);
+  }, [enabled, highlightedWidget, dialogWidget]);
+
+  const displayValue = listening
+    ? dialogText + (transcript ? ' ' + transcript : '')
+    : dialogText;
+
+  if (!enabled) return null;
 
   return (
     <div className="ivy-devtools-container">
-      {/* Toolbar */}
-      <TooltipProvider delayDuration={300}>
-        <div className="ivy-devtools ivy-devtools-toolbar">
-          {changeRequests.length > 0 && (
-            <button
-              onClick={handleApplyChanges}
-              className="ivy-devtools-apply-btn"
-            >
-              <LuCheck size={16} />
-              <span>Apply Changes</span>
-              <span className="ivy-devtools-badge">
-                {changeRequests.length}
-              </span>
-            </button>
-          )}
-          <ToolbarButton
-            icon={<FaMagic size={14} />}
-            tooltip="Modify"
-            isActive={mode === 'modify'}
-            activeClass="ivy-devtools-btn-primary"
-            onClick={() => handleModeToggle('modify')}
-          />
-          <ToolbarButton
-            icon={<LuTrash2 size={16} />}
-            tooltip="Delete"
-            isActive={mode === 'delete'}
-            activeClass="ivy-devtools-btn-destructive"
-            onClick={() => handleModeToggle('delete')}
-          />
-          <ToolbarButton
-            icon={<LuTextCursor size={16} />}
-            tooltip="Text Edit"
-            isActive={mode === 'text-edit'}
-            activeClass="ivy-devtools-btn-blue"
-            onClick={() => handleModeToggle('text-edit')}
-          />
-        </div>
-      </TooltipProvider>
-
-      {/* Modify Popover */}
-      {selectedWidget && (
-        <DevToolsPopover
-          widget={selectedWidget}
-          value={popoverText}
-          transcript={transcript}
-          listening={listening}
-          isEditing={!!editingRequestId}
-          placeholder="Describe your change request..."
-          textareaRef={textareaRef}
-          browserSupportsSpeechRecognition={browserSupportsSpeechRecognition}
-          onChange={setPopoverText}
-          onCancel={handleModifyCancel}
-          onDelete={handleModifyDelete}
-          onDone={handleModifyDone}
-          onToggleDictation={toggleDictation}
-        />
-      )}
-
-      {/* Text-Edit Popover */}
-      {textEditWidget && (
-        <DevToolsPopover
-          widget={textEditWidget}
-          value={textEditValue}
-          transcript={transcript}
-          listening={listening}
-          isEditing={!!editingRequestId}
-          placeholder="Enter text..."
-          textareaRef={textEditRef}
-          browserSupportsSpeechRecognition={browserSupportsSpeechRecognition}
-          onChange={handleTextEditChange}
-          onCancel={handleTextEditCancel}
-          onDelete={handleTextEditDelete}
-          onDone={handleTextEditDone}
-          onToggleDictation={toggleDictation}
-        />
-      )}
-
-      {/* Change Request Markers */}
-      {changeRequests.map(request => (
+      {dialogWidget && (
         <div
-          key={request.id}
-          className={`ivy-devtools ivy-devtools-marker ${
-            request.action === 'delete'
-              ? 'ivy-devtools-marker-delete'
-              : request.action === 'text-edit'
-                ? 'ivy-devtools-marker-text-edit'
-                : 'ivy-devtools-marker-modify'
-          }`}
-          style={{
-            top: request.bounds.top - 10,
-            left: request.bounds.left - 10,
-          }}
-          onClick={() => handleMarkerClick(request)}
+          className="ivy-devtools ivy-devtools-dialog"
+          style={getDialogPosition(clickPosition)}
         >
-          {request.index}
+          <div className="ivy-devtools-dialog-header">
+            <span className="ivy-devtools-dialog-type">
+              {formatWidgetType(dialogWidget.type)}
+            </span>
+            {dialogWidget.callSite?.filePath && (
+              <span className="ivy-devtools-callsite-muted">
+                {dialogWidget.callSite.filePath.split(/[/\\]/).pop()}:
+                {dialogWidget.callSite.lineNumber}
+              </span>
+            )}
+          </div>
+          <div className="ivy-devtools-textarea-wrapper">
+            <textarea
+              ref={textareaRef}
+              value={displayValue}
+              onChange={e => handleTextChange(e.target.value)}
+              placeholder={
+                dialogAction === 'delete'
+                  ? 'Optional context...'
+                  : dialogAction === 'text-edit'
+                    ? 'Enter text...'
+                    : 'Describe your change...'
+              }
+              className="ivy-devtools-textarea"
+              readOnly={listening}
+            />
+            {browserSupportsSpeechRecognition && (
+              <MicButton listening={listening} onClick={toggleDictation} />
+            )}
+          </div>
+          <div className="ivy-devtools-dialog-toggles">
+            <button
+              className={`ivy-devtools-toggle-btn ${dialogAction === 'modify' ? 'ivy-devtools-toggle-active ivy-devtools-toggle-modify' : ''}`}
+              onClick={() => handleActionChange('modify')}
+            >
+              <FaMagic size={12} />
+              Modify
+            </button>
+            <button
+              className={`ivy-devtools-toggle-btn ${dialogAction === 'delete' ? 'ivy-devtools-toggle-active ivy-devtools-toggle-delete' : ''}`}
+              onClick={() => handleActionChange('delete')}
+            >
+              <LuTrash2 size={14} />
+              Delete
+            </button>
+            <button
+              className={`ivy-devtools-toggle-btn ${dialogAction === 'text-edit' ? 'ivy-devtools-toggle-active ivy-devtools-toggle-text-edit' : ''}`}
+              onClick={() => handleActionChange('text-edit')}
+            >
+              <LuTextCursor size={14} />
+              Text
+            </button>
+          </div>
+          <div className="ivy-devtools-dialog-actions">
+            <button
+              onClick={handleAdd}
+              className="ivy-devtools-btn ivy-devtools-btn-muted"
+            >
+              <LuPlus size={14} />
+              Add
+            </button>
+            <button
+              onClick={handleSend}
+              className="ivy-devtools-btn ivy-devtools-btn-primary"
+            >
+              <LuSend size={14} />
+              Send
+            </button>
+          </div>
         </div>
-      ))}
+      )}
     </div>
   );
 }

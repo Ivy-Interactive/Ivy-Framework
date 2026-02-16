@@ -26,6 +26,10 @@ public record Iframe : WidgetBase<Iframe>
 
     [Prop] public long? RefreshToken { get; }
 
+    [Prop] public string? OutboundMessageType { get; set; }
+
+    [Prop] public string? OutboundMessageToken { get; set; }
+
     [Event] public Func<Event<Iframe, (string type, JsonNode payload)>, ValueTask>? OnMessageReceived { get; set; }
 }
 

@@ -1,7 +1,6 @@
 /* DevTools Styles - Inverted theme to stand out from app */
 .ivy-devtools-container,
 .ivy-devtools {
-  /* Light mode app -> Dark DevTools */
   --devtools-bg: #1a1a1a;
   --devtools-fg: #fafafa;
   --devtools-border: #333;
@@ -12,129 +11,12 @@
 
 .dark .ivy-devtools-container,
 .dark .ivy-devtools {
-  /* Dark mode app -> Light DevTools */
   --devtools-bg: #ffffff;
   --devtools-fg: #171717;
   --devtools-border: #e5e5e5;
   --devtools-muted: #f5f5f5;
   --devtools-muted-fg: #737373;
   --devtools-accent: #e5e5e5;
-}
-
-.ivy-devtools-toolbar {
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  z-index: 100000;
-  display: flex;
-  gap: 6px;
-  padding: 8px;
-  background: var(--devtools-bg);
-  border: 1px solid var(--devtools-border);
-  border-radius: var(--radius);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.ivy-devtools-btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-size: 12px;
-  font-family: var(--font-sans);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: var(--shadow-md);
-  transition:
-    opacity 0.15s,
-    background-color 0.15s;
-}
-
-.ivy-devtools-icon-btn {
-  position: relative;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  border-radius: calc(var(--radius) - 2px);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    opacity 0.15s,
-    background-color 0.15s;
-}
-
-.ivy-devtools-apply-btn {
-  position: relative;
-  height: 28px;
-  padding: 0 10px;
-  border: none;
-  border-radius: calc(var(--radius) - 2px);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: var(--primary);
-  color: var(--primary-foreground);
-  font-size: 12px;
-  font-weight: 500;
-  font-family: var(--font-sans);
-  transition:
-    opacity 0.15s,
-    background-color 0.15s;
-}
-
-.ivy-devtools-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  font-size: 10px;
-  font-weight: 600;
-  font-family: var(--font-sans);
-  background: var(--devtools-fg);
-  color: var(--devtools-bg);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ivy-devtools-btn-primary {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-}
-
-.ivy-devtools-btn-blue {
-  background-color: var(--blue);
-  color: var(--blue-foreground);
-}
-
-.ivy-devtools-btn-muted {
-  background-color: var(--devtools-muted);
-  color: var(--devtools-muted-fg);
-}
-
-.ivy-devtools-btn-muted:hover {
-  background-color: var(--devtools-accent);
-}
-
-.ivy-devtools-btn-success {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-}
-
-.ivy-devtools-btn-destructive {
-  background-color: var(--destructive);
-  color: var(--destructive-foreground);
 }
 
 .ivy-devtools-overlay {
@@ -165,25 +47,21 @@
   font-weight: 500;
 }
 
-.ivy-devtools-label-id {
-  font-size: 10px;
-}
-
-.ivy-devtools-popover {
+.ivy-devtools-dialog {
   position: fixed;
   z-index: 100001;
   background: var(--devtools-bg);
   border: 1px solid var(--devtools-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-boxes);
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.25),
     0 4px 8px rgba(0, 0, 0, 0.15);
   padding: 12px;
-  width: 300px;
+  width: 320px;
   font-family: var(--font-sans);
 }
 
-.ivy-devtools-popover-header {
+.ivy-devtools-dialog-header {
   margin-bottom: 8px;
   font-size: 12px;
   color: var(--devtools-muted-fg);
@@ -192,7 +70,7 @@
   gap: 8px;
 }
 
-.ivy-devtools-popover-type {
+.ivy-devtools-dialog-type {
   font-weight: 500;
   color: var(--devtools-fg);
 }
@@ -200,11 +78,6 @@
 .ivy-devtools-callsite-muted {
   font-weight: 400;
   opacity: 0.5;
-}
-
-.ivy-devtools-popover-id {
-  margin-left: 8px;
-  font-size: 10px;
 }
 
 .ivy-devtools-textarea-wrapper {
@@ -217,7 +90,7 @@
   padding: 8px;
   padding-right: 36px;
   border: 1px solid var(--devtools-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-fields);
   font-size: 13px;
   resize: none;
   font-family: var(--font-sans);
@@ -242,7 +115,7 @@
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: var(--radius);
+  border-radius: var(--radius-selectors);
   background: var(--devtools-accent);
   color: var(--devtools-muted-fg);
   cursor: pointer;
@@ -274,87 +147,102 @@
   }
 }
 
-.ivy-devtools-popover-actions {
+/* Action toggle group */
+.ivy-devtools-dialog-toggles {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.ivy-devtools-toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 1px solid var(--devtools-border);
+  border-radius: var(--radius-selectors);
+  background: var(--devtools-muted);
+  color: var(--devtools-muted-fg);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.ivy-devtools-toggle-btn:hover {
+  background: var(--devtools-accent);
+}
+
+.ivy-devtools-toggle-active {
+  border-color: transparent;
+  color: white;
+}
+
+.ivy-devtools-toggle-modify {
+  background: var(--primary);
+}
+
+.ivy-devtools-toggle-modify:hover {
+  background: var(--primary);
+  opacity: 0.9;
+}
+
+.ivy-devtools-toggle-delete {
+  background: var(--destructive);
+}
+
+.ivy-devtools-toggle-delete:hover {
+  background: var(--destructive);
+  opacity: 0.9;
+}
+
+.ivy-devtools-toggle-text-edit {
+  background: var(--blue);
+}
+
+.ivy-devtools-toggle-text-edit:hover {
+  background: var(--blue);
+  opacity: 0.9;
+}
+
+/* Submit buttons */
+.ivy-devtools-dialog-actions {
   display: flex;
   gap: 8px;
   margin-top: 8px;
   justify-content: flex-end;
 }
 
-.ivy-devtools-popover-actions .ivy-devtools-btn {
+.ivy-devtools-btn {
   padding: 6px 12px;
-}
-
-.ivy-devtools-popover-hint {
-  margin-top: 8px;
-  font-size: 10px;
-  color: var(--devtools-muted-fg);
-  text-align: right;
-}
-
-.ivy-devtools-marker {
-  position: fixed;
-  z-index: 99998;
-  width: 20px;
-  height: 20px;
-  background: var(--muted);
-  color: var(--muted-foreground);
-  border-radius: 50%;
+  border: none;
+  border-radius: var(--radius-selectors);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-sans);
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: bold;
-  font-family: var(--font-sans);
-  box-shadow: var(--shadow-md);
-  cursor: pointer;
-  transition: transform 0.15s;
+  gap: 6px;
+  transition:
+    opacity 0.15s,
+    background-color 0.15s;
 }
 
-.ivy-devtools-marker-modify {
-  background: var(--primary);
+.ivy-devtools-btn-primary {
+  background-color: var(--primary);
   color: var(--primary-foreground);
 }
 
-.ivy-devtools-marker:hover {
-  transform: scale(1.1);
+.ivy-devtools-btn-muted {
+  background-color: var(--devtools-muted);
+  color: var(--devtools-muted-fg);
 }
 
-/* Delete mode styles */
-.ivy-devtools-overlay-delete {
-  background: color-mix(in srgb, var(--destructive) 30%, transparent);
-}
-
-.ivy-devtools-label-delete {
-  background: var(--destructive);
-  color: var(--destructive-foreground);
-}
-
-.ivy-devtools-marker-delete {
-  background: var(--destructive);
-  color: var(--destructive-foreground);
-}
-
-/* Text edit mode styles */
-.ivy-devtools-overlay-text-edit {
-  background: color-mix(in srgb, var(--blue) 30%, transparent);
-}
-
-.ivy-devtools-label-text-edit {
-  background: var(--blue);
-  color: var(--blue-foreground);
-}
-
-.ivy-devtools-marker-text-edit {
-  background: var(--blue);
-  color: var(--blue-foreground);
-}
-
-.ivy-devtools-tooltip {
-  background: white !important;
-  color: black !important;
-  z-index: 100001 !important;
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    0 2px 4px rgba(0, 0, 0, 0.1) !important;
+.ivy-devtools-btn-muted:hover {
+  background-color: var(--devtools-accent);
 }

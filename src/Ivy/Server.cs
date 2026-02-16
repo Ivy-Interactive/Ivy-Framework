@@ -755,14 +755,13 @@ public static class WebApplicationExtensions
                         $"<meta name=\"ivy-license-public-key\" content=\"{ivyLicensePublicKey}\" />";
                     html = html.Replace("</head>", $"  {ivyLicensePublicKeyTag}\n</head>");
                 }
+#endif
 
                 if (serverArgs.EnableDevTools)
                 {
                     var ivyEnableDevToolsTag = $"<meta name=\"ivy-enable-dev-tools\" content=\"true\" />";
                     html = html.Replace("</head>", $"  {ivyEnableDevToolsTag}\n</head>");
                 }
-
-#endif
                 //Inject Meta Title and Description
                 if (!string.IsNullOrEmpty(serverArgs.MetaDescription))
                 {
