@@ -460,17 +460,14 @@ public class ThemeCustomizer : SampleBase
 
     public override object Build()
     {
-        public override object Build()
-        {
-            return Layout.Vertical()
-                    | Text.H2("Live Preview")
-                    | Text.P("See your theme changes in real-time").Small().Muted()
-                    | Layout.Tabs(
-                        new Tab("Components", new InteractiveThemePreview(theme)).Icon(Icons.LayoutPanelLeft),
-                        new Tab("Dashboard", new DashboardApp()).Icon(Icons.LayoutDashboard)
-                    // new Tab("Colors", new ColorPalettePreview(theme)).Icon(Icons.Palette)
-                    );
-        }
+      return Layout.Vertical()
+          | Text.H2("Live Preview")
+          | Text.P("See your theme changes in real-time").Small().Muted()
+          | Layout.Tabs(
+              new Tab("Components", new InteractiveThemePreview(theme)).Icon(Icons.LayoutPanelLeft),
+              new Tab("Dashboard", new DashboardApp()).Icon(Icons.LayoutDashboard)
+          // new Tab("Colors", new ColorPalettePreview(theme)).Icon(Icons.Palette)
+          );
     }
   }
 
@@ -709,20 +706,6 @@ public class ThemeCustomizer : SampleBase
                           "Info" => new Badge("Info").Info(),
                           _ => new Badge("Primary").Primary()
                         }).ToArray())).Height(Size.Fit())
-              | new Card((Layout.Vertical() | new Chat(chatMessages.Value.ToArray(), OnChatSend).Height(Size.Px(330))).Height(Size.Fit()))
-              | new Box(
-                  Layout.Vertical().Align(Align.Center)
-                  | Text.Block("Pagination demo").Bold()
-                      | GetPaginationContent(paginationPage.Value, totalPages)
-                      | new Pagination(paginationPage.Value, totalPages, e =>
-                      {
-                        paginationPage.Set(e.Value);
-                        return ValueTask.CompletedTask;
-                      }).Disabled(disableInputs.Value)
-              );
-
-      object BuildThirdColumn() =>
-          Layout.Vertical()
               | new Card(Layout.Vertical()
                   | Text.Block("Buttons & Actions").Bold()
                   | (Layout.Horizontal().Height(Size.Fit())
@@ -740,6 +723,20 @@ public class ThemeCustomizer : SampleBase
                   | (Layout.Vertical().Align(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary())
                   | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
               )
+              | new Box(
+                  Layout.Vertical().Align(Align.Center)
+                  | Text.Block("Pagination demo").Bold()
+                      | GetPaginationContent(paginationPage.Value, totalPages)
+                      | new Pagination(paginationPage.Value, totalPages, e =>
+                      {
+                        paginationPage.Set(e.Value);
+                        return ValueTask.CompletedTask;
+                      }).Disabled(disableInputs.Value)
+              );
+
+      object BuildThirdColumn() =>
+          Layout.Vertical()
+              | new Card((Layout.Vertical() | new Chat(chatMessages.Value.ToArray(), OnChatSend).Height(Size.Px(330))).Height(Size.Fit()))
               | new Card(Layout.Vertical()
                   | Text.Block("Inputs").Bold()
                   | searchText.ToSearchInput().Placeholder("Search in settings").Disabled(disableInputs.Value)
