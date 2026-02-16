@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/popover';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { Scales } from '@/types/scale';
+import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 
 interface ThemeColorPickerWidgetProps {
   id: string;
@@ -25,6 +26,127 @@ interface ThemeColorPickerWidgetProps {
   foreground?: boolean;
 }
 
+// Theme color mappings
+const THEME_COLOR_MAPPINGS = [
+  { label: 'P', var: '--primary' },
+  { label: 'PF', var: '--primary-foreground' },
+  { label: 'S', var: '--secondary' },
+  { label: 'SF', var: '--secondary-foreground' },
+  { label: 'Su', var: '--success' },
+  { label: 'SuF', var: '--success-foreground' },
+  { label: 'D', var: '--destructive' },
+  { label: 'DF', var: '--destructive-foreground' },
+  { label: 'W', var: '--warning' },
+  { label: 'WF', var: '--warning-foreground' },
+  { label: 'I', var: '--info' },
+  { label: 'IF', var: '--info-foreground' },
+  { label: 'M', var: '--muted' },
+  { label: 'MF', var: '--muted-foreground' },
+  { label: 'A', var: '--accent' },
+  { label: 'AF', var: '--accent-foreground' },
+  { label: 'Po', var: '--popover' },
+  { label: 'PoF', var: '--popover-foreground' },
+  { label: 'Ca', var: '--card' },
+  { label: 'CaF', var: '--card-foreground' },
+  { label: 'Bg', var: '--background' },
+  { label: 'Fg', var: '--foreground' },
+  { label: 'In', var: '--input' },
+  { label: 'Bo', var: '--border' },
+  { label: 'Ri', var: '--ring' },
+];
+
+// Helper to convert any CSS color string to Hex
+const colorToHex = (color: string): string | null => {
+  if (!color) return null;
+  // Handle Tailwind's space-separated HSL channels (e.g., "222.2 47.4% 11.2%")
+  if (/^[\d.]+\s+[\d.]+%?\s+[\d.]+%?/.test(color)) {
+    return colorToHex(`hsl(${color})`);
+  }
+  const ctx = document.createElement('canvas').getContext('2d');
+  if (!ctx) return null;
+  ctx.fillStyle = color;
+  return ctx.fillStyle;
+};
+
+// Hook to observe a CSS variable's value
+const useThemeColor = (cssVar: string | undefined): string | undefined => {
+  const [value, setValue] = React.useState<string | undefined>(undefined);
+
+  const updateColor = React.useCallback(() => {
+    if (typeof window === 'undefined' || !cssVar) {
+      setValue(undefined);
+      return;
+    }
+    const computedStyle = getComputedStyle(document.documentElement);
+    const colorValue = computedStyle.getPropertyValue(cssVar).trim();
+    const hex = colorToHex(colorValue);
+    if (hex) setValue(hex);
+  }, [cssVar]);
+
+  React.useEffect(() => {
+    updateColor();
+    const retryTimers = [100, 300, 500, 1000].map(delay =>
+      setTimeout(updateColor, delay)
+    );
+
+    if (typeof window === 'undefined') {
+      retryTimers.forEach(clearTimeout);
+      return;
+    }
+
+    const observer = new MutationObserver(mutations => {
+      let shouldUpdate = false;
+      for (const mutation of mutations) {
+        if (
+          mutation.type === 'attributes' &&
+          (mutation.attributeName === 'style' ||
+            mutation.attributeName === 'class')
+        ) {
+          shouldUpdate = true;
+          break;
+        }
+        if (mutation.type === 'childList') {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeName === 'STYLE') {
+              shouldUpdate = true;
+              break;
+            }
+          }
+          if (!shouldUpdate) {
+            for (const node of mutation.removedNodes) {
+              if (node.nodeName === 'STYLE') {
+                shouldUpdate = true;
+                break;
+              }
+            }
+          }
+        }
+        if (shouldUpdate) break;
+      }
+
+      if (shouldUpdate) {
+        setTimeout(updateColor, 10);
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+    });
+
+    observer.observe(document.head, {
+      childList: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      retryTimers.forEach(clearTimeout);
+    };
+  }, [updateColor]);
+
+  return value;
+};
+
 const ThemeColorGrid: React.FC<{
   onSelect: (color: string) => void;
   selectedColor: string | null;
@@ -34,46 +156,14 @@ const ThemeColorGrid: React.FC<{
   const cols = 20;
 
   // Theme color mappings
-  const THEME_COLOR_MAPPINGS = [
-    { label: 'P', var: '--primary' },
-    { label: 'PF', var: '--primary-foreground' },
-    { label: 'S', var: '--secondary' },
-    { label: 'SF', var: '--secondary-foreground' },
-    { label: 'Su', var: '--success' },
-    { label: 'SuF', var: '--success-foreground' },
-    { label: 'D', var: '--destructive' },
-    { label: 'DF', var: '--destructive-foreground' },
-    { label: 'W', var: '--warning' },
-    { label: 'WF', var: '--warning-foreground' },
-    { label: 'I', var: '--info' },
-    { label: 'IF', var: '--info-foreground' },
-    { label: 'M', var: '--muted' },
-    { label: 'MF', var: '--muted-foreground' },
-    { label: 'A', var: '--accent' },
-    { label: 'AF', var: '--accent-foreground' },
-    { label: 'Po', var: '--popover' },
-    { label: 'PoF', var: '--popover-foreground' },
-    { label: 'Ca', var: '--card' },
-    { label: 'CaF', var: '--card-foreground' },
-    { label: 'Bg', var: '--background' },
-    { label: 'Fg', var: '--foreground' },
-    { label: 'In', var: '--input' },
-    { label: 'Bo', var: '--border' },
-    { label: 'Ri', var: '--ring' },
-  ];
+  // THEME_COLOR_MAPPINGS used from outer scope
 
   const [resolvedThemeColors, setResolvedThemeColors] = React.useState<
     Record<string, string[]>
   >({});
 
   // Helper to convert any CSS color string to Hex
-  const colorToHex = (color: string): string | null => {
-    if (!color) return null;
-    const ctx = document.createElement('canvas').getContext('2d');
-    if (!ctx) return null;
-    ctx.fillStyle = color;
-    return ctx.fillStyle;
-  };
+  // colorToHex used from outer scope
 
   const updateThemeColors = React.useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -326,15 +416,6 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     return displayValue.startsWith('#') ? displayValue : '#000000';
   };
 
-  // Helper to determine contrast color for the "A"
-  const getContrastColor = (hex: string): string => {
-    if (!hex || !hex.startsWith('#')) return '#000000';
-    const r = parseInt(hex.substring(1, 3), 16);
-    const g = parseInt(hex.substring(3, 5), 16);
-    const b = parseInt(hex.substring(5, 7), 16);
-    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-    return yiq >= 128 ? '#000000' : '#FFFFFF';
-  };
 
   // Helper to convert hex to RGB object
   const hexToRgb = (hex: string) => {
@@ -378,11 +459,20 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
       <div className="w-[80px] h-8 flex items-center justify-center text-xs font-medium text-muted-foreground border rounded bg-muted/50">
         HEX
       </div>
-      <Input
-        value={localInputValue}
-        onChange={handleLocalInputChange}
-        className="h-8 text-xs font-mono"
-      />
+      <div className="relative flex-1">
+        <Input
+          value={localInputValue}
+          onChange={handleLocalInputChange}
+          className="h-8 text-xs font-mono pr-8"
+        />
+        <div className="absolute right-1 top-1/2 -translate-y-1/2">
+          <CopyToClipboardButton
+            textToCopy={localInputValue}
+            scale={Scales.Small}
+            className="h-6 w-6 hover:bg-transparent"
+          />
+        </div>
+      </div>
       <div
         className="w-8 h-8 rounded-md border border-input shadow-sm shrink-0"
         style={{ backgroundColor: getDisplayColor() }}
@@ -412,7 +502,22 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   const isForeground =
     foreground ||
     (placeholder && placeholder.toLowerCase().includes('foreground'));
-  const contrastColor = getContrastColor(getDisplayColor());
+
+  const parentCssVar = React.useMemo(() => {
+    if (!isForeground || !placeholder) return undefined;
+    const parts = placeholder.split(' ');
+    if (
+      parts.length > 1 &&
+      parts[parts.length - 1].toLowerCase() === 'foreground'
+    ) {
+      return `--${parts.slice(0, -1).join('-').toLowerCase()}`;
+    }
+    return undefined;
+  }, [isForeground, placeholder]);
+
+  const parentColor = useThemeColor(parentCssVar);
+  const effectiveBackgroundColor =
+    isForeground && parentColor ? parentColor : getDisplayColor();
 
   return (
     <div className="flex items-center space-x-2">
@@ -428,14 +533,19 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
               invalid && inputStyles.invalidInput
             )}
-            style={{ backgroundColor: getDisplayColor() }}
+            style={{ backgroundColor: effectiveBackgroundColor }}
           >
             <span className="sr-only">Pick a color</span>
             {isForeground && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
-                  style={{ color: contrastColor }}
-                  className="font-extrabold text-lg"
+                  style={{ color: getDisplayColor() }}
+                  className={cn(
+                    'font-extrabold leading-none',
+                    scale === Scales.Small && 'text-xl',
+                    scale === Scales.Medium && 'text-2xl',
+                    scale === Scales.Large && 'text-4xl'
+                  )}
                 >
                   A
                 </span>
