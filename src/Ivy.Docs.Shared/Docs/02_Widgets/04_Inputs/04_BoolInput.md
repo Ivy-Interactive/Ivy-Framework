@@ -120,7 +120,7 @@ To make the bool input appear like a switch, this variant should be used. This i
 some settings values on and off.  
 
 ```csharp demo-below
-public class BoolInputDemo : ViewBase
+public class BoolInputSwitchDemo : ViewBase
 {
     public override object? Build()
     {
@@ -129,29 +129,24 @@ public class BoolInputDemo : ViewBase
         var write = UseState(false);
         var delete = UseState(false);
         var dark =  UseState(false);
-        var roundTrip = UseState(false);
         
         return Layout.Vertical()
                | (Layout.Horizontal()
-                 | new BoolInput(read.Value, e => 
-                 {
-                    if(e.Value)
-                       readMessage.Set("User has readonly access!");
-                    else
-                       readMessage.Set("");
-                    read.Set(e.Value);
-                 }, variant: BoolInputs.Switch).Label("Readonly")
+                 | read.ToSwitchInput(Icons.Eye).Label("Readonly")
                  | Text.Block(readMessage))
-              | new BoolInput(write, variant: BoolInputs.Switch)
+               | write.ToSwitchInput(Icons.Pencil)
                    .Label("Can write")
                    .Disabled(read.Value)
-              | new BoolInput(delete, variant: BoolInputs.Switch).Label("Can delete")
+               | delete.ToSwitchInput(Icons.Trash)
+                   .Label("Can delete")
                    .Disabled(read.Value)
-              | new BoolInput(dark, variant: BoolInputs.Switch)
-                   .Label("Round trip");
+               | dark.ToSwitchInput(Icons.Moon)
+                   .Label("Dark Mode");
     }
 }
 ```
+
+The `ToSwitchInput` extension method also supports an optional `icon` parameter, allowing you to display an icon inside the switch thumb.
 
 ### Toggle
 

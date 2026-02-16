@@ -50,42 +50,28 @@ To set up GitHub Authentication with Ivy, you need to manually configure it in y
 
 ### Manual Configuration
 
-**1: Register the HttpClient factory in your [Program.cs](../../02_Concepts/01_Program.md)**:
-
-```csharp
-var server = new Server();
-
-server.Services.AddHttpClient("GitHubAuth", client =>
-{
-    client.DefaultRequestHeaders.Add("User-Agent", "Ivy-Framework");
-    client.DefaultRequestHeaders.Add("Accept", "application/vnd.github+json");
-    client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
-});
-
-// Ensure IConfiguration is registered
-server.Services.AddSingleton(server.Configuration);
-```
-
-**2: Configure the GitHub Auth Provider**:
+**1: Configure the GitHub Auth Provider**:
 
 ```csharp
 using Ivy.Auth.GitHub;
 
-// Configure GitHub Auth Provider - UseAuth will create the provider via DI
-server.UseAuth<GitHubAuthProvider>(c => c.UseGitHub());
+var server = new Server();
+
+server.UseAuth<GitHubAuthProvider>();
 
 await server.RunAsync();
 ```
 
-**3: Add configuration via [.NET user secrets](../../02_Concepts/14_Secrets.md) or environment variables. See [Configuration Parameters](#configuration-parameters) below for detailed instructions.**
+**2: Add configuration via [.NET user secrets](../../02_Concepts/14_Secrets.md) or environment variables. See [Configuration Parameters](#configuration-parameters) below for detailed instructions.**
 
 ### Configuration Parameters
 
-Configure the following required parameters using .NET user secrets (recommended for development) or environment variables (recommended for production):
+Configure the following parameters using .NET user secrets (recommended for development) or environment variables (recommended for production):
 
 - **GitHub:ClientId**: Required. Your GitHub OAuth App's Client ID.
 - **GitHub:ClientSecret**: Required. Your GitHub OAuth App's Client Secret.
 - **GitHub:RedirectUri**: Required. The authorization callback URL that matches your GitHub OAuth App settings.
+- **GitHub:UserAgent**: Optional. Custom User-Agent header for GitHub API requests. Defaults to `Ivy-Framework/{version}` where version is the Ivy assembly version.
 
 **Using .NET User Secrets (Development):**
 
@@ -93,6 +79,7 @@ Configure the following required parameters using .NET user secrets (recommended
 >dotnet user-secrets set "GitHub:ClientId" "your_client_id"
 >dotnet user-secrets set "GitHub:ClientSecret" "your_client_secret"
 >dotnet user-secrets set "GitHub:RedirectUri" "your_redirect_uri"
+>dotnet user-secrets set "GitHub:UserAgent" "MyApp/1.0"
 ```
 
 **Using Environment Variables (Production):**
@@ -101,6 +88,7 @@ Configure the following required parameters using .NET user secrets (recommended
 $env:GitHub__ClientId="your_client_id"
 $env:GitHub__ClientSecret="your_client_secret"
 $env:GitHub__RedirectUri="your_redirect_uri"
+$env:GitHub__UserAgent="MyApp/1.0"
 ```
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**. Never commit secrets to version control.

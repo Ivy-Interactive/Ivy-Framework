@@ -69,6 +69,7 @@ For more information, see [Authentication Overview](01_AuthenticationOverview.md
 The following parameters are supported via connection string, environment variables, or .NET user secrets:
 
 - **Authelia:Url**: Required. The base URL of your Authelia instance.
+- **Authelia:UserAgent**: Optional. Custom User-Agent header for HTTP requests. Defaults to `Ivy-Framework/{version}` where version is the Ivy assembly version.
 
 ## Authentication Flow
 
