@@ -62,6 +62,11 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
     public Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(authSession.AuthToken?.AccessToken))
+        {
+            authSession.AuthSessionData = null;
+        }
+
         _baseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
         return Task.CompletedTask;
     }
@@ -153,6 +158,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
     {
         _tokenCache = null;
         _app = null;
+        authSession.AuthSessionData = null;
 
         return Task.CompletedTask;
     }

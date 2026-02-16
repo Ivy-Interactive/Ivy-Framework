@@ -80,7 +80,7 @@ public static class CookieRegistryExtensions
         }
     }
 
-    private static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData)
+    public static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData)
     {
         if (authSessionData == null)
         {

@@ -138,6 +138,7 @@ public class AuthController() : Controller
             // Use CookieJar to ensure consistent cookie handling (including splitting for large tokens)
             var cookies = new CookieJar();
             cookies.AddCookiesForAuthToken(token);
+            cookies.AddCookiesForAuthSessionData(tempSession.AuthSessionData);
             cookies.WriteToResponse(Response);
 
             return Redirect("/");
