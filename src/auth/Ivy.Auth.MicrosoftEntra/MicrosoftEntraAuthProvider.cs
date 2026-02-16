@@ -62,7 +62,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
     public Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
-        _baseUrl = WebhookEndpoint.BuildBaseUrl(requestScheme, requestHost);
+        _baseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
         return Task.CompletedTask;
     }
 
