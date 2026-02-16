@@ -21,6 +21,8 @@ public class Theme
 
     public string? BorderRadiusSelectors { get; set; }
 
+    public string? BorderRadiusCheckbox { get; set; }
+
     public static Theme Default => new()
     {
         Name = "Default",
@@ -29,7 +31,8 @@ public class Theme
         FontSize = "16px",
         BorderRadiusBoxes = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
         BorderRadiusFields = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
-        BorderRadiusSelectors = IvyFrameworkBorderRadiusTokens.BorderRadius.Md
+        BorderRadiusSelectors = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
+        BorderRadiusCheckbox = IvyFrameworkBorderRadiusTokens.BorderRadius.Md
     };
 }
 

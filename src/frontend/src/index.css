@@ -134,6 +134,7 @@
     --radius-boxes: var(--radius-boxes);
     --radius-fields: var(--radius-fields);
     --radius-selectors: var(--radius-selectors);
+    --radius-checkbox: var(--radius-checkbox);
     --font-sans: var(--font-sans);
     --font-mono: var(--font-mono);
     --font-serif: var(--font-serif);
@@ -405,9 +406,14 @@
     border-radius: var(--radius-fields);
   }
 
-  /* For small selector components: Badge, Checkbox, Toggle, Radio */
+  /* For small selector components: Toggle, Badge */
   .rounded-selector {
     border-radius: var(--radius-selectors);
+  }
+
+  /* For checkboxes: dedicated scale (0–6px) avoids circle at 8px */
+  .rounded-checkbox {
+    border-radius: var(--radius-checkbox);
   }
 }
 
