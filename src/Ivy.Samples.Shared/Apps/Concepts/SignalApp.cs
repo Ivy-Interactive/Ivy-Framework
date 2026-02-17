@@ -1,6 +1,6 @@
 using Ivy.Core;
 using Ivy.Views;
-﻿using Ivy.Hooks;
+using Ivy.Hooks;
 using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;

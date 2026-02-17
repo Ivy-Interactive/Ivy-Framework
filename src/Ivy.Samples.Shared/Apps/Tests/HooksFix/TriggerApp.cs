@@ -1,5 +1,5 @@
 using Ivy.Views;
-﻿using Ivy.Core.Hooks;
+using Ivy.Core.Hooks;
 using Ivy.Hooks;
 
 namespace Ivy.Samples.Shared.Apps.Tests.HooksFix;

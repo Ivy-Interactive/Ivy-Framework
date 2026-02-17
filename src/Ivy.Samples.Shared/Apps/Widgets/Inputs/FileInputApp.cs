@@ -2,7 +2,7 @@ using Ivy.Core;
 using Ivy.Views;
 using Ivy.Widgets.Inputs;
 using System.Collections.Immutable;
-﻿using Ivy.Core.Helpers;
+using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
 using Ivy.Services;

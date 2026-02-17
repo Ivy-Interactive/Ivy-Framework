@@ -2,7 +2,7 @@ using Ivy.Client;
 using Ivy.Core;
 using Ivy.Views;
 using System.Collections.Immutable;
-﻿using Ivy.Shared;
+using Ivy.Shared;
 using Microsoft.Extensions.AI;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
