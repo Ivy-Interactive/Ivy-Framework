@@ -1,3 +1,8 @@
+using Microsoft.Extensions.DependencyInjection;
+using Ivy.Chrome;
+using Ivy.Samples.Shared.Helpers;
+using Ivy.Views;
+using System.Globalization;
 using Ivy.Samples.Shared.Apps.Demos;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;

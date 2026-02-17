@@ -1,3 +1,4 @@
+using Ivy.Views;
 using Ivy.Shared;
 using Ivy.Samples.Shared.Apps;
 

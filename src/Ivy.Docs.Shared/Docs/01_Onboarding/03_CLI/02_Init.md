@@ -126,7 +126,6 @@ After running `ivy init`, your project will have the following structure. The ge
 YourProject/
 ├── Program.cs              # Main project entry point
 ├── YourProject.csproj      # .NET project file
-├── GlobalUsings.cs         # Global using statements
 ├── README.md               # Project documentation
 └── .gitignore              # Git ignore file
 ```
@@ -155,39 +154,6 @@ await server.RunAsync();
 ```
 
 The template configures [Chrome](../02_Concepts/11_Chrome.md) for the browser UI.
-
-### GlobalUsings.cs
-
-Global using statements for common Ivy namespaces:
-
-```csharp
-global using Ivy;
-global using Ivy.Apps;
-global using Ivy.Auth;
-global using Ivy.Chrome;
-global using Ivy.Client;
-global using Ivy.Core;
-global using Ivy.Core.Hooks;
-global using Ivy.Helpers;
-global using Ivy.Hooks;
-global using Ivy.Shared;
-global using Ivy.Views;
-global using Ivy.Views.Alerts;
-global using Ivy.Views.Builders;
-global using Ivy.Views.Blades;
-global using Ivy.Views.Forms;
-global using Ivy.Views.Tables;
-global using Ivy.Widgets.Inputs;
-global using Microsoft.Extensions.Configuration;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Logging;
-global using System.Collections.Immutable;
-global using System.ComponentModel.DataAnnotations;
-global using System.Globalization;
-global using System.Reactive.Linq;
-
-namespace YourProject;
-```
 
 ### Prerequisites
 

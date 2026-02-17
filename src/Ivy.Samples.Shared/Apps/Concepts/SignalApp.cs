@@ -1,3 +1,5 @@
+using Ivy.Core;
+using Ivy.Views;
 ﻿using Ivy.Hooks;
 using Ivy.Shared;
 

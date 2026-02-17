@@ -1,3 +1,5 @@
+using Ivy.Core.Hooks;
+using Ivy.Views;
 #pragma warning disable IVYHOOK001
 
 using System.ComponentModel;

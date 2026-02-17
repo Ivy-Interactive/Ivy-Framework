@@ -1,3 +1,5 @@
+using Ivy.Core;
+using Ivy.Views;
 using Ivy.Samples.Shared.Helpers;
 using Ivy.Shared;
 using Ivy.Views.Blades;

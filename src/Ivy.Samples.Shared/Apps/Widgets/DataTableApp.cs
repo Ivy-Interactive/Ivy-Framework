@@ -1,3 +1,5 @@
+using Ivy.Client;
+using Ivy.Core;
 using Ivy.Samples.Shared.Apps;
 using Ivy.Shared;
 using Ivy.Views.DataTables;

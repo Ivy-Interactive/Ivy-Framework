@@ -46,7 +46,6 @@ A typical Ivy project has this folder structure:
 
 MyProject/
 ├── Program.cs                  # Entry point — configures and starts the Ivy server
-├── GlobalUsings.cs             # Global using statements (Ivy, Ivy.Apps, Ivy.Core, etc.)
 ├── MyProject.csproj            # Project file
 ├── Apps/                       # All app classes go here (convention)
 │   ├── DashboardApp.cs
