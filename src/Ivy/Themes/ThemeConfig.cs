@@ -21,8 +21,6 @@ public class Theme
 
     public string? BorderRadiusSelectors { get; set; }
 
-    public string? BorderRadiusCheckbox { get; set; }
-
     public static Theme Default => new()
     {
         Name = "Default",
