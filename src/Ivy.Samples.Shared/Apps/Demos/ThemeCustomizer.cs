@@ -378,15 +378,6 @@ public class ThemeCustomizer : SampleBase
             ("2rem", 32)
         ];
 
-        // Finer options for small square components (checkbox is ~16px, 8px = circle)
-        private static readonly (string Value, int Pixels)[] CheckboxRadiusOptions =
-        [
-            ("0px", 0),
-            ("2px", 2),
-            ("4px", 4),
-            ("6px", 6)
-        ];
-
         public override object Build()
         {
             return Layout.Vertical().Gap(3)
@@ -403,32 +394,21 @@ public class ThemeCustomizer : SampleBase
                     value => updateThemeProperty(t => t.BorderRadiusFields = value))
                 | BuildRadiusCategory(
                     "Selectors",
-                    "toggle, badge",
+                    "checkbox, toggle, badge",
                     editingTheme.Value.BorderRadiusSelectors,
-                    value => updateThemeProperty(t => t.BorderRadiusSelectors = value))
-                | BuildRadiusCategory(
-                    "Checkbox",
-                    "small square checkboxes",
-                    editingTheme.Value.BorderRadiusCheckbox,
-                    value => updateThemeProperty(t => t.BorderRadiusCheckbox = value),
-                    CheckboxRadiusOptions,
-                    defaultForNull: "4px");
+                    value => updateThemeProperty(t => t.BorderRadiusSelectors = value));
         }
 
         private static object BuildRadiusCategory(
             string title,
             string subtitle,
             string? currentValue,
-            Action<string?> onUpdate,
-            (string Value, int Pixels)[]? radiusOptions = null,
-            string? defaultForNull = null)
+            Action<string?> onUpdate)
         {
-            var opts = radiusOptions ?? RadiusOptions;
-            var effectiveValue = string.IsNullOrWhiteSpace(currentValue) ? defaultForNull ?? "0px" : currentValue;
             var options = Layout.Horizontal().Gap(2);
-            foreach (var (value, pixels) in opts)
+            foreach (var (value, pixels) in RadiusOptions)
             {
-                options = options | CreateOption(value, pixels, effectiveValue, onUpdate);
+                options = options | CreateOption(value, pixels, currentValue, onUpdate);
             }
 
             return Layout.Vertical()
@@ -467,7 +447,7 @@ public class ThemeCustomizer : SampleBase
                 )
                 .Width(Size.Px(CardSize))
                 .Height(Size.Px(CardSize))
-                .HandleClick(() => onUpdate(remValue))
+                .HandleClick(() => onUpdate(remValue == "0px" ? null : remValue))
                 .WithTooltip($"{remValue} ({pxRadius}px)");
         }
     }

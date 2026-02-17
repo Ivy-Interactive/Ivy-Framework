@@ -31,8 +31,7 @@ public class Theme
         FontSize = "16px",
         BorderRadiusBoxes = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
         BorderRadiusFields = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
-        BorderRadiusSelectors = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
-        BorderRadiusCheckbox = "0.25rem"
+        BorderRadiusSelectors = IvyFrameworkBorderRadiusTokens.BorderRadius.Md
     };
 }
 

@@ -4,7 +4,6 @@ import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { Check, Minus } from 'lucide-react';
 import * as React from 'react';
 import { Scales } from '@/types/scale';
-import { getCheckboxRadius } from '@/lib/styles';
 export type NullableBoolean = boolean | null | undefined;
 
 const getSizeClasses = (scale?: Scales): string => {
@@ -70,7 +69,7 @@ const Checkbox = React.forwardRef<
       }
     };
 
-    const baseClass = `peer ${getSizeClasses(scale)} shrink-0 rounded-checkbox border border-border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary dark:border-white/10`;
+    const baseClass = `peer ${getSizeClasses(scale)} shrink-0 rounded-selector border border-border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary dark:border-white/10`;
     const finalClass = className?.includes('bg-red-50')
       ? baseClass.replace('data-[state=checked]:bg-primary', '')
       : baseClass;
@@ -83,7 +82,6 @@ const Checkbox = React.forwardRef<
         onCheckedChange={handleCheckedChange}
         disabled={disabled}
         className={cn(finalClass, className)}
-        style={getCheckboxRadius()}
         {...props}
       >
         <CheckboxPrimitive.Indicator

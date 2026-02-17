@@ -165,9 +165,6 @@ public class ThemeService : IThemeService
 
         if (!string.IsNullOrEmpty(_currentTheme.BorderRadiusSelectors))
             sb.AppendLine($"  --radius-selectors: {_currentTheme.BorderRadiusSelectors};");
-
-        // Always output: checkbox has dedicated scale (0-6px), default 4px when not set
-        sb.AppendLine($"  --radius-checkbox: {_currentTheme.BorderRadiusCheckbox ?? "4px"};");
     }
 
     private void AppendColorVariable(StringBuilder sb, string variableName, string? colorValue)
