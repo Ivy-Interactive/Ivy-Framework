@@ -106,12 +106,13 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
   }
 
   const LucideIcon = icons[name as keyof typeof icons];
+  const isSpinner = name === 'LoaderCircle';
   return (
     <LucideIcon
       style={style}
       color={color}
       size={size}
-      className={cn(className)}
+      className={cn(isSpinner && 'animate-spin', className)}
     />
   );
 };
