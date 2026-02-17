@@ -32,7 +32,7 @@ public class Theme
         BorderRadiusBoxes = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
         BorderRadiusFields = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
         BorderRadiusSelectors = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
-        BorderRadiusCheckbox = IvyFrameworkBorderRadiusTokens.BorderRadius.Md
+        BorderRadiusCheckbox = "0.25rem"
     };
 }
 

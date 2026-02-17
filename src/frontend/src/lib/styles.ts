@@ -313,11 +313,15 @@ export const getSelectorRadius = (): React.CSSProperties => ({
   borderRadius: 'var(--radius-selectors)',
 });
 
+export const getCheckboxRadius = (): React.CSSProperties => ({
+  borderRadius: 'var(--radius-checkbox, 0.25rem)',
+});
+
 // Back‑compat helper used by older widgets.
 // Prefer passing useSemanticRadius when possible so we stay aligned with the theme tokens.
 export const getBorderRadius = (
   borderRadius?: BorderRadius,
-  useSemanticRadius?: 'box' | 'field' | 'selector'
+  useSemanticRadius?: 'box' | 'field' | 'selector' | 'checkbox'
 ): React.CSSProperties => {
   // If semantic radius is specified, use CSS variable
   if (useSemanticRadius) {
@@ -328,6 +332,8 @@ export const getBorderRadius = (
         return getFieldRadius();
       case 'selector':
         return getSelectorRadius();
+      case 'checkbox':
+        return getCheckboxRadius();
     }
   }
 

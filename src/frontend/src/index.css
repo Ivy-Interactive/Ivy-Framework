@@ -134,7 +134,7 @@
     --radius-boxes: var(--radius-boxes);
     --radius-fields: var(--radius-fields);
     --radius-selectors: var(--radius-selectors);
-    --radius-checkbox: var(--radius-checkbox);
+    --radius-checkbox: var(--radius-checkbox, 0.25rem);
     --font-sans: var(--font-sans);
     --font-mono: var(--font-mono);
     --font-serif: var(--font-serif);
@@ -413,7 +413,7 @@
 
   /* For checkboxes: dedicated scale (0–6px) avoids circle at 8px */
   .rounded-checkbox {
-    border-radius: var(--radius-checkbox);
+    border-radius: var(--radius-checkbox, 0.25rem);
   }
 }
 

@@ -4,6 +4,7 @@ import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { Check, Minus } from 'lucide-react';
 import * as React from 'react';
 import { Scales } from '@/types/scale';
+import { getCheckboxRadius } from '@/lib/styles';
 export type NullableBoolean = boolean | null | undefined;
 
 const getSizeClasses = (scale?: Scales): string => {
@@ -82,6 +83,7 @@ const Checkbox = React.forwardRef<
         onCheckedChange={handleCheckedChange}
         disabled={disabled}
         className={cn(finalClass, className)}
+        style={getCheckboxRadius()}
         {...props}
       >
         <CheckboxPrimitive.Indicator
