@@ -587,7 +587,7 @@ public class ThemeCustomizer : SampleBase
                 .Label(m => m.NameOnCard, "Name on card")
                 .Label(m => m.CardNumber, "Card number")
                 .Label(m => m.Cvv, "CVV")
-                .Label(m => m.Month, "Month")
+                .Label(m => m.Month, "Mon")
                 .Label(m => m.Year, "Year")
                 .Label(m => m.BillingAddress, "Billing address")
                 .Label(m => m.SameAsShipping, "Same as shipping address")
@@ -634,9 +634,9 @@ public class ThemeCustomizer : SampleBase
                 {
                     OnClick = _ =>
                     {
-                        client.Toast($"{name} button clicked", "Action");
-                        return ValueTask.CompletedTask;
-                    }
+                            client.Toast($"{name} button clicked", "Action");
+                            return ValueTask.CompletedTask;
+                        }
                 }.Width(Size.Full()).Disabled(disableButtons.Value);
 
             static object GetPaginationContent(int page, int total) =>
@@ -720,23 +720,30 @@ public class ThemeCustomizer : SampleBase
                             | CreateLoadingButton("Primary", ButtonVariant.Primary).Loading()
                             | CreateLoadingButton("Secondary", ButtonVariant.Secondary).Loading()
                             | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
-                        | (Layout.Grid().Width(Size.Full())
-                            | (Layout.Vertical()
+                        | (Layout.Horizontal().Width(Size.Full())
+                            | (Layout.Vertical().Align(Align.Left)
                                 | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars).Disabled(disableInputs.Value))
                             | (Layout.Vertical().Align(Align.Right)
                                 | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Disabled(disableInputs.Value)))
                         | new Box((Layout.Horizontal().Height(Size.Fit())
                             | agreeTerms.ToBoolInput().Disabled(disableInputs.Value)
                             | Text.Block("I agree to the terms and conditions")))
-                        | (Layout.Vertical().Align(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary())
                         | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
+                        | (Layout.Horizontal().Height(Size.Fit())
+                            | (Layout.Vertical() | new Box((Layout.Horizontal()
+                                    | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all buttons"))
+                                    | disableButtons.ToSwitchInput())))
+                            | (Layout.Vertical() | new Box((Layout.Horizontal()
+                                | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all inputs"))
+                                | disableInputs.ToSwitchInput()))))
+                        | (Layout.Vertical().Align(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary())
                     );
 
             object BuildThirdColumn() =>
                 Layout.Vertical()
                     | new Card((Layout.Vertical() | new Chat(chatMessages.Value.ToArray(), OnChatSend).Height(Size.Px(330))).Height(Size.Fit()))
                     | new Card(Layout.Vertical()
-                        | Text.Block("Inputs").Bold()
+                        | Text.Block("Fields").Bold()
                         | searchText.ToSearchInput().Placeholder("Search in settings").Disabled(disableInputs.Value)
                         | dateRangeState.ToDateRangeInput()
                             .Disabled(disableInputs.Value)
@@ -758,13 +765,7 @@ public class ThemeCustomizer : SampleBase
                         | Text.Block("Price range").Bold()
                         | Text.P($"Estimated monthly budget: ${price.Value}").Small()
                         | price.ToSliderInput().Min(0).Max(2000).Step(50).Disabled(disableInputs.Value)
-                        | (Layout.Horizontal().Height(Size.Fit())
-                            | (Layout.Vertical() | new Box((Layout.Horizontal()
-                                    | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all buttons"))
-                                    | disableButtons.ToSwitchInput())))
-                            | (Layout.Vertical() | new Box((Layout.Horizontal()
-                                | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all inputs"))
-                                | disableInputs.ToSwitchInput()))))
+
                     );
 
             // --- Layout -------------------------------------------------------
