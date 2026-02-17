@@ -580,7 +580,7 @@ public class ThemeCustomizer : SampleBase
                 .Clear()
                 .Add(m => m.NameOnCard)
                 .Add(m => m.CardNumber)
-                .PlaceHorizontal(m => m.Cvv, m => m.Month, m => m.Year)
+                .Place(m => m.Cvv, m => m.Month, m => m.Year)
                 .Add(m => m.BillingAddress)
                 .Add(m => m.SameAsShipping)
                 .Add(m => m.Comments)
