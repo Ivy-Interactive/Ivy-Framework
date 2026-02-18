@@ -167,4 +167,20 @@ public static class SelectInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    /// <summary>
+    /// Sets the options for a SelectInput using a collection of strings.
+    /// </summary>
+    public static SelectInput<string> Options(this SelectInput<string> widget, IEnumerable<string> options)
+    {
+        return widget with { Options = options.ToOptions().Cast<IAnyOption>().ToArray() };
+    }
+
+    /// <summary>
+    /// Creates a SelectInput from state with string options.
+    /// </summary>
+    public static SelectInput<string> ToSelectInput(this IState<string> state, IEnumerable<string> options, string? placeholder = null, bool disabled = false, SelectInputs variant = SelectInputs.Select)
+    {
+        return new SelectInput<string>(state, options.ToOptions(), placeholder, disabled, variant, false);
+    }
 }
