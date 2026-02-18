@@ -37,9 +37,9 @@ The Button widget includes three new contextual variants to help communicate dif
 
 ```csharp demo-tabs
 Layout.Horizontal()
-    | new Button("Success", variant: ButtonVariant.Success)
-    | new Button("Warning", variant: ButtonVariant.Warning)
-    | new Button("Info", variant: ButtonVariant.Info)
+    | new Button("Success").Success()
+    | new Button("Warning").Warning()
+    | new Button("Info").Info()
 ```
 
 ## Styling & Configuration
