@@ -39,13 +39,15 @@ public class BasicListDemo : ViewBase
 
 ## ListItem Configuration
 
-`ListItem`s are highly customizable, supporting titles, subtitles, [icons](../01_Primitives/02_Icon.md), and [badges](02_Badge.md).
+`ListItem`s are highly customizable, supporting titles, subtitles, [icons](../01_Primitives/02_Icon.md), [badges](02_Badge.md), and custom content via the `.Content()` extension method.
 
 ```csharp demo-tabs
 public class ListConfigDemo : ViewBase
 {
     public override object? Build()
     {
+        var notifications = UseState(false);
+    
         return Layout.Vertical().Gap(4)
             | Text.P("Title and Subtitle").Large()
             | new List(new[]
@@ -64,6 +66,20 @@ public class ListConfigDemo : ViewBase
             {
                 new ListItem("New Message", subtitle: "From John Doe", badge: "3"),
                 new ListItem("System Update", subtitle: "Available now", badge: "!")
+            })
+            | Text.P("Custom Content").Large()
+            | new List(new[]
+            {
+                new ListItem("Notifications", icon: Icons.Bell)
+                    .Content(new BoolInput(notifications, variant: BoolInputs.Switch)),
+                new ListItem("Status", icon: Icons.Activity)
+                    .Content(
+                        Layout.Horizontal().Gap(2)
+                            | new Badge("Online", BadgeVariant.Success)
+                            | Text.Muted("Last seen 2 min ago")
+                    ),
+                new ListItem("Search", icon: Icons.Search)
+                    .Content(new TextInput("", placeholder: "Type to search..."))
             });
     }
 }
