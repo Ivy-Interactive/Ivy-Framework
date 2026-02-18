@@ -4,6 +4,8 @@
 
 ~20 sub-namespaces have been collapsed into the root `namespace Ivy;`. This simplifies the API surface and eliminates the need for most `using Ivy.*` directives in connection projects.
 
+Normal Ivy apps only need to `using Ivy;`.
+
 ## Breaking Changes
 
 ### Removed Namespaces
@@ -33,6 +35,7 @@ Types that are not part of the public API have been moved from `namespace Ivy;` 
 | `Ivy` (Chrome/) | `Ivy.Core.Chrome` | `ChromeUtils` |
 | `Ivy.Middleware` | `Ivy.Core.Server.Middleware` | `PathToAppIdMiddleware`, `PathToAppIdMiddlewareExtensions`, `RoutingConstantData` |
 | `Ivy` (root) | `Ivy.Core.Server` | `AppHub`, `ClientSender`, `ClientProvider`, `AppSessionStore`, `HotReloadService`, `ServerDescription`, `AppDescription`, `ConnectionDescription`, `ServiceDescription`, `ServerUtils` |
+
 
 ### Unchanged Namespaces
 

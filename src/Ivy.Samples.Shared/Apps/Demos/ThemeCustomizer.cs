@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Ivy.Themes;
 using Ivy.Widgets.Internal;
 
 namespace Ivy.Samples.Shared.Apps.Demos;

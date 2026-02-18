@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
+using Ivy.Themes;
 
-namespace Ivy.Themes;
+// Resharper disable once CheckNamespace
+namespace Ivy;
 
 [JsonSerializable(typeof(Theme))]
 internal partial class ThemeJsonContext : JsonSerializerContext;

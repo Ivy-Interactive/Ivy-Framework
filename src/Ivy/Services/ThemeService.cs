@@ -1,6 +1,8 @@
 using System.Text;
+using Ivy.Themes;
 
-namespace Ivy.Themes;
+// Resharper disable once CheckNamespace
+namespace Ivy;
 
 public interface IThemeService
 {
