@@ -1,9 +1,9 @@
 using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
 using Ivy.Core.Hooks;
-using Ivy.Views;
 
-namespace Ivy.Hooks;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum QueryScope
 {
@@ -24,7 +24,7 @@ public record QueryOptions
     /// When true: always revalidates in background (unless Expiration is set).
     /// When false with initialValue: populates cache with initialValue, no fetch.
     /// When false without initialValue: fetches once, no background revalidation.
-    /// Useful for pre-populating from a parent query (e.g., list → detail pattern).
+    /// Useful for pre-populating from a parent query (e.g., list â†’ detail pattern).
     /// </summary>
     public bool RevalidateOnMount { get; init; } = true;
 
@@ -117,7 +117,7 @@ public static class UseQueryExtensions
 {
     private static object UseScopedQueryKey(this IViewContext context, object key, QueryOptions options)
     {
-        var appContext = context.UseService<Ivy.Apps.AppContext>();
+        var appContext = context.UseService<Ivy.AppContext>();
         //var auth = context.UseService<IAuthService?>();
 
         if (options.Scope == QueryScope.View)

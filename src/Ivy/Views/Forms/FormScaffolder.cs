@@ -1,13 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using Ivy;
 using Ivy.Core.Hooks;
-using Ivy.Services;
-using Ivy.Shared;
-using Ivy.Validation;
-using Ivy.Widgets.Inputs;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 internal static class FormScaffolder
 {
@@ -29,7 +25,11 @@ internal static class FormScaffolder
 
             var order = displayInfo.Order ?? int.MaxValue;
 
-            var wrappedFactory = ScaffoldInputFactory(field);
+            var factory = ScaffoldInputFactory(field);
+
+            Func<IAnyState, IViewContext, IAnyInput>? wrappedFactory = factory != null
+                ? (state, _) => factory(state)
+                : null;
 
             var scaffoldedField = new FormBuilderField<TModel>(
                 field.Name,
@@ -64,7 +64,7 @@ internal static class FormScaffolder
         return scaffoldedFields;
     }
 
-    private static Func<IAnyState, IViewContext, object>? ScaffoldInputFactory(FieldPropertyInfo field)
+    private static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(FieldPropertyInfo field)
     {
         var type = field.Type;
         var name = field.Name;
@@ -78,12 +78,12 @@ internal static class FormScaffolder
 
         if (field.IsIdentity())
         {
-            return (state, _) => state.ToReadOnlyInput();
+            return (state) => state.ToReadOnlyInput();
         }
 
         if (field.IsColor())
         {
-            return (state, _) =>
+            return (state) =>
             {
                 var input = state.ToColorInput();
                 if (field.IsNullable && !field.Required) input.Nullable = true;
@@ -93,7 +93,7 @@ internal static class FormScaffolder
 
         if (nonNullableType == typeof(bool))
         {
-            return (state, _) =>
+            return (state) =>
             {
                 var input = state.ToBoolInput().ScaffoldDefaults(name, type);
                 if (field.IsNullable && !field.Required) input.Nullable = true;
@@ -103,55 +103,56 @@ internal static class FormScaffolder
 
         if (field.IsEmail())
         {
-            return (state, _) =>
+            return (state) =>
             {
-                var input = ApplyMaxLength(state.ToEmailInput(field.GetDisplayInfo().Prompt), field);
-                if (field.IsNullable && !field.Required) input = input.Nullable(true);
+                var input = ApplyMaxLength(state.ToEmailInput(), field);
+                if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
             };
         }
 
         if (field.IsPhone())
         {
-            return (state, _) =>
+            return (state) =>
             {
-                var input = ApplyMaxLength(state.ToTelInput(field.GetDisplayInfo().Prompt), field);
-                if (field.IsNullable && !field.Required) input = input.Nullable(true);
+                var input = ApplyMaxLength(state.ToTelInput(), field);
+                if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
             };
         }
 
         if (field.IsUrl())
         {
-            return (state, _) =>
+            return (state) =>
             {
-                var input = ApplyMaxLength(state.ToUrlInput(field.GetDisplayInfo().Prompt), field);
-                if (field.IsNullable && !field.Required) input = input.Nullable(true);
+                var input = ApplyMaxLength(state.ToUrlInput(), field);
+                if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
             };
         }
 
         if (field.IsPassword())
         {
-            return (state, _) =>
+            return (state) =>
             {
-                var input = ApplyMaxLength(state.ToPasswordInput(field.GetDisplayInfo().Prompt), field);
-                if (field.IsNullable && !field.Required) input = input.Nullable(true);
+                var input = ApplyMaxLength(state.ToPasswordInput(), field);
+                if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
             };
         }
 
         if (nonNullableType == typeof(string))
         {
-            return (state, _) =>
+            return (state) =>
             {
                 var input = ApplyMaxLength(state.ToTextInput(), field);
 
                 if (field.HasDataTypeAttribute(DataType.MultilineText))
                 {
-                    input = input.Variant(TextInputVariants.Textarea);
+                    input = input.Variant(TextInputs.Textarea);
                 }
 
+                // If Required => don't show X button even for nullable types
                 if (field.IsNullable && !field.Required) input = input.Nullable(true);
                 return input;
             };
@@ -159,12 +160,12 @@ internal static class FormScaffolder
 
         if (nonNullableType == typeof(Icons))
         {
-            return (state, _) => state.ToIconInput();
+            return (state) => state.ToIconInput();
         }
 
         if (nonNullableType.IsEnum)
         {
-            return (state, _) =>
+            return (state) =>
             {
                 var input = state.ToSelectInput();
                 if (field.IsNullable && !field.Required) input.Nullable = true;
@@ -174,7 +175,7 @@ internal static class FormScaffolder
 
         if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
         {
-            return (state, _) =>
+            return (state) =>
             {
                 var input = state.ToSelectInput().List();
                 if (field.IsNullable && !field.Required) input.Nullable = true;
@@ -184,13 +185,17 @@ internal static class FormScaffolder
 
         if (type.IsNumeric())
         {
-            return (state, _) =>
+            return (state) =>
             {
                 var input = state.ToNumberInput();
                 if (field.GetRangeInfo().Min is { } min)
+                {
                     input = input.Min(min);
+                }
                 if (field.GetRangeInfo().Max is { } max)
+                {
                     input = input.Max(max);
+                }
                 if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input.ScaffoldDefaults(name, type);
             };
@@ -198,13 +203,18 @@ internal static class FormScaffolder
 
         if (type.IsDate())
         {
-            return (state, _) =>
+            return (state) =>
             {
                 var input = state.ToDateTimeInput();
+
                 if (field.HasDataTypeAttribute(DataType.Date))
-                    input = input.Variant(DateTimeInputVariants.Date);
+                {
+                    input = input.Variant(DateTimeInputs.Date);
+                }
                 else if (field.HasDataTypeAttribute(DataType.Time))
-                    input = input.Variant(DateTimeInputVariants.Time);
+                {
+                    input = input.Variant(DateTimeInputs.Time);
+                }
                 if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
             };
@@ -271,24 +281,10 @@ internal static class FormScaffolder
             validators.AddRange(FormHelpers.GetValidators(field.FieldInfo));
         }
 
-        if (field.IsEmail())
+        var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
+        if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
         {
             validators.Add(Validators.CreateEmailValidator(field.Name));
-        }
-
-        if (field.IsPhone())
-        {
-            validators.Add(Validators.CreateTelValidator(field.Name));
-        }
-
-        if (field.IsUrl())
-        {
-            validators.Add(Validators.CreateUrlValidator(field.Name));
-        }
-
-        if (field.IsPassword())
-        {
-            validators.Add(Validators.CreatePasswordValidator(field.Name));
         }
 
         return validators;

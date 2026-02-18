@@ -55,5 +55,9 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Ivy.Docs.Test" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Generated\" />
+  </ItemGroup>
   
 </Project>

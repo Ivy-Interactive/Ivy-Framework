@@ -1,11 +1,3 @@
-using Ivy.Core;
-using Ivy.Views;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Blades;
-using Ivy.Views.Builders;
-using Ivy.Views.Tables;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 [App(icon: Icons.Table, path: ["Tests"], searchHints: ["table", "blade", "sheet", "card", "box", "container", "width"])]

@@ -1,8 +1,3 @@
-using Ivy.Shared;
-using Ivy.Samples.Shared.Apps;
-using Ivy.Views;
-using Ivy.Widgets;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 [App(icon: Icons.Airplay, path: ["Tests"], searchHints: ["typography", "text", "markdown", "comparison"])]

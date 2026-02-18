@@ -1,6 +1,5 @@
-using Ivy.Shared;
-using Ivy.Views;
 
+// ReSharper disable once CheckNamespace
 namespace Ivy;
 
 public class FloatingBox(object? content = null) : ViewBase

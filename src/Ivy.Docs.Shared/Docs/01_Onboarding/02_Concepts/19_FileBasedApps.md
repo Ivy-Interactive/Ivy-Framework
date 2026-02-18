@@ -31,7 +31,6 @@ You will receive a file-based app that you can populate with your own context as
 #: package Ivy@*
 
 using Ivy;
-using Ivy.Views;
 
 var server = new Server();
 server.AddApp<HelloApp>();
@@ -97,7 +96,6 @@ Example (minimal for a simple app):
 
 ```csharp
 using Ivy;
-using Ivy.Views;
 ```
 
 If you use only certain widgets or types, you might need extra namespaces (for example from other Ivy packages). Add `using` directives as you would in a normal C# project.

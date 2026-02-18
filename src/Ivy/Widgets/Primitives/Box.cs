@@ -1,5 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -77,8 +76,8 @@ public static class BoxExtensions
     {
         return new Box(anything)
         {
-            BorderRadius = Shared.BorderRadius.None,
-            BorderStyle = Shared.BorderStyle.None,
+            BorderRadius = Ivy.BorderRadius.None,
+            BorderStyle = Ivy.BorderStyle.None,
             BorderThickness = new(0),
             Padding = new(0),
             Color = null,

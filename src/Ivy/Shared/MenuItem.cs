@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Http.Features;
 
 
-namespace Ivy.Shared;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum MenuItemVariant
 {

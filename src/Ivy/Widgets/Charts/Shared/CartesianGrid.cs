@@ -1,8 +1,7 @@
 // ReSharper disable once CheckNamespace
 
-using Ivy.Shared;
 
-namespace Ivy.Charts;
+namespace Ivy;
 
 public record CartesianGrid
 {

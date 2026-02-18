@@ -1,15 +1,5 @@
-using Ivy.Client;
-using Ivy.Core;
-using Ivy.Views;
-using Ivy.Widgets.Inputs;
 using System.Collections.Immutable;
-using Ivy.Core.Hooks;
-using Ivy.Shared;
 using Ivy.Themes;
-using Ivy.Hooks;
-using Ivy.Samples.Shared.Helpers;
-using Ivy.Views.Forms;
-using Ivy;
 using Ivy.Widgets.Internal;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
@@ -535,7 +525,7 @@ public class ThemeCustomizer : SampleBase
 
             // --- Settings / inputs / misc state -------------------------------
             var agreeTerms = UseState(true);
-            var themeSatisfaction = UseState(4); // 1–5 stars
+            var themeSatisfaction = UseState(4); // 1Ã¢â‚¬â€œ5 stars
             var uxSatisfaction = UseState((int?)null);
 
             var paginationPage = UseState(1);
@@ -654,7 +644,7 @@ public class ThemeCustomizer : SampleBase
                             2 => "Badges, borders and subtle shadows adapt instantly to your theme.",
                             3 => "Form controls, switches and sliders stay readable in every palette.",
                             4 => "Try a different theme and see how this card transforms.",
-                            _ => "You’ve reached the end of the tour — tweak settings and explore freely."
+                            _ => "YouÃ¢â‚¬â„¢ve reached the end of the tour Ã¢â‚¬â€ tweak settings and explore freely."
                         }).Small()
                 ).Height(Size.Fit());
 

@@ -1,10 +1,3 @@
-using Ivy.Views;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Blades;
-using Ivy.Views.Builders;
-using Ivy.Views.Tables;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 [App(icon: Icons.Table, path: ["Tests"], isVisible: false, searchHints: ["table", "cropping", "layout", "blade", "truncation"])]
@@ -23,7 +16,7 @@ public class TableTestBlade : ViewBase
         var projects = new[]
         {
             new ProjectRecord("Landskrona BoIS", "155", new DateTime(2024, 1, 15), new DateTime(2024, 12, 31), "Active", 3),
-            new ProjectRecord("IFK Göteborg", "140", new DateTime(2024, 2, 1), new DateTime(2024, 11, 30), "Active", 2),
+            new ProjectRecord("IFK GÃ¶teborg", "140", new DateTime(2024, 2, 1), new DateTime(2024, 11, 30), "Active", 2),
             new ProjectRecord("Allsvenskan Championship", "120", new DateTime(2024, 3, 1), new DateTime(2024, 10, 31), "Active", 2),
             new ProjectRecord("GAIS Football Club", "3000", new DateTime(2024, 1, 1), new DateTime(2024, 12, 31), "Active", 2),
             new ProjectRecord("Football Training Camp", "100", new DateTime(2024, 4, 1), new DateTime(2024, 8, 31), "Active", 2),

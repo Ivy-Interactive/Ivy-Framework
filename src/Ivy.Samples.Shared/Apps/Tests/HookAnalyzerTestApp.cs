@@ -1,6 +1,3 @@
-using Ivy.Views;
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 #pragma warning disable IVYHOOK001, IVYHOOK002, IVYHOOK003, IVYHOOK004, IVYHOOK005
@@ -14,7 +11,7 @@ public class HookAnalyzerTestApp : ViewBase
             Text.P("This app demonstrates various hook usage violations that trigger analyzer warnings."),
             Text.P("Check the Error List or build output to see the warnings."),
             new Separator(),
-            Text.P("⚠️ This file intentionally contains violations for testing purposes.")
+            Text.P("âš ï¸ This file intentionally contains violations for testing purposes.")
         );
     }
 }

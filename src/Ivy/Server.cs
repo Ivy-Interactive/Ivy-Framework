@@ -1,19 +1,14 @@
 using System.Diagnostics;
-using Ivy.Shared;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Ivy.Apps;
-using Ivy.Auth;
-using Ivy.Chrome;
-using Ivy.Connections;
 using Ivy.Core;
+using Ivy.Core.Apps;
+using Ivy.Core.Auth;
 using Ivy.Core.ExternalWidgets;
-using Ivy.Hooks;
+using Ivy.Core.Server;
+using Ivy.Core.Server.Middleware;
 using Ivy.Themes;
-using Ivy.Middleware;
-using Ivy.Views;
-using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
@@ -592,7 +587,7 @@ public class Server
             string? context = null;
             try { context = connection.GetContext(connectionPath); } catch { }
 
-            var secrets = (connection is Ivy.Services.IHaveSecrets hasSecrets)
+            var secrets = (connection is Ivy.IHaveSecrets hasSecrets)
                 ? hasSecrets.GetSecrets().Select(s => s.Key).ToList()
                 : new List<string>();
 
@@ -619,7 +614,7 @@ public class Server
                 return;
             }
 
-            if (connection is Ivy.Services.IHaveSecrets hasSecrets)
+            if (connection is Ivy.IHaveSecrets hasSecrets)
             {
                 var config = app.Services.GetRequiredService<IConfiguration>();
                 var missing = hasSecrets.GetSecrets()

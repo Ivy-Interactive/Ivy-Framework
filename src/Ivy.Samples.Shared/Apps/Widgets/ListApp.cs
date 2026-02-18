@@ -1,9 +1,4 @@
-using Ivy.Core;
-using Ivy.Views;
 using Ivy.Samples.Shared.Helpers;
-using Ivy.Shared;
-using Ivy.Views.Blades;
-using Ivy.Views.Builders;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 

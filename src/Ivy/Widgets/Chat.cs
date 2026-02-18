@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -70,7 +69,7 @@ public static class ChatExtensions
         return chat;
     }
 
-    internal static Chat Streaming(this Chat chat, bool streaming)
+    public static Chat Streaming(this Chat chat, bool streaming)
     {
         chat.Streaming = streaming;
         return chat;

@@ -1,7 +1,6 @@
 #:project ..\Ivy.Widgets.Leaflet.csproj
 
 using Ivy;
-using Ivy.Shared;
 using Ivy.Widgets.Leaflet;
 
 var server = new Server();

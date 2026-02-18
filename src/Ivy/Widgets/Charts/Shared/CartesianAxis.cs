@@ -1,7 +1,5 @@
-﻿using Ivy.Shared;
-
-// ReSharper disable once CheckNamespace
-namespace Ivy.Charts;
+﻿// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public record CartesianAxis
 {

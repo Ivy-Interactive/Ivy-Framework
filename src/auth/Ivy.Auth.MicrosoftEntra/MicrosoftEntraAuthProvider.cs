@@ -1,8 +1,6 @@
 using System.Text.Json;
-using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Ivy.Core;
 using System.Text.Json.Serialization;

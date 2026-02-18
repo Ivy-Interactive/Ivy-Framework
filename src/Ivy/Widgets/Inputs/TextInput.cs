@@ -1,25 +1,12 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Validation;
-using Ivy.Widgets;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
-
-/// <summary>Internal: set by the framework during view.Build() so state.ToEmailInput() etc. can validate on blur without this. or duplicate methods.</summary>
-internal static class TextInputBuildContext
-{
-    private static readonly AsyncLocal<IViewContext?> Current = new();
-    public static void SetCurrent(IViewContext? context) => Current.Value = context;
-    internal static IViewContext? GetCurrent() => Current.Value;
-}
 
 public record Affix
 {
@@ -33,7 +20,7 @@ public static class AffixExtensions
     public static Affix ToAffix(this string text) => new() { Text = text };
 }
 
-public enum TextInputVariants
+public enum TextInputs
 {
     Text,
     Textarea,
@@ -46,7 +33,7 @@ public enum TextInputVariants
 
 public interface IAnyTextInput : IAnyInput
 {
-    public TextInputVariants Variant { get; set; }
+    public TextInputs Variant { get; set; }
 }
 
 public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
@@ -57,7 +44,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public TextInputVariants Variant { get; set; } = TextInputVariants.Text;
+    [Prop] public TextInputs Variant { get; set; } = TextInputs.Text;
 
     [Prop] public string? ShortcutKey { get; set; }
 
@@ -67,45 +54,41 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public int? MaxLength { get; set; }
 
-    [Prop] public int? MinLength { get; set; }
-
     [Prop] public int? Rows { get; set; }
 
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
-
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnSubmit { get; set; }
+    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
 
 public record TextInput<TString> : TextInputBase, IInput<TString>
 {
-    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TString>();
         Value = typedState.Value;
-        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
+        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
     }
 
     [OverloadResolutionPriority(1)]
-    public TextInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange.ToEventHandler();
+        OnChange = onChange;
         Value = value;
     }
 
-    public TextInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange.ToEventHandler();
+        OnChange = onChange?.ToValueTask();
         Value = value;
     }
 
-    public TextInput(string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
     {
         Placeholder = placeholder;
         Variant = variant;
@@ -114,11 +97,11 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
 
     internal TextInput() { }
 
-    [Prop] public TString Value { get; init; } = default!;
+    [Prop] public TString Value { get; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
-    [Event] public EventHandler<Event<IInput<TString>, TString>>? OnChange { get; }
+    [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
 
 /// <summary>
@@ -126,23 +109,23 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
 /// </summary>
 public record TextInput : TextInput<string>
 {
-    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
         : base(state, placeholder, disabled, variant)
     {
     }
 
     [OverloadResolutionPriority(1)]
-    public TextInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
         : base(value, onChange, placeholder, disabled, variant)
     {
     }
 
-    public TextInput(string value, Action<Event<IInput<string>, string>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(string value, Action<Event<IInput<string>, string>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
         : base(value, onChange?.ToValueTask(), placeholder, disabled, variant)
     {
     }
 
-    public TextInput(string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
         : base(placeholder, disabled, variant)
     {
     }
@@ -150,7 +133,7 @@ public record TextInput : TextInput<string>
 
 public static class TextInputExtensions
 {
-    public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
     {
         var type = state.GetStateType();
         Type genericType = typeof(TextInput<>).MakeGenericType(type);
@@ -160,28 +143,23 @@ public static class TextInputExtensions
         return input;
     }
 
-    public static TextInputBase ToTextareaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Textarea);
+    public static TextInputBase ToTextAreaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Textarea);
 
-    public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Search);
+    public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Search);
 
-    /// <summary>Email/Password/Url/Tel input. Validates on blur when built inside a view; in forms FormView also runs validation.</summary>
-    public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
-        TextInputBuildContext.GetCurrent() is { } ctx ? BuildValidatedInput(ctx, state, TextInputVariants.Email, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Email);
-    public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
-        TextInputBuildContext.GetCurrent() is { } ctxP ? BuildValidatedInput(ctxP, state, TextInputVariants.Password, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Password);
-    public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
-        TextInputBuildContext.GetCurrent() is { } ctxU ? BuildValidatedInput(ctxU, state, TextInputVariants.Url, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Url);
-    public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
-        TextInputBuildContext.GetCurrent() is { } ctxT ? BuildValidatedInput(ctxT, state, TextInputVariants.Tel, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Tel);
+    public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Password);
+
+    public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Email);
+
+    public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Url);
+
+    public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Tel);
 
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 
     public static TextInputBase Disabled(this TextInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
 
-    public static TextInputBase Variant(this TextInputBase widget, TextInputVariants variant) => widget with { Variant = variant };
-
-    public static TextInputBase Multiline(this TextInputBase widget, bool multiline = true)
-        => widget with { Variant = multiline ? TextInputVariants.Textarea : TextInputVariants.Text };
+    public static TextInputBase Variant(this TextInputBase widget, TextInputs variant) => widget with { Variant = variant };
 
     public static TextInputBase Invalid(this TextInputBase widget, string invalid) => widget with { Invalid = invalid };
 
@@ -200,8 +178,6 @@ public static class TextInputExtensions
 
     public static TextInputBase MaxLength(this TextInputBase widget, int maxLength) => widget with { MaxLength = maxLength };
 
-    public static TextInputBase MinLength(this TextInputBase widget, int minLength) => widget with { MinLength = minLength };
-
     public static TextInputBase Rows(this TextInputBase widget, int rows) => widget with { Rows = rows };
 
     public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
@@ -217,58 +193,18 @@ public static class TextInputExtensions
         => widget with { Suffix = suffixIcon.ToAffix() };
 
     [OverloadResolutionPriority(1)]
-    public static TextInputBase OnBlur(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static TextInputBase HandleBlur(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = new(onBlur) };
+        return widget with { OnBlur = onBlur };
     }
 
-    public static TextInputBase OnBlur(this TextInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static TextInputBase HandleBlur(this TextInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget with { OnBlur = new(onBlur.ToValueTask()) };
+        return widget.HandleBlur(onBlur.ToValueTask());
     }
 
-    public static TextInputBase OnBlur(this TextInputBase widget, Action onBlur)
+    public static TextInputBase HandleBlur(this TextInputBase widget, Action onBlur)
     {
-        return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
-    }
-
-    private static TextInputBase BuildValidatedInput(IViewContext context, IAnyState state, TextInputVariants variant, string? placeholder, bool disabled)
-    {
-        var invalidState = context.UseState(default(string?), true);
-        var blurOnceState = context.UseState(false, true);
-        context.UseEffect(() =>
-        {
-            if (blurOnceState.Value)
-            {
-                var (_, err) = Validators.ValidateForVariant(state.As<object>().Value, variant);
-                invalidState.Set(err ?? "");
-            }
-        }, state, blurOnceState);
-        void OnBlur(Event<IAnyInput> _) => blurOnceState.Set(true);
-        return state.ToTextInput(placeholder, disabled, variant).Invalid(invalidState.Value ?? "").OnBlur(OnBlur);
-    }
-    public static TextInputBase Value<T>(this TextInputBase widget, T value)
-    {
-        if (widget is TextInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not TextInput<{typeof(T).Name}>");
-    }
-
-    [OverloadResolutionPriority(1)]
-    public static TextInputBase HandleSubmit(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onSubmit)
-    {
-        return widget with { OnSubmit = onSubmit };
-    }
-
-    public static TextInputBase HandleSubmit(this TextInputBase widget, Action<Event<IAnyInput>> onSubmit)
-    {
-        return widget.HandleSubmit(onSubmit.ToValueTask());
-    }
-
-    public static TextInputBase HandleSubmit(this TextInputBase widget, Action onSubmit)
-    {
-        return widget.HandleSubmit(_ => { onSubmit(); return ValueTask.CompletedTask; });
+        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 }

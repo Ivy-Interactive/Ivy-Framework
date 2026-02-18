@@ -28,10 +28,9 @@ This attribute provides essential metadata that the framework uses to:
 
 ## The `[App]` Attribute
 
-The `[App]` attribute is found in the `Ivy.Apps` namespace.
+The `[App]` attribute is found in the `Ivy` namespace.
 
 ```csharp
-using Ivy.Apps;
 
 [App(
     title: "Product Catalog", 

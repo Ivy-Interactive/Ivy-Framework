@@ -1,8 +1,3 @@
-using Ivy.Core;
-using Ivy.Views;
-using Ivy.Shared;
-using Ivy.Views.Blades;
-
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 [App(icon: Icons.PanelLeft, searchHints: ["panels", "sidebar", "drawer", "navigation", "stack", "layers"])]

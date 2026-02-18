@@ -1,11 +1,13 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Reactive.Disposables;
 using System.Reflection;
-using Ivy.Apps;
+using Ivy.Core.Apps;
 using Ivy.Core.Hooks;
-using AppContext = Ivy.Apps.AppContext;
+using Ivy.Core.Server;
+using AppContext = Ivy.AppContext;
 
-namespace Ivy.Hooks;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public struct Unit { }
 

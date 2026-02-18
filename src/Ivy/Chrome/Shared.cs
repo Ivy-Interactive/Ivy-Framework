@@ -1,13 +1,12 @@
 using System.Text.Json;
-using Ivy.Apps;
-using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Apps;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
+using Ivy.Core.Server;
 
-namespace Ivy.Chrome;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum ChromeNavigation
 {

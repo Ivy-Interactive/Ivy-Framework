@@ -1,9 +1,8 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views.Dashboards;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public record MetricRecord(
     string MetricFormatted,

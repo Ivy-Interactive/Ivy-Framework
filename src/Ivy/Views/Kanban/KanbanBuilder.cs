@@ -1,10 +1,9 @@
 using System.Linq.Expressions;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Builders;
 
-namespace Ivy.Views.Kanban;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class KanbanBuilder<TModel, TGroupKey>(
     IEnumerable<TModel> records,

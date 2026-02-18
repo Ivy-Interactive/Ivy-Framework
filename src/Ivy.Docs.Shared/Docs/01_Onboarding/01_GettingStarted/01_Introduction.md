@@ -38,9 +38,6 @@ Make sure to have latest .NET 10 installed, [download it here](https://dotnet.mi
 #:package Ivy@*
 
 using Ivy;
-using Ivy.Shared;
-using Ivy.Views;
-using Ivy.Widgets.Inputs;
 
 var server = new Server();
 server.AddApp<HelloApp>();

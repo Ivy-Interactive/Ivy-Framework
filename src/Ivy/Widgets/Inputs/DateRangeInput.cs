@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Widgets.Inputs;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

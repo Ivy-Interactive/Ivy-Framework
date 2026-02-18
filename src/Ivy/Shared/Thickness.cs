@@ -1,7 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Ivy.Shared;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 [JsonConverter(typeof(ThicknessJsonConverter))]
 public readonly record struct Thickness(int Left, int Top, int Right, int Bottom)

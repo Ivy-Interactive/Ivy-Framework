@@ -1,5 +1,4 @@
-﻿using Ivy;
-using Ivy.Shared;
+using Ivy;
 
 namespace Ivy.Samples.Shared.Helpers;
 

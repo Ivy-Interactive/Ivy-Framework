@@ -1,6 +1,3 @@
-using Ivy.Views;
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 [App(path: ["Tests"], isVisible: false, searchHints: ["url", "validation", "security", "redirect", "link", "button", "markdown", "xss", "phishing"])]

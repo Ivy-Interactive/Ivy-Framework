@@ -1,0 +1,43 @@
+using Ivy.Core.Hooks;
+
+// Resharper disable once CheckNamespace
+namespace Ivy;
+
+public interface IViewContext : IAsyncDisposable
+{
+    void TrackDisposable(IDisposable disposable);
+
+    void TrackDisposable(IEnumerable<IDisposable> disposables);
+
+    void Reset();
+
+    IState<T> UseState<T>(T? initialValue = default, bool buildOnChange = true);
+
+    IState<T> UseState<T>(Func<T> buildInitialValue, bool buildOnChange = true);
+
+    IState<T> UseRef<T>(T? initialValue = default) => UseState<T>(initialValue, buildOnChange: false);
+
+    IState<T> UseRef<T>(Func<T> buildInitialValue) => UseState<T>(buildInitialValue, buildOnChange: false);
+
+    void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers);
+
+    void UseEffect(Func<Task<IDisposable?>> handler, params IEffectTriggerConvertible[] triggers);
+
+    void UseEffect(Func<Task<IAsyncDisposable?>> handler, params IEffectTriggerConvertible[] triggers);
+
+    void UseEffect(Func<IDisposable?> handler, params IEffectTriggerConvertible[] triggers);
+
+    void UseEffect(Func<IAsyncDisposable?> handler, params IEffectTriggerConvertible[] triggers);
+
+    void UseEffect(Action handler, params IEffectTriggerConvertible[] triggers);
+
+    T CreateContext<T>(Func<T> factory);
+
+    T UseContext<T>();
+
+    object UseContext(Type serviceType);
+
+    T UseService<T>();
+
+    object UseService(Type serviceType);
+}

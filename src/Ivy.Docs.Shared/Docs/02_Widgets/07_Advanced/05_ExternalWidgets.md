@@ -42,7 +42,6 @@ Create a record that inherits from `WidgetBase<T>` and mark it with `[ExternalWi
 ```csharp
 using Ivy.Core;
 using Ivy.Core.ExternalWidgets;
-using Ivy.Shared;
 
 namespace MyProject.Widgets;
 

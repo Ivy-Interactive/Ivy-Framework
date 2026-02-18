@@ -1,7 +1,3 @@
-using Ivy.Shared;
-using Ivy.Views;
-using Ivy.Widgets.Inputs;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 public class SingleAnswerQuestion(string question, Action<bool>? onAnswer = null, string yesText = "Yes", string noText = "No") : ViewBase

@@ -107,7 +107,7 @@ public class DonutChartWithCustomLabelsView : ViewBase
                     .FontFamily("Arial"))
             )
             .ColorScheme(ColorScheme.Default)
-            .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+            .Tooltip(new ChartTooltip().Animated(true))
             .Legend(new Legend().IconType(Legend.IconTypes.Rect))
             .Total(totalValue, "Total Budget");
     }

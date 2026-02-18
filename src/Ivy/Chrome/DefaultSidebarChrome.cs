@@ -1,15 +1,13 @@
-using Ivy.Apps;
-using Ivy.Auth;
-using Ivy.Client;
 using Ivy.Core;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views;
+using Ivy.Core.Apps;
+using Ivy.Core.Chrome;
+using Ivy.Core.Server;
 using Ivy.Widgets.Internal;
 using System.Collections.Immutable;
-using AppContext = Ivy.Apps.AppContext;
+using AppContext = Ivy.AppContext;
 
-namespace Ivy.Chrome;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 [App(isVisible: false)]
 public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
@@ -382,8 +380,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
         var commonMenuItems = new[]
         {
-            MenuItem.Default("Star on Github").Tag("$github").Icon(Icons.Github)
-                .HandleSelect(() => client.OpenUrl(Resources.IvyGitHubUrl)),
+            // MenuItem.Default("Star on Github").Tag("$github").Icon(Icons.Github)
+            //     .HandleSelect(() => client.OpenUrl(Resources.IvyGitHubUrl)),
             MenuItem.Default("Theme")
                 .Tag("$theme")
                 .Icon(Icons.SunMoon)
@@ -465,7 +463,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 | searchInput
             ,
             Layout.Vertical(
-                new SidebarNews("https://ivy.app/news.json"),
+                //new SidebarNews("https://ivy.app/news.json"),
                 settings.Footer,
                 footer
             ),

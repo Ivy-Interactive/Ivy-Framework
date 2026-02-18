@@ -95,14 +95,8 @@ public static partial class MarkdownConverter
 
         codeBuilder.AppendLine("using System;");
         codeBuilder.AppendLine("using Ivy;");
-        codeBuilder.AppendLine("using Ivy.Apps;");
-        codeBuilder.AppendLine("using Ivy.Shared;");
-        codeBuilder.AppendLine("using Ivy.Core;");
-        codeBuilder.AppendLine("using Ivy.Views.Tables;");
-        codeBuilder.AppendLine("using Ivy.Views.Kanban;");
-        codeBuilder.AppendLine("using static Ivy.Views.Layout;");
-        codeBuilder.AppendLine("using static Ivy.Views.Text;");
-        codeBuilder.AppendLine("using Ivy.Views;");
+        codeBuilder.AppendLine("using static Ivy.Layout;");
+        codeBuilder.AppendLine("using static Ivy.Text;");
         if (appMeta.Imports != null)
         {
             foreach (var import in appMeta.Imports)

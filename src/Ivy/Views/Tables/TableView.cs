@@ -1,7 +1,8 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
 
-namespace Ivy.Views.Tables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class TableView<TModel>(IEnumerable<TModel> model, params ITableColumn<TModel>[] columns) : ViewBase, IStateless
 {

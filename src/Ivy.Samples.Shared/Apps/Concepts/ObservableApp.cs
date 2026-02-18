@@ -1,6 +1,4 @@
-using Ivy.Views;
 using System.Reactive.Linq;
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 

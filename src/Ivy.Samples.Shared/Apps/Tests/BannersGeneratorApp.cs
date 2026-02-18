@@ -1,9 +1,3 @@
-using Ivy.Client;
-using Ivy.Core;
-using Ivy.Views;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 [App(icon: Icons.Image, path: ["Tests"], isVisible: false, searchHints: ["sidebar", "layout", "scrolling", "forms", "generator", "testing"])]

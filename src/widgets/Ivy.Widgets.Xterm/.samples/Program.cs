@@ -1,7 +1,5 @@
 using Ivy;
 using Ivy.Hooks.Pty;
-using Ivy.Shared;
-using Ivy.Views;
 using Ivy.Widgets.Xterm;
 
 var server = new Server();

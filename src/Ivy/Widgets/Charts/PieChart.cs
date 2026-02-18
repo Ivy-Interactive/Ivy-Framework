@@ -1,6 +1,4 @@
-using Ivy.Charts;
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -33,7 +31,7 @@ public record PieChart : WidgetBase<PieChart>
 
     [Prop] public Pie[] Pies { get; init; } = [];
 
-    [Prop] public Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public ChartTooltip? Tooltip { get; init; }
 
     [Prop] public PieChartTotal? Total { get; init; }
 
@@ -43,7 +41,7 @@ public record PieChart : WidgetBase<PieChart>
     }
 }
 
-public static class PieChartExtensions
+public static partial class PieChartExtensions
 {
     public static PieChart Pie(this PieChart chart, Pie pie)
     {
@@ -80,14 +78,14 @@ public static class PieChartExtensions
         return chart with { Toolbox = new Toolbox() };
     }
 
-    public static PieChart Tooltip(this PieChart chart, Charts.Tooltip tooltip)
+    public static PieChart Tooltip(this PieChart chart, ChartTooltip tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static PieChart Tooltip(this PieChart chart)
     {
-        return chart with { Tooltip = new Charts.Tooltip() };
+        return chart with { Tooltip = new ChartTooltip() };
     }
 
     public static PieChart Total(this PieChart chart, PieChartTotal? pieChartTotal)

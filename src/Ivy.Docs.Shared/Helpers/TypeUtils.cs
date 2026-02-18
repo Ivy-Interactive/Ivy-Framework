@@ -235,7 +235,7 @@ public static class TypeUtils
         foreach (var method in methods)
         {
             var parameters = method.GetParameters().Skip(1);
-            var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.Shared.") : "")}");
+            var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.") : "")}");
             sb.AppendLine($"{method.Name}({string.Join(", ", paramSignatures)})");
         }
 
@@ -289,14 +289,14 @@ public static class TypeUtils
         }
 
         var parameters = constructor.GetParameters();
-        var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.Shared.") : "")}");
+        var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.") : "")}");
         return $"new {typeName}({string.Join(", ", paramSignatures)})";
     }
 
     private static string GetCSharpSignature(MethodInfo method)
     {
         var parameters = method.GetParameters();
-        var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.Shared.") : "")}");
+        var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.") : "")}");
         return $"{method.Name}({string.Join(", ", paramSignatures)})";
     }
 

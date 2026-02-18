@@ -1,6 +1,3 @@
-using Ivy.Views;
-using Ivy.Charts;
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 

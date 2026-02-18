@@ -1,6 +1,5 @@
 using System.ComponentModel.Design;
 using System.Reactive.Disposables;
-using Ivy.Apps;
 using Ivy.Core.Exceptions;
 using Ivy.Core.Helpers;
 

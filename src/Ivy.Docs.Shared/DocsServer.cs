@@ -1,4 +1,3 @@
-﻿using Ivy.Chrome;
 using Ivy.Docs.Shared.Middleware;
 
 namespace Ivy.Docs.Shared;

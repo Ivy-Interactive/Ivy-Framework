@@ -1,6 +1,3 @@
-using Ivy.Core;
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 #pragma warning disable IVYHOOK001

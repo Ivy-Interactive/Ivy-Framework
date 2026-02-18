@@ -4,10 +4,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Builders;
 
-namespace Ivy.Views.Tables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class TableBuilder<TModel> : ViewBase, IStateless
 {
@@ -108,18 +107,18 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         int order = fields.Count();
         foreach (var field in fields)
         {
-            var cellAlignment = Shared.Align.Left;
+            var cellAlignment = Ivy.Align.Left;
 
             var cellBuilder = _builderFactory.Default();
 
             if (field.Type.IsNumeric())
             {
-                cellAlignment = Shared.Align.Right;
+                cellAlignment = Ivy.Align.Right;
             }
 
             else if (field.Type == typeof(bool))
             {
-                cellAlignment = Shared.Align.Center;
+                cellAlignment = Ivy.Align.Center;
             }
 
             else if (

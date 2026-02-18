@@ -1,8 +1,3 @@
-using Ivy.Core;
-using Ivy.Views;
-using Ivy.Hooks;
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Demos;
 
 [App(icon: Icons.MessageCircle, searchHints: ["chat", "messaging", "conversation", "realtime", "polling"])]

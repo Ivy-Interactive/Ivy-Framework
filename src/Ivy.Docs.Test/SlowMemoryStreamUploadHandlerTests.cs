@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using Ivy.Core.Hooks;
 using Ivy.Docs.Shared.Helpers;
-using Ivy.Services;
 
 namespace Ivy.Docs.Test;
 

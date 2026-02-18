@@ -1,6 +1,3 @@
-using Ivy.Core.Hooks;
-using Ivy.Views;
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 

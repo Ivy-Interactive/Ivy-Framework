@@ -1,7 +1,3 @@
-using Ivy.Core.Hooks;
-using Ivy.Views;
-using Ivy.Hooks;
-using Ivy.Shared;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;

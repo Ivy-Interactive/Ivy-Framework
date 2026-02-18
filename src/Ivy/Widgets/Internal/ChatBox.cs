@@ -1,5 +1,3 @@
-using Ivy.Shared;
-using Ivy.Views;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

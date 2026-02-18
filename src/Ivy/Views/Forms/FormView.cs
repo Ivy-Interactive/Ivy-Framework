@@ -1,17 +1,11 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Ivy;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Validation;
-using Ivy.Widgets.Inputs;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 internal static class FormFieldViewHelpers
 {
@@ -45,7 +39,7 @@ public enum FormValidationStrategy
 
 public class FormFieldView(
     IAnyState bindingState,
-    Func<IAnyState, IViewContext, object> inputFactory,
+    Func<IAnyState, IViewContext, IAnyInput> inputFactory,
     Func<bool> visible,
     ISignal<Unit, Unit> updateSender,
     string? label = null,
@@ -61,46 +55,50 @@ public class FormFieldView(
 {
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
 
-    private IState<Func<object?, (bool, string)>[]?>? _effectiveValidatorsRef;
-
-    private bool Validate<T>(T value, IState<string> invalid, IAnyInput input)
+    private bool Validate<T>(T value, IState<string> invalid)
     {
         if (!visible()) return true;
 
-        var existing = _effectiveValidatorsRef?.Value;
-        var (isValid, errorMessage) = Validators.RunValidation(value, input, label, validators);
-        invalid?.Set(isValid ? null! : errorMessage ?? "");
-        return isValid;
+        if (validators != null)
+        {
+
+            var isValid = true;
+            var message = string.Empty;
+            foreach (var validator in validators)
+            {
+                (isValid, message) = validator(value);
+                if (!isValid)
+                {
+                    break;
+                }
+            }
+            invalid?.Set(isValid ? null! : message);
+            return isValid;
+        }
+        return true;
     }
 
     public override object? Build()
     {
         IAnyState inputState = Context.UseClonedAnyState(bindingState);
-        var visibleState = UseState(visible);
-        var updateReceiver = UseSignal<FormUpdateSignal, Unit, Unit>();
-
-        UseEffect(() => updateReceiver.Receive(_ =>
-        {
-            visibleState.Set(visible());
-            return default;
-        }));
-
-        var result = inputFactory(inputState, Context);
-        var input = (IAnyInput)result;
         var invalidState = UseState((string?)null!);
         var blurOnceState = UseState(false);
         var validationReceiver = UseSignal<FormValidateSignal, Unit, bool>();
-
-        _effectiveValidatorsRef = Context.UseRef<Func<object?, (bool, string)>[]?>(validators);
-        _effectiveValidatorsRef.Set(Validators.GetEffectiveValidators(input, label, validators));
+        var updateReceiver = UseSignal<FormUpdateSignal, Unit, Unit>();
+        var visibleState = UseState(visible);
 
         UseEffect(() =>
         {
             return new Disposables(
+                updateReceiver.Receive(_ =>
+                {
+                    visibleState.Set(visible());
+                    return default;
+                }),
                 validationReceiver.Receive(_ =>
                 {
                     var value = inputState.As<object>().Value;
-                    return Validate(value, invalidState, input);
+                    return Validate(value, invalidState);
                 })
             );
         });
@@ -110,23 +108,24 @@ public class FormFieldView(
             var value = inputState.As<object>().Value;
             if (blurOnceState.Value)
             {
-                Validate(value, invalidState, input);
+                Validate(value, invalidState);
             }
             bindingState.As<object>().Set(value);
             updateSender.Send(new Unit());
-        }, inputState, blurOnceState);
+        }, [inputState, blurOnceState]);
 
         void OnBlur(Event<IAnyInput> _)
         {
             blurOnceState.Set(true);
         }
 
-        input = input.Invalid(invalidState.Value);
+        var input = inputFactory(inputState, Context).Invalid(invalidState.Value);
         if (validationStrategy == FormValidationStrategy.OnBlur)
         {
-            input.OnBlur(OnBlur);
+            input.HandleBlur(OnBlur);
         }
 
+        // Set placeholder if the input supports it
         if (!string.IsNullOrEmpty(placeholder))
         {
             input.Placeholder = placeholder;
@@ -145,7 +144,7 @@ public record FormFieldLayoutOptions(Guid RowKey, int Column = 0, int Order = 0,
 
 public class FormFieldBinding<TModel>(
     Expression<Func<TModel, object>> selector,
-    Func<IAnyState, IViewContext, object> factory,
+    Func<IAnyState, IViewContext, IAnyInput> factory,
     Func<bool> visible,
     ISignal<Unit, Unit> updateSignal,
     string? label = null,
@@ -222,7 +221,7 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
         var form = new Form(Layout.Horizontal(columns));
         if (handleSubmit != null)
         {
-            form = form.OnSubmit(handleSubmit);
+            form = form.HandleSubmit(handleSubmit);
         }
         return form;
     }

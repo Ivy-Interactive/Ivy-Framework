@@ -1,8 +1,4 @@
-using Ivy.Views;
-using Ivy.Charts;
-using Ivy.Shared;
 using System.Linq.Expressions;
-using Ivy.Views.Charts;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
@@ -218,7 +214,7 @@ public class AreaChart7View : ViewBase
         return new Card().Title("Weather Data Trends (Annual)")
             | data.ToAreaChart()
                 .Dimension("Month", e => e.Month)
-                .Measure("Temperature (°C)", e => e.Sum(f => f.Temperature))
+                .Measure("Temperature (Â°C)", e => e.Sum(f => f.Temperature))
                 .Measure("Humidity (%)", e => e.Sum(f => f.Humidity))
                 .Measure("Pressure (hPa)", e => e.Sum(f => f.Pressure))
                 .Measure("Wind Speed (km/h)", e => e.Sum(f => f.WindSpeed))
@@ -247,7 +243,7 @@ public class AreaChart8View : ViewBase
             new { Month = "Dec", High = 16, Low = 6, Average = 11 },
         };
 
-        return new Card().Title("Temperature Trends (°C)")
+        return new Card().Title("Temperature Trends (Â°C)")
             | data.ToAreaChart()
                 .Dimension("Month", e => e.Month)
                 .Measure("High", e => e.Sum(f => f.High))

@@ -1,5 +1,4 @@
-﻿using Ivy.Core.Helpers;
-using Ivy.Shared;
+using Ivy.Core.Helpers;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 

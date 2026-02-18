@@ -1,8 +1,6 @@
 using Ivy;
 using Ivy.Core;
-using Ivy.Shared;
 using Ivy.Core.ExternalWidgets;
-using Ivy.Hooks;
 
 namespace Ivy.Widgets.Xterm;
 

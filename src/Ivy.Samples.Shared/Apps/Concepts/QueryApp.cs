@@ -1,7 +1,3 @@
-using Ivy.Views;
-using Ivy.Hooks;
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 [App(icon: Icons.Database, searchHints: ["query", "swr", "stale", "revalidate", "fetch", "async", "loading"])]
@@ -677,11 +673,11 @@ public class PaginationExample : ViewBase
 
                // Pagination controls
                | (Layout.Horizontal().Gap(2)
-                  | new Button("← Previous", _ => page.Set(p => p - 1))
+                  | new Button("â† Previous", _ => page.Set(p => p - 1))
                         .Disabled(page.Value <= 1 || itemsQuery.Loading)
                         .Variant(ButtonVariant.Outline)
                   | Text.Literal($"{page.Value} / {totalPages}")
-                  | new Button("Next →", _ => page.Set(p => p + 1))
+                  | new Button("Next â†’", _ => page.Set(p => p + 1))
                         .Disabled(page.Value >= totalPages || itemsQuery.Loading)
                         .Variant(ButtonVariant.Outline))
 
@@ -698,10 +694,10 @@ public class PaginationComparisonExample : ViewBase
 
         return Layout.Vertical().Gap(4)
                | (Layout.Horizontal().Gap(2)
-                  | new Button("← Prev", _ => page.Set(p => Math.Max(1, p - 1)))
+                  | new Button("â† Prev", _ => page.Set(p => Math.Max(1, p - 1)))
                         .Variant(ButtonVariant.Outline)
                   | Text.Literal($"Page {page.Value}")
-                  | new Button("Next →", _ => page.Set(p => Math.Min(5, p + 1)))
+                  | new Button("Next â†’", _ => page.Set(p => Math.Min(5, p + 1)))
                         .Variant(ButtonVariant.Outline))
                | (Layout.Grid(2).Gap(4)
                   | new Card(new ComparisonPanelWithKeepPrevious(page.Value)).Title("With KeepPrevious")
@@ -725,7 +721,7 @@ public class ComparisonPanelWithKeepPrevious(int page) : ViewBase
             },
             options: new QueryOptions { KeepPrevious = true });
 
-        var content = itemsQuery.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
+        var content = itemsQuery.Value?.Select(item => Text.Literal($"â€¢ {item}")).ToArray() ?? [];
 
         return Layout.Vertical().Gap(2)
                | itemsQuery
@@ -749,7 +745,7 @@ public class ComparisonPanelWithoutKeepPrevious(int page) : ViewBase
             },
             options: new QueryOptions { KeepPrevious = false });
 
-        var content = itemsQuery.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
+        var content = itemsQuery.Value?.Select(item => Text.Literal($"â€¢ {item}")).ToArray() ?? [];
 
         return Layout.Vertical().Gap(2)
                | itemsQuery

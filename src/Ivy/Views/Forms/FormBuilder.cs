@@ -2,12 +2,10 @@ using System.Linq.Expressions;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
-using static Ivy.Views.Forms.FormHelpers;
+using static Ivy.FormHelpers;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class FormBuilder<TModel> : ViewBase
 {
@@ -16,7 +14,7 @@ public class FormBuilder<TModel> : ViewBase
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
-    internal Scale _scale = Shared.Scale.Medium;
+    internal Scale _scale = Ivy.Scale.Medium;
     internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
     internal Func<TModel, Task>? _onSubmit;
@@ -322,9 +320,9 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    public FormBuilder<TModel> Small() => Scale(Shared.Scale.Small);
-    public FormBuilder<TModel> Medium() => Scale(Shared.Scale.Medium);
-    public FormBuilder<TModel> Large() => Scale(Shared.Scale.Large);
+    public FormBuilder<TModel> Small() => Scale(Ivy.Scale.Small);
+    public FormBuilder<TModel> Medium() => Scale(Ivy.Scale.Medium);
+    public FormBuilder<TModel> Large() => Scale(Ivy.Scale.Large);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
@@ -425,8 +423,8 @@ public class FormBuilder<TModel> : ViewBase
 
         var buttonGap = _scale switch
         {
-            Shared.Scale.Small => 4,
-            Shared.Scale.Large => 8,
+            Ivy.Scale.Small => 4,
+            Ivy.Scale.Large => 8,
             _ => 6
         };
 
