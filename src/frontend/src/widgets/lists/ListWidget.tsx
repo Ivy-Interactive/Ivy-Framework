@@ -26,8 +26,6 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
     count: childArray.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 60,
-    // Allow dynamic measurement so rows expand to fit multi-line content
-    measureElement: el => el.getBoundingClientRect().height,
     overscan: 6,
   });
 
@@ -48,12 +46,12 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
           return (
             <div
               key={virtualRow.key}
+              data-index={virtualRow.index}
               className={cn(
                 'absolute top-0 left-0 w-full flex items-center min-w-0',
                 !isLast && 'border-b border-border'
               )}
               style={{
-                height: `${virtualRow.size}px`,
                 transform: `translateY(${virtualRow.start}px)`,
               }}
               ref={rowVirtualizer.measureElement}
