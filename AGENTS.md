@@ -138,6 +138,7 @@ The Text helper utility is used to create various semantic text elements.
 - Text.P: For standard paragraphs.
 - Text.Block: For block-level content (e.g., list items).
 - Text.InlineCode: For displaying inline code snippets.
+- Test.Muted
 
 Styling Modifiers:
 .NoWrap():
@@ -151,6 +152,12 @@ Layout.Vertical()
     | Text.P("This is a paragraph of text.").NoWrap()
 
 [Text](https://docs.ivy.app/widgets/primitives/text-block.md)
+
+## Colors
+
+Ivy.Colors enum has the following values:
+
+Black, White, Slate, Gray, Zinc, Neutral, Stone, Red, Orange, Amber, Yellow, Lime, Green, Emerald, Teal, Cyan, Sky, Blue, Indigo, Violet, Purple, Fuchsia, Pink, Rose, Primary, Secondary, Destructive, Success, Warning, Info, Muted
 
 ## Event Handling
 
@@ -250,7 +257,6 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 [Table](https://docs.ivy.app/widgets/common/table.md)
 [Details](https://docs.ivy.app/widgets/common/details.md) - Display structured label-value pairs
 [Program.cs](https://docs.ivy.app/onboarding/concepts/program.md)
-[Colors](https://docs.ivy.app/api-reference/ivy-shared/colors.md)
 [Size](https://docs.ivy.app/api-reference/ivy-shared/size.md)
 [Align](https://docs.ivy.app/api-reference/ivy-shared/align.md)
 [Downloads](https://docs.ivy.app/hooks/core/use-download.md)
