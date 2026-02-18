@@ -31,7 +31,7 @@ public record Card : WidgetBase<Card>
     internal object? Title { get; set; }
     internal object? Description { get; set; }
     internal object? Icon { get; set; }
-    
+
     [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
 
     [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
@@ -94,7 +94,7 @@ public static class CardExtensions
         }
         return card.Header(card.Title, card.Description, icon);
     }
-    
+
     public static Card Hover(this Card card, CardHoverVariant variant) => card with { HoverVariant = variant };
 
     private static CardHoverVariant HoverVariantWithClick(this Card card) => card.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : card.HoverVariant;
