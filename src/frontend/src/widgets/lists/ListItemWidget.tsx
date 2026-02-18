@@ -34,11 +34,7 @@ export const ListItemWidget: React.FC<ListItemWidgetProps> = ({
             {subtitle}
           </span>
         )}
-        {children && (
-          <div className="w-full py-1">
-            {children}
-          </div>
-        )}
+        {children && <div className="w-full py-1">{children}</div>}
       </div>
       {icon && icon != 'None' && (
         <Icon
