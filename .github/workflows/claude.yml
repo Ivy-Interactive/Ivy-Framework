@@ -44,10 +44,10 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - name: Setup .NET 9
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.x'
+          dotnet-version: "10.0.x"
 
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -56,7 +56,7 @@ jobs:
           aws-region: eu-north-1
 
       - name: Run Claude PR Action
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1
         with:
           trigger_phrase: "@claude"
           timeout_minutes: "60"
@@ -71,8 +71,6 @@ jobs:
       "Grep",
       "LS",
       "MultiEdit",
-      "NotebookEdit",
-      "NotebookRead",
       "Read",
       "Task",
       "TodoWrite",
