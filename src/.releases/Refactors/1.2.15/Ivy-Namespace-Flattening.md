@@ -27,22 +27,13 @@ The following namespaces no longer exist. All types they contained are now in `n
 
 ### Internal types moved to `Ivy.Core.*`
 
-Types that are not part of the public API have been moved from `namespace Ivy;` into `Ivy.Core.*` sub-namespaces (with the goal of eventually marking them `internal`):
-
-| Old Location | New Namespace | Types |
-|---|---|---|
-| `Ivy` (Apps/) | `Ivy.Core.Apps` | `AppSession`, `IAppRepository`, `ScopedAppRepository`, `AppRouter`, `AppRouteResult`, `AppRepository`, `IAppRepositoryNode`, `IAppRepositoryGroup`, `AppRepositoryGroup`, `AppHelpers`, `AppDescriptor`, `AppIds` |
-| `Ivy` (Chrome/) | `Ivy.Core.Chrome` | `ChromeUtils` |
-| `Ivy.Middleware` | `Ivy.Core.Server.Middleware` | `PathToAppIdMiddleware`, `PathToAppIdMiddlewareExtensions`, `RoutingConstantData` |
-| `Ivy` (root) | `Ivy.Core.Server` | `AppHub`, `ClientSender`, `ClientProvider`, `AppSessionStore`, `HotReloadService`, `ServerDescription`, `AppDescription`, `ConnectionDescription`, `ServiceDescription`, `ServerUtils` |
-
+Types that are not part of the public API have been moved from `namespace Ivy;` into `Ivy.Core.*` sub-namespaces (with the goal of eventually marking them `internal`)
 
 ### Unchanged Namespaces
 
 These namespaces remain as-is:
 
 - `Ivy.Core.*`
-- `Ivy.Themes`
 - `Ivy.Widgets.Internal`
 
 ### Type Renames
@@ -91,6 +82,7 @@ using Ivy.Views.Tables;
 using Ivy.Views.DataTables;
 using Ivy.Views.Kanban;
 using Ivy.Charts;
+using Ivy.Themes;
 ```
 
 ### 2. Remove `GlobalUsings.cs` entries
