@@ -97,7 +97,7 @@ export const widgetMap = {
   'Ivy.Svg': SvgWidget,
   'Ivy.Image': ImageWidget,
   'Ivy.Iframe': IframeWidget,
-  'Ivy.Code': React.lazy(() => import('@/widgets/primitives/CodeWidget')),
+  'Ivy.CodeBlock': React.lazy(() => import('@/widgets/primitives/CodeBlockWidget')),
   'Ivy.Fragment': FragmentWidget,
   'Ivy.Separator': SeparatorWidget,
   'Ivy.Skeleton': SkeletonWidget,
