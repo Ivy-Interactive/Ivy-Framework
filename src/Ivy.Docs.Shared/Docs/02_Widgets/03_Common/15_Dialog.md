@@ -41,7 +41,7 @@ public class BasicDialogExample : ViewBase
                         Text.P("Are you sure you want to proceed with this action?")
                     ),
                     new DialogFooter(
-                        new Button("Cancel", _ => isOpen.Set(false), variant: ButtonVariant.Outline),
+                        new Button("Cancel", _ => isOpen.Set(false)).Outline(),
                         new Button("Confirm", _ =>
                         {
                             isOpen.Set(false);

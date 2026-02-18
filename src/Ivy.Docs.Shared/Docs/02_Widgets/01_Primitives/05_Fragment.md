@@ -62,7 +62,7 @@ public class ConditionalRenderingView : ViewBase
                 ? new Fragment(
                     Text.P("Admin Controls"),
                     Layout.Horizontal().Gap(2)
-                        | new Button("Reset System", _ => client.Toast("System reset initiated!"), variant: ButtonVariant.Destructive)
+                        | new Button("Reset System", _ => client.Toast("System reset initiated!")).Destructive()
                         | new Button("View Logs", _ => client.Toast("Opening system logs..."))
                         | new Button("Manage Users", _ => client.Toast("User management panel opened"))
                   )

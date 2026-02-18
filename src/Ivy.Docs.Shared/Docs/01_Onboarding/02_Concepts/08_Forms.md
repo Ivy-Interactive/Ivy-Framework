@@ -954,7 +954,7 @@ public class CrudFormExample : ViewBase
                             .Required(m => m.Name, m => m.Price, m => m.Category)
                 ),
                 new DialogFooter(
-                    new Button("Cancel", _ => isCreateDialogOpen.Set(false), variant: ButtonVariant.Outline),
+                    new Button("Cancel", _ => isCreateDialogOpen.Set(false)).Outline(),
                     new Button("Create Product", _ => {
                         if (editingProduct.Value != null)
                         {
@@ -979,7 +979,7 @@ public class CrudFormExample : ViewBase
                             .Required(m => m.Name, m => m.Price, m => m.Category)
                 ),
                 new DialogFooter(
-                    new Button("Cancel", _ => isEditDialogOpen.Set(false), variant: ButtonVariant.Outline),
+                    new Button("Cancel", _ => isEditDialogOpen.Set(false)).Outline(),
                     new Button("Update Product", _ => {
                         if (editingProduct.Value != null && selectedProduct.Value != null)
                         {

@@ -251,12 +251,12 @@ Create responsive button groups:
 
 ```csharp demo-tabs ivy-bg
 new WrapLayout([
-    new Button("Save", variant: ButtonVariant.Primary),
-    new Button("Cancel", variant: ButtonVariant.Secondary),
-    new Button("Delete", variant: ButtonVariant.Destructive),
-    new Button("Export", variant: ButtonVariant.Outline),
-    new Button("Import", variant: ButtonVariant.Outline),
-    new Button("Settings", variant: ButtonVariant.Ghost)
+    new Button("Save"),
+    new Button("Cancel").Secondary(),
+    new Button("Delete").Secondary(),
+    new Button("Export").Outline(),
+    new Button("Import").Outline(),
+    new Button("Settings").Ghost()
 ], gap: 2)
 ```
 

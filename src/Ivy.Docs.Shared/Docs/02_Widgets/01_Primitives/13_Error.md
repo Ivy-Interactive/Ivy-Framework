@@ -125,7 +125,7 @@ public class ClientErrorExamplesView : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        return new Button("Show System Error", variant: ButtonVariant.Destructive)
+        return new Button("Show System Error").Destructive()
             .HandleClick(_ => client.Error(new InvalidOperationException("System configuration validation failed")));
     }
 }
@@ -211,7 +211,7 @@ public class FormValidationErrorExamplesView : ViewBase
                 | age.ToNumberInput()
                     .Placeholder("Enter your age")
                     .Invalid(ageError.Value)
-            | new Button("Validate Form", variant: ButtonVariant.Primary)
+            | new Button("Validate Form")
                 .HandleClick(ValidateForm)
             | (emailError.Value != null || passwordError.Value != null || ageError.Value != null
                 ? Callout.Error("Please fix the validation errors above", "Form Validation Failed")
@@ -238,7 +238,7 @@ public class ExceptionHandlingView : ViewBase
         }
         
         return Layout.Vertical().Gap(4)
-            | new Button("Simulate Error", variant: ButtonVariant.Destructive).HandleClick(SimulateError)
+            | new Button("Simulate Error").HandleClick(SimulateError).Destructive()
             | (showError.Value 
                 ? Layout.Vertical().Gap(4)
                     | new Error()
@@ -265,7 +265,7 @@ public class EffectErrorView : ViewBase
         var showError = UseState(false);
         
         return Layout.Vertical().Gap(4)
-            | new Button("Show Error", variant: ButtonVariant.Primary)
+            | new Button("Show Error")
                 .HandleClick(_ => showError.Set(true))
             | (showError.Value 
                 ? new Error()
@@ -322,7 +322,7 @@ public class DataLoadingView : ViewBase
         
         return Layout.Vertical().Gap(4)
             | Layout.Horizontal().Gap(2)
-                | new Button("Reload Data", variant: ButtonVariant.Primary).HandleClick(async _ => await LoadData())
+                | new Button("Reload Data").HandleClick(async _ => await LoadData())
             | (isLoading.Value 
                 ? "Loading..." 
                 : hasError.Value 
@@ -381,12 +381,12 @@ public class ErrorRecoveryExamplesView : ViewBase
         
         return Layout.Vertical().Gap(4)
             | (Layout.Horizontal().Gap(2)
-                | new Button("Simulate Error", variant: ButtonVariant.Destructive)
+                | new Button("Simulate Error").Destructive()
                     .HandleClick(SimulateRecoverableError)
-                | new Button("Try Recovery", variant: ButtonVariant.Primary)
+                | new Button("Try Recovery")
                     .HandleClick(TryRecovery)
                     .Disabled(errorState.Value == null)
-                | new Button("Skip Recovery", variant: ButtonVariant.Outline)
+                | new Button("Skip Recovery").Outline()
                     .HandleClick(SkipRecovery)
                     .Disabled(errorState.Value == null))
             | (errorState.Value != null 

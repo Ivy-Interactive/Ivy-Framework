@@ -351,7 +351,7 @@ public class DialogFileUpload : ViewBase
                 new DialogFooter(
                     new Button("Cancel", 
                         _ => { isOpen.Value = false; dialogFile.Reset(); },
-                        variant: ButtonVariant.Outline),
+                        ).Outline(),
                     new Button("Ok", _ =>
                     {
                         if (dialogFile.Value != null)

@@ -181,7 +181,6 @@ public class DeleteWithOptionsView : ViewBase
         return Layout.Vertical(
             new Button(
                 "Delete with Options",
-                variant: ButtonVariant.Destructive,
                 onClick: _ => {
                     showAlert(
                         "This will permanently delete the item. Do you want to configure deletion options?",
@@ -200,7 +199,7 @@ public class DeleteWithOptionsView : ViewBase
                         AlertButtonSet.YesNoCancel
                     );
                 }
-            ),
+            ).Destructive(),
             alertView,
             isOptionsOpen.Value ? deleteOptions.ToForm()
                 .Builder(e => e.DeleteAssociatedFiles, e => e.ToBoolInput("Delete associated files"))
