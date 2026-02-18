@@ -3,12 +3,12 @@ using Ivy.Shared;
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.Code, path: ["Widgets", "Primitives"], searchHints: ["syntax", "highlighting", "programming", "code-block", "snippet", "pre"])]
-public class CodeApp : SampleBase
+public class CodeBlockApp : SampleBase
 {
     protected override object? BuildSample()
     {
         return Layout.Vertical()
-               | Text.H1("Code")
+               | Text.H1("CodeBlock")
                | Layout.Tabs(
                    new Tab("Variants", CreateLanguageVariants()),
                    new Tab("Options", CreateOptionsVariants()),
@@ -18,7 +18,7 @@ public class CodeApp : SampleBase
 
     private object CreateLanguageVariants()
     {
-        var sampleCode = new Dictionary<Languages, string>
+        var sampleCodeBlock = new Dictionary<Languages, string>
         {
             [Languages.Csharp] = """
                 public class Fibonacci
@@ -189,7 +189,7 @@ public class CodeApp : SampleBase
         };
 
         var cards = new List<object>();
-        foreach (var (language, code) in sampleCode)
+        foreach (var (language, code) in sampleCodeBlock)
         {
             cards.Add(
                 Layout.Vertical()
