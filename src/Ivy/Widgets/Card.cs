@@ -99,6 +99,29 @@ public static class CardExtensions
         return card.Header(card.Title, card.Description, icon);
     }
 
+    public static Card Content(this Card card, object? content)
+    {
+        var slots = new List<object?>
+        {
+            content != null ? new Slot("Content", content) : null,
+            card.GetSlot("Footer"),
+            card.GetSlot("Header")
+        };
+
+        return card with { Children = slots.Where(x => x != null).Cast<object>().ToArray() };
+    }
+
+    public static Card Footer(this Card card, object? footer)
+    {
+        var slots = new List<object?>
+        {
+            card.GetSlot("Content"),
+            footer != null ? new Slot("Footer", footer) : null,
+            card.GetSlot("Header")
+        };
+
+        return card with { Children = slots.Where(x => x != null).Cast<object>().ToArray() };
+    }
 
     public static Card Hover(this Card card, CardHoverVariant variant) => card with { HoverVariant = variant };
 
