@@ -40,6 +40,11 @@ public class CustomersApp : ViewBase
 
 An app is built into a tree of widgets. This is what's rendered to the screen.
 
+## Namespace
+
+All public types in Ivy is in the `Ivy` namespace. 
+NOTE! Don't forget to add `using Ivy;` to all *.cs files where you want to use Ivy features.
+
 ## Application Structure
 
 A typical Ivy project has this folder structure:
