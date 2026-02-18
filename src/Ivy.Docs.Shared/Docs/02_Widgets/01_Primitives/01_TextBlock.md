@@ -213,6 +213,6 @@ The TextBuilder class provides several modifiers for customizing text appearance
 ## Related Components
 
 - **[Markdown](14_Markdown.md)** - For rendering markdown content
-- **[Code](10_Code.md)** - For syntax-highlighted code blocks
+- **[CodeBlock](10_CodeBlock.md)** - For syntax-highlighted code blocks
 - **[Json](17_Json.md)** - For JSON data display
 - **[Html](15_Html.md)** - For HTML content rendering

@@ -170,7 +170,7 @@ public class ComplexContentCalloutView : ViewBase
             | new Callout(
                 Layout.Vertical().Gap(2)
                     | Text.P("System error details are shown below. Please contact support if this issue persists.")
-                    | new Code("Error Code: E-1001\nTimestamp: 2024-01-15 14:30:00")
+                    | new CodeBlock("Error Code: E-1001\nTimestamp: 2024-01-15 14:30:00")
                     | Text.P("Technical details for debugging"),
                 "System Error",
                 CalloutVariant.Error);

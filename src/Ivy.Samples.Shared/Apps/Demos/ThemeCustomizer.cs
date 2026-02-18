@@ -79,7 +79,7 @@ public class ThemeCustomizer : SampleBase
                             "C#",
                             Layout.Vertical()
                                 | Text.P("Copy this C# configuration into your server setup.").Small()
-                                | new Code(GenerateCSharpCode(editingTheme.Value), Languages.Csharp)
+                                | new CodeBlock(GenerateCSharpCode(editingTheme.Value), Languages.Csharp)
                                 | new Button("Copy C# Code")
                                     .Primary()
                                     .Icon(Icons.ClipboardCopy, Align.Right)
@@ -93,7 +93,7 @@ public class ThemeCustomizer : SampleBase
                             "JSON",
                             Layout.Vertical()
                                 | Text.P("Use this JSON to persist or share the theme.").Small()
-                                | new Code(System.Text.Json.JsonSerializer.Serialize(
+                                | new CodeBlock(System.Text.Json.JsonSerializer.Serialize(
                                         editingTheme.Value,
                                         new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
                                     Languages.Json)

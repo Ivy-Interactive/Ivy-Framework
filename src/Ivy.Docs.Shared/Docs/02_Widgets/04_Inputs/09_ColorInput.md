@@ -122,7 +122,7 @@ public class ColorChangedDemo : ViewBase
                 | new ColorInput<string>
                        (colorState.Value, onChangeHandler)
                       .Variant(ColorInputs.Picker) 
-                | new Code(colorName.Value)
+                | new CodeBlock(colorName.Value)
                     .ShowCopyButton()
                     .ShowBorder());
     }    
@@ -192,7 +192,7 @@ public class CSSColorDemo : ViewBase
                          .Width(35)
                    | border.ToColorInput()
                           .Variant(ColorInputs.Picker))
-                   | new Code(genCode.Value)
+                   | new CodeBlock(genCode.Value)
                          .Language(Languages.Css)
                          .ShowCopyButton();
     }

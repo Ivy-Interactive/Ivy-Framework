@@ -212,7 +212,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         switch (variant)
         {
             case TextVariant.Code:
-                return new Code(content, codeLanguage);
+                return new CodeBlock(content, codeLanguage);
             case TextVariant.Markdown:
                 return new Markdown(content);
             case TextVariant.Json:
