@@ -2,15 +2,6 @@
 
 ## UI/UX Improvements
 
-### Enhanced Sidebar Navigation
-
-The sidebar menu now provides better visual feedback and navigation:
-
-- **Active Item Highlighting**: Clearly see your current location with highlighted active items.
-- **Auto-scroll to Active Item**: The sidebar now automatically scrolls to bring the active item into partial view when navigating or loading a page.
-- **Improved Keyboard Navigation**: Sidebar search results now support full keyboard navigation with arrow keys and automatic scrolling.
-- **Forgiving Search**: Search is now smarter, ignoring spaces and special characters for easier matching (e.g., "datatables" finds "Data Tables").
-
 ### Button Links with Configurable Target
 
 Buttons with URLs now provide flexible control over link navigation behavior. By default, buttons navigate in the same tab, but you can easily configure them to open in new tabs using the `.OpenInNewTab()` method.
@@ -21,11 +12,6 @@ new Button("External Link").Secondary()
     .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
     .OpenInNewTab()
     .Icon(Icons.ExternalLink, Align.Right);
-
-// Control target explicitly
-new Button("View Details")
-    .Url("/details")
-    .Target(LinkTarget.Self);  // Same tab
 ```
 
 ### Icon Support for Switch Inputs
@@ -50,8 +36,6 @@ dataTable
 ### Tooltips for DataTable Row Actions
 
 DataTable row action buttons now support tooltips.
-
-To add a tooltip to a row action, use the `Tooltip` property:
 
 ```csharp
 dataTable
@@ -81,26 +65,11 @@ var iconState = UseState<Icons>(Icons.Star);
 iconState.ToIconInput().Placeholder("Pick an icon");
 ```
 
-### Icon Animations
-
-Icons now support animations using the `Animation` widget with the `.WithAnimation()` extension method.
-
-```csharp
-Icons.LoaderCircle
-    .ToIcon()
-    .Color(Colors.Blue)
-    .WithAnimation(AnimationType.Rotate)
-    .Trigger(AnimationTrigger.Auto)
-    .Duration(1);
-```
-
-link to animation docs with sentence.
-
 ## Theming & Customization
 
 ### Enhanced Theme Color Picker
 
-A powerful `ThemeColorPicker` widget designed for theme customization provides an intuitive interface for selecting and adjusting theme colors with both palette and slider-based controls.
+A `ThemeColorPicker` widget designed for theme customization provides an intuitive interface for selecting and adjusting theme colors with both palette and slider-based controls.
 
 Instead of using `ColorInput` with the `ThemePicker` variant, you now use the `ThemeColorPicker` widget directly from the `Ivy.Widgets.Internal` namespace.
 
@@ -108,8 +77,6 @@ Instead of using `ColorInput` with the `ThemePicker` variant, you now use the `T
 - **Dual View Modes**: Toggle between a Palette view for quick color selection and a Picker view with RGB sliders for precise control
 - **RGB Sliders with Hex Display**: The Picker view shows RGB sliders with hexadecimal values for each channel, with gradient backgrounds showing the color range
 - **Live Format Preview**: Footer displays the selected color in HEX format with a visual preview swatch
-
-Basic usage:
 
 ```csharp
 using Ivy.Widgets.Internal;
@@ -121,7 +88,7 @@ new ThemeColorPicker(
 );
 ```
 
-Mention about need in update to new way of using ThemePicker.
+If you currently use `ColorInput` with the `ThemePicker` variant for theme colors, migrate to the new `ThemeColorPicker` widget.
 
 ### Granular Border Radius Control
 
@@ -152,10 +119,10 @@ The default theme uses semantic values from the design system tokens, providing 
 
 The Button widget now includes convenient extension methods for setting contextual variants. Instead of using the verbose `variant: ButtonVariant.Success` parameter syntax, you can now use fluent methods that chain naturally with other button configuration.
 
-New extension methods:
-
 ```csharp
-new Button("Save Changes").Success();
+new Button("Success").Success()
+new Button("Warning").Warning()
+new Button("Info").Info()
 ```
 
 These join the existing variant methods like `.Primary()`, `.Secondary()`, `.Destructive()`, `.Outline()`, `.Ghost()`, `.Link()`, and `.Ai()`, providing a complete and consistent API for button styling.
@@ -181,7 +148,7 @@ new ResizablePanelGroup(
 
 ### Simplified Auth Provider Setup
 
-**Simplified GitHub Authentication**: GitHub authentication setup is now much simpler. You no longer need to manually register an HttpClient factory or call configuration methods:
+GitHub authentication setup is now much simpler. You no longer need to manually register an HttpClient factory or call configuration methods:
 
 ```csharp
 // Old approach (still works but deprecated)
@@ -200,7 +167,7 @@ server.UseAuth<GitHubAuthProvider>();
 
 The framework now handles HttpClient configuration automatically. Just configure your GitHub credentials in user secrets or environment variables and you're ready to go.
 
-**Simplified Microsoft Entra Authentication**: Similarly, Microsoft Entra (Azure AD) authentication no longer requires the `.UseMicrosoftEntra()` call:
+Similarly, Microsoft Entra (Azure AD) authentication no longer requires the `.UseMicrosoftEntra()` call:
 
 ```csharp
 // Old approach (still works but deprecated)
@@ -210,15 +177,7 @@ server.UseAuth<MicrosoftEntraAuthProvider>(c => c.UseMicrosoftEntra());
 server.UseAuth<MicrosoftEntraAuthProvider>();
 ```
 
-**Configurable User-Agent Headers**: All auth providers now support customizable User-Agent headers for HTTP requests. This is useful for identifying your application in provider logs or when working with rate limits:
-
-```csharp
-// Configure via user secrets or environment variables
-// GitHub:UserAgent
-// Clerk:UserAgent
-// Authelia:UserAgent
-// Supabase:UserAgent
-```
+**Configurable User-Agent Headers**: All auth providers now support customizable User-Agent headers for HTTP requests.
 
 If not specified, providers default to `Ivy-Framework/{version}` where version is the Ivy assembly version.
 
