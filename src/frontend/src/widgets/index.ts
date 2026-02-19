@@ -12,3 +12,4 @@ export * from './tooltip';
 
 export * from './pagination';
 export { KanbanWidget, KanbanCardWidget } from './kanban';
+export * from './internal/CommandPaletteWidget';

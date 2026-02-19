@@ -15,6 +15,7 @@ import {
   SlotWidget,
   TooltipWidget,
   PaginationWidget,
+  CommandPaletteWidget,
 } from '@/widgets';
 import { BladeContainerWidget, BladeWidget } from '@/widgets/blades';
 import { DetailsWidget, DetailWidget } from '@/widgets/details';
@@ -156,6 +157,7 @@ export const widgetMap = {
   'Ivy.Tab': TabWidget,
   'Ivy.SidebarLayout': SidebarLayoutWidget,
   'Ivy.SidebarMenu': SidebarMenuWidget,
+  'Ivy.Widgets.Internal.CommandPalette': CommandPaletteWidget,
   'Ivy.ResizablePanelGroup': ResizablePanelGroupWidget,
   'Ivy.ResizablePanel': ResizablePanelWidget,
   'Ivy.FloatingPanel': FloatingPanelWidget,

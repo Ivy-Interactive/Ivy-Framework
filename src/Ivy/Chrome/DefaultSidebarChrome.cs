@@ -50,9 +50,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         {
             return navigate.Receive(navigateArgs =>
             {
-                OpenApp(navigateArgs);
-                return default!;
-            });
+                  OpenApp(navigateArgs);
+                  return default!;
+              });
         });
 
         UseEffect(() =>
@@ -466,6 +466,14 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             ,
             Layout.Vertical(
                 new SidebarNews("https://ivy.app/news.json"),
+                new CommandPalette(
+                    appRepository.GetMenuItems().FlattenWithPath().Select(x => x.Item with { Path = x.Path }).ToArray(),
+                    e =>
+                    {
+                        OpenApp(new NavigateArgs(e.Value));
+                        return ValueTask.CompletedTask;
+                    }
+                ),
                 settings.Footer,
                 footer
             ),
