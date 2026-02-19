@@ -47,8 +47,8 @@ else {
 
 if (-not $SkipDownloads) {
     $downloadScript = Join-Path $scriptDir "DownloadCommits.ps1"
-    & $downloadScript -Repo https://github.com/Ivy-Interactive/Ivy -OutputFolder $commitsFolder -LastDays 21 -Prefix ivy
-    & $downloadScript -Repo https://github.com/Ivy-Interactive/Ivy-Framework -OutputFolder $commitsFolder -LastDays 21 -Prefix ivy-framework
+    & $downloadScript -Repo https://github.com/Ivy-Interactive/Ivy -OutputFolder $commitsFolder -LastDays 13 -Prefix ivy
+    & $downloadScript -Repo https://github.com/Ivy-Interactive/Ivy-Framework -OutputFolder $commitsFolder -LastDays 13 -Prefix ivy-framework
 }
 
 $promptFile = Join-Path $scriptDir "prompt.md"
