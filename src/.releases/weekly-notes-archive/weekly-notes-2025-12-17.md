@@ -169,7 +169,7 @@ The `Code` widget now supports XML syntax highlighting, making it easier to disp
 
 ```csharp
 // Display XML with proper syntax highlighting
-new CodeBlock("""
+new Code("""
     <!-- Project configuration file -->
     <Project Sdk="Microsoft.NET.Sdk">
       <PropertyGroup>
