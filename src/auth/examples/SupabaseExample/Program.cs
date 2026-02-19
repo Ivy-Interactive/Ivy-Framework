@@ -1,6 +1,5 @@
 using Ivy;
 using Ivy.Auth.Supabase;
-using Ivy.Chrome;
 
 var server = new Server();
 

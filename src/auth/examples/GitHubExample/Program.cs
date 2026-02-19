@@ -1,6 +1,5 @@
 using Ivy;
 using Ivy.Auth.GitHub;
-using Ivy.Chrome;
 
 var server = new Server();
 

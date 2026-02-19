@@ -1,6 +1,5 @@
 using Ivy;
 using Ivy.Auth.Auth0;
-using Ivy.Chrome;
 
 var server = new Server();
 
