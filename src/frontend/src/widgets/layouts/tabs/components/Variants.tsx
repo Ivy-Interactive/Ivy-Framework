@@ -193,7 +193,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
           {dropdownMenu}
         </div>
       </div>
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {orderedTabWidgets.map(tabWidget => {
           if (!React.isValidElement(tabWidget)) return null;
           const props = getTabProps(tabWidget);
@@ -201,15 +201,17 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
           const { id } = props;
           if (!loadedTabs.has(id)) return null;
           const paddingStyle = getPadding(padding);
+          const isActive = activeTabId === id;
           return (
             <div
               key={id}
               role="tabpanel"
-              aria-hidden={activeTabId !== id}
+              aria-hidden={!isActive}
               className={cn(
-                'h-full overflow-auto',
-                activeTabId === id ? 'block' : 'hidden',
-                'border-none'
+                'overflow-auto border-none',
+                isActive
+                  ? 'relative h-full visible z-[1]'
+                  : 'absolute inset-0 invisible opacity-0 z-0'
               )}
               style={paddingStyle}
             >
@@ -345,7 +347,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {React.useMemo(() => {
           return tabWidgets.map(tabWidget => {
             if (!React.isValidElement(tabWidget)) return null;
@@ -377,8 +379,10 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
               <div
                 key={id}
                 className={cn(
-                  'h-full overflow-auto',
-                  activeTabId === id ? 'block' : 'hidden'
+                  'overflow-auto',
+                  activeTabId === id
+                    ? 'relative h-full visible z-[1]'
+                    : 'absolute inset-0 invisible opacity-0 z-0'
                 )}
                 style={paddingStyle}
               >
