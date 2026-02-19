@@ -1,10 +1,13 @@
 # Ivy Framework Weekly Notes - Week of 2026-02-19
 
+> [!NOTE]
+> We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
+
 ## UI/UX Improvements
 
 ### Button Links with Configurable Target
 
-Buttons with URLs now provide flexible control over link navigation behavior. By default, buttons navigate in the same tab, but you can easily configure them to open in new tabs using the `.OpenInNewTab()` method.
+[Buttons](https://docs.ivy.app/widgets/common/button) with URLs now provide flexible control over link navigation behavior. By default, buttons navigate in the same tab, but you can easily configure them to open in new tabs using the `.OpenInNewTab()` method.
 
 ```csharp
 // Opens in a new tab
@@ -16,7 +19,7 @@ new Button("External Link").Secondary()
 
 ### Icon Support for Switch Inputs
 
-Switch inputs now support icons, allowing you to add visual indicators inside the switch thumb.
+[Switch inputs](https://docs.ivy.app/onboarding/concepts/forms) now support icons, allowing you to add visual indicators inside the switch thumb.
 
 ```csharp
 var darkMode = UseState(false);
@@ -25,7 +28,7 @@ darkMode.ToSwitchInput(Icons.Moon).Label("Dark Mode");
 
 ### Clickable Links in DataTable
 
-To display a column as clickable links, use the `LinkDisplayRenderer`:
+To display a column as clickable links in a [DataTable](https://docs.ivy.app/widgets/advanced/data-table), use the `LinkDisplayRenderer`:
 
 ```csharp
 dataTable
@@ -35,7 +38,7 @@ dataTable
 
 ### Tooltips for DataTable Row Actions
 
-DataTable row action buttons now support tooltips.
+[DataTable](https://docs.ivy.app/widgets/advanced/data-table) row action buttons now support [tooltips](https://docs.ivy.app/widgets/common/tooltip).
 
 ```csharp
 dataTable
@@ -48,7 +51,7 @@ dataTable
 
 ### Improved Multiselect Component
 
-You can control how many badges are visible before overflow using the `maxVisibleBadges` property (defaults to 2):
+You can control how many badges are visible before overflow using the `maxVisibleBadges` property (defaults to 2) on [multiselect](https://docs.ivy.app/onboarding/concepts/forms) inputs:
 
 ```csharp
 multiselect
@@ -58,7 +61,7 @@ multiselect
 
 ### Icon Picker Input
 
-A new `IconInput` widget allows you to select icons from the full Lucide icon library. The input provides a searchable dropdown with visual icon previews.
+A new [IconInput](https://docs.ivy.app/onboarding/concepts/forms) widget allows you to select icons from the full [Lucide](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/src/Ivy/Shared/Icons.cs) icon library. The input provides a searchable dropdown with visual icon previews.
 
 ```csharp
 var iconState = UseState<Icons>(Icons.Star);
@@ -88,7 +91,7 @@ new ThemeColorPicker(
 );
 ```
 
-If you currently use `ColorInput` with the `ThemePicker` variant for theme colors, migrate to the new `ThemeColorPicker` widget.
+If you currently use `ColorInput` with the `ThemePicker` variant for [theme colors](https://docs.ivy.app/api-reference/ivy-shared/colors), migrate to the new `ThemeColorPicker` widget.
 
 ### Granular Border Radius Control
 
@@ -111,13 +114,13 @@ var customTheme = new Theme
 };
 ```
 
-The default theme uses semantic values from the design system tokens, providing a balanced appearance across all UI elements.
+The default theme uses semantic values from the design system tokens documented in the [Colors API](https://docs.ivy.app/api-reference/ivy-shared/colors), providing a balanced appearance across all UI elements.
 
 ## Layout & Components
 
 ### Fluent Button Variant API
 
-The Button widget now includes convenient extension methods for setting contextual variants. Instead of using the verbose `variant: ButtonVariant.Success` parameter syntax, you can now use fluent methods that chain naturally with other button configuration.
+The [Button](https://docs.ivy.app/widgets/common/button) widget now includes convenient extension methods for setting contextual variants. Instead of using the verbose `variant: ButtonVariant.Success` parameter syntax, you can now use fluent methods that chain naturally with other button configuration.
 
 ```csharp
 new Button("Success").Success()
@@ -125,11 +128,11 @@ new Button("Warning").Warning()
 new Button("Info").Info()
 ```
 
-These join the existing variant methods like `.Primary()`, `.Secondary()`, `.Destructive()`, `.Outline()`, `.Ghost()`, `.Link()`, and `.Ai()`, providing a complete and consistent API for button styling.
+These join the existing variant methods like `.Primary()`, `.Secondary()`, `.Destructive()`, `.Outline()`, `.Ghost()`, `.Link()`, and `.Ai()`, providing a complete and consistent API for [button](https://docs.ivy.app/widgets/common/button) styling.
 
 ### Improved ResizablePanel API
 
-The `ResizablePanelGroup` component now uses a more structured and type-safe API for defining panel sizes. The old integer-based sizing has been replaced with a `Size` API that provides better control and clarity.
+The `ResizablePanelGroup` component now uses a more structured and type-safe API for defining panel sizes. The old integer-based sizing has been replaced with a [Size](https://docs.ivy.app/api-reference/ivy-shared/size) API (e.g. `Size.Fraction()`, `.Min()`, `.Max()`) that provides better control and clarity; [Layout](https://docs.ivy.app/onboarding/concepts/layout) covers layout patterns.
 
 ```csharp
 new ResizablePanelGroup(
@@ -179,11 +182,11 @@ server.UseAuth<MicrosoftEntraAuthProvider>();
 
 **Configurable User-Agent Headers**: All auth providers now support customizable User-Agent headers for HTTP requests.
 
-If not specified, providers default to `Ivy-Framework/{version}` where version is the Ivy assembly version.
+If not specified, [auth providers](https://docs.ivy.app/onboarding/03_CLI/04_Authentication/01_Overview) default to `Ivy-Framework/{version}` where version is the Ivy assembly version.
 
 ### Customizable Authentication Cookie Settings
 
-You now have full control over authentication cookie settings in your Ivy applications. Using the new `Server.
+You now have full control over authentication cookie settings in your Ivy applications using the new `Server.ConfigureAuthCookieOptions` callback.
 
 By default, Ivy authentication cookies are configured with secure defaults:
 
@@ -192,7 +195,7 @@ By default, Ivy authentication cookies are configured with secure defaults:
 - **SameSite**: `Lax` (provides CSRF protection)
 - **Expires**: 1 year from creation
 
-To customize these settings, add the following to your `Program.cs` before calling `server.RunAsync()`:
+To customize these settings, add the following to your [Program.cs](https://docs.ivy.app/onboarding/concepts/program) before calling `server.RunAsync()`:
 
 ```csharp
 Server.ConfigureAuthCookieOptions = options =>
@@ -232,7 +235,7 @@ ivy init --claude
 ivy init --yes-to-all
 ```
 
-Other available options include `--hello` for demo apps, `--verbose` for detailed output, `--ignore-git` to skip Git operations, and `--prerelease` to include prerelease framework versions.
+Other [ivy init](https://docs.ivy.app/onboarding/03_CLI/02_Init) options include `--hello` for demo apps, `--verbose` for detailed output, `--ignore-git` to skip Git operations, and `--prerelease` to include prerelease framework versions.
 
 ## Bug Fixes
 
