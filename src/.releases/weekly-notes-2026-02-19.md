@@ -19,7 +19,7 @@ new Button("External Link").Secondary()
 
 ### Icon Support for Switch Inputs
 
-[Switch inputs](https://docs.ivy.app/onboarding/concepts/forms) now support icons, allowing you to add visual indicators inside the switch thumb.
+[Switch inputs](https://docs.ivy.app/widgets/inputs/bool-input) now support icons, allowing you to add visual indicators inside the switch thumb.
 
 ```csharp
 var darkMode = UseState(false);
@@ -51,7 +51,7 @@ dataTable
 
 ### Improved Multiselect Component
 
-You can control how many badges are visible before overflow using the `maxVisibleBadges` property (defaults to 2) on [multiselect](https://docs.ivy.app/onboarding/concepts/forms) inputs:
+You can control how many badges are visible before overflow using the `maxVisibleBadges` property (defaults to 2) on [multiselect](https://docs.ivy.app/widgets/inputs/select-input) inputs:
 
 ```csharp
 multiselect
@@ -61,7 +61,7 @@ multiselect
 
 ### Icon Picker Input
 
-A new [IconInput](https://docs.ivy.app/onboarding/concepts/forms) widget allows you to select icons from the full [Lucide](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/src/Ivy/Shared/Icons.cs) icon library. The input provides a searchable dropdown with visual icon previews.
+A new IconInput widget allows you to select icons from the full Lucide icon library. The input provides a searchable dropdown with visual icon previews.
 
 ```csharp
 var iconState = UseState<Icons>(Icons.Star);
@@ -128,11 +128,11 @@ new Button("Warning").Warning()
 new Button("Info").Info()
 ```
 
-These join the existing variant methods like `.Primary()`, `.Secondary()`, `.Destructive()`, `.Outline()`, `.Ghost()`, `.Link()`, and `.Ai()`, providing a complete and consistent API for [button](https://docs.ivy.app/widgets/common/button) styling.
+These join the existing variant methods like `.Primary()`, `.Secondary()`, `.Destructive()`, `.Outline()`, `.Ghost()`, `.Link()`, and `.Ai()`, providing a complete and consistent API for button styling.
 
 ### Improved ResizablePanel API
 
-The `ResizablePanelGroup` component now uses a more structured and type-safe API for defining panel sizes. The old integer-based sizing has been replaced with a [Size](https://docs.ivy.app/api-reference/ivy-shared/size) API (e.g. `Size.Fraction()`, `.Min()`, `.Max()`) that provides better control and clarity; [Layout](https://docs.ivy.app/onboarding/concepts/layout) covers layout patterns.
+The [ResizablePanelGroup](https://docs.ivy.app/widgets/layouts/resizeable-panel-group) component now uses a more structured and type-safe API for defining panel sizes. The old integer-based sizing has been replaced with a [Size](https://docs.ivy.app/api-reference/ivy-shared/size) API (e.g. `Size.Fraction()`, `.Min()`, `.Max()`) that provides better control and clarity.
 
 ```csharp
 new ResizablePanelGroup(
