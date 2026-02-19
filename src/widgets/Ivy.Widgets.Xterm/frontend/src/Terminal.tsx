@@ -202,9 +202,21 @@ export const Terminal: React.FC<TerminalProps> = ({
         .terminal-container {
           width: 100%;
           height: 100%;
-          background: #000000;
+          background: var(--background) !important;
           padding: 10px 0px 10px 10px;
           box-sizing: border-box;
+        }
+        .xterm-screen .xterm-rows {
+          color: var(--foreground) !important;
+        }
+        .xterm-viewport {
+          background: var(--background) !important;
+        }
+        .xterm .xterm-viewport {
+          background: var(--background) !important;
+        }
+        .xterm-dom-renderer-owner-1 .xterm-rows {
+          color: var(--foreground) !important;
         }
       `;
       shadowRootRef.current.appendChild(styleEl);
