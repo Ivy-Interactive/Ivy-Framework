@@ -47,12 +47,12 @@ export const CommandPaletteWidget = ({
     }
   }, [search]);
 
-  // Reset search when dialog closes
-  useEffect(() => {
-    if (!isOpen) {
+  const onOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
       setSearch('');
     }
-  }, [isOpen]);
+  };
 
   const flatItems = useMemo(() => {
     return items.filter(item => item.tag && item.label);
@@ -64,7 +64,7 @@ export const CommandPaletteWidget = ({
   };
 
   return (
-    <CommandDialog open={isOpen} onOpenChange={setIsOpen}>
+    <CommandDialog open={isOpen} onOpenChange={onOpenChange}>
       <CommandInput
         placeholder="Search widgets, categories, or keywords"
         value={search}

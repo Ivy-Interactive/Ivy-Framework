@@ -50,9 +50,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         {
             return navigate.Receive(navigateArgs =>
             {
-                  OpenApp(navigateArgs);
-                  return default!;
-              });
+                OpenApp(navigateArgs);
+                return default!;
+            });
         });
 
         UseEffect(() =>
