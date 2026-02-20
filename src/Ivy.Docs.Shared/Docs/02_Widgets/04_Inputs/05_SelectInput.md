@@ -19,7 +19,7 @@ and multiple selections, option grouping, and custom rendering of option items.
 
 ## Basic Usage
 
-For string options, use either pattern: `state.ToSelectInput(["A", "B", ...])` or `state.ToSelectInput().Options(["A", "B", ...])`. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width(Size.Full())` to make the select fill available space:
+Here's a simple example of a `SelectInput` with a few options. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width(Size.Full())` to make the select fill available space:
 
 ```csharp demo-below
 public class SelectVariantDemo : ViewBase
