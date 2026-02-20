@@ -214,6 +214,40 @@ ivy init --yes-to-all
 
 Other [ivy init](https://docs.ivy.app/onboarding/03_CLI/02_Init) options include `--hello` for demo apps, `--verbose` for detailed output, `--ignore-git` to skip Git operations, and `--prerelease` to include prerelease framework versions.
 
+## Breaking Changes
+
+### ResizeablePanel Renamed to ResizablePanel
+
+`ResizeablePanelGroup` and `ResizeablePanel` have been renamed to `ResizablePanelGroup` and `ResizablePanel`. The `int?` size parameter now uses `Size.Fraction()`:
+
+```csharp
+// Before
+new ResizeablePanel(25, content)
+
+// After
+new ResizablePanel(Size.Fraction(0.25f), content)
+```
+
+Panels now also support `.Min()` and `.Max()` constraints: `Size.Fraction(0.3f).Min(0.15f).Max(0.5f)`.
+
+See the full [migration guide](./Refactors/1.2.15/ResizablePanel-Rename.md).
+
+### OAuth Callback URL Changed
+
+The OAuth callback URL has changed from `/ivy/webhook` to `/ivy/auth/callback`. If you use OAuth authentication (Auth0, GitHub, Microsoft Entra, Supabase), update the callback/redirect URL in your provider's dashboard settings.
+
+See the full [migration guide](./Refactors/1.2.15/OAuth-Callback-URL.md).
+
+### Button URL Default Target Changed
+
+Buttons with `.Url()` now open in the **same tab** by default (previously new tab). Use `.OpenInNewTab()` to restore the old behavior:
+
+```csharp
+new Button("Docs").Url("https://docs.example.com").OpenInNewTab()
+```
+
+See the full [migration guide](./Refactors/1.2.15/Button-URL-Target.md).
+
 ## Bug Fixes
 
 - **DataTable**: Fixed cell click events not firing for link cells and actions.
