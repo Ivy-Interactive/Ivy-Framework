@@ -173,8 +173,32 @@ public static class SelectInputExtensions
         return widget with { Options = options.ToOptions().Cast<IAnyOption>().ToArray() };
     }
 
+    public static SelectInput<string[]> Options(this SelectInput<string[]> widget, IEnumerable<string> options)
+    {
+        return widget with { Options = options.ToOptions().Cast<IAnyOption>().ToArray() };
+    }
+
+    [OverloadResolutionPriority(2)]
+    public static SelectInput<string> ToSelectInput(this IState<string> state)
+    {
+        return new SelectInput<string>(state, [], null, false, SelectInputs.Select, false);
+    }
+
+    [OverloadResolutionPriority(1)]
     public static SelectInput<string> ToSelectInput(this IState<string> state, IEnumerable<string> options, string? placeholder = null, bool disabled = false, SelectInputs variant = SelectInputs.Select)
     {
         return new SelectInput<string>(state, options.ToOptions(), placeholder, disabled, variant, false);
+    }
+
+    [OverloadResolutionPriority(2)]
+    public static SelectInput<string[]> ToSelectInput(this IState<string[]> state)
+    {
+        return new SelectInput<string[]>(state, [], "Select options...", false, SelectInputs.Select, true);
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static SelectInput<string[]> ToSelectInput(this IState<string[]> state, IEnumerable<string> options, string? placeholder = null, bool disabled = false, SelectInputs variant = SelectInputs.Select)
+    {
+        return new SelectInput<string[]>(state, options.ToOptions(), placeholder ?? "Select options...", disabled, variant, true);
     }
 }

@@ -19,17 +19,15 @@ and multiple selections, option grouping, and custom rendering of option items.
 
 ## Basic Usage
 
-Here's a simple example of a `SelectInput` with a few options. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width(Size.Full())` to make the select fill available space:
+For string options, use either pattern: `state.ToSelectInput(["A", "B", ...])` or `state.ToSelectInput().Options(["A", "B", ...])`. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width(Size.Full())` to make the select fill available space:
 
 ```csharp demo-below
 public class SelectVariantDemo : ViewBase
 {
     public override object? Build()
     {
-        var langs = new string[]{"C#","Java","Go","JavaScript","F#","Kotlin","VB.NET","Rust"};
-        
         var favLang = UseState("C#");
-        return favLang.ToSelectInput(langs.ToOptions())
+        return favLang.ToSelectInput(["C#", "Java", "Go", "JavaScript", "F#", "Kotlin", "VB.NET", "Rust"])
                          .Variant(SelectInputs.Select)
                          .WithField()
                          .Label("Select your favourite programming language")
@@ -64,8 +62,8 @@ public class MultiSelectDemo : ViewBase
         var intArray = UseState<int[]>([]);
         
         var languageOptions = typeof(ProgrammingLanguages).ToOptions();
-        var stringOptions = new[]{"Option A", "Option B", "Option C", "Option D"}.ToOptions();
-        var intOptions = new[]{1, 2, 3, 4, 5}.ToOptions();
+        var stringOptions = new[] { "Option A", "Option B", "Option C", "Option D" };
+        var intOptions = new[] { 1, 2, 3, 4, 5 }.ToOptions();
         
         return Layout.Vertical()
             | Text.InlineCode("Select Variant (Enum)")
@@ -74,7 +72,7 @@ public class MultiSelectDemo : ViewBase
                 .Placeholder("Choose languages...")
             
             | Text.InlineCode("List Variant (String Array)")
-            | stringArray.ToSelectInput(stringOptions)
+            | stringArray.ToSelectInput(stringOptions.ToOptions())
                 .Variant(SelectInputs.List)
             
             | Text.InlineCode("Toggle Variant (Integer Array)")
@@ -146,7 +144,7 @@ public class SelectStylingDemo : ViewBase
         var invalidSelect = UseState("");
         var disabledSelect = UseState("");
         
-        var options = new[]{"Option 1", "Option 2", "Option 3"}.ToOptions();
+        var options = new[] { "Option 1", "Option 2", "Option 3" };
         
         return Layout.Vertical()
             | normalSelect.ToSelectInput(options)
@@ -226,7 +224,7 @@ public class CoffeeShopDemo: ViewBase
             previousCoffee.Set(coffee.Value);
         }
         
-        var coffeeSizeMenu = coffeeSize.ToSelectInput(coffeeSizes.ToOptions())
+        var coffeeSizeMenu = coffeeSize.ToSelectInput(coffeeSizes)
                                        .Variant(SelectInputs.List);
         var availableCondiments = CoffeeAccompaniments[coffee.Value];
         
