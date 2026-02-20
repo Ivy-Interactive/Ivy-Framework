@@ -113,6 +113,12 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
 
     public IAuthSession GetAuthSession() => authSession;
 
+    public async Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(CancellationToken cancellationToken)
+    {
+        return await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.GetOAuthProviderTokensAsync(authSession, ct), cancellationToken);
+    }
+
     public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)
     {
         var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession);

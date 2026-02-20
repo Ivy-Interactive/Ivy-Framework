@@ -26,6 +26,8 @@ public interface IAuthService
 
     IAuthSession GetAuthSession();
 
+    Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(CancellationToken cancellationToken = default);
+
     internal void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null);
 
     internal void SetAuthTokenCookies(bool reloadPage = true, bool? triggerMachineReload = null);

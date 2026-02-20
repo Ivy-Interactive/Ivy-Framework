@@ -10,7 +10,6 @@ public class MainApp : ViewBase
     public override object? Build()
     {
         var auth = UseService<IAuthService>();
-        var authProvider = UseService<IAuthProvider>();
         var userInfo = UseState<UserInfo?>();
         var oauthTokens = UseState<Dictionary<string, OAuthProviderToken>?>();
         var apiResponse = UseState<string?>();
@@ -21,8 +20,7 @@ public class MainApp : ViewBase
             userInfo.Set(info);
 
             // Get OAuth provider tokens
-            var session = auth.GetAuthSession();
-            var tokens = await authProvider.GetOAuthProviderTokensAsync(session);
+            var tokens = await auth.GetOAuthProviderTokensAsync();
             oauthTokens.Set(tokens);
         });
 
