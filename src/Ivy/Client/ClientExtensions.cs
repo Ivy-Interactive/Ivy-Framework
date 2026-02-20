@@ -42,7 +42,7 @@ public static class ClientExtensions
     {
         public required string RootAppId { get; set; }
     }
-    
+
     public static void CopyToClipboard(this IClientProvider client, string content)
     {
         client.Sender.Send("CopyToClipboard", content);

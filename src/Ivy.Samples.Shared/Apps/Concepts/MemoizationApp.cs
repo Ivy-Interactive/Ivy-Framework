@@ -20,7 +20,8 @@ public class MemoizationApp : SampleBase
                     (x, i) => new ListItem(x, i,
                         () => { list.Set(list.Value.MoveUp(i)); },
                         () => { list.Set(list.Value.MoveDown(i)); }
-                    ) { Key = x.ToString() } // key is needed for memoization to work where the items can be edited
+                    )
+                    { Key = x.ToString() } // key is needed for memoization to work where the items can be edited
                 )
             )
         );
