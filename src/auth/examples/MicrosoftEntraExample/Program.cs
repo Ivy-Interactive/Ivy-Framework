@@ -5,8 +5,7 @@ var server = new Server();
 
 server.UseHotReload();
 
-server.UseAuth<MicrosoftEntraAuthProvider>();
-
+server.AddConnectionsFromAssembly();
 server.AddAppsFromAssembly();
 
 var settings = new ChromeSettings()

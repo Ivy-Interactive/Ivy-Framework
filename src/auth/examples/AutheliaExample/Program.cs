@@ -5,8 +5,7 @@ var server = new Server();
 
 server.UseHotReload();
 
-server.UseAuth<AutheliaAuthProvider>();
-
+server.AddConnectionsFromAssembly();
 server.AddAppsFromAssembly();
 
 var settings = new ChromeSettings()
