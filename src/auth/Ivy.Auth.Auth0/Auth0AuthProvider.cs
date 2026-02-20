@@ -295,6 +295,11 @@ public class Auth0AuthProvider : IAuthProvider
 
         var tokenResponse = await _authClient.GetTokenAsync(tokenRequest, cancellationToken);
 
+        if (string.IsNullOrEmpty(tokenResponse.AccessToken))
+        {
+            throw new Exception("Failed to obtain Auth0 Management API token");
+        }
+
         _managementClient = new ManagementApiClient(tokenResponse.AccessToken, _domain);
         // Tokens typically last 24 hours, refresh after 23 hours to be safe
         _managementTokenExpiry = DateTime.UtcNow.AddHours(23);
@@ -304,51 +309,45 @@ public class Auth0AuthProvider : IAuthProvider
 
     public async Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            // Get user ID from the current access token
-            if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
-            {
-                return null;
-            }
-
-            var userId = claims.FindFirst("sub")?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return null;
-            }
-
-            // Get management API client
-            var managementClient = await GetManagementClientAsync(cancellationToken);
-
-            // Get user with identities
-            var user = await managementClient.Users.GetAsync(userId);
-            if (user.Identities == null || !user.Identities.Any())
-            {
-                return [];
-            }
-
-            var tokens = new Dictionary<string, OAuthProviderToken>();
-
-            foreach (var identity in user.Identities)
-            {
-                // Skip non-OAuth identities (like auth0 username/password)
-                if (identity.Connection == "Username-Password-Authentication" ||
-                    string.IsNullOrEmpty(identity.AccessToken))
-                {
-                    continue;
-                }
-
-                tokens[identity.Provider] = new OAuthProviderToken(
-                    Provider: identity.Provider,
-                    AccessToken: identity.AccessToken);
-            }
-
-            return tokens;
-        }
-        catch (Exception)
+        // Get user ID from the current access token
+        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
         {
             return null;
         }
+
+        var userId = claims.FindFirst("sub")?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return null;
+        }
+
+        // Get management API client
+        var managementClient = await GetManagementClientAsync(cancellationToken);
+
+        // Get user with identities
+        var user = await managementClient.Users.GetAsync(userId);
+
+        if (user.Identities == null || !user.Identities.Any())
+        {
+            return [];
+        }
+
+        var tokens = new Dictionary<string, OAuthProviderToken>();
+
+        foreach (var identity in user.Identities)
+        {
+            // Skip non-OAuth identities (like auth0 username/password)
+            if (identity.Connection == "Username-Password-Authentication" ||
+                string.IsNullOrEmpty(identity.AccessToken))
+            {
+                continue;
+            }
+
+            tokens[identity.Provider] = new OAuthProviderToken(
+                Provider: identity.Provider,
+                AccessToken: identity.AccessToken);
+        }
+
+        return tokens;
     }
 }
