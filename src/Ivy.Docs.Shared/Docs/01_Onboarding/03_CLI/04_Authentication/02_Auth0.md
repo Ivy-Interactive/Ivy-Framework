@@ -195,6 +195,58 @@ exports.onExecutePostLogin = async (event, api) => {
 
 The user information email, name and picture will now be added to the JWT and consumed by Ivy in the `GetUserInfoAsync` function.
 
+### Step 7: Enable Management API Access (Optional)
+
+If you need to access OAuth provider tokens (e.g., to call Google APIs directly using the Google OAuth token), you must authorize your application to access the Auth0 Management API.
+
+#### Why You Need This
+
+When users authenticate via OAuth providers like Google or GitHub, Auth0 manages the OAuth flow and stores the provider's access tokens. By default, your application cannot access these tokens. Enabling Management API access allows you to retrieve these tokens programmatically.
+
+#### Configuration Steps
+
+1. **Go to Applications > APIs** in the Auth0 Dashboard
+2. **Click on "Auth0 Management API"**
+3. **Select the "Application Access" tab**
+4. **Find your application** in the list of applications
+5. **Click "Edit"**
+6. **Toggle the switch to "Authorized"**
+7. **Grant the following scopes**:
+   - `read:users` - Required to fetch user information
+   - `read:user_idp_tokens` - Required to access OAuth provider tokens
+8. **Click "Update"**
+
+#### Using OAuth Provider Tokens
+
+Once configured, you can access OAuth provider tokens in your Ivy application:
+
+```csharp
+var authService = UseService<IAuthService>();
+
+// Get all OAuth provider tokens
+var tokens = await authService.GetOAuthProviderTokensAsync();
+
+if (tokens?.TryGetValue(OAuthProvider.Google, out var googleToken) == true)
+{
+    // Use the Google OAuth token to call Google APIs
+    using var httpClient = new HttpClient();
+    httpClient.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", googleToken.AccessToken);
+
+    var response = await httpClient.GetAsync("https://www.googleapis.com/drive/v3/files");
+    // Process response...
+}
+```
+
+**Available OAuth Providers:**
+- `OAuthProvider.Google` - Google
+- `OAuthProvider.GitHub` - GitHub
+- `OAuthProvider.Twitter` - Twitter
+- `OAuthProvider.Apple` - Apple
+- `OAuthProvider.Microsoft` - Microsoft
+
+> **Note:** If Management API access is not configured, `GetOAuthProviderTokensAsync()` will throw an exception.
+
 ## Adding Authentication
 
 To set up Auth0 Authentication with Ivy, run the following command and choose `Auth0` when asked to select an auth provider:

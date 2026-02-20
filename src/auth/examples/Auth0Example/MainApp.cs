@@ -11,7 +11,7 @@ public class MainApp : ViewBase
     {
         var auth = UseService<IAuthService>();
         var userInfo = UseState<UserInfo?>();
-        var oauthTokens = UseState<Dictionary<string, OAuthProviderToken>?>();
+        var oauthTokens = UseState<Dictionary<OAuthProvider, OAuthProviderToken>?>();
         var apiResponse = UseState<string?>();
 
         UseEffect(async () =>
@@ -54,11 +54,11 @@ public class MainApp : ViewBase
                         Text.P($"Connected providers: {string.Join(", ", oauthTokens.Value.Keys)}"),
 
                         // Example: Test Google API access if available
-                        oauthTokens.Value.ContainsKey("google-oauth2")
+                        oauthTokens.Value.ContainsKey(OAuthProvider.Google)
                             ? Layout.Vertical(
                                 new Button("Test Google API Access", async () =>
                                 {
-                                    var googleToken = oauthTokens.Value["google-oauth2"];
+                                    var googleToken = oauthTokens.Value[OAuthProvider.Google];
                                     using var httpClient = new HttpClient();
                                     httpClient.DefaultRequestHeaders.Authorization =
                                         new AuthenticationHeaderValue("Bearer", googleToken.AccessToken);
@@ -81,11 +81,11 @@ public class MainApp : ViewBase
                             : null,
 
                         // Example: Test GitHub API access if available
-                        oauthTokens.Value.ContainsKey("github")
+                        oauthTokens.Value.ContainsKey(OAuthProvider.GitHub)
                             ? Layout.Vertical(
                                 new Button("Test GitHub API Access", async () =>
                                 {
-                                    var githubToken = oauthTokens.Value["github"];
+                                    var githubToken = oauthTokens.Value[OAuthProvider.GitHub];
                                     using var httpClient = new HttpClient();
                                     httpClient.DefaultRequestHeaders.Authorization =
                                         new AuthenticationHeaderValue("Bearer", githubToken.AccessToken);

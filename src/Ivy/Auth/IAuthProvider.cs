@@ -43,9 +43,9 @@ public interface IAuthProvider
 
     Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
 
-    Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<Dictionary<string, OAuthProviderToken>?>(null);
+        return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(null);
     }
 
     bool OpenOAuthLoginInNewTab => false;

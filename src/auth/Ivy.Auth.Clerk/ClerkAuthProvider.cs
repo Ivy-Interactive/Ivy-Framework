@@ -495,7 +495,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -519,7 +519,7 @@ public class ClerkAuthProvider : IAuthProvider
                 return [];
             }
 
-            var tokens = new Dictionary<string, OAuthProviderToken>();
+            var tokens = new Dictionary<OAuthProvider, OAuthProviderToken>();
 
             // Fetch OAuth tokens for each external account
             foreach (var externalAccount in user.ExternalAccounts)
@@ -531,6 +531,22 @@ public class ClerkAuthProvider : IAuthProvider
                         ? externalAccount.Provider
                         : $"oauth_{externalAccount.Provider}";
 
+                    // Clerk uses format like "oauth_google", "oauth_github", etc.
+                    var provider = providerForApi.Replace("oauth_", "").ToLowerInvariant() switch
+                    {
+                        "google" => OAuthProvider.Google,
+                        "github" => OAuthProvider.GitHub,
+                        "microsoft" => OAuthProvider.Microsoft,
+                        "apple" => OAuthProvider.Apple,
+                        "twitter" => OAuthProvider.Twitter,
+                        _ => (OAuthProvider?)null
+                    };
+
+                    if (provider == null)
+                    {
+                        continue; // Skip unsupported providers
+                    }
+
                     var tokenResponse = await _backendClient.GetOAuthAccessTokenAsync(
                         userId,
                         providerForApi,
@@ -538,9 +554,8 @@ public class ClerkAuthProvider : IAuthProvider
 
                     if (tokenResponse != null)
                     {
-                        // Use the original provider name as the key for consistency
-                        tokens[providerForApi] = new OAuthProviderToken(
-                            Provider: tokenResponse.Provider,
+                        tokens[provider.Value] = new OAuthProviderToken(
+                            Provider: provider.Value,
                             AccessToken: tokenResponse.Token,
                             Scopes: tokenResponse.Scopes,
                             ExpiresAt: tokenResponse.ExpiresAt.HasValue

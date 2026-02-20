@@ -113,7 +113,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
 
     public IAuthSession GetAuthSession() => authSession;
 
-    public async Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(CancellationToken cancellationToken)
+    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(CancellationToken cancellationToken)
     {
         return await TimeoutHelper.WithTimeoutAsync(ct =>
             authProvider.GetOAuthProviderTokensAsync(authSession, ct), cancellationToken);

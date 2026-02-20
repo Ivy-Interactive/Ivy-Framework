@@ -11,7 +11,7 @@ public class MainApp : ViewBase
     {
         var auth = UseService<IAuthService>();
         var userInfo = UseState<UserInfo?>();
-        var oauthTokens = UseState<Dictionary<string, OAuthProviderToken>?>();
+        var oauthTokens = UseState<Dictionary<OAuthProvider, OAuthProviderToken>?>();
         var googleProfile = UseState<string?>();
         var githubRepos = UseState<string?>();
 
@@ -55,13 +55,13 @@ public class MainApp : ViewBase
                         Text.P($"Connected providers: {string.Join(", ", oauthTokens.Value.Keys)}"),
 
                         // Example: Test Google API access if available
-                        oauthTokens.Value.ContainsKey("oauth_google")
+                        oauthTokens.Value.ContainsKey(OAuthProvider.Google)
                             ? Layout.Vertical(
                                 Text.H4("Google OAuth Test"),
                                 Layout.Horizontal(
                                     new Button("Get Google Profile", async () =>
                                     {
-                                        var googleToken = oauthTokens.Value["oauth_google"];
+                                        var googleToken = oauthTokens.Value[OAuthProvider.Google];
                                         using var httpClient = new HttpClient();
                                         httpClient.DefaultRequestHeaders.Authorization =
                                             new AuthenticationHeaderValue("Bearer", googleToken.AccessToken);
@@ -79,7 +79,7 @@ public class MainApp : ViewBase
                                     }, variant: ButtonVariant.Primary),
                                     new Button("List Google Drive Files", async () =>
                                     {
-                                        var googleToken = oauthTokens.Value["oauth_google"];
+                                        var googleToken = oauthTokens.Value[OAuthProvider.Google];
                                         using var httpClient = new HttpClient();
                                         httpClient.DefaultRequestHeaders.Authorization =
                                             new AuthenticationHeaderValue("Bearer", googleToken.AccessToken);
@@ -103,12 +103,12 @@ public class MainApp : ViewBase
                             : null,
 
                         // Example: Test GitHub API access if available
-                        oauthTokens.Value.ContainsKey("oauth_github")
+                        oauthTokens.Value.ContainsKey(OAuthProvider.GitHub)
                             ? Layout.Vertical(
                                 Text.H4("GitHub OAuth Test"),
                                 new Button("Fetch My Repositories", async () =>
                                 {
-                                    var githubToken = oauthTokens.Value["oauth_github"];
+                                    var githubToken = oauthTokens.Value[OAuthProvider.GitHub];
                                     using var httpClient = new HttpClient();
                                     httpClient.DefaultRequestHeaders.Authorization =
                                         new AuthenticationHeaderValue("Bearer", githubToken.AccessToken);

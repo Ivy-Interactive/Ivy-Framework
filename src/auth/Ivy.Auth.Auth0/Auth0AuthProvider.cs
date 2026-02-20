@@ -307,7 +307,21 @@ public class Auth0AuthProvider : IAuthProvider
         return _managementClient;
     }
 
-    public async Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    private static OAuthProvider? MapAuth0ProviderToEnum(string auth0Provider)
+    {
+        // Auth0 uses format like "google-oauth2", "github", "windowslive", etc.
+        return auth0Provider.ToLowerInvariant() switch
+        {
+            "google-oauth2" => OAuthProvider.Google,
+            "github" => OAuthProvider.GitHub,
+            "windowslive" => OAuthProvider.Microsoft,
+            "apple" => OAuthProvider.Apple,
+            "twitter" => OAuthProvider.Twitter,
+            _ => null
+        };
+    }
+
+    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         // Get user ID from the current access token
         if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
@@ -332,7 +346,7 @@ public class Auth0AuthProvider : IAuthProvider
             return [];
         }
 
-        var tokens = new Dictionary<string, OAuthProviderToken>();
+        var tokens = new Dictionary<OAuthProvider, OAuthProviderToken>();
 
         foreach (var identity in user.Identities)
         {
@@ -343,8 +357,14 @@ public class Auth0AuthProvider : IAuthProvider
                 continue;
             }
 
-            tokens[identity.Provider] = new OAuthProviderToken(
-                Provider: identity.Provider,
+            var provider = MapAuth0ProviderToEnum(identity.Provider);
+            if (provider == null)
+            {
+                continue; // Skip unsupported providers
+            }
+
+            tokens[provider.Value] = new OAuthProviderToken(
+                Provider: provider.Value,
                 AccessToken: identity.AccessToken);
         }
 

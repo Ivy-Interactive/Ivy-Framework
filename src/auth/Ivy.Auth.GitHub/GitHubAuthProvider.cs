@@ -225,23 +225,23 @@ public class GitHubAuthProvider : IAuthProvider
     public GitHubAuthProvider UseGitHub() => this;
 
     /// <summary>Get OAuth provider tokens - returns the GitHub access token</summary>
-    public Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         var token = authSession.AuthToken?.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
         {
-            return Task.FromResult<Dictionary<string, OAuthProviderToken>?>(null);
+            return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(null);
         }
 
-        var tokens = new Dictionary<string, OAuthProviderToken>
+        var tokens = new Dictionary<OAuthProvider, OAuthProviderToken>
         {
-            ["github"] = new OAuthProviderToken(
-                Provider: "github",
+            [OAuthProvider.GitHub] = new OAuthProviderToken(
+                Provider: OAuthProvider.GitHub,
                 AccessToken: token,
                 Scopes: ["user:email"])
         };
 
-        return Task.FromResult<Dictionary<string, OAuthProviderToken>?>(tokens);
+        return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(tokens);
     }
 
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)

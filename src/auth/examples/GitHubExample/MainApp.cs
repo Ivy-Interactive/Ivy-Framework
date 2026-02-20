@@ -12,7 +12,7 @@ public class MainApp : ViewBase
     {
         var auth = UseService<IAuthService>();
         var userInfo = UseState<UserInfo?>();
-        var oauthTokens = UseState<Dictionary<string, OAuthProviderToken>?>();
+        var oauthTokens = UseState<Dictionary<OAuthProvider, OAuthProviderToken>?>();
         var githubRepos = UseState<List<string>?>();
 
         UseEffect(async () =>
@@ -53,11 +53,11 @@ public class MainApp : ViewBase
                     Text.P($"Connected providers: {string.Join(", ", oauthTokens.Value.Keys)}"),
 
                     // Example: Fetch user's repositories
-                    oauthTokens.Value.ContainsKey("github")
+                    oauthTokens.Value.ContainsKey(OAuthProvider.GitHub)
                         ? Layout.Vertical(
                             new Button("Fetch My Repositories", async () =>
                             {
-                                var githubToken = oauthTokens.Value["github"];
+                                var githubToken = oauthTokens.Value[OAuthProvider.GitHub];
                                 using var httpClient = new HttpClient();
                                 httpClient.DefaultRequestHeaders.Authorization =
                                     new AuthenticationHeaderValue("Bearer", githubToken.AccessToken);
