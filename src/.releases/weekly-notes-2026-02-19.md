@@ -26,6 +26,8 @@ var darkMode = UseState(false);
 darkMode.ToSwitchInput(Icons.Moon).Label("Dark Mode");
 ```
 
+![switch](https://github.com/user-attachments/assets/e963dd62-102c-476d-af1d-a69ce3112019)
+
 ### Clickable Links in DataTable
 
 To display a column as clickable links in a [DataTable](https://docs.ivy.app/widgets/advanced/data-table), use the `LinkDisplayRenderer`:
@@ -35,6 +37,8 @@ dataTable
     .Column(x => x.WebsiteUrl)
     .Renderer(x => x.WebsiteUrl, new LinkDisplayRenderer { Type = LinkDisplayType.Url });
 ```
+
+https://github.com/user-attachments/assets/4a0eb48f-7cf1-471f-9a22-43878502a493
 
 ### Tooltips for DataTable Row Actions
 
@@ -49,15 +53,7 @@ dataTable
         .OnClick(row => EditRecord(row.Id)));
 ```
 
-### Improved Multiselect Component
-
-You can control how many badges are visible before overflow using the `maxVisibleBadges` property (defaults to 2) on [multiselect](https://docs.ivy.app/widgets/inputs/select-input) inputs:
-
-```csharp
-multiselect
-    .MaxVisibleBadges(3)  // Show up to 3 badges before showing "+N"
-    .Options(myOptions);
-```
+<img width="186" height="79" alt="datatableTooltip" src="https://github.com/user-attachments/assets/fcb3d517-4317-4f6c-8e06-3037d60e2c96" />
 
 ### Icon Picker Input
 
@@ -67,6 +63,8 @@ A new IconInput widget allows you to select icons from the full Lucide icon libr
 var iconState = UseState<Icons>(Icons.Star);
 iconState.ToIconInput().Placeholder("Pick an icon");
 ```
+
+![iconinput](https://github.com/user-attachments/assets/e0aa7d91-e44f-4a66-ae74-c403384a21a1)
 
 ## Theming & Customization
 
@@ -105,6 +103,8 @@ new Button("Warning").Warning()
 new Button("Info").Info()
 ```
 
+<img width="304" height="61" alt="image" src="https://github.com/user-attachments/assets/7cb716b4-a9ef-4327-abaf-2e5baeef142b" />
+
 These join the existing variant methods like `.Primary()`, `.Secondary()`, `.Destructive()`, `.Outline()`, `.Ghost()`, `.Link()`, and `.Ai()`, providing a complete and consistent API for button styling.
 
 ### Improved ResizablePanel API
@@ -123,6 +123,8 @@ new ResizablePanelGroup(
     )
 )
 ```
+
+![resizeable](https://github.com/user-attachments/assets/5cacf7d0-6685-4050-b006-c81b4e1c08d3)
 
 ## Authentication & Security
 
