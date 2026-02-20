@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
+using Auth0.ManagementApi;
 using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +30,8 @@ public class Auth0AuthProvider : IAuthProvider
     private readonly List<AuthOption> _authOptions = new();
 
     private readonly ConfigurationManager<OpenIdConnectConfiguration> _configurationManager;
+    private ManagementApiClient? _managementClient;
+    private DateTime _managementTokenExpiry = DateTime.MinValue;
 
     public Auth0AuthProvider(IConfiguration configuration)
     {
@@ -272,5 +275,80 @@ public class Auth0AuthProvider : IAuthProvider
     {
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Microsoft", "microsoft", Icons.Microsoft));
         return this;
+    }
+
+    private async Task<ManagementApiClient> GetManagementClientAsync(CancellationToken cancellationToken)
+    {
+        // Check if we have a valid management client
+        if (_managementClient != null && DateTime.UtcNow < _managementTokenExpiry)
+        {
+            return _managementClient;
+        }
+
+        // Request a new management API token
+        var tokenRequest = new ClientCredentialsTokenRequest
+        {
+            ClientId = _clientId,
+            ClientSecret = _clientSecret,
+            Audience = $"https://{_domain}/api/v2/"
+        };
+
+        var tokenResponse = await _authClient.GetTokenAsync(tokenRequest, cancellationToken);
+
+        _managementClient = new ManagementApiClient(tokenResponse.AccessToken, _domain);
+        // Tokens typically last 24 hours, refresh after 23 hours to be safe
+        _managementTokenExpiry = DateTime.UtcNow.AddHours(23);
+
+        return _managementClient;
+    }
+
+    public async Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Get user ID from the current access token
+            if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
+            {
+                return null;
+            }
+
+            var userId = claims.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return null;
+            }
+
+            // Get management API client
+            var managementClient = await GetManagementClientAsync(cancellationToken);
+
+            // Get user with identities
+            var user = await managementClient.Users.GetAsync(userId);
+            if (user.Identities == null || !user.Identities.Any())
+            {
+                return [];
+            }
+
+            var tokens = new Dictionary<string, OAuthProviderToken>();
+
+            foreach (var identity in user.Identities)
+            {
+                // Skip non-OAuth identities (like auth0 username/password)
+                if (identity.Connection == "Username-Password-Authentication" ||
+                    string.IsNullOrEmpty(identity.AccessToken))
+                {
+                    continue;
+                }
+
+                tokens[identity.Provider] = new OAuthProviderToken(
+                    Provider: identity.Provider,
+                    AccessToken: identity.AccessToken);
+            }
+
+            return tokens;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 }

@@ -224,6 +224,26 @@ public class GitHubAuthProvider : IAuthProvider
     [Obsolete("GitHub OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public GitHubAuthProvider UseGitHub() => this;
 
+    /// <summary>Get OAuth provider tokens - returns the GitHub access token</summary>
+    public Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    {
+        var token = authSession.AuthToken?.AccessToken;
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return Task.FromResult<Dictionary<string, OAuthProviderToken>?>(null);
+        }
+
+        var tokens = new Dictionary<string, OAuthProviderToken>
+        {
+            ["github"] = new OAuthProviderToken(
+                Provider: "github",
+                AccessToken: token,
+                Scopes: ["user:email"])
+        };
+
+        return Task.FromResult<Dictionary<string, OAuthProviderToken>?>(tokens);
+    }
+
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)
     {
         using var requestBody = new FormUrlEncodedContent(new[]

@@ -25,6 +25,7 @@ public class ClerkAuthProvider : IAuthProvider
     private readonly string _frontendApiDomain;
     private readonly List<AuthOption> _authOptions = [];
     private readonly HttpClient _httpClient;
+    private readonly BackendApiClient _backendClient;
     private ICollection<SecurityKey>? _signingKeys;
     private DateTime _signingKeysLastFetched = DateTime.MinValue;
     private readonly bool _isProduction;
@@ -51,6 +52,8 @@ public class ClerkAuthProvider : IAuthProvider
 
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
         var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
+
+        _backendClient = new BackendApiClient(_secretKey);
 
         var (secretIsProduction, _) = ParseKey("Clerk:SecretKey", "sk", _secretKey);
         var (publishableIsProduction, publishableKeyValue) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
@@ -485,6 +488,76 @@ public class ClerkAuthProvider : IAuthProvider
             }, out SecurityToken validatedToken);
 
             return (principal, new TokenLifetime(validatedToken.ValidTo, validatedToken.ValidFrom));
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    public async Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Get user ID from the current session token
+            if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) is not var (claims, _))
+            {
+                return null;
+            }
+
+            var userId = claims.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return null;
+            }
+
+            // Get user details to find their external accounts
+            var user = await _backendClient.GetUserAsync(userId, cancellationToken);
+
+            if (user?.ExternalAccounts == null || user.ExternalAccounts.Count == 0)
+            {
+                return [];
+            }
+
+            var tokens = new Dictionary<string, OAuthProviderToken>();
+
+            // Fetch OAuth tokens for each external account
+            foreach (var externalAccount in user.ExternalAccounts)
+            {
+                try
+                {
+                    // Clerk's Backend API uses "oauth_" prefix for OAuth providers
+                    var providerForApi = externalAccount.Provider.StartsWith("oauth_")
+                        ? externalAccount.Provider
+                        : $"oauth_{externalAccount.Provider}";
+
+                    var tokenResponse = await _backendClient.GetOAuthAccessTokenAsync(
+                        userId,
+                        providerForApi,
+                        cancellationToken);
+
+                    if (tokenResponse != null)
+                    {
+                        // Use the original provider name as the key for consistency
+                        tokens[providerForApi] = new OAuthProviderToken(
+                            Provider: tokenResponse.Provider,
+                            AccessToken: tokenResponse.Token,
+                            Scopes: tokenResponse.Scopes,
+                            ExpiresAt: tokenResponse.ExpiresAt.HasValue
+                                ? DateTimeOffset.FromUnixTimeMilliseconds(tokenResponse.ExpiresAt.Value)
+                                : null,
+                            PublicMetadata: tokenResponse.PublicMetadata,
+                            Label: tokenResponse.Label);
+                    }
+                }
+                catch (Exception)
+                {
+                    // Skip this provider if we can't get the token
+                    continue;
+                }
+            }
+
+            return tokens;
         }
         catch (Exception)
         {
