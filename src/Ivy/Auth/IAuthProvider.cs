@@ -43,10 +43,6 @@ public interface IAuthProvider
 
     Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Gets OAuth access tokens from external providers (Google, GitHub, etc.) when available.
-    /// Returns null if the provider doesn't support accessing underlying OAuth tokens.
-    /// </summary>
     Task<Dictionary<string, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         return Task.FromResult<Dictionary<string, OAuthProviderToken>?>(null);
