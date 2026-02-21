@@ -94,7 +94,7 @@ public class SmartSearchView : ViewBase
                 isSheetOpen.Set(false);
                 return ValueTask.CompletedTask;
             }, sheetContent, title: queryQuestion.Value, description: "AI-generated answer from Ivy docs")
-                .Width(Size.Rem(28))
+                .Width(Size.Fraction(0.4f))
             : null;
 
         return Layout.Vertical().Gap(2)
