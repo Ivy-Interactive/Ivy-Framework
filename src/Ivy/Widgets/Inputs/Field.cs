@@ -2,17 +2,11 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
-using Ivy.Widgets.Inputs.Validated;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// Return type of WithField(). Implemented by Field and ValidatedFieldView so Label/Description/Required/Help (and Width when Field) apply without conflicting with Card or other types.
-/// </summary>
-public interface IFieldWithLabel { }
-
-public record Field : WidgetBase<Field>, IFieldWithLabel
+public record Field : WidgetBase<Field>
 {
     public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium) : base([input])
     {
@@ -65,56 +59,5 @@ public static class FieldExtensions
 
     public static Field Required(this Field field) => field with { Required = true };
 
-    public static IFieldWithLabel Label(this IFieldWithLabel fieldOrView, string label) =>
-        fieldOrView is Field f ? f.Label(label) : fieldOrView is ValidatedFieldView v ? v.Label(label) : fieldOrView;
-
-    public static IFieldWithLabel Description(this IFieldWithLabel fieldOrView, string description) =>
-        fieldOrView is Field f ? f.Description(description) : fieldOrView is ValidatedFieldView v ? v.Description(description) : fieldOrView;
-
-    public static IFieldWithLabel Required(this IFieldWithLabel fieldOrView) =>
-        fieldOrView is Field f ? f.Required() : fieldOrView is ValidatedFieldView v ? v.Required() : fieldOrView;
-
-    public static IFieldWithLabel Help(this IFieldWithLabel fieldOrView, string help) =>
-        fieldOrView is Field f ? f.Help(help) : fieldOrView is ValidatedFieldView v ? v.Help(help) : fieldOrView;
-
-    public static IFieldWithLabel Width(this IFieldWithLabel fieldOrView, Size? width) =>
-        fieldOrView is Field f ? f.Width(width) : fieldOrView;
-
-    public static IFieldWithLabel Width(this IFieldWithLabel fieldOrView, int units) =>
-        fieldOrView is Field f ? f.Width(units) : fieldOrView;
-
-    public static IFieldWithLabel Width(this IFieldWithLabel fieldOrView, double units) =>
-        fieldOrView is Field f ? f.Width(units) : fieldOrView;
-
-    public static IFieldWithLabel Height(this IFieldWithLabel fieldOrView, Size? height) =>
-        fieldOrView is Field f ? f.Height(height) : fieldOrView;
-
-    public static IFieldWithLabel Height(this IFieldWithLabel fieldOrView, int units) =>
-        fieldOrView is Field f ? f.Height(units) : fieldOrView;
-
-    public static IFieldWithLabel Height(this IFieldWithLabel fieldOrView, double units) =>
-        fieldOrView is Field f ? f.Height(units) : fieldOrView;
-
-    public static IFieldWithLabel Scale(this IFieldWithLabel fieldOrView, Scale scale) =>
-        fieldOrView is Field f ? f.Scale(scale) : fieldOrView;
-
-    public static IFieldWithLabel Small(this IFieldWithLabel fieldOrView) =>
-        fieldOrView is Field f ? f.Small() : fieldOrView;
-
-    public static IFieldWithLabel Medium(this IFieldWithLabel fieldOrView) =>
-        fieldOrView is Field f ? f.Medium() : fieldOrView;
-
-    public static IFieldWithLabel Large(this IFieldWithLabel fieldOrView) =>
-        fieldOrView is Field f ? f.Large() : fieldOrView;
-
-    public static IWidget WithTooltip(this IFieldWithLabel fieldOrView, string toolTip) =>
-        new Tooltip(fieldOrView, toolTip);
-
-    public static IFieldWithLabel WithField(this IAnyInput input)
-    {
-        if (input is TextInputBase tb && tb.BoundState != null &&
-            tb.Variant is TextInputs.Email or TextInputs.Password or TextInputs.Tel or TextInputs.Url)
-            return new ValidatedFieldView(tb, tb.BoundState, tb.Variant);
-        return new Field(input);
-    }
+    public static Field WithField(this IAnyInput input) => new Field(input);
 }

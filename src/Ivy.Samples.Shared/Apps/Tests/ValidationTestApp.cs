@@ -42,7 +42,7 @@ public class TextInputVariantsTab : ViewBase
     }
 }
 
-/// <summary>Field-wrapped variant inputs (ToEmailInput, ToTelInput, etc. + WithField()).</summary>
+/// <summary>Validated field inputs (ToEmailField, ToTelField, etc.) with label, description, and validation on blur.</summary>
 public class FieldVariantsTab : ViewBase
 {
     public override object? Build()
@@ -54,12 +54,12 @@ public class FieldVariantsTab : ViewBase
 
         return new Card(
             Layout.Vertical().Gap(6)
-                | Text.H3("Field-wrapped inputs")
-                | Text.P("Each input is wrapped in a Field with label, description, and required.")
-                | email.ToEmailInput("user@example.com").WithField().Label("Email").Description("We use this for account recovery.").Required()
-                | tel.ToTelInput("+1 234 567 8900").WithField().Label("Phone").Description("7–15 digits.").Required()
-                | url.ToUrlInput("https://example.com").WithField().Label("Website").Description("Must start with http or https.")
-                | password.ToPasswordInput("At least 8 characters").WithField().Label("Password").Description("Required for sign-up.").Required()
+                | Text.H3("Validated fields")
+                | Text.P("Each uses To*Field() for a Field with label, description, required, and validation on blur.")
+                | email.ToEmailField("user@example.com").Label("Email").Description("We use this for account recovery.").Required()
+                | tel.ToTelField("+1 234 567 8900").Label("Phone").Description("7–15 digits.").Required()
+                | url.ToUrlField("https://example.com").Label("Website").Description("Must start with http or https.")
+                | password.ToPasswordField("At least 8 characters").Label("Password").Description("Required for sign-up.").Required()
         ).Width(Size.Full());
     }
 }

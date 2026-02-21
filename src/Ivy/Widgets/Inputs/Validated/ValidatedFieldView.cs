@@ -1,3 +1,4 @@
+using Ivy;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -9,23 +10,26 @@ namespace Ivy.Widgets.Inputs.Validated;
 
 /// <summary>
 /// View that wraps a validating TextInput (Email, Password, Tel, Url) in a Field and wires auto-validation on blur.
+/// Use via ToEmailField(), ToPasswordField(), ToUrlField(), ToTelField().
 /// </summary>
-internal sealed class ValidatedFieldView : ViewBase, IFieldWithLabel
+public sealed class ValidatedFieldView : ViewBase
 {
-    private readonly TextInputBase _input;
     private readonly IAnyState _state;
     private readonly TextInputs _variant;
+    private readonly string? _placeholder;
+    private readonly bool _disabled;
     private readonly string? _label;
     private readonly string? _description;
     private readonly bool _required;
     private readonly string? _help;
     private readonly Scale _scale;
 
-    public ValidatedFieldView(TextInputBase input, IAnyState state, TextInputs variant, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium)
+    public ValidatedFieldView(IAnyState state, TextInputs variant, string? placeholder = null, bool disabled = false, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium)
     {
-        _input = input;
         _state = state;
         _variant = variant;
+        _placeholder = placeholder;
+        _disabled = disabled;
         _label = label;
         _description = description;
         _required = required;
@@ -33,10 +37,12 @@ internal sealed class ValidatedFieldView : ViewBase, IFieldWithLabel
         _scale = scale;
     }
 
-    public ValidatedFieldView Label(string label) => new(_input, _state, _variant, label, _description, _required, _help, _scale);
-    public ValidatedFieldView Description(string description) => new(_input, _state, _variant, _label, description, _required, _help, _scale);
-    public ValidatedFieldView Required() => new(_input, _state, _variant, _label, _description, true, _help, _scale);
-    public ValidatedFieldView Help(string help) => new(_input, _state, _variant, _label, _description, _required, help, _scale);
+    public ValidatedFieldView Label(string label) => new(_state, _variant, _placeholder, _disabled, label, _description, _required, _help, _scale);
+    public ValidatedFieldView Description(string description) => new(_state, _variant, _placeholder, _disabled, _label, description, _required, _help, _scale);
+    public ValidatedFieldView Required() => new(_state, _variant, _placeholder, _disabled, _label, _description, true, _help, _scale);
+    public ValidatedFieldView Help(string help) => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, help, _scale);
+    public ValidatedFieldView Placeholder(string placeholder) => new(_state, _variant, placeholder, _disabled, _label, _description, _required, _help, _scale);
+    public ValidatedFieldView Disabled(bool disabled = true) => new(_state, _variant, _placeholder, disabled, _label, _description, _required, _help, _scale);
 
     public override object? Build()
     {
@@ -48,17 +54,17 @@ internal sealed class ValidatedFieldView : ViewBase, IFieldWithLabel
             if (blurOnceState.Value)
             {
                 var value = _state.As<object>().Value;
-                var (isValid, errorMessage) = TextInputExtensions.ValidateForVariant(value, _variant);
+                var (isValid, errorMessage) = TextInputValidation.ValidateForVariant(value, _variant);
                 invalidState.Set(isValid ? null! : errorMessage ?? "");
             }
         }, _state, blurOnceState);
 
         void OnBlur(Event<IAnyInput> _) => blurOnceState.Set(true);
 
-        var validatedInput = _input
+        var input = _state.ToTextInput(_placeholder, _disabled, _variant)
             .Invalid(invalidState.Value ?? "")
             .HandleBlur(OnBlur);
 
-        return new Field(validatedInput, _label, _description, _required, _help, _scale);
+        return new Field(input, _label, _description, _required, _help, _scale);
     }
 }
