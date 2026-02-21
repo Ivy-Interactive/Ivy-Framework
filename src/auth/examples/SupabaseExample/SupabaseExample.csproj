@@ -5,12 +5,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UserSecretsId>38a3de50-7842-4022-910b-7229065367d1</UserSecretsId>
+    <RootNamespace>SupabaseExample</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
-    <ProjectReference Include="..\..\auth\Ivy.Auth.GitHub\Ivy.Auth.GitHub.csproj" />
+    <ProjectReference Include="..\..\..\Ivy\Ivy.csproj" />
+    <ProjectReference Include="..\..\Ivy.Auth.Supabase\Ivy.Auth.Supabase.csproj" />
   </ItemGroup>
 
 </Project>

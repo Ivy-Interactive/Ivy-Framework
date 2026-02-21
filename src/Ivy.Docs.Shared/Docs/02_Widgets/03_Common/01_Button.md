@@ -37,9 +37,9 @@ The Button widget includes three new contextual variants to help communicate dif
 
 ```csharp demo-tabs
 Layout.Horizontal()
-    | new Button("Success", variant: ButtonVariant.Success)
-    | new Button("Warning", variant: ButtonVariant.Warning)
-    | new Button("Info", variant: ButtonVariant.Info)
+    | new Button("Success").Success()
+    | new Button("Warning").Warning()
+    | new Button("Info").Info()
 ```
 
 ## Styling & Configuration
@@ -70,7 +70,7 @@ Layout.Vertical().Gap(4)
     | (Layout.Horizontal().Gap(4)
         | new Button("Save").Icon(Icons.Save)
         | new Button("Next").Icon(Icons.ArrowRight, Align.Right)
-        | new Button(null, icon: Icons.Settings, variant: ButtonVariant.Ghost))
+        | new Button().Icon(Icons.Settings).Ghost())
 ```
 
 ## Buttons with URLs
@@ -83,13 +83,13 @@ Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/
 
 ```csharp demo-tabs
     Layout.Horizontal().Gap(4)
-        | new Button("Visit Ivy Docs", variant: ButtonVariant.Primary)
+        | new Button("Visit Ivy Docs")
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
-        | new Button("External Link", variant: ButtonVariant.Secondary)
+        | new Button("External Link").Secondary()
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
             .OpenInNewTab()
             .Icon(Icons.ExternalLink, Align.Right)
-        | new Button("Link Style", variant: ButtonVariant.Link)
+        | new Button("Link Style").Link()
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
 ```
 

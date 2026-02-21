@@ -1,3 +1,3 @@
 # Ivy.Auth.Supabase
 
-An Ivy authentication provider for Supabase.
+This package provides Supabase authentication integration for the Ivy framework.

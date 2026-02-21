@@ -22,6 +22,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets/**/*" />
     <EmbeddedResource Include="Generated/**/*.md" />
+    <EmbeddedResource Include="..\..\AGENTS.md" Link="Assets\AGENTS.md" />
   </ItemGroup>
 
   <ItemGroup>

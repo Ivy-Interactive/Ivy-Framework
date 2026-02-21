@@ -6,9 +6,9 @@ using Ivy.Widgets;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Mvc;
 
-namespace OAuthTestApp;
+namespace MicrosoftEntraExample;
 
-[App(id: "oauth-test-app", title: "GitHub OAuth Test")]
+[App(id: "auth-test", title: "Auth Test")]
 public class MainApp : ViewBase
 {
     public override object? Build()
@@ -24,7 +24,7 @@ public class MainApp : ViewBase
 
         if (userInfo.Value is null)
         {
-             return Text.P("Loading user data...");
+            return Text.P("Loading user data...");
         }
 
         var user = userInfo.Value;

@@ -199,6 +199,15 @@ public static class ButtonExtensions
     [RelatedTo(nameof(Button.Variant))]
     public static Button Ai(this Button button) => button.Variant(ButtonVariant.Ai);
 
+    [RelatedTo(nameof(Button.Variant))]
+    public static Button Success(this Button button) => button.Variant(ButtonVariant.Success);
+
+    [RelatedTo(nameof(Button.Variant))]
+    public static Button Warning(this Button button) => button.Variant(ButtonVariant.Warning);
+
+    [RelatedTo(nameof(Button.Variant))]
+    public static Button Info(this Button button) => button.Variant(ButtonVariant.Info);
+
     public static Button BorderRadius(this Button button, BorderRadius radius) => button with { BorderRadius = radius };
 
     [RelatedTo(nameof(Button.Target))]

@@ -17,6 +17,7 @@ import { Scales } from '@/types/scale';
 import {
   labelSizeVariants,
   descriptionSizeVariants,
+  boolInputRowMinHeightVariants,
 } from '@/components/ui/input/bool-input-variants';
 
 type VariantType = 'Checkbox' | 'Switch' | 'Toggle';
@@ -53,6 +54,7 @@ interface CheckboxVariantProps extends BaseVariantProps {
 }
 
 interface SwitchVariantProps extends BaseVariantProps {
+  icon?: string;
   onCheckedChange: (checked: boolean) => void;
 }
 
@@ -128,12 +130,13 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            'flex gap-2',
-            description ? 'items-start' : 'items-center'
+            'flex gap-2 items-center',
+            boolInputRowMinHeightVariants({ scale }),
+            description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
         >
-          <div className={cn(description && 'mt-1.5')}>
+          <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(checkboxElement, invalid)}
           </div>
           <InputLabel
@@ -158,6 +161,7 @@ const VariantComponents = {
       disabled,
       invalid,
       scale = Scales.Medium,
+      icon,
       onCheckedChange,
       'data-testid': dataTestId,
     }: SwitchVariantProps) => {
@@ -168,6 +172,7 @@ const VariantComponents = {
           onCheckedChange={onCheckedChange}
           disabled={disabled}
           scale={scale}
+          icon={icon}
           className={cn(invalid && inputStyles.invalid)}
           data-testid={dataTestId}
         />
@@ -176,12 +181,13 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            'flex gap-2',
-            description ? 'items-start' : 'items-center'
+            'flex gap-2 items-center',
+            boolInputRowMinHeightVariants({ scale }),
+            description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
         >
-          <div className={cn(description && 'mt-1.5')}>
+          <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(switchElement, invalid)}
           </div>
           <InputLabel
@@ -228,12 +234,13 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            'flex space-x-2',
-            description ? 'items-start' : 'items-center'
+            'flex space-x-2 items-center',
+            boolInputRowMinHeightVariants({ scale }),
+            description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
         >
-          <div className={cn(description && 'mt-1.5')}>
+          <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(toggleElement, invalid)}
           </div>
           <InputLabel

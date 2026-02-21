@@ -8,11 +8,11 @@ export function getContentAlign(align?: Align): 'left' | 'center' | 'right' {
   if (!align) return 'left';
 
   switch (align) {
-    case Align.Left:
+    case 'Left':
       return 'left';
-    case Align.Center:
+    case 'Center':
       return 'center';
-    case Align.Right:
+    case 'Right':
       return 'right';
     default:
       return 'left';

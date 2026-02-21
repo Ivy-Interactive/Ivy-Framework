@@ -1,3 +1,3 @@
 # Ivy.Auth.MicrosoftEntra
 
-An Ivy authentication provider for Microsoft Entra (Azure Active Directory).
+This package provides Microsoft Entra authentication integration for the Ivy framework.

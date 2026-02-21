@@ -21,12 +21,14 @@ public class GitHubAuthProvider : IAuthProvider
     private readonly string _clientId;
     private readonly string _clientSecret;
     private readonly string _redirectUri;
-    private readonly List<AuthOption> _authOptions = new();
 
     /// <summary>Initialize GitHub auth provider</summary>
-    public GitHubAuthProvider(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public GitHubAuthProvider(IConfiguration configuration)
     {
-        _httpClient = httpClientFactory.CreateClient("GitHubAuth");
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "GitHub:UserAgent");
+
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
 
         _clientId = configuration.GetValue<string>("GitHub:ClientId") ?? throw new InvalidOperationException(
             "Missing required configuration: 'GitHub:ClientId'. Please set this value in your environment variables or user secrets. See the README setup steps for instructions.");
@@ -211,10 +213,7 @@ public class GitHubAuthProvider : IAuthProvider
     }
 
     /// <summary>Get auth options</summary>
-    public AuthOption[] GetAuthOptions()
-    {
-        return _authOptions.ToArray();
-    }
+    public AuthOption[] GetAuthOptions() => [new AuthOption(AuthFlow.OAuth, "GitHub", "github", Icons.Github)];
 
     /// <summary>No expiration - returns null</summary>
     public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
@@ -223,11 +222,8 @@ public class GitHubAuthProvider : IAuthProvider
     }
 
     /// <summary>Add GitHub auth option</summary>
-    public GitHubAuthProvider UseGitHub()
-    {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitHub", "github", Icons.Github));
-        return this;
-    }
+    [Obsolete("GitHub OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
+    public GitHubAuthProvider UseGitHub() => this;
 
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)
     {
@@ -242,7 +238,6 @@ public class GitHubAuthProvider : IAuthProvider
         using var request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
         request.Content = requestBody;
         request.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-        request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
 

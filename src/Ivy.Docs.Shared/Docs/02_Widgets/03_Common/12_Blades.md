@@ -86,7 +86,7 @@ public class SearchableListView : ViewBase
 
         var header = Layout.Horizontal(
             searchTerm.ToTextInput().Placeholder("Search products..."),
-            new Button(icon: Icons.Search, variant: ButtonVariant.Outline)
+            new Button().Icon(Icons.Search).Outline()
         ).Gap(1);
 
         object content = filteredProducts.Any()

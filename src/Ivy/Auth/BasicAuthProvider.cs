@@ -20,13 +20,8 @@ public class BasicAuthProvider : IAuthProvider
 
     private static string TokenUseClaim => "https://ivy.app/claims/token_use";
 
-    public BasicAuthProvider()
+    public BasicAuthProvider(IConfiguration configuration)
     {
-        var configuration = new ConfigurationBuilder()
-            .AddEnvironmentVariables()
-            .AddUserSecrets(Assembly.GetEntryAssembly()!)
-            .Build();
-
         var hashSecret = configuration["BasicAuth:HashSecret"] ?? throw new Exception("BasicAuth:HashSecret is required");
         var jwtSecret = configuration["BasicAuth:JwtSecret"] ?? throw new Exception("BasicAuth:JwtSecret is required");
         _issuer = configuration["BasicAuth:JwtIssuer"] ?? "ivy";
@@ -189,10 +184,7 @@ public class BasicAuthProvider : IAuthProvider
         return Task.FromResult<UserInfo?>(new UserInfo(user, user, null, null));
     }
 
-    public AuthOption[] GetAuthOptions()
-    {
-        return [new AuthOption(AuthFlow.EmailPassword)];
-    }
+    public AuthOption[] GetAuthOptions() => [new AuthOption(AuthFlow.EmailPassword)];
 
     public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {

@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Auth0Example</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Ivy\Ivy.csproj" />
+    <ProjectReference Include="..\..\Ivy.Auth.Auth0\Ivy.Auth.Auth0.csproj" />
+  </ItemGroup>
+
+</Project>

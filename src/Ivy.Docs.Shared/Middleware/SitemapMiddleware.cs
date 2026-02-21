@@ -30,6 +30,12 @@ public class SitemapMiddleware(RequestDelegate next, Server server)
             return;
         }
 
+        if (path is "/agents.md" or "/llms.txt")
+        {
+            await ServeAgentsFile(context);
+            return;
+        }
+
         await next(context);
     }
 
@@ -70,5 +76,19 @@ public class SitemapMiddleware(RequestDelegate next, Server server)
         context.Response.ContentType = "application/xml; charset=utf-8";
         context.Response.StatusCode = 200;
         await context.Response.WriteAsync(sb.ToString());
+    }
+
+    private static async Task ServeAgentsFile(HttpContext context)
+    {
+        await using var stream = typeof(SitemapMiddleware).Assembly.GetManifestResourceStream("Ivy.Docs.Shared.Assets.AGENTS.md");
+        if (stream == null)
+        {
+            context.Response.StatusCode = 404;
+            return;
+        }
+
+        context.Response.ContentType = "text/plain; charset=utf-8";
+        context.Response.StatusCode = 200;
+        await stream.CopyToAsync(context.Response.Body);
     }
 }

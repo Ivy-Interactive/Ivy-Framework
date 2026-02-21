@@ -241,8 +241,17 @@ public static class BoolInputExtensions
         }
     }
 
-    public static BoolInputBase ToSwitchInput(this IAnyState state, string? label = null, bool disabled = false)
-        => state.ToBoolInput(label, disabled, BoolInputs.Switch);
+    public static BoolInputBase ToSwitchInput(this IAnyState state, Icons? icon = null, string? label = null,
+        bool disabled = false)
+    {
+        var input = state.ToBoolInput(label, disabled, BoolInputs.Switch);
+        if (icon != null)
+        {
+            input.Icon = icon.Value;
+        }
+
+        return input;
+    }
 
     public static BoolInputBase ToToggleInput(this IAnyState state, Icons? icon = null, string? label = null,
         bool disabled = false)

@@ -11,10 +11,10 @@ searchHints:
 # Icon
 
 <Ingress>
-Display beautiful vector icons from the comprehensive Lucide icon set with customizable colors, sizes, and styling options.
+Display crisp Lucide vector icons with customizable colors, sizes, and animation-ready styling. Use [Colors](../../04_ApiReference/IvyShared/Colors.md) and the [Animation](../05_Effects/Animation.md) widget with `.ToIcon().Color().WithAnimation()` to create expressive, interactive icons.
 </Ingress>
 
-The `Icon` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays vector icons from Ivy's built-in icon set. Icons enhance visual communication and can be customized with different colors and sizes.
+The `Icon` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays vector icons from Ivy's built-in icon set. Icons enhance visual communication and can be customized with different colors, sizes, and animations.
 
 ## Lucide Icons
 
@@ -81,4 +81,52 @@ Layout.Horizontal()
     | new Icon(Icons.Cloud).Large()
 ```
 
-<WidgetDocs Type="Ivy.Icon" ExtensionTypes="Ivy.IconExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Icon.cs"/>
+## Animation
+
+You can animate icons using the [`Animation`](../../02_Widgets/05_Effects/Animation.md) widget and the `.WithAnimation()` extension methods.
+
+```csharp demo-tabs
+Layout.Horizontal().Align(Align.Center)
+    | Icons.LoaderCircle
+        .ToIcon()
+        .Color(Colors.Blue)
+        .WithAnimation(AnimationType.Rotate)
+        .Trigger(AnimationTrigger.Auto)
+        .Duration(1)
+    | Icons.Heart
+        .ToIcon()
+        .Color(Colors.Red)
+        .WithAnimation(AnimationType.Pulse)
+        .Trigger(AnimationTrigger.Click)
+    | Icons.MousePointer
+        .ToIcon()
+        .Color(Colors.Blue)
+        .WithAnimation(AnimationType.Hover)
+        .Trigger(AnimationTrigger.Hover)
+    | Icons.Target
+        .ToIcon()
+        .Color(Colors.Green)
+        .WithAnimation(AnimationType.Pulse)
+        .Trigger(AnimationTrigger.Hover)
+        .Duration(0.5)
+    | Icons.Bell
+        .ToIcon()
+        .Color(Colors.Orange)
+        .WithAnimation(AnimationType.Shake)
+        .Trigger(AnimationTrigger.Click)
+        .Duration(0.6)
+    | Icons.Rocket
+        .ToIcon()
+        .Color(Colors.Red)
+        .WithAnimation(AnimationType.Bounce)
+        .Trigger(AnimationTrigger.Click)
+        .Duration(0.8)
+    | Icons.Gift
+        .ToIcon()
+        .Color(Colors.Pink)
+        .WithAnimation(AnimationType.Bounce)
+        .Trigger(AnimationTrigger.Hover)
+        .Duration(0.7)
+```
+
+<WidgetDocs Type="Ivy.Icon" ExtensionTypes="Ivy.IconExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Icon.cs" Docs="../../02_Widgets/05_Effects/Animation.md"/>

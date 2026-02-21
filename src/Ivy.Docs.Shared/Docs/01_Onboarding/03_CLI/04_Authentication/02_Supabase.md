@@ -123,6 +123,7 @@ The following parameters are supported via connection string, environment variab
 - **Supabase:Url**: Required. Your Supabase project URL.
 - **Supabase:ApiKey**: Required. Your Supabase project's anonymous (anon) or publishable key.
 - **Supabase:LegacyJwtSecret**: Required if still using a legacy JWT secret, otherwise optional. Your Supabase project's legacy JWT secret.
+- **Supabase:UserAgent**: Optional. Custom User-Agent header for HTTP requests. Defaults to `Ivy-Framework/{version}` where version is the Ivy assembly version.
 
 ## Authentication Flow
 

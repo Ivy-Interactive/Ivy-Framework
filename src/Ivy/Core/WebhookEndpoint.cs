@@ -1,12 +1,29 @@
 namespace Ivy.Core;
 
-public record WebhookEndpoint(string Id, string BaseUrl)
+public record WebhookEndpoint
 {
-    public WebhookEndpoint(string id, string scheme, string host) : this(id, BuildBaseUrl(scheme, host))
+    public string Id { get; init; }
+    public string BaseUrl { get; init; }
+
+    private WebhookEndpoint(string id, string baseUrl)
     {
+        Id = id;
+        BaseUrl = baseUrl;
     }
 
-    public static string BuildBaseUrl(string scheme, string host) => $"{scheme}://{host}/ivy/webhook";
+    public static WebhookEndpoint CreateWebhook(string id, string scheme, string host)
+    {
+        return new(id, BuildWebhookBaseUrl(scheme, host));
+    }
+
+    public static WebhookEndpoint CreateAuthCallback(string id, string scheme, string host)
+    {
+        return new(id, BuildAuthCallbackBaseUrl(scheme, host));
+    }
+
+    public static string BuildWebhookBaseUrl(string scheme, string host) => $"{scheme}://{host}/ivy/webhook";
+
+    public static string BuildAuthCallbackBaseUrl(string scheme, string host) => $"{scheme}://{host}/ivy/auth/callback";
 
     public Uri GetUri(bool includeIdInPath = true) => includeIdInPath
         ? new Uri($"{BaseUrl}/{Id}")

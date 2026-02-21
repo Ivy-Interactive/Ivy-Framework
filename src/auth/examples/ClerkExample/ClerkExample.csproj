@@ -5,13 +5,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NoWarn>CS1591</NoWarn>
-    <UserSecretsId>d94b1619-62c6-4ecf-af4b-a326a596279e</UserSecretsId>
+    <RootNamespace>ClerkExample</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Ivy.Auth.Supabase/Ivy.Auth.Supabase.csproj" />
-    <ProjectReference Include="../../Ivy/Ivy.csproj" />
+    <ProjectReference Include="..\..\..\Ivy\Ivy.csproj" />
+    <ProjectReference Include="..\..\Ivy.Auth.Clerk\Ivy.Auth.Clerk.csproj" />
   </ItemGroup>
 
 </Project>
