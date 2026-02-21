@@ -369,6 +369,13 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
         }
 
+        if (settings.MainContentTop != null && body != null)
+        {
+            body = Layout.Vertical().Gap(4)
+                | settings.MainContentTop
+                | body;
+        }
+
         var searchInput = search.ToSearchInput().ShortcutKey("CTRL+K").TestId("sidebar-search");
 
         var sidebarMenu = new SidebarMenu(

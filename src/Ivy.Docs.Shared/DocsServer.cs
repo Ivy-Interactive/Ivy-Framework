@@ -1,5 +1,8 @@
-﻿using Ivy.Chrome;
+using Ivy.Chrome;
 using Ivy.Docs.Shared.Middleware;
+using Ivy.Docs.Shared.Services;
+using Ivy.Docs.Shared.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Docs.Shared;
 
@@ -19,6 +22,9 @@ public static class DocsServer
             app.UseMarkdownFiles();
         });
 
+        server.Services.AddHttpClient<IvyDocsQuestionsClient>();
+        server.Services.AddScoped<IIvyDocsQuestionsClient>(sp => sp.GetRequiredService<IvyDocsQuestionsClient>());
+
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
         server.SetMetaTitle($"Ivy Docs {version}");
 
@@ -29,7 +35,8 @@ public static class DocsServer
                 | Text.Muted($"Version {version}")
             )
             .DefaultApp<Apps.Onboarding.GettingStarted.IntroductionApp>()
-            .UsePages();
+            .UsePages()
+            .MainContentTop(new SmartSearchView());
         server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 
         await server.RunAsync();

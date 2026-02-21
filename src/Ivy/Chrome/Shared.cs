@@ -19,6 +19,7 @@ public record ChromeSettings
 {
     public object? Header { get; init; }
     public object? Footer { get; init; }
+    public object? MainContentTop { get; init; }
     public string? DefaultAppId { get; init; }
     public string? WallpaperAppId { get; init; }
     public bool PreventTabDuplicates { get; init; }
@@ -37,6 +38,7 @@ public static class ChromeSettingsExtensions
 {
     public static ChromeSettings Header(this ChromeSettings settings, object? header) => settings with { Header = header };
     public static ChromeSettings Footer(this ChromeSettings settings, object? footer) => settings with { Footer = footer };
+    public static ChromeSettings MainContentTop(this ChromeSettings settings, object? content) => settings with { MainContentTop = content };
     public static ChromeSettings DefaultAppId(this ChromeSettings settings, string? defaultAppId) => settings with { DefaultAppId = defaultAppId };
     public static ChromeSettings DefaultApp<T>(this ChromeSettings settings)
     {
