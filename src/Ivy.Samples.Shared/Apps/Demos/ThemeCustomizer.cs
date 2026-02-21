@@ -593,15 +593,10 @@ public class ThemeCustomizer : SampleBase
                 .Label(m => m.BillingAddress, "Billing address")
                 .Label(m => m.SameAsShipping, "Same as shipping address")
                 .Label(m => m.Comments, "Comments")
-<<<<<<< 1955-textinput-add-validation-for-emailtelephoneurls
                 .Builder(m => m.Cvv, s => s.ToPasswordField().Placeholder("CVV").Disabled(disableInputs.Value))
                 .Builder(m => m.Comments, s => s.ToTextAreaInput().Placeholder("Add any additional comments").Disabled(disableInputs.Value))
-=======
->>>>>>> main
                 .Builder(m => m.NameOnCard, s => s.ToTextInput().Disabled(disableInputs.Value))
                 .Builder(m => m.CardNumber, s => s.ToTextInput().Disabled(disableInputs.Value))
-                .Builder(m => m.Cvv, s => s.ToPasswordInput().Placeholder("CVV").Disabled(disableInputs.Value))
-                .Builder(m => m.Comments, s => s.ToTextAreaInput().Placeholder("Add any additional comments").Disabled(disableInputs.Value))
                 .Builder(m => m.Month, s => s.ToTextInput().Disabled(disableInputs.Value))
                 .Builder(m => m.Year, s => s.ToTextInput().Disabled(disableInputs.Value))
                 .Builder(m => m.BillingAddress, s => s.ToTextInput().Disabled(disableInputs.Value))
