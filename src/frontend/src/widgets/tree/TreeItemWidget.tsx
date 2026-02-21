@@ -137,6 +137,7 @@ export const TreeItemWidget: React.FC<TreeItemWidgetProps> = ({
       onKeyDown={handleKeyDown}
       onClick={handleClick}
     >
+      {/* Spacer matching chevron width to align leaf nodes with parent nodes */}
       <span className="h-5 w-5 shrink-0" />
       {icon && icon !== 'None' && (
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={icon} />

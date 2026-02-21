@@ -16,7 +16,6 @@ interface TreeWidgetProps {
 }
 
 export const TreeWidget: React.FC<TreeWidgetProps> = ({
-  id,
   showLines = true,
   children,
 }) => {
@@ -25,7 +24,6 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({
   return (
     <TreeContext.Provider value={contextValue}>
       <div
-        key={id}
         className={cn('ivy-tree w-full', showLines && 'ivy-tree--lines')}
         role="tree"
       >
