@@ -79,6 +79,15 @@ public class SmartSearchView : ViewBase
                             | sourceLinks
                         : null);
             }
+            else if (!query.Loading && !query.Validating && query.Error is null)
+            {
+                // Query completed but no answer (API returned null)
+                sheetContent = Layout.Center()
+                    | (Layout.Vertical().Gap(4).Center()
+                        | Text.H1("No answer found :|").Bold()
+                        | Text.Muted("We couldn't find an answer to your question in the Ivy docs. Try rephrasing or browse the documentation.")
+                    );
+            }
         }
 
         var searchBar = Layout.Horizontal().Gap(2).Align(Align.Center)
