@@ -8,8 +8,6 @@ namespace Ivy.Docs.Shared.Views;
 /// </summary>
 public class SmartSearchView : ViewBase
 {
-    private sealed record AskKey(string Question, int AskId);
-
     public override object? Build()
     {
         var questionsClient = UseService<IIvyDocsQuestionsClient>();
@@ -17,34 +15,21 @@ public class SmartSearchView : ViewBase
         var inputState = UseState("");
         var queryQuestion = UseState(() => (string?)null); // when set, we run the query and show sheet
         var isSheetOpen = UseState(false);
-        var askId = UseState(0); // increment on each Ask so each question gets a fresh query
-        // Which key we're showing result for; null = show searching. Cleared on new Ask so we never show old answer.
-        var displayedKey = UseState(() => (AskKey?)null);
 
-        var currentKey = queryQuestion.Value is { } q ? new AskKey(q, askId.Value) : (AskKey?)null;
-        var query = UseQuery<IvyDocsQuestionResult?, AskKey>(
-            key: currentKey,
-            fetcher: async (key, ct) =>
+        var query = UseQuery<IvyDocsQuestionResult?, string>(
+            key: queryQuestion.Value,
+            fetcher: async (question, ct) =>
             {
-                if (string.IsNullOrWhiteSpace(key.Question)) return null;
-                return await questionsClient.AskAsync(key.Question, ct).ConfigureAwait(false);
+                if (string.IsNullOrWhiteSpace(question)) return null;
+                return await questionsClient.AskAsync(question!, ct).ConfigureAwait(false);
             },
             options: new QueryOptions { Scope = QueryScope.View, RevalidateOnMount = false });
-
-        // When query has finished for current key and we're "waiting" (displayedKey null), commit to showing this result
-        UseEffect(() =>
-        {
-            if (displayedKey.Value is null && currentKey is not null && !query.Loading && !query.Validating && (query.Value is not null || query.Error is not null))
-                displayedKey.Set(currentKey);
-        }, EffectTrigger.OnBuild());
 
         void SubmitQuestion()
         {
             var q = inputState.Value?.Trim();
             if (string.IsNullOrEmpty(q)) return;
-            query.Mutator.Invalidate();
-            displayedKey.Set((AskKey?)null);
-            askId.Set(askId.Value + 1);
+            query.Mutator.Invalidate(); // clear result and set Loading so sheet shows searching view
             queryQuestion.Set(q);
             isSheetOpen.Set(true);
         }
@@ -52,8 +37,7 @@ public class SmartSearchView : ViewBase
         object? sheetContent = null;
         if (isSheetOpen.Value)
         {
-            // Show searching when loading, validating, or result is for a previous question (displayedKey not yet current)
-            var isFetching = query.Loading || query.Validating || (currentKey is not null && currentKey != displayedKey.Value);
+            var isFetching = query.Loading || query.Validating;
             if (isFetching)
             {
                 sheetContent = Layout.Vertical().Gap(4)
@@ -64,7 +48,7 @@ public class SmartSearchView : ViewBase
                     | new Skeleton().Height(120)
                     | new Skeleton().Height(60);
             }
-            else if (query.Error is { } err && currentKey == displayedKey.Value)
+            else if (query.Error is { } err)
             {
                 sheetContent = Layout.Vertical().Gap(4)
                     | Callout.Error(err.Message)
@@ -73,7 +57,7 @@ public class SmartSearchView : ViewBase
                         query.Mutator.Revalidate();
                     }).Variant(ButtonVariant.Outline);
             }
-            else if (query.Value is { } result && currentKey == displayedKey.Value)
+            else if (query.Value is { } result)
             {
                 object? sourceLinks = null;
                 if (result.Sources.Count > 0)
