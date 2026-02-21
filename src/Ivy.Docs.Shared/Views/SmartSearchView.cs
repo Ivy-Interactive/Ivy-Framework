@@ -29,7 +29,9 @@ public class SmartSearchView : ViewBase
         {
             var q = inputState.Value?.Trim();
             if (string.IsNullOrEmpty(q)) return;
-            query.Mutator.Invalidate(); // clear result and set Loading so sheet shows searching view
+            var questionChanged = q != queryQuestion.Value;
+            if (questionChanged)
+                query.Mutator.Invalidate(); // clear and show searching view only when question changed
             queryQuestion.Set(q);
             isSheetOpen.Set(true);
         }
