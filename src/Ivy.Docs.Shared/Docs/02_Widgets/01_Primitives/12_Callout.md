@@ -196,7 +196,7 @@ public class FormCalloutView : ViewBase
                 Layout.Vertical().Gap(2)
                     | Text.P("All fields marked with * are required. Your information will be kept secure.")
                     | loginModel.ToForm()
-                        .Builder(m => m.Email, s => s.ToEmailInput().Placeholder("Enter your email"))
+                        .Builder(m => m.Email, s => s.ToEmailField().Placeholder("Enter your email"))
                         .Label(m => m.Email, "Email Address *"),
                 "Form Guidelines",
                 CalloutVariant.Info)
@@ -204,7 +204,7 @@ public class FormCalloutView : ViewBase
                 Layout.Vertical().Gap(2)
                     | Text.P("Please use your work email address for business communications.")
                     | loginModel.ToForm()
-                        .Builder(m => m.Password, s => s.ToPasswordInput().Placeholder("Enter your password"))
+                        .Builder(m => m.Password, s => s.ToPasswordField().Placeholder("Enter your password"))
                         .Label(m => m.Password, "Password *"),
                 "Email Policy",
                 CalloutVariant.Warning);

@@ -80,7 +80,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             .Label(m => m.User, "User")
             .Label(m => m.Password, "Password")
             .Builder(m => m.User, state => state.ToTextInput())
-            .Builder(m => m.Password, state => state.ToPasswordInput());
+            .Builder(m => m.Password, state => state.ToPasswordField());
 
         var (submitForm, formView, _, submitting) = formBuilder.UseForm(this.Context);
 

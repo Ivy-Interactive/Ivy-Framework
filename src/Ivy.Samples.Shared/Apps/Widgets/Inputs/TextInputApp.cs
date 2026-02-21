@@ -23,18 +23,18 @@ public class TextInputApp : SampleBase
 
                           | Text.InlineCode("string")
                           | (Layout.Vertical()
-                             | stringState.ToTextInput()
+                             | stringState.ToPasswordField()
                              | stringState.ToTextAreaInput()
-                             | stringState.ToPasswordInput()
+                             | stringState.ToPasswordField()
                              | stringState.ToSearchInput()
                           )
                           | stringState
 
                           | Text.InlineCode("string?")
                           | (Layout.Vertical()
-                             | nullStringState.ToTextInput()
+                             | nullStringState.ToPasswordField()
                              | nullStringState.ToTextAreaInput()
-                             | nullStringState.ToPasswordInput()
+                             | nullStringState.ToPasswordField()
                              | nullStringState.ToSearchInput()
                           )
                           | nullStringState
@@ -54,16 +54,16 @@ public class TextInputApp : SampleBase
                   | Text.InlineCode("Invalid")
 
                   | Text.InlineCode("TextInputs.Text")
-                  | withoutValue.ToTextInput().Placeholder("Placeholder")
-                  | withValue.ToTextInput()
-                  | withValue.ToTextInput().Disabled()
-                  | withValue.ToTextInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+                  | withoutValue.ToPasswordField().Placeholder("Placeholder")
+                  | withValue.ToPasswordField()
+                  | withValue.ToPasswordField().Disabled()
+                  | withValue.ToPasswordField().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
                   | Text.InlineCode("TextInputs.Password")
-                  | withoutValue.ToPasswordInput().Placeholder("Placeholder")
-                  | withValue.ToPasswordInput()
-                  | withValue.ToPasswordInput().Disabled()
-                  | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+                  | withoutValue.ToPasswordField().Placeholder("Placeholder")
+                  | withValue.ToPasswordField()
+                  | withValue.ToPasswordField().Disabled()
+                  | withValue.ToPasswordField().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
                   | Text.InlineCode("TextInputs.TextArea")
                   | withoutValue.ToTextAreaInput().Placeholder("Placeholder")
@@ -100,7 +100,7 @@ public class TextInputApp : SampleBase
                 )
                | Text.H3("OnBlur")
                | Layout.Horizontal(
-                   onBlurState.ToTextInput().HandleBlur(e => onBlurLabel.Set("Blur")),
+                   onBlurState.ToTextInput(null, false, TextInputs.Password).HandleBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
             ;
@@ -125,14 +125,14 @@ public class TextInputSizes : ViewBase
                | Text.InlineCode("Large")
 
                | Text.InlineCode("TextInputs.Text")
-               | textState.ToTextInput().Small()
-               | textState.ToTextInput()
-               | textState.ToTextInput().Large()
+               | textState.ToPasswordField().Small()
+               | textState.ToPasswordField()
+               | textState.ToPasswordField().Large()
 
                | Text.InlineCode("TextInputs.Password")
-               | passwordState.ToPasswordInput().Small()
-               | passwordState.ToPasswordInput()
-               | passwordState.ToPasswordInput().Large()
+               | passwordState.ToPasswordField().Small()
+               | passwordState.ToPasswordField()
+               | passwordState.ToPasswordField().Large()
 
                | Text.InlineCode("TextInputs.TextArea")
                | textareaState.ToTextAreaInput().Small()

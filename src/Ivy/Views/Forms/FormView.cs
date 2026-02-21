@@ -10,6 +10,7 @@ using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Validation;
 using Ivy.Widgets.Inputs;
+using Ivy.Widgets.Inputs.Validated;
 
 namespace Ivy.Views.Forms;
 
@@ -45,7 +46,7 @@ public enum FormValidationStrategy
 
 public class FormFieldView(
     IAnyState bindingState,
-    Func<IAnyState, IViewContext, IAnyInput> inputFactory,
+    Func<IAnyState, IViewContext, object> inputFactory,
     Func<bool> visible,
     ISignalSender<Unit, Unit> updateSender,
     string? label = null,
@@ -76,25 +77,42 @@ public class FormFieldView(
     public override object? Build()
     {
         IAnyState inputState = Context.UseClonedAnyState(bindingState);
+        var visibleState = UseState(visible);
+        var updateReceiver = UseSignal<FormUpdateSignal, Unit, Unit>();
+
+        UseEffect(() => updateReceiver.Receive(_ =>
+        {
+            visibleState.Set(visible());
+            return default;
+        }));
+
+        var result = inputFactory(inputState, Context);
+
+        if (result is ValidatedFieldView validatedField)
+        {
+            validatedField = validatedField.Label(label ?? "").Description(description ?? "");
+            if (required) validatedField = validatedField.Required();
+            if (!string.IsNullOrEmpty(help)) validatedField = validatedField.Help(help);
+            if (!string.IsNullOrEmpty(placeholder)) validatedField = validatedField.Placeholder(placeholder);
+            UseEffect(() =>
+            {
+                bindingState.As<object>().Set(inputState.As<object>().Value);
+                updateSender.Send(new Unit());
+            }, inputState);
+            return visibleState.Value ? validatedField : null;
+        }
+
+        var input = (IAnyInput)result;
         var invalidState = UseState((string?)null!);
         var blurOnceState = UseState(false);
         var validationReceiver = UseSignal<FormValidateSignal, Unit, bool>();
-        var updateReceiver = UseSignal<FormUpdateSignal, Unit, Unit>();
-        var visibleState = UseState(visible);
 
         _effectiveValidatorsRef = Context.UseRef<Func<object?, (bool, string)>[]?>(validators);
-
-        var input = inputFactory(inputState, Context);
         _effectiveValidatorsRef.Set(Validators.GetEffectiveValidators(input, label, validators));
 
         UseEffect(() =>
         {
             return new Disposables(
-                updateReceiver.Receive(_ =>
-                {
-                    visibleState.Set(visible());
-                    return default;
-                }),
                 validationReceiver.Receive(_ =>
                 {
                     var value = inputState.As<object>().Value;
@@ -143,7 +161,7 @@ public record FormFieldLayoutOptions(Guid RowKey, int Column = 0, int Order = 0,
 
 public class FormFieldBinding<TModel>(
     Expression<Func<TModel, object>> selector,
-    Func<IAnyState, IViewContext, IAnyInput> factory,
+    Func<IAnyState, IViewContext, object> factory,
     Func<bool> visible,
     ISignalSender<Unit, Unit> updateSignal,
     string? label = null,

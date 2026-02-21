@@ -34,10 +34,10 @@ public class TextInputVariantsTab : ViewBase
             Layout.Vertical().Gap(4)
                 | Text.H3("TextInput variants (no Field)")
                 | Text.P("Email, Tel, Url, and Password variants.")
-                | email.ToEmailInput("e.g. user@example.com")
-                | tel.ToTelInput("e.g. +1 234 567 8900")
-                | url.ToUrlInput("e.g. https://example.com")
-                | password.ToPasswordInput("Min 8 characters")
+                | email.ToTextInput("e.g. user@example.com", false, TextInputs.Email)
+                | tel.ToTextInput("e.g. +1 234 567 8900", false, TextInputs.Tel)
+                | url.ToTextInput("e.g. https://example.com", false, TextInputs.Url)
+                | password.ToTextInput("Min 8 characters", false, TextInputs.Password)
         ).Width(Size.Full());
     }
 }
@@ -83,10 +83,10 @@ public class FormFieldsTab : ViewBase
         }, model);
 
         var form = model.ToForm("Submit")
-            .Builder(m => m.Email, s => s.ToEmailInput())
-            .Builder(m => m.Password, s => s.ToPasswordInput())
-            .Builder(m => m.PhoneNumber, s => s.ToTelInput())
-            .Builder(m => m.Website, s => s.ToUrlInput());
+            .Builder(m => m.Email, s => s.ToEmailField())
+            .Builder(m => m.Password, s => s.ToPasswordField())
+            .Builder(m => m.PhoneNumber, s => s.ToTelField())
+            .Builder(m => m.Website, s => s.ToUrlField());
 
         return new Card(
             Layout.Vertical().Gap(4)

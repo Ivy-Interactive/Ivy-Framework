@@ -69,17 +69,27 @@ public class FormBuilder<TModel> : ViewBase
         return Builder(field, (state, _) => factory(state));
     }
 
+    public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, object> factory)
+    {
+        return Builder(field, (state, _) => factory(state));
+    }
+
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IViewContext, IAnyInput> factory)
+    {
+        return Builder(field, (state, context) => (object)factory(state, context));
+    }
+
+    public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IViewContext, object> factory)
     {
         var fieldInfo = GetField(field);
 
         //todo: Why is this needed? Can we solve this differently in the scaffolding step?
-        Func<IAnyState, IViewContext, IAnyInput> ScaffoldWrapper(Func<IAnyState, IViewContext, IAnyInput> inner)
+        Func<IAnyState, IViewContext, object> ScaffoldWrapper(Func<IAnyState, IViewContext, object> inner)
         {
             return (state, context) =>
             {
-                var input = inner(state, context);
-                if (input is IAnyBoolInput boolInput)
+                var result = inner(state, context);
+                if (result is IAnyBoolInput boolInput)
                 {
                     // Only apply scaffold defaults if no custom label was set
                     if (HasCustomLabel(fieldInfo.Label, fieldInfo.Name))
@@ -93,12 +103,12 @@ public class FormBuilder<TModel> : ViewBase
                         boolInput.ScaffoldDefaults(fieldInfo.Name, fieldInfo.Type);
                     }
                 }
-                else if (input is IAnyNumberInput numberInput)
+                else if (result is IAnyNumberInput numberInput)
                 {
                     numberInput.ScaffoldDefaults(fieldInfo.Name, fieldInfo.Type);
                 }
 
-                return input;
+                return result;
             };
         }
 
@@ -110,10 +120,20 @@ public class FormBuilder<TModel> : ViewBase
 
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IAnyInput> input)
     {
+        return Builder<TU>((state, _) => (object)input(state));
+    }
+
+    public FormBuilder<TModel> Builder<TU>(Func<IAnyState, object> input)
+    {
         return Builder<TU>((state, _) => input(state));
     }
 
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IViewContext, IAnyInput> input)
+    {
+        return Builder<TU>((state, context) => (object)input(state, context));
+    }
+
+    public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IViewContext, object> input)
     {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
         {

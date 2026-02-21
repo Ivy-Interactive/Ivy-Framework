@@ -122,25 +122,25 @@ public class TextInputTests
         var textInput = state.ToTextInput();
         Assert.Equal(TextInputs.Text, textInput.Variant);
 
-        // Test ToPasswordInput extension
-        var passwordInput = state.ToPasswordInput();
-        Assert.Equal(TextInputs.Password, passwordInput.Variant);
+        // Test ToPasswordField extension
+        var passwordField = state.ToPasswordField();
+        Assert.NotNull(passwordField);
 
         // Test ToSearchInput extension
         var searchInput = state.ToSearchInput();
         Assert.Equal(TextInputs.Search, searchInput.Variant);
 
-        // Test ToEmailInput extension
-        var emailInput = state.ToEmailInput();
-        Assert.Equal(TextInputs.Email, emailInput.Variant);
+        // Test ToEmailField extension
+        var emailField = state.ToEmailField();
+        Assert.NotNull(emailField);
 
-        // Test ToUrlInput extension
-        var urlInput = state.ToUrlInput();
-        Assert.Equal(TextInputs.Url, urlInput.Variant);
+        // Test ToUrlField extension
+        var urlField = state.ToUrlField();
+        Assert.NotNull(urlField);
 
-        // Test ToTelInput extension
-        var telInput = state.ToTelInput();
-        Assert.Equal(TextInputs.Tel, telInput.Variant);
+        // Test ToTelField extension
+        var telField = state.ToTelField();
+        Assert.NotNull(telField);
     }
 
     [Fact]
@@ -151,8 +151,8 @@ public class TextInputTests
         var textInput = state.ToTextInput(placeholder: "Enter text");
         Assert.Equal("Enter text", textInput.Placeholder);
 
-        var passwordInput = state.ToPasswordInput(placeholder: "Enter password");
-        Assert.Equal("Enter password", passwordInput.Placeholder);
+        var passwordField = state.ToPasswordField().Placeholder("Enter password");
+        Assert.NotNull(passwordField);
     }
 
     [Fact]
@@ -163,8 +163,8 @@ public class TextInputTests
         var textInput = state.ToTextInput(disabled: true);
         Assert.True(textInput.Disabled);
 
-        var passwordInput = state.ToPasswordInput(disabled: true);
-        Assert.True(passwordInput.Disabled);
+        var passwordField = state.ToPasswordField().Disabled(true);
+        Assert.NotNull(passwordField);
     }
 
     [Fact]

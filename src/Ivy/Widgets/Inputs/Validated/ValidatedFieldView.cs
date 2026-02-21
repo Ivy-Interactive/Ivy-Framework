@@ -23,8 +23,11 @@ public sealed class ValidatedFieldView : ViewBase
     private readonly bool _required;
     private readonly string? _help;
     private readonly Scale _scale;
+    private readonly int? _maxLength;
+    private readonly bool _nullable;
+    private readonly string? _invalid;
 
-    public ValidatedFieldView(IAnyState state, TextInputs variant, string? placeholder = null, bool disabled = false, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium)
+    public ValidatedFieldView(IAnyState state, TextInputs variant, string? placeholder = null, bool disabled = false, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium, int? maxLength = null, bool nullable = false, string? invalid = null)
     {
         _state = state;
         _variant = variant;
@@ -35,14 +38,23 @@ public sealed class ValidatedFieldView : ViewBase
         _required = required;
         _help = help;
         _scale = scale;
+        _maxLength = maxLength;
+        _nullable = nullable;
+        _invalid = invalid;
     }
 
-    public ValidatedFieldView Label(string label) => new(_state, _variant, _placeholder, _disabled, label, _description, _required, _help, _scale);
-    public ValidatedFieldView Description(string description) => new(_state, _variant, _placeholder, _disabled, _label, description, _required, _help, _scale);
-    public ValidatedFieldView Required() => new(_state, _variant, _placeholder, _disabled, _label, _description, true, _help, _scale);
-    public ValidatedFieldView Help(string help) => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, help, _scale);
-    public ValidatedFieldView Placeholder(string placeholder) => new(_state, _variant, placeholder, _disabled, _label, _description, _required, _help, _scale);
-    public ValidatedFieldView Disabled(bool disabled = true) => new(_state, _variant, _placeholder, disabled, _label, _description, _required, _help, _scale);
+    public ValidatedFieldView Label(string label) => new(_state, _variant, _placeholder, _disabled, label, _description, _required, _help, _scale, _maxLength, _nullable, _invalid);
+    public ValidatedFieldView Description(string description) => new(_state, _variant, _placeholder, _disabled, _label, description, _required, _help, _scale, _maxLength, _nullable, _invalid);
+    public ValidatedFieldView Required() => new(_state, _variant, _placeholder, _disabled, _label, _description, true, _help, _scale, _maxLength, _nullable, _invalid);
+    public ValidatedFieldView Help(string help) => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, help, _scale, _maxLength, _nullable, _invalid);
+    public ValidatedFieldView Placeholder(string placeholder) => new(_state, _variant, placeholder, _disabled, _label, _description, _required, _help, _scale, _maxLength, _nullable, _invalid);
+    public ValidatedFieldView Disabled(bool disabled = true) => new(_state, _variant, _placeholder, disabled, _label, _description, _required, _help, _scale, _maxLength, _nullable, _invalid);
+    public ValidatedFieldView MaxLength(int maxLength) => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, _help, _scale, maxLength, _nullable, _invalid);
+    public ValidatedFieldView Nullable(bool nullable = true) => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, _help, _scale, _maxLength, nullable, _invalid);
+    public ValidatedFieldView Invalid(string? invalid) => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, _help, _scale, _maxLength, _nullable, invalid);
+    public ValidatedFieldView Small() => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, _help, Shared.Scale.Small, _maxLength, _nullable, _invalid);
+    public ValidatedFieldView Medium() => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, _help, Shared.Scale.Medium, _maxLength, _nullable, _invalid);
+    public ValidatedFieldView Large() => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, _help, Shared.Scale.Large, _maxLength, _nullable, _invalid);
 
     public override object? Build()
     {
@@ -61,9 +73,14 @@ public sealed class ValidatedFieldView : ViewBase
 
         void OnBlur(Event<IAnyInput> _) => blurOnceState.Set(true);
 
+        var invalidMessage = invalidState.Value ?? _invalid ?? "";
         var input = _state.ToTextInput(_placeholder, _disabled, _variant)
-            .Invalid(invalidState.Value ?? "")
+            .Invalid(invalidMessage)
             .HandleBlur(OnBlur);
+        if (_maxLength is { } maxLen)
+            input = ((TextInputBase)input).MaxLength(maxLen);
+        if (_nullable)
+            input = ((TextInputBase)input).Nullable(true);
 
         return new Field(input, _label, _description, _required, _help, _scale);
     }

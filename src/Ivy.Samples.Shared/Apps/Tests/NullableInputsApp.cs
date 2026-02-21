@@ -87,22 +87,22 @@ public class NullableInputsApp : SampleBase
                 | scaleText.ToTextInput().Placeholder("Small...").Nullable().Small()
                 | scaleTextarea.ToTextAreaInput().Placeholder("Small...").Nullable().Small()
                 | scaleSearch.ToSearchInput().Placeholder("Small...").Nullable().Small()
-                | scalePassword.ToPasswordInput().Placeholder("Small...").Nullable().Small()
-                | scaleEmail.ToEmailInput().Placeholder("Small...").Nullable().Small()
+                | scalePassword.ToPasswordField().Placeholder("Small...").Nullable().Small()
+                | scaleEmail.ToEmailField().Placeholder("Small...").Nullable().Small()
 
                 | Text.Block("Medium")
                 | scaleText.ToTextInput().Placeholder("Medium...").Nullable().Medium()
                 | scaleTextarea.ToTextAreaInput().Placeholder("Medium...").Nullable().Medium()
                 | scaleSearch.ToSearchInput().Placeholder("Medium...").Nullable().Medium()
-                | scalePassword.ToPasswordInput().Placeholder("Medium...").Nullable().Medium()
-                | scaleEmail.ToEmailInput().Placeholder("Medium...").Nullable().Medium()
+                | scalePassword.ToPasswordField().Placeholder("Medium...").Nullable().Medium()
+                | scaleEmail.ToEmailField().Placeholder("Medium...").Nullable().Medium()
 
                 | Text.Block("Large")
                 | scaleText.ToTextInput().Placeholder("Large...").Nullable().Large()
                 | scaleTextarea.ToTextAreaInput().Placeholder("Large...").Nullable().Large()
                 | scaleSearch.ToSearchInput().Placeholder("Large...").Nullable().Large()
-                | scalePassword.ToPasswordInput().Placeholder("Large...").Nullable().Large()
-                | scaleEmail.ToEmailInput().Placeholder("Large...").Nullable().Large()
+                | scalePassword.ToPasswordField().Placeholder("Large...").Nullable().Large()
+                | scaleEmail.ToEmailField().Placeholder("Large...").Nullable().Large()
              )
 
              | Text.H3("Number Inputs - Scale Comparison")
@@ -229,11 +229,11 @@ public class NullableInputsApp : SampleBase
                 | (nullableSearch.Value == null ? Text.InlineCode("null") : Text.Block(nullableSearch.Value))
 
                 | Text.Block("Email (string?)")
-                | nullableEmail.ToEmailInput().Placeholder("Enter email...").Nullable()
+                | nullableEmail.ToEmailField().Placeholder("Enter email...").Nullable()
                 | (nullableEmail.Value == null ? Text.InlineCode("null") : Text.Block(nullableEmail.Value))
 
                 | Text.Block("Password (string?)")
-                | nullablePassword.ToPasswordInput().Placeholder("Enter password...").Nullable()
+                | nullablePassword.ToPasswordField().Placeholder("Enter password...").Nullable()
                 | (nullablePassword.Value == null ? Text.InlineCode("null") : Text.Block("***"))
 
                 | Text.Block("Code Input (string?)")
@@ -357,13 +357,13 @@ public class NullableInputsApp : SampleBase
                 | nullableTextarea.ToTextAreaInput().Placeholder("Required field").Invalid("This field is required").Nullable()
                 | Text.Block("Nullable textarea input with validation error")
 
-                | nullablePassword.ToPasswordInput().Placeholder("Required field").Invalid("This field is required").Nullable()
+                | nullablePassword.ToPasswordField().Placeholder("Required field").Invalid("This field is required").Nullable()
                 | Text.Block("Nullable password input with validation error")
 
                 | nullableSearch.ToSearchInput().Placeholder("Required field").Invalid("This field is required").Nullable()
                 | Text.Block("Nullable search input with validation error")
 
-                | nullableEmail.ToEmailInput().Placeholder("Required field").Invalid("This field is required").Nullable()
+                | nullableEmail.ToEmailField().Placeholder("Required field").Invalid("This field is required").Nullable()
                 | Text.Block("Nullable email input with validation error")
 
                 | nullableInt.ToNumberInput().Placeholder("Enter number").Invalid("Invalid number").Nullable()

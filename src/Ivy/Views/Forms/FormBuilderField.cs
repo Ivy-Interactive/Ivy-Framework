@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Ivy.Core.Hooks;
 using Ivy.Widgets.Inputs;
 
@@ -8,7 +8,7 @@ public class FormBuilderField<TModel>(
     string name,
     string label,
     int order,
-    Func<IAnyState, IViewContext, IAnyInput>? inputFactory,
+    Func<IAnyState, IViewContext, object>? inputFactory,
     FieldInfo? fieldInfo,
     PropertyInfo? propertyInfo,
     bool required)
@@ -41,7 +41,7 @@ public class FormBuilderField<TModel>(
 
     public string? Placeholder { get; set; }
 
-    public Func<IAnyState, IViewContext, IAnyInput>? InputFactory { get; set; } = inputFactory;
+    public Func<IAnyState, IViewContext, object>? InputFactory { get; set; } = inputFactory;
 
     public bool Removed { get; set; }
 

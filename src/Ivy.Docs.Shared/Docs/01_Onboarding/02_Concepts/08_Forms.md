@@ -436,8 +436,8 @@ public class DisplayAttributeExample : ViewBase
         
         return user.ToForm("Create Account")
             .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions))
-            .Builder(m => m.Password, s => s.ToPasswordInput())
-            .Builder(m => m.ConfirmPassword, s => s.ToPasswordInput())
+            .Builder(m => m.Password, s => s.ToPasswordField())
+            .Builder(m => m.ConfirmPassword, s => s.ToPasswordField())
             .Validate<string>(m => m.ConfirmPassword, confirmPassword =>
                 (confirmPassword == user.Value.Password, "Passwords must match"));
     }
@@ -558,7 +558,7 @@ public class MultipleValidatorsExample : ViewBase
         var account = UseState(() => new AccountModel());
         
         return account.ToForm("Create Account")
-            .Builder(m => m.Password, s => s.ToPasswordInput());
+            .Builder(m => m.Password, s => s.ToPasswordField());
     }
 }
 ```
