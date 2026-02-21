@@ -64,6 +64,18 @@ public record TreeItem : WidgetBase<TreeItem>
 
 public static class TreeItemExtensions
 {
+    public static TreeItem Label(this TreeItem item, string label)
+    {
+        item.Label = label;
+        return item;
+    }
+
+    public static TreeItem Icon(this TreeItem item, Icons icon)
+    {
+        item.Icon = icon;
+        return item;
+    }
+
     public static TreeItem Open(this TreeItem item, bool open = true)
     {
         item.Open = open;
