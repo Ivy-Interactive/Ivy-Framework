@@ -151,6 +151,44 @@ Use `HandleRowAction()` to respond to row action menu selections. The handler re
 
 The handler can access both properties: `args.Id` to identify the row and `args.Tag` to determine which action was selected. This is particularly useful when handling nested menu items, as each child menu item can have its own tag.
 
+```csharp demo-tabs
+public class RowActionsDemo : ViewBase
+{
+    public record Employee(int Id, string Name, string Email, int Salary);
+
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        var employees = Enumerable.Range(1, 50)
+            .Select(i => new Employee(i, $"Employee {i}", $"emp{i}@company.com", 40000 + i * 1000))
+            .AsQueryable();
+
+        return employees.ToDataTable(idSelector: e => e.Id)
+            .Header(e => e.Name, "Name")
+            .Header(e => e.Email, "Email")
+            .Header(e => e.Salary, "Salary")
+            .RowActions(
+                MenuItem.Default(Icons.Pencil, "edit"),
+                MenuItem.Default(Icons.Trash2, "delete"),
+                MenuItem.Default(Icons.EllipsisVertical, "more")
+                    .Children([
+                        MenuItem.Default(Icons.Archive, "archive").Label("Archive"),
+                        MenuItem.Default(Icons.Download, "export").Label("Export"),
+                        MenuItem.Default(Icons.Share2, "share").Label("Share")
+                    ])
+            )
+            .HandleRowAction(async e =>
+            {
+                var args = e.Value;
+                client.Toast($"Action: {args.Tag} on row ID: {args.Id}");
+                await ValueTask.CompletedTask;
+            })
+            .Height(Size.Units(100));
+    }
+}
+```
+
+
 <Callout Type="tip">
 Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Click on a link to open it. External links (http/https) open in a new focused tab, while relative URLs navigate in the same tab.
 </Callout>
