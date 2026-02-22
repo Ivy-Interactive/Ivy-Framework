@@ -14,7 +14,7 @@ interface TreeItemWidgetProps {
   onItemClick: (item: MenuItem) => void;
 }
 
-export const TreeItemWidget: React.FC<TreeItemWidgetProps> = ({
+export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   item,
   onItemClick,
 }) => {
@@ -102,7 +102,7 @@ export const TreeItemWidget: React.FC<TreeItemWidgetProps> = ({
         <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
           <div className="ivy-tree-children pl-3 ml-2 border-l border-border/50">
             {item.children!.map((child, index) => (
-              <TreeItemWidget
+              <TreeItem
                 key={`${child.label}-${index}`}
                 item={child}
                 onItemClick={onItemClick}

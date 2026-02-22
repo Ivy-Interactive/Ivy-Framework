@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { MenuItem } from '@/types/widgets';
-import { TreeItemWidget } from './TreeItemWidget';
+import { TreeItem } from './TreeItem';
 import { useEventHandler } from '@/components/event-handler';
 
 interface TreeWidgetProps {
@@ -23,7 +23,7 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = [] }) => {
   return (
     <div className={cn('ivy-tree w-full')} role="tree">
       {items.map((item, index) => (
-        <TreeItemWidget
+        <TreeItem
           key={`${item.label}-${index}`}
           item={item}
           onItemClick={onItemClick}
