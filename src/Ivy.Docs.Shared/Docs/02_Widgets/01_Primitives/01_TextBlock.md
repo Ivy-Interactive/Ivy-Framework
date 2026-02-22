@@ -12,7 +12,7 @@ searchHints:
 
 The `TextBlock` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays text content with customizable styling. It's a fundamental building block for creating [user interfaces](../../01_Onboarding/02_Concepts/02_Views.md) with text, supporting various formatting options and layout properties.
 
-This widget is rarely used directly. Instead, we use the helper class `Ivy.Views.Text` which provides a more user-friendly API for creating text elements.
+This widget is rarely used directly. Instead, we use the helper class `Text` which provides a more user-friendly API for creating text elements.
 
 ## Basic Text Variants
 
