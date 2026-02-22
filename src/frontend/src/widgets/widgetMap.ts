@@ -55,7 +55,7 @@ import {
   FloatingPanelWidget,
 } from '@/widgets/layouts';
 import { ListWidget, ListItemWidget } from '@/widgets/lists';
-import { TreeWidget, TreeItemWidget } from '@/widgets/tree';
+import { TreeWidget } from '@/widgets/tree';
 import {
   TextBlockWidget,
   HtmlWidget,
@@ -209,7 +209,6 @@ export const widgetMap = {
 
   // Tree
   'Ivy.Tree': TreeWidget,
-  'Ivy.TreeItem': TreeItemWidget,
 
   // Details
   'Ivy.Details': DetailsWidget,

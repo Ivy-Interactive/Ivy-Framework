@@ -5,57 +5,46 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { ChevronRight } from 'lucide-react';
-import { useEventHandler } from '@/components/event-handler';
 import Icon from '@/components/Icon';
 import { cn } from '@/lib/utils';
-import { TreeContext } from './TreeWidget';
+import { MenuItem } from '@/types/widgets';
 
 interface TreeItemWidgetProps {
-  id: string;
-  label?: string;
-  icon?: string;
-  open?: boolean;
-  disabled?: boolean;
-  children?: React.ReactNode;
+  item: MenuItem;
+  onItemClick: (item: MenuItem) => void;
 }
 
 export const TreeItemWidget: React.FC<TreeItemWidgetProps> = ({
-  id,
-  label,
-  icon,
-  open = false,
-  disabled = false,
-  children,
+  item,
+  onItemClick,
 }) => {
-  const [isOpen, setIsOpen] = React.useState(open);
-  const eventHandler = useEventHandler();
-  const hasChildren = React.Children.count(children) > 0;
-  const { showLines } = React.useContext(TreeContext);
+  const [isOpen, setIsOpen] = React.useState(item.expanded ?? false);
+  const hasChildren = item.children && item.children.length > 0;
 
   React.useEffect(() => {
-    setIsOpen(open);
-  }, [open]);
+    setIsOpen(item.expanded ?? false);
+  }, [item.expanded]);
 
   const handleToggle = (e: React.MouseEvent) => {
-    if (disabled) return;
+    if (item.disabled) return;
     e.stopPropagation();
     setIsOpen(prev => !prev);
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    if (disabled) return;
+    if (item.disabled) return;
     e.stopPropagation();
-    eventHandler('OnClick', id, []);
+    onItemClick(item);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (disabled) return;
+    if (item.disabled) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       if (hasChildren) {
         setIsOpen(prev => !prev);
       } else {
-        eventHandler('OnClick', id, []);
+        onItemClick(item);
       }
     }
     if (e.key === 'ArrowRight' && hasChildren && !isOpen) {
@@ -72,18 +61,18 @@ export const TreeItemWidget: React.FC<TreeItemWidgetProps> = ({
     return (
       <Collapsible
         open={isOpen}
-        onOpenChange={val => !disabled && setIsOpen(val)}
+        onOpenChange={val => !item.disabled && setIsOpen(val)}
       >
         <div
           className={cn(
             'ivy-tree-item group flex items-center gap-1 rounded-sm py-1 px-1 text-sm cursor-pointer select-none',
             'hover:bg-accent/50 transition-colors',
-            disabled && 'opacity-50 cursor-not-allowed'
+            item.disabled && 'opacity-50 cursor-not-allowed'
           )}
           role="treeitem"
           aria-expanded={isOpen}
-          aria-disabled={disabled}
-          tabIndex={disabled ? -1 : 0}
+          aria-disabled={item.disabled}
+          tabIndex={item.disabled ? -1 : 0}
           onKeyDown={handleKeyDown}
           onClick={handleClick}
         >
@@ -92,7 +81,7 @@ export const TreeItemWidget: React.FC<TreeItemWidgetProps> = ({
               className="flex items-center justify-center h-5 w-5 shrink-0 rounded-sm hover:bg-accent transition-colors"
               onClick={handleToggle}
               tabIndex={-1}
-              disabled={disabled}
+              disabled={item.disabled}
             >
               <ChevronRight
                 className={cn(
@@ -102,22 +91,23 @@ export const TreeItemWidget: React.FC<TreeItemWidgetProps> = ({
               />
             </button>
           </CollapsibleTrigger>
-          {icon && icon !== 'None' && (
+          {item.icon && item.icon !== 'None' && (
             <Icon
               className="h-4 w-4 shrink-0 text-muted-foreground"
-              name={icon}
+              name={item.icon}
             />
           )}
-          <span className="truncate">{label}</span>
+          <span className="truncate">{item.label}</span>
         </div>
         <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-          <div
-            className={cn(
-              'ivy-tree-children pl-3 ml-2',
-              showLines && 'border-l border-border/50'
-            )}
-          >
-            {children}
+          <div className="ivy-tree-children pl-3 ml-2 border-l border-border/50">
+            {item.children!.map((child, index) => (
+              <TreeItemWidget
+                key={child.label ?? index}
+                item={child}
+                onItemClick={onItemClick}
+              />
+            ))}
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -129,20 +119,23 @@ export const TreeItemWidget: React.FC<TreeItemWidgetProps> = ({
       className={cn(
         'ivy-tree-item flex items-center gap-1 rounded-sm py-1 px-1 text-sm cursor-pointer select-none',
         'hover:bg-accent/50 transition-colors',
-        disabled && 'opacity-50 cursor-not-allowed'
+        item.disabled && 'opacity-50 cursor-not-allowed'
       )}
       role="treeitem"
-      aria-disabled={disabled}
-      tabIndex={disabled ? -1 : 0}
+      aria-disabled={item.disabled}
+      tabIndex={item.disabled ? -1 : 0}
       onKeyDown={handleKeyDown}
       onClick={handleClick}
     >
       {/* Spacer matching chevron width to align leaf nodes with parent nodes */}
       <span className="h-5 w-5 shrink-0" />
-      {icon && icon !== 'None' && (
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={icon} />
+      {item.icon && item.icon !== 'None' && (
+        <Icon
+          className="h-4 w-4 shrink-0 text-muted-foreground"
+          name={item.icon}
+        />
       )}
-      <span className="truncate">{label}</span>
+      <span className="truncate">{item.label}</span>
     </div>
   );
 };

@@ -15,29 +15,31 @@ searchHints:
 Display hierarchical data structures like file trees, nested categories, and organizational charts with collapsible nodes.
 </Ingress>
 
-The `Tree` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) renders recursive data in a familiar tree view. Each `TreeItem` can contain nested `TreeItem`s, supports icons, click events, and expand/collapse behavior. All properties are configurable via fluent extension methods.
+The `Tree` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) renders recursive data in a familiar tree view using `MenuItem` for each node. Each `MenuItem` can contain nested children, supports icons, click events, and expand/collapse behavior.
 
 ## Basic Usage
 
 ```csharp demo-below
 new Tree(
-    new TreeItem("src", items: [
-        new TreeItem("components", items: [
-            new TreeItem("Button.tsx").Icon(Icons.Code),
-            new TreeItem("Card.tsx").Icon(Icons.Code)
-        ])
-            .Icon(Icons.Folder)
-            .Open(),
-        new TreeItem("App.tsx").Icon(Icons.Code)
-    ])
+    new MenuItem("src")
         .Icon(Icons.Folder)
-        .Open()
+        .Expanded()
+        .Children(
+            new MenuItem("components")
+                .Icon(Icons.Folder)
+                .Expanded()
+                .Children(
+                    new MenuItem("Button.tsx").Icon(Icons.Code),
+                    new MenuItem("Card.tsx").Icon(Icons.Code)
+                ),
+            new MenuItem("App.tsx").Icon(Icons.Code)
+        )
 )
 ```
 
-## Icons and Click Events
+## Click Events
 
-TreeItems support icons and click handlers for interactive trees.
+Use `HandleSelect` on the Tree and `Tag` on each MenuItem to handle clicks. The `DefaultSelectHandler` routes events to individual `MenuItem.OnSelect` handlers.
 
 ```csharp demo-tabs
 public class TreeClickDemo : ViewBase
@@ -49,59 +51,35 @@ public class TreeClickDemo : ViewBase
         return Layout.Vertical().Gap(2)
             | Text.Block($"Selected: {(string.IsNullOrEmpty(selected.Value) ? "nothing" : selected.Value)}")
             | new Tree(
-                new TreeItem("src")
+                new MenuItem("src")
                     .Icon(Icons.Folder)
-                    .Open()
-                    .HandleClick(() => selected.Set("src")),
-                new TreeItem("App.tsx")
-                    .Icon(Icons.Code)
-                    .HandleClick(() => selected.Set("App.tsx")),
-                new TreeItem("index.ts")
-                    .Icon(Icons.Code)
-                    .HandleClick(() => selected.Set("index.ts"))
-            );
+                    .Expanded()
+                    .Children(
+                        new MenuItem("App.tsx").Icon(Icons.Code).Tag("App.tsx"),
+                        new MenuItem("index.ts").Icon(Icons.Code).Tag("index.ts")
+                    )
+            ).HandleSelect(e => selected.Set(e.Value?.ToString() ?? ""));
     }
 }
 ```
 
-## Styling
+## Disabled Items
 
-### ShowLines and HideLines
-
-Guide lines visually connect parent and child nodes. They are enabled by default and can be hidden with `.HideLines()`.
-
-```csharp demo-tabs
-Layout.Vertical().Gap(4)
-    | Text.Block("With lines (default)")
-    | new Tree(
-        new TreeItem("Root", items: [
-            new TreeItem("Child A").Icon(Icons.FileText),
-            new TreeItem("Child B").Icon(Icons.FileText)
-        ]).Icon(Icons.Folder).Open()
-    )
-    | Text.Block("Without lines")
-    | new Tree(
-        new TreeItem("Root", items: [
-            new TreeItem("Child A").Icon(Icons.FileText),
-            new TreeItem("Child B").Icon(Icons.FileText)
-        ]).Icon(Icons.Folder).Open()
-    ).HideLines()
-```
-
-### Disabled Items
-
-Individual tree items can be disabled to prevent interaction.
+Individual menu items can be disabled to prevent interaction.
 
 ```csharp demo-tabs
 new Tree(
-    new TreeItem("Available", items: [
-        new TreeItem("editable.txt").Icon(Icons.FileText),
-        new TreeItem("read-only.txt").Icon(Icons.Lock).Disabled()
-    ]).Icon(Icons.Folder).Open(),
-    new TreeItem("Restricted")
+    new MenuItem("Available")
+        .Icon(Icons.Folder)
+        .Expanded()
+        .Children(
+            new MenuItem("editable.txt").Icon(Icons.FileText).Tag("editable"),
+            new MenuItem("read-only.txt").Icon(Icons.Lock).Disabled()
+        ),
+    new MenuItem("Restricted")
         .Icon(Icons.FolderLock)
         .Disabled()
 )
 ```
 
-<WidgetDocs Type="Ivy.Tree" ExtensionTypes="Ivy.TreeExtensions, Ivy.TreeItemExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Tree/Tree.cs"/>
+<WidgetDocs Type="Ivy.Tree" ExtensionTypes="Ivy.TreeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Tree/Tree.cs"/>

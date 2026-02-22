@@ -13,82 +13,47 @@ public class TreeApp : SampleBase
             | Text.H1("Tree")
             | Text.Muted($"Selected: {selectedItem.Value}")
             | new Tree(
-                new TreeItem("src", items: [
-                    new TreeItem("components", items: [
-                        new TreeItem("Button.tsx")
-                            .Icon(Icons.Code)
-                            .HandleClick(() => selectedItem.Set("Button.tsx")),
-                        new TreeItem("Card.tsx")
-                            .Icon(Icons.Code)
-                            .HandleClick(() => selectedItem.Set("Card.tsx")),
-                        new TreeItem("Dialog.tsx")
-                            .Icon(Icons.Code)
-                            .HandleClick(() => selectedItem.Set("Dialog.tsx"))
-                    ])
-                        .Icon(Icons.Folder)
-                        .Open(),
-                    new TreeItem("hooks", items: [
-                        new TreeItem("useAuth.ts")
-                            .Icon(Icons.Code)
-                            .HandleClick(() => selectedItem.Set("useAuth.ts")),
-                        new TreeItem("useTheme.ts")
-                            .Icon(Icons.Code)
-                            .HandleClick(() => selectedItem.Set("useTheme.ts"))
-                    ]).Icon(Icons.Folder),
-                    new TreeItem("App.tsx")
-                        .Icon(Icons.Code)
-                        .HandleClick(() => selectedItem.Set("App.tsx")),
-                    new TreeItem("index.ts")
-                        .Icon(Icons.Code)
-                        .HandleClick(() => selectedItem.Set("index.ts"))
-                ])
+                new MenuItem("src")
                     .Icon(Icons.Folder)
-                    .Open(),
-                new TreeItem("public", items: [
-                    new TreeItem("favicon.ico")
-                        .Icon(Icons.Image)
-                        .HandleClick(() => selectedItem.Set("favicon.ico")),
-                    new TreeItem("index.html")
-                        .Icon(Icons.Globe)
-                        .HandleClick(() => selectedItem.Set("index.html"))
-                ]).Icon(Icons.Folder),
-                new TreeItem("package.json")
-                    .Icon(Icons.Braces)
-                    .HandleClick(() => selectedItem.Set("package.json")),
-                new TreeItem("README.md")
-                    .Icon(Icons.BookOpen)
-                    .HandleClick(() => selectedItem.Set("README.md"))
-            )
-
-            | Text.H2("Without Lines")
-            | new Tree(
-                new TreeItem("Documents", items: [
-                    new TreeItem("Reports", items: [
-                        new TreeItem("Q1 Report.pdf").Icon(Icons.FileText),
-                        new TreeItem("Q2 Report.pdf").Icon(Icons.FileText)
-                    ]).Icon(Icons.Folder).Open(),
-                    new TreeItem("Photos", items: [
-                        new TreeItem("vacation.jpg").Icon(Icons.Image),
-                        new TreeItem("profile.png").Icon(Icons.Image)
-                    ]).Icon(Icons.Folder)
-                ]).Icon(Icons.Folder).Open()
-            ).HideLines()
+                    .Expanded()
+                    .Children(
+                        new MenuItem("components")
+                            .Icon(Icons.Folder)
+                            .Expanded()
+                            .Children(
+                                new MenuItem("Button.tsx").Icon(Icons.Code).Tag("Button.tsx"),
+                                new MenuItem("Card.tsx").Icon(Icons.Code).Tag("Card.tsx"),
+                                new MenuItem("Dialog.tsx").Icon(Icons.Code).Tag("Dialog.tsx")
+                            ),
+                        new MenuItem("hooks")
+                            .Icon(Icons.Folder)
+                            .Children(
+                                new MenuItem("useAuth.ts").Icon(Icons.Code).Tag("useAuth.ts"),
+                                new MenuItem("useTheme.ts").Icon(Icons.Code).Tag("useTheme.ts")
+                            ),
+                        new MenuItem("App.tsx").Icon(Icons.Code).Tag("App.tsx"),
+                        new MenuItem("index.ts").Icon(Icons.Code).Tag("index.ts")
+                    ),
+                new MenuItem("public")
+                    .Icon(Icons.Folder)
+                    .Children(
+                        new MenuItem("favicon.ico").Icon(Icons.Image).Tag("favicon.ico"),
+                        new MenuItem("index.html").Icon(Icons.Globe).Tag("index.html")
+                    ),
+                new MenuItem("package.json").Icon(Icons.Braces).Tag("package.json"),
+                new MenuItem("README.md").Icon(Icons.BookOpen).Tag("README.md")
+            ).HandleSelect(e => selectedItem.Set(e.Value?.ToString() ?? ""))
 
             | Text.H2("Disabled Items")
             | new Tree(
-                new TreeItem("Available", items: [
-                    new TreeItem("editable.txt")
-                        .Icon(Icons.FileText)
-                        .HandleClick(() => selectedItem.Set("editable.txt")),
-                    new TreeItem("read-only.txt")
-                        .Icon(Icons.Lock)
-                        .Disabled()
-                ])
+                new MenuItem("Available")
                     .Icon(Icons.Folder)
-                    .Open(),
-                new TreeItem("Restricted")
-                    .Icon(Icons.FolderLock)
-                    .Disabled()
+                    .Expanded()
+                    .Children(
+                        new MenuItem("editable.txt").Icon(Icons.FileText).Tag("editable.txt"),
+                        new MenuItem("read-only.txt").Icon(Icons.Lock).Disabled()
+                    ),
+                new MenuItem("Restricted").Icon(Icons.FolderLock).Disabled()
             );
     }
 }
