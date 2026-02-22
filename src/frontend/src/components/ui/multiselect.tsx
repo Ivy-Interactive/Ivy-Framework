@@ -112,16 +112,14 @@ const MultipleSelector = React.forwardRef<
       const input = container.querySelector('input');
       const inputReserve = input
         ? (parseFloat(getComputedStyle(input).minWidth) || 0) +
-        (parseFloat(getComputedStyle(input).marginLeft) || 0)
+          (parseFloat(getComputedStyle(input).marginLeft) || 0)
         : 0;
 
       const calculate = () => {
         const containerWidth = container.clientWidth;
         if (containerWidth === 0) return;
 
-        const badges = Array.from(
-          measureContainer.children
-        ) as HTMLElement[];
+        const badges = Array.from(measureContainer.children) as HTMLElement[];
         const availableWidth = containerWidth - inputReserve;
 
         if (availableWidth <= 0 || badges.length === 0) {
@@ -279,7 +277,7 @@ const MultipleSelector = React.forwardRef<
                     badgeVariants({ scale }),
                     'shrink-0',
                     invalid &&
-                    'bg-destructive/10 border-destructive text-destructive'
+                      'bg-destructive/10 border-destructive text-destructive'
                   )}
                 >
                   {option.label}
