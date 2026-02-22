@@ -77,6 +77,7 @@ import {
   AppHostWidget,
   AudioPlayerWidget,
   VideoPlayerWidget,
+  SmartSearchWidget,
 } from '@/widgets/primitives';
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
@@ -121,6 +122,8 @@ export const widgetMap = {
 
   // Widgets
   'Ivy.Article': ArticleWidget,
+  'Ivy.SmartSearch': SmartSearchWidget,
+  'Ivy.Docs.Shared.Helpers.SmartSearch': SmartSearchWidget,
   'Ivy.Button': ButtonWidget,
   'Ivy.Progress': ProgressWidget,
   'Ivy.Tooltip': TooltipWidget,

@@ -15,6 +15,7 @@ export { EmptyWidget } from './EmptyWidget';
 export { AvatarWidget } from './AvatarWidget';
 export { IvyLogoWidget } from './IvyLogoWidget';
 export { SpacerWidget } from './SpacerWidget';
+export { SmartSearchWidget } from './SmartSearchWidget';
 export { LoadingWidget } from './LoadingWidget';
 export { AppHostWidget } from './AppHostWidget';
 export { AudioPlayerWidget } from './AudioPlayerWidget';

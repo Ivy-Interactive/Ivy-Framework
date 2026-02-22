@@ -1,9 +1,19 @@
+using Ivy.Core;
 using Ivy.Docs.Shared.Services;
 
-namespace Ivy.Docs.Shared.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy.Docs.Shared.Helpers;
 
 /// <summary>
-/// Smart search widget for the docs app: ask a question and get an AI-generated answer
+/// Container widget for the smart search UI with custom styling on the frontend.
+/// </summary>
+public record SmartSearch(params object?[] children) : WidgetBase<SmartSearch>(children.Where(c => c != null).Cast<object>().ToArray())
+{
+    internal SmartSearch() : this([]) { }
+}
+
+/// <summary>
+/// View for smart search: ask a question and get an AI-generated answer
 /// with optional links to reference docs. Shown at the top of the main content.
 /// </summary>
 public class SmartSearchView : ViewBase
@@ -108,8 +118,9 @@ public class SmartSearchView : ViewBase
                 .Width(Size.Fraction(0.4f))
             : null;
 
-        return Layout.Vertical().Gap(2)
-            | new Card(searchBar)
+        var content = Layout.Vertical().Gap(2)
+            | searchBar
             | (sheet ?? (object?)null!);
+        return new SmartSearch(content);
     }
 }

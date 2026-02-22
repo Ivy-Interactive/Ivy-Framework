@@ -1,7 +1,7 @@
 using Ivy.Chrome;
 using Ivy.Docs.Shared.Middleware;
 using Ivy.Docs.Shared.Services;
-using Ivy.Docs.Shared.Views;
+using Ivy.Docs.Shared.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Docs.Shared;
