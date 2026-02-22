@@ -80,7 +80,7 @@ Include the namespaces you use in the file. Common ones:
 
 | Namespace | Use for |
 |-----------|---------|
-| `Ivy` | [`Server`](./01_Program.md), server configuration and `RunAsync()`. |
+| `Ivy` | [`Server`](./01_Program.md), server configuration and `RunAsync()`. [`AppDescriptor`](./10_Apps.md), `AppIds`, `AppHelpers`, the `[App]` attribute. [`UseService`](../../03_Hooks/02_Core/11_UseService.md), service registration and resolution. Helper utilities. |
 | `Ivy.Views` | [`ViewBase`](./02_Views.md), [`Layout`](./04_Layout.md), and built-in [widgets](./03_Widgets.md) ([`Card`](../../02_Widgets/03_Common/04_Card.md), [`Text`](../../02_Widgets/01_Primitives/01_TextBlock.md), [`Button`](../../02_Widgets/03_Common/01_Button.md), etc.). |
 | `Ivy.Core` | Core Ivy types. |
 | `Ivy.Core.Hooks` | [Hooks](../../03_Hooks/01_HookIntroduction.md) ([UseState](../../03_Hooks/02_Core/03_UseState.md), [UseEffect](../../03_Hooks/02_Core/04_UseEffect.md), [UseMemo](../../03_Hooks/02_Core/05_UseMemo.md), etc.). |
