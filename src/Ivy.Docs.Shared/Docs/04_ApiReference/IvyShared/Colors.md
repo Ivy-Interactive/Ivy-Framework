@@ -201,7 +201,7 @@ public class ButtonColorsView : ViewBase
 
 ## Technical Implementation
 
-Colors are defined as an enum in `Ivy.Shared.Colors` and map to CSS custom properties that automatically adapt to the current theme. Use [Align](Align.md) with `.ContentAlign()` when centering content inside colored elements. Each color includes variants for different states and theme modes.
+Colors are defined as an enum in `Colors` and map to CSS custom properties that automatically adapt to the current theme. Use [Align](Align.md) with `.ContentAlign()` when centering content inside colored elements. Each color includes variants for different states and theme modes.
 
 ```csharp
 // Get all available colors dynamically

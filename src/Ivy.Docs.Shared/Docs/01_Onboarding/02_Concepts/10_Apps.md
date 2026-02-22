@@ -49,7 +49,7 @@ public class ProductsApp : ViewBase
 | :--- | :--- | :--- | :--- |
 | **`id`** | `string?` | `null` | A unique identifier for the app. If omitted, it is generated from the class name and namespace (see Route Generation below). |
 | **`title`** | `string?` | `null` | The human-readable title of the app. Used in window titles and navigation menus. Defaults to a readable version of the class name. |
-| **`icon`** | `Icons` | `Icons.None` | The [icon](../../02_Widgets/01_Primitives/02_Icon.md) representing the app in the navigation bar and search results. Uses the `Ivy.Shared.Icons` enum. |
+| **`icon`** | `Icons` | `Icons.None` | The [icon](../../02_Widgets/01_Primitives/02_Icon.md) representing the app in the navigation bar and search results. Uses the `Icons` enum. |
 | **`description`** | `string?` | `null` | A brief description of the app's purpose. May be shown in tooltips or app listings. |
 | **`path`** | `string[]?` | `null` | Explicitly defines the navigation path. Overrides automatic generation from the namespace. |
 | **`isVisible`** | `bool` | `true` | Controls whether the app appears in automatically generated navigation menus. Set to `false` for hidden apps or internal tools. |
