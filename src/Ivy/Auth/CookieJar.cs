@@ -31,13 +31,10 @@ public class CookieJar
         return false;
     }
 
-    public void Delete(string name)
+    public void Delete(string name, CookieOptions options)
     {
-        _assignments.Add(new CookieAssignment(name, string.Empty, new CookieOptions
-        {
-            Expires = DateTimeOffset.UnixEpoch,
-            Path = "/"
-        }));
+        options.Expires = DateTimeOffset.UnixEpoch;
+        _assignments.Add(new CookieAssignment(name, string.Empty, options));
     }
 
     public void WriteToResponse(HttpResponse response)
