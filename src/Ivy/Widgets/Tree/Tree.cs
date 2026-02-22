@@ -41,6 +41,11 @@ public record Tree : WidgetBase<Tree>
 
 public static class TreeExtensions
 {
+    public static Tree Items(this Tree tree, params MenuItem[] items)
+    {
+        return tree with { Items = items };
+    }
+
     public static Tree Items(this Tree tree, IEnumerable<MenuItem> items)
     {
         return tree with { Items = items.ToArray() };

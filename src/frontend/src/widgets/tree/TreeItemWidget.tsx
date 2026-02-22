@@ -103,7 +103,7 @@ export const TreeItemWidget: React.FC<TreeItemWidgetProps> = ({
           <div className="ivy-tree-children pl-3 ml-2 border-l border-border/50">
             {item.children!.map((child, index) => (
               <TreeItemWidget
-                key={child.label ?? index}
+                key={`${child.label}-${index}`}
                 item={child}
                 onItemClick={onItemClick}
               />

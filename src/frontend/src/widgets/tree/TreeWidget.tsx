@@ -24,7 +24,7 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = [] }) => {
     <div className={cn('ivy-tree w-full')} role="tree">
       {items.map((item, index) => (
         <TreeItemWidget
-          key={item.label ?? index}
+          key={`${item.label}-${index}`}
           item={item}
           onItemClick={onItemClick}
         />
