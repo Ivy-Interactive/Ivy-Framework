@@ -13,7 +13,7 @@ searchHints:
 Coordinate complex async work with declarative job graphs, dependency-aware scheduling, and built-in UI status reporting.
 </Ingress>
 
-The `JobScheduler` in `Ivy.Helpers` orchestrates asynchronous jobs, resolves dependencies, and exposes real-time state via reactive updates. Use [UseRef](../../../03_Hooks/02_Core/08_UseRef.md) to hold the scheduler instance, [UseRefreshToken](../../../03_Hooks/02_Core/16_UseRefreshToken.md) and [UseEffect](../../../03_Hooks/02_Core/04_UseEffect.md) to refresh the UI on job updates, and pair it with `JobSchedulerExtensions.ToView()` to render a hierarchical job monitor in your [layout](../../../01_Onboarding/02_Concepts/04_Layout.md).
+The `JobScheduler` orchestrates asynchronous jobs, resolves dependencies, and exposes real-time state via reactive updates. Use [UseRef](../../../03_Hooks/02_Core/08_UseRef.md) to hold the scheduler instance, [UseRefreshToken](../../../03_Hooks/02_Core/16_UseRefreshToken.md) and [UseEffect](../../../03_Hooks/02_Core/04_UseEffect.md) to refresh the UI on job updates, and pair it with `JobSchedulerExtensions.ToView()` to render a hierarchical job monitor in your [layout](../../../01_Onboarding/02_Concepts/04_Layout.md).
 
 ## Basic Usage
 
