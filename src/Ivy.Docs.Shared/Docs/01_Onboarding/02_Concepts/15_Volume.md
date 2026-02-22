@@ -17,6 +17,7 @@ Ivy provides a standardized way to manage [application](./10_Apps.md) data stora
 Configure a volume for your application during [server](./01_Program.md) startup:
 
 ```csharp
+using Ivy;
 
 var server = new Server();
 
@@ -87,6 +88,7 @@ Using Volumes in Services
 Inject and use the volume in your services:
 
 ```csharp
+using Ivy;
 
 public class FileService(IVolume volume)
 {

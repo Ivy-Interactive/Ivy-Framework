@@ -87,7 +87,6 @@ Include the namespaces you use in the file. Common ones:
 | `Ivy.Core.Hooks` | [Hooks](../../03_Hooks/01_HookIntroduction.md) ([UseState](../../03_Hooks/02_Core/03_UseState.md), [UseEffect](../../03_Hooks/02_Core/04_UseEffect.md), [UseMemo](../../03_Hooks/02_Core/05_UseMemo.md), etc.). |
 | `Ivy.Chrome` | [Chrome](./11_Chrome.md), sidebar, and layout configuration. |
 | `Ivy.Helpers` | Helper utilities. |
-| `Ivy.Services` | [`UseService`](../../03_Hooks/02_Core/11_UseService.md), service registration and resolution. |
 | `Ivy.Client` | [Client](./13_Clients.md) and API usage. |
 | `Ivy.Auth` | [Authentication](../03_CLI/04_Authentication/01_AuthenticationOverview.md) providers. |
 | `Ivy.Widgets.Inputs` | [Input widgets](../../02_Widgets/04_Inputs/_Index.md) ([`TextInput`](../../02_Widgets/04_Inputs/02_TextInput.md), [`SelectInput`](../../02_Widgets/04_Inputs/05_SelectInput.md), etc.). |
