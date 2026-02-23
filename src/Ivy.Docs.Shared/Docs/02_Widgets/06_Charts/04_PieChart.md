@@ -114,7 +114,7 @@ public class DonutChartWithCustomLabelsView : ViewBase
 }
 ```
 
-The legend can be placed in any of the nine positions by altering the values of the [Align](../../04_ApiReference/IvyShared/Align.md) enums.
+The legend can be placed in any of the nine positions by altering the values of the [Align](../../04_ApiReference/Ivy/Align.md) enums.
 Also, by default, the inner and outer radius is same resulting in a circle. However, as
 can be seen in this example, these values can be altered to create a custom donut. The function
 `Tooltip` makes sure that the labels show up on mouse hover. The `Animated` function makes a nice animation

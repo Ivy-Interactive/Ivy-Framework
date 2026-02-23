@@ -20,7 +20,7 @@ The `Card` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a versatil
 
 ## Basic Usage
 
-Here's a simple example of a card containing text and a button that shows a [toast message](../../01_Onboarding/02_Concepts/13_Clients.md) when clicked. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width()` to control card width.
+Here's a simple example of a card containing text and a button that shows a [toast message](../../01_Onboarding/02_Concepts/13_Clients.md) when clicked. Use [Size](../../04_ApiReference/Ivy/Size.md) for `.Width()` to control card width.
 
 ```csharp demo-below
 new Card(

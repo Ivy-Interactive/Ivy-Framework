@@ -76,8 +76,8 @@ sampleUsers.ToDataTable()
 **Column customization methods:**
 
 - **Header** - Set custom column header text
-- **Width** - Set column width using [Size](../../04_ApiReference/IvyShared/Size.md) (e.g. `Size.Px()`, `Size.Percent()`).
-- **Align** - Control text alignment ([Align](../../04_ApiReference/IvyShared/Align.md): Left, Right, Center)
+- **Width** - Set column width using [Size](../../04_ApiReference/Ivy/Size.md) (e.g. `Size.Px()`, `Size.Percent()`).
+- **Align** - Control text alignment ([Align](../../04_ApiReference/Ivy/Align.md): Left, Right, Center)
 - **Icon** - Add an icon to the column header
 - **Help** - Add tooltip help text to the column header
 - **Sortable** - Enable or disable sorting for specific columns

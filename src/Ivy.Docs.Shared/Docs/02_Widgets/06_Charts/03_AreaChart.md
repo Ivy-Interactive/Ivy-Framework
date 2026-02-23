@@ -94,9 +94,9 @@ public class Covid19Demo : ViewBase
 Migrations to Europe
 </Summary>
 <Body>
-In the previous example, solid [Colors](../../04_ApiReference/IvyShared/Colors.md) have been used. However, the colors can be transparent
+In the previous example, solid [Colors](../../04_ApiReference/Ivy/Colors.md) have been used. However, the colors can be transparent
 and the opacity can be controlled using the function `FillOpacity`. In the following example
-`Fill` (used to fill an area with a [Colors](../../04_ApiReference/IvyShared/Colors.md) value) and `FillOpacity` are used to show area charts
+`Fill` (used to fill an area with a [Colors](../../04_ApiReference/Ivy/Colors.md) value) and `FillOpacity` are used to show area charts
 that obviously fall behind other ones to show that they are indeed present.
 
 ```csharp demo-below

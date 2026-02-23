@@ -191,7 +191,7 @@ export const MyWidget: React.FC<MyWidgetProps> = ({
 };
 ```
 
-Use Ivy theme variables ([Colors](../../04_ApiReference/IvyShared/Colors.md): `--primary`, `--background`, `--foreground`, `--border`, etc.) so the widget matches the host app ([Theming](../../01_Onboarding/02_Concepts/12_Theming.md)). Size props use Ivy’s [Size](../../04_ApiReference/IvyShared/Size.md) format (e.g. `Full`, `Units:80`); you can parse them in the component or in a small helper.
+Use Ivy theme variables ([Colors](../../04_ApiReference/Ivy/Colors.md): `--primary`, `--background`, `--foreground`, `--border`, etc.) so the widget matches the host app ([Theming](../../01_Onboarding/02_Concepts/12_Theming.md)). Size props use Ivy’s [Size](../../04_ApiReference/Ivy/Size.md) format (e.g. `Full`, `Units:80`); you can parse them in the component or in a small helper.
 
 ## Project structure and build
 

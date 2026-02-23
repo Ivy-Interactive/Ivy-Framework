@@ -69,7 +69,7 @@ Layout.Vertical()
 
 ### Padding
 
-Add internal spacing around the entire wrap layout using [Thickness](../../04_ApiReference/IvyShared/Thickness.md):
+Add internal spacing around the entire wrap layout using [Thickness](../../04_ApiReference/Ivy/Thickness.md):
 
 ```csharp demo-tabs ivy-bg
 new WrapLayout([
@@ -81,7 +81,7 @@ new WrapLayout([
 
 ### Margin
 
-Add external spacing around the wrap layout with [Thickness](../../04_ApiReference/IvyShared/Thickness.md):
+Add external spacing around the wrap layout with [Thickness](../../04_ApiReference/Ivy/Thickness.md):
 
 ```csharp demo-tabs ivy-bg
 new WrapLayout([

@@ -48,9 +48,9 @@ public class BasicRowTable : ViewBase
 
 ### Custom Column Builders
 
-**Width([Size](../../04_ApiReference/IvyShared/Size.md).Full())** - sets the overall table width
+**Width([Size](../../04_ApiReference/Ivy/Size.md).Full())** - sets the overall table width
 
-**ColumnWidth(p => p.ColumnName, Size.Units())** – sets the column width with [Size](../../04_ApiReference/IvyShared/Size.md)
+**ColumnWidth(p => p.ColumnName, Size.Units())** – sets the column width with [Size](../../04_ApiReference/Ivy/Size.md)
 
 **ColumnWidth(p => p.ColumnName, Size.Fraction())** – sets the column width as a fraction (percentage) of available space
 
@@ -58,7 +58,7 @@ Long text in cells automatically gets truncated with ellipsis (...) and shows fu
 
 **Header(p => p.ColumnName)** is used to show custom header text of the table
 
-**Align(p => p.ColumnName, [Align](../../04_ApiReference/IvyShared/Align.md).Left|Center|Right)** - sets the alignment for both the header and data cells in the selected column. The alignment applies to the content within cells, not the entire column structure.
+**Align(p => p.ColumnName, [Align](../../04_ApiReference/Ivy/Align.md).Left|Center|Right)** - sets the alignment for both the header and data cells in the selected column. The alignment applies to the content within cells, not the entire column structure.
 
 **Order(p => p.ColumnNameFirst, p.ColumnNameSecond, p.ColumnNameThird, ...)** - is used to order columns in a specific way
 

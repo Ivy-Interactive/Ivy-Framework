@@ -46,7 +46,7 @@ public class SheetView : ViewBase
 
 ### Custom Content
 
-The following demonstrates how to create a sheet with custom content using a [Fragment](../01_Primitives/05_Fragment.md) and [Card](../03_Common/04_Card.md). The sheet opens with a title, description, and custom width (using [Size](../../04_ApiReference/IvyShared/Size.md)), showing how to structure content within sheets.
+The following demonstrates how to create a sheet with custom content using a [Fragment](../01_Primitives/05_Fragment.md) and [Card](../03_Common/04_Card.md). The sheet opens with a title, description, and custom width (using [Size](../../04_ApiReference/Ivy/Size.md)), showing how to structure content within sheets.
 
 ```csharp demo-tabs
 public class BasicSheetWithContent : ViewBase
@@ -136,7 +136,7 @@ public class ComplexSheetLayout : ViewBase
 
 ### Different Widths
 
-The following demonstrates different sheet width options, from small to full-screen layouts. Widths use [Size](../../04_ApiReference/IvyShared/Size.md) values such as `Size.Rem(20)`, `Size.Fraction(1/2f)`, and `Size.Full()`.
+The following demonstrates different sheet width options, from small to full-screen layouts. Widths use [Size](../../04_ApiReference/Ivy/Size.md) values such as `Size.Rem(20)`, `Size.Fraction(1/2f)`, and `Size.Full()`.
 
 ```csharp demo-tabs
 public class SheetWidthExamples : ViewBase
