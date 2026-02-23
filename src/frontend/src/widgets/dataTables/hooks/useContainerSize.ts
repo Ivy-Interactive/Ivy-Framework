@@ -12,6 +12,7 @@ export const useContainerSize = () => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastWidthRef = useRef<number>(0);
   const lastHeightRef = useRef<number>(0);
+  const hasAppliedInitialRef = useRef<boolean>(false);
   const scrollObserverRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export const useContainerSize = () => {
     };
 
     const apply = (width: number, height: number) => {
+      hasAppliedInitialRef.current = true;
       lastWidthRef.current = width;
       lastHeightRef.current = height;
       setContainerWidth(width);
@@ -42,10 +44,10 @@ export const useContainerSize = () => {
         const heightChanged = Math.abs(height - lastHeightRef.current) > 1;
 
         if (widthChanged || heightChanged) {
-          const isInitial =
-            lastWidthRef.current === 0 && lastHeightRef.current === 0;
+          const isInitial = !hasAppliedInitialRef.current;
           if (isInitial) {
-            apply(width, height);
+            // Defer to next frame so layout (e.g. tab/modal transition) can settle
+            requestAnimationFrame(() => apply(width, height));
           } else {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
             timeoutRef.current = setTimeout(() => apply(width, height), 50);
