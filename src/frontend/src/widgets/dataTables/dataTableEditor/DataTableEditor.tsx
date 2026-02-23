@@ -67,8 +67,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
   const selectionProps = getSelectionProps(selectionMode);
 
-  // Container sizing
-  const { containerRef, containerWidth, containerHeight } = useContainerSize();
+  const { containerRef, containerWidth, containerHeight, scrollContainerHeight } =
+    useContainerSize();
 
   // Search functionality
   const { showSearch, setShowSearch } = useSearch(showSearchConfig ?? false);
@@ -120,9 +120,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     hoverRow,
   });
 
-  // Empty rows calculation
   const { emptyRowsCount, totalRows } = useEmptyRows({
-    containerHeight,
+    scrollContainerHeight,
     visibleRows,
     hasMore,
     showGroups: showGroups ?? false,
@@ -199,6 +198,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       gridSelection={gridSelection}
       onGridSelectionChange={handleGridSelectionChange}
       width={containerWidth}
+      height={containerHeight > 0 ? containerHeight : undefined}
       rowMarkers={showIndexColumn ? 'number' : 'none'}
       onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
       groupHeaderHeight={showGroups ? GROUP_HEADER_HEIGHT : undefined}
@@ -218,6 +218,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       hoverRow={hoverRow}
       onRowActionClick={handleRowActionClick}
       footer={footer}
+      hasEmptyRows={emptyRowsCount > 0}
     />
   );
 };

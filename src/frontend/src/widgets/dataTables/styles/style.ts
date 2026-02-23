@@ -6,6 +6,7 @@ export const tableStyles = {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
+      minHeight: 0,
     } as React.CSSProperties,
     heading: 'text-display-25 font-bold mb-4',
   },
@@ -34,6 +35,8 @@ export const tableStyles = {
   // TableEditor component
   tableEditor: {
     gridContainer: {
+      flex: 1,
+      minHeight: 0,
       height: '100%',
       width: '100%',
       border: '1px solid var(--border)',
@@ -41,6 +44,8 @@ export const tableStyles = {
       overflow: 'hidden',
     },
     gridContainerWithOptions: {
+      flex: 1,
+      minHeight: 0,
       height: '100%',
       width: '100%',
       border: '1px solid var(--border)',

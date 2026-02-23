@@ -90,3 +90,14 @@
   z-index: 20;
   position: relative;
 }
+
+/* Hide vertical scrollbar only when content fills container (empty rows).
+   When content overflows, show scrollbar so user can scroll. */
+[data-has-empty-rows] .dvn-scroller::-webkit-scrollbar:vertical {
+  width: 0 !important;
+}
+
+[data-has-empty-rows] .dvn-scroller {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none;
+}
