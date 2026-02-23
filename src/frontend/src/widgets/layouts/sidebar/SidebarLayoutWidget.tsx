@@ -75,6 +75,14 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 }) => {
   // Get sidebar width from the width prop (default set in backend)
   const sidebarWidth = getWidth(width).width as string;
+  
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < autoCollapseThreshold;
+    }
+    return false;
+  });
+
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
     if (!mainAppSidebar) return true;
@@ -104,23 +112,53 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     const mql = window.matchMedia(`(min-width: ${autoCollapseThreshold}px)`);
 
     const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile(!e.matches);
       if (!isManuallyToggled) {
         setIsSidebarOpen(e.matches);
       }
     };
 
+    setIsMobile(!mql.matches);
     handleMediaChange(mql);
 
     mql.addEventListener('change', handleMediaChange);
     return () => mql.removeEventListener('change', handleMediaChange);
   }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar]);
 
+  const renderToggleButton = (isSidebarInternal: boolean) => {
+    if (!showToggleButton || !mainAppSidebar) return null;
+
+    // Inside the sidebar, only show close button when mobile and open
+    if (isSidebarInternal && (!isMobile || !isSidebarOpen)) return null;
+    
+    // In main content area, hide toggle if it is mobile and open (handled by sidebar button)
+    if (!isSidebarInternal && isMobile && isSidebarOpen) return null;
+
+    return (
+      <button
+        onClick={handleManualToggle}
+        className={cn(
+          'absolute top-0 z-50 p-2 rounded-selector bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer',
+          isSidebarInternal ? 'right-1' : 'left-1'
+        )}
+        style={{ marginTop: '3px' }}
+        aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+      >
+        {isSidebarOpen ? (
+          <PanelLeftClose className="h-4 w-4" />
+        ) : (
+          <PanelLeftOpen className="h-4 w-4" />
+        )}
+      </button>
+    );
+  };
+
   return (
     <div
       ref={containerRef}
       className="grid h-full w-full remove-parent-padding"
       style={{
-        gridTemplateColumns: isSidebarOpen ? `${sidebarWidth} 1fr` : '0 1fr',
+        gridTemplateColumns: isSidebarOpen ? (isMobile ? '100% 0' : `${sidebarWidth} 1fr`) : '0 1fr',
         transition: 'grid-template-columns 300ms ease-in-out',
       }}
     >
@@ -129,8 +167,11 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ width: sidebarWidth }}
+        style={{ width: isMobile && isSidebarOpen ? '100%' : sidebarWidth }}
       >
+        {/* Mobile Toggle Button inside Sidebar (so it can be closed when full screen) */}
+        {renderToggleButton(true)}
+
         {hasContent(slots?.SidebarHeader) && (
           <div className="flex flex-col shrink-0 p-2 space-y-4">
             {slots?.SidebarHeader}
@@ -158,22 +199,10 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           `relative h-full overflow-auto`,
           !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : ''
         )}
+        style={{ display: isMobile && isSidebarOpen ? 'none' : 'block' }}
       >
         {/* Toggle Button - Only show for main app sidebar */}
-        {showToggleButton && mainAppSidebar && (
-          <button
-            onClick={handleManualToggle}
-            className="absolute top-0 left-1 z-50 p-2 rounded-selector bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
-            style={{ marginTop: '3px' }}
-            aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-          >
-            {isSidebarOpen ? (
-              <PanelLeftClose className="h-4 w-4" />
-            ) : (
-              <PanelLeftOpen className="h-4 w-4" />
-            )}
-          </button>
-        )}
+        {renderToggleButton(false)}
         {slots?.MainContent}
       </div>
     </div>
