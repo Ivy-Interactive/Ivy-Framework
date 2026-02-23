@@ -39,7 +39,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       className="overflow-y-auto pt-4"
       data-testid={dataTestId}
     >
-      <div className="relative mx-auto flex max-w-3xl flex-col gap-6 px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex max-w-3xl flex-col">
         {/* Search bar */}
         <div className="w-full">{searchBar}</div>
 

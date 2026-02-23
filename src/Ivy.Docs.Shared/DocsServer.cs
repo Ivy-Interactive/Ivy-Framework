@@ -35,8 +35,7 @@ public static class DocsServer
                 | Text.Muted($"Version {version}")
             )
             .DefaultApp<Apps.Onboarding.GettingStarted.IntroductionApp>()
-            .UsePages()
-            .MainContentTop(new SmartSearchView());
+            .UsePages();
         server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 
         await server.RunAsync();

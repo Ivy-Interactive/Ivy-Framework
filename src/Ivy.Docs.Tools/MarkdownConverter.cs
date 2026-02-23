@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis.CSharp;
@@ -98,6 +98,7 @@ public static partial class MarkdownConverter
         codeBuilder.AppendLine("using Ivy.Apps;");
         codeBuilder.AppendLine("using Ivy.Shared;");
         codeBuilder.AppendLine("using Ivy.Core;");
+        codeBuilder.AppendLine("using Ivy.Docs.Shared.Helpers;");
         codeBuilder.AppendLine("using Ivy.Views.Tables;");
         codeBuilder.AppendLine("using Ivy.Views.Kanban;");
         codeBuilder.AppendLine("using static Ivy.Views.Layout;");
@@ -160,6 +161,7 @@ public static partial class MarkdownConverter
 
             codeBuilder.AppendTab(2).Append("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).HandleLinkClick(onLinkClick)");
             codeBuilder.AppendLine($".Headings({headingsCode})");
+            codeBuilder.AppendTab(3).AppendLine("| new SmartSearchView()");
             codeBuilder.Append(contentBuilder);
 
             codeBuilder.AppendTab(3).AppendLine(";");
