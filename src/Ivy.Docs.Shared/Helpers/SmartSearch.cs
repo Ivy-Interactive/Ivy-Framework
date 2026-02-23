@@ -13,8 +13,8 @@ public record SmartSearch(params object?[] children) : WidgetBase<SmartSearch>(c
 }
 
 /// <summary>
-/// View for smart search: ask a question and get an AI-generated answer
-/// with optional links to reference docs. Shown at the top of the main content.
+/// View for smart search: ask a question and get an AI-generated answer inline
+/// with optional links to reference docs. Results shown below the search bar (no sheet).
 /// </summary>
 public class SmartSearchView : ViewBase
 {
@@ -23,8 +23,7 @@ public class SmartSearchView : ViewBase
         var questionsClient = UseService<IIvyDocsQuestionsClient>();
         var client = UseService<IClientProvider>();
         var inputState = UseState("");
-        var queryQuestion = UseState(() => (string?)null); // when set, we run the query and show sheet
-        var isSheetOpen = UseState(false);
+        var queryQuestion = UseState(() => (string?)null);
 
         var query = UseQuery<IvyDocsQuestionResult?, string>(
             key: queryQuestion.Value,
@@ -41,18 +40,17 @@ public class SmartSearchView : ViewBase
             if (string.IsNullOrEmpty(q)) return;
             var questionChanged = q != queryQuestion.Value;
             if (questionChanged)
-                query.Mutator.Invalidate(); // clear and show searching view only when question changed
+                query.Mutator.Invalidate();
             queryQuestion.Set(q);
-            isSheetOpen.Set(true);
         }
 
-        object? sheetContent = null;
-        if (isSheetOpen.Value)
+        object? resultsContent = null;
+        if (queryQuestion.Value != null)
         {
             var isFetching = query.Loading || query.Validating;
             if (isFetching)
             {
-                sheetContent = Layout.Vertical().Gap(4)
+                resultsContent = Layout.Vertical().Gap(4)
                     | Layout.Horizontal().Gap(2).Align(Align.Center)
                         | new Loading()
                         | Text.P("Finding an answer...")
@@ -62,12 +60,9 @@ public class SmartSearchView : ViewBase
             }
             else if (query.Error is { } err)
             {
-                sheetContent = Layout.Vertical().Gap(4)
+                resultsContent = Layout.Vertical().Gap(4)
                     | Callout.Error(err.Message)
-                    | new Button("Retry", _ =>
-                    {
-                        query.Mutator.Revalidate();
-                    }).Variant(ButtonVariant.Outline);
+                    | new Button("Retry", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline);
             }
             else if (query.Value is { } result)
             {
@@ -81,7 +76,7 @@ public class SmartSearchView : ViewBase
                         | (Layout.Vertical().Gap(1) | new Fragment(linkButtons));
                 }
 
-                sheetContent = Layout.Vertical().Gap(4)
+                resultsContent = Layout.Vertical().Gap(4)
                     | new Markdown(result.Answer)
                         | (sourceLinks != null
                         ? Layout.Vertical().Gap(2)
@@ -91,8 +86,7 @@ public class SmartSearchView : ViewBase
             }
             else if (!query.Loading && !query.Validating && query.Error is null)
             {
-                // Query completed but no answer (API returned null)
-                sheetContent = Layout.Center()
+                resultsContent = Layout.Center()
                     | (Layout.Vertical().Gap(4).Center()
                         | Text.H1("No answer found :|").Bold()
                         | Text.Muted("We couldn't find an answer to your question in the Ivy docs. Try rephrasing or browse the documentation.")
@@ -109,18 +103,9 @@ public class SmartSearchView : ViewBase
                 .Variant(ButtonVariant.Primary)
                 .TestId("docs-smart-search-submit");
 
-        var sheet = sheetContent != null
-            ? new Sheet(_ =>
-            {
-                isSheetOpen.Set(false);
-                return ValueTask.CompletedTask;
-            }, sheetContent, title: queryQuestion.Value, description: "AI-generated answer from Ivy docs")
-                .Width(Size.Fraction(0.4f))
-            : null;
-
-        var content = Layout.Vertical().Gap(2)
+        var content = Layout.Vertical().Gap(4)
             | searchBar
-            | (sheet ?? (object?)null!);
+            | (resultsContent ?? (object?)null!);
         return new SmartSearch(content);
     }
 }
