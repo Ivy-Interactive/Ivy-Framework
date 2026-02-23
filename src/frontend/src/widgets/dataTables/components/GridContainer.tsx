@@ -119,7 +119,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({
     <div
       ref={containerRef}
       style={{ ...containerStyle, position: 'relative' }}
-      data-has-empty-rows={hasEmptyRows ? true : undefined}
+      data-has-empty-rows={hasEmptyRows || undefined}
     >
       <DataEditor
         ref={gridRef}

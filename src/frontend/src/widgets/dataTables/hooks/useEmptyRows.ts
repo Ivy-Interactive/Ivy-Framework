@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { GROUP_HEADER_HEIGHT } from '../dataTableEditor/constants';
 
 interface UseEmptyRowsProps {
   scrollContainerHeight: number;
@@ -7,8 +8,6 @@ interface UseEmptyRowsProps {
   showGroups: boolean;
   rowHeight: number;
 }
-
-const GROUP_HEADER_HEIGHT = 36;
 
 /**
  * Calculates empty filler rows to fill the container when data is sparse.
