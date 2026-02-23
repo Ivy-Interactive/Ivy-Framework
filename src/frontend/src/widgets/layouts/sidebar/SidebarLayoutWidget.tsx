@@ -75,7 +75,6 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 }) => {
   // Get sidebar width from the width prop (default set in backend)
   const sidebarWidth = getWidth(width).width as string;
-  
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < autoCollapseThreshold;
@@ -130,7 +129,6 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     // Inside the sidebar, only show close button when mobile and open
     if (isSidebarInternal && (!isMobile || !isSidebarOpen)) return null;
-    
     // In main content area, hide toggle if it is mobile and open (handled by sidebar button)
     if (!isSidebarInternal && isMobile && isSidebarOpen) return null;
 
@@ -158,7 +156,11 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       ref={containerRef}
       className="grid h-full w-full remove-parent-padding"
       style={{
-        gridTemplateColumns: isSidebarOpen ? (isMobile ? '100% 0' : `${sidebarWidth} 1fr`) : '0 1fr',
+        gridTemplateColumns: isSidebarOpen
+          ? isMobile
+            ? '100% 0'
+            : `${sidebarWidth} 1fr`
+          : '0 1fr',
         transition: 'grid-template-columns 300ms ease-in-out',
       }}
     >
