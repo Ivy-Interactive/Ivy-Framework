@@ -69,6 +69,7 @@ export const useContainerSize = () => {
     containerRef,
     containerWidth,
     containerHeight,
-    scrollContainerHeight: scrollAreaHeight > 0 ? scrollAreaHeight : containerHeight,
+    scrollContainerHeight:
+      scrollAreaHeight > 0 ? scrollAreaHeight : containerHeight,
   };
 };

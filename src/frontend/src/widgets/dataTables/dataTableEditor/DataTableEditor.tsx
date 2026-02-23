@@ -67,8 +67,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
   const selectionProps = getSelectionProps(selectionMode);
 
-  const { containerRef, containerWidth, containerHeight, scrollContainerHeight } =
-    useContainerSize();
+  const {
+    containerRef,
+    containerWidth,
+    containerHeight,
+    scrollContainerHeight,
+  } = useContainerSize();
 
   // Search functionality
   const { showSearch, setShowSearch } = useSearch(showSearchConfig ?? false);
