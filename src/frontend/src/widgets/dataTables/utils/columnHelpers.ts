@@ -141,7 +141,7 @@ export function convertToGridColumns(
       const remainingWidth = containerWidth - totalWidthOfOtherColumns;
       return {
         title: col.header || col.name,
-        width: Math.max(numericBaseWidth, remainingWidth) - 10,
+        width: Math.max(numericBaseWidth, remainingWidth),
         group: showGroups ? col.group : undefined,
         icon: showColumnTypeIcons ? mapColumnIcon(col) : undefined,
       };

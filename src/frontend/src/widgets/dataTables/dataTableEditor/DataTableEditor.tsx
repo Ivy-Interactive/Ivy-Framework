@@ -16,7 +16,11 @@ import {
 } from '../hooks';
 import { GridContainer } from '../components/GridContainer';
 import { MenuItem } from '@/types/widgets';
-import { ROW_HEIGHT, GROUP_HEADER_HEIGHT } from './constants';
+import {
+  ROW_HEIGHT,
+  GROUP_HEADER_HEIGHT,
+  VERTICAL_SCROLLBAR_WIDTH,
+} from './constants';
 import { useCellContent, useGridColumns, useHeaderMenu } from './hooks';
 
 interface TableEditorProps {
@@ -152,6 +156,13 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
 
   // Grid columns configuration
+  // When vertical scrollbar is visible (!hasEmptyRows), subtract its width so column
+  // widths don't exceed available space and trigger a spurious horizontal scrollbar
+  const hasEmptyRows = emptyRowsCount > 0;
+  const effectiveWidthForColumns = hasEmptyRows
+    ? containerWidth
+    : Math.max(0, containerWidth - VERTICAL_SCROLLBAR_WIDTH);
+
   const {
     columns: finalColumns,
     shouldUseColumnGroups,
@@ -160,7 +171,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     columns,
     columnOrder,
     columnWidths,
-    containerWidth,
+    containerWidth: effectiveWidthForColumns,
     showGroups: showGroups ?? false,
     showColumnTypeIcons: showColumnTypeIcons ?? true,
   });
@@ -211,7 +222,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       onSearchClose={() => setShowSearch(false)}
       onItemHovered={enableRowHover ? onItemHovered : undefined}
       getRowThemeOverride={
-        enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined
+        enableRowHover || hasEmptyRows ? getRowThemeOverride : undefined
       }
       rowActions={rowActions}
       actionButtonsTop={actionButtonsTop}

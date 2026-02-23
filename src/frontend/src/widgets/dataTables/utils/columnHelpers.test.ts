@@ -136,8 +136,8 @@ describe('columnHelpers', () => {
 
       // ID (80) + Name (150) + Status (100) = 330
       // Remaining: 600 - 330 = 270
-      // Last column should be max(120, 270) - 10 = 260
-      expect('width' in result[3] && result[3].width).toBe(260);
+      // Last column should be max(120, 270) = 270
+      expect('width' in result[3] && result[3].width).toBe(270);
     });
 
     it('should not expand last column if containerWidth is 0', () => {
@@ -220,8 +220,8 @@ describe('columnHelpers', () => {
 
       const result = convertToGridColumns(singleColumn, [], {}, 500, false);
 
-      // Last (and only) column should expand: max(100, 500 - 0) - 10 = 490
-      expect('width' in result[0] && result[0].width).toBe(490);
+      // Last (and only) column should expand: max(100, 500 - 0) = 500
+      expect('width' in result[0] && result[0].width).toBe(500);
     });
 
     it('should filter out hidden columns', () => {
