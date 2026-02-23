@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
@@ -307,20 +307,6 @@ public class Auth0AuthProvider : IAuthProvider
         return _managementClient;
     }
 
-    private static OAuthProvider? MapAuth0ProviderToEnum(string auth0Provider)
-    {
-        // Auth0 uses format like "google-oauth2", "github", "windowslive", etc.
-        return auth0Provider.ToLowerInvariant() switch
-        {
-            "google-oauth2" => OAuthProvider.Google,
-            "github" => OAuthProvider.GitHub,
-            "windowslive" => OAuthProvider.Microsoft,
-            "apple" => OAuthProvider.Apple,
-            "twitter" => OAuthProvider.Twitter,
-            _ => null
-        };
-    }
-
     public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         // Get user ID from the current access token
@@ -357,7 +343,16 @@ public class Auth0AuthProvider : IAuthProvider
                 continue;
             }
 
-            var provider = MapAuth0ProviderToEnum(identity.Provider);
+            OAuthProvider? provider = identity.Provider.ToLowerInvariant() switch
+            {
+                "google-oauth2" => OAuthProvider.Google,
+                "github" => OAuthProvider.GitHub,
+                "windowslive" => OAuthProvider.Microsoft,
+                "apple" => OAuthProvider.Apple,
+                "twitter" => OAuthProvider.Twitter,
+                _ => null
+            };
+
             if (provider == null)
             {
                 continue; // Skip unsupported providers

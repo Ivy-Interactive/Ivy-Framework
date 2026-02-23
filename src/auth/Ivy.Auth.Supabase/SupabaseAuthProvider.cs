@@ -383,4 +383,13 @@ public class SupabaseAuthProvider : IAuthProvider
             ? new AuthToken(session.AccessToken, session.RefreshToken)
             : null;
 
+    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    {
+        // Supabase does not expose underlying OAuth provider tokens (e.g., Google, GitHub access tokens)
+        // through its client library. The Session only contains Supabase's own JWT token.
+        // If you need direct access to OAuth provider tokens, consider using those providers directly
+        // (e.g., Ivy.Auth.GitHub) or a provider that exposes them (e.g., Clerk, Auth0).
+        return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(null);
+    }
+
 }

@@ -115,5 +115,19 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
             .Build();
         return _innerAuthProvider.GetAccessTokenLifetimeAsync(authSession, cancellationToken);
     }
+
+    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    {
+        if (authSession.AuthToken?.AccessToken == null)
+        {
+            throw new InvalidOperationException("AuthSession.AuthToken.AccessToken is null");
+        }
+
+        authSession = authSession.WithCheckedAccess()
+            .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
+            .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
+            .Build();
+        return _innerAuthProvider.GetOAuthProviderTokensAsync(authSession, cancellationToken);
+    }
 }
 #endif

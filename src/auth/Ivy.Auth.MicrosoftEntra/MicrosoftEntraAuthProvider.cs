@@ -287,6 +287,52 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
     [Obsolete("Microsoft Entra OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public MicrosoftEntraAuthProvider UseMicrosoftEntra() => this;
 
+    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    {
+        if (authSession.AuthToken is not { } token)
+        {
+            return null;
+        }
+
+        try
+        {
+            var app = GetApp();
+
+            if (app is not IByRefreshToken refresher
+                || token.Tag is not JsonElement tag
+                || tag.GetString() is not string accountId
+                || accountId.Length <= 0
+                || token.RefreshToken == null)
+            {
+                return null;
+            }
+
+            // Use refresh token to get a fresh access token for Microsoft Graph
+            var result = await refresher.AcquireTokenByRefreshToken(_scopes, token.RefreshToken)
+                .ExecuteAsync(cancellationToken);
+
+            if (result?.AccessToken == null)
+            {
+                return null;
+            }
+
+            var tokens = new Dictionary<OAuthProvider, OAuthProviderToken>
+            {
+                [OAuthProvider.Microsoft] = new OAuthProviderToken(
+                    Provider: OAuthProvider.Microsoft,
+                    AccessToken: result.AccessToken,
+                    Scopes: result.Scopes?.ToArray(),
+                    ExpiresAt: result.ExpiresOn)
+            };
+
+            return tokens;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     private static string GenerateCodeVerifier()
     {
         var bytes = new byte[32];
