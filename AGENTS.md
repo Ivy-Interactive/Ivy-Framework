@@ -159,6 +159,28 @@ Ivy.Colors enum has the following values:
 
 Black, White, Slate, Gray, Zinc, Neutral, Stone, Red, Orange, Amber, Yellow, Lime, Green, Emerald, Teal, Cyan, Sky, Blue, Indigo, Violet, Purple, Fuchsia, Pink, Rose, Primary, Secondary, Destructive, Success, Warning, Info, Muted
 
+## Scale
+
+All widgets support `.Scale(Scale.Small)`, `.Scale(Scale.Medium)`, `.Scale(Scale.Large)`.
+Convenience methods: `.Small()`, `.Medium()`, `.Large()`.
+Scale adjusts the overall visual size of a widget (text, padding, etc.).
+There is no `ButtonSize` enum — use `Scale` for all widgets.
+
+## Size
+
+`.Width(Size.X)` and `.Height(Size.X)` set widget dimensions.
+`.Size(Size.X)` sets both width and height.
+
+Common Size values:
+- Size.Units(n) — Tailwind spacing scale (n × 0.25rem)
+- Size.Full() — 100%
+- Size.Fit() — fit-content
+- Size.Auto() — auto
+- Size.Px(n) — exact pixels
+- Size.Fraction(0.5f) — percentage, Size.Half(), Size.Third()
+
+Size is NOT the same as Scale. Size controls dimensions; Scale controls visual density.
+
 ## Event Handling
 
 new Button("Click Me")
