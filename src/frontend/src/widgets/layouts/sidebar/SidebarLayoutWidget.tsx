@@ -117,7 +117,6 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       }
     };
 
-    setIsMobile(!mql.matches);
     handleMediaChange(mql);
 
     mql.addEventListener('change', handleMediaChange);
