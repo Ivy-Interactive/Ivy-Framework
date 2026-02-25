@@ -20,19 +20,16 @@ The Ivy MCP Server enables AI assistants to directly interact with the Ivy Frame
 
 ## Prerequisites
 
-Before connecting your IDE, you must install or update the Ivy CLI to the latest version to ensure MCP support.
+Before connecting your IDE, you must install Ivy CLI to ensure MCP support.
 
 ```bash
 dotnet tool install -g Ivy.Console
-# Or to update if already installed:
-dotnet tool update -g Ivy.Console
 ```
+## Quick Start: Scaffold a New Project with Claude and Cursor
 
-## Quick Start: Scaffold a New Project
+The fastest way to get started is scaffolding the sample `--hello` project, which configures the IDE-specific MCP settings in one command.
 
-The fastest way to get started is using the `--hello` flag, which scaffolds a project and configures the IDE-specific MCP settings in one command.
-
-### Claude Desktop
+### Claude 
 
 ```bash
 ivy init --hello --claude
@@ -44,9 +41,24 @@ ivy init --hello --claude
 ivy init --hello --cursor
 ```
 
-## Connecting Your IDE
+## Connecting Other IDEs
 
-If you are adding Ivy to an existing project, follow the steps below for your specific environment.
+If you are adding Ivy to an IDE, follow the steps below for your specific environment.
+
+
+
+### VS Code
+
+1. Open your project directory in VS Code.
+2. Initialise the Ivy project: `ivy init`
+3. Generate the MCP configuration: `ivy mcp config`
+4. In the chat, prompt `#AGENTS.md` to sync the project context and agent instructions.
+
+### Antigravity
+
+1. Open Antigravity and navigate to your project.
+2. Run: `ivy mcp config`
+3. Prompt `@AGENTS.md` in the chat to sync the project context and agent instructions.
 
 ### Windsurf (Cascade)
 
@@ -54,40 +66,10 @@ If you are adding Ivy to an existing project, follow the steps below for your sp
 2. Run the configuration command to automatically update your `windsurf.json`:
 
 ```bash
-ivy mcp config --windsurf
+ivy mcp config
 ```
 
 3. Restart your Cascade session to enable Ivy tool-calling.
-
-### VS Code
-
-1. Open your project directory in VS Code.
-2. Initialise the Ivy project: `ivy init`
-3. Generate the MCP configuration: `ivy mcp config --vscode`
-4. In the chat, prompt `#AGENTS.md` to help the assistant recognize the Ivy context.
-
-### Antigravity
-
-1. Open Antigravity and navigate to your project.
-2. Run: `ivy mcp config --antigravity`
-3. Prompt `@AGENTS` in the chat to sync the project context and agent instructions.
-
-### JetBrains Rider
-
-1. Open Settings > Tools > MCP Servers.
-2. Click `+` to add a new server.
-3. **Command**: Input the path to your ivy tool (e.g., `/Users/YOUR_USER/.dotnet/tools/ivy`).
-4. **Arguments**:
-
-```text
-mcp --path "/your/absolute/project/path"
-```
-
-5. **Environment Variables**:
-
-```plaintext
-Ivy__Mcp__ApiUrl=https://staging.mcp.ivy.app
-```
 
 ## Manual Configuration (Advanced)
 
