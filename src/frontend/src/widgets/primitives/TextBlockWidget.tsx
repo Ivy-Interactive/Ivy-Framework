@@ -215,7 +215,10 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
     ...getOverflow(overflow),
     wordBreak: 'normal',
     overflowWrap: 'break-word',
-    ...(textAlignment && { textAlign: textAlignment.toLowerCase() as React.CSSProperties['textAlign'] }),
+    ...(textAlignment && {
+      textAlign:
+        textAlignment.toLowerCase() as React.CSSProperties['textAlign'],
+    }),
   };
 
   const scaleClasses: Record<string, string> = {
