@@ -204,6 +204,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _bold;
     private bool _italic;
     private bool _muted;
+    private TextAlignment? _textAlignment;
 
     private Scale? _scale;
 
@@ -226,7 +227,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
             default:
                 {
                     var text = new TextBlock(
-                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted)
+                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted, _textAlignment)
                     {
                         Scale = _scale
                     };
@@ -314,6 +315,20 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     public TextBuilder Medium() => Scale(Ivy.Shared.Scale.Medium);
 
     public TextBuilder Large() => Scale(Ivy.Shared.Scale.Large);
+
+    public TextBuilder Align(TextAlignment alignment)
+    {
+        _textAlignment = alignment;
+        return this;
+    }
+
+    public TextBuilder Left() => Align(TextAlignment.Left);
+
+    public TextBuilder Center() => Align(TextAlignment.Center);
+
+    public TextBuilder Right() => Align(TextAlignment.Right);
+
+    public TextBuilder Justify() => Align(TextAlignment.Justify);
 }
 
 
