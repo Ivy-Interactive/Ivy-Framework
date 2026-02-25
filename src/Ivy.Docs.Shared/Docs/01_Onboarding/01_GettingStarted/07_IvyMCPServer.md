@@ -8,6 +8,8 @@ searchHints:
   - cursor
   - antigravity
   - vscode
+  - windsurf
+  - rider
 ---
 
 # Getting Started: Ivy MCP Server
@@ -18,48 +20,88 @@ The Ivy MCP Server enables AI assistants to directly interact with the Ivy Frame
 
 ## Prerequisites
 
-Before connecting your IDE, you should install the Ivy CLI. This tool provides commands to automatically configure and scaffold Ivy projects with MCP support.
+Before connecting your IDE, you must install or update the Ivy CLI to the latest version to ensure MCP support.
 
 ```bash
 dotnet tool install -g Ivy.Console
+# Or to update if already installed:
+dotnet tool update -g Ivy.Console
 ```
 
-## Quick Start: Connecting Your IDE
+## Quick Start: Scaffold a New Project
 
-Select the instructions for your preferred AI assistant or IDE below to set up the Ivy MCP connection.
+The fastest way to get started is using the `--hello` flag, which scaffolds a project and configures the IDE-specific MCP settings in one command.
 
-### Claude  
-
-To use the Ivy MCP Server with the Claude Desktop app, you can use the Ivy CLI to automatically configure it, or add it manually.
-
-#### 1. Automatic Configuration
-
-Run the following command in your terminal to create a specific MCP configuration for your project:
-
-```bash
-ivy mcp config
-```
-
-*Alternatively, if you are starting a new project, you can scaffold it with Claude support:*
+### Claude Desktop
 
 ```bash
 ivy init --hello --claude
 ```
 
-#### 2. Manual Configuration
+### Cursor
 
-1. Open your `claude_desktop_config.json` file.
-2. Add the Ivy server to the `mcpServers` object:
+```bash
+ivy init --hello --cursor
+```
+
+## Connecting Your IDE
+
+If you are adding Ivy to an existing project, follow the steps below for your specific environment.
+
+### Windsurf (Cascade)
+
+1. Open Windsurf.
+2. Run the configuration command to automatically update your `windsurf.json`:
+
+```bash
+ivy mcp config --windsurf
+```
+
+3. Restart your Cascade session to enable Ivy tool-calling.
+
+### VS Code
+
+1. Open your project directory in VS Code.
+2. Initialise the Ivy project: `ivy init`
+3. Generate the MCP configuration: `ivy mcp config --vscode`
+4. In the chat, prompt `#AGENTS.md` to help the assistant recognize the Ivy context.
+
+### Antigravity
+
+1. Open Antigravity and navigate to your project.
+2. Run: `ivy mcp config --antigravity`
+3. Prompt `@AGENTS` in the chat to sync the project context and agent instructions.
+
+### JetBrains Rider
+
+1. Open Settings > Tools > MCP Servers.
+2. Click `+` to add a new server.
+3. **Command**: Input the path to your ivy tool (e.g., `/Users/YOUR_USER/.dotnet/tools/ivy`).
+4. **Arguments**:
+
+```text
+mcp --path "/your/absolute/project/path"
+```
+
+5. **Environment Variables**:
+
+```plaintext
+Ivy__Mcp__ApiUrl=https://staging.mcp.ivy.app
+```
+
+## Manual Configuration (Advanced)
+
+For custom setups or troubleshooting, ensure your `mcp.json` (or equivalent config) follows this structure. Note that the `--path` argument is required for the Language Server Protocol (LSP) to function correctly.
 
 ```json
 {
   "mcpServers": {
-     "ivy-release": {
-      "command": "/Users/<your-user>/.dotnet/tools/ivy",
+    "ivy-mcp": {
+      "command": "/Users/YOUR_USER/.dotnet/tools/ivy",
       "args": [
         "mcp",
         "--path",
-        "/absolute/path/to/your/project"
+        "/Users/YOUR_USER/path/to/your/project"
       ],
       "env": {
         "Ivy__Mcp__ApiUrl": "https://staging.mcp.ivy.app"
@@ -68,88 +110,3 @@ ivy init --hello --claude
   }
 }
 ```
-
-3. Restart the Claude Desktop app.
-
-### Cursor
-
-Configure Cursor to interact with the Ivy MCP Server via its feature settings or by using the Ivy CLI.
-
-#### 1. Automatic Configuration
-
-Use the Ivy CLI to scaffold a new project with Cursor support:
-
-```bash
-ivy init --hello --cursor
-```
-
-#### 2. Manual Configuration
-
-1. Navigate to **Settings** > **Features** > **MCP**.
-2. Click **+ Add New MCP Server**.
-3. Name the server **Ivy**.
-
-- Type: **command**
-- Command: `/Users/<your-user>/.dotnet/tools/ivy`
-- Arguments: `mcp --path /absolute/path/to/your/project`
-- Environment Variables: `Ivy__Mcp__ApiUrl=https://staging.mcp.ivy.app`
-
-4. Click **Save** to finalize the integration.
-
-
-### VS Code
-
-The Ivy VS Code extension provides the most seamless experience for using the Ivy MCP Server.
-
-1. Open the **Extensions** view in VS Code (`Ctrl+Shift+X`).
-2. Search for **"Ivy"**.
-3. Click **Install**.
-
-<Callout Type="tip">
-Once installed, the extension will automatically manage the configuration of the Ivy MCP Server for your environment.
-</Callout>
-
-### Antigravity
-
-Antigravity features native, built-in support for the Ivy MCP Server, providing first-class agentic coding capabilities.
-
-1. Open Antigravity **Settings**.
-2. Navigate to **MCP Servers**.
-3. Locate the **Ivy MCP Server** entry.
-4. Toggle it to **Enabled**.
-
-The server will start automatically and its tools will be immediately available to the built-in AI assistant.
-
-
-## API Reference
-
-The Ivy MCP Server provides several endpoints for retrieving framework context and documentation.
-
-### Base URL
-`https://staging.mcp.ivy.app`
-
-### Endpoints
-
-#### GET /questions
-Ask questions about the Ivy Framework and receive markdown-formatted answers.
-- **Parameters:**
-  - `question` (required): The user's question.
-  - `packageVersion`: The package version (defaults to `lts`).
-  - `packageId`: The package ID (defaults to `Ivy`).
-
-#### GET /docs
-List all available documentation files in YAML format.
-- **Parameters:**
-  - `version`: The version (defaults to `lts`).
-
-#### GET /docs/\{path\}
-Retrieve the content of a specific documentation file.
-- **Parameters:**
-  - `path` (required): The relative path to the file (e.g., `ApiReference/IvyShared/Colors.md`).
-  - `version`: The version.
-
-#### GET /widgets
-Get a list of all available Ivy widgets and their properties.
-- **Parameters:**
-  - `version`: The package version.
-  - `packageId`: The package ID.
