@@ -116,6 +116,15 @@ public class SupabaseAuthProvider : IAuthProvider
                 ["connection"] = connectionId,
             };
         }
+        else if (provider == GotrueConstants.Provider.Google)
+        {
+            // These parameters are needed to get a refresh token from Google.
+            signInOptions.QueryParams = new()
+            {
+                ["access_type"] = "offline",
+                ["prompt"] = "consent",
+            };
+        }
 
         var providerAuthState = await _client.Auth.SignIn(provider, signInOptions)
             .WaitAsync(cancellationToken);
