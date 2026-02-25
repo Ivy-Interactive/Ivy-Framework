@@ -137,7 +137,6 @@ Create a `.samples/{WidgetName}.cs` file to demonstrate the widget:
 #:project ..\Ivy.Widgets.Leaflet.csproj
 
 using Ivy;
-using Ivy.Shared;
 using Ivy.Widgets.Leaflet;
 
 var server = new Server();

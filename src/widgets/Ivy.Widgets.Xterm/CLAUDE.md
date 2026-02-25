@@ -135,7 +135,6 @@ Create a `.samples/{WidgetName}.cs` file to demonstrate the widget:
 #:project ..\Ivy.Widgets.Xterm.csproj
 
 using Ivy;
-using Ivy.Shared;
 using Ivy.Widgets.Xterm;
 
 var server = new Server();
