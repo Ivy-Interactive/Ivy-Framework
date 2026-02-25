@@ -121,19 +121,19 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
 
     public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession);
+        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession, authProvider.ProviderSuffix);
         client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 
     public void SetAuthTokenCookies(bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        var cookieJarId = sessionStore.RegisterAuthTokenCookies(authSession.AuthToken);
+        var cookieJarId = sessionStore.RegisterAuthTokenCookies(authSession.AuthToken, authProvider.ProviderSuffix);
         client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 
     public void SetAuthSessionDataCookies(bool reloadPage = false, bool? triggerMachineReload = null)
     {
-        var cookieJarId = sessionStore.RegisterAuthSessionDataCookies(authSession.AuthSessionData);
+        var cookieJarId = sessionStore.RegisterAuthSessionDataCookies(authSession.AuthSessionData, authProvider.ProviderSuffix);
         client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 }

@@ -8,6 +8,8 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
 {
     private readonly IAuthProvider _innerAuthProvider = innerAuthProvider;
 
+    public string ProviderSuffix => _innerAuthProvider.ProviderSuffix;
+
     public Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()

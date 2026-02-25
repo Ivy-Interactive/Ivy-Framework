@@ -21,34 +21,37 @@ public static class CookieRegistryExtensions
         return null;
     }
 
-    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession)
+    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession, string providerSuffix)
     {
         var cookies = new CookieJar();
-        cookies.AddCookiesForAuthToken(authSession.AuthToken);
-        cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData);
+        cookies.AddCookiesForAuthToken(authSession.AuthToken, providerSuffix);
+        cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData, providerSuffix);
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static CookieJarId RegisterAuthTokenCookies(this AppSessionStore sessionStore, AuthToken? authToken)
+    public static CookieJarId RegisterAuthTokenCookies(this AppSessionStore sessionStore, AuthToken? authToken, string providerSuffix)
     {
         var cookies = new CookieJar();
-        cookies.AddCookiesForAuthToken(authToken);
+        cookies.AddCookiesForAuthToken(authToken, providerSuffix);
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static CookieJarId RegisterAuthSessionDataCookies(this AppSessionStore sessionStore, string? authSessionData)
+    public static CookieJarId RegisterAuthSessionDataCookies(this AppSessionStore sessionStore, string? authSessionData, string providerSuffix)
     {
         var cookies = new CookieJar();
-        cookies.AddCookiesForAuthSessionData(authSessionData);
+        cookies.AddCookiesForAuthSessionData(authSessionData, providerSuffix);
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken)
+    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken, string providerSuffix)
     {
+        var authTokenName = $"auth_token_{providerSuffix}";
+        var extRefreshTokenName = $"auth_ext_refresh_token_{providerSuffix}";
+
         if (string.IsNullOrEmpty(authToken?.AccessToken))
         {
-            cookies.Delete("auth_token", CreateAuthCookieOptions());
-            cookies.Delete("auth_ext_refresh_token", CreateAuthCookieOptions());
+            cookies.Delete(authTokenName, CreateAuthCookieOptions());
+            cookies.Delete(extRefreshTokenName, CreateAuthCookieOptions());
         }
         else
         {
@@ -71,27 +74,29 @@ public static class CookieRegistryExtensions
                 var refreshToken = authToken.RefreshToken!; // non-nullness implied by condition above
                 var modifiedToken = authToken with { RefreshToken = null };
                 tokenJson = JsonSerializer.Serialize(modifiedToken, JsonHelper.DefaultOptions);
-                cookies.Append("auth_ext_refresh_token", refreshToken, cookieOptions);
+                cookies.Append(extRefreshTokenName, refreshToken, cookieOptions);
             }
             else
             {
-                cookies.Delete("auth_ext_refresh_token", CreateAuthCookieOptions());
+                cookies.Delete(extRefreshTokenName, CreateAuthCookieOptions());
             }
-            cookies.Append("auth_token", tokenJson, cookieOptions);
+            cookies.Append(authTokenName, tokenJson, cookieOptions);
         }
     }
 
-    private static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData)
+    private static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData, string providerSuffix)
     {
+        var authSessionDataName = $"auth_session_data_{providerSuffix}";
+
         if (authSessionData == null)
         {
-            cookies.Delete("auth_session_data", CreateAuthCookieOptions());
+            cookies.Delete(authSessionDataName, CreateAuthCookieOptions());
         }
         else
         {
             var cookieOptions = CreateAuthCookieOptions();
 
-            cookies.Append("auth_session_data", authSessionData, cookieOptions);
+            cookies.Append(authSessionDataName, authSessionData, cookieOptions);
         }
     }
 

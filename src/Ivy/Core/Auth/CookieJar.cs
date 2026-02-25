@@ -31,6 +31,11 @@ public class CookieJar
         return false;
     }
 
+    public bool HasCookieWithPrefix(string prefix)
+    {
+        return _assignments.Any(a => a.Name.StartsWith(prefix));
+    }
+
     public void Delete(string name, CookieOptions options)
     {
         options.Expires = DateTimeOffset.UnixEpoch;

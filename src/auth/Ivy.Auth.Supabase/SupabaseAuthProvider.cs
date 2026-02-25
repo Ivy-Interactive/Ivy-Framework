@@ -35,6 +35,8 @@ public class SupabaseAuthProvider : IAuthProvider
     private JsonWebKeySet? _cachedJwks = null;
     private DateTime _jwksCacheExpiry = DateTime.MinValue;
 
+    public string ProviderSuffix => "sb";
+
     public SupabaseAuthProvider(IConfiguration configuration)
     {
         var url = configuration.GetValue<string>("Supabase:Url") ?? throw new Exception("Supabase:Url is required");

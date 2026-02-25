@@ -13,13 +13,13 @@ namespace Ivy.Core.Auth;
 
 public static class AuthHelper
 {
-    public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
-    => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
+    public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler, string providerSuffix)
+    => GetAuthCookies(context, providerSuffix) is (var authToken, var extRefreshToken, var authSessionData)
         ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
         : new AuthSession(httpMessageHandler);
 
-    public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
-    => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
+    public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler, string providerSuffix)
+    => GetAuthCookies(context, providerSuffix) is (var authToken, var extRefreshToken, var authSessionData)
         ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
         : new AuthSession(httpMessageHandler);
 
@@ -45,7 +45,8 @@ public static class AuthHelper
         var serviceProvider = session.AppServices;
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
-        var authSession = GetAuthSession(context, httpMessageHandler);
+        var authProvider = serviceProvider.GetRequiredService<IAuthProvider>();
+        var authSession = GetAuthSession(context, httpMessageHandler, authProvider.ProviderSuffix);
         try
         {
             await ValidateAuth(serviceProvider, authSession, context.CancellationToken);
@@ -84,7 +85,8 @@ public static class AuthHelper
         try
         {
             var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
-            var authSession = GetAuthSession(controller.HttpContext, httpMessageHandler);
+            var authProvider = serviceProvider.GetRequiredService<IAuthProvider>();
+            var authSession = GetAuthSession(controller.HttpContext, httpMessageHandler, authProvider.ProviderSuffix);
             await ValidateAuth(serviceProvider, authSession, controller.HttpContext.RequestAborted);
         }
         catch (MissingAuthTokenException ex)
@@ -140,16 +142,16 @@ public static class AuthHelper
         }
     }
 
-    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(HttpContext context)
+    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(HttpContext context, string providerSuffix)
     {
         var cookies = context.Request.Cookies;
-        var authTokenValue = cookies["auth_token"].NullIfEmpty();
-        var extRefreshTokenValue = cookies["auth_ext_refresh_token"].NullIfEmpty();
-        var authSessionDataValue = cookies["auth_session_data"].NullIfEmpty();
+        var authTokenValue = cookies[$"auth_token_{providerSuffix}"].NullIfEmpty();
+        var extRefreshTokenValue = cookies[$"auth_ext_refresh_token_{providerSuffix}"].NullIfEmpty();
+        var authSessionDataValue = cookies[$"auth_session_data_{providerSuffix}"].NullIfEmpty();
         return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
     }
 
-    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(ServerCallContext context)
+    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(ServerCallContext context, string providerSuffix)
     {
         var cookies = context.RequestHeaders.GetValue("cookie") ?? string.Empty;
         if (string.IsNullOrEmpty(cookies))
@@ -168,9 +170,9 @@ public static class AuthHelper
                 : null;
         }
 
-        var authTokenValue = GetCookie("auth_token");
-        var extRefreshTokenValue = GetCookie("auth_ext_refresh_token");
-        var authSessionDataValue = GetCookie("auth_session_data");
+        var authTokenValue = GetCookie($"auth_token_{providerSuffix}");
+        var extRefreshTokenValue = GetCookie($"auth_ext_refresh_token_{providerSuffix}");
+        var authSessionDataValue = GetCookie($"auth_session_data_{providerSuffix}");
 
         return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
     }
