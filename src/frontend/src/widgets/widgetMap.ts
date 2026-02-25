@@ -221,6 +221,9 @@ export const widgetMap = {
   'Ivy.PieChart': React.lazy(() => import('@/widgets/charts/PieChartWidget')),
   'Ivy.AreaChart': React.lazy(() => import('@/widgets/charts/AreaChartWidget')),
   'Ivy.BarChart': React.lazy(() => import('@/widgets/charts/BarChartWidget')),
+  'Ivy.SunburstChart': React.lazy(
+    () => import('@/widgets/charts/SunburstChartWidget')
+  ),
 
   // Effects
   'Ivy.Confetti': React.lazy(() => import('@/widgets/effects/ConfettiWidget')),

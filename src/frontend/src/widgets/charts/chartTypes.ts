@@ -4,6 +4,7 @@ export enum ChartType {
   Bar = 'bar',
   Line = 'line',
   Pie = 'pie',
+  Sunburst = 'sunburst',
 }
 
 export interface ChartData {
@@ -41,6 +42,33 @@ export interface PieChartWidgetProps {
   colorScheme: ColorScheme;
   total?: PieChartTotalProps;
   toolbox?: ToolboxProps;
+}
+
+export interface SunburstNodeProps {
+  name: string;
+  value: number;
+  fill?: string | null;
+  children?: SunburstNodeProps[];
+}
+
+export interface SunburstChartWidgetProps {
+  id: string;
+  data: SunburstNodeProps[];
+  dataKey?: string;
+  nameKey?: string;
+  width?: string;
+  height?: string;
+  tooltip?: ToolTipProps;
+  colorScheme: ColorScheme;
+  innerRadius?: string;
+  outerRadius?: string;
+  cx?: string;
+  cy?: string;
+  startAngle?: number;
+  endAngle?: number;
+  padding?: number;
+  ringPadding?: number;
+  stroke?: string;
 }
 
 export type YAxisProps = {
