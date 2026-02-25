@@ -27,12 +27,12 @@ export function ErrorSheet() {
         >
           <SheetContent
             side="right"
-            className="w-full sm:max-w-lg overflow-y-auto"
+            className="w-full sm:max-w-lg flex flex-col h-full overflow-hidden"
           >
             <SheetHeader>
               <SheetTitle>Oops! Something went wrong</SheetTitle>
             </SheetHeader>
-            <div className="mt-6">
+            <div className="flex-1 min-h-0 overflow-y-auto">
               <ErrorDisplay
                 title={title}
                 message={message}
