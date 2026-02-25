@@ -46,41 +46,39 @@ public static class CookieRegistryExtensions
     public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken, string providerSuffix)
     {
         var authTokenName = $"auth_token_{providerSuffix}";
-        var extRefreshTokenName = $"auth_ext_refresh_token_{providerSuffix}";
+        var refreshTokenName = $"auth_refresh_token_{providerSuffix}";
+        var tagName = $"auth_tag_{providerSuffix}";
 
         if (string.IsNullOrEmpty(authToken?.AccessToken))
         {
             cookies.Delete(authTokenName, CreateAuthCookieOptions());
-            cookies.Delete(extRefreshTokenName, CreateAuthCookieOptions());
+            cookies.Delete(refreshTokenName, CreateAuthCookieOptions());
+            cookies.Delete(tagName, CreateAuthCookieOptions());
         }
         else
         {
             var cookieOptions = CreateAuthCookieOptions();
 
-            var tokenJson = JsonSerializer.Serialize(authToken, JsonHelper.DefaultOptions);
+            cookies.Append(authTokenName, authToken.AccessToken, cookieOptions);
 
-            // Calculate url-encoded token length
-            var tokenJsonLength = WebUtility.UrlEncode(tokenJson).Length;
-            var refreshTokenLength = authToken.RefreshToken != null
-                ? WebUtility.UrlEncode(authToken.RefreshToken).Length
-                : 0;
-
-            // If the token is too big, try putting the refresh token into its own cookie.
-            // I'm not trying to be overly precise here.
-            const int CookieSizeLimit = 4000;
-
-            if (tokenJsonLength > CookieSizeLimit && tokenJsonLength - refreshTokenLength < CookieSizeLimit)
+            if (!string.IsNullOrEmpty(authToken.RefreshToken))
             {
-                var refreshToken = authToken.RefreshToken!; // non-nullness implied by condition above
-                var modifiedToken = authToken with { RefreshToken = null };
-                tokenJson = JsonSerializer.Serialize(modifiedToken, JsonHelper.DefaultOptions);
-                cookies.Append(extRefreshTokenName, refreshToken, cookieOptions);
+                cookies.Append(refreshTokenName, authToken.RefreshToken, cookieOptions);
             }
             else
             {
-                cookies.Delete(extRefreshTokenName, CreateAuthCookieOptions());
+                cookies.Delete(refreshTokenName, CreateAuthCookieOptions());
             }
-            cookies.Append(authTokenName, tokenJson, cookieOptions);
+
+            if (authToken.Tag != null)
+            {
+                var tagJson = JsonSerializer.Serialize(authToken.Tag, JsonHelper.DefaultOptions);
+                cookies.Append(tagName, tagJson, cookieOptions);
+            }
+            else
+            {
+                cookies.Delete(tagName, CreateAuthCookieOptions());
+            }
         }
     }
 

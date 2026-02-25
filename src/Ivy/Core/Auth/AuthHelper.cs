@@ -14,13 +14,13 @@ namespace Ivy.Core.Auth;
 public static class AuthHelper
 {
     public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler, string providerSuffix)
-    => GetAuthCookies(context, providerSuffix) is (var authToken, var extRefreshToken, var authSessionData)
-        ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
+    => GetAuthCookies(context, providerSuffix) is (var accessToken, var refreshToken, var tag, var authSessionData)
+        ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, httpMessageHandler)
         : new AuthSession(httpMessageHandler);
 
     public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler, string providerSuffix)
-    => GetAuthCookies(context, providerSuffix) is (var authToken, var extRefreshToken, var authSessionData)
-        ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
+    => GetAuthCookies(context, providerSuffix) is (var accessToken, var refreshToken, var tag, var authSessionData)
+        ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, httpMessageHandler)
         : new AuthSession(httpMessageHandler);
 
     public static async Task ValidateAuthIfRequired(global::Ivy.Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
@@ -142,21 +142,22 @@ public static class AuthHelper
         }
     }
 
-    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(HttpContext context, string providerSuffix)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData) GetAuthCookies(HttpContext context, string providerSuffix)
     {
         var cookies = context.Request.Cookies;
-        var authTokenValue = cookies[$"auth_token_{providerSuffix}"].NullIfEmpty();
-        var extRefreshTokenValue = cookies[$"auth_ext_refresh_token_{providerSuffix}"].NullIfEmpty();
+        var accessToken = cookies[$"auth_token_{providerSuffix}"].NullIfEmpty();
+        var refreshToken = cookies[$"auth_refresh_token_{providerSuffix}"].NullIfEmpty();
+        var tag = cookies[$"auth_tag_{providerSuffix}"].NullIfEmpty();
         var authSessionDataValue = cookies[$"auth_session_data_{providerSuffix}"].NullIfEmpty();
-        return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
+        return (accessToken, refreshToken, tag, authSessionDataValue);
     }
 
-    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(ServerCallContext context, string providerSuffix)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData) GetAuthCookies(ServerCallContext context, string providerSuffix)
     {
         var cookies = context.RequestHeaders.GetValue("cookie") ?? string.Empty;
         if (string.IsNullOrEmpty(cookies))
         {
-            return (null, null, null);
+            return (null, null, null, null);
         }
 
         var cookieHeader = CookieHeaderValue.ParseList([cookies]).ToList();
@@ -170,34 +171,37 @@ public static class AuthHelper
                 : null;
         }
 
-        var authTokenValue = GetCookie($"auth_token_{providerSuffix}");
-        var extRefreshTokenValue = GetCookie($"auth_ext_refresh_token_{providerSuffix}");
+        var accessToken = GetCookie($"auth_token_{providerSuffix}");
+        var refreshToken = GetCookie($"auth_refresh_token_{providerSuffix}");
+        var tag = GetCookie($"auth_tag_{providerSuffix}");
         var authSessionDataValue = GetCookie($"auth_session_data_{providerSuffix}");
 
-        return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
+        return (accessToken, refreshToken, tag, authSessionDataValue);
     }
 
-    private static AuthSession GetAuthSession(string? authTokenValue, string? extRefreshTokenValue, string? authSessionDataValue, HttpMessageHandler httpMessageHandler)
+    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, HttpMessageHandler httpMessageHandler)
     {
-        if (authTokenValue == null)
+        if (accessToken == null)
         {
             return new(httpMessageHandler, authSessionData: authSessionDataValue);
         }
 
         try
         {
-            var token = JsonSerializer.Deserialize<AuthToken>(authTokenValue, JsonHelper.DefaultOptions);
-            if (token == null)
+            object? tag = null;
+            if (!string.IsNullOrEmpty(tagJson))
             {
-                return new(httpMessageHandler, authSessionData: authSessionDataValue);
+                try
+                {
+                    tag = JsonSerializer.Deserialize<object>(tagJson, JsonHelper.DefaultOptions);
+                }
+                catch
+                {
+                    // If tag deserialization fails, just leave it null
+                }
             }
 
-            // Check if refresh token is in a separate cookie
-            if (token.RefreshToken == null)
-            {
-                token = token with { RefreshToken = extRefreshTokenValue };
-            }
-
+            var token = new AuthToken(accessToken, refreshToken, tag);
             return new(httpMessageHandler, token, authSessionDataValue);
         }
         catch (Exception)
