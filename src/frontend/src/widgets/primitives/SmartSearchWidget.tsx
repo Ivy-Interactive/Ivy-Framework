@@ -1,5 +1,4 @@
 import { getHeight, getWidth } from '@/lib/styles';
-import { cn } from '@/lib/utils';
 import React from 'react';
 
 interface SmartSearchWidgetProps {
@@ -36,26 +35,19 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       role="search"
       aria-label="Ivy docs smart search"
       style={styles}
-      className="overflow-y-auto pt-4"
+      className="overflow-y-auto"
       data-testid={dataTestId}
     >
-      <div className="relative mx-auto flex max-w-3xl flex-col">
-        {/* Search bar */}
-        <div className="w-full">{searchBar}</div>
-
-        {/* Results: animate in when present (Bing-style) */}
-        {resultsContent != null && resultsContent.length > 0 && (
-          <div
-            className={cn(
-              'min-h-0 w-full',
-              'animate-in fade-in-0 slide-in-from-top-2 duration-300 ease-out',
-              'flex flex-col gap-4'
-            )}
-          >
-            {resultsContent}
-          </div>
-        )}
+      {/* Search bar pinned at top – fixed; half-transparent background only under the bar (not full width) */}
+      <div className="fixed top-0 z-50 w-full max-w-3xl pt-4">
+        <div className="rounded-lg border border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <div className="w-full">{searchBar}</div>
+        </div>
       </div>
+      {/* Spacer so content starts below the pinned bar */}
+      <div className="h-8 shrink-0" aria-hidden />
+      {/* Results in FloatingPanel when present */}
+      {resultsContent != null && resultsContent.length > 0 && resultsContent}
     </div>
   );
 };
