@@ -52,7 +52,7 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput    
     [Prop] public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
-    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
+    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; init; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -121,5 +121,25 @@ public static class ReadOnlyInputExtensions
     public static IAnyReadOnlyInput HandleBlur<T>(this IAnyReadOnlyInput widget, Action onBlur) where T : notnull
     {
         return widget.HandleBlur<T>(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static IAnyReadOnlyInput OnChange<T>(this IAnyReadOnlyInput widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
+    {
+        if (widget is ReadOnlyInput<T> typedWidget)
+        {
+            return typedWidget with { OnChange = onChange };
+        }
+        throw new InvalidOperationException($"Cannot set OnChange: widget is not ReadOnlyInput<{typeof(T).Name}>");
+    }
+
+    public static IAnyReadOnlyInput OnChange<T>(this IAnyReadOnlyInput widget, Action<Event<IInput<T>, T>> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
+    }
+
+    public static IAnyReadOnlyInput OnChange<T>(this IAnyReadOnlyInput widget, Action<T> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
     }
 }

@@ -70,9 +70,9 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
 
     internal IconInput() { }
 
-    [Prop] public TIcon Value { get; } = default!;
+    [Prop] public TIcon Value { get; init; } = default!;
 
-    [Event] public Func<Event<IInput<TIcon>, TIcon>, ValueTask>? OnChange { get; }
+    [Event] public Func<Event<IInput<TIcon>, TIcon>, ValueTask>? OnChange { get; init; }
 }
 
 public static class IconInputExtensions
@@ -111,4 +111,33 @@ public static class IconInputExtensions
             onBlur();
             return ValueTask.CompletedTask;
         });
+
+    public static IconInputBase Value<T>(this IconInputBase widget, T value)
+    {
+        if (widget is IconInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not IconInput<{typeof(T).Name}>");
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static IconInputBase OnChange<T>(this IconInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
+    {
+        if (widget is IconInput<T> typedWidget)
+        {
+            return typedWidget with { OnChange = onChange };
+        }
+        throw new InvalidOperationException($"Cannot set OnChange: widget is not IconInput<{typeof(T).Name}>");
+    }
+
+    public static IconInputBase OnChange<T>(this IconInputBase widget, Action<Event<IInput<T>, T>> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
+    }
+
+    public static IconInputBase OnChange<T>(this IconInputBase widget, Action<T> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
+    }
 }

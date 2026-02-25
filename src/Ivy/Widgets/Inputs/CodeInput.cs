@@ -83,11 +83,11 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
         Height = Size.Units(25);
     }
 
-    [Prop] public TString Value { get; } = default!;
+    [Prop] public TString Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
-    [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
+    [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; init; }
 }
 
 public static class CodeInputExtensions
@@ -156,5 +156,34 @@ public static class CodeInputExtensions
     public static CodeInputBase HandleBlur(this CodeInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    public static CodeInputBase Value<T>(this CodeInputBase widget, T value)
+    {
+        if (widget is CodeInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not CodeInput<{typeof(T).Name}>");
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static CodeInputBase OnChange<T>(this CodeInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
+    {
+        if (widget is CodeInput<T> typedWidget)
+        {
+            return typedWidget with { OnChange = onChange };
+        }
+        throw new InvalidOperationException($"Cannot set OnChange: widget is not CodeInput<{typeof(T).Name}>");
+    }
+
+    public static CodeInputBase OnChange<T>(this CodeInputBase widget, Action<Event<IInput<T>, T>> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
+    }
+
+    public static CodeInputBase OnChange<T>(this CodeInputBase widget, Action<T> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
     }
 }

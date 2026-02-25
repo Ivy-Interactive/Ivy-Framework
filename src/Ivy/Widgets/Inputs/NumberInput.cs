@@ -120,11 +120,11 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
 
     internal NumberInput() { }
 
-    [Prop] public TNumber Value { get; } = default!;
+    [Prop] public TNumber Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
-    [Event] public Func<Event<IInput<TNumber>, TNumber>, ValueTask>? OnChange { get; }
+    [Event] public Func<Event<IInput<TNumber>, TNumber>, ValueTask>? OnChange { get; init; }
 }
 
 public static class NumberInputExtensions
@@ -239,5 +239,34 @@ public static class NumberInputExtensions
     public static NumberInputBase HandleBlur(this NumberInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    public static NumberInputBase Value<T>(this NumberInputBase widget, T value)
+    {
+        if (widget is NumberInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not NumberInput<{typeof(T).Name}>");
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static NumberInputBase OnChange<T>(this NumberInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
+    {
+        if (widget is NumberInput<T> typedWidget)
+        {
+            return typedWidget with { OnChange = onChange };
+        }
+        throw new InvalidOperationException($"Cannot set OnChange: widget is not NumberInput<{typeof(T).Name}>");
+    }
+
+    public static NumberInputBase OnChange<T>(this NumberInputBase widget, Action<Event<IInput<T>, T>> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
+    }
+
+    public static NumberInputBase OnChange<T>(this NumberInputBase widget, Action<T> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
     }
 }

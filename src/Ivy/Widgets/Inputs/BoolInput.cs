@@ -98,11 +98,11 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 
     internal BoolInput() { }
 
-    [Prop] public TBool Value { get; } = default!;
+    [Prop] public TBool Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TBool) == typeof(bool?);
 
-    [Event] public Func<Event<IInput<TBool>, TBool>, ValueTask>? OnChange { get; }
+    [Event] public Func<Event<IInput<TBool>, TBool>, ValueTask>? OnChange { get; init; }
 }
 
 /// <summary>
@@ -307,5 +307,34 @@ public static class BoolInputExtensions
     public static BoolInputBase HandleBlur(this BoolInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    public static BoolInputBase Value<T>(this BoolInputBase widget, T value)
+    {
+        if (widget is BoolInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not BoolInput<{typeof(T).Name}>");
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static BoolInputBase OnChange<T>(this BoolInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
+    {
+        if (widget is BoolInput<T> typedWidget)
+        {
+            return typedWidget with { OnChange = onChange };
+        }
+        throw new InvalidOperationException($"Cannot set OnChange: widget is not BoolInput<{typeof(T).Name}>");
+    }
+
+    public static BoolInputBase OnChange<T>(this BoolInputBase widget, Action<Event<IInput<T>, T>> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
+    }
+
+    public static BoolInputBase OnChange<T>(this BoolInputBase widget, Action<T> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
     }
 }

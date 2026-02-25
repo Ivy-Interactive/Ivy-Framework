@@ -132,4 +132,33 @@ public static class DateRangeInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    public static DateRangeInputBase Value<T>(this DateRangeInputBase widget, T value)
+    {
+        if (widget is DateRangeInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not DateRangeInput<{typeof(T).Name}>");
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static DateRangeInputBase OnChange<T>(this DateRangeInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
+    {
+        if (widget is DateRangeInput<T> typedWidget)
+        {
+            return typedWidget with { OnChange = onChange };
+        }
+        throw new InvalidOperationException($"Cannot set OnChange: widget is not DateRangeInput<{typeof(T).Name}>");
+    }
+
+    public static DateRangeInputBase OnChange<T>(this DateRangeInputBase widget, Action<Event<IInput<T>, T>> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
+    }
+
+    public static DateRangeInputBase OnChange<T>(this DateRangeInputBase widget, Action<T> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
+    }
 }

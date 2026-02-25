@@ -99,11 +99,11 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
 
     internal TextInput() { }
 
-    [Prop] public TString Value { get; } = default!;
+    [Prop] public TString Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
-    [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
+    [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; init; }
 }
 
 /// <summary>
@@ -208,5 +208,34 @@ public static class TextInputExtensions
     public static TextInputBase HandleBlur(this TextInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    public static TextInputBase Value<T>(this TextInputBase widget, T value)
+    {
+        if (widget is TextInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not TextInput<{typeof(T).Name}>");
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static TextInputBase OnChange<T>(this TextInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
+    {
+        if (widget is TextInput<T> typedWidget)
+        {
+            return typedWidget with { OnChange = onChange };
+        }
+        throw new InvalidOperationException($"Cannot set OnChange: widget is not TextInput<{typeof(T).Name}>");
+    }
+
+    public static TextInputBase OnChange<T>(this TextInputBase widget, Action<Event<IInput<T>, T>> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
+    }
+
+    public static TextInputBase OnChange<T>(this TextInputBase widget, Action<T> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
     }
 }

@@ -84,13 +84,13 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
 
     internal SelectInput() { }
 
-    [Prop(AlwaysSerialize = true)] public TValue Value { get; } = default!;
+    [Prop(AlwaysSerialize = true)] public TValue Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
     [Prop] public IAnyOption[] Options { get; set; } = [];
 
-    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
+    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; init; }
 }
 
 public static class SelectInputExtensions
@@ -200,5 +200,34 @@ public static class SelectInputExtensions
     public static SelectInput<string[]> ToSelectInput(this IState<string[]> state, IEnumerable<string> options, string? placeholder = null, bool disabled = false, SelectInputs variant = SelectInputs.Select)
     {
         return new SelectInput<string[]>(state, options.ToOptions(), placeholder ?? "Select options...", disabled, variant, true);
+    }
+
+    public static SelectInputBase Value<T>(this SelectInputBase widget, T value)
+    {
+        if (widget is SelectInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not SelectInput<{typeof(T).Name}>");
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static SelectInputBase OnChange<T>(this SelectInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
+    {
+        if (widget is SelectInput<T> typedWidget)
+        {
+            return typedWidget with { OnChange = onChange };
+        }
+        throw new InvalidOperationException($"Cannot set OnChange: widget is not SelectInput<{typeof(T).Name}>");
+    }
+
+    public static SelectInputBase OnChange<T>(this SelectInputBase widget, Action<Event<IInput<T>, T>> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
+    }
+
+    public static SelectInputBase OnChange<T>(this SelectInputBase widget, Action<T> onChange)
+    {
+        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
     }
 }
