@@ -1,8 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading;
-using Ivy;
-using Ivy.Core;
 using Ivy.Docs.Shared.Services;
 
 // ReSharper disable once CheckNamespace
@@ -92,24 +89,21 @@ public class SmartSearchView : ViewBase
         }
 
         var searchBar = Layout.Horizontal().Gap(0).Align(Align.Center)
-            | (Layout.Vertical().Width(Size.Grow())
-                | inputState.ToTextInput()
-                    .Placeholder("Ask a question about Ivy... (e.g. how to use BoolInput)"))
-            | new Button("Ask", SubmitQuestion)
-                .Variant(ButtonVariant.Ai);
+            | inputState.ToTextInput()
+                    .Placeholder("Ask a question about Ivy... (e.g. how to use BoolInput)")
+            | new Button("Ask", SubmitQuestion).Variant(ButtonVariant.Ai);
 
         if (queryQuestion.Value == null || resultsContent == null)
         {
-            object[] one = [searchBar];
-            return new SmartSearch(one);
+            return new SmartSearch([new Slot("SearchBar", searchBar)]);
         }
 
         var apiTitle = query.Value is { Title: { } t } && !string.IsNullOrWhiteSpace(t) ? t : null;
         var resultsHeader = apiTitle != null ? Text.H2(apiTitle).Bold() : null;
-        var clearButton = new Button("Clear", _ => queryQuestion.Set(_ => (string?)null)).Variant(ButtonVariant.Ghost);
+        var clearButton = new Button("Clear", _ => queryQuestion.Set(_ => (string?)null));
         object[] children = resultsHeader != null
-            ? [searchBar, resultsHeader, resultsContent, clearButton]
-            : [searchBar, resultsContent, clearButton];
+            ? [new Slot("SearchBar", searchBar), new Slot("ResultsHeader", resultsHeader), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)]
+            : [new Slot("SearchBar", searchBar), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)];
         return new SmartSearch(children);
     }
 }

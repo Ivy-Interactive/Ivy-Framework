@@ -2,9 +2,16 @@ import { getHeight, getWidth } from '@/lib/styles';
 import React, { useRef } from 'react';
 import { X } from 'lucide-react';
 
+interface SmartSearchSlots {
+  SearchBar?: React.ReactNode[];
+  ResultsHeader?: React.ReactNode[];
+  ResultsContent?: React.ReactNode[];
+  ClearButton?: React.ReactNode[];
+}
+
 interface SmartSearchWidgetProps {
   id: string;
-  children?: React.ReactNode;
+  slots?: SmartSearchSlots;
   width?: string;
   height?: string;
   'data-testid'?: string;
@@ -12,7 +19,7 @@ interface SmartSearchWidgetProps {
 
 export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   id,
-  children,
+  slots: slotsProp,
   width = 'Full',
   height = 'Full',
   'data-testid': dataTestId,
@@ -23,16 +30,12 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   };
 
   const clearButtonRef = useRef<HTMLDivElement>(null);
-
-  const childArray = React.Children.toArray(children);
-  const searchBar = childArray[0];
-  const hasFourChildren = childArray.length >= 4;
-  const resultsHeader = hasFourChildren ? childArray[1] : null;
-  const resultsContent = hasFourChildren ? childArray[2] : childArray[1];
-  const clearButton = hasFourChildren ? childArray[3] : childArray[2];
-
-  const hasResults =
-    childArray.length >= 3 && resultsContent != null && clearButton != null;
+  const slots = slotsProp ?? {};
+  const searchBar = slots.SearchBar;
+  const resultsHeader = slots.ResultsHeader;
+  const resultsContent = slots.ResultsContent;
+  const clearButton = slots.ClearButton;
+  const hasResults = resultsContent != null && clearButton != null;
 
   return (
     <div
