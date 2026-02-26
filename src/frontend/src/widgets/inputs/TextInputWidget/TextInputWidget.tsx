@@ -34,7 +34,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   // Normalize null/undefined to empty string for display (HTML inputs can't have null values)
   const [localValue, setLocalValue] = useState(value ?? '');
   const [isFocused, setIsFocused] = useState(false);
-  const [minLengthError, setMinLengthError] = useState<string | undefined>(undefined);
+  const [minLengthError, setMinLengthError] = useState<string | undefined>(
+    undefined
+  );
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
   // Wrapper to normalize null/undefined to empty string for useSyncServerValue
@@ -62,8 +64,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       if (minLength !== undefined && newValue.length >= minLength) {
         setMinLengthError(undefined);
       }
-      if (events.includes('OnChange'))
-        eventHandler('OnChange', id, [newValue]);
+      if (events.includes('OnChange')) eventHandler('OnChange', id, [newValue]);
     },
     [eventHandler, id, events, minLength]
   );
@@ -71,7 +72,11 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   const handleBlur = useCallback(() => {
     setIsFocused(false);
     // Show validation error if value is non-empty but below the minimum length
-    if (minLength !== undefined && localValue.length > 0 && localValue.length < minLength) {
+    if (
+      minLength !== undefined &&
+      localValue.length > 0 &&
+      localValue.length < minLength
+    ) {
       setMinLengthError(`Minimum ${minLength} characters required`);
     }
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
