@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using Ivy;
@@ -27,6 +28,8 @@ public class SmartSearchView : ViewBase
         var client = UseService<IClientProvider>();
         var inputState = UseState("");
         var queryQuestion = UseState(() => (string?)null);
+        var resultForQuestion = UseState(() => (string?)null);
+        var lastResultRef = UseRef<IvyDocsQuestionResult?>(() => null);
 
         var query = UseQuery<IvyDocsQuestionResult?, string>(
             key: queryQuestion.Value,
@@ -41,16 +44,24 @@ public class SmartSearchView : ViewBase
         {
             var q = inputState.Value?.Trim();
             if (string.IsNullOrEmpty(q)) return;
-            var questionChanged = q != queryQuestion.Value;
-            if (questionChanged)
-                query.Mutator.Invalidate();
+            if (string.Equals(q, queryQuestion.Value, StringComparison.Ordinal)) return;
+            resultForQuestion.Set((string?)null);
+            query.Mutator.Invalidate();
             queryQuestion.Set(q);
         }
 
         object? resultsContent = null;
         if (queryQuestion.Value != null)
         {
-            var isFetching = query.Loading || query.Validating;
+            var resultJustArrived = query.Value != null && !query.Loading && !query.Validating && query.Error is null
+                && !ReferenceEquals(query.Value, lastResultRef.Value);
+            if (resultJustArrived)
+            {
+                lastResultRef.Value = query.Value;
+                resultForQuestion.Set(queryQuestion.Value);
+            }
+            var waitingForNewResult = queryQuestion.Value != resultForQuestion.Value;
+            var isFetching = query.Loading || query.Validating || waitingForNewResult;
             if (isFetching)
             {
                 resultsContent = Layout.Vertical().Gap(4)
