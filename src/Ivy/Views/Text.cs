@@ -204,6 +204,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _bold;
     private bool _italic;
     private bool _muted;
+    private TextAlignment? _textAlignment;
 
     private Scale? _scale;
 
@@ -212,7 +213,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         switch (variant)
         {
             case TextVariant.Code:
-                return new Code(content, codeLanguage);
+                return new CodeBlock(content, codeLanguage);
             case TextVariant.Markdown:
                 return new Markdown(content);
             case TextVariant.Json:
@@ -226,7 +227,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
             default:
                 {
                     var text = new TextBlock(
-                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted)
+                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted, _textAlignment)
                     {
                         Scale = _scale
                     };
@@ -314,6 +315,20 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     public TextBuilder Medium() => Scale(Ivy.Scale.Medium);
 
     public TextBuilder Large() => Scale(Ivy.Scale.Large);
+
+    public TextBuilder Align(TextAlignment alignment)
+    {
+        _textAlignment = alignment;
+        return this;
+    }
+
+    public static TextBuilder Left() => Align(TextAlignment.Left);
+
+    public static TextBuilder Center() => Align(TextAlignment.Center);
+
+    public static TextBuilder Right() => Align(TextAlignment.Right);
+
+    public static TextBuilder Justify() => Align(TextAlignment.Justify);
 }
 
 
