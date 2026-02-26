@@ -55,13 +55,50 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
     return () => window.removeEventListener('message', handleMessage);
   }, [handleMessage]);
 
-  useEffect(() => {
-    if (!outboundMessageType || outboundMessageToken == null) return;
+  const iframeLoadedRef = useRef(false);
+  const pendingMessageRef = useRef<{ type: string; token: string } | null>(
+    null
+  );
+
+  const sendOutboundMessage = useCallback(() => {
+    if (!pendingMessageRef.current) return;
     iframeRef.current?.contentWindow?.postMessage(
-      { type: outboundMessageType, token: outboundMessageToken },
+      {
+        type: pendingMessageRef.current.type,
+        token: pendingMessageRef.current.token,
+      },
       '*'
     );
-  }, [outboundMessageType, outboundMessageToken]);
+  }, []);
 
-  return <iframe ref={iframeRef} src={src} key={iframeKey} style={styles} />;
+  useEffect(() => {
+    if (!outboundMessageType || outboundMessageToken == null) return;
+    pendingMessageRef.current = {
+      type: outboundMessageType,
+      token: outboundMessageToken,
+    };
+    if (iframeLoadedRef.current) {
+      sendOutboundMessage();
+    }
+  }, [outboundMessageType, outboundMessageToken, sendOutboundMessage]);
+
+  // Reset loaded state when iframe key changes
+  useEffect(() => {
+    iframeLoadedRef.current = false;
+  }, [iframeKey]);
+
+  const handleIframeLoad = useCallback(() => {
+    iframeLoadedRef.current = true;
+    sendOutboundMessage();
+  }, [sendOutboundMessage]);
+
+  return (
+    <iframe
+      ref={iframeRef}
+      src={src}
+      key={iframeKey}
+      style={styles}
+      onLoad={handleIframeLoad}
+    />
+  );
 };
