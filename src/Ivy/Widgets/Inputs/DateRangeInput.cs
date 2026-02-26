@@ -71,9 +71,9 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
 
     internal DateRangeInput() { }
 
-    [Prop] public TDateRange Value { get; set; } = default!;
+    [Prop] public TDateRange Value { get; init; } = default!;
 
-    [Event] public Func<Event<IInput<TDateRange>, TDateRange>, ValueTask>? OnChange { get; set; }
+    [Event] public Func<Event<IInput<TDateRange>, TDateRange>, ValueTask>? OnChange { get; init; }
 }
 
 public static class DateRangeInputExtensions

@@ -83,11 +83,11 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 
     internal DateTimeInput() { }
 
-    [Prop] public TDate Value { get; set; } = default!;
+    [Prop] public TDate Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TDate) == typeof(DateTime?) || typeof(TDate) == typeof(DateTimeOffset?) || typeof(TDate) == typeof(DateOnly?) || typeof(TDate) == typeof(TimeOnly?);
 
-    [Event] public Func<Event<IInput<TDate>, TDate>, ValueTask>? OnChange { get; set; }
+    [Event] public Func<Event<IInput<TDate>, TDate>, ValueTask>? OnChange { get; init; }
 }
 
 public static class DateTimeInputExtensions
