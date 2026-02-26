@@ -16,12 +16,31 @@ public static class AuthSessionExtensions
         => new()
         {
             AuthToken = authSession.AuthToken,
+            OAuthProviderTokens = new Dictionary<OAuthProvider, OAuthProviderToken>(authSession.OAuthProviderTokens),
             AuthSessionData = authSession.AuthSessionData,
         };
 
     public static bool HasChangedSince(this IAuthSession authSession, AuthSessionSnapshot snapshot)
         => authSession.AuthToken != snapshot.AuthToken ||
-           authSession.AuthSessionData != snapshot.AuthSessionData;
+           authSession.AuthSessionData != snapshot.AuthSessionData ||
+           !OAuthProviderTokensEqual(authSession.OAuthProviderTokens, snapshot.OAuthProviderTokens);
+
+    private static bool OAuthProviderTokensEqual(
+        IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> current,
+        IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> snapshot)
+    {
+        if (current.Count != snapshot.Count) return false;
+
+        foreach (var kvp in current)
+        {
+            if (!snapshot.TryGetValue(kvp.Key, out var snapshotValue) || kvp.Value != snapshotValue)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public static T? GetAuthSessionData<T>(this IAuthSession authSession)
     {

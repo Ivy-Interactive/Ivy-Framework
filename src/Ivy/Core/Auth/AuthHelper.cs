@@ -200,7 +200,7 @@ public static class AuthHelper
             }
 
             var token = new AuthToken(accessToken, refreshToken, tag);
-            return new(httpMessageHandler, token, authSessionDataValue);
+            return new(httpMessageHandler, token, authSessionData: authSessionDataValue);
         }
         catch (Exception)
         {

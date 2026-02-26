@@ -4,7 +4,8 @@ namespace Ivy.Core.Auth;
 public enum AuthSessionProperty
 {
     AuthToken,
-    AuthSessionData
+    AuthSessionData,
+    OAuthProviderTokens
 }
 
 public enum AuthSessionAccessMode
@@ -30,6 +31,9 @@ public class CheckedAuthSessionBuilder(IAuthSession innerAuthSession)
 
     public CheckedAuthSessionBuilder WithSessionDataAccess(AuthSessionAccessMode accessMode)
         => WithAccessMode(AuthSessionProperty.AuthSessionData, accessMode);
+
+    public CheckedAuthSessionBuilder WithOAuthProviderTokensAccess(AuthSessionAccessMode accessMode)
+        => WithAccessMode(AuthSessionProperty.OAuthProviderTokens, accessMode);
 
     public IAuthSession Build()
     {
@@ -83,6 +87,15 @@ public readonly struct CheckedAuthSession(IAuthSession innerAuthSession, Diction
         {
             CheckWrite(AuthSessionProperty.AuthSessionData);
             _innerAuthSession.AuthSessionData = value;
+        }
+    }
+
+    public readonly IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> OAuthProviderTokens
+    {
+        get
+        {
+            CheckRead(AuthSessionProperty.OAuthProviderTokens);
+            return _innerAuthSession.OAuthProviderTokens;
         }
     }
 
