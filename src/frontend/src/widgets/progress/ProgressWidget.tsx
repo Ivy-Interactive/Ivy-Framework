@@ -9,7 +9,7 @@ interface ProgressWidgetProps {
   id: string;
   goal?: string;
   value?: number;
-  colorVariant: 'Primary';
+  color?: string;
   width?: string;
 }
 
@@ -44,16 +44,25 @@ const SparkleStyles = () => (
 export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   value,
   goal,
-  colorVariant = 'Primary',
+  color,
   width = 'Full',
 }) => {
   const isCompleted = value && value >= 100;
-  const styles = getWidth(width);
+
+  const containerStyles: React.CSSProperties = {
+    ...getWidth(width),
+    ...(color && color.toLowerCase() !== 'primary'
+      ? { '--primary': `var(--${color.toLowerCase()})` }
+      : {}),
+  };
 
   return (
     <>
       <SparkleStyles />
-      <div className="w-full group relative" style={styles}>
+      <div
+        className="w-full group relative"
+        style={containerStyles}
+      >
         {goal && (
           <Badge
             variant="secondary"
@@ -79,13 +88,6 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
         <Progress
           value={value}
           className="bg-neutral/10"
-          style={
-            {
-              '--progress-background': colorVariant
-                ? `var(--${colorVariant})`
-                : 'var(--primary)',
-            } as React.CSSProperties
-          }
         />
       </div>
     </>

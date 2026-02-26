@@ -24,10 +24,10 @@ public class ProgressApp : SampleBase
                 new Button("+10", _ => progress1.Set(Math.Min(100, (progress1.Value ?? 0) + 10)))
             )
 
-            | Text.H2("Color Variants")
+            | Text.H2("Colors")
             | Layout.Vertical()
-                | new Progress(progress2.Value).ColorVariant(Progress.ColorVariants.Primary).Goal("Primary Variant")
-                | new Progress(progress2.Value).ColorVariant(Progress.ColorVariants.EmeraldGradient).Goal("Emerald Gradient")
+                | new Progress(progress2.Value).Color(Colors.Primary).Goal("Primary")
+                | new Progress(progress2.Value).Color(Colors.Amber).Goal("Amber")
 
             | Text.H2("With Goals")
             | Layout.Vertical()

@@ -79,7 +79,7 @@ public class CommonWidgetsDemo : ViewBase
             | new Card(
                 Layout.Vertical().Gap(2)
                     | new Progress(50).Goal("Task completion")
-                    | new Progress(75).ColorVariant(Progress.ColorVariants.EmeraldGradient)
+                    | new Progress(75).Color(Colors.Amber)
                     | new Progress(90)
             ).Title("Progress").Description("Task completion indicators").Height(Size.Units(50))
             | new Card(

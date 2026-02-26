@@ -49,7 +49,7 @@ public class MetricView(
 
         object? footer = x.GoalAchieved != null
             ? new Progress((int)Math.Round(x.GoalAchieved.Value * 100.0))
-                .ColorVariant(Progress.ColorVariants.EmeraldGradient)
+                .Color(Colors.Amber)
                 .Goal(x.GoalFormatted)
             : null;
 
