@@ -155,6 +155,9 @@ public class SupabaseAuthProvider : IAuthProvider
         {
             var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier, code)
                 .WaitAsync(cancellationToken);
+
+            ExtractAndStoreProviderTokens(session, authSession);
+
             return MakeAuthToken(session);
         }
         catch (Exception ex)
@@ -392,13 +395,64 @@ public class SupabaseAuthProvider : IAuthProvider
             ? new AuthToken(session.AccessToken, session.RefreshToken)
             : null;
 
+    private static void ExtractAndStoreProviderTokens(Session? session, IAuthSession authSession)
+    {
+        if (session?.User?.AppMetadata == null || string.IsNullOrEmpty(session.ProviderToken))
+        {
+            return;
+        }
+
+        if (!session.User.UserMetadata.TryGetValue("provider_id", out var providerIdObj) || providerIdObj is not string providerId)
+        {
+            return;
+        }
+
+        OAuthProvider? oauthProvider = null;
+
+        foreach (var identity in session.User.Identities)
+        {
+            if (string.IsNullOrEmpty(identity.Id))
+            {
+                continue;
+            }
+
+            oauthProvider = identity.Provider?.ToLowerInvariant() switch
+            {
+                "google" => OAuthProvider.Google,
+                "github" => OAuthProvider.GitHub,
+                "apple" => OAuthProvider.Apple,
+                "microsoft" => OAuthProvider.Microsoft,
+                "twitter" => OAuthProvider.Twitter,
+                _ => null
+            };
+
+            if (oauthProvider.HasValue)
+            {
+                break;
+            }
+        }
+
+        if (!oauthProvider.HasValue)
+        {
+            return;
+        }
+
+        var providerAuthToken = new AuthToken(
+            session.ProviderToken,
+            session.ProviderRefreshToken);
+
+        var providerToken = new OAuthProviderToken(
+            Provider: oauthProvider.Value,
+            AuthToken: providerAuthToken);
+
+        authSession.AddOAuthProviderToken(providerToken);
+    }
+
     public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        // Supabase does not expose underlying OAuth provider tokens (e.g., Google, GitHub access tokens)
-        // through its client library. The Session only contains Supabase's own JWT token.
-        // If you need direct access to OAuth provider tokens, consider using those providers directly
-        // (e.g., Ivy.Auth.GitHub) or a provider that exposes them (e.g., Clerk, Auth0).
-        return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(null);
+        var tokens = authSession.OAuthProviderTokens;
+        return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(
+            tokens.Count > 0 ? new Dictionary<OAuthProvider, OAuthProviderToken>(tokens) : null);
     }
 
 }
