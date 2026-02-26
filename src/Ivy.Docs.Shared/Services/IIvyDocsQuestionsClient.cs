@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,6 +11,4 @@ public interface IIvyDocsQuestionsClient
     Task<IvyDocsQuestionResult?> AskAsync(string question, CancellationToken cancellationToken = default);
 }
 
-public record IvyDocsQuestionResult(string Answer, IReadOnlyList<IvyDocsQuestionSource> Sources, string? Title = null);
-
-public record IvyDocsQuestionSource(string Title, string Url);
+public record IvyDocsQuestionResult(string Answer, string? Title = null);

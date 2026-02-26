@@ -17,15 +17,14 @@ public record SmartSearch(params object?[] children) : WidgetBase<SmartSearch>(c
 }
 
 /// <summary>
-/// View for smart search: ask a question and get an AI-generated answer inline
-/// with optional links to reference docs. Results shown below the search bar (no sheet).
+/// View for smart search: ask a question and get an AI-generated answer inline.
+/// Results shown below the search bar (no sheet).
 /// </summary>
 public class SmartSearchView : ViewBase
 {
     public override object? Build()
     {
         var questionsClient = UseService<IIvyDocsQuestionsClient>();
-        var client = UseService<IClientProvider>();
         var inputState = UseState("");
         var queryQuestion = UseState(() => (string?)null);
         var resultForQuestion = UseState(() => (string?)null);
@@ -65,9 +64,8 @@ public class SmartSearchView : ViewBase
             if (isFetching)
             {
                 resultsContent = Layout.Vertical().Gap(4)
-                    | Layout.Horizontal().Gap(2).Align(Align.Center)
-                        | new Loading()
-                        | Text.P("Finding an answer...")
+                    | new Loading()
+                    | Text.P("Finding an answer...")
                     | new Skeleton().Height(80)
                     | new Skeleton().Height(120)
                     | new Skeleton().Height(60);
@@ -80,23 +78,8 @@ public class SmartSearchView : ViewBase
             }
             else if (query.Value is { } result)
             {
-                object? sourceLinks = null;
-                if (result.Sources.Count > 0)
-                {
-                    var linkButtons = result.Sources.Select(s => (object)new Button(s.Title, _ => client.OpenUrl(s.Url))
-                        .Variant(ButtonVariant.Ghost)).ToArray();
-                    sourceLinks = Layout.Vertical().Gap(2)
-                        | Text.P("Reference:").Bold()
-                        | (Layout.Vertical().Gap(1) | new Fragment(linkButtons));
-                }
-
                 resultsContent = Layout.Vertical().Gap(4)
-                    | new Markdown(result.Answer)
-                        | (sourceLinks != null
-                        ? Layout.Vertical().Gap(2)
-                            | new Separator()
-                            | sourceLinks
-                        : null);
+                    | new Markdown(result.Answer);
             }
             else if (!query.Loading && !query.Validating && query.Error is null)
             {
@@ -111,11 +94,9 @@ public class SmartSearchView : ViewBase
         var searchBar = Layout.Horizontal().Gap(0).Align(Align.Center)
             | (Layout.Vertical().Width(Size.Grow())
                 | inputState.ToTextInput()
-                    .Placeholder("Ask a question about Ivy... (e.g. how to use BoolInput)")
-                    .TestId("docs-smart-search-input"))
+                    .Placeholder("Ask a question about Ivy... (e.g. how to use BoolInput)"))
             | new Button("Ask", SubmitQuestion)
-                .Variant(ButtonVariant.Ai)
-                .TestId("docs-smart-search-submit");
+                .Variant(ButtonVariant.Ai);
 
         if (queryQuestion.Value == null || resultsContent == null)
         {
@@ -124,8 +105,8 @@ public class SmartSearchView : ViewBase
         }
 
         var apiTitle = query.Value is { Title: { } t } && !string.IsNullOrWhiteSpace(t) ? t : null;
-        var resultsHeader = apiTitle != null ? Text.H2(apiTitle).NoWrap().Bold() : null;
-        var clearButton = new Button("Clear", _ => queryQuestion.Set(_ => (string?)null)).Variant(ButtonVariant.Ghost).TestId("docs-smart-search-clear");
+        var resultsHeader = apiTitle != null ? Text.H2(apiTitle).Bold() : null;
+        var clearButton = new Button("Clear", _ => queryQuestion.Set(_ => (string?)null)).Variant(ButtonVariant.Ghost);
         object[] children = resultsHeader != null
             ? [searchBar, resultsHeader, resultsContent, clearButton]
             : [searchBar, resultsContent, clearButton];

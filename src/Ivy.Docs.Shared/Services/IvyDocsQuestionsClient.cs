@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 namespace Ivy.Docs.Shared.Services;
 
 /// <summary>
-/// Calls the Ivy docs questions API and parses response (markdown or JSON with answer/sources).
+/// Calls the Ivy docs questions API and parses response (markdown or JSON with answer).
 /// </summary>
 public class IvyDocsQuestionsClient : IIvyDocsQuestionsClient
 {
@@ -17,7 +16,6 @@ public class IvyDocsQuestionsClient : IIvyDocsQuestionsClient
     private const string ClientName = "ivyDocs";
 
     private readonly HttpClient _httpClient;
-    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     public IvyDocsQuestionsClient(HttpClient httpClient)
     {
@@ -41,12 +39,12 @@ public class IvyDocsQuestionsClient : IIvyDocsQuestionsClient
             var contentType = response.Content.Headers.ContentType?.MediaType ?? "";
             var raw = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(raw))
-                return new IvyDocsQuestionResult("No answer returned.", [], null);
+                return new IvyDocsQuestionResult("No answer returned.", null);
 
-            if (contentType.Contains("json", StringComparison.OrdinalIgnoreCase))
-                return ParseJsonResponse(raw);
+            if (contentType.Contains("json", StringComparison.OrdinalIgnoreCase) || raw.TrimStart().StartsWith("{"))
+                return ParseJsonResponse(raw) ?? new IvyDocsQuestionResult(raw.Trim(), null);
 
-            return new IvyDocsQuestionResult(raw.Trim(), [], null);
+            return new IvyDocsQuestionResult(raw.Trim(), null);
         }
         catch (Exception)
         {
@@ -60,24 +58,32 @@ public class IvyDocsQuestionsClient : IIvyDocsQuestionsClient
         {
             using var doc = JsonDocument.Parse(raw);
             var root = doc.RootElement;
-            var answer = root.TryGetProperty("answer", out var a) ? a.GetString() ?? "" : raw;
-            var header = root.TryGetProperty("title", out var titleEl) ? titleEl.GetString() : root.TryGetProperty("header", out var headerEl) ? headerEl.GetString() : null;
-            var sources = new List<IvyDocsQuestionSource>();
-            if (root.TryGetProperty("sources", out var arr) && arr.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var item in arr.EnumerateArray())
-                {
-                    var title = item.TryGetProperty("title", out var t) ? t.GetString() : null;
-                    var url = item.TryGetProperty("url", out var u) ? u.GetString() : null;
-                    if (!string.IsNullOrEmpty(url))
-                        sources.Add(new IvyDocsQuestionSource(title ?? "Doc", url));
-                }
-            }
-            return new IvyDocsQuestionResult(answer ?? "", sources, header);
+            var (answer, header) = GetAnswerAndTitle(root, raw);
+            return new IvyDocsQuestionResult(answer ?? raw, header);
         }
         catch
         {
-            return new IvyDocsQuestionResult(raw, [], null);
+            return null;
         }
+    }
+
+    private static (string? answer, string? header) GetAnswerAndTitle(JsonElement root, string raw)
+    {
+        foreach (var name in new[] { "answer", "response", "text", "content", "body" })
+        {
+            if (root.TryGetProperty(name, out var a))
+            {
+                var answer = a.ValueKind == JsonValueKind.String ? a.GetString() : raw;
+                string? header = null;
+                foreach (var t in new[] { "title", "header", "subject" })
+                    if (root.TryGetProperty(t, out var el)) { header = el.GetString(); break; }
+                return (answer ?? raw, header);
+            }
+        }
+        if (root.TryGetProperty("data", out var data))
+            return GetAnswerAndTitle(data, raw);
+        if (root.TryGetProperty("result", out var result))
+            return GetAnswerAndTitle(result, raw);
+        return (raw, null);
     }
 }
