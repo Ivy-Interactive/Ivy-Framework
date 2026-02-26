@@ -1,4 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Ivy.Docs.Shared.Services;
 
@@ -36,12 +41,12 @@ public class IvyDocsQuestionsClient : IIvyDocsQuestionsClient
             var contentType = response.Content.Headers.ContentType?.MediaType ?? "";
             var raw = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(raw))
-                return new IvyDocsQuestionResult("No answer returned.", []);
+                return new IvyDocsQuestionResult("No answer returned.", [], null);
 
             if (contentType.Contains("json", StringComparison.OrdinalIgnoreCase))
                 return ParseJsonResponse(raw);
 
-            return new IvyDocsQuestionResult(raw.Trim(), []);
+            return new IvyDocsQuestionResult(raw.Trim(), [], null);
         }
         catch (Exception)
         {
@@ -56,6 +61,7 @@ public class IvyDocsQuestionsClient : IIvyDocsQuestionsClient
             using var doc = JsonDocument.Parse(raw);
             var root = doc.RootElement;
             var answer = root.TryGetProperty("answer", out var a) ? a.GetString() ?? "" : raw;
+            var header = root.TryGetProperty("title", out var titleEl) ? titleEl.GetString() : root.TryGetProperty("header", out var headerEl) ? headerEl.GetString() : null;
             var sources = new List<IvyDocsQuestionSource>();
             if (root.TryGetProperty("sources", out var arr) && arr.ValueKind == JsonValueKind.Array)
             {
@@ -67,11 +73,11 @@ public class IvyDocsQuestionsClient : IIvyDocsQuestionsClient
                         sources.Add(new IvyDocsQuestionSource(title ?? "Doc", url));
                 }
             }
-            return new IvyDocsQuestionResult(answer ?? "", sources);
+            return new IvyDocsQuestionResult(answer ?? "", sources, header);
         }
         catch
         {
-            return new IvyDocsQuestionResult(raw, []);
+            return new IvyDocsQuestionResult(raw, [], null);
         }
     }
 }

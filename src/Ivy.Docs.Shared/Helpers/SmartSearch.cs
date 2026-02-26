@@ -1,3 +1,6 @@
+using System.Linq;
+using System.Threading;
+using Ivy;
 using Ivy.Core;
 using Ivy.Docs.Shared.Services;
 
@@ -103,9 +106,18 @@ public class SmartSearchView : ViewBase
                 .Variant(ButtonVariant.Ai)
                 .TestId("docs-smart-search-submit");
 
-        var content = Layout.Vertical().Gap(4)
-            | searchBar
-            | (resultsContent ?? (object?)null!);
-        return new SmartSearch(content);
+        if (queryQuestion.Value == null || resultsContent == null)
+        {
+            object[] one = [searchBar];
+            return new SmartSearch(one);
+        }
+
+        var apiTitle = query.Value is { Title: { } t } && !string.IsNullOrWhiteSpace(t) ? t : null;
+        var resultsHeader = apiTitle != null ? Text.H2(apiTitle).NoWrap().Bold() : null;
+        var clearButton = new Button("Clear", _ => queryQuestion.Set(_ => (string?)null)).Variant(ButtonVariant.Ghost).TestId("docs-smart-search-clear");
+        object[] children = resultsHeader != null
+            ? [searchBar, resultsHeader, resultsContent, clearButton]
+            : [searchBar, resultsContent, clearButton];
+        return new SmartSearch(children);
     }
 }
