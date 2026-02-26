@@ -282,22 +282,6 @@ public static partial class MarkdownConverter
                         {
                             headingText.Append(literal.Content.ToString());
                         }
-                        else if (inline is CodeInline code)
-                        {
-                            headingText.Append(code.Content);
-                        }
-                        else if (inline is ContainerInline container && container.Any())
-                        {
-                            // Skip containers as we'll visit their children via Descendants()
-                        }
-                        else if (inline is EmphasisInline emphasis)
-                        {
-                            // Handled by children
-                        }
-                        else if (inline is HtmlInline html)
-                        {
-                            headingText.Append(html.Tag);
-                        }
                     }
 
                     sectionBuilder.AppendLine();
