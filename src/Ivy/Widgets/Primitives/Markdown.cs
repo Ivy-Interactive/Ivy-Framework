@@ -76,5 +76,5 @@ public static class MarkdownExtensions
     public static Markdown Justify(this Markdown markdown)
     {
         return markdown with { TextAlignment = TextAlignment.Justify };
-    }   
+    }
 }
