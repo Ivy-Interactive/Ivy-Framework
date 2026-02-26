@@ -184,14 +184,16 @@ public class SliplaneAuthProvider : IAuthProvider
             throw new ArgumentException($"Unknown auth option: {option.Id}", nameof(option));
         }
 
+        // Sliplane fixed redirect URI. OAuth callbacks have "code" in query → AuthController; app webhooks use "state" only → WebhookController.
         var callbackUri = callback.GetUri(includeIdInPath: false);
+        var redirectUri = $"{callbackUri.Scheme}://{callbackUri.Authority}/ivy/webhook";
 
         var authUrl = new UriBuilder(_authorizationUrl)
         {
             Query = string.Join("&", new[]
             {
                 $"client_id={Uri.EscapeDataString(_clientId)}",
-                $"redirect_uri={Uri.EscapeDataString(callbackUri.ToString())}",
+                $"redirect_uri={Uri.EscapeDataString(redirectUri)}",
                 $"response_type=code",
                 $"scope={Uri.EscapeDataString(_scope)}",
                 $"state={Uri.EscapeDataString(callback.Id)}",

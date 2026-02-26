@@ -5,6 +5,7 @@ using Ivy.Helpers;
 using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Ivy.Core.Helpers;
@@ -76,6 +77,9 @@ public class AuthController() : Controller
 
     [Route("ivy/auth/callback")]
     [Route("ivy/auth/callback/{callbackId}")]
+    [Route("ivy/webhook")]
+    [Route("ivy/webhook/{callbackId}")]
+    [OAuthWebhookRouteConstraint]
     [HttpGet]
     public async Task<IActionResult> OAuthCallback(
         string? callbackId,
@@ -119,7 +123,9 @@ public class AuthController() : Controller
             }
             else
             {
-                logger.LogWarning("OAuth callback: session not found for connection {ConnectionId}. This will prevent the Clerk auth provider from working correctly. All other providers are unaffected.", pending.ConnectionId);
+                // Session is typically gone by the time the OAuth redirect returns (browser navigated away, closing the WebSocket).
+                // This is harmless for most providers — only Clerk requires the session-specific HttpMessageHandler.
+                logger.LogDebug("OAuth callback: session not found for connection {ConnectionId} (expected during redirect flow). Using default HttpMessageHandler; Clerk auth provider may be affected.", pending.ConnectionId);
                 httpMessageHandler = new HttpClientHandler();
             }
 
@@ -256,6 +262,18 @@ public class AuthController() : Controller
         foreach (var session in GetMachineSessions(sessionStore, machineId, excludeConnectionId))
         {
             await SessionHelpers.AbandonSessionAsync(sessionStore, session, contentBuilder, resetTokenAndReload: true, triggerMachineReload: false, logger, "TriggerMachineLogout");
+        }
+    }
+
+    //Matches "ivy/webhook" only when "code" is present (OAuth callback), not app webhooks.
+    private sealed class OAuthWebhookRouteConstraintAttribute : Attribute, IActionConstraint
+    {
+        public int Order => 0;
+
+        public bool Accept(ActionConstraintContext context)
+        {
+            var query = context.RouteContext.HttpContext.Request.Query;
+            return !string.IsNullOrEmpty(query["code"]);
         }
     }
 }
