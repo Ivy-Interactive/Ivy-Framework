@@ -53,9 +53,9 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
           <div className="w-full">{searchBar}</div>
         </div>
       </div>
-      {/* Results overlay: scrollable header + content; Clear button pinned top-right (like CodeWidget copy) */}
+      {/* Results overlay: blur main page behind; results window stays sharp */}
       {hasResults && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/20">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/20 backdrop-blur-sm">
           <div
             className="relative flex max-h-[85vh] w-[90vw] max-w-4xl flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg"
             role="dialog"
