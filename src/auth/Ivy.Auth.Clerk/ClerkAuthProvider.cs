@@ -556,7 +556,7 @@ public class ClerkAuthProvider : IAuthProvider
                     {
                         tokens[provider.Value] = new OAuthProviderToken(
                             Provider: provider.Value,
-                            AccessToken: tokenResponse.Token,
+                            AuthToken: new AuthToken(tokenResponse.Token),
                             Scopes: tokenResponse.Scopes,
                             ExpiresAt: tokenResponse.ExpiresAt.HasValue
                                 ? DateTimeOffset.FromUnixTimeMilliseconds(tokenResponse.ExpiresAt.Value)

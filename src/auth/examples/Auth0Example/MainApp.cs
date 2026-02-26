@@ -61,7 +61,7 @@ public class MainApp : ViewBase
                                     var googleToken = oauthTokens.Value[OAuthProvider.Google];
                                     using var httpClient = new HttpClient();
                                     httpClient.DefaultRequestHeaders.Authorization =
-                                        new AuthenticationHeaderValue("Bearer", googleToken.AccessToken);
+                                        new AuthenticationHeaderValue("Bearer", googleToken.AuthToken.AccessToken);
 
                                     try
                                     {
@@ -88,7 +88,7 @@ public class MainApp : ViewBase
                                     var githubToken = oauthTokens.Value[OAuthProvider.GitHub];
                                     using var httpClient = new HttpClient();
                                     httpClient.DefaultRequestHeaders.Authorization =
-                                        new AuthenticationHeaderValue("Bearer", githubToken.AccessToken);
+                                        new AuthenticationHeaderValue("Bearer", githubToken.AuthToken.AccessToken);
                                     httpClient.DefaultRequestHeaders.UserAgent.Add(
                                         new ProductInfoHeaderValue("Auth0Example", "1.0"));
 

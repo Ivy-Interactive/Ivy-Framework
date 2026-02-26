@@ -63,7 +63,7 @@ public class MainApp : ViewBase
                                         var microsoftToken = oauthTokens.Value[OAuthProvider.Microsoft];
                                         using var httpClient = new HttpClient();
                                         httpClient.DefaultRequestHeaders.Authorization =
-                                            new AuthenticationHeaderValue("Bearer", microsoftToken.AccessToken);
+                                            new AuthenticationHeaderValue("Bearer", microsoftToken.AuthToken.AccessToken);
 
                                         try
                                         {
@@ -81,7 +81,7 @@ public class MainApp : ViewBase
                                         var microsoftToken = oauthTokens.Value[OAuthProvider.Microsoft];
                                         using var httpClient = new HttpClient();
                                         httpClient.DefaultRequestHeaders.Authorization =
-                                            new AuthenticationHeaderValue("Bearer", microsoftToken.AccessToken);
+                                            new AuthenticationHeaderValue("Bearer", microsoftToken.AuthToken.AccessToken);
 
                                         try
                                         {

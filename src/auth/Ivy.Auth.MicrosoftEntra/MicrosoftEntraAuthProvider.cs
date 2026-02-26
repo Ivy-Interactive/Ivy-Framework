@@ -320,7 +320,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
             {
                 [OAuthProvider.Microsoft] = new OAuthProviderToken(
                     Provider: OAuthProvider.Microsoft,
-                    AccessToken: result.AccessToken,
+                    AuthToken: new AuthToken(result.AccessToken),
                     Scopes: result.Scopes?.ToArray(),
                     ExpiresAt: result.ExpiresOn)
             };

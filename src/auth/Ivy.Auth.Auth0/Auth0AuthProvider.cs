@@ -360,7 +360,7 @@ public class Auth0AuthProvider : IAuthProvider
 
             tokens[provider.Value] = new OAuthProviderToken(
                 Provider: provider.Value,
-                AccessToken: identity.AccessToken);
+                AuthToken: new AuthToken(identity.AccessToken));
         }
 
         return tokens;

@@ -237,7 +237,7 @@ public class GitHubAuthProvider : IAuthProvider
         {
             [OAuthProvider.GitHub] = new OAuthProviderToken(
                 Provider: OAuthProvider.GitHub,
-                AccessToken: token,
+                AuthToken: new AuthToken(token),
                 Scopes: ["user:email"])
         };
 
