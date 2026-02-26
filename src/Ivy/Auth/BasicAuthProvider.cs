@@ -18,8 +18,6 @@ public class BasicAuthProvider : IAuthProvider
     private readonly byte[] _hashSecret;
     private readonly SymmetricSecurityKey _signingKey;
 
-    public string ProviderPrefix => "ba";
-
     private static string TokenUseClaim => "https://ivy.app/claims/token_use";
 
     public BasicAuthProvider(IConfiguration configuration)

@@ -31,11 +31,6 @@ public class CookieJar
         return false;
     }
 
-    public bool HasCookieWithSuffix(string suffix)
-    {
-        return _assignments.Any(a => a.Name.EndsWith(suffix));
-    }
-
     public void Delete(string name, CookieOptions options)
     {
         options.Expires = DateTimeOffset.UnixEpoch;

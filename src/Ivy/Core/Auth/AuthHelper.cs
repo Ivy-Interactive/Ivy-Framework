@@ -13,13 +13,13 @@ namespace Ivy.Core.Auth;
 
 public static class AuthHelper
 {
-    public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler, string providerPrefix)
-    => GetAuthCookies(context, providerPrefix) is (var accessToken, var refreshToken, var tag, var authSessionData)
+    public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
+    => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData)
         ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, httpMessageHandler)
         : new AuthSession(httpMessageHandler);
 
-    public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler, string providerPrefix)
-    => GetAuthCookies(context, providerPrefix) is (var accessToken, var refreshToken, var tag, var authSessionData)
+    public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
+    => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData)
         ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, httpMessageHandler)
         : new AuthSession(httpMessageHandler);
 
@@ -45,8 +45,7 @@ public static class AuthHelper
         var serviceProvider = session.AppServices;
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
-        var authProvider = serviceProvider.GetRequiredService<IAuthProvider>();
-        var authSession = GetAuthSession(context, httpMessageHandler, authProvider.ProviderPrefix);
+        var authSession = GetAuthSession(context, httpMessageHandler);
         try
         {
             await ValidateAuth(serviceProvider, authSession, context.CancellationToken);
@@ -85,8 +84,7 @@ public static class AuthHelper
         try
         {
             var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
-            var authProvider = serviceProvider.GetRequiredService<IAuthProvider>();
-            var authSession = GetAuthSession(controller.HttpContext, httpMessageHandler, authProvider.ProviderPrefix);
+            var authSession = GetAuthSession(controller.HttpContext, httpMessageHandler);
             await ValidateAuth(serviceProvider, authSession, controller.HttpContext.RequestAborted);
         }
         catch (MissingAuthTokenException ex)
@@ -142,17 +140,17 @@ public static class AuthHelper
         }
     }
 
-    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData) GetAuthCookies(HttpContext context, string providerPrefix)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData) GetAuthCookies(HttpContext context)
     {
         var cookies = context.Request.Cookies;
-        var accessToken = cookies[$"{providerPrefix}_access_token"].NullIfEmpty();
-        var refreshToken = cookies[$"{providerPrefix}_refresh_token"].NullIfEmpty();
-        var tag = cookies[$"{providerPrefix}_auth_tag"].NullIfEmpty();
-        var authSessionDataValue = cookies[$"{providerPrefix}_auth_session_data"].NullIfEmpty();
+        var accessToken = cookies["access_token"].NullIfEmpty();
+        var refreshToken = cookies["refresh_token"].NullIfEmpty();
+        var tag = cookies["auth_tag"].NullIfEmpty();
+        var authSessionDataValue = cookies["auth_session_data"].NullIfEmpty();
         return (accessToken, refreshToken, tag, authSessionDataValue);
     }
 
-    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData) GetAuthCookies(ServerCallContext context, string providerPrefix)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData) GetAuthCookies(ServerCallContext context)
     {
         var cookies = context.RequestHeaders.GetValue("cookie") ?? string.Empty;
         if (string.IsNullOrEmpty(cookies))
@@ -171,10 +169,10 @@ public static class AuthHelper
                 : null;
         }
 
-        var accessToken = GetCookie($"{providerPrefix}_access_token");
-        var refreshToken = GetCookie($"{providerPrefix}_refresh_token");
-        var tag = GetCookie($"{providerPrefix}_auth_tag");
-        var authSessionDataValue = GetCookie($"{providerPrefix}_auth_session_data");
+        var accessToken = GetCookie("access_token");
+        var refreshToken = GetCookie("refresh_token");
+        var tag = GetCookie("auth_tag");
+        var authSessionDataValue = GetCookie("auth_session_data");
 
         return (accessToken, refreshToken, tag, authSessionDataValue);
     }

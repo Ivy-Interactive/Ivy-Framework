@@ -33,8 +33,6 @@ public class Auth0AuthProvider : IAuthProvider
     private ManagementApiClient? _managementClient;
     private DateTime _managementTokenExpiry = DateTime.MinValue;
 
-    public string ProviderPrefix => "a0";
-
     public Auth0AuthProvider(IConfiguration configuration)
     {
         _domain = configuration.GetValue<string>("Auth0:Domain") ?? throw new Exception("Auth0:Domain is required");

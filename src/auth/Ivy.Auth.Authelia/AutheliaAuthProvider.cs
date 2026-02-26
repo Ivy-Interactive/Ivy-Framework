@@ -18,8 +18,6 @@ public class AutheliaAuthProvider : IAuthProvider
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
     };
 
-    public string ProviderPrefix => "al";
-
     public AutheliaAuthProvider(IConfiguration configuration)
     {
         _baseUrl = configuration.GetValue<string>("Authelia:Url")

@@ -79,7 +79,7 @@ public class AppHub(
                 authProvider = new CheckedAuthProvider(authProvider);
 #endif
 
-                var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler, authProvider.ProviderPrefix);
+                var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
                 var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
 
                 var oldSession = authSession.TakeSnapshot();

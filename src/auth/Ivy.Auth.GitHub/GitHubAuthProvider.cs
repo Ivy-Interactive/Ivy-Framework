@@ -21,8 +21,6 @@ public class GitHubAuthProvider : IAuthProvider
     private readonly string _clientSecret;
     private readonly string _redirectUri;
 
-    public string ProviderPrefix => "gh";
-
     /// <summary>Initialize GitHub auth provider</summary>
     public GitHubAuthProvider(IConfiguration configuration)
     {
