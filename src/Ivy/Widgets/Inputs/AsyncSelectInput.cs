@@ -249,7 +249,6 @@ public static class AsyncSelectInputViewExtensions
             };
             return clone;
         }
-        
         var widgetType = widget.GetType();
         if (widgetType.IsGenericType && widgetType.GetGenericTypeDefinition() == typeof(AsyncSelectInputView<>))
         {
