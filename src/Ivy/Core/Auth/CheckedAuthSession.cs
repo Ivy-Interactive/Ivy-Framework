@@ -99,6 +99,18 @@ public readonly struct CheckedAuthSession(IAuthSession innerAuthSession, Diction
         }
     }
 
+    public readonly void AddOAuthProviderToken(OAuthProviderToken token)
+    {
+        CheckWrite(AuthSessionProperty.OAuthProviderTokens);
+        _innerAuthSession.AddOAuthProviderToken(token);
+    }
+
+    public readonly void ClearOAuthProviderTokens()
+    {
+        CheckWrite(AuthSessionProperty.OAuthProviderTokens);
+        _innerAuthSession.ClearOAuthProviderTokens();
+    }
+
     public readonly HttpMessageHandler HttpMessageHandler
     {
         get => _innerAuthSession.HttpMessageHandler;

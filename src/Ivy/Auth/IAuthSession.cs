@@ -7,6 +7,9 @@ public interface IAuthSession
     public IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> OAuthProviderTokens { get; }
     public string? AuthSessionData { get; set; }
     public HttpMessageHandler HttpMessageHandler { get; set; }
+
+    public void AddOAuthProviderToken(OAuthProviderToken token);
+    public void ClearOAuthProviderTokens();
 }
 
 public class AuthSession(HttpMessageHandler httpMessageHandler, AuthToken? authToken = null, Dictionary<OAuthProvider, OAuthProviderToken>? oauthProviderTokens = null, string? authSessionData = null) : IAuthSession
@@ -17,6 +20,16 @@ public class AuthSession(HttpMessageHandler httpMessageHandler, AuthToken? authT
     public IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> OAuthProviderTokens { get => _oauthProviderTokens; }
     public string? AuthSessionData { get; set; } = authSessionData;
     public HttpMessageHandler HttpMessageHandler { get; set; } = httpMessageHandler;
+
+    public void AddOAuthProviderToken(OAuthProviderToken token)
+    {
+        _oauthProviderTokens[token.Provider] = token;
+    }
+
+    public void ClearOAuthProviderTokens()
+    {
+        _oauthProviderTokens.Clear();
+    }
 }
 
 public readonly struct AuthSessionSnapshot
