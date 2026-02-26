@@ -35,7 +35,7 @@ public class SupabaseAuthProvider : IAuthProvider
     private JsonWebKeySet? _cachedJwks = null;
     private DateTime _jwksCacheExpiry = DateTime.MinValue;
 
-    public string ProviderSuffix => "sb";
+    public string ProviderPrefix => "sb";
 
     public SupabaseAuthProvider(IConfiguration configuration)
     {

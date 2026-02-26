@@ -121,7 +121,7 @@ public class AuthController() : Controller
                 httpMessageHandler = new HttpClientHandler();
             }
 
-            var tempSession = AuthHelper.GetAuthSession(HttpContext, httpMessageHandler, authProvider.ProviderSuffix);
+            var tempSession = AuthHelper.GetAuthSession(HttpContext, httpMessageHandler, authProvider.ProviderPrefix);
 
             var token = await authProvider.HandleOAuthCallbackAsync(tempSession, HttpContext.Request);
 
@@ -135,7 +135,7 @@ public class AuthController() : Controller
 
             // Use CookieJar to ensure consistent cookie handling (including splitting for large tokens)
             var cookies = new CookieJar();
-            cookies.AddCookiesForAuthToken(token, authProvider.ProviderSuffix);
+            cookies.AddCookiesForAuthToken(token, authProvider.ProviderPrefix);
             cookies.WriteToResponse(Response);
 
             return Redirect("/");
@@ -166,7 +166,7 @@ public class AuthController() : Controller
 
         if (request.TriggerMachineReload)
         {
-            if (cookies.HasCookieWithPrefix("auth_token_"))
+            if (cookies.HasCookieWithSuffix("_access_token"))
             {
                 // Trigger reload for all sessions with the same machineId on login
                 if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var loginHeaderValue))

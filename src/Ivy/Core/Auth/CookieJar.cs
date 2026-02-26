@@ -31,9 +31,9 @@ public class CookieJar
         return false;
     }
 
-    public bool HasCookieWithPrefix(string prefix)
+    public bool HasCookieWithSuffix(string suffix)
     {
-        return _assignments.Any(a => a.Name.StartsWith(prefix));
+        return _assignments.Any(a => a.Name.EndsWith(suffix));
     }
 
     public void Delete(string name, CookieOptions options)

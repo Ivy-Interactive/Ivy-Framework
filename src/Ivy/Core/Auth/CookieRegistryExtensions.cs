@@ -21,33 +21,33 @@ public static class CookieRegistryExtensions
         return null;
     }
 
-    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession, string providerSuffix)
+    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession, string providerPrefix)
     {
         var cookies = new CookieJar();
-        cookies.AddCookiesForAuthToken(authSession.AuthToken, providerSuffix);
-        cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData, providerSuffix);
+        cookies.AddCookiesForAuthToken(authSession.AuthToken, providerPrefix);
+        cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData, providerPrefix);
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static CookieJarId RegisterAuthTokenCookies(this AppSessionStore sessionStore, AuthToken? authToken, string providerSuffix)
+    public static CookieJarId RegisterAuthTokenCookies(this AppSessionStore sessionStore, AuthToken? authToken, string providerPrefix)
     {
         var cookies = new CookieJar();
-        cookies.AddCookiesForAuthToken(authToken, providerSuffix);
+        cookies.AddCookiesForAuthToken(authToken, providerPrefix);
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static CookieJarId RegisterAuthSessionDataCookies(this AppSessionStore sessionStore, string? authSessionData, string providerSuffix)
+    public static CookieJarId RegisterAuthSessionDataCookies(this AppSessionStore sessionStore, string? authSessionData, string providerPrefix)
     {
         var cookies = new CookieJar();
-        cookies.AddCookiesForAuthSessionData(authSessionData, providerSuffix);
+        cookies.AddCookiesForAuthSessionData(authSessionData, providerPrefix);
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken, string providerSuffix)
+    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken, string providerPrefix)
     {
-        var authTokenName = $"auth_token_{providerSuffix}";
-        var refreshTokenName = $"auth_refresh_token_{providerSuffix}";
-        var tagName = $"auth_tag_{providerSuffix}";
+        var authTokenName = $"{providerPrefix}_access_token";
+        var refreshTokenName = $"{providerPrefix}_refresh_token";
+        var tagName = $"{providerPrefix}_auth_tag";
 
         if (string.IsNullOrEmpty(authToken?.AccessToken))
         {
@@ -82,9 +82,9 @@ public static class CookieRegistryExtensions
         }
     }
 
-    private static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData, string providerSuffix)
+    private static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData, string providerPrefix)
     {
-        var authSessionDataName = $"auth_session_data_{providerSuffix}";
+        var authSessionDataName = $"{providerPrefix}_auth_session_data";
 
         if (authSessionData == null)
         {

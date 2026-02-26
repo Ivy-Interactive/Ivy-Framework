@@ -18,7 +18,7 @@ public class AutheliaAuthProvider : IAuthProvider
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
     };
 
-    public string ProviderSuffix => "al";
+    public string ProviderPrefix => "al";
 
     public AutheliaAuthProvider(IConfiguration configuration)
     {

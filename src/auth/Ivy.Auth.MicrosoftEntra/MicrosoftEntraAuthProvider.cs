@@ -35,7 +35,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
     private readonly string _clientSecret;
     private readonly ConfigurationManager<OpenIdConnectConfiguration> _configurationManager;
 
-    public string ProviderSuffix => "me";
+    public string ProviderPrefix => "me";
 
     record struct TokenCache(Dictionary<string, RefreshToken> RefreshToken);
 

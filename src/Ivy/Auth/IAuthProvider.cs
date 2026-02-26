@@ -20,7 +20,7 @@ public static class AuthProviderHelpers
 
 public interface IAuthProvider
 {
-    string ProviderSuffix { get; }
+    string ProviderPrefix { get; }
 
     Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {

@@ -33,7 +33,7 @@ public class Auth0AuthProvider : IAuthProvider
     private ManagementApiClient? _managementClient;
     private DateTime _managementTokenExpiry = DateTime.MinValue;
 
-    public string ProviderSuffix => "a0";
+    public string ProviderPrefix => "a0";
 
     public Auth0AuthProvider(IConfiguration configuration)
     {
