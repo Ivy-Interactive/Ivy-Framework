@@ -44,11 +44,11 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       role="search"
       aria-label="Ivy docs smart search"
       style={styles}
-      className="overflow-y-auto"
+      className="overflow-y-auto pt-4"
       data-testid={dataTestId}
     >
       {/* Search bar pinned at top – fixed; half-transparent background only under the bar (not full width) */}
-      <div className="fixed top-0 z-50 w-full max-w-3xl pt-4">
+      <div className="fixed top-0 z-50 w-full max-w-3xl pt-4 pb-4">
         <div className="rounded-lg border border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <div className="w-full">{searchBar}</div>
         </div>
