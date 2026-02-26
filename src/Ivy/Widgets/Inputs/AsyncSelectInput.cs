@@ -63,7 +63,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public AsyncSelectLookupDelegate<TValue> Lookup { get; }
 
-    public TValue Value { get; private set; } = typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!;
+    public TValue Value { get; init; } = typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!;
 
     public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
@@ -233,6 +233,36 @@ public static class AsyncSelectInputViewExtensions
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
+    public static IAnyAsyncSelectInputBase Value<T>(this IAnyAsyncSelectInputBase widget, T value)
+    {
+        if (widget is AsyncSelectInputView<T> typedWidget)
+        {
+            var clone = new AsyncSelectInputView<T>(typedWidget.Search, typedWidget.Lookup, typedWidget.Placeholder, typedWidget.Disabled)
+            {
+                Value = value,
+                OnChange = typedWidget.OnChange,
+                Nullable = typedWidget.Nullable,
+                OnBlur = typedWidget.OnBlur,
+                Invalid = typedWidget.Invalid,
+                Scale = typedWidget.Scale,
+            };
+            return clone;
+        }
+
+        var widgetType = widget.GetType();
+        if (widgetType.IsGenericType && widgetType.GetGenericTypeDefinition() == typeof(AsyncSelectInputView<>))
+        {
+            var valueProperty = widgetType.GetProperty("Value");
+            if (valueProperty != null && valueProperty.CanWrite)
+            {
+                valueProperty.SetValue(widget, value);
+                return widget;
+            }
+        }
+
+        throw new InvalidOperationException($"Cannot set Value: widget is not AsyncSelectInputView<{typeof(T).Name}>");
+    }
+
     [OverloadResolutionPriority(1)]
     public static IAnyAsyncSelectInputBase OnChange<T>(this IAnyAsyncSelectInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
     {
@@ -241,6 +271,7 @@ public static class AsyncSelectInputViewExtensions
             // Create a new instance with the new OnChange, since AsyncSelectInputView is a class
             var clone = new AsyncSelectInputView<T>(typedWidget.Search, typedWidget.Lookup, typedWidget.Placeholder, typedWidget.Disabled)
             {
+                Value = typedWidget.Value,
                 OnChange = onChange,
                 Nullable = typedWidget.Nullable,
                 OnBlur = typedWidget.OnBlur,
