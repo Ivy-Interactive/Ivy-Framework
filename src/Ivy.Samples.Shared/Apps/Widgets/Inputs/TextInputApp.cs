@@ -40,7 +40,6 @@ public class TextInputApp : SampleBase
                           | nullStringState
             ;
 
-
         return Layout.Vertical()
                | Text.H1("Text Inputs")
                | Text.H2("Sizes")
@@ -86,6 +85,9 @@ public class TextInputApp : SampleBase
                | Text.H2("Data Binding")
                | dataBinding
 
+               | Text.H2("Length constraints")
+               | new TextInputLengthConstraints()
+
                //Events: 
 
                | Text.H2("Events")
@@ -103,10 +105,29 @@ public class TextInputApp : SampleBase
                    onBlurState.ToTextInput().HandleBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
+               | new Spacer().Height(15)
             ;
     }
 
     // Helper methods moved to TextInputSizes and TextInputPrefixSuffix classes
+}
+
+public class TextInputLengthConstraints : ViewBase
+{
+    public override object Build()
+    {
+        var minLengthState = UseState("");
+        var maxLengthState = UseState("");
+        var bothLengthState = UseState("");
+
+        return Layout.Grid().Columns(3)
+               | Text.InlineCode("MinLength(3)")
+               | Text.InlineCode("MaxLength(10)")
+               | Text.InlineCode("MinLength(5) + MaxLength(10)")
+               | minLengthState.ToTextInput().Placeholder("At least 3 characters").MinLength(3)
+               | maxLengthState.ToTextInput().Placeholder("Up to 10 characters").MaxLength(10)
+               | bothLengthState.ToTextInput().Placeholder("Between 5 and 10 characters").MinLength(5).MaxLength(10);
+    }
 }
 
 public class TextInputSizes : ViewBase
