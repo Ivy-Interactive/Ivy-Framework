@@ -1,5 +1,6 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy.Shared;
 using Size = Ivy.Size;
 
 // ReSharper disable once CheckNamespace
@@ -322,13 +323,13 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    public static TextBuilder Left() => Align(TextAlignment.Left);
+    public TextBuilder Left() => Align(TextAlignment.Left);
 
-    public static TextBuilder Center() => Align(TextAlignment.Center);
+    public TextBuilder Center() => Align(TextAlignment.Center);
 
-    public static TextBuilder Right() => Align(TextAlignment.Right);
+    public TextBuilder Right() => Align(TextAlignment.Right);
 
-    public static TextBuilder Justify() => Align(TextAlignment.Justify);
+    public TextBuilder Justify() => Align(TextAlignment.Justify);
 }
 
 
