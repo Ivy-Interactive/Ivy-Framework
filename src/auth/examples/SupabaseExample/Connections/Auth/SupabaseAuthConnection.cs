@@ -19,7 +19,7 @@ public class SupabaseAuthConnection : IConnection, IHaveSecrets
 
     public void RegisterServices(Server server)
     {
-        server.UseAuth<SupabaseAuthProvider>(c => c.UseEmailPassword().UseGoogle());
+        server.UseAuth<SupabaseAuthProvider>(c => c.UseEmailPassword().UseGoogle().UseGithub());
     }
 
     public Secret[] GetSecrets() =>

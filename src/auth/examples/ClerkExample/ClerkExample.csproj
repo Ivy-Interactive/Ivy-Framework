@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Ivy\Ivy.csproj" />
     <ProjectReference Include="..\..\Ivy.Auth.Clerk\Ivy.Auth.Clerk.csproj" />
+    <ProjectReference Include="..\Ivy.Auth.Examples.Shared\Ivy.Auth.Examples.Shared.csproj" />
   </ItemGroup>
 
 </Project>

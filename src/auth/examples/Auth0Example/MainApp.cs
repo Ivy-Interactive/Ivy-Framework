@@ -1,6 +1,5 @@
 using Ivy;
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
+using Ivy.Auth.Examples.Shared;
 
 namespace Auth0Example;
 
@@ -12,7 +11,6 @@ public class MainApp : ViewBase
         var auth = UseService<IAuthService>();
         var userInfo = UseState<UserInfo?>();
         var oauthTokens = UseState<Dictionary<OAuthProvider, OAuthProviderToken>?>();
-        var apiResponse = UseState<string?>();
 
         UseEffect(async () =>
         {
@@ -53,60 +51,8 @@ public class MainApp : ViewBase
                     : Layout.Vertical(
                         Text.P($"Connected providers: {string.Join(", ", oauthTokens.Value.Keys)}"),
 
-                        // Example: Test Google API access if available
-                        oauthTokens.Value.ContainsKey(OAuthProvider.Google)
-                            ? Layout.Vertical(
-                                new Button("Test Google API Access", async () =>
-                                {
-                                    var googleToken = oauthTokens.Value[OAuthProvider.Google];
-                                    using var httpClient = new HttpClient();
-                                    httpClient.DefaultRequestHeaders.Authorization =
-                                        new AuthenticationHeaderValue("Bearer", googleToken.AuthToken.AccessToken);
-
-                                    try
-                                    {
-                                        var response = await httpClient.GetStringAsync(
-                                            "https://www.googleapis.com/oauth2/v2/userinfo");
-                                        apiResponse.Set(response);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        apiResponse.Set($"Error: {ex.Message}");
-                                    }
-                                }, variant: ButtonVariant.Primary),
-                                apiResponse.Value != null
-                                    ? Text.Json(apiResponse.Value)
-                                    : null
-                            ).Gap(10)
-                            : null,
-
-                        // Example: Test GitHub API access if available
-                        oauthTokens.Value.ContainsKey(OAuthProvider.GitHub)
-                            ? Layout.Vertical(
-                                new Button("Test GitHub API Access", async () =>
-                                {
-                                    var githubToken = oauthTokens.Value[OAuthProvider.GitHub];
-                                    using var httpClient = new HttpClient();
-                                    httpClient.DefaultRequestHeaders.Authorization =
-                                        new AuthenticationHeaderValue("Bearer", githubToken.AuthToken.AccessToken);
-                                    httpClient.DefaultRequestHeaders.UserAgent.Add(
-                                        new ProductInfoHeaderValue("Auth0Example", "1.0"));
-
-                                    try
-                                    {
-                                        var response = await httpClient.GetStringAsync("https://api.github.com/user");
-                                        apiResponse.Set(response);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        apiResponse.Set($"Error: {ex.Message}");
-                                    }
-                                }, variant: ButtonVariant.Primary),
-                                apiResponse.Value != null
-                                    ? Text.Json(apiResponse.Value)
-                                    : null
-                            ).Gap(10)
-                            : null
+                        // Automatically show the appropriate test view for each provider
+                        Layout.Vertical(oauthTokens.Value.Values.Select(token => new OAuthProviderTestView(token)).ToArray())
                     ).Gap(10)
 
         ).Gap(40).Padding(50).Align(Align.Center).Height(Size.Full());

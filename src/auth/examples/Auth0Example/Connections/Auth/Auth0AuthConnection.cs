@@ -19,7 +19,7 @@ public class Auth0AuthConnection : IConnection, IHaveSecrets
 
     public void RegisterServices(Server server)
     {
-        server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle());
+        server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle().UseGithub().UseMicrosoft());
     }
 
     public Secret[] GetSecrets() =>

@@ -10,6 +10,7 @@
     <Project Path="auth/examples/BasicAuthExample/BasicAuthExample.csproj" />
     <Project Path="auth/examples/ClerkExample/ClerkExample.csproj" />
     <Project Path="auth/examples/GitHubExample/GitHubExample.csproj" />
+    <Project Path="auth/examples/Ivy.Auth.Examples.Shared/Ivy.Auth.Examples.Shared.csproj" />
     <Project Path="auth/examples/MicrosoftEntraExample/MicrosoftEntraExample.csproj" />
     <Project Path="auth/examples/SupabaseExample/SupabaseExample.csproj" />
   </Folder>

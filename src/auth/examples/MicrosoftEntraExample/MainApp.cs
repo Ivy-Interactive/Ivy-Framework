@@ -1,6 +1,5 @@
 using Ivy;
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
+using Ivy.Auth.Examples.Shared;
 
 namespace MicrosoftEntraExample;
 
@@ -12,7 +11,6 @@ public class MainApp : ViewBase
         var auth = UseService<IAuthService>();
         var userInfo = UseState<UserInfo?>();
         var oauthTokens = UseState<Dictionary<OAuthProvider, OAuthProviderToken>?>();
-        var graphProfile = UseState<string?>();
 
         UseEffect(async () =>
         {
@@ -53,53 +51,8 @@ public class MainApp : ViewBase
                     : Layout.Vertical(
                         Text.P($"Connected providers: {string.Join(", ", oauthTokens.Value.Keys)}"),
 
-                        // Example: Test Microsoft Graph API access
-                        oauthTokens.Value.ContainsKey(OAuthProvider.Microsoft)
-                            ? Layout.Vertical(
-                                Text.H4("Microsoft Graph API Test"),
-                                Layout.Horizontal(
-                                    new Button("Get Profile", async () =>
-                                    {
-                                        var microsoftToken = oauthTokens.Value[OAuthProvider.Microsoft];
-                                        using var httpClient = new HttpClient();
-                                        httpClient.DefaultRequestHeaders.Authorization =
-                                            new AuthenticationHeaderValue("Bearer", microsoftToken.AuthToken.AccessToken);
-
-                                        try
-                                        {
-                                            var response = await httpClient.GetStringAsync(
-                                                "https://graph.microsoft.com/v1.0/me");
-                                            graphProfile.Set(response);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            graphProfile.Set($"{{\"error\": \"{ex.Message}\"}}");
-                                        }
-                                    }, variant: ButtonVariant.Primary),
-                                    new Button("List OneDrive Files", async () =>
-                                    {
-                                        var microsoftToken = oauthTokens.Value[OAuthProvider.Microsoft];
-                                        using var httpClient = new HttpClient();
-                                        httpClient.DefaultRequestHeaders.Authorization =
-                                            new AuthenticationHeaderValue("Bearer", microsoftToken.AuthToken.AccessToken);
-
-                                        try
-                                        {
-                                            var response = await httpClient.GetStringAsync(
-                                                "https://graph.microsoft.com/v1.0/me/drive/root/children");
-                                            graphProfile.Set(response);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            graphProfile.Set($"{{\"error\": \"{ex.Message}\"}}");
-                                        }
-                                    }, variant: ButtonVariant.Outline)
-                                ).Gap(10),
-                                graphProfile.Value != null
-                                    ? Text.Json(graphProfile.Value)
-                                    : null
-                            ).Gap(10)
-                            : null
+                        // Automatically show the appropriate test view for each provider
+                        Layout.Vertical(oauthTokens.Value.Values.Select(token => new OAuthProviderTestView(token)).ToArray())
                     ).Gap(10)
 
         ).Gap(40).Padding(50).Align(Align.Center).Height(Size.Full());

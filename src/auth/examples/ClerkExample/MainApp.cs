@@ -1,6 +1,5 @@
 using Ivy;
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
+using Ivy.Auth.Examples.Shared;
 
 namespace ClerkExample;
 
@@ -12,8 +11,6 @@ public class MainApp : ViewBase
         var auth = UseService<IAuthService>();
         var userInfo = UseState<UserInfo?>();
         var oauthTokens = UseState<Dictionary<OAuthProvider, OAuthProviderToken>?>();
-        var googleProfile = UseState<string?>();
-        var githubRepos = UseState<string?>();
 
         UseEffect(async () =>
         {
@@ -54,82 +51,8 @@ public class MainApp : ViewBase
                     : Layout.Vertical(
                         Text.P($"Connected providers: {string.Join(", ", oauthTokens.Value.Keys)}"),
 
-                        // Example: Test Google API access if available
-                        oauthTokens.Value.ContainsKey(OAuthProvider.Google)
-                            ? Layout.Vertical(
-                                Text.H4("Google OAuth Test"),
-                                Layout.Horizontal(
-                                    new Button("Get Google Profile", async () =>
-                                    {
-                                        var googleToken = oauthTokens.Value[OAuthProvider.Google];
-                                        using var httpClient = new HttpClient();
-                                        httpClient.DefaultRequestHeaders.Authorization =
-                                            new AuthenticationHeaderValue("Bearer", googleToken.AuthToken.AccessToken);
-
-                                        try
-                                        {
-                                            var response = await httpClient.GetStringAsync(
-                                                "https://www.googleapis.com/oauth2/v2/userinfo");
-                                            googleProfile.Set(response);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            googleProfile.Set($"{{\"error\": \"{ex.Message}\"}}");
-                                        }
-                                    }, variant: ButtonVariant.Primary),
-                                    new Button("List Google Drive Files", async () =>
-                                    {
-                                        var googleToken = oauthTokens.Value[OAuthProvider.Google];
-                                        using var httpClient = new HttpClient();
-                                        httpClient.DefaultRequestHeaders.Authorization =
-                                            new AuthenticationHeaderValue("Bearer", googleToken.AuthToken.AccessToken);
-
-                                        try
-                                        {
-                                            var response = await httpClient.GetStringAsync(
-                                                "https://www.googleapis.com/drive/v3/files?pageSize=10");
-                                            googleProfile.Set(response);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            googleProfile.Set($"{{\"error\": \"{ex.Message}\"}}");
-                                        }
-                                    }, variant: ButtonVariant.Outline)
-                                ).Gap(10),
-                                googleProfile.Value != null
-                                    ? Text.Json(googleProfile.Value)
-                                    : null
-                            ).Gap(10)
-                            : null,
-
-                        // Example: Test GitHub API access if available
-                        oauthTokens.Value.ContainsKey(OAuthProvider.GitHub)
-                            ? Layout.Vertical(
-                                Text.H4("GitHub OAuth Test"),
-                                new Button("Fetch My Repositories", async () =>
-                                {
-                                    var githubToken = oauthTokens.Value[OAuthProvider.GitHub];
-                                    using var httpClient = new HttpClient();
-                                    httpClient.DefaultRequestHeaders.Authorization =
-                                        new AuthenticationHeaderValue("Bearer", githubToken.AuthToken.AccessToken);
-                                    httpClient.DefaultRequestHeaders.UserAgent.Add(
-                                        new ProductInfoHeaderValue("ClerkExample", "1.0"));
-
-                                    try
-                                    {
-                                        var response = await httpClient.GetStringAsync("https://api.github.com/user/repos");
-                                        githubRepos.Set(response);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        githubRepos.Set($"{{\"error\": \"{ex.Message}\"}}");
-                                    }
-                                }, variant: ButtonVariant.Primary),
-                                githubRepos.Value != null
-                                    ? Text.Json(githubRepos.Value)
-                                    : null
-                            ).Gap(10)
-                            : null
+                        // Automatically show the appropriate test view for each provider
+                        Layout.Vertical(oauthTokens.Value.Values.Select(token => new OAuthProviderTestView(token)).ToArray())
                     ).Gap(10)
 
         ).Gap(40).Padding(50).Align(Align.Center).Height(Size.Full());
