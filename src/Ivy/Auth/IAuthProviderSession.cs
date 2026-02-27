@@ -9,6 +9,9 @@ public interface IAuthProviderSession : IAuthTokenHandlerSession
     public void AddOAuthProviderToken(OAuthProviderToken token);
     public void RemoveOAuthProviderToken(OAuthProvider provider);
     public void ClearOAuthProviderTokens();
+
+    public event Action<OAuthProvider>? OAuthProviderTokenAdded;
+    public event Action<OAuthProvider>? OAuthProviderTokenRemoved;
 }
 
 public class AuthProviderSession(HttpMessageHandler httpMessageHandler, AuthToken? authToken = null, Dictionary<OAuthProvider, OAuthProviderToken>? oauthProviderTokens = null, string? authSessionData = null) : AuthTokenHandlerSession(authToken, authSessionData), IAuthProviderSession
@@ -18,19 +21,35 @@ public class AuthProviderSession(HttpMessageHandler httpMessageHandler, AuthToke
     public IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> OAuthProviderTokens { get => _oauthProviderTokens; }
     public HttpMessageHandler HttpMessageHandler { get; set; } = httpMessageHandler;
 
+    public event Action<OAuthProvider>? OAuthProviderTokenAdded;
+    public event Action<OAuthProvider>? OAuthProviderTokenRemoved;
+
     public void AddOAuthProviderToken(OAuthProviderToken token)
     {
+        var isNew = !_oauthProviderTokens.ContainsKey(token.Provider);
         _oauthProviderTokens[token.Provider] = token;
+        if (isNew)
+        {
+            OAuthProviderTokenAdded?.Invoke(token.Provider);
+        }
     }
 
     public void RemoveOAuthProviderToken(OAuthProvider provider)
     {
-        _oauthProviderTokens.Remove(provider);
+        if (_oauthProviderTokens.Remove(provider))
+        {
+            OAuthProviderTokenRemoved?.Invoke(provider);
+        }
     }
 
     public void ClearOAuthProviderTokens()
     {
+        var providers = _oauthProviderTokens.Keys.ToList();
         _oauthProviderTokens.Clear();
+        foreach (var provider in providers)
+        {
+            OAuthProviderTokenRemoved?.Invoke(provider);
+        }
     }
 }
 

@@ -122,5 +122,17 @@ public readonly struct CheckedAuthSession(IAuthProviderSession innerAuthSession,
         get => _innerAuthSession.HttpMessageHandler;
         set => _innerAuthSession.HttpMessageHandler = value;
     }
+
+    public event Action<OAuthProvider>? OAuthProviderTokenAdded
+    {
+        add => _innerAuthSession.OAuthProviderTokenAdded += value;
+        remove => _innerAuthSession.OAuthProviderTokenAdded -= value;
+    }
+
+    public event Action<OAuthProvider>? OAuthProviderTokenRemoved
+    {
+        add => _innerAuthSession.OAuthProviderTokenRemoved += value;
+        remove => _innerAuthSession.OAuthProviderTokenRemoved -= value;
+    }
 }
 #endif

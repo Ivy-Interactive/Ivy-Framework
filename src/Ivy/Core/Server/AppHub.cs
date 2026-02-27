@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json.Nodes;
 using Ivy.Core;
 using Ivy.Core.Apps;
@@ -23,6 +24,11 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
+    private readonly ConcurrentDictionary<string, Action<OAuthProvider>> _oauthTokenAddedHandlers = new();
+    private readonly ConcurrentDictionary<string, Action<OAuthProvider>> _oauthTokenRemovedHandlers = new();
+    private readonly ConcurrentDictionary<string, HashSet<OAuthProvider>> _activeOAuthRefreshLoops = new();
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<OAuthProvider, CancellationTokenSource>> _oauthRefreshCancellations = new();
+
     private AppContext GetAppArgs(string connectionId, string machineId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
     {
         string? appArgs = null;
@@ -255,10 +261,65 @@ public class AppHub(
                     var authSession = authService.GetAuthProviderSession();
                     var oauthProviders = authSession.OAuthProviderTokens.Keys.ToList();
 
+                    // Track active OAuth refresh loops and their cancellation tokens for this connection
+                    var activeProviders = _activeOAuthRefreshLoops.GetOrAdd(connectionId, _ => new HashSet<OAuthProvider>());
+                    var cancellations = _oauthRefreshCancellations.GetOrAdd(connectionId, _ => new ConcurrentDictionary<OAuthProvider, CancellationTokenSource>());
+
                     foreach (var provider in oauthProviders)
                     {
-                        _ = Task.Run(() => OAuthTokenRefreshLoopAsync(connectionId, provider, connectionAborted), connectionAborted);
+                        lock (activeProviders)
+                        {
+                            if (activeProviders.Add(provider))
+                            {
+                                var cts = CancellationTokenSource.CreateLinkedTokenSource(connectionAborted);
+                                cancellations[provider] = cts;
+                                _ = Task.Run(() => OAuthTokenRefreshLoopAsync(connectionId, provider, cts.Token), connectionAborted);
+                            }
+                        }
                     }
+
+                    // Subscribe to new OAuth provider tokens being added
+                    Action<OAuthProvider> addedHandler = provider =>
+                    {
+                        // Check if connection is still active
+                        if (!sessionStore.Sessions.ContainsKey(connectionId))
+                        {
+                            return;
+                        }
+
+                        lock (activeProviders)
+                        {
+                            if (activeProviders.Add(provider))
+                            {
+                                logger.LogInformation("Starting OAuth token refresh loop for newly added provider {Provider} on connection {ConnectionId}", provider, connectionId);
+                                var cts = CancellationTokenSource.CreateLinkedTokenSource(connectionAborted);
+                                cancellations[provider] = cts;
+                                _ = Task.Run(() => OAuthTokenRefreshLoopAsync(connectionId, provider, cts.Token), connectionAborted);
+                            }
+                        }
+                    };
+
+                    // Subscribe to OAuth provider tokens being removed
+                    Action<OAuthProvider> removedHandler = provider =>
+                    {
+                        logger.LogInformation("Cancelling OAuth token refresh loop for removed provider {Provider} on connection {ConnectionId}", provider, connectionId);
+
+                        if (cancellations.TryRemove(provider, out var cts))
+                        {
+                            cts.Cancel();
+                            cts.Dispose();
+                        }
+
+                        lock (activeProviders)
+                        {
+                            activeProviders.Remove(provider);
+                        }
+                    };
+
+                    _oauthTokenAddedHandlers[connectionId] = addedHandler;
+                    _oauthTokenRemovedHandlers[connectionId] = removedHandler;
+                    authSession.OAuthProviderTokenAdded += addedHandler;
+                    authSession.OAuthProviderTokenRemoved += removedHandler;
                 }
             }
         }
@@ -297,6 +358,55 @@ public class AppHub(
 
             // Cancel all pending HTTP tunnel requests for this connection
             HttpTunnelingController.CancelRequestsForConnection(Context.ConnectionId, "SignalR connection closed");
+
+            // Clean up OAuth token event subscriptions
+            if (_oauthTokenAddedHandlers.TryRemove(Context.ConnectionId, out var addedHandler))
+            {
+                // Get the auth session and unsubscribe
+                if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var tempAppState))
+                {
+                    var authService = tempAppState.AppServices.GetService<IAuthProviderService>();
+                    if (authService != null)
+                    {
+                        var authSession = authService.GetAuthProviderSession();
+                        authSession.OAuthProviderTokenAdded -= addedHandler;
+                    }
+                }
+            }
+
+            if (_oauthTokenRemovedHandlers.TryRemove(Context.ConnectionId, out var removedHandler))
+            {
+                // Get the auth session and unsubscribe
+                if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var tempAppState))
+                {
+                    var authService = tempAppState.AppServices.GetService<IAuthProviderService>();
+                    if (authService != null)
+                    {
+                        var authSession = authService.GetAuthProviderSession();
+                        authSession.OAuthProviderTokenRemoved -= removedHandler;
+                    }
+                }
+            }
+
+            // Cancel and dispose all OAuth refresh loop cancellation tokens
+            if (_oauthRefreshCancellations.TryRemove(Context.ConnectionId, out var cancellations))
+            {
+                foreach (var kvp in cancellations)
+                {
+                    try
+                    {
+                        kvp.Value.Cancel();
+                        kvp.Value.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Error cancelling OAuth refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, Context.ConnectionId);
+                    }
+                }
+            }
+
+            // Clean up active OAuth refresh loop tracking
+            _activeOAuthRefreshLoops.TryRemove(Context.ConnectionId, out _);
 
             if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
             {
@@ -507,39 +617,62 @@ public class AppHub(
 
     private async Task OAuthTokenRefreshLoopAsync(string connectionId, OAuthProvider provider, CancellationToken cancellationToken)
     {
-        var session = sessionStore.Sessions[connectionId];
-        var registry = session.AppServices.GetService<IOAuthTokenHandlerRegistry>();
-        if (registry == null)
+        try
         {
-            logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No OAuth token handler registry for {ConnectionId}, exiting loop.", provider, connectionId);
-            return;
-        }
+            var session = sessionStore.Sessions[connectionId];
+            var registry = session.AppServices.GetService<IOAuthTokenHandlerRegistry>();
+            if (registry == null)
+            {
+                logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No OAuth token handler registry for {ConnectionId}, exiting loop.", provider, connectionId);
+                return;
+            }
 
-        var handler = registry.GetHandler(provider);
-        if (handler == null)
+            var handler = registry.GetHandler(provider);
+            if (handler == null)
+            {
+                logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No handler registered for {ConnectionId}, exiting loop.", provider, connectionId);
+                return;
+            }
+
+            var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
+            var authSession = authService.GetAuthProviderSession();
+            var client = session.AppServices.GetRequiredService<IClientProvider>();
+            var oauthLogger = session.AppServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger<OAuthTokenService>();
+
+            // Create a service instance for this provider
+            var oauthTokenService = new OAuthTokenService(
+                provider,
+                handler,
+                authSession,
+                client,
+                sessionStore,
+                oauthLogger);
+
+            var strategy = new OAuthTokenRefreshStrategy(connectionId, oauthTokenService, handler, logger);
+
+            await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
+        }
+        finally
         {
-            logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No handler registered for {ConnectionId}, exiting loop.", provider, connectionId);
-            return;
+            // Clean up: remove provider from active set when loop exits
+            if (_activeOAuthRefreshLoops.TryGetValue(connectionId, out var activeProviders))
+            {
+                lock (activeProviders)
+                {
+                    activeProviders.Remove(provider);
+                }
+            }
+
+            // Clean up: dispose the cancellation token source
+            if (_oauthRefreshCancellations.TryGetValue(connectionId, out var cancellations))
+            {
+                if (cancellations.TryRemove(provider, out var cts))
+                {
+                    cts.Dispose();
+                }
+            }
         }
-
-        var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
-        var authSession = authService.GetAuthProviderSession();
-        var client = session.AppServices.GetRequiredService<IClientProvider>();
-        var oauthLogger = session.AppServices.GetRequiredService<ILoggerFactory>()
-            .CreateLogger<OAuthTokenService>();
-
-        // Create a service instance for this provider
-        var oauthTokenService = new OAuthTokenService(
-            provider,
-            handler,
-            authSession,
-            client,
-            sessionStore,
-            oauthLogger);
-
-        var strategy = new OAuthTokenRefreshStrategy(connectionId, oauthTokenService, handler, logger);
-
-        await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
     }
 
     public void HotReload()
