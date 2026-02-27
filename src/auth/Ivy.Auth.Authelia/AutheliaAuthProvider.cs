@@ -111,12 +111,6 @@ public class AutheliaAuthProvider : IAuthProvider
     {
         return Task.FromResult<TokenLifetime?>(null);
     }
-
-    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        // Authelia does not expose OAuth provider tokens.
-        return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(null);
-    }
 }
 
 public class AutheliaUserInfoResponse

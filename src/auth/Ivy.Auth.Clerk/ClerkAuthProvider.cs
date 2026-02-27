@@ -497,6 +497,12 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
+        // Return stored tokens if available
+        if (authSession.OAuthProviderTokens.Count > 0)
+        {
+            return new Dictionary<OAuthProvider, OAuthProviderToken>(authSession.OAuthProviderTokens);
+        }
+
         try
         {
             // Get user ID from the current session token

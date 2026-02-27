@@ -227,6 +227,13 @@ public class GitHubAuthProvider : IAuthProvider
     /// <summary>Get OAuth provider tokens - returns the GitHub access token</summary>
     public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
+        // Return stored tokens if available
+        if (authSession.OAuthProviderTokens.Count > 0)
+        {
+            return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(
+                new Dictionary<OAuthProvider, OAuthProviderToken>(authSession.OAuthProviderTokens));
+        }
+
         var token = authSession.AuthToken?.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
         {

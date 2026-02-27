@@ -458,9 +458,9 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        var tokens = authSession.OAuthProviderTokens;
+        // Supabase does not provide a way to get the provider tokens outside of the initial authentication flow, so we rely on storing them when we first receive them.
         return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(
-            tokens.Count > 0 ? new Dictionary<OAuthProvider, OAuthProviderToken>(tokens) : null);
+            new Dictionary<OAuthProvider, OAuthProviderToken>(authSession.OAuthProviderTokens));
     }
 
 }

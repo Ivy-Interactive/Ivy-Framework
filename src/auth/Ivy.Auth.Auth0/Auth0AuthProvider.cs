@@ -309,6 +309,12 @@ public class Auth0AuthProvider : IAuthProvider
 
     public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
+        // Return stored tokens if available
+        if (authSession.OAuthProviderTokens.Count > 0)
+        {
+            return new Dictionary<OAuthProvider, OAuthProviderToken>(authSession.OAuthProviderTokens);
+        }
+
         // Get user ID from the current access token
         if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
         {
