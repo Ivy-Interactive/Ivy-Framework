@@ -18,7 +18,7 @@ public static class AuthProviderHelpers
     }
 }
 
-public interface IAuthProvider
+public interface IAuthProvider : IAuthTokenHandler
 {
     Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
@@ -29,19 +29,11 @@ public interface IAuthProvider
 
     Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
 
-    Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
-
-    Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
-
-    Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
-
     AuthOption[] GetAuthOptions();
 
     Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
 
     Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default);
-
-    Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
 
     Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
