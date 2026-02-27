@@ -8,7 +8,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
 {
     private readonly IAuthProvider _innerAuthProvider = innerAuthProvider;
 
-    public Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    public Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadWrite)
@@ -18,7 +18,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         return _innerAuthProvider.InitializeAsync(authSession, requestScheme, requestHost, cancellationToken);
     }
 
-    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
@@ -27,7 +27,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         return _innerAuthProvider.LoginAsync(authSession, email, password, cancellationToken);
     }
 
-    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {
@@ -42,54 +42,54 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         return _innerAuthProvider.LogoutAsync(authSession, cancellationToken);
     }
 
-    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {
             throw new InvalidOperationException("AuthSession.AuthToken.AccessToken is null");
         }
 
-        authSession = authSession.WithCheckedAccess()
+        var checkedSession = ((IAuthProviderSession)authSession).WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
             .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
-        return _innerAuthProvider.RefreshAccessTokenAsync(authSession, cancellationToken);
+        return _innerAuthProvider.RefreshAccessTokenAsync(checkedSession, cancellationToken);
     }
 
-    public Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<bool> ValidateAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {
             throw new InvalidOperationException("AuthSession.AuthToken.AccessToken is null");
         }
 
-        authSession = authSession.WithCheckedAccess()
+        var checkedSession = ((IAuthProviderSession)authSession).WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
-        return _innerAuthProvider.ValidateAccessTokenAsync(authSession, cancellationToken);
+        return _innerAuthProvider.ValidateAccessTokenAsync(checkedSession, cancellationToken);
     }
 
-    public Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<UserInfo?> GetUserInfoAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {
             throw new InvalidOperationException("AuthSession.AuthToken.AccessToken is null");
         }
 
-        authSession = authSession.WithCheckedAccess()
+        var checkedSession = ((IAuthProviderSession)authSession).WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
             .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
-        return _innerAuthProvider.GetUserInfoAsync(authSession, cancellationToken);
+        return _innerAuthProvider.GetUserInfoAsync(checkedSession, cancellationToken);
     }
 
     public AuthOption[] GetAuthOptions()
         => _innerAuthProvider.GetAuthOptions();
 
-    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
@@ -99,7 +99,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         return _innerAuthProvider.GetOAuthUriAsync(authSession, option, callback, cancellationToken);
     }
 
-    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
@@ -109,22 +109,22 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         return _innerAuthProvider.HandleOAuthCallbackAsync(authSession, request, cancellationToken);
     }
 
-    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {
             throw new InvalidOperationException("AuthSession.AuthToken.AccessToken is null");
         }
 
-        authSession = authSession.WithCheckedAccess()
+        var checkedSession = ((IAuthProviderSession)authSession).WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
             .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
-        return _innerAuthProvider.GetAccessTokenLifetimeAsync(authSession, cancellationToken);
+        return _innerAuthProvider.GetAccessTokenLifetimeAsync(checkedSession, cancellationToken);
     }
 
-    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {

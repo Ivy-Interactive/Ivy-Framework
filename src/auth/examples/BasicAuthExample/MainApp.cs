@@ -8,7 +8,7 @@ public class MainApp : ViewBase
 {
     public override object? Build()
     {
-        var auth = UseService<IAuthService>();
+        var auth = UseService<IAuthProviderService>();
         var userInfo = UseState<UserInfo?>();
 
         UseEffect(async () =>

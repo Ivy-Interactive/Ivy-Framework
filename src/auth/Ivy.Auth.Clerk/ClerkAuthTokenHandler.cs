@@ -22,7 +22,7 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
         IsProduction = isProduction;
     }
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -54,8 +54,8 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
         }
     }
 
-    protected FrontendApiClient MakeFrontendApiClient(IAuthSession authSession)
-        => new(FrontendApiDomain, authSession.HttpMessageHandler);
+    protected FrontendApiClient MakeFrontendApiClient(IAuthTokenHandlerSession authSession)
+        => new(FrontendApiDomain, ((IAuthProviderSession)authSession).HttpMessageHandler);
 
     protected static ClerkSession? GetActiveSession(ClerkClient client)
     {
@@ -66,10 +66,10 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
             ?? activeSessions.FirstOrDefault();
     }
 
-    protected Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    protected Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
         => GetClerkCredentialsAsync(authSession, includeSessionToken: false, cancellationToken);
 
-    protected async Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthSession authSession, bool includeSessionToken, CancellationToken cancellationToken)
+    protected async Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthTokenHandlerSession authSession, bool includeSessionToken, CancellationToken cancellationToken)
     {
         var credentials = new ClerkCredentials();
 
@@ -129,12 +129,12 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
         }
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<bool> ValidateAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         return (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken)) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<UserInfo?> GetUserInfoAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) is not var (claims, _))
         {
@@ -151,7 +151,7 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
         );
     }
 
-    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: true, cancellationToken) is var (_, lifetime))
         {

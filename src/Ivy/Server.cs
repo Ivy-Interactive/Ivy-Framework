@@ -230,6 +230,8 @@ public class Server
             return provider;
         });
 
+        Services.AddSingleton<IOAuthTokenHandlerRegistry, OAuthTokenHandlerRegistry>();
+
         AddApp(new AppDescriptor
         {
             Id = AppIds.Auth,

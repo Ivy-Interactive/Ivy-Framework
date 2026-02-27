@@ -128,7 +128,7 @@ public static class UseQueryExtensions
     private static object UseScopedQueryKey(this IViewContext context, object key, QueryOptions options)
     {
         var appContext = context.UseService<Ivy.AppContext>();
-        //var auth = context.UseService<IAuthService?>();
+        //var auth = context.UseService<IAuthProviderService?>();
 
         if (options.Scope == QueryScope.View)
         {
@@ -147,7 +147,7 @@ public static class UseQueryExtensions
 
         // if (options.Scope == QueryScope.User)
         // {
-        //     throw new NotImplementedException("User scope is not implemented yet. We need to implement GetUserId() in IAuthService.");
+        //     throw new NotImplementedException("User scope is not implemented yet. We need to implement GetUserId() in IAuthProviderService.");
         //     var userId = auth?.GetUserId()
         //     if (userId is not null)
         //     {
@@ -179,7 +179,7 @@ public static class UseQueryExtensions
             return context.UseViewScopedQuery(key, fetcher, opts, initialValue);
         }
 
-        // Server-scoped: 
+        // Server-scoped:
         var subscriberId = context.UseRef(Guid.NewGuid);
         var queryService = (QueryService)context.UseService<IQueryService>();
         var scopedKey = key is not null ? context.UseScopedQueryKey(key, opts) : null;

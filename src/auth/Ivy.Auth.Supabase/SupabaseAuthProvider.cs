@@ -81,7 +81,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
         return null;
     }
 
-    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
+    public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken)
     {
         var session = await Client.Auth.SignIn(email, password)
             .WaitAsync(cancellationToken);
@@ -89,7 +89,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
         return authToken;
     }
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public async Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         var provider = option.Id switch
         {
@@ -151,7 +151,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
         return providerAuthState.Uri;
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(_pkceCodeVerifier))
         {
@@ -184,7 +184,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
         }
     }
 
-    public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken)
     {
         await Client.Auth.SignOut()
             .WaitAsync(cancellationToken);
@@ -267,7 +267,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
         return this;
     }
 
-    private static void ExtractAndStoreProviderTokens(Session? session, IAuthSession authSession)
+    private static void ExtractAndStoreProviderTokens(Session? session, IAuthProviderSession authSession)
     {
         if (session?.User?.AppMetadata == null || string.IsNullOrEmpty(session.ProviderToken))
         {
@@ -328,7 +328,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
         authSession.AddOAuthProviderToken(providerToken);
     }
 
-    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         // Supabase does not provide a way to get the provider tokens outside of the initial authentication flow, so we rely on storing them when we first receive them.
         return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(

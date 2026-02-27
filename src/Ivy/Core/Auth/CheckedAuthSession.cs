@@ -15,9 +15,9 @@ public enum AuthSessionAccessMode
     ReadWrite,
 }
 
-public class CheckedAuthSessionBuilder(IAuthSession innerAuthSession)
+public class CheckedAuthSessionBuilder(IAuthProviderSession innerAuthSession)
 {
-    private readonly IAuthSession _innerAuthSession = innerAuthSession;
+    private readonly IAuthProviderSession _innerAuthSession = innerAuthSession;
     private readonly Dictionary<AuthSessionProperty, AuthSessionAccessMode> _propertyAccessModes = [];
 
     public CheckedAuthSessionBuilder WithAccessMode(AuthSessionProperty property, AuthSessionAccessMode accessMode)
@@ -35,15 +35,15 @@ public class CheckedAuthSessionBuilder(IAuthSession innerAuthSession)
     public CheckedAuthSessionBuilder WithOAuthProviderTokensAccess(AuthSessionAccessMode accessMode)
         => WithAccessMode(AuthSessionProperty.OAuthProviderTokens, accessMode);
 
-    public IAuthSession Build()
+    public IAuthProviderSession Build()
     {
         return new CheckedAuthSession(_innerAuthSession, _propertyAccessModes);
     }
 }
 
-public readonly struct CheckedAuthSession(IAuthSession innerAuthSession, Dictionary<AuthSessionProperty, AuthSessionAccessMode> propertyAccessModes) : IAuthSession
+public readonly struct CheckedAuthSession(IAuthProviderSession innerAuthSession, Dictionary<AuthSessionProperty, AuthSessionAccessMode> propertyAccessModes) : IAuthProviderSession
 {
-    private readonly IAuthSession _innerAuthSession = innerAuthSession;
+    private readonly IAuthProviderSession _innerAuthSession = innerAuthSession;
     private readonly Dictionary<AuthSessionProperty, AuthSessionAccessMode> _propertyAccessModes = propertyAccessModes;
 
     readonly void CheckRead(AuthSessionProperty property)
@@ -103,6 +103,12 @@ public readonly struct CheckedAuthSession(IAuthSession innerAuthSession, Diction
     {
         CheckWrite(AuthSessionProperty.OAuthProviderTokens);
         _innerAuthSession.AddOAuthProviderToken(token);
+    }
+
+    public readonly void RemoveOAuthProviderToken(OAuthProvider provider)
+    {
+        CheckWrite(AuthSessionProperty.OAuthProviderTokens);
+        _innerAuthSession.RemoveOAuthProviderToken(provider);
     }
 
     public readonly void ClearOAuthProviderTokens()

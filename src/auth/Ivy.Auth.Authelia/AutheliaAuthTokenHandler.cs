@@ -16,14 +16,14 @@ public class AutheliaAuthTokenHandler : IAuthTokenHandler
         HttpClient = httpClient;
     }
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         // Authelia session tokens cannot be refreshed - validate and return null if invalid
         var isValid = await ValidateAccessTokenAsync(authSession, cancellationToken);
         return isValid ? authSession.AuthToken : null;
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<bool> ValidateAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         // Send a request with the session cookie to /api/user/info.
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
@@ -32,7 +32,7 @@ public class AutheliaAuthTokenHandler : IAuthTokenHandler
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<UserInfo?> GetUserInfoAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
         request.Headers.Add("Cookie", $"authelia_session={authSession.AuthToken?.AccessToken}");
@@ -50,7 +50,7 @@ public class AutheliaAuthTokenHandler : IAuthTokenHandler
             : null;
     }
 
-    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         return Task.FromResult<TokenLifetime?>(null);
     }

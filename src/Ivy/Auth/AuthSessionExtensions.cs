@@ -8,11 +8,11 @@ namespace Ivy;
 public static class AuthSessionExtensions
 {
 #if DEBUG
-    internal static CheckedAuthSessionBuilder WithCheckedAccess(this IAuthSession authSession)
+    internal static CheckedAuthSessionBuilder WithCheckedAccess(this IAuthProviderSession authSession)
         => new(authSession);
 #endif
 
-    public static AuthSessionSnapshot TakeSnapshot(this IAuthSession authSession)
+    public static AuthProviderSessionSnapshot TakeSnapshot(this IAuthProviderSession authSession)
         => new()
         {
             AuthToken = authSession.AuthToken,
@@ -20,7 +20,7 @@ public static class AuthSessionExtensions
             AuthSessionData = authSession.AuthSessionData,
         };
 
-    public static bool HasChangedSince(this IAuthSession authSession, AuthSessionSnapshot snapshot)
+    public static bool HasChangedSince(this IAuthProviderSession authSession, AuthProviderSessionSnapshot snapshot)
         => authSession.AuthToken != snapshot.AuthToken ||
            authSession.AuthSessionData != snapshot.AuthSessionData ||
            !OAuthProviderTokensEqual(authSession.OAuthProviderTokens, snapshot.OAuthProviderTokens);
@@ -42,7 +42,7 @@ public static class AuthSessionExtensions
         return true;
     }
 
-    public static T? GetAuthSessionData<T>(this IAuthSession authSession)
+    public static T? GetAuthSessionData<T>(this IAuthProviderSession authSession)
     {
         if (string.IsNullOrEmpty(authSession.AuthSessionData))
         {
@@ -54,7 +54,7 @@ public static class AuthSessionExtensions
             : JsonSerializer.Deserialize<T>(authSession.AuthSessionData, JsonHelper.DefaultOptions);
     }
 
-    public static void SetAuthSessionData<T>(this IAuthSession authSession, T? data)
+    public static void SetAuthSessionData<T>(this IAuthProviderSession authSession, T? data)
     {
         if (data == null)
         {

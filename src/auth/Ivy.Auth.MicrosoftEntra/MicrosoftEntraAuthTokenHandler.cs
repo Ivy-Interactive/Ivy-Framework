@@ -96,7 +96,7 @@ public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
         return null;
     }
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         var app = GetApp();
 
@@ -172,12 +172,12 @@ public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
         }
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<bool> ValidateAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         return await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not null;
     }
 
-    public Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task<UserInfo?> GetUserInfoAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         if (authSession.AuthToken?.AccessToken is not { } idToken)
         {
@@ -213,7 +213,7 @@ public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
         }
     }
 
-    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         if (authSession.AuthToken?.AccessToken is not { } accessToken)
         {

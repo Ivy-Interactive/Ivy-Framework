@@ -70,7 +70,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         );
     }
 
-    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
+    public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken)
     {
         var request = new ResourceOwnerTokenRequest
         {
@@ -87,7 +87,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         return new AuthToken(response.AccessToken, response.RefreshToken);
     }
 
-    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         var connection = option.Id switch
         {
@@ -116,7 +116,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         return Task.FromResult(authorizationUrl.Build());
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -152,7 +152,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         }
     }
 
-    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken)
         => Task.CompletedTask;
 
     public AuthOption[] GetAuthOptions()
@@ -226,7 +226,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         return _managementClient;
     }
 
-    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         // Return stored tokens if available
         if (authSession.OAuthProviderTokens.Count > 0)

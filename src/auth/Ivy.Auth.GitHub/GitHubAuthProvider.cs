@@ -41,13 +41,13 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>Not supported - use OAuth flow</summary>
-    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         throw new NotSupportedException("GitHub authentication only supports OAuth flow. Use GetOAuthUriAsync and HandleOAuthCallbackAsync instead.");
     }
 
     /// <summary>Generate OAuth authorization URI</summary>
-    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         var callbackUri = callback.GetUri(includeIdInPath: false);
 
@@ -67,7 +67,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>Handle OAuth callback and exchange code for token</summary>
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -108,7 +108,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>No-op logout</summary>
-    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }
@@ -121,7 +121,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     public GitHubAuthProvider UseGitHub() => this;
 
     /// <summary>Get OAuth provider tokens - returns the GitHub access token</summary>
-    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         // Return stored tokens if available
         if (authSession.OAuthProviderTokens.Count > 0)

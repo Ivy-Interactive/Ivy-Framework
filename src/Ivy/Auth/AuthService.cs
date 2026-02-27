@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 // Resharper disable once CheckNamespace
 namespace Ivy;
 
-public class AuthService(IAuthProvider authProvider, IAuthSession authSession, IClientProvider client, AppSessionStore sessionStore) : IAuthService
+public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore) : IAuthProviderService
 {
     public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
@@ -108,11 +108,35 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
         return refreshedToken;
     }
 
+    public async Task<bool> ValidateAccessTokenAsync(CancellationToken cancellationToken)
+    {
+        if (authSession.AuthToken is null)
+        {
+            return false;
+        }
+
+        return await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.ValidateAccessTokenAsync(authSession, ct), cancellationToken);
+    }
+
+    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(CancellationToken cancellationToken)
+    {
+        if (authSession.AuthToken is null)
+        {
+            return null;
+        }
+
+        return await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.GetAccessTokenLifetimeAsync(authSession, ct), cancellationToken);
+    }
+
     public AuthToken? GetCurrentToken() => authSession.AuthToken;
 
     public string? GetCurrentSessionData() => authSession.AuthSessionData;
 
-    public IAuthSession GetAuthSession() => authSession;
+    public IAuthTokenHandlerSession GetAuthTokenHandlerSession() => authSession;
+
+    public IAuthProviderSession GetAuthProviderSession() => authSession;
 
     public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(CancellationToken cancellationToken)
     {

@@ -20,22 +20,22 @@ public static class AuthProviderHelpers
 
 public interface IAuthProvider : IAuthTokenHandler
 {
-    Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }
 
-    Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default);
+    Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default);
 
-    Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
+    Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default);
 
     AuthOption[] GetAuthOptions();
 
-    Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
+    Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
 
-    Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default);
+    Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default);
 
-    Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(null);
     }

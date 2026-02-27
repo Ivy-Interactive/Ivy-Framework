@@ -36,7 +36,7 @@ public class Auth0AuthTokenHandler : IAuthTokenHandler
         ConfigurationManager = configurationManager;
     }
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         if (authSession.AuthToken is not { } token || token.RefreshToken == null)
         {
@@ -61,12 +61,12 @@ public class Auth0AuthTokenHandler : IAuthTokenHandler
         }
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<bool> ValidateAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         return (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken)) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<UserInfo?> GetUserInfoAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
         {
@@ -80,7 +80,7 @@ public class Auth0AuthTokenHandler : IAuthTokenHandler
         );
     }
 
-    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         if (authSession.AuthToken?.AccessToken is not { } accessToken)
         {

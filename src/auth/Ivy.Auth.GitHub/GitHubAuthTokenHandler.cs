@@ -14,13 +14,13 @@ public class GitHubAuthTokenHandler : IAuthTokenHandler
     }
 
     /// <summary>No refresh tokens - returns null</summary>
-    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         return Task.FromResult<AuthToken?>(null);
     }
 
     /// <summary>Validate access token via GitHub API</summary>
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<bool> ValidateAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         var token = authSession.AuthToken?.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
@@ -43,7 +43,7 @@ public class GitHubAuthTokenHandler : IAuthTokenHandler
     }
 
     /// <summary>Get user info from GitHub API</summary>
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<UserInfo?> GetUserInfoAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         var token = authSession.AuthToken?.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
@@ -115,7 +115,7 @@ public class GitHubAuthTokenHandler : IAuthTokenHandler
     }
 
     /// <summary>No expiration - returns null</summary>
-    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
     {
         return Task.FromResult<TokenLifetime?>(null);
     }

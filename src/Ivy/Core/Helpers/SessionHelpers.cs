@@ -23,11 +23,11 @@ public static class SessionHelpers
         {
             var displayException = new Exception("Your session is no longer valid. Please log in again.");
             var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
-            var authService = session.AppServices.GetRequiredService<IAuthService>();
+            var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
 
             if (resetTokenAndReload)
             {
-                authService.GetAuthSession().AuthToken = null;
+                authService.GetAuthProviderSession().AuthToken = null;
                 authService.SetAuthTokenCookies(reloadPage: true, triggerMachineReload: triggerMachineReload);
             }
 

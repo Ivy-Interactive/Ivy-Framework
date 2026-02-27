@@ -52,17 +52,17 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
         );
     }
 
-    public Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    public Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
         var baseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
         SetBaseUrl(baseUrl);
         return Task.CompletedTask;
     }
 
-    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
+    public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken)
         => throw new InvalidOperationException("Microsoft Entra login with email/password is not supported");
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public async Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         _codeVerifier = GenerateCodeVerifier();
         var codeChallenge = GenerateCodeChallenge(_codeVerifier);
@@ -81,7 +81,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
         return authUrl;
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -113,7 +113,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
         );
     }
 
-    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken)
     {
         ClearApp();
         return Task.CompletedTask;
@@ -124,7 +124,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
     [Obsolete("Microsoft Entra OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public MicrosoftEntraAuthProvider UseMicrosoftEntra() => this;
 
-    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         // Return stored tokens if available
         if (authSession.OAuthProviderTokens.Count > 0)

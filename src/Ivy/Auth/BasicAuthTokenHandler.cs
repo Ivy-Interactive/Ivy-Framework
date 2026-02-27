@@ -20,7 +20,7 @@ public class BasicAuthTokenHandler : IAuthTokenHandler
         SigningKey = signingKey;
     }
 
-    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         // Check that refresh token is provided
         if (string.IsNullOrEmpty(authSession.AuthToken?.RefreshToken))
@@ -55,10 +55,10 @@ public class BasicAuthTokenHandler : IAuthTokenHandler
         return Task.FromResult<AuthToken?>(newToken);
     }
 
-    public Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task<bool> ValidateAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
         => Task.FromResult(ValidateAccessToken(authSession.AuthToken?.AccessToken));
 
-    public Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task<UserInfo?> GetUserInfoAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         if (ValidateToken(authSession.AuthToken?.AccessToken, Audience, "access") is not var (principal, _) ||
             principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
@@ -69,7 +69,7 @@ public class BasicAuthTokenHandler : IAuthTokenHandler
         return Task.FromResult<UserInfo?>(new UserInfo(user, user, null, null));
     }
 
-    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
     {
         if (ValidateToken(authSession.AuthToken?.AccessToken, Audience, "access") is var (_, expiration))
         {

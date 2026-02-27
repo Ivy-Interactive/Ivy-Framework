@@ -80,7 +80,7 @@ public class AppHub(
 #endif
 
                 var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
-                var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
+                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore);
 
                 var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
@@ -91,7 +91,7 @@ public class AppHub(
                     authService.SetAuthCookies(reloadPage: false);
                 }
 
-                appServices.AddSingleton<IAuthService>(s => authService);
+                appServices.AddSingleton<IAuthProviderService>(s => authService);
 
                 oldSession = authSession.TakeSnapshot();
                 try
@@ -130,7 +130,7 @@ public class AppHub(
             // Override to Auth app if authentication failed
             if (server.AuthProviderType != null)
             {
-                var authService = appServices.BuildServiceProvider().GetService<IAuthService>();
+                var authService = appServices.BuildServiceProvider().GetService<IAuthProviderService>();
                 if (authService?.GetCurrentToken() == null)
                 {
                     var authApp = server.AppRepository.GetAppOrDefault(AppIds.Auth);
@@ -247,6 +247,19 @@ public class AppHub(
             if (server.AuthProviderType != null && routeResult.AppId != AppIds.Auth)
             {
                 _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted), connectionAborted);
+
+                // Start a refresh loop for each OAuth provider token in the session
+                var authService = appState.AppServices.GetService<IAuthProviderService>();
+                if (authService != null)
+                {
+                    var authSession = authService.GetAuthProviderSession();
+                    var oauthProviders = authSession.OAuthProviderTokens.Keys.ToList();
+
+                    foreach (var provider in oauthProviders)
+                    {
+                        _ = Task.Run(() => OAuthTokenRefreshLoopAsync(connectionId, provider, connectionAborted), connectionAborted);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -320,7 +333,7 @@ public class AppHub(
         }
     }
 
-    enum AuthRefreshState
+    enum TokenRefreshState
     {
         Initial,
         HasToken,
@@ -329,73 +342,65 @@ public class AppHub(
         TokenInvalid,
     }
 
-    async Task AbandonConnection(string connectionId, bool resetTokenAndReload)
+    private async Task TokenRefreshLoopAsync(
+        ITokenRefreshStrategy strategy,
+        string connectionId,
+        CancellationToken cancellationToken)
     {
-        var session = sessionStore.Sessions[connectionId];
-        await SessionHelpers.AbandonSessionAsync(sessionStore, session, contentBuilder, resetTokenAndReload, triggerMachineReload: true, logger, "AuthRefreshLoop");
-    }
-
-    private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
-    {
-        var state = AuthRefreshState.Initial;
+        var state = TokenRefreshState.Initial;
         var consecutiveErrors = 0;
 
         while (true)
         {
             try
             {
-                var session = sessionStore.Sessions[connectionId];
-                var authService = session.AppServices.GetRequiredService<IAuthService>();
-                var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
-
-                var authSession = authService.GetAuthSession();
-
                 switch (state)
                 {
-                    case AuthRefreshState.Initial:
-                        logger.LogInformation("AuthRefreshLoop: Initialized for {ConnectionId}.", connectionId);
-                        state = authSession.AuthToken == null
-                            ? AuthRefreshState.HasNoToken
-                            : AuthRefreshState.HasToken;
+                    case TokenRefreshState.Initial:
+                        logger.LogInformation("{StrategyName}RefreshLoop: Initialized for {ConnectionId}.", strategy.LoggingName, connectionId);
+                        state = strategy.HasToken()
+                            ? TokenRefreshState.HasToken
+                            : TokenRefreshState.HasNoToken;
                         break;
 
-                    case AuthRefreshState.HasNoToken:
-                        if (authSession.AuthToken != null)
+                    case TokenRefreshState.HasNoToken:
+                        if (strategy.HasToken())
                         {
-                            state = AuthRefreshState.HasToken;
+                            state = TokenRefreshState.HasToken;
                         }
                         else
                         {
-                            logger.LogInformation("AuthRefreshLoop: No token for {ConnectionId}, waiting 5 minutes.", connectionId);
+                            logger.LogInformation("{StrategyName}RefreshLoop: No token for {ConnectionId}, waiting 5 minutes.", strategy.LoggingName, connectionId);
                             await Task.Delay(TimeSpan.FromMinutes(5), cancellationToken);
                         }
                         break;
 
-                    case AuthRefreshState.HasToken:
+                    case TokenRefreshState.HasToken:
                         {
-                            if (authSession.AuthToken == null)
+                            if (!strategy.HasToken())
                             {
-                                logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}.", connectionId);
-                                await AbandonConnection(connectionId, resetTokenAndReload: true);
-                                return;
+                                logger.LogError("{StrategyName}RefreshLoop: Token lost for {ConnectionId}.", strategy.LoggingName, connectionId);
+                                var shouldContinue = await strategy.OnTokenLostAsync();
+                                if (!shouldContinue)
+                                {
+                                    return;
+                                }
                             }
 
-                            var isValid = await TimeoutHelper.WithTimeoutAsync(
-                                ct => authProvider.ValidateAccessTokenAsync(authSession, ct),
-                                cancellationToken);
+                            var isValid = await strategy.ValidateTokenAsync(cancellationToken);
 
                             if (!isValid)
                             {
-                                state = AuthRefreshState.TokenInvalid;
+                                state = TokenRefreshState.TokenInvalid;
                             }
                             else
                             {
-                                var lifetime = await TimeoutHelper.WithTimeoutAsync(
-                                    ct => authProvider.GetAccessTokenLifetimeAsync(authSession, ct),
-                                    cancellationToken);
+                                var lifetime = await strategy.GetTokenLifetimeAsync(cancellationToken);
 
                                 TimeSpan renewalMargin;
-                                if (lifetime != null && lifetime.NotBefore != null && lifetime.Expires != null && lifetime.Expires - lifetime.NotBefore is { } duration && duration < TimeSpan.FromMinutes(3))
+                                if (lifetime != null && lifetime.NotBefore != null && lifetime.Expires != null &&
+                                    lifetime.Expires - lifetime.NotBefore is { } duration &&
+                                    duration < TimeSpan.FromMinutes(3))
                                 {
                                     renewalMargin = duration / 6;
                                 }
@@ -406,7 +411,7 @@ public class AppHub(
 
                                 if (lifetime?.Expires != null && lifetime.Expires - renewalMargin < DateTimeOffset.UtcNow)
                                 {
-                                    state = AuthRefreshState.TokenExpired;
+                                    state = TokenRefreshState.TokenExpired;
                                 }
                                 else
                                 {
@@ -414,68 +419,127 @@ public class AppHub(
                                     var waitUntil = (lifetime?.Expires ?? DateTimeOffset.UtcNow.AddMinutes(15)) - renewalMargin;
                                     var delay = waitUntil - DateTimeOffset.UtcNow;
 
-                                    // Don't wait more than `maxDelay`
+                                    // Don't wait more than maxDelay
                                     var maxDelay = TimeSpan.FromHours(2);
                                     if (delay > maxDelay)
                                     {
                                         delay = maxDelay;
                                     }
-                                    logger.LogInformation("AuthRefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", connectionId, DateTimeOffset.UtcNow + delay);
+
+                                    // Don't wait less than minDelay (for OAuth tokens)
+                                    var minDelay = TimeSpan.FromMinutes(5);
+                                    if (delay < minDelay)
+                                    {
+                                        delay = minDelay;
+                                    }
+
+                                    logger.LogInformation("{StrategyName}RefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", strategy.LoggingName, connectionId, DateTimeOffset.UtcNow + delay);
                                     await Task.Delay(delay, cancellationToken);
                                 }
                             }
                         }
                         break;
 
-                    case AuthRefreshState.TokenExpired:
-                    case AuthRefreshState.TokenInvalid:
+                    case TokenRefreshState.TokenExpired:
+                    case TokenRefreshState.TokenInvalid:
                         {
-                            var oldSession = authSession.TakeSnapshot();
-                            await authService.RefreshAccessTokenAsync(cancellationToken);
-                            if (state == AuthRefreshState.TokenInvalid && authSession.AuthToken == oldSession.AuthToken)
+                            var refreshSucceeded = await strategy.RefreshTokenAsync(cancellationToken);
+
+                            if (refreshSucceeded)
                             {
-                                // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).
-                                // It is still good to handle it here to avoid an infinite loop.
-                                logger.LogError("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
-                                await authService.LogoutAsync(cancellationToken);
-                            }
-                            if (authSession.AuthToken == null)
-                            {
-                                logger.LogError("AuthRefreshLoop: Token refresh failed for {ConnectionId}, aborting connection.", connectionId);
-                                // Setting the token and reloading will have already happened above if null.
-                                await AbandonConnection(connectionId, resetTokenAndReload: false);
-                                return;
+                                logger.LogInformation("{StrategyName}RefreshLoop: Token refreshed successfully for {ConnectionId}.", strategy.LoggingName, connectionId);
+                                state = TokenRefreshState.HasToken;
                             }
                             else
                             {
-                                state = AuthRefreshState.HasToken;
+                                logger.LogError("{StrategyName}RefreshLoop: Token refresh failed for {ConnectionId}.", strategy.LoggingName, connectionId);
+                                var shouldContinue = await strategy.OnRefreshFailedAsync();
+                                if (!shouldContinue)
+                                {
+                                    return;
+                                }
                             }
                         }
                         break;
                 }
+
+                consecutiveErrors = 0;
             }
             catch (TaskCanceledException)
             {
-                logger.LogInformation("AuthRefreshLoop: cancelled for {ConnectionId}", connectionId);
+                logger.LogInformation("{StrategyName}RefreshLoop: cancelled for {ConnectionId}", strategy.LoggingName, connectionId);
                 return;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "AuthRefreshLoop: Error during auth refresh loop for {ConnectionId}", connectionId);
+                logger.LogError(ex, "{StrategyName}RefreshLoop: Error during token refresh loop for {ConnectionId}", strategy.LoggingName, connectionId);
                 consecutiveErrors++;
                 if (consecutiveErrors >= 5)
                 {
-                    logger.LogError("AuthRefreshLoop: Too many consecutive errors, abandoning connection {ConnectionId}", connectionId);
-                    await AbandonConnection(connectionId, resetTokenAndReload: true);
+                    logger.LogError("{StrategyName}RefreshLoop: Too many consecutive errors for {ConnectionId}, exiting loop", strategy.LoggingName, connectionId);
                     return;
                 }
-                logger.LogInformation("AuthRefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", connectionId);
+                logger.LogInformation("{StrategyName}RefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", strategy.LoggingName, connectionId);
                 await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
                 continue;
             }
-
-            consecutiveErrors = 0;
         }
+    }
+
+    private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
+    {
+        var session = sessionStore.Sessions[connectionId];
+        var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
+        var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
+        var authSession = authService.GetAuthProviderSession();
+
+        var strategy = new MainAuthTokenRefreshStrategy(
+            connectionId,
+            authProvider,
+            authService,
+            authSession,
+            sessionStore,
+            contentBuilder,
+            logger);
+
+        await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
+    }
+
+    private async Task OAuthTokenRefreshLoopAsync(string connectionId, OAuthProvider provider, CancellationToken cancellationToken)
+    {
+        var session = sessionStore.Sessions[connectionId];
+        var registry = session.AppServices.GetService<IOAuthTokenHandlerRegistry>();
+        if (registry == null)
+        {
+            logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No OAuth token handler registry for {ConnectionId}, exiting loop.", provider, connectionId);
+            return;
+        }
+
+        var handler = registry.GetHandler(provider);
+        if (handler == null)
+        {
+            logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No handler registered for {ConnectionId}, exiting loop.", provider, connectionId);
+            return;
+        }
+
+        var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
+        var authSession = authService.GetAuthProviderSession();
+        var client = session.AppServices.GetRequiredService<IClientProvider>();
+        var oauthLogger = session.AppServices.GetRequiredService<ILoggerFactory>()
+            .CreateLogger<OAuthTokenService>();
+
+        // Create a service instance for this provider
+        var oauthTokenService = new OAuthTokenService(
+            provider,
+            handler,
+            authSession,
+            client,
+            sessionStore,
+            oauthLogger);
+
+        var strategy = new OAuthTokenRefreshStrategy(connectionId, oauthTokenService, handler, logger);
+
+        await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
     }
 
     public void HotReload()

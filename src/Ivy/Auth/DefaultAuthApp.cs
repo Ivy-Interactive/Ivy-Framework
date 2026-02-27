@@ -13,7 +13,7 @@ public class DefaultAuthApp : ViewBase
 {
     public override object Build()
     {
-        var auth = UseService<IAuthService>();
+        var auth = UseService<IAuthProviderService>();
         var errorMessage = UseState<string?>();
         var serverArgs = UseService<ServerArgs>();
         var appName = serverArgs.MetaTitle.NullIfEmpty()?.Trim() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
@@ -68,7 +68,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
     {
         var credentials = UseState(() => new LoginFormModel("", ""));
         var loading = UseState<bool>();
-        var auth = UseService<IAuthService>();
+        var auth = UseService<IAuthProviderService>();
         var client = UseService<IClientProvider>();
 
         var formBuilder = credentials.ToForm("Login")

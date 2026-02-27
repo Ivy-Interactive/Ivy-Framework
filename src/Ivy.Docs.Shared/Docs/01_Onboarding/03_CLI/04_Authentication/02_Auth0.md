@@ -221,7 +221,7 @@ When users authenticate via OAuth providers like Google or GitHub, Auth0 manages
 Once configured, you can access OAuth provider tokens in your Ivy application:
 
 ```csharp
-var authService = UseService<IAuthService>();
+var authService = UseService<IAuthProviderService>();
 
 // Get all OAuth provider tokens
 var tokens = await authService.GetOAuthProviderTokensAsync();

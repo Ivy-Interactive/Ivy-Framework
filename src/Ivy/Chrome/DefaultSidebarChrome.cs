@@ -25,7 +25,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var selectedIndex = UseState<int?>();
         var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
-        var auth = UseService<IAuthService?>();
+        var auth = UseService<IAuthProviderService?>();
         var user = UseState<UserInfo?>();
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
@@ -407,7 +407,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 )
         };
 
-        var authSession = auth?.GetAuthSession();
+        var authSession = auth?.GetAuthProviderSession();
         var isLoggedIn = authSession != null;
 
         var onLogout = new Action(async () =>

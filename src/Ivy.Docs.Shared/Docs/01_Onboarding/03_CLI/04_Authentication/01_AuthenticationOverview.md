@@ -131,12 +131,12 @@ If configuration is present in both .NET user secrets and environment variables,
 3. Credentials are validated by the configured authentication provider.
 4. If valid, Ivy establishes an authenticated session for the user.
 
-## Using IAuthService in Views
+## Using IAuthProviderService in Views
 
-Use [UseService](../../02_Concepts/01_Program.md) to obtain `IAuthService` in your [views](../../02_Concepts/02_Views.md):
+Use [UseService](../../02_Concepts/01_Program.md) to obtain `IAuthProviderService` in your [views](../../02_Concepts/02_Views.md):
 
 ```csharp
-var auth = UseService<IAuthService>();
+var auth = UseService<IAuthProviderService>();
 
 await auth.LoginAsync(email, password);
 var user = await auth.GetUserInfoAsync();
@@ -207,7 +207,7 @@ By default, Ivy authentication cookies are configured with:
 To override these defaults, set `Server.ConfigureAuthCookieOptions` in your `Program.cs` before calling `server.RunAsync()`:
 
 ```csharp
-Server.ConfigureAuthCookieOptions = options => 
+Server.ConfigureAuthCookieOptions = options =>
 {
     options.Expires = DateTimeOffset.UtcNow.AddDays(30);
 };

@@ -32,7 +32,7 @@ public class AutheliaAuthProvider : AutheliaAuthTokenHandler, IAuthProvider
         return httpClient;
     }
 
-    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string username, string password, CancellationToken cancellationToken)
+    public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string username, string password, CancellationToken cancellationToken)
     {
         var payload = new { username, password };
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -49,7 +49,7 @@ public class AutheliaAuthProvider : AutheliaAuthTokenHandler, IAuthProvider
         return null;
     }
 
-    public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken)
     {
         // Instruct Authelia to log out. Then expire the session cookie.
         await HttpClient.PostAsync("/api/logout", new StringContent(string.Empty), cancellationToken);
@@ -60,12 +60,12 @@ public class AutheliaAuthProvider : AutheliaAuthTokenHandler, IAuthProvider
         _cookieContainer.Add(new Uri(_baseUrl), expired);
     }
 
-    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

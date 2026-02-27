@@ -21,7 +21,7 @@ public static class CookieRegistryExtensions
         return null;
     }
 
-    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession)
+    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthProviderSession authSession)
     {
         var cookies = new CookieJar();
         cookies.AddCookiesForAuthToken(authSession.AuthToken);

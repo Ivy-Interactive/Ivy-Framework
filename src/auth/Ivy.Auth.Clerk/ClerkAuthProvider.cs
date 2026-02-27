@@ -87,7 +87,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         }
     }
 
-    private async Task<AuthToken?> TryRestoreExistingSessionAsync(IAuthSession authSession, ClerkCredentials credentials, CancellationToken cancellationToken)
+    private async Task<AuthToken?> TryRestoreExistingSessionAsync(IAuthProviderSession authSession, ClerkCredentials credentials, CancellationToken cancellationToken)
     {
         try
         {
@@ -117,8 +117,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     private static bool IsSessionExistsError(ClerkException ex)
         => ex.Errors?.Any(e => e.Code == "session_exists") == true;
 
-
-    public async Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    public async Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
         _origin = $"{requestScheme}://{requestHost}";
 
@@ -136,7 +135,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     }
 
 
-    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -180,7 +179,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         }
     }
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public async Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_origin))
         {
@@ -222,7 +221,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         return new Uri(oauthUri);
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
         var sessionId = request.Query["created_session_id"].ToString();
         var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
@@ -247,7 +246,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         }
     }
 
-    public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
         var jwt = authSession.AuthToken?.AccessToken;
@@ -312,7 +311,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     }
 
 
-    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         // Return stored tokens if available
         if (authSession.OAuthProviderTokens.Count > 0)

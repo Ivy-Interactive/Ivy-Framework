@@ -12,15 +12,15 @@ namespace Ivy.Core.Auth;
 
 public static class AuthHelper
 {
-    public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
+    public static AuthProviderSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
     => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var oauthTokens)
         ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, oauthTokens, httpMessageHandler)
-        : new AuthSession(httpMessageHandler);
+        : new AuthProviderSession(httpMessageHandler);
 
-    public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
+    public static AuthProviderSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
     => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var oauthTokens)
         ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, oauthTokens, httpMessageHandler)
-        : new AuthSession(httpMessageHandler);
+        : new AuthProviderSession(httpMessageHandler);
 
     public static async Task ValidateAuthIfRequired(global::Ivy.Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
     {
@@ -110,7 +110,7 @@ public static class AuthHelper
         return null;
     }
 
-    private static async Task ValidateAuth(IServiceProvider serviceProvider, AuthSession authSession, CancellationToken cancellationToken)
+    private static async Task ValidateAuth(IServiceProvider serviceProvider, AuthProviderSession authSession, CancellationToken cancellationToken)
     {
         if (authSession.AuthToken == null || string.IsNullOrEmpty(authSession.AuthToken.AccessToken))
         {
@@ -181,7 +181,7 @@ public static class AuthHelper
         return (accessToken, refreshToken, tag, authSessionDataValue, oauthTokens);
     }
 
-    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<OAuthProvider, OAuthProviderToken> oauthTokens, HttpMessageHandler httpMessageHandler)
+    private static AuthProviderSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<OAuthProvider, OAuthProviderToken> oauthTokens, HttpMessageHandler httpMessageHandler)
     {
         if (accessToken == null)
         {
