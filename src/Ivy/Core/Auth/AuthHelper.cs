@@ -218,7 +218,7 @@ public static class AuthHelper
 
         foreach (OAuthProvider provider in Enum.GetValues(typeof(OAuthProvider)))
         {
-            var prefix = GetProviderPrefix(provider);
+            var prefix = provider.GetPrefix();
             var accessTokenName = $"{prefix}_access_token";
             var refreshTokenName = $"{prefix}_refresh_token";
             var tagName = $"{prefix}_auth_tag";
@@ -268,7 +268,7 @@ public static class AuthHelper
 
         foreach (OAuthProvider provider in Enum.GetValues(typeof(OAuthProvider)))
         {
-            var prefix = GetProviderPrefix(provider);
+            var prefix = provider.GetPrefix();
             var accessTokenName = $"{prefix}_access_token";
             var refreshTokenName = $"{prefix}_refresh_token";
             var tagName = $"{prefix}_auth_tag";
@@ -303,7 +303,7 @@ public static class AuthHelper
         return oauthTokens;
     }
 
-    private static string GetProviderPrefix(OAuthProvider provider)
+    public static string GetPrefix(this OAuthProvider provider)
     {
         return provider switch
         {

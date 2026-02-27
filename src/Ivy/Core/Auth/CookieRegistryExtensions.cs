@@ -108,7 +108,7 @@ public static class CookieRegistryExtensions
 
         foreach (var (provider, token) in oauthProviderTokens)
         {
-            var prefix = GetProviderPrefix(provider);
+            var prefix = provider.GetPrefix();
             var accessTokenName = $"{prefix}_access_token";
             var refreshTokenName = $"{prefix}_refresh_token";
             var tagName = $"{prefix}_auth_tag";
@@ -144,27 +144,6 @@ public static class CookieRegistryExtensions
                 cookies.Delete(tagName, CreateAuthCookieOptions());
             }
         }
-    }
-
-    private static string GetProviderPrefix(OAuthProvider provider)
-    {
-        return provider switch
-        {
-            OAuthProvider.Google => "go",
-            OAuthProvider.GitHub => "gh",
-            OAuthProvider.Microsoft => "ms",
-            OAuthProvider.Apple => "ap",
-            OAuthProvider.Twitter => "tw",
-            OAuthProvider.Discord => "dc",
-            OAuthProvider.Twitch => "tc",
-            OAuthProvider.Figma => "fg",
-            OAuthProvider.Notion => "nt",
-            OAuthProvider.Azure => "az",
-            OAuthProvider.WorkOS => "wo",
-            OAuthProvider.GitLab => "gl",
-            OAuthProvider.Bitbucket => "bb",
-            _ => provider.ToString().ToLowerInvariant().Substring(0, Math.Min(2, provider.ToString().Length))
-        };
     }
 
     private static CookieOptions CreateAuthCookieOptions()
