@@ -19,34 +19,51 @@ public class Auth0OAuthException(string? error, string? errorDescription)
     public string? ErrorDescription { get; } = errorDescription;
 }
 
-public class Auth0AuthProvider : IAuthProvider
+public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
 {
-    private readonly AuthenticationApiClient _authClient;
-    private readonly string _domain;
-    private readonly string _clientId;
-    private readonly string _clientSecret;
-    private readonly string _audience;
-    private readonly string _namespace;
     private readonly List<AuthOption> _authOptions = new();
-
-    private readonly ConfigurationManager<OpenIdConnectConfiguration> _configurationManager;
     private ManagementApiClient? _managementClient;
     private DateTime _managementTokenExpiry = DateTime.MinValue;
 
     public Auth0AuthProvider(IConfiguration configuration)
+        : base(
+            CreateAuthClient(configuration),
+            GetDomain(configuration),
+            GetClientId(configuration),
+            GetClientSecret(configuration),
+            GetAudience(configuration),
+            GetNamespace(configuration),
+            CreateConfigurationManager(configuration))
     {
-        _domain = configuration.GetValue<string>("Auth0:Domain") ?? throw new Exception("Auth0:Domain is required");
-        _clientId = configuration.GetValue<string>("Auth0:ClientId") ?? throw new Exception("Auth0:ClientId is required");
-        _clientSecret = configuration.GetValue<string>("Auth0:ClientSecret") ?? throw new Exception("Auth0:ClientSecret is required");
-        _audience = configuration.GetValue<string>("Auth0:Audience") ?? throw new Exception("Auth0:Audience is required");
-        _namespace = configuration.GetValue<string>("Auth0:Namespace") ?? "https://ivy.app/";
+    }
 
-        _authClient = new AuthenticationApiClient(_domain);
+    private static AuthenticationApiClient CreateAuthClient(IConfiguration configuration)
+    {
+        var domain = GetDomain(configuration);
+        return new AuthenticationApiClient(domain);
+    }
 
-        // Setup OpenID configuration manager for JWKS
-        var authority = $"https://{_domain}/";
+    private static string GetDomain(IConfiguration configuration)
+        => configuration.GetValue<string>("Auth0:Domain") ?? throw new Exception("Auth0:Domain is required");
+
+    private static string GetClientId(IConfiguration configuration)
+        => configuration.GetValue<string>("Auth0:ClientId") ?? throw new Exception("Auth0:ClientId is required");
+
+    private static string GetClientSecret(IConfiguration configuration)
+        => configuration.GetValue<string>("Auth0:ClientSecret") ?? throw new Exception("Auth0:ClientSecret is required");
+
+    private static string GetAudience(IConfiguration configuration)
+        => configuration.GetValue<string>("Auth0:Audience") ?? throw new Exception("Auth0:Audience is required");
+
+    private static string GetNamespace(IConfiguration configuration)
+        => configuration.GetValue<string>("Auth0:Namespace") ?? "https://ivy.app/";
+
+    private static ConfigurationManager<OpenIdConnectConfiguration> CreateConfigurationManager(IConfiguration configuration)
+    {
+        var domain = GetDomain(configuration);
+        var authority = $"https://{domain}/";
         var documentRetriever = new HttpDocumentRetriever { RequireHttps = true };
-        _configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+        return new ConfigurationManager<OpenIdConnectConfiguration>(
             $"{authority}.well-known/openid-configuration",
             new OpenIdConnectConfigurationRetriever(),
             documentRetriever
@@ -57,16 +74,16 @@ public class Auth0AuthProvider : IAuthProvider
     {
         var request = new ResourceOwnerTokenRequest
         {
-            ClientId = _clientId,
-            ClientSecret = _clientSecret,
+            ClientId = ClientId,
+            ClientSecret = ClientSecret,
             Username = email,
             Password = password,
             Scope = "openid profile email",
-            Audience = _audience,
+            Audience = Audience,
             Realm = "Username-Password-Authentication",
         };
 
-        var response = await _authClient.GetTokenAsync(request, cancellationToken);
+        var response = await AuthClient.GetTokenAsync(request, cancellationToken);
         return new AuthToken(response.AccessToken, response.RefreshToken);
     }
 
@@ -83,17 +100,17 @@ public class Auth0AuthProvider : IAuthProvider
         };
 
         var callbackUri = callback.GetUri(includeIdInPath: false);
-        var authorizationUrl = _authClient.BuildAuthorizationUrl()
+        var authorizationUrl = AuthClient.BuildAuthorizationUrl()
             .WithResponseType(AuthorizationResponseType.Code)
-            .WithClient(_clientId)
+            .WithClient(ClientId)
             .WithConnection(connection)
             .WithRedirectUrl(callbackUri.ToString())
             .WithScope("openid profile email")
             .WithState(callback.Id);
 
-        if (!string.IsNullOrEmpty(_audience))
+        if (!string.IsNullOrEmpty(Audience))
         {
-            authorizationUrl = authorizationUrl.WithAudience(_audience);
+            authorizationUrl = authorizationUrl.WithAudience(Audience);
         }
 
         return Task.FromResult(authorizationUrl.Build());
@@ -119,13 +136,13 @@ public class Auth0AuthProvider : IAuthProvider
         {
             var request_ = new AuthorizationCodeTokenRequest
             {
-                ClientId = _clientId,
-                ClientSecret = _clientSecret,
+                ClientId = ClientId,
+                ClientSecret = ClientSecret,
                 Code = code,
                 RedirectUri = $"{request.Scheme}://{request.Host}{request.Path}"
             };
 
-            var response = await _authClient.GetTokenAsync(request_, cancellationToken);
+            var response = await AuthClient.GetTokenAsync(request_, cancellationToken);
 
             return new AuthToken(response.AccessToken, response.RefreshToken);
         }
@@ -138,107 +155,9 @@ public class Auth0AuthProvider : IAuthProvider
     public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
         => Task.CompletedTask;
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        if (authSession.AuthToken is not { } token || token.RefreshToken == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            var request = new RefreshTokenRequest
-            {
-                ClientId = _clientId,
-                ClientSecret = _clientSecret,
-                RefreshToken = token.RefreshToken
-            };
-
-            var response = await _authClient.GetTokenAsync(request, cancellationToken);
-            return new AuthToken(response.AccessToken, response.RefreshToken ?? token.RefreshToken);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string? jwt, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrEmpty(jwt))
-        {
-            return null;
-        }
-
-        try
-        {
-            var discoveryDocument = await _configurationManager.GetConfigurationAsync(cancellationToken);
-            var signingKeys = discoveryDocument.SigningKeys;
-
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = $"https://{_domain}/",
-                ValidateAudience = true,
-                ValidAudience = _audience,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKeys = signingKeys,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(2),
-            };
-
-            var handler = new JwtSecurityTokenHandler
-            {
-                InboundClaimTypeMap = new Dictionary<string, string>()
-            };
-            var claims = handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
-            return (claims, validatedToken.ValidTo);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        return (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken)) is not null;
-    }
-
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
-        {
-            return null;
-        }
-        return new UserInfo(
-            claims.FindFirst("sub")?.Value ?? "",
-            claims.FindFirst(_namespace + "email")?.Value ?? "",
-            claims.FindFirst(_namespace + "name")?.Value ?? "",
-            claims.FindFirst(_namespace + "avatar")?.Value ?? ""
-        );
-    }
-
     public AuthOption[] GetAuthOptions()
     {
         return _authOptions.ToArray();
-    }
-
-    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        if (authSession.AuthToken?.AccessToken is not { } accessToken)
-        {
-            return null;
-        }
-
-        if (await VerifyToken(accessToken, cancellationToken) is var (_, expiration))
-        {
-            return new TokenLifetime(expiration);
-        }
-        else
-        {
-            return null;
-        }
     }
 
     public Auth0AuthProvider UseEmailPassword()
@@ -288,19 +207,19 @@ public class Auth0AuthProvider : IAuthProvider
         // Request a new management API token
         var tokenRequest = new ClientCredentialsTokenRequest
         {
-            ClientId = _clientId,
-            ClientSecret = _clientSecret,
-            Audience = $"https://{_domain}/api/v2/"
+            ClientId = ClientId,
+            ClientSecret = ClientSecret,
+            Audience = $"https://{Domain}/api/v2/"
         };
 
-        var tokenResponse = await _authClient.GetTokenAsync(tokenRequest, cancellationToken);
+        var tokenResponse = await AuthClient.GetTokenAsync(tokenRequest, cancellationToken);
 
         if (string.IsNullOrEmpty(tokenResponse.AccessToken))
         {
             throw new Exception("Failed to obtain Auth0 Management API token");
         }
 
-        _managementClient = new ManagementApiClient(tokenResponse.AccessToken, _domain);
+        _managementClient = new ManagementApiClient(tokenResponse.AccessToken, Domain);
         // Tokens typically last 24 hours, refresh after 23 hours to be safe
         _managementTokenExpiry = DateTime.UtcNow.AddHours(23);
 

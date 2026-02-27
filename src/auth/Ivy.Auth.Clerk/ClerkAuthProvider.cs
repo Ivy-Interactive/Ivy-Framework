@@ -19,16 +19,11 @@ public class ClerkOAuthException(string? error, string? errorDescription)
     public string? ErrorDescription { get; } = errorDescription;
 }
 
-public class ClerkAuthProvider : IAuthProvider
+public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 {
     private readonly string _secretKey;
-    private readonly string _frontendApiDomain;
     private readonly List<AuthOption> _authOptions = [];
-    private readonly HttpClient _httpClient;
     private readonly BackendApiClient _backendClient;
-    private ICollection<SecurityKey>? _signingKeys;
-    private DateTime _signingKeysLastFetched = DateTime.MinValue;
-    private readonly bool _isProduction;
     private string? _origin = null;
 
     public bool OpenOAuthLoginInNewTab => true;
@@ -44,49 +39,52 @@ public class ClerkAuthProvider : IAuthProvider
     }
 
     public ClerkAuthProvider(IConfiguration configuration)
+        : base(CreateHttpClient(configuration), GetFrontendApiDomain(configuration), GetIsProduction(configuration))
     {
-        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Clerk:UserAgent");
-
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
-
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
-        var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
 
         _backendClient = new BackendApiClient(_secretKey);
+    }
 
-        var (secretIsProduction, _) = ParseKey("Clerk:SecretKey", "sk", _secretKey);
-        var (publishableIsProduction, publishableKeyValue) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
-        _isProduction = secretIsProduction;
+    private static bool GetIsProduction(IConfiguration configuration)
+    {
+        var secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
+        var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
+
+        var (secretIsProduction, _) = ParseKey("Clerk:SecretKey", "sk", secretKey);
+        var (publishableIsProduction, _) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
 
         if (secretIsProduction != publishableIsProduction)
         {
             throw new Exception("Clerk:SecretKey and Clerk:PublishableKey must both be for the same environment (test or live)");
         }
 
+        return secretIsProduction;
+    }
+
+    private static HttpClient CreateHttpClient(IConfiguration configuration)
+    {
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Clerk:UserAgent");
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
+        return httpClient;
+    }
+
+    private static string GetFrontendApiDomain(IConfiguration configuration)
+    {
+        var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
+        var (_, publishableKeyValue) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
+
         try
         {
             var base64Decoded = WebEncoders.Base64UrlDecode(publishableKeyValue);
             var base64DecodedString = Encoding.UTF8.GetString(base64Decoded);
-
-            _frontendApiDomain = base64DecodedString.Split('$', 2)[0];
+            return base64DecodedString.Split('$', 2)[0];
         }
         catch (Exception ex)
         {
             throw new Exception("Clerk:PublishableKey contains an invalid base64 string", ex);
         }
-    }
-
-    private FrontendApiClient MakeFrontendApiClient(IAuthSession authSession)
-        => new(_frontendApiDomain, authSession.HttpMessageHandler);
-
-    private static ClerkSession? GetActiveSession(ClerkClient client)
-    {
-        var activeSessions = client.Sessions.Where(session => session.Status == "active");
-
-        // Prefer the last active session, but don't force it
-        return activeSessions.FirstOrDefault(session => session.Id == client.LastActiveSessionId)
-            ?? activeSessions.FirstOrDefault();
     }
 
     private async Task<AuthToken?> TryRestoreExistingSessionAsync(IAuthSession authSession, ClerkCredentials credentials, CancellationToken cancellationToken)
@@ -119,75 +117,13 @@ public class ClerkAuthProvider : IAuthProvider
     private static bool IsSessionExistsError(ClerkException ex)
         => ex.Errors?.Any(e => e.Code == "session_exists") == true;
 
-    private async Task<ClerkSession?> GetActiveSession(FrontendApiClient frontendClient, ClerkCredentials credentials, CancellationToken cancellationToken)
-    {
-        var clientResponse = await frontendClient.GetCurrentClientAsync(credentials, cancellationToken);
-        if (clientResponse.Response is { } client &&
-            GetActiveSession(client) is { } session &&
-            session?.LastActiveToken.Jwt is { } sessionToken &&
-            await ValidateToken(sessionToken, lenientLifetimeValidation: false, cancellationToken) != null)
-        {
-            return session;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    private Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthSession authSession, CancellationToken cancellationToken)
-        => GetClerkCredentialsAsync(authSession, includeSessionToken: false, cancellationToken);
-
-    private async Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthSession authSession, bool includeSessionToken, CancellationToken cancellationToken)
-    {
-        var credentials = new ClerkCredentials();
-
-        var frontendClient = MakeFrontendApiClient(authSession);
-
-        if (_isProduction)
-        {
-            if (!includeSessionToken || await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) == null)
-            {
-                if (await GetActiveSession(frontendClient, credentials, cancellationToken) is { } session)
-                {
-                    credentials.Session = session;
-                    if (includeSessionToken)
-                    {
-                        authSession.AuthToken = new AuthToken(session.LastActiveToken.Jwt);
-                    }
-                }
-            }
-        }
-        else
-        {
-            if (authSession.AuthSessionData is { } devBrowserJwt && devBrowserJwt.StartsWith("dvb_"))
-            {
-                credentials.DevBrowserToken = devBrowserJwt;
-            }
-            else
-            {
-                authSession.AuthSessionData = null;
-                var devBrowserTokenResponse = await frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
-                devBrowserJwt = devBrowserTokenResponse.Id;
-                authSession.AuthSessionData = devBrowserJwt;
-                credentials.DevBrowserToken = devBrowserJwt;
-            }
-        }
-
-        if (includeSessionToken && credentials.SessionToken == null)
-        {
-            credentials.SessionToken = authSession.AuthToken?.AccessToken;
-        }
-
-        return credentials;
-    }
 
     public async Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
         _origin = $"{requestScheme}://{requestHost}";
 
         var frontendClient = MakeFrontendApiClient(authSession);
-        if (_isProduction)
+        if (IsProduction)
         {
             await frontendClient.GetEnvironmentAsync(cancellationToken: cancellationToken);
             await GetClerkCredentialsAsync(authSession, includeSessionToken: true, cancellationToken: cancellationToken);
@@ -199,23 +135,6 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    private async Task<ICollection<SecurityKey>> GetSigningKeysAsync(CancellationToken cancellationToken)
-    {
-        // Cache keys for 1 hour
-        if (_signingKeys != null && DateTime.UtcNow - _signingKeysLastFetched < TimeSpan.FromHours(1))
-        {
-            return _signingKeys;
-        }
-
-        var jwksUrl = $"https://{_frontendApiDomain}/.well-known/jwks.json";
-        var jwksJson = await _httpClient.GetStringAsync(jwksUrl, cancellationToken);
-        var jwks = new JsonWebKeySet(jwksJson);
-
-        _signingKeys = jwks.GetSigningKeys();
-        _signingKeysLastFetched = DateTime.UtcNow;
-
-        return _signingKeys;
-    }
 
     public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
@@ -351,72 +270,6 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var token = authSession.AuthToken;
-            var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
-
-            var (principal, _) = await ValidateToken(token?.AccessToken, lenientLifetimeValidation: true, cancellationToken)
-                ?? throw new Exception("Failed to validate access token during token refresh.");
-
-            if (principal.FindFirst("sid")?.Value is not { } sessionId)
-            {
-                throw new Exception("No session ID found in access token.");
-            }
-
-            var frontendClient = MakeFrontendApiClient(authSession);
-            var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
-            if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: false, cancellationToken) == null)
-            {
-                throw new Exception("New JWT from Clerk is invalid.");
-            }
-            else
-            {
-                return new AuthToken(newToken.Jwt!);
-            }
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        return (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken)) is not null;
-    }
-
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) is not var (claims, _))
-        {
-            return null;
-        }
-
-        return new UserInfo(
-            claims.FindFirst("sub")?.Value.NullIfEmpty() ?? "",
-            claims.FindFirst("email")?.Value.NullIfEmpty() ?? claims.FindFirst("username")?.Value.NullIfEmpty() ?? "",
-            claims.FindFirst("full_name")?.Value.NullIfEmpty(),
-            claims.FindFirst("has_image")?.Value != "false"
-                ? claims.FindFirst("image_url")?.Value.NullIfEmpty()
-                : null
-        );
-    }
-
-    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: true, cancellationToken) is var (_, lifetime))
-        {
-            return lifetime;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     public AuthOption[] GetAuthOptions()
     {
         return _authOptions.ToArray();
@@ -458,42 +311,6 @@ public class ClerkAuthProvider : IAuthProvider
         return this;
     }
 
-    private async Task<(ClaimsPrincipal, TokenLifetime)?> ValidateToken(string? jwt, bool lenientLifetimeValidation, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrEmpty(jwt))
-        {
-            return null;
-        }
-
-        var signingKeys = await GetSigningKeysAsync(cancellationToken);
-
-        var handler = new JwtSecurityTokenHandler
-        {
-            MapInboundClaims = false
-        };
-        try
-        {
-            var principal = handler.ValidateToken(jwt, new TokenValidationParameters
-            {
-                TryAllIssuerSigningKeys = true,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKeys = signingKeys,
-                ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
-                ValidateIssuer = true,
-                ValidIssuer = $"https://{_frontendApiDomain}",
-                ValidateAudience = false,
-                ClockSkew = lenientLifetimeValidation
-                    ? TimeSpan.FromDays(1)
-                    : TimeSpan.Zero,
-            }, out SecurityToken validatedToken);
-
-            return (principal, new TokenLifetime(validatedToken.ValidTo, validatedToken.ValidFrom));
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
 
     public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {

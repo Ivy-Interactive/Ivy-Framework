@@ -20,31 +20,26 @@ public class SupabaseOAuthException(string? error, string? errorCode, string? er
     public string? ErrorDescription { get; } = errorDescription;
 }
 
-public class SupabaseAuthProvider : IAuthProvider
+public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
 {
-    private readonly global::Supabase.Client _client;
-    private readonly HttpClient _httpClient;
-    private readonly string _jwksUrl;
-    private readonly string _issuer;
-    private readonly SymmetricSecurityKey? _legacyJwtKey = null;
-
     private readonly List<AuthOption> _authOptions = new();
 
     private string? _pkceCodeVerifier = null;
 
-    private JsonWebKeySet? _cachedJwks = null;
-    private DateTime _jwksCacheExpiry = DateTime.MinValue;
-
     public SupabaseAuthProvider(IConfiguration configuration)
+        : base(
+            CreateHttpClient(configuration),
+            GetIssuer(configuration),
+            GetJwksUrl(configuration),
+            CreateLegacyJwtKey(configuration),
+            CreateClient(configuration))
+    {
+    }
+
+    private static global::Supabase.Client CreateClient(IConfiguration configuration)
     {
         var url = configuration.GetValue<string>("Supabase:Url") ?? throw new Exception("Supabase:Url is required");
         var apiKey = configuration.GetValue<string>("Supabase:ApiKey") ?? throw new Exception("Supabase:ApiKey is required");
-        var legacyJwtSecret = configuration.GetValue<string?>("Supabase:LegacyJwtSecret");
-        if (!string.IsNullOrEmpty(legacyJwtSecret))
-        {
-            var keyBytes = Encoding.UTF8.GetBytes(legacyJwtSecret);
-            _legacyJwtKey = new SymmetricSecurityKey(keyBytes);
-        }
 
         var options = new SupabaseOptions
         {
@@ -52,20 +47,43 @@ public class SupabaseAuthProvider : IAuthProvider
             AutoConnectRealtime = false
         };
 
-        _client = new global::Supabase.Client(url, apiKey, options);
+        return new global::Supabase.Client(url, apiKey, options);
+    }
 
+    private static HttpClient CreateHttpClient(IConfiguration configuration)
+    {
         var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Supabase:UserAgent");
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
+        return httpClient;
+    }
 
-        // Setup JWKS URL
-        _issuer = new Uri(new Uri(url), "auth/v1").ToString();
-        _jwksUrl = $"{_issuer}/.well-known/jwks.json";
+    private static string GetIssuer(IConfiguration configuration)
+    {
+        var url = configuration.GetValue<string>("Supabase:Url") ?? throw new Exception("Supabase:Url is required");
+        return new Uri(new Uri(url), "auth/v1").ToString();
+    }
+
+    private static string GetJwksUrl(IConfiguration configuration)
+    {
+        var issuer = GetIssuer(configuration);
+        return $"{issuer}/.well-known/jwks.json";
+    }
+
+    private static SymmetricSecurityKey? CreateLegacyJwtKey(IConfiguration configuration)
+    {
+        var legacyJwtSecret = configuration.GetValue<string?>("Supabase:LegacyJwtSecret");
+        if (!string.IsNullOrEmpty(legacyJwtSecret))
+        {
+            var keyBytes = Encoding.UTF8.GetBytes(legacyJwtSecret);
+            return new SymmetricSecurityKey(keyBytes);
+        }
+        return null;
     }
 
     public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
     {
-        var session = await _client.Auth.SignIn(email, password)
+        var session = await Client.Auth.SignIn(email, password)
             .WaitAsync(cancellationToken);
         var authToken = MakeAuthToken(session);
         return authToken;
@@ -126,7 +144,7 @@ public class SupabaseAuthProvider : IAuthProvider
             };
         }
 
-        var providerAuthState = await _client.Auth.SignIn(provider, signInOptions)
+        var providerAuthState = await Client.Auth.SignIn(provider, signInOptions)
             .WaitAsync(cancellationToken);
         _pkceCodeVerifier = providerAuthState.PKCEVerifier;
 
@@ -153,7 +171,7 @@ public class SupabaseAuthProvider : IAuthProvider
 
         try
         {
-            var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier, code)
+            var session = await Client.Auth.ExchangeCodeForSession(_pkceCodeVerifier, code)
                 .WaitAsync(cancellationToken);
 
             ExtractAndStoreProviderTokens(session, authSession);
@@ -168,97 +186,13 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        await _client.Auth.SignOut()
+        await Client.Auth.SignOut()
             .WaitAsync(cancellationToken);
-    }
-
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        if (authSession.AuthToken is not { } token || token.RefreshToken == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            var session = await _client.Auth.SetSession(token.AccessToken, token.RefreshToken, forceAccessTokenRefresh: true)
-                .WaitAsync(cancellationToken);
-            var authToken = MakeAuthToken(session);
-            return authToken;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        return await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not null;
-    }
-
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
-        {
-            return null;
-        }
-
-        var userId = claims.FindFirst("sub")?.Value;
-        var email = claims.FindFirst("email")?.Value;
-        string? name = null, avatarUrl = null;
-
-        var metadataJson = claims.FindFirst("user_metadata")?.Value;
-        try
-        {
-            if (!string.IsNullOrEmpty(metadataJson))
-            {
-                using var doc = JsonDocument.Parse(metadataJson);
-                var root = doc.RootElement;
-
-                if (root.TryGetProperty("full_name", out var fullNameProperty))
-                {
-                    name = fullNameProperty.GetString();
-                }
-                if (root.TryGetProperty("avatar_url", out var avatarUrlProperty))
-                {
-                    avatarUrl = avatarUrlProperty.GetString();
-                }
-            }
-        }
-        catch (JsonException)
-        {
-            // Ignore JSON parsing errors
-        }
-
-        if (userId == null || email == null)
-        {
-            return null;
-        }
-
-        return new UserInfo(
-            userId,
-            email,
-            name,
-            avatarUrl
-        );
     }
 
     public AuthOption[] GetAuthOptions()
     {
         return _authOptions.ToArray();
-    }
-
-    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is var (_, expiration))
-        {
-            return new TokenLifetime(expiration);
-        }
-        else
-        {
-            return null;
-        }
     }
 
     public SupabaseAuthProvider UseEmailPassword()
@@ -332,68 +266,6 @@ public class SupabaseAuthProvider : IAuthProvider
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Bitbucket", nameof(GotrueConstants.Provider.Bitbucket).ToLower(), Icons.Bitbucket));
         return this;
     }
-
-    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string? jwt, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrEmpty(jwt))
-        {
-            return null;
-        }
-
-        try
-        {
-            var handler = new JwtSecurityTokenHandler
-            {
-                InboundClaimTypeMap = new Dictionary<string, string>()
-            };
-
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = _issuer,
-                ValidateAudience = true,
-                ValidAudience = "authenticated",
-                ValidateIssuerSigningKey = true,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(2),
-            };
-
-            var parsedToken = handler.ReadJwtToken(jwt);
-            if (parsedToken.Header.Alg == SecurityAlgorithms.HmacSha256)
-            {
-                tokenValidationParameters.IssuerSigningKey = _legacyJwtKey;
-            }
-            else
-            {
-                // Check cache first
-                if (_cachedJwks == null || DateTime.UtcNow >= _jwksCacheExpiry)
-                {
-                    var jwksJson = await _httpClient.GetStringAsync(_jwksUrl, cancellationToken);
-                    _cachedJwks = new JsonWebKeySet(jwksJson);
-                    _jwksCacheExpiry = DateTime.UtcNow.AddHours(24);
-                }
-
-                if (_cachedJwks.Keys.Count == 0)
-                {
-                    return null;
-                }
-
-                tokenValidationParameters.IssuerSigningKeys = _cachedJwks.Keys;
-            }
-
-            var claims = handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
-            return (claims, validatedToken.ValidTo);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    private AuthToken? MakeAuthToken(Session? session) =>
-        session?.AccessToken != null
-            ? new AuthToken(session.AccessToken, session.RefreshToken)
-            : null;
 
     private static void ExtractAndStoreProviderTokens(Session? session, IAuthSession authSession)
     {

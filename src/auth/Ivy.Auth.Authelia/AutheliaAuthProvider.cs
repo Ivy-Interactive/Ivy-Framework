@@ -7,34 +7,36 @@ using Microsoft.Extensions.Configuration;
 
 namespace Ivy.Auth.Authelia;
 
-public class AutheliaAuthProvider : IAuthProvider
+public class AutheliaAuthProvider : AutheliaAuthTokenHandler, IAuthProvider
 {
-    private readonly HttpClient _httpClient;
     private readonly CookieContainer _cookieContainer;
     private readonly string _baseUrl;
 
-    private readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
-
     public AutheliaAuthProvider(IConfiguration configuration)
+        : base(CreateHttpClient(configuration, out var cookieContainer, out var baseUrl))
     {
-        _baseUrl = configuration.GetValue<string>("Authelia:Url")
+        _cookieContainer = cookieContainer;
+        _baseUrl = baseUrl;
+    }
+
+    private static HttpClient CreateHttpClient(IConfiguration configuration, out CookieContainer cookieContainer, out string baseUrl)
+    {
+        baseUrl = configuration.GetValue<string>("Authelia:Url")
             ?? throw new Exception("Authelia:Url is required");
         var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Authelia:UserAgent");
 
-        _cookieContainer = new CookieContainer();
-        var handler = new HttpClientHandler { CookieContainer = _cookieContainer };
-        _httpClient = new HttpClient(handler) { BaseAddress = new Uri(_baseUrl) };
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
+        cookieContainer = new CookieContainer();
+        var handler = new HttpClientHandler { CookieContainer = cookieContainer };
+        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(baseUrl) };
+        httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
+        return httpClient;
     }
 
     public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string username, string password, CancellationToken cancellationToken)
     {
         var payload = new { username, password };
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync("/api/firstfactor", content, cancellationToken);
+        var response = await HttpClient.PostAsync("/api/firstfactor", content, cancellationToken);
         if (response.IsSuccessStatusCode)
         {
             // Return the "authelia_session" cookie value as our token.
@@ -50,19 +52,12 @@ public class AutheliaAuthProvider : IAuthProvider
     public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         // Instruct Authelia to log out. Then expire the session cookie.
-        await _httpClient.PostAsync("/api/logout", new StringContent(string.Empty), cancellationToken);
+        await HttpClient.PostAsync("/api/logout", new StringContent(string.Empty), cancellationToken);
         var expired = new Cookie("authelia_session", "", "/", new Uri(_baseUrl).Host)
         {
             Expires = DateTime.UtcNow.AddDays(-1)
         };
         _cookieContainer.Add(new Uri(_baseUrl), expired);
-    }
-
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        // Authelia session tokens cannot be refreshed - validate and return null if invalid
-        var isValid = await ValidateAccessTokenAsync(authSession, cancellationToken);
-        return isValid ? authSession.AuthToken : null;
     }
 
     public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
@@ -75,56 +70,8 @@ public class AutheliaAuthProvider : IAuthProvider
         throw new NotImplementedException();
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        // Send a request with the session cookie to /api/user/info.
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
-        request.Headers.Add("Cookie", $"authelia_session={authSession.AuthToken?.AccessToken}");
-        var response = await _httpClient.SendAsync(request, cancellationToken);
-        return response.IsSuccessStatusCode;
-    }
-
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
-        request.Headers.Add("Cookie", $"authelia_session={authSession.AuthToken?.AccessToken}");
-        var response = await _httpClient.SendAsync(request, cancellationToken);
-        if (!response.IsSuccessStatusCode)
-            return null;
-        var json = await response.Content.ReadAsStringAsync(cancellationToken);
-        var wrapper = JsonSerializer.Deserialize<AutheliaUserInfoResponse>(json, _jsonOptions);
-        if (wrapper?.Data == null)
-            return null;
-        var displayName = wrapper.Data.DisplayName ?? string.Empty;
-        var email = wrapper.Data.Emails?.FirstOrDefault();
-        return email != null
-            ? new UserInfo(displayName, email, displayName, null)
-            : null;
-    }
-
     public AuthOption[] GetAuthOptions()
     {
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
-
-    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        return Task.FromResult<TokenLifetime?>(null);
-    }
-}
-
-public class AutheliaUserInfoResponse
-{
-    public string? Status { get; set; }
-    public AutheliaUserInfoData? Data { get; set; }
-}
-
-public class AutheliaUserInfoData
-{
-    public string? DisplayName { get; set; }
-    public string? Method { get; set; }
-    public bool HasWebauthn { get; set; }
-    public bool HasTotp { get; set; }
-    public bool HasDuo { get; set; }
-    public string[]? Emails { get; set; }
 }
