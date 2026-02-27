@@ -133,9 +133,9 @@ public class AuthController() : Controller
 
             logger.LogInformation("OAuth callback successful, setting auth cookies");
 
-            // Use CookieJar to ensure consistent cookie handling (including splitting for large tokens)
             var cookies = new CookieJar();
             cookies.AddCookiesForAuthToken(token);
+            cookies.AddCookiesForOAuthProviderTokens(tempSession.OAuthProviderTokens);
             cookies.WriteToResponse(Response);
 
             return Redirect("/");

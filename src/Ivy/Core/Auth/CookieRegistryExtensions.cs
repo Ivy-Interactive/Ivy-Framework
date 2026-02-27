@@ -99,7 +99,7 @@ public static class CookieRegistryExtensions
         }
     }
 
-    private static void AddCookiesForOAuthProviderTokens(this CookieJar cookies, IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> oauthProviderTokens)
+    public static void AddCookiesForOAuthProviderTokens(this CookieJar cookies, IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> oauthProviderTokens)
     {
         // Clear any existing OAuth provider token cookies that are no longer present
         // We'll handle this by setting cookies for all current providers and deleting old ones on read
