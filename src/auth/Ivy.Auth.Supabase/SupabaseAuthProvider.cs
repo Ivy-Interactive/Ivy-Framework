@@ -423,6 +423,14 @@ public class SupabaseAuthProvider : IAuthProvider
                 "apple" => OAuthProvider.Apple,
                 "microsoft" => OAuthProvider.Microsoft,
                 "twitter" => OAuthProvider.Twitter,
+                "discord" => OAuthProvider.Discord,
+                "twitch" => OAuthProvider.Twitch,
+                "figma" => OAuthProvider.Figma,
+                "notion" => OAuthProvider.Notion,
+                "azure" => OAuthProvider.Azure,
+                "workos" => OAuthProvider.WorkOS,
+                "gitlab" => OAuthProvider.GitLab,
+                "bitbucket" => OAuthProvider.Bitbucket,
                 _ => null
             };
 

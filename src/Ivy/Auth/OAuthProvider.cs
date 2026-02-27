@@ -7,5 +7,13 @@ public enum OAuthProvider
     GitHub,
     Microsoft,
     Apple,
-    Twitter
+    Twitter,
+    Discord,
+    Twitch,
+    Figma,
+    Notion,
+    Azure,
+    WorkOS,
+    GitLab,
+    Bitbucket,
 }
