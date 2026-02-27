@@ -64,6 +64,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
         }
 
         authSession.AuthToken = null;
+        authSession.ClearOAuthProviderTokens();
         SetAuthCookies();
     }
 
