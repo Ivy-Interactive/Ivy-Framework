@@ -216,7 +216,7 @@ public static class AuthHelper
     {
         var oauthTokens = new Dictionary<OAuthProvider, OAuthProviderToken>();
 
-        foreach (OAuthProvider provider in Enum.GetValues(typeof(OAuthProvider)))
+        foreach (OAuthProvider provider in Enum.GetValues<OAuthProvider>())
         {
             var prefix = provider.GetPrefix();
             var accessTokenName = $"{prefix}_access_token";
@@ -266,7 +266,7 @@ public static class AuthHelper
                 : null;
         }
 
-        foreach (OAuthProvider provider in Enum.GetValues(typeof(OAuthProvider)))
+        foreach (OAuthProvider provider in Enum.GetValues<OAuthProvider>())
         {
             var prefix = provider.GetPrefix();
             var accessTokenName = $"{prefix}_access_token";
