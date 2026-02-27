@@ -90,8 +90,11 @@ public class SmartSearchView : ViewBase
 
         var searchBar = Layout.Horizontal().Gap(0).Align(Align.Center)
             | inputState.ToTextInput()
-                    .Placeholder("Ask a question about Ivy... (e.g. how to use BoolInput)")
-            | new Button("Ask", SubmitQuestion).Variant(ButtonVariant.Ai);
+                .Placeholder("Ask a question about Ivy... (e.g. how to use BoolInput)")
+                .TestId("docs-smart-search-input")
+            | new Button("Ask", SubmitQuestion)
+                .Variant(ButtonVariant.Ai)
+                .TestId("docs-smart-search-ask");
 
         if (queryQuestion.Value == null || resultsContent == null)
         {

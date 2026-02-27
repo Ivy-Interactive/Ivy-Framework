@@ -311,7 +311,30 @@ SidebarInset.displayName = 'SidebarInset';
 const SidebarInput = React.forwardRef<
   React.ElementRef<typeof Input>,
   React.ComponentProps<typeof Input>
->(({ className, ...props }, ref) => {
+>(({ className, onFocus, onClick, ...props }, ref) => {
+  const handleFocus: React.FocusEventHandler<HTMLInputElement> = event => {
+    onFocus?.(event);
+
+    // When the sidebar search is focused, open the docs smart search window
+    // so the main query input lives there.
+    try {
+      window.dispatchEvent(new Event('ivy-docs-open-smart-search'));
+    } catch {
+      // Ignore errors (e.g., document not available in non-browser environments)
+    }
+  };
+
+  const handleClick: React.MouseEventHandler<HTMLInputElement> = event => {
+    onClick?.(event);
+
+    // Mirror focus behavior on click to ensure consistent UX.
+    try {
+      window.dispatchEvent(new Event('ivy-docs-open-smart-search'));
+    } catch {
+      // Ignore errors
+    }
+  };
+
   return (
     <Input
       ref={ref}
@@ -320,6 +343,8 @@ const SidebarInput = React.forwardRef<
         'h-8 w-full bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring',
         className
       )}
+      onFocus={handleFocus}
+      onClick={handleClick}
       {...props}
     />
   );
