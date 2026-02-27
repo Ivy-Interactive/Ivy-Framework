@@ -283,7 +283,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
 
         foreach (var identity in session.User.Identities)
         {
-            if (string.IsNullOrEmpty(identity.Id))
+            if (string.IsNullOrEmpty(identity.Id) || identity.Id != providerId)
             {
                 continue;
             }
