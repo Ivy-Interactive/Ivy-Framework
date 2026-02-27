@@ -7,6 +7,10 @@ namespace Ivy;
 /// <summary>
 /// A layout that wraps items to the next line when space is exceeded.
 /// </summary>
+/// <remarks>
+/// This type is obsolete. Use <see cref="StackLayout"/> with <see cref="StackLayout.Wrap"/> = true instead.
+/// </remarks>
+[Obsolete("Use StackLayout with Wrap = true instead")]
 public record WrapLayout : WidgetBase<WrapLayout>
 {
     public WrapLayout(object[] children, int gap = 4, Thickness? padding = null, Thickness? margin = null,

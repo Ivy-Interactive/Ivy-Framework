@@ -11,5 +11,8 @@ public enum Align
     Left,
     Right,
     Center,
-    Stretch
+    Stretch,
+    SpaceBetween,
+    SpaceAround,
+    SpaceEvenly
 }

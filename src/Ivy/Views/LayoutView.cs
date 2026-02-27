@@ -6,15 +6,9 @@ namespace Ivy.Views;
 
 public class LayoutView : ViewBase, IStateless
 {
-    private enum LayoutType
-    {
-        Stack,
-        Wrap
-    }
-
     private readonly List<LayoutElement> _elements = new();
     private Orientation _orientation = Orientation.Vertical;
-    private LayoutType _layoutType = LayoutType.Stack;
+    private bool _wrap = false;
 
     private class LayoutElement(object content)
     {
@@ -25,7 +19,8 @@ public class LayoutView : ViewBase, IStateless
     {
     }
 
-    private int _gap = 4;
+    private int _rowGap = 4;
+    private int _columnGap = 4;
     private Thickness? _padding = null;
     private Thickness? _margin = null;
     private Size? _width = null;
@@ -38,13 +33,22 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Gap(bool gap)
     {
-        _gap = gap ? 4 : 0;
+        _rowGap = gap ? 4 : 0;
+        _columnGap = gap ? 4 : 0;
         return this;
     }
 
     public LayoutView Gap(int gap)
     {
-        _gap = gap;
+        _rowGap = gap;
+        _columnGap = gap;
+        return this;
+    }
+
+    public LayoutView Gap(int rowGap, int columnGap)
+    {
+        _rowGap = rowGap;
+        _columnGap = columnGap;
         return this;
     }
 
@@ -284,7 +288,7 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Vertical(params object[] elements)
     {
-        _layoutType = LayoutType.Stack;
+        _wrap = false;
         _orientation = Orientation.Vertical;
         Add(elements);
         return this;
@@ -297,7 +301,7 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Horizontal(params object[] elements)
     {
-        _layoutType = LayoutType.Stack;
+        _wrap = false;
         _orientation = Orientation.Horizontal;
         Add(elements);
         return this;
@@ -310,7 +314,8 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Wrap(params object[] elements)
     {
-        _layoutType = LayoutType.Wrap;
+        _wrap = true;
+        _orientation = Orientation.Horizontal;
         Add(elements);
         return this;
     }
@@ -318,6 +323,19 @@ public class LayoutView : ViewBase, IStateless
     public LayoutView Wrap(IEnumerable<object> elements)
     {
         return Wrap(elements.ToArray());
+    }
+
+    public LayoutView Wrap(Orientation orientation, params object[] elements)
+    {
+        _wrap = true;
+        _orientation = orientation;
+        Add(elements);
+        return this;
+    }
+
+    public LayoutView Wrap(Orientation orientation, IEnumerable<object> elements)
+    {
+        return Wrap(orientation, elements.ToArray());
     }
 
     public LayoutView Scroll(Scroll scroll = Shared.Scroll.Auto)
@@ -334,20 +352,16 @@ public class LayoutView : ViewBase, IStateless
 
     public override object? Build()
     {
-        if (_layoutType == LayoutType.Wrap)
-        {
-            return new WrapLayout(_elements.Select(e => e.Content).ToArray(), _gap, _padding, _margin,
-                    _background, _alignment, _removeParentPadding)
-                .Width(_width)
-                .Height(_height)
-                .Visible(_visible);
-        }
-
-        return new StackLayout(_elements.Select(e => e.Content).ToArray(), _orientation, _gap, _padding, _margin, _background,
-                _alignment, _removeParentPadding)
+        var layout = new StackLayout(_elements.Select(e => e.Content).ToArray(), _orientation, _rowGap, _padding, _margin, _background,
+                _alignment, _removeParentPadding, _wrap)
+            {
+                ColumnGap = _columnGap
+            }
             .Width(_width)
             .Height(_height)
             .Visible(_visible);
+
+        return layout;
     }
 
     public static LayoutView operator |(LayoutView view, object? child)

@@ -3,5 +3,8 @@
 public enum Scroll
 {
     None,
-    Auto
+    Auto,
+    Vertical,
+    Horizontal,
+    Both
 }
