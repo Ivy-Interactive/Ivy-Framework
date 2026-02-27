@@ -55,6 +55,9 @@ public static class CookieRegistryExtensions
             cookies.Delete(authTokenName, CreateAuthCookieOptions());
             cookies.Delete(refreshTokenName, CreateAuthCookieOptions());
             cookies.Delete(tagName, CreateAuthCookieOptions());
+
+            // Also delete all OAuth provider token cookies when logging out
+            DeleteAllOAuthProviderTokenCookies(cookies);
         }
         else
         {
@@ -143,6 +146,23 @@ public static class CookieRegistryExtensions
             {
                 cookies.Delete(tagName, CreateAuthCookieOptions());
             }
+        }
+    }
+
+    private static void DeleteAllOAuthProviderTokenCookies(CookieJar cookies)
+    {
+        var cookieOptions = CreateAuthCookieOptions();
+
+        foreach (OAuthProvider provider in Enum.GetValues<OAuthProvider>())
+        {
+            var prefix = provider.GetPrefix();
+            var accessTokenName = $"{prefix}_access_token";
+            var refreshTokenName = $"{prefix}_refresh_token";
+            var tagName = $"{prefix}_auth_tag";
+
+            cookies.Delete(accessTokenName, cookieOptions);
+            cookies.Delete(refreshTokenName, cookieOptions);
+            cookies.Delete(tagName, cookieOptions);
         }
     }
 
