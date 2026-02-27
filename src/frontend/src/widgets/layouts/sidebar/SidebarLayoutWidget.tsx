@@ -481,14 +481,18 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   }, [searchActive, items]);
 
   useEffect(() => {
-    sidebarSearchStore.setState({
+    const next: Parameters<typeof sidebarSearchStore.setState>[0] = {
       items,
       searchActive,
       flatItems,
       eventHandler,
       id,
       activeTag,
-    });
+    };
+    if (!searchActive) {
+      next.fullMenuItems = items;
+    }
+    sidebarSearchStore.setState(next);
   }, [items, searchActive, flatItems, eventHandler, id, activeTag]);
 
   useEffect(() => {
@@ -538,44 +542,6 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       p = p.parentElement;
     }
   }, [searchActive, flatItems.length, selectedIndex]);
-
-  // When there are no matching pages, send the current query to the docs MCP
-  // (smart search) so the user gets an AI answer instead.
-  useEffect(() => {
-    if (!searchActive || flatItems.length > 0) return;
-
-    const sidebarInput = document.querySelector<HTMLInputElement>(
-      '[data-testid="sidebar-search"]'
-    );
-    if (!sidebarInput) return;
-
-    const dispatchAutoAsk = () => {
-      const query = sidebarInput.value?.trim();
-      if (!query || query.length < 2) return;
-      window.dispatchEvent(
-        new CustomEvent('ivy-docs-auto-ask-question', { detail: { query } })
-      );
-    };
-
-    const debounceMs = 400;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-    const scheduleAutoAsk = () => {
-      if (timeoutId != null) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        timeoutId = null;
-        dispatchAutoAsk();
-      }, debounceMs);
-    };
-
-    scheduleAutoAsk();
-    sidebarInput.addEventListener('input', scheduleAutoAsk);
-
-    return () => {
-      if (timeoutId != null) clearTimeout(timeoutId);
-      sidebarInput.removeEventListener('input', scheduleAutoAsk);
-    };
-  }, [searchActive, flatItems.length]);
 
   // Expand sections and scroll to active item when activeTag changes
   useEffect(() => {

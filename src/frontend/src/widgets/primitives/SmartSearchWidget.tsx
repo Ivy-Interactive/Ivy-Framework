@@ -2,6 +2,8 @@ import { getHeight, getWidth } from '@/lib/styles';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSyncExternalStore } from 'react';
 import { X } from 'lucide-react';
+import type { MenuItem } from '@/types/widgets';
+import { filterMenuItemsForSearch } from '@/widgets/layouts/sidebar/sidebarSearchFilter';
 import { sidebarSearchStore } from '@/widgets/layouts/sidebar/sidebarSearchStore';
 import { SidebarSearchResultsList } from '@/widgets/layouts/sidebar/SidebarSearchResultsList';
 
@@ -41,6 +43,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   const hasResults = resultsContent != null && clearButton != null;
 
   const [isOpen, setIsOpen] = useState(false);
+  const [windowQuery, setWindowQuery] = useState('');
   const [pageSuggestionsSelectedIndex, setPageSuggestionsSelectedIndex] =
     useState(0);
 
@@ -50,13 +53,25 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
     sidebarSearchStore.getState
   );
 
-  const hasPageSuggestions =
-    sidebarSearchState.searchActive && sidebarSearchState.flatItems.length > 0;
+  // Filter full menu by window query only (sidebar is unchanged)
+  const windowFiltered = React.useMemo(() => {
+    const q = windowQuery.trim();
+    const fullMenu =
+      sidebarSearchState.fullMenuItems ?? sidebarSearchState.items;
+    if (!q || !fullMenu.length) {
+      return {
+        searchResultsItems: [] as MenuItem[],
+        flatItems: [] as MenuItem[],
+      };
+    }
+    return filterMenuItemsForSearch(fullMenu, q);
+  }, [windowQuery, sidebarSearchState.fullMenuItems, sidebarSearchState.items]);
 
+  const hasPageSuggestions = windowFiltered.flatItems.length > 0;
   const pageSuggestionsIndex = hasPageSuggestions
     ? Math.min(
         pageSuggestionsSelectedIndex,
-        Math.max(0, sidebarSearchState.flatItems.length - 1)
+        Math.max(0, windowFiltered.flatItems.length - 1)
       )
     : 0;
 
@@ -99,8 +114,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
     return () => cancelAnimationFrame(id);
   }, [isOpen]);
 
-  // Keep the Chrome simple search (sidebar search) in sync with the docs smart
-  // search input so typing in the window still filters pages as before.
+  // Track window search query so we can filter page suggestions only in the window (sidebar stays unchanged).
   useEffect(() => {
     if (!isOpen && !hasResults) return;
 
@@ -109,29 +123,23 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
     );
     if (!smartInput) return;
 
-    const handleInput = () => {
-      const value = smartInput.value;
-      const sidebarInput = document.querySelector<HTMLInputElement>(
-        '[data-testid="sidebar-search"]'
-      );
-      if (!sidebarInput) return;
-
-      const descriptor =
-        Object.getOwnPropertyDescriptor(
-          Object.getPrototypeOf(sidebarInput),
-          'value'
-        )?.set ??
-        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')
-          ?.set;
-      if (!descriptor) return;
-
-      descriptor.call(sidebarInput, value);
-      sidebarInput.dispatchEvent(new Event('input', { bubbles: true }));
-    };
-
+    const handleInput = () => setWindowQuery(smartInput.value);
     smartInput.addEventListener('input', handleInput);
     return () => smartInput.removeEventListener('input', handleInput);
   }, [isOpen, hasResults]);
+
+  // When there are no page matches in the window, send query to MCP after debounce.
+  useEffect(() => {
+    const q = windowQuery.trim();
+    if (q.length < 2 || windowFiltered.flatItems.length > 0) return;
+
+    const t = setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent('ivy-docs-auto-ask-question', { detail: { query: q } })
+      );
+    }, 400);
+    return () => clearTimeout(t);
+  }, [windowQuery, windowFiltered.flatItems.length]);
 
   // When there are no page matches, sidebar dispatches ivy-docs-auto-ask-question.
   // Set the smart search input to that query and trigger Ask so MCP is called.
@@ -201,6 +209,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
                 aria-label="Close"
                 onClick={() => {
                   setIsOpen(false);
+                  setWindowQuery('');
                   lastAutoAskQueryRef.current = null;
                   clearButtonRef.current
                     ?.querySelector<HTMLButtonElement>('button')
@@ -223,8 +232,8 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
                     Pages
                   </h3>
                   <SidebarSearchResultsList
-                    items={sidebarSearchState.items}
-                    flatItems={sidebarSearchState.flatItems}
+                    items={windowFiltered.searchResultsItems}
+                    flatItems={windowFiltered.flatItems}
                     selectedIndex={pageSuggestionsIndex}
                     setSelectedIndex={setPageSuggestionsSelectedIndex}
                     onSelect={tag => {
