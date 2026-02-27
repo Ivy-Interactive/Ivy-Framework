@@ -439,29 +439,35 @@ export function DevTools() {
           className="ivy-devtools ivy-devtools-dialog"
           style={getDialogPosition(clickPosition)}
         >
-          <div className="ivy-devtools-dialog-header">
-            <span className="ivy-devtools-dialog-type">
-              {formatWidgetType(dialogWidget.type)}
-            </span>
-            {dialogWidget.callSite?.filePath && (
-              <span className="ivy-devtools-callsite-muted">
-                {dialogWidget.callSite.filePath.split(/[/\\]/).pop()}:
-                {dialogWidget.callSite.lineNumber}
-              </span>
-            )}
+          <div className="ivy-devtools-dialog-toggles">
+            <button
+              className={`ivy-devtools-toggle-btn ${dialogAction === 'modify' ? 'ivy-devtools-toggle-active' : ''}`}
+              onClick={() => handleActionChange('modify')}
+            >
+              <FaMagic size={12} />
+              Change
+            </button>
+            <button
+              className={`ivy-devtools-toggle-btn ${dialogAction === 'text-edit' ? 'ivy-devtools-toggle-active' : ''}`}
+              onClick={() => handleActionChange('text-edit')}
+            >
+              <LuTextCursor size={14} />
+              Edit Text
+            </button>
+            <button
+              className={`ivy-devtools-toggle-btn ${dialogAction === 'delete' ? 'ivy-devtools-toggle-active' : ''}`}
+              onClick={() => handleActionChange('delete')}
+            >
+              <LuTrash2 size={14} />
+              Delete
+            </button>
           </div>
           <div className="ivy-devtools-textarea-wrapper">
             <textarea
               ref={textareaRef}
               value={displayValue}
               onChange={e => handleTextChange(e.target.value)}
-              placeholder={
-                dialogAction === 'delete'
-                  ? 'Optional context...'
-                  : dialogAction === 'text-edit'
-                    ? 'Enter text...'
-                    : 'Describe your change...'
-              }
+              placeholder="Write anything..."
               className="ivy-devtools-textarea"
               readOnly={listening}
             />
@@ -469,43 +475,20 @@ export function DevTools() {
               <MicButton listening={listening} onClick={toggleDictation} />
             )}
           </div>
-          <div className="ivy-devtools-dialog-toggles">
-            <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === 'modify' ? 'ivy-devtools-toggle-active ivy-devtools-toggle-modify' : ''}`}
-              onClick={() => handleActionChange('modify')}
-            >
-              <FaMagic size={12} />
-              Modify
-            </button>
-            <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === 'delete' ? 'ivy-devtools-toggle-active ivy-devtools-toggle-delete' : ''}`}
-              onClick={() => handleActionChange('delete')}
-            >
-              <LuTrash2 size={14} />
-              Delete
-            </button>
-            <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === 'text-edit' ? 'ivy-devtools-toggle-active ivy-devtools-toggle-text-edit' : ''}`}
-              onClick={() => handleActionChange('text-edit')}
-            >
-              <LuTextCursor size={14} />
-              Text
-            </button>
-          </div>
           <div className="ivy-devtools-dialog-actions">
             <button
               onClick={handleAdd}
               className="ivy-devtools-btn ivy-devtools-btn-muted"
             >
               <LuPlus size={14} />
-              Add
+              Add To Prompt
             </button>
             <button
               onClick={handleSend}
-              className="ivy-devtools-btn ivy-devtools-btn-primary"
+              className="ivy-devtools-btn ivy-devtools-btn-outlined"
             >
               <LuSend size={14} />
-              Send
+              Send direct
             </button>
           </div>
         </div>

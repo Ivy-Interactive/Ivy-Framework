@@ -1,27 +1,8 @@
-/* DevTools Styles - Inverted theme to stand out from app */
-.ivy-devtools-container,
-.ivy-devtools {
-  --devtools-bg: #1a1a1a;
-  --devtools-fg: #fafafa;
-  --devtools-border: #333;
-  --devtools-muted: #2a2a2a;
-  --devtools-muted-fg: #a0a0a0;
-  --devtools-accent: #3a3a3a;
-}
-
-.dark .ivy-devtools-container,
-.dark .ivy-devtools {
-  --devtools-bg: #ffffff;
-  --devtools-fg: #171717;
-  --devtools-border: #e5e5e5;
-  --devtools-muted: #f5f5f5;
-  --devtools-muted-fg: #737373;
-  --devtools-accent: #e5e5e5;
-}
-
+/* DevTools Styles - theme-aware using design system variables */
 .ivy-devtools-overlay {
   position: fixed;
-  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  background: color-mix(in srgb, var(--primary) 25%, transparent);
+  border: 2px solid var(--primary);
   pointer-events: none;
   z-index: 99999;
   box-sizing: border-box;
@@ -31,14 +12,14 @@
   position: absolute;
   top: 0;
   right: 0;
-  background-color: var(--devtools-bg);
-  color: var(--devtools-fg);
+  background-color: var(--popover);
+  color: var(--popover-foreground);
   padding: 4px 8px;
   font-size: 11px;
   font-family: var(--font-sans);
-  border-radius: 6px;
+  border-radius: var(--radius-selectors);
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   line-height: 1.4;
   pointer-events: none;
 }
@@ -50,34 +31,52 @@
 .ivy-devtools-dialog {
   position: fixed;
   z-index: 100001;
-  background: var(--devtools-bg);
-  border: 1px solid var(--devtools-border);
+  background: var(--popover);
+  border: 2px solid var(--primary);
   border-radius: var(--radius-boxes);
   box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 4px 8px rgba(0, 0, 0, 0.15);
+    0 12px 32px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.2);
   padding: 12px;
-  width: 320px;
+  width: 340px;
   font-family: var(--font-sans);
 }
 
-.ivy-devtools-dialog-header {
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: var(--devtools-muted-fg);
+.ivy-devtools-dialog-toggles {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.ivy-devtools-toggle-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.ivy-devtools-dialog-type {
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--radius-selectors);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 14px;
   font-weight: 500;
-  color: var(--devtools-fg);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.ivy-devtools-callsite-muted {
-  font-weight: 400;
-  opacity: 0.5;
+.ivy-devtools-toggle-btn:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
+
+.ivy-devtools-toggle-active {
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+}
+
+.ivy-devtools-toggle-active:hover {
+  background: color-mix(in srgb, var(--primary) 22%, transparent);
+  color: var(--primary);
 }
 
 .ivy-devtools-textarea-wrapper {
@@ -86,26 +85,25 @@
 
 .ivy-devtools-textarea {
   width: 100%;
-  height: 80px;
-  padding: 8px;
+  height: 64px;
+  padding: 10px 12px;
   padding-right: 36px;
-  border: 1px solid var(--devtools-border);
+  border: none;
   border-radius: var(--radius-fields);
-  font-size: 13px;
+  font-size: 15px;
   resize: none;
   font-family: var(--font-sans);
-  background: var(--devtools-muted);
-  color: var(--devtools-fg);
+  background: transparent;
+  color: var(--foreground);
   box-sizing: border-box;
 }
 
 .ivy-devtools-textarea::placeholder {
-  color: var(--devtools-muted-fg);
+  color: var(--muted-foreground);
 }
 
 .ivy-devtools-textarea:focus {
   outline: none;
-  border-color: var(--primary);
 }
 
 .ivy-devtools-mic-btn {
@@ -116,19 +114,17 @@
   height: 28px;
   border: none;
   border-radius: var(--radius-selectors);
-  background: var(--devtools-accent);
-  color: var(--devtools-muted-fg);
+  background: var(--accent);
+  color: var(--muted-foreground);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition:
-    background-color 0.15s,
-    color 0.15s;
+  transition: all 0.15s;
 }
 
 .ivy-devtools-mic-btn:hover {
-  background: var(--devtools-border);
+  background: var(--border);
 }
 
 .ivy-devtools-mic-active {
@@ -147,102 +143,46 @@
   }
 }
 
-/* Action toggle group */
-.ivy-devtools-dialog-toggles {
-  display: flex;
-  gap: 4px;
-  margin-top: 8px;
-}
-
-.ivy-devtools-toggle-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 6px 8px;
-  border: 1px solid var(--devtools-border);
-  border-radius: var(--radius-selectors);
-  background: var(--devtools-muted);
-  color: var(--devtools-muted-fg);
-  font-size: 11px;
-  font-family: var(--font-sans);
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    color 0.15s,
-    border-color 0.15s;
-}
-
-.ivy-devtools-toggle-btn:hover {
-  background: var(--devtools-accent);
-}
-
-.ivy-devtools-toggle-active {
-  border-color: transparent;
-  color: white;
-}
-
-.ivy-devtools-toggle-modify {
-  background: var(--primary);
-}
-
-.ivy-devtools-toggle-modify:hover {
-  background: var(--primary);
-  opacity: 0.9;
-}
-
-.ivy-devtools-toggle-delete {
-  background: var(--destructive);
-}
-
-.ivy-devtools-toggle-delete:hover {
-  background: var(--destructive);
-  opacity: 0.9;
-}
-
-.ivy-devtools-toggle-text-edit {
-  background: var(--blue);
-}
-
-.ivy-devtools-toggle-text-edit:hover {
-  background: var(--blue);
-  opacity: 0.9;
-}
-
-/* Submit buttons */
 .ivy-devtools-dialog-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   margin-top: 8px;
+  align-items: center;
   justify-content: flex-end;
 }
 
 .ivy-devtools-btn {
-  padding: 6px 12px;
+  padding: 8px 16px;
   border: none;
-  border-radius: var(--radius-selectors);
+  border-radius: var(--radius-fields);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 500;
   font-family: var(--font-sans);
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition:
-    opacity 0.15s,
-    background-color 0.15s;
-}
-
-.ivy-devtools-btn-primary {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
+  gap: 8px;
+  transition: all 0.15s ease;
 }
 
 .ivy-devtools-btn-muted {
-  background-color: var(--devtools-muted);
-  color: var(--devtools-muted-fg);
+  background: transparent;
+  color: var(--muted-foreground);
 }
 
 .ivy-devtools-btn-muted:hover {
-  background-color: var(--devtools-accent);
+  color: var(--foreground);
+}
+
+.ivy-devtools-btn-outlined {
+  background: var(--accent);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 20px;
+}
+
+.ivy-devtools-btn-outlined:hover {
+  background: var(--muted);
+  border-color: var(--muted-foreground);
 }
