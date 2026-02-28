@@ -168,6 +168,27 @@ public class EmojiView : ViewBase
 }
 ```
 
+### Text Alignment
+
+Align the whole markdown block within its container using `.Align(TextAlignment)` with `TextAlignment.Left`, `TextAlignment.Center`, `TextAlignment.Right`, or `TextAlignment.Justify`, or use the shorthand methods `.Left()`, `.Center()`, `.Right()`, `.Justify()`. Default is left.
+
+```csharp demo-tabs
+public class TextAlignmentMarkdownView : ViewBase
+{
+    public override object? Build()
+    {
+        var content = "Aligned text";
+        var longContent = "This paragraph is long enough to wrap across several lines, so justify alignment spreads the text to fill the full width of the container.";
+        return new StackLayout([
+            new Markdown(content),
+            new Markdown(content).Center(),
+            new Markdown(content).Right(),
+            new Markdown(longContent).Justify()
+        ]);
+    }
+}
+```
+
 ### HTML Support and Link Handling
 
 The Markdown widget supports HTML tags for advanced formatting and provides interactive link handling through the OnLinkClick event. This allows for custom navigation logic and enhanced user interactions.
