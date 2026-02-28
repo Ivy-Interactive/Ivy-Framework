@@ -34,6 +34,9 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   const handleClick = (e: React.MouseEvent) => {
     if (item.disabled) return;
     e.stopPropagation();
+    if (hasChildren) {
+      setIsOpen(prev => !prev);
+    }
     onItemClick(item);
   };
 
