@@ -4,11 +4,12 @@ using Ivy.Core.Helpers;
 using Ivy.Core.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 // Resharper disable once CheckNamespace
 namespace Ivy;
 
-public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, IServiceProvider? serviceProvider = null) : IAuthProviderService
+public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, IServiceProvider? serviceProvider = null, ILogger<AuthProviderService>? logger = null) : IAuthProviderService
 {
     // Hold removed OAuth provider sessions so they can be updated in place and restored later
     private readonly Dictionary<string, IAuthTokenHandlerSession> _removedOAuthSessions = new();
@@ -157,6 +158,12 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
         var filteredSessions = serviceProvider != null
             ? result.Sessions.Where(kvp => serviceProvider.GetKeyedService<IAuthTokenHandler>(kvp.Key) != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
             : result.Sessions;
+
+        var unhandledSessions = result.Sessions?.Where(kvp => !filteredSessions.ContainsKey(kvp.Key)).Select(s => s.Key).ToList();
+        if (unhandledSessions != null && unhandledSessions.Count > 0)
+        {
+            logger?.LogWarning("The following OAuth provider sessions are available but have no registered handler and will be ignored: {UnhandledProviders}", string.Join(", ", unhandledSessions));
+        }
 
         // Diff and update authSession.OAuthProviderSessions
         var currentProviders = authSession.OAuthProviderSessions.Keys.ToHashSet();

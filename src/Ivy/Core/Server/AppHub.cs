@@ -86,7 +86,8 @@ public class AppHub(
 #endif
 
                 var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
-                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore, server.ServiceProvider);
+                var authServiceLogger = server.ServiceProvider?.GetService<ILoggerFactory>()?.CreateLogger<AuthProviderService>();
+                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore, server.ServiceProvider, authServiceLogger);
 
                 var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
