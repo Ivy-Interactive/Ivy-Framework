@@ -303,7 +303,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   };
 
   const [mcpPanelWidth, setMcpPanelWidth] = useState<number | null>(null);
-  const MIN_PANEL_WIDTH_REM = 20;
+  const MIN_PANEL_WIDTH_REM = 30;
   const minPanelWidthPx = MIN_PANEL_WIDTH_REM * 16;
 
   useEffect(() => {
