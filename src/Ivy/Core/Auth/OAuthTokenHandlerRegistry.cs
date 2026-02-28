@@ -125,9 +125,4 @@ public class OAuthTokenHandlerRegistry : IOAuthTokenHandlerRegistry
     {
         return _handlers.TryGetValue(provider, out var handler) ? handler : null;
     }
-
-    public IEnumerable<OAuthProvider> GetRegisteredProviders()
-    {
-        return _handlers.Keys;
-    }
 }

@@ -6,6 +6,4 @@ public interface IOAuthTokenHandlerRegistry
     void Register(OAuthProvider provider, IAuthTokenHandler handler);
 
     IAuthTokenHandler? GetHandler(OAuthProvider provider);
-
-    IEnumerable<OAuthProvider> GetRegisteredProviders();
 }
