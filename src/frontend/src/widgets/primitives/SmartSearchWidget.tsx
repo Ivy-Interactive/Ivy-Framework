@@ -149,6 +149,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
 
   // Open the smart search window when the sidebar search input is focused or clicked (never let sidebar search receive input).
   // If the answer panel is open, close it first so the overlay can show.
+  // Use mousedown (capture) so we run before the input gets focus; click/focus fire after focus has already moved.
   useEffect(() => {
     const openWindow = () => {
       if (hasResultsRef.current) {
@@ -159,6 +160,14 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       setIsOpen(true);
     };
 
+    const handleMouseDown = (e: MouseEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el?.closest?.('[data-testid="sidebar-search"]')) {
+        e.preventDefault();
+        e.stopPropagation();
+        openWindow();
+      }
+    };
     const handleFocus = (e: FocusEvent) => {
       const el = e.target as HTMLElement | null;
       if (el?.closest?.('[data-testid="sidebar-search"]')) {
@@ -167,22 +176,14 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
         openWindow();
       }
     };
-    const handleClick = (e: MouseEvent) => {
-      const el = e.target as HTMLElement | null;
-      if (el?.closest?.('[data-testid="sidebar-search"]')) {
-        e.preventDefault();
-        e.stopPropagation();
-        openWindow();
-      }
-    };
 
+    document.body.addEventListener('mousedown', handleMouseDown, true);
     document.body.addEventListener('focus', handleFocus, true);
-    document.body.addEventListener('click', handleClick, true);
     window.addEventListener('ivy-docs-open-smart-search', openWindow);
 
     return () => {
+      document.body.removeEventListener('mousedown', handleMouseDown, true);
       document.body.removeEventListener('focus', handleFocus, true);
-      document.body.removeEventListener('click', handleClick, true);
       window.removeEventListener('ivy-docs-open-smart-search', openWindow);
     };
   }, []);
