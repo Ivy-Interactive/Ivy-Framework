@@ -9,6 +9,9 @@ namespace Ivy;
 
 public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, IOAuthTokenHandlerRegistry? oauthRegistry = null) : IAuthProviderService
 {
+    // Hold removed OAuth provider sessions so they can be updated in place and restored later
+    private readonly Dictionary<OAuthProvider, IAuthTokenHandlerSession> _removedOAuthSessions = new();
+
     public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
         var oldSession = authSession.TakeSnapshot();
@@ -65,6 +68,7 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
 
         authSession.AuthToken = null;
         authSession.ClearOAuthProviderSessions();
+        _removedOAuthSessions.Clear();
         SetAuthCookies();
     }
 
@@ -157,15 +161,39 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
         var currentProviders = authSession.OAuthProviderSessions.Keys.ToHashSet();
         var newProviders = filteredSessions.Keys.ToHashSet();
 
+        // Remove providers that are no longer present, but keep them in _removedOAuthSessions
         foreach (var provider in currentProviders.Where(p => !newProviders.Contains(p)))
         {
+            if (authSession.OAuthProviderSessions.TryGetValue(provider, out var sessionToRemove))
+            {
+                _removedOAuthSessions[provider] = sessionToRemove;
+            }
             authSession.RemoveOAuthProviderSession(provider);
         }
 
-        // Add or update providers
+        // Add or update sessions
         foreach (var kvp in filteredSessions)
         {
-            authSession.AddOAuthProviderSession(kvp.Key, kvp.Value);
+            // Check if session exists in active sessions
+            if (authSession.OAuthProviderSessions.TryGetValue(kvp.Key, out var existingSession))
+            {
+                // Update existing active session in place to preserve references
+                existingSession.AuthToken = kvp.Value.AuthToken;
+                existingSession.AuthSessionData = kvp.Value.AuthSessionData;
+            }
+            // Check if session exists in removed sessions
+            else if (_removedOAuthSessions.Remove(kvp.Key, out var removedSession))
+            {
+                // Update the removed session in place and restore it to active sessions
+                removedSession.AuthToken = kvp.Value.AuthToken;
+                removedSession.AuthSessionData = kvp.Value.AuthSessionData;
+                authSession.AddOAuthProviderSession(kvp.Key, removedSession);
+            }
+            else
+            {
+                // New session, add it
+                authSession.AddOAuthProviderSession(kvp.Key, kvp.Value);
+            }
         }
 
         return OAuthProviderSessionsResult.Success(filteredSessions);
