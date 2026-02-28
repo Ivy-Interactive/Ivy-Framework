@@ -23,12 +23,22 @@
       <Build Solution="*|x64" Project="false" />
       <Build Solution="*|x86" Project="false" />
     </Project>
+    <Project Path="auth/Ivy.Auth.Apple/Ivy.Auth.Apple.csproj" />
     <Project Path="auth/Ivy.Auth.Authelia/Ivy.Auth.Authelia.csproj" />
+    <Project Path="auth/Ivy.Auth.Bitbucket/Ivy.Auth.Bitbucket.csproj" />
     <Project Path="auth/Ivy.Auth.Clerk/Ivy.Auth.Clerk.csproj" />
+    <Project Path="auth/Ivy.Auth.Discord/Ivy.Auth.Discord.csproj" />
+    <Project Path="auth/Ivy.Auth.Figma/Ivy.Auth.Figma.csproj" />
     <Project Path="auth/Ivy.Auth.GitHub/Ivy.Auth.GitHub.csproj" />
+    <Project Path="auth/Ivy.Auth.GitLab/Ivy.Auth.GitLab.csproj" />
+    <Project Path="auth/Ivy.Auth.Google/Ivy.Auth.Google.csproj" />
     <Project Path="auth/Ivy.Auth.MicrosoftEntra/Ivy.Auth.MicrosoftEntra.csproj" />
+    <Project Path="auth/Ivy.Auth.Notion/Ivy.Auth.Notion.csproj" />
     <Project Path="auth/Ivy.Auth.Sliplane/Ivy.Auth.Sliplane.csproj" />
     <Project Path="auth/Ivy.Auth.Supabase/Ivy.Auth.Supabase.csproj" />
+    <Project Path="auth/Ivy.Auth.Twitch/Ivy.Auth.Twitch.csproj" />
+    <Project Path="auth/Ivy.Auth.Twitter/Ivy.Auth.Twitter.csproj" />
+    <Project Path="auth/Ivy.Auth.WorkOS/Ivy.Auth.WorkOS.csproj" />
   </Folder>
   <Folder Name="/Auth/examples/">
     <Project Path="auth/examples/SliplaneExample/SliplaneExample.csproj" />
