@@ -58,7 +58,7 @@ public record DataTable : WidgetBase<DataTable>
 
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellActivated { get; set; }
 
-    [Event] public Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? OnRowAction { get; set; }
+    [Event] public Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? HandleRowAction { get; set; }
 
     public static Detail operator |(DataTable widget, object child)
     {

@@ -117,8 +117,8 @@ export const useRowHover = ({
       // Extract _hiddenKey directly from Arrow table
       const rowId = getHiddenKeyValue(hoverRow);
 
-      // Send event to backend's OnRowAction event with row ID and menu item tag
-      eventHandler('OnRowAction', widgetId, [
+      // Send event to backend's HandleRowAction event with row ID and menu item tag
+      eventHandler('HandleRowAction', widgetId, [
         {
           id: rowId !== null ? rowId : hoverRow,
           tag: action.tag ?? null,

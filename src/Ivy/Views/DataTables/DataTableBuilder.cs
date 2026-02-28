@@ -20,7 +20,7 @@ public class DataTableBuilder<TModel>(
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
     private MenuItem[]? _menuItemRowActions;
-    private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
+    private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _handleRowAction;
     private readonly Dictionary<string, Action<object>> _cellActions = [];
 
     private readonly string? _idColumnName =
@@ -254,7 +254,7 @@ public class DataTableBuilder<TModel>(
 
     public DataTableBuilder<TModel> HandleRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
     {
-        _onRowAction = handler;
+        _handleRowAction = handler;
         return this;
     }
 
@@ -324,7 +324,7 @@ public class DataTableBuilder<TModel>(
         }
 
         return new DataTableView(queryable1, width, _height, columns, configuration, onCellClick, _onCellActivated,
-            _menuItemRowActions, _onRowAction, idSelectorForView);
+            _menuItemRowActions, _handleRowAction, idSelectorForView);
     }
 
     public object[] GetMemoValues()
