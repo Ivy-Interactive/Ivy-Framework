@@ -69,6 +69,17 @@ public class SmartSearchView : ViewBase
             queryQuestion.Set(q);
         }
 
+        ValueTask OnFollowUpSend(Event<Chat, string> e)
+        {
+            var text = e.Value?.Trim();
+            if (string.IsNullOrEmpty(text)) return ValueTask.CompletedTask;
+            var userMsg = new ChatMessage(ChatSender.User, text);
+            var loadingMsg = new ChatMessage(ChatSender.Assistant, new ChatLoading());
+            followUpMessages.Set(followUpMessages.Value.Concat(new[] { userMsg, loadingMsg }).ToArray());
+            pendingFollowUp.Set(text);
+            return ValueTask.CompletedTask;
+        }
+
         object? resultsContent = null;
         if (queryQuestion.Value != null)
         {
@@ -98,8 +109,10 @@ public class SmartSearchView : ViewBase
             }
             else if (query.Value is { } result)
             {
-                resultsContent = Layout.Vertical().Gap(4)
-                    | new Markdown(result.Answer);
+                // Use the same Chat view for the first answer so it matches follow-up responses
+                var firstAnswerMessage = new ChatMessage(ChatSender.Assistant, new Markdown(result.Answer));
+                var allMessages = new[] { firstAnswerMessage }.Concat(followUpMessages.Value).ToArray();
+                resultsContent = new Chat(allMessages, OnFollowUpSend).Placeholder("Ask a follow-up question…");
             }
             else if (!query.Loading && !query.Validating && query.Error is null)
             {
@@ -136,29 +149,14 @@ public class SmartSearchView : ViewBase
         }
         var clearButton = new Button("Clear", _ => ClearResults());
 
-        async ValueTask OnFollowUpSend(Event<Chat, string> e)
-        {
-            var text = e.Value?.Trim();
-            if (string.IsNullOrEmpty(text)) return;
-            var userMsg = new ChatMessage(ChatSender.User, text);
-            var loadingMsg = new ChatMessage(ChatSender.Assistant, new ChatLoading());
-            followUpMessages.Set(followUpMessages.Value.Concat(new[] { userMsg, loadingMsg }).ToArray());
-            pendingFollowUp.Set(text);
-        }
-
-        var followUpChat = new Chat(
-            followUpMessages.Value,
-            OnFollowUpSend)
-            .Placeholder("Ask a follow-up question…");
-
+        // First answer is now rendered inside ResultsContent as Chat; no separate FollowUpChat slot
         var slots = new List<object>
         {
             new Slot("SearchInput", searchInput),
             new Slot("AskButton", askButton),
             new Slot("ClearInputButton", clearInputButton),
             new Slot("ResultsContent", resultsContent),
-            new Slot("ClearButton", clearButton),
-            new Slot("FollowUpChat", followUpChat)
+            new Slot("ClearButton", clearButton)
         };
         if (resultsHeader != null)
             slots.Insert(3, new Slot("ResultsHeader", resultsHeader));
