@@ -8,7 +8,7 @@ namespace Ivy.Auth.Supabase;
 
 public class SupabaseAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
+    protected HttpClient HttpClient;
     protected readonly string Issuer;
     protected readonly string JwksUrl;
     protected readonly SymmetricSecurityKey? LegacyJwtKey;
@@ -17,9 +17,9 @@ public class SupabaseAuthTokenHandler : IAuthTokenHandler
     private JsonWebKeySet? _cachedJwks = null;
     private DateTime _jwksCacheExpiry = DateTime.MinValue;
 
-    public SupabaseAuthTokenHandler(HttpClient httpClient, string issuer, string jwksUrl, SymmetricSecurityKey? legacyJwtKey, global::Supabase.Client client)
+    public SupabaseAuthTokenHandler(string issuer, string jwksUrl, SymmetricSecurityKey? legacyJwtKey, global::Supabase.Client client)
     {
-        HttpClient = httpClient;
+        HttpClient = new HttpClient();
         Issuer = issuer;
         JwksUrl = jwksUrl;
         LegacyJwtKey = legacyJwtKey;

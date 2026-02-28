@@ -6,12 +6,12 @@ namespace Ivy.Auth.Google;
 [OAuthTokenHandler(OAuthProviders.Google)]
 public class GoogleAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
+    private readonly HttpClient _httpClient;
 
     /// <summary>Initialize Google auth token handler</summary>
-    public GoogleAuthTokenHandler(HttpClient httpClient)
+    public GoogleAuthTokenHandler()
     {
-        HttpClient = httpClient;
+        _httpClient = new HttpClient();
     }
 
     /// <summary>Refresh Google OAuth access token</summary>
@@ -29,7 +29,7 @@ public class GoogleAuthTokenHandler : IAuthTokenHandler
                 new KeyValuePair<string, string>("grant_type", "refresh_token")
             });
 
-            var response = await HttpClient.PostAsync("https://oauth2.googleapis.com/token", content, cancellationToken);
+            var response = await _httpClient.PostAsync("https://oauth2.googleapis.com/token", content, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -66,7 +66,7 @@ public class GoogleAuthTokenHandler : IAuthTokenHandler
 
         try
         {
-            var response = await HttpClient.GetAsync($"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={Uri.EscapeDataString(token)}", cancellationToken);
+            var response = await _httpClient.GetAsync($"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={Uri.EscapeDataString(token)}", cancellationToken);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -87,7 +87,7 @@ public class GoogleAuthTokenHandler : IAuthTokenHandler
             using var request = new HttpRequestMessage(HttpMethod.Get, "https://www.googleapis.com/oauth2/v2/userinfo");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -117,7 +117,7 @@ public class GoogleAuthTokenHandler : IAuthTokenHandler
 
         try
         {
-            var response = await HttpClient.GetAsync($"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={Uri.EscapeDataString(token)}", cancellationToken);
+            var response = await _httpClient.GetAsync($"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={Uri.EscapeDataString(token)}", cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 

@@ -6,12 +6,12 @@ namespace Ivy.Auth.Figma;
 [OAuthTokenHandler(OAuthProviders.Figma)]
 public class FigmaAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
+    private readonly HttpClient _httpClient;
 
     /// <summary>Initialize Figma auth token handler</summary>
-    public FigmaAuthTokenHandler(HttpClient httpClient)
+    public FigmaAuthTokenHandler()
     {
-        HttpClient = httpClient;
+        _httpClient = new HttpClient();
     }
 
     /// <summary>Refresh Figma OAuth access token</summary>
@@ -29,7 +29,7 @@ public class FigmaAuthTokenHandler : IAuthTokenHandler
                 new KeyValuePair<string, string>("grant_type", "refresh_token")
             });
 
-            var response = await HttpClient.PostAsync("https://www.figma.com/api/oauth/refresh", content, cancellationToken);
+            var response = await _httpClient.PostAsync("https://www.figma.com/api/oauth/refresh", content, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -64,7 +64,7 @@ public class FigmaAuthTokenHandler : IAuthTokenHandler
             using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.figma.com/v1/me");
             request.Headers.Add("X-Figma-Token", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -85,7 +85,7 @@ public class FigmaAuthTokenHandler : IAuthTokenHandler
             using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.figma.com/v1/me");
             request.Headers.Add("X-Figma-Token", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 

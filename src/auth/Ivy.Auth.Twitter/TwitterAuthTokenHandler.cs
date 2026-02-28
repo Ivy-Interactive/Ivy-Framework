@@ -6,12 +6,12 @@ namespace Ivy.Auth.Twitter;
 [OAuthTokenHandler(OAuthProviders.Twitter)]
 public class TwitterAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
+    private readonly HttpClient _httpClient;
 
     /// <summary>Initialize Twitter auth token handler</summary>
-    public TwitterAuthTokenHandler(HttpClient httpClient)
+    public TwitterAuthTokenHandler()
     {
-        HttpClient = httpClient;
+        _httpClient = new HttpClient();
     }
 
     /// <summary>Refresh Twitter OAuth access token</summary>
@@ -29,7 +29,7 @@ public class TwitterAuthTokenHandler : IAuthTokenHandler
                 new KeyValuePair<string, string>("grant_type", "refresh_token")
             });
 
-            var response = await HttpClient.PostAsync("https://api.twitter.com/2/oauth2/token", content, cancellationToken);
+            var response = await _httpClient.PostAsync("https://api.twitter.com/2/oauth2/token", content, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -68,7 +68,7 @@ public class TwitterAuthTokenHandler : IAuthTokenHandler
             using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.twitter.com/2/users/me");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -89,7 +89,7 @@ public class TwitterAuthTokenHandler : IAuthTokenHandler
             using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.twitter.com/2/users/me?user.fields=profile_image_url");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 

@@ -6,12 +6,12 @@ namespace Ivy.Auth.GitLab;
 [OAuthTokenHandler(OAuthProviders.GitLab)]
 public class GitLabAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
+    private readonly HttpClient _httpClient;
 
     /// <summary>Initialize GitLab auth token handler</summary>
-    public GitLabAuthTokenHandler(HttpClient httpClient)
+    public GitLabAuthTokenHandler()
     {
-        HttpClient = httpClient;
+        _httpClient = new HttpClient();
     }
 
     /// <summary>Refresh GitLab OAuth access token</summary>
@@ -29,7 +29,7 @@ public class GitLabAuthTokenHandler : IAuthTokenHandler
                 new KeyValuePair<string, string>("grant_type", "refresh_token")
             });
 
-            var response = await HttpClient.PostAsync("https://gitlab.com/oauth/token", content, cancellationToken);
+            var response = await _httpClient.PostAsync("https://gitlab.com/oauth/token", content, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -68,7 +68,7 @@ public class GitLabAuthTokenHandler : IAuthTokenHandler
             using var request = new HttpRequestMessage(HttpMethod.Get, "https://gitlab.com/api/v4/user");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -89,7 +89,7 @@ public class GitLabAuthTokenHandler : IAuthTokenHandler
             using var request = new HttpRequestMessage(HttpMethod.Get, "https://gitlab.com/api/v4/user");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 

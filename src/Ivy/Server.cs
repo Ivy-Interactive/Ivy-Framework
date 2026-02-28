@@ -305,17 +305,13 @@ public class Server
                         }
                         catch
                         {
-                            // Continue if we can't instantiate a handler
+                            // Continue if we can't register a handler
                         }
                     }
                 }
-                catch (ReflectionTypeLoadException)
-                {
-                    // Continue if we can't load types from an assembly
-                }
                 catch
                 {
-                    // Continue on any other error
+                    // Continue loading types from an assembly fails
                 }
             }
         }

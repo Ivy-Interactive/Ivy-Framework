@@ -11,9 +11,9 @@ public class AutheliaAuthTokenHandler : IAuthTokenHandler
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
     };
 
-    public AutheliaAuthTokenHandler(HttpClient httpClient)
+    public AutheliaAuthTokenHandler()
     {
-        HttpClient = httpClient;
+        HttpClient = new HttpClient();
     }
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)

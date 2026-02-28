@@ -4,12 +4,9 @@ namespace Ivy.Auth.WorkOS;
 [OAuthTokenHandler(OAuthProviders.WorkOS)]
 public class WorkOSAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
-
     /// <summary>Initialize WorkOS auth token handler</summary>
-    public WorkOSAuthTokenHandler(HttpClient httpClient)
+    public WorkOSAuthTokenHandler()
     {
-        HttpClient = httpClient;
     }
 
     /// <summary>WorkOS tokens don't support direct refresh</summary>

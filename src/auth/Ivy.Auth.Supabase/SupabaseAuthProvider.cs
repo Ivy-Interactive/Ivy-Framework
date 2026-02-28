@@ -28,12 +28,12 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
 
     public SupabaseAuthProvider(IConfiguration configuration)
         : base(
-            CreateHttpClient(configuration),
             GetIssuer(configuration),
             GetJwksUrl(configuration),
             CreateLegacyJwtKey(configuration),
             CreateClient(configuration))
     {
+        HttpClient = CreateHttpClient(configuration);
     }
 
     private static global::Supabase.Client CreateClient(IConfiguration configuration)

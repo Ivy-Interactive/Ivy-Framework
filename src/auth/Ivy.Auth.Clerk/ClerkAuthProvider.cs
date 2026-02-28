@@ -39,8 +39,9 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     }
 
     public ClerkAuthProvider(IConfiguration configuration)
-        : base(CreateHttpClient(configuration), GetFrontendApiDomain(configuration), GetIsProduction(configuration))
+        : base(GetFrontendApiDomain(configuration), GetIsProduction(configuration))
     {
+        HttpClient = CreateHttpClient(configuration);
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
 
         _backendClient = new BackendApiClient(_secretKey);

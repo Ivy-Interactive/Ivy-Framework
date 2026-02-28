@@ -6,12 +6,12 @@ namespace Ivy.Auth.Bitbucket;
 [OAuthTokenHandler(OAuthProviders.Bitbucket)]
 public class BitbucketAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
+    private readonly HttpClient _httpClient;
 
     /// <summary>Initialize Bitbucket auth token handler</summary>
-    public BitbucketAuthTokenHandler(HttpClient httpClient)
+    public BitbucketAuthTokenHandler()
     {
-        HttpClient = httpClient;
+        _httpClient = new HttpClient();
     }
 
     /// <summary>Refresh Bitbucket OAuth access token</summary>
@@ -29,7 +29,7 @@ public class BitbucketAuthTokenHandler : IAuthTokenHandler
                 new KeyValuePair<string, string>("grant_type", "refresh_token")
             });
 
-            var response = await HttpClient.PostAsync("https://bitbucket.org/site/oauth2/access_token", content, cancellationToken);
+            var response = await _httpClient.PostAsync("https://bitbucket.org/site/oauth2/access_token", content, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -68,7 +68,7 @@ public class BitbucketAuthTokenHandler : IAuthTokenHandler
             using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.bitbucket.org/2.0/user");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -89,7 +89,7 @@ public class BitbucketAuthTokenHandler : IAuthTokenHandler
             using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.bitbucket.org/2.0/user");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 

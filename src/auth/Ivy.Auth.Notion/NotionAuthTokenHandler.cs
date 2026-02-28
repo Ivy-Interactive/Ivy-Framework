@@ -4,12 +4,9 @@ namespace Ivy.Auth.Notion;
 [OAuthTokenHandler(OAuthProviders.Notion)]
 public class NotionAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
-
     /// <summary>Initialize Notion auth token handler</summary>
-    public NotionAuthTokenHandler(HttpClient httpClient)
+    public NotionAuthTokenHandler()
     {
-        HttpClient = httpClient;
     }
 
     /// <summary>Notion tokens don't support refresh</summary>

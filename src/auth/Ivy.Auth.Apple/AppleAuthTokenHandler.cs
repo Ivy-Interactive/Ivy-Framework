@@ -6,12 +6,12 @@ namespace Ivy.Auth.Apple;
 [OAuthTokenHandler(OAuthProviders.Apple)]
 public class AppleAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
+    private readonly HttpClient _httpClient;
 
     /// <summary>Initialize Apple auth token handler</summary>
-    public AppleAuthTokenHandler(HttpClient httpClient)
+    public AppleAuthTokenHandler()
     {
-        HttpClient = httpClient;
+        _httpClient = new HttpClient();
     }
 
     /// <summary>Refresh Apple OAuth access token</summary>
@@ -29,7 +29,7 @@ public class AppleAuthTokenHandler : IAuthTokenHandler
                 new KeyValuePair<string, string>("grant_type", "refresh_token")
             });
 
-            var response = await HttpClient.PostAsync("https://appleid.apple.com/auth/token", content, cancellationToken);
+            var response = await _httpClient.PostAsync("https://appleid.apple.com/auth/token", content, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 

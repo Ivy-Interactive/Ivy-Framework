@@ -13,8 +13,9 @@ public class AutheliaAuthProvider : AutheliaAuthTokenHandler, IAuthProvider
     private readonly string _baseUrl;
 
     public AutheliaAuthProvider(IConfiguration configuration)
-        : base(CreateHttpClient(configuration, out var cookieContainer, out var baseUrl))
+        : base()
     {
+        HttpClient = CreateHttpClient(configuration, out var cookieContainer, out var baseUrl);
         _cookieContainer = cookieContainer;
         _baseUrl = baseUrl;
     }

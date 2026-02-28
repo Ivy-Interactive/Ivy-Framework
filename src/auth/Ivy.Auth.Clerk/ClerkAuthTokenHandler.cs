@@ -8,16 +8,16 @@ namespace Ivy.Auth.Clerk;
 
 public class ClerkAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
+    protected HttpClient HttpClient;
     protected readonly string FrontendApiDomain;
     protected readonly bool IsProduction;
 
     private ICollection<SecurityKey>? _signingKeys;
     private DateTime _signingKeysLastFetched = DateTime.MinValue;
 
-    public ClerkAuthTokenHandler(HttpClient httpClient, string frontendApiDomain, bool isProduction)
+    public ClerkAuthTokenHandler(string frontendApiDomain, bool isProduction)
     {
-        HttpClient = httpClient;
+        HttpClient = new HttpClient();
         FrontendApiDomain = frontendApiDomain;
         IsProduction = isProduction;
     }
