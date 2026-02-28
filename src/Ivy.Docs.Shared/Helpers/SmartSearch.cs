@@ -96,17 +96,19 @@ public class SmartSearchView : ViewBase
             .Small()
             .TestId("docs-smart-search-ask");
 
+        var clearInputButton = new Button("", _ => inputState.Set(""));
+
         if (queryQuestion.Value == null || resultsContent == null)
         {
-            return new SmartSearch([new Slot("SearchInput", searchInput), new Slot("AskButton", askButton)]);
+            return new SmartSearch([new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ClearInputButton", clearInputButton)]);
         }
 
         var apiTitle = query.Value is { Title: { } t } && !string.IsNullOrWhiteSpace(t) ? t : null;
         var resultsHeader = apiTitle != null ? Text.H2(apiTitle).Bold() : null;
         var clearButton = new Button("Clear", _ => queryQuestion.Set(_ => (string?)null));
         object[] children = resultsHeader != null
-            ? [new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ResultsHeader", resultsHeader), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)]
-            : [new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)];
+            ? [new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ClearInputButton", clearInputButton), new Slot("ResultsHeader", resultsHeader), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)]
+            : [new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ClearInputButton", clearInputButton), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)];
         return new SmartSearch(children);
     }
 }

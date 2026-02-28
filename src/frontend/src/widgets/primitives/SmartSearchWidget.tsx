@@ -17,6 +17,7 @@ import { mcpPanelStore } from './mcpPanelStore';
 interface SmartSearchSlots {
   SearchInput?: React.ReactNode[];
   AskButton?: React.ReactNode[];
+  ClearInputButton?: React.ReactNode[];
   ResultsHeader?: React.ReactNode[];
   ResultsContent?: React.ReactNode[];
   ClearButton?: React.ReactNode[];
@@ -43,26 +44,36 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   };
 
   const clearButtonRef = useRef<HTMLDivElement>(null);
+  const clearInputButtonRef = useRef<HTMLDivElement>(null);
   const slots = slotsProp ?? {};
   const searchInput = slots.SearchInput;
   const askButton = slots.AskButton;
+  const clearInputButton = slots.ClearInputButton;
   const resultsHeader = slots.ResultsHeader;
   const resultsContent = slots.ResultsContent;
   const clearButton = slots.ClearButton;
   const hasResults = resultsContent != null && clearButton != null;
 
   const [isOpen, setIsOpen] = useState(false);
+  const [windowQuery, setWindowQuery] = useState('');
+  const [pageSuggestionsSelectedIndex, setPageSuggestionsSelectedIndex] =
+    useState(0);
+
+  const closeSearchOverlay = React.useCallback(() => {
+    setIsOpen(false);
+    setWindowQuery('');
+    clearInputButtonRef.current
+      ?.querySelector<HTMLButtonElement>('button')
+      ?.click();
+  }, []);
 
   // Sync MCP panel store and close search overlay when MCP results arrive (so overlay doesn’t show again after panel close).
   useEffect(() => {
     mcpPanelStore.setOpen(hasResults);
     if (hasResults) {
-      queueMicrotask(() => setIsOpen(false));
+      queueMicrotask(() => closeSearchOverlay());
     }
-  }, [hasResults]);
-  const [windowQuery, setWindowQuery] = useState('');
-  const [pageSuggestionsSelectedIndex, setPageSuggestionsSelectedIndex] =
-    useState(0);
+  }, [hasResults, closeSearchOverlay]);
 
   const sidebarSearchState = useSyncExternalStore(
     sidebarSearchStore.subscribe,
@@ -135,14 +146,11 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-        setWindowQuery('');
-      }
+      if (e.key === 'Escape') closeSearchOverlay();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, closeSearchOverlay]);
 
   // Track window search query so we can filter page suggestions only in the window (sidebar stays unchanged).
   useEffect(() => {
@@ -208,14 +216,14 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       className="overflow-y-auto pt-4"
       data-testid={dataTestId}
     >
+      <div ref={clearInputButtonRef} className="sr-only" aria-hidden>
+        {clearInputButton}
+      </div>
       {/* Search overlay: only search bar + page suggestions (no MCP results here). Hide when MCP results show (panel opens). */}
       {isOpen && !hasResults && (
         <div
           className="fixed inset-0 z-40 flex items-start justify-center bg-black/20 backdrop-blur-sm p-4 pt-6"
-          onClick={() => {
-            setIsOpen(false);
-            setWindowQuery('');
-          }}
+          onClick={closeSearchOverlay}
           role="presentation"
         >
           <div
@@ -244,7 +252,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
                         sidebarSearchState.id,
                         [tag]
                       );
-                      setIsOpen(false);
+                      closeSearchOverlay();
                     }}
                     activeTag={sidebarSearchState.activeTag}
                   />
