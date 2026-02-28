@@ -24,6 +24,7 @@ interface SmartSearchSlots {
   ResultsHeader?: React.ReactNode[];
   ResultsContent?: React.ReactNode[];
   ClearButton?: React.ReactNode[];
+  FollowUpChat?: React.ReactNode[];
 }
 
 interface SmartSearchWidgetProps {
@@ -55,6 +56,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   const resultsHeader = slots.ResultsHeader;
   const resultsContent = slots.ResultsContent;
   const clearButton = slots.ClearButton;
+  const followUpChat = slots.FollowUpChat;
   const hasResults = resultsContent != null && clearButton != null;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -381,13 +383,21 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
                     <X className="h-4 w-4" />
                   </button>
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                <div className="min-h-0 flex-1 overflow-y-auto p-4 flex flex-col">
                   {resultsHeader != null && (
                     <div className="mb-4 border-b border-border pb-4">
                       {resultsHeader}
                     </div>
                   )}
                   {resultsContent}
+                  {followUpChat != null && followUpChat.length > 0 && (
+                    <>
+                      <div className="shrink-0 border-t border-border mt-4 pt-4" />
+                      <div className="shrink-0 min-h-0 flex flex-col mt-4">
+                        {followUpChat}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </ResizablePanel>

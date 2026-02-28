@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Ivy.Docs.Shared.Services;
 
 // ReSharper disable once CheckNamespace
@@ -35,6 +37,27 @@ public class SmartSearchView : ViewBase
                 return await questionsClient.AskAsync(question!, ct).ConfigureAwait(false);
             },
             options: new QueryOptions { Scope = QueryScope.View, RevalidateOnMount = false });
+
+        var followUpMessages = UseState(Array.Empty<ChatMessage>());
+        var pendingFollowUp = UseState(() => (string?)null);
+
+        UseEffect(
+            async () =>
+            {
+                var q = pendingFollowUp.Value;
+                if (string.IsNullOrWhiteSpace(q)) return;
+                var result = await questionsClient.AskAsync(q!).ConfigureAwait(false);
+                var prev = followUpMessages.Value;
+                var withoutLoading = prev.Length > 0 && prev[^1].Children.Length == 1 && prev[^1].Children[0] is ChatLoading
+                    ? prev.Take(prev.Length - 1).ToArray()
+                    : prev;
+                var answerContent = result is { Answer: { } ans }
+                    ? (object)new Markdown(ans)
+                    : (object)new Markdown("No answer returned.");
+                followUpMessages.Set(withoutLoading.Concat(new[] { new ChatMessage(ChatSender.Assistant, answerContent) }).ToArray());
+                pendingFollowUp.Set(default(string?));
+            },
+            EffectTrigger.OnStateChange(pendingFollowUp));
 
         void SubmitQuestion()
         {
@@ -105,10 +128,40 @@ public class SmartSearchView : ViewBase
 
         var apiTitle = query.Value is { Title: { } t } && !string.IsNullOrWhiteSpace(t) ? t : null;
         var resultsHeader = apiTitle != null ? Text.H2(apiTitle).Bold() : null;
-        var clearButton = new Button("Clear", _ => queryQuestion.Set(_ => (string?)null));
-        object[] children = resultsHeader != null
-            ? [new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ClearInputButton", clearInputButton), new Slot("ResultsHeader", resultsHeader), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)]
-            : [new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ClearInputButton", clearInputButton), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)];
-        return new SmartSearch(children);
+        void ClearResults()
+        {
+            queryQuestion.Set(_ => (string?)null);
+            followUpMessages.Set(Array.Empty<ChatMessage>());
+            pendingFollowUp.Set(default(string?));
+        }
+        var clearButton = new Button("Clear", _ => ClearResults());
+
+        async ValueTask OnFollowUpSend(Event<Chat, string> e)
+        {
+            var text = e.Value?.Trim();
+            if (string.IsNullOrEmpty(text)) return;
+            var userMsg = new ChatMessage(ChatSender.User, text);
+            var loadingMsg = new ChatMessage(ChatSender.Assistant, new ChatLoading());
+            followUpMessages.Set(followUpMessages.Value.Concat(new[] { userMsg, loadingMsg }).ToArray());
+            pendingFollowUp.Set(text);
+        }
+
+        var followUpChat = new Chat(
+            followUpMessages.Value,
+            OnFollowUpSend)
+            .Placeholder("Ask a follow-up question…");
+
+        var slots = new List<object>
+        {
+            new Slot("SearchInput", searchInput),
+            new Slot("AskButton", askButton),
+            new Slot("ClearInputButton", clearInputButton),
+            new Slot("ResultsContent", resultsContent),
+            new Slot("ClearButton", clearButton),
+            new Slot("FollowUpChat", followUpChat)
+        };
+        if (resultsHeader != null)
+            slots.Insert(3, new Slot("ResultsHeader", resultsHeader));
+        return new SmartSearch(slots.ToArray());
     }
 }
