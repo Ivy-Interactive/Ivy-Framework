@@ -4,19 +4,20 @@ import { validateImageUrl } from '@/lib/url';
 import { VideoPlayerError } from './VideoPlayerError';
 import type { VideoPlayerProps } from './types';
 
-export const NativeVideoPlayer: React.FC<VideoPlayerProps> = ({
-  id,
-  validatedSrc,
-  poster,
-  width,
-  height,
-  autoplay = false,
-  loop = false,
-  muted = false,
-  preload = 'metadata',
-  controls = true,
-  onError,
-}) => {
+export const NativeVideoPlayer: React.FC<VideoPlayerProps> = (props: VideoPlayerProps) => {
+  const {
+    id,
+    validatedSrc,
+    poster,
+    width,
+    height,
+    autoplay = false,
+    loop = false,
+    muted = false,
+    preload = 'metadata',
+    controls = true,
+    onError,
+  } = props;
   const [hasError, setHasError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const validatedPoster = poster ? validateImageUrl(poster) : null;
