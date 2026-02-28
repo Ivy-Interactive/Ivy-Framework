@@ -10,19 +10,16 @@ public class MainApp : ViewBase
     {
         var auth = UseService<IAuthProviderService>();
         var userInfo = UseState<UserInfo?>();
-        var oauthTokens = UseState<Dictionary<OAuthProvider, OAuthProviderToken>?>();
+        var oauthSessions = UseState<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>();
 
         UseEffect(async () =>
         {
             var info = await auth.GetUserInfoAsync();
             userInfo.Set(info);
 
-            // Get OAuth provider sessions and convert to tokens for display
+            // Get OAuth provider sessions
             var sessions = await auth.GetOAuthProviderSessionsAsync();
-            var tokens = sessions?.ToDictionary(
-                kvp => kvp.Key,
-                kvp => new OAuthProviderToken(kvp.Key, kvp.Value.AuthToken ?? new AuthToken("", null)));
-            oauthTokens.Set(tokens);
+            oauthSessions.Set(sessions);
         });
 
         if (userInfo.Value is null)
@@ -45,17 +42,17 @@ public class MainApp : ViewBase
                  ).Gap(4).Align(Align.Center)
             ).Gap(20).Align(Align.Center),
 
-            // OAuth Provider Tokens Section
-            Text.H3("OAuth Provider Tokens"),
-            oauthTokens.Value == null
-                ? Text.P("OAuth tokens not available")
-                : oauthTokens.Value.Count == 0
+            // OAuth Provider Sessions Section
+            Text.H3("OAuth Provider Sessions"),
+            oauthSessions.Value == null
+                ? Text.P("OAuth sessions not available")
+                : oauthSessions.Value.Count == 0
                     ? Text.P("No OAuth providers connected")
                     : Layout.Vertical(
-                        Text.P($"Connected providers: {string.Join(", ", oauthTokens.Value.Keys)}"),
+                        Text.P($"Connected providers: {string.Join(", ", oauthSessions.Value.Keys)}"),
 
                         // Automatically show the appropriate test view for each provider
-                        Layout.Vertical(oauthTokens.Value.Values.Select(token => new OAuthProviderTestView(token)).ToArray())
+                        Layout.Vertical(oauthSessions.Value.Select(kvp => new OAuthProviderTestView(kvp.Key, kvp.Value)).ToArray())
                     ).Gap(10)
 
         ).Gap(40).Padding(50).Align(Align.Center).Height(Size.Full());

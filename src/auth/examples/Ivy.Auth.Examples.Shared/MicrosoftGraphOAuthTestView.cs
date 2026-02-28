@@ -5,11 +5,11 @@ namespace Ivy.Auth.Examples.Shared;
 
 public class MicrosoftGraphOAuthTestView : ViewBase
 {
-    private readonly OAuthProviderToken _token;
+    private readonly IAuthTokenHandlerSession _session;
 
-    public MicrosoftGraphOAuthTestView(OAuthProviderToken token)
+    public MicrosoftGraphOAuthTestView(IAuthTokenHandlerSession session)
     {
-        _token = token;
+        _session = session;
     }
 
     public override object? Build()
@@ -23,7 +23,7 @@ public class MicrosoftGraphOAuthTestView : ViewBase
                 {
                     using var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", _token.AuthToken.AccessToken);
+                        new AuthenticationHeaderValue("Bearer", _session.AuthToken?.AccessToken);
 
                     try
                     {
@@ -40,7 +40,7 @@ public class MicrosoftGraphOAuthTestView : ViewBase
                 {
                     using var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", _token.AuthToken.AccessToken);
+                        new AuthenticationHeaderValue("Bearer", _session.AuthToken?.AccessToken);
 
                     try
                     {

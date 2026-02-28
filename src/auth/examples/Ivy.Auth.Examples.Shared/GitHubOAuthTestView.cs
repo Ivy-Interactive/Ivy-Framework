@@ -29,12 +29,12 @@ public record GitHubUser(
 
 public class GitHubOAuthTestView : ViewBase
 {
-    private readonly OAuthProviderToken _token;
+    private readonly IAuthTokenHandlerSession _session;
     private readonly string _appName;
 
-    public GitHubOAuthTestView(OAuthProviderToken token, string appName = "IvyAuthExample")
+    public GitHubOAuthTestView(IAuthTokenHandlerSession session, string appName = "IvyAuthExample")
     {
-        _token = token;
+        _session = session;
         _appName = appName;
     }
 
@@ -50,7 +50,7 @@ public class GitHubOAuthTestView : ViewBase
                 {
                     using var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", _token.AuthToken.AccessToken);
+                        new AuthenticationHeaderValue("Bearer", _session.AuthToken?.AccessToken);
                     httpClient.DefaultRequestHeaders.UserAgent.Add(
                         new ProductInfoHeaderValue(_appName, "1.0"));
 
@@ -93,7 +93,7 @@ public class GitHubOAuthTestView : ViewBase
                 {
                     using var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", _token.AuthToken.AccessToken);
+                        new AuthenticationHeaderValue("Bearer", _session.AuthToken?.AccessToken);
                     httpClient.DefaultRequestHeaders.UserAgent.Add(
                         new ProductInfoHeaderValue(_appName, "1.0"));
 

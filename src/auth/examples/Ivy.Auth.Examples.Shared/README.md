@@ -16,7 +16,7 @@ Tests Google OAuth integration with the following capabilities:
 
 **Usage:**
 ```csharp
-new GoogleOAuthTestView(oauthToken)
+new GoogleOAuthTestView(session)
 ```
 
 ### GitHubOAuthTestView
@@ -27,7 +27,7 @@ Tests GitHub OAuth integration with the following capabilities:
 
 **Usage:**
 ```csharp
-new GitHubOAuthTestView(oauthToken, appName: "YourAppName")
+new GitHubOAuthTestView(session, appName: "YourAppName")
 ```
 
 ### MicrosoftGraphOAuthTestView
@@ -38,7 +38,7 @@ Tests Microsoft Graph API integration with the following capabilities:
 
 **Usage:**
 ```csharp
-new MicrosoftGraphOAuthTestView(oauthToken)
+new MicrosoftGraphOAuthTestView(session)
 ```
 
 ## Integration Example
@@ -57,10 +57,10 @@ To use these components in an authentication example project:
 using Ivy.Auth.Examples.Shared;
 ```
 
-3. Use the view components when displaying OAuth provider tokens:
+3. Use the view components when displaying OAuth provider sessions:
 ```csharp
-oauthTokens.Value.ContainsKey(OAuthProvider.Google)
-    ? new GoogleOAuthTestView(oauthTokens.Value[OAuthProvider.Google])
+oauthSessions.Value?.TryGetValue(OAuthProvider.Google, out var googleSession) == true
+    ? new GoogleOAuthTestView(googleSession)
     : null
 ```
 
@@ -75,7 +75,7 @@ oauthTokens.Value.ContainsKey(OAuthProvider.Google)
 
 Each view class:
 - Inherits from `ViewBase` to integrate with Ivy's UI framework
-- Accepts an `OAuthProviderToken` as a constructor parameter
+- Accepts an `IAuthTokenHandlerSession` as a constructor parameter
 - Uses Ivy UI components (Button, Layout, Text) for rendering
 - Manages its own state for API responses
 - Handles errors gracefully and displays them to the user

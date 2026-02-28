@@ -4,24 +4,26 @@ namespace Ivy.Auth.Examples.Shared;
 
 /// <summary>
 /// Unified OAuth provider test view that automatically delegates to the appropriate
-/// provider-specific test view based on the token's provider type.
+/// provider-specific test view based on the provider type.
 /// </summary>
 public class OAuthProviderTestView : ViewBase
 {
-    private readonly OAuthProviderToken _token;
+    private readonly OAuthProvider _provider;
+    private readonly IAuthTokenHandlerSession _session;
 
-    public OAuthProviderTestView(OAuthProviderToken token)
+    public OAuthProviderTestView(OAuthProvider provider, IAuthTokenHandlerSession session)
     {
-        _token = token;
+        _provider = provider;
+        _session = session;
     }
 
     public override object? Build()
     {
-        return _token.Provider switch
+        return _provider switch
         {
-            OAuthProvider.Google => new GoogleOAuthTestView(_token),
-            OAuthProvider.GitHub => new GitHubOAuthTestView(_token),
-            OAuthProvider.Microsoft => new MicrosoftGraphOAuthTestView(_token),
+            OAuthProvider.Google => new GoogleOAuthTestView(_session),
+            OAuthProvider.GitHub => new GitHubOAuthTestView(_session),
+            OAuthProvider.Microsoft => new MicrosoftGraphOAuthTestView(_session),
             OAuthProvider.Apple => UnsupportedProviderView("Apple"),
             OAuthProvider.Twitter => UnsupportedProviderView("Twitter"),
             OAuthProvider.Discord => UnsupportedProviderView("Discord"),
@@ -32,7 +34,7 @@ public class OAuthProviderTestView : ViewBase
             OAuthProvider.WorkOS => UnsupportedProviderView("WorkOS"),
             OAuthProvider.GitLab => UnsupportedProviderView("GitLab"),
             OAuthProvider.Bitbucket => UnsupportedProviderView("Bitbucket"),
-            _ => UnsupportedProviderView(_token.Provider.ToString())
+            _ => UnsupportedProviderView(_provider.ToString())
         };
     }
 
@@ -40,8 +42,8 @@ public class OAuthProviderTestView : ViewBase
     {
         return Layout.Vertical(
             Text.H4($"{providerName} OAuth"),
-            Text.P($"OAuth provider token available for {providerName}, but no test view has been implemented yet."),
-            Text.Muted($"Access Token: {_token.AuthToken.AccessToken?[..Math.Min(20, _token.AuthToken.AccessToken?.Length ?? 0)]}...")
+            Text.P($"OAuth provider session available for {providerName}, but no test view has been implemented yet."),
+            Text.Muted($"Access Token: {_session.AuthToken?.AccessToken?[..Math.Min(20, _session.AuthToken?.AccessToken?.Length ?? 0)]}...")
         ).Gap(10);
     }
 }

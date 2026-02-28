@@ -57,7 +57,7 @@ public static class CookieRegistryExtensions
             cookies.Delete(tagName, CreateAuthCookieOptions());
 
             // Also delete all OAuth provider token cookies when logging out
-            DeleteAllOAuthProviderTokenCookies(cookies);
+            DeleteAllOAuthProviderSessionCookies(cookies);
         }
         else
         {
@@ -146,7 +146,7 @@ public static class CookieRegistryExtensions
         }
     }
 
-    private static void DeleteAllOAuthProviderTokenCookies(CookieJar cookies)
+    private static void DeleteAllOAuthProviderSessionCookies(CookieJar cookies)
     {
         var cookieOptions = CreateAuthCookieOptions();
 
