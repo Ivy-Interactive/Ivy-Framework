@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Ivy\Ivy.csproj" />
-    <ProjectReference Include="..\..\Ivy.Auth.Sliplane\Ivy.Auth.Sliplane.csproj" />
+    <ProjectReference Include="../../../Ivy/Ivy.csproj" />
+    <ProjectReference Include="../../Ivy.Auth.Sliplane/Ivy.Auth.Sliplane.csproj" />
   </ItemGroup>
 
 </Project>
