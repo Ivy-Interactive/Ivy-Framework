@@ -59,10 +59,7 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   return (
     <>
       <SparkleStyles />
-      <div
-        className="w-full group relative"
-        style={containerStyles}
-      >
+      <div className="w-full group relative" style={containerStyles}>
         {goal && (
           <Badge
             variant="secondary"
@@ -85,10 +82,7 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
             )}
           </Badge>
         )}
-        <Progress
-          value={value}
-          className="bg-neutral/10"
-        />
+        <Progress value={value} className="bg-neutral/10" />
       </div>
     </>
   );
