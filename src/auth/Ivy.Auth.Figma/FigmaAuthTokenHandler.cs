@@ -3,6 +3,7 @@ using System.Text.Json;
 namespace Ivy.Auth.Figma;
 
 /// <summary>Figma OAuth token handler</summary>
+[OAuthTokenHandler(OAuthProvider.Figma)]
 public class FigmaAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

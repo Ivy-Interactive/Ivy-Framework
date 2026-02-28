@@ -3,6 +3,7 @@ using System.Text.Json;
 namespace Ivy.Auth.Apple;
 
 /// <summary>Apple OAuth token handler</summary>
+[OAuthTokenHandler(OAuthProvider.Apple)]
 public class AppleAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

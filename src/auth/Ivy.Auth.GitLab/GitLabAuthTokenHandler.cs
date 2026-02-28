@@ -3,6 +3,7 @@ using System.Text.Json;
 namespace Ivy.Auth.GitLab;
 
 /// <summary>GitLab OAuth token handler</summary>
+[OAuthTokenHandler(OAuthProvider.GitLab)]
 public class GitLabAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

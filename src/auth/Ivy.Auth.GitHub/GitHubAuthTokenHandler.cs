@@ -3,6 +3,7 @@ using System.Text.Json;
 namespace Ivy.Auth.GitHub;
 
 /// <summary>GitHub auth token handler</summary>
+[OAuthTokenHandler(OAuthProvider.GitHub)]
 public class GitHubAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

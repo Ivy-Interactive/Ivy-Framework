@@ -1,6 +1,7 @@
 namespace Ivy.Auth.Notion;
 
 /// <summary>Notion OAuth token handler</summary>
+[OAuthTokenHandler(OAuthProvider.Notion)]
 public class NotionAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;
