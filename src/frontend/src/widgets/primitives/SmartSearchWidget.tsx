@@ -365,7 +365,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
               minSize={mcpPanelMinSizePct}
               order={2}
             >
-              <div className="flex h-full flex-col">
+              <div className="flex min-w-0 h-full flex-col">
                 <div ref={clearButtonRef} className="sr-only" aria-hidden>
                   {clearButton}
                 </div>
@@ -382,22 +382,21 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
                     <X className="h-4 w-4" />
                   </button>
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto p-4 flex flex-col">
+                <div className="min-w-0 min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 flex flex-col wrap-break-word">
                   {resultsHeader != null && (
-                    <div className="mb-4 border-b border-border pb-4">
+                    <div className="mb-4 min-w-0 border-b border-border pb-4 wrap-break-word">
                       {resultsHeader}
                     </div>
                   )}
-                  {resultsContent}
-                  {followUpChat != null && followUpChat.length > 0 && (
-                    <>
-                      <div className="shrink-0 border-t border-border mt-4 pt-4" />
-                      <div className="shrink-0 min-h-0 flex flex-col mt-4">
-                        {followUpChat}
-                      </div>
-                    </>
-                  )}
+                  <div className="min-w-0 wrap-break-word">
+                    {resultsContent}
+                  </div>
                 </div>
+                {followUpChat != null && followUpChat.length > 0 && (
+                  <div className="shrink-0 border-t border-border bg-background p-4 wrap-break-word">
+                    {followUpChat}
+                  </div>
+                )}
               </div>
             </ResizablePanel>
           </ResizablePanelGroup>
