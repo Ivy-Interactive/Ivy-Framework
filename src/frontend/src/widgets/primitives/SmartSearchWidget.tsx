@@ -1,5 +1,5 @@
 import { getHeight, getWidth } from '@/lib/styles';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSyncExternalStore } from 'react';
 import { X } from 'lucide-react';
 import type { MenuItem } from '@/types/widgets';
@@ -14,6 +14,7 @@ import {
 } from '@/widgets/layouts/sidebar/sidebarSearchFilter';
 import { sidebarSearchStore } from '@/widgets/layouts/sidebar/sidebarSearchStore';
 import { SidebarSearchResultsList } from '@/widgets/layouts/sidebar/SidebarSearchResultsList';
+import { cn } from '@/lib/utils';
 import { mcpPanelStore } from './mcpPanelStore';
 
 interface SmartSearchSlots {
@@ -137,10 +138,57 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       ? suggestionItems
       : null;
   const listFlatLength = listToShow?.flatItems.length ?? 0;
+  const showMcpOption = windowQuery.trim() !== '';
+  const effectiveLength = listFlatLength + (showMcpOption ? 1 : 0);
   const pageSuggestionsIndex =
-    listFlatLength > 0
-      ? Math.min(pageSuggestionsSelectedIndex, Math.max(0, listFlatLength - 1))
+    effectiveLength > 0
+      ? Math.min(pageSuggestionsSelectedIndex, Math.max(0, effectiveLength - 1))
       : 0;
+
+  const handleOverlayKeyDown = React.useCallback(
+    (e: React.KeyboardEvent) => {
+      if (effectiveLength === 0) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        e.stopPropagation();
+        setPageSuggestionsSelectedIndex(i =>
+          Math.min(i + 1, effectiveLength - 1)
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        e.stopPropagation();
+        setPageSuggestionsSelectedIndex(i => Math.max(i - 1, 0));
+      } else if (e.key === 'Enter') {
+        if (pageSuggestionsIndex < listFlatLength) {
+          const item = listToShow?.flatItems[pageSuggestionsIndex];
+          if (item?.tag) {
+            e.preventDefault();
+            e.stopPropagation();
+            sidebarSearchState.eventHandler('OnSelect', sidebarSearchState.id, [
+              item.tag,
+            ]);
+            closeSearchOverlay();
+          }
+        } else {
+          e.preventDefault();
+          e.stopPropagation();
+          document
+            .querySelector<HTMLButtonElement>(
+              '[data-testid="docs-smart-search-ask"]'
+            )
+            ?.click();
+        }
+      }
+    },
+    [
+      effectiveLength,
+      listFlatLength,
+      listToShow?.flatItems,
+      pageSuggestionsIndex,
+      sidebarSearchState,
+      closeSearchOverlay,
+    ]
+  );
 
   const hasResultsRef = useRef(hasResults);
   useEffect(() => {
@@ -188,18 +236,42 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
     };
   }, []);
 
-  // Focus the search input once the window (and search bar) is in the DOM.
-  useEffect(() => {
+  // Focus the search input once the overlay and slotted input are in the DOM.
+  const focusSearchInput = React.useCallback(() => {
+    document
+      .querySelector<HTMLInputElement>(
+        '[data-testid="docs-smart-search-input"]'
+      )
+      ?.focus();
+  }, []);
+
+  useLayoutEffect(() => {
     if (!isOpen) return;
-    const id = requestAnimationFrame(() => {
+    focusSearchInput();
+    const fallback = setTimeout(focusSearchInput, 100);
+    return () => clearTimeout(fallback);
+  }, [isOpen, focusSearchInput]);
+
+  // Scroll selected suggestion (or MCP option) into view when navigating with keys (overlay only).
+  useEffect(() => {
+    if (!isOpen || hasResults || effectiveLength === 0) return;
+    if (pageSuggestionsIndex < listFlatLength) {
+      const el = document.querySelector(
+        `[data-sidebar-result-index="${pageSuggestionsIndex}"]`
+      );
+      el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } else {
       document
-        .querySelector<HTMLInputElement>(
-          '[data-testid="docs-smart-search-input"]'
-        )
-        ?.focus();
-    });
-    return () => cancelAnimationFrame(id);
-  }, [isOpen]);
+        .querySelector('[data-smart-search-mcp-option]')
+        ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [
+    isOpen,
+    hasResults,
+    effectiveLength,
+    listFlatLength,
+    pageSuggestionsIndex,
+  ]);
 
   // Close search window on Escape.
   useEffect(() => {
@@ -290,6 +362,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
             role="dialog"
             aria-label="Search"
             onClick={e => e.stopPropagation()}
+            onKeyDownCapture={handleOverlayKeyDown}
           >
             <div className="flex min-h-0 flex-1 flex-col p-4 pt-4">
               {/* 1. Search input: same as sidebar (Search variant with icon and kbd inside input) */}
@@ -314,15 +387,31 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
                   />
                 )}
               </div>
-              {windowQuery.trim() !== '' && (
+              {showMcpOption && (
                 <>
-                  {/* Separator */}
                   <div className="shrink-0 border-t border-border" />
-                  {/* Search with Ivy MCP */}
-                  <p className="shrink-0 py-3 text-sm text-muted-foreground">
+                  <p className="shrink-0 py-3 px-2 text-sm text-muted-foreground">
                     Search with Ivy MCP
                   </p>
-                  <div className="flex shrink-0 flex-wrap items-center gap-2 py-3">
+                  <div
+                    data-smart-search-mcp-option
+                    role="button"
+                    tabIndex={-1}
+                    className={cn(
+                      'shrink-0 flex flex-wrap items-center gap-2 rounded-selector cursor-pointer py-2 px-2',
+                      pageSuggestionsIndex === listFlatLength && 'bg-accent/30'
+                    )}
+                    onMouseEnter={() =>
+                      setPageSuggestionsSelectedIndex(listFlatLength)
+                    }
+                    onClick={() =>
+                      document
+                        .querySelector<HTMLButtonElement>(
+                          '[data-testid="docs-smart-search-ask"]'
+                        )
+                        ?.click()
+                    }
+                  >
                     {askButton}
                     <span className="text-muted-foreground">
                       How to use {windowQuery.trim()}?
