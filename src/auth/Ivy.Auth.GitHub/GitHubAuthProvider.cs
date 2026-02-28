@@ -1,8 +1,8 @@
 using System.Text.Json;
-using Ivy.Auth;
 using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+
 namespace Ivy.Auth.GitHub;
 
 /// <summary>GitHub OAuth exception</summary>
