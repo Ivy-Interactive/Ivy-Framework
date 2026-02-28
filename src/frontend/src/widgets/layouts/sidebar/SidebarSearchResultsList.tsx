@@ -95,10 +95,15 @@ export const SidebarSearchResultsList: React.FC<
           );
 
           return (
-            <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-              <h4 className="sticky top-0 z-10 bg-background px-2 py-2 text-small-label text-muted-foreground mb-0">
-                {item.label}
-              </h4>
+            <div
+              key={item.label || 'results'}
+              className="space-y-1 mt-6 first:mt-0"
+            >
+              {item.label ? (
+                <h4 className="sticky top-0 z-10 bg-background px-2 py-2 text-small-label text-muted-foreground mb-0">
+                  {item.label}
+                </h4>
+              ) : null}
               <ul className="space-y-1">
                 {groupsOrdered.map(([path, pathItems], index) => (
                   <React.Fragment key={path || '__none__'}>

@@ -1,3 +1,4 @@
+import { Kbd } from '@/components/Kbd';
 import { getHeight, getWidth } from '@/lib/styles';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSyncExternalStore } from 'react';
@@ -14,7 +15,8 @@ import { SidebarSearchResultsList } from '@/widgets/layouts/sidebar/SidebarSearc
 import { mcpPanelStore } from './mcpPanelStore';
 
 interface SmartSearchSlots {
-  SearchBar?: React.ReactNode[];
+  SearchInput?: React.ReactNode[];
+  AskButton?: React.ReactNode[];
   ResultsHeader?: React.ReactNode[];
   ResultsContent?: React.ReactNode[];
   ClearButton?: React.ReactNode[];
@@ -42,7 +44,8 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
 
   const clearButtonRef = useRef<HTMLDivElement>(null);
   const slots = slotsProp ?? {};
-  const searchBar = slots.SearchBar;
+  const searchInput = slots.SearchInput;
+  const askButton = slots.AskButton;
   const resultsHeader = slots.ResultsHeader;
   const resultsContent = slots.ResultsContent;
   const clearButton = slots.ClearButton;
@@ -128,6 +131,19 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
     return () => cancelAnimationFrame(id);
   }, [isOpen]);
 
+  // Close search window on Escape.
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        setWindowQuery('');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   // Track window search query so we can filter page suggestions only in the window (sidebar stays unchanged).
   useEffect(() => {
     if (!isOpen && !hasResults) return;
@@ -194,36 +210,29 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
     >
       {/* Search overlay: only search bar + page suggestions (no MCP results here). Hide when MCP results show (panel opens). */}
       {isOpen && !hasResults && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+        <div
+          className="fixed inset-0 z-40 flex items-start justify-center bg-black/20 backdrop-blur-sm p-4 pt-6"
+          onClick={() => {
+            setIsOpen(false);
+            setWindowQuery('');
+          }}
+          role="presentation"
+        >
           <div
             className="relative flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg"
             role="dialog"
             aria-label="Search"
+            onClick={e => e.stopPropagation()}
           >
-            <div className="absolute top-0 right-0 z-50 p-4">
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => {
-                  setIsOpen(false);
-                  setWindowQuery('');
-                }}
-                className="p-2 rounded-md hover:bg-accent focus:outline-none cursor-pointer text-muted-foreground hover:text-foreground min-w-9 min-h-9"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="shrink-0 border-b border-border p-4 pt-12">
-              <div className="rounded-lg border border-border/40 bg-muted/30 p-2">
-                {searchBar}
+            <div className="flex min-h-0 flex-1 flex-col p-4 pt-4">
+              {/* 1. Search input with ESC hint inside the same box */}
+              <div className="flex shrink-0 items-center gap-2 rounded-lg border border-border/40 bg-muted/30 py-1.5 px-2">
+                <div className="min-w-0 flex-1">{searchInput}</div>
+                <Kbd>ESC</Kbd>
               </div>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto p-4">
-              {hasPageSuggestions && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                    Pages
-                  </h3>
+              {/* 2. Pages search results (no heading) */}
+              <div className="min-h-0 flex-1 overflow-y-auto pt-4">
+                {hasPageSuggestions && (
                   <SidebarSearchResultsList
                     items={windowFiltered.searchResultsItems}
                     flatItems={windowFiltered.flatItems}
@@ -239,7 +248,23 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
                     }}
                     activeTag={sidebarSearchState.activeTag}
                   />
-                </div>
+                )}
+              </div>
+              {windowQuery.trim() !== '' && (
+                <>
+                  {/* Separator */}
+                  <div className="shrink-0 border-t border-border" />
+                  {/* Search with Ivy MCP */}
+                  <p className="shrink-0 py-3 text-sm text-muted-foreground">
+                    Search with Ivy MCP
+                  </p>
+                  <div className="flex shrink-0 flex-wrap items-center gap-2 py-3">
+                    {askButton}
+                    <span className="text-muted-foreground">
+                      How to use {windowQuery.trim()}?
+                    </span>
+                  </div>
+                </>
               )}
             </div>
           </div>

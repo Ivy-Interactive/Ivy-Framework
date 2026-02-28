@@ -74,7 +74,7 @@ export function flattenWithPath(
 }
 
 /**
- * Filter full menu tree by query and return items in "Search Results" shape
+ * Filter full menu tree by query and return items in a single group shape
  * (single group with matching leaves + path), and flat list for list component.
  */
 export function filterMenuItemsForSearch(
@@ -104,7 +104,7 @@ export function filterMenuItemsForSearch(
     flatItems.length > 0
       ? [
           {
-            label: 'Search Results',
+            label: '',
             variant: 'Default',
             checked: false,
             disabled: false,

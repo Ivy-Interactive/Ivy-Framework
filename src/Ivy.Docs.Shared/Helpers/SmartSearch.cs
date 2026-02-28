@@ -88,25 +88,25 @@ public class SmartSearchView : ViewBase
             }
         }
 
-        var searchBar = Layout.Horizontal().Gap(0).Align(Align.Center)
-            | inputState.ToTextInput()
-                .Placeholder("Ask a question about Ivy... (e.g. how to use BoolInput)")
-                .TestId("docs-smart-search-input")
-            | new Button("Ask", SubmitQuestion)
-                .Variant(ButtonVariant.Ai)
-                .TestId("docs-smart-search-ask");
+        var searchInput = inputState.ToTextInput()
+            .Placeholder("Search...")
+            .TestId("docs-smart-search-input");
+        var askButton = new Button("Ask", SubmitQuestion)
+            .Variant(ButtonVariant.Ai)
+            .Small()
+            .TestId("docs-smart-search-ask");
 
         if (queryQuestion.Value == null || resultsContent == null)
         {
-            return new SmartSearch([new Slot("SearchBar", searchBar)]);
+            return new SmartSearch([new Slot("SearchInput", searchInput), new Slot("AskButton", askButton)]);
         }
 
         var apiTitle = query.Value is { Title: { } t } && !string.IsNullOrWhiteSpace(t) ? t : null;
         var resultsHeader = apiTitle != null ? Text.H2(apiTitle).Bold() : null;
         var clearButton = new Button("Clear", _ => queryQuestion.Set(_ => (string?)null));
         object[] children = resultsHeader != null
-            ? [new Slot("SearchBar", searchBar), new Slot("ResultsHeader", resultsHeader), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)]
-            : [new Slot("SearchBar", searchBar), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)];
+            ? [new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ResultsHeader", resultsHeader), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)]
+            : [new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ResultsContent", resultsContent), new Slot("ClearButton", clearButton)];
         return new SmartSearch(children);
     }
 }
