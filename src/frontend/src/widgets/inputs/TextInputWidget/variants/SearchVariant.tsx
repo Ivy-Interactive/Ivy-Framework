@@ -83,6 +83,10 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.trim() !== '';
   const showClear = props.nullable && !props.disabled && hasValue;
+  const isEscapeShortcut =
+    props.shortcutKey?.toUpperCase().replace(/\s/g, '') === 'ESC';
+  const showShortcutKbd =
+    props.shortcutKey && !hasValue && (!isFocused || isEscapeShortcut);
 
   // Merge focusRef and inputRef
   const mergedRef = useCallback(
@@ -122,12 +126,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             'pl-8 cursor-pointer border-0 shadow-none dark:bg-transparent',
             props.invalid && inputStyles.invalidInput,
             (props.invalid || showClear) && 'pr-8',
-            props.shortcutKey &&
-              !isFocused &&
-              !hasValue &&
-              !showClear &&
-              !props.invalid &&
-              'pr-16',
+            showShortcutKbd && !showClear && !props.invalid && 'pr-16',
             showClear && props.invalid && 'pr-16',
             !hasValue && props.nullable && 'placeholder:text-muted-foreground',
             '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden'
@@ -148,7 +147,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             <X className={xIconVariants({ scale })} />
           </button>
         )}
-        {props.shortcutKey && !isFocused && !hasValue && (
+        {showShortcutKbd && (
           <div className="pointer-events-auto flex items-center h-4">
             <kbd className="text-xs text-foreground bg-muted border border-border rounded-selector px-1 py-0.25">
               {shortcutDisplay}

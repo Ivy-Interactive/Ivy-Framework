@@ -124,8 +124,9 @@ public class SmartSearchView : ViewBase
             }
         }
 
-        var searchInput = inputState.ToTextInput()
+        var searchInput = inputState.ToSearchInput()
             .Placeholder("Search...")
+            .ShortcutKey("ESC")
             .TestId("docs-smart-search-input");
         var askButton = new Button("Ask", SubmitQuestion)
             .Variant(ButtonVariant.Ai)

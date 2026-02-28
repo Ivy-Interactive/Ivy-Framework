@@ -1,8 +1,7 @@
-import { Kbd } from '@/components/Kbd';
 import { getHeight, getWidth } from '@/lib/styles';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSyncExternalStore } from 'react';
-import { Search, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import type { MenuItem } from '@/types/widgets';
 import {
   ResizablePanelGroup,
@@ -292,12 +291,8 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
             onClick={e => e.stopPropagation()}
           >
             <div className="flex min-h-0 flex-1 flex-col p-4 pt-4">
-              {/* 1. Search input with search icon (like sidebar) and ESC hint inside the same box */}
-              <div className="flex shrink-0 items-center gap-2 rounded-lg border border-border/40 bg-muted/30 py-1.5 px-2">
-                <Search className="h-4 w-4 shrink-0 text-muted-foreground/70" />
-                <div className="min-w-0 flex-1">{searchInput}</div>
-                <Kbd>ESC</Kbd>
-              </div>
+              {/* 1. Search input: same as sidebar (Search variant with icon and kbd inside input) */}
+              <div className="shrink-0 w-full">{searchInput}</div>
               {/* 2. Search results or suggestions (useful pages when input is empty) */}
               <div className="min-h-0 flex-1 overflow-y-auto pt-4">
                 {listToShow != null && (
