@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace Ivy.Auth.GitHub;
 
@@ -10,16 +11,13 @@ public class GitHubAuthTokenHandler : IAuthTokenHandler
     protected readonly HttpClient HttpClient;
     private readonly ILogger<GitHubAuthTokenHandler> _logger;
 
-    /// <summary>Initialize GitHub auth token handler (for reflection-based instantiation)</summary>
-    public GitHubAuthTokenHandler(HttpClient httpClient)
-        : this(httpClient, null)
-    {
-    }
-
     /// <summary>Initialize GitHub auth token handler</summary>
-    public GitHubAuthTokenHandler(HttpClient httpClient, ILogger<GitHubAuthTokenHandler>? logger)
+    public GitHubAuthTokenHandler(IConfiguration configuration, ILogger<GitHubAuthTokenHandler>? logger = null)
     {
-        HttpClient = httpClient;
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "GitHub:UserAgent");
+        HttpClient = new HttpClient();
+        HttpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
+
         _logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<GitHubAuthTokenHandler>.Instance;
     }
 

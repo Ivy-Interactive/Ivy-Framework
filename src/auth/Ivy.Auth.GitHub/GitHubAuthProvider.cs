@@ -2,6 +2,7 @@ using System.Text.Json;
 using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Auth.GitHub;
 
@@ -21,8 +22,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     private readonly string _redirectUri;
 
     /// <summary>Initialize GitHub auth provider</summary>
-    public GitHubAuthProvider(IConfiguration configuration)
-        : base(CreateHttpClient(configuration))
+    public GitHubAuthProvider(IConfiguration configuration, ILogger<GitHubAuthTokenHandler>? logger = null) : base(configuration, logger)
     {
         _clientId = configuration.GetValue<string>("GitHub:ClientId") ?? throw new InvalidOperationException(
             "Missing required configuration: 'GitHub:ClientId'. Please set this value in your environment variables or user secrets. See the README setup steps for instructions.");
@@ -30,14 +30,6 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
             "Missing required configuration: 'GitHub:ClientSecret'. Please set this value in your environment variables or user secrets. See the README setup steps for instructions.");
         _redirectUri = configuration.GetValue<string>("GitHub:RedirectUri") ?? throw new InvalidOperationException(
             "Missing required configuration: 'GitHub:RedirectUri'. Please set this value in your environment variables or user secrets. See the README setup steps for instructions.");
-    }
-
-    private static HttpClient CreateHttpClient(IConfiguration configuration)
-    {
-        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "GitHub:UserAgent");
-        var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
-        return httpClient;
     }
 
     /// <summary>Not supported - use OAuth flow</summary>

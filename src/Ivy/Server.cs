@@ -301,16 +301,7 @@ public class Server
 
                         try
                         {
-                            // Create an instance with HttpClient
-                            var httpClient = new HttpClient();
-                            // Set a default User-Agent header (required by some APIs like GitHub)
-                            httpClient.DefaultRequestHeaders.Add("User-Agent", "Ivy-Framework/1.0");
-                            var handler = (IAuthTokenHandler?)Activator.CreateInstance(handlerType, httpClient);
-
-                            if (handler != null)
-                            {
-                                Services.AddKeyedSingleton<IAuthTokenHandler>(attribute.Provider, handler);
-                            }
+                            Services.AddKeyedSingleton(typeof(IAuthTokenHandler), attribute.Provider, handlerType);
                         }
                         catch
                         {
