@@ -42,7 +42,6 @@ import {
 } from '@/widgets/inputs';
 import {
   StackLayoutWidget,
-  WrapLayoutWidget,
   GridLayoutWidget,
   HeaderLayoutWidget,
   FooterLayoutWidget,
@@ -151,7 +150,6 @@ export const widgetMap = {
 
   // Layouts
   'Ivy.StackLayout': StackLayoutWidget,
-  'Ivy.WrapLayout': WrapLayoutWidget,
   'Ivy.GridLayout': GridLayoutWidget,
   'Ivy.HeaderLayout': HeaderLayoutWidget,
   'Ivy.FooterLayout': FooterLayoutWidget,
