@@ -138,10 +138,10 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
 
     public IAuthProviderSession GetAuthProviderSession() => authSession;
 
-    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(CancellationToken cancellationToken)
+    public async Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(CancellationToken cancellationToken)
     {
         return await TimeoutHelper.WithTimeoutAsync(ct =>
-            authProvider.GetOAuthProviderTokensAsync(authSession, ct), cancellationToken);
+            authProvider.GetOAuthProviderSessionsAsync(authSession, ct), cancellationToken);
     }
 
     public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)

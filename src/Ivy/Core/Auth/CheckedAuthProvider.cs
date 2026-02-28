@@ -124,7 +124,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         return _innerAuthProvider.GetAccessTokenLifetimeAsync(checkedSession, cancellationToken);
     }
 
-    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {
@@ -134,9 +134,9 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
-            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadOnly)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
-        return _innerAuthProvider.GetOAuthProviderTokensAsync(authSession, cancellationToken);
+        return _innerAuthProvider.GetOAuthProviderSessionsAsync(authSession, cancellationToken);
     }
 }
 #endif

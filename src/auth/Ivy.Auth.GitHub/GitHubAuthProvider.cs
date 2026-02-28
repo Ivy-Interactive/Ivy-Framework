@@ -120,33 +120,33 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     [Obsolete("GitHub OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public GitHubAuthProvider UseGitHub() => this;
 
-    /// <summary>Get OAuth provider tokens - returns the GitHub access token</summary>
-    public Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    /// <summary>Get OAuth provider sessions - returns live session references that stay up-to-date</summary>
+    public Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
-        // Return stored sessions converted to tokens if available
+        // Return stored sessions if available
         if (authSession.OAuthProviderSessions.Count > 0)
         {
-            return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(
-                authSession.OAuthProviderSessions.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => new OAuthProviderToken(kvp.Key, kvp.Value.AuthToken ?? new AuthToken("", null))));
+            return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(
+                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
         }
 
+        // If no stored sessions, create one from the main auth token (GitHub uses the main token)
         var token = authSession.AuthToken?.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
         {
-            return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(null);
+            return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(null);
         }
 
-        var tokens = new Dictionary<OAuthProvider, OAuthProviderToken>
+        // Create and store the session so future refreshes keep it updated
+        var session = new AuthTokenHandlerSession(new AuthToken(token), null);
+        authSession.AddOAuthProviderSession(OAuthProvider.GitHub, session);
+
+        var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>
         {
-            [OAuthProvider.GitHub] = new OAuthProviderToken(
-                Provider: OAuthProvider.GitHub,
-                AuthToken: new AuthToken(token),
-                Scopes: ["user:email"])
+            [OAuthProvider.GitHub] = session
         };
 
-        return Task.FromResult<Dictionary<OAuthProvider, OAuthProviderToken>?>(tokens);
+        return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(sessions);
     }
 
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)

@@ -226,14 +226,12 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         return _managementClient;
     }
 
-    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
-        // Return stored sessions converted to tokens if available
+        // Return stored sessions if available
         if (authSession.OAuthProviderSessions.Count > 0)
         {
-            return authSession.OAuthProviderSessions.ToDictionary(
-                kvp => kvp.Key,
-                kvp => new OAuthProviderToken(kvp.Key, kvp.Value.AuthToken ?? new AuthToken("", null)));
+            return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions);
         }
 
         // Get user ID from the current access token
@@ -256,10 +254,10 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
 
         if (user.Identities == null || !user.Identities.Any())
         {
-            return [];
+            return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
         }
 
-        var tokens = new Dictionary<OAuthProvider, OAuthProviderToken>();
+        var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
 
         foreach (var identity in user.Identities)
         {
@@ -285,11 +283,12 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
                 continue; // Skip unsupported providers
             }
 
-            tokens[provider.Value] = new OAuthProviderToken(
-                Provider: provider.Value,
-                AuthToken: new AuthToken(identity.AccessToken));
+            // Create and store the session so future refreshes keep it updated
+            var session = new AuthTokenHandlerSession(new AuthToken(identity.AccessToken), null);
+            authSession.AddOAuthProviderSession(provider.Value, session);
+            sessions[provider.Value] = session;
         }
 
-        return tokens;
+        return sessions;
     }
 }

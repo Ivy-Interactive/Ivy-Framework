@@ -124,14 +124,12 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
     [Obsolete("Microsoft Entra OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public MicrosoftEntraAuthProvider UseMicrosoftEntra() => this;
 
-    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
-        // Return stored sessions converted to tokens if available
+        // Return stored sessions if available
         if (authSession.OAuthProviderSessions.Count > 0)
         {
-            return authSession.OAuthProviderSessions.ToDictionary(
-                kvp => kvp.Key,
-                kvp => new OAuthProviderToken(kvp.Key, kvp.Value.AuthToken ?? new AuthToken("", null)));
+            return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions);
         }
 
         if (authSession.AuthToken is not { } token)
@@ -161,16 +159,16 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
                 return null;
             }
 
-            var tokens = new Dictionary<OAuthProvider, OAuthProviderToken>
+            // Create and store the session so future refreshes keep it updated
+            var session = new AuthTokenHandlerSession(new AuthToken(result.AccessToken), null);
+            authSession.AddOAuthProviderSession(OAuthProvider.Microsoft, session);
+
+            var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>
             {
-                [OAuthProvider.Microsoft] = new OAuthProviderToken(
-                    Provider: OAuthProvider.Microsoft,
-                    AuthToken: new AuthToken(result.AccessToken),
-                    Scopes: result.Scopes?.ToArray(),
-                    ExpiresAt: result.ExpiresOn)
+                [OAuthProvider.Microsoft] = session
             };
 
-            return tokens;
+            return sessions;
         }
         catch (Exception)
         {

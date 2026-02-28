@@ -223,15 +223,15 @@ Once configured, you can access OAuth provider tokens in your Ivy application:
 ```csharp
 var authService = UseService<IAuthProviderService>();
 
-// Get all OAuth provider tokens
-var tokens = await authService.GetOAuthProviderTokensAsync();
+// Get all OAuth provider sessions
+var sessions = await authService.GetOAuthProviderSessionsAsync();
 
-if (tokens?.TryGetValue(OAuthProvider.Google, out var googleToken) == true)
+if (sessions?.TryGetValue(OAuthProvider.Google, out var googleSession) == true)
 {
     // Use the Google OAuth token to call Google APIs
     using var httpClient = new HttpClient();
     httpClient.DefaultRequestHeaders.Authorization =
-        new AuthenticationHeaderValue("Bearer", googleToken.AccessToken);
+        new AuthenticationHeaderValue("Bearer", googleSession.AuthToken?.AccessToken);
 
     var response = await httpClient.GetAsync("https://www.googleapis.com/drive/v3/files");
     // Process response...
@@ -245,7 +245,7 @@ if (tokens?.TryGetValue(OAuthProvider.Google, out var googleToken) == true)
 - `OAuthProvider.Apple` - Apple
 - `OAuthProvider.Microsoft` - Microsoft
 
-> **Note:** If Management API access is not configured, `GetOAuthProviderTokensAsync()` will throw an exception.
+> **Note:** If Management API access is not configured, `GetOAuthProviderSessionsAsync()` will throw an exception.
 
 ## Adding Authentication
 

@@ -311,14 +311,12 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     }
 
 
-    public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
-        // Return stored sessions converted to tokens if available
+        // Return stored sessions if available
         if (authSession.OAuthProviderSessions.Count > 0)
         {
-            return authSession.OAuthProviderSessions.ToDictionary(
-                kvp => kvp.Key,
-                kvp => new OAuthProviderToken(kvp.Key, kvp.Value.AuthToken ?? new AuthToken("", null)));
+            return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions);
         }
 
         try
@@ -340,10 +338,10 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
             if (user?.ExternalAccounts == null || user.ExternalAccounts.Count == 0)
             {
-                return [];
+                return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
             }
 
-            var tokens = new Dictionary<OAuthProvider, OAuthProviderToken>();
+            var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
 
             // Fetch OAuth tokens for each external account
             foreach (var externalAccount in user.ExternalAccounts)
@@ -378,15 +376,10 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
                     if (tokenResponse != null)
                     {
-                        tokens[provider.Value] = new OAuthProviderToken(
-                            Provider: provider.Value,
-                            AuthToken: new AuthToken(tokenResponse.Token),
-                            Scopes: tokenResponse.Scopes,
-                            ExpiresAt: tokenResponse.ExpiresAt.HasValue
-                                ? DateTimeOffset.FromUnixTimeMilliseconds(tokenResponse.ExpiresAt.Value)
-                                : null,
-                            PublicMetadata: tokenResponse.PublicMetadata,
-                            Label: tokenResponse.Label);
+                        // Create and store the session so future refreshes keep it updated
+                        var session = new AuthTokenHandlerSession(new AuthToken(tokenResponse.Token), null);
+                        authSession.AddOAuthProviderSession(provider.Value, session);
+                        sessions[provider.Value] = session;
                     }
                 }
                 catch (Exception)
@@ -396,7 +389,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                 }
             }
 
-            return tokens;
+            return sessions;
         }
         catch (Exception)
         {

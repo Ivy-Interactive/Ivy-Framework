@@ -17,8 +17,11 @@ public class MainApp : ViewBase
             var info = await auth.GetUserInfoAsync();
             userInfo.Set(info);
 
-            // Get OAuth provider tokens
-            var tokens = await auth.GetOAuthProviderTokensAsync();
+            // Get OAuth provider sessions and convert to tokens for display
+            var sessions = await auth.GetOAuthProviderSessionsAsync();
+            var tokens = sessions?.ToDictionary(
+                kvp => kvp.Key,
+                kvp => new OAuthProviderToken(kvp.Key, kvp.Value.AuthToken ?? new AuthToken("", null)));
             oauthTokens.Set(tokens);
         });
 
