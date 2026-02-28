@@ -338,7 +338,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       {/* MCP results: right-side panel (right of TOC); hide TOC when not enough space. Uses Ivy Resizable. */}
       {hasResults && (
         <div
-          className="fixed top-0 right-0 bottom-0 z-30 flex flex-col border-l border-border bg-background shadow-lg"
+          className="fixed top-0 right-0 bottom-0 z-30 flex flex-col bg-background shadow-lg"
           style={{
             width: `${panelContainerWidth}px`,
             minWidth: `${MIN_PANEL_WIDTH_REM}rem`,
@@ -356,7 +356,10 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
               minSize={0}
               maxSize={100}
             />
-            <ResizableHandle withHandle className="bg-transparent!" />
+            <ResizableHandle
+              withHandle
+              className="w-1 shrink-0 bg-transparent hover:bg-transparent cursor-col-resize"
+            />
             <ResizablePanel
               defaultSize={mcpPanelDefaultSizePct}
               minSize={mcpPanelMinSizePct}
