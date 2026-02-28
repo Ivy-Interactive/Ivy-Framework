@@ -99,6 +99,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           type={showPassword ? 'text' : 'password'}
           disabled={props.disabled}
           maxLength={props.maxLength}
+          minLength={props.minLength}
           onChange={handleChange}
           onBlur={onBlur}
           onFocus={onFocus}

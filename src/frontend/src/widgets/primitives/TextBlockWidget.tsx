@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/tooltip';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Scales } from '@/types/scale';
+import { TextAlignment } from '@/types/textAlignment';
 
 type TextBlockVariant =
   | 'Literal'
@@ -45,6 +46,7 @@ interface TextBlockWidgetProps {
   italic?: boolean;
   muted?: boolean;
   scale?: Scales;
+  textAlignment?: TextAlignment;
 }
 
 interface VariantMap {
@@ -205,6 +207,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   italic,
   muted,
   scale,
+  textAlignment,
 }) => {
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -212,6 +215,10 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
     ...getOverflow(overflow),
     wordBreak: 'normal',
     overflowWrap: 'break-word',
+    ...(textAlignment && {
+      textAlign:
+        textAlignment.toLowerCase() as React.CSSProperties['textAlign'],
+    }),
   };
 
   const scaleClasses: Record<string, string> = {

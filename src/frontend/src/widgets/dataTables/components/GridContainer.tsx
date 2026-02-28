@@ -63,6 +63,8 @@ interface GridContainerProps {
   hoverRow: number | undefined;
   onRowActionClick: (action: MenuItem) => void;
   footer?: React.ReactNode;
+  height?: number;
+  hasEmptyRows?: boolean;
 }
 
 /**
@@ -106,13 +108,19 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   hoverRow,
   onRowActionClick,
   footer,
+  height,
+  hasEmptyRows = false,
 }) => {
   const containerStyle = hasOptions
     ? tableStyles.tableEditor.gridContainerWithOptions
     : tableStyles.tableEditor.gridContainer;
 
   return (
-    <div ref={containerRef} style={{ ...containerStyle, position: 'relative' }}>
+    <div
+      ref={containerRef}
+      style={{ ...containerStyle, position: 'relative' }}
+      data-has-empty-rows={hasEmptyRows || undefined}
+    >
       <DataEditor
         ref={gridRef}
         columns={columns}
@@ -137,6 +145,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({
         gridSelection={gridSelection}
         onGridSelectionChange={onGridSelectionChange}
         width={width}
+        height={height}
         rowMarkers={rowMarkers}
         onColumnMoved={onColumnMoved}
         groupHeaderHeight={groupHeaderHeight}
