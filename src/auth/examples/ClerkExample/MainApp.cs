@@ -10,7 +10,7 @@ public class MainApp : ViewBase
     {
         var auth = UseService<IAuthProviderService>();
         var userInfo = UseState<UserInfo?>();
-        var oauthSessions = UseState<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>();
+        var oauthSessions = UseState<Dictionary<string, IAuthTokenHandlerSession>?>();
 
         UseEffect(async () =>
         {

@@ -3,7 +3,7 @@ namespace Ivy;
 
 public interface IOAuthTokenService : IAuthTokenHandlerService
 {
-    OAuthProvider Provider { get; }
+    string Provider { get; }
 
     bool HasToken();
 

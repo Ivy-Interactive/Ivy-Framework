@@ -102,7 +102,7 @@ public static class CookieRegistryExtensions
         }
     }
 
-    public static void AddCookiesForOAuthProviderSessions(this CookieJar cookies, IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> oauthProviderSessions)
+    public static void AddCookiesForOAuthProviderSessions(this CookieJar cookies, IReadOnlyDictionary<string, IAuthTokenHandlerSession> oauthProviderSessions)
     {
         var cookieOptions = CreateAuthCookieOptions();
 
@@ -150,7 +150,17 @@ public static class CookieRegistryExtensions
     {
         var cookieOptions = CreateAuthCookieOptions();
 
-        foreach (OAuthProvider provider in Enum.GetValues<OAuthProvider>())
+        // Delete cookies for all well-known OAuth providers
+        var wellKnownProviders = new[]
+        {
+            OAuthProviders.Google, OAuthProviders.GitHub, OAuthProviders.Microsoft,
+            OAuthProviders.Apple, OAuthProviders.Twitter, OAuthProviders.Discord,
+            OAuthProviders.Twitch, OAuthProviders.Figma, OAuthProviders.Notion,
+            OAuthProviders.Azure, OAuthProviders.WorkOS, OAuthProviders.GitLab,
+            OAuthProviders.Bitbucket
+        };
+
+        foreach (var provider in wellKnownProviders)
         {
             var prefix = provider.GetPrefix();
             var accessTokenName = $"{prefix}_access_token";

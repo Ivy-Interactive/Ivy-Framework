@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace Ivy.Auth.Discord;
 
 /// <summary>Discord OAuth token handler</summary>
-[OAuthTokenHandler(OAuthProvider.Discord)]
+[OAuthTokenHandler(OAuthProviders.Discord)]
 public class DiscordAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

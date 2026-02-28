@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Ivy.Auth.MicrosoftEntra;
 
-[OAuthTokenHandler(OAuthProvider.Microsoft)]
+[OAuthTokenHandler(OAuthProviders.Microsoft)]
 public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly string TenantId;

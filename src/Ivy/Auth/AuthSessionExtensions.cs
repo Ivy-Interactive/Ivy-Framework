@@ -16,7 +16,7 @@ public static class AuthSessionExtensions
         => new()
         {
             AuthToken = authSession.AuthToken,
-            OAuthProviderSessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions),
+            OAuthProviderSessions = new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions),
             AuthSessionData = authSession.AuthSessionData,
         };
 
@@ -26,8 +26,8 @@ public static class AuthSessionExtensions
            !OAuthProviderSessionsEqual(authSession.OAuthProviderSessions, snapshot.OAuthProviderSessions);
 
     private static bool OAuthProviderSessionsEqual(
-        IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> current,
-        IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> snapshot)
+        IReadOnlyDictionary<string, IAuthTokenHandlerSession> current,
+        IReadOnlyDictionary<string, IAuthTokenHandlerSession> snapshot)
     {
         if (current.Count != snapshot.Count) return false;
 

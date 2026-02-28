@@ -5,12 +5,12 @@ namespace Ivy;
 
 public class OAuthProviderSessionsResult
 {
-    public Dictionary<OAuthProvider, IAuthTokenHandlerSession>? Sessions { get; init; }
+    public Dictionary<string, IAuthTokenHandlerSession>? Sessions { get; init; }
     public bool CanRetry { get; init; }
 
     private OAuthProviderSessionsResult() { }
 
-    public static OAuthProviderSessionsResult Success(Dictionary<OAuthProvider, IAuthTokenHandlerSession> sessions)
+    public static OAuthProviderSessionsResult Success(Dictionary<string, IAuthTokenHandlerSession> sessions)
     {
         return new OAuthProviderSessionsResult
         {

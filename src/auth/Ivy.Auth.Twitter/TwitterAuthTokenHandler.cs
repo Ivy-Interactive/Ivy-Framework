@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace Ivy.Auth.Twitter;
 
 /// <summary>Twitter OAuth token handler</summary>
-[OAuthTokenHandler(OAuthProvider.Twitter)]
+[OAuthTokenHandler(OAuthProviders.Twitter)]
 public class TwitterAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

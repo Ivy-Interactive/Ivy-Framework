@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace Ivy.Auth.Google;
 
 /// <summary>Google OAuth token handler</summary>
-[OAuthTokenHandler(OAuthProvider.Google)]
+[OAuthTokenHandler(OAuthProviders.Google)]
 public class GoogleAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

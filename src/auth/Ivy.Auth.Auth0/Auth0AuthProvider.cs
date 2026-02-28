@@ -232,7 +232,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
             return OAuthProviderSessionsResult.Success(
-                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
         }
 
         // Get user ID from the current access token
@@ -255,10 +255,10 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
 
         if (user.Identities == null || !user.Identities.Any())
         {
-            return OAuthProviderSessionsResult.Success(new Dictionary<OAuthProvider, IAuthTokenHandlerSession>());
+            return OAuthProviderSessionsResult.Success(new Dictionary<string, IAuthTokenHandlerSession>());
         }
 
-        var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
+        var sessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
         foreach (var identity in user.Identities)
         {
@@ -269,13 +269,13 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
                 continue;
             }
 
-            OAuthProvider? provider = identity.Provider.ToLowerInvariant() switch
+            string? provider = identity.Provider.ToLowerInvariant() switch
             {
-                "google-oauth2" => OAuthProvider.Google,
-                "github" => OAuthProvider.GitHub,
-                "windowslive" => OAuthProvider.Microsoft,
-                "apple" => OAuthProvider.Apple,
-                "twitter" => OAuthProvider.Twitter,
+                "google-oauth2" => OAuthProviders.Google,
+                "github" => OAuthProviders.GitHub,
+                "windowslive" => OAuthProviders.Microsoft,
+                "apple" => OAuthProviders.Apple,
+                "twitter" => OAuthProviders.Twitter,
                 _ => null
             };
 
@@ -286,7 +286,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
 
             // Create the session
             var session = new AuthTokenHandlerSession(new AuthToken(identity.AccessToken), null);
-            sessions[provider.Value] = session;
+            sessions[provider] = session;
         }
 
         return OAuthProviderSessionsResult.Success(sessions);

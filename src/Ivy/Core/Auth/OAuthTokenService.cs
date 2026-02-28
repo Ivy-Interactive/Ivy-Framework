@@ -6,7 +6,7 @@ namespace Ivy.Core.Auth;
 
 public class OAuthTokenService : IOAuthTokenService
 {
-    private readonly OAuthProvider _provider;
+    private readonly string _provider;
     private readonly IAuthTokenHandler _handler;
     private readonly IAuthTokenHandlerSession _session;
     private readonly IAuthProviderSession _parentSession;
@@ -14,10 +14,10 @@ public class OAuthTokenService : IOAuthTokenService
     private readonly AppSessionStore _sessionStore;
     private readonly ILogger<OAuthTokenService> _logger;
 
-    public OAuthProvider Provider => _provider;
+    public string Provider => _provider;
 
     public OAuthTokenService(
-        OAuthProvider provider,
+        string provider,
         IAuthTokenHandler handler,
         IAuthTokenHandlerSession session,
         IAuthProviderSession parentSession,

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 namespace Ivy.Auth.GitHub;
 
 /// <summary>GitHub auth token handler</summary>
-[OAuthTokenHandler(OAuthProvider.GitHub)]
+[OAuthTokenHandler(OAuthProviders.GitHub)]
 public class GitHubAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

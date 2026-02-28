@@ -130,7 +130,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
         if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
             return OAuthProviderSessionsResult.Success(
-                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
         }
 
         if (authSession.AuthToken is not { } token)
@@ -163,9 +163,9 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
             // Create the session
             var session = new AuthTokenHandlerSession(new AuthToken(result.AccessToken), null);
 
-            var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>
+            var sessions = new Dictionary<string, IAuthTokenHandlerSession>
             {
-                [OAuthProvider.Microsoft] = session
+                [OAuthProviders.Microsoft] = session
             };
 
             return OAuthProviderSessionsResult.Success(sessions);

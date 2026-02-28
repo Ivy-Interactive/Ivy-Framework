@@ -317,7 +317,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
             return OAuthProviderSessionsResult.Success(
-                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
         }
 
         try
@@ -339,10 +339,10 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
             if (user?.ExternalAccounts == null || user.ExternalAccounts.Count == 0)
             {
-                return OAuthProviderSessionsResult.Success(new Dictionary<OAuthProvider, IAuthTokenHandlerSession>());
+                return OAuthProviderSessionsResult.Success(new Dictionary<string, IAuthTokenHandlerSession>());
             }
 
-            var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
+            var sessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
             // Fetch OAuth tokens for each external account
             foreach (var externalAccount in user.ExternalAccounts)
@@ -357,12 +357,12 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                     // Clerk uses format like "oauth_google", "oauth_github", etc.
                     var provider = providerForApi.Replace("oauth_", "").ToLowerInvariant() switch
                     {
-                        "google" => OAuthProvider.Google,
-                        "github" => OAuthProvider.GitHub,
-                        "microsoft" => OAuthProvider.Microsoft,
-                        "apple" => OAuthProvider.Apple,
-                        "twitter" => OAuthProvider.Twitter,
-                        _ => (OAuthProvider?)null
+                        "google" => OAuthProviders.Google,
+                        "github" => OAuthProviders.GitHub,
+                        "microsoft" => OAuthProviders.Microsoft,
+                        "apple" => OAuthProviders.Apple,
+                        "twitter" => OAuthProviders.Twitter,
+                        _ => (string?)null
                     };
 
                     if (provider == null)
@@ -379,7 +379,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                     {
                         // Create the session
                         var session = new AuthTokenHandlerSession(new AuthToken(tokenResponse.Token), null);
-                        sessions[provider.Value] = session;
+                        sessions[provider] = session;
                     }
                 }
                 catch (Exception)

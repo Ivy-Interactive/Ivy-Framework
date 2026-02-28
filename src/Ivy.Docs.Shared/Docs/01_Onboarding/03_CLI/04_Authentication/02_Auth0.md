@@ -226,7 +226,7 @@ var authService = UseService<IAuthProviderService>();
 // Get all OAuth provider sessions
 var result = await authService.GetOAuthProviderSessionsAsync();
 
-if (result.Sessions?.TryGetValue(OAuthProvider.Google, out var googleSession) == true)
+if (result.Sessions?.TryGetValue(OAuthProviders.Google, out var googleSession) == true)
 {
     // Use the Google OAuth token to call Google APIs
     using var httpClient = new HttpClient();
@@ -239,11 +239,11 @@ if (result.Sessions?.TryGetValue(OAuthProvider.Google, out var googleSession) ==
 ```
 
 **Available OAuth Providers:**
-- `OAuthProvider.Google` - Google
-- `OAuthProvider.GitHub` - GitHub
-- `OAuthProvider.Twitter` - Twitter
-- `OAuthProvider.Apple` - Apple
-- `OAuthProvider.Microsoft` - Microsoft
+- `OAuthProviders.Google` - Google
+- `OAuthProviders.GitHub` - GitHub
+- `OAuthProviders.Twitter` - Twitter
+- `OAuthProviders.Apple` - Apple
+- `OAuthProviders.Microsoft` - Microsoft
 
 > **Note:** If Management API access is not configured, `GetOAuthProviderSessionsAsync()` will throw an exception.
 

@@ -5,7 +5,7 @@ namespace Ivy.Core.Auth;
 
 public class OAuthTokenHandlerRegistry : IOAuthTokenHandlerRegistry
 {
-    private readonly Dictionary<OAuthProvider, IAuthTokenHandler> _handlers = new();
+    private readonly Dictionary<string, IAuthTokenHandler> _handlers = new();
     private readonly ILogger<OAuthTokenHandlerRegistry>? _logger;
 
     public OAuthTokenHandlerRegistry(ILogger<OAuthTokenHandlerRegistry>? logger = null)
@@ -116,12 +116,12 @@ public class OAuthTokenHandlerRegistry : IOAuthTokenHandlerRegistry
             _handlers.Count, string.Join(", ", _handlers.Keys));
     }
 
-    public void Register(OAuthProvider provider, IAuthTokenHandler handler)
+    public void Register(string provider, IAuthTokenHandler handler)
     {
         _handlers[provider] = handler;
     }
 
-    public IAuthTokenHandler? GetHandler(OAuthProvider provider)
+    public IAuthTokenHandler? GetHandler(string provider)
     {
         return _handlers.TryGetValue(provider, out var handler) ? handler : null;
     }

@@ -279,7 +279,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
             return;
         }
 
-        OAuthProvider? oauthProvider = null;
+        string? oauthProvider = null;
 
         foreach (var identity in session.User.Identities)
         {
@@ -290,29 +290,29 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
 
             oauthProvider = identity.Provider?.ToLowerInvariant() switch
             {
-                "google" => OAuthProvider.Google,
-                "github" => OAuthProvider.GitHub,
-                "apple" => OAuthProvider.Apple,
-                "microsoft" => OAuthProvider.Microsoft,
-                "twitter" => OAuthProvider.Twitter,
-                "discord" => OAuthProvider.Discord,
-                "twitch" => OAuthProvider.Twitch,
-                "figma" => OAuthProvider.Figma,
-                "notion" => OAuthProvider.Notion,
-                "azure" => OAuthProvider.Azure,
-                "workos" => OAuthProvider.WorkOS,
-                "gitlab" => OAuthProvider.GitLab,
-                "bitbucket" => OAuthProvider.Bitbucket,
+                "google" => OAuthProviders.Google,
+                "github" => OAuthProviders.GitHub,
+                "apple" => OAuthProviders.Apple,
+                "microsoft" => OAuthProviders.Microsoft,
+                "twitter" => OAuthProviders.Twitter,
+                "discord" => OAuthProviders.Discord,
+                "twitch" => OAuthProviders.Twitch,
+                "figma" => OAuthProviders.Figma,
+                "notion" => OAuthProviders.Notion,
+                "azure" => OAuthProviders.Azure,
+                "workos" => OAuthProviders.WorkOS,
+                "gitlab" => OAuthProviders.GitLab,
+                "bitbucket" => OAuthProviders.Bitbucket,
                 _ => null
             };
 
-            if (oauthProvider.HasValue)
+            if (oauthProvider != null)
             {
                 break;
             }
         }
 
-        if (!oauthProvider.HasValue)
+        if (oauthProvider == null)
         {
             return;
         }
@@ -322,7 +322,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
             session.ProviderRefreshToken);
 
         var providerSession = new AuthTokenHandlerSession(providerAuthToken, null);
-        authSession.AddOAuthProviderSession(oauthProvider.Value, providerSession);
+        authSession.AddOAuthProviderSession(oauthProvider, providerSession);
     }
 
     public Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
@@ -331,7 +331,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
         if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
             return Task.FromResult(OAuthProviderSessionsResult.Success(
-                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions)));
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions)));
         }
 
         // Supabase does not provide a way to get the provider tokens outside of the initial authentication flow, so we rely on storing them when we first receive them.

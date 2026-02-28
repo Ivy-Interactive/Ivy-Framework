@@ -139,7 +139,7 @@ public static class AuthHelper
         }
     }
 
-    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthSessions) GetAuthCookies(HttpContext context)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<string, IAuthTokenHandlerSession> OAuthSessions) GetAuthCookies(HttpContext context)
     {
         var cookies = context.Request.Cookies;
         var accessToken = cookies["access_token"].NullIfEmpty();
@@ -152,12 +152,12 @@ public static class AuthHelper
         return (accessToken, refreshToken, tag, authSessionDataValue, oauthSessions);
     }
 
-    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthSessions) GetAuthCookies(ServerCallContext context)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<string, IAuthTokenHandlerSession> OAuthSessions) GetAuthCookies(ServerCallContext context)
     {
         var cookies = context.RequestHeaders.GetValue("cookie") ?? string.Empty;
         if (string.IsNullOrEmpty(cookies))
         {
-            return (null, null, null, null, new Dictionary<OAuthProvider, IAuthTokenHandlerSession>());
+            return (null, null, null, null, new Dictionary<string, IAuthTokenHandlerSession>());
         }
 
         var cookieHeader = CookieHeaderValue.ParseList([cookies]).ToList();
@@ -181,7 +181,7 @@ public static class AuthHelper
         return (accessToken, refreshToken, tag, authSessionDataValue, oauthSessions);
     }
 
-    private static AuthProviderSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<OAuthProvider, IAuthTokenHandlerSession> oauthSessions, HttpMessageHandler httpMessageHandler)
+    private static AuthProviderSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> oauthSessions, HttpMessageHandler httpMessageHandler)
     {
         if (accessToken == null)
         {
@@ -212,11 +212,11 @@ public static class AuthHelper
         }
     }
 
-    private static Dictionary<OAuthProvider, IAuthTokenHandlerSession> ExtractOAuthProviderSessionsFromCookies(IRequestCookieCollection cookies)
+    private static Dictionary<string, IAuthTokenHandlerSession> ExtractOAuthProviderSessionsFromCookies(IRequestCookieCollection cookies)
     {
-        var oauthSessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
+        var oauthSessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
-        foreach (OAuthProvider provider in Enum.GetValues<OAuthProvider>())
+        foreach (var provider in OAuthProviders.All)
         {
             var prefix = provider.GetPrefix();
             var accessTokenName = $"{prefix}_access_token";
@@ -253,9 +253,9 @@ public static class AuthHelper
         return oauthSessions;
     }
 
-    private static Dictionary<OAuthProvider, IAuthTokenHandlerSession> ExtractOAuthProviderSessionsFromCookieHeader(List<CookieHeaderValue> cookieHeader)
+    private static Dictionary<string, IAuthTokenHandlerSession> ExtractOAuthProviderSessionsFromCookieHeader(List<CookieHeaderValue> cookieHeader)
     {
-        var oauthSessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
+        var oauthSessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
         string? GetCookie(string name)
         {
@@ -266,7 +266,7 @@ public static class AuthHelper
                 : null;
         }
 
-        foreach (OAuthProvider provider in Enum.GetValues<OAuthProvider>())
+        foreach (var provider in OAuthProviders.All)
         {
             var prefix = provider.GetPrefix();
             var accessTokenName = $"{prefix}_access_token";
@@ -303,24 +303,8 @@ public static class AuthHelper
         return oauthSessions;
     }
 
-    public static string GetPrefix(this OAuthProvider provider)
+    public static string GetPrefix(this string provider)
     {
-        return provider switch
-        {
-            OAuthProvider.Google => "go",
-            OAuthProvider.GitHub => "gh",
-            OAuthProvider.Microsoft => "ms",
-            OAuthProvider.Apple => "ap",
-            OAuthProvider.Twitter => "tw",
-            OAuthProvider.Discord => "dc",
-            OAuthProvider.Twitch => "tc",
-            OAuthProvider.Figma => "fg",
-            OAuthProvider.Notion => "nt",
-            OAuthProvider.Azure => "az",
-            OAuthProvider.WorkOS => "wo",
-            OAuthProvider.GitLab => "gl",
-            OAuthProvider.Bitbucket => "bb",
-            _ => provider.ToString().ToLowerInvariant().Substring(0, Math.Min(2, provider.ToString().Length))
-        };
+        return provider.Length >= 2 ? provider.Substring(0, 2) : provider;
     }
 }

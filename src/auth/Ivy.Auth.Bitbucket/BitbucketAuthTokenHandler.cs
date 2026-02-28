@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace Ivy.Auth.Bitbucket;
 
 /// <summary>Bitbucket OAuth token handler</summary>
-[OAuthTokenHandler(OAuthProvider.Bitbucket)]
+[OAuthTokenHandler(OAuthProviders.Bitbucket)]
 public class BitbucketAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

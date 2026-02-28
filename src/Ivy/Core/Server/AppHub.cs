@@ -24,10 +24,10 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    private readonly ConcurrentDictionary<string, Action<OAuthProvider>> _oauthTokenAddedHandlers = new();
-    private readonly ConcurrentDictionary<string, Action<OAuthProvider>> _oauthTokenRemovedHandlers = new();
-    private readonly ConcurrentDictionary<string, HashSet<OAuthProvider>> _activeOAuthRefreshLoops = new();
-    private readonly ConcurrentDictionary<string, ConcurrentDictionary<OAuthProvider, CancellationTokenSource>> _oauthRefreshCancellations = new();
+    private readonly ConcurrentDictionary<string, Action<string>> _oauthTokenAddedHandlers = new();
+    private readonly ConcurrentDictionary<string, Action<string>> _oauthTokenRemovedHandlers = new();
+    private readonly ConcurrentDictionary<string, HashSet<string>> _activeOAuthRefreshLoops = new();
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>> _oauthRefreshCancellations = new();
 
     private AppContext GetAppArgs(string connectionId, string machineId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
     {
@@ -263,10 +263,10 @@ public class AppHub(
                     var oauthProviders = authSession.OAuthProviderSessions.Keys.ToList();
 
                     // Track active OAuth refresh loops and their cancellation tokens for this connection
-                    var activeProviders = _activeOAuthRefreshLoops.GetOrAdd(connectionId, _ => new HashSet<OAuthProvider>());
-                    var cancellations = _oauthRefreshCancellations.GetOrAdd(connectionId, _ => new ConcurrentDictionary<OAuthProvider, CancellationTokenSource>());
+                    var activeProviders = _activeOAuthRefreshLoops.GetOrAdd(connectionId, _ => new HashSet<string>());
+                    var cancellations = _oauthRefreshCancellations.GetOrAdd(connectionId, _ => new ConcurrentDictionary<string, CancellationTokenSource>());
 
-                    void AddProvider(OAuthProvider provider)
+                    void AddProvider(string provider)
                     {
                         lock (activeProviders)
                         {
@@ -285,7 +285,7 @@ public class AppHub(
                     }
 
                     // Subscribe to new OAuth provider sessions being added
-                    Action<OAuthProvider> addedHandler = provider =>
+                    Action<string> addedHandler = provider =>
                     {
                         // Check if connection is still active
                         if (!sessionStore.Sessions.ContainsKey(connectionId))
@@ -297,7 +297,7 @@ public class AppHub(
                     };
 
                     // Subscribe to OAuth provider sessions being removed
-                    Action<OAuthProvider> removedHandler = provider =>
+                    Action<string> removedHandler = provider =>
                     {
                         logger.LogInformation("Cancelling OAuth token refresh loop for removed provider {Provider} on connection {ConnectionId}", provider, connectionId);
 
@@ -605,7 +605,7 @@ public class AppHub(
         await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
     }
 
-    private async Task OAuthTokenRefreshLoopAsync(string connectionId, OAuthProvider provider, CancellationToken cancellationToken)
+    private async Task OAuthTokenRefreshLoopAsync(string connectionId, string provider, CancellationToken cancellationToken)
     {
         try
         {

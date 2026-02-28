@@ -1,7 +1,7 @@
 namespace Ivy.Auth.WorkOS;
 
 /// <summary>WorkOS OAuth token handler</summary>
-[OAuthTokenHandler(OAuthProvider.WorkOS)]
+[OAuthTokenHandler(OAuthProviders.WorkOS)]
 public class WorkOSAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

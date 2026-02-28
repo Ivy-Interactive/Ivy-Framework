@@ -10,7 +10,7 @@ namespace Ivy;
 public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, IOAuthTokenHandlerRegistry? oauthRegistry = null) : IAuthProviderService
 {
     // Hold removed OAuth provider sessions so they can be updated in place and restored later
-    private readonly Dictionary<OAuthProvider, IAuthTokenHandlerSession> _removedOAuthSessions = new();
+    private readonly Dictionary<string, IAuthTokenHandlerSession> _removedOAuthSessions = new();
 
     public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {

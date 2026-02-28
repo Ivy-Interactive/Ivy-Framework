@@ -3,25 +3,25 @@ namespace Ivy;
 
 public interface IAuthProviderSession : IAuthTokenHandlerSession
 {
-    public IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthProviderSessions { get; }
+    public IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthProviderSessions { get; }
     public HttpMessageHandler HttpMessageHandler { get; set; }
 
-    public void AddOAuthProviderSession(OAuthProvider provider, IAuthTokenHandlerSession session);
-    public void RemoveOAuthProviderSession(OAuthProvider provider);
+    public void AddOAuthProviderSession(string provider, IAuthTokenHandlerSession session);
+    public void RemoveOAuthProviderSession(string provider);
     public void ClearOAuthProviderSessions();
 
-    public event Action<OAuthProvider>? OAuthProviderSessionAdded;
-    public event Action<OAuthProvider>? OAuthProviderSessionRemoved;
+    public event Action<string>? OAuthProviderSessionAdded;
+    public event Action<string>? OAuthProviderSessionRemoved;
 }
 
 public class AuthProviderSession : AuthTokenHandlerSession, IAuthProviderSession
 {
-    private readonly Dictionary<OAuthProvider, IAuthTokenHandlerSession> _oauthProviderSessions;
+    private readonly Dictionary<string, IAuthTokenHandlerSession> _oauthProviderSessions;
 
     public AuthProviderSession(
         HttpMessageHandler httpMessageHandler,
         AuthToken? authToken = null,
-        Dictionary<OAuthProvider, IAuthTokenHandlerSession>? oauthProviderSessions = null,
+        Dictionary<string, IAuthTokenHandlerSession>? oauthProviderSessions = null,
         string? authSessionData = null)
         : base(authToken, authSessionData)
     {
@@ -29,13 +29,13 @@ public class AuthProviderSession : AuthTokenHandlerSession, IAuthProviderSession
         _oauthProviderSessions = oauthProviderSessions ?? [];
     }
 
-    public IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthProviderSessions => _oauthProviderSessions;
+    public IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthProviderSessions => _oauthProviderSessions;
     public HttpMessageHandler HttpMessageHandler { get; set; }
 
-    public event Action<OAuthProvider>? OAuthProviderSessionAdded;
-    public event Action<OAuthProvider>? OAuthProviderSessionRemoved;
+    public event Action<string>? OAuthProviderSessionAdded;
+    public event Action<string>? OAuthProviderSessionRemoved;
 
-    public void AddOAuthProviderSession(OAuthProvider provider, IAuthTokenHandlerSession session)
+    public void AddOAuthProviderSession(string provider, IAuthTokenHandlerSession session)
     {
         var isNew = !_oauthProviderSessions.ContainsKey(provider);
         _oauthProviderSessions[provider] = session;
@@ -45,7 +45,7 @@ public class AuthProviderSession : AuthTokenHandlerSession, IAuthProviderSession
         }
     }
 
-    public void RemoveOAuthProviderSession(OAuthProvider provider)
+    public void RemoveOAuthProviderSession(string provider)
     {
         if (_oauthProviderSessions.Remove(provider))
         {
@@ -67,6 +67,6 @@ public class AuthProviderSession : AuthTokenHandlerSession, IAuthProviderSession
 public readonly struct AuthProviderSessionSnapshot
 {
     public readonly AuthToken? AuthToken { get; init; }
-    public readonly IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthProviderSessions { get; init; }
+    public readonly IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthProviderSessions { get; init; }
     public readonly string? AuthSessionData { get; init; }
 }

@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace Ivy.Auth.Twitch;
 
 /// <summary>Twitch OAuth token handler</summary>
-[OAuthTokenHandler(OAuthProvider.Twitch)]
+[OAuthTokenHandler(OAuthProviders.Twitch)]
 public class TwitchAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;

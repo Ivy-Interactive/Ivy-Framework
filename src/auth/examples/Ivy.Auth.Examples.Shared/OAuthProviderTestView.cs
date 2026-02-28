@@ -8,10 +8,10 @@ namespace Ivy.Auth.Examples.Shared;
 /// </summary>
 public class OAuthProviderTestView : ViewBase
 {
-    private readonly OAuthProvider _provider;
+    private readonly string _provider;
     private readonly IAuthTokenHandlerSession _session;
 
-    public OAuthProviderTestView(OAuthProvider provider, IAuthTokenHandlerSession session)
+    public OAuthProviderTestView(string provider, IAuthTokenHandlerSession session)
     {
         _provider = provider;
         _session = session;
@@ -21,19 +21,19 @@ public class OAuthProviderTestView : ViewBase
     {
         return _provider switch
         {
-            OAuthProvider.Google => new GoogleOAuthTestView(_session),
-            OAuthProvider.GitHub => new GitHubOAuthTestView(_session),
-            OAuthProvider.Microsoft => new MicrosoftGraphOAuthTestView(_session),
-            OAuthProvider.Apple => UnsupportedProviderView("Apple"),
-            OAuthProvider.Twitter => UnsupportedProviderView("Twitter"),
-            OAuthProvider.Discord => UnsupportedProviderView("Discord"),
-            OAuthProvider.Twitch => UnsupportedProviderView("Twitch"),
-            OAuthProvider.Figma => UnsupportedProviderView("Figma"),
-            OAuthProvider.Notion => UnsupportedProviderView("Notion"),
-            OAuthProvider.Azure => UnsupportedProviderView("Azure"),
-            OAuthProvider.WorkOS => UnsupportedProviderView("WorkOS"),
-            OAuthProvider.GitLab => UnsupportedProviderView("GitLab"),
-            OAuthProvider.Bitbucket => UnsupportedProviderView("Bitbucket"),
+            OAuthProviders.Google => new GoogleOAuthTestView(_session),
+            OAuthProviders.GitHub => new GitHubOAuthTestView(_session),
+            OAuthProviders.Microsoft => new MicrosoftGraphOAuthTestView(_session),
+            OAuthProviders.Apple => UnsupportedProviderView("Apple"),
+            OAuthProviders.Twitter => UnsupportedProviderView("Twitter"),
+            OAuthProviders.Discord => UnsupportedProviderView("Discord"),
+            OAuthProviders.Twitch => UnsupportedProviderView("Twitch"),
+            OAuthProviders.Figma => UnsupportedProviderView("Figma"),
+            OAuthProviders.Notion => UnsupportedProviderView("Notion"),
+            OAuthProviders.Azure => UnsupportedProviderView("Azure"),
+            OAuthProviders.WorkOS => UnsupportedProviderView("WorkOS"),
+            OAuthProviders.GitLab => UnsupportedProviderView("GitLab"),
+            OAuthProviders.Bitbucket => UnsupportedProviderView("Bitbucket"),
             _ => UnsupportedProviderView(_provider.ToString())
         };
     }

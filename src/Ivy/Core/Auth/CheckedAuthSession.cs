@@ -90,7 +90,7 @@ public readonly struct CheckedAuthSession(IAuthProviderSession innerAuthSession,
         }
     }
 
-    public readonly IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthProviderSessions
+    public readonly IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthProviderSessions
     {
         get
         {
@@ -99,13 +99,13 @@ public readonly struct CheckedAuthSession(IAuthProviderSession innerAuthSession,
         }
     }
 
-    public readonly void AddOAuthProviderSession(OAuthProvider provider, IAuthTokenHandlerSession session)
+    public readonly void AddOAuthProviderSession(string provider, IAuthTokenHandlerSession session)
     {
         CheckWrite(AuthSessionProperty.OAuthProviderSessions);
         _innerAuthSession.AddOAuthProviderSession(provider, session);
     }
 
-    public readonly void RemoveOAuthProviderSession(OAuthProvider provider)
+    public readonly void RemoveOAuthProviderSession(string provider)
     {
         CheckWrite(AuthSessionProperty.OAuthProviderSessions);
         _innerAuthSession.RemoveOAuthProviderSession(provider);
@@ -123,13 +123,13 @@ public readonly struct CheckedAuthSession(IAuthProviderSession innerAuthSession,
         set => _innerAuthSession.HttpMessageHandler = value;
     }
 
-    public event Action<OAuthProvider>? OAuthProviderSessionAdded
+    public event Action<string>? OAuthProviderSessionAdded
     {
         add => _innerAuthSession.OAuthProviderSessionAdded += value;
         remove => _innerAuthSession.OAuthProviderSessionAdded -= value;
     }
 
-    public event Action<OAuthProvider>? OAuthProviderSessionRemoved
+    public event Action<string>? OAuthProviderSessionRemoved
     {
         add => _innerAuthSession.OAuthProviderSessionRemoved += value;
         remove => _innerAuthSession.OAuthProviderSessionRemoved -= value;

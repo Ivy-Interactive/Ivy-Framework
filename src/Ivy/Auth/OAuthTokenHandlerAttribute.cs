@@ -9,15 +9,15 @@ namespace Ivy;
 public class OAuthTokenHandlerAttribute : Attribute
 {
     /// <summary>
-    /// The OAuth provider this handler is for
+    /// The OAuth provider identifier this handler is for
     /// </summary>
-    public OAuthProvider Provider { get; }
+    public string Provider { get; }
 
     /// <summary>
     /// Marks an IAuthTokenHandler implementation for a specific OAuth provider
     /// </summary>
-    /// <param name="provider">The OAuth provider this handler is for</param>
-    public OAuthTokenHandlerAttribute(OAuthProvider provider)
+    /// <param name="provider">The OAuth provider identifier this handler is for</param>
+    public OAuthTokenHandlerAttribute(string provider)
     {
         Provider = provider;
     }

@@ -127,7 +127,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
         if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
             return Task.FromResult(OAuthProviderSessionsResult.Success(
-                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions)));
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions)));
         }
 
         // If no stored sessions, create one from the main auth token (GitHub uses the main token)
@@ -140,9 +140,9 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
         // Create the session
         var session = new AuthTokenHandlerSession(new AuthToken(token), null);
 
-        var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>
+        var sessions = new Dictionary<string, IAuthTokenHandlerSession>
         {
-            [OAuthProvider.GitHub] = session
+            [OAuthProviders.GitHub] = session
         };
 
         return Task.FromResult(OAuthProviderSessionsResult.Success(sessions));

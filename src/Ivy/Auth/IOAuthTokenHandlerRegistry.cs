@@ -3,7 +3,7 @@ namespace Ivy;
 
 public interface IOAuthTokenHandlerRegistry
 {
-    void Register(OAuthProvider provider, IAuthTokenHandler handler);
+    void Register(string provider, IAuthTokenHandler handler);
 
-    IAuthTokenHandler? GetHandler(OAuthProvider provider);
+    IAuthTokenHandler? GetHandler(string provider);
 }
