@@ -536,13 +536,6 @@ public class AppHub(
                                         delay = maxDelay;
                                     }
 
-                                    // Don't wait less than minDelay (for OAuth tokens)
-                                    var minDelay = TimeSpan.FromMinutes(5);
-                                    if (delay < minDelay)
-                                    {
-                                        delay = minDelay;
-                                    }
-
                                     logger.LogInformation("{StrategyName}RefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", strategy.LoggingName, connectionId, DateTimeOffset.UtcNow + delay);
                                     await Task.Delay(delay, cancellationToken);
                                 }
