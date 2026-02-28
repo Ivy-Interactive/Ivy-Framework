@@ -21,10 +21,10 @@ public static class CookieRegistryExtensions
         return null;
     }
 
-    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthProviderSession authSession)
+    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthProviderSession authSession, IEnumerable<string>? providersToDelete = null)
     {
         var cookies = new CookieJar();
-        cookies.AddCookiesForAuthToken(authSession.AuthToken);
+        cookies.AddCookiesForAuthToken(authSession.AuthToken, providersToDelete);
         cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData);
         cookies.AddCookiesForOAuthProviderSessions(authSession.OAuthProviderSessions);
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
@@ -44,7 +44,7 @@ public static class CookieRegistryExtensions
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken)
+    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken, IEnumerable<string>? providersToDelete = null)
     {
         var authTokenName = "access_token";
         var refreshTokenName = "refresh_token";
@@ -56,8 +56,17 @@ public static class CookieRegistryExtensions
             cookies.Delete(refreshTokenName, CreateAuthCookieOptions());
             cookies.Delete(tagName, CreateAuthCookieOptions());
 
-            // Also delete all OAuth provider token cookies when logging out
-            DeleteAllOAuthProviderSessionCookies(cookies);
+            // Delete OAuth provider session cookies
+            if (providersToDelete != null)
+            {
+                var cookieOptions = CreateAuthCookieOptions();
+                foreach (var provider in providersToDelete)
+                {
+                    cookies.Delete($"{provider}_access_token", cookieOptions);
+                    cookies.Delete($"{provider}_refresh_token", cookieOptions);
+                    cookies.Delete($"{provider}_auth_tag", cookieOptions);
+                }
+            }
         }
         else
         {
@@ -108,10 +117,9 @@ public static class CookieRegistryExtensions
 
         foreach (var (provider, session) in oauthProviderSessions)
         {
-            var prefix = provider.GetPrefix();
-            var accessTokenName = $"{prefix}_access_token";
-            var refreshTokenName = $"{prefix}_refresh_token";
-            var tagName = $"{prefix}_auth_tag";
+            var accessTokenName = $"{provider}_access_token";
+            var refreshTokenName = $"{provider}_refresh_token";
+            var tagName = $"{provider}_auth_tag";
 
             // Store access token
             if (!string.IsNullOrEmpty(session.AuthToken?.AccessToken))
@@ -143,33 +151,6 @@ public static class CookieRegistryExtensions
             {
                 cookies.Delete(tagName, CreateAuthCookieOptions());
             }
-        }
-    }
-
-    private static void DeleteAllOAuthProviderSessionCookies(CookieJar cookies)
-    {
-        var cookieOptions = CreateAuthCookieOptions();
-
-        // Delete cookies for all well-known OAuth providers
-        var wellKnownProviders = new[]
-        {
-            OAuthProviders.Google, OAuthProviders.GitHub, OAuthProviders.Microsoft,
-            OAuthProviders.Apple, OAuthProviders.Twitter, OAuthProviders.Discord,
-            OAuthProviders.Twitch, OAuthProviders.Figma, OAuthProviders.Notion,
-            OAuthProviders.Azure, OAuthProviders.WorkOS, OAuthProviders.GitLab,
-            OAuthProviders.Bitbucket
-        };
-
-        foreach (var provider in wellKnownProviders)
-        {
-            var prefix = provider.GetPrefix();
-            var accessTokenName = $"{prefix}_access_token";
-            var refreshTokenName = $"{prefix}_refresh_token";
-            var tagName = $"{prefix}_auth_tag";
-
-            cookies.Delete(accessTokenName, cookieOptions);
-            cookies.Delete(refreshTokenName, cookieOptions);
-            cookies.Delete(tagName, cookieOptions);
         }
     }
 

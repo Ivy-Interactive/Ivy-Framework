@@ -216,12 +216,16 @@ public static class AuthHelper
     {
         var oauthSessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
-        foreach (var provider in OAuthProviders.All)
+        // Discover OAuth provider cookies by scanning for the pattern: {provider}_access_token
+        var accessTokenCookies = cookies.Keys
+            .Where(key => key.EndsWith("_access_token") && key != "access_token")
+            .ToList();
+
+        foreach (var accessTokenName in accessTokenCookies)
         {
-            var prefix = provider.GetPrefix();
-            var accessTokenName = $"{prefix}_access_token";
-            var refreshTokenName = $"{prefix}_refresh_token";
-            var tagName = $"{prefix}_auth_tag";
+            var provider = accessTokenName[..^"_access_token".Length];
+            var refreshTokenName = $"{provider}_refresh_token";
+            var tagName = $"{provider}_auth_tag";
 
             var accessToken = cookies[accessTokenName].NullIfEmpty();
             if (accessToken == null)
@@ -266,12 +270,17 @@ public static class AuthHelper
                 : null;
         }
 
-        foreach (var provider in OAuthProviders.All)
+        // Discover OAuth provider cookies by scanning for the pattern: {provider}_access_token
+        var accessTokenCookies = cookieHeader
+            .Where(c => c.Name.Value != null && c.Name.Value.EndsWith("_access_token") && c.Name.Value != "access_token")
+            .Select(c => c.Name.Value!)
+            .ToList();
+
+        foreach (var accessTokenName in accessTokenCookies)
         {
-            var prefix = provider.GetPrefix();
-            var accessTokenName = $"{prefix}_access_token";
-            var refreshTokenName = $"{prefix}_refresh_token";
-            var tagName = $"{prefix}_auth_tag";
+            var provider = accessTokenName[..^"_access_token".Length];
+            var refreshTokenName = $"{provider}_refresh_token";
+            var tagName = $"{provider}_auth_tag";
 
             var accessToken = GetCookie(accessTokenName);
             if (accessToken == null)
@@ -301,10 +310,5 @@ public static class AuthHelper
         }
 
         return oauthSessions;
-    }
-
-    public static string GetPrefix(this string provider)
-    {
-        return provider.Length >= 2 ? provider.Substring(0, 2) : provider;
     }
 }

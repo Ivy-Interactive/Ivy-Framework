@@ -16,10 +16,4 @@ public static class OAuthProviders
     public const string WorkOS = "workos";
     public const string GitLab = "gitlab";
     public const string Bitbucket = "bitbucket";
-
-    public static readonly string[] All =
-    [
-        Google, GitHub, Microsoft, Apple, Twitter, Discord,
-        Twitch, Figma, Notion, Azure, WorkOS, GitLab, Bitbucket
-    ];
 }

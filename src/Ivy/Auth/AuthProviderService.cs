@@ -68,10 +68,16 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
                 authProvider.LogoutAsync(authSession, ct), cancellationToken);
         }
 
+        // Capture OAuth providers before clearing so we can delete their cookies
+        var providersToDelete = authSession.OAuthProviderSessions.Keys.ToList();
+
         authSession.AuthToken = null;
         authSession.ClearOAuthProviderSessions();
         _removedOAuthSessions.Clear();
-        SetAuthCookies();
+
+        // Pass the captured providers to delete their cookies
+        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession, providersToDelete);
+        client.SetAuthCookies(cookieJarId, reloadPage: true, triggerMachineReload: null);
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken)
