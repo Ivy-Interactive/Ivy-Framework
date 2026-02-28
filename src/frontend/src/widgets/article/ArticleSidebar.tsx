@@ -1,7 +1,9 @@
 import { TableOfContents } from '@/widgets/article/TableOfContents';
 import { GitHubContributors } from '@/widgets/article/GitHubContributors';
 import { DocumentTools } from '@/widgets/article/DocumentTools';
+import { mcpPanelStore } from '@/widgets/primitives/mcpPanelStore';
 import React, { useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 interface ArticleSidebarProps {
   articleRef: React.RefObject<HTMLElement | null>;
@@ -10,6 +12,8 @@ interface ArticleSidebarProps {
   title?: string;
   headings?: { id: string; text: string; level: number }[];
 }
+
+const VIEWPORT_THRESHOLD_HIDE_TOC = 1400;
 
 export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
   articleRef,
@@ -20,12 +24,27 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
 }) => {
   const [tocLoading, setTocLoading] = useState(true);
   const [contributorsLoading, setContributorsLoading] = useState(true);
-  // Only show contributors when TOC is ready too
-  const showContributors = !tocLoading && !contributorsLoading;
-  // Only show sidebar if TOC should be displayed
-  // If headings are provided, we don't need to block on loading state for TOC to check emptiness
-  // But TableOfContents component handles loading state
-  if (!showToc) return null;
+  const [viewportWidth, setViewportWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  );
+  const mcpPanelOpen = useSyncExternalStore(
+    mcpPanelStore.subscribe,
+    mcpPanelStore.getState,
+    mcpPanelStore.getState
+  ).isOpen;
+
+  React.useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const hideTocForMcpPanel =
+    mcpPanelOpen && viewportWidth < VIEWPORT_THRESHOLD_HIDE_TOC;
+  const showSidebar = showToc && !hideTocForMcpPanel;
+  const showContributors = !tocLoading && !contributorsLoading && showSidebar;
+
+  if (!showSidebar) return null;
 
   return (
     <div className="hidden lg:block w-64">
