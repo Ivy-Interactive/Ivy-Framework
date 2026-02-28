@@ -77,6 +77,8 @@ public class OAuthTokenHandlerRegistry : IOAuthTokenHandlerRegistry
                         {
                             // Create an instance with HttpClient
                             var httpClient = new HttpClient();
+                            // Set a default User-Agent header (required by some APIs like GitHub)
+                            httpClient.DefaultRequestHeaders.Add("User-Agent", "Ivy-Framework/1.0");
                             var handler = (IAuthTokenHandler?)Activator.CreateInstance(handlerType, httpClient);
 
                             if (handler != null)
