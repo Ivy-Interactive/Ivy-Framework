@@ -33,17 +33,18 @@ export const useCursorPosition = (
   return { elementRef: elementRefRef, savePosition };
 };
 
-export const useEnterKeyBlur = (): ((
-  e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
-) => void) => {
+export const useEnterKeyBlur = (
+  onSubmit?: () => void
+): ((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void) => {
   return useCallback(
     (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       if (e.key === 'Enter') {
+        onSubmit?.();
         e.currentTarget.blur();
         e.preventDefault();
       }
     },
-    []
+    [onSubmit]
   );
 };
 

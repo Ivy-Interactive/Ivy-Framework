@@ -64,6 +64,8 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
+    [Event] public Func<Event<IAnyInput>, ValueTask>? OnSubmit { get; set; }
+
     public Type[] SupportedStateTypes() => [];
 }
 
@@ -226,4 +228,19 @@ public static class TextInputExtensions
         throw new InvalidOperationException($"Cannot set Value: widget is not TextInput<{typeof(T).Name}>");
     }
 
+    [OverloadResolutionPriority(1)]
+    public static TextInputBase HandleSubmit(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onSubmit)
+    {
+        return widget with { OnSubmit = onSubmit };
+    }
+
+    public static TextInputBase HandleSubmit(this TextInputBase widget, Action<Event<IAnyInput>> onSubmit)
+    {
+        return widget.HandleSubmit(onSubmit.ToValueTask());
+    }
+
+    public static TextInputBase HandleSubmit(this TextInputBase widget, Action onSubmit)
+    {
+        return widget.HandleSubmit(_ => { onSubmit(); return ValueTask.CompletedTask; });
+    }
 }

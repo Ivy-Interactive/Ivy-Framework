@@ -25,6 +25,7 @@ interface SearchVariantProps {
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClear: (e: React.MouseEvent) => void;
+  onSubmit?: () => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
@@ -37,6 +38,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   onBlur,
   onFocus,
   onClear,
+  onSubmit,
   inputRef,
   isFocused,
   scale = Scales.Medium,
@@ -62,6 +64,9 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+      if (e.key === 'Enter') {
+        onSubmit?.();
+      }
       shouldFocusMenuRef.current = true;
       e.currentTarget.blur();
       e.preventDefault();

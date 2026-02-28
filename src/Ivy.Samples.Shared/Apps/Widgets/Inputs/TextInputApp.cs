@@ -105,6 +105,8 @@ public class TextInputApp : SampleBase
                    onBlurState.ToTextInput().OnBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
+               | Text.H3("OnSubmit (press Enter)")
+               | new TextInputSubmitDemo()
                | new Spacer().Height(15)
             ;
     }
@@ -199,5 +201,39 @@ public class TextInputAffixes : ViewBase
                | nullableState.ToTextInput().Prefix("@").Invalid("Required field").ShortcutKey("Ctrl+U")
                | nullableState.ToTextInput().Suffix(Icons.Search).Invalid("Invalid input").ShortcutKey("Ctrl+F")
                | nullableState.ToTextInput().Prefix(Icons.Mail).Suffix(".com").Invalid("Error").ShortcutKey("Ctrl+E");
+    }
+}
+
+public class TextInputSubmitDemo : ViewBase
+{
+    public override object Build()
+    {
+        var searchQuery = UseState("");
+        var searchResult = UseState("");
+        var tag = UseState("");
+        var tags = UseState<List<string>>(new List<string>());
+
+        return Layout.Vertical()
+               | Text.P("Search example (type and press Enter):")
+               | Layout.Horizontal(
+                   searchQuery.ToSearchInput()
+                       .Placeholder("Search...")
+                       .HandleSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}")),
+                   searchResult
+               )
+               | Text.P("Quick-add tags (type and press Enter to add):")
+               | Layout.Horizontal(
+                   tag.ToTextInput()
+                       .Placeholder("Add a tag...")
+                       .HandleSubmit(() =>
+                       {
+                           if (!string.IsNullOrWhiteSpace(tag.Value))
+                           {
+                               tags.Set(new List<string>(tags.Value) { tag.Value });
+                               tag.Set("");
+                           }
+                       }),
+                   Layout.Horizontal().Gap(2) | tags.Value.Select(t => new Badge(t))
+               );
     }
 }
