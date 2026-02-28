@@ -358,7 +358,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
             />
             <ResizableHandle
               withHandle
-              className="w-1 shrink-0 bg-transparent hover:bg-transparent cursor-col-resize"
+              className="w-1 shrink-0 border-l border-border bg-transparent hover:bg-transparent cursor-col-resize"
             />
             <ResizablePanel
               defaultSize={mcpPanelDefaultSizePct}
