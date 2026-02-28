@@ -311,12 +311,13 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     }
 
 
-    public async Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public async Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
-        // Return stored sessions if available
-        if (authSession.OAuthProviderSessions.Count > 0)
+        // Return stored sessions if available and not skipping cache
+        if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
-            return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions);
+            return OAuthProviderSessionsResult.Success(
+                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
         }
 
         try
@@ -324,13 +325,13 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
             // Get user ID from the current session token
             if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) is not var (claims, _))
             {
-                return null;
+                return OAuthProviderSessionsResult.Failure();
             }
 
             var userId = claims.FindFirst("sub")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return null;
+                return OAuthProviderSessionsResult.Failure();
             }
 
             // Get user details to find their external accounts
@@ -338,7 +339,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
             if (user?.ExternalAccounts == null || user.ExternalAccounts.Count == 0)
             {
-                return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
+                return OAuthProviderSessionsResult.Success(new Dictionary<OAuthProvider, IAuthTokenHandlerSession>());
             }
 
             var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
@@ -388,11 +389,11 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                 }
             }
 
-            return sessions;
+            return OAuthProviderSessionsResult.Success(sessions);
         }
         catch (Exception)
         {
-            return null;
+            return OAuthProviderSessionsResult.Failure();
         }
     }
 }

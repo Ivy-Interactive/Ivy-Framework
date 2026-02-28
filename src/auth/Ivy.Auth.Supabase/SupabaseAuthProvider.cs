@@ -325,17 +325,19 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
         authSession.AddOAuthProviderSession(oauthProvider.Value, providerSession);
     }
 
-    public Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
-        // Return stored sessions if available
-        if (authSession.OAuthProviderSessions.Count > 0)
+        // Return stored sessions if available and not skipping cache
+        if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
-            return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(
-                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
+            return Task.FromResult(OAuthProviderSessionsResult.Success(
+                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions)));
         }
 
         // Supabase does not provide a way to get the provider tokens outside of the initial authentication flow, so we rely on storing them when we first receive them.
-        return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(null);
+        // If we're here (either skipCache=true or no cached sessions), there's no way to refetch, so signal that retrying won't help.
+        // This should lead to an immediate logout so that we can hopefully recover a valid session on the next login.
+        return Task.FromResult(OAuthProviderSessionsResult.Failure(canRetry: false));
     }
 
 }

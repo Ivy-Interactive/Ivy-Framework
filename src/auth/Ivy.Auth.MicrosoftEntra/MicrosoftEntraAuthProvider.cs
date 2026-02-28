@@ -124,17 +124,18 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
     [Obsolete("Microsoft Entra OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public MicrosoftEntraAuthProvider UseMicrosoftEntra() => this;
 
-    public async Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public async Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
-        // Return stored sessions if available
-        if (authSession.OAuthProviderSessions.Count > 0)
+        // Return stored sessions if available and not skipping cache
+        if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
-            return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions);
+            return OAuthProviderSessionsResult.Success(
+                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
         }
 
         if (authSession.AuthToken is not { } token)
         {
-            return null;
+            return OAuthProviderSessionsResult.Failure();
         }
 
         try
@@ -147,7 +148,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
                 || accountId.Length <= 0
                 || token.RefreshToken == null)
             {
-                return null;
+                return OAuthProviderSessionsResult.Failure();
             }
 
             // Use refresh token to get a fresh access token for Microsoft Graph
@@ -156,7 +157,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
 
             if (result?.AccessToken == null)
             {
-                return null;
+                return OAuthProviderSessionsResult.Failure();
             }
 
             // Create the session
@@ -167,11 +168,11 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
                 [OAuthProvider.Microsoft] = session
             };
 
-            return sessions;
+            return OAuthProviderSessionsResult.Success(sessions);
         }
         catch (Exception)
         {
-            return null;
+            return OAuthProviderSessionsResult.Failure();
         }
     }
 

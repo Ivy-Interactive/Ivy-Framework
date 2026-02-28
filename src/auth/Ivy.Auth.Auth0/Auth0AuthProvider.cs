@@ -226,24 +226,25 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         return _managementClient;
     }
 
-    public async Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public async Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
-        // Return stored sessions if available
-        if (authSession.OAuthProviderSessions.Count > 0)
+        // Return stored sessions if available and not skipping cache
+        if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
-            return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions);
+            return OAuthProviderSessionsResult.Success(
+                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
         }
 
         // Get user ID from the current access token
         if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
         {
-            return null;
+            return OAuthProviderSessionsResult.Failure();
         }
 
         var userId = claims.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId))
         {
-            return null;
+            return OAuthProviderSessionsResult.Failure();
         }
 
         // Get management API client
@@ -254,7 +255,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
 
         if (user.Identities == null || !user.Identities.Any())
         {
-            return new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
+            return OAuthProviderSessionsResult.Success(new Dictionary<OAuthProvider, IAuthTokenHandlerSession>());
         }
 
         var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>();
@@ -288,6 +289,6 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
             sessions[provider.Value] = session;
         }
 
-        return sessions;
+        return OAuthProviderSessionsResult.Success(sessions);
     }
 }

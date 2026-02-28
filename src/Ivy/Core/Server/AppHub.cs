@@ -648,7 +648,13 @@ public class AppHub(
                 sessionStore,
                 oauthLogger);
 
-            var strategy = new OAuthTokenRefreshStrategy(connectionId, oauthTokenService, handler, logger);
+            var strategy = new OAuthTokenRefreshStrategy(
+                connectionId,
+                oauthTokenService,
+                authService,
+                sessionStore,
+                contentBuilder,
+                logger);
 
             await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
         }

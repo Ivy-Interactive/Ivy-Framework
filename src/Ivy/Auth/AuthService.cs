@@ -138,20 +138,20 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
 
     public IAuthProviderSession GetAuthProviderSession() => authSession;
 
-    public async Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(CancellationToken cancellationToken)
+    public async Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default)
     {
-        var sessions = await TimeoutHelper.WithTimeoutAsync(ct =>
-            authProvider.GetOAuthProviderSessionsAsync(authSession, ct), cancellationToken);
+        var result = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.GetOAuthProviderSessionsAsync(authSession, skipCache, ct), cancellationToken);
 
-        if (sessions == null)
+        if (result.Sessions == null)
         {
-            return null;
+            return result;
         }
 
         // Filter to only include providers that have a registered handler
         var filteredSessions = oauthRegistry != null
-            ? sessions.Where(kvp => oauthRegistry.GetHandler(kvp.Key) != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
-            : sessions;
+            ? result.Sessions.Where(kvp => oauthRegistry.GetHandler(kvp.Key) != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+            : result.Sessions;
 
         // Diff and update authSession.OAuthProviderSessions
         var currentProviders = authSession.OAuthProviderSessions.Keys.ToHashSet();
@@ -168,7 +168,7 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
             authSession.AddOAuthProviderSession(kvp.Key, kvp.Value);
         }
 
-        return filteredSessions;
+        return OAuthProviderSessionsResult.Success(filteredSessions);
     }
 
     public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)

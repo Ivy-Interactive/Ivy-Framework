@@ -224,9 +224,9 @@ Once configured, you can access OAuth provider tokens in your Ivy application:
 var authService = UseService<IAuthProviderService>();
 
 // Get all OAuth provider sessions
-var sessions = await authService.GetOAuthProviderSessionsAsync();
+var result = await authService.GetOAuthProviderSessionsAsync();
 
-if (sessions?.TryGetValue(OAuthProvider.Google, out var googleSession) == true)
+if (result.Sessions?.TryGetValue(OAuthProvider.Google, out var googleSession) == true)
 {
     // Use the Google OAuth token to call Google APIs
     using var httpClient = new HttpClient();

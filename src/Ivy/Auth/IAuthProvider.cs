@@ -35,9 +35,9 @@ public interface IAuthProvider : IAuthTokenHandler
 
     Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default);
 
-    Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(null);
+        return Task.FromResult(OAuthProviderSessionsResult.Failure(canRetry: false));
     }
 
     bool OpenOAuthLoginInNewTab => false;

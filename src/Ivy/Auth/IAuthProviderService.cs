@@ -18,7 +18,7 @@ public interface IAuthProviderService : IAuthTokenHandlerService
 
     IAuthProviderSession GetAuthProviderSession();
 
-    Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(CancellationToken cancellationToken = default);
+    Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default);
 
     internal void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null);
 }

@@ -121,20 +121,20 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     public GitHubAuthProvider UseGitHub() => this;
 
     /// <summary>Get OAuth provider sessions - returns live session references that stay up-to-date</summary>
-    public Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
-        // Return stored sessions if available
-        if (authSession.OAuthProviderSessions.Count > 0)
+        // Return stored sessions if available and not skipping cache
+        if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
         {
-            return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(
-                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
+            return Task.FromResult(OAuthProviderSessionsResult.Success(
+                new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions)));
         }
 
         // If no stored sessions, create one from the main auth token (GitHub uses the main token)
         var token = authSession.AuthToken?.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
         {
-            return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(null);
+            return Task.FromResult(OAuthProviderSessionsResult.Failure());
         }
 
         // Create the session
@@ -145,7 +145,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
             [OAuthProvider.GitHub] = session
         };
 
-        return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(sessions);
+        return Task.FromResult(OAuthProviderSessionsResult.Success(sessions));
     }
 
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)
