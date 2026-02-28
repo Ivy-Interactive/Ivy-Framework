@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Auth.GitHub;
 
@@ -7,17 +8,27 @@ namespace Ivy.Auth.GitHub;
 public class GitHubAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly HttpClient HttpClient;
+    private readonly ILogger<GitHubAuthTokenHandler> _logger;
 
-    /// <summary>Initialize GitHub auth token handler</summary>
+    /// <summary>Initialize GitHub auth token handler (for reflection-based instantiation)</summary>
     public GitHubAuthTokenHandler(HttpClient httpClient)
+        : this(httpClient, null)
     {
-        HttpClient = httpClient;
     }
 
-    /// <summary>No refresh tokens - returns null</summary>
-    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
+    /// <summary>Initialize GitHub auth token handler</summary>
+    public GitHubAuthTokenHandler(HttpClient httpClient, ILogger<GitHubAuthTokenHandler>? logger)
     {
-        return Task.FromResult<AuthToken?>(null);
+        HttpClient = httpClient;
+        _logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<GitHubAuthTokenHandler>.Instance;
+    }
+
+    /// <summary>No refresh tokens - returns existing token if valid</summary>
+    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
+    {
+        // GitHub session tokens cannot be refreshed - validate and return null if invalid
+        var isValid = await ValidateAccessTokenAsync(authSession, cancellationToken);
+        return isValid ? authSession.AuthToken : null;
     }
 
     /// <summary>Validate access token via GitHub API</summary>
@@ -25,7 +36,9 @@ public class GitHubAuthTokenHandler : IAuthTokenHandler
     {
         var token = authSession.AuthToken?.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
+        {
             return false;
+        }
 
         try
         {
@@ -39,6 +52,7 @@ public class GitHubAuthTokenHandler : IAuthTokenHandler
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            _logger.LogError(ex, "Exception during GitHub token validation");
             return false;
         }
     }
