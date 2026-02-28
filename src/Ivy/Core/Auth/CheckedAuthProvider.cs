@@ -13,7 +13,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadWrite)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadWrite)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.InitializeAsync(authSession, requestScheme, requestHost, cancellationToken);
     }
@@ -22,7 +22,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
     {
         authSession = authSession.WithCheckedAccess()
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadWrite)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.LoginAsync(authSession, email, password, cancellationToken);
     }
@@ -37,7 +37,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadWrite)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.LogoutAsync(authSession, cancellationToken);
     }
@@ -52,7 +52,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         var checkedSession = ((IAuthProviderSession)authSession).WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadWrite)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.RefreshAccessTokenAsync(checkedSession, cancellationToken);
     }
@@ -81,7 +81,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         var checkedSession = ((IAuthProviderSession)authSession).WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
-            .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadOnly)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
         return _innerAuthProvider.GetUserInfoAsync(checkedSession, cancellationToken);
     }
@@ -94,7 +94,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadOnly)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
         return _innerAuthProvider.GetOAuthUriAsync(authSession, option, callback, cancellationToken);
     }
@@ -104,7 +104,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadWrite)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.HandleOAuthCallbackAsync(authSession, request, cancellationToken);
     }
@@ -119,7 +119,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         var checkedSession = ((IAuthProviderSession)authSession).WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
-            .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadOnly)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
         return _innerAuthProvider.GetAccessTokenLifetimeAsync(checkedSession, cancellationToken);
     }
@@ -134,7 +134,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
-            .WithOAuthProviderTokensAccess(AuthSessionAccessMode.ReadOnly)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
         return _innerAuthProvider.GetOAuthProviderTokensAsync(authSession, cancellationToken);
     }

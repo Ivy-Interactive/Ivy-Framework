@@ -126,10 +126,12 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
 
     public async Task<Dictionary<OAuthProvider, OAuthProviderToken>?> GetOAuthProviderTokensAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
     {
-        // Return stored tokens if available
-        if (authSession.OAuthProviderTokens.Count > 0)
+        // Return stored sessions converted to tokens if available
+        if (authSession.OAuthProviderSessions.Count > 0)
         {
-            return new Dictionary<OAuthProvider, OAuthProviderToken>(authSession.OAuthProviderTokens);
+            return authSession.OAuthProviderSessions.ToDictionary(
+                kvp => kvp.Key,
+                kvp => new OAuthProviderToken(kvp.Key, kvp.Value.AuthToken ?? new AuthToken("", null)));
         }
 
         if (authSession.AuthToken is not { } token)

@@ -254,12 +254,12 @@ public class AppHub(
             {
                 _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted), connectionAborted);
 
-                // Start a refresh loop for each OAuth provider token in the session
+                // Start a refresh loop for each OAuth provider session
                 var authService = appState.AppServices.GetService<IAuthProviderService>();
                 if (authService != null)
                 {
                     var authSession = authService.GetAuthProviderSession();
-                    var oauthProviders = authSession.OAuthProviderTokens.Keys.ToList();
+                    var oauthProviders = authSession.OAuthProviderSessions.Keys.ToList();
 
                     // Track active OAuth refresh loops and their cancellation tokens for this connection
                     var activeProviders = _activeOAuthRefreshLoops.GetOrAdd(connectionId, _ => new HashSet<OAuthProvider>());
@@ -278,7 +278,7 @@ public class AppHub(
                         }
                     }
 
-                    // Subscribe to new OAuth provider tokens being added
+                    // Subscribe to new OAuth provider sessions being added
                     Action<OAuthProvider> addedHandler = provider =>
                     {
                         // Check if connection is still active
@@ -299,7 +299,7 @@ public class AppHub(
                         }
                     };
 
-                    // Subscribe to OAuth provider tokens being removed
+                    // Subscribe to OAuth provider sessions being removed
                     Action<OAuthProvider> removedHandler = provider =>
                     {
                         logger.LogInformation("Cancelling OAuth token refresh loop for removed provider {Provider} on connection {ConnectionId}", provider, connectionId);
@@ -318,8 +318,8 @@ public class AppHub(
 
                     _oauthTokenAddedHandlers[connectionId] = addedHandler;
                     _oauthTokenRemovedHandlers[connectionId] = removedHandler;
-                    authSession.OAuthProviderTokenAdded += addedHandler;
-                    authSession.OAuthProviderTokenRemoved += removedHandler;
+                    authSession.OAuthProviderSessionAdded += addedHandler;
+                    authSession.OAuthProviderSessionRemoved += removedHandler;
                 }
             }
         }
@@ -359,7 +359,7 @@ public class AppHub(
             // Cancel all pending HTTP tunnel requests for this connection
             HttpTunnelingController.CancelRequestsForConnection(Context.ConnectionId, "SignalR connection closed");
 
-            // Clean up OAuth token event subscriptions
+            // Clean up OAuth session event subscriptions
             if (_oauthTokenAddedHandlers.TryRemove(Context.ConnectionId, out var addedHandler))
             {
                 // Get the auth session and unsubscribe
@@ -369,7 +369,7 @@ public class AppHub(
                     if (authService != null)
                     {
                         var authSession = authService.GetAuthProviderSession();
-                        authSession.OAuthProviderTokenAdded -= addedHandler;
+                        authSession.OAuthProviderSessionAdded -= addedHandler;
                     }
                 }
             }
@@ -383,7 +383,7 @@ public class AppHub(
                     if (authService != null)
                     {
                         var authSession = authService.GetAuthProviderSession();
-                        authSession.OAuthProviderTokenRemoved -= removedHandler;
+                        authSession.OAuthProviderSessionRemoved -= removedHandler;
                     }
                 }
             }
@@ -636,6 +636,14 @@ public class AppHub(
 
             var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
             var authSession = authService.GetAuthProviderSession();
+
+            // Get the provider's session
+            if (!authSession.OAuthProviderSessions.TryGetValue(provider, out var providerSession))
+            {
+                logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No session found for {ConnectionId}, exiting loop.", provider, connectionId);
+                return;
+            }
+
             var client = session.AppServices.GetRequiredService<IClientProvider>();
             var oauthLogger = session.AppServices.GetRequiredService<ILoggerFactory>()
                 .CreateLogger<OAuthTokenService>();
@@ -644,6 +652,7 @@ public class AppHub(
             var oauthTokenService = new OAuthTokenService(
                 provider,
                 handler,
+                providerSession,
                 authSession,
                 client,
                 sessionStore,

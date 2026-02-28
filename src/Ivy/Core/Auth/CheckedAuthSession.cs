@@ -5,7 +5,7 @@ public enum AuthSessionProperty
 {
     AuthToken,
     AuthSessionData,
-    OAuthProviderTokens
+    OAuthProviderSessions
 }
 
 public enum AuthSessionAccessMode
@@ -32,8 +32,8 @@ public class CheckedAuthSessionBuilder(IAuthProviderSession innerAuthSession)
     public CheckedAuthSessionBuilder WithSessionDataAccess(AuthSessionAccessMode accessMode)
         => WithAccessMode(AuthSessionProperty.AuthSessionData, accessMode);
 
-    public CheckedAuthSessionBuilder WithOAuthProviderTokensAccess(AuthSessionAccessMode accessMode)
-        => WithAccessMode(AuthSessionProperty.OAuthProviderTokens, accessMode);
+    public CheckedAuthSessionBuilder WithOAuthProviderSessionsAccess(AuthSessionAccessMode accessMode)
+        => WithAccessMode(AuthSessionProperty.OAuthProviderSessions, accessMode);
 
     public IAuthProviderSession Build()
     {
@@ -90,31 +90,31 @@ public readonly struct CheckedAuthSession(IAuthProviderSession innerAuthSession,
         }
     }
 
-    public readonly IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> OAuthProviderTokens
+    public readonly IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthProviderSessions
     {
         get
         {
-            CheckRead(AuthSessionProperty.OAuthProviderTokens);
-            return _innerAuthSession.OAuthProviderTokens;
+            CheckRead(AuthSessionProperty.OAuthProviderSessions);
+            return _innerAuthSession.OAuthProviderSessions;
         }
     }
 
-    public readonly void AddOAuthProviderToken(OAuthProviderToken token)
+    public readonly void AddOAuthProviderSession(OAuthProvider provider, IAuthTokenHandlerSession session)
     {
-        CheckWrite(AuthSessionProperty.OAuthProviderTokens);
-        _innerAuthSession.AddOAuthProviderToken(token);
+        CheckWrite(AuthSessionProperty.OAuthProviderSessions);
+        _innerAuthSession.AddOAuthProviderSession(provider, session);
     }
 
-    public readonly void RemoveOAuthProviderToken(OAuthProvider provider)
+    public readonly void RemoveOAuthProviderSession(OAuthProvider provider)
     {
-        CheckWrite(AuthSessionProperty.OAuthProviderTokens);
-        _innerAuthSession.RemoveOAuthProviderToken(provider);
+        CheckWrite(AuthSessionProperty.OAuthProviderSessions);
+        _innerAuthSession.RemoveOAuthProviderSession(provider);
     }
 
-    public readonly void ClearOAuthProviderTokens()
+    public readonly void ClearOAuthProviderSessions()
     {
-        CheckWrite(AuthSessionProperty.OAuthProviderTokens);
-        _innerAuthSession.ClearOAuthProviderTokens();
+        CheckWrite(AuthSessionProperty.OAuthProviderSessions);
+        _innerAuthSession.ClearOAuthProviderSessions();
     }
 
     public readonly HttpMessageHandler HttpMessageHandler
@@ -123,16 +123,17 @@ public readonly struct CheckedAuthSession(IAuthProviderSession innerAuthSession,
         set => _innerAuthSession.HttpMessageHandler = value;
     }
 
-    public event Action<OAuthProvider>? OAuthProviderTokenAdded
+    public event Action<OAuthProvider>? OAuthProviderSessionAdded
     {
-        add => _innerAuthSession.OAuthProviderTokenAdded += value;
-        remove => _innerAuthSession.OAuthProviderTokenAdded -= value;
+        add => _innerAuthSession.OAuthProviderSessionAdded += value;
+        remove => _innerAuthSession.OAuthProviderSessionAdded -= value;
     }
 
-    public event Action<OAuthProvider>? OAuthProviderTokenRemoved
+    public event Action<OAuthProvider>? OAuthProviderSessionRemoved
     {
-        add => _innerAuthSession.OAuthProviderTokenRemoved += value;
-        remove => _innerAuthSession.OAuthProviderTokenRemoved -= value;
+        add => _innerAuthSession.OAuthProviderSessionRemoved += value;
+        remove => _innerAuthSession.OAuthProviderSessionRemoved -= value;
     }
+
 }
 #endif

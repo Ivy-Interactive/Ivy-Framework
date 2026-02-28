@@ -183,9 +183,15 @@ public static class AuthHelper
 
     private static AuthProviderSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<OAuthProvider, OAuthProviderToken> oauthTokens, HttpMessageHandler httpMessageHandler)
     {
+        // Convert OAuthProviderToken dictionary to IAuthTokenHandlerSession dictionary
+        var oauthSessions = oauthTokens.ToDictionary(
+            kvp => kvp.Key,
+            kvp => (IAuthTokenHandlerSession)new AuthTokenHandlerSession(kvp.Value.AuthToken, null)
+        );
+
         if (accessToken == null)
         {
-            return new(httpMessageHandler, oauthProviderTokens: oauthTokens, authSessionData: authSessionDataValue);
+            return new(httpMessageHandler, null, oauthSessions, authSessionDataValue);
         }
 
         try
@@ -204,11 +210,11 @@ public static class AuthHelper
             }
 
             var token = new AuthToken(accessToken, refreshToken, tag);
-            return new(httpMessageHandler, token, oauthTokens, authSessionData: authSessionDataValue);
+            return new(httpMessageHandler, token, oauthSessions, authSessionDataValue);
         }
         catch (Exception)
         {
-            return new(httpMessageHandler, oauthProviderTokens: oauthTokens, authSessionData: authSessionDataValue);
+            return new(httpMessageHandler, null, oauthSessions, authSessionDataValue);
         }
     }
 

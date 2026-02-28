@@ -3,52 +3,63 @@ namespace Ivy;
 
 public interface IAuthProviderSession : IAuthTokenHandlerSession
 {
-    public IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> OAuthProviderTokens { get; }
+    public IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthProviderSessions { get; }
     public HttpMessageHandler HttpMessageHandler { get; set; }
 
-    public void AddOAuthProviderToken(OAuthProviderToken token);
-    public void RemoveOAuthProviderToken(OAuthProvider provider);
-    public void ClearOAuthProviderTokens();
+    public void AddOAuthProviderSession(OAuthProvider provider, IAuthTokenHandlerSession session);
+    public void RemoveOAuthProviderSession(OAuthProvider provider);
+    public void ClearOAuthProviderSessions();
 
-    public event Action<OAuthProvider>? OAuthProviderTokenAdded;
-    public event Action<OAuthProvider>? OAuthProviderTokenRemoved;
+    public event Action<OAuthProvider>? OAuthProviderSessionAdded;
+    public event Action<OAuthProvider>? OAuthProviderSessionRemoved;
 }
 
-public class AuthProviderSession(HttpMessageHandler httpMessageHandler, AuthToken? authToken = null, Dictionary<OAuthProvider, OAuthProviderToken>? oauthProviderTokens = null, string? authSessionData = null) : AuthTokenHandlerSession(authToken, authSessionData), IAuthProviderSession
+public class AuthProviderSession : AuthTokenHandlerSession, IAuthProviderSession
 {
-    private readonly Dictionary<OAuthProvider, OAuthProviderToken> _oauthProviderTokens = oauthProviderTokens ?? [];
+    private readonly Dictionary<OAuthProvider, IAuthTokenHandlerSession> _oauthProviderSessions;
 
-    public IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> OAuthProviderTokens { get => _oauthProviderTokens; }
-    public HttpMessageHandler HttpMessageHandler { get; set; } = httpMessageHandler;
-
-    public event Action<OAuthProvider>? OAuthProviderTokenAdded;
-    public event Action<OAuthProvider>? OAuthProviderTokenRemoved;
-
-    public void AddOAuthProviderToken(OAuthProviderToken token)
+    public AuthProviderSession(
+        HttpMessageHandler httpMessageHandler,
+        AuthToken? authToken = null,
+        Dictionary<OAuthProvider, IAuthTokenHandlerSession>? oauthProviderSessions = null,
+        string? authSessionData = null)
+        : base(authToken, authSessionData)
     {
-        var isNew = !_oauthProviderTokens.ContainsKey(token.Provider);
-        _oauthProviderTokens[token.Provider] = token;
+        HttpMessageHandler = httpMessageHandler;
+        _oauthProviderSessions = oauthProviderSessions ?? [];
+    }
+
+    public IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthProviderSessions => _oauthProviderSessions;
+    public HttpMessageHandler HttpMessageHandler { get; set; }
+
+    public event Action<OAuthProvider>? OAuthProviderSessionAdded;
+    public event Action<OAuthProvider>? OAuthProviderSessionRemoved;
+
+    public void AddOAuthProviderSession(OAuthProvider provider, IAuthTokenHandlerSession session)
+    {
+        var isNew = !_oauthProviderSessions.ContainsKey(provider);
+        _oauthProviderSessions[provider] = session;
         if (isNew)
         {
-            OAuthProviderTokenAdded?.Invoke(token.Provider);
+            OAuthProviderSessionAdded?.Invoke(provider);
         }
     }
 
-    public void RemoveOAuthProviderToken(OAuthProvider provider)
+    public void RemoveOAuthProviderSession(OAuthProvider provider)
     {
-        if (_oauthProviderTokens.Remove(provider))
+        if (_oauthProviderSessions.Remove(provider))
         {
-            OAuthProviderTokenRemoved?.Invoke(provider);
+            OAuthProviderSessionRemoved?.Invoke(provider);
         }
     }
 
-    public void ClearOAuthProviderTokens()
+    public void ClearOAuthProviderSessions()
     {
-        var providers = _oauthProviderTokens.Keys.ToList();
-        _oauthProviderTokens.Clear();
+        var providers = _oauthProviderSessions.Keys.ToList();
+        _oauthProviderSessions.Clear();
         foreach (var provider in providers)
         {
-            OAuthProviderTokenRemoved?.Invoke(provider);
+            OAuthProviderSessionRemoved?.Invoke(provider);
         }
     }
 }
@@ -56,6 +67,6 @@ public class AuthProviderSession(HttpMessageHandler httpMessageHandler, AuthToke
 public readonly struct AuthProviderSessionSnapshot
 {
     public readonly AuthToken? AuthToken { get; init; }
-    public readonly IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> OAuthProviderTokens { get; init; }
+    public readonly IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> OAuthProviderSessions { get; init; }
     public readonly string? AuthSessionData { get; init; }
 }

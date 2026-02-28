@@ -26,7 +26,7 @@ public static class CookieRegistryExtensions
         var cookies = new CookieJar();
         cookies.AddCookiesForAuthToken(authSession.AuthToken);
         cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData);
-        cookies.AddCookiesForOAuthProviderTokens(authSession.OAuthProviderTokens);
+        cookies.AddCookiesForOAuthProviderSessions(authSession.OAuthProviderSessions);
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
@@ -102,14 +102,11 @@ public static class CookieRegistryExtensions
         }
     }
 
-    public static void AddCookiesForOAuthProviderTokens(this CookieJar cookies, IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> oauthProviderTokens)
+    public static void AddCookiesForOAuthProviderSessions(this CookieJar cookies, IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> oauthProviderSessions)
     {
-        // Clear any existing OAuth provider token cookies that are no longer present
-        // We'll handle this by setting cookies for all current providers and deleting old ones on read
-
         var cookieOptions = CreateAuthCookieOptions();
 
-        foreach (var (provider, token) in oauthProviderTokens)
+        foreach (var (provider, session) in oauthProviderSessions)
         {
             var prefix = provider.GetPrefix();
             var accessTokenName = $"{prefix}_access_token";
@@ -117,9 +114,9 @@ public static class CookieRegistryExtensions
             var tagName = $"{prefix}_auth_tag";
 
             // Store access token
-            if (!string.IsNullOrEmpty(token.AuthToken.AccessToken))
+            if (!string.IsNullOrEmpty(session.AuthToken?.AccessToken))
             {
-                cookies.Append(accessTokenName, token.AuthToken.AccessToken, cookieOptions);
+                cookies.Append(accessTokenName, session.AuthToken.AccessToken, cookieOptions);
             }
             else
             {
@@ -127,9 +124,9 @@ public static class CookieRegistryExtensions
             }
 
             // Store refresh token if present
-            if (!string.IsNullOrEmpty(token.AuthToken.RefreshToken))
+            if (!string.IsNullOrEmpty(session.AuthToken?.RefreshToken))
             {
-                cookies.Append(refreshTokenName, token.AuthToken.RefreshToken, cookieOptions);
+                cookies.Append(refreshTokenName, session.AuthToken.RefreshToken, cookieOptions);
             }
             else
             {
@@ -137,9 +134,9 @@ public static class CookieRegistryExtensions
             }
 
             // Store tag if present
-            if (token.AuthToken.Tag != null)
+            if (session.AuthToken?.Tag != null)
             {
-                var tagJson = JsonSerializer.Serialize(token.AuthToken.Tag, JsonHelper.DefaultOptions);
+                var tagJson = JsonSerializer.Serialize(session.AuthToken.Tag, JsonHelper.DefaultOptions);
                 cookies.Append(tagName, tagJson, cookieOptions);
             }
             else

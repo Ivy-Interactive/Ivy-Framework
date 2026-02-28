@@ -16,24 +16,31 @@ public static class AuthSessionExtensions
         => new()
         {
             AuthToken = authSession.AuthToken,
-            OAuthProviderTokens = new Dictionary<OAuthProvider, OAuthProviderToken>(authSession.OAuthProviderTokens),
+            OAuthProviderSessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions),
             AuthSessionData = authSession.AuthSessionData,
         };
 
     public static bool HasChangedSince(this IAuthProviderSession authSession, AuthProviderSessionSnapshot snapshot)
         => authSession.AuthToken != snapshot.AuthToken ||
            authSession.AuthSessionData != snapshot.AuthSessionData ||
-           !OAuthProviderTokensEqual(authSession.OAuthProviderTokens, snapshot.OAuthProviderTokens);
+           !OAuthProviderSessionsEqual(authSession.OAuthProviderSessions, snapshot.OAuthProviderSessions);
 
-    private static bool OAuthProviderTokensEqual(
-        IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> current,
-        IReadOnlyDictionary<OAuthProvider, OAuthProviderToken> snapshot)
+    private static bool OAuthProviderSessionsEqual(
+        IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> current,
+        IReadOnlyDictionary<OAuthProvider, IAuthTokenHandlerSession> snapshot)
     {
         if (current.Count != snapshot.Count) return false;
 
         foreach (var kvp in current)
         {
-            if (!snapshot.TryGetValue(kvp.Key, out var snapshotValue) || kvp.Value != snapshotValue)
+            if (!snapshot.TryGetValue(kvp.Key, out var snapshotSession))
+            {
+                return false;
+            }
+
+            // Compare the sessions by their auth tokens
+            if (kvp.Value.AuthToken != snapshotSession.AuthToken ||
+                kvp.Value.AuthSessionData != snapshotSession.AuthSessionData)
             {
                 return false;
             }

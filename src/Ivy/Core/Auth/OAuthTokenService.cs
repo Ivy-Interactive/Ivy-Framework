@@ -8,7 +8,8 @@ public class OAuthTokenService : IOAuthTokenService
 {
     private readonly OAuthProvider _provider;
     private readonly IAuthTokenHandler _handler;
-    private readonly IAuthProviderSession _authSession;
+    private readonly IAuthTokenHandlerSession _session;
+    private readonly IAuthProviderSession _parentSession;
     private readonly IClientProvider _client;
     private readonly AppSessionStore _sessionStore;
     private readonly ILogger<OAuthTokenService> _logger;
@@ -18,14 +19,16 @@ public class OAuthTokenService : IOAuthTokenService
     public OAuthTokenService(
         OAuthProvider provider,
         IAuthTokenHandler handler,
-        IAuthProviderSession authSession,
+        IAuthTokenHandlerSession session,
+        IAuthProviderSession parentSession,
         IClientProvider client,
         AppSessionStore sessionStore,
         ILogger<OAuthTokenService> logger)
     {
         _provider = provider;
         _handler = handler;
-        _authSession = authSession;
+        _session = session;
+        _parentSession = parentSession;
         _client = client;
         _sessionStore = sessionStore;
         _logger = logger;
@@ -33,25 +36,15 @@ public class OAuthTokenService : IOAuthTokenService
 
     public bool HasToken()
     {
-        return _authSession.OAuthProviderTokens.ContainsKey(_provider);
+        return _session.AuthToken != null;
     }
 
     public async Task<bool> ValidateAccessTokenAsync(CancellationToken cancellationToken = default)
     {
-        if (!_authSession.OAuthProviderTokens.TryGetValue(_provider, out var currentToken))
-        {
-            return false;
-        }
-
-        // Create a temporary auth token handler session for this OAuth token
-        var tempAuthSession = new AuthTokenHandlerSession(
-            currentToken.AuthToken,
-            _authSession.AuthSessionData);
-
         try
         {
             return await TimeoutHelper.WithTimeoutAsync(
-                ct => _handler.ValidateAccessTokenAsync(tempAuthSession, ct),
+                ct => _handler.ValidateAccessTokenAsync(_session, ct),
                 cancellationToken);
         }
         catch (Exception ex)
@@ -63,20 +56,10 @@ public class OAuthTokenService : IOAuthTokenService
 
     public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(CancellationToken cancellationToken = default)
     {
-        if (!_authSession.OAuthProviderTokens.TryGetValue(_provider, out var currentToken))
-        {
-            return null;
-        }
-
-        // Create a temporary auth token handler session for this OAuth token
-        var tempAuthSession = new AuthTokenHandlerSession(
-            currentToken.AuthToken,
-            _authSession.AuthSessionData);
-
         try
         {
             return await TimeoutHelper.WithTimeoutAsync(
-                ct => _handler.GetAccessTokenLifetimeAsync(tempAuthSession, ct),
+                ct => _handler.GetAccessTokenLifetimeAsync(_session, ct),
                 cancellationToken);
         }
         catch (Exception ex)
@@ -88,37 +71,23 @@ public class OAuthTokenService : IOAuthTokenService
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken = default)
     {
-        if (!_authSession.OAuthProviderTokens.TryGetValue(_provider, out var currentToken))
-        {
-            _logger.LogDebug("No token found for OAuth provider {Provider}", _provider);
-            return null;
-        }
-
-        // Create a temporary auth token handler session for this OAuth token
-        var tempAuthSession = new AuthTokenHandlerSession(
-            currentToken.AuthToken,
-            _authSession.AuthSessionData);
-
         try
         {
             _logger.LogInformation("Attempting to refresh OAuth token for {Provider}", _provider);
 
             var newToken = await TimeoutHelper.WithTimeoutAsync(
-                ct => _handler.RefreshAccessTokenAsync(tempAuthSession, ct),
+                ct => _handler.RefreshAccessTokenAsync(_session, ct),
                 cancellationToken);
 
             if (newToken != null)
             {
                 _logger.LogInformation("Successfully refreshed OAuth token for {Provider}", _provider);
 
-                // Update the provider token with the new auth token
-                var updatedProviderToken = currentToken with { AuthToken = newToken };
-
-                // Update the session
-                _authSession.AddOAuthProviderToken(updatedProviderToken);
+                // Update the session's auth token directly
+                _session.AuthToken = newToken;
 
                 // Update cookies (don't reload page for OAuth token refreshes)
-                var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession);
+                var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession);
                 _client.SetAuthCookies(cookieJarId, reloadPage: false, triggerMachineReload: null);
 
                 return newToken;
@@ -138,20 +107,10 @@ public class OAuthTokenService : IOAuthTokenService
 
     public async Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken = default)
     {
-        if (!_authSession.OAuthProviderTokens.TryGetValue(_provider, out var currentToken))
-        {
-            return null;
-        }
-
-        // Create a temporary auth token handler session for this OAuth token
-        var tempAuthSession = new AuthTokenHandlerSession(
-            currentToken.AuthToken,
-            _authSession.AuthSessionData);
-
         try
         {
             return await TimeoutHelper.WithTimeoutAsync(
-                ct => _handler.GetUserInfoAsync(tempAuthSession, ct),
+                ct => _handler.GetUserInfoAsync(_session, ct),
                 cancellationToken);
         }
         catch (Exception ex)
@@ -163,46 +122,38 @@ public class OAuthTokenService : IOAuthTokenService
 
     public AuthToken? GetCurrentToken()
     {
-        if (_authSession.OAuthProviderTokens.TryGetValue(_provider, out var currentToken))
-        {
-            return currentToken.AuthToken;
-        }
-        return null;
+        return _session.AuthToken;
     }
 
-    public string? GetCurrentSessionData() => _authSession.AuthSessionData;
+    public string? GetCurrentSessionData()
+    {
+        return _session.AuthSessionData;
+    }
 
     public IAuthTokenHandlerSession GetAuthTokenHandlerSession()
     {
-        if (_authSession.OAuthProviderTokens.TryGetValue(_provider, out var currentToken))
-        {
-            return new AuthTokenHandlerSession(currentToken.AuthToken, _authSession.AuthSessionData);
-        }
-        return new AuthTokenHandlerSession(null, _authSession.AuthSessionData);
+        return _session;
     }
 
     public void SetAuthTokenCookies(bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        if (_authSession.OAuthProviderTokens.TryGetValue(_provider, out var currentToken))
-        {
-            var cookieJarId = _sessionStore.RegisterAuthTokenCookies(currentToken.AuthToken);
-            _client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
-        }
+        var cookieJarId = _sessionStore.RegisterAuthTokenCookies(_session.AuthToken);
+        _client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 
     public void SetAuthSessionDataCookies(bool reloadPage = false, bool? triggerMachineReload = null)
     {
-        var cookieJarId = _sessionStore.RegisterAuthSessionDataCookies(_authSession.AuthSessionData);
+        var cookieJarId = _sessionStore.RegisterAuthSessionDataCookies(_session.AuthSessionData);
         _client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 
     public void RemoveToken()
     {
         _logger.LogInformation("Removing OAuth token for {Provider}", _provider);
-        _authSession.RemoveOAuthProviderToken(_provider);
+        _parentSession.RemoveOAuthProviderSession(_provider);
 
         // Update cookies to reflect removal (don't reload page)
-        var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession);
+        var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession);
         _client.SetAuthCookies(cookieJarId, reloadPage: false, triggerMachineReload: null);
     }
 }
