@@ -137,9 +137,8 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
             return Task.FromResult<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?>(null);
         }
 
-        // Create and store the session so future refreshes keep it updated
+        // Create the session
         var session = new AuthTokenHandlerSession(new AuthToken(token), null);
-        authSession.AddOAuthProviderSession(OAuthProvider.GitHub, session);
 
         var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>
         {

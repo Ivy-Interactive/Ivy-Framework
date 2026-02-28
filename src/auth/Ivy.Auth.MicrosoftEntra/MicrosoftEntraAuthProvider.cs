@@ -159,9 +159,8 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
                 return null;
             }
 
-            // Create and store the session so future refreshes keep it updated
+            // Create the session
             var session = new AuthTokenHandlerSession(new AuthToken(result.AccessToken), null);
-            authSession.AddOAuthProviderSession(OAuthProvider.Microsoft, session);
 
             var sessions = new Dictionary<OAuthProvider, IAuthTokenHandlerSession>
             {

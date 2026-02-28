@@ -283,9 +283,8 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
                 continue; // Skip unsupported providers
             }
 
-            // Create and store the session so future refreshes keep it updated
+            // Create the session
             var session = new AuthTokenHandlerSession(new AuthToken(identity.AccessToken), null);
-            authSession.AddOAuthProviderSession(provider.Value, session);
             sessions[provider.Value] = session;
         }
 

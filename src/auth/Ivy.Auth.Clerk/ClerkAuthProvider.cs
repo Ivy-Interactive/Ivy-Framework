@@ -376,9 +376,8 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
                     if (tokenResponse != null)
                     {
-                        // Create and store the session so future refreshes keep it updated
+                        // Create the session
                         var session = new AuthTokenHandlerSession(new AuthToken(tokenResponse.Token), null);
-                        authSession.AddOAuthProviderSession(provider.Value, session);
                         sessions[provider.Value] = session;
                     }
                 }

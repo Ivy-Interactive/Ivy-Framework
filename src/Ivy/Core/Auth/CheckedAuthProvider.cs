@@ -134,7 +134,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
-            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
+            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
         return _innerAuthProvider.GetOAuthProviderSessionsAsync(authSession, cancellationToken);
     }
