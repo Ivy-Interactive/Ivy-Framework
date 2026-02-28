@@ -172,6 +172,7 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
         }
 
         // Add or update sessions
+        bool hasChanges = false;
         foreach (var kvp in filteredSessions)
         {
             // Check if session exists in active sessions
@@ -188,12 +189,19 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
                 removedSession.AuthToken = kvp.Value.AuthToken;
                 removedSession.AuthSessionData = kvp.Value.AuthSessionData;
                 authSession.AddOAuthProviderSession(kvp.Key, removedSession);
+                hasChanges = true;
             }
             else
             {
                 // New session, add it
                 authSession.AddOAuthProviderSession(kvp.Key, kvp.Value);
+                hasChanges = true;
             }
+        }
+
+        if (hasChanges || currentProviders.Count != newProviders.Count)
+        {
+            SetAuthCookies(reloadPage: false);
         }
 
         return OAuthProviderSessionsResult.Success(filteredSessions);
