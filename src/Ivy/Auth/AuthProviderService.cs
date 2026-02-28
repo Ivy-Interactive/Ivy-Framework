@@ -3,11 +3,12 @@ using Ivy.Core.Auth;
 using Ivy.Core.Helpers;
 using Ivy.Core.Server;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 // Resharper disable once CheckNamespace
 namespace Ivy;
 
-public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, IOAuthTokenHandlerRegistry? oauthRegistry = null) : IAuthProviderService
+public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, IServiceProvider? serviceProvider = null) : IAuthProviderService
 {
     // Hold removed OAuth provider sessions so they can be updated in place and restored later
     private readonly Dictionary<string, IAuthTokenHandlerSession> _removedOAuthSessions = new();
@@ -153,8 +154,8 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
         }
 
         // Filter to only include providers that have a registered handler
-        var filteredSessions = oauthRegistry != null
-            ? result.Sessions.Where(kvp => oauthRegistry.GetHandler(kvp.Key) != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+        var filteredSessions = serviceProvider != null
+            ? result.Sessions.Where(kvp => serviceProvider.GetKeyedService<IAuthTokenHandler>(kvp.Key) != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
             : result.Sessions;
 
         // Diff and update authSession.OAuthProviderSessions

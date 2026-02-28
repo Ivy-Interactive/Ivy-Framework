@@ -230,7 +230,7 @@ public class Server
             return provider;
         });
 
-        Services.AddSingleton<IOAuthTokenHandlerRegistry, OAuthTokenHandlerRegistry>();
+        DiscoverAndRegisterOAuthTokenHandlers();
 
         AddApp(new AppDescriptor
         {
@@ -242,6 +242,96 @@ public class Server
         });
         AuthProviderType = typeof(T);
         return this;
+    }
+
+    private void DiscoverAndRegisterOAuthTokenHandlers()
+    {
+        try
+        {
+            // Load all "Ivy.Auth.*" assemblies eagerly to ensure their handlers are registered in the DI container
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly?.Location != null)
+            {
+                var assemblyDirectory = Path.GetDirectoryName(entryAssembly.Location);
+                if (assemblyDirectory != null)
+                {
+                    var authAssemblyFiles = Directory.GetFiles(assemblyDirectory, "Ivy.Auth.*.dll");
+
+                    foreach (var assemblyFile in authAssemblyFiles)
+                    {
+                        try
+                        {
+                            Assembly.LoadFrom(assemblyFile);
+                        }
+                        catch
+                        {
+                            // Continue if we can't load an assembly
+                        }
+                    }
+                }
+            }
+
+            // Now get all loaded assemblies
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
+            {
+                try
+                {
+                    // Skip system assemblies for performance
+                    var assemblyName = assembly.GetName().Name ?? "";
+                    if (assemblyName.StartsWith("System.") ||
+                        assemblyName.StartsWith("Microsoft.") ||
+                        assemblyName == "netstandard" ||
+                        assemblyName == "mscorlib")
+                    {
+                        continue;
+                    }
+
+                    // Find all types with OAuthTokenHandlerAttribute
+                    var handlerTypes = assembly.GetTypes()
+                        .Where(t => t.IsClass && !t.IsAbstract && typeof(IAuthTokenHandler).IsAssignableFrom(t))
+                        .Where(t => t.GetCustomAttribute<OAuthTokenHandlerAttribute>() != null)
+                        .ToList();
+
+                    foreach (var handlerType in handlerTypes)
+                    {
+                        var attribute = handlerType.GetCustomAttribute<OAuthTokenHandlerAttribute>();
+                        if (attribute == null)
+                            continue;
+
+                        try
+                        {
+                            // Create an instance with HttpClient
+                            var httpClient = new HttpClient();
+                            // Set a default User-Agent header (required by some APIs like GitHub)
+                            httpClient.DefaultRequestHeaders.Add("User-Agent", "Ivy-Framework/1.0");
+                            var handler = (IAuthTokenHandler?)Activator.CreateInstance(handlerType, httpClient);
+
+                            if (handler != null)
+                            {
+                                Services.AddKeyedSingleton<IAuthTokenHandler>(attribute.Provider, handler);
+                            }
+                        }
+                        catch
+                        {
+                            // Continue if we can't instantiate a handler
+                        }
+                    }
+                }
+                catch (ReflectionTypeLoadException)
+                {
+                    // Continue if we can't load types from an assembly
+                }
+                catch
+                {
+                    // Continue on any other error
+                }
+            }
+        }
+        catch
+        {
+            // Continue if discovery completely fails, just continue with no handlers
+        }
     }
 
     public Server UseDefaultApp(Type appType)

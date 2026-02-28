@@ -86,8 +86,7 @@ public class AppHub(
 #endif
 
                 var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
-                var oauthRegistry = server.ServiceProvider!.GetService<IOAuthTokenHandlerRegistry>();
-                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore, oauthRegistry);
+                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore, server.ServiceProvider);
 
                 var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
@@ -610,14 +609,7 @@ public class AppHub(
         try
         {
             var session = sessionStore.Sessions[connectionId];
-            var registry = session.AppServices.GetService<IOAuthTokenHandlerRegistry>();
-            if (registry == null)
-            {
-                logger.LogError("OAuthTokenRefreshLoop[{Provider}]: No OAuth token handler registry for {ConnectionId}, exiting loop.", provider, connectionId);
-                return;
-            }
-
-            var handler = registry.GetHandler(provider);
+            var handler = server.ServiceProvider!.GetKeyedService<IAuthTokenHandler>(provider);
             if (handler == null)
             {
                 logger.LogError("OAuthTokenRefreshLoop[{Provider}]: No handler registered for {ConnectionId}, exiting loop.", provider, connectionId);
