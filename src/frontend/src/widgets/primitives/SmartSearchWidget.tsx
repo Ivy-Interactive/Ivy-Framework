@@ -2,14 +2,17 @@ import { Kbd } from '@/components/Kbd';
 import { getHeight, getWidth } from '@/lib/styles';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSyncExternalStore } from 'react';
-import { X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import type { MenuItem } from '@/types/widgets';
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from '@/components/ui/resizable';
-import { filterMenuItemsForSearch } from '@/widgets/layouts/sidebar/sidebarSearchFilter';
+import {
+  filterMenuItemsForSearch,
+  pickSuggestionsFromSections,
+} from '@/widgets/layouts/sidebar/sidebarSearchFilter';
 import { sidebarSearchStore } from '@/widgets/layouts/sidebar/sidebarSearchStore';
 import { SidebarSearchResultsList } from '@/widgets/layouts/sidebar/SidebarSearchResultsList';
 import { mcpPanelStore } from './mcpPanelStore';
@@ -95,13 +98,48 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
     return filterMenuItemsForSearch(fullMenu, q);
   }, [windowQuery, sidebarSearchState.fullMenuItems, sidebarSearchState.items]);
 
+  const SUGGESTIONS_COUNT = 10;
+  const suggestionItems = React.useMemo(() => {
+    const fullMenu =
+      sidebarSearchState.fullMenuItems ?? sidebarSearchState.items;
+    if (!fullMenu.length) {
+      return {
+        searchResultsItems: [] as MenuItem[],
+        flatItems: [] as MenuItem[],
+      };
+    }
+    const picked = pickSuggestionsFromSections(fullMenu, SUGGESTIONS_COUNT);
+    const flatItems = picked.map(({ item, path }) => ({
+      ...item,
+      path: path || undefined,
+    }));
+    const searchResultsItems: MenuItem[] = [
+      {
+        label: '',
+        variant: 'Default',
+        checked: false,
+        disabled: false,
+        expanded: true,
+        children: flatItems,
+      } as MenuItem,
+    ];
+    return { searchResultsItems, flatItems };
+  }, [sidebarSearchState.fullMenuItems, sidebarSearchState.items]);
+
   const hasPageSuggestions = windowFiltered.flatItems.length > 0;
-  const pageSuggestionsIndex = hasPageSuggestions
-    ? Math.min(
-        pageSuggestionsSelectedIndex,
-        Math.max(0, windowFiltered.flatItems.length - 1)
-      )
-    : 0;
+  const queryTrimmed = windowQuery.trim();
+  const hasSuggestions =
+    suggestionItems.flatItems.length > 0 && queryTrimmed === '';
+  const listToShow = hasPageSuggestions
+    ? windowFiltered
+    : hasSuggestions
+      ? suggestionItems
+      : null;
+  const listFlatLength = listToShow?.flatItems.length ?? 0;
+  const pageSuggestionsIndex =
+    listFlatLength > 0
+      ? Math.min(pageSuggestionsSelectedIndex, Math.max(0, listFlatLength - 1))
+      : 0;
 
   const hasResultsRef = useRef(hasResults);
   useEffect(() => {
@@ -252,17 +290,18 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
             onClick={e => e.stopPropagation()}
           >
             <div className="flex min-h-0 flex-1 flex-col p-4 pt-4">
-              {/* 1. Search input with ESC hint inside the same box */}
+              {/* 1. Search input with search icon (like sidebar) and ESC hint inside the same box */}
               <div className="flex shrink-0 items-center gap-2 rounded-lg border border-border/40 bg-muted/30 py-1.5 px-2">
+                <Search className="h-4 w-4 shrink-0 text-muted-foreground/70" />
                 <div className="min-w-0 flex-1">{searchInput}</div>
                 <Kbd>ESC</Kbd>
               </div>
-              {/* 2. Pages search results (no heading) */}
+              {/* 2. Search results or suggestions (useful pages when input is empty) */}
               <div className="min-h-0 flex-1 overflow-y-auto pt-4">
-                {hasPageSuggestions && (
+                {listToShow != null && (
                   <SidebarSearchResultsList
-                    items={windowFiltered.searchResultsItems}
-                    flatItems={windowFiltered.flatItems}
+                    items={listToShow.searchResultsItems}
+                    flatItems={listToShow.flatItems}
                     selectedIndex={pageSuggestionsIndex}
                     setSelectedIndex={setPageSuggestionsSelectedIndex}
                     onSelect={tag => {

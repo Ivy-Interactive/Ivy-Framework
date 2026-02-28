@@ -74,6 +74,33 @@ export function flattenWithPath(
 }
 
 /**
+ * Pick up to `maxCount` items from the menu, one (or more) from each top-level
+ * section, so suggestions span different folders instead of the first N in order.
+ */
+export function pickSuggestionsFromSections(
+  menuItems: MenuItem[],
+  maxCount: number
+): { item: MenuItem; path: string }[] {
+  if (!menuItems.length || maxCount <= 0) return [];
+  const sections = menuItems.map(section => flattenWithPath([section]));
+  const result: { item: MenuItem; path: string }[] = [];
+  let index = 0;
+  while (result.length < maxCount) {
+    let added = false;
+    for (const section of sections) {
+      if (result.length >= maxCount) break;
+      if (index < section.length) {
+        result.push(section[index]);
+        added = true;
+      }
+    }
+    if (!added) break;
+    index++;
+  }
+  return result;
+}
+
+/**
  * Filter full menu tree by query and return items in a single group shape
  * (single group with matching leaves + path), and flat list for list component.
  */
