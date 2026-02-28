@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 // Resharper disable once CheckNamespace
 namespace Ivy;
 
-public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore) : IAuthProviderService
+public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, IOAuthTokenHandlerRegistry? oauthRegistry = null) : IAuthProviderService
 {
     public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
@@ -140,8 +140,18 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
 
     public async Task<Dictionary<OAuthProvider, IAuthTokenHandlerSession>?> GetOAuthProviderSessionsAsync(CancellationToken cancellationToken)
     {
-        return await TimeoutHelper.WithTimeoutAsync(ct =>
+        var sessions = await TimeoutHelper.WithTimeoutAsync(ct =>
             authProvider.GetOAuthProviderSessionsAsync(authSession, ct), cancellationToken);
+
+        if (sessions == null || oauthRegistry == null)
+        {
+            return sessions;
+        }
+
+        // Filter to only include providers that have a registered handler
+        return sessions
+            .Where(kvp => oauthRegistry.GetHandler(kvp.Key) != null)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 
     public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)

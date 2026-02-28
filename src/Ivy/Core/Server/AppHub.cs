@@ -86,7 +86,8 @@ public class AppHub(
 #endif
 
                 var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
-                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore);
+                var oauthRegistry = server.ServiceProvider!.GetService<IOAuthTokenHandlerRegistry>();
+                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore, oauthRegistry);
 
                 var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
@@ -265,7 +266,7 @@ public class AppHub(
                     var activeProviders = _activeOAuthRefreshLoops.GetOrAdd(connectionId, _ => new HashSet<OAuthProvider>());
                     var cancellations = _oauthRefreshCancellations.GetOrAdd(connectionId, _ => new ConcurrentDictionary<OAuthProvider, CancellationTokenSource>());
 
-                    foreach (var provider in oauthProviders)
+                    void AddProvider(OAuthProvider provider)
                     {
                         lock (activeProviders)
                         {
@@ -278,6 +279,11 @@ public class AppHub(
                         }
                     }
 
+                    foreach (var provider in oauthProviders)
+                    {
+                        AddProvider(provider);
+                    }
+
                     // Subscribe to new OAuth provider sessions being added
                     Action<OAuthProvider> addedHandler = provider =>
                     {
@@ -287,16 +293,7 @@ public class AppHub(
                             return;
                         }
 
-                        lock (activeProviders)
-                        {
-                            if (activeProviders.Add(provider))
-                            {
-                                logger.LogInformation("Starting OAuth token refresh loop for newly added provider {Provider} on connection {ConnectionId}", provider, connectionId);
-                                var cts = CancellationTokenSource.CreateLinkedTokenSource(connectionAborted);
-                                cancellations[provider] = cts;
-                                _ = Task.Run(() => OAuthTokenRefreshLoopAsync(connectionId, provider, cts.Token), connectionAborted);
-                            }
-                        }
+                        AddProvider(provider);
                     };
 
                     // Subscribe to OAuth provider sessions being removed
@@ -616,14 +613,14 @@ public class AppHub(
             var registry = session.AppServices.GetService<IOAuthTokenHandlerRegistry>();
             if (registry == null)
             {
-                logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No OAuth token handler registry for {ConnectionId}, exiting loop.", provider, connectionId);
+                logger.LogError("OAuthTokenRefreshLoop[{Provider}]: No OAuth token handler registry for {ConnectionId}, exiting loop.", provider, connectionId);
                 return;
             }
 
             var handler = registry.GetHandler(provider);
             if (handler == null)
             {
-                logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No handler registered for {ConnectionId}, exiting loop.", provider, connectionId);
+                logger.LogError("OAuthTokenRefreshLoop[{Provider}]: No handler registered for {ConnectionId}, exiting loop.", provider, connectionId);
                 return;
             }
 
@@ -633,7 +630,7 @@ public class AppHub(
             // Get the provider's session
             if (!authSession.OAuthProviderSessions.TryGetValue(provider, out var providerSession))
             {
-                logger.LogDebug("OAuthTokenRefreshLoop[{Provider}]: No session found for {ConnectionId}, exiting loop.", provider, connectionId);
+                logger.LogError("OAuthTokenRefreshLoop[{Provider}]: No session found for {ConnectionId}, exiting loop.", provider, connectionId);
                 return;
             }
 
