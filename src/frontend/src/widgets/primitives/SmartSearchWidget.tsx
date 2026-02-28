@@ -103,19 +103,38 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       )
     : 0;
 
-  // Open the smart search window when the sidebar search input is focused or clicked.
-  // The sidebar search is rendered by the Ivy widget tree (data-testid="sidebar-search"),
-  // not by SidebarInput from the UI library, so we use event delegation.
+  const hasResultsRef = useRef(hasResults);
   useEffect(() => {
-    const openWindow = () => setIsOpen(true);
+    hasResultsRef.current = hasResults;
+  }, [hasResults]);
+
+  // Open the smart search window when the sidebar search input is focused or clicked (never let sidebar search receive input).
+  // If the answer panel is open, close it first so the overlay can show.
+  useEffect(() => {
+    const openWindow = () => {
+      if (hasResultsRef.current) {
+        clearButtonRef.current
+          ?.querySelector<HTMLButtonElement>('button')
+          ?.click();
+      }
+      setIsOpen(true);
+    };
 
     const handleFocus = (e: FocusEvent) => {
       const el = e.target as HTMLElement | null;
-      if (el?.closest?.('[data-testid="sidebar-search"]')) openWindow();
+      if (el?.closest?.('[data-testid="sidebar-search"]')) {
+        e.preventDefault();
+        e.stopPropagation();
+        openWindow();
+      }
     };
     const handleClick = (e: MouseEvent) => {
       const el = e.target as HTMLElement | null;
-      if (el?.closest?.('[data-testid="sidebar-search"]')) openWindow();
+      if (el?.closest?.('[data-testid="sidebar-search"]')) {
+        e.preventDefault();
+        e.stopPropagation();
+        openWindow();
+      }
     };
 
     document.body.addEventListener('focus', handleFocus, true);
