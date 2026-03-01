@@ -147,11 +147,11 @@ const CodeBlock = memo(
         const cleanContent = lines.join('\n'); // Remove any empty lines
 
         return (
-          <div className="relative min-w-0 max-w-full overflow-x-hidden">
+          <div className="relative">
             <div className="absolute top-2 right-2 z-10">
               <CopyToClipboardButton textToCopy={cleanContent} />
             </div>
-            <ScrollArea className="w-full min-w-0">
+            <ScrollArea className="w-full">
               <pre
                 className={cn(
                   'p-4 bg-muted rounded-md font-mono text-sm',
@@ -177,35 +177,32 @@ const CodeBlock = memo(
       return (
         <Suspense
           fallback={
-            <div className="min-w-0 max-w-full overflow-x-hidden">
-              <ScrollArea className="w-full min-w-0 border border-border rounded-md">
-                <pre
-                  className={cn(
-                    'p-4 bg-muted rounded-md font-mono text-sm',
-                    shouldWrap && 'whitespace-pre-wrap break-all'
-                  )}
-                  style={shouldWrap ? {} : { overflowX: 'auto' }}
-                >
-                  {content}
-                </pre>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            </div>
+            <ScrollArea className="w-full border border-border rounded-md">
+              <pre
+                className={cn(
+                  'p-4 bg-muted rounded-md font-mono text-sm',
+                  shouldWrap && 'whitespace-pre-wrap break-all'
+                )}
+                style={shouldWrap ? {} : { overflowX: 'auto' }}
+              >
+                {content}
+              </pre>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           }
         >
-          <div className="relative min-w-0 max-w-full overflow-x-hidden">
+          <div className="relative">
             <div className="absolute top-2 right-2 z-10">
               <CopyToClipboardButton textToCopy={content} />
             </div>
-            <ScrollArea className="w-full min-w-0">
+            <ScrollArea className="w-full">
               <SyntaxHighlighter
                 language={match[1]}
                 style={dynamicTheme}
                 customStyle={{
                   margin: 0,
-                  maxWidth: '100%',
                   ...whiteSpaceStyle,
-                  wordBreak: 'break-word',
+                  wordBreak: 'normal',
                   overflowWrap: 'break-word',
                 }}
                 wrapLongLines={shouldWrap}
@@ -578,18 +575,16 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   }, []);
 
   return (
-    <div className="min-w-0 max-w-full overflow-x-hidden">
-      <ReactMarkdown
-        components={{
-          ...componentsParams,
-        }}
-        remarkPlugins={plugins.remarkPlugins}
-        rehypePlugins={plugins.rehypePlugins}
-        urlTransform={urlTransform}
-      >
-        {content}
-      </ReactMarkdown>
-    </div>
+    <ReactMarkdown
+      components={{
+        ...componentsParams,
+      }}
+      remarkPlugins={plugins.remarkPlugins}
+      rehypePlugins={plugins.rehypePlugins}
+      urlTransform={urlTransform}
+    >
+      {content}
+    </ReactMarkdown>
   );
 };
 
