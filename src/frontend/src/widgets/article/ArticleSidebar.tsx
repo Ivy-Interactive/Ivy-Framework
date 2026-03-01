@@ -13,7 +13,8 @@ interface ArticleSidebarProps {
   headings?: { id: string; text: string; level: number }[];
 }
 
-const VIEWPORT_THRESHOLD_HIDE_TOC = 1400;
+/** When panel uses more than this fraction of viewport, TOC is considered overlayed and hidden. */
+const TOC_OVERLAY_FRACTION = 0.5;
 
 export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
   articleRef,
@@ -24,24 +25,16 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
 }) => {
   const [tocLoading, setTocLoading] = useState(true);
   const [contributorsLoading, setContributorsLoading] = useState(true);
-  const [viewportWidth, setViewportWidth] = useState(
-    typeof window !== 'undefined' ? window.innerWidth : 1024
-  );
-  const mcpPanelOpen = useSyncExternalStore(
+
+  const { isOpen: mcpPanelOpen, panelWidthFraction } = useSyncExternalStore(
     mcpPanelStore.subscribe,
     mcpPanelStore.getState,
     mcpPanelStore.getState
-  ).isOpen;
+  );
 
-  React.useEffect(() => {
-    const onResize = () => setViewportWidth(window.innerWidth);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
-  const hideTocForMcpPanel =
-    mcpPanelOpen && viewportWidth < VIEWPORT_THRESHOLD_HIDE_TOC;
-  const showSidebar = showToc && !hideTocForMcpPanel;
+  const tocOverlayedByPanel =
+    mcpPanelOpen && panelWidthFraction > TOC_OVERLAY_FRACTION;
+  const showSidebar = showToc && (!mcpPanelOpen || !tocOverlayedByPanel);
   const showContributors = !tocLoading && !contributorsLoading && showSidebar;
 
   if (!showSidebar) return null;

@@ -3,11 +3,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSyncExternalStore } from 'react';
 import { X } from 'lucide-react';
 import type { MenuItem } from '@/types/widgets';
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from '@/components/ui/resizable';
+import { ResizablePanelGroup, ResizablePanel } from '@/components/ui/resizable';
 import {
   filterMenuItemsForSearch,
   pickSuggestionsFromSections,
@@ -302,41 +298,61 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
     clearButtonRef.current?.querySelector<HTMLButtonElement>('button')?.click();
   };
 
-  const [mcpPanelWidth, setMcpPanelWidth] = useState<number | null>(null);
-  const MIN_PANEL_WIDTH_REM = 30;
-  const minPanelWidthPx = MIN_PANEL_WIDTH_REM * 16;
+  const [userPanelFraction, setUserPanelFraction] = useState<number | null>(
+    null
+  );
+
+  const MIN_PANEL_FRACTION = 0.25;
+  const DEFAULT_PANEL_FRACTION = 0.4;
+  const MAX_PANEL_FRACTION = 0.8;
+
+  const effectivePanelFraction = Math.max(
+    MIN_PANEL_FRACTION,
+    Math.min(MAX_PANEL_FRACTION, userPanelFraction ?? DEFAULT_PANEL_FRACTION)
+  );
 
   useEffect(() => {
-    if (!hasResults) return;
-
-    const updateWidth = () => {
-      const boundary = document.querySelector('[data-docs-content-boundary]');
-      if (!boundary) {
-        setMcpPanelWidth(null);
-        return;
-      }
-      const rect = boundary.getBoundingClientRect();
-      const available = window.innerWidth - rect.right;
-      setMcpPanelWidth(Math.max(minPanelWidthPx, Math.round(available)));
-    };
-
-    updateWidth();
-    const ro = new ResizeObserver(updateWidth);
-    const boundary = document.querySelector('[data-docs-content-boundary]');
-    if (boundary) ro.observe(boundary);
-    window.addEventListener('resize', updateWidth);
+    if (hasResults) {
+      mcpPanelStore.setPanelWidthFraction(effectivePanelFraction);
+    } else {
+      mcpPanelStore.setPanelWidthFraction(0);
+    }
     return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', updateWidth);
+      mcpPanelStore.setPanelWidthFraction(0);
     };
-  }, [hasResults, minPanelWidthPx]);
+  }, [hasResults, effectivePanelFraction]);
 
-  const panelContainerWidth = mcpPanelWidth ?? 28 * 16;
-  const mcpPanelMinSizePct =
-    panelContainerWidth > 0
-      ? Math.min(100, (minPanelWidthPx / panelContainerWidth) * 100)
-      : 20;
-  const mcpPanelDefaultSizePct = (2 / 3) * 100;
+  useEffect(() => {
+    if (!hasResults) {
+      queueMicrotask(() => setUserPanelFraction(null));
+      return;
+    }
+    return () => {
+      queueMicrotask(() => setUserPanelFraction(null));
+    };
+  }, [hasResults]);
+
+  const handlePanelResizeStart = React.useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const onMove = (moveEvent: MouseEvent) => {
+      const fraction =
+        (window.innerWidth - moveEvent.clientX) / window.innerWidth;
+      const clamped = Math.max(
+        MIN_PANEL_FRACTION,
+        Math.min(MAX_PANEL_FRACTION, fraction)
+      );
+      setUserPanelFraction(clamped);
+      mcpPanelStore.setPanelWidthFraction(clamped);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    onMove(e.nativeEvent);
+  }, []);
 
   return (
     <div
@@ -427,33 +443,28 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       {/* MCP results: right-side panel (right of TOC); hide TOC when not enough space. Uses Ivy Resizable. */}
       {hasResults && (
         <div
-          className="fixed top-0 right-0 bottom-0 z-30 flex flex-col bg-background shadow-lg"
+          className="fixed top-0 right-0 bottom-0 z-30 flex flex-col bg-background shadow-lg border-l border-border"
           style={{
-            width: `${panelContainerWidth}px`,
-            minWidth: `${MIN_PANEL_WIDTH_REM}rem`,
+            width: `${effectivePanelFraction * 100}vw`,
+            minWidth: `${MIN_PANEL_FRACTION * 100}vw`,
           }}
           role="dialog"
           aria-label="AI answer"
         >
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize answer panel"
+            onMouseDown={handlePanelResizeStart}
+            className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize z-10 shrink-0"
+            style={{ touchAction: 'none' }}
+          />
           <ResizablePanelGroup
             direction="horizontal"
             className="h-full w-full"
             autoSaveId="ivy-docs-mcp-panel"
           >
-            <ResizablePanel
-              defaultSize={100 - mcpPanelDefaultSizePct}
-              minSize={0}
-              maxSize={100}
-            />
-            <ResizableHandle
-              withHandle
-              className="w-1 shrink-0 border-l border-border bg-transparent hover:bg-transparent cursor-col-resize"
-            />
-            <ResizablePanel
-              defaultSize={mcpPanelDefaultSizePct}
-              minSize={mcpPanelMinSizePct}
-              order={2}
-            >
+            <ResizablePanel defaultSize={100} minSize={0}>
               <div className="flex min-w-0 h-full flex-col">
                 <div ref={clearButtonRef} className="sr-only" aria-hidden>
                   {clearButton}
