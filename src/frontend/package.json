@@ -136,7 +136,8 @@
     "@swc/helpers": "0.5.17",
     "dompurify": "3.3.0",
     "lodash-es": "4.17.23",
-    "minimatch": "9.0.6",
+    "minimatch": "9.0.7",
+    "rollup": ">=4.59.0",
     "remark-mermaid-plugin": {
       "mermaid": "11.12.1"
     }
