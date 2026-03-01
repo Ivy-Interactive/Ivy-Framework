@@ -29,7 +29,7 @@ public class DataTableView(
             OnCellClick = onCellClick,
             OnCellActivated = onCellActivated,
             RowActions = rowActions,
-            HandleRowAction = onRowAction
+            OnRowAction = onRowAction
         };
 
         return table;

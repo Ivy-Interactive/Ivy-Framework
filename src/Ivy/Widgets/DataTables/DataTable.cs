@@ -58,10 +58,22 @@ public record DataTable : WidgetBase<DataTable>
 
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellActivated { get; set; }
 
-    [Event] public Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? HandleRowAction { get; set; }
+    [Event] public Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? OnRowAction { get; set; }
 
     public static Detail operator |(DataTable widget, object child)
     {
         throw new NotSupportedException("DataTable does not support children.");
     }
+}
+
+public static class DataTableWidgetExtensions
+{
+    public static DataTable HandleRowAction(this DataTable table, Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
+        => table with { OnRowAction = handler };
+
+    public static DataTable HandleCellClick(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+        => table with { OnCellClick = handler };
+
+    public static DataTable HandleCellActivated(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+        => table with { OnCellActivated = handler };
 }
