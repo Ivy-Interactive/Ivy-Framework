@@ -272,11 +272,22 @@ public class DataTableApp : SampleBase
                 await ValueTask.CompletedTask;
             });
 
-        return new Fragment([dataTable, new EmployeeEditDialog(editModalOpen, editingEmployee)]);
+        return new Fragment([dataTable, new EmployeeEditDialog(editModalOpen, editingEmployee, updated =>
+        {
+            var original = employees.Value.FirstOrDefault(e => e.Id == updated.Id);
+            if (original != null)
+            {
+                var index = employees.Value.IndexOf(original);
+                if (index != -1)
+                {
+                    employees.Value[index] = updated;
+                }
+            }
+        })]);
     }
 }
 
-public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> employeeState) : ViewBase
+public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> employeeState, Action<EmployeeRecord> onSave) : ViewBase
 {
     public override object? Build()
     {
@@ -301,8 +312,7 @@ public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> emp
         {
             if (updated != null)
             {
-                // In a real app we'd save to DB here. This is a mock demo, so the object mutations handled
-                // by ToForm() on the reference object are already applied to the list item.
+                onSave(updated);
                 client.Toast($"Employee {updated.Name} saved successfully");
             }
 
