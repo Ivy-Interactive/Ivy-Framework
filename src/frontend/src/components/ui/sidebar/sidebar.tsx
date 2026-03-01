@@ -312,27 +312,18 @@ const SidebarInput = React.forwardRef<
   React.ElementRef<typeof Input>,
   React.ComponentProps<typeof Input>
 >(({ className, onFocus, onClick, ...props }, ref) => {
+  const openSmartSearch = () => {
+    window.dispatchEvent(new Event('ivy-docs-open-smart-search'));
+  };
+
   const handleFocus: React.FocusEventHandler<HTMLInputElement> = event => {
     onFocus?.(event);
-
-    // When the sidebar search is focused, open the docs smart search window
-    // so the main query input lives there.
-    try {
-      window.dispatchEvent(new Event('ivy-docs-open-smart-search'));
-    } catch {
-      // Ignore errors (e.g., document not available in non-browser environments)
-    }
+    openSmartSearch();
   };
 
   const handleClick: React.MouseEventHandler<HTMLInputElement> = event => {
     onClick?.(event);
-
-    // Mirror focus behavior on click to ensure consistent UX.
-    try {
-      window.dispatchEvent(new Event('ivy-docs-open-smart-search'));
-    } catch {
-      // Ignore errors
-    }
+    openSmartSearch();
   };
 
   return (
