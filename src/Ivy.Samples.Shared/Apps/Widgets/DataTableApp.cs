@@ -242,18 +242,32 @@ public class DataTableApp : SampleBase
             .HandleRowAction(async e =>
             {
                 var args = e.Value;
-                if (args.Tag?.ToString() == "edit" && int.TryParse(args.Id?.ToString() ?? "", out int employeeId))
+                if (int.TryParse(args.Id?.ToString() ?? "", out int employeeId))
                 {
-                    var employee = employees.Value.FirstOrDefault(emp => emp.Id == employeeId);
-                    if (employee != null)
+                    var tag = args.Tag?.ToString();
+                    if (tag == "edit")
                     {
-                        editingEmployee.Set(employee);
-                        editModalOpen.Set(true);
+                        var employee = employees.Value.FirstOrDefault(emp => emp.Id == employeeId);
+                        if (employee != null)
+                        {
+                            editingEmployee.Set(employee);
+                            editModalOpen.Set(true);
+                        }
                     }
-                }
-                else
-                {
-                    client.Toast($"Row action: ID: {args.Id}, Tag: {args.Tag}");
+                    else if (tag == "delete")
+                    {
+                        var employee = employees.Value.FirstOrDefault(emp => emp.Id == employeeId);
+                        if (employee != null)
+                        {
+                            employees.Value.Remove(employee);
+                            queryService.Invalidate(k => k is string s && s == nameof(EmployeeRecord));
+                            client.Toast($"Employee {employee.Name} deleted");
+                        }
+                    }
+                    else
+                    {
+                        client.Toast($"Row action: ID: {args.Id}, Tag: {args.Tag}");
+                    }
                 }
                 await ValueTask.CompletedTask;
             });
