@@ -48,7 +48,7 @@ export const useDataLoading = ({
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
   const batchSize = config.batchSize ?? 20;
-  const connectionKey = `${connection.connectionId}-${connection.sourceId}`;
+  const connectionKey = `${connection.connectionId}-${connection.sourceId}-${connection.versionToken || ''}`;
 
   // Reset currentRowCountRef when filter or sort changes
   useEffect(() => {

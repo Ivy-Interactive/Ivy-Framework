@@ -1,35 +1,33 @@
 using Ivy.Samples.Shared.Apps;
 using Ivy.Shared;
 using Ivy.Views.DataTables;
+using Ivy.Hooks;
+using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-/// <summary>
-/// Comprehensive DataTable test with all column types
-/// Tests the fix for issue #1273 - column type metadata preservation
-/// Tests the fix for issue #1311 - table width and height setting
-/// </summary>
-public record EmployeeRecord(
-    int Id,
-    string EmployeeCode,
-    string Name,
-    string Email,
-    int Age,
-    decimal Salary,
-    double Performance,
-    bool IsActive,
-    bool IsManager,
-    DateTime HireDate,
-    DateTime LastReview,
-    Icons Status,
-    Icons Priority,
-    Icons Department,
-    string Notes,
-    int? OptionalId,
-    string[] Skills,
-    string? WidgetLink,
-    string? ProfileLink
-);
+public class EmployeeRecord
+{
+    public int Id { get; set; }
+    public string EmployeeCode { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public int Age { get; set; }
+    public decimal Salary { get; set; }
+    public double Performance { get; set; }
+    public bool IsActive { get; set; }
+    public bool IsManager { get; set; }
+    public DateTime HireDate { get; set; }
+    public DateTime LastReview { get; set; }
+    public Icons Status { get; set; }
+    public Icons Priority { get; set; }
+    public Icons Department { get; set; }
+    public string Notes { get; set; }
+    public int? OptionalId { get; set; }
+    public string[] Skills { get; set; }
+    public string? WidgetLink { get; set; }
+    public string? ProfileLink { get; set; }
+}
 
 [App(icon: Icons.DatabaseZap)]
 public class DataTableApp : SampleBase
@@ -83,31 +81,37 @@ public class DataTableApp : SampleBase
                 var widgetLink = "/widgets/charts/area-chart"; // Internal widget link - relative URL works on any domain
                 var profileLink = $"https://linkedin.com/in/{firstName.ToLower()}{lastName.ToLower()}{i}"; // External LinkedIn profile
 
-                return new EmployeeRecord(
-                    Id: i,
-                    EmployeeCode: $"EMP{i:D4}",
-                    Name: name,
-                    Email: email,
-                    Age: age,
-                    Salary: salary,
-                    Performance: performance,
-                    IsActive: isActive,
-                    IsManager: isManager,
-                    HireDate: hireDate,
-                    LastReview: lastReview,
-                    Status: status,
-                    Priority: priority,
-                    Department: department,
-                    Notes: notes,
-                    OptionalId: optionalId,
-                    Skills: skills,
-                    WidgetLink: widgetLink,
-                    ProfileLink: profileLink
-                );
+                return new EmployeeRecord
+                {
+                    Id = i,
+                    EmployeeCode = $"EMP{i:D4}",
+                    Name = name,
+                    Email = email,
+                    Age = age,
+                    Salary = salary,
+                    Performance = performance,
+                    IsActive = isActive,
+                    IsManager = isManager,
+                    HireDate = hireDate,
+                    LastReview = lastReview,
+                    Status = status,
+                    Priority = priority,
+                    Department = department,
+                    Notes = notes,
+                    OptionalId = optionalId,
+                    Skills = skills,
+                    WidgetLink = widgetLink,
+                    ProfileLink = profileLink
+                };
             }).ToList();
         });
 
         // The DataTable builder will be recreated each time, but use the cached employee data
+        var editModalOpen = UseState(() => false);
+        var editingEmployee = UseState<EmployeeRecord?>(() => null);
+        var queryService = UseService<IQueryService>();
+
+        // Configuration and row actions logic
         var dataTable = employees.Value.AsQueryable().ToDataTable(idSelector: e => e.Id)
             // Table dimensions (fix for issue #1311)
             .Width(Size.Full()) // Table width set to 120 units (30rem)
@@ -238,10 +242,63 @@ public class DataTableApp : SampleBase
             .HandleRowAction(async e =>
             {
                 var args = e.Value;
-                client.Toast($"Row action: ID: {args.Id}, Tag: {args.Tag}");
+                if (args.Tag?.ToString() == "edit" && int.TryParse(args.Id?.ToString() ?? "", out int employeeId))
+                {
+                    var employee = employees.Value.FirstOrDefault(emp => emp.Id == employeeId);
+                    if (employee != null)
+                    {
+                        editingEmployee.Set(employee);
+                        editModalOpen.Set(true);
+                    }
+                }
+                else
+                {
+                    client.Toast($"Row action: ID: {args.Id}, Tag: {args.Tag}");
+                }
                 await ValueTask.CompletedTask;
             });
 
-        return dataTable;
+        return new Fragment([dataTable, new EmployeeEditDialog(editModalOpen, editingEmployee)]);
+    }
+}
+
+public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> employeeState) : ViewBase
+{
+    public override object? Build()
+    {
+        var queryService = UseService<IQueryService>();
+        var client = UseService<IClientProvider>();
+
+        if (employeeState.Value == null)
+        {
+            return new Empty();
+        }
+
+        // We bind the form to the employee state. ToForm() will handle the object mutations and submission.
+        return employeeState.Value
+            .ToForm()
+            .Remove(e => e.Id)
+            .Remove(e => e.EmployeeCode)
+            .Remove(e => e.HireDate)
+            .HandleSubmit(OnSubmit)
+            .ToDialog(isOpen, title: "Edit Employee", submitTitle: "Save");
+
+        Task OnSubmit(EmployeeRecord? updated)
+        {
+            if (updated != null)
+            {
+                // In a real app we'd save to DB here. This is a mock demo, so the object mutations handled
+                // by ToForm() on the reference object are already applied to the list item.
+                client.Toast($"Employee {updated.Name} saved successfully");
+            }
+
+            isOpen.Set((bool)false);
+            employeeState.Set((EmployeeRecord?)null);
+
+            // Trigger refresh
+            queryService.Invalidate(k => k is string s && s == nameof(EmployeeRecord));
+
+            return Task.CompletedTask;
+        }
     }
 }
