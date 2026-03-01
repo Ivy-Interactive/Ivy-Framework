@@ -73,7 +73,7 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
 
     [Prop] public TDateRange Value { get; init; } = default!;
 
-    [Event] public Func<Event<IInput<TDateRange>, TDateRange>, ValueTask>? OnChange { get; init; }
+    [Event] public Func<Event<IInput<TDateRange>, TDateRange>, ValueTask>? OnChange { get; set; }
 }
 
 public static class DateRangeInputExtensions
@@ -142,23 +142,4 @@ public static class DateRangeInputExtensions
         throw new InvalidOperationException($"Cannot set Value: widget is not DateRangeInput<{typeof(T).Name}>");
     }
 
-    [OverloadResolutionPriority(1)]
-    public static DateRangeInputBase OnChange<T>(this DateRangeInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
-    {
-        if (widget is DateRangeInput<T> typedWidget)
-        {
-            return typedWidget with { OnChange = onChange };
-        }
-        throw new InvalidOperationException($"Cannot set OnChange: widget is not DateRangeInput<{typeof(T).Name}>");
-    }
-
-    public static DateRangeInputBase OnChange<T>(this DateRangeInputBase widget, Action<Event<IInput<T>, T>> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
-    }
-
-    public static DateRangeInputBase OnChange<T>(this DateRangeInputBase widget, Action<T> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
-    }
 }

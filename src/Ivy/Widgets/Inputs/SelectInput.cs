@@ -90,7 +90,7 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
 
     [Prop] public IAnyOption[] Options { get; set; } = [];
 
-    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; init; }
+    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 }
 
 public static class SelectInputExtensions
@@ -211,23 +211,4 @@ public static class SelectInputExtensions
         throw new InvalidOperationException($"Cannot set Value: widget is not SelectInput<{typeof(T).Name}>");
     }
 
-    [OverloadResolutionPriority(1)]
-    public static SelectInputBase OnChange<T>(this SelectInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
-    {
-        if (widget is SelectInput<T> typedWidget)
-        {
-            return typedWidget with { OnChange = onChange };
-        }
-        throw new InvalidOperationException($"Cannot set OnChange: widget is not SelectInput<{typeof(T).Name}>");
-    }
-
-    public static SelectInputBase OnChange<T>(this SelectInputBase widget, Action<Event<IInput<T>, T>> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
-    }
-
-    public static SelectInputBase OnChange<T>(this SelectInputBase widget, Action<T> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
-    }
 }

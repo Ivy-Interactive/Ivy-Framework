@@ -84,7 +84,7 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 
     [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
-    [Event] public Func<Event<IInput<TNumber>, TNumber>, ValueTask>? OnChange { get; init; }
+    [Event] public Func<Event<IInput<TNumber>, TNumber>, ValueTask>? OnChange { get; }
 }
 
 public static class FeedbackInputExtensions
@@ -134,23 +134,4 @@ public static class FeedbackInputExtensions
         throw new InvalidOperationException($"Cannot set Value: widget is not FeedbackInput<{typeof(T).Name}>");
     }
 
-    [OverloadResolutionPriority(1)]
-    public static FeedbackInputBase OnChange<T>(this FeedbackInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
-    {
-        if (widget is FeedbackInput<T> typedWidget)
-        {
-            return typedWidget with { OnChange = onChange };
-        }
-        throw new InvalidOperationException($"Cannot set OnChange: widget is not FeedbackInput<{typeof(T).Name}>");
-    }
-
-    public static FeedbackInputBase OnChange<T>(this FeedbackInputBase widget, Action<Event<IInput<T>, T>> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
-    }
-
-    public static FeedbackInputBase OnChange<T>(this FeedbackInputBase widget, Action<T> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
-    }
 }

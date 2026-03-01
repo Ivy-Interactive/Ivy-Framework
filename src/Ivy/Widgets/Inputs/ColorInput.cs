@@ -82,7 +82,7 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
 
     [Prop] public TColor Value { get; init; } = default!;
 
-    [Event] public Func<Event<IInput<TColor>, TColor>, ValueTask>? OnChange { get; init; }
+    [Event] public Func<Event<IInput<TColor>, TColor>, ValueTask>? OnChange { get; }
 }
 
 /// <summary>
@@ -208,23 +208,4 @@ public static class ColorInputExtensions
         throw new InvalidOperationException($"Cannot set Value: widget is not ColorInput<{typeof(T).Name}>");
     }
 
-    [OverloadResolutionPriority(1)]
-    public static ColorInputBase OnChange<T>(this ColorInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
-    {
-        if (widget is ColorInput<T> typedWidget)
-        {
-            return typedWidget with { OnChange = onChange };
-        }
-        throw new InvalidOperationException($"Cannot set OnChange: widget is not ColorInput<{typeof(T).Name}>");
-    }
-
-    public static ColorInputBase OnChange<T>(this ColorInputBase widget, Action<Event<IInput<T>, T>> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
-    }
-
-    public static ColorInputBase OnChange<T>(this ColorInputBase widget, Action<T> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
-    }
 }

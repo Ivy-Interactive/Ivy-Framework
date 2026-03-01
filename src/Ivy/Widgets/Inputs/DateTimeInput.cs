@@ -87,7 +87,7 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 
     [Prop] public new bool Nullable { get; set; } = typeof(TDate) == typeof(DateTime?) || typeof(TDate) == typeof(DateTimeOffset?) || typeof(TDate) == typeof(DateOnly?) || typeof(TDate) == typeof(TimeOnly?);
 
-    [Event] public Func<Event<IInput<TDate>, TDate>, ValueTask>? OnChange { get; init; }
+    [Event] public Func<Event<IInput<TDate>, TDate>, ValueTask>? OnChange { get; set; }
 }
 
 public static class DateTimeInputExtensions
@@ -261,23 +261,4 @@ public static class DateTimeInputExtensions
         throw new InvalidOperationException($"Cannot set Value: widget is not DateTimeInput<{typeof(T).Name}>");
     }
 
-    [OverloadResolutionPriority(1)]
-    public static DateTimeInputBase OnChange<T>(this DateTimeInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
-    {
-        if (widget is DateTimeInput<T> typedWidget)
-        {
-            return typedWidget with { OnChange = onChange };
-        }
-        throw new InvalidOperationException($"Cannot set OnChange: widget is not DateTimeInput<{typeof(T).Name}>");
-    }
-
-    public static DateTimeInputBase OnChange<T>(this DateTimeInputBase widget, Action<Event<IInput<T>, T>> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
-    }
-
-    public static DateTimeInputBase OnChange<T>(this DateTimeInputBase widget, Action<T> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
-    }
 }

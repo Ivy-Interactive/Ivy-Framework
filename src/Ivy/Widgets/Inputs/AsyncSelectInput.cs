@@ -263,47 +263,8 @@ public static class AsyncSelectInputViewExtensions
         throw new InvalidOperationException($"Cannot set Value: widget is not AsyncSelectInputView<{typeof(T).Name}>");
     }
 
-    [OverloadResolutionPriority(1)]
-    public static IAnyAsyncSelectInputBase OnChange<T>(this IAnyAsyncSelectInputBase widget, Func<Event<IInput<T>, T>, ValueTask> onChange)
-    {
-        if (widget is AsyncSelectInputView<T> typedWidget)
-        {
-            // Create a new instance with the new OnChange, since AsyncSelectInputView is a class
-            var clone = new AsyncSelectInputView<T>(typedWidget.Search, typedWidget.Lookup, typedWidget.Placeholder, typedWidget.Disabled)
-            {
-                Value = typedWidget.Value,
-                OnChange = onChange,
-                Nullable = typedWidget.Nullable,
-                OnBlur = typedWidget.OnBlur,
-                Invalid = typedWidget.Invalid,
-                Scale = typedWidget.Scale,
-            };
-            return clone;
-        }
-        var widgetType = widget.GetType();
-        if (widgetType.IsGenericType && widgetType.GetGenericTypeDefinition() == typeof(AsyncSelectInputView<>))
-        {
-            var onChangeProperty = widgetType.GetProperty("OnChange");
-            if (onChangeProperty != null && onChangeProperty.CanWrite)
-            {
-                onChangeProperty.SetValue(widget, onChange);
-                return widget;
-            }
-        }
-
-        throw new InvalidOperationException("Unable to set OnChange handler on async select input");
-    }
-
-    public static IAnyAsyncSelectInputBase OnChange<T>(this IAnyAsyncSelectInputBase widget, Action<Event<IInput<T>, T>> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e); return ValueTask.CompletedTask; });
-    }
-
-    public static IAnyAsyncSelectInputBase OnChange<T>(this IAnyAsyncSelectInputBase widget, Action<T> onChange)
-    {
-        return widget.OnChange<T>(e => { onChange(e.Value); return ValueTask.CompletedTask; });
-    }
 }
+
 
 internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
 {
