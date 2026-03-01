@@ -68,7 +68,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       ?.click();
   }, []);
 
-  // Sync MCP panel store and close search overlay when MCP results arrive (so overlay doesn’t show again after panel close).
+  // Sync MCP panel store and close search overlay when MCP results arrive (so overlay doesn't show again after panel close).
   useEffect(() => {
     mcpPanelStore.setOpen(hasResults);
     if (hasResults) {

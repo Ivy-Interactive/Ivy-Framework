@@ -1,7 +1,7 @@
 import { TableOfContents } from '@/widgets/article/TableOfContents';
 import { GitHubContributors } from '@/widgets/article/GitHubContributors';
 import { DocumentTools } from '@/widgets/article/DocumentTools';
-import { mcpPanelStore } from '@/widgets/primitives/mcpPanelStore';
+import { mcpPanelStore } from '@/widgets/internal/SmartSearchWidget/mcpPanelStore';
 import React, { useState } from 'react';
 import { useSyncExternalStore } from 'react';
 

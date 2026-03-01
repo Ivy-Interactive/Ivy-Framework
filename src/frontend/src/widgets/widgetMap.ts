@@ -224,14 +224,18 @@ export const widgetMap = {
 
   // Internal
   'Ivy.SmartSearch': React.lazy(() =>
-    import('@/widgets/primitives/SmartSearchWidget').then(m => ({
-      default: m.SmartSearchWidget,
-    }))
+    import('@/widgets/internal/SmartSearchWidget/SmartSearchWidget').then(
+      m => ({
+        default: m.SmartSearchWidget,
+      })
+    )
   ),
   'Ivy.Docs.Shared.Helpers.SmartSearch': React.lazy(() =>
-    import('@/widgets/primitives/SmartSearchWidget').then(m => ({
-      default: m.SmartSearchWidget,
-    }))
+    import('@/widgets/internal/SmartSearchWidget/SmartSearchWidget').then(
+      m => ({
+        default: m.SmartSearchWidget,
+      })
+    )
   ),
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')

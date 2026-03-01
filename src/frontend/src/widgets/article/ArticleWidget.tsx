@@ -4,7 +4,7 @@ import { ArticleSidebar } from '@/widgets/article/ArticleSidebar';
 import { InternalLink } from '@/types/widgets';
 import React, { useRef } from 'react';
 import { useSyncExternalStore } from 'react';
-import { mcpPanelStore } from '@/widgets/primitives/mcpPanelStore';
+import { mcpPanelStore } from '@/widgets/internal/SmartSearchWidget/mcpPanelStore';
 
 interface ArticleWidgetProps {
   id: string;
