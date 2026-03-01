@@ -249,17 +249,6 @@ public static class AsyncSelectInputViewExtensions
             return clone;
         }
 
-        var widgetType = widget.GetType();
-        if (widgetType.IsGenericType && widgetType.GetGenericTypeDefinition() == typeof(AsyncSelectInputView<>))
-        {
-            var valueProperty = widgetType.GetProperty("Value");
-            if (valueProperty != null && valueProperty.CanWrite)
-            {
-                valueProperty.SetValue(widget, value);
-                return widget;
-            }
-        }
-
         throw new InvalidOperationException($"Cannot set Value: widget is not AsyncSelectInputView<{typeof(T).Name}>");
     }
 
