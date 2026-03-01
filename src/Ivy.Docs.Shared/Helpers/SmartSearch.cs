@@ -1,24 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Ivy.Docs.Shared.Services;
 
-// ReSharper disable once CheckNamespace
 namespace Ivy.Docs.Shared.Helpers;
 
-/// <summary>
-/// Container widget for the smart search UI with custom styling on the frontend.
-/// </summary>
 public record SmartSearch(params object?[] children) : WidgetBase<SmartSearch>(children.Where(c => c != null).Cast<object>().ToArray())
 {
     internal SmartSearch() : this([]) { }
 }
 
-/// <summary>
-/// View for smart search: ask a question and get an AI-generated answer inline.
-/// Results shown below the search bar (no sheet).
-/// </summary>
 public class SmartSearchView : ViewBase
 {
     public override object? Build()
@@ -150,7 +138,6 @@ public class SmartSearchView : ViewBase
         }
         var clearButton = new Button("Clear", _ => ClearResults());
 
-        // First answer is now rendered inside ResultsContent as Chat; no separate FollowUpChat slot
         var slots = new List<object>
         {
             new Slot("SearchInput", searchInput),
