@@ -6,105 +6,13 @@ using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-public class EmployeeRecord
-{
-    public int Id { get; set; }
-    public string EmployeeCode { get; set; }
-    public string Name { get; set; }
-    public string Email { get; set; }
-    public int Age { get; set; }
-    public decimal Salary { get; set; }
-    public double Performance { get; set; }
-    public bool IsActive { get; set; }
-    public bool IsManager { get; set; }
-    public DateTime HireDate { get; set; }
-    public DateTime LastReview { get; set; }
-    public Icons Status { get; set; }
-    public Icons Priority { get; set; }
-    public Icons Department { get; set; }
-    public string Notes { get; set; }
-    public int? OptionalId { get; set; }
-    public string[] Skills { get; set; }
-    public string? WidgetLink { get; set; }
-    public string? ProfileLink { get; set; }
-}
-
 [App(icon: Icons.DatabaseZap)]
 public class DataTableApp : SampleBase
 {
     protected override object? BuildSample()
     {
         var client = UseService<IClientProvider>();
-
-        // Create the employee data once at app level (like Kanban caches its tasks)
-        var employees = UseState(() =>
-        {
-            var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
-
-            var random = new Random(42);
-            var startDate = new DateTime(2020, 1, 1);
-
-            var departments = new[] { Icons.Building, Icons.Code, Icons.Users, Icons.ShoppingCart, Icons.Headphones };
-            var statuses = new[] { Icons.CircleCheck, Icons.Clock, Icons.TriangleAlert, Icons.X, Icons.Pause };
-            var priorities = new[] { Icons.ArrowUp, Icons.ArrowRight, Icons.ArrowDown, Icons.Flag, Icons.Star };
-
-            var firstNames = new[] { "John", "Jane", "Mike", "Sarah", "David", "Emily", "Chris", "Lisa", "Tom", "Anna" };
-            var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez" };
-
-            return Enumerable.Range(1, 1000).Select(i =>
-            {
-                var firstName = firstNames[random.Next(firstNames.Length)];
-                var lastName = lastNames[random.Next(lastNames.Length)];
-                var name = $"{firstName} {lastName}";
-                var email = $"employee{i}@company.com";
-                var age = random.Next(22, 65);
-                var salary = (decimal)(random.Next(30000, 150000) / 1000 * 1000);
-                var performance = Math.Round(random.NextDouble() * 5, 2);
-                var isActive = random.NextDouble() > 0.2;
-                var isManager = random.NextDouble() > 0.8;
-                var hireDate = startDate.AddDays(random.Next(0, 1826));
-                var lastReview = DateTime.Now.AddDays(-random.Next(0, 365));
-                var status = statuses[random.Next(statuses.Length)];
-                var priority = priorities[random.Next(priorities.Length)];
-                var department = departments[random.Next(departments.Length)];
-                var notes = $"Employee notes for {i}";
-                var optionalId = random.NextDouble() > 0.3 ? (int?)random.Next(1, 1000) : null;
-
-                // Generate 2-5 random skills for each employee
-                var skillCount = random.Next(2, 6);
-                var skills = Enumerable.Range(0, skillCount)
-                    .Select(_ => allSkills[random.Next(allSkills.Length)])
-                    .Distinct()
-                    .ToArray();
-
-                // Generate link URLs
-                var widgetLink = "/widgets/charts/area-chart"; // Internal widget link - relative URL works on any domain
-                var profileLink = $"https://linkedin.com/in/{firstName.ToLower()}{lastName.ToLower()}{i}"; // External LinkedIn profile
-
-                return new EmployeeRecord
-                {
-                    Id = i,
-                    EmployeeCode = $"EMP{i:D4}",
-                    Name = name,
-                    Email = email,
-                    Age = age,
-                    Salary = salary,
-                    Performance = performance,
-                    IsActive = isActive,
-                    IsManager = isManager,
-                    HireDate = hireDate,
-                    LastReview = lastReview,
-                    Status = status,
-                    Priority = priority,
-                    Department = department,
-                    Notes = notes,
-                    OptionalId = optionalId,
-                    Skills = skills,
-                    WidgetLink = widgetLink,
-                    ProfileLink = profileLink
-                };
-            }).ToList();
-        });
+        var mockService = UseService<MockEmployeeService>();
 
         // The DataTable builder will be recreated each time, but use the cached employee data
         var editModalOpen = UseState(() => false);
@@ -112,7 +20,7 @@ public class DataTableApp : SampleBase
         var queryService = UseService<IQueryService>();
 
         // Configuration and row actions logic
-        var dataTable = employees.Value.AsQueryable().ToDataTable(idSelector: e => e.Id)
+        var dataTable = mockService.GetEmployees().AsQueryable().ToDataTable(idSelector: e => e.Id)
             // Table dimensions (fix for issue #1311)
             .Width(Size.Full()) // Table width set to 120 units (30rem)
             .Height(Size.Full()) // Table height set to 120 units (30rem)
@@ -247,7 +155,7 @@ public class DataTableApp : SampleBase
                     var tag = args.Tag?.ToString();
                     if (tag == "edit")
                     {
-                        var employee = employees.Value.FirstOrDefault(emp => emp.Id == employeeId);
+                        var employee = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == employeeId);
                         if (employee != null)
                         {
                             editingEmployee.Set(employee);
@@ -256,10 +164,10 @@ public class DataTableApp : SampleBase
                     }
                     else if (tag == "delete")
                     {
-                        var employee = employees.Value.FirstOrDefault(emp => emp.Id == employeeId);
+                        var employee = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == employeeId);
                         if (employee != null)
                         {
-                            employees.Value.Remove(employee);
+                            mockService.DeleteEmployee(employee.Id);
                             queryService.Invalidate(k => k is string s && s == nameof(EmployeeRecord));
                             client.Toast($"Employee {employee.Name} deleted");
                         }
@@ -274,15 +182,7 @@ public class DataTableApp : SampleBase
 
         return new Fragment([dataTable, new EmployeeEditDialog(editModalOpen, editingEmployee, updated =>
         {
-            var original = employees.Value.FirstOrDefault(e => e.Id == updated.Id);
-            if (original != null)
-            {
-                var index = employees.Value.IndexOf(original);
-                if (index != -1)
-                {
-                    employees.Value[index] = updated;
-                }
-            }
+            mockService.UpdateEmployee(updated);
         })]);
     }
 }
