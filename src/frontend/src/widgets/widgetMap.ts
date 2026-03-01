@@ -77,7 +77,6 @@ import {
   AppHostWidget,
   AudioPlayerWidget,
   VideoPlayerWidget,
-  SmartSearchWidget,
 } from '@/widgets/primitives';
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
@@ -122,8 +121,6 @@ export const widgetMap = {
 
   // Widgets
   'Ivy.Article': ArticleWidget,
-  'Ivy.SmartSearch': SmartSearchWidget,
-  'Ivy.Docs.Shared.Helpers.SmartSearch': SmartSearchWidget,
   'Ivy.Button': ButtonWidget,
   'Ivy.Progress': ProgressWidget,
   'Ivy.Tooltip': TooltipWidget,
@@ -226,7 +223,16 @@ export const widgetMap = {
   ),
 
   // Internal
-
+  'Ivy.SmartSearch': React.lazy(() =>
+    import('@/widgets/primitives/SmartSearchWidget').then(m => ({
+      default: m.SmartSearchWidget,
+    }))
+  ),
+  'Ivy.Docs.Shared.Helpers.SmartSearch': React.lazy(() =>
+    import('@/widgets/primitives/SmartSearchWidget').then(m => ({
+      default: m.SmartSearchWidget,
+    }))
+  ),
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')
   ),
