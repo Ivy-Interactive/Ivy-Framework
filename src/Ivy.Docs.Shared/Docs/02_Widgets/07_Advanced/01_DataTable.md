@@ -349,4 +349,4 @@ sampleUsers.ToDataTable()
 </Body>
 </Details>
 
-<WidgetDocs Type="Ivy.DataTable" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/DataTables/DataTable.cs"/>
+<WidgetDocs Type="Ivy.DataTable" ExtensionTypes="Ivy.DataTableWidgetExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/DataTables/DataTable.cs"/>
