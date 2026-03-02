@@ -59,6 +59,8 @@ export interface SunburstChartWidgetProps {
   width?: string;
   height?: string;
   tooltip?: ToolTipProps;
+  legend?: LegendProps;
+  toolbox?: ToolboxProps;
   colorScheme: ColorScheme;
   innerRadius?: number;
   outerRadius?: number;

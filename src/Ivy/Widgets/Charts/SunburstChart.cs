@@ -34,6 +34,10 @@ public record SunburstChart : WidgetBase<SunburstChart>
 
   [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
+  [Prop] public Legend? Legend { get; init; } = null;
+
+  [Prop] public Toolbox? Toolbox { get; init; } = null;
+
   [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
   /// <summary>
@@ -102,6 +106,26 @@ public static class SunburstChartExtensions
   public static SunburstChart Tooltip(this SunburstChart chart)
   {
     return chart with { Tooltip = new Charts.Tooltip() };
+  }
+
+  public static SunburstChart Legend(this SunburstChart chart, Legend? legend)
+  {
+    return chart with { Legend = legend };
+  }
+
+  public static SunburstChart Legend(this SunburstChart chart)
+  {
+    return chart with { Legend = new Legend() };
+  }
+
+  public static SunburstChart Toolbox(this SunburstChart chart, Toolbox toolbox)
+  {
+    return chart with { Toolbox = toolbox };
+  }
+
+  public static SunburstChart Toolbox(this SunburstChart chart)
+  {
+    return chart with { Toolbox = new Toolbox() };
   }
 
   public static SunburstChart InnerRadius(this SunburstChart chart, int value)

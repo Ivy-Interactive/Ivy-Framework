@@ -2,9 +2,10 @@ import React, { useMemo } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
-import { getColors, generateTextStyle, generateTooltip } from './sharedUtils';
+import { getColors, generateTextStyle, generateTooltip, generateEChartToolbox } from './sharedUtils';
 import { ChartType, SunburstChartWidgetProps, SunburstNodeProps } from './chartTypes';
 import { getChartThemeColors } from './styles';
+import { PIE_LEGEND_DEFAULTS, applyDefaults } from './chartDefaults';
 
 const resolveIvyColor = (colorName?: string | null): string | undefined => {
   if (!colorName) return undefined;
@@ -19,7 +20,7 @@ const resolveIvyColor = (colorName?: string | null): string | undefined => {
   return colorName;
 };
 
-const mapDataToECharts = (nodes: SunburstNodeProps[], chartColors: string[], parentColor?: string, depth = 0): any[] => {
+const mapDataToECharts = (nodes: SunburstNodeProps[], chartColors: string[], parentColor?: string, depth = 0, opacity = 1.0): any[] => {
   return nodes.map((node, index) => {
     // Resolve custom Ivy Colors to standard hex values so ECharts can render them correctly
     const nodeColor = resolveIvyColor(node.fill);
@@ -33,12 +34,13 @@ const mapDataToECharts = (nodes: SunburstNodeProps[], chartColors: string[], par
       value: (node.children?.length && node.value === 0) ? undefined : node.value,
       itemStyle: {
         color: currentColor,
+        opacity: opacity,
       },
       // Recursively map children, passing down the assigned color so children can calculate 
       // lighter/darker variations (handled implicitly by ECharts if we just set the same color, 
       // or we can let ECharts naturally gradient it. Providing the explicit color helps match theme).
       children: node.children && node.children.length > 0
-        ? mapDataToECharts(node.children, chartColors, currentColor, depth + 1)
+        ? mapDataToECharts(node.children, chartColors, currentColor, depth + 1, Math.max(0.2, opacity - 0.25))
         : undefined
     };
   });
@@ -49,6 +51,8 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
   width = 'Full',
   height = 'Full',
   tooltip,
+  legend,
+  toolbox,
   colorScheme = 'Default',
   innerRadius,
   outerRadius,
@@ -100,8 +104,40 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
       ? themeColors.background
       : stroke;
 
+    const leg = legend ? applyDefaults(legend, PIE_LEGEND_DEFAULTS) : null;
+
     return {
       color: chartColors,
+      ...(leg && {
+        legend: {
+          data: eChartsData.map((d: any) => d.name),
+          orient:
+            leg.layout?.toLowerCase() === 'vertical'
+              ? 'vertical'
+              : 'horizontal',
+          left:
+            leg.align?.toLowerCase() === 'left'
+              ? 'left'
+              : leg.align?.toLowerCase() === 'right'
+                ? 'right'
+                : 'center',
+          top:
+            leg.verticalAlign?.toLowerCase() === 'top'
+              ? 'top'
+              : leg.verticalAlign?.toLowerCase() === 'middle'
+                ? 'middle'
+                : 'bottom',
+          icon: leg.iconType ?? 'circle',
+          itemWidth: leg.iconSize ?? PIE_LEGEND_DEFAULTS.iconSize,
+          itemHeight: leg.iconSize ?? PIE_LEGEND_DEFAULTS.iconSize,
+          type: 'scroll',
+          textStyle: generateTextStyle(
+            themeColors.foreground,
+            themeColors.fontSans
+          ),
+        },
+      }),
+      toolbox: generateEChartToolbox(toolbox && { ...toolbox, magicType: false }),
       textStyle: generateTextStyle(
         themeColors.foreground,
         themeColors.fontSans
@@ -156,10 +192,23 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
             }
           ]
         },
-      ],
+        leg ? {
+          type: 'pie',
+          data: eChartsData.map((d: any) => ({ name: d.name, value: 0, itemStyle: d.itemStyle })),
+          center: ['-100%', '-100%'],
+          radius: [0, 0],
+          label: { show: false },
+          labelLine: { show: false },
+          tooltip: { show: false },
+          itemStyle: { opacity: 0 },
+          silent: true
+        } : null
+      ].filter(Boolean),
     };
   }, [
     chartColors,
+    legend,
+    toolbox,
     themeColors,
     tooltip,
     eChartsData,

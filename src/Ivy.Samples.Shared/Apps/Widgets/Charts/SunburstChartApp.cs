@@ -8,8 +8,9 @@ public class SunburstChartApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return Layout.Grid().Columns(1)
+        return Layout.Grid().Columns(2)
             | new SunburstChart0View()
+            | new SunburstChart1View()
         ;
     }
 }
@@ -24,14 +25,14 @@ public class SunburstChart0View : ViewBase
             {
                 new SunburstNode("Biology", 0, new[]
                 {
-                    new SunburstNode("Exam", 15),
+                    new SunburstNode("Exam", 10),
                     new SunburstNode("Lab", 10),
-                    new SunburstNode("Homework", 5)
+                    new SunburstNode("Homework", 10)
                 }),
                 new SunburstNode("Chemistry", 0, new[]
                 {
                     new SunburstNode("Experiment", 12),
-                    new SunburstNode("Report", 8)
+                    new SunburstNode("Report", 10)
                 }),
                 new SunburstNode("Physics", 0, new[]
                 {
@@ -79,12 +80,57 @@ public class SunburstChart0View : ViewBase
             }) { Fill = Colors.Zinc },
         };
 
-        return new Card().Title("Subject Breakdown").Height(160)
+        return new Card().Title("School Subjects Breakdown").Height(180)
             | new SunburstChart(data)
                 .InnerRadius(100)
                 .OuterRadius(260)
                 .Padding(4)
                 .Tooltip()
+                .Legend(new Legend().Horizontal().Center().Bottom())
+                .Toolbox()
+        ;
+    }
+
+}
+
+public class SunburstChart1View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new SunburstNode("Needs", 0, new[]
+            {
+                new SunburstNode("Housing", 2000),
+                new SunburstNode("Transportation", 800),
+                new SunburstNode("Utilities", 400),
+                new SunburstNode("Groceries", 600),
+                new SunburstNode("Health", 300)
+            }) { Fill = Colors.Rose },
+
+            new SunburstNode("Wants", 0, new[]
+            {
+                new SunburstNode("Dining", 500),
+                new SunburstNode("Meals", 300),
+                new SunburstNode("Shopping", 400),
+                new SunburstNode("Travel", 600)
+            }) { Fill = Colors.Teal },
+
+            new SunburstNode("Savings", 0, new[]
+            {
+                new SunburstNode("Investments", 700),
+                new SunburstNode("ISK", 300)
+            }) { Fill = Colors.Indigo },
+        };
+
+        return new Card().Title("Monthly Expense Breakdown").Height(180)
+            | new SunburstChart(data)
+                .InnerRadius(100)
+                .OuterRadius(260)
+                .Padding(4)
+                .Tooltip()
+                .Legend(new Legend().Horizontal().Center().Bottom())
+                .Toolbox()
         ;
     }
 
