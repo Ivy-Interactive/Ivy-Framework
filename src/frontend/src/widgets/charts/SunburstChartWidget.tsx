@@ -2,46 +2,76 @@ import React, { useMemo } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
-import { getColors, generateTextStyle, generateTooltip, generateEChartToolbox } from './sharedUtils';
-import { ChartType, SunburstChartWidgetProps, SunburstNodeProps } from './chartTypes';
+import {
+  getColors,
+  generateTextStyle,
+  generateTooltip,
+  generateEChartToolbox,
+} from './sharedUtils';
+import {
+  ChartType,
+  SunburstChartWidgetProps,
+  SunburstNodeProps,
+} from './chartTypes';
 import { getChartThemeColors } from './styles';
 import { PIE_LEGEND_DEFAULTS, applyDefaults } from './chartDefaults';
 
 const resolveIvyColor = (colorName?: string | null): string | undefined => {
   if (!colorName) return undefined;
-  if (colorName.startsWith('#') || colorName.startsWith('rgb') || colorName.startsWith('hsl')) return colorName;
+  if (
+    colorName.startsWith('#') ||
+    colorName.startsWith('rgb') ||
+    colorName.startsWith('hsl')
+  )
+    return colorName;
 
   if (typeof document !== 'undefined') {
     const cssVarName = `--${colorName.toLowerCase()}`;
-    const cssVal = getComputedStyle(document.documentElement).getPropertyValue(cssVarName).trim();
+    const cssVal = getComputedStyle(document.documentElement)
+      .getPropertyValue(cssVarName)
+      .trim();
     if (cssVal) return cssVal;
   }
 
   return colorName;
 };
 
-const mapDataToECharts = (nodes: SunburstNodeProps[], chartColors: string[], parentColor?: string, depth = 0, opacity = 1.0): any[] => {
+const mapDataToECharts = (
+  nodes: SunburstNodeProps[],
+  chartColors: string[],
+  parentColor?: string,
+  depth = 0,
+  opacity = 1.0
+): any[] => {
   return nodes.map((node, index) => {
     // Resolve custom Ivy Colors to standard hex values so ECharts can render them correctly
     const nodeColor = resolveIvyColor(node.fill);
 
-    // Assign a color based on the top-level index if no parent color is provided, 
+    // Assign a color based on the top-level index if no parent color is provided,
     // or use the explicitly set Fill color if available.
-    const currentColor = nodeColor || parentColor || chartColors[index % chartColors.length];
+    const currentColor =
+      nodeColor || parentColor || chartColors[index % chartColors.length];
 
     return {
       name: node.name,
-      value: (node.children?.length && node.value === 0) ? undefined : node.value,
+      value: node.children?.length && node.value === 0 ? undefined : node.value,
       itemStyle: {
         color: currentColor,
         opacity: opacity,
       },
-      // Recursively map children, passing down the assigned color so children can calculate 
-      // lighter/darker variations (handled implicitly by ECharts if we just set the same color, 
+      // Recursively map children, passing down the assigned color so children can calculate
+      // lighter/darker variations (handled implicitly by ECharts if we just set the same color,
       // or we can let ECharts naturally gradient it. Providing the explicit color helps match theme).
-      children: node.children && node.children.length > 0
-        ? mapDataToECharts(node.children, chartColors, currentColor, depth + 1, Math.max(0.2, opacity - 0.25))
-        : undefined
+      children:
+        node.children && node.children.length > 0
+          ? mapDataToECharts(
+              node.children,
+              chartColors,
+              currentColor,
+              depth + 1,
+              Math.max(0.2, opacity - 0.25)
+            )
+          : undefined,
     };
   });
 };
@@ -97,12 +127,16 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
     [colorScheme, colors]
   );
 
-  const eChartsData = useMemo(() => mapDataToECharts(data, chartColors), [data, chartColors]);
+  const eChartsData = useMemo(
+    () => mapDataToECharts(data, chartColors),
+    [data, chartColors]
+  );
 
   const option = useMemo(() => {
-    const strokeColor = stroke === '#ffffff' || stroke.toLowerCase() === 'white'
-      ? themeColors.background
-      : stroke;
+    const strokeColor =
+      stroke === '#ffffff' || stroke.toLowerCase() === 'white'
+        ? themeColors.background
+        : stroke;
 
     const leg = legend ? applyDefaults(legend, PIE_LEGEND_DEFAULTS) : null;
 
@@ -137,7 +171,9 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
           ),
         },
       }),
-      toolbox: generateEChartToolbox(toolbox && { ...toolbox, magicType: false }),
+      toolbox: generateEChartToolbox(
+        toolbox && { ...toolbox, magicType: false }
+      ),
       textStyle: generateTextStyle(
         themeColors.foreground,
         themeColors.fontSans
@@ -173,36 +209,59 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
             color: themeColors.foreground,
           },
           emphasis: {
-            focus: 'ancestor'
+            focus: 'ancestor',
           },
           // Customize levels for ring padding (gap width) and visual hierarchy
           levels: [
             {}, // Blank for root
-            { // Level 1
-              itemStyle: { borderWidth: padding, borderRadius: padding > 0 ? 4 : 0 },
-              label: { rotate: 'tangential' }
+            {
+              // Level 1
+              itemStyle: {
+                borderWidth: padding,
+                borderRadius: padding > 0 ? 4 : 0,
+              },
+              label: { rotate: 'tangential' },
             },
-            { // Level 2
-              itemStyle: { borderWidth: padding, borderRadius: padding > 0 ? 4 : 0 },
-              label: { align: 'center', rotate: 'tangential' }
+            {
+              // Level 2
+              itemStyle: {
+                borderWidth: padding,
+                borderRadius: padding > 0 ? 4 : 0,
+              },
+              label: { align: 'center', rotate: 'tangential' },
             },
-            { // Level 3
-              label: { align: 'center', rotate: 'tangential', padding: 3, silent: false },
-              itemStyle: { borderWidth: padding, borderRadius: padding > 0 ? 4 : 0 }
-            }
-          ]
+            {
+              // Level 3
+              label: {
+                align: 'center',
+                rotate: 'tangential',
+                padding: 3,
+                silent: false,
+              },
+              itemStyle: {
+                borderWidth: padding,
+                borderRadius: padding > 0 ? 4 : 0,
+              },
+            },
+          ],
         },
-        leg ? {
-          type: 'pie',
-          data: eChartsData.map((d: any) => ({ name: d.name, value: 0, itemStyle: d.itemStyle })),
-          center: ['-100%', '-100%'],
-          radius: [0, 0],
-          label: { show: false },
-          labelLine: { show: false },
-          tooltip: { show: false },
-          itemStyle: { opacity: 0 },
-          silent: true
-        } : null
+        leg
+          ? {
+              type: 'pie',
+              data: eChartsData.map((d: any) => ({
+                name: d.name,
+                value: 0,
+                itemStyle: d.itemStyle,
+              })),
+              center: ['-100%', '-100%'],
+              radius: [0, 0],
+              label: { show: false },
+              labelLine: { show: false },
+              tooltip: { show: false },
+              itemStyle: { opacity: 0 },
+              silent: true,
+            }
+          : null,
       ].filter(Boolean),
     };
   }, [
