@@ -15,6 +15,7 @@ import type {
   ToolboxProps,
   XAxisProps,
   YAxisProps,
+  FunnelProps,
 } from './chartTypes';
 
 // Line/Area defaults (Line.cs, Area.cs)
@@ -42,6 +43,13 @@ export const PIE_DEFAULTS: Partial<PieProps> = {
   animated: false,
   startAngle: 0,
   endAngle: 360,
+};
+
+// Funnel defaults (Funnel.cs)
+export const FUNNEL_DEFAULTS: Partial<FunnelProps> = {
+  legendType: 'Line',
+  strokeWidth: 1,
+  animated: true,
 };
 
 // CartesianGrid defaults (CartesianGrid.cs)

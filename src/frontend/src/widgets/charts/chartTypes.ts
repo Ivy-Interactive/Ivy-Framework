@@ -4,6 +4,7 @@ export enum ChartType {
   Bar = 'bar',
   Line = 'line',
   Pie = 'pie',
+  Funnel = 'funnel',
 }
 
 export interface ChartData {
@@ -40,6 +41,18 @@ export interface PieChartWidgetProps {
   legend?: PieLegendProps;
   colorScheme: ColorScheme;
   total?: PieChartTotalProps;
+  toolbox?: ToolboxProps;
+}
+
+export interface FunnelChartWidgetProps {
+  id: string;
+  data: ChartData[];
+  width?: string;
+  height?: string;
+  funnels?: FunnelProps[];
+  tooltip?: ToolTipProps;
+  legend?: LegendProps;
+  colorScheme: ColorScheme;
   toolbox?: ToolboxProps;
 }
 
@@ -297,6 +310,19 @@ export type PieProps = {
   nameKey: string;
   outerRadius?: string | number;
   startAngle?: number;
+  stroke?: string | null;
+  strokeDashArray?: string | null;
+  strokeWidth?: number;
+};
+
+export type FunnelProps = {
+  animated?: boolean;
+  dataKey: string;
+  fill?: string | null;
+  fillOpacity?: number | null;
+  labelLists?: string[];
+  legendType?: string;
+  nameKey?: string;
   stroke?: string | null;
   strokeDashArray?: string | null;
   strokeWidth?: number;
