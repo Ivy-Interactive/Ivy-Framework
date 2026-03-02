@@ -99,7 +99,8 @@ var myService = UseService<IMyService>();
 - Add Children: Pipe child elements using the | operator to arrange them top-to-bottom (vertical) or left-to-right (horizontal).
 - Layouts can be customized with methods like .Gap(int number) to set spacing between children. Use .Left(), .Center(), or .Right() methods to control alignment.
 - The number in Gap(int number) works the same as in Tailwind CSS spacing scale (e.g., 1 = 0.25rem, 2 = 0.5rem, etc.).
-Layouts have a default gap of 4 (1rem). In general, you very rarely need to set the gap explicitly.
+- Layouts have a default gap of 4 (1rem). Do NOT add `.Gap(4)` — it is the default and adds unnecessary noise. Only use `.Gap()` when you need a value other than 4.
+- `.Padding()` is rarely needed. Layouts and pages already have appropriate padding by default. Only add `.Padding()` when you need extra inner spacing for a specific design reason.
 
 // Basic Vertical Layout
 Layout.Vertical()
@@ -119,8 +120,6 @@ Grids:
 Layout.Grid()
   .Columns(2)
   .Rows(2)
-  .Gap(4)
-  .Padding(8)
     | Text.Block("Cell 1")
     | Text.Block("Cell 2")
     ...
