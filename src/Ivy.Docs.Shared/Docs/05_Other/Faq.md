@@ -18,3 +18,35 @@ Use the `TextInputs.Textarea` variant or the dedicated `ToTextAreaInput` extensi
 state.ToTextAreaInput(placeholder: "Enter text...")
 ```
 
+## How do I read CSV data or load external data in Ivy?
+
+Ivy apps are standard C# applications, so you can use any .NET approach to load data:
+
+**Embedded CSV data (hardcoded):**
+```csharp
+// Define your data as C# records/classes and initialize inline
+var data = new[] {
+    new { Date = "2012-01-01", TempMax = 12.8, TempMin = 5.0, Weather = "drizzle" },
+    // ...
+};
+```
+
+**Read from a CSV file using CsvHelper (NuGet package):**
+```csharp
+// Add NuGet package: CsvHelper
+using CsvHelper;
+using System.Globalization;
+
+using var reader = new StreamReader("data.csv");
+using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+var records = csv.GetRecords<WeatherRecord>().ToList();
+```
+
+**Fetch data from a URL at runtime:**
+```csharp
+var http = new HttpClient();
+var csvText = await http.GetStringAsync("https://example.com/data.csv");
+// Parse csvText manually or with CsvHelper
+```
+
+For small datasets, embedding data directly as C# collections is simplest. For larger datasets, use CsvHelper or similar libraries.
