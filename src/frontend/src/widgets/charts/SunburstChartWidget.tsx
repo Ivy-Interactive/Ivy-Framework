@@ -6,15 +6,31 @@ import { getColors, generateTextStyle, generateTooltip } from './sharedUtils';
 import { ChartType, SunburstChartWidgetProps, SunburstNodeProps } from './chartTypes';
 import { getChartThemeColors } from './styles';
 
+const resolveIvyColor = (colorName?: string | null): string | undefined => {
+  if (!colorName) return undefined;
+  if (colorName.startsWith('#') || colorName.startsWith('rgb') || colorName.startsWith('hsl')) return colorName;
+
+  if (typeof document !== 'undefined') {
+    const cssVarName = `--${colorName.toLowerCase()}`;
+    const cssVal = getComputedStyle(document.documentElement).getPropertyValue(cssVarName).trim();
+    if (cssVal) return cssVal;
+  }
+
+  return colorName;
+};
+
 const mapDataToECharts = (nodes: SunburstNodeProps[], chartColors: string[], parentColor?: string, depth = 0): any[] => {
   return nodes.map((node, index) => {
+    // Resolve custom Ivy Colors to standard hex values so ECharts can render them correctly
+    const nodeColor = resolveIvyColor(node.fill);
+
     // Assign a color based on the top-level index if no parent color is provided, 
     // or use the explicitly set Fill color if available.
-    const currentColor = node.fill || parentColor || chartColors[index % chartColors.length];
+    const currentColor = nodeColor || parentColor || chartColors[index % chartColors.length];
 
     return {
       name: node.name,
-      value: node.value,
+      value: (node.children?.length && node.value === 0) ? undefined : node.value,
       itemStyle: {
         color: currentColor,
       },
@@ -127,21 +143,15 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
           levels: [
             {}, // Blank for root
             { // Level 1
-              r0: innerRadius ?? '15%',
-              r: '40%',
               itemStyle: { borderWidth: padding, borderRadius: padding > 0 ? 4 : 0 },
               label: { rotate: 'tangential' }
             },
             { // Level 2
-              r0: '42%',
-              r: '70%',
               itemStyle: { borderWidth: padding, borderRadius: padding > 0 ? 4 : 0 },
               label: { align: 'center', rotate: 'tangential' }
             },
             { // Level 3
-              r0: '72%',
-              r: outerRadius ?? '95%',
-              label: { position: 'outside', padding: 3, silent: false },
+              label: { align: 'center', rotate: 'tangential', padding: 3, silent: false },
               itemStyle: { borderWidth: padding, borderRadius: padding > 0 ? 4 : 0 }
             }
           ]

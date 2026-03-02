@@ -37,34 +37,34 @@ public record SunburstChart : WidgetBase<SunburstChart>
   [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
   /// <summary>
-  /// Inner radius of the sunburst chart, in pixels or percentage. Controls the size of the hole.
+  /// Inner radius of the sunburst chart, in pixels. Controls the size of the hole.
   /// </summary>
-  [Prop] public string? InnerRadius { get; init; }
+  [Prop] public int InnerRadius { get; init; } = 50;
 
   /// <summary>
-  /// Outer radius of the sunburst chart, in pixels or percentage. When null, it fills the available space.
+  /// Outer radius of the sunburst chart, in pixels. When null, it fills the available space.
   /// </summary>
-  [Prop] public string? OuterRadius { get; init; }
+  [Prop] public int? OuterRadius { get; init; } = null;
 
   /// <summary>
-  /// X coordinate of the center. When null, defaults to "50%".
+  /// X coordinate of the center in pixels. When null, defaults to auto-centering.
   /// </summary>
-  [Prop] public string? Cx { get; init; }
+  [Prop] public int? Cx { get; init; } = null;
 
   /// <summary>
-  /// Y coordinate of the center. When null, defaults to "50%".
+  /// Y coordinate of the center in pixels. When null, defaults to auto-centering.
   /// </summary>
-  [Prop] public string? Cy { get; init; }
+  [Prop] public int? Cy { get; init; } = null;
 
   /// <summary>
   /// Start angle of the sunburst chart.
   /// </summary>
-  [Prop] public int StartAngle { get; init; } = 90;
+  [Prop] public int StartAngle { get; init; } = 0;
 
   /// <summary>
   /// End angle of the sunburst chart. Default doesn't need to be set since total is based on 360 relative to start.
   /// </summary>
-  [Prop] public int? EndAngle { get; init; }
+  [Prop] public int EndAngle { get; init; } = 360;
 
   /// <summary>
   /// Padding adds spacing between individual sectors within the same ring.
@@ -106,40 +106,20 @@ public static class SunburstChartExtensions
 
   public static SunburstChart InnerRadius(this SunburstChart chart, int value)
   {
-    return chart with { InnerRadius = $"{value}px" };
-  }
-
-  public static SunburstChart InnerRadius(this SunburstChart chart, string value)
-  {
     return chart with { InnerRadius = value };
   }
 
   public static SunburstChart OuterRadius(this SunburstChart chart, int value)
-  {
-    return chart with { OuterRadius = $"{value}px" };
-  }
-
-  public static SunburstChart OuterRadius(this SunburstChart chart, string value)
   {
     return chart with { OuterRadius = value };
   }
 
   public static SunburstChart Cx(this SunburstChart chart, int value)
   {
-    return chart with { Cx = $"{value}px" };
-  }
-
-  public static SunburstChart Cx(this SunburstChart chart, string value)
-  {
     return chart with { Cx = value };
   }
 
   public static SunburstChart Cy(this SunburstChart chart, int value)
-  {
-    return chart with { Cy = $"{value}px" };
-  }
-
-  public static SunburstChart Cy(this SunburstChart chart, string value)
   {
     return chart with { Cy = value };
   }

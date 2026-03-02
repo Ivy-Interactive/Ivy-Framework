@@ -60,10 +60,10 @@ export interface SunburstChartWidgetProps {
   height?: string;
   tooltip?: ToolTipProps;
   colorScheme: ColorScheme;
-  innerRadius?: string;
-  outerRadius?: string;
-  cx?: string;
-  cy?: string;
+  innerRadius?: number;
+  outerRadius?: number;
+  cx?: number;
+  cy?: number;
   startAngle?: number;
   endAngle?: number;
   padding?: number;
