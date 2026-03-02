@@ -9,5 +9,4 @@ searchHints:
   - antigravity
   - vscode
   - windsurf
-  - rider
 ---
