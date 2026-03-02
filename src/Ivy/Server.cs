@@ -643,6 +643,9 @@ public class Server
             return;
         }
 
+        if (!CheckForMissingSecrets(app.Services))
+            return;
+
         try
         {
             CheckForAppIdCollisions(app);
@@ -653,6 +656,67 @@ public class Server
         {
             Console.WriteLine($@"Failed to start Ivy server. Is the port already in use?");
         }
+    }
+
+    private bool CheckForMissingSecrets(IServiceProvider serviceProvider)
+    {
+        var config = serviceProvider.GetRequiredService<IConfiguration>();
+        var missingByProvider = new Dictionary<string, List<string>>();
+
+        // Gather from DI
+        var providers = serviceProvider.GetServices<IHaveSecrets>();
+        foreach (var provider in providers)
+            CheckProvider(provider, config, missingByProvider);
+
+        // Gather from assembly (fallback, skip already-found types)
+        var assembly = Assembly.GetEntryAssembly();
+        if (assembly != null)
+        {
+            var knownTypes = providers.Select(p => p.GetType()).ToHashSet();
+            var types = assembly.GetTypes()
+                .Where(t => t is { IsClass: true, IsAbstract: false }
+                            && typeof(IHaveSecrets).IsAssignableFrom(t)
+                            && !knownTypes.Contains(t));
+
+            foreach (var type in types)
+            {
+                try
+                {
+                    if (Activator.CreateInstance(type) is IHaveSecrets provider)
+                        CheckProvider(provider, config, missingByProvider);
+                }
+                catch
+                {
+                    // Skip types that can't be instantiated
+                }
+            }
+        }
+
+        if (missingByProvider.Count == 0)
+            return true;
+
+        Console.Error.WriteLine("Missing secrets detected. The Ivy server cannot start.");
+        Console.Error.WriteLine();
+        foreach (var (providerName, keys) in missingByProvider)
+        {
+            Console.Error.WriteLine($"  {providerName}:");
+            foreach (var key in keys)
+                Console.Error.WriteLine($"    - {key}");
+            Console.Error.WriteLine();
+        }
+        return false;
+    }
+
+    private static void CheckProvider(IHaveSecrets provider, IConfiguration config,
+        Dictionary<string, List<string>> missingByProvider)
+    {
+        var missing = provider.GetSecrets()
+            .Where(s => string.IsNullOrEmpty(config[s.Key]))
+            .Select(s => s.Key)
+            .ToList();
+
+        if (missing.Count > 0)
+            missingByProvider[provider.GetType().Name] = missing;
     }
 
     private void CheckForAppIdCollisions(WebApplication app)
