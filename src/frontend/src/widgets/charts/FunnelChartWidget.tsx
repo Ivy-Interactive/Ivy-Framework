@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
@@ -24,11 +24,12 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
   width = 'Full',
   height = 'Full',
   funnels = [],
-  tooltip,
   toolbox,
   legend,
   colorScheme = 'Default',
 }) => {
+  const chartRef = useRef<ReactECharts>(null);
+
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,
     monitorSystem: true,
@@ -106,7 +107,27 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
             show: true,
             position: 'inside',
             formatter: function (params: any) {
-              const percent = Math.round((Number(params.value) / maxVal) * 100);
+              let currentMax = maxVal;
+              try {
+                const chart = chartRef.current?.getEchartsInstance();
+                if (chart) {
+                  const opts = chart.getOption() as any;
+                  if (opts?.series?.[0]?.data) {
+                    const sData = opts.series[0].data;
+                    if (Array.isArray(sData)) {
+                      currentMax = Math.max(
+                        ...sData.map((d: any) => Number(d.value) || 0),
+                        1
+                      );
+                    }
+                  }
+                }
+              } catch (e) {
+                // Ignore errors related to checking echarts instance
+              }
+              const percent = Math.round(
+                (Number(params.value) / currentMax) * 100
+              );
               return `${percent}%`;
             },
             color: '#fff',
@@ -163,9 +184,27 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
         axisLabel: {
           show: true,
           formatter: function (value: number) {
-            if (value >= newData.length) return '';
-            const dataObj = newData[value];
-            let valObj = dataObj.value;
+            let currentData = newData;
+            try {
+              const chart = chartRef.current?.getEchartsInstance();
+              if (chart) {
+                const opts = chart.getOption() as any;
+                if (opts?.series?.[0]?.data) {
+                  const sData = opts.series[0].data;
+                  if (Array.isArray(sData)) {
+                    currentData = sData;
+                  }
+                }
+              }
+            } catch (e) {
+              // Ignore errors related to checking echarts instance
+            }
+
+            if (value >= currentData.length) return '';
+            const dataObj = currentData[value];
+            let valObj = Number(dataObj.value);
+            if (isNaN(valObj)) valObj = 0;
+
             let displayVal = valObj.toString();
             if (valObj >= 1000) {
               displayVal =
@@ -242,6 +281,7 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
   return (
     <div style={styles}>
       <ReactECharts
+        ref={chartRef}
         option={option}
         style={chartStyles}
         notMerge={true}
