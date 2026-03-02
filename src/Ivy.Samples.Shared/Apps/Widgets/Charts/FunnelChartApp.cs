@@ -23,24 +23,36 @@ public class FunnelChartApp : SampleBase
             new("Purchases", 20000)
         };
 
-        return Layout.Grid().Columns(1)
-            | (new Card().Title("Standard Funnel").Description("Shows stages in a conversion pipeline using default settings.")
+        return Layout.Grid().Columns(2)
+            | ((new Card().Title("Standard Funnel").Description("Shows stages in a conversion pipeline using default settings.")
                 | data.ToFunnelChart(
                     dimension: x => x.Stage,
                     measure: q => q.Sum(x => x.Value))
                     .Toolbox()
-              )
-            | (new Card().Title("Rainbow Funnel").Description("Shows stages using the rainbow color scheme and explicit legend alignment.")
+              ).GridColumnSpan(2))
+            | ((new Card().Title("Rainbow Funnel").Description("Shows stages using the rainbow color scheme and explicit legend alignment.")
                 | data.ToFunnelChart(
                     dimension: x => x.Stage,
                     measure: q => q.Sum(x => x.Value),
                     polish: chart => chart
                         .ColorScheme(Ivy.Charts.ColorScheme.Rainbow)
-                        .Legend(new Ivy.Charts.Legend()
-                            .Align(Ivy.Charts.Legend.Alignments.Left)
-                            .VerticalAlign(Ivy.Charts.Legend.VerticalAlignments.Middle)
-                            .Layout(Ivy.Charts.Legend.Layouts.Vertical)
-                        )
+                        .Legend(new Ivy.Charts.Legend())
+                ).Toolbox()).GridColumnSpan(2))
+            | (new Card().Title("Vertical Funnel").Description("Shows stages in a conversion pipeline using vertical orientation.")
+                | data.ToFunnelChart(
+                    dimension: x => x.Stage,
+                    measure: q => q.Sum(x => x.Value),
+                    polish: chart => chart with { Funnels = [chart.Funnels[0].Orient(FunnelOrientations.Vertical)] }
+                ).Toolbox())
+            | (new Card().Title("Vertical Funnel (Rainbow)").Description("Shows vertical orientation with the rainbow color scheme.")
+                | data.ToFunnelChart(
+                    dimension: x => x.Stage,
+                    measure: q => q.Sum(x => x.Value),
+                    polish: chart => chart with
+                    {
+                        ColorScheme = Ivy.Charts.ColorScheme.Rainbow,
+                        Funnels = [chart.Funnels[0].Orient(FunnelOrientations.Vertical)]
+                    }
                 ).Toolbox());
     }
 }

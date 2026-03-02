@@ -88,6 +88,12 @@ namespace Ivy
         }
     }
 
+    public enum FunnelOrientations
+    {
+        Horizontal,
+        Vertical
+    }
+
     public record Funnel
     {
         public Funnel(string dataKey, string? nameKey = "name")
@@ -116,6 +122,8 @@ namespace Ivy
         public double? FillOpacity { get; set; } = null;
 
         public string? StrokeDashArray { get; set; }
+
+        public FunnelOrientations Orient { get; set; } = FunnelOrientations.Horizontal;
 
         public bool Animated { get; set; } = true;
 
@@ -157,6 +165,11 @@ namespace Ivy
         public static Funnel Animated(this Funnel funnel, bool animated = true)
         {
             return funnel with { Animated = animated };
+        }
+
+        public static Funnel Orient(this Funnel funnel, FunnelOrientations orient)
+        {
+            return funnel with { Orient = orient };
         }
 
         public static Funnel LabelLists(this Funnel funnel, LabelList[] labelLists)

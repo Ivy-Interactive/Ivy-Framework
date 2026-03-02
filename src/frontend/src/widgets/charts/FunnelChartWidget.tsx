@@ -79,9 +79,14 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
     [newData]
   );
 
+  const isHorizontal = useMemo(() => {
+    if (!funnels || funnels.length === 0) return true;
+    return funnels[0].orient?.toLowerCase() !== 'vertical';
+  }, [funnels]);
+
   const series = useMemo(
     () =>
-      valueKeys.map(key => {
+      valueKeys.flatMap(key => {
         const rawFunnelConfig = funnels?.find(
           a => a.dataKey.toLowerCase() === key
         );
@@ -89,68 +94,147 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
           ? { ...FUNNEL_DEFAULTS, ...rawFunnelConfig }
           : FUNNEL_DEFAULTS;
 
-        return {
+        const baseSeries = {
           name: key.charAt(0).toUpperCase() + key.slice(1),
           type: ChartType.Funnel,
-          orient: 'horizontal',
+          orient: isHorizontal ? 'horizontal' : 'vertical',
           left: '10%',
-          top: 100,
+          top: isHorizontal ? 100 : 50,
           bottom: legend ? 60 : 20,
-          width: '80%',
+          width: isHorizontal ? '80%' : '70%',
           min: 0,
           minSize: '0%',
           maxSize: '100%',
           sort: 'descending',
           gap: 0,
           animation: funnelConfig.animated ?? true,
-          label: {
-            show: true,
-            position: 'inside',
-            formatter: function (params: any) {
-              let currentMax = maxVal;
-              try {
-                const chart = chartRef.current?.getEchartsInstance();
-                if (chart) {
-                  const opts = chart.getOption() as any;
-                  if (opts?.series?.[0]?.data) {
-                    const sData = opts.series[0].data;
-                    if (Array.isArray(sData)) {
-                      currentMax = Math.max(
-                        ...sData.map((d: any) => Number(d.value) || 0),
-                        1
-                      );
-                    }
-                  }
-                }
-              } catch (e) {
-                // Ignore errors related to checking echarts instance
-              }
-              const percent = Math.round(
-                (Number(params.value) / currentMax) * 100
-              );
-              return `${percent}%`;
-            },
-            color: '#fff',
-            fontSize: 14,
-          },
-          labelLine: {
-            show: false,
-          },
-          itemStyle: {
-            color: funnelConfig.fill ?? undefined,
-            opacity: funnelConfig.fillOpacity ?? undefined,
-            borderColor: funnelConfig.stroke ?? '#fff',
-            borderWidth: funnelConfig.strokeWidth ?? 1,
-          },
-          emphasis: {
-            label: {
-              fontSize: 20,
-            },
-          },
           data: newData,
         };
+
+        const standardLabelFormatter = function (params: any) {
+          let currentMax = maxVal;
+          try {
+            const chart = chartRef.current?.getEchartsInstance();
+            if (chart) {
+              const opts = chart.getOption() as any;
+              if (opts?.series?.[0]?.data) {
+                const sData = opts.series[0].data;
+                if (Array.isArray(sData)) {
+                  currentMax = Math.max(
+                    ...sData.map((d: any) => Number(d.value) || 0),
+                    1
+                  );
+                }
+              }
+            }
+          } catch (e) {}
+          const percent = Math.round((Number(params.value) / currentMax) * 100);
+          return `${percent}%`;
+        };
+
+        if (isHorizontal) {
+          return [
+            {
+              ...baseSeries,
+              label: {
+                show: true,
+                position: 'inside',
+                formatter: standardLabelFormatter,
+                color: '#fff',
+                fontSize: 14,
+              },
+              labelLine: { show: false },
+              itemStyle: {
+                color: funnelConfig.fill ?? undefined,
+                opacity: funnelConfig.fillOpacity ?? undefined,
+                borderColor: funnelConfig.stroke ?? '#fff',
+                borderWidth: funnelConfig.strokeWidth ?? 1,
+              },
+              emphasis: { label: { fontSize: 20 } },
+            },
+          ];
+        } else {
+          return [
+            {
+              ...baseSeries,
+              label: {
+                show: true,
+                position: 'inside',
+                formatter: standardLabelFormatter,
+                color: '#fff',
+                fontSize: 14,
+              },
+              labelLine: { show: false },
+              itemStyle: {
+                color: funnelConfig.fill ?? undefined,
+                opacity: funnelConfig.fillOpacity ?? undefined,
+                borderColor: funnelConfig.stroke ?? (isDark ? '#000' : '#fff'),
+                borderWidth: funnelConfig.strokeWidth ?? 1,
+              },
+              emphasis: { label: { fontSize: 20 } },
+            },
+            {
+              ...baseSeries,
+              name: baseSeries.name + ' (Labels)',
+              label: {
+                show: true,
+                position: 'right',
+                formatter: function (params: any) {
+                  let valObj = Number(params.value);
+                  let displayVal = valObj.toString();
+                  if (valObj >= 1000) {
+                    displayVal =
+                      (valObj / 1000).toFixed(valObj % 1000 === 0 ? 0 : 1) +
+                      'K';
+                  }
+                  return `{name|${params.name}}\n{value|${displayVal}}`;
+                },
+                color: themeColors.foreground,
+                fontSize: 14,
+                rich: {
+                  name: {
+                    color: themeColors.mutedForeground,
+                    fontSize: 14,
+                    padding: [0, 0, 4, 0],
+                  },
+                  value: {
+                    color: themeColors.foreground,
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                  },
+                },
+              },
+              labelLine: {
+                show: true,
+                length: 40,
+                lineStyle: {
+                  color: isDark
+                    ? 'rgba(255, 255, 255, 0.2)'
+                    : 'rgba(0, 0, 0, 0.2)',
+                  width: 1,
+                  type: 'solid',
+                },
+              },
+              itemStyle: {
+                color: 'transparent',
+                borderColor: 'transparent',
+                borderWidth: 0,
+              },
+              emphasis: { disabled: true },
+            },
+          ];
+        }
       }),
-    [valueKeys, funnels, newData, legend, maxVal]
+    [
+      valueKeys,
+      funnels,
+      newData,
+      legend,
+      maxVal,
+      isHorizontal,
+      themeColors,
+      isDark,
+    ]
   );
 
   const option = useMemo(() => {
@@ -160,78 +244,85 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
       color: chartColors,
       grid: {
         left: '10%',
-        width: '80%',
-        top: 100,
+        width: isHorizontal ? '80%' : '70%',
+        top: isHorizontal ? 100 : 50,
         bottom: leg ? 60 : 20,
         containLabel: false,
       },
-      xAxis: {
-        type: 'value',
-        min: 0,
-        max: newData.length,
-        interval: 1,
-        position: 'top',
-        axisLine: { show: false },
-        axisTick: { show: false },
-        splitLine: {
-          show: true,
-          lineStyle: {
-            type: 'solid',
-            width: 1,
-            color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-          },
-        },
-        axisLabel: {
-          show: true,
-          formatter: function (value: number) {
-            let currentData = newData;
-            try {
-              const chart = chartRef.current?.getEchartsInstance();
-              if (chart) {
-                const opts = chart.getOption() as any;
-                if (opts?.series?.[0]?.data) {
-                  const sData = opts.series[0].data;
-                  if (Array.isArray(sData)) {
-                    currentData = sData;
+      xAxis: isHorizontal
+        ? {
+            type: 'value',
+            min: 0,
+            max: newData.length,
+            interval: 1,
+            position: 'top',
+            axisLine: { show: false },
+            axisTick: { show: false },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                type: 'solid',
+                width: 1,
+                color: isDark
+                  ? 'rgba(255, 255, 255, 0.1)'
+                  : 'rgba(0, 0, 0, 0.1)',
+              },
+            },
+            axisLabel: {
+              show: true,
+              formatter: function (value: number) {
+                let currentData = newData;
+                try {
+                  const chart = chartRef.current?.getEchartsInstance();
+                  if (chart) {
+                    const opts = chart.getOption() as any;
+                    if (opts?.series?.[0]?.data) {
+                      const sData = opts.series[0].data;
+                      if (Array.isArray(sData)) {
+                        currentData = sData;
+                      }
+                    }
                   }
+                } catch (e) {
+                  // Ignore errors related to checking echarts instance
                 }
-              }
-            } catch (e) {
-              // Ignore errors related to checking echarts instance
-            }
 
-            if (value >= currentData.length) return '';
-            const dataObj = currentData[value];
-            let valObj = Number(dataObj.value);
-            if (isNaN(valObj)) valObj = 0;
+                if (value >= currentData.length) return '';
+                const dataObj = currentData[value];
+                let valObj = Number(dataObj.value);
+                if (isNaN(valObj)) valObj = 0;
 
-            let displayVal = valObj.toString();
-            if (valObj >= 1000) {
-              displayVal =
-                (valObj / 1000).toFixed(valObj % 1000 === 0 ? 0 : 1) + 'K';
-            }
-            return `{name|${dataObj.name}}\n{value|${displayVal}}`;
-          },
-          rich: {
-            name: {
-              color: themeColors.mutedForeground,
-              fontSize: 14,
+                let displayVal = valObj.toString();
+                if (valObj >= 1000) {
+                  displayVal =
+                    (valObj / 1000).toFixed(valObj % 1000 === 0 ? 0 : 1) + 'K';
+                }
+                return `{name|${dataObj.name}}\n{value|${displayVal}}`;
+              },
+              rich: {
+                name: {
+                  color: themeColors.mutedForeground,
+                  fontSize: 14,
+                  align: 'left',
+                  padding: [0, 0, 8, 8],
+                },
+                value: {
+                  color: themeColors.foreground,
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  align: 'left',
+                  padding: [0, 0, 16, 8],
+                },
+              },
+              margin: 10,
               align: 'left',
-              padding: [0, 0, 8, 8],
+              verticalAlign: 'bottom',
             },
-            value: {
-              color: themeColors.foreground,
-              fontSize: 24,
-              fontWeight: 'bold',
-              align: 'left',
-              padding: [0, 0, 16, 8],
-            },
+          }
+        : {
+            type: 'value',
+            show: false,
           },
-          margin: 10,
-          align: 'left',
-          verticalAlign: 'bottom',
-        },
-      },
       yAxis: {
         type: 'value',
         show: false,

@@ -326,6 +326,7 @@ export type FunnelProps = {
   stroke?: string | null;
   strokeDashArray?: string | null;
   strokeWidth?: number;
+  orient?: 'horizontal' | 'vertical';
 };
 
 export interface ToolTipProps {
