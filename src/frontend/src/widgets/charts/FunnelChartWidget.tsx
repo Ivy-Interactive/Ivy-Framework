@@ -257,7 +257,8 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
             axisLabel: {
               show: true,
               formatter: function (value: number) {
-                let currentData = newData;
+                let currentData: { value: number | string; name: string }[] =
+                  newData.map(d => ({ ...d, value: Number(d.value) || 0 }));
                 try {
                   const chart = chartRef.current?.getEchartsInstance();
                   if (chart) {
