@@ -16,6 +16,13 @@ import {
 import { getChartThemeColors } from './styles';
 import { PIE_LEGEND_DEFAULTS, applyDefaults } from './chartDefaults';
 
+interface EChartsSunburstNode {
+  name: string;
+  value?: number;
+  itemStyle?: { color?: string; opacity?: number };
+  children?: EChartsSunburstNode[];
+}
+
 const resolveIvyColor = (colorName?: string | null): string | undefined => {
   if (!colorName) return undefined;
   if (
@@ -42,7 +49,7 @@ const mapDataToECharts = (
   parentColor?: string,
   depth = 0,
   opacity = 1.0
-): any[] => {
+): EChartsSunburstNode[] => {
   return nodes.map((node, index) => {
     // Resolve custom Ivy Colors to standard hex values so ECharts can render them correctly
     const nodeColor = resolveIvyColor(node.fill);
@@ -91,7 +98,6 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
   startAngle = 90,
   endAngle,
   padding = 2,
-  ringPadding = 2,
   stroke = '#ffffff',
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
@@ -144,7 +150,7 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
       color: chartColors,
       ...(leg && {
         legend: {
-          data: eChartsData.map((d: any) => d.name),
+          data: eChartsData.map((d: EChartsSunburstNode) => d.name),
           orient:
             leg.layout?.toLowerCase() === 'vertical'
               ? 'vertical'
@@ -248,7 +254,7 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
         leg
           ? {
               type: 'pie',
-              data: eChartsData.map((d: any) => ({
+              data: eChartsData.map((d: EChartsSunburstNode) => ({
                 name: d.name,
                 value: 0,
                 itemStyle: d.itemStyle,
@@ -278,7 +284,6 @@ const SunburstChartWidget: React.FC<SunburstChartWidgetProps> = ({
     startAngle,
     endAngle,
     padding,
-    ringPadding,
     stroke,
   ]);
 
