@@ -65,179 +65,165 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
     [colorScheme, colors]
   );
 
-  const newData = useMemo(
-    () =>
-      data.map(d => ({
-        value: d.measure as number,
-        name: d.dimension as string,
-      })),
-    [data]
-  );
+  const newData = data.map(d => ({
+    value: d.measure as number,
+    name: d.dimension as string,
+  }));
 
-  const maxVal = useMemo(
-    () => Math.max(...newData.map(d => d.value || 0), 1),
-    [newData]
-  );
+  const maxVal = Math.max(...newData.map(d => d.value || 0), 1);
 
   const isHorizontal = useMemo(() => {
     if (!funnels || funnels.length === 0) return true;
     return funnels[0].orient?.toLowerCase() !== 'vertical';
   }, [funnels]);
 
-  const series = useMemo(
-    () =>
-      valueKeys.flatMap(key => {
-        const rawFunnelConfig = funnels?.find(
-          a => a.dataKey.toLowerCase() === key
-        );
-        const funnelConfig = rawFunnelConfig
-          ? { ...FUNNEL_DEFAULTS, ...rawFunnelConfig }
-          : FUNNEL_DEFAULTS;
+  const series = valueKeys.flatMap(key => {
+    const rawFunnelConfig = funnels?.find(a => a.dataKey.toLowerCase() === key);
+    const funnelConfig = rawFunnelConfig
+      ? { ...FUNNEL_DEFAULTS, ...rawFunnelConfig }
+      : FUNNEL_DEFAULTS;
 
-        const baseSeries = {
-          name: key.charAt(0).toUpperCase() + key.slice(1),
-          type: ChartType.Funnel,
-          orient: isHorizontal ? 'horizontal' : 'vertical',
-          left: '10%',
-          top: isHorizontal ? 100 : 50,
-          bottom: legend ? 60 : 20,
-          width: isHorizontal ? '80%' : '70%',
-          min: 0,
-          minSize: '0%',
-          maxSize: '100%',
-          sort: 'descending',
-          gap: 0,
-          animation: funnelConfig.animated ?? true,
-          data: newData,
-        };
+    const baseSeries = {
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      type: ChartType.Funnel,
+      orient: isHorizontal ? 'horizontal' : 'vertical',
+      left: '10%',
+      top: isHorizontal ? 100 : 50,
+      bottom: legend ? 60 : 20,
+      width: isHorizontal ? '80%' : '70%',
+      min: 0,
+      minSize: '0%',
+      maxSize: '100%',
+      sort: 'descending',
+      gap: 0,
+      animation: funnelConfig.animated ?? true,
+      data: newData,
+    };
 
-        const standardLabelFormatter = function (params: any) {
-          let currentMax = maxVal;
-          try {
-            const chart = chartRef.current?.getEchartsInstance();
-            if (chart) {
-              const opts = chart.getOption() as any;
-              if (opts?.series?.[0]?.data) {
-                const sData = opts.series[0].data;
-                if (Array.isArray(sData)) {
-                  currentMax = Math.max(
-                    ...sData.map((d: any) => Number(d.value) || 0),
-                    1
-                  );
-                }
-              }
+    const standardLabelFormatter = function (params: {
+      value: number | string;
+    }) {
+      let currentMax = maxVal;
+      try {
+        const chart = chartRef.current?.getEchartsInstance();
+        if (chart) {
+          const opts = chart.getOption() as {
+            series?: { data?: { value: number | string }[] }[];
+          };
+          if (opts?.series?.[0]?.data) {
+            const sData = opts.series[0].data;
+            if (Array.isArray(sData)) {
+              currentMax = Math.max(
+                ...sData.map(
+                  (d: { value: number | string }) => Number(d.value) || 0
+                ),
+                1
+              );
             }
-          } catch (e) {}
-          const percent = Math.round((Number(params.value) / currentMax) * 100);
-          return `${percent}%`;
-        };
-
-        if (isHorizontal) {
-          return [
-            {
-              ...baseSeries,
-              label: {
-                show: true,
-                position: 'inside',
-                formatter: standardLabelFormatter,
-                color: '#fff',
-                fontSize: 14,
-              },
-              labelLine: { show: false },
-              itemStyle: {
-                color: funnelConfig.fill ?? undefined,
-                opacity: funnelConfig.fillOpacity ?? undefined,
-                borderColor: funnelConfig.stroke ?? '#fff',
-                borderWidth: funnelConfig.strokeWidth ?? 1,
-              },
-              emphasis: { label: { fontSize: 20 } },
-            },
-          ];
-        } else {
-          return [
-            {
-              ...baseSeries,
-              label: {
-                show: true,
-                position: 'inside',
-                formatter: standardLabelFormatter,
-                color: '#fff',
-                fontSize: 14,
-              },
-              labelLine: { show: false },
-              itemStyle: {
-                color: funnelConfig.fill ?? undefined,
-                opacity: funnelConfig.fillOpacity ?? undefined,
-                borderColor: funnelConfig.stroke ?? (isDark ? '#000' : '#fff'),
-                borderWidth: funnelConfig.strokeWidth ?? 1,
-              },
-              emphasis: { label: { fontSize: 20 } },
-            },
-            {
-              ...baseSeries,
-              name: baseSeries.name + ' (Labels)',
-              label: {
-                show: true,
-                position: 'right',
-                formatter: function (params: any) {
-                  let valObj = Number(params.value);
-                  let displayVal = valObj.toString();
-                  if (valObj >= 1000) {
-                    displayVal =
-                      (valObj / 1000).toFixed(valObj % 1000 === 0 ? 0 : 1) +
-                      'K';
-                  }
-                  return `{name|${params.name}}\n{value|${displayVal}}`;
-                },
-                color: themeColors.foreground,
-                fontSize: 14,
-                rich: {
-                  name: {
-                    color: themeColors.mutedForeground,
-                    fontSize: 14,
-                    padding: [0, 0, 4, 0],
-                  },
-                  value: {
-                    color: themeColors.foreground,
-                    fontSize: 18,
-                    fontWeight: 'bold',
-                  },
-                },
-              },
-              labelLine: {
-                show: true,
-                length: 40,
-                lineStyle: {
-                  color: isDark
-                    ? 'rgba(255, 255, 255, 0.2)'
-                    : 'rgba(0, 0, 0, 0.2)',
-                  width: 1,
-                  type: 'solid',
-                },
-              },
-              itemStyle: {
-                color: 'transparent',
-                borderColor: 'transparent',
-                borderWidth: 0,
-              },
-              emphasis: { disabled: true },
-            },
-          ];
+          }
         }
-      }),
-    [
-      valueKeys,
-      funnels,
-      newData,
-      legend,
-      maxVal,
-      isHorizontal,
-      themeColors,
-      isDark,
-    ]
-  );
+      } catch {
+        // ignore
+      }
+      const percent = Math.round((Number(params.value) / currentMax) * 100);
+      return `${percent}%`;
+    };
 
-  const option = useMemo(() => {
+    if (isHorizontal) {
+      return [
+        {
+          ...baseSeries,
+          label: {
+            show: true,
+            position: 'inside',
+            formatter: standardLabelFormatter,
+            color: '#fff',
+            fontSize: 14,
+          },
+          labelLine: { show: false },
+          itemStyle: {
+            color: funnelConfig.fill ?? undefined,
+            opacity: funnelConfig.fillOpacity ?? undefined,
+            borderColor: funnelConfig.stroke ?? '#fff',
+            borderWidth: funnelConfig.strokeWidth ?? 1,
+          },
+          emphasis: { label: { fontSize: 20 } },
+        },
+      ];
+    } else {
+      return [
+        {
+          ...baseSeries,
+          label: {
+            show: true,
+            position: 'inside',
+            formatter: standardLabelFormatter,
+            color: '#fff',
+            fontSize: 14,
+          },
+          labelLine: { show: false },
+          itemStyle: {
+            color: funnelConfig.fill ?? undefined,
+            opacity: funnelConfig.fillOpacity ?? undefined,
+            borderColor: funnelConfig.stroke ?? (isDark ? '#000' : '#fff'),
+            borderWidth: funnelConfig.strokeWidth ?? 1,
+          },
+          emphasis: { label: { fontSize: 20 } },
+        },
+        {
+          ...baseSeries,
+          name: baseSeries.name + ' (Labels)',
+          label: {
+            show: true,
+            position: 'right',
+            formatter: function (params: {
+              value: number | string;
+              name: string;
+            }) {
+              const valObj = Number(params.value);
+              let displayVal = valObj.toString();
+              if (valObj >= 1000) {
+                displayVal =
+                  (valObj / 1000).toFixed(valObj % 1000 === 0 ? 0 : 1) + 'K';
+              }
+              return `{name|${params.name}}\n{value|${displayVal}}`;
+            },
+            color: themeColors.foreground,
+            fontSize: 14,
+            rich: {
+              name: {
+                color: themeColors.mutedForeground,
+                fontSize: 14,
+                padding: [0, 0, 4, 0],
+              },
+              value: {
+                color: themeColors.foreground,
+                fontSize: 18,
+                fontWeight: 'bold',
+              },
+            },
+          },
+          labelLine: {
+            show: true,
+            length: 40,
+            lineStyle: {
+              color: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+              width: 1,
+              type: 'solid',
+            },
+          },
+          itemStyle: {
+            color: 'transparent',
+            borderColor: 'transparent',
+            borderWidth: 0,
+          },
+          emphasis: { disabled: true },
+        },
+      ];
+    }
+  });
+
+  const option = (() => {
     const leg = legend ? applyDefaults(legend, FUNNEL_LEGEND_DEFAULTS) : null;
 
     return {
@@ -275,7 +261,11 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
                 try {
                   const chart = chartRef.current?.getEchartsInstance();
                   if (chart) {
-                    const opts = chart.getOption() as any;
+                    const opts = chart.getOption() as {
+                      series?: {
+                        data?: { value: number | string; name: string }[];
+                      }[];
+                    };
                     if (opts?.series?.[0]?.data) {
                       const sData = opts.series[0].data;
                       if (Array.isArray(sData)) {
@@ -283,7 +273,7 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
                       }
                     }
                   }
-                } catch (e) {
+                } catch {
                   // Ignore errors related to checking echarts instance
                 }
 
@@ -367,7 +357,7 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
         toolbox && { ...toolbox, magicType: false }
       ),
     };
-  }, [chartColors, legend, themeColors, series, toolbox]);
+  })();
 
   return (
     <div style={styles}>
