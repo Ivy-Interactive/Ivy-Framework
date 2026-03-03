@@ -13,6 +13,7 @@ import { ActionRenderer } from '../dataTables/dataTableRowAction/actionRenderer'
 interface TreeItemWidgetProps {
   item: MenuItem;
   rowActions?: MenuItem[];
+  hasSiblingWithChildren?: boolean;
   onItemClick: (item: MenuItem) => void;
   onRowActionClick?: (item: MenuItem, action: MenuItem) => void;
 }
@@ -20,6 +21,7 @@ interface TreeItemWidgetProps {
 export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   item,
   rowActions,
+  hasSiblingWithChildren,
   onItemClick,
   onRowActionClick,
 }) => {
@@ -134,6 +136,9 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
                 item={child}
                 onItemClick={onItemClick}
                 rowActions={rowActions}
+                hasSiblingWithChildren={item.children!.some(
+                  c => c.children && c.children.length > 0
+                )}
                 onRowActionClick={onRowActionClick}
               />
             ))}
@@ -156,8 +161,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       onKeyDown={handleKeyDown}
       onClick={handleClick}
     >
-      {/* Spacer matching chevron width to align leaf nodes with parent nodes */}
-      <span className="h-5 w-5 shrink-0" />
+      {hasSiblingWithChildren && <span className="h-5 w-5 shrink-0" />}
       {item.icon && item.icon !== 'None' && (
         <Icon
           className="h-4 w-4 shrink-0 text-muted-foreground"
