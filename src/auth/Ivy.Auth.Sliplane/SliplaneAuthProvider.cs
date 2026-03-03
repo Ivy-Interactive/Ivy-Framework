@@ -220,7 +220,11 @@ public class SliplaneAuthProvider : IAuthProvider
 
         try
         {
-            var redirectUri = $"{request.Scheme}://{request.Host}{request.Path}";
+            var scheme = request.Headers.TryGetValue("X-Forwarded-Proto", out var forwardedProto)
+                ? forwardedProto.ToString()
+                : request.Scheme;
+
+            var redirectUri = $"{scheme}://{request.Host}{request.Path}";
 
             using var content = new FormUrlEncodedContent(new[]
             {
