@@ -17,10 +17,11 @@ public class DataTableApp : SampleBase
         // The DataTable builder will be recreated each time, but use the cached employee data
         var editModalOpen = UseState(() => false);
         var editingEmployee = UseState<EmployeeRecord?>(() => null);
-        var queryService = UseService<IQueryService>();
+        var refreshToken = UseRefreshToken();
 
         // Configuration and row actions logic
         var dataTable = mockService.GetEmployees().AsQueryable().ToDataTable(idSelector: e => e.Id)
+            .RefreshToken(refreshToken)
             // Table dimensions (fix for issue #1311)
             .Width(Size.Full()) // Table width set to 120 units (30rem)
             .Height(Size.Full()) // Table height set to 120 units (30rem)
@@ -168,7 +169,7 @@ public class DataTableApp : SampleBase
                         if (employee != null)
                         {
                             mockService.DeleteEmployee(employee.Id);
-                            queryService.Invalidate(k => k is string s && s == nameof(EmployeeRecord));
+                            refreshToken.Refresh();
                             client.Toast($"Employee {employee.Name} deleted");
                         }
                     }
@@ -180,18 +181,17 @@ public class DataTableApp : SampleBase
                 await ValueTask.CompletedTask;
             });
 
-        return new Fragment([dataTable, new EmployeeEditDialog(editModalOpen, editingEmployee, updated =>
+        return new Fragment([dataTable, new EmployeeEditDialog(editModalOpen, editingEmployee, refreshToken, updated =>
         {
             mockService.UpdateEmployee(updated);
         })]);
     }
 }
 
-public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> employeeState, Action<EmployeeRecord> onSave) : ViewBase
+public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> employeeState, RefreshToken refreshToken, Action<EmployeeRecord> onSave) : ViewBase
 {
     public override object? Build()
     {
-        var queryService = UseService<IQueryService>();
         var client = UseService<IClientProvider>();
 
         if (employeeState.Value == null)
@@ -220,7 +220,7 @@ public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> emp
             employeeState.Set((EmployeeRecord?)null);
 
             // Trigger refresh
-            queryService.Invalidate(k => k is string s && s == nameof(EmployeeRecord));
+            refreshToken.Refresh();
 
             return Task.CompletedTask;
         }

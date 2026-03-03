@@ -8,12 +8,12 @@ namespace Ivy.Views.DataTables;
 
 public static class UseDataTableExtensions
 {
-    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable)
+    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, RefreshToken? refreshToken = null)
     {
-        return UseDataTable(context, queryable, null);
+        return UseDataTable(context, queryable, null, refreshToken);
     }
 
-    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, Func<object, object?>? idSelector)
+    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, Func<object, object?>? idSelector, RefreshToken? refreshToken = null)
     {
         var connection = context.UseState<DataTableConnection?>(buildOnChange: false);
         var lastQueryable = context.UseState<object?>(buildOnChange: false);
@@ -26,7 +26,7 @@ public static class UseDataTableExtensions
             new QueryOptions { RevalidateOnMount = false }
         );
 
-        var versionToken = versionTrigger.Value ?? "0";
+        var versionToken = refreshToken != null ? $"{versionTrigger.Value ?? "0"}_{refreshToken.Token}" : (versionTrigger.Value ?? "0");
 
         var dataTableService = context.UseService<IDataTableService>();
 

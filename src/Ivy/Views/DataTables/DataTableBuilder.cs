@@ -5,6 +5,7 @@ using Ivy.Core;
 using Ivy.Helpers;
 using Ivy.Shared;
 using Microsoft.Extensions.AI;
+using Ivy.Hooks;
 
 namespace Ivy.Views.DataTables;
 
@@ -22,6 +23,7 @@ public class DataTableBuilder<TModel>(
     private MenuItem[]? _menuItemRowActions;
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
     private readonly Dictionary<string, Action<object>> _cellActions = [];
+    private RefreshToken? _refreshToken;
 
     private readonly string? _idColumnName =
         idSelector != null ? Utils.GetNameFromMemberExpression(idSelector.Body) : null;
@@ -265,6 +267,12 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+    public DataTableBuilder<TModel> RefreshToken(RefreshToken token)
+    {
+        _refreshToken = token;
+        return this;
+    }
+
     public override object? Build()
     {
         var chatClient = UseService<IChatClient?>();
@@ -324,12 +332,12 @@ public class DataTableBuilder<TModel>(
         }
 
         return new DataTableView(queryable1, width, _height, columns, configuration, onCellClick, _onCellActivated,
-            _menuItemRowActions, _onRowAction, idSelectorForView);
+            _menuItemRowActions, _onRowAction, idSelectorForView, _refreshToken);
     }
 
     public object[] GetMemoValues()
     {
         // Memoize based on configuration - if config hasn't changed, don't rebuild
-        return [_width!, _height!, _configuration];
+        return [_width!, _height!, _configuration, _refreshToken?.Token!];
     }
 }
