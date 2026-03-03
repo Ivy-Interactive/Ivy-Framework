@@ -48,7 +48,7 @@ var colorInputWithPlaceholder = new ColorInput("Choose a color");
 var colorInputFull = new ColorInput(
     placeholder: "Select your favorite color",
     disabled: false,
-    variant: ColorInputVariant.TextAndPicker
+    variant: ColorInputVariants.TextAndPicker
 );
 ```
 
@@ -58,10 +58,10 @@ var colorInputFull = new ColorInput(
 
 | Variant | Description |
 |---------|-------------|
-| `ColorInputVariant.Text` | Text input for entering hex codes manually |
-| `ColorInputVariant.Picker` | Color picker only |
-| `ColorInputVariant.TextAndPicker` | Text input with color picker (default) |
-| `ColorInputVariant.Swatch` | Grid of predefined colors from `Colors` enum |
+| `ColorInputVariants.Text` | Text input for entering hex codes manually |
+| `ColorInputVariants.Picker` | Color picker only |
+| `ColorInputVariants.TextAndPicker` | Text input with color picker (default) |
+| `ColorInputVariants.Swatch` | Grid of predefined colors from `Colors` enum |
 
 The following code shows all variants in action:
 
@@ -72,10 +72,10 @@ public class ColorVariantsDemo : ViewBase
     {    
         var colorState = UseState("red");
         return Layout.Grid().Columns(2).ColumnWidths(Size.Units(30), null)
-            | Text.P("Just Text").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Text)
-            | Text.P("Just Picker").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Picker)
-            | Text.P("Text and Picker").Small() | colorState.ToColorInput().Variant(ColorInputVariant.TextAndPicker)
-            | Text.P("Swatch").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Swatch);
+            | Text.P("Just Text").Small() | colorState.ToColorInput().Variant(ColorInputVariants.Text)
+            | Text.P("Just Picker").Small() | colorState.ToColorInput().Variant(ColorInputVariants.Picker)
+            | Text.P("Text and Picker").Small() | colorState.ToColorInput().Variant(ColorInputVariants.TextAndPicker)
+            | Text.P("Swatch").Small() | colorState.ToColorInput().Variant(ColorInputVariants.Swatch);
     }   
 }
 ```
@@ -91,7 +91,7 @@ public class ColorSwatchDemo : ViewBase
     {    
         var colorState = UseState(Colors.Blue);
         return Layout.Vertical()
-            | colorState.ToColorInput().Variant(ColorInputVariant.Swatch)
+            | colorState.ToColorInput().Variant(ColorInputVariants.Swatch)
             | Text.P($"Selected: {colorState.Value}");
     }   
 }
@@ -121,7 +121,7 @@ public class ColorChangedDemo : ViewBase
                 | (Layout.Horizontal()
                 | new ColorInput<string>
                        (colorState.Value, onChangeHandler)
-                      .Variant(ColorInputVariant.Picker) 
+                      .Variant(ColorInputVariants.Picker) 
                 | new CodeBlock(colorName.Value)
                     .ShowCopyButton()
                     .ShowBorder());
@@ -181,17 +181,17 @@ public class CSSColorDemo : ViewBase
                    | Text.InlineCode("color")
                          .Width(35)
                    | color.ToColorInput()
-                          .Variant(ColorInputVariant.Picker))
+                          .Variant(ColorInputVariants.Picker))
                 | (Layout.Horizontal()
                    | Text.InlineCode("background-color")
                          .Width(35)
                    | bgColor.ToColorInput()
-                          .Variant(ColorInputVariant.Picker))
+                          .Variant(ColorInputVariants.Picker))
                 | (Layout.Horizontal()
                    | Text.InlineCode("border")
                          .Width(35)
                    | border.ToColorInput()
-                          .Variant(ColorInputVariant.Picker))
+                          .Variant(ColorInputVariants.Picker))
                    | new CodeBlock(genCode.Value)
                          .Language(Languages.Css)
                          .ShowCopyButton();

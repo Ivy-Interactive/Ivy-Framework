@@ -17,7 +17,7 @@ public class TextInputTests
         var textInput = new TextInput(state);
 
         Assert.Equal("initial", textInput.Value);
-        Assert.Equal(TextInputVariant.Text, textInput.Variant);
+        Assert.Equal(TextInputVariants.Text, textInput.Variant);
         Assert.NotNull(textInput.OnChange);
     }
 
@@ -54,10 +54,10 @@ public class TextInputTests
     [Fact]
     public void TextInput_WithPlaceholderAndVariant_WorksCorrectly()
     {
-        var textInput = new TextInput(placeholder: "Enter text", variant: TextInputVariant.Password);
+        var textInput = new TextInput(placeholder: "Enter text", variant: TextInputVariants.Password);
 
         Assert.Equal("Enter text", textInput.Placeholder);
-        Assert.Equal(TextInputVariant.Password, textInput.Variant);
+        Assert.Equal(TextInputVariants.Password, textInput.Variant);
         Assert.False(textInput.Disabled);
     }
 
@@ -69,18 +69,18 @@ public class TextInputTests
         var textInput = new TextInput<string>(state);
 
         Assert.Equal("test", textInput.Value);
-        Assert.Equal(TextInputVariant.Text, textInput.Variant);
+        Assert.Equal(TextInputVariants.Text, textInput.Variant);
     }
 
     [Theory]
-    [InlineData(TextInputVariant.Text)]
-    [InlineData(TextInputVariant.Textarea)]
-    [InlineData(TextInputVariant.Email)]
-    [InlineData(TextInputVariant.Tel)]
-    [InlineData(TextInputVariant.Url)]
-    [InlineData(TextInputVariant.Password)]
-    [InlineData(TextInputVariant.Search)]
-    public void TextInput_AllVariants_WorkCorrectly(TextInputVariant variant)
+    [InlineData(TextInputVariants.Text)]
+    [InlineData(TextInputVariants.Textarea)]
+    [InlineData(TextInputVariants.Email)]
+    [InlineData(TextInputVariants.Tel)]
+    [InlineData(TextInputVariants.Url)]
+    [InlineData(TextInputVariants.Password)]
+    [InlineData(TextInputVariants.Search)]
+    public void TextInput_AllVariants_WorkCorrectly(TextInputVariants variant)
     {
         var textInput = new TextInput(variant: variant);
 
@@ -120,27 +120,27 @@ public class TextInputTests
 
         // Test ToTextInput extension
         var textInput = state.ToTextInput();
-        Assert.Equal(TextInputVariant.Text, textInput.Variant);
+        Assert.Equal(TextInputVariants.Text, textInput.Variant);
 
         // Test ToPasswordInput extension
         var passwordInput = state.ToPasswordInput();
-        Assert.Equal(TextInputVariant.Password, passwordInput.Variant);
+        Assert.Equal(TextInputVariants.Password, passwordInput.Variant);
 
         // Test ToSearchInput extension
         var searchInput = state.ToSearchInput();
-        Assert.Equal(TextInputVariant.Search, searchInput.Variant);
+        Assert.Equal(TextInputVariants.Search, searchInput.Variant);
 
         // Test ToEmailInput extension
         var emailInput = state.ToEmailInput();
-        Assert.Equal(TextInputVariant.Email, emailInput.Variant);
+        Assert.Equal(TextInputVariants.Email, emailInput.Variant);
 
         // Test ToUrlInput extension
         var urlInput = state.ToUrlInput();
-        Assert.Equal(TextInputVariant.Url, urlInput.Variant);
+        Assert.Equal(TextInputVariants.Url, urlInput.Variant);
 
         // Test ToTelInput extension
         var telInput = state.ToTelInput();
-        Assert.Equal(TextInputVariant.Tel, telInput.Variant);
+        Assert.Equal(TextInputVariants.Tel, telInput.Variant);
     }
 
     [Fact]
@@ -175,13 +175,13 @@ public class TextInputTests
         var textInput = state.ToTextInput()
             .Placeholder("Enter text")
             .Disabled(true)
-            .Variant(TextInputVariant.Email)
+            .Variant(TextInputVariants.Email)
             .Invalid("Invalid email")
             .ShortcutKey("Ctrl+E");
 
         Assert.Equal("Enter text", textInput.Placeholder);
         Assert.True(textInput.Disabled);
-        Assert.Equal(TextInputVariant.Email, textInput.Variant);
+        Assert.Equal(TextInputVariants.Email, textInput.Variant);
         Assert.Equal("Invalid email", textInput.Invalid);
         Assert.Equal("Ctrl+E", textInput.ShortcutKey);
     }
