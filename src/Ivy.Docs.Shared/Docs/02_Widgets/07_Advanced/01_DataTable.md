@@ -188,7 +188,6 @@ public class RowActionsDemo : ViewBase
 }
 ```
 
-
 <Callout Type="tip">
 Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Click on a link to open it. External links (http/https) open in a new focused tab, while relative URLs navigate in the same tab.
 </Callout>
@@ -205,6 +204,39 @@ The `OnCellClick()` handler is triggered on a single click, while `OnCellActivat
 - **CellValue** - The value of the cell that was clicked
 
 These properties allow you to perform context-specific actions based on which cell was interacted with. For example, you can display a toast notification with the column name and row index, or navigate to a detail view based on the cell's value.
+
+## Triggering Refreshes
+
+You can programmatically force a DataTable to refresh its data by utilizing the `UseRefreshToken` hook and the `.RefreshToken()` fluent API. This is especially useful for reloading the table after users perform actions like creating, updating, or deleting records in a separate dialog or blade.
+
+First, obtain a token using `UseRefreshToken()`, pass it to the `DataTableBuilder`, and then call `refreshToken.Refresh()` whenever you need the table to reload:
+
+```csharp
+public class RefreshTokenDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var refreshToken = UseRefreshToken();
+        var employees = GetEmployees().AsQueryable();
+
+        // Pass the token to the builder
+        var table = employees
+            .ToDataTable(e => e.Name)
+            .RefreshToken(refreshToken)
+            .Header(e => e.Name, "Name")
+            .Width(e => e.Name, Size.Units(50))
+            .Height(Size.Units(100));
+
+        var refreshButton = new Button("Reload Table").HandleClick(e =>
+        {
+            // Trigger a refresh of the DataTable
+            refreshToken.Refresh();
+        });
+
+        return new Fragment(refreshButton, table);
+    }
+}
+```
 
 ## AI-Powered Filtering
 
