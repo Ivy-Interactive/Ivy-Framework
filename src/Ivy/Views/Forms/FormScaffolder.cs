@@ -109,7 +109,7 @@ internal static class FormScaffolder
         {
             return (state) =>
             {
-                var view = state.ToEmailField();
+                var view = state.ToEmailInput();
                 if (field.GetMaxLength() is { } maxLen) view = view.MaxLength(maxLen);
                 if (field.IsNullable && !field.Required) view = view.Nullable(true);
                 return (object)view;
@@ -120,7 +120,7 @@ internal static class FormScaffolder
         {
             return (state) =>
             {
-                var view = state.ToTelField();
+                var view = state.ToTelInput();
                 if (field.GetMaxLength() is { } maxLen) view = view.MaxLength(maxLen);
                 if (field.IsNullable && !field.Required) view = view.Nullable(true);
                 return (object)view;
@@ -131,7 +131,7 @@ internal static class FormScaffolder
         {
             return (state) =>
             {
-                var view = state.ToUrlField();
+                var view = state.ToUrlInput();
                 if (field.GetMaxLength() is { } maxLen) view = view.MaxLength(maxLen);
                 if (field.IsNullable && !field.Required) view = view.Nullable(true);
                 return (object)view;
@@ -142,7 +142,7 @@ internal static class FormScaffolder
         {
             return (state) =>
             {
-                var view = state.ToPasswordField();
+                var view = state.ToPasswordInput();
                 if (field.GetMaxLength() is { } maxLen) view = view.MaxLength(maxLen);
                 if (field.IsNullable && !field.Required) view = view.Nullable(true);
                 return (object)view;

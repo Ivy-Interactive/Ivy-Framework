@@ -42,7 +42,7 @@ public class TextInputVariantsTab : ViewBase
     }
 }
 
-/// <summary>Validated field inputs (ToEmailField, ToTelField, etc.) with label, description, and validation on blur.</summary>
+/// <summary>Validated field inputs (ToEmailInput, ToTelInput, etc.) with label, description, and validation on blur.</summary>
 public class FieldVariantsTab : ViewBase
 {
     public override object? Build()
@@ -55,11 +55,11 @@ public class FieldVariantsTab : ViewBase
         return new Card(
             Layout.Vertical().Gap(6)
                 | Text.H3("Validated fields")
-                | Text.P("Each uses To*Field() for a Field with label, description, required, and validation on blur.")
-                | email.ToEmailField("user@example.com").Label("Email").Description("We use this for account recovery.").Required()
-                | tel.ToTelField("+1 234 567 8900").Label("Phone").Description("7–15 digits.").Required()
-                | url.ToUrlField("https://example.com").Label("Website").Description("Must start with http or https.")
-                | password.ToPasswordField("At least 8 characters").Label("Password").Description("Required for sign-up.").Required()
+                | Text.P("Each uses To*Input() for a Field with label, description, required, and validation on blur.")
+                | email.ToEmailInput("user@example.com").Label("Email").Description("We use this for account recovery.").Required()
+                | tel.ToTelInput("+1 234 567 8900").Label("Phone").Description("7–15 digits.").Required()
+                | url.ToUrlInput("https://example.com").Label("Website").Description("Must start with http or https.")
+                | password.ToPasswordInput("At least 8 characters").Label("Password").Description("Required for sign-up.").Required()
         ).Width(Size.Full());
     }
 }
@@ -83,10 +83,10 @@ public class FormFieldsTab : ViewBase
         }, model);
 
         var form = model.ToForm("Submit")
-            .Builder(m => m.Email, s => s.ToEmailField())
-            .Builder(m => m.Password, s => s.ToPasswordField())
-            .Builder(m => m.PhoneNumber, s => s.ToTelField())
-            .Builder(m => m.Website, s => s.ToUrlField());
+            .Builder(m => m.Email, s => s.ToEmailInput())
+            .Builder(m => m.Password, s => s.ToPasswordInput())
+            .Builder(m => m.PhoneNumber, s => s.ToTelInput())
+            .Builder(m => m.Website, s => s.ToUrlInput());
 
         return new Card(
             Layout.Vertical().Gap(4)

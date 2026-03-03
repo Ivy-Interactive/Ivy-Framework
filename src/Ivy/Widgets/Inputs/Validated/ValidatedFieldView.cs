@@ -10,7 +10,7 @@ namespace Ivy.Widgets.Inputs.Validated;
 
 /// <summary>
 /// View that wraps a validating TextInput (Email, Password, Tel, Url) in a Field and wires auto-validation on blur.
-/// Use via ToEmailField(), ToPasswordField(), ToUrlField(), ToTelField().
+/// Use via ToEmailInput(), ToPasswordInput(), ToUrlInput(), ToTelInput().
 /// </summary>
 public sealed class ValidatedFieldView : ViewBase
 {

@@ -24,10 +24,10 @@ public class GridLayoutApp : SampleBase
                | withValue.ToTextInput().Invalid("Error")
 
                | Text.InlineCode("TextVariant.Password")
-               | withoutValue.ToPasswordField().Placeholder("Placeholder")
-               | withValue.ToPasswordField()
-               | withValue.ToPasswordField().Disabled()
-               | withValue.ToPasswordField().Invalid("Error")
+               | withoutValue.ToPasswordInput().Placeholder("Placeholder")
+               | withValue.ToPasswordInput()
+               | withValue.ToPasswordInput().Disabled()
+               | withValue.ToPasswordInput().Invalid("Error")
 
                | Text.InlineCode("TextVariant.TextArea")
                | withoutValue.ToTextAreaInput().Placeholder("Placeholder")

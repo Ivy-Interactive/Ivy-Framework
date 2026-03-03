@@ -23,18 +23,18 @@ public class TextInputApp : SampleBase
 
                           | Text.InlineCode("string")
                           | (Layout.Vertical()
-                             | stringState.ToPasswordField()
+                             | stringState.ToPasswordInput()
                              | stringState.ToTextAreaInput()
-                             | stringState.ToPasswordField()
+                             | stringState.ToPasswordInput()
                              | stringState.ToSearchInput()
                           )
                           | stringState
 
                           | Text.InlineCode("string?")
                           | (Layout.Vertical()
-                             | nullStringState.ToPasswordField()
+                             | nullStringState.ToPasswordInput()
                              | nullStringState.ToTextAreaInput()
-                             | nullStringState.ToPasswordField()
+                             | nullStringState.ToPasswordInput()
                              | nullStringState.ToSearchInput()
                           )
                           | nullStringState
@@ -54,16 +54,16 @@ public class TextInputApp : SampleBase
                   | Text.InlineCode("Invalid")
 
                   | Text.InlineCode("TextInputs.Text")
-                  | withoutValue.ToPasswordField().Placeholder("Placeholder")
-                  | withValue.ToPasswordField()
-                  | withValue.ToPasswordField().Disabled()
-                  | withValue.ToPasswordField().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+                  | withoutValue.ToPasswordInput().Placeholder("Placeholder")
+                  | withValue.ToPasswordInput()
+                  | withValue.ToPasswordInput().Disabled()
+                  | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
                   | Text.InlineCode("TextInputs.Password")
-                  | withoutValue.ToPasswordField().Placeholder("Placeholder")
-                  | withValue.ToPasswordField()
-                  | withValue.ToPasswordField().Disabled()
-                  | withValue.ToPasswordField().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+                  | withoutValue.ToPasswordInput().Placeholder("Placeholder")
+                  | withValue.ToPasswordInput()
+                  | withValue.ToPasswordInput().Disabled()
+                  | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
                   | Text.InlineCode("TextInputs.TextArea")
                   | withoutValue.ToTextAreaInput().Placeholder("Placeholder")
@@ -125,14 +125,14 @@ public class TextInputSizes : ViewBase
                | Text.InlineCode("Large")
 
                | Text.InlineCode("TextInputs.Text")
-               | textState.ToPasswordField().Small()
-               | textState.ToPasswordField()
-               | textState.ToPasswordField().Large()
+               | textState.ToPasswordInput().Small()
+               | textState.ToPasswordInput()
+               | textState.ToPasswordInput().Large()
 
                | Text.InlineCode("TextInputs.Password")
-               | passwordState.ToPasswordField().Small()
-               | passwordState.ToPasswordField()
-               | passwordState.ToPasswordField().Large()
+               | passwordState.ToPasswordInput().Small()
+               | passwordState.ToPasswordInput()
+               | passwordState.ToPasswordInput().Large()
 
                | Text.InlineCode("TextInputs.TextArea")
                | textareaState.ToTextAreaInput().Small()

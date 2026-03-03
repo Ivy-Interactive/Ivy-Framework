@@ -204,7 +204,7 @@ public class FormValidationErrorExamplesView : ViewBase
                     .Placeholder("Enter your email")
                     .Invalid(emailError.Value)
                 | Text.Label("Password")
-                | password.ToPasswordField()
+                | password.ToPasswordInput()
                     .Placeholder("Enter your password")
                 | Text.Label("Age")
                 | age.ToNumberInput()

@@ -150,17 +150,17 @@ public static class TextInputExtensions
 
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Search);
 
-    /// <summary>Returns a validated Field for email. Use .Label(), .Description(), .Required() etc. on the result.</summary>
-    public static ValidatedFieldView ToEmailField(this IAnyState state, string? placeholder = null, bool disabled = false) => new(state, TextInputs.Email, placeholder, disabled);
+    /// <summary>Returns a validated input for email. Use .Label(), .Description(), .Required() etc. on the result.</summary>
+    public static ValidatedFieldView ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => new(state, TextInputs.Email, placeholder, disabled);
 
-    /// <summary>Returns a validated Field for password. Use .Label(), .Description(), .Required() etc. on the result.</summary>
-    public static ValidatedFieldView ToPasswordField(this IAnyState state, string? placeholder = null, bool disabled = false) => new(state, TextInputs.Password, placeholder, disabled);
+    /// <summary>Returns a validated input for password. Use .Label(), .Description(), .Required() etc. on the result.</summary>
+    public static ValidatedFieldView ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => new(state, TextInputs.Password, placeholder, disabled);
 
-    /// <summary>Returns a validated Field for URL. Use .Label(), .Description(), .Required() etc. on the result.</summary>
-    public static ValidatedFieldView ToUrlField(this IAnyState state, string? placeholder = null, bool disabled = false) => new(state, TextInputs.Url, placeholder, disabled);
+    /// <summary>Returns a validated input for URL. Use .Label(), .Description(), .Required() etc. on the result.</summary>
+    public static ValidatedFieldView ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => new(state, TextInputs.Url, placeholder, disabled);
 
-    /// <summary>Returns a validated Field for phone. Use .Label(), .Description(), .Required() etc. on the result.</summary>
-    public static ValidatedFieldView ToTelField(this IAnyState state, string? placeholder = null, bool disabled = false) => new(state, TextInputs.Tel, placeholder, disabled);
+    /// <summary>Returns a validated input for phone. Use .Label(), .Description(), .Required() etc. on the result.</summary>
+    public static ValidatedFieldView ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) => new(state, TextInputs.Tel, placeholder, disabled);
 
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 

@@ -122,24 +122,24 @@ public class TextInputTests
         var textInput = state.ToTextInput();
         Assert.Equal(TextInputs.Text, textInput.Variant);
 
-        // Test ToPasswordField extension
-        var passwordField = state.ToPasswordField();
+        // Test ToPasswordInput extension
+        var passwordField = state.ToPasswordInput();
         Assert.NotNull(passwordField);
 
         // Test ToSearchInput extension
         var searchInput = state.ToSearchInput();
         Assert.Equal(TextInputs.Search, searchInput.Variant);
 
-        // Test ToEmailField extension
-        var emailField = state.ToEmailField();
+        // Test ToEmailInput extension
+        var emailField = state.ToEmailInput();
         Assert.NotNull(emailField);
 
-        // Test ToUrlField extension
-        var urlField = state.ToUrlField();
+        // Test ToUrlInput extension
+        var urlField = state.ToUrlInput();
         Assert.NotNull(urlField);
 
-        // Test ToTelField extension
-        var telField = state.ToTelField();
+        // Test ToTelInput extension
+        var telField = state.ToTelInput();
         Assert.NotNull(telField);
     }
 
@@ -151,7 +151,7 @@ public class TextInputTests
         var textInput = state.ToTextInput(placeholder: "Enter text");
         Assert.Equal("Enter text", textInput.Placeholder);
 
-        var passwordField = state.ToPasswordField().Placeholder("Enter password");
+        var passwordField = state.ToPasswordInput().Placeholder("Enter password");
         Assert.NotNull(passwordField);
     }
 
@@ -163,7 +163,7 @@ public class TextInputTests
         var textInput = state.ToTextInput(disabled: true);
         Assert.True(textInput.Disabled);
 
-        var passwordField = state.ToPasswordField().Disabled(true);
+        var passwordField = state.ToPasswordInput().Disabled(true);
         Assert.NotNull(passwordField);
     }
 

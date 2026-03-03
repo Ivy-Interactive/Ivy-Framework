@@ -44,7 +44,7 @@ public class FieldApp : SampleBase
                     .Required()
 
                 // Password field, disabled if name is empty, with help text
-                | passwordState.ToPasswordField()
+                | passwordState.ToPasswordInput()
                     .Placeholder("Enter password")
                     .Disabled(string.IsNullOrWhiteSpace(nameState.Value))
                     .Label("Password")
