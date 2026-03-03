@@ -57,6 +57,9 @@ public static class TreeWidgetExtensions
     public static Tree HandleRowAction(this Tree tree, Func<Event<Tree, TreeRowActionClickEventArgs>, ValueTask> handler)
         => tree with { OnRowAction = handler };
 
+    public static Tree HandleRowAction(this Tree tree, Action<Event<Tree, TreeRowActionClickEventArgs>> handler)
+        => tree with { OnRowAction = handler.ToValueTask() };
+
     public static Tree RowActions(this Tree tree, params MenuItem[] actions)
         => tree with { RowActions = actions };
 }

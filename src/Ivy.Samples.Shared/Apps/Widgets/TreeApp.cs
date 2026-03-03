@@ -56,11 +56,7 @@ public class TreeApp : SampleBase
                 )
             ])
             .HandleSelect(e => selectedItem.Set(e.Value?.ToString() ?? ""))
-            .HandleRowAction(e =>
-            {
-                lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}");
-                return ValueTask.CompletedTask;
-            })
+            .HandleRowAction(e => lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}"))
 
             | Text.H2("Disabled Items")
             | new Tree(
