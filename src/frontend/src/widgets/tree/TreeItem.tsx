@@ -8,15 +8,20 @@ import { ChevronRight } from 'lucide-react';
 import Icon from '@/components/Icon';
 import { cn } from '@/lib/utils';
 import { MenuItem } from '@/types/widgets';
+import { ActionRenderer } from '../dataTables/dataTableRowAction/actionRenderer';
 
 interface TreeItemWidgetProps {
   item: MenuItem;
+  rowActions?: MenuItem[];
   onItemClick: (item: MenuItem) => void;
+  onRowActionClick?: (item: MenuItem, action: MenuItem) => void;
 }
 
 export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   item,
+  rowActions,
   onItemClick,
+  onRowActionClick,
 }) => {
   const [isOpen, setIsOpen] = React.useState(item.expanded ?? false);
   const hasChildren = item.children && item.children.length > 0;
@@ -68,8 +73,8 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       >
         <div
           className={cn(
-            'ivy-tree-item group flex items-center gap-1 rounded-sm py-1 px-1 text-sm cursor-pointer select-none',
-            'hover:bg-accent/50 transition-colors',
+            'ivy-tree-item group flex items-center gap-1 flex-1 rounded-sm py-1 px-1 text-sm cursor-pointer select-none outline-none',
+            'hover:bg-accent/50 transition-colors focus-visible:ring-1 focus-visible:ring-ring',
             item.disabled && 'opacity-50 cursor-not-allowed'
           )}
           role="treeitem"
@@ -100,7 +105,26 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
               name={item.icon}
             />
           )}
-          <span className="truncate">{item.label}</span>
+          <span className="truncate flex-1">{item.label}</span>
+
+          {rowActions && rowActions.length > 0 && onRowActionClick && (
+            <div
+              className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 flex items-center shrink-0"
+              onClick={e => e.stopPropagation()}
+              onKeyDown={e => e.stopPropagation()}
+              onPointerDown={e => e.stopPropagation()}
+            >
+              {rowActions.map((action, index) => (
+                <ActionRenderer
+                  key={`${action.label}-${index}`}
+                  action={action}
+                  onActionClick={clickedAction =>
+                    onRowActionClick(item, clickedAction)
+                  }
+                />
+              ))}
+            </div>
+          )}
         </div>
         <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
           <div className="ivy-tree-children pl-3 ml-2 border-l border-border/50">
@@ -109,6 +133,8 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
                 key={`${child.label}-${index}`}
                 item={child}
                 onItemClick={onItemClick}
+                rowActions={rowActions}
+                onRowActionClick={onRowActionClick}
               />
             ))}
           </div>
@@ -120,8 +146,8 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   return (
     <div
       className={cn(
-        'ivy-tree-item flex items-center gap-1 rounded-sm py-1 px-1 text-sm cursor-pointer select-none',
-        'hover:bg-accent/50 transition-colors',
+        'ivy-tree-item group flex items-center flex-1 gap-1 rounded-sm py-1 px-1 text-sm cursor-pointer select-none outline-none',
+        'hover:bg-accent/50 transition-colors focus-visible:ring-1 focus-visible:ring-ring',
         item.disabled && 'opacity-50 cursor-not-allowed'
       )}
       role="treeitem"
@@ -138,7 +164,26 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
           name={item.icon}
         />
       )}
-      <span className="truncate">{item.label}</span>
+      <span className="truncate flex-1">{item.label}</span>
+
+      {rowActions && rowActions.length > 0 && onRowActionClick && (
+        <div
+          className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 flex items-center shrink-0 pr-1"
+          onClick={e => e.stopPropagation()}
+          onKeyDown={e => e.stopPropagation()}
+          onPointerDown={e => e.stopPropagation()}
+        >
+          {rowActions.map((action, index) => (
+            <ActionRenderer
+              key={`${action.label}-${index}`}
+              action={action}
+              onActionClick={clickedAction =>
+                onRowActionClick(item, clickedAction)
+              }
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

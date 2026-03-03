@@ -8,10 +8,14 @@ public class TreeApp : SampleBase
     protected override object? BuildSample()
     {
         var selectedItem = UseState("Nothing selected");
+        var lastAction = UseState("None");
 
         return Layout.Vertical()
             | Text.H1("Tree")
-            | Text.Muted($"Selected: {selectedItem.Value}")
+            | Layout.Horizontal()
+                | Text.Muted($"Selected: {selectedItem.Value}")
+                | Text.Muted($"Last Action: {lastAction.Value}")
+            | Layout.Horizontal()
             | new Tree(
                 new MenuItem("src")
                     .Icon(Icons.Folder)
@@ -42,7 +46,21 @@ public class TreeApp : SampleBase
                     ),
                 new MenuItem("package.json").Icon(Icons.Braces).Tag("package.json"),
                 new MenuItem("README.md").Icon(Icons.BookOpen).Tag("README.md")
-            ).HandleSelect(e => selectedItem.Set(e.Value?.ToString() ?? ""))
+            )
+            .RowActions([
+                new MenuItem("Edit").Icon(Icons.Pencil).Tag("edit"),
+                new MenuItem("More").Icon(Icons.Ellipsis).Children(
+                    new MenuItem("Duplicate").Icon(Icons.Copy).Tag("duplicate"),
+                    new MenuItem("Share").Icon(Icons.Share).Tag("share"),
+                    new MenuItem("Delete").Icon(Icons.Trash).Tag("delete")
+                )
+            ])
+            .HandleSelect(e => selectedItem.Set(e.Value?.ToString() ?? ""))
+            .HandleRowAction(e =>
+            {
+                lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}");
+                return ValueTask.CompletedTask;
+            })
 
             | Text.H2("Disabled Items")
             | new Tree(

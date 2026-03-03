@@ -7,15 +7,34 @@ import { useEventHandler } from '@/components/event-handler';
 interface TreeWidgetProps {
   id: string;
   items?: MenuItem[];
+  rowActions?: MenuItem[];
 }
 
-export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = [] }) => {
+export const TreeWidget: React.FC<TreeWidgetProps> = ({
+  id,
+  items = [],
+  rowActions,
+}) => {
   const eventHandler = useEventHandler();
 
   const onItemClick = React.useCallback(
     (item: MenuItem) => {
       if (!item.tag) return;
       eventHandler('OnSelect', id, [item.tag]);
+    },
+    [eventHandler, id]
+  );
+
+  const onRowActionClick = React.useCallback(
+    (item: MenuItem, action: MenuItem) => {
+      // Both the item and the action might have tags (often undefined if just labels)
+      // Send them via the payload of the TreeRowActionClickEventArgs
+      eventHandler('OnRowAction', id, [
+        {
+          itemValue: item.tag ?? item.label,
+          actionTag: action.tag ?? action.label,
+        },
+      ]);
     },
     [eventHandler, id]
   );
@@ -27,6 +46,8 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = [] }) => {
           key={`${item.label}-${index}`}
           item={item}
           onItemClick={onItemClick}
+          rowActions={rowActions}
+          onRowActionClick={onRowActionClick}
         />
       ))}
     </div>

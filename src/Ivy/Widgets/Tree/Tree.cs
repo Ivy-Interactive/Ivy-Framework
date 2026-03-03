@@ -4,6 +4,15 @@ using Ivy.Shared;
 
 namespace Ivy;
 
+public class TreeRowActionClickEventArgs
+{
+    /// <summary> Tag of the tree item where the action was clicked. </summary>
+    public object? ItemValue { get; set; }
+
+    /// <summary> Tag of the menu item (action) that was clicked. </summary>
+    public object? ActionTag { get; set; }
+}
+
 public record Tree : WidgetBase<Tree>
 {
     public Tree(params MenuItem[] items)
@@ -22,7 +31,11 @@ public record Tree : WidgetBase<Tree>
 
     [Prop] public MenuItem[] Items { get; set; } = [];
 
+    [Prop] public MenuItem[]? RowActions { get; set; }
+
     [Event] public Func<Event<Tree, object>, ValueTask>? OnSelect { get; set; }
+
+    [Event] public Func<Event<Tree, TreeRowActionClickEventArgs>, ValueTask>? OnRowAction { get; set; }
 
     public static Func<Event<Tree, object>, ValueTask> DefaultSelectHandler()
     {
@@ -37,6 +50,15 @@ public record Tree : WidgetBase<Tree>
     {
         return tree with { Items = [.. tree.Items, item] };
     }
+}
+
+public static class TreeWidgetExtensions
+{
+    public static Tree HandleRowAction(this Tree tree, Func<Event<Tree, TreeRowActionClickEventArgs>, ValueTask> handler)
+        => tree with { OnRowAction = handler };
+
+    public static Tree RowActions(this Tree tree, params MenuItem[] actions)
+        => tree with { RowActions = actions };
 }
 
 public static class TreeExtensions
