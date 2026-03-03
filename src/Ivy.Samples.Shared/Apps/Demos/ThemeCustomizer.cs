@@ -353,7 +353,7 @@ public class ThemeCustomizer : SampleBase
                         colorState.Set(e.Value);
                         onChange(e.Value);
                     },
-                    variant: ColorInputs.TextAndPicker
+                    variant: ColorInputVariant.TextAndPicker
                 );
         }
     }
@@ -691,7 +691,7 @@ public class ThemeCustomizer : SampleBase
                                 new Option<string>("Success", "Success"),
                                 new Option<string>("Warning", "Warning"),
                                 new Option<string>("Info", "Info")
-                            }).Variant(SelectInputs.Toggle).Disabled(disableInputs.Value)
+                            }).Variant(SelectInputVariant.Toggle).Disabled(disableInputs.Value)
                             | Text.Block("Selected badges:").Small()
                             | (Layout.Horizontal().Align(Align.Center)
                                 | badgeVariant.Value.Select(variant => variant switch
@@ -723,9 +723,9 @@ public class ThemeCustomizer : SampleBase
                             | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
                         | (Layout.Horizontal().Width(Size.Full())
                             | (Layout.Vertical().Align(Align.Left)
-                                | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars).Disabled(disableInputs.Value))
+                                | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Disabled(disableInputs.Value))
                             | (Layout.Vertical().Align(Align.Right)
-                                | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Disabled(disableInputs.Value)))
+                                | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs).Disabled(disableInputs.Value)))
                         | new Box((Layout.Horizontal().Height(Size.Fit())
                             | agreeTerms.ToBoolInput().Disabled(disableInputs.Value)
                             | Text.Block("I agree to the terms and conditions")))
@@ -761,7 +761,7 @@ public class ThemeCustomizer : SampleBase
                         | email.ToTextInput()
                             .Placeholder("Email (Ctrl+E)")
                             .ShortcutKey("Ctrl+E")
-                            .Variant(TextInputs.Email)
+                            .Variant(TextInputVariant.Email)
                             .Disabled(disableInputs.Value)
                         | Text.Block("Price range").Bold()
                         | Text.P($"Estimated monthly budget: ${price.Value}").Small()
@@ -845,9 +845,9 @@ public class ThemeCustomizer : SampleBase
                         .ContentAlign(Align.Center),
                     Layout.Vertical()
                         | Text.P("Background:").Small()
-                        | bgState.ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
+                        | bgState.ToColorInput().Variant(ColorInputVariant.TextAndPicker).Disabled()
                         | Text.P("Foreground:").Small()
-                        | fgState.ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
+                        | fgState.ToColorInput().Variant(ColorInputVariant.TextAndPicker).Disabled()
                 );
         }
     }

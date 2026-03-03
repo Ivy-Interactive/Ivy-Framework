@@ -10,7 +10,7 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum FeedbackInputs
+public enum FeedbackInputVariant
 {
     Stars,
     Thumbs,
@@ -19,7 +19,7 @@ public enum FeedbackInputs
 
 public interface IAnyFeedbackInput : IAnyInput
 {
-    public FeedbackInputs Variant { get; set; }
+    public FeedbackInputVariant Variant { get; set; }
 }
 
 public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFeedbackInput
@@ -32,7 +32,7 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     [Prop] public bool Nullable { get; set; }
 
-    [Prop] public FeedbackInputs Variant { get; set; } = FeedbackInputs.Stars;
+    [Prop] public FeedbackInputVariant Variant { get; set; } = FeedbackInputVariant.Stars;
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -48,7 +48,7 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 {
     [OverloadResolutionPriority(1)]
-    public FeedbackInput(IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputs variant = FeedbackInputs.Stars)
+    public FeedbackInput(IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TNumber>();
@@ -57,21 +57,21 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
     }
 
     [OverloadResolutionPriority(1)]
-    public FeedbackInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, FeedbackInputs variant = FeedbackInputs.Stars)
+    public FeedbackInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange;
         Value = value;
     }
 
-    public FeedbackInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, FeedbackInputs variant = FeedbackInputs.Stars)
+    public FeedbackInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
         : this(placeholder, disabled, variant)
     {
         OnChange = e => { state(e.Value); return ValueTask.CompletedTask; };
         Value = value;
     }
 
-    public FeedbackInput(string? placeholder = null, bool disabled = false, FeedbackInputs variant = FeedbackInputs.Stars)
+    public FeedbackInput(string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
     {
         Placeholder = placeholder;
         Disabled = disabled;
@@ -89,11 +89,11 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 
 public static class FeedbackInputExtensions
 {
-    public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputs? variant = null)
+    public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant? variant = null)
     {
         var type = state.GetStateType();
 
-        variant ??= type == typeof(bool) || type == typeof(bool?) ? FeedbackInputs.Thumbs : FeedbackInputs.Stars;
+        variant ??= type == typeof(bool) || type == typeof(bool?) ? FeedbackInputVariant.Thumbs : FeedbackInputVariant.Stars;
 
         Type genericType = typeof(FeedbackInput<>).MakeGenericType(type);
         FeedbackInputBase input = (FeedbackInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
@@ -104,7 +104,7 @@ public static class FeedbackInputExtensions
 
     public static FeedbackInputBase Disabled(this FeedbackInputBase widget, bool enabled = true) => widget with { Disabled = enabled };
 
-    public static FeedbackInputBase Variant(this FeedbackInputBase widget, FeedbackInputs variant) => widget with { Variant = variant };
+    public static FeedbackInputBase Variant(this FeedbackInputBase widget, FeedbackInputVariant variant) => widget with { Variant = variant };
 
     public static FeedbackInputBase Invalid(this FeedbackInputBase widget, string invalid) => widget with { Invalid = invalid };
     public static FeedbackInputBase Nullable(this FeedbackInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };

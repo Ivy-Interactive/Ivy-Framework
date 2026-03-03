@@ -10,14 +10,14 @@ using Ivy.Widgets.Inputs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum CodeInputs
+public enum CodeInputVariant
 {
     Default
 }
 
 public interface IAnyCodeInput : IAnyInput
 {
-    public CodeInputs Variant { get; set; }
+    public CodeInputVariant Variant { get; set; }
 }
 
 public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
@@ -30,7 +30,7 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public bool Nullable { get; set; }
 
-    [Prop] public CodeInputs Variant { get; set; } = CodeInputs.Default;
+    [Prop] public CodeInputVariant Variant { get; set; } = CodeInputVariant.Default;
 
     [Prop] public Languages? Language { get; set; } = null;
 
@@ -47,7 +47,7 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 public record CodeInput<TString> : CodeInputBase, IInput<TString>
 {
     [OverloadResolutionPriority(1)]
-    public CodeInput(IAnyState state, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
+    public CodeInput(IAnyState state, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TString>();
@@ -56,21 +56,21 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
     }
 
     [OverloadResolutionPriority(1)]
-    public CodeInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
+    public CodeInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange;
         Value = value;
     }
 
-    public CodeInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
+    public CodeInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange == null ? null : e => { onChange(e); return ValueTask.CompletedTask; };
         Value = value;
     }
 
-    public CodeInput(string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default) : this()
+    public CodeInput(string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default) : this()
     {
         Placeholder = placeholder;
         Variant = variant;
@@ -92,7 +92,7 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
 
 public static class CodeInputExtensions
 {
-    public static CodeInputBase ToCodeInput(this IAnyState state, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default, Languages language = Languages.Json)
+    public static CodeInputBase ToCodeInput(this IAnyState state, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default, Languages language = Languages.Json)
     {
         var type = state.GetStateType();
         Type genericType = typeof(CodeInput<>).MakeGenericType(type);
@@ -122,7 +122,7 @@ public static class CodeInputExtensions
         return widget with { Disabled = disabled };
     }
 
-    public static CodeInputBase Variant(this CodeInputBase widget, CodeInputs variant)
+    public static CodeInputBase Variant(this CodeInputBase widget, CodeInputVariant variant)
     {
         return widget with { Variant = variant };
     }

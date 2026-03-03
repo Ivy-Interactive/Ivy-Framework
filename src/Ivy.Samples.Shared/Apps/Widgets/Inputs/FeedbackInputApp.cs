@@ -28,23 +28,23 @@ public class FeedbackInputApp : SampleBase
                | Text.InlineCode("Disabled")
                | Text.InlineCode("Invalid")
 
-               | Text.InlineCode("FeedbackInputs.Stars")
-               | zeroState.ToFeedbackInput().Variant(FeedbackInputs.Stars)
+               | Text.InlineCode("FeedbackInputVariant.Stars")
+               | zeroState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars)
                | Text.InlineCode(zeroState.Value.ToString())
-               | twoState.ToFeedbackInput().Variant(FeedbackInputs.Stars).Disabled()
-               | twoState.ToFeedbackInput().Variant(FeedbackInputs.Stars).Invalid("Invalid feedback")
+               | twoState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Disabled()
+               | twoState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Invalid("Invalid feedback")
 
-               | Text.InlineCode("FeedbackInputs.Emojis")
-               | zeroState.ToFeedbackInput().Variant(FeedbackInputs.Emojis)
+               | Text.InlineCode("FeedbackInputVariant.Emojis")
+               | zeroState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis)
                | Text.InlineCode(zeroState.Value.ToString())
-               | twoState.ToFeedbackInput().Variant(FeedbackInputs.Emojis).Disabled()
-               | twoState.ToFeedbackInput().Variant(FeedbackInputs.Emojis).Invalid("Invalid feedback")
+               | twoState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Disabled()
+               | twoState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Invalid("Invalid feedback")
 
-               | Text.InlineCode("FeedbackInputs.Thumbs")
-               | zeroState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs)
+               | Text.InlineCode("FeedbackInputVariant.Thumbs")
+               | zeroState.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs)
                | Text.InlineCode(zeroState.Value.ToString())
-               | twoState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Disabled()
-               | twoState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Invalid("Invalid feedback")
+               | twoState.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs).Disabled()
+               | twoState.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs).Invalid("Invalid feedback")
             ;
 
 
@@ -56,19 +56,19 @@ public class FeedbackInputApp : SampleBase
                           | Text.InlineCode("Large")
 
                           | Text.InlineCode("Stars")
-                          | sizeState.ToFeedbackInput().Variant(FeedbackInputs.Stars).Small()
-                          | sizeState.ToFeedbackInput().Variant(FeedbackInputs.Stars)
-                          | sizeState.ToFeedbackInput().Variant(FeedbackInputs.Stars).Large()
+                          | sizeState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Small()
+                          | sizeState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars)
+                          | sizeState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Large()
 
                           | Text.InlineCode("Emojis")
-                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputs.Emojis).Small()
-                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputs.Emojis)
-                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputs.Emojis).Large()
+                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Small()
+                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis)
+                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Large()
 
                           | Text.InlineCode("Thumbs")
-                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Small()
-                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs)
-                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Large()
+                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs).Small()
+                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs)
+                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs).Large()
         ;
 
 

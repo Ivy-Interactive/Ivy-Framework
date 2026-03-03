@@ -151,7 +151,7 @@ internal static class FormScaffolder
 
                 if (field.HasDataTypeAttribute(DataType.MultilineText))
                 {
-                    input = input.Variant(TextInputs.Textarea);
+                    input = input.Variant(TextInputVariant.Textarea);
                 }
 
                 // If Required => don't show X button even for nullable types
@@ -211,11 +211,11 @@ internal static class FormScaffolder
 
                 if (field.HasDataTypeAttribute(DataType.Date))
                 {
-                    input = input.Variant(DateTimeInputs.Date);
+                    input = input.Variant(DateTimeInputVariant.Date);
                 }
                 else if (field.HasDataTypeAttribute(DataType.Time))
                 {
-                    input = input.Variant(DateTimeInputs.Time);
+                    input = input.Variant(DateTimeInputVariant.Time);
                 }
                 if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
