@@ -50,3 +50,21 @@ var csvText = await http.GetStringAsync("https://example.com/data.csv");
 ```
 
 For small datasets, embedding data directly as C# collections is simplest. For larger datasets, use CsvHelper or similar libraries.
+
+## How do I create a horizontal layout with items spaced between (like CSS justify-content: space-between)?
+
+Instead, use a `Spacer` with `Size.Grow()` to push items apart:
+
+```csharp
+Layout.Horizontal().Align(Align.Center)
+    | Text.H1("Title")
+    | new Spacer().Width(Size.Grow())
+    | new Button("Action", handler)
+```
+
+The `Spacer` takes up all remaining space, pushing elements before it to the left and elements after it to the right. You can also use `.Right()` on the layout to align all children to the right:
+
+```csharp
+Layout.Horizontal().Right()
+    | new Button("Right-aligned", handler)
+```
