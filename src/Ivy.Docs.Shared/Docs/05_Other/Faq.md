@@ -88,3 +88,15 @@ return Layout.Vertical()
 ```
 
 `mutation.Trigger` is the action to invoke. `mutation.IsLoading` indicates if the operation is in progress. `mutation.Error` contains any exception that was thrown.
+
+## How do I configure an Ivy project to use local source for the Ivy framework?
+
+To use a local copy of the Ivy framework source code instead of the NuGet package:
+
+1. Set the `IVY_PROJECT_PATH` environment variable to point to your local `Ivy.csproj` file (e.g., `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Ivy.csproj`)
+2. Run `ivy init --local-source` to create a new project with local source references
+3. For existing projects, use `ivy debug use-local-source` to convert from PackageReference to ProjectReference
+
+The project file will use a `<ProjectReference>` pointing to the local Ivy.csproj instead of a `<PackageReference>`. This is useful for developing and debugging the Ivy framework itself.
+
+**Important:** Do NOT use direct DLL references (`<Reference Include="Ivy"><HintPath>...</HintPath></Reference>`) — this will fail because transitive NuGet dependencies (Microsoft.Extensions, System.Reactive, etc.) won't be resolved.
