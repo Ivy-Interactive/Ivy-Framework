@@ -14,7 +14,7 @@ public class ServerDescription
     public List<ConnectionDescription> Connections { get; set; } = new();
 
     [YamlMember(Alias = "secrets")]
-    public List<string> Secrets { get; set; } = new();
+    public List<SecretDescription> Secrets { get; set; } = new();
 
     [YamlMember(Alias = "services")]
     public List<ServiceDescription> Services { get; set; } = new();
@@ -79,13 +79,13 @@ public class ServerDescription
 
         // Gather secrets from IHaveSecrets implementations
         var secretsProviders = serviceProvider.GetServices<IHaveSecrets>();
-        var secretKeys = new HashSet<string>();
+        var secretEntries = new Dictionary<string, string?>();
         foreach (var provider in secretsProviders)
         {
             var secrets = provider.GetSecrets();
             foreach (var secret in secrets)
             {
-                secretKeys.Add(secret.Key);
+                secretEntries.TryAdd(secret.Key, secret.Preset);
             }
         }
 
@@ -108,7 +108,7 @@ public class ServerDescription
                         var secrets = provider.GetSecrets();
                         foreach (var secret in secrets)
                         {
-                            secretKeys.Add(secret.Key);
+                            secretEntries.TryAdd(secret.Key, secret.Preset);
                         }
                     }
                 }
@@ -118,7 +118,9 @@ public class ServerDescription
                 }
             }
         }
-        description.Secrets = secretKeys.ToList();
+        description.Secrets = secretEntries
+            .Select(kvp => new SecretDescription { Key = kvp.Key, Preset = kvp.Value })
+            .ToList();
 
         // Gather all registered services from the DI container
         if (serviceProvider is ServiceProvider sp)
@@ -252,4 +254,13 @@ public class ServiceDescription
 
     [YamlMember(Alias = "description")]
     public string? Description { get; set; }
+}
+
+public class SecretDescription
+{
+    [YamlMember(Alias = "key")]
+    public string Key { get; set; } = string.Empty;
+
+    [YamlMember(Alias = "preset")]
+    public string? Preset { get; set; }
 }
