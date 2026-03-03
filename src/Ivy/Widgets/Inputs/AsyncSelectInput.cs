@@ -164,7 +164,7 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectSearc
         var header = Layout.Vertical().Gap(2)
             | searchInput;
 
-        var content = Layout.Vertical().Gap(2)
+        var content = Layout.Vertical().Gap(2).RemoveParentPadding()
             | (loading ? Text.Block("Loading...") : new List(items));
 
         return new HeaderLayout(header, content)
