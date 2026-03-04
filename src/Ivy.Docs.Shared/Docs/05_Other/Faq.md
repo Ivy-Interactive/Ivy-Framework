@@ -100,3 +100,63 @@ To use a local copy of the Ivy framework source code instead of the NuGet packag
 The project file will use a `<ProjectReference>` pointing to the local Ivy.csproj instead of a `<PackageReference>`. This is useful for developing and debugging the Ivy framework itself.
 
 **Important:** Do NOT use direct DLL references (`<Reference Include="Ivy"><HintPath>...</HintPath></Reference>`) — this will fail because transitive NuGet dependencies (Microsoft.Extensions, System.Reactive, etc.) won't be resolved.
+
+## How do I create a Callout or info/warning/error message box in Ivy?
+
+Use the static factory methods on `Callout`:
+
+```csharp
+Callout.Info("No items found.")
+Callout.Warning("This action cannot be undone.")
+Callout.Error("Something went wrong.")
+Callout.Success("Operation completed!")
+```
+
+## How do I handle enter key press on a TextInput?
+
+Single-line TextInputs automatically blur when the user presses Enter, so use `HandleBlur` to react to the Enter key:
+
+```csharp
+var input = UseState("");
+input.ToTextInput()
+    .Placeholder("Type and press Enter")
+    .HandleBlur(() => DoSomething(input.Value))
+```
+
+`HandleBlur` takes an `Action` that is invoked when the input loses focus — which happens automatically on Enter for single-line text inputs.
+
+## How do I show streaming text from an API (e.g., OpenAI) in Ivy?
+
+`UseQuery` is for request-response patterns, NOT for streaming. For streaming API responses where you want to show text appearing incrementally, use a regular async method that updates an `IState<string>` inside the streaming loop:
+
+```csharp
+var output = UseState("");
+var isStreaming = UseState(false);
+
+async Task StreamResponse()
+{
+    isStreaming.Set(true);
+    output.Set("");
+
+    try
+    {
+        var result = new System.Text.StringBuilder();
+        await foreach (var chunk in myStreamingApi.StreamAsync())
+        {
+            result.Append(chunk);
+            output.Set(result.ToString()); // UI updates on each chunk
+        }
+    }
+    finally
+    {
+        isStreaming.Set(false);
+    }
+}
+
+return Layout.Vertical()
+    | new Button("Generate", async _ => await StreamResponse())
+        .Disabled(isStreaming.Value)
+    | Text.P(output.Value);
+```
+
+Each `state.Set()` call triggers a re-render, so the UI updates incrementally as chunks arrive. Use `UseMutation` if you want built-in loading/error tracking for non-streaming async operations instead.
