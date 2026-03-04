@@ -276,6 +276,13 @@ public class Server
     {
         var themeService = new ThemeService();
         themeService.SetTheme(theme);
+
+        var themeType = theme.GetType();
+        if (themeType != typeof(Theme))
+        {
+            themeService.SetThemeFactory(() => (Theme)Activator.CreateInstance(themeType)!);
+        }
+
         Services.AddSingleton<IThemeService>(themeService);
         return this;
     }
@@ -286,6 +293,14 @@ public class Server
         configureTheme(theme);
         var themeService = new ThemeService();
         themeService.SetTheme(theme);
+
+        themeService.SetThemeFactory(() =>
+        {
+            var t = new Theme();
+            configureTheme(t);
+            return t;
+        });
+
         Services.AddSingleton<IThemeService>(themeService);
         return this;
     }
@@ -541,6 +556,14 @@ public class Server
                 AppRepository.Reload();
                 var hubContext = app.Services.GetService<IHubContext<AppHub>>()!;
                 hubContext.Clients.All.SendAsync("HotReload", cancellationToken: cts.Token);
+
+                var themeService = app.Services.GetService<IThemeService>();
+                if (themeService?.ThemeFactory != null)
+                {
+                    themeService.ReloadTheme();
+                    var newCss = themeService.GenerateThemeCss();
+                    hubContext.Clients.All.SendAsync("ApplyTheme", newCss, cancellationToken: cts.Token);
+                }
             };
         }
 

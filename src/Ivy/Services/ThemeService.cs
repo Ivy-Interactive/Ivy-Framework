@@ -8,7 +8,13 @@ public interface IThemeService
 {
     Theme CurrentTheme { get; }
 
+    Func<Theme>? ThemeFactory { get; }
+
     void SetTheme(Theme theme);
+
+    void SetThemeFactory(Func<Theme> factory);
+
+    void ReloadTheme();
 
     string GenerateThemeCss();
 
@@ -18,12 +24,26 @@ public interface IThemeService
 public class ThemeService : IThemeService
 {
     private Theme _currentTheme = Theme.Default;
+    private Func<Theme>? _themeFactory;
 
     public Theme CurrentTheme => _currentTheme;
+
+    public Func<Theme>? ThemeFactory => _themeFactory;
 
     public void SetTheme(Theme theme)
     {
         _currentTheme = theme ?? Theme.Default;
+    }
+
+    public void SetThemeFactory(Func<Theme> factory)
+    {
+        _themeFactory = factory;
+    }
+
+    public void ReloadTheme()
+    {
+        if (_themeFactory == null) return;
+        SetTheme(_themeFactory());
     }
 
     public string GenerateThemeCss()
