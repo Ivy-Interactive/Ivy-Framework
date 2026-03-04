@@ -24,15 +24,15 @@ public enum Languages
 /// <summary>
 /// Displays inline or block code snippets.
 /// </summary>
-public record Code : WidgetBase<Code>
+public record CodeBlock : WidgetBase<CodeBlock>
 {
-    public Code(string content, Languages language = Languages.Csharp)
+    public CodeBlock(string content, Languages language = Languages.Csharp)
     {
         Content = content;
         Language = language;
     }
 
-    internal Code()
+    internal CodeBlock()
     {
         Width = Size.Full();
         Height = Size.MaxContent().Max(Size.Px(800));
@@ -50,29 +50,29 @@ public record Code : WidgetBase<Code>
 
 }
 
-public static class CodeExtensions
+public static class CodeBlockExtensions
 {
-    public static Code Content(this Code code, string content)
+    public static CodeBlock Content(this CodeBlock code, string content)
     {
         return code with { Content = content };
     }
 
-    public static Code Language(this Code code, Languages language)
+    public static CodeBlock Language(this CodeBlock code, Languages language)
     {
         return code with { Language = language };
     }
 
-    public static Code ShowLineNumbers(this Code code, bool showLineNumbers = true)
+    public static CodeBlock ShowLineNumbers(this CodeBlock code, bool showLineNumbers = true)
     {
         return code with { ShowLineNumbers = showLineNumbers };
     }
 
-    public static Code ShowCopyButton(this Code code, bool showCopyButton = true)
+    public static CodeBlock ShowCopyButton(this CodeBlock code, bool showCopyButton = true)
     {
         return code with { ShowCopyButton = showCopyButton };
     }
 
-    public static Code ShowBorder(this Code code, bool showBorder = true)
+    public static CodeBlock ShowBorder(this CodeBlock code, bool showBorder = true)
     {
         return code with { ShowBorder = showBorder };
     }

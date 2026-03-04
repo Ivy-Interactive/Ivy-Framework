@@ -3,7 +3,6 @@ import { Button } from './ui/button';
 import { ClipboardCopy, Check } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { createPrismTheme } from '@/lib/prismTheme';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface ErrorDisplayProps {
   title?: string | null;
@@ -51,7 +50,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       {stackTrace && (
         <div>
           <h4 className="text-sm font-medium mb-2">Stack Trace</h4>
-          <ScrollArea className="w-full border border-border rounded-md">
+          <div className="w-full max-h-[50vh] overflow-auto border border-border rounded-md">
             <SyntaxHighlighter
               language="csharp"
               style={createPrismTheme()}
@@ -60,8 +59,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
             >
               {stackTrace}
             </SyntaxHighlighter>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+          </div>
         </div>
       )}
 

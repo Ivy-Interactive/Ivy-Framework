@@ -188,7 +188,7 @@ public class NumberInputApp : SampleBase
                     .Currency("USD")
                   | usdValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("USD")
 
                   | Text.Block("EUR")
@@ -197,7 +197,7 @@ public class NumberInputApp : SampleBase
                     .Currency("EUR")
                   | eurValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("EUR")
 
                   | Text.Block("GBP")
@@ -206,7 +206,7 @@ public class NumberInputApp : SampleBase
                     .Currency("GBP")
                   | gbpValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("GBP")
 
                   | Text.Block("JPY")
@@ -215,7 +215,7 @@ public class NumberInputApp : SampleBase
                     .Currency("JPY")
                   | jpyValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("JPY")
 
                   | Text.Block("Null Value")
@@ -224,7 +224,7 @@ public class NumberInputApp : SampleBase
                     .Currency("USD")
                   | nullCurrencyValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("USD")
                )
 
@@ -279,7 +279,7 @@ public class NumberInputApp : SampleBase
                     .Max(10000)
                   | usdValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("USD")
                     .Min(0)
                     .Max(10000)
@@ -291,7 +291,7 @@ public class NumberInputApp : SampleBase
                     .Step(0.01)
                   | eurValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("EUR")
                     .Step(0.01)
 
@@ -302,7 +302,7 @@ public class NumberInputApp : SampleBase
                     .Precision(2)
                   | gbpValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("GBP")
                     .Precision(2)
                );

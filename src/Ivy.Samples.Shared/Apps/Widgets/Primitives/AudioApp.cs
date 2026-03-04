@@ -71,7 +71,7 @@ public class AudioApp : SampleBase
                 ).Title("Custom Sizing"))
             | Layout.Vertical().Gap(4)
                 | Text.H3("Usage Examples")
-                | new Code("""
+                | new CodeBlock("""
                     // Basic audio player
                     var audio = new Audio("path/to/audio.mp3");
                     

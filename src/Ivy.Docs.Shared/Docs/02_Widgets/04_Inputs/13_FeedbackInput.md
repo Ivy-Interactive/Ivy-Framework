@@ -36,9 +36,9 @@ public class BasicFeedbackDemo : ViewBase
 ## Variants
 
 `FeedbackInput`s come in several variants to suit different use cases:
- For star style feedback ( 1 star to 5 stars) the variant `FeedbackInputs.Stars` should be used.
+ For star style feedback ( 1 star to 5 stars) the variant `FeedbackInputVariants.Stars` should be used.
  For binary style feedback ( yes, no, liked/disliked, recommended/not-recommended) type feedback
- the variant `FeedbackInputs.Thumbs` should be used. `FeedbackInputs.Emojis` should be used
+ the variant `FeedbackInputVariants.Thumbs` should be used. `FeedbackInputVariants.Emojis` should be used
  for collecting sentiment analysis feedbacks about anything.
 
 ```csharp demo-below
@@ -53,15 +53,15 @@ public class FeedbackDemo : ViewBase
         return Layout.Vertical()
                 | H3 ("Simple movie review")
                 | new FeedbackInput<bool>(thumbsFeedback)
-                      .Variant(FeedbackInputs.Thumbs)
+                      .Variant(FeedbackInputVariants.Thumbs)
                       .WithField()
                       .Label("Did you like the movie ?")
                 | new FeedbackInput<int>(starFeedback)
-                      .Variant(FeedbackInputs.Stars)
+                      .Variant(FeedbackInputVariants.Stars)
                       .WithField()
                       .Label("How would you like to rate the movie ?")
                 | new FeedbackInput<int>(emojiFeedback)
-                      .Variant(FeedbackInputs.Emojis)
+                      .Variant(FeedbackInputVariants.Emojis)
                       .WithField()
                       .Label("How do you feel after seeing the movie ?");
     }  

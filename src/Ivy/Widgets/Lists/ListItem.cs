@@ -60,3 +60,8 @@ public record ListItem : WidgetBase<ListItem>
 
     [Event] public Func<Event<ListItem>, ValueTask>? OnClick { get; set; }
 }
+
+public static class ListItemExtensions
+{
+    public static ListItem Content(this ListItem listItem, object child) => listItem with { Children = [child] };
+}

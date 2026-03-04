@@ -65,3 +65,15 @@ public record DataTable : WidgetBase<DataTable>
         throw new NotSupportedException("DataTable does not support children.");
     }
 }
+
+public static class DataTableWidgetExtensions
+{
+    public static DataTable HandleRowAction(this DataTable table, Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
+        => table with { OnRowAction = handler };
+
+    public static DataTable HandleCellClick(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+        => table with { OnCellClick = handler };
+
+    public static DataTable HandleCellActivated(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+        => table with { OnCellActivated = handler };
+}

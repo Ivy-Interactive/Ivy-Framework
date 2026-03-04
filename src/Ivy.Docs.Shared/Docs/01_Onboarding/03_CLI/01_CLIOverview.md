@@ -28,6 +28,7 @@ Get started with Ivy CLI in just a few commands:
 
 ```terminal
 >ivy init
+>ivy upgrade
 >ivy db add
 >ivy auth add
 >ivy deploy
@@ -97,13 +98,15 @@ Most Ivy commands require authentication. Use `ivy login` to authenticate with y
 ## Next Steps
 
 1. **Initialize a project**: `ivy init`
-2. **Add a database**: `ivy db add`
-3. **Add authentication**: `ivy auth add`
-4. **Deploy your project**: `ivy deploy`
+2. **Upgrade your project**: `ivy upgrade`
+3. **Add a database**: `ivy db add`
+4. **Add authentication**: `ivy auth add`
+5. **Deploy your project**: `ivy deploy`
 
 For detailed information on each feature, see the specific documentation files:
 
 - [Project Initialization](02_Init.md)
+- [Project Upgrade](08_Upgrade.md)
 - [Database Integration](05_DatabaseIntegration/01_DatabaseOverview.md)
 - [Authentication Setup](04_Authentication/01_AuthenticationOverview.md)
 - [Deployment Guide](06_Deployment/01_DeploymentOverview.md)

@@ -55,6 +55,7 @@ import {
   FloatingPanelWidget,
 } from '@/widgets/layouts';
 import { ListWidget, ListItemWidget } from '@/widgets/lists';
+import { TreeWidget } from '@/widgets/tree';
 import {
   TextBlockWidget,
   HtmlWidget,
@@ -97,7 +98,9 @@ export const widgetMap = {
   'Ivy.Svg': SvgWidget,
   'Ivy.Image': ImageWidget,
   'Ivy.Iframe': IframeWidget,
-  'Ivy.Code': React.lazy(() => import('@/widgets/primitives/CodeWidget')),
+  'Ivy.CodeBlock': React.lazy(
+    () => import('@/widgets/primitives/CodeBlockWidget')
+  ),
   'Ivy.Fragment': FragmentWidget,
   'Ivy.Separator': SeparatorWidget,
   'Ivy.Skeleton': SkeletonWidget,
@@ -205,6 +208,9 @@ export const widgetMap = {
   // Lists
   'Ivy.List': ListWidget,
   'Ivy.ListItem': ListItemWidget,
+
+  // Tree
+  'Ivy.Tree': TreeWidget,
 
   // Details
   'Ivy.Details': DetailsWidget,

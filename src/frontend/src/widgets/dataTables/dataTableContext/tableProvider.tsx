@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import * as arrow from 'apache-arrow';
 import { Filter } from '@/services/grpcTableService';
 import { TableContext } from './tableContext';
@@ -17,9 +17,9 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   config,
   editable = false,
 }) => {
-  const [visibleRows, setVisibleRows] = React.useState(0);
-  const [error, setError] = React.useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = React.useState<Filter | null>(null);
+  const [visibleRows, setVisibleRows] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<Filter | null>(null);
 
   const arrowTableRef = useRef<arrow.Table | null>(null);
   const { allowColumnResizing, allowSorting } = config;
@@ -30,7 +30,6 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     setColumns,
     columnWidths,
     columnOrder,
-    resetColumnWidths,
     initializeColumnOrder,
     initializeColumnWidths,
     handleColumnResize,
@@ -44,13 +43,6 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const { activeSort, handleSort, initializeSortFromColumns } = useSorting({
     allowSorting: allowSorting ?? true,
   });
-
-  const connectionKey = `${connection.connectionId}-${connection.sourceId}`;
-
-  // Reset column widths when connection changes
-  React.useEffect(() => {
-    resetColumnWidths();
-  }, [connectionKey, resetColumnWidths]);
 
   // Data loading
   const { isLoading, hasMore, loadMoreData } = useDataLoading({

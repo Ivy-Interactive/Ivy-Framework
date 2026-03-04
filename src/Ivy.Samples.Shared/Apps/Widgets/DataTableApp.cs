@@ -1,35 +1,10 @@
 using Ivy.Samples.Shared.Apps;
 using Ivy.Shared;
 using Ivy.Views.DataTables;
+using Ivy.Hooks;
+using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
-
-/// <summary>
-/// Comprehensive DataTable test with all column types
-/// Tests the fix for issue #1273 - column type metadata preservation
-/// Tests the fix for issue #1311 - table width and height setting
-/// </summary>
-public record EmployeeRecord(
-    int Id,
-    string EmployeeCode,
-    string Name,
-    string Email,
-    int Age,
-    decimal Salary,
-    double Performance,
-    bool IsActive,
-    bool IsManager,
-    DateTime HireDate,
-    DateTime LastReview,
-    Icons Status,
-    Icons Priority,
-    Icons Department,
-    string Notes,
-    int? OptionalId,
-    string[] Skills,
-    string? WidgetLink,
-    string? ProfileLink
-);
 
 [App(icon: Icons.DatabaseZap)]
 public class DataTableApp : SampleBase
@@ -37,78 +12,16 @@ public class DataTableApp : SampleBase
     protected override object? BuildSample()
     {
         var client = UseService<IClientProvider>();
-
-        // Create the employee data once at app level (like Kanban caches its tasks)
-        var employees = UseState(() =>
-        {
-            var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
-
-            var random = new Random(42);
-            var startDate = new DateTime(2020, 1, 1);
-
-            var departments = new[] { Icons.Building, Icons.Code, Icons.Users, Icons.ShoppingCart, Icons.Headphones };
-            var statuses = new[] { Icons.CircleCheck, Icons.Clock, Icons.TriangleAlert, Icons.X, Icons.Pause };
-            var priorities = new[] { Icons.ArrowUp, Icons.ArrowRight, Icons.ArrowDown, Icons.Flag, Icons.Star };
-
-            var firstNames = new[] { "John", "Jane", "Mike", "Sarah", "David", "Emily", "Chris", "Lisa", "Tom", "Anna" };
-            var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez" };
-
-            return Enumerable.Range(1, 1000).Select(i =>
-            {
-                var firstName = firstNames[random.Next(firstNames.Length)];
-                var lastName = lastNames[random.Next(lastNames.Length)];
-                var name = $"{firstName} {lastName}";
-                var email = $"employee{i}@company.com";
-                var age = random.Next(22, 65);
-                var salary = (decimal)(random.Next(30000, 150000) / 1000 * 1000);
-                var performance = Math.Round(random.NextDouble() * 5, 2);
-                var isActive = random.NextDouble() > 0.2;
-                var isManager = random.NextDouble() > 0.8;
-                var hireDate = startDate.AddDays(random.Next(0, 1826));
-                var lastReview = DateTime.Now.AddDays(-random.Next(0, 365));
-                var status = statuses[random.Next(statuses.Length)];
-                var priority = priorities[random.Next(priorities.Length)];
-                var department = departments[random.Next(departments.Length)];
-                var notes = $"Employee notes for {i}";
-                var optionalId = random.NextDouble() > 0.3 ? (int?)random.Next(1, 1000) : null;
-
-                // Generate 2-5 random skills for each employee
-                var skillCount = random.Next(2, 6);
-                var skills = Enumerable.Range(0, skillCount)
-                    .Select(_ => allSkills[random.Next(allSkills.Length)])
-                    .Distinct()
-                    .ToArray();
-
-                // Generate link URLs
-                var widgetLink = "/widgets/charts/area-chart"; // Internal widget link - relative URL works on any domain
-                var profileLink = $"https://linkedin.com/in/{firstName.ToLower()}{lastName.ToLower()}{i}"; // External LinkedIn profile
-
-                return new EmployeeRecord(
-                    Id: i,
-                    EmployeeCode: $"EMP{i:D4}",
-                    Name: name,
-                    Email: email,
-                    Age: age,
-                    Salary: salary,
-                    Performance: performance,
-                    IsActive: isActive,
-                    IsManager: isManager,
-                    HireDate: hireDate,
-                    LastReview: lastReview,
-                    Status: status,
-                    Priority: priority,
-                    Department: department,
-                    Notes: notes,
-                    OptionalId: optionalId,
-                    Skills: skills,
-                    WidgetLink: widgetLink,
-                    ProfileLink: profileLink
-                );
-            }).ToList();
-        });
+        var mockService = UseService<MockEmployeeService>();
 
         // The DataTable builder will be recreated each time, but use the cached employee data
-        var dataTable = employees.Value.AsQueryable().ToDataTable(idSelector: e => e.Id)
+        var editModalOpen = UseState(() => false);
+        var editingEmployee = UseState<EmployeeRecord?>(() => null);
+        var refreshToken = UseRefreshToken();
+
+        // Configuration and row actions logic
+        var dataTable = mockService.GetEmployees().AsQueryable().ToDataTable(idSelector: e => e.Id)
+            .RefreshToken(refreshToken)
             // Table dimensions (fix for issue #1311)
             .Width(Size.Full()) // Table width set to 120 units (30rem)
             .Height(Size.Full()) // Table height set to 120 units (30rem)
@@ -238,10 +151,78 @@ public class DataTableApp : SampleBase
             .HandleRowAction(async e =>
             {
                 var args = e.Value;
-                client.Toast($"Row action: ID: {args.Id}, Tag: {args.Tag}");
+                if (int.TryParse(args.Id?.ToString() ?? "", out int employeeId))
+                {
+                    var tag = args.Tag?.ToString();
+                    if (tag == "edit")
+                    {
+                        var employee = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == employeeId);
+                        if (employee != null)
+                        {
+                            editingEmployee.Set(employee);
+                            editModalOpen.Set(true);
+                        }
+                    }
+                    else if (tag == "delete")
+                    {
+                        var employee = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == employeeId);
+                        if (employee != null)
+                        {
+                            mockService.DeleteEmployee(employee.Id);
+                            refreshToken.Refresh();
+                            client.Toast($"Employee {employee.Name} deleted");
+                        }
+                    }
+                    else
+                    {
+                        client.Toast($"Row action: ID: {args.Id}, Tag: {args.Tag}");
+                    }
+                }
                 await ValueTask.CompletedTask;
             });
 
-        return dataTable;
+        return new Fragment([dataTable, new EmployeeEditDialog(editModalOpen, editingEmployee, refreshToken, updated =>
+        {
+            mockService.UpdateEmployee(updated);
+        })]);
+    }
+}
+
+public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> employeeState, RefreshToken refreshToken, Action<EmployeeRecord> onSave) : ViewBase
+{
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+
+        if (employeeState.Value == null)
+        {
+            return new Empty();
+        }
+
+        // We bind the form to the employee state. ToForm() will handle the object mutations and submission.
+        return employeeState.Value
+            .ToForm()
+            .Remove(e => e.Id)
+            .Remove(e => e.EmployeeCode)
+            .Remove(e => e.HireDate)
+            .HandleSubmit(OnSubmit)
+            .ToDialog(isOpen, title: "Edit Employee", submitTitle: "Save");
+
+        Task OnSubmit(EmployeeRecord? updated)
+        {
+            if (updated != null)
+            {
+                onSave(updated);
+                client.Toast($"Employee {updated.Name} saved successfully");
+            }
+
+            isOpen.Set((bool)false);
+            employeeState.Set((EmployeeRecord?)null);
+
+            // Trigger refresh
+            refreshToken.Refresh();
+
+            return Task.CompletedTask;
+        }
     }
 }

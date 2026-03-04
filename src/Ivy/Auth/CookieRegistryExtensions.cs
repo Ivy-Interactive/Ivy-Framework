@@ -46,8 +46,8 @@ public static class CookieRegistryExtensions
     {
         if (string.IsNullOrEmpty(authToken?.AccessToken))
         {
-            cookies.Delete("auth_token");
-            cookies.Delete("auth_ext_refresh_token");
+            cookies.Delete("auth_token", CreateAuthCookieOptions());
+            cookies.Delete("auth_ext_refresh_token", CreateAuthCookieOptions());
         }
         else
         {
@@ -74,7 +74,7 @@ public static class CookieRegistryExtensions
             }
             else
             {
-                cookies.Delete("auth_ext_refresh_token");
+                cookies.Delete("auth_ext_refresh_token", CreateAuthCookieOptions());
             }
             cookies.Append("auth_token", tokenJson, cookieOptions);
         }
@@ -84,7 +84,7 @@ public static class CookieRegistryExtensions
     {
         if (authSessionData == null)
         {
-            cookies.Delete("auth_session_data");
+            cookies.Delete("auth_session_data", CreateAuthCookieOptions());
         }
         else
         {

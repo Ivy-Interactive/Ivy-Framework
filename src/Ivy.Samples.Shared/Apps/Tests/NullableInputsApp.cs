@@ -341,7 +341,7 @@ public class NullableInputsApp : SampleBase
                 | (nullableFeedback.Value == null ? Text.InlineCode("null") : Text.Block(nullableFeedback.Value.ToString()!))
 
                 | Text.Block("Feedback Thumbs (bool?)")
-                | nullableFeedbackBool.ToFeedbackInput(placeholder: "Give feedback...", variant: FeedbackInputs.Thumbs).Nullable()
+                | nullableFeedbackBool.ToFeedbackInput(placeholder: "Give feedback...", variant: FeedbackInputVariants.Thumbs).Nullable()
                 | (nullableFeedbackBool.Value == null ? Text.InlineCode("null") : Text.Block(nullableFeedbackBool.Value.Value.ToString()))
              )
 
@@ -420,7 +420,7 @@ public class NullableInputsApp : SampleBase
                 | nullableFeedback.ToFeedbackInput(placeholder: "Rate us...").Invalid("Rating is required").Nullable()
                 | Text.Block("Nullable feedback stars input with validation error")
 
-                | nullableFeedbackBool.ToFeedbackInput(placeholder: "Give feedback...", variant: FeedbackInputs.Thumbs).Invalid("Feedback is required").Nullable()
+                | nullableFeedbackBool.ToFeedbackInput(placeholder: "Give feedback...", variant: FeedbackInputVariants.Thumbs).Invalid("Feedback is required").Nullable()
                 | Text.Block("Nullable feedback thumbs input with validation error")
              )
 

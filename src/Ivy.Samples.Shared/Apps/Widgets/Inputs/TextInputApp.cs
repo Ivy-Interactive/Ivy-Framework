@@ -40,7 +40,6 @@ public class TextInputApp : SampleBase
                           | nullStringState
             ;
 
-
         return Layout.Vertical()
                | Text.H1("Text Inputs")
                | Text.H2("Sizes")
@@ -53,25 +52,25 @@ public class TextInputApp : SampleBase
                   | Text.InlineCode("Disabled")
                   | Text.InlineCode("Invalid")
 
-                  | Text.InlineCode("TextInputs.Text")
+                  | Text.InlineCode("TextInputVariants.Text")
+                  | withoutValue.ToTextInput().Placeholder("Placeholder")
+                  | withValue.ToTextInput()
+                  | withValue.ToTextInput().Disabled()
+                  | withValue.ToTextInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+                  | Text.InlineCode("TextInputVariants.Password")
                   | withoutValue.ToPasswordInput().Placeholder("Placeholder")
                   | withValue.ToPasswordInput()
                   | withValue.ToPasswordInput().Disabled()
                   | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
-                  | Text.InlineCode("TextInputs.Password")
-                  | withoutValue.ToPasswordInput().Placeholder("Placeholder")
-                  | withValue.ToPasswordInput()
-                  | withValue.ToPasswordInput().Disabled()
-                  | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
-
-                  | Text.InlineCode("TextInputs.TextArea")
+                  | Text.InlineCode("TextInputVariants.TextArea")
                   | withoutValue.ToTextAreaInput().Placeholder("Placeholder")
                   | withValue.ToTextAreaInput()
                   | withValue.ToTextAreaInput().Disabled()
                   | withValue.ToTextAreaInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
-                  | Text.InlineCode("TextInputs.Search")
+                  | Text.InlineCode("TextInputVariants.Search")
                   | withoutValue.ToSearchInput().Placeholder("Placeholder").ShortcutKey("Ctrl+K")
                   | withValue.ToSearchInput()
                   | withValue.ToSearchInput().Disabled()
@@ -85,6 +84,9 @@ public class TextInputApp : SampleBase
 
                | Text.H2("Data Binding")
                | dataBinding
+
+               | Text.H2("Length constraints")
+               | new TextInputLengthConstraints()
 
                //Events: 
 
@@ -103,10 +105,29 @@ public class TextInputApp : SampleBase
                    onBlurState.ToTextInput(null, false, TextInputs.Password).HandleBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
+               | new Spacer().Height(15)
             ;
     }
 
     // Helper methods moved to TextInputSizes and TextInputPrefixSuffix classes
+}
+
+public class TextInputLengthConstraints : ViewBase
+{
+    public override object Build()
+    {
+        var minLengthState = UseState("");
+        var maxLengthState = UseState("");
+        var bothLengthState = UseState("");
+
+        return Layout.Grid().Columns(3)
+               | Text.InlineCode("MinLength(3)")
+               | Text.InlineCode("MaxLength(10)")
+               | Text.InlineCode("MinLength(5) + MaxLength(10)")
+               | minLengthState.ToTextInput().Placeholder("At least 3 characters").MinLength(3)
+               | maxLengthState.ToTextInput().Placeholder("Up to 10 characters").MaxLength(10)
+               | bothLengthState.ToTextInput().Placeholder("Between 5 and 10 characters").MinLength(5).MaxLength(10);
+    }
 }
 
 public class TextInputSizes : ViewBase
@@ -124,22 +145,22 @@ public class TextInputSizes : ViewBase
                | Text.InlineCode("Medium")
                | Text.InlineCode("Large")
 
-               | Text.InlineCode("TextInputs.Text")
-               | textState.ToPasswordInput().Small()
-               | textState.ToPasswordInput()
-               | textState.ToPasswordInput().Large()
+               | Text.InlineCode("TextInputVariants.Text")
+               | textState.ToTextInput().Small()
+               | textState.ToTextInput()
+               | textState.ToTextInput().Large()
 
-               | Text.InlineCode("TextInputs.Password")
+               | Text.InlineCode("TextInputVariants.Password")
                | passwordState.ToPasswordInput().Small()
                | passwordState.ToPasswordInput()
                | passwordState.ToPasswordInput().Large()
 
-               | Text.InlineCode("TextInputs.TextArea")
+               | Text.InlineCode("TextInputVariants.TextArea")
                | textareaState.ToTextAreaInput().Small()
                | textareaState.ToTextAreaInput()
                | textareaState.ToTextAreaInput().Large()
 
-               | Text.InlineCode("TextInputs.Search")
+               | Text.InlineCode("TextInputVariants.Search")
                | searchState.ToSearchInput().Small()
                | searchState.ToSearchInput()
                | searchState.ToSearchInput().Large();

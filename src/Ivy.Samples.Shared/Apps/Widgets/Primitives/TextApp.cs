@@ -7,86 +7,55 @@ public class TextApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var headings = Layout.Vertical(
-            Text.H4("Headings").Bold(),
+        var headingsAndBasics = Layout.Vertical(
+            Text.InlineCode("Headings").Bold().Large(),
             Text.H1("H1().Bold()").Bold(),
             Text.H2("H2().Italic()").Italic(),
             Text.H3("H3().Muted()").Muted(),
-            Text.H4("H4().Bold().Italic()").Bold().Italic()
-        );
-
-        var basic = Layout.Vertical(
+            Text.H4("H4().Bold().Italic()").Bold().Italic(),
             Text.H4("Basic Text").Bold(),
             Text.P("P().Italic()").Italic(),
             Text.Inline("Inline().Muted()").Muted(),
-            Text.Block("Block().Bold().Italic()").Bold().Italic()
-        );
-
-        var labels = Layout.Vertical(
+            Text.Block("Block().Bold().Italic()").Bold().Italic(),
             Text.H4("Label Modifiers").Bold(),
             Text.Label("Label().Bold()").Bold(),
             Text.Label("Label().Italic()").Italic(),
-            Text.Label("Label().Muted()").Muted(),
-            Text.Label("Label().Bold().Italic()").Bold().Italic(),
-            Text.Label("Label().Bold().Muted()").Bold().Muted(),
-            Text.Label("Label().Italic().Muted()").Italic().Muted()
+            Text.Label("Label().Muted()").Muted()
         );
 
-        var sizes = Layout.Vertical(
-            Text.H4("Size Variants").Bold(),
+        var styles = Layout.Vertical(
+            Text.InlineCode("Size Variants").Bold().Large(),
             Text.Lead("Lead().Bold()").Bold(),
-            Text.Lead("Lead().Italic()").Italic(),
             Text.P("P().Large().Bold()").Large().Bold(),
-            Text.P("P().Large().Italic()").Large().Italic(),
-            Text.P("P().Small().Bold()").Small().Bold(),
-            Text.P("P().Small().Italic()").Small().Italic(),
-            Text.P("P().Small().Muted()").Small().Muted()
-        );
-
-        var emphasis = Layout.Vertical(
+            Text.P("P().Small().Muted()").Small().Muted(),
             Text.H4("Emphasis").Bold(),
             Text.Strong("Strong().Italic()").Italic(),
-            Text.Strong("Strong().Muted()").Muted(),
             Text.Bold("Bold().Italic()").Italic(),
-            Text.Muted("Muted().Bold()").Bold(),
-            Text.Muted("Muted().Italic()").Italic()
-        );
-
-        var quotes = Layout.Vertical(
+            Text.Muted("Muted().Italic()").Italic(),
             Text.H4("Quotes & Code").Bold(),
-            Text.Blockquote("Blockquote().Bold()").Bold(),
-            Text.Blockquote("Blockquote().Italic()").Italic(),
             Text.Blockquote("Blockquote().Muted()").Muted(),
             Text.InlineCode("InlineCode().Bold()").Bold(),
-            Text.InlineCode("InlineCode().Italic()").Italic()
-        );
-
-        var semantic = Layout.Vertical(
             Text.H4("Semantic Styles").Bold(),
             Text.Danger("Danger().Bold()").Bold(),
-            Text.Danger("Danger().Italic()").Italic(),
-            Text.Warning("Warning().Bold()").Bold(),
             Text.Warning("Warning().Italic()").Italic(),
-            Text.Success("Success().Bold()").Bold(),
-            Text.Success("Success().Italic()").Italic()
+            Text.Success("Success().Bold()").Bold()
         );
 
-        var leftColumn = Layout.Vertical(
-            headings,
-            basic,
-            labels
+        var alignment = Layout.Vertical(
+            Text.InlineCode("Left (default)").Bold().Large(),
+            Text.P("This paragraph is left-aligned. It is the default alignment for most text blocks and works well for body copy.").Left(),
+            Text.InlineCode("Center").Bold().Large(),
+            Text.P("This paragraph is centered. Useful for short lines, titles, or callouts.").Center(),
+            Text.InlineCode("Right").Bold().Large(),
+            Text.P("This paragraph is right-aligned. Often used for numbers or dates in narrow columns.").Right(),
+            Text.InlineCode("Justify").Bold().Large(),
+            Text.P("This paragraph is justified. Text is aligned to both the left and the right edge by adjusting the spacing between words. Justification works best when the paragraph spans several lines, so you can see how each line stretches to fill the full width. It is commonly used in newspapers, magazines, and multi-column layouts where a clean, block-like appearance is desired. The browser distributes extra space between words to make the right edge line up neatly.").Justify()
         );
 
-        var rightColumn = Layout.Vertical(
-            sizes,
-            emphasis,
-            quotes,
-            semantic
-        );
-
-        return Layout.Horizontal(
-            leftColumn,
-            rightColumn
+        return Layout.Tabs(
+            new Tab("Headings & basics", headingsAndBasics).Icon(Icons.Type),
+            new Tab("Styles", styles).Icon(Icons.Palette),
+            new Tab("Alignment", alignment).Icon(Icons.TextAlignCenter)
         );
     }
 }

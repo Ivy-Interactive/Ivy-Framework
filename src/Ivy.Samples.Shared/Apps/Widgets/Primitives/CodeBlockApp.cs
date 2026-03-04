@@ -3,12 +3,12 @@ using Ivy.Shared;
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.Code, path: ["Widgets", "Primitives"], searchHints: ["syntax", "highlighting", "programming", "code-block", "snippet", "pre"])]
-public class CodeApp : SampleBase
+public class CodeBlockApp : SampleBase
 {
     protected override object? BuildSample()
     {
         return Layout.Vertical()
-               | Text.H1("Code")
+               | Text.H1("CodeBlock")
                | Layout.Tabs(
                    new Tab("Variants", CreateLanguageVariants()),
                    new Tab("Options", CreateOptionsVariants()),
@@ -18,7 +18,7 @@ public class CodeApp : SampleBase
 
     private object CreateLanguageVariants()
     {
-        var sampleCode = new Dictionary<Languages, string>
+        var sampleCodeBlock = new Dictionary<Languages, string>
         {
             [Languages.Csharp] = """
                 public class Fibonacci
@@ -189,12 +189,12 @@ public class CodeApp : SampleBase
         };
 
         var cards = new List<object>();
-        foreach (var (language, code) in sampleCode)
+        foreach (var (language, code) in sampleCodeBlock)
         {
             cards.Add(
                 Layout.Vertical()
                     | Text.Label(language.ToString()).Bold()
-                    | new Code(code, language)
+                    | new CodeBlock(code, language)
                     .ShowCopyButton(true)
                     .Height(Size.Units(60))
             );
@@ -226,16 +226,16 @@ public class CodeApp : SampleBase
         {
             Layout.Vertical()
                 | Text.InlineCode("Default")
-                | new Code(sampleCode, Languages.Csharp),
+                | new CodeBlock(sampleCode, Languages.Csharp),
             Layout.Vertical()
                 | Text.InlineCode("With Line Numbers")
-                | new Code(sampleCode, Languages.Csharp).ShowLineNumbers(true),
+                | new CodeBlock(sampleCode, Languages.Csharp).ShowLineNumbers(true),
             Layout.Vertical()
                 | Text.InlineCode("No Copy Button")
-                | new Code(sampleCode, Languages.Csharp).ShowCopyButton(false),
+                | new CodeBlock(sampleCode, Languages.Csharp).ShowCopyButton(false),
             Layout.Vertical()
                 | Text.InlineCode("No Border")
-                | new Code(sampleCode, Languages.Csharp).ShowBorder(false)
+                | new CodeBlock(sampleCode, Languages.Csharp).ShowBorder(false)
         };
 
         var variants = Layout.Grid().Columns(2).Gap(4) | optionBlocks;
@@ -257,12 +257,12 @@ public class CodeApp : SampleBase
         return Layout.Vertical().Gap(6)
             | Layout.Vertical().Gap(2)
                 | Text.H3("Small Scale")
-                | new Code(sampleCode, Languages.Csharp).Small()
+                | new CodeBlock(sampleCode, Languages.Csharp).Small()
             | Layout.Vertical().Gap(2)
                 | Text.H3("Medium Scale (Default)")
-                | new Code(sampleCode, Languages.Csharp)
+                | new CodeBlock(sampleCode, Languages.Csharp)
             | Layout.Vertical().Gap(2)
                 | Text.H3("Large Scale")
-                | new Code(sampleCode, Languages.Csharp).Large();
+                | new CodeBlock(sampleCode, Languages.Csharp).Large();
     }
 }

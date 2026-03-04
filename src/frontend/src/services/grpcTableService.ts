@@ -63,6 +63,7 @@ export interface DataTableQuery {
   aggregations?: Aggregation[];
   connectionId?: string;
   sourceId?: string;
+  versionToken?: string;
 }
 
 // Alias for backward compatibility with tests
@@ -378,6 +379,12 @@ export class GrpcTableService extends EventEmitter {
     if (query.sourceId) {
       const sourceData = encoder.encode(query.sourceId);
       chunks.push(this.encodeField(8, 2, sourceData)); // Field 8, wire type 2
+    }
+
+    // Serialize versionToken (field 9, string)
+    if (query.versionToken) {
+      const tokenData = encoder.encode(query.versionToken);
+      chunks.push(this.encodeField(9, 2, tokenData)); // Field 9, wire type 2
     }
 
     // Combine all chunks

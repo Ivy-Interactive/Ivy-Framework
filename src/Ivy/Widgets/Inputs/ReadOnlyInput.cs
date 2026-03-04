@@ -41,7 +41,7 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
         Value = default!;
     }
 
-    [Prop] public TValue Value { get; }
+    [Prop] public TValue Value { get; init; }
 
     [Prop] public bool Disabled { get; set; }
 
@@ -122,4 +122,14 @@ public static class ReadOnlyInputExtensions
     {
         return widget.HandleBlur<T>(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    public static IAnyReadOnlyInput Value<T>(this IAnyReadOnlyInput widget, T value)
+    {
+        if (widget is ReadOnlyInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not ReadOnlyInput<{typeof(T).Name}>");
+    }
+
 }

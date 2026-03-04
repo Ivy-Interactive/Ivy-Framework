@@ -1,59 +1,43 @@
 import { useMemo } from 'react';
+import { GROUP_HEADER_HEIGHT } from '../dataTableEditor/constants';
 
 interface UseEmptyRowsProps {
-  containerHeight: number;
+  scrollContainerHeight: number;
   visibleRows: number;
   hasMore: boolean;
   showGroups: boolean;
   rowHeight: number;
 }
 
-const GROUP_HEADER_HEIGHT = 36;
-
 /**
- * Hook to calculate empty rows needed to fill container whitespace
+ * Calculates empty filler rows to fill the container when data is sparse.
+ * Uses floor to avoid overflow (extra row would trigger unwanted scrollbar).
  */
 export const useEmptyRows = ({
-  containerHeight,
+  scrollContainerHeight,
   visibleRows,
   hasMore,
   showGroups,
   rowHeight,
 }: UseEmptyRowsProps) => {
-  // Calculate whitespace height needed to fill container
   const whitespaceHeight = useMemo(() => {
-    // Only add whitespace when there's no more data to load
-    if (hasMore || containerHeight === 0 || visibleRows === 0) {
-      return 0;
-    }
+    if (hasMore || scrollContainerHeight === 0 || visibleRows === 0) return 0;
 
-    // Calculate header height (regular header + group header if enabled)
-    const headerHeight = rowHeight;
-    const groupHeaderHeight = showGroups ? GROUP_HEADER_HEIGHT : 0;
-    const totalHeaderHeight = headerHeight + groupHeaderHeight;
-
-    // Calculate total height of visible rows
+    const totalHeaderHeight =
+      rowHeight + (showGroups ? GROUP_HEADER_HEIGHT : 0);
     const rowsHeight = visibleRows * rowHeight;
+    const safeHeight = Math.floor(scrollContainerHeight);
 
-    // Calculate whitespace needed
-    const calculatedWhitespace =
-      containerHeight - totalHeaderHeight - rowsHeight;
+    return Math.max(0, safeHeight - totalHeaderHeight - rowsHeight);
+  }, [scrollContainerHeight, visibleRows, hasMore, rowHeight, showGroups]);
 
-    // Only return positive values
-    return Math.max(0, calculatedWhitespace);
-  }, [containerHeight, visibleRows, hasMore, rowHeight, showGroups]);
-
-  // Calculate number of empty rows needed to fill whitespace
   const emptyRowsCount = useMemo(() => {
     if (whitespaceHeight <= 0) return 0;
-    return Math.ceil(whitespaceHeight / rowHeight);
+    return Math.floor(whitespaceHeight / rowHeight);
   }, [whitespaceHeight, rowHeight]);
-
-  // Total rows including empty filler rows
-  const totalRows = visibleRows + emptyRowsCount;
 
   return {
     emptyRowsCount,
-    totalRows,
+    totalRows: visibleRows + emptyRowsCount,
   };
 };

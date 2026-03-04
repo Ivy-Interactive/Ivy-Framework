@@ -71,7 +71,10 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
       <DropdownMenuTrigger asChild>
         <TriggerButton action={action} actionId={actionId} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent
+        align="end"
+        onCloseAutoFocus={e => e.preventDefault()}
+      >
         {validChildren.map(childAction => {
           const childId = getActionId(childAction);
           return (

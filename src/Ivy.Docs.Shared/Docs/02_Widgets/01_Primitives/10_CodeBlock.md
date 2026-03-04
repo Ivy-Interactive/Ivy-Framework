@@ -8,17 +8,17 @@ searchHints:
   - programming
 ---
 
-# Code
+# CodeBlock
 
 <Ingress>
 Display beautifully formatted code snippets with syntax highlighting, line numbers, and copy functionality for multiple programming languages.
 </Ingress>
 
-The `Code` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays formatted code snippets with syntax highlighting. It supports multiple programming languages and features line numbers and copy buttons for better user experience. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width()` and `.Height()` to control dimensions.
+The `CodeBlock` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays formatted code snippets with syntax highlighting. It supports multiple programming languages and features line numbers and copy buttons for better user experience. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width()` and `.Height()` to control dimensions.
 
 ```csharp demo-tabs
 Layout.Vertical()
-    | new Code(@"function fibonacci(n) {
+    | new CodeBlock(@"function fibonacci(n) {
   if (n <= 1) return n;
   return fibonacci(n-1) + fibonacci(n-2);
 }
@@ -36,5 +36,5 @@ for (let i = 0; i < 10; i++) {
 ```
 
 
-<WidgetDocs Type="Ivy.Code" ExtensionTypes="Ivy.CodeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Code.cs"/>
+<WidgetDocs Type="Ivy.CodeBlock" ExtensionTypes="Ivy.CodeBlockExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/CodeBlock.cs"/>
 

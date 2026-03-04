@@ -29,6 +29,21 @@ new Card(
 ).Title("Card App").Description("This is a card app.").Width(Size.Units(100))
 ```
 
+## Header, Content, and Footer
+
+Cards have three named slots: **Header**, **Content**, and **Footer**. Use the fluent API to set each slot independently.
+
+```csharp demo-below
+new Card()
+    .Header(Text.H4("Fluent API"))
+    .Content(Layout.Vertical()
+        | Text.P("Content and footer set fluently.")
+        | Text.Block("Second paragraph in content.")
+    )
+    .Footer(new Button("Action", _ => client.Toast("Footer action!")))
+    .Width(Size.Units(100))
+```
+
 ## Click Listener
 
 HandleClick attaches an event listener and makes the card clickable.

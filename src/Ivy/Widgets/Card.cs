@@ -62,6 +62,13 @@ public static class CardExtensions
 {
     internal static Slot? GetSlot(this Card card, string name) => card.Children.FirstOrDefault(e => e is Slot slot && slot.Name == name) as Slot;
 
+    private static object[] WithSlot(Card card, string slotName, object? value)
+    {
+        var others = card.Children.OfType<Slot>().Where(s => s.Name != slotName);
+        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
+        return result.Cast<object>().ToArray();
+    }
+
     public static Card Header(this Card card, object? title = null, object? description = null, object? icon = null)
     {
         object? header = Layout.Vertical().Gap(0)
@@ -99,6 +106,11 @@ public static class CardExtensions
         return card.Header(card.Title, card.Description, icon);
     }
 
+    public static Card Content(this Card card, object? content) =>
+        card with { Children = WithSlot(card, "Content", content) };
+
+    public static Card Footer(this Card card, object? footer) =>
+        card with { Children = WithSlot(card, "Footer", footer) };
 
     public static Card Hover(this Card card, CardHoverVariant variant) => card with { HoverVariant = variant };
 

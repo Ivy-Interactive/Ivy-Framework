@@ -63,11 +63,11 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public AsyncSelectLookupDelegate<TValue> Lookup { get; }
 
-    public TValue Value { get; private set; } = typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!;
+    public TValue Value { get; init; } = typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!;
 
     public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
-    public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
+    public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; init; }
 
     public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -164,7 +164,7 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectSearc
         var header = Layout.Vertical().Gap(2)
             | searchInput;
 
-        var content = Layout.Vertical().Gap(2)
+        var content = Layout.Vertical().Gap(2).RemoveParentPadding()
             | (loading ? Text.Block("Loading...") : new List(items));
 
         return new HeaderLayout(header, content)
@@ -232,7 +232,28 @@ public static class AsyncSelectInputViewExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    public static IAnyAsyncSelectInputBase Value<T>(this IAnyAsyncSelectInputBase widget, T value)
+    {
+        if (widget is AsyncSelectInputView<T> typedWidget)
+        {
+            var clone = new AsyncSelectInputView<T>(typedWidget.Search, typedWidget.Lookup, typedWidget.Placeholder, typedWidget.Disabled)
+            {
+                Value = value,
+                OnChange = typedWidget.OnChange,
+                Nullable = typedWidget.Nullable,
+                OnBlur = typedWidget.OnBlur,
+                Invalid = typedWidget.Invalid,
+                Scale = typedWidget.Scale,
+            };
+            return clone;
+        }
+
+        throw new InvalidOperationException($"Cannot set Value: widget is not AsyncSelectInputView<{typeof(T).Name}>");
+    }
+
 }
+
 
 internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
 {

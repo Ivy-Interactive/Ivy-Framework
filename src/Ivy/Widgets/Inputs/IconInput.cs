@@ -70,7 +70,7 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
 
     internal IconInput() { }
 
-    [Prop] public TIcon Value { get; } = default!;
+    [Prop] public TIcon Value { get; init; } = default!;
 
     [Event] public Func<Event<IInput<TIcon>, TIcon>, ValueTask>? OnChange { get; }
 }
@@ -111,4 +111,14 @@ public static class IconInputExtensions
             onBlur();
             return ValueTask.CompletedTask;
         });
+
+    public static IconInputBase Value<T>(this IconInputBase widget, T value)
+    {
+        if (widget is IconInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not IconInput<{typeof(T).Name}>");
+    }
+
 }

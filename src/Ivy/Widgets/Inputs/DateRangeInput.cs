@@ -71,7 +71,7 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
 
     internal DateRangeInput() { }
 
-    [Prop] public TDateRange Value { get; set; } = default!;
+    [Prop] public TDateRange Value { get; init; } = default!;
 
     [Event] public Func<Event<IInput<TDateRange>, TDateRange>, ValueTask>? OnChange { get; set; }
 }
@@ -132,4 +132,14 @@ public static class DateRangeInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    public static DateRangeInputBase Value<T>(this DateRangeInputBase widget, T value)
+    {
+        if (widget is DateRangeInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not DateRangeInput<{typeof(T).Name}>");
+    }
+
 }

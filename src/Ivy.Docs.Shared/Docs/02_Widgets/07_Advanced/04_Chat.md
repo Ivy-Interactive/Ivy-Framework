@@ -338,7 +338,7 @@ public class AdvancedChatDemo : ViewBase
 
             object response = @event.Value.ToLower() switch
             {
-                "analyze code" => new Code("""
+                "analyze code" => new CodeBlock("""
                     public class Example
                     {
                         public string ProcessData(string input)

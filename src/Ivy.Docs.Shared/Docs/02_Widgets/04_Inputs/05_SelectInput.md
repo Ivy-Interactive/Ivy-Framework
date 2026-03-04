@@ -26,11 +26,9 @@ public class SelectVariantDemo : ViewBase
 {
     public override object? Build()
     {
-        var langs = new string[]{"C#","Java","Go","JavaScript","F#","Kotlin","VB.NET","Rust"};
-        
         var favLang = UseState("C#");
-        return favLang.ToSelectInput(langs.ToOptions())
-                         .Variant(SelectInputs.Select)
+        return favLang.ToSelectInput(["C#", "Java", "Go", "JavaScript", "F#", "Kotlin", "VB.NET", "Rust"])
+                         .Variant(SelectInputVariants.Select)
                          .WithField()
                          .Label("Select your favourite programming language")
                          .Width(Size.Full());
@@ -64,22 +62,22 @@ public class MultiSelectDemo : ViewBase
         var intArray = UseState<int[]>([]);
         
         var languageOptions = typeof(ProgrammingLanguages).ToOptions();
-        var stringOptions = new[]{"Option A", "Option B", "Option C", "Option D"}.ToOptions();
-        var intOptions = new[]{1, 2, 3, 4, 5}.ToOptions();
+        var stringOptions = new[] { "Option A", "Option B", "Option C", "Option D" };
+        var intOptions = new[] { 1, 2, 3, 4, 5 }.ToOptions();
         
         return Layout.Vertical()
             | Text.InlineCode("Select Variant (Enum)")
             | languagesSelect.ToSelectInput(languageOptions)
-                .Variant(SelectInputs.Select)
+                .Variant(SelectInputVariants.Select)
                 .Placeholder("Choose languages...")
             
             | Text.InlineCode("List Variant (String Array)")
-            | stringArray.ToSelectInput(stringOptions)
-                .Variant(SelectInputs.List)
+            | stringArray.ToSelectInput(stringOptions.ToOptions())
+                .Variant(SelectInputVariants.List)
             
             | Text.InlineCode("Toggle Variant (Integer Array)")
             | intArray.ToSelectInput(intOptions)
-                .Variant(SelectInputs.Toggle);
+                .Variant(SelectInputVariants.Toggle);
     }
 }
 ```
@@ -146,7 +144,7 @@ public class SelectStylingDemo : ViewBase
         var invalidSelect = UseState("");
         var disabledSelect = UseState("");
         
-        var options = new[]{"Option 1", "Option 2", "Option 3"}.ToOptions();
+        var options = new[] { "Option 1", "Option 2", "Option 3" };
         
         return Layout.Vertical()
             | normalSelect.ToSelectInput(options)
@@ -226,12 +224,12 @@ public class CoffeeShopDemo: ViewBase
             previousCoffee.Set(coffee.Value);
         }
         
-        var coffeeSizeMenu = coffeeSize.ToSelectInput(coffeeSizes.ToOptions())
-                                       .Variant(SelectInputs.List);
+        var coffeeSizeMenu = coffeeSize.ToSelectInput(coffeeSizes)
+                                       .Variant(SelectInputVariants.List);
         var availableCondiments = CoffeeAccompaniments[coffee.Value];
         
         var condimentMenu = selectedCondiments.ToSelectInput(availableCondiments.ToOptions())
-            .Variant(SelectInputs.Toggle);
+            .Variant(SelectInputVariants.Toggle);
         
         var orderSummary = BuildOrderSummary(coffee.Value, coffeeSize.Value, selectedCondiments.Value);
         

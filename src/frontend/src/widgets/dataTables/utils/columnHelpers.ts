@@ -126,22 +126,13 @@ export function convertToGridColumns(
       numericBaseWidth = 150;
     }
 
-    // Make the last column fill the remaining space
+    // Make the last column fill the remaining space using grow (avoids gap from
+    // manual width calc; grid handles scrollbar space internally)
     if (index === orderedColumns.length - 1 && containerWidth > 0) {
-      const totalWidthOfOtherColumns = orderedColumns
-        .slice(0, -1)
-        .reduce((sum, c) => {
-          const idx = columns.indexOf(c);
-          const colWidth = columnWidths[idx.toString()] || c.width;
-          const numericColWidth =
-            typeof colWidth === 'string' ? parseFloat(colWidth) : colWidth;
-          return sum + numericColWidth;
-        }, 0);
-
-      const remainingWidth = containerWidth - totalWidthOfOtherColumns;
       return {
         title: col.header || col.name,
-        width: Math.max(numericBaseWidth, remainingWidth) - 10,
+        width: numericBaseWidth,
+        grow: 1,
         group: showGroups ? col.group : undefined,
         icon: showColumnTypeIcons ? mapColumnIcon(col) : undefined,
       };

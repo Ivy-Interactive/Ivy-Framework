@@ -10,14 +10,14 @@ public class IconInputApp : SampleBase
         return Layout.Vertical()
                | Text.H1("Icon Input")
                | Layout.Tabs(
-                   new Tab("Variants", new IconInputVariants()),
+                   new Tab("Variants", new IconInputVariantTests()),
                    new Tab("Size Variants", new IconInputSizeVariants()),
                    new Tab("Data Binding", new IconInputDataBindings())
                ).Variant(TabsVariant.Content);
     }
 }
 
-public class IconInputVariants : ViewBase
+public class IconInputVariantTests : ViewBase
 {
     public override object Build()
     {

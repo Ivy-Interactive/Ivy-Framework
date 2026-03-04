@@ -134,7 +134,7 @@ public class SidebarMenuExample : ViewBase
             sidebarContent: sidebarMenu,
             sidebarHeader: Layout.Vertical().Gap(2)
                 | Text.Lead("My App")
-                | new TextInput(placeholder: "Search...", variant: TextInputs.Search),
+                | new TextInput(placeholder: "Search...", variant: TextInputVariants.Search),
             sidebarFooter: Layout.Horizontal().Gap(2)
                 | new Avatar("JD").Size(20)
                 | (Layout.Vertical()
@@ -178,7 +178,7 @@ public class MainAppSidebarExample : ViewBase
                 | new Button("Calendar").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Calendar")),
             sidebarHeader: Layout.Vertical().Gap(2)
                 | Text.Lead("Workspace")
-                | new TextInput(placeholder: "Search...", variant: TextInputs.Search)
+                | new TextInput(placeholder: "Search...", variant: TextInputVariants.Search)
         ); 
     }
 }

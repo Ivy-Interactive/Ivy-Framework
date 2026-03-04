@@ -61,7 +61,7 @@ public class LongSidebarTestApp : SampleBase
             ),
 
             // Show Logo
-            showLogo.ToBoolInput("Show Logo").Variant(BoolInputs.Checkbox),
+            showLogo.ToBoolInput("Show Logo").Variant(BoolInputVariants.Checkbox),
 
             // Seed
             Layout.Vertical(

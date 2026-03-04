@@ -176,7 +176,7 @@ public static class TypeUtils
                 var defaultValue = prop.GetValue(defaultValueProvider);
                 var literal = CSharpLiteralGenerator.ToCSharpLiteral(defaultValue);
                 literal = literal?.EatLeft("Ivy.").EatLeft("Shared.");
-                return literal != null ? new Code(literal, Languages.Csharp).ShowCopyButton(false).ShowBorder(false) : defaultValue.ToString();
+                return literal != null ? new CodeBlock(literal, Languages.Csharp).ShowCopyButton(false).ShowBorder(false) : defaultValue.ToString();
             }
             catch (Exception)
             {
@@ -191,7 +191,7 @@ public static class TypeUtils
             var extensions = TypeUtils.GetExtensionMethods(prop, baseType, extensionsTypes);
             if (!string.IsNullOrEmpty(extensions))
             {
-                return new Code(extensions, Languages.Csharp).ShowCopyButton(false).ShowBorder(false);
+                return new CodeBlock(extensions, Languages.Csharp).ShowCopyButton(false).ShowBorder(false);
             }
             return null;
         }
@@ -208,7 +208,7 @@ public static class TypeUtils
             var extensions = TypeUtils.GetExtensionMethods(prop, baseType, extensionsTypes);
             if (!string.IsNullOrEmpty(extensions))
             {
-                return new Code(extensions, Languages.Csharp).ShowCopyButton(false).ShowBorder(false);
+                return new CodeBlock(extensions, Languages.Csharp).ShowCopyButton(false).ShowBorder(false);
             }
             return null;
         }
@@ -270,12 +270,12 @@ public static class TypeUtils
 
     public static SignatureRecord GetSignatureRecord(ConstructorInfo constructor)
     {
-        return new SignatureRecord(new Code(GetCSharpSignature(constructor)).ShowCopyButton(false).ShowBorder(false));
+        return new SignatureRecord(new CodeBlock(GetCSharpSignature(constructor)).ShowCopyButton(false).ShowBorder(false));
     }
 
     public static SignatureRecord GetSignatureRecord(MethodInfo constructor)
     {
-        return new SignatureRecord(new Code(GetCSharpSignature(constructor)).ShowCopyButton(false).ShowBorder(false));
+        return new SignatureRecord(new CodeBlock(GetCSharpSignature(constructor)).ShowCopyButton(false).ShowBorder(false));
     }
 
     private static string GetCSharpSignature(ConstructorInfo constructor)

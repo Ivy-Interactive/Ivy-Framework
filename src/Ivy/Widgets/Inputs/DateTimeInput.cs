@@ -10,7 +10,7 @@ using Ivy.Widgets.Inputs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum DateTimeInputs
+public enum DateTimeInputVariants
 {
     Date,
     DateTime,
@@ -19,14 +19,14 @@ public enum DateTimeInputs
 
 public interface IAnyDateTimeInput : IAnyInput
 {
-    public DateTimeInputs Variant { get; set; }
+    public DateTimeInputVariants Variant { get; set; }
 
     public string? Format { get; set; }
 }
 
 public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDateTimeInput
 {
-    [Prop] public DateTimeInputs Variant { get; set; } = DateTimeInputs.Date;
+    [Prop] public DateTimeInputVariants Variant { get; set; } = DateTimeInputVariants.Date;
 
     [Prop] public string? Placeholder { get; set; }
 
@@ -54,7 +54,7 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 {
     [OverloadResolutionPriority(1)]
-    public DateTimeInput(IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputs variant = DateTimeInputs.Date) : this(placeholder, disabled, variant)
+    public DateTimeInput(IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputVariants variant = DateTimeInputVariants.Date) : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TDate>();
         Value = typedState.Value;
@@ -62,19 +62,19 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
     }
 
     [OverloadResolutionPriority(1)]
-    public DateTimeInput(TDate value, Func<Event<IInput<TDate>, TDate>, ValueTask> onChange, string? placeholder = null, bool disabled = false, DateTimeInputs variant = DateTimeInputs.Date) : this(placeholder, disabled, variant)
+    public DateTimeInput(TDate value, Func<Event<IInput<TDate>, TDate>, ValueTask> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariants variant = DateTimeInputVariants.Date) : this(placeholder, disabled, variant)
     {
         OnChange = onChange;
         Value = value;
     }
 
-    public DateTimeInput(TDate value, Action<Event<IInput<TDate>, TDate>> onChange, string? placeholder = null, bool disabled = false, DateTimeInputs variant = DateTimeInputs.Date) : this(placeholder, disabled, variant)
+    public DateTimeInput(TDate value, Action<Event<IInput<TDate>, TDate>> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariants variant = DateTimeInputVariants.Date) : this(placeholder, disabled, variant)
     {
         OnChange = e => { onChange(e); return ValueTask.CompletedTask; };
         Value = value;
     }
 
-    public DateTimeInput(string? placeholder = null, bool disabled = false, DateTimeInputs variant = DateTimeInputs.Date)
+    public DateTimeInput(string? placeholder = null, bool disabled = false, DateTimeInputVariants variant = DateTimeInputVariants.Date)
     {
         Variant = variant;
         Placeholder = placeholder;
@@ -83,7 +83,7 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 
     internal DateTimeInput() { }
 
-    [Prop] public TDate Value { get; set; } = default!;
+    [Prop] public TDate Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TDate) == typeof(DateTime?) || typeof(TDate) == typeof(DateTimeOffset?) || typeof(TDate) == typeof(DateOnly?) || typeof(TDate) == typeof(TimeOnly?);
 
@@ -93,10 +93,10 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 public static class DateTimeInputExtensions
 {
     public static DateTimeInputBase ToDateInput(this IAnyState state, string? placeholder = null, bool disabled = false,
-    DateTimeInputs variant = DateTimeInputs.Date)
+    DateTimeInputVariants variant = DateTimeInputVariants.Date)
     => ToDateTimeInput(state, placeholder, disabled, variant);
 
-    public static DateTimeInputBase ToDateTimeInput(this IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputs variant = DateTimeInputs.DateTime)
+    public static DateTimeInputBase ToDateTimeInput(this IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputVariants variant = DateTimeInputVariants.DateTime)
     {
         var stateType = state.GetStateType();
         var isNullable = stateType.IsNullableType();
@@ -212,7 +212,7 @@ public static class DateTimeInputExtensions
     }
 
     public static DateTimeInputBase ToTimeInput(this IAnyState state, string? placeholder = null, bool disabled = false)
-    => state.ToDateTimeInput(placeholder, disabled, DateTimeInputs.Time);
+    => state.ToDateTimeInput(placeholder, disabled, DateTimeInputVariants.Time);
 
     internal static IAnyDateTimeInput ScaffoldDefaults(this IAnyDateTimeInput input, string? name, Type type)
     {
@@ -227,7 +227,7 @@ public static class DateTimeInputExtensions
 
     public static DateTimeInputBase Disabled(this DateTimeInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
 
-    public static DateTimeInputBase Variant(this DateTimeInputBase widget, DateTimeInputs variant) => widget with { Variant = variant };
+    public static DateTimeInputBase Variant(this DateTimeInputBase widget, DateTimeInputVariants variant) => widget with { Variant = variant };
 
     public static DateTimeInputBase Placeholder(this DateTimeInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 
@@ -251,4 +251,14 @@ public static class DateTimeInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    public static DateTimeInputBase Value<T>(this DateTimeInputBase widget, T value)
+    {
+        if (widget is DateTimeInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not DateTimeInput<{typeof(T).Name}>");
+    }
+
 }
