@@ -14,17 +14,17 @@ public static class TextInputValidation
     /// Validates value for the given text input variant. Returns (true, null) if valid, (false, errorMessage) if invalid.
     /// Used by ValidatedFieldView and FormFieldView via Validators.
     /// </summary>
-    public static (bool isValid, string? errorMessage) ValidateForVariant(object? value, TextInputs variant)
+    public static (bool isValid, string? errorMessage) ValidateForVariant(object? value, TextInputVariants variant)
     {
         if (value is not string s || string.IsNullOrWhiteSpace(s))
             return (true, null);
 
         return variant switch
         {
-            TextInputs.Email => ValidateEmail(s),
-            TextInputs.Password => ValidatePassword(s),
-            TextInputs.Tel => ValidateTel(s),
-            TextInputs.Url => ValidateUrl(s),
+            TextInputVariants.Email => ValidateEmail(s),
+            TextInputVariants.Password => ValidatePassword(s),
+            TextInputVariants.Tel => ValidateTel(s),
+            TextInputVariants.Url => ValidateUrl(s),
             _ => (true, null)
         };
     }

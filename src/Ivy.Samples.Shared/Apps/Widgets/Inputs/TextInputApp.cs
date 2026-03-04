@@ -102,7 +102,7 @@ public class TextInputApp : SampleBase
                 )
                | Text.H3("OnBlur")
                | Layout.Horizontal(
-                   onBlurState.ToTextInput(null, false, TextInputs.Password).HandleBlur(e => onBlurLabel.Set("Blur")),
+                   onBlurState.ToTextInput(null, false, TextInputVariants.Password).HandleBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
                | new Spacer().Height(15)

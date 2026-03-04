@@ -111,21 +111,21 @@ public class ValidatorsTests
     }
 
     [Theory]
-    [InlineData(TextInputs.Email)]
-    [InlineData(TextInputs.Tel)]
-    [InlineData(TextInputs.Url)]
-    [InlineData(TextInputs.Password)]
-    public void ForVariant_EmailTelUrlPassword_ReturnsValidator(TextInputs variant)
+    [InlineData(TextInputVariants.Email)]
+    [InlineData(TextInputVariants.Tel)]
+    [InlineData(TextInputVariants.Url)]
+    [InlineData(TextInputVariants.Password)]
+    public void ForVariant_EmailTelUrlPassword_ReturnsValidator(TextInputVariants variant)
     {
         var validator = Validators.ForVariant(variant, "Field");
         Assert.NotNull(validator);
     }
 
     [Theory]
-    [InlineData(TextInputs.Text)]
-    [InlineData(TextInputs.Textarea)]
-    [InlineData(TextInputs.Search)]
-    public void ForVariant_TextTextareaSearch_ReturnsNull(TextInputs variant)
+    [InlineData(TextInputVariants.Text)]
+    [InlineData(TextInputVariants.Textarea)]
+    [InlineData(TextInputVariants.Search)]
+    public void ForVariant_TextTextareaSearch_ReturnsNull(TextInputVariants variant)
     {
         var validator = Validators.ForVariant(variant, "Field");
         Assert.Null(validator);

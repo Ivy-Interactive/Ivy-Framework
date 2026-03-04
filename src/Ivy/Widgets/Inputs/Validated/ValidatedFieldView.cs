@@ -15,7 +15,7 @@ namespace Ivy.Widgets.Inputs.Validated;
 public sealed class ValidatedFieldView : ViewBase
 {
     private readonly IAnyState _state;
-    private readonly TextInputs _variant;
+    private readonly TextInputVariants _variant;
     private readonly string? _placeholder;
     private readonly bool _disabled;
     private readonly string? _label;
@@ -27,7 +27,7 @@ public sealed class ValidatedFieldView : ViewBase
     private readonly bool _nullable;
     private readonly string? _invalid;
 
-    public ValidatedFieldView(IAnyState state, TextInputs variant, string? placeholder = null, bool disabled = false, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium, int? maxLength = null, bool nullable = false, string? invalid = null)
+    public ValidatedFieldView(IAnyState state, TextInputVariants variant, string? placeholder = null, bool disabled = false, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium, int? maxLength = null, bool nullable = false, string? invalid = null)
     {
         _state = state;
         _variant = variant;

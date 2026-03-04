@@ -13,25 +13,25 @@ namespace Ivy.Validation;
 public static class Validators
 {
     public static Func<object?, (bool, string)> CreateEmailValidator(string fieldName) =>
-        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputs.Email); return (ok, err ?? ""); };
+        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputVariants.Email); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)> CreateTelValidator(string fieldName) =>
-        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputs.Tel); return (ok, err ?? ""); };
+        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputVariants.Tel); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)> CreateUrlValidator(string fieldName) =>
-        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputs.Url); return (ok, err ?? ""); };
+        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputVariants.Url); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)> CreatePasswordValidator(string fieldName, int minLength = 8) =>
-        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputs.Password); return (ok, err ?? ""); };
+        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputVariants.Password); return (ok, err ?? ""); };
 
-    public static Func<object?, (bool, string)>? ForVariant(TextInputs variant, string fieldName)
+    public static Func<object?, (bool, string)>? ForVariant(TextInputVariants variant, string fieldName)
     {
         return variant switch
         {
-            TextInputs.Email => CreateEmailValidator(fieldName),
-            TextInputs.Tel => CreateTelValidator(fieldName),
-            TextInputs.Url => CreateUrlValidator(fieldName),
-            TextInputs.Password => CreatePasswordValidator(fieldName),
+            TextInputVariants.Email => CreateEmailValidator(fieldName),
+            TextInputVariants.Tel => CreateTelValidator(fieldName),
+            TextInputVariants.Url => CreateUrlValidator(fieldName),
+            TextInputVariants.Password => CreatePasswordValidator(fieldName),
             _ => null
         };
     }
@@ -48,7 +48,7 @@ public static class Validators
         return list.ToArray();
     }
 
-    public static (bool isValid, string? errorMessage) ValidateValue(object? value, TextInputs variant, string? label)
+    public static (bool isValid, string? errorMessage) ValidateValue(object? value, TextInputVariants variant, string? label)
     {
         var validator = ForVariant(variant, label ?? "");
         if (validator == null)

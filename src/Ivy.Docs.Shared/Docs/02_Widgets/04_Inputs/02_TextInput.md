@@ -297,12 +297,15 @@ public class DataCaptureUsingExtensionDemo: ViewBase
                 | password.ToPasswordInput()
                           .Placeholder("Password")
                           .Disabled(userName.Value.Length == 0)
+                          .WithField()
                           .Label("Password")
                 | email.ToEmailInput()
                        .Placeholder("Email")
+                       .WithField()
                        .Label("Email")
                 | tel.ToTelInput()
                      .Placeholder("Mobile")
+                     .WithField()
                      .Label("Mobile")
                 | address.ToTextAreaInput()
                          .Placeholder("Address Line1\nAddress Line2\nAddress Line 3")
@@ -312,6 +315,7 @@ public class DataCaptureUsingExtensionDemo: ViewBase
                          .Label("Address")
                 | website.ToUrlInput()
                          .Placeholder("https://ivy.app/")
+                         .WithField()
                          .Label("Website");                             
     }
 }
@@ -430,6 +434,7 @@ public class LoginForm : ViewBase
                     .Placeholder("Enter your password")
                      // Disabled when username is empty
                     .Disabled(string.IsNullOrWhiteSpace(usernameState.Value))
+                    .WithField()
                     .Label("Password")
                 | new Button("Login")
                     .Disabled(string.IsNullOrWhiteSpace(usernameState.Value) || 
