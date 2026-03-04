@@ -287,6 +287,17 @@ public class Server
         return this;
     }
 
+    public Server UseTheme(Func<Theme> themeFactory)
+    {
+        var theme = themeFactory();
+        var themeService = new ThemeService();
+        themeService.SetTheme(theme);
+        themeService.SetThemeFactory(themeFactory);
+
+        Services.AddSingleton<IThemeService>(themeService);
+        return this;
+    }
+
     public Server UseTheme(Action<Theme> configureTheme)
     {
         var theme = new Theme();
