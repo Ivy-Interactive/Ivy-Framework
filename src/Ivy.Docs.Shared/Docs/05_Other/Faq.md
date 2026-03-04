@@ -161,6 +161,21 @@ return Layout.Vertical()
 
 Each `state.Set()` call triggers a re-render, so the UI updates incrementally as chunks arrive. Use `UseMutation` if you want built-in loading/error tracking for non-streaming async operations instead.
 
+## How do I handle row actions on a DataTable?
+
+Use `.RowActions()` to define actions and `.HandleRowAction()` to handle clicks:
+
+```csharp
+items.ToDataTable()
+    .RowActions(
+        new RowAction("edit", "Edit", Icons.Pencil),
+        new RowAction("delete", "Delete", Icons.Trash2))
+    .HandleRowAction("edit", e => EditItem(e.Value))
+    .HandleRowAction("delete", async e => await DeleteItem(e.Value))
+```
+
+**Important:** The method is `.HandleRowAction()`, NOT `.OnRowAction()`. The `On` prefix does not exist on DataTableBuilder.
+
 ## What namespace are Ivy types in? (MetricView, charts, DataTable, ViewBase, IState, etc.)
 
 All Ivy types are in the root `Ivy` namespace. There are no sub-namespaces. You only need:
