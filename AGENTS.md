@@ -224,6 +224,59 @@ void UseEffect(Func<Task<IDisposable>> asyncEffectWithCleanup, IEffectTriggers o
 - IState<T> is automatically converted to EffectTrigger.OnStateChange
 - If no triggers are provided, the effect trigger is assumed to be OnMount.
 
+### UseQuery
+
+UseQuery is the **preferred pattern for data fetching** in Ivy. It should be favored over the UseEffect + UseState fetch pattern.
+
+var query = UseQuery(
+    key: "my-data",
+    fetcher: async (ct) => await LoadDataAsync(ct)
+);
+
+if (query.Loading) return Skeleton.Card();
+if (query.Error is { } error) return Callout.Error(error.Message);
+
+// Use query.Value
+
+QueryResult<T> properties:
+- .Value — the fetched data (default until loaded)
+- .Loading — true during initial fetch (no value yet)
+- .Validating — true during background revalidation
+- .Error — exception if the fetch failed
+- .Mutator — provides .Revalidate(), .Invalidate(), .Mutate(value, revalidate)
+
+Key conventions:
+- String: `"my-data"`
+- Tuple: `(nameof(MyBlade), entityId)`
+
+Common options (QueryOptions):
+- KeepPrevious: true — show stale data while revalidating with a new key
+- RevalidateOnMount: false — skip initial fetch when using initialValue
+- RefreshInterval: TimeSpan — poll at an interval
+- Scope: QueryScope.View — isolate cache to the view instance (default is Server)
+
+Tag-based invalidation (cross-component):
+var queryService = UseService<IQueryService>();
+queryService.RevalidateByTag(typeof(Product[]));        // collection
+queryService.RevalidateByTag((typeof(Product), id));    // single entity
+
+Static "hooks" pattern (reusable across views):
+public static QueryResult<T[]> UseMyRecords(IViewContext context, string filter)
+{
+    return context.UseQuery(
+        key: (nameof(UseMyRecords), filter),
+        fetcher: async ct => { /* fetch */ },
+        tags: [typeof(T[])],
+        options: new QueryOptions { KeepPrevious = true }
+    );
+}
+
+Dependent fetching (wait for another query):
+var user = UseQuery(key: "user", fetcher: async ct => await GetUser(ct));
+var projects = UseQuery(
+    () => user.Value?.Id,   // null = idle, no fetch
+    async (userId, ct) => await GetProjects(userId, ct));
+
 [UseRef](https://docs.ivy.app/hooks/core/use-ref.md)
 [UseContext](https://docs.ivy.app/hooks/core/use-context.md)
 [UseQuery](https://docs.ivy.app/hooks/core/use-query.md)
