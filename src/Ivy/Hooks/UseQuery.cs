@@ -93,7 +93,17 @@ public record QueryResult<TValue>(
     bool Validating,
     bool Previous,
     QueryMutator<TValue> Mutator,
-    Exception? Error = null);
+    Exception? Error = null) : IEffectTriggerConvertible
+{
+    internal IAnyState? State { get; init; }
+
+    public IEffectTrigger ToTrigger()
+    {
+        if (State is null)
+            throw new InvalidOperationException("Cannot use an idle QueryResult as an effect trigger.");
+        return EffectTrigger.OnStateChange(State);
+    }
+}
 
 public static class QueryResultExtensions
 {
@@ -248,7 +258,7 @@ public static class UseQueryExtensions
                 Previous: false, emptyMutator);
         }
 
-        return resultState.Value;
+        return resultState.Value with { State = resultState };
     }
 
     private static QueryResult<TValue> UseViewScopedQuery<TValue, TKey>(this IViewContext context, TKey? key,
@@ -398,10 +408,10 @@ public static class UseQueryExtensions
         // If skipping initial fetch with initialValue, return non-loading state
         if (shouldSkipInitialFetch && !hasFetchedRef.Value)
         {
-            return new QueryResult<TValue>(initialValue, Loading: false, Validating: false, Previous: false, mutator);
+            return new QueryResult<TValue>(initialValue, Loading: false, Validating: false, Previous: false, mutator) { State = resultState };
         }
 
-        return resultState.Value;
+        return resultState.Value with { State = resultState };
     }
 
     public static QueryMutator UseMutation(this IViewContext context, object key, QueryOptions? options = null)
