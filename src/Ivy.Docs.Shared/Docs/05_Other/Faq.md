@@ -189,3 +189,19 @@ This single using statement gives you access to everything: `ViewBase`, `IState<
 **Do NOT use sub-namespaces** like `Ivy.Views.Dashboards`, `Ivy.Widgets.DataTables`, `Ivy.Client`, `Ivy.Hooks`, `Ivy.Services`, or `Ivy.Apps`. These do not exist — the framework source code organizes files in subdirectories but all types use `namespace Ivy;`.
 
 Ivy projects include `<ImplicitUsings>enable</ImplicitUsings>` plus a global using for the project's own namespace, so typically the only explicit using you need is `using Ivy;` and `using Microsoft.EntityFrameworkCore;` (for database connections).
+
+## What are the available ButtonVariant values in Ivy?
+
+`ButtonVariant` has these values: `Primary`, `Destructive`, `Outline`, `Secondary`, `Success`, `Warning`, `Info`, `Ghost`, `Link`, `Inline`, `Ai`.
+
+Set via the `.Variant()` method or shortcut methods:
+
+```csharp
+new Button("Save", handler).Variant(ButtonVariant.Primary)
+// or use shortcut:
+new Button("Save", handler).Primary()
+
+// Other shortcuts: .Secondary(), .Outline(), .Destructive(), .Ghost(), .Link(), .Inline(), .Ai()
+```
+
+**Important:** There is no `ButtonVariant.Default`. Use `ButtonVariant.Primary` instead.
