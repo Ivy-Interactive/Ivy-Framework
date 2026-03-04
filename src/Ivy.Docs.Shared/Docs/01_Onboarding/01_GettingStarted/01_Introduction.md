@@ -166,7 +166,7 @@ Create a new directory for your project and initialize it. We recommend using th
 Run the project with hot reloading enabled:
 
 ```terminal
->dotnet watch
+>ivy run
 ```
 
 ## Community & Resources
