@@ -8,9 +8,9 @@ namespace Ivy;
 /// <summary>
 /// Allows users to record audio directly from the browser.
 /// </summary>
-public record AudioRecorder : WidgetBase<AudioRecorder>
+public record AudioInput : WidgetBase<AudioInput>
 {
-    public AudioRecorder(UploadContext upload, string? label = null, string? recordingLabel = null, string mimeType = "audio/webm", int? chunkInterval = null, bool disabled = false)
+    public AudioInput(UploadContext upload, string? label = null, string? recordingLabel = null, string mimeType = "audio/webm", int? chunkInterval = null, bool disabled = false)
     {
         UploadUrl = upload.UploadUrl;
         Label = label;
@@ -20,7 +20,7 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
         Disabled = disabled;
     }
 
-    internal AudioRecorder() { }
+    internal AudioInput() { }
 
     [Prop] public bool Disabled { get; set; }
 
@@ -35,34 +35,34 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
     [Prop] public string? UploadUrl { get; set; }
 }
 
-public static class AudioRecorderExtensions
+public static class AudioInputExtensions
 {
-    public static AudioRecorder Label(this AudioRecorder widget, string label)
+    public static AudioInput Label(this AudioInput widget, string label)
     {
         return widget with { Label = label };
     }
 
-    public static AudioRecorder RecordingLabel(this AudioRecorder widget, string label)
+    public static AudioInput RecordingLabel(this AudioInput widget, string label)
     {
         return widget with { RecordingLabel = label };
     }
 
-    public static AudioRecorder Disabled(this AudioRecorder widget, bool disabled = true)
+    public static AudioInput Disabled(this AudioInput widget, bool disabled = true)
     {
         return widget with { Disabled = disabled };
     }
 
-    public static AudioRecorder MimeType(this AudioRecorder widget, string mimeType)
+    public static AudioInput MimeType(this AudioInput widget, string mimeType)
     {
         return widget with { MimeType = mimeType };
     }
 
-    public static AudioRecorder ChunkInterval(this AudioRecorder widget, int? chunkInterval)
+    public static AudioInput ChunkInterval(this AudioInput widget, int? chunkInterval)
     {
         return widget with { ChunkInterval = chunkInterval };
     }
 
-    public static AudioRecorder UploadUrl(this AudioRecorder widget, string? uploadUrl)
+    public static AudioInput UploadUrl(this AudioInput widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
     }
