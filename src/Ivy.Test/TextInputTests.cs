@@ -151,8 +151,8 @@ public class TextInputTests
         var textInput = state.ToTextInput(placeholder: "Enter text");
         Assert.Equal("Enter text", textInput.Placeholder);
 
-        var passwordField = state.ToPasswordInput().Placeholder("Enter password");
-        Assert.NotNull(passwordField);
+        var passwordInput = state.ToPasswordInput(placeholder: "Enter password");
+        Assert.Equal("Enter password", passwordInput.Placeholder);
     }
 
     [Fact]
@@ -163,8 +163,8 @@ public class TextInputTests
         var textInput = state.ToTextInput(disabled: true);
         Assert.True(textInput.Disabled);
 
-        var passwordField = state.ToPasswordInput().Disabled(true);
-        Assert.NotNull(passwordField);
+        var passwordInput = state.ToPasswordInput(disabled: true);
+        Assert.True(passwordInput.Disabled);
     }
 
     [Fact]

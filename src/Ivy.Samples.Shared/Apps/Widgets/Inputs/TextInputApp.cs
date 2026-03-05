@@ -23,7 +23,7 @@ public class TextInputApp : SampleBase
 
                           | Text.InlineCode("string")
                           | (Layout.Vertical()
-                             | stringState.ToPasswordInput()
+                             | stringState.ToTextInput()
                              | stringState.ToTextAreaInput()
                              | stringState.ToPasswordInput()
                              | stringState.ToSearchInput()
@@ -32,7 +32,7 @@ public class TextInputApp : SampleBase
 
                           | Text.InlineCode("string?")
                           | (Layout.Vertical()
-                             | nullStringState.ToPasswordInput()
+                             | nullStringState.ToTextInput()
                              | nullStringState.ToTextAreaInput()
                              | nullStringState.ToPasswordInput()
                              | nullStringState.ToSearchInput()
@@ -102,7 +102,7 @@ public class TextInputApp : SampleBase
                 )
                | Text.H3("OnBlur")
                | Layout.Horizontal(
-                   onBlurState.ToTextInput(null, false, TextInputVariants.Password).HandleBlur(e => onBlurLabel.Set("Blur")),
+                   onBlurState.ToTextInput().HandleBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
                | new Spacer().Height(15)
