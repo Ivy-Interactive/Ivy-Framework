@@ -745,8 +745,8 @@ public class DynamicConfigurationExample : ViewBase
         
         return Layout.Vertical()
             | (Layout.Horizontal()
-                | new Button("New User").HandleClick(_ => isEditMode.Set(false))
-                | new Button("Edit User").HandleClick(_ => isEditMode.Set(true)))
+                | new Button("New User").OnClick(_ => isEditMode.Set(false))
+                | new Button("Edit User").OnClick(_ => isEditMode.Set(true)))
             | form
             | (Layout.Horizontal()
                 | new Button(isEditMode.Value ? "Update User" : "Create User")
@@ -777,7 +777,7 @@ public class SheetFormExample : ViewBase
         var isSheetOpen = UseState(false);
         
         return Layout.Vertical()
-            | new Button("Add New Product").HandleClick(_ => isSheetOpen.Set(true))
+            | new Button("Add New Product").OnClick(_ => isSheetOpen.Set(true))
             | product.ToForm()
                 .Required(m => m.Name, m => m.Price, m => m.Category)
                 .ToSheet(isSheetOpen, "New Product", "Fill in the product details below");
@@ -805,7 +805,7 @@ public class DialogFormExample : ViewBase
         var isDialogOpen = UseState(false);
         
         return Layout.Vertical()
-            | new Button("Create User").HandleClick(_ => isDialogOpen.Set(true))
+            | new Button("Create User").OnClick(_ => isDialogOpen.Set(true))
             | user.ToForm()
                 .Required(m => m.FirstName, m => m.LastName, m => m.Email)
                 .ToDialog(isDialogOpen, "Create New User", "Please provide user information", 
@@ -881,7 +881,7 @@ public class UseFormHookExample : ViewBase
         return Layout.Vertical()
             | formView
             | Layout.Horizontal()
-                | new Button("Save").HandleClick(_ => HandleSubmit())
+                | new Button("Save").OnClick(_ => HandleSubmit())
                     .Loading(loading).Disabled(loading)
                 | validationView;
     }

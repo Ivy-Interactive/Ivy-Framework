@@ -29,7 +29,7 @@ public class TextInputTests
 
         // Simulate OnChange event
         var eventArgs = new Event<IInput<string>, string>("OnChange", textInput, "new value");
-        textInput.OnChange!(eventArgs);
+        textInput.OnChange!.Invoke(eventArgs);
 
         Assert.Equal("new value", state.Value);
     }
@@ -47,7 +47,7 @@ public class TextInputTests
 
         // Test the OnChange handler
         var eventArgs = new Event<IInput<string>, string>("OnChange", textInput, "updated");
-        textInput.OnChange!(eventArgs);
+        textInput.OnChange!.Invoke(eventArgs);
         Assert.Equal("updated", capturedValue);
     }
 
@@ -212,17 +212,17 @@ public class TextInputTests
         var textInput = new TextInput();
         bool onBlurCalled = false;
 
-        textInput.OnBlur = e =>
+        textInput.OnBlur = new(e =>
         {
             onBlurCalled = true;
             return ValueTask.CompletedTask;
-        };
+        });
 
         Assert.NotNull(textInput.OnBlur);
 
         // Simulate OnBlur event
         var eventArgs = new Event<IAnyInput>("OnBlur", textInput);
-        textInput.OnBlur!(eventArgs);
+        textInput.OnBlur!.Invoke(eventArgs);
 
         Assert.True(onBlurCalled);
     }

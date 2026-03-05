@@ -43,7 +43,7 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
     [
@@ -71,21 +71,21 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
     {
         var typedState = state.As<TBool>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public BoolInput(TBool value, Func<Event<IInput<TBool>, TBool>, ValueTask> onChange, string? label = null,
         bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox) : this(label, disabled, variant)
     {
-        OnChange = onChange;
+        OnChange = new(onChange);
         Value = value;
     }
 
     public BoolInput(TBool value, Action<Event<IInput<TBool>, TBool>> onChange, string? label = null,
         bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox) : this(label, disabled, variant)
     {
-        OnChange = e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = new(onChange.ToValueTask());
         Value = value;
     }
 
@@ -102,7 +102,7 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 
     [Prop] public new bool Nullable { get; set; } = typeof(TBool) == typeof(bool?);
 
-    [Event] public Func<Event<IInput<TBool>, TBool>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TBool>, TBool>>? OnChange { get; }
 }
 
 /// <summary>
@@ -294,19 +294,19 @@ public static class BoolInputExtensions
         widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]
-    public static BoolInputBase HandleBlur(this BoolInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static BoolInputBase OnBlur(this BoolInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static BoolInputBase HandleBlur(this BoolInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static BoolInputBase OnBlur(this BoolInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget with { OnBlur = new(onBlur.ToValueTask()) };
     }
 
-    public static BoolInputBase HandleBlur(this BoolInputBase widget, Action onBlur)
+    public static BoolInputBase OnBlur(this BoolInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
     public static BoolInputBase Value<T>(this BoolInputBase widget, T value)

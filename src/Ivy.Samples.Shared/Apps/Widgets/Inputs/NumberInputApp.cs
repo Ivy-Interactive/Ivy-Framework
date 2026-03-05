@@ -161,7 +161,7 @@ public class NumberInputApp : SampleBase
                | Layout.Horizontal(
                    onBlurState
                     .ToNumberInput()
-                    .HandleBlur(e => onBlurLabel.Set("Blur")),
+                    .OnBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
             ;

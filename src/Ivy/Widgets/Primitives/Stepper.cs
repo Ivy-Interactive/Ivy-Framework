@@ -15,7 +15,7 @@ public record Stepper : WidgetBase<Stepper>
     [OverloadResolutionPriority(1)]
     public Stepper(Func<Event<Stepper, int>, ValueTask>? onSelect, int? selectedIndex, params IEnumerable<StepperItem> items)
     {
-        OnSelect = onSelect;
+        OnSelect = onSelect.ToEventHandler();
         SelectedIndex = selectedIndex;
         Items = items.ToArray();
     }
@@ -30,12 +30,12 @@ public record Stepper : WidgetBase<Stepper>
 
     [Prop] public bool AllowSelectForward { get; set; } = false;
 
-    [Event] public Func<Event<Stepper, int>, ValueTask>? OnSelect { get; set; }
+    [Event] public EventHandler<Event<Stepper, int>>? OnSelect { get; set; }
 }
 
 public static class StepperExtensions
 {
-    public static Stepper HandleSelect(this Stepper stepper, Func<Event<Stepper, int>, ValueTask> onSelect) => stepper with { OnSelect = onSelect };
+    public static Stepper OnSelect(this Stepper stepper, Func<Event<Stepper, int>, ValueTask> onSelect) => stepper with { OnSelect = new(onSelect) };
     public static Stepper AllowSelectForward(this Stepper stepper, bool allowSelectForward = true) => stepper with { AllowSelectForward = allowSelectForward };
 }
 

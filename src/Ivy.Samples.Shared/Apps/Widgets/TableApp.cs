@@ -216,7 +216,7 @@ public class ColumnWidthsExample : ViewBase
                             .ToButton()
                             .Outline()
                             .Tooltip("Copy Link")
-                            .HandleClick(() => { })
+                            .OnClick(() => { })
                 })
                 .ToTable()
                 .Width(Size.Units(100))

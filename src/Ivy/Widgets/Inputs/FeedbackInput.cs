@@ -34,7 +34,7 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     [Prop] public FeedbackInputVariants Variant { get; set; } = FeedbackInputVariants.Stars;
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [
         typeof(bool), typeof(bool?),
@@ -53,21 +53,21 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
     {
         var typedState = state.As<TNumber>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public FeedbackInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, FeedbackInputVariants variant = FeedbackInputVariants.Stars)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange;
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
     public FeedbackInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, FeedbackInputVariants variant = FeedbackInputVariants.Stars)
         : this(placeholder, disabled, variant)
     {
-        OnChange = e => { state(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { state(e.Value); return ValueTask.CompletedTask; });
         Value = value;
     }
 
@@ -84,7 +84,7 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 
     [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
-    [Event] public Func<Event<IInput<TNumber>, TNumber>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TNumber>, TNumber>>? OnChange { get; }
 }
 
 public static class FeedbackInputExtensions
@@ -110,19 +110,19 @@ public static class FeedbackInputExtensions
     public static FeedbackInputBase Nullable(this FeedbackInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]
-    public static FeedbackInputBase HandleBlur(this FeedbackInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static FeedbackInputBase OnBlur(this FeedbackInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static FeedbackInputBase HandleBlur(this FeedbackInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static FeedbackInputBase OnBlur(this FeedbackInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static FeedbackInputBase HandleBlur(this FeedbackInputBase widget, Action onBlur)
+    public static FeedbackInputBase OnBlur(this FeedbackInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
     public static FeedbackInputBase Value<T>(this FeedbackInputBase widget, T value)

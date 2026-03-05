@@ -290,7 +290,7 @@ public class KanbanBuilderWithClickExample : ViewBase
                         .Remove(x => x.Id)
                         .MultiLine(x => x.Description)
                 )
-                .HandleClick(() => showTaskSheet(task.Id)))
+                .OnClick(() => showTaskSheet(task.Id)))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .HandleMove(moveData =>
@@ -505,7 +505,7 @@ public class KanbanHeaderLayoutExample : ViewBase
         var createBtn = new Button("Add Task")
             .Icon(Icons.Plus)
             .Variant(ButtonVariant.Primary)
-            .HandleClick(OnAddTask);
+            .OnClick(OnAddTask);
 
         var kanban = tasks.Value
             .ToKanban(

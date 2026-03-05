@@ -39,7 +39,7 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
@@ -55,21 +55,21 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
     {
         var typedState = state.As<TValue>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public SelectInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariants variant = SelectInputVariants.Select, bool selectMany = false)
     : this(options, placeholder, disabled, variant, selectMany)
     {
-        OnChange = onChange;
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
     public SelectInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariants variant = SelectInputVariants.Select, bool selectMany = false)
         : this(options, placeholder, disabled, variant, selectMany)
     {
-        OnChange = onChange == null ? null : e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
@@ -90,7 +90,7 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
 
     [Prop] public IAnyOption[] Options { get; set; } = [];
 
-    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TValue>, TValue>>? OnChange { get; }
 }
 
 public static class SelectInputExtensions
@@ -153,19 +153,19 @@ public static class SelectInputExtensions
     public static SelectInputBase List(this SelectInputBase widget) => widget with { Variant = SelectInputVariants.List };
 
     [OverloadResolutionPriority(1)]
-    public static SelectInputBase HandleBlur(this SelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static SelectInputBase OnBlur(this SelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static SelectInputBase HandleBlur(this SelectInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static SelectInputBase OnBlur(this SelectInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget with { OnBlur = new(onBlur.ToValueTask()) };
     }
 
-    public static SelectInputBase HandleBlur(this SelectInputBase widget, Action onBlur)
+    public static SelectInputBase OnBlur(this SelectInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
     public static SelectInput<string> Options(this SelectInput<string> widget, IEnumerable<string> options)

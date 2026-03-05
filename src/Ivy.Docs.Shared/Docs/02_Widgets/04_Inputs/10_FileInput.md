@@ -469,14 +469,14 @@ public class FileInputEventHandlersDemo : ViewBase
         return Layout.Vertical()
                 | files.ToFileInput(upload)
                     .Placeholder("Choose files")
-                    .HandleBlur((Event<IAnyInput> e) =>
+                    .OnBlur((Event<IAnyInput> e) =>
                     {
                         if (files.Value.Length > 0)
                             blurMessage.Set($"Blur: {files.Value.Length} file(s) selected");
                         else
                             blurMessage.Set("Blur: No file selected");
                     })
-                    .HandleCancel((Guid fileId) =>
+                    .OnCancel((Guid fileId) =>
                     {
                         upload.Value.Cancel(fileId);
                         files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());

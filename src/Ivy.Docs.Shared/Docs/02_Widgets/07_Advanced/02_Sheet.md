@@ -82,8 +82,8 @@ public class SheetWithFooterActions : ViewBase
         return new Button("Open Sheet with Actions").WithSheet(
             () => new FooterLayout(
                 Layout.Horizontal().Gap(2)
-                    | new Button("Save").Variant(ButtonVariant.Primary).HandleClick(_ => client.Toast("Profile saved successfully!"))
-                    | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => client.Toast("Changes cancelled")),
+                    | new Button("Save").Variant(ButtonVariant.Primary).OnClick(_ => client.Toast("Profile saved successfully!"))
+                    | new Button("Cancel").Variant(ButtonVariant.Outline).OnClick(_ => client.Toast("Changes cancelled")),
                 new Card(
                     "This sheet has action buttons in the footer"
                 ).Title("Content")
@@ -122,9 +122,9 @@ public class ComplexSheetLayout : ViewBase
                 ).Title("Preferences")
                 | new Card(
                     Layout.Horizontal().Gap(2)
-                        | new Button("Update Profile").HandleClick(_ => client.Toast("Profile updated!"))
-                        | new Button("Change Password").HandleClick(_ => client.Toast("Password change initiated"))
-                        | new Button("Delete Account").Variant(ButtonVariant.Destructive).HandleClick(_ => client.Toast("Account deletion requested"))
+                        | new Button("Update Profile").OnClick(_ => client.Toast("Profile updated!"))
+                        | new Button("Change Password").OnClick(_ => client.Toast("Password change initiated"))
+                        | new Button("Delete Account").Variant(ButtonVariant.Destructive).OnClick(_ => client.Toast("Account deletion requested"))
                 ).Title("Actions"),
             title: "User Profile",
             description: "Manage your account settings and preferences",
@@ -197,7 +197,7 @@ public class NavigationSheetContent : ViewBase
                 | pages.Select((page, index) => 
                     new Button(page)
                         .Variant(currentPage.Value == index ? ButtonVariant.Primary : ButtonVariant.Outline)
-                        .HandleClick(_ => currentPage.Value = index)
+                        .OnClick(_ => currentPage.Value = index)
                 ).ToArray())
             | new Card(
                 $"This is the {pages[currentPage.Value]} page content"
@@ -237,7 +237,7 @@ public class KanbanWithSheetExample : ViewBase
                 idSelector: t => t.Id,
                 orderSelector: t => t.Priority)
             .CardBuilder(task => new Card(task.Title, task.Description)
-                .HandleClick(() => showEdit(task.Id)))
+                .OnClick(() => showEdit(task.Id)))
             .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
@@ -323,9 +323,9 @@ public class TaskFormSheet : ViewBase
         
         var layout = new FooterLayout(
             Layout.Horizontal().Gap(2)
-                | new Button("Save").HandleClick(_ => HandleSubmit())
+                | new Button("Save").OnClick(_ => HandleSubmit())
                     .Loading(loading).Disabled(loading)
-                | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => _isOpen.Set(false))
+                | new Button("Cancel").Variant(ButtonVariant.Outline).OnClick(_ => _isOpen.Set(false))
                 | validationView,
             formView
         );
@@ -380,7 +380,7 @@ public class ConditionalSheetExample : ViewBase
                     Layout.Vertical().Gap(2)
                         | Text.H3("Detailed Information")
                         | Text.P("This is a detailed view with more information about the selected item.").Small()
-                        | new Button("Action").Variant(ButtonVariant.Primary).HandleClick(_ => client.Toast("Action performed on detailed item!"))
+                        | new Button("Action").Variant(ButtonVariant.Primary).OnClick(_ => client.Toast("Action performed on detailed item!"))
                 ).Title("Details View"),
                 
                 _ => new Card("Unknown view mode").Title("Error")
@@ -388,22 +388,22 @@ public class ConditionalSheetExample : ViewBase
         }
         
         return Layout.Vertical().Gap(2)
-            | new Button("Open Conditional Sheet").HandleClick(_ => isOpen.Value = true)
+            | new Button("Open Conditional Sheet").OnClick(_ => isOpen.Value = true)
             | (isOpen.Value ? new Sheet((Event<Sheet> _) => isOpen.Value = false,
                 Layout.Vertical().Gap(2)
                     | (Layout.Horizontal().Gap(2)
                         | new Button("List").Variant(viewMode.Value == "list" ? ButtonVariant.Primary : ButtonVariant.Outline)
-                            .HandleClick(_ => {
+                            .OnClick(_ => {
                                 viewMode.Value = "list";
                                 client.Toast("Switched to List view");
                             })
                         | new Button("Grid").Variant(viewMode.Value == "grid" ? ButtonVariant.Primary : ButtonVariant.Outline)
-                            .HandleClick(_ => {
+                            .OnClick(_ => {
                                 viewMode.Value = "grid";
                                 client.Toast("Switched to Grid view");
                             })
                         | new Button("Details").Variant(viewMode.Value == "details" ? ButtonVariant.Primary : ButtonVariant.Outline)
-                            .HandleClick(_ => {
+                            .OnClick(_ => {
                                 viewMode.Value = "details";
                                 client.Toast("Switched to Details view");
                             }))

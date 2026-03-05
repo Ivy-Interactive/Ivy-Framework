@@ -222,7 +222,7 @@ public class HtmlAndLinksView : ViewBase
         };
             
         return new Markdown(markdownContent)
-            .HandleLinkClick(handleLink);
+            .OnLinkClick(handleLink);
     }
 }
 ```
@@ -269,7 +269,7 @@ public class ComprehensiveMarkdownView : ViewBase
         Action<string> handleLink = url => Console.WriteLine($"Navigate to: {url}");
             
         return new Markdown(markdownContent)
-            .HandleLinkClick(handleLink);
+            .OnLinkClick(handleLink);
     }
 }
 ```

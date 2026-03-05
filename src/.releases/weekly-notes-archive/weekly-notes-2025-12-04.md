@@ -44,7 +44,7 @@ Forms now support async submit handlers, upload awareness (auto-disabling submit
 model.ToForm()
     .ValidationStrategy(FormValidationStrategy.OnSubmit)
     .SubmitBuilder(isLoading => new Button("Save Changes").Loading(isLoading))
-    .HandleSubmit(async (user) => await SaveAsync(user));
+    .OnSubmit(async (user) => await SaveAsync(user));
 ```
 
 **Comprehensive DataAnnotations Support:**
@@ -86,7 +86,7 @@ tasks.ToKanban(
 .CardBuilder(task => new Card()
     .Title(task.Title)
     .Description(task.Description)
-    .HandleClick(() => showTaskSheet(task.Id)))  // Card click example
+    .OnClick(() => showTaskSheet(task.Id)))  // Card click example
 ```
 
 **Custom Card Ordering:**
@@ -147,7 +147,7 @@ users.ToDataTable(idSelector: e => e.Id)
                 MenuItem.Default(Icons.Archive, "archive").Label("Archive")
             ])
     )
-    .HandleRowAction(async e =>
+    .OnRowAction(async e =>
     {
         var userId = e.Value.Id;   // Direct access to row ID
         var action = e.Value.Tag;  // Menu item tag

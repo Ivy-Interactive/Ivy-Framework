@@ -38,7 +38,7 @@ public record Card : WidgetBase<Card>
 
     [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
 
-    [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
+    [Event] public EventHandler<Event<Card>>? OnClick { get; set; }
 
     public static Card operator |(Card widget, object child)
     {
@@ -116,39 +116,39 @@ public static class CardExtensions
 
     private static CardHoverVariant HoverVariantWithClick(this Card card) => card.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : card.HoverVariant;
 
-    public static Card HandleClick(this Card card, Func<Event<Card>, ValueTask> onClick)
+    public static Card OnClick(this Card card, Func<Event<Card>, ValueTask> onClick)
     {
         return card with
         {
             HoverVariant = card.HoverVariantWithClick(),
-            OnClick = onClick
+            OnClick = new(onClick)
         };
     }
 
-    public static Card HandleClick(this Card card, Action<Event<Card>> onClick)
+    public static Card OnClick(this Card card, Action<Event<Card>> onClick)
     {
         return card with
         {
             HoverVariant = card.HoverVariantWithClick(),
-            OnClick = onClick.ToValueTask()
+            OnClick = new(onClick.ToValueTask())
         };
     }
 
-    public static Card HandleClick(this Card card, Action onClick)
+    public static Card OnClick(this Card card, Action onClick)
     {
         return card with
         {
             HoverVariant = card.HoverVariantWithClick(),
-            OnClick = _ => { onClick(); return ValueTask.CompletedTask; }
+            OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; })
         };
     }
 
-    public static Card HandleClick(this Card card, Func<ValueTask> onClick)
+    public static Card OnClick(this Card card, Func<ValueTask> onClick)
     {
         return card with
         {
             HoverVariant = card.HoverVariantWithClick(),
-            OnClick = _ => onClick()
+            OnClick = new(_ => onClick())
         };
     }
 }

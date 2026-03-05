@@ -54,7 +54,7 @@ public class SidebarWithHeaderFooterExample : ViewBase
                     | Text.P("This is the main content area with a sidebar navigation.")
                     | new Button("Action Button")
                         .Variant(ButtonVariant.Primary)
-                        .HandleClick(_ => client.Toast("Action performed!"))
+                        .OnClick(_ => client.Toast("Action performed!"))
             ).Title("Dashboard"),
             sidebarContent: Layout.Vertical().Gap(2)
                 | new Button("Home").Variant(ButtonVariant.Ghost)
@@ -166,16 +166,16 @@ public class MainAppSidebarExample : ViewBase
                     Layout.Vertical().Gap(2)
                         | Text.P("Main Application").Large()
                         | Text.P("This sidebar is configured as the main app sidebar with toggle functionality.")
-                        | new Button("Test Action").HandleClick(_ => client.Toast("Action performed!"))
+                        | new Button("Test Action").OnClick(_ => client.Toast("Action performed!"))
                 ).Title("Welcome")
                 | new Card(
                     "Additional content can be placed here. The sidebar will automatically collapse on smaller screens."
                 ).Title("Content Area"),
             sidebarContent: Layout.Vertical().Gap(1)
-                | new Button("Dashboard").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Dashboard"))
-                | new Button("Projects").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Projects"))
-                | new Button("Team").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Team"))
-                | new Button("Calendar").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Calendar")),
+                | new Button("Dashboard").Variant(ButtonVariant.Ghost).OnClick(_ => client.Toast("Dashboard"))
+                | new Button("Projects").Variant(ButtonVariant.Ghost).OnClick(_ => client.Toast("Projects"))
+                | new Button("Team").Variant(ButtonVariant.Ghost).OnClick(_ => client.Toast("Team"))
+                | new Button("Calendar").Variant(ButtonVariant.Ghost).OnClick(_ => client.Toast("Calendar")),
             sidebarHeader: Layout.Vertical().Gap(2)
                 | Text.Lead("Workspace")
                 | new TextInput(placeholder: "Search...", variant: TextInputVariants.Search)

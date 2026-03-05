@@ -98,7 +98,7 @@ public class CreateDialogExample : ViewBase
                )
                | model.Value
                    .ToForm()
-                   .HandleSubmit(OnSubmit)
+                   .OnSubmit(OnSubmit)
                    .Builder(e => e.Name, e => e.ToTextInput().Placeholder("Enter item name"))
                    .Builder(e => e.Description, e => e.ToTextAreaInput().Placeholder("Enter description"))
                    .Builder(e => e.Category, e => e.ToTextInput().Placeholder("Enter category"))

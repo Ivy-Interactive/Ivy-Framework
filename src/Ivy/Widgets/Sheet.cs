@@ -20,7 +20,7 @@ public record Sheet : WidgetBase<Sheet>
     [OverloadResolutionPriority(1)]
     public Sheet(Func<Event<Sheet>, ValueTask>? onClose, object content, string? title = null, string? description = null) : base([new Slot("Content", content)])
     {
-        OnClose = onClose;
+        OnClose = onClose.ToEventHandler();
         Title = title;
         Description = description;
         Width = DefaultWidth;
@@ -29,7 +29,7 @@ public record Sheet : WidgetBase<Sheet>
     // Overload for Action<Event<Sheet>>
     public Sheet(Action<Event<Sheet>>? onClose, object content, string? title = null, string? description = null) : base([new Slot("Content", content)])
     {
-        OnClose = onClose?.ToValueTask();
+        OnClose = onClose.ToEventHandler();
         Title = title;
         Description = description;
         Width = DefaultWidth;
@@ -38,7 +38,7 @@ public record Sheet : WidgetBase<Sheet>
     // Overload for simple Action (no parameters)
     public Sheet(Action? onClose, object content, string? title = null, string? description = null) : base([new Slot("Content", content)])
     {
-        OnClose = onClose == null ? null : (_ => { onClose(); return ValueTask.CompletedTask; });
+        OnClose = onClose == null ? null : new(_ => { onClose(); return ValueTask.CompletedTask; });
         Title = title;
         Description = description;
         Width = DefaultWidth;
@@ -50,7 +50,7 @@ public record Sheet : WidgetBase<Sheet>
 
     [Prop] public string? Description { get; }
 
-    [Event] public Func<Event<Sheet>, ValueTask>? OnClose { get; set; }
+    [Event] public EventHandler<Event<Sheet>>? OnClose { get; set; }
 
     public static Sheet operator |(Sheet widget, object child)
     {
@@ -110,9 +110,9 @@ public static class SheetExtensions
             var layout = new FooterLayout(
                 Layout.Horizontal().Gap(2)
                 | FormBuilder<TModel>.DefaultSubmitBuilder(submitTitle ?? "Save")(isLoading)
-                    .HandleClick(_ => HandleSubmitAndClose())
+                    .OnClick(_ => HandleSubmitAndClose())
                     .Scale(formBuilder._scale)
-                | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => isOpen.Set(false))
+                | new Button("Cancel").Variant(ButtonVariant.Outline).OnClick(_ => isOpen.Set(false))
                     .Scale(formBuilder._scale)
                 | validationView,
                 formView
@@ -133,11 +133,11 @@ public class WithSheetView(Button trigger, Func<object> contentFactory, string? 
         var isOpen = UseState(false);
         var clonedTrigger = trigger with
         {
-            OnClick = _ =>
+            OnClick = new(_ =>
             {
                 isOpen.Value = true;
                 return ValueTask.CompletedTask;
-            }
+            })
         };
         return new Fragment(
             clonedTrigger,

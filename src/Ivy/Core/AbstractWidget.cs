@@ -60,6 +60,14 @@ public abstract record AbstractWidget : IWidget
         if (eventDelegate == null)
             return false;
 
+        // Unwrap EventHandler<T> wrapper to get the underlying Func delegate
+        var eventDelegateType = eventDelegate.GetType();
+        if (eventDelegateType.IsGenericType && eventDelegateType.GetGenericTypeDefinition() == typeof(EventHandler<>))
+        {
+            eventDelegate = eventDelegateType.GetProperty("Handler")!.GetValue(eventDelegate);
+            if (eventDelegate == null) return false;
+        }
+
         if (IsFunc(eventDelegate, out Type? eventType, out Type? returnType) && returnType == typeof(ValueTask))
         {
             var eventInstance = eventType!.IsGenericType switch

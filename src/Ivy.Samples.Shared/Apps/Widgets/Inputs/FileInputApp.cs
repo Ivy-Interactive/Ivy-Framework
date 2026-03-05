@@ -252,7 +252,7 @@ public class FileInputEventHandlersExample : ViewBase
                | Text.P("Demonstrate OnBlur and OnCancel event handlers. OnBlur fires when the file dialog closes or input loses focus. OnCancel fires when the cancel button is clicked on a file.")
                | files.ToFileInput(upload)
                    .Placeholder("Choose files - try selecting, canceling the dialog, or clicking the X button")
-                   .HandleBlur((Event<IAnyInput> e) =>
+                   .OnBlur((Event<IAnyInput> e) =>
                    {
                        blurCount.Set(blurCount.Value + 1);
                        if (files.Value.Length > 0)
@@ -262,7 +262,7 @@ public class FileInputEventHandlersExample : ViewBase
                        else
                            blurMessage.Set($"Blur Event #{blurCount.Value}: No file selected (dialog cancelled)");
                    })
-                   .HandleCancel((Guid fileId) =>
+                   .OnCancel((Guid fileId) =>
                    {
                        upload.Value.Cancel(fileId);
                        files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());

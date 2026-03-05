@@ -214,7 +214,7 @@ public class MyApp : AppBase
     {
         new Map()
             .Label("Hello World")
-            .HandleClick(() => Console.WriteLine("Clicked!"));
+            .OnClick(() => Console.WriteLine("Clicked!"));
     }
 }
 ```

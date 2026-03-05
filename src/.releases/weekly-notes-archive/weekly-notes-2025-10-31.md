@@ -66,7 +66,7 @@ return tasks.ToKanban(
     .HandleMove(moveData => { /* Update task status */ })
     .HandleAdd(columnKey => { /* Add new task */ })
     .HandleDelete(cardId => { /* Remove task */ })
-    .HandleClick(cardId => { /* Show details */ });
+    .OnClick(cardId => { /* Show details */ });
 ```
 
 ### URL State Preservation

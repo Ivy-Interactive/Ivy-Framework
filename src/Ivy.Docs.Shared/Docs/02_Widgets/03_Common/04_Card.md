@@ -53,7 +53,7 @@ new Card(
     "This card is clickable."
 ).Title("Clickable Card")
  .Description("Demonstrating click and mouse hover.")
- .HandleClick(_ => client.Toast("Card clicked!"))
+ .OnClick(_ => client.Toast("Card clicked!"))
  .Width(Size.Units(100))
 ```
 

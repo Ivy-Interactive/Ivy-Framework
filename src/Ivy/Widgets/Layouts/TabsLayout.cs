@@ -20,10 +20,10 @@ public record TabsLayout : WidgetBase<TabsLayout>
     [OverloadResolutionPriority(1)]
     public TabsLayout(Func<Event<TabsLayout, int>, ValueTask>? onSelect, Func<Event<TabsLayout, int>, ValueTask>? onClose, Func<Event<TabsLayout, int>, ValueTask>? onRefresh, Func<Event<TabsLayout, int[]>, ValueTask>? onReorder, int? selectedIndex, params Tab[] tabs) : base(tabs.Cast<object>().ToArray())
     {
-        OnSelect = onSelect;
-        OnClose = onClose;
-        OnRefresh = onRefresh;
-        OnReorder = onReorder;
+        OnSelect = onSelect.ToEventHandler();
+        OnClose = onClose.ToEventHandler();
+        OnRefresh = onRefresh.ToEventHandler();
+        OnReorder = onReorder.ToEventHandler();
         SelectedIndex = selectedIndex;
     }
 
@@ -37,34 +37,10 @@ public record TabsLayout : WidgetBase<TabsLayout>
         Action<Event<TabsLayout, int>>? onRefresh, Action<Event<TabsLayout, int[]>>? onReorder, int? selectedIndex,
         params Tab[] tabs)
         : this(
-            onSelect != null
-                ? e =>
-                {
-                    onSelect(e);
-                    return ValueTask.CompletedTask;
-                }
-    : null,
-            onClose != null
-                ? e =>
-                {
-                    onClose(e);
-                    return ValueTask.CompletedTask;
-                }
-    : null,
-            onRefresh != null
-                ? e =>
-                {
-                    onRefresh(e);
-                    return ValueTask.CompletedTask;
-                }
-    : null,
-            onReorder != null
-                ? e =>
-                {
-                    onReorder(e);
-                    return ValueTask.CompletedTask;
-                }
-    : null,
+            onSelect?.ToValueTask(),
+            onClose?.ToValueTask(),
+            onRefresh?.ToValueTask(),
+            onReorder?.ToValueTask(),
             selectedIndex, tabs)
     {
     }
@@ -79,15 +55,15 @@ public record TabsLayout : WidgetBase<TabsLayout>
 
     [Prop] public string? AddButtonText { get; set; }
 
-    [Event] public Func<Event<TabsLayout, int>, ValueTask>? OnSelect { get; set; }
+    [Event] public EventHandler<Event<TabsLayout, int>>? OnSelect { get; set; }
 
-    [Event] public Func<Event<TabsLayout, int>, ValueTask>? OnClose { get; set; }
+    [Event] public EventHandler<Event<TabsLayout, int>>? OnClose { get; set; }
 
-    [Event] public Func<Event<TabsLayout, int>, ValueTask>? OnRefresh { get; set; }
+    [Event] public EventHandler<Event<TabsLayout, int>>? OnRefresh { get; set; }
 
-    [Event] public Func<Event<TabsLayout, int[]>, ValueTask>? OnReorder { get; set; }
+    [Event] public EventHandler<Event<TabsLayout, int[]>>? OnReorder { get; set; }
 
-    [Event] public Func<Event<TabsLayout, int>, ValueTask>? OnAddButtonClick { get; set; }
+    [Event] public EventHandler<Event<TabsLayout, int>>? OnAddButtonClick { get; set; }
 }
 
 public static class TabsLayoutExtensions
@@ -124,7 +100,7 @@ public static class TabsLayoutExtensions
 
     public static TabsLayout AddButton(this TabsLayout tabsLayout, string? addButtonText, Func<Event<TabsLayout, int>, ValueTask>? onAddButtonClick = null)
     {
-        return tabsLayout with { AddButtonText = addButtonText, OnAddButtonClick = onAddButtonClick };
+        return tabsLayout with { AddButtonText = addButtonText, OnAddButtonClick = onAddButtonClick.ToEventHandler() };
     }
 
     public static TabsLayout AddButton(this TabsLayout tabsLayout, string? addButtonText, Action<Event<TabsLayout, int>>? onAddButtonClick)
@@ -132,8 +108,7 @@ public static class TabsLayoutExtensions
         return tabsLayout with
         {
             AddButtonText = addButtonText,
-            OnAddButtonClick = onAddButtonClick != null ? e => { onAddButtonClick(e); return ValueTask.CompletedTask; }
-            : null
+            OnAddButtonClick = onAddButtonClick.ToEventHandler()
         };
     }
 }

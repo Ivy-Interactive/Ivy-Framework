@@ -19,7 +19,7 @@ public class CardApp : SampleBase
             .Header(Text.H4("OnClick test"))
             .Content("This card demonstrates OnClick handlers.")
             .TestId("card-onclick")
-        .HandleClick(_ =>
+        .OnClick(_ =>
         {
             client.Toast("Clicked!");
         });

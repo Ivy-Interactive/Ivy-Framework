@@ -43,7 +43,7 @@ content.ToTiptapInput()
     .AutoFocus()
     .ShowToolbar()
     .HandleFocus(() => Console.WriteLine("Focused"))
-    .HandleBlur(() => Console.WriteLine("Blurred"));
+    .OnBlur(() => Console.WriteLine("Blurred"));
 ```
 
 ## Features

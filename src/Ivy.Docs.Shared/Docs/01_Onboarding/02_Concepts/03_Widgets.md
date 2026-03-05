@@ -84,7 +84,7 @@ public class CommonWidgetsDemo : ViewBase
             ).Title("Progress").Description("Task completion indicators").Height(Size.Units(50))
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | new Card("Clickable Card").HandleClick(_ => client.Toast("Clicked!"))
+                    | new Card("Clickable Card").OnClick(_ => client.Toast("Clicked!"))
             ).Title("Cards").Description("Content containers").Height(Size.Units(50))
             | new Card(
                 new[] {

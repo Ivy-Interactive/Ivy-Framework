@@ -148,7 +148,7 @@ public class DataTableApp : SampleBase
                         MenuItem.Default(Icons.Share2, "share").Label("Share")
                     ])
             )
-            .HandleRowAction(async e =>
+            .OnRowAction(async e =>
             {
                 var args = e.Value;
                 if (int.TryParse(args.Id?.ToString() ?? "", out int employeeId))
@@ -205,7 +205,7 @@ public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> emp
             .Remove(e => e.Id)
             .Remove(e => e.EmployeeCode)
             .Remove(e => e.HireDate)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "Edit Employee", submitTitle: "Save");
 
         Task OnSubmit(EmployeeRecord? updated)
