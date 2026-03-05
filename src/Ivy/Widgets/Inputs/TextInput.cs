@@ -152,12 +152,16 @@ public static class TextInputExtensions
 
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Search);
 
+    public static ValidatedTextInputBuilder ToPasswordInput(this IAnyState state) => new(state, TextInputVariants.Password);
     public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Password);
 
+    public static ValidatedTextInputBuilder ToEmailInput(this IAnyState state) => new(state, TextInputVariants.Email);
     public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Email);
 
+    public static ValidatedTextInputBuilder ToUrlInput(this IAnyState state) => new(state, TextInputVariants.Url);
     public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Url);
 
+    public static ValidatedTextInputBuilder ToTelInput(this IAnyState state) => new(state, TextInputVariants.Tel);
     public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Tel);
 
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };

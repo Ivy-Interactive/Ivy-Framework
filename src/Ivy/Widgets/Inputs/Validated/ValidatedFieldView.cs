@@ -56,6 +56,12 @@ public sealed class ValidatedFieldView : ViewBase
     public ValidatedFieldView Medium() => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, _help, Shared.Scale.Medium, _maxLength, _nullable, _invalid);
     public ValidatedFieldView Large() => new(_state, _variant, _placeholder, _disabled, _label, _description, _required, _help, Shared.Scale.Large, _maxLength, _nullable, _invalid);
 
+
+    public static ValidatedFieldView Email(IAnyState state) => new(state, TextInputVariants.Email);
+    public static ValidatedFieldView Tel(IAnyState state) => new(state, TextInputVariants.Tel);
+    public static ValidatedFieldView Url(IAnyState state) => new(state, TextInputVariants.Url);
+    public static ValidatedFieldView Password(IAnyState state) => new(state, TextInputVariants.Password);
+
     public override object? Build()
     {
         var invalidState = UseState(default(string?));

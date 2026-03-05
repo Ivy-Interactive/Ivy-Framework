@@ -2,7 +2,6 @@ using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views.Forms;
 using Ivy.Widgets.Inputs;
-using Ivy.Widgets.Inputs.Validated;
 
 namespace Ivy.Samples.Shared.Apps.Tests;
 
@@ -36,10 +35,10 @@ public class TextInputVariantsTab : ViewBase
             Layout.Vertical().Gap(4)
                 | Text.H3("TextInput variants (no Field)")
                 | Text.P("Email, Tel, Url, and Password variants.")
-                | email.ToTextInput("e.g. user@example.com", false, TextInputVariants.Email)
-                | tel.ToTextInput("e.g. +1 234 567 8900", false, TextInputVariants.Tel)
-                | url.ToTextInput("e.g. https://example.com", false, TextInputVariants.Url)
-                | password.ToTextInput("Min 8 characters", false, TextInputVariants.Password)
+                | email.ToEmailInput().Placeholder("e.g. user@example.com")
+                | tel.ToTelInput().Placeholder("e.g. +1 234 567 8900")
+                | url.ToUrlInput().Placeholder("e.g. https://example.com")
+                | password.ToPasswordInput().Placeholder("Min 8 characters")
         ).Width(Size.Full());
     }
 }
@@ -58,10 +57,10 @@ public class FieldVariantsTab : ViewBase
             Layout.Vertical().Gap(6)
                 | Text.H3("Validated fields")
                 | Text.P("Each uses To*Input() for a Field with label, description, required, and validation on blur.")
-                | new ValidatedFieldView(email, TextInputVariants.Email, "user@example.com").Label("Email").Description("We use this for account recovery.").Required()
-                | new ValidatedFieldView(tel, TextInputVariants.Tel, "+1 234 567 8900").Label("Phone").Description("7–15 digits.").Required()
-                | new ValidatedFieldView(url, TextInputVariants.Url, "https://example.com").Label("Website").Description("Must start with http or https.")
-                | new ValidatedFieldView(password, TextInputVariants.Password, "At least 8 characters").Label("Password").Description("Required for sign-up.").Required()
+                | email.ToEmailInput().Placeholder("e.g. user@example.com").WithField().Label("Email").Description("We use this for account recovery.").Required()
+                | tel.ToTelInput().Placeholder("e.g. +1 234 567 8900").WithField().Label("Phone").Description("7–15 digits.").Required()
+                | url.ToUrlInput().Placeholder("e.g. https://example.com").WithField().Label("Website").Description("Must start with http or https.")
+                | password.ToPasswordInput().Placeholder("Min 8 characters").WithField().Label("Password").Description("Required for sign-up.").Required()
         ).Width(Size.Full());
     }
 }

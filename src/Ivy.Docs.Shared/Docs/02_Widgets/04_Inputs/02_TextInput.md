@@ -56,9 +56,8 @@ public class PasswordCaptureDemo: ViewBase
     public override object? Build()
     {
         var password = UseState("");
-        return new TextInput(password)
+        return password.ToPasswordInput()
                      .Placeholder("Password")
-                     .Variant(TextInputVariants.Password)
                      .WithField()
                      .Label("Enter Password");         
     }
@@ -126,9 +125,8 @@ public class EmailEnterDemo: ViewBase
     public override object? Build()
     {
         var email = UseState("");
-        return new TextInput(email)
+        return email.ToEmailInput()
                        .Placeholder("user@domain.com")
-                       .Variant(TextInputVariants.Email)
                        .WithField()
                        .Label("Email");
     }
@@ -147,9 +145,8 @@ public class PhoneEnterDemo: ViewBase
     public override object? Build()
     {
         var tel = UseState("");
-        return new TextInput(tel)
+        return tel.ToTelInput()
                       .Placeholder("+1-123-3456")
-                      .Variant(TextInputVariants.Tel)
                       .WithField()
                       .Label("Phone");
     }
@@ -168,9 +165,8 @@ public class URLEnterDemo: ViewBase
     public override object? Build()
     {
         var url = UseState("");
-        return new TextInput(url)
+        return url.ToUrlInput()
                       .Placeholder("https://ivy.app/")
-                      .Variant(TextInputVariants.Url)
                       .WithField()
                       .Label("Website");
     }

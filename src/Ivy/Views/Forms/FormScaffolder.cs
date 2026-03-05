@@ -109,10 +109,10 @@ internal static class FormScaffolder
         {
             return (state) =>
             {
-                var view = state.ToEmailInput();
-                if (field.GetMaxLength() is { } maxLen) view = view.MaxLength(maxLen);
-                if (field.IsNullable && !field.Required) view = view.Nullable(true);
-                return (object)view;
+                var input = state.ToEmailInput("");
+                if (field.GetMaxLength() is { } maxLen) input = input.MaxLength(maxLen);
+                if (field.IsNullable && !field.Required) input = input.Nullable(true);
+                return (object)input;
             };
         }
 
@@ -120,10 +120,10 @@ internal static class FormScaffolder
         {
             return (state) =>
             {
-                var view = state.ToTelInput();
-                if (field.GetMaxLength() is { } maxLen) view = view.MaxLength(maxLen);
-                if (field.IsNullable && !field.Required) view = view.Nullable(true);
-                return (object)view;
+                var input = state.ToTelInput("");
+                if (field.GetMaxLength() is { } maxLen) input = input.MaxLength(maxLen);
+                if (field.IsNullable && !field.Required) input = input.Nullable(true);
+                return (object)input;
             };
         }
 
@@ -131,10 +131,10 @@ internal static class FormScaffolder
         {
             return (state) =>
             {
-                var view = state.ToUrlInput();
-                if (field.GetMaxLength() is { } maxLen) view = view.MaxLength(maxLen);
-                if (field.IsNullable && !field.Required) view = view.Nullable(true);
-                return (object)view;
+                var input = state.ToUrlInput("");
+                if (field.GetMaxLength() is { } maxLen) input = input.MaxLength(maxLen);
+                if (field.IsNullable && !field.Required) input = input.Nullable(true);
+                return (object)input;
             };
         }
 
@@ -142,10 +142,10 @@ internal static class FormScaffolder
         {
             return (state) =>
             {
-                var view = state.ToPasswordInput();
-                if (field.GetMaxLength() is { } maxLen) view = view.MaxLength(maxLen);
-                if (field.IsNullable && !field.Required) view = view.Nullable(true);
-                return (object)view;
+                var input = state.ToPasswordInput("");
+                if (field.GetMaxLength() is { } maxLen) input = input.MaxLength(maxLen);
+                if (field.IsNullable && !field.Required) input = input.Nullable(true);
+                return (object)input;
             };
         }
 

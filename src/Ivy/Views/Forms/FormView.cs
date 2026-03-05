@@ -88,6 +88,21 @@ public class FormFieldView(
 
         var result = inputFactory(inputState, Context);
 
+        if (result is ValidatedTextInputBuilder validatedBuilder)
+        {
+            var fieldView = validatedBuilder.WithField().Label(label ?? "").Description(description ?? "");
+            if (required) fieldView = fieldView.Required();
+            if (!string.IsNullOrEmpty(help)) fieldView = fieldView.Help(help);
+            if (!string.IsNullOrEmpty(placeholder)) fieldView = fieldView.Placeholder(placeholder);
+            fieldView = scale switch { Scale.Small => fieldView.Small(), Scale.Large => fieldView.Large(), _ => fieldView.Medium() };
+            UseEffect(() =>
+            {
+                bindingState.As<object>().Set(inputState.As<object>().Value);
+                updateSender.Send(new Unit());
+            }, inputState);
+            return visibleState.Value ? fieldView : null;
+        }
+
         if (result is ValidatedFieldView validatedField)
         {
             validatedField = validatedField.Label(label ?? "").Description(description ?? "");
