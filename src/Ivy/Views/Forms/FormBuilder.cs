@@ -88,8 +88,8 @@ public class FormBuilder<TModel> : ViewBase
         {
             return (state, context) =>
             {
-                var result = inner(state, context);
-                if (result is IAnyBoolInput boolInput)
+                var input = inner(state, context);
+                if (input is IAnyBoolInput boolInput)
                 {
                     // Only apply scaffold defaults if no custom label was set
                     if (HasCustomLabel(fieldInfo.Label, fieldInfo.Name))
@@ -103,12 +103,12 @@ public class FormBuilder<TModel> : ViewBase
                         boolInput.ScaffoldDefaults(fieldInfo.Name, fieldInfo.Type);
                     }
                 }
-                else if (result is IAnyNumberInput numberInput)
+                else if (input is IAnyNumberInput numberInput)
                 {
                     numberInput.ScaffoldDefaults(fieldInfo.Name, fieldInfo.Type);
                 }
 
-                return result;
+                return input;
             };
         }
 

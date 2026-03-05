@@ -38,7 +38,6 @@ public static class FormHelpers
                         DisplayName = propertyInfo.Name
                     };
                     var result = capturedAttr.GetValidationResult(value, validationContext);
-                    // GetValidationResult returns null on success (per DataAnnotations contract)
                     var isValid = result == null || result == ValidationResult.Success;
                     return isValid
                         ? (true, "")

@@ -2,7 +2,6 @@ using System.Net.Mail;
 using System.Text.RegularExpressions;
 using Ivy.Widgets.Inputs;
 
-// ReSharper disable once CheckNamespace
 namespace Ivy.Widgets.Inputs.Validated;
 
 /// <summary>

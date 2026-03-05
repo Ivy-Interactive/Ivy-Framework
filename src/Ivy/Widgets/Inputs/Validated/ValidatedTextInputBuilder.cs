@@ -5,7 +5,6 @@ using Ivy.Core.Hooks;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
-// ReSharper disable once CheckNamespace
 namespace Ivy.Widgets.Inputs.Validated;
 
 /// <summary>
