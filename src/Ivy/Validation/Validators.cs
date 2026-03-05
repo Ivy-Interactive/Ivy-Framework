@@ -2,27 +2,26 @@ using System.Collections.Generic;
 using System.Linq;
 using Ivy;
 using Ivy.Widgets.Inputs;
-using Ivy.Widgets.Inputs.Validated;
 
 namespace Ivy.Validation;
 
 /// <summary>
 /// Shared validation for forms. Email, tel, url, and password are validated on blur and submit via FormFieldView.
-/// Validation logic lives in TextInputValidation.
+/// Validation logic lives in TextInputExtensions.ValidateForVariant.
 /// </summary>
 public static class Validators
 {
     public static Func<object?, (bool, string)> CreateEmailValidator(string fieldName) =>
-        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputVariants.Email); return (ok, err ?? ""); };
+        v => { var (ok, err) = TextInputExtensions.ValidateForVariant(v, TextInputVariants.Email); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)> CreateTelValidator(string fieldName) =>
-        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputVariants.Tel); return (ok, err ?? ""); };
+        v => { var (ok, err) = TextInputExtensions.ValidateForVariant(v, TextInputVariants.Tel); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)> CreateUrlValidator(string fieldName) =>
-        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputVariants.Url); return (ok, err ?? ""); };
+        v => { var (ok, err) = TextInputExtensions.ValidateForVariant(v, TextInputVariants.Url); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)> CreatePasswordValidator(string fieldName, int minLength = 8) =>
-        v => { var (ok, err) = TextInputValidation.ValidateForVariant(v, TextInputVariants.Password); return (ok, err ?? ""); };
+        v => { var (ok, err) = TextInputExtensions.ValidateForVariant(v, TextInputVariants.Password); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)>? ForVariant(TextInputVariants variant, string fieldName)
     {

@@ -10,7 +10,6 @@ using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Validation;
 using Ivy.Widgets.Inputs;
-using Ivy.Widgets.Inputs.Validated;
 
 namespace Ivy.Views.Forms;
 
@@ -87,36 +86,6 @@ public class FormFieldView(
         }));
 
         var result = inputFactory(inputState, Context);
-
-        if (result is ValidatedTextInputBuilder validatedBuilder)
-        {
-            var fieldView = validatedBuilder.WithField().Label(label ?? "").Description(description ?? "");
-            if (required) fieldView = fieldView.Required();
-            if (!string.IsNullOrEmpty(help)) fieldView = fieldView.Help(help);
-            if (!string.IsNullOrEmpty(placeholder)) fieldView = fieldView.Placeholder(placeholder);
-            fieldView = scale switch { Scale.Small => fieldView.Small(), Scale.Large => fieldView.Large(), _ => fieldView.Medium() };
-            UseEffect(() =>
-            {
-                bindingState.As<object>().Set(inputState.As<object>().Value);
-                updateSender.Send(new Unit());
-            }, inputState);
-            return visibleState.Value ? fieldView : null;
-        }
-
-        if (result is ValidatedFieldView validatedField)
-        {
-            validatedField = validatedField.Label(label ?? "").Description(description ?? "");
-            if (required) validatedField = validatedField.Required();
-            if (!string.IsNullOrEmpty(help)) validatedField = validatedField.Help(help);
-            if (!string.IsNullOrEmpty(placeholder)) validatedField = validatedField.Placeholder(placeholder);
-            UseEffect(() =>
-            {
-                bindingState.As<object>().Set(inputState.As<object>().Value);
-                updateSender.Send(new Unit());
-            }, inputState);
-            return visibleState.Value ? validatedField : null;
-        }
-
         var input = (IAnyInput)result;
         var invalidState = UseState((string?)null!);
         var blurOnceState = UseState(false);

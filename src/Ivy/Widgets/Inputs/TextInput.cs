@@ -1,15 +1,26 @@
+using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Shared;
+using Ivy.Widgets;
 using Ivy.Widgets.Inputs;
-using Ivy.Widgets.Inputs.Validated;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
+
+/// <summary>Used by the framework to set current build context so state.ToEmailInput() etc. validate on blur without duplicate overloads.</summary>
+public static class TextInputBuildContext
+{
+    private static readonly AsyncLocal<IViewContext?> Current = new();
+    public static void SetCurrent(IViewContext? context) => Current.Value = context;
+    internal static IViewContext? GetCurrent() => Current.Value;
+}
 
 public record Affix
 {
@@ -152,17 +163,83 @@ public static class TextInputExtensions
 
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Search);
 
-    public static ValidatedTextInputBuilder ToPasswordInput(this IAnyState state) => new(state, TextInputVariants.Password);
-    public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Password);
+    /// <summary>Email/Password/Url/Tel input. Validates on blur when built inside a view; in forms FormView also runs validation.</summary>
+    public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
+        TextInputBuildContext.GetCurrent() is { } ctx ? BuildValidatedInput(state, TextInputVariants.Email, ctx, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Email);
+    public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
+        TextInputBuildContext.GetCurrent() is { } ctxP ? BuildValidatedInput(state, TextInputVariants.Password, ctxP, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Password);
+    public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
+        TextInputBuildContext.GetCurrent() is { } ctxU ? BuildValidatedInput(state, TextInputVariants.Url, ctxU, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Url);
+    public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
+        TextInputBuildContext.GetCurrent() is { } ctxT ? BuildValidatedInput(state, TextInputVariants.Tel, ctxT, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Tel);
 
-    public static ValidatedTextInputBuilder ToEmailInput(this IAnyState state) => new(state, TextInputVariants.Email);
-    public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Email);
+    private static TextInputBase BuildValidatedInput(IAnyState state, TextInputVariants variant, IViewContext context, string? placeholder, bool disabled)
+    {
+        var invalidState = context.UseState(default(string?), true);
+        var blurOnceState = context.UseState(false, true);
+        context.UseEffect(() =>
+        {
+            if (blurOnceState.Value)
+                invalidState.Set((variant switch
+                {
+                    TextInputVariants.Email => ValidateEmail(state.As<object>().Value),
+                    TextInputVariants.Password => ValidatePassword(state.As<object>().Value),
+                    TextInputVariants.Url => ValidateUrl(state.As<object>().Value),
+                    TextInputVariants.Tel => ValidateTel(state.As<object>().Value),
+                    _ => null
+                }) ?? "");
+        }, state, blurOnceState);
+        void OnBlur(Event<IAnyInput> _) => blurOnceState.Set(true);
+        return state.ToTextInput(placeholder, disabled, variant).Invalid(invalidState.Value ?? "").HandleBlur(OnBlur);
+    }
 
-    public static ValidatedTextInputBuilder ToUrlInput(this IAnyState state) => new(state, TextInputVariants.Url);
-    public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Url);
+    /// <summary>Returns (true, null) if valid, (false, errorMessage) if invalid. Used by Validators and form validation.</summary>
+    public static (bool isValid, string? errorMessage) ValidateForVariant(object? value, TextInputVariants variant)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s))
+            return (true, null);
+        var err = variant switch
+        {
+            TextInputVariants.Email => ValidateEmail(value),
+            TextInputVariants.Password => ValidatePassword(value),
+            TextInputVariants.Tel => ValidateTel(value),
+            TextInputVariants.Url => ValidateUrl(value),
+            _ => null
+        };
+        return (err == null, err);
+    }
 
-    public static ValidatedTextInputBuilder ToTelInput(this IAnyState state) => new(state, TextInputVariants.Tel);
-    public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Tel);
+    private static string? ValidateEmail(object? value)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        try
+        {
+            var addr = new MailAddress(s);
+            return addr.Host.Contains('.') ? null : "Please enter a valid email address";
+        }
+        catch (FormatException) { return "Please enter a valid email address"; }
+    }
+
+    private static string? ValidatePassword(object? value, int minLength = 8)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        return s.Length >= minLength ? null : $"Password must be at least {minLength} characters";
+    }
+
+    private static string? ValidateTel(object? value)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        var digitsOnly = Regex.Replace(s, @"\D", "");
+        if (digitsOnly.Length < 7 || digitsOnly.Length > 15) return "Please enter a valid phone number";
+        return Regex.IsMatch(s, @"^[\d\s+\-().]+$") ? null : "Please enter a valid phone number";
+    }
+
+    private static string? ValidateUrl(object? value)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        if (!Uri.TryCreate(s, UriKind.Absolute, out var uri) || !uri.IsAbsoluteUri) return "Please enter a valid URL";
+        return uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps ? null : "Please enter a valid URL (http or https)";
+    }
 
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 

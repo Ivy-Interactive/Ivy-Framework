@@ -29,11 +29,7 @@ internal static class FormScaffolder
 
             var order = displayInfo.Order ?? int.MaxValue;
 
-            var factory = ScaffoldInputFactory(field);
-
-            Func<IAnyState, IViewContext, object>? wrappedFactory = factory != null
-                ? (state, _) => factory!(state)
-                : null;
+            var wrappedFactory = ScaffoldInputFactory(field);
 
             var scaffoldedField = new FormBuilderField<TModel>(
                 field.Name,
@@ -68,7 +64,7 @@ internal static class FormScaffolder
         return scaffoldedFields;
     }
 
-    private static Func<IAnyState, object>? ScaffoldInputFactory(FieldPropertyInfo field)
+    private static Func<IAnyState, IViewContext, object>? ScaffoldInputFactory(FieldPropertyInfo field)
     {
         var type = field.Type;
         var name = field.Name;
@@ -82,76 +78,72 @@ internal static class FormScaffolder
 
         if (field.IsIdentity())
         {
-            return (state) => (object)state.ToReadOnlyInput();
+            return (state, _) => state.ToReadOnlyInput();
         }
 
         if (field.IsColor())
         {
-            return (state) =>
+            return (state, _) =>
             {
                 var input = state.ToColorInput();
                 if (field.IsNullable && !field.Required) input.Nullable = true;
-                return (object)input;
+                return input;
             };
         }
 
         if (nonNullableType == typeof(bool))
         {
-            return (state) =>
+            return (state, _) =>
             {
                 var input = state.ToBoolInput().ScaffoldDefaults(name, type);
                 if (field.IsNullable && !field.Required) input.Nullable = true;
-                return (object)input;
+                return input;
             };
         }
 
         if (field.IsEmail())
         {
-            return (state) =>
+            return (state, _) =>
             {
-                var input = state.ToEmailInput("");
-                if (field.GetMaxLength() is { } maxLen) input = input.MaxLength(maxLen);
+                var input = ApplyMaxLength(state.ToEmailInput(field.GetDisplayInfo().Prompt), field);
                 if (field.IsNullable && !field.Required) input = input.Nullable(true);
-                return (object)input;
+                return input;
             };
         }
 
         if (field.IsPhone())
         {
-            return (state) =>
+            return (state, _) =>
             {
-                var input = state.ToTelInput("");
-                if (field.GetMaxLength() is { } maxLen) input = input.MaxLength(maxLen);
+                var input = ApplyMaxLength(state.ToTelInput(field.GetDisplayInfo().Prompt), field);
                 if (field.IsNullable && !field.Required) input = input.Nullable(true);
-                return (object)input;
+                return input;
             };
         }
 
         if (field.IsUrl())
         {
-            return (state) =>
+            return (state, _) =>
             {
-                var input = state.ToUrlInput("");
-                if (field.GetMaxLength() is { } maxLen) input = input.MaxLength(maxLen);
+                var input = ApplyMaxLength(state.ToUrlInput(field.GetDisplayInfo().Prompt), field);
                 if (field.IsNullable && !field.Required) input = input.Nullable(true);
-                return (object)input;
+                return input;
             };
         }
 
         if (field.IsPassword())
         {
-            return (state) =>
+            return (state, _) =>
             {
-                var input = state.ToPasswordInput("");
-                if (field.GetMaxLength() is { } maxLen) input = input.MaxLength(maxLen);
+                var input = ApplyMaxLength(state.ToPasswordInput(field.GetDisplayInfo().Prompt), field);
                 if (field.IsNullable && !field.Required) input = input.Nullable(true);
-                return (object)input;
+                return input;
             };
         }
 
         if (nonNullableType == typeof(string))
         {
-            return (state) =>
+            return (state, _) =>
             {
                 var input = ApplyMaxLength(state.ToTextInput(), field);
 
@@ -160,71 +152,61 @@ internal static class FormScaffolder
                     input = input.Variant(TextInputVariants.Textarea);
                 }
 
-                // If Required => don't show X button even for nullable types
                 if (field.IsNullable && !field.Required) input = input.Nullable(true);
-                return (object)input;
+                return input;
             };
         }
 
         if (nonNullableType == typeof(Icons))
         {
-            return (state) => (object)state.ToIconInput();
+            return (state, _) => state.ToIconInput();
         }
 
         if (nonNullableType.IsEnum)
         {
-            return (state) =>
+            return (state, _) =>
             {
                 var input = state.ToSelectInput();
                 if (field.IsNullable && !field.Required) input.Nullable = true;
-                return (object)input;
+                return input;
             };
         }
 
         if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
         {
-            return (state) =>
+            return (state, _) =>
             {
                 var input = state.ToSelectInput().List();
                 if (field.IsNullable && !field.Required) input.Nullable = true;
-                return (object)input;
+                return input;
             };
         }
 
         if (type.IsNumeric())
         {
-            return (state) =>
+            return (state, _) =>
             {
                 var input = state.ToNumberInput();
                 if (field.GetRangeInfo().Min is { } min)
-                {
                     input = input.Min(min);
-                }
                 if (field.GetRangeInfo().Max is { } max)
-                {
                     input = input.Max(max);
-                }
                 if (field.IsNullable && !field.Required) input.Nullable = true;
-                return (object)input.ScaffoldDefaults(name, type);
+                return input.ScaffoldDefaults(name, type);
             };
         }
 
         if (type.IsDate())
         {
-            return (state) =>
+            return (state, _) =>
             {
                 var input = state.ToDateTimeInput();
-
                 if (field.HasDataTypeAttribute(DataType.Date))
-                {
                     input = input.Variant(DateTimeInputVariants.Date);
-                }
                 else if (field.HasDataTypeAttribute(DataType.Time))
-                {
                     input = input.Variant(DateTimeInputVariants.Time);
-                }
                 if (field.IsNullable && !field.Required) input.Nullable = true;
-                return (object)input;
+                return input;
             };
         }
 
