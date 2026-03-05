@@ -49,8 +49,7 @@ public abstract class AbstractSignal<TInput, TOutput>
 
     internal IDisposable ReceiveWithId(Guid receiverId, Func<TInput, TOutput> callback)
     {
-        _subscribers.TryRemove(receiverId, out _);
-        _subscribers.TryAdd(receiverId, callback);
+        _subscribers.AddOrUpdate(receiverId, callback, (_, _) => callback);
         return Disposable.Create(() =>
         {
             _subscribers.TryRemove(receiverId, out _);
