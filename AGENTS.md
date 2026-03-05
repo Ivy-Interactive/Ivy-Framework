@@ -17,6 +17,8 @@ Terminology:
 
 A view is defined as a class that inherits from `ViewBase` and implements a `Build` method. The `Build` method returns either another view or a widget.
 
+> WARNING: There is NO `AppBase` class. ALL views and apps inherit from `ViewBase`.
+
 Widgets can have multiple children, but views can only return a single object (widget or view). To return multiple widgets from a view, you can use a `Fragment` use the Layout helpers. See below.
 
 public class MyView : ViewBase
@@ -215,6 +217,8 @@ var iconsState = this.UseState<Icons[]>();
 If you don't specify a value, default(T) is used.
 
 UseState hook returns a state object IState<T> that provides:
+
+> WARNING: UseState returns `IState<T>`, NOT `State<T>`. There is no `State<T>` type in Ivy.
 
 - .Value property to read the current state.
 - .Set(newValue) method to update the state in UseEffect or in an event handler.
