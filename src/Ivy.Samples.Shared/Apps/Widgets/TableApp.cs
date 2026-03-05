@@ -85,7 +85,7 @@ public class TableSizesExample : ViewBase
                 .ToTable().Small()
                 .Builder(e => e.Url, e => e.Link())
                 .Width(Size.Full())
-                .MultiLine(e => e.Name)
+                .Multiline(e => e.Name)
                 // Add explicit column widths to test overflow
                 .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
                 .ColumnWidth(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
@@ -98,7 +98,7 @@ public class TableSizesExample : ViewBase
                 .ToTable()
                 .Builder(e => e.Url, e => e.Link())
                 .Width(Size.Full())
-                .MultiLine(e => e.Name)
+                .Multiline(e => e.Name)
                 // Add explicit column widths to test overflow
                 .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
                 .ColumnWidth(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
@@ -111,7 +111,7 @@ public class TableSizesExample : ViewBase
                 .ToTable().Large()
                 .Builder(e => e.Url, e => e.Link())
                 .Width(Size.Full())
-                .MultiLine(e => e.Name)
+                .Multiline(e => e.Name)
                 // Add explicit column widths to test overflow
                 .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
                 .ColumnWidth(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  

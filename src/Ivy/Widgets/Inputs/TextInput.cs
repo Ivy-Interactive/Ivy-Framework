@@ -165,6 +165,9 @@ public static class TextInputExtensions
 
     public static TextInputBase Variant(this TextInputBase widget, TextInputVariants variant) => widget with { Variant = variant };
 
+    public static TextInputBase Multiline(this TextInputBase widget, bool multiline = true)
+        => widget with { Variant = multiline ? TextInputVariants.Textarea : TextInputVariants.Text };
+
     public static TextInputBase Invalid(this TextInputBase widget, string invalid) => widget with { Invalid = invalid };
 
     public static TextInputBase Nullable(this TextInputBase widget, bool? nullable = true)

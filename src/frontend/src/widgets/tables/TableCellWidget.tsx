@@ -16,7 +16,7 @@ interface TableCellWidgetProps {
   isFooter?: boolean;
   align: Align;
   width?: string;
-  multiLine?: boolean;
+  multiline?: boolean;
   children?: React.ReactNode;
 }
 
@@ -47,7 +47,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   isFooter,
   align,
   width,
-  multiLine,
+  multiline,
 }) => {
   const cellStyles = {
     ...getWidth(width),
@@ -59,12 +59,12 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
     <div
       className={cn(
         'align-middle force-text-inherit',
-        multiLine && 'whitespace-normal wrap-break-word',
-        !multiLine && 'min-w-0'
+        multiline && 'whitespace-normal wrap-break-word',
+        !multiline && 'min-w-0'
       )}
       style={textAlignStyle}
     >
-      {!multiLine ? (
+      {!multiline ? (
         <span
           className="inline-block overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
           style={textAlignStyle}
@@ -85,7 +85,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
 
   // Only show tooltip for string/number children to avoid "[object Object]" issues
   const shouldShowTooltip =
-    !multiLine &&
+    !multiline &&
     (typeof children === 'string' || typeof children === 'number');
 
   const cellClasses = cn('border-border force-text-inherit', {

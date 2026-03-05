@@ -58,7 +58,7 @@ Mark specific fields as multi-line for better text display. This is perfect for 
 ```csharp demo-tabs
 new { Name = "Widget", Description = "Long description text" }
     .ToDetails()
-    .MultiLine(x => x.Description)
+    .Multiline(x => x.Description)
 ```
 
 ## Custom Builders

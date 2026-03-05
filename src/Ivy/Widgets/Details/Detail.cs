@@ -8,10 +8,10 @@ namespace Ivy;
 /// </summary>
 public record Detail : WidgetBase<Detail>
 {
-    public Detail(string? label, object? value, bool multiLine) : base(value != null ? [value] : [])
+    public Detail(string? label, object? value, bool multiline) : base(value != null ? [value] : [])
     {
         Label = label;
-        MultiLine = multiLine;
+        Multiline = multiline;
     }
 
     internal Detail()
@@ -20,7 +20,7 @@ public record Detail : WidgetBase<Detail>
 
     [Prop] public string? Label { get; set; }
 
-    [Prop] public bool MultiLine { get; set; }
+    [Prop] public bool Multiline { get; set; }
 
     public static Detail operator |(Detail widget, object child)
     {
