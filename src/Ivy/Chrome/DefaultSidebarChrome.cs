@@ -468,6 +468,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 footer
             ),
             settings.Width
-        ).MainAppSidebar(true);
+        ).Open(settings.SidebarOpen).MainAppSidebar(true);
     }
 }
