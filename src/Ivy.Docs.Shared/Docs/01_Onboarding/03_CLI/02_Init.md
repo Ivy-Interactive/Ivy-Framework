@@ -137,8 +137,8 @@ YourProject/
 The main [entry point](../02_Concepts/01_Program.md) for your Ivy project:
 
 ```csharp
-CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 var server = new Server();
+server.UseCulture("en-US");
 #if !DEBUG
 server.UseHttpRedirection();
 #endif

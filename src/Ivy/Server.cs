@@ -166,6 +166,14 @@ public class Server
         return this;
     }
 
+    public Server UseCulture(string cultureName)
+    {
+        var culture = new System.Globalization.CultureInfo(cultureName);
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+        return this;
+    }
+
     public Server UseConfiguration(IConfiguration configuration)
     {
         Configuration = configuration;
