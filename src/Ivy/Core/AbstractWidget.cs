@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using Ivy.Core.Helpers;
@@ -7,7 +9,7 @@ namespace Ivy.Core;
 public abstract record AbstractWidget : IWidget
 {
     private string? _id;
-    private readonly Dictionary<(Type, string), object?> _attachedProps = new();
+    private readonly ConcurrentDictionary<(Type, string), object?> _attachedProps = new();
 
 #if DEBUG
     /// <summary>
@@ -38,6 +40,7 @@ public abstract record AbstractWidget : IWidget
         return _attachedProps.GetValueOrDefault((t, name));
     }
 
+    [ScaffoldColumn(false)]
     public string? Id
     {
         get
@@ -51,12 +54,14 @@ public abstract record AbstractWidget : IWidget
         set => _id = value;
     }
 
+    [ScaffoldColumn(false)]
     public string? Key { get; set; }
 
     public string? Path { get; set; }
 
     public CallSite? CallSite { get; set; }
 
+    [ScaffoldColumn(false)]
     public object[] Children { get; set; }
 
     public JsonNode Serialize() => WidgetSerializer.Serialize(this);
