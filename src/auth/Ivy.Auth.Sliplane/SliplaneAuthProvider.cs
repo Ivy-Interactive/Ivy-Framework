@@ -137,7 +137,9 @@ public class SliplaneAuthProvider : IAuthProvider
         }
     }
 
-    /// <summary>Get user info — Sliplane does not expose a user-info endpoint, so a basic placeholder is returned after token validation</summary>
+    /// <summary>
+    /// Get user info from Sliplane using the /v0/me endpoint.
+    /// </summary>
     public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         var token = authSession.AuthToken?.AccessToken;
@@ -146,23 +148,52 @@ public class SliplaneAuthProvider : IAuthProvider
 
         try
         {
-            // Verify token is valid by calling the projects API
-            using var request = new HttpRequestMessage(HttpMethod.Get, "https://ctrl.sliplane.io/v0/projects");
+            using var request = new HttpRequestMessage(HttpMethod.Get, "https://ctrl.sliplane.io/v0/me");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
+                return null;
+
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            if (root.ValueKind != JsonValueKind.Object ||
+                !root.TryGetProperty("user", out var user) ||
+                user.ValueKind != JsonValueKind.Object)
             {
+                _logger?.LogWarning("Sliplane /v0/me response did not contain a 'user' object. Raw response: {Json}", json);
                 return null;
             }
 
-            // Sliplane OAuth does not provide a user info endpoint.
-            // Return a placeholder — apps can override this by wrapping the provider.
+            var id = user.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.String
+                ? idProp.GetString()
+                : null;
+
+            var email = user.TryGetProperty("email", out var emailProp) && emailProp.ValueKind == JsonValueKind.String
+                ? emailProp.GetString()
+                : null;
+
+            var name = user.TryGetProperty("name", out var nameProp) && nameProp.ValueKind == JsonValueKind.String
+                ? nameProp.GetString()
+                : null;
+
+            var avatarUrl = user.TryGetProperty("avatarUrl", out var avatarProp) && avatarProp.ValueKind == JsonValueKind.String
+                ? avatarProp.GetString()
+                : null;
+
+            if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(email))
+            {
+                _logger?.LogWarning("Sliplane /v0/me user object did not contain id or email. Raw response: {Json}", json);
+                return null;
+            }
+
             return new UserInfo(
-                Id: "sliplane-user",
-                Email: "user@sliplane.io",
-                FullName: "Sliplane User",
-                AvatarUrl: null
+                Id: id ?? email ?? string.Empty,
+                Email: email ?? string.Empty,
+                FullName: name,
+                AvatarUrl: avatarUrl
             );
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
