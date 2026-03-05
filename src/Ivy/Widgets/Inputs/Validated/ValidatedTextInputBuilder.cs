@@ -33,6 +33,8 @@ public sealed class ValidatedTextInputBuilder : ViewBase
         _scale = scale;
     }
 
+    public TextInputVariants Variant => _variant;
+
     public ValidatedTextInputBuilder Placeholder(string placeholder) =>
         new(_state, _variant, placeholder, _disabled, _invalid, _nullable, _scale);
 
