@@ -119,6 +119,12 @@ public class FrontendApiClient
         return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
     }
 
+    public async Task<ClerkSignInResponse> RetrieveSignInAsync(string signInId, ClerkCredentials credentials, CancellationToken cancellationToken = default)
+    {
+        var response = await RequestAsync(HttpMethod.Get, $"client/sign_ins/{signInId}", credentials, cancellationToken: cancellationToken);
+        return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
+    }
+
     public async Task<ClerkSignInResponse> PrepareFirstFactorVerificationAsync(ClerkCredentials credentials, string origin, string signInId, string strategy, string redirectUrl, string? actionCompleteRedirectUrl, CancellationToken cancellationToken = default)
     {
         var formData = new Dictionary<string, string>
