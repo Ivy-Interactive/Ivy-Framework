@@ -1,7 +1,11 @@
-﻿namespace Ivy.Core.Apps;
+﻿using System.Reactive;
+
+namespace Ivy.Core.Apps;
 
 internal class ScopedAppRepository(IAppRepository inner, string targetId, AppDescriptor? overrideApp) : IAppRepository
 {
+    public IObservable<Unit> Reloaded => inner.Reloaded;
+
     public MenuItem[] GetMenuItems() => inner.GetMenuItems();
 
     public AppDescriptor GetAppOrDefault(string? id)

@@ -79,7 +79,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     menuItems.Set([]);
                 }
             }
-        }, [search]);
+        }, search, appRepository.Reloaded.ToTrigger());
 
         void OpenApp(NavigateArgs navigateArgs, bool replaceHistory = false)
         {

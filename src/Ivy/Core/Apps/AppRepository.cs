@@ -1,4 +1,5 @@
-
+using System.Reactive;
+using System.Reactive.Subjects;
 
 namespace Ivy.Core.Apps;
 
@@ -53,7 +54,10 @@ public class AppRepositoryGroup(string title) : IAppRepositoryGroup
 
 public class AppRepository : IAppRepository
 {
+    private readonly Subject<Unit> _reloaded = new();
     private readonly List<Func<AppDescriptor[]>> _factories = [];
+
+    public IObservable<Unit> Reloaded => _reloaded;
 
     private IAppRepositoryNode? Root { get; set; }
 
@@ -150,6 +154,8 @@ public class AppRepository : IAppRepository
                 }
             }
         }
+
+        _reloaded.OnNext(default);
     }
 
     private List<IAppRepositoryNode> GetAllLeafNodes(IAppRepositoryGroup group)
