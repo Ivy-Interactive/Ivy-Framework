@@ -88,12 +88,29 @@ const MultipleSelector = React.forwardRef<
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     const containerRef = React.useRef<HTMLSpanElement>(null);
+    const triggerWrapperRef = React.useRef<HTMLDivElement>(null);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
     const [open, setOpen] = React.useState(false);
+    const [openUpward, setOpenUpward] = React.useState(false);
     const [inputValue, setInputValue] = React.useState('');
     const measureRef = React.useRef<HTMLDivElement>(null);
     const [visibleCount, setVisibleCount] = React.useState(
       maxVisibleBadges ?? 1
     );
+
+    React.useEffect(() => {
+      if (open && triggerWrapperRef.current) {
+        requestAnimationFrame(() => {
+          if (!triggerWrapperRef.current) return;
+          const rect = triggerWrapperRef.current.getBoundingClientRect();
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const dropdownHeight = dropdownRef.current?.offsetHeight ?? 0;
+          setOpenUpward(spaceBelow < dropdownHeight + 8);
+        });
+      } else {
+        setOpenUpward(false);
+      }
+    }, [open]);
 
     React.useEffect(() => {
       if (maxVisibleBadges !== undefined) {
@@ -216,7 +233,7 @@ const MultipleSelector = React.forwardRef<
         )}
         {...commandProps}
       >
-        <div className="relative w-full">
+        <div ref={triggerWrapperRef} className="relative w-full">
           {maxVisibleBadges === undefined && value.length > 0 && (
             <div
               ref={measureRef}
@@ -375,7 +392,13 @@ const MultipleSelector = React.forwardRef<
             />
           </div>
           {open && defaultOptions.length > 0 && (
-            <div className="absolute w-full z-50 top-full mt-1 rounded-box border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+            <div
+              ref={dropdownRef}
+              className={cn(
+                'absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none animate-in',
+                openUpward ? 'bottom-full mb-1' : 'top-full mt-1'
+              )}
+            >
               <CommandGroup className="h-full overflow-auto max-h-[300px]">
                 {defaultOptions.map(option => {
                   const selected = isSelected(option);
@@ -412,7 +435,12 @@ const MultipleSelector = React.forwardRef<
             </div>
           )}
           {open && defaultOptions.length === 0 && emptyIndicator && (
-            <div className="absolute w-full z-50 top-full mt-1 rounded-box border bg-popover text-popover-foreground shadow-md outline-none p-2">
+            <div
+              className={cn(
+                'absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none p-2',
+                openUpward ? 'bottom-full mb-1' : 'top-full mt-1'
+              )}
+            >
               {emptyIndicator}
             </div>
           )}
