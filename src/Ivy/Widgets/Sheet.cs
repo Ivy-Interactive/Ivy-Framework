@@ -94,7 +94,8 @@ public static class SheetExtensions
             {
                 isOpen.Value = false;
                 return ValueTask.CompletedTask;
-            }, content, title, description) with { Side = side };
+            }, content, title, description) with
+            { Side = side };
 
             // Use Height for top/bottom, Width for left/right
             if (side is SheetSide.Top or SheetSide.Bottom)
@@ -141,7 +142,8 @@ public static class SheetExtensions
             var sheet = new Sheet(_ =>
             {
                 isOpen.Value = false;
-            }, layout, title, description) with { Side = side };
+            }, layout, title, description) with
+            { Side = side };
 
             // Use Height for top/bottom, Width for left/right
             if (side is SheetSide.Top or SheetSide.Bottom)
@@ -174,7 +176,8 @@ public class WithSheetView(Button trigger, Func<object> contentFactory, string? 
             {
                 isOpen.Value = false;
                 return ValueTask.CompletedTask;
-            }, contentFactory(), title, description) with { Side = side };
+            }, contentFactory(), title, description) with
+            { Side = side };
 
             // Use Height for top/bottom, Width for left/right
             if (side is SheetSide.Top or SheetSide.Bottom)
