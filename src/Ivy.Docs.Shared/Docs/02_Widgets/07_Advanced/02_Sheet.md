@@ -168,6 +168,42 @@ public class SheetWidthExamples : ViewBase
 }
 ```
 
+### Different Sides
+
+Sheets can slide in from any edge of the screen using the `side` parameter with `SheetSide` enum values: `Left`, `Right` (default), `Top`, or `Bottom`. For top/bottom sheets, the size parameter controls height instead of width.
+
+```csharp demo-tabs
+public class SheetSideExamples : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Horizontal().Gap(2)
+            | new Button("Left Sheet").WithSheet(
+                () => new Card("This sheet slides in from the left").Title("Left Side"),
+                title: "Left Sheet",
+                side: SheetSide.Left
+            )
+            | new Button("Right Sheet").WithSheet(
+                () => new Card("This sheet slides in from the right (default)").Title("Right Side"),
+                title: "Right Sheet",
+                side: SheetSide.Right
+            )
+            | new Button("Top Sheet").WithSheet(
+                () => new Card("This sheet slides in from the top").Title("Top Side"),
+                title: "Top Sheet",
+                width: Size.Rem(20),
+                side: SheetSide.Top
+            )
+            | new Button("Bottom Sheet").WithSheet(
+                () => new Card("This sheet slides in from the bottom").Title("Bottom Side"),
+                title: "Bottom Sheet",
+                width: Size.Rem(20),
+                side: SheetSide.Bottom
+            );
+    }
+}
+```
+
 ### Sheet with Navigation
 
 This example shows a sheet with internal navigation between multiple pages using [state management](../../03_Hooks/02_Core/03_UseState.md).

@@ -9,6 +9,7 @@ import {
 import { getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
+import './sheet.css';
 
 type SheetSide = 'left' | 'right' | 'top' | 'bottom';
 

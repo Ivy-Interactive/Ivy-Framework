@@ -10,9 +10,6 @@ using static Ivy.Views.Forms.FormHelpers;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// Specifies the side from which the sheet slides in.
-/// </summary>
 public enum SheetSide
 {
     Left,
@@ -79,9 +76,6 @@ public record Sheet : WidgetBase<Sheet>
 
 public static class SheetExtensions
 {
-    /// <summary>
-    /// Sets the side from which the sheet slides in.
-    /// </summary>
     public static Sheet Side(this Sheet sheet, SheetSide side) => sheet with { Side = side };
 
     public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
