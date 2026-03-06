@@ -2,6 +2,7 @@
 
 using System.ComponentModel;
 using Ivy.Shared;
+using Ivy.Widgets.Inputs;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -14,6 +15,7 @@ public class SelectInputApp : SampleBase
             new Tab("Basic", new SelectInputBasicExample()),
             new Tab("Sizes", new SelectInputSizesExample()),
             new Tab("Variants", new SelectInputVariantsExample()),
+            new Tab("Disabled Options", new SelectInputDisabledOptionsExample()),
             new Tab("Nullable & Edge Cases", new SelectInputAdvancedExample()),
             new Tab("Advanced Props", new SelectInputAdvancedPropsExample()),
             new Tab("Ghost", new SelectInputGhostExample())
@@ -180,6 +182,50 @@ public class SelectInputVariantsExample : ViewBase
                 | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariants.Toggle).Invalid("Invalid")
                 | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariants.Toggle).Placeholder("Select colors")
                 | Text.InlineCode($"[{string.Join(", ", colorStateToggle.Value)}]"));
+    }
+}
+
+public class SelectInputDisabledOptionsExample : ViewBase
+{
+    public override object? Build()
+    {
+        var fruitState = UseState("apple");
+        var colorState = UseState<string[]>([]);
+
+        var fruitOptions = new IAnyOption[]
+        {
+            new Option<string>("Apple", "apple"),
+            new Option<string>("Orange", "orange"),
+            new Option<string>("Grape (Out of Stock)", "grape").Disabled(),
+            new Option<string>("Banana", "banana"),
+            new Option<string>("Mango (Coming Soon)", "mango").Disabled(),
+        };
+
+        var colorOptions = new IAnyOption[]
+        {
+            new Option<string>("Red", "red"),
+            new Option<string>("Green", "green"),
+            new Option<string>("Blue (Premium)", "blue").Disabled(),
+            new Option<string>("Yellow", "yellow"),
+            new Option<string>("Purple (Unavailable)", "purple").Disabled(),
+        };
+
+        return Layout.Vertical()
+            | Text.H3("Disabled Options")
+            | Text.P("Individual options can be disabled using the fluent .Disabled() method. Disabled options appear greyed out and cannot be selected.")
+            | Layout.Grid().Columns(3).Gap(6)
+                | (Layout.Vertical().Gap(2)
+                    | Text.InlineCode("Select Variant")
+                    | fruitState.ToSelectInput(fruitOptions)
+                        .Placeholder("Select a fruit..."))
+                | (Layout.Vertical().Gap(2)
+                    | Text.InlineCode("List Variant")
+                    | colorState.ToSelectInput(colorOptions)
+                        .Variant(SelectInputVariants.List))
+                | (Layout.Vertical().Gap(2)
+                    | Text.InlineCode("Toggle Variant")
+                    | colorState.ToSelectInput(colorOptions)
+                        .Variant(SelectInputVariants.Toggle));
     }
 }
 

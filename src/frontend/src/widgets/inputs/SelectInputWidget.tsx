@@ -75,6 +75,7 @@ interface Option {
   value: string | number;
   label: string;
   group?: string;
+  disabled?: boolean;
 }
 
 interface SelectInputWidgetProps {
@@ -417,6 +418,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 const isDisabled =
                   disabled ||
                   loading ||
+                  option.disabled ||
                   (!isSelected && isAtMax) ||
                   (isSelected &&
                     minSelections != null &&
@@ -448,6 +450,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 const isDisabled =
                   disabled ||
                   loading ||
+                  option.disabled ||
                   (!isSelected && isAtMax) ||
                   (isSelected &&
                     minSelections != null &&
@@ -558,11 +561,13 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
             data-testid={dataTestId}
           >
             {validOptions.map(option => {
+              const isOptionDisabled = disabled || option.disabled;
               return (
                 <div key={option.value} className="flex items-center space-x-2">
                   <RadioGroupItem
                     value={option.value.toString()}
                     id={`${id}-${option.value}`}
+                    disabled={isOptionDisabled}
                     className={cn(
                       'border-input text-input',
                       circleSizeVariants[scale],
@@ -571,7 +576,8 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                         : undefined,
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput
-                        : undefined
+                        : undefined,
+                      isOptionDisabled && 'opacity-50 cursor-not-allowed'
                     )}
                   />
                   <Label
@@ -581,7 +587,8 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                       selectTextVariants[scale],
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput
-                        : undefined
+                        : undefined,
+                      isOptionDisabled && 'opacity-50 cursor-not-allowed'
                     )}
                   >
                     {option.label}
@@ -791,6 +798,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 const isDisabled =
                   disabled ||
                   loading ||
+                  option.disabled ||
                   (!isSelected && isAtMax) ||
                   (isSelected &&
                     minSelections != null &&
@@ -955,6 +963,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
       disable:
         disabled ||
         loading ||
+        option.disabled ||
         (isAtMax && !selectedValues.includes(option.value.toString())),
     }));
   }, [validOptions, selectedValues, maxSelections, disabled, loading]);
@@ -1265,7 +1274,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                       key={option.value}
                       value={option.value.toString()}
                       scale={scale}
-                      disabled={disabled || loading}
+                      disabled={disabled || loading || option.disabled}
                     >
                       {option.label}
                     </SelectItem>
