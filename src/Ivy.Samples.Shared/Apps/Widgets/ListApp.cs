@@ -41,18 +41,13 @@ public class ListBlade : ViewBase
             var newIds = e.Value;
             var currentProducts = filteredProducts.Value;
 
-            Console.WriteLine($"[ListApp] onReorder Triggered!");
-            Console.WriteLine($"[ListApp] Expected Length = {currentProducts.Length}, Received Length = {newIds.Length}");
-            Console.WriteLine($"[ListApp] Received Payload: [{string.Join(", ", newIds)}]");
-            Console.WriteLine($"[ListApp] Current Products: [{string.Join(", ", currentProducts.Select(p => p.Email))}]");
+
 
             var newProducts = newIds
                 .Select(id => currentProducts.FirstOrDefault(p => p.Email == id))
                 .Where(p => p != null)
                 .Cast<User>()
                 .ToArray();
-
-            Console.WriteLine($"[ListApp] Matched Products Length = {newProducts.Length}");
 
             filteredProducts.Set(newProducts);
         });
