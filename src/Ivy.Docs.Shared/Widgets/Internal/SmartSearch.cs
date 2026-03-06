@@ -1,17 +1,28 @@
+using Ivy.Apps;
+using Ivy.Chrome;
 using Ivy.Docs.Shared.Services;
 
-namespace Ivy.Docs.Shared.Helpers;
+namespace Ivy.Docs.Shared.Widgets.Internal;
 
+/// <summary>
+/// Docs-internal widget: smart search (slots for search input, ask button, overlay trigger, etc.).
+/// </summary>
 public record SmartSearch(params object?[] children) : WidgetBase<SmartSearch>(children.Where(c => c != null).Cast<object>().ToArray())
 {
     internal SmartSearch() : this([]) { }
 }
 
+/// <summary>
+/// Docs-internal view: smart search (overlay + answer sheet).
+/// </summary>
 public class SmartSearchView : ViewBase
 {
     public override object? Build()
     {
         var questionsClient = UseService<IIvyDocsQuestionsClient>();
+        var appRepository = UseService<IAppRepository>();
+        var navigator = Context.UseNavigation();
+        var overlayOpen = UseState(false);
         var inputState = UseState("");
         var queryQuestion = UseState(() => (string?)null);
         var resultForQuestion = UseState(() => (string?)null);
@@ -97,7 +108,6 @@ public class SmartSearchView : ViewBase
             }
             else if (query.Value is { } result)
             {
-                // Use the same Chat view for the first answer so it matches follow-up responses
                 var firstAnswerMessage = new ChatMessage(ChatSender.Assistant, new Markdown(result.Answer));
                 var allMessages = new[] { firstAnswerMessage }.Concat(followUpMessages.Value).ToArray();
                 resultsContent = new Chat(allMessages, OnFollowUpSend).Placeholder("Ask a follow-up question…");
@@ -122,10 +132,77 @@ public class SmartSearchView : ViewBase
             .TestId("docs-smart-search-ask");
 
         var clearInputButton = new Button("", _ => inputState.Set(""));
+        var openTrigger = new Button("", _ => overlayOpen.Set(true)).TestId("docs-smart-search-open-trigger");
+
+        var windowQuery = inputState.Value?.Trim() ?? "";
+        var allMenuItems = appRepository.GetMenuItems();
+        var flattened = allMenuItems.FlattenWithPath().ToList();
+        var suggestionItems = string.IsNullOrEmpty(windowQuery)
+            ? flattened.Take(10).Select(x => x.Item with { Path = string.IsNullOrEmpty(x.Path) ? null : x.Path }).ToList()
+            : flattened
+                .Select(x => new { x.Item, x.Path, Score = ChromeUtils.ItemMatchScore(x.Item, windowQuery) })
+                .Where(x => x.Score > 0)
+                .OrderByDescending(x => x.Score)
+                .ThenBy(x => x.Item.Label)
+                .Select(x => x.Item with { Path = string.IsNullOrEmpty(x.Path) ? null : x.Path })
+                .ToList();
+
+        var suggestionListItems = suggestionItems.Select(item =>
+        {
+            var tag = item.Tag?.ToString() ?? "";
+            return (object)new ListItem(
+                title: item.Label,
+                subtitle: item.Path,
+                icon: item.Icon,
+                tag: item.Tag,
+                onClick: (Action)(() =>
+                {
+                    if (!string.IsNullOrEmpty(tag))
+                        navigator.Navigate("app://" + tag);
+                    overlayOpen.Set(false);
+                }));
+        }).ToArray();
+
+        var overlayListOrPlaceholder = suggestionListItems.Length > 0
+            ? (object)new List(suggestionListItems)
+            : (object)Text.Muted("Type to search or pick a suggestion above.");
+
+        var overlayBottom = !string.IsNullOrEmpty(windowQuery)
+            ? (object)(Layout.Vertical().Gap(2)
+                | Text.P("Get an answer").Small().Muted()
+                | askButton)
+            : null;
+
+        var overlayContent = overlayBottom != null
+            ? (object)(Layout.Vertical().Gap(4)
+                | searchInput
+                | overlayListOrPlaceholder
+                | overlayBottom)
+            : (object)(Layout.Vertical().Gap(4)
+                | searchInput
+                | overlayListOrPlaceholder);
+
+        var overlayDialog = new Dialog(
+            _ => { overlayOpen.Set(false); return ValueTask.CompletedTask; },
+            new DialogHeader("Search"),
+            new DialogBody(overlayContent),
+            new DialogFooter()).Width(Size.Rem(36));
+
+        var baseSlots = new List<object>
+        {
+            new Slot("SearchInput", searchInput),
+            new Slot("AskButton", askButton),
+            new Slot("ClearInputButton", clearInputButton),
+            new Slot("OpenTrigger", openTrigger)
+        };
 
         if (queryQuestion.Value == null || resultsContent == null)
         {
-            return new SmartSearch([new Slot("SearchInput", searchInput), new Slot("AskButton", askButton), new Slot("ClearInputButton", clearInputButton)]);
+            if (!overlayOpen.Value)
+                return new SmartSearch(baseSlots.ToArray());
+            return new Fragment(
+                new SmartSearch(baseSlots.ToArray()),
+                overlayDialog);
         }
 
         var apiTitle = query.Value is { Title: { } t } && !string.IsNullOrWhiteSpace(t) ? t : null;
@@ -136,18 +213,19 @@ public class SmartSearchView : ViewBase
             followUpMessages.Set(Array.Empty<ChatMessage>());
             pendingFollowUp.Set(default(string?));
         }
-        var clearButton = new Button("Clear", _ => ClearResults());
 
-        var slots = new List<object>
-        {
-            new Slot("SearchInput", searchInput),
-            new Slot("AskButton", askButton),
-            new Slot("ClearInputButton", clearInputButton),
-            new Slot("ResultsContent", resultsContent),
-            new Slot("ClearButton", clearButton)
-        };
-        if (resultsHeader != null)
-            slots.Insert(3, new Slot("ResultsHeader", resultsHeader));
-        return new SmartSearch(slots.ToArray());
+        var sheetContent = resultsHeader != null
+            ? (object)(Layout.Vertical().Gap(4) | resultsHeader | resultsContent)
+            : (object)(Layout.Vertical().Gap(4) | resultsContent);
+
+        var answerSheet = new Sheet(
+            _ => { ClearResults(); return ValueTask.CompletedTask; },
+            sheetContent,
+            "Answer",
+            null).Width(Sheet.DefaultWidth);
+
+        return new Fragment(
+            new SmartSearch(baseSlots.ToArray()),
+            answerSheet);
     }
 }

@@ -81,6 +81,7 @@ import {
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
 import React from 'react';
+import { SmartSearchWidget } from '@/widgets/internal/SmartSearchWidget/SmartSearchWidget';
 
 export const widgetMap = {
   $loading: LoadingScreen,
@@ -223,20 +224,7 @@ export const widgetMap = {
   ),
 
   // Internal
-  'Ivy.SmartSearch': React.lazy(() =>
-    import('@/widgets/internal/SmartSearchWidget/SmartSearchWidget').then(
-      m => ({
-        default: m.SmartSearchWidget,
-      })
-    )
-  ),
-  'Ivy.Docs.Shared.Helpers.SmartSearch': React.lazy(() =>
-    import('@/widgets/internal/SmartSearchWidget/SmartSearchWidget').then(
-      m => ({
-        default: m.SmartSearchWidget,
-      })
-    )
-  ),
+  'Ivy.Docs.Shared.Widgets.Internal.SmartSearch': SmartSearchWidget,
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')
   ),

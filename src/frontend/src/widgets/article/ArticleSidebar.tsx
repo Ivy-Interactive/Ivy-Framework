@@ -1,9 +1,7 @@
 import { TableOfContents } from '@/widgets/article/TableOfContents';
 import { GitHubContributors } from '@/widgets/article/GitHubContributors';
 import { DocumentTools } from '@/widgets/article/DocumentTools';
-import { mcpPanelStore } from '@/widgets/internal/SmartSearchWidget/mcpPanelStore';
 import React, { useState } from 'react';
-import { useSyncExternalStore } from 'react';
 
 interface ArticleSidebarProps {
   articleRef: React.RefObject<HTMLElement | null>;
@@ -12,9 +10,6 @@ interface ArticleSidebarProps {
   title?: string;
   headings?: { id: string; text: string; level: number }[];
 }
-
-/** When panel uses more than this fraction of viewport, TOC is considered overlayed and hidden. */
-const TOC_OVERLAY_FRACTION = 0.5;
 
 export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
   articleRef,
@@ -26,15 +21,7 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
   const [tocLoading, setTocLoading] = useState(true);
   const [contributorsLoading, setContributorsLoading] = useState(true);
 
-  const { isOpen: mcpPanelOpen, panelWidthFraction } = useSyncExternalStore(
-    mcpPanelStore.subscribe,
-    mcpPanelStore.getState,
-    mcpPanelStore.getState
-  );
-
-  const tocOverlayedByPanel =
-    mcpPanelOpen && panelWidthFraction > TOC_OVERLAY_FRACTION;
-  const showSidebar = showToc && (!mcpPanelOpen || !tocOverlayedByPanel);
+  const showSidebar = showToc;
   const showContributors = !tocLoading && !contributorsLoading && showSidebar;
 
   if (!showSidebar) return null;

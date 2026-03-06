@@ -3,8 +3,6 @@ import { ArticleFooter } from '@/widgets/article/ArticleFooter';
 import { ArticleSidebar } from '@/widgets/article/ArticleSidebar';
 import { InternalLink } from '@/types/widgets';
 import React, { useRef } from 'react';
-import { useSyncExternalStore } from 'react';
-import { mcpPanelStore } from '@/widgets/internal/SmartSearchWidget/mcpPanelStore';
 
 interface ArticleWidgetProps {
   id: string;
@@ -36,24 +34,11 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
   const articleRef = useRef<HTMLElement>(null);
-  const { isOpen, panelWidthFraction } = useSyncExternalStore(
-    mcpPanelStore.subscribe,
-    mcpPanelStore.getState,
-    mcpPanelStore.getState
-  );
 
   return (
     <div
       className="flex flex-col gap-2 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative"
       data-docs-content-boundary
-      style={
-        isOpen && panelWidthFraction > 0
-          ? {
-              width: '100%',
-              maxWidth: `calc(100vw * (1 - ${panelWidthFraction}))`,
-            }
-          : undefined
-      }
     >
       <div className="flex flex-grow gap-8">
         <article ref={articleRef} className="w-full max-w-[48rem]">
