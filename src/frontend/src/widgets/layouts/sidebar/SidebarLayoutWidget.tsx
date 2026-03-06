@@ -251,9 +251,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         {resizable && isSidebarOpen && (
           <div
             className={cn(
-              'absolute top-0 right-0 w-1 h-full cursor-ew-resize group',
-              'hover:bg-primary/20 active:bg-primary/30',
-              isResizing && 'bg-primary/30'
+              'absolute top-0 right-0 w-1 h-full cursor-ew-resize group'
             )}
             onMouseDown={handleResizeStart}
             onTouchStart={handleResizeStart}
