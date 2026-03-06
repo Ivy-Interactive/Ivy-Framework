@@ -340,14 +340,7 @@ public class CellBuildersExample : ViewBase
 
 ### Progress Builder
 
-The `Progress()` builder renders numeric values as inline [progress](10_Progress.md) bars within table cells. This is useful for displaying completion percentages, download progress, or any numeric data that represents progress toward a goal.
-
-**Parameters:**
-- `min` - Minimum value (default: 0)
-- `max` - Maximum value (default: 100)
-- `color` - Explicit color for the progress bar
-- `format` - Format string to display the value (use `%d` for integer, `%f` for decimal)
-- `autoColor` - Automatically color based on percentage: green (>=75%), yellow (>=50%), orange (>=25%), red (<25%)
+The `Progress()` builder renders numeric values as inline [progress](10_Progress.md) bars within table cells.
 
 ```csharp demo-tabs
 public class ProgressBuilderExample : ViewBase
