@@ -15,7 +15,8 @@ public class SelectInputApp : SampleBase
             new Tab("Sizes", new SelectInputSizesExample()),
             new Tab("Variants", new SelectInputVariantsExample()),
             new Tab("Nullable & Edge Cases", new SelectInputAdvancedExample()),
-            new Tab("Advanced Props", new SelectInputAdvancedPropsExample())
+            new Tab("Advanced Props", new SelectInputAdvancedPropsExample()),
+            new Tab("Ghost", new SelectInputGhostExample())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -311,6 +312,41 @@ public class SelectInputAdvancedPropsExample : ViewBase
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow())
                         | fwNullableMultiToggle.ToSelectInput(options).Variant(SelectInputVariants.Toggle)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow()).Nullable(true)));
+    }
+}
+
+public class SelectInputGhostExample : ViewBase
+{
+    private enum Colors { Red, Green, Blue, Yellow }
+
+    public override object? Build()
+    {
+        var colorState = UseState(Colors.Red);
+        var colorArrayState = UseState<Colors[]>([Colors.Red, Colors.Blue]);
+        var colorOptions = typeof(Colors).ToOptions();
+
+        return Layout.Vertical()
+            | Text.H3("Ghost Styling")
+            | Text.P("Ghost styling removes borders and background fill, making the select blend into its surroundings.")
+            | Layout.Grid().Columns(2).Gap(6)
+                | (Layout.Vertical().Gap(2)
+                    | Text.InlineCode("Normal")
+                    | colorState.ToSelectInput(colorOptions))
+                | (Layout.Vertical().Gap(2)
+                    | Text.InlineCode("Ghost")
+                    | colorState.ToSelectInput(colorOptions).Ghost())
+                | (Layout.Vertical().Gap(2)
+                    | Text.InlineCode("Normal (List)")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariants.List))
+                | (Layout.Vertical().Gap(2)
+                    | Text.InlineCode("Ghost (List)")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariants.List).Ghost())
+                | (Layout.Vertical().Gap(2)
+                    | Text.InlineCode("Normal (Toggle)")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariants.Toggle))
+                | (Layout.Vertical().Gap(2)
+                    | Text.InlineCode("Ghost (Toggle)")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariants.Toggle).Ghost());
     }
 }
 

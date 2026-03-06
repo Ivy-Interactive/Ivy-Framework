@@ -56,6 +56,7 @@ interface AsyncSelectInputWidgetProps {
   loading?: boolean;
   invalid?: string;
   scale?: Scales;
+  ghost?: boolean;
 }
 
 export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
@@ -66,6 +67,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   invalid,
   loading,
   scale = Scales.Medium,
+  ghost = false,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -152,7 +154,8 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         onClick={handleSelect}
         className={cn(
           asyncSelectContainerVariants({ scale }),
-          invalid && inputStyles.invalidInput
+          invalid && inputStyles.invalidInput,
+          ghost && 'border-transparent shadow-none'
         )}
       >
         {wrappedDisplayValue}
