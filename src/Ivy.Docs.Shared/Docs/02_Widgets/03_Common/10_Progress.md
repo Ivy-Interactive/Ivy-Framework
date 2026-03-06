@@ -41,4 +41,36 @@ public class ProgressDemo : ViewBase
 }
 ```
 
+## Indeterminate Mode
+
+Use the `Indeterminate` property to display an animated progress bar when the completion percentage is unknown. This is useful for tasks like file uploads, API calls, or any operation where you can't determine the exact progress.
+
+```csharp demo-tabs
+public class IndeterminateProgressDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var isLoading = UseState(true);
+        var progress = UseState(0);
+
+        return Layout.Vertical(
+            // Basic indeterminate progress
+            new Progress().Indeterminate().Goal("Loading..."),
+
+            // Toggle between indeterminate and determinate
+            new Progress(progress.Value)
+                .Indeterminate(isLoading.Value)
+                .Goal(isLoading.Value ? "Syncing..." : $"{progress.Value}% Complete"),
+
+            Layout.Horizontal(
+                new Button("Toggle Loading", _ => isLoading.Set(!isLoading.Value)),
+                new Button("Set 50%", _ => progress.Set(50))
+            )
+        );
+    }
+}
+```
+
+The indeterminate animation respects the user's `prefers-reduced-motion` setting — when active, a static appearance is shown instead of the sliding animation.
+
 <WidgetDocs Type="Ivy.Progress" ExtensionTypes="Ivy.ProgressExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Progress.cs"/>

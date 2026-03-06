@@ -44,7 +44,31 @@ public class ProgressApp : SampleBase
                 | new Progress(100).Goal("Completed!")
 
             | Text.H2("Indeterminate Progress")
+            | Text.Label("Using null value (backward compatible):")
             | new Progress((int?)null).Goal("Loading...")
+
+            | Text.Label("Using explicit Indeterminate property:")
+            | new Progress().Indeterminate().Goal("Processing...")
+            | new Progress(50).Indeterminate().Goal("Syncing (50% before pause)...")
+
+            | Text.H2("Toggle Indeterminate Mode")
+            | BuildIndeterminateToggle()
+        ;
+    }
+
+    private object BuildIndeterminateToggle()
+    {
+        var isLoading = UseState(true);
+        var progress = UseState(25);
+
+        return Layout.Vertical()
+            | new Progress(progress.Value)
+                .Indeterminate(isLoading.Value)
+                .Goal(isLoading.Value ? "Waiting for server..." : $"{progress.Value}% Complete")
+            | Layout.Horizontal(
+                new Button(isLoading.Value ? "Stop Loading" : "Start Loading", _ => isLoading.Set(!isLoading.Value)),
+                new Button("+10%", _ => progress.Set(Math.Min(100, progress.Value + 10)))
+            )
         ;
     }
 }

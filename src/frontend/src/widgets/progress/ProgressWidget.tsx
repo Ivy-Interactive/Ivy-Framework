@@ -11,6 +11,7 @@ interface ProgressWidgetProps {
   value?: number;
   color?: string;
   width?: string;
+  indeterminate?: boolean;
 }
 
 const SparkleStyles = () => (
@@ -46,8 +47,10 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   goal,
   color,
   width = 'Full',
+  indeterminate = false,
 }) => {
-  const isCompleted = value && value >= 100;
+  const isIndeterminate = indeterminate || value === null || value === undefined;
+  const isCompleted = !isIndeterminate && value && value >= 100;
 
   const containerStyles: React.CSSProperties = {
     ...getWidth(width),
@@ -82,7 +85,7 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
             )}
           </Badge>
         )}
-        <Progress value={value} className="bg-neutral/10" />
+        <Progress value={isIndeterminate ? undefined : value} indeterminate={isIndeterminate} className="bg-neutral/10" />
       </div>
     </>
   );
