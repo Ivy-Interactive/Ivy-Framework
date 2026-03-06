@@ -225,3 +225,26 @@ public class MyApp : ViewBase
     }
 }
 ```
+
+## How do I show an alert dialog to the user?
+
+Use the `UseAlert` hook, which returns a tuple of `(alertView, showAlert)`:
+
+```csharp
+var (alertView, showAlert) = UseAlert();
+
+return Layout.Vertical()
+    | new Button("Show Alert", _ =>
+        showAlert("Are you sure?", result =>
+        {
+            // result is the AlertResult (Ok, Cancel, Yes, No)
+        }, "Confirmation", AlertButtonSet.OkCancel))
+    | alertView; // IMPORTANT: alertView must be included in the view tree
+```
+
+**Key points:**
+- `UseAlert()` returns a **tuple**, not an object — always destructure it
+- `showAlert` is a delegate: `showAlert(message, callback, title?, buttonSet?)`
+- `alertView` must be rendered somewhere in your view tree for the dialog to appear
+- Available button sets: `AlertButtonSet.Ok`, `AlertButtonSet.OkCancel`, `AlertButtonSet.YesNo`, `AlertButtonSet.YesNoCancel`
+- For simple toast notifications, use `client.Toast("message")` or `client.Error("message")` via `IClientProvider`
