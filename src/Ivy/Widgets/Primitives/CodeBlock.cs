@@ -50,6 +50,8 @@ public record CodeBlock : WidgetBase<CodeBlock>
 
     [Prop] public bool ShowBorder { get; set; } = true;
 
+    [Prop] public bool WrapLines { get; set; }
+
 }
 
 public static class CodeBlockExtensions
@@ -82,6 +84,11 @@ public static class CodeBlockExtensions
     public static CodeBlock ShowBorder(this CodeBlock code, bool showBorder = true)
     {
         return code with { ShowBorder = showBorder };
+    }
+
+    public static CodeBlock WrapLines(this CodeBlock code, bool wrapLines = true)
+    {
+        return code with { WrapLines = wrapLines };
     }
 
 }

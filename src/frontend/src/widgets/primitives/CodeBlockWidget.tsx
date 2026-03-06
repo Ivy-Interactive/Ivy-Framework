@@ -18,6 +18,7 @@ interface CodeWidgetProps {
   showLineNumbers?: boolean;
   startingLineNumber?: number;
   showBorder?: boolean;
+  wrapLines?: boolean;
   width?: string;
   height?: string;
   scale?: Scales;
@@ -65,6 +66,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     showLineNumbers = false,
     startingLineNumber = 1,
     showBorder = true,
+    wrapLines = false,
     width = 'Full',
     height = 'MaxContent,,Px:800',
     scale = Scales.Medium,
@@ -129,8 +131,8 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
 
     const highlighterKey = useMemo(
       () =>
-        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}`,
-      [id, language, showLineNumbers, showBorder, startingLineNumber]
+        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}-${wrapLines}`,
+      [id, language, showLineNumbers, showBorder, startingLineNumber, wrapLines]
     );
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
@@ -145,7 +147,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         }
       : { ...getWidth(width) };
 
-    const shouldWrap = true;
+    const shouldWrap = wrapLines;
 
     return (
       <div className="relative" style={containerStyles}>

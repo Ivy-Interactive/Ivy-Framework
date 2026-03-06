@@ -51,6 +51,16 @@ Layout.Vertical()
       .Language(Languages.Csharp)
 ```
 
+## Wrap Lines
+
+Use `WrapLines` to enable wrapping of long lines within the code block. This improves readability for code with long lines, especially in constrained layouts. By default, long lines require horizontal scrolling.
+
+```csharp demo-tabs
+Layout.Vertical()
+    | new CodeBlock(@"public class Example { public void VeryLongMethodName(string parameter1, int parameter2, bool parameter3) { Console.WriteLine(""This is a very long line that will wrap instead of requiring horizontal scrolling.""); } }")
+      .WrapLines()
+      .Language(Languages.Csharp)
+```
 
 <WidgetDocs Type="Ivy.CodeBlock" ExtensionTypes="Ivy.CodeBlockExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/CodeBlock.cs"/>
 
