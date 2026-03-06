@@ -65,7 +65,7 @@ public class PasswordCaptureDemo: ViewBase
 }
 ```
 
-### TextArea
+### Textarea
 
 When a multiline text is needed, `TextInputVariants.Textarea` variant should be used. A common use-case is for capturing address
 that typically spans over multiple lines. The following demo shows how to use it.
@@ -306,7 +306,7 @@ public class DataCaptureUsingExtensionDemo: ViewBase
                      .Placeholder("Mobile")
                      .WithField()
                      .Label("Mobile")
-                | address.ToTextAreaInput()
+                | address.ToTextareaInput()
                          .Placeholder("Address Line1\nAddress Line2\nAddress Line 3")
                          .Height(40)
                          .Width(100)

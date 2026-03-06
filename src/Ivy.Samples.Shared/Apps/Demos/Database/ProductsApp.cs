@@ -299,7 +299,7 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
         return productQuery.Value!
             .ToForm()
             .Builder(e => e.Rating, e => e.ToFeedbackInput())
-            .Builder(e => e.Description, e => e.ToTextAreaInput())
+            .Builder(e => e.Description, e => e.ToTextareaInput())
             .Place(e => e.Name, e => e.DepartmentId) // Place will specify the order of the fields
             .PlaceHorizontal(e => e.Width, e => e.Height) // This will place the fields side by side - useful for related fields
             .Group("Details", open: true, e => e.Description, e => e.Meta) // This will group the fields in a collapsible group that is open by default - useful for related fields that are less common

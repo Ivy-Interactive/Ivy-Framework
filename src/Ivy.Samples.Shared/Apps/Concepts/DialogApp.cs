@@ -100,7 +100,7 @@ public class CreateDialogExample : ViewBase
                    .ToForm()
                    .HandleSubmit(OnSubmit)
                    .Builder(e => e.Name, e => e.ToTextInput().Placeholder("Enter item name"))
-                   .Builder(e => e.Description, e => e.ToTextAreaInput().Placeholder("Enter description"))
+                   .Builder(e => e.Description, e => e.ToTextareaInput().Placeholder("Enter description"))
                    .Builder(e => e.Category, e => e.ToTextInput().Placeholder("Enter category"))
                    .ToDialog(isOpen, title: "Create New Item", description: "Fill in the details below to create a new item.", submitTitle: "Create", width: Size.Units(200));
     }
@@ -136,7 +136,7 @@ public class ExitCommentDialogExample : ViewBase
                        new DialogBody(
                            Layout.Vertical().Gap(3)
                            | Text.P("Please share your feedback or reason for leaving:")
-                           | comment.ToTextAreaInput()
+                           | comment.ToTextareaInput()
                                .Placeholder("Enter your comment here...")
                                .Height(Size.Units(100))
                        ),

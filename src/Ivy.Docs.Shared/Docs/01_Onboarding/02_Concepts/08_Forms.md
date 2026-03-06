@@ -123,7 +123,7 @@ public class CustomInputsExample : ViewBase
         var tagOptions = new[] { "Electronics", "Clothing", "Books", "Home", "Sports", "Food" }.ToOptions();
         
         return product.ToForm()
-            .Builder(m => m.Description, s => s.ToTextAreaInput())
+            .Builder(m => m.Description, s => s.ToTextareaInput())
             .Builder(m => m.JsonConfig, s => s.ToCodeInput().Language(Languages.Json))
             .Builder(m => m.Tags, s => s.ToSelectInput(tagOptions))
             .Builder(m => m.ReleaseDate, s => s.ToDateTimeInput())

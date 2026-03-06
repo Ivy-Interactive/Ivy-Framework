@@ -137,7 +137,7 @@ public class FormSpacerView : ViewBase
                     | email.ToTextInput().Placeholder("Enter your email")
                     | new Spacer().Height(4)
                     | Text.Label("Message:")
-                    | message.ToTextAreaInput().Placeholder("Enter your message")
+                    | message.ToTextareaInput().Placeholder("Enter your message")
                     | new Spacer().Height(10)
                     | (Layout.Horizontal().Gap(3)
                         | new Button("Cancel").Variant(ButtonVariant.Outline)

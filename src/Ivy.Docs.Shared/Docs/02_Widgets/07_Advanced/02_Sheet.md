@@ -302,7 +302,7 @@ public class TaskFormSheet : ViewBase
         var (onSubmit, formView, validationView, loading) = UseForm(() => task.ToForm()
             .Required(m => m.Title, m => m.Description)
             .Builder(m => m.Status, s => s.ToSelectInput(new[] { "Todo", "In Progress", "Done" }.ToOptions()))
-            .Builder(m => m.Description, s => s.ToTextAreaInput())
+            .Builder(m => m.Description, s => s.ToTextareaInput())
             .Remove(m => m.Id));
         
         async ValueTask HandleSubmit()

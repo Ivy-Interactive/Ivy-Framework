@@ -147,7 +147,7 @@ public static class TextInputExtensions
         return input;
     }
 
-    public static TextInputBase ToTextAreaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Textarea);
+    public static TextInputBase ToTextareaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Textarea);
 
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Search);
 

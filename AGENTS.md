@@ -180,7 +180,7 @@ var userNameState = UseState("");
 var input = userNameState.ToTextInput().Placeholder("Enter your name");
 
 ToTextInput()
-ToTextAreaInput()
+ToTextareaInput()
 ToPasswordInput()
 ToNumberInput()
 ToBoolInput()
