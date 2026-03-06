@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 
 interface ListItemWidgetProps {
   id: string;
+  itemId?: string;
   title?: string;
   subtitle?: string;
   icon?: string;
@@ -14,6 +15,7 @@ interface ListItemWidgetProps {
 
 export const ListItemWidget: React.FC<ListItemWidgetProps> = ({
   id,
+  // itemId is used by parent ListWidget for reordering, not used here
   title,
   subtitle,
   icon,

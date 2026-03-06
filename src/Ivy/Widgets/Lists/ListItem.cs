@@ -59,9 +59,18 @@ public record ListItem : WidgetBase<ListItem>
     public object? Tag { get; } //not a prop!
 
     [Event] public EventHandler<Event<ListItem>>? OnClick { get; set; }
+
+    [Prop] public string? ItemId { get; set; }
 }
 
 public static class ListItemExtensions
 {
     public static ListItem Content(this ListItem listItem, object child) => listItem with { Children = [child] };
+
+    public static ListItem Key(this ListItem listItem, object key)
+    {
+        listItem.Key = key.ToString();
+        listItem.ItemId = key.ToString();
+        return listItem;
+    }
 }

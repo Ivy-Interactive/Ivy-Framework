@@ -183,7 +183,9 @@ public class SearchableListDemo : ViewBase
 
 ### Reorderable Lists
 
-Lists can be reordered by the user if the `Reorderable` property is set to `true`. You can listen to the `OnReorder` event to update the underlying state:
+Lists can be reordered by the user if the `Reorderable` property is set to `true`. You can listen to the `OnReorder` event to update the underlying state.
+
+When building a reorderable list, you should provide a unique `.Key()` to each item. If no ID/Key is provided, the list assigns temporary indices automatically, but this is not recommended for dynamic lists.
 
 ```csharp demo-tabs
 public class ReorderableListDemo : ViewBase
@@ -196,7 +198,7 @@ public class ReorderableListDemo : ViewBase
         // Handle reordering
         var onReorder = new Action<Event<List, string[]>>(e =>
         {
-            var newOrderIds = e.Value;
+            var newOrderIds = e.Value; // Contains the newly ordered IDs defined by .Key()
             var currentItems = items.Value;
             
             // Map the new IDs back to the original items
@@ -209,7 +211,8 @@ public class ReorderableListDemo : ViewBase
             items.Set(newItems);
         });
         
-        var listItems = items.Value.Select(item => new ListItem(item) { Id = item });
+        // Use .Key() to map the items to unique identifiers for drag-and-drop
+        var listItems = items.Value.Select(item => new ListItem(item).Key(item));
         
         return Layout.Vertical()
             | Text.P("Drag items to reorder them").Muted()

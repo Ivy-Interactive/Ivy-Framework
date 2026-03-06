@@ -142,6 +142,8 @@ const MemoizedWidget = memo(
       props.widgetNodeChildren = children.filter(
         child => child.type === 'Ivy.KanbanCard'
       );
+    } else if (node.type === 'Ivy.List') {
+      props.widgetNodeChildren = children;
     }
 
     const content = (

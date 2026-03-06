@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { WidgetNode } from '@/types/widgets';
 import {
   DndContext,
   closestCenter,
@@ -24,6 +25,7 @@ type ListWidgetProps = {
   id: string;
   children: React.ReactNode;
   reorderable?: boolean;
+  widgetNodeChildren?: WidgetNode[];
 };
 
 interface SortableItemProps {
@@ -69,25 +71,49 @@ export const ListWidget = ({
   id,
   children,
   reorderable = false,
+  widgetNodeChildren,
 }: ListWidgetProps) => {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const childArray = React.Children.toArray(children);
   const eventHandler = useEventHandler();
 
-  const getChildId = (child: React.ReactNode, index: number): string => {
-    if (React.isValidElement<{ id?: string }>(child) && child.props.id) {
-      return child.props.id;
+  const currentIds = childArray.map((child, index) => {
+    // Try to grab itemId organically from the raw backend payload first
+    if (widgetNodeChildren && widgetNodeChildren[index]) {
+      const nodeProps = widgetNodeChildren[index].props as { itemId?: string };
+      if (nodeProps?.itemId) {
+        return nodeProps.itemId;
+      }
+    }
+
+    // Fallback to React component props
+    if (React.isValidElement<{ id?: string; itemId?: string }>(child)) {
+      if (child.props.itemId) return child.props.itemId;
+      if (child.props.id) return child.props.id;
     }
     return `item-${index}`;
-  };
+  });
 
-  const initialItems = childArray.map((child, index) =>
-    getChildId(child, index)
-  );
-  const [items, setItems] = useState(initialItems);
+  const [prevIds, setPrevIds] = useState<string[]>([]);
+  const [items, setItems] = useState<string[]>([]);
+
+  if (
+    prevIds.length !== currentIds.length ||
+    prevIds.some((id, index) => id !== currentIds[index])
+  ) {
+    const nextItems = items.filter(id => currentIds.includes(id));
+    const newItems = currentIds.filter(id => !nextItems.includes(id));
+
+    setPrevIds(currentIds);
+    setItems([...nextItems, ...newItems]);
+  }
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -101,7 +127,12 @@ export const ListWidget = ({
         const oldIndex = prevItems.indexOf(active.id as string);
         const newIndex = prevItems.indexOf(over.id as string);
         const newItems = arrayMove(prevItems, oldIndex, newIndex);
-        eventHandler('OnReorder', id, [newItems]);
+
+        // Optimistically update the UI while server processes the reorder
+        setTimeout(() => {
+          eventHandler('OnReorder', id, [newItems]);
+        }, 0);
+
         return newItems;
       });
     }
@@ -117,8 +148,8 @@ export const ListWidget = ({
 
   if (reorderable) {
     const sortedChildren = items.map(itemId => {
-      const index = initialItems.indexOf(itemId);
-      return index >= 0 ? childArray[index] : null;
+      const originalIndex = currentIds.indexOf(itemId);
+      return originalIndex >= 0 ? childArray[originalIndex] : null;
     });
 
     return (
