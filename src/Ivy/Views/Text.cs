@@ -193,6 +193,11 @@ public static class Text
     }
 
     public static TextBuilder Display(IAnyState state) => Display(state.ToString() ?? "");
+
+    /// <summary>
+    /// Create a <see cref="RichTextBuilder"/> for composing inline text with mixed formatting.
+    /// </summary>
+    public static RichTextBuilder Rich() => new();
 }
 
 public class TextBuilder(string content, TextVariant variant, Languages codeLanguage = Languages.Csharp) : ViewBase, IStateless
