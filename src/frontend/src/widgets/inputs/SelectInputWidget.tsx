@@ -375,7 +375,8 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
       className={cn(
         selectContainerVariants({ scale }),
         invalid && 'border-destructive focus-within:ring-destructive',
-        ghost && 'border-transparent shadow-none'
+        ghost &&
+          'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
       )}
       style={styles}
     >
@@ -542,7 +543,8 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
       className={cn(
         selectContainerVariants({ scale }),
         invalid && 'border-destructive focus-within:ring-destructive',
-        ghost && 'border-transparent shadow-none'
+        ghost &&
+          'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
       )}
       style={styles}
     >
@@ -745,7 +747,8 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
       className={cn(
         'relative w-full border border-input bg-transparent rounded-box shadow-sm px-3 py-2 focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
         invalid && 'border-destructive focus-within:ring-destructive',
-        ghost && 'border-transparent shadow-none'
+        ghost &&
+          'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
       )}
       style={styles}
     >
@@ -1190,7 +1193,8 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
         'relative',
         invalid && inputStyles.invalidInput,
         !hasValue && 'text-muted-foreground',
-        ghost && 'border-transparent shadow-none'
+        ghost &&
+          'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground'
       )}
       scale={scale}
     >
