@@ -627,6 +627,19 @@ public class AppHub(
                 return;
             }
 
+            // Initialize the token handler
+            var httpContext = Context.GetHttpContext();
+            if (httpContext != null)
+            {
+                var requestScheme = httpContext.Request.Scheme;
+                if (httpContext.Request.Headers.TryGetValue("X-Forwarded-Proto", out var forwardedProto))
+                {
+                    requestScheme = forwardedProto.ToString();
+                }
+
+                await handler.InitializeAsync(providerSession, requestScheme, httpContext.Request.Host.Value!, cancellationToken);
+            }
+
             var client = session.AppServices.GetRequiredService<IClientProvider>();
             var oauthLogger = session.AppServices.GetRequiredService<ILoggerFactory>()
                 .CreateLogger<OAuthTokenService>();

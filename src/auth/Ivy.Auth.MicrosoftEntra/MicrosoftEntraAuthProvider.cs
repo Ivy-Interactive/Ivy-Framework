@@ -29,13 +29,6 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
     {
     }
 
-    public Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
-    {
-        var baseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
-        SetBaseUrl(baseUrl);
-        return Task.CompletedTask;
-    }
-
     public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken)
         => throw new InvalidOperationException("Microsoft Entra login with email/password is not supported");
 

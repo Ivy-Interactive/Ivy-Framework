@@ -20,11 +20,6 @@ public static class AuthProviderHelpers
 
 public interface IAuthProvider : IAuthTokenHandler
 {
-    Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
-    {
-        return Task.CompletedTask;
-    }
-
     Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default);
 
     Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default);

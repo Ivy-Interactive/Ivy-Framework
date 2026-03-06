@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Ivy.Auth.Clerk.ApiClient;
 using Ivy.Auth.Clerk.ApiClient.Models;
+using Ivy.Core;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Ivy.Auth.Clerk;
@@ -11,6 +12,8 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
     protected HttpClient HttpClient;
     protected readonly string FrontendApiDomain;
     protected readonly bool IsProduction;
+    protected string? _origin = null;
+    protected string? _callbackBaseUrl = null;
 
     private ICollection<SecurityKey>? _signingKeys;
     private DateTime _signingKeysLastFetched = DateTime.MinValue;
@@ -20,6 +23,24 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
         HttpClient = new HttpClient();
         FrontendApiDomain = frontendApiDomain;
         IsProduction = isProduction;
+    }
+
+    public async Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    {
+        _origin = $"{requestScheme}://{requestHost}";
+        _callbackBaseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
+
+        var frontendClient = MakeFrontendApiClient(authSession);
+        if (IsProduction)
+        {
+            await frontendClient.GetEnvironmentAsync(cancellationToken: cancellationToken);
+            await GetClerkCredentialsAsync(authSession, includeSessionToken: true, cancellationToken: cancellationToken);
+        }
+        else
+        {
+            var credentials = await GetClerkCredentialsAsync(authSession, includeSessionToken: false, cancellationToken: cancellationToken);
+            await frontendClient.UpdateEnvironmentAsync(credentials, _origin, cancellationToken);
+        }
     }
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)

@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Ivy.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Protocols;
@@ -36,6 +37,13 @@ public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
             $"https://login.microsoftonline.com/{TenantId}/.well-known/openid-configuration",
             new OpenIdConnectConfigurationRetriever()
         );
+    }
+
+    public Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    {
+        var baseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
+        SetBaseUrl(baseUrl);
+        return Task.CompletedTask;
     }
 
     public void SetBaseUrl(string baseUrl)

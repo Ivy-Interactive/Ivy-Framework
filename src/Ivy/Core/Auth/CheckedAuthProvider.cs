@@ -8,14 +8,14 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
 {
     private readonly IAuthProvider _innerAuthProvider = innerAuthProvider;
 
-    public Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    public Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
-        authSession = authSession.WithCheckedAccess()
+        var providerSession = ((IAuthProviderSession)authSession).WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadWrite)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
             .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
-        return _innerAuthProvider.InitializeAsync(authSession, requestScheme, requestHost, cancellationToken);
+        return _innerAuthProvider.InitializeAsync(providerSession, requestScheme, requestHost, cancellationToken);
     }
 
     public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default)

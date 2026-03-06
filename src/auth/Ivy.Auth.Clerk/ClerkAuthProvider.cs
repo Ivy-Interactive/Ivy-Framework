@@ -22,8 +22,6 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     private readonly string _secretKey;
     private readonly List<AuthOption> _authOptions = [];
     private readonly BackendApiClient _backendClient;
-    private string? _origin = null;
-    private string? _callbackBaseUrl = null;
 
     public bool OpenOAuthLoginInNewTab => true;
 
@@ -116,24 +114,6 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
     private static bool IsSessionExistsError(ClerkException ex)
         => ex.Errors?.Any(e => e.Code == "session_exists") == true;
-
-    public async Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
-    {
-        _origin = $"{requestScheme}://{requestHost}";
-        _callbackBaseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
-
-        var frontendClient = MakeFrontendApiClient(authSession);
-        if (IsProduction)
-        {
-            await frontendClient.GetEnvironmentAsync(cancellationToken: cancellationToken);
-            await GetClerkCredentialsAsync(authSession, includeSessionToken: true, cancellationToken: cancellationToken);
-        }
-        else
-        {
-            var credentials = await GetClerkCredentialsAsync(authSession, includeSessionToken: false, cancellationToken: cancellationToken);
-            await frontendClient.UpdateEnvironmentAsync(credentials, _origin, cancellationToken);
-        }
-    }
 
 
     public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default)
