@@ -36,7 +36,20 @@ public class ListBlade : ViewBase
             blades.Push(this, new DetailsBlade(user), user.Name);
         });
 
-        ListItem CreateItem(User user) => new(title: user.Name, onClick: onItemClicked, tag: user, subtitle: user.Email, badge: user.Age.ToString());
+        var onReorder = new Action<Event<List, string[]>>(e =>
+        {
+            var newIds = e.Value;
+            var currentProducts = filteredProducts.Value;
+            var newProducts = newIds
+                .Select(id => currentProducts.FirstOrDefault(p => p.Email == id))
+                .Where(p => p != null)
+                .Cast<User>()
+                .ToArray();
+
+            filteredProducts.Set(newProducts);
+        });
+
+        ListItem CreateItem(User user) => new ListItem(title: user.Name, onClick: onItemClicked, tag: user, subtitle: user.Email, badge: user.Age.ToString()) { Id = user.Email };
 
         var items = filteredProducts.Value.Select(CreateItem);
 
@@ -52,7 +65,7 @@ public class ListBlade : ViewBase
 
         return new Fragment()
                | new BladeHeader(header)
-               | new List(items);
+               | new List(items).Reorderable().OnReorder(onReorder);
     }
 }
 

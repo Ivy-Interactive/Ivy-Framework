@@ -181,6 +181,45 @@ public class SearchableListDemo : ViewBase
 }
 ```
 
+### Reorderable Lists
+
+Lists can be reordered by the user if the `Reorderable` property is set to `true`. You can listen to the `OnReorder` event to update the underlying state:
+
+```csharp demo-tabs
+public class ReorderableListDemo : ViewBase
+{
+    public override object? Build()
+    {
+        // Initial items state
+        var items = UseState(new[] { "Apple", "Banana", "Cherry", "Date" });
+        
+        // Handle reordering
+        var onReorder = new Action<Event<List, string[]>>(e =>
+        {
+            var newOrderIds = e.Value;
+            var currentItems = items.Value;
+            
+            // Map the new IDs back to the original items
+            var newItems = newOrderIds
+                .Select(id => currentItems.FirstOrDefault(item => item == id))
+                .Where(item => item != null)
+                .Cast<string>()
+                .ToArray();
+                
+            items.Set(newItems);
+        });
+        
+        var listItems = items.Value.Select(item => new ListItem(item) { Id = item });
+        
+        return Layout.Vertical()
+            | Text.P("Drag items to reorder them").Muted()
+            | new List(listItems)
+                .Reorderable()
+                .OnReorder(onReorder);
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.List" ExtensionTypes="Ivy.WidgetBaseExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Lists/List.cs"/>
 
 ## Examples
