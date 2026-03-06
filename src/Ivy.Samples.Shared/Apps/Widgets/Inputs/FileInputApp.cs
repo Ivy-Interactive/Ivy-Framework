@@ -20,6 +20,7 @@ public class FileInputApp : SampleBase
                    new Tab("Size Variants", new FileInputSizeVariants()),
                    new Tab("Data Binding", new FileInputDataBinding()),
                    new Tab("Type Restrictions", new FileInputTypeRestrictions()),
+                   new Tab("File Size Limits", new FileInputFileSizeLimits()),
                    new Tab("Count Limits", new FileInputCountLimits()),
                    new Tab("Content Display", new FileInputContentDisplay()),
                    new Tab("Event Handlers", new FileInputEventHandlersExample()),
@@ -175,6 +176,45 @@ public class FileInputTypeRestrictions : ViewBase
                   | Text.Block("All Files")
                   | Text.InlineCode("(default)")
                   | singleLimitFile.ToFileInput(singleLimitFileUpload).Placeholder("Select any file")
+               );
+    }
+}
+
+public class FileInputFileSizeLimits : ViewBase
+{
+    public override object? Build()
+    {
+        var minSizeFile = UseState<FileUpload<byte[]>?>(() => null);
+        var maxSizeFile = UseState<FileUpload<byte[]>?>(() => null);
+        var rangeSizeFile = UseState<FileUpload<byte[]>?>(() => null);
+
+        var minSizeUpload = UseUpload(MemoryStreamUploadHandler.Create(minSizeFile))
+            .MinFileSize(1024); // 1 KB minimum
+        var maxSizeUpload = UseUpload(MemoryStreamUploadHandler.Create(maxSizeFile))
+            .MaxFileSize(5 * 1024 * 1024); // 5 MB maximum
+        var rangeSizeUpload = UseUpload(MemoryStreamUploadHandler.Create(rangeSizeFile))
+            .MinFileSize(1024)           // 1 KB minimum
+            .MaxFileSize(10 * 1024 * 1024); // 10 MB maximum
+
+        return Layout.Vertical()
+               | Text.H2("File Size Limits")
+               | Text.P("Control minimum and maximum file sizes using MinFileSize and MaxFileSize. Use MinFileSize to reject empty or trivially small files.")
+               | (Layout.Grid().Columns(3)
+                  | Text.InlineCode("Size Limit")
+                  | Text.InlineCode("Description")
+                  | Text.InlineCode("File Input")
+
+                  | Text.Block("Min 1 KB")
+                  | Text.Block("Reject files smaller than 1 KB (empty or trivial files)")
+                  | minSizeFile.ToFileInput(minSizeUpload).Placeholder("Minimum 1 KB")
+
+                  | Text.Block("Max 5 MB")
+                  | Text.Block("Reject files larger than 5 MB")
+                  | maxSizeFile.ToFileInput(maxSizeUpload).Placeholder("Maximum 5 MB")
+
+                  | Text.Block("1 KB - 10 MB")
+                  | Text.Block("Accept files between 1 KB and 10 MB")
+                  | rangeSizeFile.ToFileInput(rangeSizeUpload).Placeholder("Between 1 KB and 10 MB")
                );
     }
 }
