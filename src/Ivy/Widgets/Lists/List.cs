@@ -19,4 +19,15 @@ public record List : WidgetBase<List>
     internal List()
     {
     }
+
+    /// <summary>
+    /// Enables drag-and-drop reordering of list items.
+    /// </summary>
+    [Prop] public bool Reorderable { get; set; }
+
+    /// <summary>
+    /// Event fired when items are reordered via drag-and-drop.
+    /// The event value contains the ordered list of item IDs.
+    /// </summary>
+    [Event] public EventHandler<Event<List, string[]>>? OnReorder { get; set; }
 }
