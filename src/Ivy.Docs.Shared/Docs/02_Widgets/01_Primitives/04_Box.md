@@ -166,6 +166,51 @@ public class ColorExamplesView : ViewBase
 
 For more colors, see the [Colors](../../04_ApiReference/IvyShared/Colors.md) reference.
 
+### Click Events
+
+Boxes can be made interactive by attaching an `OnClick` event handler. When an `OnClick` handler is attached, the box automatically gains hover effects to indicate interactivity.
+
+```csharp demo-tabs
+public class ClickableBoxView : ViewBase
+{
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+
+        return new Box("Click me!")
+            .OnClick(_ => client.Toast("Box clicked!"))
+            .Padding(8)
+            .Width(Size.Fit());
+    }
+}
+```
+
+### Hover Effects
+
+Control the hover behavior of a Box using the `Hover()` extension method with `CardHoverVariant`. When using `OnClick`, a hover effect is automatically applied if none is set.
+
+```csharp demo-tabs
+public class HoverVariantView : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Horizontal().Gap(4)
+            | new Box("No Hover")
+                .Hover(CardHoverVariant.None)
+                .Padding(8)
+                .Width(Size.Fraction(1/3f))
+            | new Box("Pointer Only")
+                .Hover(CardHoverVariant.Pointer)
+                .Padding(8)
+                .Width(Size.Fraction(1/3f))
+            | new Box("Pointer + Translate")
+                .Hover(CardHoverVariant.PointerAndTranslate)
+                .Padding(8)
+                .Width(Size.Fraction(1/3f));
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.Box" ExtensionTypes="Ivy.BoxExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Box.cs"/>
 
 ## Examples
@@ -240,6 +285,46 @@ public class CardLayoutView : ViewBase
                     Text.P("Projects: 15"),
                     Text.P("Experience: 5 years")
                 );
+    }
+}
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Interactive Selection
+</Summary>
+<Body>
+Create clickable boxes for selection interfaces. This example demonstrates how to use `OnClick` and hover effects to build an interactive selection UI.
+
+```csharp demo-tabs
+public class InteractiveSelectionView : ViewBase
+{
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        var selected = UseState("Option A");
+
+        return Layout.Horizontal().Gap(4)
+            | CreateOption("Option A", selected, client)
+            | CreateOption("Option B", selected, client)
+            | CreateOption("Option C", selected, client);
+    }
+
+    private Box CreateOption(string label, IState<string> selected, IClientProvider client)
+    {
+        var isSelected = selected.Value == label;
+        return new Box(label)
+            .Color(isSelected ? Colors.Primary : Colors.Muted)
+            .BorderThickness(isSelected ? 2 : 1)
+            .OnClick(_ => {
+                selected.Set(label);
+                client.Toast($"Selected: {label}");
+            })
+            .Padding(8)
+            .Width(Size.Fraction(1/3f));
     }
 }
 ```
