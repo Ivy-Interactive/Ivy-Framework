@@ -6,6 +6,8 @@ searchHints:
   - side-panel
   - layout
   - aside
+  - resizable
+  - drag-to-resize
 ---
 
 # SidebarLayout
@@ -159,7 +161,7 @@ public class MainAppSidebarExample : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        
+
         return new SidebarLayout(
             mainContent: Layout.Vertical().Gap(4)
                 | new Card(
@@ -179,13 +181,63 @@ public class MainAppSidebarExample : ViewBase
             sidebarHeader: Layout.Vertical().Gap(2)
                 | Text.Lead("Workspace")
                 | new TextInput(placeholder: "Search...", variant: TextInputVariants.Search)
-        ); 
+        );
     }
 }
 ```
 
 <Callout Type="tip">
 "There is default padding of 2 in main content accessible via MainContentPadding by default."
+</Callout>
+
+### Resizable Sidebar
+
+You can make the sidebar resizable by users at runtime using the `.Resizable()` extension method. This adds a drag handle to the sidebar border that allows users to adjust the width:
+
+```csharp demo-tabs
+public class ResizableSidebarExample : ViewBase
+{
+    public override object? Build()
+    {
+        return new SidebarLayout(
+            mainContent: new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.P("Resizable Sidebar Demo").Large()
+                    | Text.P("Drag the sidebar border to resize it. The sidebar width is constrained between 200px and 600px by default.")
+            ).Title("Main Content"),
+            sidebarContent: Layout.Vertical().Gap(2)
+                | Text.P("Sidebar Content")
+                | Text.P("Drag the right edge to resize this sidebar.").Small().Color(Colors.Gray)
+        ).Resizable();
+    }
+}
+```
+
+You can customize the min/max constraints using the `Size` API with `.Min()` and `.Max()`:
+
+```csharp demo-tabs
+public class ResizableSidebarCustomConstraintsExample : ViewBase
+{
+    public override object? Build()
+    {
+        return new SidebarLayout(
+            mainContent: new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.P("Custom Constraints").Large()
+                    | Text.P("This sidebar has custom width constraints: 150px min, 400px max, starting at 250px.")
+            ).Title("Main Content"),
+            sidebarContent: Layout.Vertical().Gap(2)
+                | Text.P("Custom Width")
+                | Text.P("Min: 150px, Max: 400px").Small().Color(Colors.Gray)
+        )
+        .Width(Size.Px(250).Min(Size.Px(150)).Max(Size.Px(400)))
+        .Resizable();
+    }
+}
+```
+
+<Callout Type="tip">
+"The resize handle supports mouse drag, touch gestures, and keyboard navigation with arrow keys for accessibility."
 </Callout>
 
 ### SidebarMenu Widget
