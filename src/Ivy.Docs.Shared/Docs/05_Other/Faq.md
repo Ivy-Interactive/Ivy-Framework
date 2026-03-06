@@ -274,3 +274,35 @@ posts.ToDataTable()
 ```
 
 This also simplifies the DataTable configuration since you don't need to `.Hidden()` navigation properties or other fields you don't want displayed.
+
+## How do I show a delete confirmation before deleting an entity?
+
+Use `UseAlert()` for confirmation dialogs:
+
+```csharp
+var (alertView, showAlert) = UseAlert();
+var client = UseService<IClientProvider>();
+
+void DeleteItem(int id)
+{
+    showAlert("Are you sure you want to delete this item?", async result =>
+    {
+        if (result == AlertResult.Ok)
+        {
+            await using var db = dbFactory.CreateDbContext();
+            var item = await db.Items.FindAsync(id);
+            if (item != null)
+            {
+                db.Items.Remove(item);
+                await db.SaveChangesAsync();
+                client.Toast("Item deleted");
+                refreshToken.Refresh();
+            }
+        }
+    }, "Confirm Delete", AlertButtonSet.OkCancel);
+}
+
+return Layout.Vertical()
+    | new Button("Delete", _ => DeleteItem(itemId)).Destructive()
+    | alertView; // IMPORTANT: must include alertView in the view tree
+```
