@@ -7,7 +7,7 @@ public class MainApp : ViewBase
 {
     public override object? Build()
     {
-        var auth = UseService<IAuthService>();
+        var auth = UseService<IAuthProviderService>();
         var userInfo = UseState<UserInfo?>();
 
         UseEffect(async () =>
@@ -35,4 +35,3 @@ public class MainApp : ViewBase
         ).Gap(40).Padding(50).Align(Align.Center).Height(Size.Full());
     }
 }
-

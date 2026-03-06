@@ -16,4 +16,5 @@ public static class OAuthProviders
     public const string WorkOS = "workos";
     public const string GitLab = "gitlab";
     public const string Bitbucket = "bitbucket";
+    public const string Sliplane = "sliplane";
 }
