@@ -49,7 +49,7 @@ public static class AuthSessionExtensions
         return true;
     }
 
-    public static T? GetAuthSessionData<T>(this IAuthProviderSession authSession)
+    public static T? GetAuthSessionData<T>(this IAuthTokenHandlerSession authSession)
     {
         if (string.IsNullOrEmpty(authSession.AuthSessionData))
         {
@@ -61,7 +61,7 @@ public static class AuthSessionExtensions
             : JsonSerializer.Deserialize<T>(authSession.AuthSessionData, JsonHelper.DefaultOptions);
     }
 
-    public static void SetAuthSessionData<T>(this IAuthProviderSession authSession, T? data)
+    public static void SetAuthSessionData<T>(this IAuthTokenHandlerSession authSession, T? data)
     {
         if (data == null)
         {

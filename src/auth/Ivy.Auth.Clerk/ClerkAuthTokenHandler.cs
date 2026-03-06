@@ -91,17 +91,18 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
         }
         else
         {
-            if (authSession.AuthSessionData is { } devBrowserJwt && devBrowserJwt.StartsWith("dvb_"))
+            var sessionData = authSession.GetAuthSessionData<ClerkAuthSessionData>() ?? new();
+
+            if (sessionData.DevBrowserToken is { } devBrowserToken)
             {
-                credentials.DevBrowserToken = devBrowserJwt;
+                credentials.DevBrowserToken = devBrowserToken;
             }
             else
             {
-                authSession.AuthSessionData = null;
                 var devBrowserTokenResponse = await frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
-                devBrowserJwt = devBrowserTokenResponse.Id;
-                authSession.AuthSessionData = devBrowserJwt;
-                credentials.DevBrowserToken = devBrowserJwt;
+                sessionData.DevBrowserToken = devBrowserTokenResponse.Id;
+                authSession.SetAuthSessionData(sessionData);
+                credentials.DevBrowserToken = devBrowserTokenResponse.Id;
             }
         }
 

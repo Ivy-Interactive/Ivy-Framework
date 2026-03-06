@@ -213,6 +213,11 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
             signInResponse = await frontendClient.CreateSignInAsync(credentials, _origin, strategy, redirectUrl, null, cancellationToken);
         }
 
+        // Store the sign-in ID so we can retrieve status in the callback
+        var sessionData = authSession.GetAuthSessionData<ClerkAuthSessionData>() ?? new();
+        sessionData.PendingSignInId = signInResponse.Response!.Id;
+        authSession.SetAuthSessionData(sessionData);
+
         var firstFactorVerificationResponse = await frontendClient.PrepareFirstFactorVerificationAsync(credentials, _origin, signInResponse.Response!.Id, strategy, redirectUrl, null, cancellationToken);
 
         if (firstFactorVerificationResponse.Response?.FirstFactorVerification?.ExternalVerificationRedirectUrl is not { } oauthUri)
@@ -224,26 +229,68 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
-        var sessionId = request.Query["created_session_id"].ToString();
         var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
         var frontendClient = MakeFrontendApiClient(authSession);
+        var sessionId = request.Query["created_session_id"].ToString();
+        var sessionData = authSession.GetAuthSessionData<ClerkAuthSessionData>() ?? new();
+        if (sessionData?.PendingSignInId is not { } pendingSignInId)
+        {
+            throw new Exception("No pending sign-in found in OAuth callback.");
+        }
+
+        var signInStatus = await frontendClient.RetrieveSignInAsync(pendingSignInId, credentials, cancellationToken);
+        if (signInStatus.Response?.Status == "complete" && signInStatus.Response.CreatedSessionId is { } createdSessionId && createdSessionId != sessionId)
+        {
+            throw new Exception($"Session ID from query does not match session ID from sign-in status.");
+        }
+
+        if (signInStatus.Response?.Status == "needs_identifier" && signInStatus.Response.FirstFactorVerification?.Status == "transferable")
+        {
+            // TODO: sign up flow for new users
+            return null;
+        }
+
         try
         {
-            await frontendClient.TouchSessionAsync(sessionId, credentials, cancellationToken);
-            var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
-
-            if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: false, cancellationToken) == null)
+            if (string.IsNullOrEmpty(sessionId))
             {
-                throw new Exception("Failed to get new JWT from Clerk.");
+                Console.WriteLine($"[Clerk OAuth Callback] Sign-in ID: {pendingSignInId}");
+                Console.WriteLine($"[Clerk OAuth Callback] Status: {signInStatus.Response?.Status}");
+                Console.WriteLine($"[Clerk OAuth Callback] Created Session ID: {signInStatus.Response?.CreatedSessionId}");
+                Console.WriteLine($"[Clerk OAuth Callback] First Factor Status: {signInStatus.Response?.FirstFactorVerification?.Status}");
+
+                if (signInStatus.Response?.FirstFactorVerification?.Error is { } error)
+                {
+                    Console.WriteLine($"[Clerk OAuth Callback] Error Code: {error.Code}");
+                    Console.WriteLine($"[Clerk OAuth Callback] Error Message: {error.Message}");
+                    Console.WriteLine($"[Clerk OAuth Callback] Error Long Message: {error.LongMessage}");
+                }
+                return null;
             }
             else
             {
-                return new AuthToken(newToken.Jwt!);
+                await frontendClient.TouchSessionAsync(sessionId, credentials, cancellationToken);
+                var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
+
+                if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: false, cancellationToken) == null)
+                {
+                    throw new Exception("Failed to get new JWT from Clerk.");
+                }
+                else
+                {
+                    return new AuthToken(newToken.Jwt!);
+                }
             }
         }
         catch (Exception)
         {
             return null;
+        }
+        finally
+        {
+            // Clear the pending sign-in ID after handling the callback
+            sessionData.PendingSignInId = null;
+            authSession.SetAuthSessionData(sessionData);
         }
     }
 
