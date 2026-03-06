@@ -58,6 +58,8 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public bool Loading { get; set; }
 
+    [Prop] public bool Ghost { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
@@ -180,6 +182,8 @@ public static class SelectInputExtensions
     public static SelectInputBase EmptyMessage(this SelectInputBase widget, string message) => widget with { EmptyMessage = message };
 
     public static SelectInputBase Loading(this SelectInputBase widget, bool loading = true) => widget with { Loading = loading };
+
+    public static SelectInputBase Ghost(this SelectInputBase widget, bool ghost = true) => widget with { Ghost = ghost };
 
     public static SelectInputBase List(this SelectInputBase widget) => widget with { Variant = SelectInputVariants.List };
 
