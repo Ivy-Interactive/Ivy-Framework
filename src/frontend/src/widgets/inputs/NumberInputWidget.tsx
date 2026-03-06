@@ -312,7 +312,10 @@ const NumberVariant = memo(
               )}
               {/* Invalid icon - rightmost */}
               {invalid && (
-                <InvalidIcon message={invalid} className="pointer-events-auto" />
+                <InvalidIcon
+                  message={invalid}
+                  className="pointer-events-auto"
+                />
               )}
             </div>
           )}
