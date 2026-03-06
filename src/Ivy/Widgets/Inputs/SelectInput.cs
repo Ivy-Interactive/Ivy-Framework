@@ -11,6 +11,13 @@ using Ivy.Widgets.Inputs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public enum SearchMode
+{
+    CaseInsensitive,
+    CaseSensitive,
+    Fuzzy
+}
+
 public enum SelectInputVariants
 {
     Select,
@@ -38,6 +45,18 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
     [Prop] public char Separator { get; set; } = ';';
 
     [Prop] public bool Nullable { get; set; }
+
+    [Prop] public int? MaxSelections { get; set; }
+
+    [Prop] public int? MinSelections { get; set; }
+
+    [Prop] public bool Searchable { get; set; }
+
+    [Prop] public SearchMode SearchMode { get; set; } = SearchMode.CaseInsensitive;
+
+    [Prop] public string? EmptyMessage { get; set; }
+
+    [Prop] public bool Loading { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
@@ -149,6 +168,18 @@ public static class SelectInputExtensions
     }
 
     public static SelectInputBase Separator(this SelectInputBase widget, char separator) => widget with { Separator = separator };
+
+    public static SelectInputBase MaxSelections(this SelectInputBase widget, int max) => widget with { MaxSelections = max };
+
+    public static SelectInputBase MinSelections(this SelectInputBase widget, int min) => widget with { MinSelections = min };
+
+    public static SelectInputBase Searchable(this SelectInputBase widget, bool searchable = true) => widget with { Searchable = searchable };
+
+    public static SelectInputBase SearchMode(this SelectInputBase widget, SearchMode mode) => widget with { SearchMode = mode };
+
+    public static SelectInputBase EmptyMessage(this SelectInputBase widget, string message) => widget with { EmptyMessage = message };
+
+    public static SelectInputBase Loading(this SelectInputBase widget, bool loading = true) => widget with { Loading = loading };
 
     public static SelectInputBase List(this SelectInputBase widget) => widget with { Variant = SelectInputVariants.List };
 
