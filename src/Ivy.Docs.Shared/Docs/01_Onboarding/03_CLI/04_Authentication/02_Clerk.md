@@ -82,11 +82,23 @@ Clerk supports numerous social authentication providers:
 1. **Go to "Configure → User & authentication -> SSO connections"** in your Clerk Dashboard
 2. **Click "Add connection", then "For all users"**
 3. **Select a provider you wish to enable** (Google, GitHub, Microsoft, Apple, etc.)
-4. **Configure OAuth credentials** for your provider if using custom settings, as required in production
-5. **Configure other settings for your provider**
-6. **Click "Apply"**
+4. **Ensure "Enable for sign-up and sign-in" is selected** (this allows new users to create accounts via OAuth)
+5. **Configure OAuth credentials** for your provider if using custom settings, as required in production
+6. **Configure other settings for your provider**
+7. **Click "Apply"**
 
 > **Note**: Clerk provides development OAuth credentials for testing. For production, you'll need to configure your own OAuth applications with each provider. See [Clerk's OAuth documentation](https://clerk.com/docs/authentication/social-connections/overview) for detailed setup instructions.
+
+#### Disable Bot Sign-up Protection for OAuth
+
+If users can sign in via OAuth but cannot sign up (new users trying to authenticate via OAuth fail), you need to disable bot sign-up protection:
+
+1. **Go to "Configure → User & authentication → Attack protection"** in your Clerk Dashboard
+2. **Find the "Bot sign-up protection" section**
+3. **Toggle off "Bot sign-up protection"**
+4. **Click "Save"**
+
+This allows OAuth providers to create new user accounts without requiring additional CAPTCHA verification, which Ivy does not currently support.
 
 ### Step 5: Configure Session Token
 
@@ -276,6 +288,20 @@ Key features of the Clerk provider:
 - In production: Ensure you've configured custom OAuth credentials for each provider
 - Verify OAuth redirect URLs are properly configured
 - Check provider-specific settings in Clerk Dashboard
+
+**OAuth Sign-up Fails**
+
+If existing users can sign in via OAuth but new users cannot create accounts (authentication fails):
+
+- Ensure the OAuth provider is enabled for sign-up:
+  - Go to **Configure → User & authentication → SSO connections** in your Clerk Dashboard
+  - Click on your OAuth provider
+  - Verify "Enable for sign-up and sign-in" is selected
+  - Click "Apply"
+- Disable bot sign-up protection:
+  - Go to **Configure → User & authentication → Attack protection** in your Clerk Dashboard
+  - Disable "Bot sign-up protection"
+  - This allows OAuth providers to create new user accounts without CAPTCHA verification
 
 ## Related Documentation
 
