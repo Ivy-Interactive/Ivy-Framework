@@ -21,12 +21,41 @@ public static class CookieRegistryExtensions
         return null;
     }
 
-    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthProviderSession authSession, IEnumerable<string>? providersToDelete = null)
+    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthProviderSession authSession, string? machineId = null, IEnumerable<string>? providersToDelete = null)
     {
         var cookies = new CookieJar();
         cookies.AddCookiesForAuthToken(authSession.AuthToken, providersToDelete);
         cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData);
-        cookies.AddCookiesForOAuthProviderSessions(authSession.OAuthProviderSessions);
+
+        // Filter out OAuth providers that have been globally removed (if machineId is provided)
+        IReadOnlyDictionary<string, IAuthTokenHandlerSession> sessionsToWrite = authSession.OAuthProviderSessions;
+        HashSet<string> removedProviders = new();
+
+        if (machineId != null)
+        {
+            removedProviders = sessionStore.GetRemovedOAuthProviders(machineId);
+            if (removedProviders.Count > 0)
+            {
+                sessionsToWrite = authSession.OAuthProviderSessions
+                    .Where(kvp => !removedProviders.Contains(kvp.Key))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            }
+        }
+
+        cookies.AddCookiesForOAuthProviderSessions(sessionsToWrite);
+
+        // Also delete cookies for removed providers
+        if (removedProviders.Count > 0)
+        {
+            var cookieOptions = CreateAuthCookieOptions();
+            foreach (var provider in removedProviders)
+            {
+                cookies.Delete($"{provider}_access_token", cookieOptions);
+                cookies.Delete($"{provider}_refresh_token", cookieOptions);
+                cookies.Delete($"{provider}_auth_tag", cookieOptions);
+            }
+        }
+
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 

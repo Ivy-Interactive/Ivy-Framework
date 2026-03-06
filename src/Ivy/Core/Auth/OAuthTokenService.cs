@@ -12,6 +12,7 @@ public class OAuthTokenService : IOAuthTokenService
     private readonly IAuthProviderSession _parentSession;
     private readonly IClientProvider _client;
     private readonly AppSessionStore _sessionStore;
+    private readonly string _machineId;
     private readonly ILogger<OAuthTokenService> _logger;
 
     public string Provider => _provider;
@@ -23,6 +24,7 @@ public class OAuthTokenService : IOAuthTokenService
         IAuthProviderSession parentSession,
         IClientProvider client,
         AppSessionStore sessionStore,
+        string machineId,
         ILogger<OAuthTokenService> logger)
     {
         _provider = provider;
@@ -31,6 +33,7 @@ public class OAuthTokenService : IOAuthTokenService
         _parentSession = parentSession;
         _client = client;
         _sessionStore = sessionStore;
+        _machineId = machineId;
         _logger = logger;
     }
 
@@ -87,7 +90,7 @@ public class OAuthTokenService : IOAuthTokenService
                 _session.AuthToken = newToken;
 
                 // Update cookies (don't reload page for OAuth token refreshes)
-                var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession);
+                var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession, _machineId);
                 _client.SetAuthCookies(cookieJarId, reloadPage: false, triggerMachineReload: null);
 
                 return newToken;
@@ -153,7 +156,7 @@ public class OAuthTokenService : IOAuthTokenService
         _parentSession.RemoveOAuthProviderSession(_provider);
 
         // Update cookies to reflect removal (don't reload page)
-        var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession);
+        var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession, _machineId);
         _client.SetAuthCookies(cookieJarId, reloadPage: false, triggerMachineReload: null);
     }
 }

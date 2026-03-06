@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 // Resharper disable once CheckNamespace
 namespace Ivy;
 
-public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, IServiceProvider? serviceProvider = null, ILogger<AuthProviderService>? logger = null) : IAuthProviderService
+public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, string machineId, IServiceProvider? serviceProvider = null, ILogger<AuthProviderService>? logger = null) : IAuthProviderService
 {
     // Hold removed OAuth provider sessions so they can be updated in place and restored later
     private readonly Dictionary<string, IAuthTokenHandlerSession> _removedOAuthSessions = new();
@@ -21,6 +21,12 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
         var token = await TimeoutHelper.WithTimeoutAsync(ct =>
             authProvider.LoginAsync(authSession, email, password, ct), cancellationToken);
         authSession.AuthToken = token;
+
+        // Clear removed OAuth providers list on successful login
+        if (token != null)
+        {
+            sessionStore.ClearRemovedOAuthProviders(machineId);
+        }
 
         if (authSession.HasChangedSince(oldSession))
         {
@@ -71,12 +77,18 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
         // Capture OAuth providers before clearing so we can delete their cookies
         var providersToDelete = authSession.OAuthProviderSessions.Keys.ToList();
 
+        // Mark OAuth providers as removed globally so other tabs know not to re-add them
+        foreach (var provider in providersToDelete)
+        {
+            sessionStore.MarkOAuthProviderRemoved(machineId, provider);
+        }
+
         authSession.AuthToken = null;
         authSession.ClearOAuthProviderSessions();
         _removedOAuthSessions.Clear();
 
         // Pass the captured providers to delete their cookies
-        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession, providersToDelete);
+        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession, machineId, providersToDelete);
         client.SetAuthCookies(cookieJarId, reloadPage: true, triggerMachineReload: null);
     }
 
@@ -223,7 +235,7 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
 
     public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession);
+        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession, machineId);
         client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 

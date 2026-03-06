@@ -78,6 +78,8 @@ public class AppHub(
                 requestScheme = forwardedProto.ToString();
             }
 
+            var machineId = AppRouter.GetMachineId(httpContext);
+
             if (server.AuthProviderType != null)
             {
                 var authProvider = server.ServiceProvider!.GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
@@ -87,7 +89,7 @@ public class AppHub(
 
                 var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
                 var authServiceLogger = server.ServiceProvider?.GetService<ILoggerFactory>()?.CreateLogger<AuthProviderService>();
-                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore, server.ServiceProvider, authServiceLogger);
+                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore, machineId, server.ServiceProvider, authServiceLogger);
 
                 var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
@@ -155,8 +157,6 @@ public class AppHub(
             }
 
             appServices.AddSingleton(routeResult.AppRepository);
-
-            var machineId = AppRouter.GetMachineId(httpContext);
 
             var appArgs = GetAppArgs(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
 
@@ -646,6 +646,7 @@ public class AppHub(
                 authSession,
                 client,
                 sessionStore,
+                session.MachineId,
                 oauthLogger);
 
             var strategy = new OAuthTokenRefreshStrategy(
