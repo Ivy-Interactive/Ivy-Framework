@@ -10,12 +10,21 @@ using static Ivy.Views.Forms.FormHelpers;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public enum SheetSide
+{
+    Left,
+    Right,
+    Top,
+    Bottom
+}
+
 /// <summary>
 /// A side-aligned modal panel for editing or displaying distinct sub-tasks.
 /// </summary>
 public record Sheet : WidgetBase<Sheet>
 {
     public static Size DefaultWidth => Size.Rem(24);
+    public static Size DefaultHeight => Size.Rem(16);
 
     [OverloadResolutionPriority(1)]
     public Sheet(Func<Event<Sheet>, ValueTask>? onClose, object content, string? title = null, string? description = null) : base([new Slot("Content", content)])
@@ -50,6 +59,8 @@ public record Sheet : WidgetBase<Sheet>
 
     [Prop] public string? Description { get; }
 
+    [Prop] public SheetSide Side { get; init; } = SheetSide.Right;
+
     [Event] public EventHandler<Event<Sheet>>? OnClose { get; set; }
 
     public static Sheet operator |(Sheet widget, object child)
@@ -65,28 +76,38 @@ public record Sheet : WidgetBase<Sheet>
 
 public static class SheetExtensions
 {
-    public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null)
+    public static Sheet Side(this Sheet sheet, SheetSide side) => sheet with { Side = side };
+
+    public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
     {
-        return new WithSheetView(trigger, contentFactory, title, description, width);
+        return new WithSheetView(trigger, contentFactory, title, description, width, side);
     }
 
     [OverloadResolutionPriority(-1)]
-    public static IView ToSheet(this object content, IState<bool> isOpen, string? title = null, string? description = null, Size? width = null)
+    public static IView ToSheet(this object content, IState<bool> isOpen, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
     {
         return new FuncView(_ =>
         {
             if (!isOpen.Value) return null;
 
-            return new Sheet(_ =>
+            var sheet = new Sheet(_ =>
             {
                 isOpen.Value = false;
                 return ValueTask.CompletedTask;
-            }, content, title, description).Width(width ?? Sheet.DefaultWidth);
+            }, content, title, description) with
+            { Side = side };
+
+            // Use Height for top/bottom, Width for left/right
+            if (side is SheetSide.Top or SheetSide.Bottom)
+            {
+                return sheet.Height(width ?? Sheet.DefaultHeight);
+            }
+            return sheet.Width(width ?? Sheet.DefaultWidth);
         });
     }
 
     [OverloadResolutionPriority(1)]
-    public static IView ToSheet<TModel>(this FormBuilder<TModel> formBuilder, IState<bool> isOpen, string? title = null, string? description = null, string? submitTitle = null, Size? width = null)
+    public static IView ToSheet<TModel>(this FormBuilder<TModel> formBuilder, IState<bool> isOpen, string? title = null, string? description = null, string? submitTitle = null, Size? width = null, SheetSide side = SheetSide.Right)
     {
         return new FuncView((context) =>
         {
@@ -118,15 +139,23 @@ public static class SheetExtensions
                 formView
             );
 
-            return new Sheet(_ =>
+            var sheet = new Sheet(_ =>
             {
                 isOpen.Value = false;
-            }, layout, title, description).Width(width ?? Sheet.DefaultWidth);
+            }, layout, title, description) with
+            { Side = side };
+
+            // Use Height for top/bottom, Width for left/right
+            if (side is SheetSide.Top or SheetSide.Bottom)
+            {
+                return sheet.Height(width ?? Sheet.DefaultHeight);
+            }
+            return sheet.Width(width ?? Sheet.DefaultWidth);
         });
     }
 }
 
-public class WithSheetView(Button trigger, Func<object> contentFactory, string? title, string? description, Size? width) : ViewBase
+public class WithSheetView(Button trigger, Func<object> contentFactory, string? title, string? description, Size? width, SheetSide side = SheetSide.Right) : ViewBase
 {
     public override object? Build()
     {
@@ -139,13 +168,28 @@ public class WithSheetView(Button trigger, Func<object> contentFactory, string? 
                 return ValueTask.CompletedTask;
             })
         };
-        return new Fragment(
-            clonedTrigger,
-            isOpen.Value ? new Sheet(_ =>
+
+        Sheet? sheet = null;
+        if (isOpen.Value)
+        {
+            sheet = new Sheet(_ =>
             {
                 isOpen.Value = false;
                 return ValueTask.CompletedTask;
-            }, contentFactory(), title, description).Width(width ?? Sheet.DefaultWidth) : null
-        );
+            }, contentFactory(), title, description) with
+            { Side = side };
+
+            // Use Height for top/bottom, Width for left/right
+            if (side is SheetSide.Top or SheetSide.Bottom)
+            {
+                sheet = sheet.Height(width ?? Sheet.DefaultHeight);
+            }
+            else
+            {
+                sheet = sheet.Width(width ?? Sheet.DefaultWidth);
+            }
+        }
+
+        return new Fragment(clonedTrigger, sheet);
     }
 }
