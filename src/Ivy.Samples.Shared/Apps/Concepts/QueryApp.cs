@@ -1059,7 +1059,7 @@ public class QueryEffectTriggerExample : ViewBase
         // Use the query as an effect trigger — fires whenever the query state changes
         UseEffect(() =>
         {
-            effectLog.Set(log => [..log, $"[{DateTime.Now:HH:mm:ss.fff}] Query changed → Loading={query.Loading}, Value={query.Value ?? "(null)"}"] );
+            effectLog.Set(log => [.. log, $"[{DateTime.Now:HH:mm:ss.fff}] Query changed → Loading={query.Loading}, Value={query.Value ?? "(null)"}"]);
         }, query);
 
         var logEntries = effectLog.Value
