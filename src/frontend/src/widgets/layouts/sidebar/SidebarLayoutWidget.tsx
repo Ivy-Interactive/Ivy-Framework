@@ -108,7 +108,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
       if (!isManuallyToggled) {
-        setIsSidebarOpen(e.matches);
+        setIsSidebarOpen(openProp && e.matches);
       }
     };
 
@@ -116,7 +116,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     mql.addEventListener('change', handleMediaChange);
     return () => mql.removeEventListener('change', handleMediaChange);
-  }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar]);
+  }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar, openProp]);
 
   return (
     <div
