@@ -159,6 +159,25 @@ public class FrontendApiClient
         return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
     }
 
+    public async Task<ClerkSignUpResponse> CreateSignUpAsync(ClerkCredentials credentials, string origin, string strategy, string redirectUrl, string? actionCompleteRedirectUrl, CancellationToken cancellationToken = default)
+    {
+        var formData = new Dictionary<string, string>
+        {
+            { "strategy", strategy },
+            { "redirect_url", redirectUrl }
+        };
+
+        if (actionCompleteRedirectUrl is not null)
+        {
+            formData.Add("action_complete_redirect_url", actionCompleteRedirectUrl);
+        }
+
+        var content = new FormUrlEncodedContent(formData);
+
+        var response = await RequestAsync(HttpMethod.Post, "client/sign_ups", credentials, setHeaders: headers => headers.Add("Origin", origin), content: content, cancellationToken: cancellationToken);
+        return await ParseResponseAsync<ClerkSignUpResponse>(response, credentials, cancellationToken);
+    }
+
     private async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string endpoint, ClerkCredentials? credentials = null, bool sendSessionToken = true, string? additionalQueryParameters = null, Action<HttpRequestHeaders>? setHeaders = null, HttpContent? content = null, CancellationToken cancellationToken = default)
     {
         if (credentials?.DevBrowserToken != null)

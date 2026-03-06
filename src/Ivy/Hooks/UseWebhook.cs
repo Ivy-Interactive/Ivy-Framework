@@ -1,9 +1,8 @@
 using System.Collections.Concurrent;
 using Ivy.Core;
-using Ivy.Core.Hooks;
+using Ivy.Core.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using AppContext = Ivy.AppContext;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -35,11 +34,11 @@ public static class UseWebhookExtensions
     {
         var webhookId = context.UseState(() => Guid.NewGuid().ToString(), false);
         var webhookController = context.UseService<IWebhookRegistry>();
-        var args = context.UseService<AppContext>();
+        var requestContext = context.UseService<RequestContext>();
 
         context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.OnMount()]);
 
-        return WebhookEndpoint.CreateWebhook(webhookId.Value, args.Scheme, args.Host);
+        return WebhookEndpoint.CreateWebhook(webhookId.Value, requestContext);
     }
 }
 

@@ -21,7 +21,8 @@ public class AppHub(
     IContentBuilder contentBuilder,
     AppSessionStore sessionStore,
     ILogger<AppHub> logger,
-    IQueryableRegistry queryableRegistry
+    IQueryableRegistry queryableRegistry,
+    RequestContext requestContext
     ) : Hub
 {
     private readonly ConcurrentDictionary<string, Action<string>> _oauthTokenAddedHandlers = new();
@@ -29,7 +30,7 @@ public class AppHub(
     private readonly ConcurrentDictionary<string, HashSet<string>> _activeOAuthRefreshLoops = new();
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>> _oauthRefreshCancellations = new();
 
-    private AppContext GetAppArgs(string connectionId, string machineId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
+    private AppContext GetAppArgs(string connectionId, string machineId, string appId, string? navigationAppId, HttpContext httpContext)
     {
         string? appArgs = null;
         if (httpContext.Request.Query.TryGetValue("appArgs", out var appArgsParam))
@@ -37,7 +38,7 @@ public class AppHub(
             appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
-        return new AppContext(connectionId, machineId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!);
+        return new AppContext(connectionId, machineId, appId, navigationAppId, appArgs ?? server.Args?.Args);
     }
 
     public override async Task OnConnectedAsync()
@@ -67,6 +68,7 @@ public class AppHub(
                 Context.ConnectionId));
             appServices.AddSingleton<IClientProvider>(clientProvider);
             appServices.AddSingleton<IUploadService>(new UploadService(Context.ConnectionId, clientProvider));
+            appServices.AddSingleton(requestContext);
 
             var tunneledHttpHandler = new TunneledHttpMessageHandler(clientProvider, Context.ConnectionId);
             appServices.AddSingleton<HttpMessageHandler>(tunneledHttpHandler);
@@ -77,6 +79,9 @@ public class AppHub(
             {
                 requestScheme = forwardedProto.ToString();
             }
+
+            // Initialize RequestContext with scheme and host from the first request
+            requestContext.Initialize(requestScheme, request.Host.Value!);
 
             if (server.AuthProviderType != null)
             {
@@ -158,7 +163,7 @@ public class AppHub(
 
             var machineId = AppRouter.GetMachineId(httpContext);
 
-            var appArgs = GetAppArgs(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
+            var appArgs = GetAppArgs(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, httpContext);
 
             logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
 

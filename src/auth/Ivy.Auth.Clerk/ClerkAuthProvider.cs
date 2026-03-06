@@ -9,6 +9,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.WebUtilities;
 using Ivy.Auth.Clerk.ApiClient.Models;
 using Ivy.Auth.Clerk.ApiClient.Responses;
+using System.Text.Json;
 
 namespace Ivy.Auth.Clerk;
 
@@ -229,6 +230,11 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(_origin))
+        {
+            throw new Exception("ClerkAuthProvider is not initialized. Call InitializeAsync before using.");
+        }
+
         var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
         var frontendClient = MakeFrontendApiClient(authSession);
         var sessionId = request.Query["created_session_id"].ToString();
@@ -238,15 +244,16 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
             throw new Exception("No pending sign-in found in OAuth callback.");
         }
 
-        var signInStatus = await frontendClient.RetrieveSignInAsync(pendingSignInId, credentials, cancellationToken);
-        if (signInStatus.Response?.Status == "complete" && signInStatus.Response.CreatedSessionId is { } createdSessionId && createdSessionId != sessionId)
+        var signIn = await frontendClient.RetrieveSignInAsync(pendingSignInId, credentials, cancellationToken);
+        if (signIn.Response?.Status == "complete" && signIn.Response.CreatedSessionId is { } createdSessionId && createdSessionId != sessionId)
         {
             throw new Exception($"Session ID from query does not match session ID from sign-in status.");
         }
 
-        if (signInStatus.Response?.Status == "needs_identifier" && signInStatus.Response.FirstFactorVerification?.Status == "transferable")
+        if (signIn.Response?.Status == "needs_identifier" && signIn.Response.FirstFactorVerification?.Status == "transferable")
         {
-            // TODO: sign up flow for new users
+            await frontendClient.CreateSignUpAsync(credentials, _origin, signIn.Response.FirstFactorVerification.Strategy, null, null, cancellationToken);
+            Console.WriteLine("Bad sign in: " + JsonSerializer.Serialize(signIn));
             return null;
         }
 
@@ -255,11 +262,11 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
             if (string.IsNullOrEmpty(sessionId))
             {
                 Console.WriteLine($"[Clerk OAuth Callback] Sign-in ID: {pendingSignInId}");
-                Console.WriteLine($"[Clerk OAuth Callback] Status: {signInStatus.Response?.Status}");
-                Console.WriteLine($"[Clerk OAuth Callback] Created Session ID: {signInStatus.Response?.CreatedSessionId}");
-                Console.WriteLine($"[Clerk OAuth Callback] First Factor Status: {signInStatus.Response?.FirstFactorVerification?.Status}");
+                Console.WriteLine($"[Clerk OAuth Callback] Status: {signIn.Response?.Status}");
+                Console.WriteLine($"[Clerk OAuth Callback] Created Session ID: {signIn.Response?.CreatedSessionId}");
+                Console.WriteLine($"[Clerk OAuth Callback] First Factor Status: {signIn.Response?.FirstFactorVerification?.Status}");
 
-                if (signInStatus.Response?.FirstFactorVerification?.Error is { } error)
+                if (signIn.Response?.FirstFactorVerification?.Error is { } error)
                 {
                     Console.WriteLine($"[Clerk OAuth Callback] Error Code: {error.Code}");
                     Console.WriteLine($"[Clerk OAuth Callback] Error Message: {error.Message}");
