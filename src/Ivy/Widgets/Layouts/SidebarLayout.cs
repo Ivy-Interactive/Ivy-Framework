@@ -12,8 +12,6 @@ namespace Ivy;
 public record SidebarLayout : WidgetBase<SidebarLayout>
 {
     public static Size DefaultWidth => Size.Rem(16);
-    public static Size DefaultMinWidth => Size.Px(200);
-    public static Size DefaultMaxWidth => Size.Px(600);
 
     public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader = null, object? sidebarFooter = null, Size? width = null)
     : base([new Slot("MainContent", mainContent), new Slot("SidebarContent", sidebarContent), new Slot("SidebarHeader", sidebarHeader), new Slot("SidebarFooter", sidebarFooter)])
@@ -28,10 +26,6 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
     [Prop] public int MainContentPadding { get; set; } = 2;
 
     [Prop] public bool Resizable { get; set; } = false;
-
-    [Prop] public Size? MinWidth { get; set; }
-
-    [Prop] public Size? MaxWidth { get; set; }
 
     public static SidebarLayout operator |(SidebarLayout widget, object child)
     {
@@ -53,32 +47,32 @@ public static class SidebarLayoutExtensions
 
     /// <summary>
     /// Enables drag-to-resize on the sidebar border. Users can drag to adjust the sidebar width at runtime.
-    /// Default constraints are 200px min and 600px max (similar to Streamlit).
+    /// Use .Width(Size.Px(300).Min(Size.Px(200)).Max(Size.Px(600))) to customize constraints.
+    /// Default constraints when resizable is 200px min and 600px max.
     /// </summary>
     public static SidebarLayout Resizable(this SidebarLayout sidebar, bool resizable = true)
     {
+        if (!resizable)
+        {
+            return sidebar with { Resizable = false };
+        }
+
+        // Apply default min/max constraints if not already set on the Width
+        var width = sidebar.Width ?? SidebarLayout.DefaultWidth;
+        if (width.Min == null)
+        {
+            width = width.Min(Size.Px(200));
+        }
+        if (width.Max == null)
+        {
+            width = width.Max(Size.Px(600));
+        }
+
         return sidebar with
         {
-            Resizable = resizable,
-            MinWidth = sidebar.MinWidth ?? SidebarLayout.DefaultMinWidth,
-            MaxWidth = sidebar.MaxWidth ?? SidebarLayout.DefaultMaxWidth
+            Resizable = true,
+            Width = width
         };
-    }
-
-    /// <summary>
-    /// Sets the minimum width constraint for the resizable sidebar.
-    /// </summary>
-    public static SidebarLayout MinWidth(this SidebarLayout sidebar, Size minWidth)
-    {
-        return sidebar with { MinWidth = minWidth };
-    }
-
-    /// <summary>
-    /// Sets the maximum width constraint for the resizable sidebar.
-    /// </summary>
-    public static SidebarLayout MaxWidth(this SidebarLayout sidebar, Size maxWidth)
-    {
-        return sidebar with { MaxWidth = maxWidth };
     }
 }
 

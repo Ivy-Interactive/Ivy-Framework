@@ -34,10 +34,8 @@ interface SidebarLayoutWidgetProps {
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
   mainContentPadding?: number; // Padding for main content area (default: 2)
-  width?: string; // Width of the sidebar (default: 256px)
+  width?: string; // Width of the sidebar (Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue")
   resizable?: boolean; // Enable drag-to-resize on sidebar border
-  minWidth?: string; // Minimum width constraint for resizable sidebar
-  maxWidth?: string; // Maximum width constraint for resizable sidebar
 }
 
 // Helper to parse a Size string to pixels
@@ -101,16 +99,17 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   mainContentPadding,
   width,
   resizable = false,
-  minWidth: minWidthProp,
-  maxWidth: maxWidthProp,
 }) => {
+  // Parse Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue"
+  const [wantedWidth, minWidthStr, maxWidthStr] = (width ?? '').split(',');
+
   // Get sidebar width from the width prop (default set in backend)
   const sidebarWidth = getWidth(width).width as string;
-  const initialWidthPx = parseSizeToPixels(width?.split(',')[0], 256);
+  const initialWidthPx = parseSizeToPixels(wantedWidth, 256);
 
-  // Parse min/max constraints (defaults match Streamlit: 200-600px)
-  const minWidthPx = parseSizeToPixels(minWidthProp, 200);
-  const maxWidthPx = parseSizeToPixels(maxWidthProp, 600);
+  // Parse min/max constraints from Size API (defaults match Streamlit: 200-600px)
+  const minWidthPx = parseSizeToPixels(minWidthStr, 200);
+  const maxWidthPx = parseSizeToPixels(maxWidthStr, 600);
 
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
