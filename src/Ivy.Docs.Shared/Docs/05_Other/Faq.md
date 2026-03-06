@@ -248,3 +248,29 @@ return Layout.Vertical()
 - `alertView` must be rendered somewhere in your view tree for the dialog to appear
 - Available button sets: `AlertButtonSet.Ok`, `AlertButtonSet.OkCancel`, `AlertButtonSet.YesNo`, `AlertButtonSet.YesNoCancel`
 - For simple toast notifications, use `client.Toast("message")` or `client.Error("message")` via `IClientProvider`
+
+## How do I show navigation properties in a DataTable?
+
+`DataTableBuilder` only supports top-level properties of the model type. Nested property access like `p.Author.Username` will throw a `KeyNotFoundException` at runtime because only direct properties are scaffolded as columns.
+
+**Solution:** Project your query into a flat DTO with all needed fields as direct properties:
+
+```csharp
+// BAD - nested property access will fail at runtime
+var posts = db.Posts.Include(p => p.Author).AsQueryable();
+posts.ToDataTable()
+    .Header(p => p.Author.Username, "Author"); // KeyNotFoundException!
+
+// GOOD - project into a flat DTO
+record PostListItem(int Id, string Title, string AuthorName, string Status);
+
+var posts = db.Posts
+    .Include(p => p.Author)
+    .Select(p => new PostListItem(p.Id, p.Title, p.Author.Username, p.Status.ToString()))
+    .AsQueryable();
+
+posts.ToDataTable()
+    .Header(p => p.AuthorName, "Author"); // Works!
+```
+
+This also simplifies the DataTable configuration since you don't need to `.Hidden()` navigation properties or other fields you don't want displayed.
