@@ -138,7 +138,7 @@ public class TableBuilderTests
     [Fact]
     public void ProgressBuilder_ShouldReturnLayoutWithFormatString()
     {
-        var builder = new ProgressBuilder<TestModel>(format: "%d%%");
+        var builder = new ProgressBuilder<TestModel>(format: "%d%");
         var result = builder.Build(50, new TestModel());
         Assert.IsType<LayoutView>(result);
     }

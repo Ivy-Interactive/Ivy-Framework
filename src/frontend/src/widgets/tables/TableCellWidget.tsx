@@ -65,12 +65,12 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
       style={textAlignStyle}
     >
       {!multiline ? (
-        <span
-          className="inline-block overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
+        <div
+          className="overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
           style={textAlignStyle}
         >
           {children}
-        </span>
+        </div>
       ) : (
         children
       )}

@@ -365,7 +365,7 @@ public class ProgressBuilderExample : ViewBase
             | tasks
                 .ToTable()
                 .Width(Size.Full())
-                .Builder(e => e.Progress, f => f.Progress(format: "%d%%", autoColor: true))
+                .Builder(e => e.Progress, f => f.Progress(format: "%d%", autoColor: true))
                 .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Progress, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Priority, Size.Fraction(0.2f))
