@@ -379,7 +379,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
         // Validate minimum file size
         if (minFileSize.HasValue)
         {
-            var minSizeValidation = Widgets.Inputs.FileInputValidation.ValidateMinFileSize(fileUpload, minFileSize);
+            var minSizeValidation = FileInputValidation.ValidateMinFileSize(fileUpload, minFileSize);
             if (!minSizeValidation.IsValid)
             {
                 // Send toast notification for file size error

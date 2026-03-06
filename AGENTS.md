@@ -40,7 +40,7 @@ public class MyView : ViewBase
   }
 }
 
-The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**:
+The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**: The attribute uses **named parameters**:
 
 [App(title: "Customers", icon: Icons.Rocket)]
 public class CustomersApp : ViewBase
@@ -49,11 +49,6 @@ public class CustomersApp : ViewBase
 - `icon` uses the `Icons` enum — these are Lucide icons in PascalCase (e.g. `Icons.Link`, `Icons.Settings`, `Icons.Rocket`).
 
 An app is built into a tree of widgets. This is what's rendered to the screen.
-
-## Namespace
-
-All public types in Ivy is in the `Ivy` namespace. 
-NOTE! Don't forget to add `using Ivy;` to all *.cs files where you want to use Ivy features.
 
 ## Application Structure
 
@@ -66,7 +61,7 @@ MyProject/
 │   ├── DashboardApp.cs
 │   └── Settings/               # Subfolder namespaces become URL path segments
 │       └── UserProfileApp.cs   # → /settings/user-profile
-└── Connections/               
+└── Connections/
     └── MyDb/
         ├── MyDbContext.cs
         ├── MyDbContextFactory.cs
@@ -190,6 +185,7 @@ There is no `ButtonSize` enum — use `Scale` for all widgets.
 `.Size(Size.X)` sets both width and height.
 
 Common Size values:
+
 - Size.Units(n) — Tailwind spacing scale (n × 0.25rem)
 - Size.Full() — 100%
 - Size.Fit() — fit-content
@@ -220,7 +216,7 @@ new TextInput().Default()
 ### UseState
 
 var nameState = UseState("World");
-var iconsState = this.UseState<Icons[]>();
+var iconsState = UseState<Icons[]>();
 
 If you don't specify a value, default(T) is used.
 
@@ -260,6 +256,7 @@ if (query.Error is { } error) return Callout.Error(error.Message);
 // Use query.Value
 
 QueryResult<T> properties:
+
 - .Value — the fetched data (default until loaded)
 - .Loading — true during initial fetch (no value yet)
 - .Validating — true during background revalidation
@@ -267,10 +264,12 @@ QueryResult<T> properties:
 - .Mutator — provides .Revalidate(), .Invalidate(), .Mutate(value, revalidate)
 
 Key conventions:
+
 - String: `"my-data"`
 - Tuple: `(nameof(MyBlade), entityId)`
 
 Common options (QueryOptions):
+
 - KeepPrevious: true — show stale data while revalidating with a new key
 - RevalidateOnMount: false — skip initial fetch when using initialValue
 - RefreshInterval: TimeSpan — poll at an interval
@@ -286,7 +285,7 @@ public static QueryResult<T[]> UseMyRecords(IViewContext context, string filter)
 {
     return context.UseQuery(
         key: (nameof(UseMyRecords), filter),
-        fetcher: async ct => { /* fetch */ },
+        fetcher: async ct => { /*fetch*/ },
         tags: [typeof(T[])],
         options: new QueryOptions { KeepPrevious = true }
     );
