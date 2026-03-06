@@ -3,7 +3,7 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
 import { X, Check } from 'lucide-react';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import {
@@ -157,15 +157,12 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
   scale = Scales.Medium,
 }) => {
   const [localAlpha, setLocalAlpha] = useState<number | null>(null);
+  if (localAlpha !== null && alpha === localAlpha) {
+    setLocalAlpha(null);
+  }
   const displayAlpha = localAlpha ?? alpha;
   const height = scale === Scales.Small ? 24 : scale === Scales.Large ? 36 : 30;
   const percentage = Math.round((displayAlpha / 255) * 100);
-
-  useEffect(() => {
-    if (localAlpha !== null && alpha === localAlpha) {
-      setLocalAlpha(null);
-    }
-  }, [alpha, localAlpha]);
 
   const gradientStyle: React.CSSProperties = useMemo(
     () => ({
