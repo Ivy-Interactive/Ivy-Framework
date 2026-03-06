@@ -214,7 +214,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         gridTemplateColumns: isSidebarOpen
           ? `${effectiveSidebarWidth} 1fr`
           : '0 1fr',
-        transition: isResizing ? 'none' : 'grid-template-columns 300ms ease-in-out',
+        transition: isResizing
+          ? 'none'
+          : 'grid-template-columns 300ms ease-in-out',
       }}
     >
       {/* Custom Sidebar with Slide Animation */}
