@@ -1,11 +1,8 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using Ivy.Core;
+﻿using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Ivy.Auth.Clerk.ApiClient;
 using System.Text;
-using System.Security.Claims;
 using Microsoft.AspNetCore.WebUtilities;
 using Ivy.Auth.Clerk.ApiClient.Models;
 using Ivy.Auth.Clerk.ApiClient.Responses;
@@ -26,6 +23,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     private readonly List<AuthOption> _authOptions = [];
     private readonly BackendApiClient _backendClient;
     private string? _origin = null;
+    private string? _callbackBaseUrl = null;
 
     public bool OpenOAuthLoginInNewTab => true;
 
@@ -122,6 +120,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     public async Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
         _origin = $"{requestScheme}://{requestHost}";
+        _callbackBaseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
 
         var frontendClient = MakeFrontendApiClient(authSession);
         if (IsProduction)
@@ -183,7 +182,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
     public async Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(_origin))
+        if (string.IsNullOrEmpty(_origin) || string.IsNullOrEmpty(_callbackBaseUrl))
         {
             throw new Exception("ClerkAuthProvider is not initialized. Call InitializeAsync before using.");
         }
@@ -230,7 +229,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(_origin))
+        if (string.IsNullOrEmpty(_origin) || string.IsNullOrEmpty(_callbackBaseUrl))
         {
             throw new Exception("ClerkAuthProvider is not initialized. Call InitializeAsync before using.");
         }
@@ -252,8 +251,30 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
         if (signIn.Response?.Status == "needs_identifier" && signIn.Response.FirstFactorVerification?.Status == "transferable")
         {
-            await frontendClient.CreateSignUpAsync(credentials, _origin, signIn.Response.FirstFactorVerification.Strategy, null, null, cancellationToken);
-            Console.WriteLine("Bad sign in: " + JsonSerializer.Serialize(signIn));
+            try
+            {
+                var redirectUrl = $"{_callbackBaseUrl}/{Guid.NewGuid()}";
+                var signUpResponse = await frontendClient.CreateSignUpAsync(credentials, _origin, signIn.Response.FirstFactorVerification.Strategy, redirectUrl, redirectUrl, transfer: true, cancellationToken);
+
+                if (signUpResponse.Response?.CreatedSessionId is { } newSessionId)
+                {
+                    await frontendClient.TouchSessionAsync(newSessionId, credentials, cancellationToken);
+                    var newToken = await frontendClient.CreateSessionTokenAsync(newSessionId, credentials, cancellationToken);
+
+                    if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: false, cancellationToken) == null)
+                    {
+                        throw new Exception("New JWT from Clerk is invalid.");
+                    }
+
+                    return new AuthToken(newToken.Jwt!);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Clerk OAuth Callback] Failed to transfer sign-in: {ex.Message}");
+            }
+
+            Console.WriteLine($"[Clerk OAuth Callback] Transferable sign-in could not be completed. User needs to sign up first.");
             return null;
         }
 

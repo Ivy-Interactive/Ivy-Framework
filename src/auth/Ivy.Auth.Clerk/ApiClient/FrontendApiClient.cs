@@ -159,7 +159,34 @@ public class FrontendApiClient
         return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
     }
 
-    public async Task<ClerkSignUpResponse> CreateSignUpAsync(ClerkCredentials credentials, string origin, string strategy, string redirectUrl, string? actionCompleteRedirectUrl, CancellationToken cancellationToken = default)
+    public async Task<ClerkSignUpResponse> CreateSignUpAsync(ClerkCredentials credentials, string origin, string? strategy, string? redirectUrl, string? actionCompleteRedirectUrl, bool transfer, CancellationToken cancellationToken = default)
+    {
+        var formData = new Dictionary<string, string>();
+
+        if (strategy is not null)
+        {
+            formData.Add("strategy", strategy);
+        }
+        if (redirectUrl is not null)
+        {
+            formData.Add("redirect_url", redirectUrl);
+        }
+        if (actionCompleteRedirectUrl is not null)
+        {
+            formData.Add("action_complete_redirect_url", actionCompleteRedirectUrl);
+        }
+        if (transfer)
+        {
+            formData.Add("transfer", "true");
+        }
+
+        var content = new FormUrlEncodedContent(formData);
+
+        var response = await RequestAsync(HttpMethod.Post, "client/sign_ups", credentials, setHeaders: headers => headers.Add("Origin", origin), content: content, cancellationToken: cancellationToken);
+        return await ParseResponseAsync<ClerkSignUpResponse>(response, credentials, cancellationToken);
+    }
+
+    public async Task<ClerkSignUpResponse> PrepareSignUpExternalAccountAsync(ClerkCredentials credentials, string signUpId, string origin, string strategy, string redirectUrl, string? actionCompleteRedirectUrl, CancellationToken cancellationToken = default)
     {
         var formData = new Dictionary<string, string>
         {
@@ -174,7 +201,7 @@ public class FrontendApiClient
 
         var content = new FormUrlEncodedContent(formData);
 
-        var response = await RequestAsync(HttpMethod.Post, "client/sign_ups", credentials, setHeaders: headers => headers.Add("Origin", origin), content: content, cancellationToken: cancellationToken);
+        var response = await RequestAsync(HttpMethod.Post, $"client/sign_ups/{signUpId}/prepare_verification", credentials, setHeaders: headers => headers.Add("Origin", origin), content: content, cancellationToken: cancellationToken);
         return await ParseResponseAsync<ClerkSignUpResponse>(response, credentials, cancellationToken);
     }
 
