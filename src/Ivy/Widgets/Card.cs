@@ -12,6 +12,7 @@ public enum CardHoverVariant
     PointerAndTranslate,
 }
 
+
 /// <summary>
 /// A flexible container with a border and shadow for grouping related content.
 /// </summary>

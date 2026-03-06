@@ -18,6 +18,7 @@ interface CardWidgetProps {
   height?: string;
   hoverVariant?: 'None' | 'Pointer' | 'PointerAndTranslate';
   scale?: Scales;
+  disabled?: boolean;
   'data-testid'?: string;
   slots?: {
     Header?: React.ReactNode[];
@@ -33,6 +34,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   height,
   hoverVariant = 'None',
   scale = Scales.Medium,
+  disabled,
   slots,
   'data-testid': testId,
 }) => {
@@ -48,11 +50,12 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   const headerIsEmpty = !slots?.Header || slots.Header.length === 0;
 
   const handleClick = useCallback(() => {
+    if (disabled) return;
     if (events.includes('OnClick')) eventHandler('OnClick', id, []);
-  }, [id, eventHandler, events]);
+  }, [id, eventHandler, events, disabled]);
 
   const hoverClass =
-    hoverVariant === 'None'
+    hoverVariant === 'None' || disabled
       ? cardStyles.hover.none
       : hoverVariant === 'Pointer'
         ? cardStyles.hover.pointer
@@ -63,8 +66,9 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       role="region"
       data-testid={testId}
       style={styles}
+      disabled={disabled}
       className={cn(cardStyles.container, hoverClass)}
-      onClick={handleClick}
+      onClick={disabled ? undefined : handleClick}
     >
       {!headerIsEmpty ? (
         <CardHeader className={cn(cardStyles.header.base, sizeClasses.header)}>
