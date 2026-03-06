@@ -101,11 +101,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
     <>
       <div
         style={styles}
-        className={cn(
-          className,
-          hoverClass,
-          '[&>p]:my-0 [&>span]:leading-none'
-        )}
+        className={cn(className, hoverClass)}
         onClick={isClickable ? handleClick : undefined}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
