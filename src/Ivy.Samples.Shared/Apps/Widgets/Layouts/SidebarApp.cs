@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
-[App(icon: Icons.PanelLeft, path: ["Widgets", "Layouts"], searchHints: ["navigation", "menu", "drawer", "side-panel", "layout", "aside"])]
+[App(icon: Icons.PanelLeft, path: ["Widgets", "Layouts"], searchHints: ["navigation", "menu", "drawer", "side-panel", "layout", "aside", "resizable", "drag-to-resize"])]
 public class SidebarApp : SampleBase
 {
     protected override object? BuildSample()
@@ -12,6 +12,6 @@ public class SidebarApp : SampleBase
             "SidebarContent",
             "SidebarHeader",
             "SidebarFooter"
-        );
+        ).Resizable();
     }
 }
