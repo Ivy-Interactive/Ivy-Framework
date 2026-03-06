@@ -24,6 +24,13 @@ public class CardApp : SampleBase
             client.Toast("Clicked!");
         });
 
+        var disabledCard = new Card()
+            .Header(Text.H4("Disabled Card"))
+            .Content("This card is disabled and cannot be clicked.")
+            .OnClick(_ => client.Toast("This won't fire!"))
+            .Disabled()
+            .TestId("card-disabled");
+
         var smallCard = new Card()
             .Header(Text.H4("Small Card with Elements"), icon: Icons.Info.ToIcon().Color(Colors.Neutral))
             .Content("This is a small card with elements.")
@@ -44,9 +51,10 @@ public class CardApp : SampleBase
         return Layout.Vertical()
          | Text.H1("Card")
          | Text.H2("Basic Examples")
-         | (Layout.Grid().Columns(2)
+         | (Layout.Grid().Columns(3)
             | card1
             | card4
+            | disabledCard
             )
          | (Layout.Grid().Columns(4)
             | new TotalSalesMetricView()
