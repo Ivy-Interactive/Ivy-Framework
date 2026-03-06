@@ -75,7 +75,7 @@ export const ListWidget = ({
   const eventHandler = useEventHandler();
 
   const getChildId = (child: React.ReactNode, index: number): string => {
-    if (React.isValidElement(child) && child.props.id) {
+    if (React.isValidElement<{ id?: string }>(child) && child.props.id) {
       return child.props.id;
     }
     return `item-${index}`;
