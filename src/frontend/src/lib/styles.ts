@@ -409,16 +409,18 @@ export const getAlignSelf = (alignSelf?: Align): React.CSSProperties => {
 
   switch (alignSelf) {
     case 'TopLeft':
-    case 'Left':
-    case 'BottomLeft':
-      return { alignSelf: 'flex-start' };
+    case 'TopCenter':
     case 'TopRight':
-    case 'Right':
+      return { alignSelf: 'flex-start' };
+    case 'BottomLeft':
+    case 'BottomCenter':
     case 'BottomRight':
       return { alignSelf: 'flex-end' };
-    case 'TopCenter':
+    case 'Left':
+      return { alignSelf: 'flex-start' };
+    case 'Right':
+      return { alignSelf: 'flex-end' };
     case 'Center':
-    case 'BottomCenter':
       return { alignSelf: 'center' };
     case 'Stretch':
       return { alignSelf: 'stretch' };
