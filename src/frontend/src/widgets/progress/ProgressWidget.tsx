@@ -49,7 +49,8 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   width = 'Full',
   indeterminate = false,
 }) => {
-  const isIndeterminate = indeterminate || value === null || value === undefined;
+  const isIndeterminate =
+    indeterminate || value === null || value === undefined;
   const isCompleted = !isIndeterminate && value && value >= 100;
 
   const containerStyles: React.CSSProperties = {
@@ -85,7 +86,11 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
             )}
           </Badge>
         )}
-        <Progress value={isIndeterminate ? undefined : value} indeterminate={isIndeterminate} className="bg-neutral/10" />
+        <Progress
+          value={isIndeterminate ? undefined : value}
+          indeterminate={isIndeterminate}
+          className="bg-neutral/10"
+        />
       </div>
     </>
   );

@@ -26,9 +26,7 @@ const Progress = React.forwardRef<
     <ProgressPrimitive.Indicator
       className={cn(
         'h-full flex-1 bg-primary transition-all',
-        indeterminate
-          ? 'w-1/3 animate-indeterminate'
-          : 'w-full'
+        indeterminate ? 'w-1/3 animate-indeterminate' : 'w-full'
       )}
       style={
         indeterminate
