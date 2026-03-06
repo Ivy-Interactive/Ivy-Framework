@@ -137,7 +137,7 @@ The Card widget now supports click handling and hover effects, making it easier 
 new Card("Click me for more details")
     .Title("Product Card")
     .Description("Click to view details")
-    .OnClick(() => client.Navigate("/product/123"));
+    .HandleClick(() => client.Navigate("/product/123"));
 ```
 
 When you add a click handler using `HandleClick()`, the card automatically applies hover effects with pointer cursor and a subtle translate animation (`CardHoverVariant.PointerAndTranslate`). You can customize the hover behavior using the `Hover()` method to choose between no styling (`None`), pointer only (`Pointer`), or pointer with animation (`PointerAndTranslate`).

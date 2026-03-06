@@ -240,7 +240,7 @@ public class HiddenArgsApp : SampleBase
                 Text.H2("Hidden App with Arguments"),
                 Text.P($"Name: {args.Name}"),
                 Text.P($"Value: {args.Value}"),
-                new Button("Back").OnClick(() => 
+                new Button("Back").HandleClick(() => 
                 {
                     navigator.Navigate("app://concepts/links");
                 })

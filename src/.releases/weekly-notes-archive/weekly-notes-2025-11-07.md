@@ -125,7 +125,7 @@ public override ChromeSettings GetChromeSettings()
             {
                 MenuItem.Default("Documentation")
                     .Icon(Icons.Book)
-                    .OnSelect(() => navigator.Navigate("app://docs"))
+                    .HandleSelect(() => navigator.Navigate("app://docs"))
             };
             return items.Concat(customItems);
         });

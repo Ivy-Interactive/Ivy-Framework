@@ -44,10 +44,10 @@ new Tree(
             new MenuItem("App.tsx").Icon(Icons.Code).Tag("App.tsx"),
             new MenuItem("index.ts").Icon(Icons.Code).Tag("index.ts")
         )
-).OnSelect(e => selectedFile.Set(e.Value?.ToString() ?? ""))
+).HandleSelect(e => selectedFile.Set(e.Value?.ToString() ?? ""))
 ```
 
-The Tree widget uses MenuItem for each node, supporting all the features you'd expect like icons, nested children with `.Children()`, expand/collapse with `.Expanded()`, disabled items with `.Disabled()`, and custom click handling through `.Tag()` and `.OnSelect()`. It also includes full keyboard navigation support (Arrow keys to expand/collapse, Enter/Space to select).
+The Tree widget uses MenuItem for each node, supporting all the features you'd expect like icons, nested children with `.Children()`, expand/collapse with `.Expanded()`, disabled items with `.Disabled()`, and custom click handling through `.Tag()` and `.HandleSelect()`. It also includes full keyboard navigation support (Arrow keys to expand/collapse, Enter/Space to select).
 
 ## Improvements
 

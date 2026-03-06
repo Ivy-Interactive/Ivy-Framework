@@ -24,7 +24,7 @@ async ValueTask OnClick()
 }
 
 return new Button("Submit")
-    .OnClick(OnClick)
+    .HandleClick(OnClick)
     .Loading(loading); // Automatically shows loading when true
 ```
 
@@ -94,7 +94,7 @@ data.ToDataTable()
                 MenuItem.Default(Icons.Download, "export").Label("Export")
             ])
     )
-    .OnRowAction(async e =>
+    .HandleRowAction(async e =>
     {
         var actionId = e.Value.ActionId;
         var rowIndex = e.Value.RowIndex;
@@ -256,7 +256,7 @@ data.ToKanban(
         .Remove(x => x.Id)
         .MultiLine(x => x.Description)
 )))
-.OnCardMove(moveData => {
+.HandleCardMove(moveData => {
     // Handle drag-and-drop
 });
 ```
@@ -378,7 +378,7 @@ The old `RowAction` class and `OnRowAction` method are replaced:
 .RowActions(
     MenuItem.Default(Icons.Pencil, "edit").Tooltip("Edit")
 )
-.OnRowAction(e => { /* ... */ })
+.HandleRowAction(e => { /* ... */ })
 ```
 
 **Breaking Changes:**
