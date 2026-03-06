@@ -616,7 +616,11 @@ public class Server
             var connection = ServerDescription.FindConnection(this, app.Services, _args.DescribeConnection);
             if (connection == null)
             {
-                Console.Error.WriteLine($"Connection '{_args.DescribeConnection}' not found.");
+                var available = ServerDescription.GetConnectionNames(this, app.Services);
+                var availableList = available.Count > 0
+                    ? string.Join(", ", available)
+                    : "(none)";
+                Console.Error.WriteLine($"Connection '{_args.DescribeConnection}' not found. Available connections: {availableList}");
                 return;
             }
 
@@ -652,7 +656,11 @@ public class Server
             var connection = ServerDescription.FindConnection(this, app.Services, _args.TestConnection);
             if (connection == null)
             {
-                Console.Error.WriteLine($"Connection '{_args.TestConnection}' not found.");
+                var available = ServerDescription.GetConnectionNames(this, app.Services);
+                var availableList = available.Count > 0
+                    ? string.Join(", ", available)
+                    : "(none)";
+                Console.Error.WriteLine($"Connection '{_args.TestConnection}' not found. Available connections: {availableList}");
                 return;
             }
 

@@ -208,6 +208,45 @@ public class ServerDescription
         return null;
     }
 
+    public static List<string> GetConnectionNames(global::Ivy.Server server, IServiceProvider serviceProvider)
+    {
+        var names = new List<string>();
+
+        var connections = serviceProvider.GetServices<IConnection>();
+        foreach (var c in connections)
+        {
+            var name = c.GetName();
+            if (!string.IsNullOrEmpty(name))
+                names.Add(name);
+        }
+
+        var assembly = Assembly.GetEntryAssembly();
+        if (assembly == null) return names;
+
+        var connectionTypes = assembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IConnection).IsAssignableFrom(t));
+
+        foreach (var type in connectionTypes)
+        {
+            if (connections.Any(c => c.GetType() == type))
+                continue;
+
+            try
+            {
+                var connection = (IConnection)Activator.CreateInstance(type)!;
+                var name = connection.GetName();
+                if (!string.IsNullOrEmpty(name) && !names.Contains(name))
+                    names.Add(name);
+            }
+            catch
+            {
+                // Skip connections that can't be instantiated
+            }
+        }
+
+        return names;
+    }
+
     public string ToYaml()
     {
         var serializer = new SerializerBuilder()
