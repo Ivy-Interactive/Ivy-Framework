@@ -200,6 +200,41 @@ public class FormatStyleDemos : ViewBase
 
 ```
 
+## Prefix and Suffix
+
+In certain scenarios, it is beneficial to prepend or append static content—such as text fragments or icons—to an input field. This practice is particularly useful for displaying a currency symbol, a unit label, or an icon that denotes the expected input.
+
+```csharp demo-below
+public class NumberPrefixSuffixDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var price = UseState(99.99m);
+        var weight = UseState(5.5);
+        var temperature = UseState(22);
+
+        return Layout.Vertical()
+                | price.ToNumberInput()
+                       .Prefix("$")
+                       .Precision(2)
+                       .WithField()
+                       .Label("Price")
+                | weight.ToNumberInput()
+                        .Suffix("kg")
+                        .Precision(1)
+                        .WithField()
+                        .Label("Weight")
+                | temperature.ToNumberInput()
+                             .Prefix(Icons.Thermometer)
+                             .Suffix("°C")
+                             .WithField()
+                             .Label("Temperature");
+    }
+}
+```
+
+The `Prefix` and `Suffix` methods accept either a `string` or an `Icons` value, thereby providing flexibility for augmenting the contextual information of the input.
+
 ## Event Handling
 
 `NumberInput`s can handle change and blur events:
