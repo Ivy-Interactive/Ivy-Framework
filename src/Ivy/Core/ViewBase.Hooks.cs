@@ -167,11 +167,11 @@ public abstract partial class ViewBase
     protected WebhookEndpoint UseWebhook(Func<HttpRequest, Task> handler) =>
         this.Context.UseWebhook(handler);
 
-    protected DataTableConnection? UseDataTable(IQueryable queryable) =>
-        this.Context.UseDataTable(queryable);
+    protected DataTableConnection? UseDataTable(IQueryable queryable, RefreshToken? refreshToken = null) =>
+        this.Context.UseDataTable(queryable, refreshToken);
 
-    protected DataTableConnection? UseDataTable(IQueryable queryable, Func<object, object?>? idSelector) =>
-        this.Context.UseDataTable(queryable, idSelector);
+    protected DataTableConnection? UseDataTable(IQueryable queryable, Func<object, object?>? idSelector, RefreshToken? refreshToken = null) =>
+        this.Context.UseDataTable(queryable, idSelector, refreshToken);
 
     protected IView UseBlades(Func<IView> rootBlade, string? title = null, Size? width = null) =>
         this.Context.UseBlades(rootBlade, title, width);

@@ -74,6 +74,15 @@ Layout.Vertical().Gap(4)
         | new Badge(null, icon:Icons.X, variant:BadgeVariant.Destructive))
 ```
 
+## Click Listener
+
+Badges can be made clickable using the `OnClick` extension method. This is useful for filter chips, tag management, and toggle states.
+
+```csharp demo-below
+new Badge("Click Me", icon:Icons.MousePointer)
+    .OnClick(_ => client.Toast("Badge clicked!"))
+```
+
 <WidgetDocs Type="Ivy.Badge" ExtensionTypes="Ivy.BadgeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Badge.cs"/>
 
 ## Examples

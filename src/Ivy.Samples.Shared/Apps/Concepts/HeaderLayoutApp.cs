@@ -42,19 +42,19 @@ public class HeaderLayoutView : ViewBase
             Layout.Horizontal().Gap(4)
                 | searchText.ToTextInput()
                     .Placeholder("Search items...")
-                    .Variant(TextInputs.Search)
+                    .Variant(TextInputVariants.Search)
                 | new Button("Add Item")
                     .Icon(Icons.Plus)
                     .Variant(ButtonVariant.Primary)
-                    .HandleClick(OnAddItem)
+                    .OnClick(OnAddItem)
                 | new Button("Clear All")
                     .Icon(Icons.Trash)
                     .Variant(ButtonVariant.Outline)
-                    .HandleClick(OnClearItems)
+                    .OnClick(OnClearItems)
                 | new Button("Export")
                     .Icon(Icons.Download)
                     .Variant(ButtonVariant.Ghost)
-                    .HandleClick(OnExport)
+                    .OnClick(OnExport)
         );
 
         // Create scrollable content with many items

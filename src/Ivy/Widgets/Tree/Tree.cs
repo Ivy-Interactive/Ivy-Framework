@@ -4,6 +4,15 @@ using Ivy.Shared;
 
 namespace Ivy;
 
+public class TreeRowActionClickEventArgs
+{
+    /// <summary> Tag of the tree item where the action was clicked. </summary>
+    public object? ItemValue { get; set; }
+
+    /// <summary> Tag of the menu item (action) that was clicked. </summary>
+    public object? ActionTag { get; set; }
+}
+
 public record Tree : WidgetBase<Tree>
 {
     public Tree(params MenuItem[] items)
@@ -22,7 +31,11 @@ public record Tree : WidgetBase<Tree>
 
     [Prop] public MenuItem[] Items { get; set; } = [];
 
-    [Event] public Func<Event<Tree, object>, ValueTask>? OnSelect { get; set; }
+    [Prop] public MenuItem[]? RowActions { get; set; }
+
+    [Event] public EventHandler<Event<Tree, object>>? OnSelect { get; set; }
+
+    [Event] public EventHandler<Event<Tree, TreeRowActionClickEventArgs>>? OnRowAction { get; set; }
 
     public static Func<Event<Tree, object>, ValueTask> DefaultSelectHandler()
     {
@@ -39,6 +52,18 @@ public record Tree : WidgetBase<Tree>
     }
 }
 
+public static class TreeWidgetExtensions
+{
+    public static Tree OnRowAction(this Tree tree, Func<Event<Tree, TreeRowActionClickEventArgs>, ValueTask> handler)
+        => tree with { OnRowAction = new(handler) };
+
+    public static Tree OnRowAction(this Tree tree, Action<Event<Tree, TreeRowActionClickEventArgs>> handler)
+        => tree with { OnRowAction = new(handler.ToValueTask()) };
+
+    public static Tree RowActions(this Tree tree, params MenuItem[] actions)
+        => tree with { RowActions = actions };
+}
+
 public static class TreeExtensions
 {
     public static Tree Items(this Tree tree, params MenuItem[] items)
@@ -51,18 +76,18 @@ public static class TreeExtensions
         return tree with { Items = items.ToArray() };
     }
 
-    public static Tree HandleSelect(this Tree tree, Func<Event<Tree, object>, ValueTask> onSelect)
+    public static Tree OnSelect(this Tree tree, Func<Event<Tree, object>, ValueTask> onSelect)
     {
-        return tree with { OnSelect = onSelect };
+        return tree with { OnSelect = new(onSelect) };
     }
 
-    public static Tree HandleSelect(this Tree tree, Action<Event<Tree, object>> onSelect)
+    public static Tree OnSelect(this Tree tree, Action<Event<Tree, object>> onSelect)
     {
-        return tree with { OnSelect = onSelect.ToValueTask() };
+        return tree with { OnSelect = new(onSelect.ToValueTask()) };
     }
 
-    public static Tree HandleSelect(this Tree tree, Action<object> onSelect)
+    public static Tree OnSelect(this Tree tree, Action<object> onSelect)
     {
-        return tree with { OnSelect = @event => { onSelect(@event.Value); return ValueTask.CompletedTask; } };
+        return tree with { OnSelect = new(@event => { onSelect(@event.Value); return ValueTask.CompletedTask; }) };
     }
 }

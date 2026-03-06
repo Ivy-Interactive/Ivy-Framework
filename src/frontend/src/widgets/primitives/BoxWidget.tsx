@@ -13,7 +13,10 @@ import {
   getWidth,
 } from '@/lib/styles';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useEventHandler } from '@/components/event-handler';
+
+export type BoxHoverVariant = 'None' | 'Pointer' | 'PointerAndTranslate';
 
 interface BoxWidgetProps {
   id: string;
@@ -29,9 +32,12 @@ interface BoxWidgetProps {
   contentAlign: Align;
   opacity?: number;
   className?: string;
+  events?: string[];
+  hoverVariant?: BoxHoverVariant;
 }
 
 export const BoxWidget: React.FC<BoxWidgetProps> = ({
+  id,
   children,
   width,
   height,
@@ -44,7 +50,12 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   contentAlign = 'TopLeft',
   opacity,
   className,
+  events = [],
+  hoverVariant = 'None',
 }) => {
+  const eventHandler = useEventHandler();
+  const isClickable = events.includes('OnClick');
+
   // Use semantic box radius for 'Rounded', explicit values for 'None'/'Full'
   const borderRadiusStyle: React.CSSProperties =
     borderRadius === 'Rounded'
@@ -68,9 +79,33 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
     ...getColor(color, 'color', 'foreground'),
   };
 
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      // Prevent event from bubbling up if not strictly necessary,
+      // but only fire if interactive.
+      if (isClickable) {
+        e.stopPropagation();
+        eventHandler('OnClick', id, []);
+      }
+    },
+    [id, isClickable, eventHandler]
+  );
+
+  const hoverClass =
+    hoverVariant === 'None'
+      ? null
+      : hoverVariant === 'Pointer'
+        ? 'cursor-pointer'
+        : 'cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition';
   return (
     <>
-      <div style={styles} className={cn(className)}>
+      <div
+        style={styles}
+        className={cn(className, hoverClass)}
+        onClick={isClickable ? handleClick : undefined}
+        role={isClickable ? 'button' : undefined}
+        tabIndex={isClickable ? 0 : undefined}
+      >
         {children}
       </div>
     </>

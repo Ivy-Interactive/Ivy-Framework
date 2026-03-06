@@ -158,7 +158,7 @@ public static partial class MarkdownConverter
             }
             headingsCode.Append("}");
 
-            codeBuilder.AppendTab(2).Append("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).HandleLinkClick(onLinkClick)");
+            codeBuilder.AppendTab(2).Append("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).OnLinkClick(onLinkClick)");
             codeBuilder.AppendLine($".Headings({headingsCode})");
             codeBuilder.Append(contentBuilder);
 
@@ -204,7 +204,7 @@ public static partial class MarkdownConverter
                 referencedApps.UnionWith(types);
                 AppendAsMultiLineStringIfNecessary(baseIndentLevel, convertedMarkdown, codeBuilder,
                     isNestedContent ? ", new Markdown(" : "| new Markdown(",
-                    ").HandleLinkClick(onLinkClick)");
+                    ").OnLinkClick(onLinkClick)");
                 sectionBuilder.Clear();
             }
         }
@@ -503,7 +503,7 @@ public static partial class MarkdownConverter
         var (types, convertedContent) = linkConverter.Convert(content);
         referencedApps.UnionWith(types);
 
-        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).HandleLinkClick(onLinkClick)");
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).OnLinkClick(onLinkClick)");
     }
 
     private static void HandleEmbedBlock(StringBuilder codeBuilder, XElement xml)
@@ -578,7 +578,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
             string mermaidBlock = $"```mermaid\n{codeContent}\n```";
             AppendAsMultiLineStringIfNecessary(baseIndentLevel, mermaidBlock, codeBuilder,
                 isNestedContent ? ", new Markdown(" : "| new Markdown(",
-                ").HandleLinkClick(onLinkClick)");
+                ").OnLinkClick(onLinkClick)");
         }
         else
         {

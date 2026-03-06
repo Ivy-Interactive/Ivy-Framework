@@ -24,10 +24,10 @@ public class ProgressApp : SampleBase
                 new Button("+10", _ => progress1.Set(Math.Min(100, (progress1.Value ?? 0) + 10)))
             )
 
-            | Text.H2("Color Variants")
+            | Text.H2("Colors")
             | Layout.Vertical()
-                | new Progress(progress2.Value).ColorVariant(Progress.ColorVariants.Primary).Goal("Primary Variant")
-                | new Progress(progress2.Value).ColorVariant(Progress.ColorVariants.EmeraldGradient).Goal("Emerald Gradient")
+                | new Progress(progress2.Value).Color(Colors.Primary).Goal("Primary")
+                | new Progress(progress2.Value).Color(Colors.Amber).Goal("Amber")
 
             | Text.H2("With Goals")
             | Layout.Vertical()
@@ -44,7 +44,31 @@ public class ProgressApp : SampleBase
                 | new Progress(100).Goal("Completed!")
 
             | Text.H2("Indeterminate Progress")
+            | Text.Label("Using null value (backward compatible):")
             | new Progress((int?)null).Goal("Loading...")
+
+            | Text.Label("Using explicit Indeterminate property:")
+            | new Progress().Indeterminate().Goal("Processing...")
+            | new Progress(50).Indeterminate().Goal("Syncing (50% before pause)...")
+
+            | Text.H2("Toggle Indeterminate Mode")
+            | BuildIndeterminateToggle()
+        ;
+    }
+
+    private object BuildIndeterminateToggle()
+    {
+        var isLoading = UseState(true);
+        var progress = UseState(25);
+
+        return Layout.Vertical()
+            | new Progress(progress.Value)
+                .Indeterminate(isLoading.Value)
+                .Goal(isLoading.Value ? "Waiting for server..." : $"{progress.Value}% Complete")
+            | Layout.Horizontal(
+                new Button(isLoading.Value ? "Stop Loading" : "Start Loading", _ => isLoading.Set(!isLoading.Value)),
+                new Button("+10%", _ => progress.Set(Math.Min(100, progress.Value + 10)))
+            )
         ;
     }
 }

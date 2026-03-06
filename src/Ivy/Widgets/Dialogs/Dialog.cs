@@ -21,10 +21,10 @@ public record Dialog : WidgetBase<Dialog>
     [OverloadResolutionPriority(1)]
     public Dialog(Func<Event<Dialog>, ValueTask> onClose, DialogHeader header, DialogBody body, DialogFooter footer) : base([header, body, footer])
     {
-        OnClose = onClose;
+        OnClose = new(onClose);
     }
 
-    [Event] public Func<Event<Dialog>, ValueTask>? OnClose { get; set; }
+    [Event] public EventHandler<Event<Dialog>>? OnClose { get; set; }
 
     public static Dialog operator |(Dialog dialog, object child)
     {
@@ -32,7 +32,7 @@ public record Dialog : WidgetBase<Dialog>
     }
 
     public Dialog(Action<Event<Dialog>> onClose, DialogHeader header, DialogBody body, DialogFooter footer)
-    : this(e => { onClose(e); return ValueTask.CompletedTask; }, header, body, footer)
+    : this(onClose.ToValueTask(), header, body, footer)
     {
     }
 
@@ -95,7 +95,7 @@ public static class DialogExtensions
                     validationView,
                     new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Scale(formBuilder._scale),
                     FormBuilder<TModel>.DefaultSubmitBuilder(submitTitle ?? "Save")(isLoading)
-                        .HandleClick(_ => HandleSubmitAndClose())
+                        .OnClick(_ => HandleSubmitAndClose())
                         .Scale(formBuilder._scale)
                 )
             ).Width(width ?? Dialog.DefaultWidth);

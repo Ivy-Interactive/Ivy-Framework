@@ -48,7 +48,7 @@ The `NumberInput` allows users to enter numeric values directly.
 ### Slider
 
 This variant helps create a slider that changes the value as the slider is pulled to the right.
-This creates the `NumberInputs.Slider` variant.
+This creates the `NumberInputVariants.Slider` variant.
 
 The following demo shows how a slider can be used to give a visual clue.
 
@@ -70,7 +70,7 @@ public class NumberSliderInput : ViewBase
                      .Max(500.0)
                      .Precision(2)
                      .Step(0.5)
-                     .Variant(NumberInputs.Slider)
+                     .Variant(NumberInputVariants.Slider)
                      .WithField()
                      .Label("Tapes")
                 | Text.Block(cart);
@@ -83,7 +83,7 @@ public class NumberSliderInput : ViewBase
 To enable users to enter money amounts, this variant should be used. The extension function `ToMoneyInput`
 should be used to create this variant. This is the idiomatic way to use Ivy.
 
-The following demo uses `NumberInputs.Number` with `NumberFormatStyle.Currency` to create
+The following demo uses `NumberInputVariants.Number` with `NumberFormatStyle.Currency` to create
 `NumberInput`s that can take money inputs. `ToMoneyInput` hides all these complexities.
 
 ```csharp demo-below
@@ -259,7 +259,7 @@ public class GroceryAppDemo : ViewBase
                    // Since it is disabled, no need to have an onChange event
                    | new NumberInput<decimal>(eggs.Value * eggCost + breadCost * breads.Value,_ => { })
                                      .Disabled()
-                                     .Variant(NumberInputs.Number)
+                                     .Variant(NumberInputVariants.Number)
                                      .Precision(2)
                                      .FormatStyle(NumberFormatStyle.Currency)
                                      .Currency("EUR"));

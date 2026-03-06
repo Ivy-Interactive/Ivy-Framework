@@ -53,6 +53,17 @@ Layout.Vertical().Gap(2)
     | new Expandable("Open", "This expandable is open").Open()
 ```
 
+### With Icon
+
+Add an icon to the expandable header to provide additional visual context.
+
+```csharp demo-tabs
+Layout.Vertical().Gap(2)
+    | new Expandable("Settings", "Configure your application preferences here.").Icon(Icons.Settings)
+    | new Expandable("User Profile", "View and edit your profile information.").Icon(Icons.User)
+    | new Expandable("Notifications", "Manage your notification preferences.").Icon(Icons.Bell)
+```
+
 <WidgetDocs Type="Ivy.Expandable" ExtensionTypes="Ivy.ExpandableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Expandable.cs"/>
 
 ## Examples

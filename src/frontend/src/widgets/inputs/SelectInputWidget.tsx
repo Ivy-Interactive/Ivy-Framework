@@ -16,13 +16,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { cn } from '@/lib/utils';
 import { getWidth, inputStyles } from '@/lib/styles';
+import { Input } from '@/components/ui/input';
 import {
   Tooltip,
   TooltipProvider,
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip';
-import { X } from 'lucide-react';
+import { X, Search, Loader2 } from 'lucide-react';
 import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
 import {
@@ -88,6 +89,12 @@ interface SelectInputWidgetProps {
   eventHandler: EventHandler;
   selectMany: boolean;
   separator: string;
+  maxSelections?: number;
+  minSelections?: number;
+  searchable?: boolean;
+  searchMode?: 'CaseInsensitive' | 'CaseSensitive' | 'Fuzzy';
+  emptyMessage?: string;
+  loading?: boolean;
   'data-testid'?: string;
   scale?: Scales;
   width?: string;
@@ -217,7 +224,8 @@ const ToggleOptionItem: React.FC<{
   isSelected: boolean;
   invalid?: string;
   scale?: Scales;
-}> = ({ option, isSelected, invalid, scale = Scales.Medium }) => {
+  disabled?: boolean;
+}> = ({ option, isSelected, invalid, scale = Scales.Medium, disabled }) => {
   const isInvalid = !!invalid && isSelected;
 
   const sizeClasses = {
@@ -243,6 +251,7 @@ const ToggleOptionItem: React.FC<{
             ? 'data-[state=on]:bg-primary data-[state=on]:border-primary data-[state=on]:text-primary-foreground'
             : undefined
       )}
+      disabled={disabled}
     >
       {option.label}
     </ToggleGroupItem>
@@ -274,6 +283,12 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   selectMany = false,
   separator = ',',
   nullable = false,
+  maxSelections,
+  minSelections,
+  searchable = false,
+  searchMode = 'CaseInsensitive',
+  emptyMessage,
+  loading = false,
   scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
@@ -310,6 +325,37 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   }, [value, selectMany, separator]);
 
   const hasValue = selectedValues.length > 0;
+  const isAtMax =
+    maxSelections != null && selectedValues.length >= maxSelections;
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredOptions = useMemo(() => {
+    if (!searchable || !searchTerm) return validOptions;
+
+    return validOptions.filter(option => {
+      if (searchMode === 'Fuzzy') {
+        let i = 0;
+        let j = 0;
+        const searchLower = searchTerm.toLowerCase();
+        const labelLower = option.label.toLowerCase();
+        while (i < searchLower.length && j < labelLower.length) {
+          if (searchLower[i] === labelLower[j]) i++;
+          j++;
+        }
+        return i === searchLower.length;
+      }
+      const term =
+        searchMode === 'CaseInsensitive'
+          ? searchTerm.toLowerCase()
+          : searchTerm;
+      const label =
+        searchMode === 'CaseInsensitive'
+          ? option.label.toLowerCase()
+          : option.label;
+      return label.includes(term);
+    });
+  }, [validOptions, searchable, searchTerm, searchMode]);
 
   const handleValueChange = useSelectValueHandler(
     id,
@@ -332,7 +378,28 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     >
       <div className="flex items-center gap-2">
         <div className="flex-1">
-          {selectMany ? (
+          {searchable && (
+            <div className="relative mb-3">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="pl-9 h-9"
+                disabled={disabled || loading}
+              />
+            </div>
+          )}
+          {loading ? (
+            <div className="flex justify-center p-2">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredOptions.length === 0 ? (
+            <div className="p-2 text-center text-sm text-muted-foreground">
+              {emptyMessage || 'No options available'}
+            </div>
+          ) : selectMany ? (
             <ToggleGroup
               type="multiple"
               value={selectedValues.map(v => v.toString())}
@@ -341,8 +408,16 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
               className="flex flex-wrap gap-2"
               data-testid={dataTestId}
             >
-              {validOptions.map(option => {
+              {filteredOptions.map(option => {
                 const isSelected = selectedValues.includes(option.value);
+                const isDisabled =
+                  disabled ||
+                  loading ||
+                  (!isSelected && isAtMax) ||
+                  (isSelected &&
+                    minSelections != null &&
+                    selectedValues.length <= minSelections);
+
                 return (
                   <ToggleOptionItem
                     key={option.value}
@@ -350,6 +425,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     isSelected={isSelected}
                     invalid={invalid}
                     scale={scale}
+                    disabled={isDisabled}
                   />
                 );
               })}
@@ -362,9 +438,17 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
               disabled={disabled}
               className="flex flex-wrap gap-2"
             >
-              {validOptions.map(option => {
+              {filteredOptions.map(option => {
                 const isSelected =
                   selectedValues[0] === option.value.toString();
+                const isDisabled =
+                  disabled ||
+                  loading ||
+                  (!isSelected && isAtMax) ||
+                  (isSelected &&
+                    minSelections != null &&
+                    selectedValues.length <= minSelections);
+
                 return (
                   <ToggleOptionItem
                     key={option.value}
@@ -372,6 +456,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     isSelected={isSelected}
                     invalid={invalid}
                     scale={scale}
+                    disabled={isDisabled}
                   />
                 );
               })}
@@ -537,6 +622,12 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   eventHandler,
   separator = ',',
   nullable = false,
+  maxSelections,
+  minSelections,
+  searchable = false,
+  searchMode = 'CaseInsensitive',
+  emptyMessage,
+  loading = false,
   scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
@@ -608,6 +699,37 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   );
 
   const hasValues = selectedValues.length > 0;
+  const isAtMax =
+    maxSelections != null && selectedValues.length >= maxSelections;
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredOptions = useMemo(() => {
+    if (!searchable || !searchTerm) return validOptions;
+
+    return validOptions.filter(option => {
+      if (searchMode === 'Fuzzy') {
+        let i = 0;
+        let j = 0;
+        const searchLower = searchTerm.toLowerCase();
+        const labelLower = option.label.toLowerCase();
+        while (i < searchLower.length && j < labelLower.length) {
+          if (searchLower[i] === labelLower[j]) i++;
+          j++;
+        }
+        return i === searchLower.length;
+      }
+      const term =
+        searchMode === 'CaseInsensitive'
+          ? searchTerm.toLowerCase()
+          : searchTerm;
+      const label =
+        searchMode === 'CaseInsensitive'
+          ? option.label.toLowerCase()
+          : option.label;
+      return label.includes(term);
+    });
+  }, [validOptions, searchable, searchTerm, searchMode]);
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -622,77 +744,114 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
     >
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
-          <div
-            className={cn(
-              'flex flex-col gap-4',
-              validOptions.length > 6
-                ? 'max-h-48 overflow-y-auto pr-2 -mr-2'
-                : ''
-            )}
-            data-testid={dataTestId}
-          >
-            {validOptions.map(option => {
-              const isSelected = selectedValues.includes(option.value);
-              const isInvalid = !!invalid && isSelected;
-              return (
-                <div key={option.value} className="flex items-center space-x-2">
-                  {isInvalid ? (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Checkbox
-                            id={`${id}-${option.value}`}
-                            checked={isSelected}
-                            onCheckedChange={checked =>
-                              handleCheckboxChange(
-                                option.value,
-                                checked === true
-                              )
-                            }
-                            disabled={disabled}
-                            className={cn(
-                              inputStyles.invalidInput,
-                              'bg-destructive/10 border-destructive text-destructive',
-                              selectTextVariants[scale]
-                            )}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-popover text-popover-foreground shadow-md">
-                          <div className="max-w-xs sm:max-w-sm">{invalid}</div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ) : (
-                    <Checkbox
-                      id={`${id}-${option.value}`}
-                      checked={isSelected}
-                      onCheckedChange={checked =>
-                        handleCheckboxChange(option.value, checked === true)
-                      }
-                      disabled={disabled}
-                      className={cn(
-                        'data-[state=unchecked]:bg-transparent data-[state=unchecked]:border-border',
-                        selectTextVariants[scale],
-                        isSelected
-                          ? 'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground'
-                          : undefined
-                      )}
-                    />
-                  )}
-                  <Label
-                    htmlFor={`${id}-${option.value}`}
-                    className={cn(
-                      'flex-1 cursor-pointer',
-                      selectTextVariants[scale],
-                      isInvalid ? inputStyles.invalidInput : undefined
-                    )}
+          {searchable && (
+            <div className="relative mb-3">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="pl-9 h-9"
+                disabled={disabled || loading}
+              />
+            </div>
+          )}
+          {loading ? (
+            <div className="flex justify-center p-4">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredOptions.length === 0 ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              {emptyMessage || 'No options available'}
+            </div>
+          ) : (
+            <div
+              className={cn(
+                'flex flex-col gap-4',
+                filteredOptions.length > 6
+                  ? 'max-h-48 overflow-y-auto pr-2 -mr-2'
+                  : ''
+              )}
+              data-testid={dataTestId}
+            >
+              {filteredOptions.map(option => {
+                const isSelected = selectedValues.includes(option.value);
+                const isInvalid = !!invalid && isSelected;
+                const isDisabled =
+                  disabled ||
+                  loading ||
+                  (!isSelected && isAtMax) ||
+                  (isSelected &&
+                    minSelections != null &&
+                    selectedValues.length <= minSelections);
+
+                return (
+                  <div
+                    key={option.value}
+                    className="flex items-center space-x-2"
                   >
-                    {option.label}
-                  </Label>
-                </div>
-              );
-            })}
-          </div>
+                    {isInvalid ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Checkbox
+                              id={`${id}-${option.value}`}
+                              checked={isSelected}
+                              onCheckedChange={checked =>
+                                handleCheckboxChange(
+                                  option.value,
+                                  checked === true
+                                )
+                              }
+                              disabled={isDisabled}
+                              className={cn(
+                                inputStyles.invalidInput,
+                                'bg-destructive/10 border-destructive text-destructive',
+                                selectTextVariants[scale]
+                              )}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                            <div className="max-w-xs sm:max-w-sm">
+                              {invalid}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <Checkbox
+                        id={`${id}-${option.value}`}
+                        checked={isSelected}
+                        onCheckedChange={checked =>
+                          handleCheckboxChange(option.value, checked === true)
+                        }
+                        disabled={isDisabled}
+                        className={cn(
+                          'data-[state=unchecked]:bg-transparent data-[state=unchecked]:border-border',
+                          selectTextVariants[scale],
+                          isSelected
+                            ? 'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground'
+                            : undefined
+                        )}
+                      />
+                    )}
+                    <Label
+                      htmlFor={`${id}-${option.value}`}
+                      className={cn(
+                        'flex-1 cursor-pointer',
+                        selectTextVariants[scale],
+                        isInvalid ? inputStyles.invalidInput : undefined,
+                        isDisabled && !isSelected ? 'opacity-50' : undefined
+                      )}
+                    >
+                      {option.label}
+                    </Label>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
         {((nullable && hasValues && !disabled) || invalid) && (
           <div className="flex flex-col items-center gap-1">
@@ -737,6 +896,12 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   eventHandler,
   nullable = false,
   selectMany = false,
+  maxSelections,
+  minSelections,
+  searchable = false,
+  searchMode = 'CaseInsensitive',
+  emptyMessage,
+  loading = false,
   scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
@@ -770,15 +935,18 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   }, [selectMany, value]);
 
   // Convert options to MultiSelectOption format
-  const multiSelectOptions: MultiSelectOption[] = useMemo(
-    () =>
-      validOptions.map(option => ({
-        label: option.label,
-        value: option.value.toString(),
-        disable: false,
-      })),
-    [validOptions]
-  );
+  const multiSelectOptions: MultiSelectOption[] = useMemo(() => {
+    const isAtMax =
+      maxSelections != null && selectedValues.length >= maxSelections;
+    return validOptions.map(option => ({
+      label: option.label,
+      value: option.value.toString(),
+      disable:
+        disabled ||
+        loading ||
+        (isAtMax && !selectedValues.includes(option.value.toString())),
+    }));
+  }, [validOptions, selectedValues, maxSelections, disabled, loading]);
 
   // Create lookup map for efficient option finding
   const optionsLookup = useMemo(() => {
@@ -868,11 +1036,50 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
     };
   }, [selectedLabel, stringValue, selectMany]);
 
+  // Shared Search State
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredOptions = useMemo(() => {
+    if (!searchable || !searchTerm) return validOptions;
+
+    return validOptions.filter(option => {
+      if (searchMode === 'Fuzzy') {
+        let i = 0;
+        let j = 0;
+        const searchLower = searchTerm.toLowerCase();
+        const labelLower = option.label.toLowerCase();
+        while (i < searchLower.length && j < labelLower.length) {
+          if (searchLower[i] === labelLower[j]) i++;
+          j++;
+        }
+        return i === searchLower.length;
+      }
+      const term =
+        searchMode === 'CaseInsensitive'
+          ? searchTerm.toLowerCase()
+          : searchTerm;
+      const label =
+        searchMode === 'CaseInsensitive'
+          ? option.label.toLowerCase()
+          : option.label;
+      return label.includes(term);
+    });
+  }, [validOptions, searchable, searchTerm, searchMode]);
+
   // Handle multiselect case
   if (selectMany) {
     const handleMultiSelectChange = (
       newSelectedOptions: MultiSelectOption[]
     ) => {
+      // Prevent deselection if at or below min
+      if (
+        minSelections != null &&
+        newSelectedOptions.length < minSelections &&
+        newSelectedOptions.length < selectedValues.length
+      ) {
+        return; // ignore the change
+      }
+
       const newValues = newSelectedOptions.map(opt => opt.value);
       const convertedValue = convertValuesToOriginalType(
         newValues,
@@ -891,7 +1098,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             defaultOptions={multiSelectOptions}
             onValueChange={handleMultiSelectChange}
             placeholder={placeholder}
-            disabled={disabled}
+            disabled={disabled || loading}
             className="w-full"
             invalid={!!invalid}
             hidePlaceholderWhenSelected
@@ -899,11 +1106,18 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             data-testid={dataTestId}
           />
           {(nullable && selectedMultiSelectOptions.length > 0 && !disabled) ||
-          invalid ? (
+          invalid ||
+          loading ? (
             <div
               className={selectIconContainerVariants({ scale })}
               style={{ zIndex: 2 }}
             >
+              {/* Loading spinner */}
+              {loading && (
+                <div className="pointer-events-auto flex items-center h-6 p-1">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
+                </div>
+              )}
               {/* Clear (X) button */}
               {nullable &&
                 selectedMultiSelectOptions.length > 0 &&
@@ -946,8 +1160,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
     );
   }
 
-  // Original single select logic
-  const groupedOptions = validOptions.reduce<Record<string, Option[]>>(
+  const groupedOptions = filteredOptions.reduce<Record<string, Option[]>>(
     (acc, option) => {
       const key = option.group || 'default';
       if (!acc[key]) {
@@ -1004,28 +1217,62 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
         >
           {selectTrigger}
           <SelectContent scale={scale}>
-            {Object.entries(groupedOptions).map(([group, options]) => (
-              <SelectGroup key={group}>
-                {group !== 'default' && <SelectLabel>{group}</SelectLabel>}
-                {options.map(option => (
-                  <SelectItem
-                    key={option.value}
-                    value={option.value.toString()}
-                    scale={scale}
-                  >
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ))}
+            {searchable && (
+              <div className="p-2 border-b">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    onKeyDown={e => e.stopPropagation()}
+                    onClick={e => e.stopPropagation()}
+                    className="pl-9 h-9"
+                    disabled={disabled || loading}
+                  />
+                </div>
+              </div>
+            )}
+            {loading ? (
+              <div className="flex justify-center p-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : filteredOptions.length === 0 ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                {emptyMessage || 'No options available'}
+              </div>
+            ) : (
+              Object.entries(groupedOptions).map(([group, options]) => (
+                <SelectGroup key={group}>
+                  {group !== 'default' && <SelectLabel>{group}</SelectLabel>}
+                  {options.map(option => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value.toString()}
+                      scale={scale}
+                      disabled={disabled || loading}
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))
+            )}
           </SelectContent>
         </Select>
         {/* Right-side icon container */}
-        {(nullable && hasValue && !disabled) || invalid ? (
+        {(nullable && hasValue && !disabled) || invalid || loading ? (
           <div
             className={selectIconContainerVariants({ scale })}
             style={{ zIndex: 2 }}
           >
+            {/* Loading spinner */}
+            {loading && (
+              <div className="pointer-events-auto flex items-center h-6 p-1">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
+              </div>
+            )}
             {/* Clear (X) button */}
             {nullable && hasValue && !disabled && (
               <button
@@ -1077,6 +1324,12 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
     variant: props.variant ?? 'Select',
     separator: props.separator ?? ';',
     selectMany: props.selectMany ?? false,
+    maxSelections: props.maxSelections,
+    minSelections: props.minSelections,
+    searchable: props.searchable ?? false,
+    searchMode: props.searchMode ?? 'CaseInsensitive',
+    emptyMessage: props.emptyMessage,
+    loading: props.loading ?? false,
   };
 
   switch (normalizedProps.variant) {

@@ -9,8 +9,9 @@ interface ProgressWidgetProps {
   id: string;
   goal?: string;
   value?: number;
-  colorVariant: 'Primary';
+  color?: string;
   width?: string;
+  indeterminate?: boolean;
 }
 
 const SparkleStyles = () => (
@@ -44,16 +45,25 @@ const SparkleStyles = () => (
 export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   value,
   goal,
-  colorVariant = 'Primary',
+  color,
   width = 'Full',
+  indeterminate = false,
 }) => {
-  const isCompleted = value && value >= 100;
-  const styles = getWidth(width);
+  const isIndeterminate =
+    indeterminate || value === null || value === undefined;
+  const isCompleted = !isIndeterminate && value && value >= 100;
+
+  const containerStyles: React.CSSProperties = {
+    ...getWidth(width),
+    ...(color && color.toLowerCase() !== 'primary'
+      ? { '--primary': `var(--${color.toLowerCase()})` }
+      : {}),
+  };
 
   return (
     <>
       <SparkleStyles />
-      <div className="w-full group relative" style={styles}>
+      <div className="w-full group relative" style={containerStyles}>
         {goal && (
           <Badge
             variant="secondary"
@@ -77,15 +87,9 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
           </Badge>
         )}
         <Progress
-          value={value}
+          value={isIndeterminate ? undefined : value}
+          indeterminate={isIndeterminate}
           className="bg-neutral/10"
-          style={
-            {
-              '--progress-background': colorVariant
-                ? `var(--${colorVariant})`
-                : 'var(--primary)',
-            } as React.CSSProperties
-          }
         />
       </div>
     </>

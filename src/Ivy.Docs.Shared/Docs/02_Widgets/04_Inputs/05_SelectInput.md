@@ -28,7 +28,7 @@ public class SelectVariantDemo : ViewBase
     {
         var favLang = UseState("C#");
         return favLang.ToSelectInput(["C#", "Java", "Go", "JavaScript", "F#", "Kotlin", "VB.NET", "Rust"])
-                         .Variant(SelectInputs.Select)
+                         .Variant(SelectInputVariants.Select)
                          .WithField()
                          .Label("Select your favourite programming language")
                          .Width(Size.Full());
@@ -68,16 +68,16 @@ public class MultiSelectDemo : ViewBase
         return Layout.Vertical()
             | Text.InlineCode("Select Variant (Enum)")
             | languagesSelect.ToSelectInput(languageOptions)
-                .Variant(SelectInputs.Select)
+                .Variant(SelectInputVariants.Select)
                 .Placeholder("Choose languages...")
             
             | Text.InlineCode("List Variant (String Array)")
             | stringArray.ToSelectInput(stringOptions.ToOptions())
-                .Variant(SelectInputs.List)
+                .Variant(SelectInputVariants.List)
             
             | Text.InlineCode("Toggle Variant (Integer Array)")
             | intArray.ToSelectInput(intOptions)
-                .Variant(SelectInputs.Toggle);
+                .Variant(SelectInputVariants.Toggle);
     }
 }
 ```
@@ -225,11 +225,11 @@ public class CoffeeShopDemo: ViewBase
         }
         
         var coffeeSizeMenu = coffeeSize.ToSelectInput(coffeeSizes)
-                                       .Variant(SelectInputs.List);
+                                       .Variant(SelectInputVariants.List);
         var availableCondiments = CoffeeAccompaniments[coffee.Value];
         
         var condimentMenu = selectedCondiments.ToSelectInput(availableCondiments.ToOptions())
-            .Variant(SelectInputs.Toggle);
+            .Variant(SelectInputVariants.Toggle);
         
         var orderSummary = BuildOrderSummary(coffee.Value, coffeeSize.Value, selectedCondiments.Value);
         

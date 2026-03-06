@@ -32,7 +32,7 @@ var chromeSettings = new ChromeSettings()
     .Footer(
         Layout.Vertical().Gap(2)
         | new Button("Support")
-            .HandleClick(_ => { })
+            .OnClick(_ => { })
         | Text.P("Enterprise Application Framework").Small()
     )
     .DefaultApp<MyApp>()

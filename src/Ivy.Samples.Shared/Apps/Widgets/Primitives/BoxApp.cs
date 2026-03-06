@@ -7,6 +7,8 @@ public class BoxApp : SampleBase
 {
     protected override object? BuildSample()
     {
+        var client = UseService<IClientProvider>();
+
         //Get all colors:
         Colors[] colors = (Colors[])Enum.GetValues(typeof(Colors));
 
@@ -55,6 +57,20 @@ public class BoxApp : SampleBase
                | (Layout.Horizontal()
                   | box.BorderRadius(BorderRadius.Full).Content("BorderRadius.Full")
                   | box.BorderRadius(BorderRadius.None).Content("BorderRadius.None")
+               )
+
+               | Text.H2("OnClick")
+               | new DemoView(_ => box.OnClick(() => client.Toast("Box clicked!")).Content("Clickable Box"))
+               | (Layout.Horizontal()
+                  | box.OnClick(() => client.Toast("Click me clicked!")).Content("Click me!")
+               )
+
+               | Text.H2("Hover Variants")
+               | new DemoView(_ => box.Hover(CardHoverVariant.PointerAndTranslate).Content("CardHoverVariant.PointerAndTranslate"))
+               | (Layout.Horizontal()
+                  | box.Hover(CardHoverVariant.None).Content("None")
+                  | box.Hover(CardHoverVariant.Pointer).Content("Pointer")
+                  | box.Hover(CardHoverVariant.PointerAndTranslate).Content("PointerAndTranslate")
                )
 
             ;

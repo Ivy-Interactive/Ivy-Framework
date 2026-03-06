@@ -197,7 +197,7 @@ The `SelectInput` widget now properly handles nullable values when cleared. Both
 Ivy now includes a `UseRef` hook for storing values that persist across renders without triggering re-renders, similar to React's useRef.
 
 ```csharp
-var counterRef = this.UseRef(0);
+var counterRef = UseRef(0);
 counterRef.Set(counterRef.Value + 1); // No re-render
 ```
 

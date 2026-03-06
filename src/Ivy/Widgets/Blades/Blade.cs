@@ -16,8 +16,8 @@ public record Blade : WidgetBase<Blade>
     {
         Index = index;
         Title = title;
-        OnClose = onClose;
-        OnRefresh = onRefresh;
+        OnClose = onClose.ToEventHandler();
+        OnRefresh = onRefresh.ToEventHandler();
         Width = width ?? Size.Fit().Min(Size.Units(90)).Max(Size.Units(300));
     }
 
@@ -29,16 +29,14 @@ public record Blade : WidgetBase<Blade>
 
     [Prop] public string? Title { get; set; }
 
-    [Event] public Func<Event<Blade>, ValueTask>? OnClose { get; set; }
+    [Event] public EventHandler<Event<Blade>>? OnClose { get; set; }
 
-    [Event] public Func<Event<Blade>, ValueTask>? OnRefresh { get; set; }
+    [Event] public EventHandler<Event<Blade>>? OnRefresh { get; set; }
 
     public Blade(IView bladeView, int index, string? title, Size? width, Action<Event<Blade>>? onClose, Action<Event<Blade>>? onRefresh)
     : this(bladeView, index, title, width,
-           onClose != null ? e => { onClose(e); return ValueTask.CompletedTask; }
-    : null,
-           onRefresh != null ? e => { onRefresh(e); return ValueTask.CompletedTask; }
-    : null)
+           onClose?.ToValueTask(),
+           onRefresh?.ToValueTask())
     {
     }
 }

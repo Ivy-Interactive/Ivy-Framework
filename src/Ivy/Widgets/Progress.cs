@@ -10,12 +10,6 @@ namespace Ivy;
 /// </summary>
 public record Progress : WidgetBase<Progress>
 {
-    public enum ColorVariants
-    {
-        Primary,
-        EmeraldGradient
-    }
-
     public Progress(IState<int> state) : this(state.Value)
     {
     }
@@ -34,7 +28,9 @@ public record Progress : WidgetBase<Progress>
 
     [Prop] public string? Goal { get; set; }
 
-    [Prop] public ColorVariants ColorVariant { get; set; } = ColorVariants.Primary;
+    [Prop] public Colors? Color { get; set; }
+
+    [Prop] public bool Indeterminate { get; set; }
 
     public static Progress operator |(Progress widget, object child)
     {
@@ -54,8 +50,13 @@ public static class ProgressExtensions
         return progress with { Goal = goal };
     }
 
-    public static Progress ColorVariant(this Progress progress, Progress.ColorVariants variant)
+    public static Progress Color(this Progress progress, Colors? color)
     {
-        return progress with { ColorVariant = variant };
+        return progress with { Color = color };
+    }
+
+    public static Progress Indeterminate(this Progress progress, bool indeterminate = true)
+    {
+        return progress with { Indeterminate = indeterminate };
     }
 }

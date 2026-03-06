@@ -58,7 +58,7 @@ public class FormBuilder<TModel> : ViewBase
     /// Sets a callback that is invoked after the form passes validation but before the model state is updated.
     /// Use this for async operations like saving to a database.
     /// </summary>
-    public FormBuilder<TModel> HandleSubmit(Func<TModel, Task> onSubmit)
+    public FormBuilder<TModel> OnSubmit(Func<TModel, Task> onSubmit)
     {
         _onSubmit = onSubmit;
         return this;
@@ -413,7 +413,7 @@ public class FormBuilder<TModel> : ViewBase
         return Layout.Vertical().Gap(buttonGap)
                | formView
                | Layout.Horizontal(
-                   _submitBuilder(submitting || isUploading).HandleClick(_ => handleSubmit()).Scale(_scale),
+                   _submitBuilder(submitting || isUploading).OnClick(_ => handleSubmit()).Scale(_scale),
                    validationView
                 );
     }

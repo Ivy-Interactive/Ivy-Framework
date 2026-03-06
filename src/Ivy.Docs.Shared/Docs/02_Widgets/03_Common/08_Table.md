@@ -327,7 +327,7 @@ public class CellBuildersExample : ViewBase
             .ColumnWidth(p => p.Price, Size.Fraction(0.15f))        // 15% for Price
             .ColumnWidth(p => p.Url, Size.Fraction(0.2f))           // 20% for URL
             .ColumnWidth(p => p.Description, Size.Fraction(0.25f))  // 25% for Description
-            .MultiLine(p => p.Description)                    // Enable multiline for the Description column
+            .Multiline(p => p.Description)                    // Enable multiline for the Description column
             .Builder(p => p.Url, f => f.Link())               // Link builder
             .Builder(p => p.Description, f => f.Text())       // Text builder
             .Builder(p => p.Sku, f => f.CopyToClipboard())    // Copy to clipboard

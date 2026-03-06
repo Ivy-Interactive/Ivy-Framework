@@ -45,7 +45,7 @@ public record Button : WidgetBase<Button>
         Title = title;
         Variant = variant;
         Icon = icon;
-        OnClick = onClick;
+        OnClick = onClick.ToEventHandler();
     }
 
     public Button(string? title = null, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
@@ -53,7 +53,7 @@ public record Button : WidgetBase<Button>
         Title = title;
         Variant = variant;
         Icon = icon;
-        OnClick = onClick?.ToValueTask();
+        OnClick = onClick.ToEventHandler();
     }
 
     public Button(string? title = null, Action? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
@@ -61,7 +61,7 @@ public record Button : WidgetBase<Button>
         Title = title;
         Variant = variant;
         Icon = icon;
-        OnClick = onClick == null ? null : (_ => { onClick(); return ValueTask.CompletedTask; });
+        OnClick = onClick == null ? null : new(_ => { onClick(); return ValueTask.CompletedTask; });
     }
 
     [Prop] public string? Title { get; set; }
@@ -86,7 +86,7 @@ public record Button : WidgetBase<Button>
 
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
-    [Event] public Func<Event<Button>, ValueTask>? OnClick { get; set; }
+    [Event] public EventHandler<Event<Button>>? OnClick { get; set; }
 
     public object? Tag { get; set; } //not a prop!
 
@@ -106,7 +106,7 @@ public static class ButtonExtensions
 
     public static Button ToButton(this Icons icon, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
     {
-        return new Button(null, onClick?.ToValueTask(), icon: icon, variant: variant);
+        return new Button(null, onClick, icon: icon, variant: variant);
     }
 
     public static IView ToTrigger(this Button trigger, Func<IState<bool>, object> action)
@@ -116,14 +116,14 @@ public static class ButtonExtensions
                 var isOpen = context.UseState(false);
                 var clonedTrigger = trigger with
                 {
-                    OnClick = async @event =>
+                    OnClick = new(async @event =>
                     {
                         if (trigger.OnClick != null)
                         {
-                            await trigger.OnClick(@event);
+                            await trigger.OnClick.Invoke(@event);
                         }
                         isOpen.Value = true;
-                    }
+                    })
                 };
                 return new Fragment(
                     clonedTrigger,
@@ -163,13 +163,13 @@ public static class ButtonExtensions
 
     public static Button Loading(this Button button, IState<bool> loading) => button.Loading(loading.Value);
 
-    public static Button HandleClick(this Button button, Func<Event<Button>, ValueTask> onClick) => button with { OnClick = onClick };
+    public static Button OnClick(this Button button, Func<Event<Button>, ValueTask> onClick) => button with { OnClick = new(onClick) };
 
-    public static Button HandleClick(this Button button, Action<Event<Button>> onClick) => button with { OnClick = onClick.ToValueTask() };
+    public static Button OnClick(this Button button, Action<Event<Button>> onClick) => button with { OnClick = new(onClick.ToValueTask()) };
 
-    public static Button HandleClick(this Button button, Action onClick) => button with { OnClick = _ => { onClick(); return ValueTask.CompletedTask; } };
+    public static Button OnClick(this Button button, Action onClick) => button with { OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; }) };
 
-    public static Button HandleClick(this Button button, Func<ValueTask> onClick) => button with { OnClick = _ => onClick() };
+    public static Button OnClick(this Button button, Func<ValueTask> onClick) => button with { OnClick = new(_ => onClick()) };
 
     public static Button Tag(this Button button, object tag) => button with { Tag = tag };
 

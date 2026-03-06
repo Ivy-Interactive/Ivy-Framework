@@ -30,7 +30,7 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
     [OverloadResolutionPriority(1)]
     public DropDownMenu(Func<Event<DropDownMenu, object>, ValueTask> onSelect, object trigger, params IEnumerable<MenuItem> items) : base([new Slot("Trigger", trigger)])
     {
-        OnSelect = onSelect;
+        OnSelect = new(onSelect);
         Items = items.ToArray();
     }
 
@@ -44,7 +44,7 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
     }
 
     public DropDownMenu(Action<Event<DropDownMenu, object>> onSelect, object trigger, params IEnumerable<MenuItem> items)
-        : this(e => { onSelect(e); return ValueTask.CompletedTask; }, trigger, items)
+        : this(onSelect.ToValueTask(), trigger, items)
     {
     }
 
@@ -58,7 +58,7 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
 
     [Prop] public int AlignOffset { get; set; } = 0;
 
-    [Event] public Func<Event<DropDownMenu, object>, ValueTask>? OnSelect { get; set; }
+    [Event] public EventHandler<Event<DropDownMenu, object>>? OnSelect { get; set; }
 
     public static DropDownMenu operator |(DropDownMenu widget, object child)
     {
@@ -128,18 +128,18 @@ public static class DropDownMenuExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Func<Event<DropDownMenu, object>, ValueTask> onSelect)
+    public static DropDownMenu OnSelect(this DropDownMenu dropDownMenu, Func<Event<DropDownMenu, object>, ValueTask> onSelect)
     {
-        return dropDownMenu with { OnSelect = onSelect };
+        return dropDownMenu with { OnSelect = new(onSelect) };
     }
 
-    public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Action<Event<DropDownMenu, object>> onSelect)
+    public static DropDownMenu OnSelect(this DropDownMenu dropDownMenu, Action<Event<DropDownMenu, object>> onSelect)
     {
-        return dropDownMenu with { OnSelect = onSelect.ToValueTask() };
+        return dropDownMenu with { OnSelect = new(onSelect.ToValueTask()) };
     }
 
-    public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Action<object> onSelect)
+    public static DropDownMenu OnSelect(this DropDownMenu dropDownMenu, Action<object> onSelect)
     {
-        return dropDownMenu with { OnSelect = @event => { onSelect(@event.Value); return ValueTask.CompletedTask; } };
+        return dropDownMenu with { OnSelect = new(@event => { onSelect(@event.Value); return ValueTask.CompletedTask; }) };
     }
 }

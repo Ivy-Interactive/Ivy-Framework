@@ -49,7 +49,7 @@ public record SidebarMenu : WidgetBase<SidebarLayout>
     [OverloadResolutionPriority(1)]
     public SidebarMenu(Func<Event<SidebarMenu, object>, ValueTask> onSelect, params MenuItem[] items)
     {
-        OnSelect = onSelect;
+        OnSelect = new(onSelect);
         Items = items;
     }
 
@@ -57,9 +57,9 @@ public record SidebarMenu : WidgetBase<SidebarLayout>
 
     [Prop] public MenuItem[] Items { get; set; }
 
-    [Event] public Func<Event<SidebarMenu, object>, ValueTask> OnSelect { get; set; }
+    [Event] public EventHandler<Event<SidebarMenu, object>> OnSelect { get; set; }
 
-    [Event] public Func<Event<SidebarMenu, object>, ValueTask>? OnCtrlRightClickSelect { get; set; }
+    [Event] public EventHandler<Event<SidebarMenu, object>>? OnCtrlRightClickSelect { get; set; }
 
     public static SidebarMenu operator |(SidebarMenu widget, object child)
     {
@@ -67,7 +67,7 @@ public record SidebarMenu : WidgetBase<SidebarLayout>
     }
 
     public SidebarMenu(Action<Event<SidebarMenu, object>> onSelect, params MenuItem[] items)
-    : this(e => { onSelect(e); return ValueTask.CompletedTask; }, items)
+    : this(onSelect.ToValueTask(), items)
     {
     }
 }

@@ -70,6 +70,20 @@ public static class FileInputValidation
         return ValidationResult.Success();
     }
 
+    public static ValidationResult ValidateMinFileSize(IFileUpload file, long? minFileSize)
+    {
+        if (minFileSize == null) return ValidationResult.Success();
+
+        if (file.Length < minFileSize.Value)
+        {
+            var minSizeFormatted = Utils.FormatBytes(minFileSize.Value);
+            var fileSizeFormatted = Utils.FormatBytes(file.Length);
+            return ValidationResult.Error($"File '{file.FileName}' is too small ({fileSizeFormatted}). Minimum required size is {minSizeFormatted}.");
+        }
+
+        return ValidationResult.Success();
+    }
+
     private static List<string> ParseAcceptPattern(string accept)
     {
         return accept.Split(',')

@@ -61,7 +61,7 @@ public class MyNavigationApp : ViewBase
         var navigator = UseNavigation();
         
         return new Button("Navigate to Another App")
-            .HandleClick(() => navigator.Navigate(typeof(AnotherApp)));
+            .OnClick(() => navigator.Navigate(typeof(AnotherApp)));
     }
 }
 ```
@@ -96,13 +96,13 @@ public class DashboardApp : ViewBase
         
         return Layout.Vertical(
             new Button("Go to User Profile")
-                .HandleClick(() => navigator.Navigate(typeof(UserProfileApp))),
+                .OnClick(() => navigator.Navigate(typeof(UserProfileApp))),
                 
             new Button("Open Settings")
-                .HandleClick(() => navigator.Navigate(typeof(SettingsApp))),
+                .OnClick(() => navigator.Navigate(typeof(SettingsApp))),
                 
             new Button("View Reports")
-                .HandleClick(() => navigator.Navigate(typeof(ReportsApp)))
+                .OnClick(() => navigator.Navigate(typeof(ReportsApp)))
         );
     }
 }

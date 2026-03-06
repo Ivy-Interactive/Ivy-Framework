@@ -8,7 +8,7 @@ using Ivy.Widgets.Inputs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum BoolInputs
+public enum BoolInputVariants
 {
     Checkbox,
     Switch,
@@ -21,7 +21,7 @@ public interface IAnyBoolInput : IAnyInput
 
     public string? Description { get; set; }
 
-    public BoolInputs Variant { get; set; }
+    public BoolInputVariants Variant { get; set; }
 
     public Icons Icon { get; set; }
 }
@@ -36,14 +36,14 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 
     [Prop] public string? Description { get; set; }
 
-    [Prop] public BoolInputs Variant { get; set; } = BoolInputs.Checkbox;
+    [Prop] public BoolInputVariants Variant { get; set; } = BoolInputVariants.Checkbox;
 
     [Prop] public Icons Icon { get; set; }
 
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
     [
@@ -66,30 +66,30 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 {
     [OverloadResolutionPriority(1)]
     public BoolInput(IAnyState state, string? label = null, bool disabled = false,
-        BoolInputs variant = BoolInputs.Checkbox)
+        BoolInputVariants variant = BoolInputVariants.Checkbox)
         : this(label, disabled, variant)
     {
         var typedState = state.As<TBool>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public BoolInput(TBool value, Func<Event<IInput<TBool>, TBool>, ValueTask> onChange, string? label = null,
-        bool disabled = false, BoolInputs variant = BoolInputs.Checkbox) : this(label, disabled, variant)
+        bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox) : this(label, disabled, variant)
     {
-        OnChange = onChange;
+        OnChange = new(onChange);
         Value = value;
     }
 
     public BoolInput(TBool value, Action<Event<IInput<TBool>, TBool>> onChange, string? label = null,
-        bool disabled = false, BoolInputs variant = BoolInputs.Checkbox) : this(label, disabled, variant)
+        bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox) : this(label, disabled, variant)
     {
-        OnChange = e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = new(onChange.ToValueTask());
         Value = value;
     }
 
-    public BoolInput(string? label = null, bool disabled = false, BoolInputs variant = BoolInputs.Checkbox)
+    public BoolInput(string? label = null, bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox)
     {
         Label = label;
         Disabled = disabled;
@@ -98,11 +98,11 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 
     internal BoolInput() { }
 
-    [Prop] public TBool Value { get; } = default!;
+    [Prop] public TBool Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TBool) == typeof(bool?);
 
-    [Event] public Func<Event<IInput<TBool>, TBool>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TBool>, TBool>>? OnChange { get; }
 }
 
 /// <summary>
@@ -112,25 +112,25 @@ public record BoolInput : BoolInput<bool>
 {
     [OverloadResolutionPriority(1)]
     public BoolInput(IAnyState state, string? label = null, bool disabled = false,
-        BoolInputs variant = BoolInputs.Checkbox)
+        BoolInputVariants variant = BoolInputVariants.Checkbox)
         : base(state, label, disabled, variant)
     {
     }
 
     [OverloadResolutionPriority(1)]
     public BoolInput(bool value, Func<Event<IInput<bool>, bool>, ValueTask> onChange, string? label = null,
-        bool disabled = false, BoolInputs variant = BoolInputs.Checkbox)
+        bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox)
         : base(value, onChange, label, disabled, variant)
     {
     }
 
     public BoolInput(bool value, Action<Event<IInput<bool>, bool>> onChange, string? label = null,
-        bool disabled = false, BoolInputs variant = BoolInputs.Checkbox)
+        bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox)
         : base(value, onChange, label, disabled, variant)
     {
     }
 
-    public BoolInput(string? label = null, bool disabled = false, BoolInputs variant = BoolInputs.Checkbox)
+    public BoolInput(string? label = null, bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox)
         : base(label, disabled, variant)
     {
     }
@@ -139,7 +139,7 @@ public record BoolInput : BoolInput<bool>
 public static class BoolInputExtensions
 {
     public static BoolInputBase ToBoolInput(this IAnyState state, string? label = null, bool disabled = false,
-    BoolInputs variant = BoolInputs.Checkbox)
+    BoolInputVariants variant = BoolInputVariants.Checkbox)
     {
         var stateType = state.GetStateType();
         var isNullable = stateType.IsNullableType();
@@ -244,7 +244,7 @@ public static class BoolInputExtensions
     public static BoolInputBase ToSwitchInput(this IAnyState state, Icons? icon = null, string? label = null,
         bool disabled = false)
     {
-        var input = state.ToBoolInput(label, disabled, BoolInputs.Switch);
+        var input = state.ToBoolInput(label, disabled, BoolInputVariants.Switch);
         if (icon != null)
         {
             input.Icon = icon.Value;
@@ -256,7 +256,7 @@ public static class BoolInputExtensions
     public static BoolInputBase ToToggleInput(this IAnyState state, Icons? icon = null, string? label = null,
         bool disabled = false)
     {
-        var input = state.ToBoolInput(label, disabled, BoolInputs.Toggle);
+        var input = state.ToBoolInput(label, disabled, BoolInputVariants.Toggle);
         if (icon != null)
         {
             input.Icon = icon.Value;
@@ -280,7 +280,7 @@ public static class BoolInputExtensions
     public static BoolInputBase Disabled(this BoolInputBase widget, bool disabled = true) =>
         widget with { Disabled = disabled };
 
-    public static BoolInputBase Variant(this BoolInputBase widget, BoolInputs variant) =>
+    public static BoolInputBase Variant(this BoolInputBase widget, BoolInputVariants variant) =>
         widget with { Variant = variant };
 
     public static BoolInputBase Icon(this BoolInputBase widget, Icons icon) => widget with { Icon = icon };
@@ -294,18 +294,28 @@ public static class BoolInputExtensions
         widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]
-    public static BoolInputBase HandleBlur(this BoolInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static BoolInputBase OnBlur(this BoolInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static BoolInputBase HandleBlur(this BoolInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static BoolInputBase OnBlur(this BoolInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget with { OnBlur = new(onBlur.ToValueTask()) };
     }
 
-    public static BoolInputBase HandleBlur(this BoolInputBase widget, Action onBlur)
+    public static BoolInputBase OnBlur(this BoolInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
+
+    public static BoolInputBase Value<T>(this BoolInputBase widget, T value)
+    {
+        if (widget is BoolInput<T> typedWidget)
+        {
+            return typedWidget with { Value = value };
+        }
+        throw new InvalidOperationException($"Cannot set Value: widget is not BoolInput<{typeof(T).Name}>");
+    }
+
 }

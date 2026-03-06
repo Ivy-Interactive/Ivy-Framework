@@ -19,7 +19,7 @@ public record Kanban : WidgetBase<Kanban>
 
     [Prop] public Size? ColumnWidth { get; set; }
 
-    [Event] public Func<Event<Kanban, (object? CardId, object? ToColumn, int? TargetIndex)>, ValueTask>? OnCardMove { get; set; }
+    [Event] public EventHandler<Event<Kanban, (object? CardId, object? ToColumn, int? TargetIndex)>>? OnCardMove { get; set; }
 
     public static Kanban operator |(Kanban kanban, KanbanCard child)
     {

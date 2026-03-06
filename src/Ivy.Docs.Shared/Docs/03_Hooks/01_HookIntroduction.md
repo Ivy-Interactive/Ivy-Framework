@@ -158,7 +158,7 @@ public class BasicReducerDemo : ViewBase
 
     public override object? Build()
     {
-        var (count, dispatch) = this.UseReducer(CounterReducer, 0);
+        var (count, dispatch) = UseReducer(CounterReducer, 0);
 
         return Layout.Vertical(
             Text.P($"Count: {count}").Large(),
@@ -214,7 +214,7 @@ public class MemoDemo : ViewBase
             | number.ToNumberInput()
                 .Min(0)
                 .Max(20)
-                .Variant(NumberInputs.Slider)
+                .Variant(NumberInputVariants.Slider)
                 .WithField()
                 .Label($"Number: {number.Value}")
             | Text.P($"{number.Value}² = {squared}")
@@ -254,7 +254,7 @@ public class CallbackDemo : ViewBase
             | multiplier.ToNumberInput()
                 .Min(1)
                 .Max(10)
-                .Variant(NumberInputs.Slider)
+                .Variant(NumberInputVariants.Slider)
                 .WithField()
                 .Label("Multiplier")
             | (Layout.Horizontal()

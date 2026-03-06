@@ -72,7 +72,7 @@ public record MyWidget : WidgetBase<MyWidget>
 - **GlobalName** — Must match the Vite library `name` (and the global variable the IIFE assigns). Use the full namespace with dots replaced by underscores (e.g. `MyProject_Widgets_MyWidget`).
 
 <Callout Type="info">
-Use `[Prop]` for data and `[Event]` for callbacks. You can add extension methods for a fluent API (e.g. `.Label("...")`, `.HandleClick(...)`).
+Use `[Prop]` for data and `[Event]` for callbacks. You can add extension methods for a fluent API (e.g. `.Label("...")`, `.OnClick(...)`).
 </Callout>
 
 ## Frontend (Vite Library)

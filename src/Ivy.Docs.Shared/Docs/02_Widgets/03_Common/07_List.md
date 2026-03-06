@@ -71,7 +71,7 @@ public class ListConfigDemo : ViewBase
             | new List(new[]
             {
                 new ListItem("Notifications", icon: Icons.Bell)
-                    .Content(new BoolInput(notifications, variant: BoolInputs.Switch)),
+                    .Content(new BoolInput(notifications, variant: BoolInputVariants.Switch)),
                 new ListItem("Status", icon: Icons.Activity)
                     .Content(
                         Layout.Horizontal().Gap(2)

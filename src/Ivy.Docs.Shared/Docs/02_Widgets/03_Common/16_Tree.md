@@ -58,7 +58,48 @@ public class TreeClickDemo : ViewBase
                         new MenuItem("App.tsx").Icon(Icons.Code).Tag("App.tsx"),
                         new MenuItem("index.ts").Icon(Icons.Code).Tag("index.ts")
                     )
-            ).HandleSelect(e => selected.Set(e.Value?.ToString() ?? ""));
+            ).OnSelect(e => selected.Set(e.Value?.ToString() ?? ""));
+    }
+}
+```
+
+## Row Actions
+
+**Row actions** can be defined as a set of actions (buttons or menu items) displayed for each tree row. Configure them via `.RowActions()` with one or more `MenuItem`s, and subscribe to clicks with `.OnRowAction()`.
+
+```csharp demo-tabs
+public class TreeRowActionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var lastAction = UseState("None");
+
+        return Layout.Vertical()
+            | Text.Block($"  Last Action: {lastAction.Value}")
+            | new Tree(
+                new MenuItem("src")
+                    .Icon(Icons.Folder)
+                    .Expanded()
+                    .Children(
+                        new MenuItem("components")
+                            .Icon(Icons.Folder)
+                            .Expanded()
+                            .Children(
+                                new MenuItem("Button.tsx").Icon(Icons.Code).Tag("Button.tsx"),
+                                new MenuItem("Card.tsx").Icon(Icons.Code).Tag("Card.tsx")
+                            ),
+                        new MenuItem("App.tsx").Icon(Icons.Code).Tag("App.tsx")
+                    ),
+                new MenuItem("package.json").Icon(Icons.Braces).Tag("package.json")
+            )
+            .RowActions(
+                new MenuItem("Edit").Icon(Icons.Pencil).Tag("edit"),
+                new MenuItem("More").Icon(Icons.Ellipsis).Children(
+                    new MenuItem("Duplicate").Icon(Icons.Copy).Tag("duplicate"),
+                    new MenuItem("Delete").Icon(Icons.Trash).Tag("delete")
+                )
+            )
+            .OnRowAction(e => lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}"));
     }
 }
 ```

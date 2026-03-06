@@ -1,17 +1,19 @@
 import { HtmlRenderer } from '@/components/HtmlRenderer';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Scales } from '@/types/scale';
 
 interface HtmlWidgetProps {
   id: string;
   content: string;
   scale?: Scales;
+  dangerouslyAllowScripts?: boolean;
 }
 
 export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
   id,
   content,
   scale = Scales.Medium,
+  dangerouslyAllowScripts = false,
 }) => {
   const getScaleStyle = (s: Scales): React.CSSProperties => {
     switch (s) {
@@ -38,6 +40,38 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
     gap: '1rem',
     ...getScaleStyle(scale),
   };
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Execute scripts when dangerouslyAllowScripts is enabled
+  useEffect(() => {
+    if (!dangerouslyAllowScripts || !containerRef.current) return;
+
+    // Find all script tags and execute them
+    const scripts = containerRef.current.querySelectorAll('script');
+    scripts.forEach(oldScript => {
+      const newScript = document.createElement('script');
+      // Copy all attributes
+      Array.from(oldScript.attributes).forEach(attr => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+      // Copy inline script content
+      newScript.textContent = oldScript.textContent;
+      // Replace old script with new one to trigger execution
+      oldScript.parentNode?.replaceChild(newScript, oldScript);
+    });
+  }, [dangerouslyAllowScripts, content]);
+
+  if (dangerouslyAllowScripts) {
+    return (
+      <div
+        ref={containerRef}
+        style={styles}
+        className="w-full"
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    );
+  }
 
   return (
     <div style={styles} className="w-full">

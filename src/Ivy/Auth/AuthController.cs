@@ -119,7 +119,7 @@ public class AuthController() : Controller
             }
             else
             {
-                logger.LogWarning("OAuth callback: session not found for connection {ConnectionId}. This will prevent the Clerk auth provider from working correctly. All other providers are unaffected.", pending.ConnectionId);
+                logger.LogDebug("OAuth callback: session not found for connection {ConnectionId} (expected during redirect flow). Using default HttpMessageHandler; Clerk auth provider may be affected.", pending.ConnectionId);
                 httpMessageHandler = new HttpClientHandler();
             }
 

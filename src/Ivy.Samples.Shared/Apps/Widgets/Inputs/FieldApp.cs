@@ -54,14 +54,14 @@ public class FieldApp : SampleBase
 
                 // Checkbox wrapped with .WithField()
                 | acceptedTerms.ToSelectInput(options.ToOptions())
-                                .Variant(SelectInputs.List)
+                                .Variant(SelectInputVariants.List)
                     .WithField()
                     .Label("Accept Terms & Conditions")
                     .Description("You must accept to continue")
                     .Required()
 
                 // TextArea input using .WithField()
-                | addressState.ToTextAreaInput()
+                | addressState.ToTextareaInput()
                     .Placeholder("Street, City, ZIP")
                     .WithField()
                     .Label("Address")

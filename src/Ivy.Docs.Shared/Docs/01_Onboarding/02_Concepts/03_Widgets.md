@@ -37,13 +37,13 @@ Ivy ships with a comprehensive set of strongly-typed widgets:
 
 | Category | Examples |
 |----------|----------|
-| Common | [Button](../../02_Widgets/03_Common/01_Button.md), [Badge](../../02_Widgets/03_Common/02_Badge.md), [Progress](../../02_Widgets/03_Common/10_Progress.md), [Table](../../02_Widgets/03_Common/08_Table.md), [Card](../../02_Widgets/03_Common/04_Card.md), [Tooltip](../../02_Widgets/03_Common/03_Tooltip.md), [Expandable](../../02_Widgets/03_Common/06_Expandable.md), [Blades](../../02_Widgets/03_Common/12_Blades.md), [Details](../../02_Widgets/03_Common/05_Details.md), [DropDownMenu](../../02_Widgets/03_Common/11_DropDownMenu.md), [List](../../02_Widgets/03_Common/07_List.md)... |
-| Inputs | [TextInput](../../02_Widgets/04_Inputs/02_TextInput.md), [NumberInput](../../02_Widgets/04_Inputs/03_NumberInput.md), [BoolInput](../../02_Widgets/04_Inputs/04_BoolInput.md), [DateTimeInput](../../02_Widgets/04_Inputs/07_DateTimeInput.md), [FileInput](../../02_Widgets/04_Inputs/10_FileInput.md), [Feedback](../../02_Widgets/04_Inputs/13_FeedbackInput.md), [DateRange](../../02_Widgets/04_Inputs/08_DateRangeInput.md), [Color](../../02_Widgets/04_Inputs/09_ColorInput.md), [CodeInput](../../02_Widgets/04_Inputs/11_CodeInput.md), [ReadOnly](../../02_Widgets/04_Inputs/14_ReadOnlyInput.md), [AsyncSelect](../../02_Widgets/04_Inputs/06_AsyncSelectInput.md)... |
-| Primitives | [Text](../../02_Widgets/01_Primitives/01_TextBlock.md), [Icon](../../02_Widgets/01_Primitives/02_Icon.md), [Image](../../02_Widgets/01_Primitives/03_Image.md), [Markdown](../../02_Widgets/01_Primitives/14_Markdown.md), [Json](../../02_Widgets/01_Primitives/17_Json.md), [CodeBlock](../../02_Widgets/01_Primitives/10_CodeBlock.md), [Avatar](../../02_Widgets/01_Primitives/08_Avatar.md), [Box](../../02_Widgets/01_Primitives/04_Box.md), [Callout](../../02_Widgets/01_Primitives/12_Callout.md), [Error](../../02_Widgets/01_Primitives/13_Error.md), [Spacer](../../02_Widgets/01_Primitives/06_Spacer.md), [Separator](../../02_Widgets/01_Primitives/07_Separator.md), [Xml](../../02_Widgets/01_Primitives/16_Xml.md), [Html](../../02_Widgets/01_Primitives/15_Html.md)... |
-| Layouts | [StackLayout](../../02_Widgets/02_Layouts/01_StackLayout.md), [GridLayout](../../02_Widgets/02_Layouts/03_GridLayout.md), [TabsLayout](../../02_Widgets/02_Layouts/07_TabsLayout.md), [SidebarLayout](../../02_Widgets/02_Layouts/06_SidebarLayout.md), [FloatingPanel](../../02_Widgets/02_Layouts/09_FloatingPanel.md), [ResizablePanelGroup](../../02_Widgets/02_Layouts/08_ResizablePanelGroup.md), [Header](../../02_Widgets/02_Layouts/04_HeaderLayout.md), [Footer](../../02_Widgets/02_Layouts/05_FooterLayout.md)... |
-| Effects | [Animation](../../02_Widgets/05_Effects/Animation.md), [Confetti](../../02_Widgets/05_Effects/Confetti.md)... |
-| Charts | [LineChart](../../02_Widgets/06_Charts/01_LineChart.md), [BarChart](../../02_Widgets/06_Charts/02_BarChart.md), [PieChart](../../02_Widgets/06_Charts/04_PieChart.md), [AreaChart](../../02_Widgets/06_Charts/03_AreaChart.md)... |
-| Advanced | [Sheet](../../02_Widgets/07_Advanced/02_Sheet.md), [Chat](../../02_Widgets/07_Advanced/04_Chat.md)... |
+| Common | [Button](../../02_Widgets/03_Common/01_Button.md), [Badge](../../02_Widgets/03_Common/02_Badge.md), [Tooltip](../../02_Widgets/03_Common/03_Tooltip.md), [Card](../../02_Widgets/03_Common/04_Card.md), [Details](../../02_Widgets/03_Common/05_Details.md), [Expandable](../../02_Widgets/03_Common/06_Expandable.md), [List](../../02_Widgets/03_Common/07_List.md), [Table](../../02_Widgets/03_Common/08_Table.md), [Pagination](../../02_Widgets/03_Common/09_Pagination.md), [Progress](../../02_Widgets/03_Common/10_Progress.md), [DropDownMenu](../../02_Widgets/03_Common/11_DropDownMenu.md), [Blades](../../02_Widgets/03_Common/12_Blades.md), [MetricView](../../02_Widgets/03_Common/13_MetricView.md), [Terminal](../../02_Widgets/03_Common/14_Terminal.md), [Dialog](../../02_Widgets/03_Common/15_Dialog.md), [Tree](../../02_Widgets/03_Common/16_Tree.md) |
+| Inputs | [Field](../../02_Widgets/04_Inputs/01_Field.md), [TextInput](../../02_Widgets/04_Inputs/02_TextInput.md), [NumberInput](../../02_Widgets/04_Inputs/03_NumberInput.md), [BoolInput](../../02_Widgets/04_Inputs/04_BoolInput.md), [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md), [AsyncSelectInput](../../02_Widgets/04_Inputs/06_AsyncSelectInput.md), [DateTimeInput](../../02_Widgets/04_Inputs/07_DateTimeInput.md), [DateRangeInput](../../02_Widgets/04_Inputs/08_DateRangeInput.md), [ColorInput](../../02_Widgets/04_Inputs/09_ColorInput.md), [FileInput](../../02_Widgets/04_Inputs/10_FileInput.md), [CodeInput](../../02_Widgets/04_Inputs/11_CodeInput.md), [AudioInput](../../02_Widgets/04_Inputs/12_AudioInput.md), [FeedbackInput](../../02_Widgets/04_Inputs/13_FeedbackInput.md), [ReadOnlyInput](../../02_Widgets/04_Inputs/14_ReadOnlyInput.md) |
+| Primitives | [Text](../../02_Widgets/01_Primitives/01_TextBlock.md), [Icon](../../02_Widgets/01_Primitives/02_Icon.md), [Image](../../02_Widgets/01_Primitives/03_Image.md), [Box](../../02_Widgets/01_Primitives/04_Box.md), [Fragment](../../02_Widgets/01_Primitives/05_Fragment.md), [Spacer](../../02_Widgets/01_Primitives/06_Spacer.md), [Separator](../../02_Widgets/01_Primitives/07_Separator.md), [Avatar](../../02_Widgets/01_Primitives/08_Avatar.md), [Skeleton](../../02_Widgets/01_Primitives/09_Skeleton.md), [CodeBlock](../../02_Widgets/01_Primitives/10_CodeBlock.md), [Kbd](../../02_Widgets/01_Primitives/11_Kbd.md), [Callout](../../02_Widgets/01_Primitives/12_Callout.md), [Error](../../02_Widgets/01_Primitives/13_Error.md), [Markdown](../../02_Widgets/01_Primitives/14_Markdown.md), [Html](../../02_Widgets/01_Primitives/15_Html.md), [Xml](../../02_Widgets/01_Primitives/16_Xml.md), [Json](../../02_Widgets/01_Primitives/17_Json.md), [Svg](../../02_Widgets/01_Primitives/18_Svg.md), [Embed](../../02_Widgets/01_Primitives/19_Embed.md), [Iframe](../../02_Widgets/01_Primitives/20_Iframe.md), [AudioPlayer](../../02_Widgets/01_Primitives/21_AudioPlayer.md), [VideoPlayer](../../02_Widgets/01_Primitives/22_VideoPlayer.md), [Stepper](../../02_Widgets/01_Primitives/23_Stepper.md) |
+| Layouts | [StackLayout](../../02_Widgets/02_Layouts/01_StackLayout.md), [WrapLayout](../../02_Widgets/02_Layouts/02_WrapLayout.md), [GridLayout](../../02_Widgets/02_Layouts/03_GridLayout.md), [HeaderLayout](../../02_Widgets/02_Layouts/04_HeaderLayout.md), [FooterLayout](../../02_Widgets/02_Layouts/05_FooterLayout.md), [SidebarLayout](../../02_Widgets/02_Layouts/06_SidebarLayout.md), [TabsLayout](../../02_Widgets/02_Layouts/07_TabsLayout.md), [ResizablePanelGroup](../../02_Widgets/02_Layouts/08_ResizablePanelGroup.md), [FloatingPanel](../../02_Widgets/02_Layouts/09_FloatingPanel.md) |
+| Effects | [Animation](../../02_Widgets/05_Effects/Animation.md), [Confetti](../../02_Widgets/05_Effects/Confetti.md) |
+| Charts | [LineChart](../../02_Widgets/06_Charts/01_LineChart.md), [BarChart](../../02_Widgets/06_Charts/02_BarChart.md), [AreaChart](../../02_Widgets/06_Charts/03_AreaChart.md), [PieChart](../../02_Widgets/06_Charts/04_PieChart.md) |
+| Advanced | [DataTable](../../02_Widgets/07_Advanced/01_DataTable.md), [Sheet](../../02_Widgets/07_Advanced/02_Sheet.md), [Kanban](../../02_Widgets/07_Advanced/03_Kanban.md), [Chat](../../02_Widgets/07_Advanced/04_Chat.md), [ExternalWidgets](../../02_Widgets/07_Advanced/05_ExternalWidgets.md) |
 
 ### Common Widgets
 
@@ -79,12 +79,12 @@ public class CommonWidgetsDemo : ViewBase
             | new Card(
                 Layout.Vertical().Gap(2)
                     | new Progress(50).Goal("Task completion")
-                    | new Progress(75).ColorVariant(Progress.ColorVariants.EmeraldGradient)
+                    | new Progress(75).Color(Colors.Amber)
                     | new Progress(90)
             ).Title("Progress").Description("Task completion indicators").Height(Size.Units(50))
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | new Card("Clickable Card").HandleClick(_ => client.Toast("Clicked!"))
+                    | new Card("Clickable Card").OnClick(_ => client.Toast("Clicked!"))
             ).Title("Cards").Description("Content containers").Height(Size.Units(50))
             | new Card(
                 new[] {
@@ -182,13 +182,13 @@ public class InputWidgetsDemo : ViewBase
             | new Card(
                 Layout.Vertical().Gap(2)
                     | new TextInput(textState).Placeholder("Enter text...")
-                    | new TextInput(textState).Variant(TextInputs.Password).Placeholder("Password")
-                    | new TextInput(textState).Variant(TextInputs.Email).Placeholder("Email")
-                    | new TextInput(textState).Variant(TextInputs.Search).Placeholder("Search...")
+                    | new TextInput(textState).Variant(TextInputVariants.Password).Placeholder("Password")
+                    | new TextInput(textState).Variant(TextInputVariants.Email).Placeholder("Email")
+                    | new TextInput(textState).Variant(TextInputVariants.Search).Placeholder("Search...")
             ).Title("TextInput").Description("Text input variants").Height(Size.Units(80))
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | new NumberInput<double>(numberState).Min(0).Max(100).Variant(NumberInputs.Slider)
+                    | new NumberInput<double>(numberState).Min(0).Max(100).Variant(NumberInputVariants.Slider)
                     | new NumberInput<int>(numberState).Placeholder("Enter number")
                     | new NumberInput<decimal>(numberState).FormatStyle(NumberFormatStyle.Currency).Currency("USD").Placeholder("$0.00")
                     | new NumberInput<double>(numberState).FormatStyle(NumberFormatStyle.Percent).Placeholder("0%")
@@ -209,10 +209,10 @@ public class InputWidgetsDemo : ViewBase
                 new DateTimeInput<DateTime>(dateState).Placeholder("Select date")
             ).Title("DateTimeInput").Description("Date and time picker").Height(Size.Units(40))
             | new Card(
-                new FeedbackInput<int>(feedbackState).Variant(FeedbackInputs.Stars)
+                new FeedbackInput<int>(feedbackState).Variant(FeedbackInputVariants.Stars)
             ).Title("Feedback").Description("Star rating").Height(Size.Units(40))
             | new Card(
-                colorState.ToColorInput().Variant(ColorInputs.Picker)
+                colorState.ToColorInput().Variant(ColorInputVariants.Picker)
             ).Title("Color").Description("Color picker").Height(Size.Units(40))
             | new Card(
                 codeState.ToCodeInput().Language(Languages.Javascript).Height(Size.Units(15))

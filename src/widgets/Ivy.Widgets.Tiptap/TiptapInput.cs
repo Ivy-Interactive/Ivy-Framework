@@ -168,8 +168,8 @@ public static class TiptapInputExtensions
         widget with { OnBlur = onBlur };
 
     public static TiptapInputBase HandleBlur(this TiptapInputBase widget, Action<Event<IAnyInput>> onBlur) =>
-        widget.HandleBlur(onBlur.ToValueTask());
+        widget.OnBlur(onBlur.ToValueTask());
 
     public static TiptapInputBase HandleBlur(this TiptapInputBase widget, Action handler) =>
-        widget.HandleBlur(_ => { handler(); return ValueTask.CompletedTask; });
+        widget.OnBlur(_ => { handler(); return ValueTask.CompletedTask; });
 }

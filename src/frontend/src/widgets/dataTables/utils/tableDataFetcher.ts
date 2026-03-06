@@ -55,6 +55,7 @@ export const fetchTableData = async (
     offset: startIndex,
     connectionId: connection.connectionId,
     sourceId: connection.sourceId,
+    versionToken: connection.versionToken,
     ...(filter && { filter }),
     ...(sort && { sort }),
   };

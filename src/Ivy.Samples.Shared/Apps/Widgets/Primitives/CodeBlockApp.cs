@@ -231,6 +231,9 @@ public class CodeBlockApp : SampleBase
                 | Text.InlineCode("With Line Numbers")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowLineNumbers(true),
             Layout.Vertical()
+                | Text.InlineCode("Starting Line Number")
+                | new CodeBlock(sampleCode, Languages.Csharp).ShowLineNumbers(true).StartingLineNumber(42),
+            Layout.Vertical()
                 | Text.InlineCode("No Copy Button")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowCopyButton(false),
             Layout.Vertical()

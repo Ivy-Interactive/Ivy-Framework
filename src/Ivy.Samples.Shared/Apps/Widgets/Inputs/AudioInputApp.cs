@@ -6,7 +6,7 @@ namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
 [App(icon: Icons.Mic, path: ["Widgets", "Inputs"], searchHints: ["microphone", "recording", "voice", "audio", "capture", "sound"])]
 
-public class AudioRecorderApp() : SampleBase
+public class AudioInputApp() : SampleBase
 {
     protected override object? BuildSample()
     {
@@ -18,12 +18,12 @@ public class AudioRecorderApp() : SampleBase
 
         return Layout.Vertical()
                | Text.H1("Audio Recorder Widget Examples")
-               | Text.P("Demonstrates the AudioRecorder widget for capturing audio input. This widget is for recording audio, not playing it. The recorder interface is theme-aware and adapts to light/dark themes.")
+               | Text.P("Demonstrates the AudioInput widget for capturing audio input. This widget is for recording audio, not playing it. The recorder interface is theme-aware and adapts to light/dark themes.")
                | Text.H2("Upload Examples")
                | (Layout.Horizontal().Gap(4)
-                    | new Card(new AudioRecorderBasic()).Title("Basic")
-                    | new Card(new AudioRecorderChunkedUpload()).Title("Chunked Upload")
-                    | new Card(new AudioRecorderDisabledState()).Title("Disabled State"))
+                    | new Card(new AudioInputBasic()).Title("Basic")
+                    | new Card(new AudioInputChunkedUpload()).Title("Chunked Upload")
+                    | new Card(new AudioInputDisabledState()).Title("Disabled State"))
                | Text.H2("Sizes")
                | CreateSizesSection(dummyUpload.Value);
     }
@@ -37,18 +37,18 @@ public class AudioRecorderApp() : SampleBase
                | Text.InlineCode("Large")
 
                | Text.InlineCode("Audio Recorder")
-               | new AudioRecorder(upload, "Start recording", "Recording audio...").Small()
-               | new AudioRecorder(upload, "Start recording", "Recording audio...")
-               | new AudioRecorder(upload, "Start recording", "Recording audio...").Large()
+               | new AudioInput(upload, "Start recording", "Recording audio...").Small()
+               | new AudioInput(upload, "Start recording", "Recording audio...")
+               | new AudioInput(upload, "Start recording", "Recording audio...").Large()
 
                | Text.InlineCode("Disabled State")
-               | new AudioRecorder(upload, "Start recording", "Recording audio...", disabled: true).Small()
-               | new AudioRecorder(upload, "Start recording", "Recording audio...", disabled: true)
-               | new AudioRecorder(upload, "Start recording", "Recording audio...", disabled: true).Large();
+               | new AudioInput(upload, "Start recording", "Recording audio...", disabled: true).Small()
+               | new AudioInput(upload, "Start recording", "Recording audio...", disabled: true)
+               | new AudioInput(upload, "Start recording", "Recording audio...", disabled: true).Large();
     }
 }
 
-public class AudioRecorderBasic : ViewBase
+public class AudioInputBasic : ViewBase
 {
     public override object? Build()
     {
@@ -71,15 +71,15 @@ public class AudioRecorderBasic : ViewBase
         }, audioFile);
 
         return Layout.Vertical().Gap(4)
-               | Text.P("Basic AudioRecorder example. Records audio and uploads the complete recording when you stop.")
-               | new AudioRecorder(upload.Value, "Start recording", "Recording audio...")
+               | Text.P("Basic AudioInput example. Records audio and uploads the complete recording when you stop.")
+               | new AudioInput(upload.Value, "Start recording", "Recording audio...")
                | (audioFile.Value != null
                    ? Text.P($"Last upload: {Utils.FormatBytes(audioFile.Value.Length)}").Small()
                    : Text.P("No recordings uploaded yet").Small());
     }
 }
 
-public class AudioRecorderChunkedUpload : ViewBase
+public class AudioInputChunkedUpload : ViewBase
 {
     public override object? Build()
     {
@@ -106,7 +106,7 @@ public class AudioRecorderChunkedUpload : ViewBase
 
         return Layout.Vertical().Gap(4)
                | Text.P("Records audio and uploads in 2-second chunks while recording. Each chunk is accumulated into a single file.")
-               | new AudioRecorder(upload.Value, "Start chunked recording", "Recording (uploading every 2s)...")
+               | new AudioInput(upload.Value, "Start chunked recording", "Recording (uploading every 2s)...")
                    .ChunkInterval(2000)
                | Text.P($"Chunks received: {chunkCount.Value}").Small()
                | (audioFile.Value != null
@@ -115,7 +115,7 @@ public class AudioRecorderChunkedUpload : ViewBase
     }
 }
 
-public class AudioRecorderDisabledState : ViewBase
+public class AudioInputDisabledState : ViewBase
 {
     public override object? Build()
     {
@@ -126,7 +126,7 @@ public class AudioRecorderDisabledState : ViewBase
         );
 
         return Layout.Vertical().Gap(4)
-               | Text.P("Demonstrates the AudioRecorder widget in a disabled state. The recorder is non-interactive and cannot be used for recording.")
-               | new AudioRecorder(dummyUpload.Value, "Start recording", "Recording audio...", disabled: true);
+               | Text.P("Demonstrates the AudioInput widget in a disabled state. The recorder is non-interactive and cannot be used for recording.")
+               | new AudioInput(dummyUpload.Value, "Start recording", "Recording audio...", disabled: true);
     }
 }

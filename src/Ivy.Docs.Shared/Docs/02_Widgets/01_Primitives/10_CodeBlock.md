@@ -22,7 +22,7 @@ Layout.Vertical()
   if (n <= 1) return n;
   return fibonacci(n-1) + fibonacci(n-2);
 }
-    
+
 // Print first 10 Fibonacci numbers
 for (let i = 0; i < 10; i++) {
   console.log(fibonacci(i));
@@ -33,6 +33,22 @@ for (let i = 0; i < 10; i++) {
       .Language(Languages.Javascript)
       .Width(Size.Full())
       .Height(Size.Auto())
+```
+
+## Starting Line Number
+
+Use `StartingLineNumber` to offset line numbering when displaying code excerpts. This is useful when showing a snippet from a larger file where you want to preserve the original line numbers.
+
+```csharp demo-tabs
+Layout.Vertical()
+    | new CodeBlock(@"    private static int Calculate(int input)
+    {
+        return input * 2 + 1;
+    }
+}")
+      .ShowLineNumbers()
+      .StartingLineNumber(18)
+      .Language(Languages.Csharp)
 ```
 
 

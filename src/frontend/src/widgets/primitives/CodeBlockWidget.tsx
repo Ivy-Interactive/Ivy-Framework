@@ -16,6 +16,7 @@ interface CodeWidgetProps {
   language: string;
   showCopyButton?: boolean;
   showLineNumbers?: boolean;
+  startingLineNumber?: number;
   showBorder?: boolean;
   width?: string;
   height?: string;
@@ -62,6 +63,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     language = 'Csharp',
     showCopyButton = true,
     showLineNumbers = false,
+    startingLineNumber = 1,
     showBorder = true,
     width = 'Full',
     height = 'MaxContent,,Px:800',
@@ -127,8 +129,8 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
 
     const highlighterKey = useMemo(
       () =>
-        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}`,
-      [id, language, showLineNumbers, showBorder]
+        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}`,
+      [id, language, showLineNumbers, showBorder, startingLineNumber]
     );
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
@@ -172,6 +174,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
               customStyle={isFull ? { ...preStyle, height: 'auto' } : preStyle}
               style={dynamicTheme}
               showLineNumbers={showLineNumbers}
+              startingLineNumber={startingLineNumber}
               wrapLines={true}
               wrapLongLines={shouldWrap}
               key={highlighterKey}

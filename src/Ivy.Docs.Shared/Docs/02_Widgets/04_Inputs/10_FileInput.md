@@ -145,7 +145,7 @@ Multiple file selection is automatically enabled when you use `ImmutableArray&lt
 
 ## File Validation
 
-Configure validation directly on the upload context using `.Accept()`, `.MaxFileSize()`, and `.MaxFiles()`:
+Configure validation directly on the upload context using `.Accept()`, `.MaxFileSize()`, `.MinFileSize()`, and `.MaxFiles()`:
 
 ```csharp demo-below
 public class FileUploadValidation : ViewBase
@@ -236,6 +236,33 @@ public class FileSizeLimitDemo : ViewBase
 You can set size limits clearly with helper methods:
 `.FromKilobytes()`, `.FromMegabytes()`, or `.FromGigabytes()` provide clear, self-documenting limits.
 </Callout>
+
+### Minimum File Size
+
+Use `.MinFileSize()` to reject empty or trivially small files that are likely erroneous:
+
+```csharp demo-below
+public class MinFileSizeLimitDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var file = UseState<FileUpload<byte[]>?>();
+        var upload = UseUpload(
+            MemoryStreamUploadHandler.Create(file))
+            .MinFileSize(FileSize.FromKilobytes(1))  // Minimum 1 KB
+            .MaxFileSize(FileSize.FromMegabytes(10)); // Maximum 10 MB
+
+        return Layout.Vertical()
+                | Text.H2("File Size Range (1 KB - 10 MB)")
+                | file
+                    .ToFileInput(upload)
+                    .Placeholder("Min 1 KB, Max 10 MB")
+                | (file.Value != null
+                    ? Text.P($"Selected: {file.Value.FileName} ({Utils.FormatBytes(file.Value.Length)})")
+                    : null);
+    }
+}
+```
 
 ### Multiple Files Limit
 
@@ -469,14 +496,14 @@ public class FileInputEventHandlersDemo : ViewBase
         return Layout.Vertical()
                 | files.ToFileInput(upload)
                     .Placeholder("Choose files")
-                    .HandleBlur((Event<IAnyInput> e) =>
+                    .OnBlur((Event<IAnyInput> e) =>
                     {
                         if (files.Value.Length > 0)
                             blurMessage.Set($"Blur: {files.Value.Length} file(s) selected");
                         else
                             blurMessage.Set("Blur: No file selected");
                     })
-                    .HandleCancel((Guid fileId) =>
+                    .OnCancel((Guid fileId) =>
                     {
                         upload.Value.Cancel(fileId);
                         files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
@@ -616,6 +643,7 @@ public class ConfiguredUploadExample : ViewBase
 | `Cancel`     | `Action<Guid>` | Cancels an in-progress upload by file ID                         |
 | `Accept`     | `string?`      | MIME type or file extension filter (e.g., `"image/*"`, `".pdf,.doc"`) |
 | `MaxFileSize`| `long?`        | Maximum file size in bytes                                       |
+| `MinFileSize`| `long?`        | Minimum file size in bytes                                       |
 | `MaxFiles`   | `int?`         | Maximum number of files (for multiple file uploads)              |
 
 <WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/FileInput.cs"/>
