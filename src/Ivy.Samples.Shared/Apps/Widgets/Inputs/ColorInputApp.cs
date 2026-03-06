@@ -15,6 +15,8 @@ public class ColorInputApp : SampleBase
                | new ColorInputConstructorTests()
                | Text.H2("Variants")
                | new ColorInputVariantTests()
+               | Text.H2("Alpha Channel")
+               | new ColorInputAlphaTests()
                | Text.H2("Format Tests")
                | new ColorInputFormatTests()
                | Text.H2("Data Binding")
@@ -286,5 +288,32 @@ public class ColorInputDataBindings : ViewBase
             Colors c => Text.InlineCode(c.ToString()),
             _ => Text.InlineCode(value?.ToString() ?? "null")
         };
+    }
+}
+
+public class ColorInputAlphaTests : ViewBase
+{
+    public override object Build()
+    {
+        var textAlphaState = UseState("#ff000080");
+        var pickerAlphaState = UseState("#00ff00cc");
+        var bothAlphaState = UseState("#0000ffaa");
+
+        return Layout.Grid().Columns(3)
+            | Text.InlineCode("Variant")
+            | Text.InlineCode("ColorInput")
+            | Text.InlineCode("State Value")
+
+            | Text.InlineCode("Text + Alpha")
+            | textAlphaState.ToColorInput().Variant(ColorInputVariants.Text).AllowAlpha()
+            | Text.InlineCode(textAlphaState.Value ?? "null")
+
+            | Text.InlineCode("Picker + Alpha")
+            | pickerAlphaState.ToColorInput().Variant(ColorInputVariants.Picker).AllowAlpha()
+            | Text.InlineCode(pickerAlphaState.Value ?? "null")
+
+            | Text.InlineCode("TextAndPicker + Alpha")
+            | bothAlphaState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).AllowAlpha()
+            | Text.InlineCode(bothAlphaState.Value ?? "null");
     }
 }

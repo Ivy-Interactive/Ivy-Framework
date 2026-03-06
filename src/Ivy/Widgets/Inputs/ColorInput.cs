@@ -35,6 +35,8 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     [Prop] public bool? Foreground { get; set; }
 
+    [Prop] public bool AllowAlpha { get; set; }
+
     [Prop] public ColorInputVariants Variant { get; set; } = ColorInputVariants.TextAndPicker;
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
@@ -181,6 +183,11 @@ public static class ColorInputExtensions
     public static ColorInputBase Foreground(this ColorInputBase widget, bool? foreground = true)
     {
         return widget with { Foreground = foreground };
+    }
+
+    public static ColorInputBase AllowAlpha(this ColorInputBase widget, bool allowAlpha = true)
+    {
+        return widget with { AllowAlpha = allowAlpha };
     }
 
     [OverloadResolutionPriority(1)]
