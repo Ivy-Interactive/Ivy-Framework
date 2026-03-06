@@ -1,3 +1,4 @@
+using Ivy.Core;
 using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
@@ -5,6 +6,8 @@ namespace Ivy.Samples.Shared.Apps.Widgets;
 [App(icon: Icons.Pill, path: ["Widgets"], searchHints: ["tag", "label", "chip", "status", "indicator", "pill"])]
 public class BadgeApp : SampleBase
 {
+    private readonly IClientProvider _client = UseService<IClientProvider>();
+
     private static readonly BadgeVariant[] Variants = [
         BadgeVariant.Primary,
         BadgeVariant.Destructive,
@@ -93,6 +96,16 @@ public class BadgeApp : SampleBase
                    new Badge("3", variant: BadgeVariant.Outline),
                    new Badge("10", variant: BadgeVariant.Secondary),
                    new Badge("99+", variant: BadgeVariant.Success)
+               )
+
+               | Text.H2("Clickable Badges")
+               | Layout.Horizontal(
+                   new Badge("Click Me", icon: Icons.MousePointer)
+                       .OnClick(_ => _client.Toast("Badge clicked!")),
+                   new Badge("Filter", icon: Icons.Filter, variant: BadgeVariant.Secondary)
+                       .OnClick(_ => _client.Toast("Filter applied!")),
+                   new Badge("Remove", icon: Icons.X, variant: BadgeVariant.Destructive)
+                       .OnClick(_ => _client.Toast("Item removed!"))
                )
             ;
     }
