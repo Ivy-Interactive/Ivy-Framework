@@ -205,3 +205,23 @@ new Button("Save", handler).Primary()
 ```
 
 **Important:** There is no `ButtonVariant.Default`. Use `ButtonVariant.Primary` instead.
+
+## Does the App attribute have a layout parameter?
+
+No. The `[App]` attribute only supports `title`, `icon`, `group`, and `connection` named parameters. Layout is controlled within the `Build()` method using layout helpers:
+
+```csharp
+[App(title: "My App", icon: Icons.Layout)]
+public class MyApp : ViewBase
+{
+    public override object? Build()
+    {
+        // Layout is set here, not in the attribute
+        return Layout.TopCenter()
+            | (Layout.Vertical().Width(Size.Full().Max(200))
+                | Text.H1("My App")
+                | ...
+            );
+    }
+}
+```
