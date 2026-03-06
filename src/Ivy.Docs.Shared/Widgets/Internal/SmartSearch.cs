@@ -161,9 +161,9 @@ public class SmartSearchView : ViewBase
                         navigator.Navigate("app://" + tag);
                     overlayOpen.Set(false);
                 }));
-        }).ToArray();
+        }).ToList();
 
-        var overlayListOrPlaceholder = suggestionListItems.Length > 0
+        var overlayListOrPlaceholder = suggestionListItems.Count > 0
             ? (object)new List(suggestionListItems)
             : (object)Text.Muted("Type to search or pick a suggestion above.");
 

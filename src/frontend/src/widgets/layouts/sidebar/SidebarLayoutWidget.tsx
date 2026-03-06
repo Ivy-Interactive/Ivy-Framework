@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import Icon from '@/components/Icon';
 import {
@@ -18,7 +12,6 @@ import { MenuItem, WidgetEventHandlerType } from '@/types/widgets';
 import { useFocusable } from '@/hooks/use-focus-management';
 import { sidebarMenuRef } from './sidebar-refs';
 import { sidebarSearchStore } from './sidebarSearchStore';
-import { SidebarSearchResultsList } from './SidebarSearchResultsList';
 import { useEventHandler } from '@/components/event-handler';
 import { cn, getAppId } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
@@ -184,35 +177,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 interface SidebarMenuWidgetProps {
   id: string;
   items: MenuItem[];
-  searchActive?: boolean;
 }
-
-const getFlatItemsInSearchRenderOrder = (items: MenuItem[]): MenuItem[] => {
-  const result: MenuItem[] = [];
-  for (const item of items) {
-    if (item.children && item.children.length > 0) {
-      const groupsMap = item.children.reduce<Record<string, MenuItem[]>>(
-        (acc, child) => {
-          const path = child.path ?? '';
-          (acc[path] ??= []).push(child);
-          return acc;
-        },
-        {}
-      );
-      const groupsOrdered = Object.entries(groupsMap).sort(
-        ([pathA], [pathB]) => {
-          if (!pathA) return 1;
-          if (!pathB) return -1;
-          return 0;
-        }
-      );
-      for (const [, pathItems] of groupsOrdered) {
-        result.push(...pathItems);
-      }
-    }
-  }
-  return result;
-};
 
 function findPathToTag(
   items: MenuItem[],
@@ -457,12 +422,8 @@ const renderMenuItems = (
 export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   id,
   items = [],
-  searchActive = false,
 }) => {
   const eventHandler = useEventHandler();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const prevSearchActiveRef = React.useRef(searchActive);
-
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set()
   );
@@ -476,76 +437,19 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   // Register only the sidebar menu container with useFocusable
   const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
 
-  const flatItems: MenuItem[] = useMemo(() => {
-    return searchActive ? getFlatItemsInSearchRenderOrder(items) : [];
-  }, [searchActive, items]);
-
   useEffect(() => {
-    const next: Parameters<typeof sidebarSearchStore.setState>[0] = {
+    sidebarSearchStore.setState({
       items,
-      searchActive,
-      flatItems,
+      fullMenuItems: items,
       eventHandler,
       id,
       activeTag,
-    };
-    if (!searchActive) {
-      next.fullMenuItems = items;
-    }
-    sidebarSearchStore.setState(next);
-  }, [items, searchActive, flatItems, eventHandler, id, activeTag]);
-
-  useEffect(() => {
-    // Only reset when search becomes active (false -> true transition)
-    if (searchActive && !prevSearchActiveRef.current) {
-      queueMicrotask(() => setSelectedIndex(0));
-    }
-    prevSearchActiveRef.current = searchActive;
-  }, [searchActive]);
-
-  useEffect(() => {
-    if (!searchActive || flatItems.length === 0) return;
-    const el = containerRef.current?.querySelector<HTMLElement>(
-      `[data-sidebar-result-index="${selectedIndex}"]`
-    );
-    if (!el) return;
-
-    // Smooth scrolling logic for search results
-    let p: HTMLElement | null = el.parentElement;
-    while (p) {
-      const { overflowY } = getComputedStyle(p);
-      if (
-        (overflowY === 'auto' ||
-          overflowY === 'scroll' ||
-          overflowY === 'overlay') &&
-        p.scrollHeight > p.clientHeight
-      ) {
-        if (selectedIndex === 0) {
-          p.scrollTo({ top: 0, behavior: 'smooth' });
-          return;
-        }
-        const elRect = el.getBoundingClientRect();
-        const portRect = p.getBoundingClientRect();
-        const isAbove = elRect.top < portRect.top;
-        const isBelow = elRect.bottom > portRect.bottom;
-        if (isAbove || isBelow) {
-          const delta = isAbove
-            ? elRect.top - portRect.top
-            : elRect.bottom - portRect.bottom;
-          p.scrollTo({
-            top: Math.max(0, p.scrollTop + delta),
-            behavior: 'smooth',
-          });
-        }
-        return;
-      }
-      p = p.parentElement;
-    }
-  }, [searchActive, flatItems.length, selectedIndex]);
+    });
+  }, [items, eventHandler, id, activeTag]);
 
   // Expand sections and scroll to active item when activeTag changes
   useEffect(() => {
-    if (!activeTag || searchActive) return;
+    if (!activeTag) return;
 
     // Find the path to the active item
     const path = findPathToTag(items, activeTag);
@@ -582,7 +486,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     }
 
     prevActiveTagRef.current = activeTag;
-  }, [activeTag, items, searchActive]);
+  }, [activeTag, items]);
 
   const handleExpandChange = useCallback((label: string, expanded: boolean) => {
     setExpandedSections(prev => {
@@ -596,36 +500,6 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     });
   }, []);
 
-  const handleMenuKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (!searchActive || flatItems.length === 0) return;
-      if (e.key === 'ArrowDown') {
-        setSelectedIndex(idx => Math.min(idx + 1, flatItems.length - 1));
-        e.preventDefault();
-      } else if (e.key === 'ArrowUp') {
-        setSelectedIndex(idx => Math.max(idx - 1, 0));
-        e.preventDefault();
-      } else if (e.key === 'Enter') {
-        const item = flatItems[selectedIndex];
-        if (item && item.tag) {
-          eventHandler('OnSelect', id, [item.tag]);
-        }
-        e.preventDefault();
-      }
-    },
-    [searchActive, flatItems, selectedIndex, eventHandler, id]
-  );
-
-  const onCtrlRightClickSelect = useCallback(
-    (e: React.MouseEvent, item: MenuItem) => {
-      if (e.ctrlKey && e.button === 2 && !!item.tag) {
-        e.preventDefault();
-        eventHandler('OnCtrlRightClickSelect', id, [item.tag]);
-      }
-    },
-    [eventHandler, id]
-  );
-
   return (
     <div
       ref={el => {
@@ -636,39 +510,17 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         containerRef.current = el;
       }}
       tabIndex={0}
-      onFocus={() => {
-        if (searchActive && flatItems.length > 0) setSelectedIndex(0);
-      }}
-      onKeyDown={handleMenuKeyDown}
       style={{ outline: 'none' }}
       data-sidebar-menu-widget
     >
-      {searchActive ? (
-        flatItems.length > 0 ? (
-          <SidebarSearchResultsList
-            items={items}
-            flatItems={flatItems}
-            selectedIndex={selectedIndex}
-            setSelectedIndex={setSelectedIndex}
-            onSelect={tag => eventHandler('OnSelect', id, [tag])}
-            onCtrlRightClick={onCtrlRightClickSelect}
-            activeTag={activeTag}
-          />
-        ) : (
-          <div className="flex items-center justify-center p-4 text-descriptive text-muted-foreground">
-            No results found
-          </div>
-        )
-      ) : (
-        renderMenuItems(
-          items,
-          eventHandler,
-          id,
-          0,
-          activeTag,
-          expandedSections,
-          handleExpandChange
-        )
+      {renderMenuItems(
+        items,
+        eventHandler,
+        id,
+        0,
+        activeTag,
+        expandedSections,
+        handleExpandChange
       )}
     </div>
   );

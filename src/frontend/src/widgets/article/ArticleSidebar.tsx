@@ -21,10 +21,12 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
   const [tocLoading, setTocLoading] = useState(true);
   const [contributorsLoading, setContributorsLoading] = useState(true);
 
-  const showSidebar = showToc;
-  const showContributors = !tocLoading && !contributorsLoading && showSidebar;
-
-  if (!showSidebar) return null;
+  // Only show contributors when TOC is ready too
+  const showContributors = !tocLoading && !contributorsLoading;
+  // Only show sidebar if TOC should be displayed
+  // If headings are provided, we don't need to block on loading state for TOC to check emptiness
+  // But TableOfContents component handles loading state
+  if (!showToc) return null;
 
   return (
     <div className="hidden lg:block w-64">
