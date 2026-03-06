@@ -1,4 +1,6 @@
+using Ivy.Views;
 using Ivy.Views.Tables;
+using Ivy.Views.Builders;
 using Ivy.Shared;
 using Xunit;
 
@@ -57,5 +59,87 @@ public class TableBuilderTests
 
         var activeColumn = columns["IsActive"];
         Assert.Equal(Align.Center, (Align)GetProp(activeColumn!, "Align")); // Bool is Center default. Reset sets to Left. expected FAIL.
+    }
+
+    [Fact]
+    public void ProgressBuilder_ShouldReturnProgressWidget()
+    {
+        var builder = new ProgressBuilder<TestModel>();
+        var result = builder.Build(50, new TestModel());
+        Assert.IsType<Progress>(result);
+    }
+
+    [Fact]
+    public void ProgressBuilder_ShouldReturnNullForNullValue()
+    {
+        var builder = new ProgressBuilder<TestModel>();
+        var result = builder.Build(null, new TestModel());
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void ProgressBuilder_ShouldReturnNullForNonNumericValue()
+    {
+        var builder = new ProgressBuilder<TestModel>();
+        var result = builder.Build("not a number", new TestModel());
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void ProgressBuilder_ShouldCalculatePercentageCorrectly()
+    {
+        var builder = new ProgressBuilder<TestModel>(min: 0, max: 200);
+        var result = builder.Build(100, new TestModel()) as Progress;
+        Assert.NotNull(result);
+        Assert.Equal(50, result.Value);
+    }
+
+    [Fact]
+    public void ProgressBuilder_ShouldClampPercentageToZeroToHundred()
+    {
+        var builder = new ProgressBuilder<TestModel>(min: 0, max: 100);
+
+        var resultOver = builder.Build(150, new TestModel()) as Progress;
+        Assert.NotNull(resultOver);
+        Assert.Equal(100, resultOver.Value);
+
+        var resultUnder = builder.Build(-50, new TestModel()) as Progress;
+        Assert.NotNull(resultUnder);
+        Assert.Equal(0, resultUnder.Value);
+    }
+
+    [Fact]
+    public void ProgressBuilder_ShouldApplyAutoColor()
+    {
+        var builder = new ProgressBuilder<TestModel>(autoColor: true);
+
+        var resultHigh = builder.Build(80, new TestModel()) as Progress;
+        Assert.NotNull(resultHigh);
+        Assert.Equal(Colors.Success, resultHigh.Color);
+
+        var resultMedium = builder.Build(60, new TestModel()) as Progress;
+        Assert.NotNull(resultMedium);
+        Assert.Equal(Colors.Warning, resultMedium.Color);
+
+        var resultLow = builder.Build(10, new TestModel()) as Progress;
+        Assert.NotNull(resultLow);
+        Assert.Equal(Colors.Destructive, resultLow.Color);
+    }
+
+    [Fact]
+    public void ProgressBuilder_ShouldApplyExplicitColor()
+    {
+        var builder = new ProgressBuilder<TestModel>(color: Colors.Blue);
+        var result = builder.Build(50, new TestModel()) as Progress;
+        Assert.NotNull(result);
+        Assert.Equal(Colors.Blue, result.Color);
+    }
+
+    [Fact]
+    public void ProgressBuilder_ShouldReturnLayoutWithFormatString()
+    {
+        var builder = new ProgressBuilder<TestModel>(format: "%d%%");
+        var result = builder.Build(50, new TestModel());
+        Assert.IsType<LayoutView>(result);
     }
 }
