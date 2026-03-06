@@ -1,6 +1,14 @@
 All Ivy documentation pages are listed on: <https://docs.ivy.app/sitemap.xml>.
 Add ".md" to the end of any URL to go directly to the Markdown version of the doc.
 
+## Quick Reference — Commonly Misremembered Facts
+
+- Base class is `ViewBase` (NOT `AppBase` — there is no `AppBase` class)
+- `Text` is a static helper — use `Text.P()`, `Text.H2()`, etc.
+- `UseState<T>()` returns `IState<T>`, NOT `State<T>`
+- All types are in the `Ivy` namespace — no sub-namespaces
+- `Colors` is a flat enum (e.g. `Colors.Red`, `Colors.Blue`) — no shade levels
+
 # Introduction to the Ivy Framework for LLMs
 
 - Ivy is a declarative full-stack UI framework that allows developers to build user interfaces using a component-based approach very similar to React.
