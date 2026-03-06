@@ -122,149 +122,46 @@ public class SpacingExamplesView : ViewBase
 }
 ```
 
-### Advanced Spacing
+### Advanced Features & Interactions
 
-Use the [Thickness](../../04_ApiReference/IvyShared/Thickness.md) class for more precise control over padding on different sides. This allows you to specify different spacing values for left, top, right, and bottom edges.
+Boxes support precise spacing with the [Thickness](../../04_ApiReference/IvyShared/Thickness.md) class, a wide range of [Colors](../../04_ApiReference/IvyShared/Colors.md), and interactive states using `OnClick` and `Hover()`.
 
-```csharp demo-tabs
-public class AdvancedSpacingView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Vertical().Gap(8)
-            | Layout.Horizontal().Gap(4)
-                | new Box("No Padding")
-                    .Width(Size.Fraction(1/2f))
-                | new Box("Uniform Padding (8)")
-                    .Padding(new Thickness(8))
-                    .Width(Size.Fraction(1/2f))
-            | Layout.Horizontal().Gap(4)
-                | new Box("Horizontal/Vertical (16,8)")
-                    .Padding(new Thickness(16, 8))
-                    .Width(Size.Fraction(1/2f))
-                | new Box("Asymmetric (24,12,6,18)")
-                    .Padding(new Thickness(24, 12, 6, 18))
-                    .Width(Size.Fraction(1/2f));
-    }
-}
-```
-
-### Colors
-
-Boxes support a wide range of predefined colors that automatically adapt to light/dark themes.
+The following example demonstrates combining these features to create status indicators, interactive selections, and professional card layouts.
 
 ```csharp demo-tabs
-public class ColorExamplesView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Vertical().Gap(4)
-            | new Box("Primary Color").Color(Colors.Primary).Padding(8);
-    }
-}
-```
-
-For more colors, see the [Colors](../../04_ApiReference/IvyShared/Colors.md) reference.
-
-### Click Events
-
-Boxes can be made interactive by attaching an `OnClick` event handler. When an `OnClick` handler is attached, the box automatically gains hover effects to indicate interactivity.
-
-```csharp demo-tabs
-public class ClickableBoxView : ViewBase
+public class BoxFeaturesView : ViewBase
 {
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
+        var selected = UseState("Option A");
 
-        return new Box("Click me!")
-            .OnClick(_ => client.Toast("Box clicked!"))
-            .Padding(8)
-            .Width(Size.Fit());
-    }
-}
-```
-
-### Hover Effects
-
-Control the hover behavior of a Box using the `Hover()` extension method with `CardHoverVariant`. When using `OnClick`, a hover effect is automatically applied if none is set.
-
-```csharp demo-tabs
-public class HoverVariantView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Horizontal().Gap(4)
-            | new Box("No Hover")
-                .Hover(CardHoverVariant.None)
-                .Padding(8)
-                .Width(Size.Fraction(1/3f))
-            | new Box("Pointer Only")
-                .Hover(CardHoverVariant.Pointer)
-                .Padding(8)
-                .Width(Size.Fraction(1/3f))
-            | new Box("Pointer + Translate")
-                .Hover(CardHoverVariant.PointerAndTranslate)
-                .Padding(8)
-                .Width(Size.Fraction(1/3f));
-    }
-}
-```
-
-<WidgetDocs Type="Ivy.Box" ExtensionTypes="Ivy.BoxExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Box.cs"/>
-
-## Examples
-
-<Details>
-<Summary>
-Status Dashboard
-</Summary>
-<Body>
-Create a dashboard with status indicators using different colors and styles. This example demonstrates how to use boxes for displaying system status information with appropriate visual cues.
-
-```csharp demo-tabs
-public class StatusDashboardView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Horizontal().Gap(4)
-            | new Box("System Online")
-                .Color(Colors.Green)
-                .BorderRadius(BorderRadius.Rounded)
-                .BorderThickness(2)
-                .Padding(8)
-                .Width(Size.Fraction(1/3f))
-            | new Box("Warning: High CPU Usage")
-                .Color(Colors.Yellow)
-                .BorderStyle(BorderStyle.Dashed)
-                .BorderThickness(2)
-                .Padding(8)
-                .Width(Size.Fraction(1/3f))
-            | new Box("Database Error")
-                .Color(Colors.Red)
-                .BorderThickness(2)
-                .Padding(8)
-                .Width(Size.Fraction(1/3f));
-    }
-}
-```
-
-</Body>
-</Details>
-
-<Details>
-<Summary>
-Card Layout
-</Summary>
-<Body>
-Build card-based layouts with consistent styling for displaying structured information. This example shows how to create professional-looking cards with proper spacing, borders, and content organization.
-
-```csharp demo-tabs
-public class CardLayoutView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Grid().Columns(2).Gap(8)
+        return Layout.Vertical().Gap(8)
+            | Layout.Grid().Columns(2).Gap(8)
+                // Advanced Spacing & Colors
+                | new Box("Asymmetric Padding & Primary Color")
+                    .Padding(new Thickness(24, 12, 6, 18))
+                    .Color(Colors.Primary)
+                
+                // Status Indicator
+                | new Box("System Online (Green)")
+                    .Color(Colors.Green)
+                    .BorderRadius(BorderRadius.Rounded)
+                    .BorderThickness(2)
+                    .Padding(8)
+                
+                // Click Events & Hover Effects
+                | new Box("Pointer + Translate Hover")
+                    .Hover(CardHoverVariant.PointerAndTranslate)
+                    .OnClick(_ => client.Toast("Box clicked!"))
+                    .Padding(8)
+                
+                // Interactive Selection
+                | Layout.Horizontal().Gap(4)
+                    | CreateOption("Option A", selected, client)
+                    | CreateOption("Option B", selected, client)
+            
+            // Card Layout
             | new Box()
                 .Color(Colors.White)
                 .BorderRadius(BorderRadius.Rounded)
@@ -274,43 +171,7 @@ public class CardLayoutView : ViewBase
                     Text.Label("User Profile"),
                     Text.P("John Doe"),
                     Text.P("Software Developer")
-                )
-            | new Box()
-                .Color(Colors.White)
-                .BorderRadius(BorderRadius.Rounded)
-                .BorderThickness(1)
-                .Padding(12)
-                .Content(
-                    Text.Label("Statistics"),
-                    Text.P("Projects: 15"),
-                    Text.P("Experience: 5 years")
                 );
-    }
-}
-```
-
-</Body>
-</Details>
-
-<Details>
-<Summary>
-Interactive Selection
-</Summary>
-<Body>
-Create clickable boxes for selection interfaces. This example demonstrates how to use `OnClick` and hover effects to build an interactive selection UI.
-
-```csharp demo-tabs
-public class InteractiveSelectionView : ViewBase
-{
-    public override object? Build()
-    {
-        var client = UseService<IClientProvider>();
-        var selected = UseState("Option A");
-
-        return Layout.Horizontal().Gap(4)
-            | CreateOption("Option A", selected, client)
-            | CreateOption("Option B", selected, client)
-            | CreateOption("Option C", selected, client);
     }
 
     private Box CreateOption(string label, IState<string> selected, IClientProvider client)
@@ -319,15 +180,15 @@ public class InteractiveSelectionView : ViewBase
         return new Box(label)
             .Color(isSelected ? Colors.Primary : Colors.Muted)
             .BorderThickness(isSelected ? 2 : 1)
+            .Hover(CardHoverVariant.Pointer)
             .OnClick(_ => {
                 selected.Set(label);
                 client.Toast($"Selected: {label}");
             })
             .Padding(8)
-            .Width(Size.Fraction(1/3f));
+            .Width(Size.Fraction(1/2f));
     }
 }
 ```
 
-</Body>
-</Details>
+<WidgetDocs Type="Ivy.Box" ExtensionTypes="Ivy.BoxExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Box.cs"/>
