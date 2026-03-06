@@ -2,7 +2,6 @@ using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Auth;
 using Ivy.Core.Hooks;
-using Ivy.Core.Server;
 using Microsoft.AspNetCore.Mvc;
 using AppContext = Ivy.AppContext;
 
@@ -142,12 +141,10 @@ public class OAuthFlowView(AuthOption option) : ViewBase
         var args = this.UseService<AppContext>();
         var registry = this.UseService<IOAuthCallbackRegistry>();
         var auth = this.UseService<IAuthProvider>();
-        var requestContext = this.UseService<RequestContext>();
 
         var state = this.UseState(() => registry.RegisterPending(args.ConnectionId, option.Id ?? ""));
 
-        var (scheme, host) = requestContext.GetRequired();
-        var oauthUriBuilder = new UriBuilder($"{scheme}://{host}/ivy/auth/oauth-login")
+        var oauthUriBuilder = new UriBuilder($"{args.Scheme}://{args.Host}/ivy/auth/oauth-login")
         {
             Query = $"optionId={Uri.EscapeDataString(option.Id ?? "")}&callbackId={Uri.EscapeDataString(state.Value)}&connectionId={Uri.EscapeDataString(args.ConnectionId)}"
         };

@@ -1,5 +1,3 @@
-using Ivy.Core.Server;
-
 namespace Ivy.Core;
 
 public record WebhookEndpoint
@@ -21,24 +19,6 @@ public record WebhookEndpoint
     public static WebhookEndpoint CreateAuthCallback(string id, string scheme, string host)
     {
         return new(id, BuildAuthCallbackBaseUrl(scheme, host));
-    }
-
-    /// <summary>
-    /// Creates a webhook endpoint using the RequestContext from DI.
-    /// </summary>
-    public static WebhookEndpoint CreateWebhook(string id, RequestContext requestContext)
-    {
-        var (scheme, host) = requestContext.GetRequired();
-        return CreateWebhook(id, scheme, host);
-    }
-
-    /// <summary>
-    /// Creates an auth callback endpoint using the RequestContext from DI.
-    /// </summary>
-    public static WebhookEndpoint CreateAuthCallback(string id, RequestContext requestContext)
-    {
-        var (scheme, host) = requestContext.GetRequired();
-        return CreateAuthCallback(id, scheme, host);
     }
 
     public static string BuildWebhookBaseUrl(string scheme, string host) => $"{scheme}://{host}/ivy/webhook";

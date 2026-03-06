@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Ivy.Core;
-using Ivy.Core.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,11 +33,11 @@ public static class UseWebhookExtensions
     {
         var webhookId = context.UseState(() => Guid.NewGuid().ToString(), false);
         var webhookController = context.UseService<IWebhookRegistry>();
-        var requestContext = context.UseService<RequestContext>();
+        var appContext = context.UseService<AppContext>();
 
         context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.OnMount()]);
 
-        return WebhookEndpoint.CreateWebhook(webhookId.Value, requestContext);
+        return WebhookEndpoint.CreateWebhook(webhookId.Value, appContext.Scheme, appContext.Host);
     }
 }
 

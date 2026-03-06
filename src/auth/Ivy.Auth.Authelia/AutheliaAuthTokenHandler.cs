@@ -1,19 +1,30 @@
+using System.Net;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace Ivy.Auth.Authelia;
 
 public class AutheliaAuthTokenHandler : IAuthTokenHandler
 {
-    protected readonly HttpClient HttpClient;
+    protected HttpClient HttpClient;
+    protected readonly CookieContainer CookieContainer;
+    protected readonly string BaseUrl;
 
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
     };
 
-    public AutheliaAuthTokenHandler()
+    public AutheliaAuthTokenHandler(IConfiguration configuration)
     {
-        HttpClient = new HttpClient();
+        BaseUrl = configuration.GetValue<string>("Authelia:Url")
+            ?? throw new Exception("Authelia:Url is required");
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Authelia:UserAgent");
+
+        CookieContainer = new CookieContainer();
+        var handler = new HttpClientHandler { CookieContainer = CookieContainer };
+        HttpClient = new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) };
+        HttpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
     }
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)

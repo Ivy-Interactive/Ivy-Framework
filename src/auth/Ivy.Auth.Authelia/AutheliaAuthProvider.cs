@@ -9,28 +9,9 @@ namespace Ivy.Auth.Authelia;
 
 public class AutheliaAuthProvider : AutheliaAuthTokenHandler, IAuthProvider
 {
-    private readonly CookieContainer _cookieContainer;
-    private readonly string _baseUrl;
-
     public AutheliaAuthProvider(IConfiguration configuration)
-        : base()
+        : base(configuration)
     {
-        HttpClient = CreateHttpClient(configuration, out var cookieContainer, out var baseUrl);
-        _cookieContainer = cookieContainer;
-        _baseUrl = baseUrl;
-    }
-
-    private static HttpClient CreateHttpClient(IConfiguration configuration, out CookieContainer cookieContainer, out string baseUrl)
-    {
-        baseUrl = configuration.GetValue<string>("Authelia:Url")
-            ?? throw new Exception("Authelia:Url is required");
-        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Authelia:UserAgent");
-
-        cookieContainer = new CookieContainer();
-        var handler = new HttpClientHandler { CookieContainer = cookieContainer };
-        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(baseUrl) };
-        httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
-        return httpClient;
     }
 
     public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string username, string password, CancellationToken cancellationToken)
@@ -41,7 +22,7 @@ public class AutheliaAuthProvider : AutheliaAuthTokenHandler, IAuthProvider
         if (response.IsSuccessStatusCode)
         {
             // Return the "authelia_session" cookie value as our token.
-            var cookies = _cookieContainer.GetCookies(new Uri(_baseUrl));
+            var cookies = CookieContainer.GetCookies(new Uri(BaseUrl));
             var session = cookies["authelia_session"]?.Value;
             return session != null
                 ? new AuthToken(session)
@@ -54,11 +35,11 @@ public class AutheliaAuthProvider : AutheliaAuthTokenHandler, IAuthProvider
     {
         // Instruct Authelia to log out. Then expire the session cookie.
         await HttpClient.PostAsync("/api/logout", new StringContent(string.Empty), cancellationToken);
-        var expired = new Cookie("authelia_session", "", "/", new Uri(_baseUrl).Host)
+        var expired = new Cookie("authelia_session", "", "/", new Uri(BaseUrl).Host)
         {
             Expires = DateTime.UtcNow.AddDays(-1)
         };
-        _cookieContainer.Add(new Uri(_baseUrl), expired);
+        CookieContainer.Add(new Uri(BaseUrl), expired);
     }
 
     public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)

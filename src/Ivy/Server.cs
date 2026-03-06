@@ -606,7 +606,6 @@ public class Server
         builder.Services.AddSingleton(sessionStore);
         builder.Services.AddSingleton<IOAuthCallbackRegistry, OAuthCallbackRegistry>();
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-        builder.Services.AddSingleton<RequestContext>();
         builder.Services.AddHealthChecks();
         builder.Services.AddQueryManager();
 
