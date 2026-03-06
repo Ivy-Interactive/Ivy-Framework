@@ -226,7 +226,8 @@ public static class TextInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
-     private static TextInputBase BuildValidatedInput(IViewContext context, IAnyState state, TextInputVariants variant, string? placeholder, bool disabled)
+
+    private static TextInputBase BuildValidatedInput(IViewContext context, IAnyState state, TextInputVariants variant, string? placeholder, bool disabled)
     {
         var invalidState = context.UseState(default(string?), true);
         var blurOnceState = context.UseState(false, true);
