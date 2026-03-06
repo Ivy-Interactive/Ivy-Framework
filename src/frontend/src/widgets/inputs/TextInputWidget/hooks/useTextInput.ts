@@ -35,7 +35,9 @@ export const useCursorPosition = (
 
 export const useEnterKeyBlur = (
   onSubmit?: () => void
-): ((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void) => {
+): ((
+  e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
+) => void) => {
   return useCallback(
     (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       if (e.key === 'Enter') {
