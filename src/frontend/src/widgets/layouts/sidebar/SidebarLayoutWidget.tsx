@@ -4,7 +4,6 @@ import React, {
   useCallback,
   useMemo,
   useRef,
-  useLayoutEffect,
 } from 'react';
 
 import Icon from '@/components/Icon';
@@ -132,12 +131,14 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // Update currentWidth when width prop changes (but not during resize)
-  useLayoutEffect(() => {
+  const [prevInitialWidthPx, setPrevInitialWidthPx] = useState(initialWidthPx);
+
+  if (initialWidthPx !== prevInitialWidthPx) {
+    setPrevInitialWidthPx(initialWidthPx);
     if (!isResizing) {
       setCurrentWidth(initialWidthPx);
     }
-  }, [initialWidthPx, isResizing]);
+  }
 
   // Handle resize drag
   const handleResizeStart = useCallback(
