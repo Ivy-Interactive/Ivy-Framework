@@ -6,11 +6,17 @@ import { DateTimeInputWidgetProps } from './types';
 import { DateVariant } from './DateVariant';
 import { DateTimeVariant } from './DateTimeVariant';
 import { TimeVariant } from './TimeVariant';
+import { MonthVariant } from './MonthVariant';
+import { WeekVariant } from './WeekVariant';
+import { YearVariant } from './YearVariant';
 
-const VariantComponents = {
+const VariantComponents: Record<string, React.FC<any>> = {
   Date: DateVariant,
   DateTime: DateTimeVariant,
   Time: TimeVariant,
+  Month: MonthVariant,
+  Week: WeekVariant,
+  Year: YearVariant,
 };
 
 export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({

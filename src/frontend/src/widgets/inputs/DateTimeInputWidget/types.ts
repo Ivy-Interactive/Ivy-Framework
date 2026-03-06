@@ -1,6 +1,12 @@
 import { Scales } from '@/types/scale';
 
-export type VariantType = 'Date' | 'DateTime' | 'Time';
+export type VariantType =
+  | 'Date'
+  | 'DateTime'
+  | 'Time'
+  | 'Month'
+  | 'Week'
+  | 'Year';
 
 export interface DateTimeInputWidgetProps {
   id: string;
@@ -38,4 +44,16 @@ export interface DateTimeVariantProps extends BaseVariantProps {
 
 export interface TimeVariantProps extends BaseVariantProps {
   onTimeChange: (time: string) => void;
+}
+
+export interface MonthVariantProps extends BaseVariantProps {
+  onDateChange: (date: Date | undefined) => void;
+}
+
+export interface WeekVariantProps extends BaseVariantProps {
+  onDateChange: (date: Date | undefined) => void;
+}
+
+export interface YearVariantProps extends BaseVariantProps {
+  onDateChange: (date: Date | undefined) => void;
 }
