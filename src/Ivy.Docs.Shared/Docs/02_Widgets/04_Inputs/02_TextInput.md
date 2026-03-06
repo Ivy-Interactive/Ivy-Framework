@@ -346,7 +346,7 @@ public class BasicFilter : ViewBase
         
         return Layout.Vertical()
             | searchState.ToSearchInput().Placeholder("Which fruit you like?")
-            | result.ToTextAreaInput(content);
+            | result.ToTextareaInput(content);
     }     
 }
 ```
