@@ -3,7 +3,7 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
 import { X, Check } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import {
@@ -156,8 +156,16 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
   disabled = false,
   scale = Scales.Medium,
 }) => {
+  const [localAlpha, setLocalAlpha] = useState<number | null>(null);
+  const displayAlpha = localAlpha ?? alpha;
   const height = scale === Scales.Small ? 24 : scale === Scales.Large ? 36 : 30;
-  const percentage = Math.round((alpha / 255) * 100);
+  const percentage = Math.round((displayAlpha / 255) * 100);
+
+  useEffect(() => {
+    if (localAlpha !== null && alpha === localAlpha) {
+      setLocalAlpha(null);
+    }
+  }, [alpha, localAlpha]);
 
   const gradientStyle: React.CSSProperties = useMemo(
     () => ({
@@ -165,6 +173,16 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
     }),
     [color]
   );
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalAlpha(Number(e.target.value));
+  };
+
+  const handleCommit = () => {
+    if (localAlpha !== null) {
+      onChange(localAlpha);
+    }
+  };
 
   return (
     <div className="flex items-center gap-1.5">
@@ -188,16 +206,18 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
           type="range"
           min={0}
           max={255}
-          value={alpha}
+          value={displayAlpha}
           disabled={disabled}
-          onChange={e => onChange(Number(e.target.value))}
+          onChange={handleInput}
+          onPointerUp={handleCommit}
+          onKeyUp={handleCommit}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
           aria-label={`Opacity: ${percentage}%`}
           title={`${percentage}%`}
         />
         <div
           className="absolute top-0 bottom-0 w-1 bg-white border border-foreground/40 rounded-sm pointer-events-none"
-          style={{ left: `calc(${(alpha / 255) * 100}% - 2px)` }}
+          style={{ left: `calc(${(displayAlpha / 255) * 100}% - 2px)` }}
         />
       </div>
       <span className="text-xs text-muted-foreground w-8 text-right tabular-nums">
