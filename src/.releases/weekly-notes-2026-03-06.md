@@ -804,3 +804,64 @@ The `--hello` flag scaffolds a sample project and automatically configures the I
 ```
 
 The `ivy mcp config` command generates the appropriate MCP server configuration file for your IDE, making it easy to connect your AI tools to the Ivy ecosystem.
+
+
+## What's Changed
+* [ErrorSheet]: scope scrolling to error content area by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2310
+* [DataTable]: show scrollbars only when needed by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2315
+* [TextBlock]: Add TextAlignment support and improve Text sample by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2404
+* [TextInput]: add MinLength support and improve samples by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2408
+* [Progress]: standardize Color property by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2417
+* [Tree]: expand nodes on label click by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2419
+* [Security]: fix warning by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2418
+* [Security]: fix bag of warnings by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2424
+* [ListWidget]: remove parent padding hack by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2422
+* [Markdown]:  Added TextAlignment property by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2409
+* [CLI]: add Upgrade docs page and update links by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2427
+* [ButtonWidget]: fix AI variant gradient clipping for Full rounded shape by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2426
+* [OAuth]: Add Sliplane Auth Pprovider and example app by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2414
+* [DataTables]: rename OnRowAction to HandleRowAction by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2423
+* [Inputs]: add fluent setters for Value and OnChange properties by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2406
+* (docs)getting-started-mcp by @joshuauaua in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2405
+* datatables: refresh token support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2425
+* (async select): fix paddings for list items only in async select by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2441
+* refactor: rename input type enums to a consistent `*InputVariant` nam… by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2442
+* (tree): item action menu by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2443
+* (Tree): Remove empty space in nodes with no children by @dcrjodle in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2445
+* [OAuth]: fix callback redirect in Sliplane Auth Provider by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2446
+* (tree):  add a doc section about handling raw actions by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2448
+* feat: avoid overlaying of kanban cards by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2449
+* [List] Safe full‑bleed mode via remove-parent-padding by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2454
+* [OAuth]: Improve Sliplane auth flow and user info by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2461
+* (audio)  refactor AudioRecorder into AudioInput by @joshuauaua in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2456
+* refactor: EventHandler wrapper and Handle* → On* rename by @ivy-interactive-claude-code[bot] in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2460
+* docs: list all widgets in Widget Library table by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2473
+* refactor: standardize TextArea → Textarea naming by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2472
+* feat: rename MultiLine to Multiline & add Multiline() extension for TextInputBase by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2471
+* feat(badge): add OnClick event handler by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2475
+* feat(box): add OnClick event and HoverVariant support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2474
+* feat(file-input): add minimum file size validation by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2476
+* feat(Card): add Disabled property to prevent interaction by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2477
+* feat(CodeBlock): add StartingLineNumber property by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2478
+* feat(expandable): add icon support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2479
+* feat: Add search, loading, and selection limit features to SelectInput. by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2484
+* feat(spacer): default to grow behavior by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2482
+* feat(html): add DangerouslyAllowScripts option to Html widget by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2485
+* docs: remove unnecessary `this.` prefix from hooks in documentation by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2486
+* feat(Sheet): Add Side API for slide direction by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2489
+* feat(progress): add explicit Indeterminate property by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2488
+* feat(select): add Ghost() API to all select variants by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2491
+* feat(table): add Progress() builder renderer by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2492
+* fix(markdown): add missing border to code blocks by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2494
+* feat(SidebarLayout): Add Resizable drag-to-resize support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2487
+* feat(separator): add TextAlign property with fluent API by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2495
+* feat(Option): Add per-item Disabled support to SelectInput options by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2496
+* fix(themes): change default theme to system for auto dark/light mode by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2497
+* feat(TextInput): add OnSubmit event for Enter key handling by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2498
+* feat(NumberInput): Add Prefix and Suffix support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2499
+* feat(CodeBlock): add WrapLines option for wrapping long lines by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2500
+
+## New Contributors
+* @ivy-interactive-claude-code[bot] made their first contribution in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2460
+
+**Full Changelog**: https://github.com/Ivy-Interactive/Ivy-Framework/compare/v1.2.16...v1.2.17
