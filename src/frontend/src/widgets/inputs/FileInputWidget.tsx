@@ -13,6 +13,7 @@ import {
   uploadIconVariants,
   textVariants,
 } from '@/components/ui/input/file-input-variants';
+import { validateSingleFile, validateFileCount } from './file-input-validation';
 
 enum FileInputStatus {
   Pending = 'Pending',
@@ -40,6 +41,7 @@ interface FileInputWidgetProps {
   width?: string;
   accept?: string;
   maxFileSize?: number;
+  minFileSize?: number;
   multiple?: boolean;
   maxFiles?: number;
   placeholder?: string;
@@ -56,6 +58,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   width,
   accept,
   maxFileSize,
+  minFileSize,
   multiple = false,
   maxFiles,
   placeholder,
@@ -73,30 +76,26 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
   const hasBlurHandler = Array.isArray(events) && events.includes('OnBlur');
 
-  const formatBytes = (bytes: number): string => {
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes === 0) return '0 B';
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const size = bytes / Math.pow(1024, i);
-    return `${size.toFixed(size >= 10 ? 0 : 2)} ${sizes[i]}`;
-  };
-
   const validateFile = useCallback(
     (file: File): boolean => {
-      // Validate file size
-      if (maxFileSize && file.size > maxFileSize) {
-        const maxSizeFormatted = formatBytes(maxFileSize);
-        const fileSizeFormatted = formatBytes(file.size);
+      const result = validateSingleFile({
+        file,
+        accept,
+        maxFileSize,
+        minFileSize,
+      });
+
+      if (!result.valid) {
         toast({
-          title: 'File too large',
-          description: `File '${file.name}' is ${fileSizeFormatted}. Maximum allowed size is ${maxSizeFormatted}.`,
+          title: result.title || 'Validation Error',
+          description: result.error,
           variant: 'destructive',
         });
         return false;
       }
       return true;
     },
-    [maxFileSize]
+    [accept, maxFileSize, minFileSize]
   );
 
   const uploadFile = useCallback(
@@ -163,14 +162,16 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         : value
           ? 1
           : 0;
-      if (maxFiles && currentFileCount + files.length > maxFiles) {
-        const remaining = maxFiles - currentFileCount;
+
+      const countValidation = validateFileCount(
+        currentFileCount,
+        files.length,
+        maxFiles
+      );
+      if (!countValidation.valid) {
         toast({
-          title: 'Too many files',
-          description:
-            remaining > 0
-              ? `You can only upload ${remaining} more file${remaining !== 1 ? 's' : ''}. Maximum is ${maxFiles} files total.`
-              : `Maximum of ${maxFiles} file${maxFiles !== 1 ? 's' : ''} already reached.`,
+          title: countValidation.title || 'Too many files',
+          description: countValidation.error,
           variant: 'destructive',
         });
         e.target.value = '';
@@ -280,14 +281,16 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         : value
           ? 1
           : 0;
-      if (maxFiles && currentFileCount + files.length > maxFiles) {
-        const remaining = maxFiles - currentFileCount;
+
+      const countValidation = validateFileCount(
+        currentFileCount,
+        files.length,
+        maxFiles
+      );
+      if (!countValidation.valid) {
         toast({
-          title: 'Too many files',
-          description:
-            remaining > 0
-              ? `You can only upload ${remaining} more file${remaining !== 1 ? 's' : ''}. Maximum is ${maxFiles} files total.`
-              : `Maximum of ${maxFiles} file${maxFiles !== 1 ? 's' : ''} already reached.`,
+          title: countValidation.title || 'Too many files',
+          description: countValidation.error,
           variant: 'destructive',
         });
         return;
