@@ -342,7 +342,7 @@ public class ProgressBuilderExample : ViewBase
             | tasks
                 .ToTable()
                 .Width(Size.Full())
-                .Builder(e => e.Progress, f => f.Progress(autoColor: true))
+                .Builder(e => e.Progress, f => f.Progress().AutoColor())
                 .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Progress, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Priority, Size.Fraction(0.2f))
@@ -353,7 +353,7 @@ public class ProgressBuilderExample : ViewBase
                 .Select(d => new { d.File, d.Downloaded, d.Total, Percent = (double)d.Downloaded / d.Total * 100 })
                 .ToTable()
                 .Width(Size.Full())
-                .Builder(e => e.Percent, f => f.Progress(min: 0, max: 100, autoColor: true))
+                .Builder(e => e.Percent, f => f.Progress().Min(0).Max(100).AutoColor())
                 .Header(e => e.Percent, "Progress")
                 .ColumnWidth(e => e.File, Size.Fraction(0.3f))
                 .ColumnWidth(e => e.Downloaded, Size.Fraction(0.2f))
@@ -365,7 +365,7 @@ public class ProgressBuilderExample : ViewBase
             | tasks
                 .ToTable()
                 .Width(Size.Full())
-                .Builder(e => e.Progress, f => f.Progress(format: "%d%", autoColor: true))
+                .Builder(e => e.Progress, f => f.Progress().Format("%d%").AutoColor())
                 .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Progress, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Priority, Size.Fraction(0.2f))
@@ -375,7 +375,7 @@ public class ProgressBuilderExample : ViewBase
             | tasks
                 .ToTable()
                 .Width(Size.Full())
-                .Builder(e => e.Progress, f => f.Progress(color: Colors.Blue))
+                .Builder(e => e.Progress, f => f.Progress().Color(Colors.Blue))
                 .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Progress, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Priority, Size.Fraction(0.2f));

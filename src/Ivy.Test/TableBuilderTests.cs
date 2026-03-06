@@ -88,7 +88,7 @@ public class TableBuilderTests
     [Fact]
     public void ProgressBuilder_ShouldCalculatePercentageCorrectly()
     {
-        var builder = new ProgressBuilder<TestModel>(min: 0, max: 200);
+        var builder = new ProgressBuilder<TestModel>().Min(0).Max(200);
         var result = builder.Build(100, new TestModel()) as Progress;
         Assert.NotNull(result);
         Assert.Equal(50, result.Value);
@@ -97,7 +97,7 @@ public class TableBuilderTests
     [Fact]
     public void ProgressBuilder_ShouldClampPercentageToZeroToHundred()
     {
-        var builder = new ProgressBuilder<TestModel>(min: 0, max: 100);
+        var builder = new ProgressBuilder<TestModel>().Min(0).Max(100);
 
         var resultOver = builder.Build(150, new TestModel()) as Progress;
         Assert.NotNull(resultOver);
@@ -111,7 +111,7 @@ public class TableBuilderTests
     [Fact]
     public void ProgressBuilder_ShouldApplyAutoColor()
     {
-        var builder = new ProgressBuilder<TestModel>(autoColor: true);
+        var builder = new ProgressBuilder<TestModel>().AutoColor();
 
         var resultHigh = builder.Build(80, new TestModel()) as Progress;
         Assert.NotNull(resultHigh);
@@ -129,7 +129,7 @@ public class TableBuilderTests
     [Fact]
     public void ProgressBuilder_ShouldApplyExplicitColor()
     {
-        var builder = new ProgressBuilder<TestModel>(color: Colors.Blue);
+        var builder = new ProgressBuilder<TestModel>().Color(Colors.Blue);
         var result = builder.Build(50, new TestModel()) as Progress;
         Assert.NotNull(result);
         Assert.Equal(Colors.Blue, result.Color);
@@ -138,7 +138,7 @@ public class TableBuilderTests
     [Fact]
     public void ProgressBuilder_ShouldReturnLayoutWithFormatString()
     {
-        var builder = new ProgressBuilder<TestModel>(format: "%d%");
+        var builder = new ProgressBuilder<TestModel>().Format("%d%");
         var result = builder.Build(50, new TestModel());
         Assert.IsType<LayoutView>(result);
     }

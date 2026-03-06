@@ -3,13 +3,44 @@ using Ivy.Views;
 
 namespace Ivy.Views.Builders;
 
-public class ProgressBuilder<TModel>(
-    double min = 0,
-    double max = 100,
-    Colors? color = null,
-    string? format = null,
-    bool autoColor = false) : IBuilder<TModel>
+public class ProgressBuilder<TModel> : IBuilder<TModel>
 {
+    private double min = 0;
+    private double max = 100;
+    private Colors? color = null;
+    private string? format = null;
+    private bool autoColor = false;
+
+    public ProgressBuilder<TModel> Min(double value)
+    {
+        min = value;
+        return this;
+    }
+
+    public ProgressBuilder<TModel> Max(double value)
+    {
+        max = value;
+        return this;
+    }
+
+    public ProgressBuilder<TModel> Color(Colors value)
+    {
+        color = value;
+        return this;
+    }
+
+    public ProgressBuilder<TModel> Format(string value)
+    {
+        format = value;
+        return this;
+    }
+
+    public ProgressBuilder<TModel> AutoColor(bool value = true)
+    {
+        autoColor = value;
+        return this;
+    }
+
     public object? Build(object? value, TModel record)
     {
         if (value == null)

@@ -35,14 +35,9 @@ public static class BuilderFactoryExtensions
         return new FuncBuilder<TModel, TIn>(func);
     }
 
-    public static IBuilder<TModel> Progress<TModel>(
-        this IBuilderFactory<TModel> factory,
-        double min = 0,
-        double max = 100,
-        Ivy.Shared.Colors? color = null,
-        string? format = null,
-        bool autoColor = false)
+    public static ProgressBuilder<TModel> Progress<TModel>(
+        this IBuilderFactory<TModel> factory)
     {
-        return new ProgressBuilder<TModel>(min, max, color, format, autoColor);
+        return new ProgressBuilder<TModel>();
     }
 }
