@@ -266,33 +266,51 @@ public class SelectInputAdvancedPropsExample : ViewBase
         var fwMultiList = UseState<Frameworks[]>([Frameworks.React, Frameworks.Vue]);
         var fwMultiToggle = UseState<Frameworks[]>([Frameworks.React, Frameworks.Vue]);
         var fwMultiSelect = UseState<Frameworks[]>([Frameworks.React, Frameworks.Vue]);
+
+        var fwNullableSingle = UseState((Frameworks?)null);
+        var fwNullableMultiList = UseState<Frameworks[]?>(() => null);
+        var fwNullableMultiToggle = UseState<Frameworks[]?>(() => null);
+        var fwNullableMultiSelect = UseState<Frameworks[]?>(() => null);
+
         var options = typeof(Frameworks).ToOptions();
 
         var isLoading = UseState(false);
         var isSearchable = UseState(true);
 
-        return Layout.Vertical().Gap(6)
+        return Layout.Vertical()
             | Text.H3("Advanced properties")
-            | (Layout.Horizontal().Gap(4)
+            | (Layout.Horizontal()
                 | isLoading.ToSwitchInput().Label("Loading State")
                 | isSearchable.ToSwitchInput().Label("Searchable"))
-            | Layout.Grid().Columns(2).Gap(6)
-                | (Layout.Vertical().Gap(4)
+            | Layout.Grid().Columns(2)
+                | (Layout.Vertical()
                     | Text.H4("Select (Single)")
-                    | fwSingle.ToSelectInput(options).Variant(SelectInputVariants.Select)
-                        .Searchable(isSearchable.Value).Loading(isLoading.Value).EmptyMessage("No frameworks found").SearchMode(SearchMode.Fuzzy))
-                | (Layout.Vertical().Gap(4)
+                    | (Layout.Horizontal()
+                        | fwSingle.ToSelectInput(options).Variant(SelectInputVariants.Select)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).EmptyMessage("No frameworks found").SearchMode(SearchMode.Fuzzy).Width(Size.Grow())
+                        | fwNullableSingle.ToSelectInput(options).Variant(SelectInputVariants.Select)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).EmptyMessage("No frameworks found").SearchMode(SearchMode.Fuzzy).Width(Size.Grow()).Nullable(true)))
+                | (Layout.Vertical()
                     | Text.H4("Select (Multi, Min=1, Max=3)")
-                    | fwMultiSelect.ToSelectInput(options).Variant(SelectInputVariants.Select)
-                        .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found"))
-                | (Layout.Vertical().Gap(4)
+                    | (Layout.Horizontal()
+                        | fwMultiSelect.ToSelectInput(options).Variant(SelectInputVariants.Select)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow())
+                        | fwNullableMultiSelect.ToSelectInput(options).Variant(SelectInputVariants.Select)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow()).Nullable(true)))
+                | (Layout.Vertical()
                     | Text.H4("List (Multi, Min=1, Max=3)")
-                    | fwMultiList.ToSelectInput(options).Variant(SelectInputVariants.List)
-                        .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found"))
-                | (Layout.Vertical().Gap(4)
+                    | (Layout.Horizontal()
+                        | fwMultiList.ToSelectInput(options).Variant(SelectInputVariants.List)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow())
+                        | fwNullableMultiList.ToSelectInput(options).Variant(SelectInputVariants.List)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow()).Nullable(true)))
+                | (Layout.Vertical()
                     | Text.H4("Toggle (Multi, Min=1, Max=3)")
-                    | fwMultiToggle.ToSelectInput(options).Variant(SelectInputVariants.Toggle)
-                        .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here"));
+                    | (Layout.Horizontal()
+                        | fwMultiToggle.ToSelectInput(options).Variant(SelectInputVariants.Toggle)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow())
+                        | fwNullableMultiToggle.ToSelectInput(options).Variant(SelectInputVariants.Toggle)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow()).Nullable(true)));
     }
 }
 
