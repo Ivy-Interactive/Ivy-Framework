@@ -38,8 +38,6 @@ ivy auth add
 
 All input widgets now support fluent `.Value()` setters, making it easier to set initial values or update input values programmatically. This works with all input types including TextInput, NumberInput, BoolInput, SelectInput, DateTimeInput, ColorInput, and more.
 
-**Usage:**
-
 ```csharp
 // Set initial value on a text input
 var username = UseState("");
@@ -67,12 +65,12 @@ All event handler extension methods have been renamed from `Handle*` to `On*` to
 
 **Common renames:**
 
-- `.HandleClick()` → `.OnClick()`
-- `.HandleSubmit()` → `.OnSubmit()`
-- `.HandleChange()` → `.OnChange()`
-- `.HandleSelect()` → `.OnSelect()`
-- `.HandleBlur()` → `.OnBlur()`
-- `.HandleRowAction()` → `.OnRowAction()`
+- `.HandleClick()` – `.OnClick()`
+- `.HandleSubmit()` – `.OnSubmit()`
+- `.HandleChange()` – `.OnChange()`
+- `.HandleSelect()` – `.OnSelect()`
+- `.HandleBlur()` – `.OnBlur()`
+- `.HandleRowAction()` – `.OnRowAction()`
 
 **Before:**
 
@@ -125,8 +123,7 @@ The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()`
 ```csharp
 var description = UseState("");
 return description.ToTextAreaInput()
-    .Placeholder("Enter description...")
-    .Rows(4);
+    .Placeholder("Enter description...");
 ```
 
 **After:**
@@ -134,8 +131,7 @@ return description.ToTextAreaInput()
 ```csharp
 var description = UseState("");
 return description.ToTextareaInput()
-    .Placeholder("Enter description...")
-    .Rows(4);
+    .Placeholder("Enter description...");
 ```
 
 ### MultiLine Property and Methods Renamed to Multiline
@@ -172,15 +168,15 @@ All input widget variant enums have been renamed to follow a consistent `*InputV
 
 **Updated enum names:**
 
-- `TextInputs` → `TextInputVariants`
-- `SelectInputs` → `SelectInputVariants`
-- `NumberInputs` → `NumberInputVariants`
-- `ColorInputs` → `ColorInputVariants`
-- `DateTimeInputs` → `DateTimeInputVariants`
-- `BoolInputs` → `BoolInputVariants`
-- `FileInputs` → `FileInputVariants`
-- `CodeInputs` → `CodeInputVariants`
-- `FeedbackInputs` → `FeedbackInputVariants`
+- `TextInputs` – `TextInputVariants`
+- `SelectInputs` – `SelectInputVariants`
+- `NumberInputs` – `NumberInputVariants`
+- `ColorInputs` – `ColorInputVariants`
+- `DateTimeInputs` – `DateTimeInputVariants`
+- `BoolInputs` – `BoolInputVariants`
+- `FileInputs` – `FileInputVariants`
+- `CodeInputs` – `CodeInputVariants`
+- `FeedbackInputs` – `FeedbackInputVariants`
 
 **Before:**
 
@@ -206,7 +202,7 @@ Simply replace all instances of the old enum names with their new `*Variants` co
 
 Both the `Text` and `Markdown` widgets now support text alignment with new fluent methods for controlling how content is aligned within its container. You can align text left (default), center, right, or justify.
 
-**Text widget usage:**
+**Text widget:**
 
 ```csharp
 Text.P("Left-aligned paragraph").Left()
@@ -215,7 +211,7 @@ Text.P("Right-aligned numbers or dates").Right()
 Text.P("Justified text that stretches to fill the full width").Justify()
 ```
 
-**Markdown widget usage:**
+**Markdown widget:**
 
 ```csharp
 new Markdown("# Centered Title").Center()
@@ -223,18 +219,9 @@ new Markdown("Right-aligned content").Right()
 new Markdown("Justified paragraph text").Justify()
 ```
 
-You can also use the generic `.Align()` method on both widgets:
-
-```csharp
-Text.P("Custom alignment").Align(TextAlignment.Center)
-new Markdown("Custom alignment").Align(TextAlignment.Right)
-```
-
 ### DataTable Programmatic Refresh
 
 The `DataTable` widget now supports programmatic refreshing with the new `UseRefreshToken()` hook and `.RefreshToken()` fluent API. This feature is particularly useful for reloading table data after CRUD operations like creating, updating, or deleting records.
-
-**Usage:**
 
 ```csharp
 public class EmployeeTable : ViewBase
@@ -265,8 +252,6 @@ public class EmployeeTable : ViewBase
 
 The `CodeBlock` widget now supports line wrapping with the new `.WrapLines()` method. When enabled, long lines wrap within the code block instead of requiring horizontal scrolling
 
-**Usage:**
-
 ```csharp
 new CodeBlock(@"public class Example {
     public void VeryLongMethodName(string parameter1, int parameter2, bool parameter3) {
@@ -280,8 +265,6 @@ new CodeBlock(@"public class Example {
 ### CodeBlock Starting Line Numbers
 
 The `CodeBlock` widget now supports custom starting line numbers with the new `.StartingLineNumber()` method. This is useful when displaying code excerpts where you want to preserve the original line numbers from the source file.
-
-**Usage:**
 
 ```csharp
 new CodeBlock(@"    private static int Calculate(int input)
@@ -297,16 +280,11 @@ new CodeBlock(@"    private static int Calculate(int input)
 ### Expandable Icon Support
 
 The `Expandable` widget now supports icons with the new `.Icon()` extension method, following the same pattern used by Button and Badge widgets.
-**Usage:**
 
 ```csharp
 Layout.Vertical().Gap(2)
     | new Expandable("Settings", "Configure your application preferences here.")
         .Icon(Icons.Settings)
-    | new Expandable("User Profile", "View and edit your profile information.")
-        .Icon(Icons.User)
-    | new Expandable("Notifications", "Manage your notification preferences.")
-        .Icon(Icons.Bell)
 ```
 
 ### SelectInput Advanced Features
@@ -369,8 +347,6 @@ Layout.Horizontal().Gap(4)
 
 The `Html` widget now supports JavaScript execution with the new `DangerouslyAllowScripts()` option. This allows rendering raw HTML that includes `<script>` tags when you trust the source completely.
 
-**Usage:**
-
 ```csharp
 var htmlWithScript = """
     <div id="target-div">Loading...</div>
@@ -385,8 +361,6 @@ new Html(htmlWithScript).DangerouslyAllowScripts()
 ### Sheet Slide Directions
 
 The `Sheet` widget now supports sliding in from any edge of the screen with the new `.Side()` API and `SheetSide` enum. Previously sheets only slid from the right; now they can come from Left, Right, Top, or Bottom.
-
-**Usage:**
 
 ```csharp
 // Slide from left (great for navigation)
@@ -404,8 +378,6 @@ new Sheet().Side(SheetSide.Bottom)
 
 The `Progress` widget now has an explicit `Indeterminate` property for displaying animated progress bars when completion percentage is unknown.
 
-**Usage:**
-
 ```csharp
 // Basic indeterminate progress
 new Progress().Indeterminate().Goal("Loading...")
@@ -422,8 +394,6 @@ new Progress(progress.Value)
 ### Table Progress Builder
 
 The `Table` widget now supports rendering progress bars in cells with the new `.Progress()` builder.
-
-**Usage:**
 
 ```csharp
 var tasks = new[] {
@@ -448,8 +418,6 @@ tasks.ToTable()
 
 The `SidebarLayout` widget now supports drag-to-resize functionality with the new `.Resizable()` extension method. Users can drag the sidebar border to adjust its width at runtime.
 
-**Usage:**
-
 ```csharp
 // Basic resizable sidebar
 new SidebarLayout(
@@ -471,8 +439,6 @@ new SidebarLayout(
 
 The `Separator` widget now supports positioning label text along the separator line with the new `.TextAlign()` method. Text can be positioned at Left, Center (default), or Right.
 
-**Usage:**
-
 ```csharp
 Layout.Vertical().Gap(4)
     | new Separator("Left Aligned").TextAlign(TextAlignment.Left)
@@ -484,16 +450,11 @@ Layout.Vertical().Gap(4)
 
 Individual options in `SelectInput` can now be disabled using the `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list.
 
-**Usage:**
-
 ```csharp
 var fruit = UseState("apple");
 
 var fruitOptions = new IAnyOption[]
 {
-    new Option<string>("Apple", "apple"),
-    new Option<string>("Orange", "orange"),
-    new Option<string>("Grape (Out of Stock)", "grape").Disabled(),
     new Option<string>("Banana", "banana"),
     new Option<string>("Mango (Coming Soon)", "mango").Disabled(),
 };
@@ -506,12 +467,7 @@ fruit.ToSelectInput(fruitOptions)
 
 All `SelectInput` and `AsyncSelectInput` variants now support ghost styling with the new `.Ghost()` extension method. Ghost styling removes borders and background fill, making the select blend into its surroundings.
 
-**Usage:**
-
 ```csharp
-// Normal select with borders
-colorState.ToSelectInput(colorOptions)
-
 // Ghost select without borders
 colorState.ToSelectInput(colorOptions).Ghost()
 
@@ -534,24 +490,10 @@ The default theme has been changed from 'light' to 'system', so the application 
 
 The `NumberInput` widget now supports prefix and suffix properties, matching the existing pattern on `TextInput`.
 
-**Usage:**
-
 ```csharp
-var price = UseState(99.99m);
-var weight = UseState(5.5);
 var temperature = UseState(22);
 
 return Layout.Vertical()
-    | price.ToNumberInput()
-        .Prefix("$")
-        .Precision(2)
-        .WithField()
-        .Label("Price")
-    | weight.ToNumberInput()
-        .Suffix("kg")
-        .Precision(1)
-        .WithField()
-        .Label("Weight")
     | temperature.ToNumberInput()
         .Prefix(Icons.Thermometer)
         .Suffix("°C")
@@ -562,7 +504,6 @@ return Layout.Vertical()
 ### TextInput OnSubmit Event
 
 The `TextInput` widget now supports an `OnSubmit` event that fires when the user presses Enter in single-line text inputs.
-**Usage:**
 
 ```csharp
 var searchQuery = UseState("");
@@ -592,15 +533,9 @@ tag.ToTextInput()
 ### TextInput MinLength Validation
 
 The `TextInput` widget and all its variants (Password, Search, Textarea) now support minimum length validation with the new `.MinLength()` method.
-**Usage:**
 
 ```csharp
 var usernameState = UseState("");
-
-// Require at least 3 characters
-usernameState.ToTextInput()
-    .Placeholder("At least 3 characters")
-    .MinLength(3)
 
 // Combine with MaxLength for range constraints
 usernameState.ToTextInput()
@@ -613,38 +548,16 @@ usernameState.ToTextInput()
 
 The `Badge` widget now supports click events with the new `.OnClick()` extension method.
 
-**Usage:**
-
 ```csharp
 new Badge("Click Me", icon: Icons.MousePointer)
     .OnClick(_ => client.Toast("Badge clicked!"))
-
-new Badge("Filter", icon: Icons.ListFilterPlus, variant: BadgeVariant.Secondary)
-    .OnClick(_ => ApplyFilter())
-
-new Badge("Remove", icon: Icons.X, variant: BadgeVariant.Destructive)
-    .OnClick(_ => RemoveItem())
 ```
 
 ### Box Widget Interactivity
 
 The `Box` widget now supports click events and hover effects, making it easy to create interactive regions without using the heavier Card widget.
 
-**Click events:**
-
 ```csharp
-new Box("Clickable Box")
-    .OnClick(() => client.Toast("Box clicked!"))
-    .Padding(8)
-```
-
-**Hover effects:**
-
-```csharp
-new Box("Hover over me")
-    .Hover(CardHoverVariant.Pointer)
-    .Padding(8)
-
 new Box("Interactive box")
     .Hover(CardHoverVariant.PointerAndTranslate)
     .OnClick(() => HandleSelection())
@@ -656,8 +569,6 @@ When you add `.OnClick()` to a Box, it automatically applies `CardHoverVariant.P
 ### Card Disabled State
 
 The `Card` widget now supports a disabled state using the `.Disabled()` extension method.
-
-**Usage:**
 
 ```csharp
 new Card("This card cannot be clicked")
@@ -671,8 +582,6 @@ new Card("This card cannot be clicked")
 ### FileInput Minimum Size Validation
 
 The `FileInput` widget now supports minimum file size validation with the new `.MinFileSize()` method.
-
-**Usage:**
 
 ```csharp
 var file = UseState<FileUpload<byte[]>?>();
@@ -689,8 +598,6 @@ return file
 
 A new `.Multiline()` extension method has been added to `TextInputBase` for quickly converting any text input into a textarea.
 
-**Usage:**
-
 ```csharp
 var notes = UseState("");
 
@@ -702,18 +609,11 @@ notes.ToTextInput()
 // Equivalent to
 notes.ToTextareaInput()
     .Placeholder("Enter notes...")
-
-// Or
-notes.ToTextInput()
-    .Variant(TextInputVariants.Textarea)
-    .Placeholder("Enter notes...")
 ```
-
-## Bug Fixes
 
 ### MCP Server Configuration
 
-The Ivy CLI now includes commands to easily configure the Ivy MCP (Model Context Protocol) Server with your AI-powered IDE. This enables AI assistants like Claude Code, Cursor, VS Code Copilot, and others to directly interact with the Ivy Framework, providing them with access to documentation, widget properties, and framework-specific knowledge.
+The Ivy CLI now includes commands to easily configure the Ivy MCP (Model Context Protocol) Server with your AI-powered IDE. This enables AI assistants like Claude Code, Cursor, VS Code, Copilot, and others to directly interact with the Ivy Framework, providing them with access to documentation, widget properties, and framework-specific knowledge.
 
 **Quick setup with IDE-specific configuration:**
 
@@ -739,63 +639,64 @@ The `--hello` flag scaffolds a sample project and automatically configures the I
 
 The `ivy mcp config` command generates the appropriate MCP server configuration file for your IDE, making it easy to connect your AI tools to the Ivy ecosystem.
 
-
 ## What's Changed
-* [ErrorSheet]: scope scrolling to error content area by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2310
-* [DataTable]: show scrollbars only when needed by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2315
-* [TextBlock]: Add TextAlignment support and improve Text sample by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2404
-* [TextInput]: add MinLength support and improve samples by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2408
-* [Progress]: standardize Color property by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2417
-* [Tree]: expand nodes on label click by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2419
-* [Security]: fix warning by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2418
-* [Security]: fix bag of warnings by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2424
-* [ListWidget]: remove parent padding hack by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2422
-* [Markdown]:  Added TextAlignment property by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2409
-* [CLI]: add Upgrade docs page and update links by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2427
-* [ButtonWidget]: fix AI variant gradient clipping for Full rounded shape by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2426
-* [OAuth]: Add Sliplane Auth Pprovider and example app by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2414
-* [DataTables]: rename OnRowAction to HandleRowAction by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2423
-* [Inputs]: add fluent setters for Value and OnChange properties by @defymecobra in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2406
-* (docs)getting-started-mcp by @joshuauaua in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2405
-* datatables: refresh token support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2425
-* (async select): fix paddings for list items only in async select by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2441
-* refactor: rename input type enums to a consistent `*InputVariant` nam… by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2442
-* (tree): item action menu by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2443
-* (Tree): Remove empty space in nodes with no children by @dcrjodle in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2445
-* [OAuth]: fix callback redirect in Sliplane Auth Provider by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2446
-* (tree):  add a doc section about handling raw actions by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2448
-* feat: avoid overlaying of kanban cards by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2449
-* [List] Safe full‑bleed mode via remove-parent-padding by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2454
-* [OAuth]: Improve Sliplane auth flow and user info by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2461
-* (audio)  refactor AudioRecorder into AudioInput by @joshuauaua in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2456
-* refactor: EventHandler wrapper and Handle* → On* rename by @ivy-interactive-claude-code[bot] in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2460
-* docs: list all widgets in Widget Library table by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2473
-* refactor: standardize TextArea → Textarea naming by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2472
-* feat: rename MultiLine to Multiline & add Multiline() extension for TextInputBase by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2471
-* feat(badge): add OnClick event handler by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2475
-* feat(box): add OnClick event and HoverVariant support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2474
-* feat(file-input): add minimum file size validation by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2476
-* feat(Card): add Disabled property to prevent interaction by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2477
-* feat(CodeBlock): add StartingLineNumber property by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2478
-* feat(expandable): add icon support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2479
-* feat: Add search, loading, and selection limit features to SelectInput. by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2484
-* feat(spacer): default to grow behavior by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2482
-* feat(html): add DangerouslyAllowScripts option to Html widget by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2485
-* docs: remove unnecessary `this.` prefix from hooks in documentation by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2486
-* feat(Sheet): Add Side API for slide direction by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2489
-* feat(progress): add explicit Indeterminate property by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2488
-* feat(select): add Ghost() API to all select variants by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2491
-* feat(table): add Progress() builder renderer by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2492
-* fix(markdown): add missing border to code blocks by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2494
-* feat(SidebarLayout): Add Resizable drag-to-resize support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2487
-* feat(separator): add TextAlign property with fluent API by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2495
-* feat(Option): Add per-item Disabled support to SelectInput options by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2496
-* fix(themes): change default theme to system for auto dark/light mode by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2497
-* feat(TextInput): add OnSubmit event for Enter key handling by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2498
-* feat(NumberInput): Add Prefix and Suffix support by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2499
-* feat(CodeBlock): add WrapLines option for wrapping long lines by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2500
+
+* [ErrorSheet]: scope scrolling to error content area by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2310>
+- [DataTable]: show scrollbars only when needed by @ArtemLazarchuk in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2315>
+- [TextBlock]: Add TextAlignment support and improve Text sample by @ArtemLazarchuk in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2404>
+- [TextInput]: add MinLength support and improve samples by @ArtemLazarchuk in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2408>
+- [Progress]: standardize Color property by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2417>
+- [Tree]: expand nodes on label click by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2419>
+- [Security]: fix warning by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2418>
+- [Security]: fix bag of warnings by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2424>
+- [ListWidget]: remove parent padding hack by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2422>
+- [Markdown]:  Added TextAlignment property by @ArtemLazarchuk in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2409>
+- [CLI]: add Upgrade docs page and update links by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2427>
+- [ButtonWidget]: fix AI variant gradient clipping for Full rounded shape by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2426>
+- [OAuth]: Add Sliplane Auth Pprovider and example app by @ArtemLazarchuk in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2414>
+- [DataTables]: rename OnRowAction to HandleRowAction by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2423>
+- [Inputs]: add fluent setters for Value and OnChange properties by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2406>
+- (docs)getting-started-mcp by @joshuauaua in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2405>
+- datatables: refresh token support by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2425>
+- (async select): fix paddings for list items only in async select by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2441>
+- refactor: rename input type enums to a consistent `*InputVariant` nam… by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2442>
+- (tree): item action menu by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2443>
+- (Tree): Remove empty space in nodes with no children by @dcrjodle in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2445>
+- [OAuth]: fix callback redirect in Sliplane Auth Provider by @ArtemLazarchuk in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2446>
+- (tree):  add a doc section about handling raw actions by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2448>
+- feat: avoid overlaying of kanban cards by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2449>
+- [List] Safe full‑bleed mode via remove-parent-padding by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2454>
+- [OAuth]: Improve Sliplane auth flow and user info by @ArtemLazarchuk in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2461>
+- (audio)  refactor AudioRecorder into AudioInput by @joshuauaua in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2456>
+- refactor: EventHandler wrapper and Handle*→ On* rename by @ivy-interactive-claude-code[bot] in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2460>
+- docs: list all widgets in Widget Library table by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2473>
+- refactor: standardize TextArea → Textarea naming by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2472>
+- feat: rename MultiLine to Multiline & add Multiline() extension for TextInputBase by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2471>
+- feat(badge): add OnClick event handler by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2475>
+- feat(box): add OnClick event and HoverVariant support by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2474>
+- feat(file-input): add minimum file size validation by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2476>
+- feat(Card): add Disabled property to prevent interaction by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2477>
+- feat(CodeBlock): add StartingLineNumber property by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2478>
+- feat(expandable): add icon support by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2479>
+- feat: Add search, loading, and selection limit features to SelectInput. by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2484>
+- feat(spacer): default to grow behavior by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2482>
+- feat(html): add DangerouslyAllowScripts option to Html widget by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2485>
+- docs: remove unnecessary `this.` prefix from hooks in documentation by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2486>
+- feat(Sheet): Add Side API for slide direction by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2489>
+- feat(progress): add explicit Indeterminate property by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2488>
+- feat(select): add Ghost() API to all select variants by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2491>
+- feat(table): add Progress() builder renderer by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2492>
+- fix(markdown): add missing border to code blocks by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2494>
+- feat(SidebarLayout): Add Resizable drag-to-resize support by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2487>
+- feat(separator): add TextAlign property with fluent API by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2495>
+- feat(Option): Add per-item Disabled support to SelectInput options by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2496>
+- fix(themes): change default theme to system for auto dark/light mode by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2497>
+- feat(TextInput): add OnSubmit event for Enter key handling by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2498>
+- feat(NumberInput): Add Prefix and Suffix support by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2499>
+- feat(CodeBlock): add WrapLines option for wrapping long lines by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2500>
 
 ## New Contributors
-* @ivy-interactive-claude-code[bot] made their first contribution in https://github.com/Ivy-Interactive/Ivy-Framework/pull/2460
 
-**Full Changelog**: https://github.com/Ivy-Interactive/Ivy-Framework/compare/v1.2.16...v1.2.17
+* @ivy-interactive-claude-code[bot] made their first contribution in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/2460>
+
+**Full Changelog**: <https://github.com/Ivy-Interactive/Ivy-Framework/compare/v1.2.16...v1.2.17>
