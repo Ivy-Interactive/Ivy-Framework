@@ -53,7 +53,7 @@ export function App() {
   }, [connection]);
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="ivy-ui-theme">
+    <ThemeProvider defaultTheme="system" storageKey="ivy-ui-theme">
       <ErrorBoundary>
         <EventHandlerProvider eventHandler={eventHandler}>
           <>
