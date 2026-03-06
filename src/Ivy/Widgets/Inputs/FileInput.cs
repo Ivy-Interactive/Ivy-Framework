@@ -33,6 +33,8 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public long? MaxFileSize { get; set; }
 
+    [Prop] public long? MinFileSize { get; set; }
+
     [Prop] public bool Multiple { get; set; }
 
     [Prop] public int? MaxFiles { get; set; }
@@ -57,7 +59,11 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
             var typeValidation = FileInputValidation.ValidateFileType(file, Accept);
             if (!typeValidation.IsValid) return typeValidation;
 
-            // Validate file size
+            // Validate minimum file size
+            var minSizeValidation = FileInputValidation.ValidateMinFileSize(file, MinFileSize);
+            if (!minSizeValidation.IsValid) return minSizeValidation;
+
+            // Validate maximum file size
             return FileInputValidation.ValidateFileSize(file, MaxFileSize);
         }
 
@@ -85,6 +91,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
             // Validate file sizes
             foreach (var f in filesList)
             {
+                var minSizeValidation = FileInputValidation.ValidateMinFileSize(f, MinFileSize);
+                if (!minSizeValidation.IsValid) return minSizeValidation;
+
                 var sizeValidation = FileInputValidation.ValidateFileSize(f, MaxFileSize);
                 if (!sizeValidation.IsValid) return sizeValidation;
             }
@@ -207,6 +216,7 @@ public static class FileInputExtensions
             UploadUrl = ctx.UploadUrl,
             Accept = ctx.Accept ?? input.Accept,
             MaxFileSize = ctx.MaxFileSize,
+            MinFileSize = ctx.MinFileSize,
             MaxFiles = ctx.MaxFiles ?? input.MaxFiles
         };
 
@@ -305,6 +315,11 @@ public static class FileInputExtensions
     public static FileInputBase MaxFileSize(this FileInputBase widget, long maxFileSize)
     {
         return widget with { MaxFileSize = maxFileSize };
+    }
+
+    public static FileInputBase MinFileSize(this FileInputBase widget, long minFileSize)
+    {
+        return widget with { MinFileSize = minFileSize };
     }
 
     public static FileInputBase UploadUrl(this FileInputBase widget, string? uploadUrl)

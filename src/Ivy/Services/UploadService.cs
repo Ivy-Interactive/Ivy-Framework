@@ -20,6 +20,8 @@ public record UploadContext(string UploadUrl, Action<Guid> Cancel)
 
     public long? MaxFileSize { get; init; }
 
+    public long? MinFileSize { get; init; }
+
     public int? MaxFiles { get; init; }
 }
 
@@ -34,6 +36,12 @@ public static class UploadContextExtensions
     public static IState<UploadContext> MaxFileSize(this IState<UploadContext> state, long maxFileSize)
     {
         state.Set(state.Value with { MaxFileSize = maxFileSize });
+        return state;
+    }
+
+    public static IState<UploadContext> MinFileSize(this IState<UploadContext> state, long minFileSize)
+    {
+        state.Set(state.Value with { MinFileSize = minFileSize });
         return state;
     }
 
@@ -295,14 +303,14 @@ public class UploadController(AppSessionStore sessionStore, Server server) : Con
 
 public class UploadService(string connectionId, IClientProvider clientProvider) : IUploadService, IDisposable
 {
-    private readonly ConcurrentDictionary<Guid, (UploadDelegate handler, CancellationTokenSource cts, string? mimeType, string? fileName, Func<(string? accept, long? maxFileSize)> getValidation)> _uploads = new();
+    private readonly ConcurrentDictionary<Guid, (UploadDelegate handler, CancellationTokenSource cts, string? mimeType, string? fileName, Func<(string? accept, long? maxFileSize, long? minFileSize)> getValidation)> _uploads = new();
     private readonly ConcurrentDictionary<Guid, CancellationTokenSource> _inflightUploads = new();
 
-    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null, string? accept = null, long? maxFileSize = null)
+    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null, string? accept = null, long? maxFileSize = null, long? minFileSize = null)
     {
         var uploadId = Guid.NewGuid();
         var cts = new CancellationTokenSource();
-        _uploads[uploadId] = (handler, cts, defaultContentType, defaultFileName, () => (accept, maxFileSize));
+        _uploads[uploadId] = (handler, cts, defaultContentType, defaultFileName, () => (accept, maxFileSize, minFileSize));
 
         var cleanup = Disposable.Create(() =>
         {
@@ -313,7 +321,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
         return (cleanup, $"/ivy/upload/{connectionId}/{uploadId}");
     }
 
-    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null)
+    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize, long? minFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null)
     {
         var uploadId = Guid.NewGuid();
         var cts = new CancellationTokenSource();
@@ -336,7 +344,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
         }
 
         var (handler, cts, defaultContentType, defaultFileName, getValidation) = upload;
-        var (accept, maxFileSize) = getValidation();
+        var (accept, maxFileSize, minFileSize) = getValidation();
 
         if (file.Length == 0)
         {
@@ -356,7 +364,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
             Length = file.Length
         };
 
-        // Validate file size
+        // Validate maximum file size
         if (maxFileSize.HasValue)
         {
             var sizeValidation = Widgets.Inputs.FileInputValidation.ValidateFileSize(fileUpload, maxFileSize);
@@ -364,6 +372,18 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
             {
                 // Send toast notification for file size error
                 clientProvider.Toast(sizeValidation.ErrorMessage ?? "File is too large", "File too large");
+                return new OkResult(); // Return OK to prevent frontend error handling
+            }
+        }
+
+        // Validate minimum file size
+        if (minFileSize.HasValue)
+        {
+            var minSizeValidation = Widgets.Inputs.FileInputValidation.ValidateMinFileSize(fileUpload, minFileSize);
+            if (!minSizeValidation.IsValid)
+            {
+                // Send toast notification for file size error
+                clientProvider.Toast(minSizeValidation.ErrorMessage ?? "File is too small", "File too small");
                 return new OkResult(); // Return OK to prevent frontend error handling
             }
         }
@@ -423,7 +443,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
 
 public interface IUploadService
 {
-    (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null);
+    (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize, long? minFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null);
 
     Task<IActionResult> Upload(string uploadId, IFormFile file);
 
