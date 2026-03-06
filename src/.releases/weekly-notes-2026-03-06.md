@@ -1,12 +1,16 @@
 # Ivy Framework Weekly Notes - Week of 2026-03-06
 
+> [!NOTE]
+> We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
+
 ## New Widgets
 
 ### Tree Widget for Hierarchical Data
 
-A new `Tree` widget is now available for displaying hierarchical data structures like file trees, nested categories, and organizational charts. The Tree widget uses `MenuItem` objects for each node, supporting icons, expand/collapse behavior, click events, and disabled states.
+`Tree` widget got event handling, support for optional Icon and nested menus, as well as RowActions API like it is done in DataTables
 
 **Basic usage:**
+
 ```csharp
 new Tree(
     new MenuItem("src")
@@ -25,6 +29,7 @@ new Tree(
 ```
 
 **Handling click events:**
+
 ```csharp
 var selected = UseState("");
 
@@ -41,11 +46,8 @@ return new Tree(
 
 Individual items can be marked as `.Disabled()` to prevent interaction.
 
-**Interaction Improvements:**
-Tree nodes with children now expand and collapse when clicking anywhere on the label, not just the chevron icon. This makes the tree more intuitive and easier to navigate, especially for deeply nested structures.
-
 **Row Actions:**
-The Tree widget now supports row actions - contextual actions that appear for each tree item. Configure them using `.RowActions()` and handle clicks with `.HandleRowAction()`:
+The Tree widget now supports row actions - contextual actions that appear for each tree item.
 
 ```csharp
 var lastAction = UseState("None");
@@ -64,13 +66,8 @@ return new Tree(
         new MenuItem("Delete").Icon(Icons.Trash).Tag("delete")
     )
 )
-.HandleRowAction(e => lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}"));
+.OnRowAction(e => lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}"));
 ```
-
-Actions appear on hover and provide an intuitive way to perform operations on tree items like editing, duplicating, or deleting.
-
-**Visual Alignment:**
-The Tree widget now has improved visual alignment for leaf nodes (items without children). Previously, all leaf nodes had extra indentation to match the chevron spacing of parent nodes. Now, this spacing is only added when the leaf node has siblings with children, resulting in a cleaner, more compact tree structure with less unnecessary indentation.
 
 ## Authentication
 
@@ -79,6 +76,7 @@ The Tree widget now has improved visual alignment for leaf nodes (items without 
 The Ivy Framework now supports Sliplane OAuth 2.0 authentication, enabling users to sign in with their Sliplane accounts. This is particularly useful for applications deployed on or integrated with [Sliplane](https://sliplane.io).
 
 **Setup:**
+
 ```csharp
 using Ivy.Auth.Sliplane;
 
@@ -88,23 +86,17 @@ await server.RunAsync();
 ```
 
 **Configuration** (via user secrets or environment variables):
+
 ```terminal
 >dotnet user-secrets set "Sliplane:ClientId" "your_client_id"
 >dotnet user-secrets set "Sliplane:ClientSecret" "your_client_secret"
 ```
 
-The provider implements the OAuth 2.0 authorization code flow with support for token validation, refresh tokens, and secure credential management. To obtain OAuth credentials, contact Sliplane support and provide your callback URL (`https://your-domain.com/ivy/auth/callback`).
+Or use CLI
 
-The Sliplane provider now properly handles reverse proxy and load balancer scenarios by respecting the `X-Forwarded-Proto` header. This ensures correct redirect URI generation when your application runs behind a proxy that terminates HTTPS, preventing OAuth callback mismatches.
-
-**User Information Retrieval:**
-The Sliplane OAuth provider now retrieves real user information from the Sliplane `/v0/me` API endpoint. Previously, the provider returned placeholder data after validating the token. Now it fetches and parses actual user details including:
-- User ID
-- Email address
-- Full name
-- Avatar URL
-
-This improvement means your application can now display accurate user profiles and identity information for users authenticated via Sliplane, rather than generic placeholder data.
+```terminal
+ivy auth add
+```
 
 ## API Improvements
 
@@ -113,6 +105,7 @@ This improvement means your application can now display accurate user profiles a
 All input widgets now support fluent `.Value()` setters, making it easier to set initial values or update input values programmatically. This works with all input types including TextInput, NumberInput, BoolInput, SelectInput, DateTimeInput, ColorInput, and more.
 
 **Usage:**
+
 ```csharp
 // Set initial value on a text input
 var username = UseState("");
@@ -139,6 +132,7 @@ The `.Value()` method creates a new instance of the widget with the specified va
 The DataTable widget now uses consistent "Handle" prefix methods for event handlers, aligning with the framework's standard event handling pattern. The new fluent API provides a cleaner way to attach event handlers.
 
 **New API:**
+
 ```csharp
 users.ToDataTable()
     .HandleRowAction(e => {
@@ -159,6 +153,7 @@ This replaces the previous record-style property setting and provides better con
 We've introduced a cleaner pattern for managing conditional UI with the `UseTrigger` hook. This simplifies scenarios where you need to show/hide components based on user interaction.
 
 **Before:**
+
 ```csharp
 var showPanel = UseState(false);
 
@@ -169,6 +164,7 @@ return Layout.Vertical()
 ```
 
 **After:**
+
 ```csharp
 var (panelView, showPanel) = UseTrigger((IState<bool> isOpen) =>
     isOpen.Value ? new FloatingPanel(
@@ -181,6 +177,7 @@ return Layout.Vertical()
 ```
 
 The `UseTrigger` hook returns a tuple with:
+
 - `panelView`: The rendered component (updates automatically when state changes)
 - `showPanel()`: A trigger function that sets the internal state to true
 
@@ -188,11 +185,12 @@ This pattern works great for modals, floating panels, and any conditional UI tha
 
 ## Breaking Changes
 
-### Event Handler Naming: Handle* → On*
+### Event Handler Naming: Handle*→ On*
 
 All event handler extension methods have been renamed from `Handle*` to `On*` to provide a more intuitive API. This affects all widgets with event handlers including Button, Card, Form, Tree, DataTable, and input widgets.
 
 **Common renames:**
+
 - `.HandleClick()` → `.OnClick()`
 - `.HandleSubmit()` → `.OnSubmit()`
 - `.HandleChange()` → `.OnChange()`
@@ -201,6 +199,7 @@ All event handler extension methods have been renamed from `Handle*` to `On*` to
 - `.HandleRowAction()` → `.OnRowAction()`
 
 **Before:**
+
 ```csharp
 new Button("Save")
     .HandleClick(async () => await SaveAsync());
@@ -213,6 +212,7 @@ new Tree(items)
 ```
 
 **After:**
+
 ```csharp
 new Button("Save")
     .OnClick(async () => await SaveAsync());
@@ -231,11 +231,13 @@ The underlying event properties remain the same (e.g., `OnClick`, `OnSubmit`). T
 The `AudioRecorder` widget has been renamed to `AudioInput` for better consistency with other input widgets in the framework.
 
 **Before:**
+
 ```csharp
 new AudioRecorder(upload.Value, "Start recording", "Recording...")
 ```
 
 **After:**
+
 ```csharp
 new AudioInput(upload.Value, "Start recording", "Recording...")
 ```
@@ -247,6 +249,7 @@ Update all references from `AudioRecorder` to `AudioInput` in your codebase. The
 The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()` (lowercase 'a') to align with the HTML `<textarea>` element specification and match the `TextInputVariants.Textarea` enum value.
 
 **Before:**
+
 ```csharp
 var description = UseState("");
 return description.ToTextAreaInput()
@@ -255,6 +258,7 @@ return description.ToTextAreaInput()
 ```
 
 **After:**
+
 ```csharp
 var description = UseState("");
 return description.ToTextareaInput()
@@ -263,6 +267,7 @@ return description.ToTextareaInput()
 ```
 
 Alternatively, you can use the variant enum directly:
+
 ```csharp
 description.ToTextInput(variant: TextInputVariants.Textarea)
 ```
@@ -272,6 +277,7 @@ description.ToTextInput(variant: TextInputVariants.Textarea)
 The `MultiLine` property and methods have been renamed to `Multiline` (lowercase 'l') across the framework for consistency with .NET naming conventions. This affects `Detail`, `TableCell`, and their respective builders.
 
 **Before:**
+
 ```csharp
 // In Details
 new Detail("Notes", notes, multiLine: true);
@@ -283,6 +289,7 @@ new TableCell(content).MultiLine();
 ```
 
 **After:**
+
 ```csharp
 // In Details
 new Detail("Notes", notes, multiline: true);
@@ -298,6 +305,7 @@ new TableCell(content).Multiline();
 All input widget variant enums have been renamed to follow a consistent `*InputVariants` (plural) naming pattern. This provides better consistency across the framework and aligns with the standard `{Widget}Variant` convention used by other widgets.
 
 **Updated enum names:**
+
 - `TextInputs` → `TextInputVariants`
 - `SelectInputs` → `SelectInputVariants`
 - `NumberInputs` → `NumberInputVariants`
@@ -309,6 +317,7 @@ All input widget variant enums have been renamed to follow a consistent `*InputV
 - `FeedbackInputs` → `FeedbackInputVariants`
 
 **Before:**
+
 ```csharp
 myState.ToTextInput().Variant(TextInputs.Email);
 myState.ToColorInput().Variant(ColorInputs.Swatch);
@@ -316,6 +325,7 @@ myState.ToBoolInput().Variant(BoolInputs.Switch);
 ```
 
 **After:**
+
 ```csharp
 myState.ToTextInput().Variant(TextInputVariants.Email);
 myState.ToColorInput().Variant(ColorInputVariants.Swatch);
@@ -331,6 +341,7 @@ Simply replace all instances of the old enum names with their new `*Variants` co
 Both the `Text` and `Markdown` widgets now support text alignment with new fluent methods for controlling how content is aligned within its container. You can align text left (default), center, right, or justify.
 
 **Text widget usage:**
+
 ```csharp
 Text.P("Left-aligned paragraph").Left()
 Text.P("Centered title or callout").Center()
@@ -339,6 +350,7 @@ Text.P("Justified text that stretches to fill the full width").Justify()
 ```
 
 **Markdown widget usage:**
+
 ```csharp
 new Markdown("# Centered Title").Center()
 new Markdown("Right-aligned content").Right()
@@ -346,6 +358,7 @@ new Markdown("Justified paragraph text").Justify()
 ```
 
 You can also use the generic `.Align()` method on both widgets:
+
 ```csharp
 Text.P("Custom alignment").Align(TextAlignment.Center)
 new Markdown("Custom alignment").Align(TextAlignment.Right)
@@ -358,6 +371,7 @@ The alignment methods work with all text variants (H1-H4, P, Lead, Label, etc.) 
 The `DataTable` widget now supports programmatic refreshing with the new `UseRefreshToken()` hook and `.RefreshToken()` fluent API. This feature is particularly useful for reloading table data after CRUD operations like creating, updating, or deleting records.
 
 **Usage:**
+
 ```csharp
 public class EmployeeTable : ViewBase
 {
@@ -388,6 +402,7 @@ When `refreshToken.Refresh()` is called, the DataTable automatically reloads its
 ### DataTable Scrollbar Optimization
 
 The `DataTable` widget now intelligently shows scrollbars only when content actually overflows. Previously, scrollbars would appear even when empty rows were used to fill the container. Now the table automatically:
+
 - Hides scrollbars when data fits within the visible area (with empty rows filling remaining space)
 - Shows scrollbars only when content exceeds the container height
 - Uses flex-grow for the last column to eliminate gaps and avoid manual scrollbar width calculations
@@ -399,6 +414,7 @@ This creates a cleaner, more polished appearance for tables with varying amounts
 The `CodeBlock` widget now supports line wrapping with the new `.WrapLines()` method. When enabled, long lines wrap within the code block instead of requiring horizontal scrolling, improving readability for code with long lines in constrained layouts.
 
 **Usage:**
+
 ```csharp
 new CodeBlock(@"public class Example {
     public void VeryLongMethodName(string parameter1, int parameter2, bool parameter3) {
@@ -416,6 +432,7 @@ By default, long lines require horizontal scrolling. Use `.WrapLines()` when dis
 The `CodeBlock` widget now supports custom starting line numbers with the new `.StartingLineNumber()` method. This is useful when displaying code excerpts where you want to preserve the original line numbers from the source file.
 
 **Usage:**
+
 ```csharp
 new CodeBlock(@"    private static int Calculate(int input)
     {
@@ -434,6 +451,7 @@ This feature makes it easier to show code snippets from larger files while maint
 The `Expandable` widget now supports icons with the new `.Icon()` extension method, following the same pattern used by Button and Badge widgets. Icons appear before the expandable header text, providing visual context.
 
 **Usage:**
+
 ```csharp
 Layout.Vertical().Gap(2)
     | new Expandable("Settings", "Configure your application preferences here.")
@@ -451,6 +469,7 @@ The icon automatically scales with the expandable's size (.Small(), .Medium(), .
 The `SelectInput` widget has three powerful new features:
 
 **Search Support:**
+
 ```csharp
 options.ToSelectInput(options)
     .Searchable(true)
@@ -459,6 +478,7 @@ options.ToSelectInput(options)
 ```
 
 **Selection Limits:**
+
 ```csharp
 // For multi-select variants
 colors.ToSelectInput(options)
@@ -468,6 +488,7 @@ colors.ToSelectInput(options)
 ```
 
 **Loading State:**
+
 ```csharp
 var isLoading = UseState(true);
 
@@ -482,6 +503,7 @@ All three features work across all SelectInput variants (Select, List, Toggle).
 The `Spacer` widget now defaults to grow behavior (`flex-grow: 1`), automatically filling available space in the parent layout's direction. This matches the common use case of pushing sibling elements apart without requiring explicit `.Width(Size.Grow())`.
 
 **Before:**
+
 ```csharp
 Layout.Horizontal().Gap(4)
     | new Button("Left Button").Variant(ButtonVariant.Outline)
@@ -490,6 +512,7 @@ Layout.Horizontal().Gap(4)
 ```
 
 **After:**
+
 ```csharp
 Layout.Horizontal().Gap(4)
     | new Button("Left Button").Variant(ButtonVariant.Outline)
@@ -504,6 +527,7 @@ This is a breaking change if you relied on the previous minimal-space behavior, 
 The `Html` widget now supports JavaScript execution with the new `DangerouslyAllowScripts()` option. This allows rendering raw HTML that includes `<script>` tags when you trust the source completely.
 
 **Usage:**
+
 ```csharp
 var htmlWithScript = """
     <div id="target-div">Loading...</div>
@@ -522,6 +546,7 @@ new Html(htmlWithScript).DangerouslyAllowScripts()
 The `Sheet` widget now supports sliding in from any edge of the screen with the new `.Side()` API and `SheetSide` enum. Previously sheets only slid from the right; now they can come from Left, Right, Top, or Bottom.
 
 **Usage:**
+
 ```csharp
 // Slide from left (great for navigation)
 new Button("Left Sheet").WithSheet(
@@ -546,6 +571,7 @@ For top/bottom sheets, the `width` parameter controls height instead of width. T
 The `Progress` widget now has an explicit `Indeterminate` property for displaying animated progress bars when completion percentage is unknown. This is useful for tasks like file uploads, API calls, or any operation where you can't determine exact progress.
 
 **Usage:**
+
 ```csharp
 // Basic indeterminate progress
 new Progress().Indeterminate().Goal("Loading...")
@@ -566,6 +592,7 @@ The indeterminate animation respects the user's `prefers-reduced-motion` setting
 The `Table` widget now supports rendering progress bars in cells with the new `.Progress()` builder. This provides an inline visual representation of numeric values like completion percentages or download progress.
 
 **Usage:**
+
 ```csharp
 var tasks = new[] {
     new {Name = "Design Review", Progress = 100},
@@ -580,6 +607,7 @@ tasks.ToTable()
 ```
 
 **Features:**
+
 - `.AutoColor()` - Automatically colors progress bars based on value (green ≥75%, yellow ≥50%, orange ≥25%, red <25%)
 - `.Color(Colors.Blue)` - Set a specific color for all progress bars
 - `.Min(0).Max(100)` - Custom range for percentage calculation
@@ -590,6 +618,7 @@ tasks.ToTable()
 The `SidebarLayout` widget now supports drag-to-resize functionality with the new `.Resizable()` extension method. Users can drag the sidebar border to adjust its width at runtime.
 
 **Usage:**
+
 ```csharp
 // Basic resizable sidebar
 new SidebarLayout(
@@ -614,6 +643,7 @@ Default constraints are 200px min and 600px max. The resize handle supports mous
 The `Separator` widget now supports positioning label text along the separator line with the new `.TextAlign()` method. Text can be positioned at Left, Center (default), or Right.
 
 **Usage:**
+
 ```csharp
 Layout.Vertical().Gap(4)
     | new Separator("Left Aligned").TextAlign(TextAlignment.Left)
@@ -628,6 +658,7 @@ This is particularly useful for section headers, form dividers, or visual organi
 Individual options in `SelectInput` can now be disabled using the `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list.
 
 **Usage:**
+
 ```csharp
 var fruit = UseState("apple");
 
@@ -651,6 +682,7 @@ This works across all SelectInput variants (Select, List, Toggle, Radio) and is 
 All `SelectInput` and `AsyncSelectInput` variants now support ghost styling with the new `.Ghost()` extension method. Ghost styling removes borders and background fill, making the select blend into its surroundings.
 
 **Usage:**
+
 ```csharp
 // Normal select with borders
 colorState.ToSelectInput(colorOptions)
@@ -684,6 +716,7 @@ The `AsyncSelectInput` widget now has improved visual alignment in its dropdown 
 The `NumberInput` widget now supports prefix and suffix properties, matching the existing pattern on `TextInput`. This allows displaying contextual visual cues inside the input field such as currency symbols, unit labels, or icons.
 
 **Usage:**
+
 ```csharp
 var price = UseState(99.99m);
 var weight = UseState(5.5);
@@ -714,6 +747,7 @@ The `Prefix()` and `Suffix()` methods accept either a `string` or an `Icons` val
 The `TextInput` widget now supports an `OnSubmit` event that fires when the user presses Enter in single-line text inputs. This enables common interaction patterns like search boxes, quick-add fields, and login forms without requiring a Form wrapper.
 
 **Usage:**
+
 ```csharp
 var searchQuery = UseState("");
 var searchResult = UseState("");
@@ -740,6 +774,7 @@ tag.ToTextInput()
 ```
 
 The event has three overloads:
+
 - `OnSubmit(Func<Event<IAnyInput>, ValueTask>)` - Async with event parameter
 - `OnSubmit(Action<Event<IAnyInput>>)` - Sync with event parameter
 - `OnSubmit(Action)` - Simple callback
@@ -751,6 +786,7 @@ Note: The Textarea variant intentionally does not trigger OnSubmit since Enter i
 The `TextInput` widget and all its variants (Password, Search, Textarea) now support minimum length validation with the new `.MinLength()` method. When a user enters text but doesn't meet the minimum length requirement, a validation error is displayed.
 
 **Usage:**
+
 ```csharp
 var usernameState = UseState("");
 
@@ -773,12 +809,14 @@ The validation error appears on blur when the input has content but doesn't meet
 The `Progress` widget now uses the framework's standard `Colors` enum instead of a widget-specific color variant system. This provides consistency across all widgets and access to the full color palette.
 
 **Before:**
+
 ```csharp
 new Progress(75).ColorVariant(Progress.ColorVariants.Primary)
 new Progress(75).ColorVariant(Progress.ColorVariants.EmeraldGradient)
 ```
 
 **After:**
+
 ```csharp
 new Progress(75).Color(Colors.Primary)
 new Progress(75).Color(Colors.Amber)
@@ -799,6 +837,7 @@ The Kanban widget now has improved horizontal scrolling behavior. Columns mainta
 The `List` widget now supports full-bleed rendering by automatically removing parent padding when used inside containers like `Card`. This allows list items to extend edge-to-edge within their container, creating a cleaner, more modern appearance.
 
 **Usage:**
+
 ```csharp
 new Card(
     new List(
@@ -816,6 +855,7 @@ The list items will now extend to the card's edges rather than respecting the ca
 The `Badge` widget now supports click events with the new `.OnClick()` extension method. This enables interactive badges for common UI patterns like filter chips, tag management, and toggle states.
 
 **Usage:**
+
 ```csharp
 new Badge("Click Me", icon: Icons.MousePointer)
     .OnClick(_ => client.Toast("Badge clicked!"))
@@ -834,6 +874,7 @@ Clickable badges automatically receive hover states and cursor changes to indica
 The `Box` widget now supports click events and hover effects, making it easy to create interactive regions without using the heavier Card widget.
 
 **Click events:**
+
 ```csharp
 new Box("Clickable Box")
     .OnClick(() => client.Toast("Box clicked!"))
@@ -841,6 +882,7 @@ new Box("Clickable Box")
 ```
 
 **Hover effects:**
+
 ```csharp
 new Box("Hover over me")
     .Hover(CardHoverVariant.Pointer)
@@ -859,6 +901,7 @@ When you add `.OnClick()` to a Box, it automatically applies `CardHoverVariant.P
 The `Card` widget now supports a disabled state using the `.Disabled()` extension method. This prevents user interaction and applies visual feedback (reduced opacity) to indicate the card is not available.
 
 **Usage:**
+
 ```csharp
 new Card("This card cannot be clicked")
     .Title("Disabled Card")
@@ -875,6 +918,7 @@ Disabled cards ignore click events and show a disabled cursor, making them perfe
 The `FileInput` widget now supports minimum file size validation with the new `.MinFileSize()` method. This helps reject empty or trivially small files that are likely erroneous.
 
 **Usage:**
+
 ```csharp
 var file = UseState<FileUpload<byte[]>?>();
 var upload = UseUpload(MemoryStreamUploadHandler.Create(file))
@@ -893,6 +937,7 @@ The validation works on both the client and server side, providing immediate fee
 A new `.Multiline()` extension method has been added to `TextInputBase` for quickly converting any text input into a textarea. This provides a more convenient alternative to setting the variant explicitly.
 
 **Usage:**
+
 ```csharp
 var notes = UseState("");
 
@@ -926,6 +971,7 @@ Fixed a visual issue where code blocks within the `Markdown` widget were renderi
 The Ivy CLI now includes an `ivy upgrade` command that makes it simple to update your project to the latest version of the framework. This command automatically updates all Ivy package references in your `.csproj` file to the newest available version.
 
 **Basic usage:**
+
 ```terminal
 >ivy upgrade
 ```
@@ -933,6 +979,7 @@ The Ivy CLI now includes an `ivy upgrade` command that makes it simple to update
 The command will detect your current version, fetch the latest release, and update all package references. By default, it verifies your Git status and commits the upgrade changes automatically.
 
 **Available options:**
+
 ```terminal
 # Enable detailed logging
 >ivy upgrade --verbose
@@ -948,6 +995,7 @@ After upgrading, run `ivy run` to verify everything builds correctly. If you enc
 The Ivy CLI now includes commands to easily configure the Ivy MCP (Model Context Protocol) Server with your AI-powered IDE. This enables AI assistants like Claude Code, Cursor, VS Code Copilot, and others to directly interact with the Ivy Framework, providing them with access to documentation, widget properties, and framework-specific knowledge.
 
 **Quick setup with IDE-specific configuration:**
+
 ```terminal
 # Set up for Claude Code
 >ivy init --hello --claude
@@ -959,6 +1007,7 @@ The Ivy CLI now includes commands to easily configure the Ivy MCP (Model Context
 The `--hello` flag scaffolds a sample project and automatically configures the IDE-specific MCP settings in one command.
 
 **Manual MCP configuration:**
+
 ```terminal
 # Initialize your project
 >ivy init
@@ -976,6 +1025,7 @@ The `ivy mcp config` command generates the appropriate MCP server configuration 
 The `this.` prefix is no longer necessary when calling hooks in your components. All framework documentation has been updated to reflect the cleaner, more concise syntax:
 
 **Before:**
+
 ```csharp
 var state = this.UseState(0);
 var iconsState = this.UseState<Icons[]>();
@@ -983,6 +1033,7 @@ var client = this.UseService<IClientProvider>();
 ```
 
 **After:**
+
 ```csharp
 var state = UseState(0);
 var iconsState = UseState<Icons[]>();
@@ -994,15 +1045,3 @@ Both syntaxes work, but the shorter form without `this.` is now the recommended 
 ### Improved Error Display Scrolling
 
 The error sheet now has better scrolling behavior with a sticky header and properly scoped scroll areas. Stack traces are easier to navigate with the scrollbar constrained to just the code block, and the error title remains visible while scrolling through long stack traces.
-
-## Security
-
-### Dependency Updates
-
-This release includes important security updates to frontend dependencies:
-- Updated `dompurify` to version 3.3.2 for the latest HTML sanitization security patches
-- Updated `minimatch` to version 9.0.7 to address security warnings
-- Updated `rollup` to version 4.59.0 across all frontend packages
-- Updated `balanced-match` and `brace-expansion` dependencies to their latest secure versions
-
-These updates ensure your Ivy applications are built with the latest secure versions of critical build-time dependencies.
