@@ -30,6 +30,18 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
         var menuItems = UseState(() => appRepository.GetMenuItems());
+
+        // Auto-default: if there's exactly one visible app, select it and close sidebar
+        var visibleApps = appRepository.GetMenuItems().FlattenWithPath().ToArray();
+        if (visibleApps.Length == 1 && visibleApps[0].Item.Tag is string singleAppId)
+        {
+            settings = settings with
+            {
+                DefaultAppId = settings.DefaultAppId ?? singleAppId,
+                SidebarOpen = false
+            };
+        }
+
         var args = UseService<AppContext>();
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
