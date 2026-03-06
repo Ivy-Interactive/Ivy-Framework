@@ -627,17 +627,11 @@ public class AppHub(
                 return;
             }
 
-            // Initialize the token handler
-            var httpContext = Context.GetHttpContext();
-            if (httpContext != null)
+            // Initialize the token handler using AppContext (not Hub.Context which can be disposed)
+            var appContext = session.AppServices.GetService<AppContext>();
+            if (appContext != null)
             {
-                var requestScheme = httpContext.Request.Scheme;
-                if (httpContext.Request.Headers.TryGetValue("X-Forwarded-Proto", out var forwardedProto))
-                {
-                    requestScheme = forwardedProto.ToString();
-                }
-
-                await handler.InitializeAsync(providerSession, requestScheme, httpContext.Request.Host.Value!, cancellationToken);
+                await handler.InitializeAsync(providerSession, appContext.Scheme, appContext.Host, cancellationToken);
             }
 
             var client = session.AppServices.GetRequiredService<IClientProvider>();
