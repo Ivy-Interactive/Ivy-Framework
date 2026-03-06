@@ -18,14 +18,14 @@ The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()`
 ### Before (v1.2.16 and earlier)
 
 ```csharp
-var state = this.UseState("");
+var state = UseState("");
 return state.ToTextAreaInput(placeholder: "Enter description...");
 ```
 
 ### After (v1.2.17+)
 
 ```csharp
-var state = this.UseState("");
+var state = UseState("");
 return state.ToTextareaInput(placeholder: "Enter description...");
 ```
 
@@ -48,8 +48,8 @@ Replace all instances of `ToTextAreaInput` with `ToTextareaInput`.
 ```csharp
 public override object? Build()
 {
-    var description = this.UseState("");
-    var notes = this.UseState<string?>(null);
+    var description = UseState("");
+    var notes = UseState<string?>(null);
 
     return new VStack(
         description.ToTextAreaInput(placeholder: "Description").Rows(4),
@@ -63,8 +63,8 @@ public override object? Build()
 ```csharp
 public override object? Build()
 {
-    var description = this.UseState("");
-    var notes = this.UseState<string?>(null);
+    var description = UseState("");
+    var notes = UseState<string?>(null);
 
     return new VStack(
         description.ToTextareaInput(placeholder: "Description").Rows(4),

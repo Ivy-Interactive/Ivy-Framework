@@ -25,9 +25,9 @@ public class LucideIconsView : ViewBase
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
-        var searchState = this.UseState("code");
-        var iconsState = this.UseState<Icons[]>(Array.Empty<Icons>());
+        var client = UseService<IClientProvider>();
+        var searchState = UseState("code");
+        var iconsState = UseState<Icons[]>(Array.Empty<Icons>());
         
         UseEffect(() =>
         {

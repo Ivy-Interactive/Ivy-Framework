@@ -158,7 +158,7 @@ public class BasicReducerDemo : ViewBase
 
     public override object? Build()
     {
-        var (count, dispatch) = this.UseReducer(CounterReducer, 0);
+        var (count, dispatch) = UseReducer(CounterReducer, 0);
 
         return Layout.Vertical(
             Text.P($"Count: {count}").Large(),

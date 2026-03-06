@@ -208,7 +208,7 @@ new TextInput().Default()
 ### UseState
 
 var nameState = UseState("World");
-var iconsState = this.UseState<Icons[]>();
+var iconsState = UseState<Icons[]>();
 
 If you don't specify a value, default(T) is used.
 
