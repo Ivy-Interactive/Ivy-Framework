@@ -25,31 +25,8 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
     private string? _codeVerifier = null;
 
     public MicrosoftEntraAuthProvider(IConfiguration configuration)
-        : base(
-            GetTenantId(configuration),
-            GetClientId(configuration),
-            GetClientSecret(configuration),
-            ["User.Read", "openid", "profile", "email", "offline_access"],
-            CreateConfigurationManager(configuration))
+        : base(configuration)
     {
-    }
-
-    private static string GetTenantId(IConfiguration configuration)
-        => configuration.GetValue<string>("MicrosoftEntra:TenantId") ?? throw new Exception("MicrosoftEntra:TenantId is required");
-
-    private static string GetClientId(IConfiguration configuration)
-        => configuration.GetValue<string>("MicrosoftEntra:ClientId") ?? throw new Exception("MicrosoftEntra:ClientId is required");
-
-    private static string GetClientSecret(IConfiguration configuration)
-        => configuration.GetValue<string>("MicrosoftEntra:ClientSecret") ?? throw new Exception("MicrosoftEntra:ClientSecret is required");
-
-    private static ConfigurationManager<OpenIdConnectConfiguration> CreateConfigurationManager(IConfiguration configuration)
-    {
-        var tenantId = GetTenantId(configuration);
-        return new ConfigurationManager<OpenIdConnectConfiguration>(
-            $"https://login.microsoftonline.com/{tenantId}/.well-known/openid-configuration",
-            new OpenIdConnectConfigurationRetriever()
-        );
     }
 
     public Task InitializeAsync(IAuthProviderSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)

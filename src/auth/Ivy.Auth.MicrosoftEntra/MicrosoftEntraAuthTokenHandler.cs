@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -25,18 +26,16 @@ public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
     record struct TokenCache(Dictionary<string, RefreshToken> RefreshToken);
     record struct RefreshToken([property: JsonPropertyName("secret")] string Secret);
 
-    public MicrosoftEntraAuthTokenHandler(
-        string tenantId,
-        string clientId,
-        string clientSecret,
-        string[] scopes,
-        ConfigurationManager<OpenIdConnectConfiguration> configurationManager)
+    public MicrosoftEntraAuthTokenHandler(IConfiguration configuration)
     {
-        TenantId = tenantId;
-        ClientId = clientId;
-        ClientSecret = clientSecret;
-        Scopes = scopes;
-        ConfigurationManager = configurationManager;
+        TenantId = configuration.GetValue<string>("MicrosoftEntra:TenantId") ?? throw new Exception("MicrosoftEntra:TenantId is required");
+        ClientId = configuration.GetValue<string>("MicrosoftEntra:ClientId") ?? throw new Exception("MicrosoftEntra:ClientId is required");
+        ClientSecret = configuration.GetValue<string>("MicrosoftEntra:ClientSecret") ?? throw new Exception("MicrosoftEntra:ClientSecret is required");
+        Scopes = ["User.Read", "openid", "profile", "email", "offline_access"];
+        ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            $"https://login.microsoftonline.com/{TenantId}/.well-known/openid-configuration",
+            new OpenIdConnectConfigurationRetriever()
+        );
     }
 
     public void SetBaseUrl(string baseUrl)
