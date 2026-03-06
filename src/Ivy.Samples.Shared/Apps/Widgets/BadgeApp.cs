@@ -1,12 +1,13 @@
 using Ivy.Core;
 using Ivy.Shared;
+using Ivy.Views.Builders;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
 [App(icon: Icons.Pill, path: ["Widgets"], searchHints: ["tag", "label", "chip", "status", "indicator", "pill"])]
 public class BadgeApp : SampleBase
 {
-    private readonly IClientProvider _client = UseService<IClientProvider>();
+    private IClientProvider _client => UseService<IClientProvider>();
 
     private static readonly BadgeVariant[] Variants = [
         BadgeVariant.Primary,
@@ -99,14 +100,36 @@ public class BadgeApp : SampleBase
                )
 
                | Text.H2("Clickable Badges")
-               | Layout.Horizontal(
-                   new Badge("Click Me", icon: Icons.MousePointer)
-                       .OnClick(_ => _client.Toast("Badge clicked!")),
-                   new Badge("Filter", icon: Icons.Filter, variant: BadgeVariant.Secondary)
-                       .OnClick(_ => _client.Toast("Filter applied!")),
-                   new Badge("Remove", icon: Icons.X, variant: BadgeVariant.Destructive)
-                       .OnClick(_ => _client.Toast("Item removed!"))
-               )
+               | new ClickableBadgesExample()
             ;
+    }
+}
+
+public class ClickableBadgesExample : ViewBase
+{
+    public override object? Build()
+    {
+        var isOpen = UseState(false);
+        var popupMessage = UseState("");
+
+        return Layout.Vertical()
+            | Layout.Horizontal(
+                new Badge("Click Me", icon: Icons.MousePointer)
+                    .OnClick(_ => { popupMessage.Set("Badge clicked!"); isOpen.Set(true); }),
+                new Badge("Filter", icon: Icons.ListFilterPlus, variant: BadgeVariant.Secondary)
+                    .OnClick(_ => { popupMessage.Set("Filter applied!"); isOpen.Set(true); }),
+                new Badge("Remove", icon: Icons.X, variant: BadgeVariant.Destructive)
+                    .OnClick(_ => { popupMessage.Set("Item removed!"); isOpen.Set(true); })
+            )
+            | (isOpen.Value
+                ? new Dialog(
+                    _ => isOpen.Set(false),
+                    new DialogHeader("Badge Action"),
+                    new DialogBody(Text.P(popupMessage.Value)),
+                    new DialogFooter(
+                        new Button("Close", _ => isOpen.Set(false))
+                    )
+                )
+                : null);
     }
 }
