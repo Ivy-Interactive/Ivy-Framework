@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Text.RegularExpressions;
 using Ivy;
 using Ivy.Widgets.Inputs;
 
@@ -7,21 +9,68 @@ namespace Ivy.Validation;
 
 /// <summary>
 /// Shared validation for forms. Email, tel, url, and password are validated on blur and submit via FormFieldView.
-/// Validation logic lives in TextInputExtensions.ValidateForVariant.
 /// </summary>
 public static class Validators
 {
+    /// <summary>Returns (true, null) if valid, (false, errorMessage) if invalid. Used by form validation and TextInput on-blur.</summary>
+    public static (bool isValid, string? errorMessage) ValidateForVariant(object? value, TextInputVariants variant, int passwordMinLength = 8)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s))
+            return (true, null);
+        var err = variant switch
+        {
+            TextInputVariants.Email => ValidateEmail(value),
+            TextInputVariants.Password => ValidatePassword(value, passwordMinLength),
+            TextInputVariants.Tel => ValidateTel(value),
+            TextInputVariants.Url => ValidateUrl(value),
+            _ => null
+        };
+        return (err == null, err);
+    }
+
+    private static string? ValidateEmail(object? value)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        try
+        {
+            var addr = new MailAddress(s);
+            return addr.Host.Contains('.') ? null : "Please enter a valid email address";
+        }
+        catch (FormatException) { return "Please enter a valid email address"; }
+    }
+
+    private static string? ValidatePassword(object? value, int minLength = 8)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        return s.Length >= minLength ? null : $"Password must be at least {minLength} characters";
+    }
+
+    private static string? ValidateTel(object? value)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        var digitsOnly = Regex.Replace(s, @"\D", "");
+        if (digitsOnly.Length < 7 || digitsOnly.Length > 15) return "Please enter a valid phone number";
+        return Regex.IsMatch(s, @"^[\d\s+\-().]+$") ? null : "Please enter a valid phone number";
+    }
+
+    private static string? ValidateUrl(object? value)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        if (!Uri.TryCreate(s, UriKind.Absolute, out var uri) || !uri.IsAbsoluteUri) return "Please enter a valid URL";
+        return uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps ? null : "Please enter a valid URL (http or https)";
+    }
+
     public static Func<object?, (bool, string)> CreateEmailValidator(string fieldName) =>
-        v => { var (ok, err) = TextInputExtensions.ValidateForVariant(v, TextInputVariants.Email); return (ok, err ?? ""); };
+        v => { var (ok, err) = ValidateForVariant(v, TextInputVariants.Email); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)> CreateTelValidator(string fieldName) =>
-        v => { var (ok, err) = TextInputExtensions.ValidateForVariant(v, TextInputVariants.Tel); return (ok, err ?? ""); };
+        v => { var (ok, err) = ValidateForVariant(v, TextInputVariants.Tel); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)> CreateUrlValidator(string fieldName) =>
-        v => { var (ok, err) = TextInputExtensions.ValidateForVariant(v, TextInputVariants.Url); return (ok, err ?? ""); };
+        v => { var (ok, err) = ValidateForVariant(v, TextInputVariants.Url); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)> CreatePasswordValidator(string fieldName, int minLength = 8) =>
-        v => { var (ok, err) = TextInputExtensions.ValidateForVariant(v, TextInputVariants.Password); return (ok, err ?? ""); };
+        v => { var (ok, err) = ValidateForVariant(v, TextInputVariants.Password, minLength); return (ok, err ?? ""); };
 
     public static Func<object?, (bool, string)>? ForVariant(TextInputVariants variant, string fieldName)
     {
@@ -47,12 +96,9 @@ public static class Validators
         return list.ToArray();
     }
 
-    public static (bool isValid, string? errorMessage) ValidateValue(object? value, TextInputVariants variant, string? label)
+    public static (bool isValid, string? errorMessage) ValidateValue(object? value, TextInputVariants variant, string? label, int passwordMinLength = 8)
     {
-        var validator = ForVariant(variant, label ?? "");
-        if (validator == null)
-            return (true, null);
-        var (valid, message) = validator(value);
+        var (valid, message) = ValidateForVariant(value, variant, passwordMinLength);
         return (valid, valid ? null : message);
     }
 
