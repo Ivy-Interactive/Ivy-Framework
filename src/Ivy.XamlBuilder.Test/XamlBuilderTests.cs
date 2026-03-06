@@ -224,7 +224,7 @@ public class XamlBuilderTests
         Assert.Single(chart.Areas);
         Assert.NotNull(chart.Areas[0].Label);
         Assert.Equal(Positions.Top, chart.Areas[0].Label!.Position);
-        Assert.Equal(10, chart.Areas[0].Label.Offset);
+        Assert.Equal(10, chart.Areas[0].Label!.Offset);
     }
 
     // --- Full AreaChart integration ---
