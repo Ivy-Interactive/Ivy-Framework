@@ -91,8 +91,11 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     const alignSelf = childAlignSelf[index];
     if (alignSelf && React.isValidElement(child)) {
       const alignSelfStyles = getAlignSelf(alignSelf);
-      return React.cloneElement(child as React.ReactElement<{ style?: React.CSSProperties }>, {
-        style: { ...(child.props.style || {}), ...alignSelfStyles },
+      const typedChild = child as React.ReactElement<{
+        style?: React.CSSProperties;
+      }>;
+      return React.cloneElement(typedChild, {
+        style: { ...(typedChild.props.style || {}), ...alignSelfStyles },
       });
     }
     return child;

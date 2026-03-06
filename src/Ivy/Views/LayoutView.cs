@@ -354,9 +354,9 @@ public class LayoutView : ViewBase, IStateless
     {
         var layout = new StackLayout(_elements.Select(e => e.Content).ToArray(), _orientation, _rowGap, _padding, _margin, _background,
                 _alignment, _removeParentPadding, _wrap)
-            {
-                ColumnGap = _columnGap
-            }
+        {
+            ColumnGap = _columnGap
+        }
             .Width(_width)
             .Height(_height)
             .Visible(_visible);
