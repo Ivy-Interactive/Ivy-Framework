@@ -249,53 +249,23 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
             throw new Exception($"Session ID from query does not match session ID from sign-in status.");
         }
 
-        if (signIn.Response?.Status == "needs_identifier" && signIn.Response.FirstFactorVerification?.Status == "transferable")
+        try
         {
-            try
+
+            if (signIn.Response?.Status == "needs_identifier" && signIn.Response.FirstFactorVerification?.Status == "transferable")
             {
                 var redirectUrl = $"{_callbackBaseUrl}/{Guid.NewGuid()}";
                 var signUpResponse = await frontendClient.CreateSignUpAsync(credentials, _origin, signIn.Response.FirstFactorVerification.Strategy, redirectUrl, redirectUrl, transfer: true, cancellationToken);
 
                 if (signUpResponse.Response?.CreatedSessionId is { } newSessionId)
                 {
-                    await frontendClient.TouchSessionAsync(newSessionId, credentials, cancellationToken);
-                    var newToken = await frontendClient.CreateSessionTokenAsync(newSessionId, credentials, cancellationToken);
-
-                    if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: false, cancellationToken) == null)
-                    {
-                        throw new Exception("New JWT from Clerk is invalid.");
-                    }
-
-                    return new AuthToken(newToken.Jwt!);
+                    sessionId = newSessionId;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Clerk OAuth Callback] Failed to transfer sign-in: {ex.Message}");
-            }
 
-            Console.WriteLine($"[Clerk OAuth Callback] Transferable sign-in could not be completed. User needs to sign up first.");
-            return null;
-        }
-
-        try
-        {
-            if (string.IsNullOrEmpty(sessionId))
-            {
-                Console.WriteLine($"[Clerk OAuth Callback] Sign-in ID: {pendingSignInId}");
-                Console.WriteLine($"[Clerk OAuth Callback] Status: {signIn.Response?.Status}");
-                Console.WriteLine($"[Clerk OAuth Callback] Created Session ID: {signIn.Response?.CreatedSessionId}");
-                Console.WriteLine($"[Clerk OAuth Callback] First Factor Status: {signIn.Response?.FirstFactorVerification?.Status}");
-
-                if (signIn.Response?.FirstFactorVerification?.Error is { } error)
-                {
-                    Console.WriteLine($"[Clerk OAuth Callback] Error Code: {error.Code}");
-                    Console.WriteLine($"[Clerk OAuth Callback] Error Message: {error.Message}");
-                    Console.WriteLine($"[Clerk OAuth Callback] Error Long Message: {error.LongMessage}");
-                }
                 return null;
             }
-            else
+
+            if (!string.IsNullOrEmpty(sessionId))
             {
                 await frontendClient.TouchSessionAsync(sessionId, credentials, cancellationToken);
                 var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
@@ -309,6 +279,8 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                     return new AuthToken(newToken.Jwt!);
                 }
             }
+
+            throw new Exception("No session ID found.");
         }
         catch (Exception)
         {
