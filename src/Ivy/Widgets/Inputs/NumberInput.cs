@@ -68,6 +68,10 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public string? TargetType { get; set; }
 
+    [Prop] public Affix? Prefix { get; set; }
+
+    [Prop] public Affix? Suffix { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [
@@ -224,6 +228,18 @@ public static class NumberInputExtensions
     {
         return widget with { Invalid = invalid };
     }
+
+    public static NumberInputBase Prefix(this NumberInputBase widget, string prefixText)
+        => widget with { Prefix = prefixText.ToAffix() };
+
+    public static NumberInputBase Prefix(this NumberInputBase widget, Icons prefixIcon)
+        => widget with { Prefix = prefixIcon.ToAffix() };
+
+    public static NumberInputBase Suffix(this NumberInputBase widget, string suffixText)
+        => widget with { Suffix = suffixText.ToAffix() };
+
+    public static NumberInputBase Suffix(this NumberInputBase widget, Icons suffixIcon)
+        => widget with { Suffix = suffixIcon.ToAffix() };
 
     [OverloadResolutionPriority(1)]
     public static NumberInputBase OnBlur(this NumberInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

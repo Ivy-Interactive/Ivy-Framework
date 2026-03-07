@@ -75,6 +75,7 @@ interface Option {
   value: string | number;
   label: string;
   group?: string;
+  disabled?: boolean;
 }
 
 interface SelectInputWidgetProps {
@@ -95,6 +96,7 @@ interface SelectInputWidgetProps {
   searchMode?: 'CaseInsensitive' | 'CaseSensitive' | 'Fuzzy';
   emptyMessage?: string;
   loading?: boolean;
+  ghost?: boolean;
   'data-testid'?: string;
   scale?: Scales;
   width?: string;
@@ -289,6 +291,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   searchMode = 'CaseInsensitive',
   emptyMessage,
   loading = false,
+  ghost = false,
   scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
@@ -372,7 +375,9 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     <div
       className={cn(
         selectContainerVariants({ scale }),
-        invalid && 'border-destructive focus-within:ring-destructive'
+        invalid && 'border-destructive focus-within:ring-destructive',
+        ghost &&
+          'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
       )}
       style={styles}
     >
@@ -413,6 +418,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 const isDisabled =
                   disabled ||
                   loading ||
+                  option.disabled ||
                   (!isSelected && isAtMax) ||
                   (isSelected &&
                     minSelections != null &&
@@ -444,6 +450,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 const isDisabled =
                   disabled ||
                   loading ||
+                  option.disabled ||
                   (!isSelected && isAtMax) ||
                   (isSelected &&
                     minSelections != null &&
@@ -510,6 +517,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   options = [],
   eventHandler,
   nullable = false,
+  ghost = false,
   scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
@@ -537,7 +545,9 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
     <div
       className={cn(
         selectContainerVariants({ scale }),
-        invalid && 'border-destructive focus-within:ring-destructive'
+        invalid && 'border-destructive focus-within:ring-destructive',
+        ghost &&
+          'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
       )}
       style={styles}
     >
@@ -551,11 +561,13 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
             data-testid={dataTestId}
           >
             {validOptions.map(option => {
+              const isOptionDisabled = disabled || option.disabled;
               return (
                 <div key={option.value} className="flex items-center space-x-2">
                   <RadioGroupItem
                     value={option.value.toString()}
                     id={`${id}-${option.value}`}
+                    disabled={isOptionDisabled}
                     className={cn(
                       'border-input text-input',
                       circleSizeVariants[scale],
@@ -564,7 +576,8 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                         : undefined,
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput
-                        : undefined
+                        : undefined,
+                      isOptionDisabled && 'opacity-50 cursor-not-allowed'
                     )}
                   />
                   <Label
@@ -574,7 +587,8 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                       selectTextVariants[scale],
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput
-                        : undefined
+                        : undefined,
+                      isOptionDisabled && 'opacity-50 cursor-not-allowed'
                     )}
                   >
                     {option.label}
@@ -628,6 +642,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   searchMode = 'CaseInsensitive',
   emptyMessage,
   loading = false,
+  ghost = false,
   scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
@@ -738,7 +753,9 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
     <div
       className={cn(
         'relative w-full border border-input bg-transparent rounded-box shadow-sm px-3 py-2 focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
-        invalid && 'border-destructive focus-within:ring-destructive'
+        invalid && 'border-destructive focus-within:ring-destructive',
+        ghost &&
+          'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
       )}
       style={styles}
     >
@@ -781,6 +798,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 const isDisabled =
                   disabled ||
                   loading ||
+                  option.disabled ||
                   (!isSelected && isAtMax) ||
                   (isSelected &&
                     minSelections != null &&
@@ -902,6 +920,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   searchMode = 'CaseInsensitive',
   emptyMessage,
   loading = false,
+  ghost = false,
   scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
@@ -944,6 +963,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
       disable:
         disabled ||
         loading ||
+        option.disabled ||
         (isAtMax && !selectedValues.includes(option.value.toString())),
     }));
   }, [validOptions, selectedValues, maxSelections, disabled, loading]);
@@ -1099,10 +1119,11 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             onValueChange={handleMultiSelectChange}
             placeholder={placeholder}
             disabled={disabled || loading}
-            className="w-full"
+            className={cn('w-full', ghost && 'ghost')}
             invalid={!!invalid}
             hidePlaceholderWhenSelected
             scale={scale}
+            ghost={ghost}
             data-testid={dataTestId}
           />
           {(nullable && selectedMultiSelectOptions.length > 0 && !disabled) ||
@@ -1180,7 +1201,9 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
       className={cn(
         'relative',
         invalid && inputStyles.invalidInput,
-        !hasValue && 'text-muted-foreground'
+        !hasValue && 'text-muted-foreground',
+        ghost &&
+          'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground'
       )}
       scale={scale}
     >
@@ -1251,7 +1274,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                       key={option.value}
                       value={option.value.toString()}
                       scale={scale}
-                      disabled={disabled || loading}
+                      disabled={disabled || loading || option.disabled}
                     >
                       {option.label}
                     </SelectItem>
@@ -1330,6 +1353,7 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
     searchMode: props.searchMode ?? 'CaseInsensitive',
     emptyMessage: props.emptyMessage,
     loading: props.loading ?? false,
+    ghost: props.ghost ?? false,
   };
 
   switch (normalizedProps.variant) {

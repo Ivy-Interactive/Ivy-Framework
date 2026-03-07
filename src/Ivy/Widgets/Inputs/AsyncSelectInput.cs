@@ -79,6 +79,8 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public Scale Scale { get; set; } = Scale.Medium;
 
+    public bool Ghost { get; set; }
+
     public override object? Build()
     {
         var open = UseState(false);
@@ -122,7 +124,8 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 DisplayValue = displayValue,
                 OnSelect = HandleSelect,
                 Loading = loading,
-                Scale = Scale
+                Scale = Scale,
+                Ghost = Ghost
             },
             open.Value ? new Sheet(
                 OnClose,
@@ -233,6 +236,22 @@ public static class AsyncSelectInputViewExtensions
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
+    public static IAnyAsyncSelectInputBase Ghost(this IAnyAsyncSelectInputBase widget, bool ghost = true)
+    {
+        var widgetType = widget.GetType();
+        if (widgetType.IsGenericType && widgetType.GetGenericTypeDefinition() == typeof(AsyncSelectInputView<>))
+        {
+            var ghostProperty = widgetType.GetProperty("Ghost");
+            if (ghostProperty != null)
+            {
+                ghostProperty.SetValue(widget, ghost);
+                return widget;
+            }
+        }
+
+        throw new InvalidOperationException("Unable to set ghost on async select input");
+    }
+
     public static IAnyAsyncSelectInputBase Value<T>(this IAnyAsyncSelectInputBase widget, T value)
     {
         if (widget is AsyncSelectInputView<T> typedWidget)
@@ -245,6 +264,7 @@ public static class AsyncSelectInputViewExtensions
                 OnBlur = typedWidget.OnBlur,
                 Invalid = typedWidget.Invalid,
                 Scale = typedWidget.Scale,
+                Ghost = typedWidget.Ghost,
             };
             return clone;
         }
@@ -266,6 +286,8 @@ internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
     [Prop] public string? DisplayValue { get; init; }
 
     [Prop] public bool Loading { get; init; }
+
+    [Prop] public bool Ghost { get; init; }
 
     [Event] public Func<Event<AsyncSelectInput>, ValueTask>? OnSelect { get; init; }
 }

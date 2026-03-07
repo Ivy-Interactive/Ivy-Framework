@@ -30,6 +30,8 @@ public record Progress : WidgetBase<Progress>
 
     [Prop] public Colors? Color { get; set; }
 
+    [Prop] public bool Indeterminate { get; set; }
+
     public static Progress operator |(Progress widget, object child)
     {
         throw new NotSupportedException("Progress does not support children.");
@@ -51,5 +53,10 @@ public static class ProgressExtensions
     public static Progress Color(this Progress progress, Colors? color)
     {
         return progress with { Color = color };
+    }
+
+    public static Progress Indeterminate(this Progress progress, bool indeterminate = true)
+    {
+        return progress with { Indeterminate = indeterminate };
     }
 }

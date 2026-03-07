@@ -24,6 +24,7 @@ interface PasswordVariantProps {
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClear: (e: React.MouseEvent) => void;
+  onSubmit?: () => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   scale?: Scales;
@@ -35,6 +36,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   onBlur,
   onFocus,
   onClear,
+  onSubmit,
   inputRef,
   scale = Scales.Medium,
 }) => {
@@ -74,7 +76,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
     onChange(syntheticEvent);
   });
 
-  const handleKeyDown = useEnterKeyBlur();
+  const handleKeyDown = useEnterKeyBlur(onSubmit);
 
   const styles: React.CSSProperties = {
     ...getWidth(props.width),

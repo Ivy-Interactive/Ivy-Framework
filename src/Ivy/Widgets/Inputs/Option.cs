@@ -16,6 +16,8 @@ public interface IAnyOption
     public object Value { get; set; }
 
     public Icons? Icon { get; set; }
+
+    public bool Disabled { get; set; }
 }
 
 public class Option<TValue> : IAnyOption
@@ -29,13 +31,14 @@ public class Option<TValue> : IAnyOption
         Value = null!;
     }
 
-    public Option(string? label, TValue value, string? group = null, string? description = null, Icons? icon = null)
+    public Option(string? label, TValue value, string? group = null, string? description = null, Icons? icon = null, bool disabled = false)
     {
         Label = label;
         Description = description;
         Value = value!;
         Group = group;
         Icon = icon;
+        Disabled = disabled;
     }
 
     public Type GetOptionType()
@@ -54,6 +57,8 @@ public class Option<TValue> : IAnyOption
     public string? Group { get; set; }
 
     public Icons? Icon { get; set; }
+
+    public bool Disabled { get; set; }
 }
 
 public static class OptionExtensions
@@ -79,8 +84,8 @@ public static class OptionExtensions
 
             var value = Convert.ChangeType(e, enumType);
 
-            // Pass all 5 parameters including optional ones (label, value, group, description, icon)
-            return (IAnyOption)Activator.CreateInstance(optionType, label, value, null, null, null)!;
+            // Pass all 6 parameters including optional ones (label, value, group, description, icon, disabled)
+            return (IAnyOption)Activator.CreateInstance(optionType, label, value, null, null, null, false)!;
         }
 
         return Enum.GetValues(enumType).Cast<object>().Select(MakeOption).ToArray();
@@ -89,5 +94,11 @@ public static class OptionExtensions
     public static MenuItem[] ToMenuItems(this IEnumerable<IAnyOption> options)
     {
         return options.Select(e => MenuItem.Default(e.Label ?? "", e.Value)).ToArray();
+    }
+
+    public static Option<TValue> Disabled<TValue>(this Option<TValue> option, bool disabled = true)
+    {
+        option.Disabled = disabled;
+        return option;
     }
 }

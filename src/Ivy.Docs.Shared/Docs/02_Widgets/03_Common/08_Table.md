@@ -338,6 +338,31 @@ public class CellBuildersExample : ViewBase
 }
 ```
 
+### Progress Builder
+
+The `Progress()` builder renders numeric values as inline [progress](10_Progress.md) bars within table cells.
+
+```csharp demo-tabs
+public class ProgressBuilderExample : ViewBase
+{
+    public override object? Build()
+    {
+        var tasks = new[] {
+            new {Name = "Design Review", Progress = 100},
+            new {Name = "Implementation", Progress = 75},
+            new {Name = "Testing", Progress = 45},
+            new {Name = "Documentation", Progress = 20}
+        };
+
+        return tasks.ToTable()
+            .Width(Size.Full())
+            .Builder(t => t.Progress, f => f.Progress().AutoColor().Format("%d%"))
+            .ColumnWidth(t => t.Name, Size.Fraction(0.5f))
+            .ColumnWidth(t => t.Progress, Size.Fraction(0.5f));
+    }
+}
+```
+
 ### Automatic Table Conversion
 
 Any `IEnumerable` is automatically converted to a table when returned from a view. This works through the [DefaultContentBuilder](../../01_Onboarding/02_Concepts/12_ContentBuilders.md) which detects collections and converts them to tables.

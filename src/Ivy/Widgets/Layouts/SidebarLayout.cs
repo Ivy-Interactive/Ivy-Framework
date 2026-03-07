@@ -25,6 +25,8 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
 
     [Prop] public int MainContentPadding { get; set; } = 2;
 
+    [Prop] public bool Resizable { get; set; } = false;
+
     public static SidebarLayout operator |(SidebarLayout widget, object child)
     {
         throw new NotSupportedException("SidebarLayout does not support children.");
@@ -41,6 +43,36 @@ public static class SidebarLayoutExtensions
     public static SidebarLayout Padding(this SidebarLayout sidebar, int padding)
     {
         return sidebar with { MainContentPadding = padding };
+    }
+
+    /// <summary>
+    /// Enables drag-to-resize on the sidebar border. Users can drag to adjust the sidebar width at runtime.
+    /// Use .Width(Size.Px(300).Min(Size.Px(200)).Max(Size.Px(600))) to customize constraints.
+    /// Default constraints when resizable is 200px min and 600px max.
+    /// </summary>
+    public static SidebarLayout Resizable(this SidebarLayout sidebar, bool resizable = true)
+    {
+        if (!resizable)
+        {
+            return sidebar with { Resizable = false };
+        }
+
+        // Apply default min/max constraints if not already set on the Width
+        var width = sidebar.Width ?? SidebarLayout.DefaultWidth;
+        if (width.Min == null)
+        {
+            width = width.Min(Size.Px(200));
+        }
+        if (width.Max == null)
+        {
+            width = width.Max(Size.Px(600));
+        }
+
+        return sidebar with
+        {
+            Resizable = true,
+            Width = width
+        };
     }
 }
 

@@ -396,10 +396,10 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   );
 
   // Helper to convert hex to other formats
-  const formatColor = (hex: string): string => {
+  const formatColor = React.useCallback((hex: string): string => {
     // simplified for brevity as we forced HEX
     return hex;
-  };
+  }, []);
 
   React.useEffect(() => {
     setLocalInputValue(formatColor(getDisplayColor()));
