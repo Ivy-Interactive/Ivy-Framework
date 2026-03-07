@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Ivy;
 using Ivy.Core;
 
@@ -294,57 +295,88 @@ public class XamlBuilderTests
         Assert.NotNull(chart.Tooltip);
     }
 
-    // --- Anonymous data arrays ---
+    // --- JSON data arrays ---
 
     [Fact]
-    public void Build_DataPoint_Array()
+    public void Build_JsonData_ParsesCorrectly()
     {
         var xml = """
             <LineChart>
-                <LineChart.Data>
-                    <DataPoint Month="Jan" Value="100" />
-                    <DataPoint Month="Feb" Value="200" />
-                </LineChart.Data>
+                <Data><![CDATA[
+                    [{"Month": "Jan", "Revenue": 4000}]
+                ]]></Data>
             </LineChart>
             """;
         var widget = _builder.Build(xml);
         var chart = Assert.IsType<LineChart>(widget);
         var data = Assert.IsType<Dictionary<string, object>[]>(chart.Data);
-        Assert.Equal(2, data.Length);
+        Assert.Single(data);
         Assert.Equal("Jan", data[0]["Month"]);
-        Assert.Equal(100.0, data[0]["Value"]);
-        Assert.Equal("Feb", data[1]["Month"]);
-        Assert.Equal(200.0, data[1]["Value"]);
+        Assert.IsType<string>(data[0]["Month"]);
+        Assert.Equal(4000.0, data[0]["Revenue"]);
+        Assert.IsType<double>(data[0]["Revenue"]);
     }
 
     [Fact]
-    public void Build_DataPoint_MixedTypes()
+    public void Build_JsonData_StringValues_PreserveExact()
+    {
+        var xml = """
+            <LineChart>
+                <Data><![CDATA[
+                    [{"Id": "007"}]
+                ]]></Data>
+            </LineChart>
+            """;
+        var widget = _builder.Build(xml);
+        var chart = Assert.IsType<LineChart>(widget);
+        var data = Assert.IsType<Dictionary<string, object>[]>(chart.Data);
+        Assert.Single(data);
+        Assert.Equal("007", data[0]["Id"]);
+        Assert.IsType<string>(data[0]["Id"]);
+    }
+
+    [Fact]
+    public void Build_JsonData_BoolValues_PreserveType()
     {
         var xml = """
             <BarChart>
-                <BarChart.Data>
-                    <DataPoint Name="Alice" Score="95.5" Active="true" />
-                </BarChart.Data>
+                <Data><![CDATA[
+                    [{"Active": true}]
+                ]]></Data>
             </BarChart>
             """;
         var widget = _builder.Build(xml);
         var chart = Assert.IsType<BarChart>(widget);
         var data = Assert.IsType<Dictionary<string, object>[]>(chart.Data);
         Assert.Single(data);
-        Assert.Equal("Alice", data[0]["Name"]);
-        Assert.Equal(95.5, data[0]["Score"]);
         Assert.Equal(true, data[0]["Active"]);
+        Assert.IsType<bool>(data[0]["Active"]);
     }
 
     [Fact]
-    public void Build_LineChart_Full_WithData()
+    public void Build_JsonData_MalformedJson_Throws()
+    {
+        var xml = """
+            <LineChart>
+                <Data><![CDATA[
+                    [{"Month": "Jan", bad json}]
+                ]]></Data>
+            </LineChart>
+            """;
+        Assert.Throws<JsonException>(() => _builder.Build(xml));
+    }
+
+    [Fact]
+    public void Build_LineChart_Full_WithJsonData()
     {
         var xml = """
             <LineChart ColorScheme="Default">
-                <LineChart.Data>
-                    <DataPoint Month="Jan" Revenue="100" Costs="80" />
-                    <DataPoint Month="Feb" Revenue="120" Costs="90" />
-                </LineChart.Data>
+                <Data><![CDATA[
+                    [
+                        {"Month": "Jan", "Revenue": 100, "Costs": 80},
+                        {"Month": "Feb", "Revenue": 120, "Costs": 90}
+                    ]
+                ]]></Data>
                 <LineChart.Lines>
                     <Line DataKey="Revenue" />
                     <Line DataKey="Costs" />

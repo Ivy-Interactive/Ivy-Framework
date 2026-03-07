@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Reflection;
+using System.Text.Json;
 using System.Xml.Linq;
 using Ivy.Core;
 
@@ -7,7 +8,6 @@ namespace Ivy;
 
 public class XamlBuilder
 {
-    private const string DataPointElementName = "DataPoint";
     private readonly Dictionary<string, Type> _typeMap;
 
     public XamlBuilder(params Assembly[] assemblies)
@@ -57,9 +57,17 @@ public class XamlBuilder
         foreach (var child in element.Elements())
         {
             if (child.Name.LocalName.Contains('.'))
+            {
                 ProcessPropertyElement(child, widget);
+            }
+            else if (TrySetJsonProperty(widget, child))
+            {
+                // Child was a JSON data element (e.g. <Data><![CDATA[...]]></Data>)
+            }
             else
+            {
                 children.Add(BuildWidget(child));
+            }
         }
 
         widget.Children = children.ToArray();
@@ -81,21 +89,7 @@ public class XamlBuilder
         if (propType == typeof(object))
         {
             var children = propElement.Elements().ToList();
-            if (children.Count > 0 && children.All(c => c.Name.LocalName == DataPointElementName))
-            {
-                var rows = new Dictionary<string, object>[children.Count];
-                for (var i = 0; i < children.Count; i++)
-                {
-                    var row = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var attr in children[i].Attributes())
-                    {
-                        row[attr.Name.LocalName] = ParseDataValue(attr.Value);
-                    }
-                    rows[i] = row;
-                }
-                SetProperty(owner, prop, rows);
-            }
-            else if (children.Count == 1)
+            if (children.Count == 1)
             {
                 SetProperty(owner, prop, BuildObject(children[0], typeof(object)));
             }
@@ -290,13 +284,49 @@ public class XamlBuilder
         throw new InvalidOperationException($"Cannot convert '{value}' to {targetType.Name}.");
     }
 
-    private static object ParseDataValue(string value)
+    private static bool TrySetJsonProperty(AbstractWidget widget, XElement child)
     {
-        if (double.TryParse(value, CultureInfo.InvariantCulture, out var d))
-            return d;
-        if (bool.TryParse(value, out var b))
-            return b;
-        return value;
+        var prop = FindProperty(widget, child.Name.LocalName);
+        if (prop == null || child.HasElements || string.IsNullOrWhiteSpace(child.Value))
+            return false;
+
+        var jsonText = child.Value.Trim();
+        if (!jsonText.StartsWith('['))
+            return false;
+
+        var data = JsonSerializer.Deserialize<Dictionary<string, object>[]>(jsonText, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = false
+        });
+
+        if (data != null)
+        {
+            for (var i = 0; i < data.Length; i++)
+            {
+                var converted = new Dictionary<string, object>();
+                foreach (var kvp in data[i])
+                    converted[kvp.Key] = kvp.Value is JsonElement je ? ConvertJsonElement(je) : kvp.Value;
+                data[i] = converted;
+            }
+
+            SetProperty(widget, prop, data);
+        }
+
+        return true;
+    }
+
+    private static object ConvertJsonElement(JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            JsonValueKind.String => element.GetString()!,
+            JsonValueKind.Number when element.TryGetInt32(out var i) => (double)i,
+            JsonValueKind.Number => element.GetDouble(),
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Null => null!,
+            _ => element.GetRawText()
+        };
     }
 
     private static Size ParseSize(string value)
