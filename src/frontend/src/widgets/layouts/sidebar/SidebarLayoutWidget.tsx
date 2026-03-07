@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
 
 import Icon from '@/components/Icon';
 import {
@@ -14,6 +20,7 @@ import { sidebarMenuRef } from './sidebar-refs';
 import { useEventHandler } from '@/components/event-handler';
 import { cn, getAppId } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
+import { Separator } from '@/components/ui/separator';
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -176,29 +183,35 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 interface SidebarMenuWidgetProps {
   id: string;
   items: MenuItem[];
+  searchActive?: boolean;
 }
 
-function findPathToTag(
-  items: MenuItem[],
-  targetTag: string,
-  path: string[] = []
-): string[] | null {
+const getFlatItemsInSearchRenderOrder = (items: MenuItem[]): MenuItem[] => {
+  const result: MenuItem[] = [];
   for (const item of items) {
-    if (item.tag === targetTag) {
-      return path;
-    }
     if (item.children && item.children.length > 0) {
-      const result = findPathToTag(item.children, targetTag, [
-        ...path,
-        item.label,
-      ]);
-      if (result) {
-        return result;
+      const groupsMap = item.children.reduce<Record<string, MenuItem[]>>(
+        (acc, child) => {
+          const path = child.path ?? '';
+          (acc[path] ??= []).push(child);
+          return acc;
+        },
+        {}
+      );
+      const groupsOrdered = Object.entries(groupsMap).sort(
+        ([pathA], [pathB]) => {
+          if (!pathA) return 1;
+          if (!pathB) return -1;
+          return 0;
+        }
+      );
+      for (const [, pathItems] of groupsOrdered) {
+        result.push(...pathItems);
       }
     }
   }
-  return null;
-}
+  return result;
+};
 
 // Animation duration for collapsible sections (in milliseconds)
 const COLLAPSIBLE_ANIMATION_DURATION = 300;
@@ -421,8 +434,12 @@ const renderMenuItems = (
 export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   id,
   items = [],
+  searchActive = false,
 }) => {
   const eventHandler = useEventHandler();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const prevSearchActiveRef = React.useRef(searchActive);
+
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set()
   );
@@ -436,16 +453,93 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   // Register only the sidebar menu container with useFocusable
   const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
 
+  const flatItems: MenuItem[] = useMemo(() => {
+    return searchActive ? getFlatItemsInSearchRenderOrder(items) : [];
+  }, [searchActive, items]);
+
+  useEffect(() => {
+    // Only reset when search becomes active (false -> true transition)
+    if (searchActive && !prevSearchActiveRef.current) {
+      queueMicrotask(() => setSelectedIndex(0));
+    }
+    prevSearchActiveRef.current = searchActive;
+  }, [searchActive]);
+
+  useEffect(() => {
+    if (!searchActive || flatItems.length === 0) return;
+    const el = containerRef.current?.querySelector<HTMLElement>(
+      `[data-sidebar-result-index="${selectedIndex}"]`
+    );
+    if (!el) return;
+
+    // Smooth scrolling logic for search results
+    let p: HTMLElement | null = el.parentElement;
+    while (p) {
+      const { overflowY } = getComputedStyle(p);
+      if (
+        (overflowY === 'auto' ||
+          overflowY === 'scroll' ||
+          overflowY === 'overlay') &&
+        p.scrollHeight > p.clientHeight
+      ) {
+        if (selectedIndex === 0) {
+          p.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        const elRect = el.getBoundingClientRect();
+        const portRect = p.getBoundingClientRect();
+        const isAbove = elRect.top < portRect.top;
+        const isBelow = elRect.bottom > portRect.bottom;
+        if (isAbove || isBelow) {
+          const delta = isAbove
+            ? elRect.top - portRect.top
+            : elRect.bottom - portRect.bottom;
+          p.scrollTo({
+            top: Math.max(0, p.scrollTop + delta),
+            behavior: 'smooth',
+          });
+        }
+        return;
+      }
+      p = p.parentElement;
+    }
+  }, [searchActive, flatItems.length, selectedIndex]);
+
+  // Helper function to find the path to an item with a specific tag
+  const findPathToTag = useCallback(
+    (
+      items: MenuItem[],
+      targetTag: string,
+      path: string[] = []
+    ): string[] | null => {
+      for (const item of items) {
+        if (item.tag === targetTag) {
+          return path;
+        }
+        if (item.children && item.children.length > 0) {
+          const result = findPathToTag(item.children, targetTag, [
+            ...path,
+            item.label,
+          ]);
+          if (result) {
+            return result;
+          }
+        }
+      }
+      return null;
+    },
+    []
+  );
+
   // Expand sections and scroll to active item when activeTag changes
   useEffect(() => {
-    if (!activeTag) return;
+    if (!activeTag || searchActive) return;
 
     // Find the path to the active item
     const path = findPathToTag(items, activeTag);
 
     if (path && path.length > 0) {
-      // Always expand parent sections when activeTag changes (e.g. URL navigation)
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of URL to expanded state
+      // Always expand parent sections
       setExpandedSections(new Set(path));
 
       // Only scroll to center on initial mount or when URL changes externally
@@ -475,7 +569,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     }
 
     prevActiveTagRef.current = activeTag;
-  }, [activeTag, items]);
+  }, [activeTag, items, searchActive, findPathToTag]);
 
   const handleExpandChange = useCallback((label: string, expanded: boolean) => {
     setExpandedSections(prev => {
@@ -489,6 +583,134 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     });
   }, []);
 
+  const handleMenuKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!searchActive || flatItems.length === 0) return;
+      if (e.key === 'ArrowDown') {
+        setSelectedIndex(idx => Math.min(idx + 1, flatItems.length - 1));
+        e.preventDefault();
+      } else if (e.key === 'ArrowUp') {
+        setSelectedIndex(idx => Math.max(idx - 1, 0));
+        e.preventDefault();
+      } else if (e.key === 'Enter') {
+        const item = flatItems[selectedIndex];
+        if (item && item.tag) {
+          eventHandler('OnSelect', id, [item.tag]);
+        }
+        e.preventDefault();
+      }
+    },
+    [searchActive, flatItems, selectedIndex, eventHandler, id]
+  );
+
+  const renderMenuItemsWithHighlight = (items: MenuItem[]) => {
+    const onCtrlRightMouseClick = (e: React.MouseEvent, item: MenuItem) => {
+      if (e.ctrlKey && e.button === 2 && !!item.tag) {
+        e.preventDefault();
+        eventHandler('OnCtrlRightClickSelect', id, [item.tag]);
+      }
+    };
+
+    const renderResultItem = (item: MenuItem, showPath: boolean) => {
+      const flatIdx = flatItems.findIndex(
+        flatItem => flatItem.tag === item.tag
+      );
+      const isHovered = searchActive && flatIdx === selectedIndex;
+      const isActivePage = item.tag === activeTag;
+      return (
+        <li key={item.tag}>
+          <button
+            {...(flatIdx >= 0 && { 'data-sidebar-result-index': flatIdx })}
+            className={cn(
+              'flex w-full rounded-selector p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left',
+              showPath && item.path
+                ? 'flex-col items-start gap-1'
+                : 'items-center gap-2',
+              isHovered && !isActivePage && 'bg-accent/30',
+              isActivePage && 'bg-accent text-accent-foreground hover:bg-accent'
+            )}
+            tabIndex={-1}
+            onClick={() => {
+              if (item.tag) {
+                if (searchActive && flatIdx !== -1) {
+                  setSelectedIndex(flatIdx);
+                }
+                eventHandler('OnSelect', id, [item.tag]);
+              }
+            }}
+            onMouseDown={e => onCtrlRightMouseClick(e, item)}
+            onMouseEnter={() => {
+              if (searchActive) {
+                setSelectedIndex(flatIdx);
+              }
+            }}
+          >
+            {showPath && item.path && (
+              <span className="text-xs text-muted-foreground truncate w-full">
+                {item.path}
+              </span>
+            )}
+            <div className="flex w-full items-center gap-2 min-w-0">
+              <Icon name={item.icon} size={16} className="shrink-0" />
+              <span className="text-sm truncate font-medium">{item.label}</span>
+            </div>
+          </button>
+        </li>
+      );
+    };
+
+    return items.map(item => {
+      if (item.children && item.children.length > 0) {
+        const children = item.children;
+        const groupsMap = children.reduce<Record<string, MenuItem[]>>(
+          (acc, child) => {
+            const path = child.path ?? '';
+            (acc[path] ??= []).push(child);
+            return acc;
+          },
+          {}
+        );
+        const groups = Object.entries(groupsMap);
+        const groupsOrdered = groups.sort(([pathA], [pathB]) => {
+          if (!pathA) return 1;
+          if (!pathB) return -1;
+          return 0;
+        });
+
+        return (
+          <div key={item.label} className="space-y-1 mt-6 first:mt-0">
+            <h4 className="sticky top-0 z-10 bg-background px-2 py-2 text-small-label text-muted-foreground mb-0">
+              {item.label}
+            </h4>
+            <ul className="space-y-1">
+              {groupsOrdered.map(([path, pathItems], index) => (
+                <React.Fragment key={path || '__none__'}>
+                  {index > 0 && (
+                    <li className="list-none py-2" aria-hidden>
+                      <Separator orientation="horizontal" />
+                    </li>
+                  )}
+                  <li className="list-none">
+                    {path && (
+                      <div className="px-2 pt-2 pb-1 text-xs text-muted-foreground truncate">
+                        {path}
+                      </div>
+                    )}
+                    <ul className="space-y-1">
+                      {pathItems.map(child => renderResultItem(child, false))}
+                    </ul>
+                  </li>
+                </React.Fragment>
+              ))}
+            </ul>
+          </div>
+        );
+      } else {
+        return renderResultItem(item, true);
+      }
+    });
+  };
+
   return (
     <div
       ref={el => {
@@ -499,17 +721,31 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         containerRef.current = el;
       }}
       tabIndex={0}
+      onFocus={() => {
+        if (searchActive && flatItems.length > 0) setSelectedIndex(0);
+      }}
+      onKeyDown={handleMenuKeyDown}
       style={{ outline: 'none' }}
       data-sidebar-menu-widget
     >
-      {renderMenuItems(
-        items,
-        eventHandler,
-        id,
-        0,
-        activeTag,
-        expandedSections,
-        handleExpandChange
+      {searchActive ? (
+        flatItems.length > 0 ? (
+          renderMenuItemsWithHighlight(items)
+        ) : (
+          <div className="flex items-center justify-center p-4 text-descriptive text-muted-foreground">
+            No results found
+          </div>
+        )
+      ) : (
+        renderMenuItems(
+          items,
+          eventHandler,
+          id,
+          0,
+          activeTag,
+          expandedSections,
+          handleExpandChange
+        )
       )}
     </div>
   );
