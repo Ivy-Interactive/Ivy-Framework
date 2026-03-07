@@ -71,10 +71,17 @@ public class DesktopWindow(Server server)
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
-        var port = server.Args.Port;
-        var url = $"http://localhost:{port}";
         var cts = new CancellationTokenSource();
         var serverTask = server.RunAsync(cts);
+
+        // Read port AFTER RunAsync returns — the synchronous portion (including
+        // FindAvailablePort) completes before the first await, so Args.Port is
+        // already updated to the actual port the server will bind to.
+        var port = server.Args.Port;
+        var url = $"http://localhost:{port}";
+
+        // Wait for the server to become ready (or detect early failure).
+        WaitForServerReady(serverTask, url);
 
         var window = CreateWindow();
         var loadingHtml = GetLoadingHtml(url);
@@ -191,6 +198,44 @@ public class DesktopWindow(Server server)
         {
             Console.Error.WriteLine($"Fatal error: {ex}");
         }
+    }
+
+    /// <summary>
+    /// Blocks until the server responds to HTTP requests, or throws if the server
+    /// task faults, completes early (e.g. missing secrets), or times out.
+    /// </summary>
+    private static void WaitForServerReady(Task serverTask, string url, int timeoutMs = 30_000)
+    {
+        var healthUrl = $"{url}/ivy/health";
+        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+
+        while (sw.ElapsedMilliseconds < timeoutMs)
+        {
+            if (serverTask.IsFaulted)
+                throw serverTask.Exception!.GetBaseException();
+
+            if (serverTask.IsCompleted)
+                throw new InvalidOperationException(
+                    "The Ivy server exited before it started accepting requests. " +
+                    "Check the console output for errors (missing secrets, port conflicts, etc.).");
+
+            try
+            {
+                using var response = http.GetAsync(healthUrl).GetAwaiter().GetResult();
+                if (response.IsSuccessStatusCode)
+                    return;
+            }
+            catch
+            {
+                // Server not ready yet — keep polling.
+            }
+
+            Thread.Sleep(250);
+        }
+
+        throw new TimeoutException(
+            $"The Ivy server did not respond within {timeoutMs / 1000} seconds at {healthUrl}.");
     }
 
     private static string? ExtractEmbeddedIcon(Assembly assembly, string resourceName)
