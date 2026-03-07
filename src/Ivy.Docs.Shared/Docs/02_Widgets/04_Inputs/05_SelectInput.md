@@ -167,7 +167,81 @@ public class SelectStylingDemo : ViewBase
 }
 ```
 
-## Disabled Options
+## Advanced Features
+
+SelectInput supports search, selection limits, and loading state. These work across all variants (Select, List, Toggle).
+
+### Search Support
+
+Enable search with `.Searchable(true)`, set the matching mode with `.SearchMode()`, and customize the empty state with `.EmptyMessage()`:
+
+```csharp demo-below
+public class SelectSearchDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selected = UseState("");
+        var options = new[] { "C#", "Java", "Python", "JavaScript", "Go", "Rust", "F#", "Kotlin", "TypeScript" };
+        return selected.ToSelectInput(options.ToOptions())
+            .Searchable(true)
+            .SearchMode(SearchMode.Fuzzy)
+            .EmptyMessage("No items found")
+            .Placeholder("Search languages...")
+            .WithField()
+            .Label("Language")
+            .Width(Size.Full());;
+    }
+}
+```
+
+`SearchMode` can be `SearchMode.Fuzzy`, `SearchMode.CaseInsensitive`, or `SearchMode.CaseSensitive`.
+
+### Selection Limits
+
+For multi-select variants, use `.MinSelections()` and `.MaxSelections()` to enforce how many options can be selected:
+
+```csharp demo-below
+public class SelectionLimitsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var colors = UseState<string[]>([]);
+        var options = new[] { "Red", "Green", "Blue", "Yellow", "Purple" }.ToOptions();
+        return colors.ToSelectInput(options)
+            .Variant(SelectInputVariants.Toggle)
+            .MinSelections(1)
+            .MaxSelections(3)
+            .Placeholder("Pick 1 to 3 colors")
+            .WithField()
+            .Label("Colors")
+            .Width(Size.Full());;
+    }
+}
+```
+
+### Loading State
+
+Show a loading indicator while options are being fetched with `.Loading()`:
+
+```csharp demo-below
+public class SelectLoadingDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selected = UseState("");
+        var isLoading = UseState(true);
+        var options = new[] { "Option A", "Option B", "Option C" }.ToOptions();
+        return selected.ToSelectInput(options)
+            .Loading(isLoading.Value)
+            .Placeholder("Loading...")
+            .WithField()
+            .Label("Options")
+            .Width(Size.Full());;
+    }
+}
+```
+
+### Disabled Options
 
 Individual options can be disabled using the fluent `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list:
 
