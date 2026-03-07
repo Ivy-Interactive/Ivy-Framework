@@ -142,9 +142,13 @@ public class SelectStylingDemo : ViewBase
     {
         var normalSelect = UseState("");
         var invalidSelect = UseState("");
+        var ghostSelect = UseState("");
+        var loadingSelect = UseState("");
         var disabledSelect = UseState("");
 
         var options = new[] { "Option 1", "Option 2", "Option 3" };
+
+        var isLoading = UseState(true);
 
         return Layout.Vertical()
             | normalSelect.ToSelectInput(options)
@@ -157,6 +161,18 @@ public class SelectStylingDemo : ViewBase
                 .Invalid("This field is required")
                 .WithField()
                 .Label("Invalid SelectInput:")
+
+            | ghostSelect.ToSelectInput(options)
+                .Placeholder("This is ghost...")
+                .Ghost()
+                .WithField()
+                .Label("Ghost SelectInput:")
+
+            | loadingSelect.ToSelectInput(options)
+                .Placeholder("This is loading...")
+                .Loading(isLoading.Value)
+                .WithField()
+                .Label("Loading SelectInput")
 
             | disabledSelect.ToSelectInput(options)
                 .Placeholder("This is disabled...")
@@ -214,28 +230,6 @@ public class SelectionLimitsDemo : ViewBase
             .Placeholder("Pick 1 to 3 colors")
             .WithField()
             .Label("Colors")
-            .Width(Size.Full());;
-    }
-}
-```
-
-### Loading State
-
-Show a loading indicator while options are being fetched with `.Loading()`:
-
-```csharp demo-below
-public class SelectLoadingDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var selected = UseState("");
-        var isLoading = UseState(true);
-        var options = new[] { "Option A", "Option B", "Option C" }.ToOptions();
-        return selected.ToSelectInput(options)
-            .Loading(isLoading.Value)
-            .Placeholder("Loading...")
-            .WithField()
-            .Label("Options")
             .Width(Size.Full());;
     }
 }
