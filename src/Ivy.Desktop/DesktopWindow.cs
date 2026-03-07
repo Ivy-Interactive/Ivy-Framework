@@ -139,19 +139,29 @@ public class DesktopWindow(Server server)
         return """
             <!DOCTYPE html>
             <html>
-            <head><meta charset="utf-8"><title>Loading</title></head>
-            <body style="margin:0;background:#0a0a0a;color:#f8f8f8;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column">
-              <div style="width:40px;height:40px;border:3px solid #262626;border-top-color:#00cc92;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1.5rem"></div>
-              <p id="status" style="color:#8f8f8f;font-size:0.95rem">Connecting to server...</p>
+            <head>
+              <meta charset="utf-8"><title>Loading</title>
+              <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1/dist/fonts/geist-sans/style.min.css">
+            </head>
+            <body style="margin:0;background:#ffffff;color:#000000;font-family:'Geist',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column">
+              <div id="loader" style="display:none;align-items:center;flex-direction:column">
+                <div style="width:40px;height:40px;border:3px solid #d1d5db;border-top-color:#00cc92;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1.5rem"></div>
+                <p id="status" style="color:#8f8f8f;font-size:0.95rem">Connecting to server...</p>
+              </div>
               <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
               <script>
                 var serverUrl = '__SERVER_URL__';
                 var elapsed = 0;
+                var shown = false;
                 function poll() {
                   fetch(serverUrl, { mode: 'no-cors' }).then(function() {
                     window.location.href = serverUrl;
                   }).catch(function() {
                     elapsed += 500;
+                    if (!shown && elapsed >= 4000) {
+                      shown = true;
+                      document.getElementById('loader').style.display = 'flex';
+                    }
                     if (elapsed >= 30000) {
                       document.getElementById('status').textContent = 'Unable to connect to the server. It may have failed to start.';
                       document.getElementById('status').style.color = '#dd5860';
@@ -173,10 +183,15 @@ public class DesktopWindow(Server server)
         {
             var errorHtml = $"""
                 <!DOCTYPE html>
-                <html><body style="font-family:system-ui;padding:2rem;background:#0a0a0a;color:#f8f8f8">
+                <html>
+                <head>
+                  <meta charset="utf-8"><title>Error</title>
+                  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1/dist/fonts/geist-sans/style.min.css">
+                </head>
+                <body style="font-family:'Geist',system-ui,sans-serif;padding:2rem;background:#ffffff;color:#000000">
                 <h2 style="color:#dd5860">Application Error</h2>
                 <p>{WebUtility.HtmlEncode(ex.Message)}</p>
-                <pre style="background:#171717;padding:1rem;border-radius:8px;overflow:auto;font-size:0.85rem;color:#8f8f8f">{WebUtility.HtmlEncode(ex.ToString())}</pre>
+                <pre style="background:#f8f8f8;padding:1rem;border-radius:8px;overflow:auto;font-size:0.85rem;color:#8f8f8f;border:1px solid #d1d5db">{WebUtility.HtmlEncode(ex.ToString())}</pre>
                 </body></html>
                 """;
 
