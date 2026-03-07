@@ -1,6 +1,6 @@
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 
-namespace Ivy.Filters.Eval.Console;
+namespace Ivy.Agent.Filter.Eval.Console;
 
 public record TestSuite(
     string Name,

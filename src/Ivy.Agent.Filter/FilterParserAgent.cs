@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using YamlDotNet.Serialization;
 
-namespace Ivy.Filters;
+namespace Ivy.Agent.Filter;
 
 public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
 {
@@ -220,7 +220,7 @@ public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
     private static string LoadGrammarFile()
     {
         var assembly = typeof(FilterParserAgent).Assembly;
-        var resourceName = "Ivy.Filters.Filters.g4";
+        var resourceName = "Ivy.Agent.Filter.Filters.g4";
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null)

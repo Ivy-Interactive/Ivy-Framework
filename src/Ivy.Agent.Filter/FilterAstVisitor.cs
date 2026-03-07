@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text;
 using Antlr4.Runtime.Tree;
 
-namespace Ivy.Filters;
+namespace Ivy.Agent.Filter;
 
 /// <summary>
 /// Visitor that builds an AST from the ANTLR parse tree and performs semantic validation

@@ -1,7 +1,7 @@
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 using Antlr4.Runtime;
 
-namespace Ivy.Filters.Tests;
+namespace Ivy.Agent.Filter.Tests;
 
 public class DiagnosticsTests
 {

@@ -1,6 +1,6 @@
 using Antlr4.Runtime;
 
-namespace Ivy.Filters;
+namespace Ivy.Agent.Filter;
 
 /// <summary>
 /// Main entry point for parsing advanced filter filters

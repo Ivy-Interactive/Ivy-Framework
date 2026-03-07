@@ -81,7 +81,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Ivy.Filters\Ivy.Filters.csproj" />
+    <ProjectReference Include="..\Ivy.Agent.Filter\Ivy.Agent.Filter.csproj" />
   </ItemGroup>
   
   <ItemGroup>

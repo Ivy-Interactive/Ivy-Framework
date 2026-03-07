@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -7,7 +7,7 @@ using OpenAI;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace Ivy.Filters.Eval.Console;
+namespace Ivy.Agent.Filter.Eval.Console;
 
 public class RunCommand : AsyncCommand<RunCommand.Settings>
 {

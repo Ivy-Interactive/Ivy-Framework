@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 
-namespace Ivy.Filters.Eval.Console;
+namespace Ivy.Agent.Filter.Eval.Console;
 
 public sealed class TypeRegistrar : ITypeRegistrar
 {

@@ -1,8 +1,8 @@
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace Ivy.Filters.Eval.Console;
+namespace Ivy.Agent.Filter.Eval.Console;
 
 public class VerifyCommand : Command<VerifyCommand.Settings>
 {

@@ -1,4 +1,4 @@
-﻿using Ivy.Filters.Eval.Console;
+﻿using Ivy.Agent.Filter.Eval.Console;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 

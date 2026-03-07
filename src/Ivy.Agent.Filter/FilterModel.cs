@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Ivy.Filters;
+namespace Ivy.Agent.Filter;
 
 /// <summary>
 /// Represents the filter model structure for grid filtering

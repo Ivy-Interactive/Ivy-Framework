@@ -1,4 +1,4 @@
-namespace Ivy.Filters;
+namespace Ivy.Agent.Filter;
 
 /// <summary>
 /// YAML-serializable representation of field metadata

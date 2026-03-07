@@ -8,9 +8,9 @@
     <Nullable>enable</Nullable>
     <OutputType>library</OutputType>
     <NoWarn>CS1591</NoWarn>
-    <PackageId>Ivy.Filters</PackageId>
+    <PackageId>Ivy.Agent.Filter</PackageId>
     <Company>Ivy</Company>
-    <Description>Filter parsing library for Ivy Framework</Description>
+    <Description>Filter parsing library for Ivy Agent</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
@@ -45,7 +45,7 @@
   <ItemGroup>
     <Antlr4 Include="Filters.g4">
       <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>Ivy.Filters.Parser</CustomToolNamespace>
+      <CustomToolNamespace>Ivy.Agent.Filter.Parser</CustomToolNamespace>
     </Antlr4>
   </ItemGroup>
 

@@ -1,7 +1,7 @@
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 using System.Text;
 
-namespace Ivy.Filters.Eval.Console;
+namespace Ivy.Agent.Filter.Eval.Console;
 
 public static class AstFormatter
 {

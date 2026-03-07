@@ -1,11 +1,11 @@
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using Xunit.Abstractions;
 
-namespace Ivy.Filters.Tests;
+namespace Ivy.Agent.Filter.Tests;
 
 public class FilterParserAgentTests : IDisposable
 {

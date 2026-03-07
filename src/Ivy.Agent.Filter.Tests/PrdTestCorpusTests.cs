@@ -1,6 +1,6 @@
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 
-namespace Ivy.Filters.Tests;
+namespace Ivy.Agent.Filter.Tests;
 
 /// <summary>
 /// Tests based on the exact test corpus from the PRD specification

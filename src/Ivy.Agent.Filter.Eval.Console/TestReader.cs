@@ -1,8 +1,8 @@
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Ivy.Filters.Eval.Console;
+namespace Ivy.Agent.Filter.Eval.Console;
 
 public class TestReader
 {

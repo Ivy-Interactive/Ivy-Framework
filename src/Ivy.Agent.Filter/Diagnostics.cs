@@ -1,6 +1,6 @@
 using Antlr4.Runtime;
 
-namespace Ivy.Filters;
+namespace Ivy.Agent.Filter;
 
 /// <summary>
 /// Severity levels for filter diagnostics

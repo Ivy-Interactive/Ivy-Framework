@@ -1,7 +1,7 @@
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 using System.Text.Json;
 
-namespace Ivy.Filters.Tests;
+namespace Ivy.Agent.Filter.Tests;
 
 public class FilterConverterTests
 {

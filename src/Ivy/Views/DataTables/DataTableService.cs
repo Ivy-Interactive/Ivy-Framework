@@ -1,7 +1,7 @@
 using Grpc.Core;
 using Ivy.Core.Auth;
 using Ivy.Core.Server;
-using Ivy.Filters;
+using Ivy.Agent.Filter;
 using Ivy.Protos.DataTable;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Distributed;

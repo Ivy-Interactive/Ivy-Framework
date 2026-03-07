@@ -1,4 +1,4 @@
-namespace Ivy.Filters;
+namespace Ivy.Agent.Filter;
 
 /// <summary>
 /// Base class for all AST nodes in the advanced filter filter

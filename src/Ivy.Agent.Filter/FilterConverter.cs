@@ -1,4 +1,4 @@
-namespace Ivy.Filters;
+namespace Ivy.Agent.Filter;
 
 /// <summary>
 /// Converts AST nodes to grid-compatible filter models
