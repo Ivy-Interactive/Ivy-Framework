@@ -670,6 +670,47 @@ public class SimpleFormWithResetExample : ViewBase
 This example works because it uses the form's internal state management. The form maintains its own copy of the data until submission, so programmatic updates using `.Set()` will be reflected in the form fields.
 </Callout>
 
+## Submit Strategy
+
+Control when form state is committed back to the model using `SubmitStrategy`:
+
+- `OnSubmit` (default) — State is committed only when the submit button is clicked
+- `OnBlur` — State is committed when any field loses focus (submit button hidden)
+- `OnChange` — State is committed on every field value change (submit button hidden)
+
+```csharp demo-tabs
+public class SubmitStrategyExample : ViewBase
+{
+    public record SettingsModel(string Name, string Theme, int FontSize);
+
+    public override object? Build()
+    {
+        var settings = UseState(() => new SettingsModel("Default", "Light", 14));
+        var client = UseService<IClientProvider>();
+
+        UseEffect(() =>
+        {
+            if (!string.IsNullOrEmpty(settings.Value.Name))
+            {
+                client.Toast($"Settings auto-saved: {settings.Value.Name}");
+            }
+        }, settings);
+
+        return Layout.Vertical()
+            | settings.ToForm()
+                .SubmitStrategy(FormSubmitStrategy.OnChange)
+                .Label(m => m.Name, "Display Name")
+                .Label(m => m.Theme, "Theme")
+                .Label(m => m.FontSize, "Font Size")
+            | Text.Block($"Current: {settings.Value.Name}, {settings.Value.Theme}, {settings.Value.FontSize}px");
+    }
+}
+```
+
+<Callout Type="tip">
+Use `OnChange` for settings panels where changes should apply immediately, and `OnBlur` for forms where you want to commit after the user finishes editing each field.
+</Callout>
+
 ## Advanced Features
 
 ### Conditional Fields
