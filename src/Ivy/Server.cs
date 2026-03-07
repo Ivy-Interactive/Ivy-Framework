@@ -133,7 +133,7 @@ public class Server
     {
         var assembly = Assembly.GetEntryAssembly();
 
-        var connections = assembly!.GetTypes()
+        var connections = assembly!.GetLoadableTypes()
             .Where(t => t.IsClass && typeof(IConnection).IsAssignableFrom(t));
 
         foreach (var type in connections)
@@ -723,7 +723,7 @@ public class Server
         if (assembly != null)
         {
             var knownTypes = providers.Select(p => p.GetType()).ToHashSet();
-            var types = assembly.GetTypes()
+            var types = assembly.GetLoadableTypes()
                 .Where(t => t is { IsClass: true, IsAbstract: false }
                             && typeof(IHaveSecrets).IsAssignableFrom(t)
                             && !knownTypes.Contains(t));

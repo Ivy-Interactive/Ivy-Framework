@@ -199,7 +199,7 @@ public class DefaultContentBuilder : IContentBuilder
         {
             try
             {
-                foreach (var extensionType in assembly.GetTypes()
+                foreach (var extensionType in assembly.GetLoadableTypes()
                     .Where(t => t is { IsSealed: true, IsGenericType: false, IsNested: false, IsAbstract: true }))
                 {
                     foreach (var method in extensionType.GetMethods(BindingFlags.Static | BindingFlags.Public))

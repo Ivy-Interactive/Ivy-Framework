@@ -51,7 +51,7 @@ public class ServerDescription
         var assembly = Assembly.GetEntryAssembly();
         if (assembly != null)
         {
-            var connectionTypes = assembly.GetTypes()
+            var connectionTypes = assembly.GetLoadableTypes()
                 .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IConnection).IsAssignableFrom(t));
 
             foreach (var type in connectionTypes)
@@ -92,7 +92,7 @@ public class ServerDescription
         // Also check assembly for IHaveSecrets that may not be registered
         if (assembly != null)
         {
-            var secretProviderTypes = assembly.GetTypes()
+            var secretProviderTypes = assembly.GetLoadableTypes()
                 .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IHaveSecrets).IsAssignableFrom(t));
 
             foreach (var type in secretProviderTypes)
@@ -185,7 +185,7 @@ public class ServerDescription
         var assembly = Assembly.GetEntryAssembly();
         if (assembly == null) return null;
 
-        var connectionTypes = assembly.GetTypes()
+        var connectionTypes = assembly.GetLoadableTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IConnection).IsAssignableFrom(t));
 
         foreach (var type in connectionTypes)
@@ -223,7 +223,7 @@ public class ServerDescription
         var assembly = Assembly.GetEntryAssembly();
         if (assembly == null) return names;
 
-        var connectionTypes = assembly.GetTypes()
+        var connectionTypes = assembly.GetLoadableTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IConnection).IsAssignableFrom(t));
 
         foreach (var type in connectionTypes)

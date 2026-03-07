@@ -10,7 +10,7 @@ public static class AppHelpers
         assembly ??= Assembly.GetEntryAssembly();
         if (assembly == null)
             throw new InvalidOperationException("Entry assembly not found.");
-        foreach (var type in assembly.GetTypes())
+        foreach (var type in assembly.GetLoadableTypes())
         {
             if (type.GetCustomAttribute<AppAttribute>() != null)
             {

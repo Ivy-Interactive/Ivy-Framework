@@ -290,16 +290,7 @@ public class ExternalWidgetRegistry
 
     private void ScanAssembly(Assembly assembly)
     {
-        Type[] types;
-        try
-        {
-            types = assembly.GetTypes();
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            // Some types may fail to load, use the ones that succeeded
-            types = ex.Types.Where(t => t != null).ToArray()!;
-        }
+        var types = assembly.GetLoadableTypes();
 
         foreach (var type in types)
         {
