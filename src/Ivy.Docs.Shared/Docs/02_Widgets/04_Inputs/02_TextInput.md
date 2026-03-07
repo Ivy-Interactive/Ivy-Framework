@@ -177,6 +177,26 @@ public class URLEnterDemo: ViewBase
 }
 ```
 
+## MinLength Validation
+
+The TextInput widget and all its variants (Password, Search, Textarea) support minimum length validation with the `.MinLength()` method. Combine it with `.MaxLength()` for range constraints:
+
+```csharp demo-below
+public class MinLengthValidationDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var usernameState = UseState("");
+        return usernameState.ToTextInput()
+            .Placeholder("Between 5 and 10 characters")
+            .MinLength(5)
+            .MaxLength(10)
+            .WithField()
+            .Label("Username");
+    }
+}
+```
+
 ## Event Handling
 
 Use the [`OnChange`](../../01_Onboarding/02_Concepts/05_EventHandlers.md) callback to react to text input changes. The callback receives an event with the current value.
