@@ -12,10 +12,10 @@ client.Toast("Copied to clipboard!");
 
 ## How do I create a multiline textarea TextInput in Ivy?
 
-Use the `TextInputs.Textarea` variant or the dedicated `ToTextAreaInput` extension:
+Use the `TextInputVariants.Textarea` variant or the dedicated `ToTextareaInput` extension:
 
 ```csharp
-state.ToTextAreaInput(placeholder: "Enter text...")
+state.ToTextareaInput(placeholder: "Enter text...")
 ```
 
 ## How do I read CSV data or load external data in Ivy?
@@ -163,18 +163,16 @@ Each `state.Set()` call triggers a re-render, so the UI updates incrementally as
 
 ## How do I handle row actions on a DataTable?
 
-Use `.RowActions()` to define actions and `.HandleRowAction()` to handle clicks:
+Use `.RowActions()` to define actions and `.OnRowAction()` to handle clicks:
 
 ```csharp
 items.ToDataTable()
     .RowActions(
         new RowAction("edit", "Edit", Icons.Pencil),
         new RowAction("delete", "Delete", Icons.Trash2))
-    .HandleRowAction("edit", e => EditItem(e.Value))
-    .HandleRowAction("delete", async e => await DeleteItem(e.Value))
+    .OnRowAction("edit", e => EditItem(e.Value))
+    .OnRowAction("delete", async e => await DeleteItem(e.Value))
 ```
-
-**Important:** The method is `.HandleRowAction()`, NOT `.OnRowAction()`. The `On` prefix does not exist on DataTableBuilder.
 
 ## What namespace are Ivy types in? (MetricView, charts, DataTable, ViewBase, IState, etc.)
 

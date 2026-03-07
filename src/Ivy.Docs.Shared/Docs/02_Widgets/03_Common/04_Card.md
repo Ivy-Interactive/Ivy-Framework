@@ -46,7 +46,7 @@ new Card()
 
 ## Click Listener
 
-HandleClick attaches an event listener and makes the card clickable.
+OnClick attaches an event listener and makes the card clickable.
 
 ```csharp demo-below
 new Card(

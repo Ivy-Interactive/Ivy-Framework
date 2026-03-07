@@ -121,8 +121,8 @@ public class CommonWidgetsDemo : ViewBase
             ).Title("DropDownMenu").Description("Action menus").Height(Size.Units(40))
             | new Card(
                 Layout.Horizontal().Align(Align.Center).Gap(2)
-                    | new Button("Hover", icon: Icons.Info).WithTooltip("This is a tooltip")
-                    | new Button("Help", icon: Icons.CircleQuestionMark).WithTooltip("Get help here")
+                    | new Button("Hover").Icon(Icons.Info).WithTooltip("This is a tooltip")
+                    | new Button("Help").Icon(Icons.CircleQuestionMark).WithTooltip("Get help here")
             ).Title("Tooltip").Description("Contextual information").Height(Size.Units(40));
     }
 }
