@@ -42,6 +42,21 @@ public class DesktopWindow(Server server)
 
     public int Run()
     {
+        if (OperatingSystem.IsWindows() &&
+            Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
+        {
+            var result = 0;
+            var thread = new Thread(() => result = RunCore());
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            return result;
+        }
+        return RunCore();
+    }
+
+    private int RunCore()
+    {
         try
         {
             return RunInternal();
