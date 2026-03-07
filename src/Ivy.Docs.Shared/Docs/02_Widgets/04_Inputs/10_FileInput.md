@@ -158,6 +158,7 @@ public class FileUploadValidation : ViewBase
         var upload = UseUpload(
             MemoryStreamUploadHandler.Create(selectedFiles))
             .Accept("image/*")                    // Only images
+            .MinFileSize(FileSize.FromMegabytes(1))   // Minimum 1 KB
             .MaxFileSize(FileSize.FromMegabytes(5))        // 5 MB per file
             .MaxFiles(3);                         // Maximum 3 files total
 
@@ -208,7 +209,7 @@ public class FileTypeFilteringDemo : ViewBase
 
 ### File Size Limits
 
-Configure maximum file size with `.MaxFileSize()`:
+Configure minimum and maximum file size with `.MinFileSize()` and `.MaxFileSize()`:
 
 ```csharp demo-below
 public class FileSizeLimitDemo : ViewBase
@@ -218,13 +219,14 @@ public class FileSizeLimitDemo : ViewBase
         var file = UseState<FileUpload<byte[]>?>();
         var upload = UseUpload(
             MemoryStreamUploadHandler.Create(file))
-            .MaxFileSize(FileSize.FromMegabytes(2));
+            .MinFileSize(FileSize.FromMegabytes(2))
+            .MaxFileSize(FileSize.FromMegabytes(5));
 
         return Layout.Vertical()
-                | Text.H2("2 MB Size Limit")
+                | Text.H2("File size limits")
                 | file
                     .ToFileInput(upload)
-                    .Placeholder("Max 2 MB")
+                    .Placeholder("Min 2 MB, Max 5 MB")
                 | (file.Value != null
                     ? Text.P($"Selected: {file.Value.FileName} ({Utils.FormatBytes(file.Value.Length)})")
                     : null);
@@ -236,33 +238,6 @@ public class FileSizeLimitDemo : ViewBase
 You can set size limits clearly with helper methods:
 `.FromKilobytes()`, `.FromMegabytes()`, or `.FromGigabytes()` provide clear, self-documenting limits.
 </Callout>
-
-### Minimum File Size
-
-Use `.MinFileSize()` to reject empty or trivially small files that are likely erroneous:
-
-```csharp demo-below
-public class MinFileSizeLimitDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var file = UseState<FileUpload<byte[]>?>();
-        var upload = UseUpload(
-            MemoryStreamUploadHandler.Create(file))
-            .MinFileSize(FileSize.FromKilobytes(1))  // Minimum 1 KB
-            .MaxFileSize(FileSize.FromMegabytes(10)); // Maximum 10 MB
-
-        return Layout.Vertical()
-                | Text.H2("File Size Range (1 KB - 10 MB)")
-                | file
-                    .ToFileInput(upload)
-                    .Placeholder("Min 1 KB, Max 10 MB")
-                | (file.Value != null
-                    ? Text.P($"Selected: {file.Value.FileName} ({Utils.FormatBytes(file.Value.Length)})")
-                    : null);
-    }
-}
-```
 
 ### Multiple Files Limit
 
