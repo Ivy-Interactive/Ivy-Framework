@@ -14,11 +14,9 @@ searchHints:
 Sheets slide in from the side of the screen and display additional content while allowing the user to dismiss them. They provide a non-intrusive way to show additional information or [forms](../../01_Onboarding/02_Concepts/08_Forms.md) without navigating away from the current page.
 </Ingress>
 
-The `Sheet` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays content in a slide-over panel. Use [UseTrigger](../../03_Hooks/02_Core/12_UseTrigger.md) to control when the sheet is open: the trigger gives you a view to render and a callback to open it from any control (buttons, row clicks, etc.). Use [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) to structure sheet content.
-
 ## Basic Usage
 
-Use [UseTrigger](../../03_Hooks/02_Core/12_UseTrigger.md) to open a sheet. When open, render a `Sheet` with an `onClose` action that calls `isOpen.Set(false)` so the overlay and backdrop dismiss correctly:
+Use [UseTrigger](../../03_Hooks/02_Core/12_UseTrigger.md) to open a sheet. When open, render a `Sheet` with an `onClose` action that calls `isOpen.Set(false)`:
 
 ```csharp demo-below
 public class BasicSheetExample : ViewBase
@@ -41,10 +39,6 @@ public class BasicSheetExample : ViewBase
     }
 }
 ```
-
-<Callout Type="tip">
-Sheets are closed when the user clicks the backdrop or when you call the close action (e.g. from a "Cancel" or "Close" button inside the sheet). Always pass a consistent close handler to `Sheet` so both backdrop and in-sheet actions dismiss the sheet.
-</Callout>
 
 ## Custom Content
 
@@ -107,21 +101,23 @@ public class SheetWithFooterActions : ViewBase
 
 ## Different Widths
 
-Control sheet width with the `.Width()` extension. For top/bottom sides, use `.Height()` instead. Widths use [Size](../../04_ApiReference/IvyShared/Size.md) values such as `Size.Rem(20)`, `Size.Fraction(1/2f)`, and `Size.Full()`:
+Control sheet width with the `.Width()` extension. For top/bottom sides, use `.Height()` instead. Widths use [Size](../../04_ApiReference/IvyShared/Size.md) values such as `Size.Rem(20)`, `Size.Fraction(1/2f)`, and `Size.Full()`. Use `UseTrigger<Size>` so each button opens a sheet with a different width:
 
 ```csharp demo-tabs
 public class SheetWidthExamples : ViewBase
 {
     public override object? Build()
     {
-        var (sheetView, showSheet) = UseTrigger((IState<bool> isOpen) =>
+        var (sheetView, showSheet) = UseTrigger((IState<bool> isOpen, Size width) =>
             isOpen.Value ? new Sheet(_ => isOpen.Set(false),
                 new Card("This sheet uses a custom width.").Title("Width Example"),
                 title: "Custom Width")
-                .Width(Size.Fraction(1/2f)) : null);
+                .Width(width) : null);
 
-        return Layout.Vertical()
-            | new Button("Open Sheet", onClick: _ => showSheet())
+        return Layout.Horizontal().Gap(2)
+            | new Button("Rem(20)", onClick: _ => showSheet(Size.Rem(20)))
+            | new Button("Half", onClick: _ => showSheet(Size.Fraction(1/2f)))
+            | new Button("Two thirds", onClick: _ => showSheet(Size.Fraction(2/3f)))
             | sheetView;
     }
 }
