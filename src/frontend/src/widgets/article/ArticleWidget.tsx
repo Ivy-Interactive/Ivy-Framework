@@ -36,10 +36,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   const articleRef = useRef<HTMLElement>(null);
 
   return (
-    <div
-      className="flex flex-col gap-2 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative"
-      data-docs-content-boundary
-    >
+    <div className="flex flex-col gap-2 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8">
       <div className="flex flex-grow gap-8">
         <article ref={articleRef} className="w-full max-w-[48rem]">
           <TypographyProvider value={articleTypography}>
