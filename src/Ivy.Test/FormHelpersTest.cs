@@ -149,6 +149,51 @@ public class ValidationTest
     }
 }
 
+public class AllowedValuesTestModel
+{
+    [AllowedValues("USA", "Canada", "UK")]
+    public string Country { get; set; } = "USA";
+
+    [AllowedValues("Tech", "Sports", "Music")]
+    public string[] Interests { get; set; } = [];
+
+    public string NoAttribute { get; set; } = "";
+}
+
+public class AllowedValuesTest
+{
+    [Fact]
+    public void GetAllowedValues_ShouldReturnValues_WhenAttributeIsPresent()
+    {
+        var propertyInfo = typeof(AllowedValuesTestModel).GetProperty(nameof(AllowedValuesTestModel.Country));
+        var values = FormHelpers.GetAllowedValues(propertyInfo!);
+        Assert.NotNull(values);
+        Assert.Equal(new object[] { "USA", "Canada", "UK" }, values);
+    }
+
+    [Fact]
+    public void GetAllowedValues_ShouldReturnNull_WhenNoAttribute()
+    {
+        var propertyInfo = typeof(AllowedValuesTestModel).GetProperty(nameof(AllowedValuesTestModel.NoAttribute));
+        var values = FormHelpers.GetAllowedValues(propertyInfo!);
+        Assert.Null(values);
+    }
+
+    [Fact]
+    public void ScaffoldFields_ShouldCreateSelectFactory_WhenStringHasAllowedValues()
+    {
+        var fields = FormScaffolder.ScaffoldFields<AllowedValuesTestModel>(typeof(AllowedValuesTestModel));
+        Assert.NotNull(fields["Country"].InputFactory);
+    }
+
+    [Fact]
+    public void ScaffoldFields_ShouldCreateSelectFactory_WhenStringArrayHasAllowedValues()
+    {
+        var fields = FormScaffolder.ScaffoldFields<AllowedValuesTestModel>(typeof(AllowedValuesTestModel));
+        Assert.NotNull(fields["Interests"].InputFactory);
+    }
+}
+
 public class FormScaffolderTest
 {
     [Fact]

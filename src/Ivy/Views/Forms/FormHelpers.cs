@@ -221,6 +221,18 @@ public static class FormHelpers
         );
     }
 
+    public static object[]? GetAllowedValues(PropertyInfo propertyInfo)
+    {
+        var attr = propertyInfo.GetCustomAttribute<AllowedValuesAttribute>();
+        return attr?.Values?.Cast<object>().ToArray();
+    }
+
+    public static object[]? GetAllowedValues(FieldInfo fieldInfo)
+    {
+        var attr = fieldInfo.GetCustomAttribute<AllowedValuesAttribute>();
+        return attr?.Values?.Cast<object>().ToArray();
+    }
+
     public record RangeInfo(double? Min, double? Max);
 
     public static RangeInfo GetRangeInfo(PropertyInfo propertyInfo)

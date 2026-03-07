@@ -58,6 +58,8 @@ The FormBuilder automatically maps C# types to appropriate [input widgets](./03_
 | `DateTime`, `DateOnly` | [DateTimeInput](../../02_Widgets/04_Inputs/07_DateTimeInput.md) | Date/time picker |
 | `Enum` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) | Dropdown with enum values |
 | `List<Enum>` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) with multiple selection | Multi-select dropdown |
+| `string` with `[AllowedValues]` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) | Auto-generates dropdown from allowed values |
+| `string[]` with `[AllowedValues]` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) with multiple selection | Auto-generates multi-select from allowed values |
 | Properties ending in "Id" | [ReadOnlyInput](../../02_Widgets/04_Inputs/14_ReadOnlyInput.md) | Typically for system-generated IDs |
 | Properties ending in "Email" | [TextInput](../../02_Widgets/04_Inputs/02_TextInput.md) with email validation | Email-specific input |
 | Properties ending in "Password" | PasswordInput | Hidden text input |
@@ -359,10 +361,7 @@ public class ValidationExample : ViewBase
             }
         }, user);
         
-        var countryOptions = new[] { "USA", "Canada", "UK" }.ToOptions();
-        
         return user.ToForm("Create Account")
-            .Builder(m => m.Country, s => s.ToSelectInput(countryOptions))
             // Custom validation: birth date cannot be in the future
             .Validate<DateTime>(m => m.BirthDate, birthDate => 
                 (birthDate <= DateTime.Now, "Birth date cannot be in the future"))
@@ -432,10 +431,7 @@ public class DisplayAttributeExample : ViewBase
             }
         }, user);
 
-        var themeOptions = new[] { "Light", "Dark", "Auto" }.ToOptions();
-        
         return user.ToForm("Create Account")
-            .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions))
             .Builder(m => m.Password, s => s.ToPasswordInput())
             .Builder(m => m.ConfirmPassword, s => s.ToPasswordInput())
             .Validate<string>(m => m.ConfirmPassword, confirmPassword =>
@@ -516,11 +512,9 @@ public class CollectionValidationExample : ViewBase
     public override object? Build()
     {
         var survey = UseState(() => new SurveyModel());
-        var interestOptions = new[] { "Technology", "Sports", "Music", "Art", "Travel" }.ToOptions();
         var tagOptions = new[] { "New", "Popular", "Featured", "Sale", "Limited" }.ToOptions();
-        
+
         return survey.ToForm()
-            .Builder(m => m.Interests, s => s.ToSelectInput(interestOptions).List())
             .Builder(m => m.Tags, s => s.ToSelectInput(tagOptions).List());
     }
 }
