@@ -575,16 +575,18 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   }, []);
 
   return (
-    <ReactMarkdown
-      components={{
-        ...componentsParams,
-      }}
-      remarkPlugins={plugins.remarkPlugins}
-      rehypePlugins={plugins.rehypePlugins}
-      urlTransform={urlTransform}
-    >
-      {content}
-    </ReactMarkdown>
+    <>
+      <ReactMarkdown
+        components={{
+          ...componentsParams,
+        }}
+        remarkPlugins={plugins.remarkPlugins}
+        rehypePlugins={plugins.rehypePlugins}
+        urlTransform={urlTransform}
+      >
+        {content}
+      </ReactMarkdown>
+    </>
   );
 };
 
