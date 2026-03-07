@@ -91,6 +91,10 @@ public class CaptureAddressDemo: ViewBase
 
 Please note that how the newlines (`\n`) are recognized and used to create newlines in the textarea.
 
+<Callout Type="tip">
+A `.Multiline()` extension method on `TextInputBase` lets you turn any TextInput into a textarea without changing the variant explicitly. `notes.ToTextInput().Multiline()` is equivalent to `notes.ToTextareaInput()`.
+</Callout>
+
 ### Search
 
 When it is necessary to find an element from a collection of items, it is better to give users a visual clue.  
