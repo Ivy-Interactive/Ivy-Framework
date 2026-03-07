@@ -222,7 +222,7 @@ public class SmartSearchView : ViewBase
             _ => { ClearResults(); return ValueTask.CompletedTask; },
             sheetContent,
             "Answer",
-            null).Width(Sheet.DefaultWidth);
+            null).Width(Size.Fraction(0.4f));
 
         return new Fragment(
             new SmartSearch(baseSlots.ToArray()),
