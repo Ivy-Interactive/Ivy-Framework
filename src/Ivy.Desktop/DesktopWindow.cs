@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using Photino.NET;
 
@@ -77,13 +76,24 @@ public class DesktopWindow(Server server)
         var cts = new CancellationTokenSource();
         var serverTask = server.RunAsync(cts);
 
-        if (!CheckIfPortIsListening(port, serverTask).GetAwaiter().GetResult())
-        {
-            ShowErrorDialog(new InvalidOperationException(
-                $"Unable to connect to the Ivy server at {url}. The server may have failed to start."));
-            return 1;
-        }
+        var window = CreateWindow();
+        var loadingHtml = GetLoadingHtml(url);
+        var tempLoadingPath = Path.Combine(Path.GetTempPath(), $"ivy_loading_{Guid.NewGuid():N}.html");
+        File.WriteAllText(tempLoadingPath, loadingHtml);
+        window.Load(new Uri(tempLoadingPath));
 
+        window.WaitForClose();
+
+        try { File.Delete(tempLoadingPath); } catch { }
+
+        cts.Cancel();
+        serverTask.GetAwaiter().GetResult();
+
+        return 0;
+    }
+
+    private PhotinoWindow CreateWindow()
+    {
         var windowWidth = _width;
         var windowHeight = _height;
 
@@ -114,13 +124,40 @@ public class DesktopWindow(Server server)
 
         if (_center) window.Center();
 
-        window.Load(new Uri(url));
-        window.WaitForClose();
+        return window;
+    }
 
-        cts.Cancel();
-        serverTask.GetAwaiter().GetResult();
-
-        return 0;
+    private static string GetLoadingHtml(string url)
+    {
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8"><title>Loading</title></head>
+            <body style="margin:0;background:#0a0a0a;color:#f8f8f8;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column">
+              <div style="width:40px;height:40px;border:3px solid #262626;border-top-color:#00cc92;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1.5rem"></div>
+              <p id="status" style="color:#8f8f8f;font-size:0.95rem">Connecting to server...</p>
+              <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+              <script>
+                var serverUrl = '__SERVER_URL__';
+                var elapsed = 0;
+                function poll() {
+                  fetch(serverUrl, { mode: 'no-cors' }).then(function() {
+                    window.location.href = serverUrl;
+                  }).catch(function() {
+                    elapsed += 500;
+                    if (elapsed >= 30000) {
+                      document.getElementById('status').textContent = 'Unable to connect to the server. It may have failed to start.';
+                      document.getElementById('status').style.color = '#dd5860';
+                      return;
+                    }
+                    setTimeout(poll, 500);
+                  });
+                }
+                poll();
+              </script>
+            </body>
+            </html>
+            """.Replace("__SERVER_URL__", url);
     }
 
     private void ShowErrorDialog(Exception ex)
@@ -129,10 +166,10 @@ public class DesktopWindow(Server server)
         {
             var errorHtml = $"""
                 <!DOCTYPE html>
-                <html><body style="font-family:system-ui;padding:2rem;background:#1e1e2e;color:#cdd6f4">
-                <h2 style="color:#f38ba8">Application Error</h2>
+                <html><body style="font-family:system-ui;padding:2rem;background:#0a0a0a;color:#f8f8f8">
+                <h2 style="color:#dd5860">Application Error</h2>
                 <p>{WebUtility.HtmlEncode(ex.Message)}</p>
-                <pre style="background:#313244;padding:1rem;border-radius:8px;overflow:auto;font-size:0.85rem;color:#a6adc8">{WebUtility.HtmlEncode(ex.ToString())}</pre>
+                <pre style="background:#171717;padding:1rem;border-radius:8px;overflow:auto;font-size:0.85rem;color:#8f8f8f">{WebUtility.HtmlEncode(ex.ToString())}</pre>
                 </body></html>
                 """;
 
@@ -165,43 +202,5 @@ public class DesktopWindow(Server server)
         using var fileStream = File.Create(tempPath);
         stream.CopyTo(fileStream);
         return tempPath;
-    }
-
-    private static async Task<bool> CheckIfPortIsListening(int port, Task serverTask, int maxAttempts = 10)
-    {
-        var delayMs = 1000;
-        for (var i = 0; i < maxAttempts; i++)
-        {
-            // If the server task faulted, rethrow the actual startup exception
-            if (serverTask.IsFaulted)
-            {
-                // Unwrap AggregateException to get the real cause
-                if (serverTask.Exception?.InnerException != null)
-                    throw serverTask.Exception.InnerException;
-                throw serverTask.Exception ?? (Exception)new InvalidOperationException("Server task faulted.");
-            }
-
-            if (serverTask.IsCompleted)
-            {
-                // Server exited without error but also without listening — early exit
-                return false;
-            }
-
-            try
-            {
-                bool isListening = IPGlobalProperties
-                    .GetIPGlobalProperties()
-                    .GetActiveTcpListeners()
-                    .Any(endpoint => endpoint.Port == port);
-                if (isListening) return true;
-            }
-            catch
-            {
-                // Ignore
-            }
-            if (i == maxAttempts - 1) return false;
-            await Task.Delay(delayMs);
-        }
-        return false;
     }
 }
