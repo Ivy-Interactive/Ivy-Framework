@@ -11,7 +11,6 @@ import { ChevronRight, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { MenuItem, WidgetEventHandlerType } from '@/types/widgets';
 import { useFocusable } from '@/hooks/use-focus-management';
 import { sidebarMenuRef } from './sidebar-refs';
-import { sidebarSearchStore } from './sidebarSearchStore';
 import { useEventHandler } from '@/components/event-handler';
 import { cn, getAppId } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
@@ -436,16 +435,6 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
 
   // Register only the sidebar menu container with useFocusable
   const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
-
-  useEffect(() => {
-    sidebarSearchStore.setState({
-      items,
-      fullMenuItems: items,
-      eventHandler,
-      id,
-      activeTag,
-    });
-  }, [items, eventHandler, id, activeTag]);
 
   // Expand sections and scroll to active item when activeTag changes
   useEffect(() => {
