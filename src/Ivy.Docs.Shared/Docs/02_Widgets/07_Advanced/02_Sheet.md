@@ -105,49 +105,6 @@ public class SheetWithFooterActions : ViewBase
 }
 ```
 
-## Complex Layout
-
-Sheets can contain nested layouts and multiple inputs. This example shows a profile-style layout with cards and actions:
-
-```csharp demo-tabs
-public class ComplexSheetLayout : ViewBase
-{
-    public override object? Build()
-    {
-        var client = UseService<IClientProvider>();
-        var (sheetView, showSheet) = UseTrigger((IState<bool> isOpen) =>
-            isOpen.Value ? new Sheet(_ => isOpen.Set(false),
-                Layout.Vertical()
-                    | new Card(
-                        Layout.Horizontal()
-                            | new Avatar("JD").Size(64)
-                            | Layout.Vertical()
-                                | Text.P("John Doe").Small().NoWrap()
-                                | Text.P("john.doe@example.com").Small()
-                    ).Title("User Information")
-                    | new Card(
-                        Layout.Vertical()
-                            | new BoolInput("Dark Mode", true)
-                            | new BoolInput("Notifications", false)
-                            | new SelectInput<string>(options: new[] { "English", "Spanish", "French" }.ToOptions())
-                    ).Title("Preferences")
-                    | new Card(
-                        Layout.Horizontal().Gap(2)
-                            | new Button("Update Profile").OnClick(_ => client.Toast("Profile updated!"))
-                            | new Button("Change Password").OnClick(_ => client.Toast("Password change initiated"))
-                            | new Button("Delete Account").Variant(ButtonVariant.Destructive).OnClick(_ => client.Toast("Account deletion requested"))
-                    ).Title("Actions"),
-                title: "User Profile",
-                description: "Manage your account settings and preferences")
-                .Width(Size.Fraction(2/3f)) : null);
-
-        return Layout.Vertical()
-            | new Button("Open Complex Sheet", onClick: _ => showSheet())
-            | sheetView;
-    }
-}
-```
-
 ## Different Widths
 
 Control sheet width with the `.Width()` extension. For top/bottom sides, use `.Height()` instead. Widths use [Size](../../04_ApiReference/IvyShared/Size.md) values such as `Size.Rem(20)`, `Size.Fraction(1/2f)`, and `Size.Full()`:
