@@ -2,7 +2,13 @@ import * as React from 'react';
 import { useCallback, useMemo } from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import { Scales } from '@/types/scale';
-import { DateTimeInputWidgetProps } from './types';
+import {
+  DateTimeInputWidgetProps,
+  BaseVariantProps,
+  DateChangeProp,
+  TimeChangeProp,
+  VariantType,
+} from './types';
 import { DateVariant } from './DateVariant';
 import { DateTimeVariant } from './DateTimeVariant';
 import { TimeVariant } from './TimeVariant';
@@ -10,7 +16,10 @@ import { MonthVariant } from './MonthVariant';
 import { WeekVariant } from './WeekVariant';
 import { YearVariant } from './YearVariant';
 
-const VariantComponents: Record<string, React.FC<any>> = {
+const VariantComponents: Record<
+  VariantType,
+  React.FC<BaseVariantProps & DateChangeProp & TimeChangeProp>
+> = {
   Date: DateVariant,
   DateTime: DateTimeVariant,
   Time: TimeVariant,

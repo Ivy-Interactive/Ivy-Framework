@@ -33,27 +33,24 @@ export interface BaseVariantProps {
   'data-testid'?: string;
 }
 
-export interface DateVariantProps extends BaseVariantProps {
+export interface DateChangeProp {
   onDateChange: (date: Date | undefined) => void;
 }
 
-export interface DateTimeVariantProps extends BaseVariantProps {
-  onDateChange: (date: Date | undefined) => void;
+export interface TimeChangeProp {
   onTimeChange: (time: string) => void;
 }
 
-export interface TimeVariantProps extends BaseVariantProps {
-  onTimeChange: (time: string) => void;
-}
+export type DateVariantProps = BaseVariantProps & DateChangeProp;
 
-export interface MonthVariantProps extends BaseVariantProps {
-  onDateChange: (date: Date | undefined) => void;
-}
+export type DateTimeVariantProps = BaseVariantProps &
+  DateChangeProp &
+  TimeChangeProp;
 
-export interface WeekVariantProps extends BaseVariantProps {
-  onDateChange: (date: Date | undefined) => void;
-}
+export type TimeVariantProps = BaseVariantProps & TimeChangeProp;
 
-export interface YearVariantProps extends BaseVariantProps {
-  onDateChange: (date: Date | undefined) => void;
-}
+export type MonthVariantProps = BaseVariantProps & DateChangeProp;
+
+export type WeekVariantProps = BaseVariantProps & DateChangeProp;
+
+export type YearVariantProps = BaseVariantProps & DateChangeProp;
