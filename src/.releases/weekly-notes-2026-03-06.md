@@ -7,7 +7,7 @@
 
 ### Event Handler Naming: Handle*→ On*
 
-All event handler extension methods have been renamed from `Handle*` to `On*` to provide a more intuitive API. This affects all widgets with event handlers including Button, Card, Form, Tree, DataTable, and input widgets.
+All event handler extension methods have been renamed from `Handle*` to `On*` to provide a more intuitive API. This affects all widgets with event handlers including [Button](https://docs.ivy.app/widgets/common/button), [Card](https://docs.ivy.app/widgets/common/card), [Form](https://docs.ivy.app/onboarding/concepts/forms), [Tree](https://docs.ivy.app/widgets/common/tree), [DataTable](https://docs.ivy.app/widgets/advanced/data-table), and input widgets.
 
 **Common renames:**
 
@@ -146,7 +146,7 @@ Simply replace all instances of the old enum names with their new `*Variants` co
 
 ### Text Alignment Support
 
-Both the `Text` and `Markdown` widgets now support text alignment with new fluent methods for controlling how content is aligned within its container. You can align text left (default), center, right, or justify.
+Both the [Text](https://docs.ivy.app/widgets/primitives/text-block) and [Markdown](https://docs.ivy.app/widgets/primitives/markdown) widgets now support text alignment with new fluent methods for controlling how content is aligned within its container. You can align text left (default), center, right, or justify.
 
 **Text widget:**
 
@@ -167,7 +167,7 @@ new Markdown("Justified paragraph text").Justify()
 
 ### Fluent Value Setters for Input Widgets
 
-All input widgets now support fluent `.Value()` setters, making it easier to set initial values or update input values programmatically. This works with all input types including TextInput, NumberInput, BoolInput, SelectInput, DateTimeInput, ColorInput, and more.
+All input widgets now support fluent `.Value()` setters, making it easier to set initial values or update input values programmatically. This works with all input types including [TextInput](https://docs.ivy.app/widgets/inputs/text-input), [NumberInput](https://docs.ivy.app/widgets/inputs/number-input), [BoolInput](https://docs.ivy.app/widgets/inputs/bool-input), SelectInput, [DateTimeInput](https://docs.ivy.app/widgets/inputs/date-time-input), [ColorInput](https://docs.ivy.app/widgets/inputs/color-input), and more.
 
 ```csharp
 // Set initial value on a text input
@@ -190,7 +190,7 @@ country.ToSelectInput(countries)
 
 ### Separator Text Alignment
 
-The `Separator` widget now supports positioning label text along the separator line with the new `.TextAlign()` method. Text can be positioned at Left, Center (default), or Right.
+The [Separator](https://docs.ivy.app/widgets/primitives/separator) widget now supports positioning label text along the separator line with the new `.TextAlign()` method. Text can be positioned at Left, Center (default), or Right.
 
 ```csharp
 Layout.Vertical().Gap(4)
@@ -201,7 +201,7 @@ Layout.Vertical().Gap(4)
 
 ### NumberInput Prefix and Suffix
 
-The `NumberInput` widget now supports prefix and suffix properties, matching the existing pattern on `TextInput`.
+The NumberInput widget now supports prefix and suffix properties, matching the existing pattern on TextInput.
 
 ```csharp
 var temperature = UseState(22);
@@ -216,7 +216,7 @@ return Layout.Vertical()
 
 ### TextInput OnSubmit Event
 
-The `TextInput` widget now supports an `OnSubmit` event that fires when the user presses Enter in single-line text inputs.
+The TextInput widget now supports an `OnSubmit` event that fires when the user presses Enter in single-line text inputs.
 
 ```csharp
 var searchQuery = UseState("");
@@ -245,7 +245,7 @@ tag.ToTextInput()
 
 ### TextInput MinLength Validation
 
-The `TextInput` widget and all its variants (Password, Search, Textarea) now support minimum length validation with the new `.MinLength()` method.
+The TextInput widget and all its variants (Password, Search, Textarea) now support minimum length validation with the new `.MinLength()` method.
 
 ```csharp
 var usernameState = UseState("");
@@ -259,7 +259,7 @@ usernameState.ToTextInput()
 
 ### TextInput Multiline Helper Method
 
-A new `.Multiline()` extension method has been added to `TextInputBase` for quickly converting any text input into a textarea.
+A new `.Multiline()` extension method has been added to `TextInputBase` for quickly converting any TextInput into a textarea.
 
 ```csharp
 var notes = UseState("");
@@ -276,7 +276,7 @@ notes.ToTextareaInput()
 
 ### FileInput Minimum Size Validation
 
-The `FileInput` widget now supports minimum file size validation with the new `.MinFileSize()` method.
+The [FileInput](https://docs.ivy.app/widgets/inputs/file-input) widget now supports minimum file size validation with the new `.MinFileSize()` method.
 
 ```csharp
 var file = UseState<FileUpload<byte[]>?>();
@@ -291,7 +291,7 @@ return file
 
 ### CodeBlock Line Wrapping
 
-The `CodeBlock` widget now supports line wrapping with the new `.WrapLines()` method. When enabled, long lines wrap within the code block instead of requiring horizontal scrolling
+The [CodeBlock](https://docs.ivy.app/widgets/primitives/code-block) widget now supports line wrapping with the new `.WrapLines()` method. When enabled, long lines wrap within the code block instead of requiring horizontal scrolling
 
 ```csharp
 new CodeBlock(@"public class Example {
@@ -305,7 +305,7 @@ new CodeBlock(@"public class Example {
 
 ### CodeBlock Starting Line Numbers
 
-The `CodeBlock` widget now supports custom starting line numbers with the new `.StartingLineNumber()` method. This is useful when displaying code excerpts where you want to preserve the original line numbers from the source file.
+The CodeBlock widget now supports custom starting line numbers with the new `.StartingLineNumber()` method. This is useful when displaying code excerpts where you want to preserve the original line numbers from the source file.
 
 ```csharp
 new CodeBlock(@"    private static int Calculate(int input)
@@ -320,7 +320,7 @@ new CodeBlock(@"    private static int Calculate(int input)
 
 ### Expandable Icon Support
 
-The `Expandable` widget now supports icons with the new `.Icon()` extension method, following the same pattern used by Button and Badge widgets.
+The [Expandable](https://docs.ivy.app/widgets/common/expandable) widget now supports icons with the new `.Icon()` extension method, following the same pattern used by Button and Badge widgets.
 
 ```csharp
 Layout.Vertical().Gap(2)
@@ -330,7 +330,7 @@ Layout.Vertical().Gap(2)
 
 ### SelectInput Advanced Features
 
-The `SelectInput` widget has three powerful new features:
+The [SelectInput](https://docs.ivy.app/widgets/inputs/select-input) widget has three powerful new features:
 
 **Search Support:**
 
@@ -364,7 +364,7 @@ All three features work across all SelectInput variants (Select, List, Toggle).
 
 ### SelectInput Disabled Options
 
-Individual options in `SelectInput` can now be disabled using the `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list.
+Individual options in SelectInput can now be disabled using the `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list.
 
 ```csharp
 var fruit = UseState("apple");
@@ -381,7 +381,7 @@ fruit.ToSelectInput(fruitOptions)
 
 ### SelectInput Ghost Styling
 
-All `SelectInput` and `AsyncSelectInput` variants now support ghost styling with the new `.Ghost()` extension method. Ghost styling removes borders and background fill, making the select blend into its surroundings.
+All SelectInput and [AsyncSelectInput](https://docs.ivy.app/widgets/inputs/async-select-input) variants now support ghost styling with the new `.Ghost()` extension method. Ghost styling removes borders and background fill, making the select blend into its surroundings.
 
 ```csharp
 // Ghost select without borders
@@ -400,7 +400,7 @@ guidState.ToAsyncSelectInput(QueryCategories, LookupCategory)
 
 ### Card Disabled State
 
-The `Card` widget now supports a disabled state using the `.Disabled()` extension method.
+The Card widget now supports a disabled state using the `.Disabled()` extension method.
 
 ```csharp
 new Card("This card cannot be clicked")
@@ -413,7 +413,7 @@ new Card("This card cannot be clicked")
 
 ### Spacer Default Behavior Change
 
-The `Spacer` widget now defaults to grow behavior (`flex-grow: 1`), automatically filling available space in the parent layout's direction. This matches the common use case of pushing sibling elements apart without requiring explicit `.Width(Size.Grow())`.
+The [Spacer](https://docs.ivy.app/widgets/primitives/spacer) widget now defaults to grow behavior (`flex-grow: 1`), automatically filling available space in the parent layout's direction. This matches the common use case of pushing sibling elements apart without requiring explicit `.Width(Size.Grow())`.
 
 **Before:**
 
@@ -435,7 +435,7 @@ Layout.Horizontal().Gap(4)
 
 ### Html Widget Script Execution
 
-The `Html` widget now supports JavaScript execution with the new `DangerouslyAllowScripts()` option. This allows rendering raw HTML that includes `<script>` tags when you trust the source completely.
+The [Html](https://docs.ivy.app/widgets/primitives/html) widget now supports JavaScript execution with the new `DangerouslyAllowScripts()` option. This allows rendering raw HTML that includes `<script>` tags when you trust the source completely.
 
 ```csharp
 var htmlWithScript = """
@@ -450,7 +450,7 @@ new Html(htmlWithScript).DangerouslyAllowScripts()
 
 ### Sheet Slide Directions
 
-The `Sheet` widget now supports sliding in from any edge of the screen with the new `.Side()` API and `SheetSide` enum. Previously sheets only slid from the right; now they can come from Left, Right, Top, or Bottom.
+The [Sheet](https://docs.ivy.app/widgets/advanced/sheet) widget now supports sliding in from any edge of the screen with the new `.Side()` API and `SheetSide` enum. Previously sheets only slid from the right; now they can come from Left, Right, Top, or Bottom.
 
 ```csharp
 // Slide from left (great for navigation)
@@ -466,7 +466,7 @@ new Sheet().Side(SheetSide.Bottom)
 
 ### SidebarLayout Resizable Width
 
-The `SidebarLayout` widget now supports drag-to-resize functionality with the new `.Resizable()` extension method. Users can drag the sidebar border to adjust its width at runtime.
+The [SidebarLayout](https://docs.ivy.app/widgets/layouts/sidebar-layout) widget now supports drag-to-resize functionality with the new `.Resizable()` extension method. Users can drag the sidebar border to adjust its width at runtime, and configure constraints with the [Size API](https://docs.ivy.app/api-reference/ivy-shared/size).
 
 ```csharp
 // Basic resizable sidebar
@@ -487,7 +487,7 @@ new SidebarLayout(
 
 ### Progress Indeterminate Mode
 
-The `Progress` widget now has an explicit `Indeterminate` property for displaying animated progress bars when completion percentage is unknown.
+The [Progress](https://docs.ivy.app/widgets/common/progress) widget now has an explicit `Indeterminate` property for displaying animated progress bars when completion percentage is unknown.
 
 ```csharp
 // Basic indeterminate progress
@@ -504,7 +504,7 @@ new Progress(progress.Value)
 
 ### Table Progress Builder
 
-The `Table` widget now supports rendering progress bars in cells with the new `.Progress()` builder.
+The [Table](https://docs.ivy.app/widgets/common/table) widget now supports rendering progress bars in cells with the new `.Progress()` builder.
 
 ```csharp
 var tasks = new[] {
@@ -527,7 +527,7 @@ tasks.ToTable()
 
 ### DataTable Programmatic Refresh
 
-The `DataTable` widget now supports programmatic refreshing with the new `UseRefreshToken()` hook and `.RefreshToken()` fluent API. This feature is particularly useful for reloading table data after CRUD operations like creating, updating, or deleting records.
+The DataTable widget now supports programmatic refreshing with the new [UseRefreshToken](https://docs.ivy.app/hooks/core/use-refresh-token) hook and `.RefreshToken()` fluent API. This feature is particularly useful for reloading table data after CRUD operations like creating, updating, or deleting records.
 
 ```csharp
 public class EmployeeTable : ViewBase
@@ -560,7 +560,7 @@ The default theme has been changed from 'light' to 'system', so the application 
 
 ### Badge Click Events
 
-The `Badge` widget now supports click events with the new `.OnClick()` extension method.
+The [Badge](https://docs.ivy.app/widgets/common/badge) widget now supports click events with the new `.OnClick()` extension method.
 
 ```csharp
 new Badge("Click Me", icon: Icons.MousePointer)
@@ -569,7 +569,7 @@ new Badge("Click Me", icon: Icons.MousePointer)
 
 ### Box Widget Interactivity
 
-The `Box` widget now supports click events and hover effects, making it easy to create interactive regions without using the heavier Card widget.
+The [Box](https://docs.ivy.app/widgets/primitives/box) widget now supports click events and hover effects, making it easy to create interactive regions without using the heavier Card widget.
 
 ```csharp
 new Box("Interactive box")
