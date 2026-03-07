@@ -16,9 +16,9 @@ import {
   textSizeVariants,
   timerSizeVariants,
   iconSizeVariants,
-} from '@/components/ui/input/audio-recorder-variants';
+} from '@/components/ui/input/audio-input-variants';
 
-interface AudioRecorderWidgetProps {
+interface AudioInputWidgetProps {
   label?: string;
   recordingLabel?: string;
   mimeType: string;
@@ -40,7 +40,7 @@ const supportedMimeTypes = [
   'audio/wav', // uncompressed fallback (always supported, large files)
 ];
 
-export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
+export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
   label,
   recordingLabel,
   mimeType = 'audio/webm',
@@ -160,7 +160,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
         }
 
         if (!supportedMimeType) {
-          logger.error('No supported MIME type found for AudioRecorder', {
+          logger.error('No supported MIME type found for AudioInput', {
             requestedTypes: normalizedMimeTypes,
             checks: supportChecks,
             mediaRecorderAvailable,
@@ -334,4 +334,4 @@ function SecondsCounter(props: {
   );
 }
 
-export default AudioRecorderWidget;
+export default AudioInputWidget;

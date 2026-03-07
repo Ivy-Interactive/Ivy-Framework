@@ -64,15 +64,15 @@ public class ToolbarExample : ViewBase
                 | new Button("Add Item")
                     .Icon(Icons.Plus)
                     .Variant(ButtonVariant.Primary)
-                    .HandleClick(_ => client.Toast("Add item clicked"))
+                    .OnClick(_ => client.Toast("Add item clicked"))
                 | new Button("Filter")
                     .Icon(Icons.Search)
                     .Variant(ButtonVariant.Outline)
-                    .HandleClick(_ => client.Toast("Filter clicked"))
+                    .OnClick(_ => client.Toast("Filter clicked"))
                 | new Button("Export")
                     .Icon(Icons.Download)
                     .Variant(ButtonVariant.Ghost)
-                    .HandleClick(_ => client.Toast("Export clicked"))
+                    .OnClick(_ => client.Toast("Export clicked"))
         );
 
         var content = Layout.Vertical().Gap(4)
@@ -103,7 +103,7 @@ public class DashboardHeaderExample : ViewBase
                     | new Button("Refresh")
                         .Icon(Icons.RefreshCw)
                         .Variant(ButtonVariant.Outline)
-                        .HandleClick(_ => client.Toast("Refreshing data..."))
+                        .OnClick(_ => client.Toast("Refreshing data..."))
         );
 
         var dashboardContent = Layout.Grid().Columns(3).Rows(2).Gap(4)
@@ -148,19 +148,19 @@ public class NavigationHeaderExample : ViewBase
             Layout.Horizontal().Gap(3)
                 | new Button("Intro")
                     .Variant(currentSection.Value == "introduction" ? ButtonVariant.Primary : ButtonVariant.Ghost)
-                    .HandleClick(_ => {
+                    .OnClick(_ => {
                         currentSection.Value = "introduction";
                         client.Toast("Navigated to Introduction");
                     })
                 | new Button("Guide")
                     .Variant(currentSection.Value == "getting-started" ? ButtonVariant.Primary : ButtonVariant.Ghost)
-                    .HandleClick(_ => {
+                    .OnClick(_ => {
                         currentSection.Value = "getting-started";
                         client.Toast("Navigated to Getting Started");
                     })
                 | new Button("Advanced")
                     .Variant(currentSection.Value == "advanced" ? ButtonVariant.Primary : ButtonVariant.Ghost)
-                    .HandleClick(_ => {
+                    .OnClick(_ => {
                         currentSection.Value = "advanced";
                         client.Toast("Navigated to Advanced");
                     })
@@ -227,7 +227,7 @@ public class FormHeaderExample : ViewBase
                 | new Spacer().Width(Size.Grow())
                 | new Button("Cancel").Variant(ButtonVariant.Ghost)
                 | new Button("Save").Variant(ButtonVariant.Primary)
-                        .HandleClick(_ => client.Toast("Profile saved!"))
+                        .OnClick(_ => client.Toast("Profile saved!"))
         );
 
         var formContent = Layout.Vertical().Gap(4)

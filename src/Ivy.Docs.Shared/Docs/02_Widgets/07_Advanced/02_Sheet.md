@@ -82,8 +82,8 @@ public class SheetWithFooterActions : ViewBase
         return new Button("Open Sheet with Actions").WithSheet(
             () => new FooterLayout(
                 Layout.Horizontal().Gap(2)
-                    | new Button("Save").Variant(ButtonVariant.Primary).HandleClick(_ => client.Toast("Profile saved successfully!"))
-                    | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => client.Toast("Changes cancelled")),
+                    | new Button("Save").Variant(ButtonVariant.Primary).OnClick(_ => client.Toast("Profile saved successfully!"))
+                    | new Button("Cancel").Variant(ButtonVariant.Outline).OnClick(_ => client.Toast("Changes cancelled")),
                 new Card(
                     "This sheet has action buttons in the footer"
                 ).Title("Content")
@@ -122,9 +122,9 @@ public class ComplexSheetLayout : ViewBase
                 ).Title("Preferences")
                 | new Card(
                     Layout.Horizontal().Gap(2)
-                        | new Button("Update Profile").HandleClick(_ => client.Toast("Profile updated!"))
-                        | new Button("Change Password").HandleClick(_ => client.Toast("Password change initiated"))
-                        | new Button("Delete Account").Variant(ButtonVariant.Destructive).HandleClick(_ => client.Toast("Account deletion requested"))
+                        | new Button("Update Profile").OnClick(_ => client.Toast("Profile updated!"))
+                        | new Button("Change Password").OnClick(_ => client.Toast("Password change initiated"))
+                        | new Button("Delete Account").Variant(ButtonVariant.Destructive).OnClick(_ => client.Toast("Account deletion requested"))
                 ).Title("Actions"),
             title: "User Profile",
             description: "Manage your account settings and preferences",
@@ -168,6 +168,42 @@ public class SheetWidthExamples : ViewBase
 }
 ```
 
+### Different Sides
+
+Sheets can slide in from any edge of the screen using the `side` parameter with `SheetSide` enum values: `Left`, `Right` (default), `Top`, or `Bottom`. For top/bottom sheets, the size parameter controls height instead of width.
+
+```csharp demo-tabs
+public class SheetSideExamples : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Horizontal().Gap(2)
+            | new Button("Left Sheet").WithSheet(
+                () => new Card("This sheet slides in from the left").Title("Left Side"),
+                title: "Left Sheet",
+                side: SheetSide.Left
+            )
+            | new Button("Right Sheet").WithSheet(
+                () => new Card("This sheet slides in from the right (default)").Title("Right Side"),
+                title: "Right Sheet",
+                side: SheetSide.Right
+            )
+            | new Button("Top Sheet").WithSheet(
+                () => new Card("This sheet slides in from the top").Title("Top Side"),
+                title: "Top Sheet",
+                width: Size.Rem(20),
+                side: SheetSide.Top
+            )
+            | new Button("Bottom Sheet").WithSheet(
+                () => new Card("This sheet slides in from the bottom").Title("Bottom Side"),
+                title: "Bottom Sheet",
+                width: Size.Rem(20),
+                side: SheetSide.Bottom
+            );
+    }
+}
+```
+
 ### Sheet with Navigation
 
 This example shows a sheet with internal navigation between multiple pages using [state management](../../03_Hooks/02_Core/03_UseState.md).
@@ -191,13 +227,13 @@ public class NavigationSheetContent : ViewBase
     {
         var currentPage = UseState<int>(0);
         var pages = new[] { "Home", "Profile", "Settings", "Help" };
-        
+
         return Layout.Vertical()
             | (Layout.Horizontal().Gap(2)
-                | pages.Select((page, index) => 
+                | pages.Select((page, index) =>
                     new Button(page)
                         .Variant(currentPage.Value == index ? ButtonVariant.Primary : ButtonVariant.Outline)
-                        .HandleClick(_ => currentPage.Value = index)
+                        .OnClick(_ => currentPage.Value = index)
                 ).ToArray())
             | new Card(
                 $"This is the {pages[currentPage.Value]} page content"
@@ -225,19 +261,19 @@ public class KanbanWithSheetExample : ViewBase
             new TaskItem("4", "Performance Optimization", "In Progress", 2, "Optimize database queries"),
             new TaskItem("5", "Unit Tests", "Done", 1, "Write comprehensive test suite"),
         });
-        
+
         var client = UseService<IClientProvider>();
-        
+
         var (sheetView, showEdit) = UseTrigger((IState<bool> isOpen, string taskId) =>
             new TaskFormSheet(isOpen, taskId, tasks, client));
-        
+
         var kanban = tasks.Value
             .ToKanban(
                 groupBySelector: t => t.Status,
                 idSelector: t => t.Id,
                 orderSelector: t => t.Priority)
             .CardBuilder(task => new Card(task.Title, task.Description)
-                .HandleClick(() => showEdit(task.Id)))
+                .OnClick(() => showEdit(task.Id)))
             .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
@@ -272,7 +308,7 @@ public class KanbanWithSheetExample : ViewBase
                 updatedTasks.Insert(insertIndex, updated);
                 tasks.Set(updatedTasks.ToArray());
             });
-        
+
         return new Fragment()
             | kanban
             | sheetView;
@@ -285,7 +321,7 @@ public class TaskFormSheet : ViewBase
     private readonly string _taskId;
     private readonly IState<TaskItem[]> _tasks;
     private readonly IClientProvider _client;
-    
+
     public TaskFormSheet(IState<bool> isOpen, string taskId, IState<TaskItem[]> tasks, IClientProvider client)
     {
         _isOpen = isOpen;
@@ -293,18 +329,18 @@ public class TaskFormSheet : ViewBase
         _tasks = tasks;
         _client = client;
     }
-    
+
     public override object? Build()
     {
-        var task = UseState(() => _tasks.Value.FirstOrDefault(t => t.Id == _taskId) ?? 
+        var task = UseState(() => _tasks.Value.FirstOrDefault(t => t.Id == _taskId) ??
             new TaskItem(_taskId, "", "Todo", 1, ""));
-        
+
         var (onSubmit, formView, validationView, loading) = UseForm(() => task.ToForm()
             .Required(m => m.Title, m => m.Description)
             .Builder(m => m.Status, s => s.ToSelectInput(new[] { "Todo", "In Progress", "Done" }.ToOptions()))
-            .Builder(m => m.Description, s => s.ToTextAreaInput())
+            .Builder(m => m.Description, s => s.ToTextareaInput())
             .Remove(m => m.Id));
-        
+
         async ValueTask HandleSubmit()
         {
             if (await onSubmit())
@@ -320,17 +356,17 @@ public class TaskFormSheet : ViewBase
                 _isOpen.Set(false);
             }
         }
-        
+
         var layout = new FooterLayout(
             Layout.Horizontal().Gap(2)
-                | new Button("Save").HandleClick(_ => HandleSubmit())
+                | new Button("Save").OnClick(_ => HandleSubmit())
                     .Loading(loading).Disabled(loading)
-                | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => _isOpen.Set(false))
+                | new Button("Cancel").Variant(ButtonVariant.Outline).OnClick(_ => _isOpen.Set(false))
                 | validationView,
             formView
         );
-        
-        return new Sheet(_ => _isOpen.Set(false), layout, 
+
+        return new Sheet(_ => _isOpen.Set(false), layout,
             title: "Edit Task",
             description: "Update task details")
             .Width(Size.Fraction(1/3f));
@@ -357,7 +393,7 @@ public class ConditionalSheetExample : ViewBase
         var client = UseService<IClientProvider>();
         var isOpen = UseState<bool>(false);
         var viewMode = UseState<string>("list"); // "list", "grid", "details"
-        
+
         object RenderContent()
         {
             return viewMode.Value switch
@@ -368,42 +404,42 @@ public class ConditionalSheetExample : ViewBase
                         | "Item 2"
                         | "Item 3"
                 ).Title("List View"),
-                
+
                 "grid" => new Card(
                     Layout.Horizontal().Gap(2)
                         | new Card("Item 1").Width(Size.Fraction(1/3f))
                         | new Card("Item 2").Width(Size.Fraction(1/3f))
                         | new Card("Item 3").Width(Size.Fraction(1/3f))
                 ).Title("Grid View"),
-                
+
                 "details" => new Card(
                     Layout.Vertical().Gap(2)
                         | Text.H3("Detailed Information")
                         | Text.P("This is a detailed view with more information about the selected item.").Small()
-                        | new Button("Action").Variant(ButtonVariant.Primary).HandleClick(_ => client.Toast("Action performed on detailed item!"))
+                        | new Button("Action").Variant(ButtonVariant.Primary).OnClick(_ => client.Toast("Action performed on detailed item!"))
                 ).Title("Details View"),
-                
+
                 _ => new Card("Unknown view mode").Title("Error")
             };
         }
-        
+
         return Layout.Vertical().Gap(2)
-            | new Button("Open Conditional Sheet").HandleClick(_ => isOpen.Value = true)
+            | new Button("Open Conditional Sheet").OnClick(_ => isOpen.Value = true)
             | (isOpen.Value ? new Sheet((Event<Sheet> _) => isOpen.Value = false,
                 Layout.Vertical().Gap(2)
                     | (Layout.Horizontal().Gap(2)
                         | new Button("List").Variant(viewMode.Value == "list" ? ButtonVariant.Primary : ButtonVariant.Outline)
-                            .HandleClick(_ => {
+                            .OnClick(_ => {
                                 viewMode.Value = "list";
                                 client.Toast("Switched to List view");
                             })
                         | new Button("Grid").Variant(viewMode.Value == "grid" ? ButtonVariant.Primary : ButtonVariant.Outline)
-                            .HandleClick(_ => {
+                            .OnClick(_ => {
                                 viewMode.Value = "grid";
                                 client.Toast("Switched to Grid view");
                             })
                         | new Button("Details").Variant(viewMode.Value == "details" ? ButtonVariant.Primary : ButtonVariant.Outline)
-                            .HandleClick(_ => {
+                            .OnClick(_ => {
                                 viewMode.Value = "details";
                                 client.Toast("Switched to Details view");
                             }))

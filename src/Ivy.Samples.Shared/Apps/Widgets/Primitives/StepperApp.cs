@@ -24,11 +24,11 @@ public class StepperApp : SampleBase
                | Text.H3("With AllowSelectForward")
                | new Stepper(OnSelect, selectedIndex.Value, items).Width(200).AllowSelectForward()
                | (Layout.Horizontal().Gap(0)
-                  | new Button("Previous").Link().HandleClick(() =>
+                  | new Button("Previous").Link().OnClick(() =>
                   {
                       selectedIndex.Set(Math.Clamp(selectedIndex.Value - 1, 0, items.Length - 1));
                   })
-                  | new Button("Next").Link().HandleClick(() =>
+                  | new Button("Next").Link().OnClick(() =>
                   {
                       selectedIndex.Set(Math.Clamp(selectedIndex.Value + 1, 0, items.Length - 1));
                   })

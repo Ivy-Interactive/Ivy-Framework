@@ -13,7 +13,7 @@ public interface IAnyInput
     [Prop] public string? Invalid { get; set; }
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes();
 }
@@ -44,21 +44,21 @@ public static class AnyInputExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static IAnyInput HandleBlur(this IAnyInput input, Func<Event<IAnyInput>, ValueTask>? onBlur)
+    public static IAnyInput OnBlur(this IAnyInput input, Func<Event<IAnyInput>, ValueTask>? onBlur)
     {
-        input.OnBlur = onBlur;
+        input.OnBlur = onBlur.ToEventHandler();
         return input;
     }
 
-    public static IAnyInput HandleBlur(this IAnyInput input, Action<Event<IAnyInput>> onBlur)
+    public static IAnyInput OnBlur(this IAnyInput input, Action<Event<IAnyInput>> onBlur)
     {
-        input.OnBlur = onBlur.ToValueTask();
+        input.OnBlur = new(onBlur.ToValueTask());
         return input;
     }
 
-    public static IAnyInput HandleBlur(this IAnyInput input, Action onBlur)
+    public static IAnyInput OnBlur(this IAnyInput input, Action onBlur)
     {
-        input.OnBlur = _ => { onBlur(); return ValueTask.CompletedTask; };
+        input.OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; });
         return input;
     }
 }

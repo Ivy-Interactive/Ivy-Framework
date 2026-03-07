@@ -53,10 +53,24 @@ new Card(
     "This card is clickable."
 ).Title("Clickable Card")
  .Description("Demonstrating click and mouse hover.")
- .HandleClick(_ => client.Toast("Card clicked!"))
+ .OnClick(_ => client.Toast("Card clicked!"))
  .Width(Size.Units(100))
 ```
 
+
+## Disabled State
+
+Use the `Disabled()` extension method to prevent user interaction with a card. This is useful for indicating unavailable options or read-only states.
+
+```csharp demo-below
+new Card(
+    "This card cannot be clicked."
+).Title("Disabled Card")
+ .Description("User interaction is disabled.")
+ .OnClick(_ => client.Toast("This won't fire!"))
+ .Disabled()
+ .Width(Size.Units(100))
+```
 
 ## Dashboard Metrics
 

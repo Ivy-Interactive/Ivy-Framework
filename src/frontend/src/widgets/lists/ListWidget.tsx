@@ -19,7 +19,12 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
   });
 
   return (
-    <div ref={parentRef} className="relative h-full w-full overflow-y-auto">
+    <div
+      ref={parentRef}
+      className={cn(
+        'relative h-full w-full overflow-y-auto remove-parent-padding'
+      )}
+    >
       <div
         style={{
           height: rowVirtualizer.getTotalSize(),

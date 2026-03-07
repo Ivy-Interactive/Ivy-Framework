@@ -16,6 +16,22 @@ public class ExpandableApp : SampleBase
         // Original basic expandable
         var basicExpandable = new Expandable("This is an expandable", "This is the content of the expandable");
 
+        // Expandable with icon
+        var iconExpandable = new Expandable("Settings", "Configure your application preferences here.")
+            .Icon(Icons.Settings);
+
+        var smallIconExpandable = new Expandable("Small Settings", "Configure your application preferences here.")
+            .Icon(Icons.Settings)
+            .Small();
+
+        var mediumIconExpandable = new Expandable("Medium Settings", "Configure your application preferences here.")
+            .Icon(Icons.Settings)
+            .Medium();
+
+        var largeIconExpandable = new Expandable("Large Settings", "Configure your application preferences here.")
+            .Icon(Icons.Settings)
+            .Large();
+
         object BuildScaleContent(string emphasis, string body)
         {
             return Layout.Vertical()
@@ -91,6 +107,12 @@ public class ExpandableApp : SampleBase
         return Layout.Vertical()
             | Text.H2("Original Basic Expandable")
             | basicExpandable
+            | Text.H2("Expandable with Icon")
+            | iconExpandable
+            | Text.H2("Expandable with Icon + Scale Variations")
+            | smallIconExpandable
+            | mediumIconExpandable
+            | largeIconExpandable
             | Text.H2("Scale Variations")
             | Text.Block("Use the Scale helpers (Small / Medium / Large) to match the density of the surrounding layout.")
             | smallScaleExpandable

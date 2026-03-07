@@ -228,7 +228,7 @@ public class DepartmentCreateDialog(IState<bool> isOpen, RefreshToken refreshTok
 
         return department
             .ToForm()
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "Create Department", submitTitle: "Create");
 
         async Task OnSubmit(DepartmentCreateRequest request)
@@ -280,7 +280,7 @@ public class DepartmentEditSheet(IState<bool> isOpen, Guid id) : ViewBase
         return departmentQuery.Value!
             .ToForm()
             .Remove(e => e.Id)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Department");
 
         async Task OnSubmit(Department? request)

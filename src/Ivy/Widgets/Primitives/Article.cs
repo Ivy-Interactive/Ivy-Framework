@@ -34,7 +34,7 @@ public record Article : WidgetBase<Article>
 
     [Prop] public int Gap { get; set; } = 4;
 
-    [Event] public Func<Event<Article, string>, ValueTask>? OnLinkClick { get; set; }
+    [Event] public EventHandler<Event<Article, string>>? OnLinkClick { get; set; }
 }
 
 public record ArticleHeading(string Id, string Text, int Level);
@@ -56,10 +56,10 @@ public static class ArticleExtensions
     public static Article Headings(this Article article, List<ArticleHeading> headings) => article with { Headings = headings };
 
     [OverloadResolutionPriority(1)]
-    public static Article HandleLinkClick(this Article article, Func<Event<Article, string>, ValueTask> onLinkClick) => article with { OnLinkClick = onLinkClick };
+    public static Article OnLinkClick(this Article article, Func<Event<Article, string>, ValueTask> onLinkClick) => article with { OnLinkClick = new(onLinkClick) };
 
     // Overload for Action<Event<Article, string>>
-    public static Article HandleLinkClick(this Article article, Action<Event<Article, string>> onLinkClick) => article with { OnLinkClick = onLinkClick.ToValueTask() };
+    public static Article OnLinkClick(this Article article, Action<Event<Article, string>> onLinkClick) => article with { OnLinkClick = new(onLinkClick.ToValueTask()) };
 
-    public static Article HandleLinkClick(this Article article, Action<string> onLinkClick) => article with { OnLinkClick = @event => { onLinkClick(@event.Value); return ValueTask.CompletedTask; } };
+    public static Article OnLinkClick(this Article article, Action<string> onLinkClick) => article with { OnLinkClick = new(@event => { onLinkClick(@event.Value); return ValueTask.CompletedTask; }) };
 }

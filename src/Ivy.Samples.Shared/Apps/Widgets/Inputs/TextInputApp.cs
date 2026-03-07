@@ -24,7 +24,7 @@ public class TextInputApp : SampleBase
                           | Text.InlineCode("string")
                           | (Layout.Vertical()
                              | stringState.ToTextInput()
-                             | stringState.ToTextAreaInput()
+                             | stringState.ToTextareaInput()
                              | stringState.ToPasswordInput()
                              | stringState.ToSearchInput()
                           )
@@ -33,7 +33,7 @@ public class TextInputApp : SampleBase
                           | Text.InlineCode("string?")
                           | (Layout.Vertical()
                              | nullStringState.ToTextInput()
-                             | nullStringState.ToTextAreaInput()
+                             | nullStringState.ToTextareaInput()
                              | nullStringState.ToPasswordInput()
                              | nullStringState.ToSearchInput()
                           )
@@ -64,11 +64,11 @@ public class TextInputApp : SampleBase
                   | withValue.ToPasswordInput().Disabled()
                   | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
-                  | Text.InlineCode("TextInputVariants.TextArea")
-                  | withoutValue.ToTextAreaInput().Placeholder("Placeholder")
-                  | withValue.ToTextAreaInput()
-                  | withValue.ToTextAreaInput().Disabled()
-                  | withValue.ToTextAreaInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+                  | Text.InlineCode("TextInputVariants.Textarea")
+                  | withoutValue.ToTextareaInput().Placeholder("Placeholder")
+                  | withValue.ToTextareaInput()
+                  | withValue.ToTextareaInput().Disabled()
+                  | withValue.ToTextareaInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
                   | Text.InlineCode("TextInputVariants.Search")
                   | withoutValue.ToSearchInput().Placeholder("Placeholder").ShortcutKey("Ctrl+K")
@@ -102,9 +102,11 @@ public class TextInputApp : SampleBase
                 )
                | Text.H3("OnBlur")
                | Layout.Horizontal(
-                   onBlurState.ToTextInput().HandleBlur(e => onBlurLabel.Set("Blur")),
+                   onBlurState.ToTextInput().OnBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
+               | Text.H3("OnSubmit (press Enter)")
+               | new TextInputSubmitDemo()
                | new Spacer().Height(15)
             ;
     }
@@ -155,10 +157,10 @@ public class TextInputSizes : ViewBase
                | passwordState.ToPasswordInput()
                | passwordState.ToPasswordInput().Large()
 
-               | Text.InlineCode("TextInputVariants.TextArea")
-               | textareaState.ToTextAreaInput().Small()
-               | textareaState.ToTextAreaInput()
-               | textareaState.ToTextAreaInput().Large()
+               | Text.InlineCode("TextInputVariants.Textarea")
+               | textareaState.ToTextareaInput().Small()
+               | textareaState.ToTextareaInput()
+               | textareaState.ToTextareaInput().Large()
 
                | Text.InlineCode("TextInputVariants.Search")
                | searchState.ToSearchInput().Small()
@@ -199,5 +201,39 @@ public class TextInputAffixes : ViewBase
                | nullableState.ToTextInput().Prefix("@").Invalid("Required field").ShortcutKey("Ctrl+U")
                | nullableState.ToTextInput().Suffix(Icons.Search).Invalid("Invalid input").ShortcutKey("Ctrl+F")
                | nullableState.ToTextInput().Prefix(Icons.Mail).Suffix(".com").Invalid("Error").ShortcutKey("Ctrl+E");
+    }
+}
+
+public class TextInputSubmitDemo : ViewBase
+{
+    public override object Build()
+    {
+        var searchQuery = UseState("");
+        var searchResult = UseState("");
+        var tag = UseState("");
+        var tags = UseState<List<string>>(new List<string>());
+
+        return Layout.Vertical()
+               | Text.P("Search example (type and press Enter):")
+               | Layout.Horizontal(
+                   searchQuery.ToSearchInput()
+                       .Placeholder("Search...")
+                       .HandleSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}")),
+                   searchResult
+               )
+               | Text.P("Quick-add tags (type and press Enter to add):")
+               | Layout.Horizontal(
+                   tag.ToTextInput()
+                       .Placeholder("Add a tag...")
+                       .HandleSubmit(() =>
+                       {
+                           if (!string.IsNullOrWhiteSpace(tag.Value))
+                           {
+                               tags.Set(new List<string>(tags.Value) { tag.Value });
+                               tag.Set("");
+                           }
+                       }),
+                   Layout.Horizontal().Gap(2) | tags.Value.Select(t => new Badge(t))
+               );
     }
 }

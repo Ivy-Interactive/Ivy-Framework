@@ -82,6 +82,10 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
   }, [eventHandler, id, events, minLength, localValue]);
 
+  const handleSubmit = useCallback(() => {
+    if (events.includes('OnSubmit')) eventHandler('OnSubmit', id, []);
+  }, [eventHandler, id, events]);
+
   const handleFocus = useCallback(() => {
     setIsFocused(true);
     if (events.includes('OnFocus')) eventHandler('OnFocus', id, []);
@@ -154,6 +158,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           onClear={handleClear}
+          onSubmit={handleSubmit}
           inputRef={inputRef}
           scale={scale}
         />
@@ -179,6 +184,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           onClear={handleClear}
+          onSubmit={handleSubmit}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}
@@ -193,6 +199,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           onClear={handleClear}
+          onSubmit={handleSubmit}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}

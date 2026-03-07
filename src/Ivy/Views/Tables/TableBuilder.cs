@@ -42,7 +42,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             Removed = _initialRemoved;
             Align = _initialAlign;
         }
-        public bool IsMultiLine { get; set; }
+        public bool IsMultiline { get; set; }
         public Align Align { get; set; } = align;
         public Size? Width { get; set; }
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
@@ -252,12 +252,12 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    public TableBuilder<TModel> MultiLine(params Expression<Func<TModel, object>>[] fields)
+    public TableBuilder<TModel> Multiline(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var field in fields)
         {
             var hint = GetField(field);
-            hint.IsMultiLine = true;
+            hint.IsMultiline = true;
         }
         return this;
     }
@@ -343,9 +343,9 @@ public class TableBuilder<TModel> : ViewBase, IStateless
                 .IsFooter(isFooter)
                 .Align(column.Align);
 
-            if (column.IsMultiLine)
+            if (column.IsMultiline)
             {
-                cell = cell.MultiLine(true);
+                cell = cell.Multiline(true);
             }
 
             if (isHeader)

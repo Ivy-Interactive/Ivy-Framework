@@ -26,7 +26,7 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
 [
@@ -44,21 +44,21 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
     {
         var typedState = state.As<TDateRange>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
         Nullable = typeof(TDateRange) == typeof((DateOnly?, DateOnly?));
     }
 
     [OverloadResolutionPriority(1)]
     public DateRangeInput(TDateRange value, Func<Event<IInput<TDateRange>, TDateRange>, ValueTask> onChange, string? placeholder = null, bool disabled = false) : this(placeholder, disabled)
     {
-        OnChange = onChange;
+        OnChange = onChange.ToEventHandler();
         Value = value;
         Nullable = typeof(TDateRange) == typeof((DateOnly?, DateOnly?));
     }
 
     public DateRangeInput(TDateRange value, Action<Event<IInput<TDateRange>, TDateRange>> onChange, string? placeholder = null, bool disabled = false) : this(placeholder, disabled)
     {
-        OnChange = e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
         Nullable = typeof(TDateRange) == typeof((DateOnly?, DateOnly?));
     }
@@ -73,7 +73,7 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
 
     [Prop] public TDateRange Value { get; init; } = default!;
 
-    [Event] public Func<Event<IInput<TDateRange>, TDateRange>, ValueTask>? OnChange { get; set; }
+    [Event] public EventHandler<Event<IInput<TDateRange>, TDateRange>>? OnChange { get; set; }
 }
 
 public static class DateRangeInputExtensions
@@ -118,19 +118,19 @@ public static class DateRangeInputExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static DateRangeInputBase HandleBlur(this DateRangeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static DateRangeInputBase OnBlur(this DateRangeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static DateRangeInputBase HandleBlur(this DateRangeInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static DateRangeInputBase OnBlur(this DateRangeInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static DateRangeInputBase HandleBlur(this DateRangeInputBase widget, Action onBlur)
+    public static DateRangeInputBase OnBlur(this DateRangeInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
     public static DateRangeInputBase Value<T>(this DateRangeInputBase widget, T value)

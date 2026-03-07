@@ -25,6 +25,8 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
 
     [Prop] public int MainContentPadding { get; set; } = 2;
 
+    [Prop] public bool Resizable { get; set; } = false;
+
     public static SidebarLayout operator |(SidebarLayout widget, object child)
     {
         throw new NotSupportedException("SidebarLayout does not support children.");
@@ -42,6 +44,36 @@ public static class SidebarLayoutExtensions
     {
         return sidebar with { MainContentPadding = padding };
     }
+
+    /// <summary>
+    /// Enables drag-to-resize on the sidebar border. Users can drag to adjust the sidebar width at runtime.
+    /// Use .Width(Size.Px(300).Min(Size.Px(200)).Max(Size.Px(600))) to customize constraints.
+    /// Default constraints when resizable is 200px min and 600px max.
+    /// </summary>
+    public static SidebarLayout Resizable(this SidebarLayout sidebar, bool resizable = true)
+    {
+        if (!resizable)
+        {
+            return sidebar with { Resizable = false };
+        }
+
+        // Apply default min/max constraints if not already set on the Width
+        var width = sidebar.Width ?? SidebarLayout.DefaultWidth;
+        if (width.Min == null)
+        {
+            width = width.Min(Size.Px(200));
+        }
+        if (width.Max == null)
+        {
+            width = width.Max(Size.Px(600));
+        }
+
+        return sidebar with
+        {
+            Resizable = true,
+            Width = width
+        };
+    }
 }
 
 public record SidebarMenu : WidgetBase<SidebarLayout>
@@ -49,7 +81,7 @@ public record SidebarMenu : WidgetBase<SidebarLayout>
     [OverloadResolutionPriority(1)]
     public SidebarMenu(Func<Event<SidebarMenu, object>, ValueTask> onSelect, params MenuItem[] items)
     {
-        OnSelect = onSelect;
+        OnSelect = new(onSelect);
         Items = items;
     }
 
@@ -57,9 +89,9 @@ public record SidebarMenu : WidgetBase<SidebarLayout>
 
     [Prop] public MenuItem[] Items { get; set; }
 
-    [Event] public Func<Event<SidebarMenu, object>, ValueTask> OnSelect { get; set; }
+    [Event] public EventHandler<Event<SidebarMenu, object>> OnSelect { get; set; }
 
-    [Event] public Func<Event<SidebarMenu, object>, ValueTask>? OnCtrlRightClickSelect { get; set; }
+    [Event] public EventHandler<Event<SidebarMenu, object>>? OnCtrlRightClickSelect { get; set; }
 
     public static SidebarMenu operator |(SidebarMenu widget, object child)
     {
@@ -67,7 +99,7 @@ public record SidebarMenu : WidgetBase<SidebarLayout>
     }
 
     public SidebarMenu(Action<Event<SidebarMenu, object>> onSelect, params MenuItem[] items)
-    : this(e => { onSelect(e); return ValueTask.CompletedTask; }, items)
+    : this(onSelect.ToValueTask(), items)
     {
     }
 }

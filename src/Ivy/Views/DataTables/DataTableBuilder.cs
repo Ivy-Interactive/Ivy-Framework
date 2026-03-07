@@ -254,7 +254,7 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
-    public DataTableBuilder<TModel> HandleRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
+    public DataTableBuilder<TModel> OnRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
     {
         _onRowAction = handler;
         return this;

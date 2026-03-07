@@ -22,7 +22,7 @@ public abstract record IconInputBase : WidgetBase<IconInputBase>, IAnyInput
 
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(Icons), typeof(Icons?)];
 }
@@ -36,29 +36,29 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
         var typedState = state.As<TIcon>();
         var value = typedState.Value;
         Value = value;
-        OnChange = e =>
+        OnChange = new(e =>
         {
             typedState.Set(e.Value);
             return ValueTask.CompletedTask;
-        };
+        });
     }
 
     [OverloadResolutionPriority(1)]
     public IconInput(TIcon value, Func<Event<IInput<TIcon>, TIcon>, ValueTask> onChange, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
-        OnChange = onChange;
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
     public IconInput(TIcon value, Action<Event<IInput<TIcon>, TIcon>> onChange, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
-        OnChange = e =>
+        OnChange = new(e =>
         {
             onChange(e);
             return ValueTask.CompletedTask;
-        };
+        });
         Value = value;
     }
 
@@ -72,7 +72,7 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
 
     [Prop] public TIcon Value { get; init; } = default!;
 
-    [Event] public Func<Event<IInput<TIcon>, TIcon>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TIcon>, TIcon>>? OnChange { get; }
 }
 
 public static class IconInputExtensions
@@ -99,14 +99,14 @@ public static class IconInputExtensions
         widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]
-    public static IconInputBase HandleBlur(this IconInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur) =>
-        widget with { OnBlur = onBlur };
+    public static IconInputBase OnBlur(this IconInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur) =>
+        widget with { OnBlur = new(onBlur) };
 
-    public static IconInputBase HandleBlur(this IconInputBase widget, Action<Event<IAnyInput>> onBlur) =>
-        widget.HandleBlur(onBlur.ToValueTask());
+    public static IconInputBase OnBlur(this IconInputBase widget, Action<Event<IAnyInput>> onBlur) =>
+        widget.OnBlur(onBlur.ToValueTask());
 
-    public static IconInputBase HandleBlur(this IconInputBase widget, Action onBlur) =>
-        widget.HandleBlur(_ =>
+    public static IconInputBase OnBlur(this IconInputBase widget, Action onBlur) =>
+        widget.OnBlur(_ =>
         {
             onBlur();
             return ValueTask.CompletedTask;

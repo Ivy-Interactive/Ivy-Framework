@@ -85,21 +85,21 @@ public class NullableInputsApp : SampleBase
 
                 | Text.Block("Small")
                 | scaleText.ToTextInput().Placeholder("Small...").Nullable().Small()
-                | scaleTextarea.ToTextAreaInput().Placeholder("Small...").Nullable().Small()
+                | scaleTextarea.ToTextareaInput().Placeholder("Small...").Nullable().Small()
                 | scaleSearch.ToSearchInput().Placeholder("Small...").Nullable().Small()
                 | scalePassword.ToPasswordInput().Placeholder("Small...").Nullable().Small()
                 | scaleEmail.ToEmailInput().Placeholder("Small...").Nullable().Small()
 
                 | Text.Block("Medium")
                 | scaleText.ToTextInput().Placeholder("Medium...").Nullable().Medium()
-                | scaleTextarea.ToTextAreaInput().Placeholder("Medium...").Nullable().Medium()
+                | scaleTextarea.ToTextareaInput().Placeholder("Medium...").Nullable().Medium()
                 | scaleSearch.ToSearchInput().Placeholder("Medium...").Nullable().Medium()
                 | scalePassword.ToPasswordInput().Placeholder("Medium...").Nullable().Medium()
                 | scaleEmail.ToEmailInput().Placeholder("Medium...").Nullable().Medium()
 
                 | Text.Block("Large")
                 | scaleText.ToTextInput().Placeholder("Large...").Nullable().Large()
-                | scaleTextarea.ToTextAreaInput().Placeholder("Large...").Nullable().Large()
+                | scaleTextarea.ToTextareaInput().Placeholder("Large...").Nullable().Large()
                 | scaleSearch.ToSearchInput().Placeholder("Large...").Nullable().Large()
                 | scalePassword.ToPasswordInput().Placeholder("Large...").Nullable().Large()
                 | scaleEmail.ToEmailInput().Placeholder("Large...").Nullable().Large()
@@ -221,7 +221,7 @@ public class NullableInputsApp : SampleBase
                 | (nullableText.Value == null ? Text.InlineCode("null") : Text.Block(nullableText.Value))
 
                 | Text.Block("Textarea (string?)")
-                | nullableTextarea.ToTextAreaInput().Placeholder("Enter multiline text...").Nullable()
+                | nullableTextarea.ToTextareaInput().Placeholder("Enter multiline text...").Nullable()
                 | (nullableTextarea.Value == null ? Text.InlineCode("null") : Text.Block(nullableTextarea.Value))
 
                 | Text.Block("Search (string?)")
@@ -354,7 +354,7 @@ public class NullableInputsApp : SampleBase
                 | nullableText.ToTextInput().Placeholder("Required field").Invalid("This field is required").Nullable()
                 | Text.Block("Nullable text input with validation error")
 
-                | nullableTextarea.ToTextAreaInput().Placeholder("Required field").Invalid("This field is required").Nullable()
+                | nullableTextarea.ToTextareaInput().Placeholder("Required field").Invalid("This field is required").Nullable()
                 | Text.Block("Nullable textarea input with validation error")
 
                 | nullablePassword.ToPasswordInput().Placeholder("Required field").Invalid("This field is required").Nullable()

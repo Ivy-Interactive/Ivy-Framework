@@ -48,8 +48,13 @@ public class AsyncSelectInputApp : SampleBase
                 });
         }
 
-        return Layout.Vertical(
-            guidState.ToAsyncSelectInput(QueryCategories, LookupCategory, placeholder: "Select Category")
-        );
+        var guidStateGhost = UseState(default(Guid?));
+
+        return Layout.Vertical().Gap(6)
+            | Text.H3("Basic")
+            | guidState.ToAsyncSelectInput(QueryCategories, LookupCategory, placeholder: "Select Category")
+            | Text.H3("Ghost")
+            | Text.P("Ghost styling removes borders and background fill.")
+            | guidStateGhost.ToAsyncSelectInput(QueryCategories, LookupCategory, placeholder: "Select Category (Ghost)").Ghost();
     }
 }

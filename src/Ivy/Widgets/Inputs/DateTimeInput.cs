@@ -37,7 +37,7 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 
     [Prop] public string? Invalid { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
 [
@@ -58,19 +58,19 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
     {
         var typedState = state.As<TDate>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public DateTimeInput(TDate value, Func<Event<IInput<TDate>, TDate>, ValueTask> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariants variant = DateTimeInputVariants.Date) : this(placeholder, disabled, variant)
     {
-        OnChange = onChange;
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
     public DateTimeInput(TDate value, Action<Event<IInput<TDate>, TDate>> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariants variant = DateTimeInputVariants.Date) : this(placeholder, disabled, variant)
     {
-        OnChange = e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
     }
 
@@ -87,7 +87,7 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 
     [Prop] public new bool Nullable { get; set; } = typeof(TDate) == typeof(DateTime?) || typeof(TDate) == typeof(DateTimeOffset?) || typeof(TDate) == typeof(DateOnly?) || typeof(TDate) == typeof(TimeOnly?);
 
-    [Event] public Func<Event<IInput<TDate>, TDate>, ValueTask>? OnChange { get; set; }
+    [Event] public EventHandler<Event<IInput<TDate>, TDate>>? OnChange { get; set; }
 }
 
 public static class DateTimeInputExtensions
@@ -237,19 +237,19 @@ public static class DateTimeInputExtensions
     public static DateTimeInputBase Nullable(this DateTimeInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]
-    public static DateTimeInputBase HandleBlur(this DateTimeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static DateTimeInputBase OnBlur(this DateTimeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static DateTimeInputBase HandleBlur(this DateTimeInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static DateTimeInputBase OnBlur(this DateTimeInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static DateTimeInputBase HandleBlur(this DateTimeInputBase widget, Action onBlur)
+    public static DateTimeInputBase OnBlur(this DateTimeInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
     public static DateTimeInputBase Value<T>(this DateTimeInputBase widget, T value)

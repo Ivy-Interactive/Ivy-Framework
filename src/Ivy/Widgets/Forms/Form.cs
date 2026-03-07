@@ -16,28 +16,28 @@ public record Form : WidgetBase<Form>
 
     internal Form() { }
 
-    [Event] public Func<Event<Form>, ValueTask>? OnSubmit { get; set; }
+    [Event] public EventHandler<Event<Form>>? OnSubmit { get; set; }
 }
 
 public static class FormExtensions
 {
-    public static Form HandleSubmit(this Form form, Func<Event<Form>, ValueTask> onSubmit)
+    public static Form OnSubmit(this Form form, Func<Event<Form>, ValueTask> onSubmit)
     {
-        return form with { OnSubmit = onSubmit };
+        return form with { OnSubmit = new(onSubmit) };
     }
 
-    public static Form HandleSubmit(this Form form, Action<Event<Form>> onSubmit)
+    public static Form OnSubmit(this Form form, Action<Event<Form>> onSubmit)
     {
-        return form with { OnSubmit = onSubmit.ToValueTask() };
+        return form with { OnSubmit = new(onSubmit.ToValueTask()) };
     }
 
-    public static Form HandleSubmit(this Form form, Action onSubmit)
+    public static Form OnSubmit(this Form form, Action onSubmit)
     {
-        return form with { OnSubmit = _ => { onSubmit(); return ValueTask.CompletedTask; } };
+        return form with { OnSubmit = new(_ => { onSubmit(); return ValueTask.CompletedTask; }) };
     }
 
-    public static Form HandleSubmit(this Form form, Func<ValueTask> onSubmit)
+    public static Form OnSubmit(this Form form, Func<ValueTask> onSubmit)
     {
-        return form with { OnSubmit = _ => onSubmit() };
+        return form with { OnSubmit = new(_ => onSubmit()) };
     }
 }

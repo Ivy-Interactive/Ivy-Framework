@@ -124,7 +124,7 @@ public class FormFieldView(
         input = input.Invalid(invalidState.Value);
         if (validationStrategy == FormValidationStrategy.OnBlur)
         {
-            input = input.HandleBlur(OnBlur);
+            input.OnBlur(OnBlur);
         }
 
         if (!string.IsNullOrEmpty(placeholder))
@@ -222,7 +222,7 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
         var form = new Form(Layout.Horizontal(columns));
         if (handleSubmit != null)
         {
-            form = form.HandleSubmit(handleSubmit);
+            form = form.OnSubmit(handleSubmit);
         }
         return form;
     }

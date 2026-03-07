@@ -76,7 +76,7 @@ public static class CalloutExtensions
         return callout with { Icon = icon };
     }
 
-    public static Callout HandleLinkClick(this Callout callout, Action<string> onLinkClick)
+    public static Callout OnLinkClick(this Callout callout, Action<string> onLinkClick)
     {
         if (callout.Children.Length > 0 && callout.Children[0] is Markdown markdown)
         {

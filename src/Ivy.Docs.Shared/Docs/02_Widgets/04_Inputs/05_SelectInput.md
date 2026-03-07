@@ -143,26 +143,71 @@ public class SelectStylingDemo : ViewBase
         var normalSelect = UseState("");
         var invalidSelect = UseState("");
         var disabledSelect = UseState("");
-        
+
         var options = new[] { "Option 1", "Option 2", "Option 3" };
-        
+
         return Layout.Vertical()
             | normalSelect.ToSelectInput(options)
                 .Placeholder("Choose an option...")
                 .WithField()
                 .Label("Normal SelectInput:")
-            
+
             | invalidSelect.ToSelectInput(options)
                 .Placeholder("This has an error...")
                 .Invalid("This field is required")
                 .WithField()
                 .Label("Invalid SelectInput:")
-            
+
             | disabledSelect.ToSelectInput(options)
                 .Placeholder("This is disabled...")
                 .Disabled(true)
                 .WithField()
                 .Label("Disabled SelectInput:");
+    }
+}
+```
+
+## Disabled Options
+
+Individual options can be disabled using the fluent `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list:
+
+```csharp demo-tabs
+public class DisabledOptionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var fruit = UseState("apple");
+        var colors = UseState<string[]>([]);
+
+        var fruitOptions = new IAnyOption[]
+        {
+            new Option<string>("Apple", "apple"),
+            new Option<string>("Orange", "orange"),
+            new Option<string>("Grape (Out of Stock)", "grape").Disabled(),
+            new Option<string>("Banana", "banana"),
+            new Option<string>("Mango (Coming Soon)", "mango").Disabled(),
+        };
+
+        var colorOptions = new IAnyOption[]
+        {
+            new Option<string>("Red", "red"),
+            new Option<string>("Green", "green"),
+            new Option<string>("Blue (Premium)", "blue").Disabled(),
+            new Option<string>("Yellow", "yellow"),
+        };
+
+        return Layout.Vertical()
+            | Text.InlineCode("Select Variant")
+            | fruit.ToSelectInput(fruitOptions)
+                .Placeholder("Select a fruit...")
+
+            | Text.InlineCode("Toggle Variant")
+            | colors.ToSelectInput(colorOptions)
+                .Variant(SelectInputVariants.Toggle)
+
+            | Text.InlineCode("List Variant")
+            | colors.ToSelectInput(colorOptions)
+                .Variant(SelectInputVariants.List);
     }
 }
 ```

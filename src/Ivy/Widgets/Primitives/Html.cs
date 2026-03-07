@@ -16,9 +16,13 @@ public record Html : WidgetBase<Html>
     internal Html() { }
 
     [Prop] public string Content { get; set; } = string.Empty;
-
+    [Prop] public bool DangerouslyAllowScripts { get; set; }
 }
 
 public static class HtmlExtensions
 {
+    public static Html DangerouslyAllowScripts(this Html html, bool allow = true)
+    {
+        return html with { DangerouslyAllowScripts = allow };
+    }
 }

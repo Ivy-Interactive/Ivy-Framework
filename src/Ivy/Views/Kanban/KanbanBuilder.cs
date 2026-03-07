@@ -201,7 +201,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
         {
             kanban = kanban with
             {
-                OnCardMove = e =>
+                OnCardMove = new(e =>
                 {
                     if (e.Value.ToColumn == null)
                         return ValueTask.CompletedTask;
@@ -226,7 +226,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
                     {
                         return ValueTask.CompletedTask;
                     }
-                }
+                })
             };
         }
 

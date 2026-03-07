@@ -8,20 +8,20 @@ searchHints:
   - sound
 ---
 
-# Audio Recorder
+# Audio Input
 
 <Ingress>
 Enable audio recording with a flexible [interface](../../01_Onboarding/02_Concepts/02_Views.md) for capturing user audio input with automatic upload support.
 </Ingress>
 
-The `AudioRecorder` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) allows users to record audio using their microphone. It provides an audio recording interface with options for audio formats, automatic uploads, and chunked streaming. This widget is for recording audio, not playing it.
+The `AudioInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) allows users to record audio using their microphone. It provides an audio recording interface with options for audio formats, automatic uploads, and chunked streaming. This widget is for recording audio, not playing it.
 
 ## Basic Usage
 
-Here's a simple example of an `AudioRecorder` that uploads audio to the server and stores it in [state](../../03_Hooks/02_Core/03_UseState.md):
+Here's a simple example of an `AudioInput` that uploads audio to the server and stores it in [state](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp demo-below
-public class BasicAudioRecorderDemo : ViewBase
+public class BasicAudioInputDemo : ViewBase
 {
     public override object? Build()
     {
@@ -32,7 +32,7 @@ public class BasicAudioRecorderDemo : ViewBase
         );
 
         return Layout.Vertical()
-               | new AudioRecorder(upload.Value, "Start recording", "Recording audio...")
+               | new AudioInput(upload.Value, "Start recording", "Recording audio...")
                | (audioFile.Value != null
                    ? Text.P($"Recorded: {audioFile.Value.FileName} ({Utils.FormatBytes(audioFile.Value.Length)})")
                    : null);
@@ -61,7 +61,7 @@ public class ChunkedUploadDemo : ViewBase
 
         return Layout.Vertical().Gap(4)
                | Text.P("Records audio and uploads in 2-second chunks while recording. Each chunk is accumulated into a single file.")
-               | new AudioRecorder(upload.Value, "Start chunked recording", "Recording (uploading every 2s)...")
+               | new AudioInput(upload.Value, "Start chunked recording", "Recording (uploading every 2s)...")
                    .ChunkInterval(2000)
                | Text.P($"Chunks received: {chunkCount.Value}").Small()
                | (audioFile.Value != null
@@ -93,7 +93,7 @@ public class AudioFormatDemo : ViewBase
         );
 
         return Layout.Vertical()
-               | new AudioRecorder(upload.Value, "Record WebM", "Recording WebM...")
+               | new AudioInput(upload.Value, "Record WebM", "Recording WebM...")
                    .MimeType("audio/webm")
                | (audioFile.Value != null
                    ? Text.P($"Format: {audioFile.Value.ContentType}, Size: {Utils.FormatBytes(audioFile.Value.Length)}").Small()
@@ -124,7 +124,7 @@ public class CustomLabelsDemo : ViewBase
         );
 
         return Layout.Vertical()
-               | new AudioRecorder(upload.Value)
+               | new AudioInput(upload.Value)
                    .Label("Click to start voice memo")
                    .RecordingLabel("Recording your voice...")
                | (audioFile.Value != null
@@ -139,7 +139,7 @@ public class CustomLabelsDemo : ViewBase
 Disable the audio recorder:
 
 ```csharp demo-below
-public class AudioRecorderDisabledDemo : ViewBase
+public class AudioInputDisabledDemo : ViewBase
 {
     public override object? Build()
     {
@@ -149,9 +149,9 @@ public class AudioRecorderDisabledDemo : ViewBase
             defaultContentType: "audio/webm"
         );
 
-        return new AudioRecorder(upload.Value, "Recording disabled", disabled: true);
+        return new AudioInput(upload.Value, "Recording disabled", disabled: true);
     }
 }
 ```
 
-<WidgetDocs Type="Ivy.AudioRecorder" ExtensionTypes="Ivy.AudioRecorderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/AudioRecorder.cs"/>
+<WidgetDocs Type="Ivy.AudioInput" ExtensionTypes="Ivy.AudioInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/AudioInput.cs"/>

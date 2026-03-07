@@ -15,7 +15,7 @@ export const textInputSizeVariants = cva('w-full', {
 });
 
 // Size variants for Textarea (minimum height and padding scale; no fixed height)
-export const textAreaSizeVariants = cva('w-full', {
+export const textareaSizeVariants = cva('w-full', {
   variants: {
     scale: {
       Small: 'min-h-[52px] py-2 px-2 text-xs',

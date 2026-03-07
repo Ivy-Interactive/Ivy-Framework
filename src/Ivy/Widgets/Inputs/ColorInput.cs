@@ -37,7 +37,7 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     [Prop] public ColorInputVariants Variant { get; set; } = ColorInputVariants.TextAndPicker;
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [
         typeof(string),
@@ -53,21 +53,21 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
     {
         var typedState = state.As<TColor>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public ColorInput(TColor value, Func<Event<IInput<TColor>, TColor>, ValueTask> onChange, string? placeholder = null, bool disabled = false, ColorInputVariants variant = ColorInputVariants.TextAndPicker)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange;
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
     public ColorInput(TColor value, Action<Event<IInput<TColor>, TColor>> onChange, string? placeholder = null, bool disabled = false, ColorInputVariants variant = ColorInputVariants.TextAndPicker)
         : this(placeholder, disabled, variant)
     {
-        OnChange = e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
     }
 
@@ -82,7 +82,7 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
 
     [Prop] public TColor Value { get; init; } = default!;
 
-    [Event] public Func<Event<IInput<TColor>, TColor>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TColor>, TColor>>? OnChange { get; }
 }
 
 /// <summary>
@@ -184,19 +184,19 @@ public static class ColorInputExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static ColorInputBase HandleBlur(this ColorInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static ColorInputBase OnBlur(this ColorInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static ColorInputBase HandleBlur(this ColorInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static ColorInputBase OnBlur(this ColorInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static ColorInputBase HandleBlur(this ColorInputBase widget, Action onBlur)
+    public static ColorInputBase OnBlur(this ColorInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
     public static ColorInputBase Value<T>(this ColorInputBase widget, T value)

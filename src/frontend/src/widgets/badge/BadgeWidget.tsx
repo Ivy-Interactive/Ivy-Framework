@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useEventHandler } from '@/components/event-handler';
 import Icon from '@/components/Icon';
 import { camelCase } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +19,8 @@ interface BadgeWidgetProps {
     | 'Warning'
     | 'Info';
   scale?: Scales;
+  id: string;
+  events?: string[];
 }
 
 export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
@@ -26,7 +29,17 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   iconPosition = 'Left',
   variant = 'Primary',
   scale = Scales.Medium,
+  id,
+  events = [],
 }) => {
+  const eventHandler = useEventHandler();
+  const isClickable = events.includes('OnClick');
+
+  const handleClick = useCallback(() => {
+    if (isClickable) {
+      eventHandler('OnClick', id, []);
+    }
+  }, [id, isClickable, eventHandler]);
   let iconSize: number = 4;
 
   switch (scale) {
@@ -97,8 +110,10 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
             ? 'pr-1'
             : scale === Scales.Large
               ? 'pr-2'
-              : 'pr-1.5')
+              : 'pr-1.5'),
+        isClickable && 'cursor-pointer hover:opacity-80 transition-opacity'
       )}
+      onClick={handleClick}
     >
       {iconPosition === 'Left' && icon && icon !== 'None' && (
         <Icon style={iconStyles} name={icon} />

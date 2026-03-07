@@ -376,7 +376,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             menuItems.Value
         )
         {
-            OnCtrlRightClickSelect = OnCtrlRightClickSelect,
+            OnCtrlRightClickSelect = new(OnCtrlRightClickSelect),
             SearchActive = !string.IsNullOrWhiteSpace(search.Value)
         };
 

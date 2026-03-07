@@ -129,7 +129,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         return Layout.Vertical().Gap(12)
                | formView
                | new Button("Login")
-                   .HandleClick(HandleSubmit)
+                   .OnClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
                    .Scale(formBuilder._scale)

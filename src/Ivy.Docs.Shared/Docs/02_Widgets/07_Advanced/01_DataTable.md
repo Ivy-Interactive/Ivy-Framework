@@ -177,7 +177,7 @@ public class RowActionsDemo : ViewBase
                         MenuItem.Default(Icons.Share2, "share").Label("Share")
                     ])
             )
-            .HandleRowAction(async e =>
+            .OnRowAction(async e =>
             {
                 var args = e.Value;
                 client.Toast($"Action: {args.Tag} on row ID: {args.Id}");
@@ -227,7 +227,7 @@ public class RefreshTokenDemo : ViewBase
             .Width(e => e.Name, Size.Units(50))
             .Height(Size.Units(100));
 
-        var refreshButton = new Button("Reload Table").HandleClick(e =>
+        var refreshButton = new Button("Reload Table").OnClick(e =>
         {
             // Trigger a refresh of the DataTable
             refreshToken.Refresh();

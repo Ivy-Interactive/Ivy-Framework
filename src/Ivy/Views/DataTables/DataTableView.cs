@@ -28,10 +28,10 @@ public class DataTableView(
 
         var table = new DataTable(connection, width, height, columns, config)
         {
-            OnCellClick = onCellClick,
-            OnCellActivated = onCellActivated,
+            OnCellClick = onCellClick.ToEventHandler(),
+            OnCellActivated = onCellActivated.ToEventHandler(),
             RowActions = rowActions,
-            OnRowAction = onRowAction
+            OnRowAction = onRowAction.ToEventHandler()
         };
 
         return table;

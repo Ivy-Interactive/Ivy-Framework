@@ -23,7 +23,7 @@ public class ShouldFailWithAnalyser : ViewBase
 #pragma warning restore CS8321
 
         // This code is intentionally incorrect to demonstrate the analyzer's functionality.
-        return new Button().HandleClick(handler);
+        return new Button().OnClick(handler);
     }
 
 }

@@ -61,6 +61,7 @@ interface MultipleSelectorProps {
   invalid?: boolean;
   scale?: Scales;
   maxVisibleBadges?: number;
+  ghost?: boolean;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -81,6 +82,7 @@ const MultipleSelector = React.forwardRef<
       invalid = false,
       scale = Scales.Medium,
       maxVisibleBadges,
+      ghost = false,
     },
     ref
   ) => {
@@ -262,7 +264,9 @@ const MultipleSelector = React.forwardRef<
               (!value || value.length === 0) && 'text-muted-foreground',
               invalid
                 ? 'border-destructive text-destructive-foreground focus-within:ring-destructive focus-within:border-destructive'
-                : undefined
+                : undefined,
+              ghost &&
+                'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground'
             )}
           >
             <span

@@ -16,7 +16,9 @@ interface CodeWidgetProps {
   language: string;
   showCopyButton?: boolean;
   showLineNumbers?: boolean;
+  startingLineNumber?: number;
   showBorder?: boolean;
+  wrapLines?: boolean;
   width?: string;
   height?: string;
   scale?: Scales;
@@ -62,30 +64,44 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     language = 'Csharp',
     showCopyButton = true,
     showLineNumbers = false,
+    startingLineNumber = 1,
     showBorder = true,
+    wrapLines = false,
     width = 'Full',
     height = 'MaxContent,,Px:800',
     scale = Scales.Medium,
   }) => {
     const scaleStyles: Record<
       Scales,
-      { fontSize: string; padding: string; lineHeight: string }
+      {
+        fontSize: string;
+        padding: string;
+        lineHeight: string;
+        lineNumberMinWidth: string;
+        lineNumberPaddingRight: string;
+      }
     > = useMemo(
       () => ({
         [Scales.Small]: {
           fontSize: '0.75rem',
           padding: '0.5rem',
           lineHeight: '1.4',
+          lineNumberMinWidth: '1.5rem',
+          lineNumberPaddingRight: '0.5rem',
         },
         [Scales.Medium]: {
           fontSize: '0.875rem',
           padding: '0.75rem',
           lineHeight: '1.5',
+          lineNumberMinWidth: '2.25rem',
+          lineNumberPaddingRight: '0.75rem',
         },
         [Scales.Large]: {
           fontSize: '1rem',
           padding: '1rem',
           lineHeight: '1.6',
+          lineNumberMinWidth: '2.5rem',
+          lineNumberPaddingRight: '1rem',
         },
       }),
       []
@@ -113,22 +129,21 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       return style;
     }, [width, height, showBorder, currentScale]);
 
-    /** Code (inner): typography and line layout only. No padding so all lines align. */
     const codeTagStyle = useMemo<CSSProperties>(
       () => ({
         margin: 0,
-        wordBreak: 'normal',
-        overflowWrap: 'break-word',
+        wordBreak: wrapLines ? 'break-word' : 'normal',
+        whiteSpace: wrapLines ? 'pre-wrap' : 'pre',
         fontSize: currentScale.fontSize,
         lineHeight: currentScale.lineHeight,
       }),
-      [currentScale]
+      [currentScale, wrapLines]
     );
 
     const highlighterKey = useMemo(
       () =>
-        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}`,
-      [id, language, showLineNumbers, showBorder]
+        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}-${wrapLines}`,
+      [id, language, showLineNumbers, showBorder, startingLineNumber, wrapLines]
     );
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
@@ -142,8 +157,6 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
           minHeight: 0,
         }
       : { ...getWidth(width) };
-
-    const shouldWrap = true;
 
     return (
       <div className="relative" style={containerStyles}>
@@ -172,10 +185,29 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
               customStyle={isFull ? { ...preStyle, height: 'auto' } : preStyle}
               style={dynamicTheme}
               showLineNumbers={showLineNumbers}
+              startingLineNumber={startingLineNumber}
               wrapLines={true}
-              wrapLongLines={shouldWrap}
+              wrapLongLines={wrapLines}
               key={highlighterKey}
               codeTagProps={{ style: codeTagStyle }}
+              lineProps={
+                showLineNumbers
+                  ? { style: { display: 'table-row' } }
+                  : undefined
+              }
+              lineNumberStyle={
+                showLineNumbers
+                  ? {
+                      display: 'table-cell',
+                      paddingRight: currentScale.lineNumberPaddingRight,
+                      minWidth: currentScale.lineNumberMinWidth,
+                      textAlign: 'right',
+                      userSelect: 'none',
+                      color: 'var(--muted-foreground)',
+                      opacity: 0.5,
+                    }
+                  : undefined
+              }
             >
               {content}
             </SyntaxHighlighter>

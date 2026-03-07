@@ -11,22 +11,36 @@ public class HtmlApp : SampleBase
             """
             <h1>Hello World</h1>
             <p>This is <strong>bold</strong> and <em>italic</em> text.</p>
-            
+
             <h2>Code Example</h2>
             <pre>
             <code>const hello = 'world';
             console.log(hello);
             </code>
             </pre>
-            
+
             <ul>
                 <li>List item 1</li>
                 <li>List item 2</li>
             </ul>
-            
+
             <blockquote>This is a blockquote</blockquote>
             """;
 
-        return new Html(content);
+        var contentWithScript =
+            """
+            <div id="script-target">JavaScript not executed</div>
+            <script>
+                document.getElementById('script-target').textContent = 'JavaScript executed successfully!';
+            </script>
+            """;
+
+        return Layout.Vertical()
+            | new Html(content)
+            | new Separator()
+            | new Callout("DangerouslyAllowScripts Example",
+                "The Html widget below has DangerouslyAllowScripts(true) enabled, allowing JavaScript execution. Only use this with trusted content!",
+                CalloutVariant.Warning)
+            | new Html(contentWithScript).DangerouslyAllowScripts();
     }
 }

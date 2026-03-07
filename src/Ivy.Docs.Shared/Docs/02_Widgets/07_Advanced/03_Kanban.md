@@ -165,7 +165,7 @@ public class KanbanWithCustomCardsExample : ViewBase
             .CardBuilder(task => new Card(
                 content: task.ToDetails()
                     .Remove(x => x.Id)
-                    .MultiLine(x => x.Description)
+                    .Multiline(x => x.Description)
                     .Builder<DateTime>(d => d.ToString("MMM dd, yyyy"))
             ))
             .ColumnOrder(e => GetStatusOrder(e.Status))

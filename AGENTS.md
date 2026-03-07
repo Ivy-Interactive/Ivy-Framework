@@ -4,7 +4,7 @@ Add ".md" to the end of any URL to go directly to the Markdown version of the do
 # Introduction to the Ivy Framework for LLMs
 
 - Ivy is a declarative full-stack UI framework that allows developers to build user interfaces using a component-based approach very similar to React.
-- In Ivy you only write one application in pure C# and we don't have a BE and FE distinction.
+- In Ivy, you only write one application in pure C# and we don't have a BE and FE distinction.
 - UI rendering is handled by Ivy.
 - When programming in Ivy you focus on building the logical structure of your application using a large set of pre-built widgets and views - you rarely need to specify any styling - Ivy just makes it look good by default.
 
@@ -16,6 +16,8 @@ Terminology:
 - "Apps" are the top-level views that represent entire applications.
 
 A view is defined as a class that inherits from `ViewBase` and implements a `Build` method. The `Build` method returns either another view or a widget.
+
+> WARNING: There is NO `AppBase` class. ALL views and apps inherit from `ViewBase`.
 
 Widgets can have multiple children, but views can only return a single object (widget or view). To return multiple widgets from a view, you can use a `Fragment` use the Layout helpers. See below.
 
@@ -30,13 +32,43 @@ public class MyView : ViewBase
   }
 }
 
-The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute.
+The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**:
 
-[App()]
-public class MyApp : ViewBase
+[App(title: "Customers", icon: Icons.Rocket)]
+public class CustomersApp : ViewBase
 
-- The convention is to put all apps in the `Apps` folder of your Ivy project.
-- An app is built into a tree of widgets. This is what's rendered to the screen.
+- `title` is optional — if omitted, it is derived from the class name (e.g. `CustomersApp` → "Customers").
+- `icon` uses the `Icons` enum — these are Lucide icons in PascalCase (e.g. `Icons.Link`, `Icons.Settings`, `Icons.Rocket`).
+
+An app is built into a tree of widgets. This is what's rendered to the screen.
+
+## Application Structure
+
+A typical Ivy project has this folder structure:
+
+MyProject/
+├── Program.cs                  # Entry point — configures and starts the Ivy server
+├── MyProject.csproj            # Project file
+├── Apps/                       # All app classes go here (convention)
+│   ├── DashboardApp.cs
+│   └── Settings/               # Subfolder namespaces become URL path segments
+│       └── UserProfileApp.cs   # → /settings/user-profile
+└── Connections/
+    └── MyDb/
+        ├── MyDbContext.cs
+        ├── MyDbContextFactory.cs
+        ├── MyDbConnection.cs
+        └── Product.cs          # Entity classes
+
+### Dependency Injection
+
+Register services in Program.cs, consume them in views with `UseService<T>()`:
+
+// Program.cs
+server.Services.AddSingleton<IMyService, MyService>();
+
+// In a view
+var myService = UseService<IMyService>();
 
 ## Common Widgets
 
@@ -47,7 +79,7 @@ public class MyApp : ViewBase
 [Progress](https://docs.ivy.app/widgets/common/progress.md)
 [Expandable](https://docs.ivy.app/widgets/common/expandable.md)
 [Tooltip](https://docs.ivy.app/widgets/common/tooltip.md)
-[DropDownMenu](https://docs.ivy.app/widgets/common/drop-down-menu)
+[DropDownMenu](https://docs.ivy.app/widgets/common/drop-down-menu.md)
 [Table](https://docs.ivy.app/widgets/common/table.md)
 [List](https://docs.ivy.app/widgets/common/list.md)
 [Details](https://docs.ivy.app/widgets/common/details.md)
@@ -64,7 +96,8 @@ public class MyApp : ViewBase
 - Add Children: Pipe child elements using the | operator to arrange them top-to-bottom (vertical) or left-to-right (horizontal).
 - Layouts can be customized with methods like .Gap(int number) to set spacing between children. Use .Left(), .Center(), or .Right() methods to control alignment.
 - The number in Gap(int number) works the same as in Tailwind CSS spacing scale (e.g., 1 = 0.25rem, 2 = 0.5rem, etc.).
-Layouts have a default gap of 4 (1rem). In general, you very rarely need to set the gap explicitly.
+- Layouts have a default gap of 4 (1rem). Do NOT add `.Gap(4)` — it is the default and adds unnecessary noise. Only use `.Gap()` when you need a value other than 4.
+- `.Padding()` is rarely needed. Layouts and pages already have appropriate padding by default. Only add `.Padding()` when you need extra inner spacing for a specific design reason.
 
 // Basic Vertical Layout
 Layout.Vertical()
@@ -84,8 +117,6 @@ Grids:
 Layout.Grid()
   .Columns(2)
   .Rows(2)
-  .Gap(4)
-  .Padding(8)
     | Text.Block("Cell 1")
     | Text.Block("Cell 2")
     ...
@@ -93,6 +124,15 @@ Layout.Grid()
 Align values: TopLeft, TopCenter, TopRight, Left, Center, Right, BottomLeft, BottomCenter, BottomRight, Stretch
 
 [Layouts](https://docs.ivy.app/onboarding/concepts/layout.md)
+
+### Centered Max-Width Layout
+
+For simpler tools and apps, it's quite nice to give the app a max width and position it in the center:
+
+return Layout.TopCenter()
+    | (Layout.Vertical().Width(Size.Full().Max(200)).TopMargin(10)
+        | ...
+        );
 
 ## Text
 
@@ -103,6 +143,7 @@ The Text helper utility is used to create various semantic text elements.
 - Text.P: For standard paragraphs.
 - Text.Block: For block-level content (e.g., list items).
 - Text.InlineCode: For displaying inline code snippets.
+- Test.Muted
 
 Styling Modifiers:
 .NoWrap():
@@ -116,6 +157,35 @@ Layout.Vertical()
     | Text.P("This is a paragraph of text.").NoWrap()
 
 [Text](https://docs.ivy.app/widgets/primitives/text-block.md)
+
+## Colors
+
+Ivy.Colors enum has the following values:
+
+Black, White, Slate, Gray, Zinc, Neutral, Stone, Red, Orange, Amber, Yellow, Lime, Green, Emerald, Teal, Cyan, Sky, Blue, Indigo, Violet, Purple, Fuchsia, Pink, Rose, Primary, Secondary, Destructive, Success, Warning, Info, Muted
+
+## Scale
+
+All widgets support `.Scale(Scale.Small)`, `.Scale(Scale.Medium)`, `.Scale(Scale.Large)`.
+Convenience methods: `.Small()`, `.Medium()`, `.Large()`.
+Scale adjusts the overall visual size of a widget (text, padding, etc.).
+There is no `ButtonSize` enum — use `Scale` for all widgets.
+
+## Size
+
+`.Width(Size.X)` and `.Height(Size.X)` set widget dimensions.
+`.Size(Size.X)` sets both width and height.
+
+Common Size values:
+
+- Size.Units(n) — Tailwind spacing scale (n × 0.25rem)
+- Size.Full() — 100%
+- Size.Fit() — fit-content
+- Size.Auto() — auto
+- Size.Px(n) — exact pixels
+- Size.Fraction(0.5f) — percentage, Size.Half(), Size.Third()
+
+Size is NOT the same as Scale. Size controls dimensions; Scale controls visual density.
 
 ## Event Handling
 
@@ -138,11 +208,13 @@ new TextInput().Default()
 ### UseState
 
 var nameState = UseState("World");
-var iconsState = this.UseState<Icons[]>();
+var iconsState = UseState<Icons[]>();
 
 If you don't specify a value, default(T) is used.
 
 UseState hook returns a state object IState<T> that provides:
+
+> WARNING: UseState returns `IState<T>`, NOT `State<T>`. There is no `State<T>` type in Ivy.
 
 - .Value property to read the current state.
 - .Set(newValue) method to update the state in UseEffect or in an event handler.
@@ -161,15 +233,74 @@ void UseEffect(Func<Task<IDisposable>> asyncEffectWithCleanup, IEffectTriggers o
 - IState<T> is automatically converted to EffectTrigger.OnStateChange
 - If no triggers are provided, the effect trigger is assumed to be OnMount.
 
-### Other Hooks
+### UseQuery
 
-UseMemo
-UseCallback
-UseRef
-UseContext
-UseReducer
-UseQuery
-UseSignal
+UseQuery is the **preferred pattern for data fetching** in Ivy. It should be favored over the UseEffect + UseState fetch pattern.
+
+var query = UseQuery(
+    key: "my-data",
+    fetcher: async (ct) => await LoadDataAsync(ct)
+);
+
+if (query.Loading) return Skeleton.Card();
+if (query.Error is { } error) return Callout.Error(error.Message);
+
+// Use query.Value
+
+QueryResult<T> properties:
+
+- .Value — the fetched data (default until loaded)
+- .Loading — true during initial fetch (no value yet)
+- .Validating — true during background revalidation
+- .Error — exception if the fetch failed
+- .Mutator — provides .Revalidate(), .Invalidate(), .Mutate(value, revalidate)
+
+Key conventions:
+
+- String: `"my-data"`
+- Tuple: `(nameof(MyBlade), entityId)`
+
+Common options (QueryOptions):
+
+- KeepPrevious: true — show stale data while revalidating with a new key
+- RevalidateOnMount: false — skip initial fetch when using initialValue
+- RefreshInterval: TimeSpan — poll at an interval
+- Scope: QueryScope.View — isolate cache to the view instance (default is Server)
+
+Tag-based invalidation (cross-component):
+var queryService = UseService<IQueryService>();
+queryService.RevalidateByTag(typeof(Product[]));        // collection
+queryService.RevalidateByTag((typeof(Product), id));    // single entity
+
+Static "hooks" pattern (reusable across views):
+public static QueryResult<T[]> UseMyRecords(IViewContext context, string filter)
+{
+    return context.UseQuery(
+        key: (nameof(UseMyRecords), filter),
+        fetcher: async ct => { /*fetch*/ },
+        tags: [typeof(T[])],
+        options: new QueryOptions { KeepPrevious = true }
+    );
+}
+
+Dependent fetching (wait for another query):
+var user = UseQuery(key: "user", fetcher: async ct => await GetUser(ct));
+var projects = UseQuery(
+    () => user.Value?.Id,   // null = idle, no fetch
+    async (userId, ct) => await GetProjects(userId, ct));
+
+[UseRef](https://docs.ivy.app/hooks/core/use-ref.md)
+[UseContext](https://docs.ivy.app/hooks/core/use-context.md)
+[UseQuery](https://docs.ivy.app/hooks/core/use-query.md)
+[UseMutation](https://docs.ivy.app/hooks/core/use-mutation.md)
+[UseSignal](https://docs.ivy.app/hooks/core/use-signal.md)
+[UseService](https://docs.ivy.app/hooks/core/use-service.md)
+[UseArgs](https://docs.ivy.app/hooks/core/use-args.md)
+[UseDownload](https://docs.ivy.app/hooks/core/use-download.md)
+[UseRefreshToken](https://docs.ivy.app/hooks/core/use-refresh-token.md)
+[UseTrigger](https://docs.ivy.app/hooks/core/use-trigger.md)
+[UseWebhook](https://docs.ivy.app/hooks/core/use-webhook.md)
+[UseAlert](https://docs.ivy.app/onboarding/concepts/alerts.md)
 
 ## Inputs
 
@@ -179,20 +310,20 @@ extension methods on IState<T> to bind state to inputs.
 var userNameState = UseState("");
 var input = userNameState.ToTextInput().Placeholder("Enter your name");
 
-ToTextInput()
-ToTextAreaInput()
-ToPasswordInput()
-ToNumberInput()
-ToBoolInput()
-ToSelectInput(IEnumerable<IAnyOption>)
-ToCodeInput(Language)
-ToColorInput()
-ToDateTimeInput()
-ToDateRangeInput()
-ToFeedbackInput()
-
 Most inputs have extension methods for common configurations:
 userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your name");
+
+[TextInput](https://docs.ivy.app/widgets/inputs/text-input.md)
+[NumberInput](https://docs.ivy.app/widgets/inputs/number-input.md)
+[BoolInput](https://docs.ivy.app/widgets/inputs/bool-input.md)
+[SelectInput](https://docs.ivy.app/widgets/inputs/select-input.md)
+[AsyncSelectInput](https://docs.ivy.app/widgets/inputs/async-select-input.md)
+[DateTimeInput](https://docs.ivy.app/widgets/inputs/date-time-input.md)
+[DateRangeInput](https://docs.ivy.app/widgets/inputs/date-range-input.md)
+[ColorInput](https://docs.ivy.app/widgets/inputs/color-input.md)
+[CodeInput](https://docs.ivy.app/widgets/inputs/code-input.md)
+[FeedbackInput](https://docs.ivy.app/widgets/inputs/feedback-input.md)
+[FileInput](https://docs.ivy.app/widgets/inputs/file-input.md)
 
 ## Best Practices
 
@@ -201,7 +332,7 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 1. **Keep Views Pure** - Views should be pure functions of their props and state
 2. **Use Hooks Correctly** - Call hooks at the top level, never in loops or conditions  
 3. **Minimize State** - Derive computed values instead of storing them
-4. **Handle Loading States** - Always consider loading and error states
+4. **Handle Loading States** - Always consider loading and error states (UseQuery)
 5. **Leverage Type Safety** - Use strongly-typed widgets and state
 6. **Component Composition** - Build complex UIs from simple, reusable views
 
@@ -211,13 +342,8 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 [DataTable](https://docs.ivy.app/widgets/advanced/data-table.md)
 [Table](https://docs.ivy.app/widgets/common/table.md)
 [Details](https://docs.ivy.app/widgets/common/details.md) - Display structured label-value pairs
-[Services](https://docs.ivy.app/onboarding/concepts/services.md)
 [Program.cs](https://docs.ivy.app/onboarding/concepts/program.md)
-[Colors](https://docs.ivy.app/api-reference/ivy-shared/colors.md)
 [Size](https://docs.ivy.app/api-reference/ivy-shared/size.md)
 [Align](https://docs.ivy.app/api-reference/ivy-shared/align.md)
-[UseAlert](https://docs.ivy.app/onboarding/concepts/alerts.md)
-[RefreshTokens](https://docs.ivy.app/onboarding/concepts/refresh-tokens.md)
-[Downloads](https://docs.ivy.app/onboarding/concepts/downloads.md)
-[Uploads](https://docs.ivy.app/widgets/inputs/file.md)
+[Downloads](https://docs.ivy.app/hooks/core/use-download.md)
 [Icons](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/src/Ivy/Shared/Icons.cs)

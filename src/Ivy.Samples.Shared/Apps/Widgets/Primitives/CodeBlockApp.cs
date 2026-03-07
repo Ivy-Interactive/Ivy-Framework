@@ -231,11 +231,17 @@ public class CodeBlockApp : SampleBase
                 | Text.InlineCode("With Line Numbers")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowLineNumbers(true),
             Layout.Vertical()
+                | Text.InlineCode("Starting Line Number")
+                | new CodeBlock(sampleCode, Languages.Csharp).ShowLineNumbers(true).StartingLineNumber(42),
+            Layout.Vertical()
                 | Text.InlineCode("No Copy Button")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowCopyButton(false),
             Layout.Vertical()
                 | Text.InlineCode("No Border")
-                | new CodeBlock(sampleCode, Languages.Csharp).ShowBorder(false)
+                | new CodeBlock(sampleCode, Languages.Csharp).ShowBorder(false),
+            Layout.Vertical()
+                | Text.InlineCode("Wrap Lines")
+                | new CodeBlock("public class VeryLongClassName { public void VeryLongMethodName(string veryLongParameterName, int anotherVeryLongParameterName, bool yetAnotherParameter) { Console.WriteLine(\"This is a very long line that should wrap when WrapLines is enabled.\"); } }", Languages.Csharp).WrapLines().ShowLineNumbers()
         };
 
         var variants = Layout.Grid().Columns(2).Gap(4) | optionBlocks;

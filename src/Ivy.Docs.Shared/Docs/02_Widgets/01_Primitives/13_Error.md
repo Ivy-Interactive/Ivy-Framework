@@ -126,7 +126,7 @@ public class ClientErrorExamplesView : ViewBase
     {
         var client = UseService<IClientProvider>();
         return new Button("Show System Error").Destructive()
-            .HandleClick(_ => client.Error(new InvalidOperationException("System configuration validation failed")));
+            .OnClick(_ => client.Error(new InvalidOperationException("System configuration validation failed")));
     }
 }
 ```
@@ -212,7 +212,7 @@ public class FormValidationErrorExamplesView : ViewBase
                     .Placeholder("Enter your age")
                     .Invalid(ageError.Value)
             | new Button("Validate Form")
-                .HandleClick(ValidateForm)
+                .OnClick(ValidateForm)
             | (emailError.Value != null || passwordError.Value != null || ageError.Value != null
                 ? Callout.Error("Please fix the validation errors above", "Form Validation Failed")
                 : null);
@@ -238,7 +238,7 @@ public class ExceptionHandlingView : ViewBase
         }
         
         return Layout.Vertical().Gap(4)
-            | new Button("Simulate Error").HandleClick(SimulateError).Destructive()
+            | new Button("Simulate Error").OnClick(SimulateError).Destructive()
             | (showError.Value 
                 ? Layout.Vertical().Gap(4)
                     | new Error()
@@ -247,7 +247,7 @@ public class ExceptionHandlingView : ViewBase
                         .StackTrace(showDetails.Value ? "at MyApp.Views.ErrorView.SimulateError() in /src/Views/ErrorView.cs:line 15" : null)
                     | new Button(showDetails.Value ? "Hide Details" : "Show Details")
                         .Variant(ButtonVariant.Outline)
-                        .HandleClick(() => showDetails.Set(!showDetails.Value))
+                        .OnClick(() => showDetails.Set(!showDetails.Value))
                 : Text.Muted("Click the button above to simulate an error"));
     }
 }
@@ -266,7 +266,7 @@ public class EffectErrorView : ViewBase
         
         return Layout.Vertical().Gap(4)
             | new Button("Show Error")
-                .HandleClick(_ => showError.Set(true))
+                .OnClick(_ => showError.Set(true))
             | (showError.Value 
                 ? new Error()
                     .Title("Effect Failed")
@@ -322,7 +322,7 @@ public class DataLoadingView : ViewBase
         
         return Layout.Vertical().Gap(4)
             | Layout.Horizontal().Gap(2)
-                | new Button("Reload Data").HandleClick(async _ => await LoadData())
+                | new Button("Reload Data").OnClick(async _ => await LoadData())
             | (isLoading.Value 
                 ? "Loading..." 
                 : hasError.Value 
@@ -382,12 +382,12 @@ public class ErrorRecoveryExamplesView : ViewBase
         return Layout.Vertical().Gap(4)
             | (Layout.Horizontal().Gap(2)
                 | new Button("Simulate Error").Destructive()
-                    .HandleClick(SimulateRecoverableError)
+                    .OnClick(SimulateRecoverableError)
                 | new Button("Try Recovery")
-                    .HandleClick(TryRecovery)
+                    .OnClick(TryRecovery)
                     .Disabled(errorState.Value == null)
                 | new Button("Skip Recovery").Outline()
-                    .HandleClick(SkipRecovery)
+                    .OnClick(SkipRecovery)
                     .Disabled(errorState.Value == null))
             | (errorState.Value != null 
                 ? Layout.Vertical().Gap(3)

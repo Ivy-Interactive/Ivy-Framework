@@ -327,13 +327,38 @@ public class CellBuildersExample : ViewBase
             .ColumnWidth(p => p.Price, Size.Fraction(0.15f))        // 15% for Price
             .ColumnWidth(p => p.Url, Size.Fraction(0.2f))           // 20% for URL
             .ColumnWidth(p => p.Description, Size.Fraction(0.25f))  // 25% for Description
-            .MultiLine(p => p.Description)                    // Enable multiline for the Description column
+            .Multiline(p => p.Description)                    // Enable multiline for the Description column
             .Builder(p => p.Url, f => f.Link())               // Link builder
             .Builder(p => p.Description, f => f.Text())       // Text builder
             .Builder(p => p.Sku, f => f.CopyToClipboard())    // Copy to clipboard
             .Builder(p => p.Name, f => f.Default())           // Default builder
             .Header(p => p.Price, "Unit Price")
             .Align(p => p.Price, Align.Right);
+    }
+}
+```
+
+### Progress Builder
+
+The `Progress()` builder renders numeric values as inline [progress](10_Progress.md) bars within table cells.
+
+```csharp demo-tabs
+public class ProgressBuilderExample : ViewBase
+{
+    public override object? Build()
+    {
+        var tasks = new[] {
+            new {Name = "Design Review", Progress = 100},
+            new {Name = "Implementation", Progress = 75},
+            new {Name = "Testing", Progress = 45},
+            new {Name = "Documentation", Progress = 20}
+        };
+
+        return tasks.ToTable()
+            .Width(Size.Full())
+            .Builder(t => t.Progress, f => f.Progress().AutoColor().Format("%d%"))
+            .ColumnWidth(t => t.Name, Size.Fraction(0.5f))
+            .ColumnWidth(t => t.Progress, Size.Fraction(0.5f));
     }
 }
 ```

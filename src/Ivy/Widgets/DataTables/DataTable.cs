@@ -54,11 +54,11 @@ public record DataTable : WidgetBase<DataTable>
 
     [Prop] public MenuItem[]? RowActions { get; set; }
 
-    [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellClick { get; set; }
+    [Event] public EventHandler<Event<DataTable, CellClickEventArgs>>? OnCellClick { get; set; }
 
-    [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellActivated { get; set; }
+    [Event] public EventHandler<Event<DataTable, CellClickEventArgs>>? OnCellActivated { get; set; }
 
-    [Event] public Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? OnRowAction { get; set; }
+    [Event] public EventHandler<Event<DataTable, RowActionClickEventArgs>>? OnRowAction { get; set; }
 
     public static Detail operator |(DataTable widget, object child)
     {
@@ -68,12 +68,12 @@ public record DataTable : WidgetBase<DataTable>
 
 public static class DataTableWidgetExtensions
 {
-    public static DataTable HandleRowAction(this DataTable table, Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
-        => table with { OnRowAction = handler };
+    public static DataTable OnRowAction(this DataTable table, Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
+        => table with { OnRowAction = new(handler) };
 
-    public static DataTable HandleCellClick(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
-        => table with { OnCellClick = handler };
+    public static DataTable OnCellClick(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+        => table with { OnCellClick = new(handler) };
 
-    public static DataTable HandleCellActivated(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
-        => table with { OnCellActivated = handler };
+    public static DataTable OnCellActivated(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+        => table with { OnCellActivated = new(handler) };
 }

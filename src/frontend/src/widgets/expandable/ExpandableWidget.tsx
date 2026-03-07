@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/expandable/expandable-variants';
 import { ChevronRight } from 'lucide-react';
 import React from 'react';
+import Icon from '@/components/Icon';
 import { Scales } from '@/types/scale';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,7 @@ interface ExpandableWidgetProps {
   disabled?: boolean;
   open?: boolean;
   scale?: Scales;
+  icon?: string;
   slots?: {
     Header: React.ReactNode;
     Content: React.ReactNode;
@@ -31,8 +33,28 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   disabled = false,
   open = false,
   scale = Scales.Medium,
+  icon = undefined,
   slots,
 }) => {
+  let iconSize: number = 4;
+
+  switch (scale) {
+    case Scales.Small:
+      iconSize = 3;
+      break;
+    case Scales.Large:
+      iconSize = 5;
+      break;
+    default:
+      break;
+  }
+
+  const iconStyles: React.CSSProperties = {
+    width: `${iconSize * 0.25}rem`,
+    height: `${iconSize * 0.25}rem`,
+    flexShrink: 0,
+  };
+
   const [isOpen, setIsOpen] = React.useState(open);
 
   React.useEffect(() => {
@@ -108,10 +130,12 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
           <div
             className={cn(
               expandableHeaderVariants({ scale }),
-              disabled && 'text-muted-foreground'
+              disabled && 'text-muted-foreground',
+              'flex items-center gap-2'
             )}
             role="summary"
           >
+            {icon && icon !== 'None' && <Icon style={iconStyles} name={icon} />}
             {slots?.Header}
           </div>
           <span

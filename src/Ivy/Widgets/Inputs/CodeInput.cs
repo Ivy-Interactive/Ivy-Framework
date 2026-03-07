@@ -36,7 +36,7 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public bool ShowCopyButton { get; set; } = false;
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(string)];
 }
@@ -52,21 +52,21 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
     {
         var typedState = state.As<TString>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public CodeInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariants variant = CodeInputVariants.Default)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange;
+        OnChange = onChange?.ToEventHandler();
         Value = value;
     }
 
     public CodeInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariants variant = CodeInputVariants.Default)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange == null ? null : e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = onChange == null ? null : new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
     }
 
@@ -87,7 +87,7 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
-    [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TString>, TString>>? OnChange { get; }
 }
 
 public static class CodeInputExtensions
@@ -143,19 +143,19 @@ public static class CodeInputExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static CodeInputBase HandleBlur(this CodeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static CodeInputBase OnBlur(this CodeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static CodeInputBase HandleBlur(this CodeInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static CodeInputBase OnBlur(this CodeInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static CodeInputBase HandleBlur(this CodeInputBase widget, Action onBlur)
+    public static CodeInputBase OnBlur(this CodeInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
     public static CodeInputBase Value<T>(this CodeInputBase widget, T value)
