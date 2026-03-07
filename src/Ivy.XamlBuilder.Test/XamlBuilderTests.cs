@@ -294,6 +294,75 @@ public class XamlBuilderTests
         Assert.NotNull(chart.Tooltip);
     }
 
+    // --- Anonymous data arrays ---
+
+    [Fact]
+    public void Build_DataPoint_Array()
+    {
+        var xml = """
+            <LineChart>
+                <LineChart.Data>
+                    <DataPoint Month="Jan" Value="100" />
+                    <DataPoint Month="Feb" Value="200" />
+                </LineChart.Data>
+            </LineChart>
+            """;
+        var widget = _builder.Build(xml);
+        var chart = Assert.IsType<LineChart>(widget);
+        var data = Assert.IsType<Dictionary<string, object>[]>(chart.Data);
+        Assert.Equal(2, data.Length);
+        Assert.Equal("Jan", data[0]["Month"]);
+        Assert.Equal(100.0, data[0]["Value"]);
+        Assert.Equal("Feb", data[1]["Month"]);
+        Assert.Equal(200.0, data[1]["Value"]);
+    }
+
+    [Fact]
+    public void Build_DataPoint_MixedTypes()
+    {
+        var xml = """
+            <BarChart>
+                <BarChart.Data>
+                    <DataPoint Name="Alice" Score="95.5" Active="true" />
+                </BarChart.Data>
+            </BarChart>
+            """;
+        var widget = _builder.Build(xml);
+        var chart = Assert.IsType<BarChart>(widget);
+        var data = Assert.IsType<Dictionary<string, object>[]>(chart.Data);
+        Assert.Single(data);
+        Assert.Equal("Alice", data[0]["Name"]);
+        Assert.Equal(95.5, data[0]["Score"]);
+        Assert.Equal(true, data[0]["Active"]);
+    }
+
+    [Fact]
+    public void Build_LineChart_Full_WithData()
+    {
+        var xml = """
+            <LineChart ColorScheme="Default">
+                <LineChart.Data>
+                    <DataPoint Month="Jan" Revenue="100" Costs="80" />
+                    <DataPoint Month="Feb" Revenue="120" Costs="90" />
+                </LineChart.Data>
+                <LineChart.Lines>
+                    <Line DataKey="Revenue" />
+                    <Line DataKey="Costs" />
+                </LineChart.Lines>
+                <LineChart.XAxis>
+                    <XAxis DataKey="Month" />
+                </LineChart.XAxis>
+            </LineChart>
+            """;
+        var widget = _builder.Build(xml);
+        var chart = Assert.IsType<LineChart>(widget);
+        Assert.Equal(ColorScheme.Default, chart.ColorScheme);
+        var data = Assert.IsType<Dictionary<string, object>[]>(chart.Data);
+        Assert.Equal(2, data.Length);
+        Assert.Equal(2, chart.Lines.Length);
+        Assert.Single(chart.XAxis);
+    }
+
     // --- Error cases ---
 
     [Fact]

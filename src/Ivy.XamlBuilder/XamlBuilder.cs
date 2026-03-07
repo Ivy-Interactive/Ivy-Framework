@@ -7,6 +7,7 @@ namespace Ivy;
 
 public class XamlBuilder
 {
+    private const string DataPointElementName = "DataPoint";
     private readonly Dictionary<string, Type> _typeMap;
 
     public XamlBuilder(params Assembly[] assemblies)
@@ -76,6 +77,30 @@ public class XamlBuilder
                 $"Unknown property '{propertyName}' on {owner.GetType().Name}.");
 
         var propType = prop.PropertyType;
+
+        if (propType == typeof(object))
+        {
+            var children = propElement.Elements().ToList();
+            if (children.Count > 0 && children.All(c => c.Name.LocalName == DataPointElementName))
+            {
+                var rows = new Dictionary<string, object>[children.Count];
+                for (var i = 0; i < children.Count; i++)
+                {
+                    var row = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var attr in children[i].Attributes())
+                    {
+                        row[attr.Name.LocalName] = ParseDataValue(attr.Value);
+                    }
+                    rows[i] = row;
+                }
+                SetProperty(owner, prop, rows);
+            }
+            else if (children.Count == 1)
+            {
+                SetProperty(owner, prop, BuildObject(children[0], typeof(object)));
+            }
+            return;
+        }
 
         if (propType.IsArray)
         {
@@ -263,6 +288,15 @@ public class XamlBuilder
                 .ToArray();
 
         throw new InvalidOperationException($"Cannot convert '{value}' to {targetType.Name}.");
+    }
+
+    private static object ParseDataValue(string value)
+    {
+        if (double.TryParse(value, CultureInfo.InvariantCulture, out var d))
+            return d;
+        if (bool.TryParse(value, out var b))
+            return b;
+        return value;
     }
 
     private static Size ParseSize(string value)
