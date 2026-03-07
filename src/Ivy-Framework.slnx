@@ -46,4 +46,6 @@
   <Project Path="Ivy.XamlBuilder.Test/Ivy.XamlBuilder.Test.csproj" />
   <Project Path="Ivy.XamlBuilder/Ivy.XamlBuilder.csproj" />
   <Project Path="Ivy/Ivy.csproj" />
+  <Project Path="Ivy.Agent.EfQuery/Ivy.Agent.EfQuery.csproj" />
+  <Project Path="Ivy.Agent.EfQuery.Test/Ivy.Agent.EfQuery.Test.csproj" />
 </Solution>
