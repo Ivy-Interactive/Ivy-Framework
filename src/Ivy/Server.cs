@@ -7,6 +7,8 @@ using Ivy.Core.Apps;
 using Ivy.Core.Auth;
 using Ivy.Core.ExternalWidgets;
 using Ivy.Core.Server;
+using Ivy.Core.Server.ContentPipeline;
+using Ivy.Core.Server.ContentPipeline.Filters;
 using Ivy.Core.Server.Middleware;
 using Ivy.Themes;
 using Microsoft.AspNetCore.Builder;
@@ -63,6 +65,8 @@ public class Server
     private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
     private readonly List<Action<WebApplication>> _appMods = new();
     private List<string> _reservedPaths = new();
+    private readonly List<IHtmlFilter> _customHtmlFilters = new();
+    private ManifestOptions? _manifestOptions;
     private ServerArgs _args;
 
     public Server(ServerArgs? args = null)
@@ -329,6 +333,24 @@ public class Server
         Services.AddSingleton<IThemeService>(themeService);
         return this;
     }
+
+    public Server UseManifest(Action<ManifestOptions>? configure = null)
+    {
+        _manifestOptions = new ManifestOptions();
+        configure?.Invoke(_manifestOptions);
+        Services.AddSingleton(_manifestOptions);
+        return this;
+    }
+
+    public Server UseHtmlFilter(IHtmlFilter filter)
+    {
+        _customHtmlFilters.Add(filter);
+        return this;
+    }
+
+    internal IReadOnlyList<IHtmlFilter> GetCustomFilters() => _customHtmlFilters;
+
+    internal ManifestOptions? GetManifestOptions() => _manifestOptions;
 
     public async Task RunAsync(CancellationTokenSource? cts = null)
     {
@@ -854,50 +876,24 @@ public static class WebApplicationExtensions
                 using var reader = new StreamReader(stream);
                 var html = await reader.ReadToEndAsync();
 
-                //Inject Ivy license:
-                var configuration = app.Services.GetRequiredService<IConfiguration>();
-                var ivyLicense = configuration["Ivy:License"] ?? "";
-                if (!string.IsNullOrEmpty(ivyLicense))
-                {
-                    var ivyLicenseTag = $"<meta name=\"ivy-license\" content=\"{ivyLicense}\" />";
-                    html = html.Replace("</head>", $"  {ivyLicenseTag}\n</head>");
-                }
-#if DEBUG
-                var ivyLicensePublicKey = configuration["Ivy:LicensePublicKey"] ?? "";
-                if (!string.IsNullOrEmpty(ivyLicensePublicKey))
-                {
-                    var ivyLicensePublicKeyTag =
-                        $"<meta name=\"ivy-license-public-key\" content=\"{ivyLicensePublicKey}\" />";
-                    html = html.Replace("</head>", $"  {ivyLicensePublicKeyTag}\n</head>");
-                }
-#endif
+                var pipeline = new HtmlPipeline()
+                    .Use<LicenseFilter>()
+                    .Use<DevToolsFilter>()
+                    .Use<MetaDescriptionFilter>()
+                    .Use<TitleFilter>()
+                    .Use<ThemeFilter>()
+                    .Use<ManifestFilter>();
 
-                if (serverArgs.EnableDevTools)
-                {
-                    var ivyEnableDevToolsTag = $"<meta name=\"ivy-enable-dev-tools\" content=\"true\" />";
-                    html = html.Replace("</head>", $"  {ivyEnableDevToolsTag}\n</head>");
-                }
-                //Inject Meta Title and Description
-                if (!string.IsNullOrEmpty(serverArgs.MetaDescription))
-                {
-                    var metaDescriptionTag = $"<meta name=\"description\" content=\"{serverArgs.MetaDescription}\" />";
-                    html = html.Replace("</head>", $"  {metaDescriptionTag}\n</head>");
-                }
+                foreach (var filter in server.GetCustomFilters())
+                    pipeline.Use(filter);
 
-                if (!string.IsNullOrEmpty(serverArgs.MetaTitle))
+                var pipelineContext = new HtmlPipelineContext
                 {
-                    var metaTitleTag = $"<title>{serverArgs.MetaTitle}</title>";
-                    html = Regex.Replace(html, "<title>.*?</title>", metaTitleTag, RegexOptions.Singleline);
-                }
+                    Services = app.Services,
+                    ServerArgs = serverArgs
+                };
 
-                // Inject theme configuration
-                var themeService = app.Services.GetService<IThemeService>();
-                if (themeService != null)
-                {
-                    var themeCss = themeService.GenerateThemeCss();
-                    var themeMetaTag = themeService.GenerateThemeMetaTag();
-                    html = html.Replace("</head>", $"  {themeMetaTag}\n  {themeCss}\n</head>");
-                }
+                html = pipeline.Process(pipelineContext, html);
 
                 context.Response.ContentType = "text/html";
                 context.Response.StatusCode = httpStatusCode;
@@ -910,6 +906,13 @@ public static class WebApplicationExtensions
                 context.Response.ContentType = "text/plain";
                 await context.Response.WriteAsync($"Error: {resourceName} not found.");
             }
+        });
+
+        app.MapGet("/manifest.json", () =>
+        {
+            var manifest = app.Services.GetService<ManifestOptions>();
+            if (manifest == null) return Results.NotFound();
+            return Results.Json(manifest.ToManifest());
         });
 
         app.UseStaticFiles(GetStaticFileOptions("", embeddedProvider, assembly));
