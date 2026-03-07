@@ -21,6 +21,7 @@
 
   <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="../Ivy/Ivy.csproj" />
+    <ProjectReference Include="../Ivy.XamlBuilder/Ivy.XamlBuilder.csproj" />
   </ItemGroup>
   
   <!-- enable ivy analyzer for samples -->
