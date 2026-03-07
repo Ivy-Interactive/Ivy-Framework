@@ -165,6 +165,8 @@ new Markdown("Right-aligned content").Right()
 new Markdown("Justified paragraph text").Justify()
 ```
 
+<img width="1154" height="478" alt="textAlighnment" src="https://github.com/user-attachments/assets/48db1f85-0d48-49de-8bfc-26700022b50f" />
+
 ### Fluent Value Setters for Input Widgets
 
 All input widgets now support fluent `.Value()` setters, making it easier to set initial values or update input values programmatically. This works with all input types including [TextInput](https://docs.ivy.app/widgets/inputs/text-input), [NumberInput](https://docs.ivy.app/widgets/inputs/number-input), [BoolInput](https://docs.ivy.app/widgets/inputs/bool-input), SelectInput, [DateTimeInput](https://docs.ivy.app/widgets/inputs/date-time-input), [ColorInput](https://docs.ivy.app/widgets/inputs/color-input), and more.
@@ -187,6 +189,8 @@ var country = UseState("");
 country.ToSelectInput(countries)
     .Value("US")
 ```
+
+<img width="707" height="282" alt="textValue" src="https://github.com/user-attachments/assets/87134269-e853-4ef3-b17b-c62c851971a3" />
 
 ### Separator Text Alignment
 
@@ -213,6 +217,8 @@ return Layout.Vertical()
         .WithField()
         .Label("Temperature");
 ```
+
+<img width="661" height="118" alt="numberPrefixSuffix" src="https://github.com/user-attachments/assets/ec6d0a15-9f3f-49a8-8e23-0c07e581d9de" />
 
 ### TextInput OnSubmit Event
 
@@ -257,6 +263,8 @@ usernameState.ToTextInput()
     .MaxLength(10)
 ```
 
+![textMinSize](https://github.com/user-attachments/assets/ae40c173-a7ce-42f2-81ef-d61c9af5aaa9)
+
 ### TextInput Multiline Helper Method
 
 A new `.Multiline()` extension method has been added to `TextInputBase` for quickly converting any TextInput into a textarea.
@@ -274,6 +282,8 @@ notes.ToTextareaInput()
     .Placeholder("Enter notes...")
 ```
 
+<img width="230" height="121" alt="TextMultiline" src="https://github.com/user-attachments/assets/4c4cfedf-db03-4678-81dc-4ccea0ebe5b6" />
+
 ### FileInput Minimum Size Validation
 
 The [FileInput](https://docs.ivy.app/widgets/inputs/file-input) widget now supports minimum file size validation with the new `.MinFileSize()` method.
@@ -289,6 +299,8 @@ return file
     .Placeholder("Min 1 KB, Max 10 MB");
 ```
 
+<img width="641" height="191" alt="FileMinSize" src="https://github.com/user-attachments/assets/dec405f6-3e21-462c-89b4-7b4458e29731" />
+
 ### CodeBlock Line Wrapping
 
 The [CodeBlock](https://docs.ivy.app/widgets/primitives/code-block) widget now supports line wrapping with the new `.WrapLines()` method. When enabled, long lines wrap within the code block instead of requiring horizontal scrolling
@@ -302,6 +314,8 @@ new CodeBlock(@"public class Example {
     .WrapLines()
     .Language(Languages.Csharp)
 ```
+
+<img width="714" height="393" alt="codeBlockWrapLines" src="https://github.com/user-attachments/assets/8071e113-933d-4a49-aff5-45c862766626" />
 
 ### CodeBlock Starting Line Numbers
 
@@ -318,6 +332,8 @@ new CodeBlock(@"    private static int Calculate(int input)
     .Language(Languages.Csharp)
 ```
 
+<img width="691" height="121" alt="codeBlockStart" src="https://github.com/user-attachments/assets/452fa226-aebf-4eaf-943b-4d76119d1bae" />
+
 ### Expandable Icon Support
 
 The [Expandable](https://docs.ivy.app/widgets/common/expandable) widget now supports icons with the new `.Icon()` extension method, following the same pattern used by Button and Badge widgets.
@@ -327,6 +343,8 @@ Layout.Vertical().Gap(2)
     | new Expandable("Settings", "Configure your application preferences here.")
         .Icon(Icons.Settings)
 ```
+
+<img width="664" height="86" alt="expandableIcon" src="https://github.com/user-attachments/assets/28919b73-f84a-47db-897c-7e9d588201d0" />
 
 ### SelectInput Advanced Features
 
@@ -341,6 +359,8 @@ options.ToSelectInput(options)
     .EmptyMessage("No items found")
 ```
 
+![selectSearch](https://github.com/user-attachments/assets/cb12a8ae-2fdd-46c7-adf1-bb4b6c4610cb)
+
 **Selection Limits:**
 
 ```csharp
@@ -351,6 +371,8 @@ colors.ToSelectInput(options)
     .MaxSelections(3)  // Can't select more than 3
 ```
 
+![selectLimits](https://github.com/user-attachments/assets/0aba4221-d443-4e9d-aeaf-ec629db51673)
+
 **Loading State:**
 
 ```csharp
@@ -359,6 +381,8 @@ var isLoading = UseState(true);
 options.ToSelectInput(options)
     .Loading(isLoading.Value)
 ```
+
+![selectLoading](https://github.com/user-attachments/assets/4d971aa7-e222-4156-a612-1b5feb8306d3)
 
 All three features work across all SelectInput variants (Select, List, Toggle).
 
@@ -379,6 +403,8 @@ fruit.ToSelectInput(fruitOptions)
     .Placeholder("Select a fruit...")
 ```
 
+<img width="2140" height="242" alt="selectDisabled" src="https://github.com/user-attachments/assets/9579f7c0-abb2-4467-a620-b872a82755f3" />
+
 ### SelectInput Ghost Styling
 
 All SelectInput and [AsyncSelectInput](https://docs.ivy.app/widgets/inputs/async-select-input) variants now support ghost styling with the new `.Ghost()` extension method. Ghost styling removes borders and background fill, making the select blend into its surroundings.
@@ -398,6 +424,8 @@ guidState.ToAsyncSelectInput(QueryCategories, LookupCategory)
     .Ghost()
 ```
 
+<img width="2140" height="438" alt="selectGhost" src="https://github.com/user-attachments/assets/68c1aee0-d05e-4632-a55f-a25c05b07d1f" />
+
 ### Card Disabled State
 
 The Card widget now supports a disabled state using the `.Disabled()` extension method.
@@ -410,6 +438,8 @@ new Card("This card cannot be clicked")
     .Disabled()
     .Width(Size.Units(100))
 ```
+
+<img width="627" height="466" alt="cardDisabled" src="https://github.com/user-attachments/assets/6f76bb93-c2fb-4d23-b317-1ae37f5e206d" />
 
 ### Spacer Default Behavior Change
 
@@ -464,6 +494,8 @@ new Button("Left Sheet").WithSheet(
 new Sheet().Side(SheetSide.Bottom)
 ```
 
+https://github.com/user-attachments/assets/71c46968-c23c-4408-b706-65a1107d0683
+
 ### SidebarLayout Resizable Width
 
 The [SidebarLayout](https://docs.ivy.app/widgets/layouts/sidebar-layout) widget now supports drag-to-resize functionality with the new `.Resizable()` extension method. Users can drag the sidebar border to adjust its width at runtime, and configure constraints with the [Size API](https://docs.ivy.app/api-reference/ivy-shared/size).
@@ -502,6 +534,8 @@ new Progress(progress.Value)
     .Goal(isLoading.Value ? "Syncing..." : $"{progress.Value}% Complete")
 ```
 
+https://github.com/user-attachments/assets/8b83063b-8d4d-41cb-8ce8-df3168b432a8
+
 ### Table Progress Builder
 
 The [Table](https://docs.ivy.app/widgets/common/table) widget now supports rendering progress bars in cells with the new `.Progress()` builder.
@@ -524,6 +558,8 @@ tasks.ToTable()
 - `.AutoColor()` - Automatically colors progress bars based on value (green ≥75%, yellow ≥50%, orange ≥25%, red <25%)
 - `.Color(Colors.Blue)` - Set a specific color for all progress bars
 - `.Format("%d%")` - Display value alongside progress bar
+
+<img width="1065" height="296" alt="tableProgress" src="https://github.com/user-attachments/assets/088b82d9-cf8f-49e3-b2ca-e1803eedbc21" />
 
 ### DataTable Programmatic Refresh
 
@@ -567,6 +603,8 @@ new Badge("Click Me", icon: Icons.MousePointer)
     .OnClick(_ => client.Toast("Badge clicked!"))
 ```
 
+![badgeClick](https://github.com/user-attachments/assets/46c8f89b-0b7f-421a-9313-e634de27d61e)
+
 ### Box Widget Interactivity
 
 The [Box](https://docs.ivy.app/widgets/primitives/box) widget now supports click events and hover effects, making it easy to create interactive regions without using the heavier Card widget.
@@ -579,6 +617,8 @@ new Box("Interactive box")
 ```
 
 When you add `.OnClick()` to a Box, it automatically applies `CardHoverVariant.PointerAndTranslate` for visual feedback. You can customize the hover behavior using `.Hover()` to choose between `None`, `Pointer`, or `PointerAndTranslate`.
+
+![boxHover](https://github.com/user-attachments/assets/b18ffc9f-7db1-458d-89ee-0ef6db883d35)
 
 ## Authentication
 
