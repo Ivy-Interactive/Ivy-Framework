@@ -158,6 +158,36 @@ public class SheetSideExamples : ViewBase
 }
 ```
 
+## Opening from a Button
+
+When the only trigger is a single button, you can use the `WithSheet` extension on [Button](../03_Common/01_Button.md) instead of wiring `UseTrigger` yourself. It creates the open state and sheet for you:
+
+```csharp demo-tabs
+public class ButtonWithSheetExample : ViewBase
+{
+    public override object? Build()
+    {
+        return new Button("Open Sheet").WithSheet(
+            () => new SheetView(),
+            title: "This is a sheet",
+            description: "Lorem ipsum dolor sit amet",
+            width: Size.Fraction(1/2f)
+        );
+    }
+}
+
+public class SheetView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+            "Welcome to the sheet!",
+            "This is the content inside the sheet"
+        );
+    }
+}
+```
+
 ## Sheet with Navigation
 
 You can keep internal navigation state inside the sheet (e.g. tabs or wizard steps) using [UseState](../../03_Hooks/02_Core/03_UseState.md):
@@ -201,36 +231,6 @@ public class NavigationSheetContent : ViewBase
 ```
 
 <WidgetDocs Type="Ivy.Sheet" ExtensionTypes="Ivy.SheetExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Sheet.cs"/>
-
-## Opening from a Button (WithSheet)
-
-When the only trigger is a single button, you can use the `WithSheet` extension on [Button](../03_Common/01_Button.md) instead of wiring `UseTrigger` yourself. It creates the open state and sheet for you:
-
-```csharp demo-tabs
-public class ButtonWithSheetExample : ViewBase
-{
-    public override object? Build()
-    {
-        return new Button("Open Sheet").WithSheet(
-            () => new SheetView(),
-            title: "This is a sheet",
-            description: "Lorem ipsum dolor sit amet",
-            width: Size.Fraction(1/2f)
-        );
-    }
-}
-
-public class SheetView : ViewBase
-{
-    public override object? Build()
-    {
-        return new Card(
-            "Welcome to the sheet!",
-            "This is the content inside the sheet"
-        );
-    }
-}
-```
 
 For opening from multiple places (e.g. different buttons, row clicks, or with parameters like an id), use [UseTrigger](../../03_Hooks/02_Core/12_UseTrigger.md) as in the examples above.
 
