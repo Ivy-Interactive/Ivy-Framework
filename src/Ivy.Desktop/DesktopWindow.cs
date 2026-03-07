@@ -113,20 +113,27 @@ public class DesktopWindow(Server server)
         try
         {
             var errorHtml = $"""
+                <!DOCTYPE html>
                 <html><body style="font-family:system-ui;padding:2rem;background:#1e1e2e;color:#cdd6f4">
                 <h2 style="color:#f38ba8">Application Error</h2>
                 <p>{WebUtility.HtmlEncode(ex.Message)}</p>
                 <pre style="background:#313244;padding:1rem;border-radius:8px;overflow:auto;font-size:0.85rem;color:#a6adc8">{WebUtility.HtmlEncode(ex.ToString())}</pre>
                 </body></html>
                 """;
+
+            var tempHtmlPath = Path.Combine(Path.GetTempPath(), $"ivy_error_{Guid.NewGuid():N}.html");
+            File.WriteAllText(tempHtmlPath, errorHtml);
+
             var errorWindow = new PhotinoWindow() { LogVerbosity = 0 };
             errorWindow
                 .SetUseOsDefaultSize(false)
                 .SetSize(700, 500)
                 .SetTitle($"{_title} - Error")
                 .Center()
-                .LoadRawString(errorHtml);
+                .Load(new Uri(tempHtmlPath));
             errorWindow.WaitForClose();
+
+            try { File.Delete(tempHtmlPath); } catch { }
         }
         catch
         {
