@@ -20,7 +20,6 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
 }) => {
   const [tocLoading, setTocLoading] = useState(true);
   const [contributorsLoading, setContributorsLoading] = useState(true);
-
   // Only show contributors when TOC is ready too
   const showContributors = !tocLoading && !contributorsLoading;
   // Only show sidebar if TOC should be displayed

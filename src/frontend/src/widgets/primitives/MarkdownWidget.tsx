@@ -51,7 +51,7 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   };
 
   return (
-    <div className="markdown-widget w-full min-w-0 max-w-full" style={styles}>
+    <div className="markdown-widget w-full" style={styles}>
       <MarkdownRenderer
         key={id}
         content={content}
