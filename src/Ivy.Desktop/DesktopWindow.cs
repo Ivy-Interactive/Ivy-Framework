@@ -77,7 +77,7 @@ public class DesktopWindow(Server server)
         var cts = new CancellationTokenSource();
         var serverTask = server.RunAsync(cts);
 
-        if (!CheckIfPortIsListening(port).GetAwaiter().GetResult())
+        if (!CheckIfPortIsListening(port, serverTask).GetAwaiter().GetResult())
         {
             ShowErrorDialog(new InvalidOperationException(
                 $"Unable to connect to the Ivy server at {url}. The server may have failed to start."));
@@ -167,11 +167,26 @@ public class DesktopWindow(Server server)
         return tempPath;
     }
 
-    private static async Task<bool> CheckIfPortIsListening(int port, int maxAttempts = 10)
+    private static async Task<bool> CheckIfPortIsListening(int port, Task serverTask, int maxAttempts = 10)
     {
         var delayMs = 1000;
         for (var i = 0; i < maxAttempts; i++)
         {
+            // If the server task faulted, rethrow the actual startup exception
+            if (serverTask.IsFaulted)
+            {
+                // Unwrap AggregateException to get the real cause
+                if (serverTask.Exception?.InnerException != null)
+                    throw serverTask.Exception.InnerException;
+                throw serverTask.Exception ?? (Exception)new InvalidOperationException("Server task faulted.");
+            }
+
+            if (serverTask.IsCompleted)
+            {
+                // Server exited without error but also without listening — early exit
+                return false;
+            }
+
             try
             {
                 bool isListening = IPGlobalProperties
@@ -180,7 +195,8 @@ public class DesktopWindow(Server server)
                     .Any(endpoint => endpoint.Port == port);
                 if (isListening) return true;
             }
-            catch { 
+            catch
+            {
                 // Ignore
             }
             if (i == maxAttempts - 1) return false;
