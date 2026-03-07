@@ -245,7 +245,7 @@ public static class TextInputExtensions
             }
         }, state, blurOnceState);
         void OnBlur(Event<IAnyInput> _) => blurOnceState.Set(true);
-        return state.ToTextInput(placeholder, disabled, variant).Invalid(invalidState.Value ?? "").HandleBlur(OnBlur);
+        return state.ToTextInput(placeholder, disabled, variant).Invalid(invalidState.Value ?? "").OnBlur(OnBlur);
     }
     public static TextInputBase Value<T>(this TextInputBase widget, T value)
     {
