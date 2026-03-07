@@ -20,7 +20,7 @@ The `Sheet` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays con
 
 Use [UseTrigger](../../03_Hooks/02_Core/12_UseTrigger.md) to open a sheet. When open, render a `Sheet` with an `onClose` action that calls `isOpen.Set(false)` so the overlay and backdrop dismiss correctly:
 
-```csharp demo-tabs
+```csharp demo-below
 public class BasicSheetExample : ViewBase
 {
     public override object? Build()
@@ -188,8 +188,15 @@ public class SheetView : ViewBase
 }
 ```
 
-## Sheet with Navigation
+<WidgetDocs Type="Ivy.Sheet" ExtensionTypes="Ivy.SheetExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Sheet.cs"/>
 
+## Examples
+
+<Details>
+<Summary>
+Sheet with Navigation
+</Summary>
+<Body>
 You can keep internal navigation state inside the sheet (e.g. tabs or wizard steps) using [UseState](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp demo-tabs
@@ -226,81 +233,6 @@ public class NavigationSheetContent : ViewBase
             | new Card(
                 $"This is the {pages[currentPage.Value]} page content"
             ).Title("Page Content");
-    }
-}
-```
-
-<WidgetDocs Type="Ivy.Sheet" ExtensionTypes="Ivy.SheetExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Sheet.cs"/>
-
-For opening from multiple places (e.g. different buttons, row clicks, or with parameters like an id), use [UseTrigger](../../03_Hooks/02_Core/12_UseTrigger.md) as in the examples above.
-
-## Examples
-
-<Details>
-<Summary>
-Conditional Rendering
-</Summary>
-<Body>
-Use trigger state to conditionally render different content inside the sheet (e.g. list vs grid vs details):
-
-```csharp demo-tabs
-public class ConditionalSheetExample : ViewBase
-{
-    public override object? Build()
-    {
-        var client = UseService<IClientProvider>();
-        var viewMode = UseState("list"); // "list", "grid", "details"
-        var (sheetView, showSheet) = UseTrigger((IState<bool> isOpen) =>
-        {
-            if (!isOpen.Value) return null;
-
-            object RenderContent()
-            {
-                return viewMode.Value switch
-                {
-                    "list" => new Card(
-                        Layout.Vertical().Gap(1)
-                            | "Item 1"
-                            | "Item 2"
-                            | "Item 3"
-                    ).Title("List View"),
-
-                    "grid" => new Card(
-                        Layout.Horizontal().Gap(2)
-                            | new Card("Item 1").Width(Size.Fraction(1/3f))
-                            | new Card("Item 2").Width(Size.Fraction(1/3f))
-                            | new Card("Item 3").Width(Size.Fraction(1/3f))
-                    ).Title("Grid View"),
-
-                    "details" => new Card(
-                        Layout.Vertical().Gap(2)
-                            | Text.H3("Detailed Information")
-                            | Text.P("This is a detailed view with more information about the selected item.").Small()
-                            | new Button("Action").Variant(ButtonVariant.Primary).OnClick(_ => client.Toast("Action performed on detailed item!"))
-                    ).Title("Details View"),
-
-                    _ => new Card("Unknown view mode").Title("Error")
-                };
-            }
-
-            return new Sheet(_ => isOpen.Set(false),
-                Layout.Vertical().Gap(2)
-                    | (Layout.Horizontal().Gap(2)
-                        | new Button("List").Variant(viewMode.Value == "list" ? ButtonVariant.Primary : ButtonVariant.Outline)
-                            .OnClick(_ => viewMode.Set("list"))
-                        | new Button("Grid").Variant(viewMode.Value == "grid" ? ButtonVariant.Primary : ButtonVariant.Outline)
-                            .OnClick(_ => viewMode.Set("grid"))
-                        | new Button("Details").Variant(viewMode.Value == "details" ? ButtonVariant.Primary : ButtonVariant.Outline)
-                            .OnClick(_ => viewMode.Set("details")))
-                    | RenderContent(),
-                title: "Conditional Content Sheet",
-                description: "Switch between different view modes")
-                .Width(Size.Fraction(2/3f));
-        });
-
-        return Layout.Vertical().Gap(2)
-            | new Button("Open Conditional Sheet", onClick: _ => showSheet())
-            | sheetView;
     }
 }
 ```
