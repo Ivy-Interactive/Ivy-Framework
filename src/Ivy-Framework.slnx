@@ -1,0 +1,49 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Auth Examples/">
+    <Project Path="auth/examples/Auth0Example/Auth0Example.csproj" />
+    <Project Path="auth/examples/AutheliaExample/AutheliaExample.csproj" />
+    <Project Path="auth/examples/BasicAuthExample/BasicAuthExample.csproj" />
+    <Project Path="auth/examples/ClerkExample/ClerkExample.csproj" />
+    <Project Path="auth/examples/GitHubExample/GitHubExample.csproj" />
+    <Project Path="auth/examples/MicrosoftEntraExample/MicrosoftEntraExample.csproj" />
+    <Project Path="auth/examples/SupabaseExample/SupabaseExample.csproj" />
+  </Folder>
+  <Folder Name="/Auth/">
+    <Project Path="auth/Ivy.Auth.Auth0/Ivy.Auth.Auth0.csproj">
+      <BuildType Solution="*|x64" Project="?" />
+      <BuildType Solution="*|x86" Project="?" />
+      <Platform Solution="*|x64" Project="?" />
+      <Platform Solution="*|x86" Project="?" />
+      <Build Solution="*|x64" Project="false" />
+      <Build Solution="*|x86" Project="false" />
+    </Project>
+    <Project Path="auth/Ivy.Auth.Authelia/Ivy.Auth.Authelia.csproj" />
+    <Project Path="auth/Ivy.Auth.Clerk/Ivy.Auth.Clerk.csproj" />
+    <Project Path="auth/Ivy.Auth.GitHub/Ivy.Auth.GitHub.csproj" />
+    <Project Path="auth/Ivy.Auth.MicrosoftEntra/Ivy.Auth.MicrosoftEntra.csproj" />
+    <Project Path="auth/Ivy.Auth.Sliplane/Ivy.Auth.Sliplane.csproj" />
+    <Project Path="auth/Ivy.Auth.Supabase/Ivy.Auth.Supabase.csproj" />
+  </Folder>
+  <Folder Name="/Auth/examples/">
+    <Project Path="auth/examples/SliplaneExample/SliplaneExample.csproj" />
+  </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="Ivy.Docs.Tools.Test/Ivy.Docs.Tools.Test.csproj" />
+    <Project Path="Ivy.Docs.Tools/Ivy.Docs.Tools.csproj" />
+  </Folder>
+  <Project Path="Ivy.Desktop/Ivy.Desktop.csproj" />
+  <Project Path="Ivy.Docs.Shared/Ivy.Docs.Shared.csproj" />
+  <Project Path="Ivy.Docs.Test/Ivy.Docs.Test.csproj" />
+  <Project Path="Ivy.Docs/Ivy.Docs.csproj" />
+  <Project Path="Ivy.Samples.Shared/Ivy.Samples.Shared.csproj" />
+  <Project Path="Ivy.Samples/Ivy.Samples.csproj" />
+  <Project Path="Ivy.Test/Ivy.Test.csproj" />
+  <Project Path="Ivy.XamlBuilder.Test/Ivy.XamlBuilder.Test.csproj" />
+  <Project Path="Ivy.XamlBuilder/Ivy.XamlBuilder.csproj" />
+  <Project Path="Ivy/Ivy.csproj" />
+</Solution>
