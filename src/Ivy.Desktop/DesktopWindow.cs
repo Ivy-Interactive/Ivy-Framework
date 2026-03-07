@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using Photino.NET;
@@ -41,6 +42,19 @@ public class DesktopWindow(Server server)
 
     public int Run()
     {
+        try
+        {
+            return RunInternal();
+        }
+        catch (Exception ex)
+        {
+            ShowErrorDialog(ex);
+            return 1;
+        }
+    }
+
+    private int RunInternal()
+    {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
         var port = server.Args.Port;
@@ -50,10 +64,11 @@ public class DesktopWindow(Server server)
 
         if (!CheckIfPortIsListening(port).GetAwaiter().GetResult())
         {
-            Console.WriteLine($"Error: Unable to connect to {url}. Something went wrong.");
+            ShowErrorDialog(new InvalidOperationException(
+                $"Unable to connect to the Ivy server at {url}. The server may have failed to start."));
             return 1;
         }
- 
+
         var windowWidth = _width;
         var windowHeight = _height;
 
@@ -91,6 +106,32 @@ public class DesktopWindow(Server server)
         serverTask.GetAwaiter().GetResult();
 
         return 0;
+    }
+
+    private void ShowErrorDialog(Exception ex)
+    {
+        try
+        {
+            var errorHtml = $"""
+                <html><body style="font-family:system-ui;padding:2rem;background:#1e1e2e;color:#cdd6f4">
+                <h2 style="color:#f38ba8">Application Error</h2>
+                <p>{WebUtility.HtmlEncode(ex.Message)}</p>
+                <pre style="background:#313244;padding:1rem;border-radius:8px;overflow:auto;font-size:0.85rem;color:#a6adc8">{WebUtility.HtmlEncode(ex.ToString())}</pre>
+                </body></html>
+                """;
+            var errorWindow = new PhotinoWindow() { LogVerbosity = 0 };
+            errorWindow
+                .SetUseOsDefaultSize(false)
+                .SetSize(700, 500)
+                .SetTitle($"{_title} - Error")
+                .Center()
+                .LoadRawString(errorHtml);
+            errorWindow.WaitForClose();
+        }
+        catch
+        {
+            Console.Error.WriteLine($"Fatal error: {ex}");
+        }
     }
 
     private static string? ExtractEmbeddedIcon(Assembly assembly, string resourceName)
