@@ -5,7 +5,7 @@ using Photino.NET;
 
 namespace Ivy.Desktop;
 
-public class DesktopWindow
+public class DesktopWindow(Server server)
 {
     private string _title = "Ivy App";
     private int _width = 1280;
@@ -17,20 +17,14 @@ public class DesktopWindow
     private bool _devTools = false;
     private Assembly? _iconAssembly = null;
     private string? _iconResourceName = null;
-    private readonly Server _server;
-
-    public DesktopWindow(Server server)
-    {
-        _server = server;
-    }
 
     public DesktopWindow Title(string title) { _title = title; return this; }
     public DesktopWindow Size(int width, int height) { _width = width; _height = height; return this; }
-    public DesktopWindow Resizable(bool resizable) { _resizable = resizable; return this; }
-    public DesktopWindow TopMost(bool topMost) { _topMost = topMost; return this; }
-    public DesktopWindow DpiScaling(bool enabled) { _useDpiScaling = enabled; return this; }
-    public DesktopWindow Center(bool center) { _center = center; return this; }
-    public DesktopWindow DevToolsEnabled(bool enabled) { _devTools = enabled; return this; }
+    public DesktopWindow Resizable(bool resizable = true) { _resizable = resizable; return this; }
+    public DesktopWindow TopMost(bool topMost = true) { _topMost = topMost; return this; }
+    public DesktopWindow UseDpiScaling(bool enabled = true) { _useDpiScaling = enabled; return this; }
+    public DesktopWindow Center(bool center = true) { _center = center; return this; }
+    public DesktopWindow UseDevTools(bool enabled = true) { _devTools = enabled; return this; }
 
     /// <summary>
     /// Sets the window icon from an embedded resource.
@@ -49,17 +43,17 @@ public class DesktopWindow
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
-        var port = _server.Args.Port;
+        var port = server.Args.Port;
         var url = $"http://localhost:{port}";
         var cts = new CancellationTokenSource();
-        var serverTask = _server.RunAsync(cts);
+        var serverTask = server.RunAsync(cts);
 
         if (!CheckIfPortIsListening(port).GetAwaiter().GetResult())
         {
             Console.WriteLine($"Error: Unable to connect to {url}. Something went wrong.");
             return 1;
         }
-
+ 
         var windowWidth = _width;
         var windowHeight = _height;
 
@@ -123,7 +117,9 @@ public class DesktopWindow
                     .Any(endpoint => endpoint.Port == port);
                 if (isListening) return true;
             }
-            catch { }
+            catch { 
+                // Ignore
+            }
             if (i == maxAttempts - 1) return false;
             await Task.Delay(delayMs);
         }
