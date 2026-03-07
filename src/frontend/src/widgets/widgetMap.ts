@@ -81,7 +81,7 @@ import {
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
 import React from 'react';
-import { SmartSearchWidget } from '@/widgets/internal/SmartSearchWidget/SmartSearchWidget';
+import { SmartSearchWidget } from '@/widgets/internal/SmartSearchWidget';
 
 export const widgetMap = {
   $loading: LoadingScreen,
