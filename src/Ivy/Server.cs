@@ -180,6 +180,12 @@ public class Server
         return this;
     }
 
+    public Server UseConfiguration(Action<IConfigurationBuilder> configure)
+    {
+        Configuration = ServerUtils.GetConfiguration(configure);
+        return this;
+    }
+
     public Server UseChrome(ChromeSettings settings)
     {
         return UseChrome(() => new DefaultSidebarChrome(settings));

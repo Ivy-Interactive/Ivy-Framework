@@ -5,7 +5,7 @@ namespace Ivy.Core.Server;
 
 public static class ServerUtils
 {
-    public static IConfiguration GetConfiguration()
+    public static IConfiguration GetConfiguration(Action<IConfigurationBuilder>? configure = null)
     {
         var builder = new ConfigurationBuilder()
             .AddEnvironmentVariables()
@@ -16,6 +16,8 @@ public static class ServerUtils
         {
             builder.AddUserSecrets(entryAssembly);
         }
+
+        configure?.Invoke(builder);
 
         return builder.Build();
     }
