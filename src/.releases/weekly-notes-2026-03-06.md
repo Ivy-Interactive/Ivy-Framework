@@ -3,60 +3,6 @@
 > [!NOTE]
 > We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
 
-## Authentication
-
-### New Sliplane OAuth Provider
-
-The Ivy Framework now supports Sliplane OAuth 2.0 authentication, enabling users to sign in with their Sliplane accounts. This is particularly useful for applications deployed on or integrated with [Sliplane](https://sliplane.io).
-
-**Setup:**
-
-```csharp
-using Ivy.Auth.Sliplane;
-
-var server = new Server();
-server.UseAuth<SliplaneAuthProvider>();
-await server.RunAsync();
-```
-
-**Configuration** (via user secrets or environment variables):
-
-```terminal
->dotnet user-secrets set "Sliplane:ClientId" "your_client_id"
->dotnet user-secrets set "Sliplane:ClientSecret" "your_client_secret"
-```
-
-Or use CLI
-
-```terminal
-ivy auth add
-```
-
-## API Improvements
-
-### Fluent Value Setters for Input Widgets
-
-All input widgets now support fluent `.Value()` setters, making it easier to set initial values or update input values programmatically. This works with all input types including TextInput, NumberInput, BoolInput, SelectInput, DateTimeInput, ColorInput, and more.
-
-```csharp
-// Set initial value on a text input
-var username = UseState("");
-username.ToTextInput()
-    .Placeholder("Enter username")
-    .Value("john_doe")
-
-// Set value on a number input
-var age = UseState(0);
-age.ToNumberInput()
-    .Placeholder("Enter age")
-    .Value(25)
-
-// Set value on a select input
-var country = UseState("");
-country.ToSelectInput(countries)
-    .Value("US")
-```
-
 ## Breaking Changes
 
 ### Event Handler Naming: Handle*→ On*
@@ -219,33 +165,128 @@ new Markdown("Right-aligned content").Right()
 new Markdown("Justified paragraph text").Justify()
 ```
 
-### DataTable Programmatic Refresh
+### Fluent Value Setters for Input Widgets
 
-The `DataTable` widget now supports programmatic refreshing with the new `UseRefreshToken()` hook and `.RefreshToken()` fluent API. This feature is particularly useful for reloading table data after CRUD operations like creating, updating, or deleting records.
+All input widgets now support fluent `.Value()` setters, making it easier to set initial values or update input values programmatically. This works with all input types including TextInput, NumberInput, BoolInput, SelectInput, DateTimeInput, ColorInput, and more.
 
 ```csharp
-public class EmployeeTable : ViewBase
-{
-    public override object? Build()
+// Set initial value on a text input
+var username = UseState("");
+username.ToTextInput()
+    .Placeholder("Enter username")
+    .Value("john_doe")
+
+// Set value on a number input
+var age = UseState(0);
+age.ToNumberInput()
+    .Placeholder("Enter age")
+    .Value(25)
+
+// Set value on a select input
+var country = UseState("");
+country.ToSelectInput(countries)
+    .Value("US")
+```
+
+### Separator Text Alignment
+
+The `Separator` widget now supports positioning label text along the separator line with the new `.TextAlign()` method. Text can be positioned at Left, Center (default), or Right.
+
+```csharp
+Layout.Vertical().Gap(4)
+    | new Separator("Left Aligned").TextAlign(TextAlignment.Left)
+    | new Separator("Center Aligned").TextAlign(TextAlignment.Center)
+    | new Separator("Right Aligned").TextAlign(TextAlignment.Right)
+```
+
+### NumberInput Prefix and Suffix
+
+The `NumberInput` widget now supports prefix and suffix properties, matching the existing pattern on `TextInput`.
+
+```csharp
+var temperature = UseState(22);
+
+return Layout.Vertical()
+    | temperature.ToNumberInput()
+        .Prefix(Icons.Thermometer)
+        .Suffix("°C")
+        .WithField()
+        .Label("Temperature");
+```
+
+### TextInput OnSubmit Event
+
+The `TextInput` widget now supports an `OnSubmit` event that fires when the user presses Enter in single-line text inputs.
+
+```csharp
+var searchQuery = UseState("");
+var searchResult = UseState("");
+
+// Search example
+searchQuery.ToSearchInput()
+    .Placeholder("Search...")
+    .OnSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}"))
+
+// Quick-add example
+var tag = UseState("");
+var tags = UseState<List<string>>(new List<string>());
+
+tag.ToTextInput()
+    .Placeholder("Add a tag...")
+    .OnSubmit(() =>
     {
-        var refreshToken = UseRefreshToken();
-        var employees = GetEmployees().AsQueryable();
-
-        var table = employees
-            .ToDataTable(e => e.Id)
-            .RefreshToken(refreshToken)
-            .Header(e => e.Name, "Name")
-            .Height(Size.Units(100));
-
-        var refreshButton = new Button("Reload Table").OnClick(e =>
+        if (!string.IsNullOrWhiteSpace(tag.Value))
         {
-            // Trigger a refresh of the DataTable
-            refreshToken.Refresh();
-        });
+            tags.Set(new List<string>(tags.Value) { tag.Value });
+            tag.Set("");
+        }
+    })
+```
 
-        return new Fragment(refreshButton, table);
-    }
-}
+### TextInput MinLength Validation
+
+The `TextInput` widget and all its variants (Password, Search, Textarea) now support minimum length validation with the new `.MinLength()` method.
+
+```csharp
+var usernameState = UseState("");
+
+// Combine with MaxLength for range constraints
+usernameState.ToTextInput()
+    .Placeholder("Between 5 and 10 characters")
+    .MinLength(5)
+    .MaxLength(10)
+```
+
+### TextInput Multiline Helper Method
+
+A new `.Multiline()` extension method has been added to `TextInputBase` for quickly converting any text input into a textarea.
+
+```csharp
+var notes = UseState("");
+
+// New convenient method
+notes.ToTextInput()
+    .Placeholder("Enter notes...")
+    .Multiline()
+
+// Equivalent to
+notes.ToTextareaInput()
+    .Placeholder("Enter notes...")
+```
+
+### FileInput Minimum Size Validation
+
+The `FileInput` widget now supports minimum file size validation with the new `.MinFileSize()` method.
+
+```csharp
+var file = UseState<FileUpload<byte[]>?>();
+var upload = UseUpload(MemoryStreamUploadHandler.Create(file))
+    .MinFileSize(FileSize.FromKilobytes(1))   // Minimum 1 KB
+    .MaxFileSize(FileSize.FromMegabytes(10)); // Maximum 10 MB
+
+return file
+    .ToFileInput(upload)
+    .Placeholder("Min 1 KB, Max 10 MB");
 ```
 
 ### CodeBlock Line Wrapping
@@ -321,6 +362,55 @@ options.ToSelectInput(options)
 
 All three features work across all SelectInput variants (Select, List, Toggle).
 
+### SelectInput Disabled Options
+
+Individual options in `SelectInput` can now be disabled using the `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list.
+
+```csharp
+var fruit = UseState("apple");
+
+var fruitOptions = new IAnyOption[]
+{
+    new Option<string>("Banana", "banana"),
+    new Option<string>("Mango (Coming Soon)", "mango").Disabled(),
+};
+
+fruit.ToSelectInput(fruitOptions)
+    .Placeholder("Select a fruit...")
+```
+
+### SelectInput Ghost Styling
+
+All `SelectInput` and `AsyncSelectInput` variants now support ghost styling with the new `.Ghost()` extension method. Ghost styling removes borders and background fill, making the select blend into its surroundings.
+
+```csharp
+// Ghost select without borders
+colorState.ToSelectInput(colorOptions).Ghost()
+
+// Works with all variants
+colorArrayState.ToSelectInput(colorOptions)
+    .Variant(SelectInputVariants.List)
+    .Ghost()
+
+// Also works with AsyncSelectInput
+guidState.ToAsyncSelectInput(QueryCategories, LookupCategory)
+    .Placeholder("Select Category")
+    .Ghost()
+```
+
+### Card Disabled State
+
+The `Card` widget now supports a disabled state using the `.Disabled()` extension method.
+
+```csharp
+new Card("This card cannot be clicked")
+    .Title("Disabled Card")
+    .Description("User interaction is disabled")
+    .OnClick(_ => client.Toast("This won't fire!"))
+    .Disabled()
+    .Width(Size.Units(100))
+```
+
 ### Spacer Default Behavior Change
 
 The `Spacer` widget now defaults to grow behavior (`flex-grow: 1`), automatically filling available space in the parent layout's direction. This matches the common use case of pushing sibling elements apart without requiring explicit `.Width(Size.Grow())`.
@@ -374,6 +464,27 @@ new Button("Left Sheet").WithSheet(
 new Sheet().Side(SheetSide.Bottom)
 ```
 
+### SidebarLayout Resizable Width
+
+The `SidebarLayout` widget now supports drag-to-resize functionality with the new `.Resizable()` extension method. Users can drag the sidebar border to adjust its width at runtime.
+
+```csharp
+// Basic resizable sidebar
+new SidebarLayout(
+    mainContent: new Card("Main Content"),
+    sidebarContent: Layout.Vertical()
+        | Text.P("Drag the right edge to resize")
+).Resizable()
+
+// Custom constraints using Size API
+new SidebarLayout(
+    mainContent: new Card("Main Content"),
+    sidebarContent: Text.P("150px min, 400px max")
+)
+.Width(Size.Px(250).Min(Size.Px(150)).Max(Size.Px(400)))
+.Resizable()
+```
+
 ### Progress Indeterminate Mode
 
 The `Progress` widget now has an explicit `Indeterminate` property for displaying animated progress bars when completion percentage is unknown.
@@ -414,135 +525,38 @@ tasks.ToTable()
 - `.Color(Colors.Blue)` - Set a specific color for all progress bars
 - `.Format("%d%")` - Display value alongside progress bar
 
-### SidebarLayout Resizable Width
+### DataTable Programmatic Refresh
 
-The `SidebarLayout` widget now supports drag-to-resize functionality with the new `.Resizable()` extension method. Users can drag the sidebar border to adjust its width at runtime.
-
-```csharp
-// Basic resizable sidebar
-new SidebarLayout(
-    mainContent: new Card("Main Content"),
-    sidebarContent: Layout.Vertical()
-        | Text.P("Drag the right edge to resize")
-).Resizable()
-
-// Custom constraints using Size API
-new SidebarLayout(
-    mainContent: new Card("Main Content"),
-    sidebarContent: Text.P("150px min, 400px max")
-)
-.Width(Size.Px(250).Min(Size.Px(150)).Max(Size.Px(400)))
-.Resizable()
-```
-
-### Separator Text Alignment
-
-The `Separator` widget now supports positioning label text along the separator line with the new `.TextAlign()` method. Text can be positioned at Left, Center (default), or Right.
+The `DataTable` widget now supports programmatic refreshing with the new `UseRefreshToken()` hook and `.RefreshToken()` fluent API. This feature is particularly useful for reloading table data after CRUD operations like creating, updating, or deleting records.
 
 ```csharp
-Layout.Vertical().Gap(4)
-    | new Separator("Left Aligned").TextAlign(TextAlignment.Left)
-    | new Separator("Center Aligned").TextAlign(TextAlignment.Center)
-    | new Separator("Right Aligned").TextAlign(TextAlignment.Right)
-```
-
-### SelectInput Disabled Options
-
-Individual options in `SelectInput` can now be disabled using the `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list.
-
-```csharp
-var fruit = UseState("apple");
-
-var fruitOptions = new IAnyOption[]
+public class EmployeeTable : ViewBase
 {
-    new Option<string>("Banana", "banana"),
-    new Option<string>("Mango (Coming Soon)", "mango").Disabled(),
-};
+    public override object? Build()
+    {
+        var refreshToken = UseRefreshToken();
+        var employees = GetEmployees().AsQueryable();
 
-fruit.ToSelectInput(fruitOptions)
-    .Placeholder("Select a fruit...")
-```
+        var table = employees
+            .ToDataTable(e => e.Id)
+            .RefreshToken(refreshToken)
+            .Header(e => e.Name, "Name")
+            .Height(Size.Units(100));
 
-### SelectInput Ghost Styling
+        var refreshButton = new Button("Reload Table").OnClick(e =>
+        {
+            // Trigger a refresh of the DataTable
+            refreshToken.Refresh();
+        });
 
-All `SelectInput` and `AsyncSelectInput` variants now support ghost styling with the new `.Ghost()` extension method. Ghost styling removes borders and background fill, making the select blend into its surroundings.
-
-```csharp
-// Ghost select without borders
-colorState.ToSelectInput(colorOptions).Ghost()
-
-// Works with all variants
-colorArrayState.ToSelectInput(colorOptions)
-    .Variant(SelectInputVariants.List)
-    .Ghost()
-
-// Also works with AsyncSelectInput
-guidState.ToAsyncSelectInput(QueryCategories, LookupCategory)
-    .Placeholder("Select Category")
-    .Ghost()
+        return new Fragment(refreshButton, table);
+    }
+}
 ```
 
 ### Default Theme Changed to System
 
 The default theme has been changed from 'light' to 'system', so the application now respects the user's system-wide dark/light mode preference by default.
-
-### NumberInput Prefix and Suffix
-
-The `NumberInput` widget now supports prefix and suffix properties, matching the existing pattern on `TextInput`.
-
-```csharp
-var temperature = UseState(22);
-
-return Layout.Vertical()
-    | temperature.ToNumberInput()
-        .Prefix(Icons.Thermometer)
-        .Suffix("°C")
-        .WithField()
-        .Label("Temperature");
-```
-
-### TextInput OnSubmit Event
-
-The `TextInput` widget now supports an `OnSubmit` event that fires when the user presses Enter in single-line text inputs.
-
-```csharp
-var searchQuery = UseState("");
-var searchResult = UseState("");
-
-// Search example
-searchQuery.ToSearchInput()
-    .Placeholder("Search...")
-    .OnSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}"))
-
-// Quick-add example
-var tag = UseState("");
-var tags = UseState<List<string>>(new List<string>());
-
-tag.ToTextInput()
-    .Placeholder("Add a tag...")
-    .OnSubmit(() =>
-    {
-        if (!string.IsNullOrWhiteSpace(tag.Value))
-        {
-            tags.Set(new List<string>(tags.Value) { tag.Value });
-            tag.Set("");
-        }
-    })
-```
-
-### TextInput MinLength Validation
-
-The `TextInput` widget and all its variants (Password, Search, Textarea) now support minimum length validation with the new `.MinLength()` method.
-
-```csharp
-var usernameState = UseState("");
-
-// Combine with MaxLength for range constraints
-usernameState.ToTextInput()
-    .Placeholder("Between 5 and 10 characters")
-    .MinLength(5)
-    .MaxLength(10)
-```
 
 ### Badge Click Events
 
@@ -566,49 +580,33 @@ new Box("Interactive box")
 
 When you add `.OnClick()` to a Box, it automatically applies `CardHoverVariant.PointerAndTranslate` for visual feedback. You can customize the hover behavior using `.Hover()` to choose between `None`, `Pointer`, or `PointerAndTranslate`.
 
-### Card Disabled State
+## Authentication
 
-The `Card` widget now supports a disabled state using the `.Disabled()` extension method.
+### New Sliplane OAuth Provider
+
+The Ivy Framework now supports Sliplane OAuth 2.0 authentication, enabling users to sign in with their Sliplane accounts. This is particularly useful for applications deployed on or integrated with [Sliplane](https://sliplane.io).
+
+**Setup:**
 
 ```csharp
-new Card("This card cannot be clicked")
-    .Title("Disabled Card")
-    .Description("User interaction is disabled")
-    .OnClick(_ => client.Toast("This won't fire!"))
-    .Disabled()
-    .Width(Size.Units(100))
+using Ivy.Auth.Sliplane;
+
+var server = new Server();
+server.UseAuth<SliplaneAuthProvider>();
+await server.RunAsync();
 ```
 
-### FileInput Minimum Size Validation
+**Configuration** (via user secrets or environment variables):
 
-The `FileInput` widget now supports minimum file size validation with the new `.MinFileSize()` method.
-
-```csharp
-var file = UseState<FileUpload<byte[]>?>();
-var upload = UseUpload(MemoryStreamUploadHandler.Create(file))
-    .MinFileSize(FileSize.FromKilobytes(1))   // Minimum 1 KB
-    .MaxFileSize(FileSize.FromMegabytes(10)); // Maximum 10 MB
-
-return file
-    .ToFileInput(upload)
-    .Placeholder("Min 1 KB, Max 10 MB");
+```terminal
+>dotnet user-secrets set "Sliplane:ClientId" "your_client_id"
+>dotnet user-secrets set "Sliplane:ClientSecret" "your_client_secret"
 ```
 
-### TextInput Multiline Helper Method
+Or use CLI
 
-A new `.Multiline()` extension method has been added to `TextInputBase` for quickly converting any text input into a textarea.
-
-```csharp
-var notes = UseState("");
-
-// New convenient method
-notes.ToTextInput()
-    .Placeholder("Enter notes...")
-    .Multiline()
-
-// Equivalent to
-notes.ToTextareaInput()
-    .Placeholder("Enter notes...")
+```terminal
+ivy auth add
 ```
 
 ### MCP Server Configuration
