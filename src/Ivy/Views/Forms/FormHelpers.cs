@@ -38,10 +38,9 @@ public static class FormHelpers
                         DisplayName = propertyInfo.Name
                     };
                     var result = capturedAttr.GetValidationResult(value, validationContext);
-                    var isValid = result == null || result == ValidationResult.Success;
-                    return isValid
-                        ? (true, "")
-                        : (false, result!.ErrorMessage ?? "Validation failed");
+                    if (result == null || result == ValidationResult.Success)
+                        return (true, "");
+                    return (false, result.ErrorMessage ?? "Validation failed");
                 }
                 catch
                 {
@@ -79,10 +78,9 @@ public static class FormHelpers
                         DisplayName = fieldInfo.Name
                     };
                     var result = capturedAttr.GetValidationResult(value, validationContext);
-                    var isValid = result == null || result == ValidationResult.Success;
-                    return isValid
-                        ? (true, "")
-                        : (false, result!.ErrorMessage ?? "Validation failed");
+                    if (result == null || result == ValidationResult.Success)
+                        return (true, "");
+                    return (false, result.ErrorMessage ?? "Validation failed");
                 }
                 catch
                 {
