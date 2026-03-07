@@ -212,6 +212,7 @@ public class SmartSearchView : ViewBase
             queryQuestion.Set(_ => (string?)null);
             followUpMessages.Set(Array.Empty<ChatMessage>());
             pendingFollowUp.Set(default(string?));
+            overlayOpen.Set(false);
         }
 
         var sheetContent = resultsHeader != null
