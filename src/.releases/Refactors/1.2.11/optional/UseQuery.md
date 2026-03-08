@@ -177,7 +177,7 @@ if (productQuery.Loading || productQuery.Value == null)
 return productQuery.Value
     .ToForm()
     .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt)
-    .HandleSubmit(OnSubmit)
+    .OnSubmit(OnSubmit)
     .ToSheet(isOpen, "Edit Product");
 
 async Task OnSubmit(Product? request)
@@ -238,7 +238,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
         return product
             .ToForm()
             .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(...))
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "Create Product", submitTitle: "Create");
 
         async Task OnSubmit(ProductCreateRequest request)

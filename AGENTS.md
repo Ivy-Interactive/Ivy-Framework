@@ -188,7 +188,7 @@ Size is NOT the same as Scale. Size controls dimensions; Scale controls visual d
 
 new Button("Click Me")
   .Primary()
-  .HandleClick(() => {
+  .OnClick(() => {
     count.Set(count.Value + 1);
 })
 
