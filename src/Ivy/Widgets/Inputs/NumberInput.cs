@@ -136,12 +136,14 @@ public static class NumberInputExtensions
         return state.ToNumberInput(placeholder, disabled, NumberInputVariants.Slider, formatStyle);
     }
 
-    public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal, double? min = null, double? max = null)
     {
         var type = state.GetStateType();
         Type genericType = typeof(NumberInput<>).MakeGenericType(type);
         NumberInputBase input = (NumberInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant, formatStyle)!;
         input.ScaffoldDefaults(null, type);
+        if (min is not null) input = input with { Min = min };
+        if (max is not null) input = input with { Max = max };
         return input;
     }
 

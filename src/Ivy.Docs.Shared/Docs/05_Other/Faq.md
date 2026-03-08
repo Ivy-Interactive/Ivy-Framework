@@ -18,6 +18,21 @@ Use the `TextInputVariants.Textarea` variant or the dedicated `ToTextareaInput` 
 state.ToTextareaInput(placeholder: "Enter text...")
 ```
 
+## How do I set min/max values on a NumberInput?
+
+You can pass `min` and `max` directly as optional parameters to `ToNumberInput()`:
+
+```csharp
+var count = UseState(1);
+count.ToNumberInput(min: 1, max: 100).Placeholder("Enter count")
+```
+
+Alternatively, use the `.Min()` and `.Max()` fluent extension methods:
+
+```csharp
+count.ToNumberInput().Min(1).Max(100)
+```
+
 ## How do I read CSV data or load external data in Ivy?
 
 Ivy apps are standard C# applications, so you can use any .NET approach to load data:
