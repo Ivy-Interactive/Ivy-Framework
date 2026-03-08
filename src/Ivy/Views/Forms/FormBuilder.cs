@@ -403,18 +403,19 @@ public class FormBuilder<TModel> : ViewBase
 
         var fieldViews = bindings.Select(e => e.fieldView).ToArray();
 
-        if (_submitStrategy is FormSubmitStrategy.OnBlur or FormSubmitStrategy.OnChange)
+        var submitReceiver = context.UseSignal<FormSubmitSignal, Unit, Unit>();
+        context.UseEffect(() =>
         {
-            var submitReceiver = context.UseSignal<FormSubmitSignal, Unit, Unit>();
-            context.UseEffect(() =>
+            if (_submitStrategy is FormSubmitStrategy.OnBlur or FormSubmitStrategy.OnChange)
             {
                 return submitReceiver.Receive(unit =>
                 {
                     _ = OnSubmit();
                     return default;
                 });
-            });
-        }
+            }
+            return null;
+        });
 
         async ValueTask HandleSubmitEvent(Event<Form> _)
         {
