@@ -42,6 +42,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             };
         }
 
+        var sidebarOpen = UseState(settings.SidebarOpen);
+
         var args = UseService<AppContext>();
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
@@ -318,6 +320,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     client.SetTitle(serverArgs.MetaTitle);
 
                     client.Redirect("/");
+                    sidebarOpen.Set(true);
                 }
             }
 
@@ -480,6 +483,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 footer
             ),
             settings.Width
-        ).Open(settings.SidebarOpen).MainAppSidebar(true);
+        ).Open(sidebarOpen.Value).MainAppSidebar(true);
     }
 }
