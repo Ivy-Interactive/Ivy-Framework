@@ -139,9 +139,9 @@ public class Server
         AppRepository.AddFactory(() => AppHelpers.GetApps(assembly));
     }
 
-    public void AddConnectionsFromAssembly()
+    public void AddConnectionsFromAssembly(Assembly? assembly = null)
     {
-        var assembly = Assembly.GetEntryAssembly();
+        assembly ??= Assembly.GetEntryAssembly();
 
         var connections = assembly!.GetLoadableTypes()
             .Where(t => t.IsClass && typeof(IConnection).IsAssignableFrom(t));
