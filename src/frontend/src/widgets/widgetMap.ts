@@ -78,6 +78,7 @@ import {
   AppHostWidget,
   AudioPlayerWidget,
   VideoPlayerWidget,
+  RichTextBlockWidget,
 } from '@/widgets/primitives';
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
@@ -88,6 +89,7 @@ export const widgetMap = {
 
   // Primitives
   'Ivy.TextBlock': TextBlockWidget,
+  'Ivy.RichTextBlock': RichTextBlockWidget,
   'Ivy.Markdown': React.lazy(
     () => import('@/widgets/primitives/MarkdownWidget')
   ),
