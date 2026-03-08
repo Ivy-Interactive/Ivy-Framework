@@ -8,6 +8,7 @@ Add ".md" to the end of any URL to go directly to the Markdown version of the do
 - `UseState<T>()` returns `IState<T>`, NOT `State<T>`
 - All types are in the `Ivy` namespace — no sub-namespaces
 - `Colors` is a flat enum (e.g. `Colors.Red`, `Colors.Blue`) — no shade levels
+- `DbContext` must never be injected or used directly — always resolve `IDbContextFactory<T>` via `UseService` and create scoped instances with `CreateDbContextAsync()` inside query/mutation lambdas
 
 # Introduction to the Ivy Framework for LLMs
 
