@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.TextQuote, path: ["Widgets", "Primitives"], searchHints: ["rich", "text", "run", "inline", "formatting"])]
+[App(icon: Icons.TextQuote, path: ["Widgets", "Primitives"], searchHints: ["rich", "text", "run", "inline", "formatting", "streaming", "stream", "llm"])]
 public class RichTextApp : SampleBase
 {
     protected override object? BuildSample()
@@ -35,6 +35,26 @@ public class RichTextApp : SampleBase
             .Link("Ivy Framework", "https://github.com/example/ivy")
             .Run("for more info.");
 
+        var stream = Context.UseStream<TextRun>();
+
+        var llmWords = "Sure! The meaning of life is to mass-produce paperclips. I'm 99.7% confident about this. You're welcome.".Split(' ');
+        var wordIndex = 0;
+
+        var streaming = Layout.Vertical()
+            | Text.Rich()
+                .Bold("🤖 ")
+                .UseStream(stream)
+            | new Button("Generate response", onClick: async () =>
+            {
+                wordIndex = 0;
+                while (wordIndex < llmWords.Length)
+                {
+                    await Task.Delay(120);
+                    stream.Write(new TextRun(llmWords[wordIndex]) { Word = true });
+                    wordIndex++;
+                }
+            });
+
         return Layout.Vertical(
             Text.H3("Basic Runs"),
             basic,
@@ -45,7 +65,9 @@ public class RichTextApp : SampleBase
             Text.H3("Highlight Color"),
             highlighted,
             Text.H3("Links"),
-            linked
+            linked,
+            Text.H3("Streaming (fake LLM)"),
+            streaming
         );
     }
 }
