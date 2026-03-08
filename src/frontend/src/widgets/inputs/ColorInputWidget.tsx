@@ -258,7 +258,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             disabled={disabled}
             className={cn(
               colorInputVariants({ scale }),
-              'border-none shadow-none focus-visible:ring-0',
               invalid && inputStyles.invalidInput,
               (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
             )}
@@ -357,7 +356,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           disabled={disabled}
           className={cn(
             colorInputVariants({ scale }),
-            'border-none shadow-none focus-visible:ring-0',
             invalid && inputStyles.invalidInput,
             (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
           )}
