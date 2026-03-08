@@ -1,15 +1,3 @@
-All Ivy documentation pages are listed on: <https://docs.ivy.app/sitemap.xml>.
-Add ".md" to the end of any URL to go directly to the Markdown version of the doc.
-
-## Quick Reference — Commonly Misremembered Facts
-
-- Base class is `ViewBase` (NOT `AppBase` — there is no `AppBase` class)
-- `Text` is a static helper — use `Text.P()`, `Text.H2()`, etc.
-- `UseState<T>()` returns `IState<T>`, NOT `State<T>`
-- All types are in the `Ivy` namespace — no sub-namespaces
-- `Colors` is a flat enum (e.g. `Colors.Red`, `Colors.Blue`) — no shade levels
-- `DbContext` must never be injected or used directly — always resolve `IDbContextFactory<T>` via `UseService` and create scoped instances with `CreateDbContextAsync()` inside query/mutation lambdas
-
 # Introduction to the Ivy Framework for LLMs
 
 - Ivy is a declarative full-stack UI framework that allows developers to build user interfaces using a component-based approach very similar to React.
@@ -345,6 +333,15 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 5. **Leverage Type Safety** - Use strongly-typed widgets and state
 6. **Component Composition** - Build complex UIs from simple, reusable views
 
+## Common Hallucinations
+
+- Base class is `ViewBase` (NOT `AppBase` there is no `AppBase` class)
+- `Text` is a static helper - use `Text.P()`, `Text.H2()`, ...
+- `UseState<T>()` returns `IState<T>`, NOT `State<T>`
+- All types are in the `Ivy` namespace
+- `Colors` is a flat enum (e.g. `Colors.Red`, `Colors.Blue`) we have no shade levels
+- `DbContext` must never be injected directly! Always resolve `IDbContextFactory<T>` via `UseService` and create scoped instances with `CreateDbContextAsync()` inside query/mutation lambdas
+
 ## Further Reading
 
 [Forms](https://docs.ivy.app/onboarding/concepts/forms.md)
@@ -356,3 +353,6 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 [Align](https://docs.ivy.app/api-reference/ivy-shared/align.md)
 [Downloads](https://docs.ivy.app/hooks/core/use-download.md)
 [Icons](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/src/Ivy/Shared/Icons.cs)
+
+All Ivy documentation pages are listed on: <https://docs.ivy.app/sitemap.xml>.
+Add ".md" to the end of any URL to go directly to the Markdown version of the doc.
