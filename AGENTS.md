@@ -216,6 +216,8 @@ UseState hook returns a state object IState<T> that provides:
 - .Value property to read the current state.
 - .Set(newValue) method to update the state in UseEffect or in an event handler.
 
+Always use immutable types (e.g. records) with `UseState` — mutable classes that are modified in-place and passed back via `.Set()` will not trigger a re-render because the reference hasn't changed. Instead, create a new instance (e.g. using `with` expressions on records) before calling `.Set()`.
+
 ### UseEffect
 
 void UseEffect(Action effect, params IEffectTriggers[] triggers)
@@ -322,17 +324,6 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 [FeedbackInput](https://docs.ivy.app/widgets/inputs/feedback-input.md)
 [FileInput](https://docs.ivy.app/widgets/inputs/file-input.md)
 
-## Best Practices
-
-(Basically the same as React best practices)
-
-1. **Keep Views Pure** - Views should be pure functions of their props and state
-2. **Use Hooks Correctly** - Call hooks at the top level, never in loops or conditions  
-3. **Minimize State** - Derive computed values instead of storing them
-4. **Handle Loading States** - Always consider loading and error states (UseQuery)
-5. **Leverage Type Safety** - Use strongly-typed widgets and state
-6. **Component Composition** - Build complex UIs from simple, reusable views
-
 ## Common Hallucinations
 
 - Base class is `ViewBase` (NOT `AppBase` there is no `AppBase` class)
@@ -341,10 +332,6 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 - All types are in the `Ivy` namespace
 - `Colors` is a flat enum (e.g. `Colors.Red`, `Colors.Blue`) we have no shade levels
 - `DbContext` must never be injected directly! Always resolve `IDbContextFactory<T>` via `UseService` and create scoped instances with `CreateDbContextAsync()` inside query/mutation lambdas
-
-## State Management
-
-Always use immutable types (e.g. records) with `UseState` — mutable classes that are modified in-place and passed back via `.Set()` will not trigger a re-render because the reference hasn't changed. Instead, create a new instance (e.g. using `with` expressions on records) before calling `.Set()`.
 
 ## Further Reading
 
