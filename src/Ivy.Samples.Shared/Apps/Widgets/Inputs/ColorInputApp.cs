@@ -111,7 +111,6 @@ public class ColorInputVariantTests : ViewBase
             | swatchState.ToColorInput().Variant(ColorInputVariants.Swatch).Disabled()
             | nullSwatchState.ToColorInput().Variant(ColorInputVariants.Swatch)
             | nullSwatchState.ToColorInput().Variant(ColorInputVariants.Swatch).Invalid("Invalid color")
-            
             | Text.InlineCode("Ghost")
             | ghostState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Ghost()
             | ghostState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Ghost().Invalid("Invalid color")
