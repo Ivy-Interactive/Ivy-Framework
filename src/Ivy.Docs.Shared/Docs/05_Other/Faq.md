@@ -246,25 +246,32 @@ new Button("Save", handler).Primary()
 
 **Important:** There is no `ButtonVariant.Default`. Use `ButtonVariant.Primary` instead.
 
-## Does the App attribute have a layout parameter?
+## How do I create an Ivy App with the [App] attribute?
 
-No. The `[App]` attribute only supports `title`, `icon`, `group`, and `connection` named parameters. Layout is controlled within the `Build()` method using layout helpers:
+The `[App]` attribute marks a class as an Ivy application. Key parameters:
 
 ```csharp
-[App(title: "My App", icon: Icons.Layout)]
+[App(
+    title: "My App",           // Display name (optional, defaults to class name)
+    icon: Icons.Layout,        // Icon from the Icons enum (optional)
+    path: ["Category"],        // Navigation path/group (optional, array of strings)
+    description: "My app desc" // Description text (optional)
+)]
 public class MyApp : ViewBase
 {
     public override object? Build()
     {
-        // Layout is set here, not in the attribute
-        return Layout.TopCenter()
-            | (Layout.Vertical().Width(Size.Full().Max(200))
-                | Text.H1("My App")
-                | ...
-            );
+        return Text.H1("Hello World");
     }
 }
 ```
+
+**Key points:**
+- The class must inherit from `ViewBase` and override `Build()`
+- `path` controls navigation grouping (e.g., `["Settings", "Advanced"]` creates nested groups)
+- `icon` uses the `Icons` enum (e.g., `Icons.Settings`, `Icons.Users`, `Icons.Database`)
+- All parameters are optional — `[App]` with no arguments is valid
+- Other parameters: `id`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`
 
 ## How do I show an alert dialog to the user?
 
