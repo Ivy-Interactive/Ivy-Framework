@@ -25,6 +25,7 @@ interface ColorInputWidgetProps {
   variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch';
   scale?: Scales;
   foreground?: boolean;
+  ghost?: boolean;
 }
 
 // Hoisted color map for backend Colors enum
@@ -129,6 +130,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   events = [],
   variant = 'TextAndPicker',
   scale = Scales.Medium,
+  ghost = false,
 }) => {
   const eventHandler = useEventHandler();
   // Use derived state for display and input values
@@ -258,6 +260,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             disabled={disabled}
             className={cn(
               colorInputVariants({ scale }),
+              ghost && 'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
               invalid && inputStyles.invalidInput,
               (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
             )}
@@ -356,6 +359,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           disabled={disabled}
           className={cn(
             colorInputVariants({ scale }),
+            ghost && 'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
             invalid && inputStyles.invalidInput,
             (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
           )}
