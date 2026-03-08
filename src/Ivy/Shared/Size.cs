@@ -79,6 +79,10 @@ public record Size
         return new Size(SizeType.Fraction, value);
     }
 
+    public static Size Fraction(decimal value) => Fraction((float)value);
+
+    public static Size Fraction(double value) => Fraction((float)value);
+
     public static Size Full()
     {
         return new Size(SizeType.Full, null);
@@ -133,6 +137,10 @@ public record Size
     {
         return new Size(SizeType.FractionGap, value);
     }
+
+    public static Size FractionGap(decimal value) => FractionGap((float)value);
+
+    public static Size FractionGap(double value) => FractionGap((float)value);
 
     public static implicit operator string(Size size)
     {
