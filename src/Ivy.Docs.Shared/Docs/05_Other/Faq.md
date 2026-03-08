@@ -421,3 +421,23 @@ new Box(Text.P("A"))
 ```
 
 `BorderRadius.Full` makes the box fully rounded. When width and height are equal, this produces a perfect circle. Use `BorderRadius.Rounded` for rounded corners instead.
+
+## How do I format a NumberInput as currency, percent, or decimal?
+
+Use the `.FormatStyle()` fluent method with the `NumberFormatStyle` enum:
+
+```csharp
+var price = UseState(99.99m);
+var taxRate = UseState(0.08);
+
+// Currency formatting
+price.ToNumberInput().FormatStyle(NumberFormatStyle.Currency).Currency("USD")
+
+// Percent formatting
+taxRate.ToNumberInput().FormatStyle(NumberFormatStyle.Percent)
+
+// Decimal formatting (default)
+price.ToNumberInput().FormatStyle(NumberFormatStyle.Decimal)
+```
+
+Available `NumberFormatStyle` values: `Decimal` (default), `Currency`, `Percent`. For currency inputs, the recommended state type is `decimal`. Use `.Currency("USD")` to specify the currency code.
