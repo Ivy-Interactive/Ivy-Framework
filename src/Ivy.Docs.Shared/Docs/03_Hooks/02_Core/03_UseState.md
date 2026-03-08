@@ -82,6 +82,8 @@ public class DataService
 
 ### State Types and Patterns
 
+> **Tip:** Always use immutable types (e.g. records) with `UseState`. If you mutate an object in-place and call `.Set()` with the same reference, the UI will **not** re-render because the reference hasn't changed. Instead, create a new instance (e.g. using `with` expressions on records) before calling `.Set()`.
+
 Ivy supports various state types including primitives, collections, complex objects, and nullable types. Each type has specific update patterns and considerations for optimal performance and maintainability:
 
 ```csharp demo-tabs
