@@ -398,3 +398,26 @@ new Table(
 ```
 
 **Important:** `Table` takes `TableRow[]`, NOT `string[]`. There is no `.Row()` method. For data-heavy tables with sorting, filtering, and pagination, use `.ToDataTable()` on `IQueryable<T>` instead.
+
+## How do I create a circular shape or circle in Ivy?
+
+There is no dedicated Shape or Circle widget. Use a `Box` with `BorderRadius.Full` and equal width and height to create a circle:
+
+```csharp
+// A colored circle
+new Box()
+    .Color(Colors.Primary)
+    .Width(Size.Px(36))
+    .Height(Size.Px(36))
+    .BorderRadius(BorderRadius.Full)
+
+// A circle with content centered inside
+new Box(Text.P("A"))
+    .Color(Colors.Slate)
+    .Width(Size.Px(48))
+    .Height(Size.Px(48))
+    .ContentAlign(Align.Center)
+    .BorderRadius(BorderRadius.Full)
+```
+
+`BorderRadius.Full` makes the box fully rounded. When width and height are equal, this produces a perfect circle. Use `BorderRadius.Rounded` for rounded corners instead.
