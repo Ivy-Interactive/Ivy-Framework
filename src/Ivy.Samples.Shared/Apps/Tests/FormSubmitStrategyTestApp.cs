@@ -2,7 +2,7 @@ namespace Ivy.Samples.Shared.Apps.Tests;
 
 public record SettingsModel(string Name, string Theme, int FontSize);
 
-[App(icon: Icons.Settings, path: ["Tests"], isVisible: true)]
+[App(icon: Icons.Settings, path: ["Tests"], isVisible: false)]
 public class FormSubmitStrategyTestApp : SampleBase
 {
     protected override object? BuildSample()
