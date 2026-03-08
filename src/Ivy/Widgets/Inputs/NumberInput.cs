@@ -216,7 +216,12 @@ public static class NumberInputExtensions
 
     public static NumberInputBase FormatStyle(this NumberInputBase widget, NumberFormatStyle formatStyle)
     {
-        return widget with { FormatStyle = formatStyle };
+        var result = widget with { FormatStyle = formatStyle };
+        if (formatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(result.Currency))
+        {
+            result = result with { Currency = "USD" };
+        }
+        return result;
     }
 
     public static NumberInputBase Currency(this NumberInputBase widget, string currency)
