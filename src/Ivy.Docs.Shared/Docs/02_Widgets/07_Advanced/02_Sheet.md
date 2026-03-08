@@ -271,7 +271,7 @@ public class KanbanWithSheetExample : ViewBase
                 orderSelector: t => t.Priority)
             .CardBuilder(task => new Card(task.Title, task.Description)
                 .OnClick(() => showEdit(task.Id)))
-            .HandleMove(moveData =>
+            .OnMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 if (string.IsNullOrEmpty(taskId)) return;

@@ -20,7 +20,7 @@ public class DataTableBuilder<TModel>(
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
     private MenuItem[]? _menuItemRowActions;
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
-    private readonly Dictionary<string, Action<object>> _cellActions = [];
+    private readonly Dictionary<string, EventHandler<object>> _cellActions = [];
     private RefreshToken? _refreshToken;
 
     private readonly string? _idColumnName =
@@ -258,7 +258,7 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
-    public DataTableBuilder<TModel> HandleCellAction(Expression<Func<TModel, object>> field, Action<object> action)
+    public DataTableBuilder<TModel> OnCellAction(Expression<Func<TModel, object>> field, EventHandler<object> action)
     {
         var columnName = Utils.GetNameFromMemberExpression(field.Body);
         _cellActions[columnName] = action;
@@ -311,7 +311,7 @@ public class DataTableBuilder<TModel>(
                 var args = e.Value;
                 if (_cellActions.TryGetValue(args.ColumnName, out var action))
                 {
-                    action(args.CellValue!);
+                    await action.Invoke(args.CellValue!);
                 }
 
                 // Call original handler if it exists
