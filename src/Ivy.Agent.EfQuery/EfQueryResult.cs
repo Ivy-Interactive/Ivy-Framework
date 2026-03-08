@@ -8,4 +8,5 @@ public record EfQueryResult
     public long InputTokens { get; init; }
     public long OutputTokens { get; init; }
     public int Iterations { get; init; }
+    public string? FailureReason { get; init; }
 }

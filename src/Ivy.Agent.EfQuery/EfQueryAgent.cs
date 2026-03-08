@@ -39,9 +39,24 @@ public class EfQueryAgent<TContext>(IChatClient chatClient, IDbContextFactory<TC
         totalIterations++;
 
         // Step C: SQL Agent
-        var (sql, sqlData, sqlUsage, sqlIterations) = await RunSqlAgentAsync(schema, plan, context, ct);
+        var (sql, sqlData, failureReason, sqlUsage, sqlIterations) = await RunSqlAgentAsync(schema, plan, context, ct);
         TrackUsage(sqlUsage, ref totalInputTokens, ref totalOutputTokens);
         totalIterations += sqlIterations;
+
+        // If the SQL agent reported failure, return early
+        if (failureReason != null)
+        {
+            return new EfQueryResult
+            {
+                Xaml = "",
+                Sql = "",
+                Plan = plan,
+                InputTokens = totalInputTokens,
+                OutputTokens = totalOutputTokens,
+                Iterations = totalIterations,
+                FailureReason = failureReason
+            };
+        }
 
         // Step D: XAML Agent
         var (xaml, xamlUsage, xamlIterations) = await RunXamlAgentAsync(plan, sql, sqlData, ct);
@@ -84,14 +99,25 @@ public class EfQueryAgent<TContext>(IChatClient chatClient, IDbContextFactory<TC
         return (response.Text ?? "", response.Usage);
     }
 
-    private async Task<(string Sql, string DataPreview, UsageDetails? Usage, int Iterations)> RunSqlAgentAsync(
+    private async Task<(string Sql, string DataPreview, string? FailureReason, UsageDetails? Usage, int Iterations)> RunSqlAgentAsync(
         string schema, string plan, DbContext context, CancellationToken ct)
     {
         string finalSql = "";
         string finalDataPreview = "";
+        string? failureReason = null;
         UsageDetails? totalUsage = null;
 
         var finished = false;
+
+        var sqlRules = """
+            SQL Rules:
+            - Only SELECT statements are allowed. No INSERT/UPDATE/DELETE/DROP/ALTER/CREATE/MERGE.
+            - Use JOINs to combine related tables when needed.
+            - Use table aliases for readability.
+            - Limit results to 1000 rows maximum.
+            - Use the correct SQL dialect for the database shown in the schema header.
+            - For enum columns, use the integer values shown in ENUM VALUES mappings.
+            """;
 
         var chatOptions = new ChatOptions
         {
@@ -107,7 +133,7 @@ public class EfQueryAgent<TContext>(IChatClient chatClient, IDbContextFactory<TC
                         finalSql = sql;
                         var preview = FormatDataPreview(result);
                         finalDataPreview = preview;
-                        return preview;
+                        return $"{preview}\n\n{sqlRules}";
                     },
                     name: "execute_sql",
                     description: "Execute a read-only SQL SELECT query and return results. Use this to test your query."
@@ -121,6 +147,16 @@ public class EfQueryAgent<TContext>(IChatClient chatClient, IDbContextFactory<TC
                     },
                     name: "finish_sql",
                     description: "Call this when you are satisfied with the SQL query results. Pass the final SQL."
+                ),
+                AIFunctionFactory.Create(
+                    (string reason) =>
+                    {
+                        failureReason = reason;
+                        finished = true;
+                        return "Failure reported.";
+                    },
+                    name: "report_failure",
+                    description: "Call this if you cannot construct a valid query for the user's request. Provide a clear reason why."
                 )
             ]
         };
@@ -129,8 +165,8 @@ public class EfQueryAgent<TContext>(IChatClient chatClient, IDbContextFactory<TC
         {
             new(AiChatRole.System, $"""
                 You are a SQL expert. Write a read-only SQL SELECT query based on the plan.
-                Only SELECT statements are allowed. No INSERT/UPDATE/DELETE/DROP/ALTER/CREATE.
-                Limit results to 1000 rows.
+
+                {sqlRules}
 
                 Database schema:
                 {schema}
@@ -139,6 +175,7 @@ public class EfQueryAgent<TContext>(IChatClient chatClient, IDbContextFactory<TC
                 {plan}
 
                 Use the execute_sql tool to test your query. When satisfied with results, call finish_sql with the final SQL.
+                If the query is impossible given the schema, call report_failure with a clear explanation.
                 """),
             new(AiChatRole.User, "Write and execute the SQL query described in the plan.")
         };
@@ -157,7 +194,7 @@ public class EfQueryAgent<TContext>(IChatClient chatClient, IDbContextFactory<TC
                 "Please call finish_sql when you are satisfied with the query, or try a different query."));
         }
 
-        return (finalSql, finalDataPreview, totalUsage, iterations);
+        return (finalSql, finalDataPreview, failureReason, totalUsage, iterations);
     }
 
     private async Task<(string Xaml, UsageDetails? Usage, int Iterations)> RunXamlAgentAsync(

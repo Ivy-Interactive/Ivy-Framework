@@ -22,7 +22,7 @@ internal static class SqlExecutor
         if (connection.State != ConnectionState.Open)
             await connection.OpenAsync(ct);
 
-        await using var transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
+        await using var transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadUncommitted, ct);
 
         try
         {
@@ -53,8 +53,6 @@ internal static class SqlExecutor
             if (await reader.ReadAsync(ct))
                 totalRowCount = -1; // indicates more rows exist
 
-            await transaction.RollbackAsync(ct);
-
             return new SqlExecutionResult
             {
                 Columns = columns,
@@ -64,7 +62,6 @@ internal static class SqlExecutor
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync(ct);
             return new SqlExecutionResult
             {
                 Columns = [],
@@ -72,6 +69,10 @@ internal static class SqlExecutor
                 TotalRowCount = 0,
                 Error = ex.Message
             };
+        }
+        finally
+        {
+            await transaction.RollbackAsync(ct);
         }
     }
 }
