@@ -21,7 +21,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
     private Expression<Func<TModel, object?>>? _cardOrderBySelector;
     private bool _cardOrderDescending;
     private Func<TModel, object>? _customCardRenderer;
-    private EventHandler<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>>? _onMove;
+    private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
     private object? _empty;
     private Size? _width = Size.Full();
     private Size? _height = Size.Full();
@@ -208,7 +208,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
 
                     if (e.Value.ToColumn is TGroupKey groupKey)
                     {
-                        return _onMove.Invoke(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
+                        return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
                             e.EventName,
                             e.Sender,
                             (e.Value.CardId, groupKey, e.Value.TargetIndex)));
@@ -217,7 +217,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
                     try
                     {
                         var convertedKey = (TGroupKey)Convert.ChangeType(e.Value.ToColumn, typeof(TGroupKey));
-                        return _onMove.Invoke(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
+                        return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
                                 e.EventName,
                                 e.Sender,
                             (e.Value.CardId, convertedKey, e.Value.TargetIndex)));
