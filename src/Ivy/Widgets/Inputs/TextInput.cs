@@ -64,7 +64,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnSubmit { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnSubmit { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
@@ -229,18 +229,18 @@ public static class TextInputExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static TextInputBase HandleSubmit(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onSubmit)
+    public static TextInputBase OnSubmit(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onSubmit)
     {
         return widget with { OnSubmit = onSubmit };
     }
 
-    public static TextInputBase HandleSubmit(this TextInputBase widget, Action<Event<IAnyInput>> onSubmit)
+    public static TextInputBase OnSubmit(this TextInputBase widget, Action<Event<IAnyInput>> onSubmit)
     {
-        return widget.HandleSubmit(onSubmit.ToValueTask());
+        return widget.OnSubmit(onSubmit.ToValueTask());
     }
 
-    public static TextInputBase HandleSubmit(this TextInputBase widget, Action onSubmit)
+    public static TextInputBase OnSubmit(this TextInputBase widget, Action onSubmit)
     {
-        return widget.HandleSubmit(_ => { onSubmit(); return ValueTask.CompletedTask; });
+        return widget.OnSubmit(_ => { onSubmit(); return ValueTask.CompletedTask; });
     }
 }

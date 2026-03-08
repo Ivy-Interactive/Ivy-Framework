@@ -23,7 +23,7 @@ public record MenuItem(
     string? Shortcut = null,
     bool Expanded = false,
     string? Tooltip = null,
-    Action<MenuItem>? OnSelect = null,
+    EventHandler<MenuItem>? OnSelect = null,
     string[]? SearchHints = null,
     string? Path = null)
 {
@@ -38,9 +38,9 @@ public record MenuItem(
     public static MenuItem Default(Icons icon, object? tag = null)
         => new(Variant: MenuItemVariant.Default, Icon: icon, Tag: tag ?? icon.ToString());
 
-    private readonly Action<MenuItem>? _onSelect = OnSelect;
+    private readonly EventHandler<MenuItem>? _onSelect = OnSelect;
     [System.Text.Json.Serialization.JsonIgnore]
-    public Action<MenuItem>? OnSelect
+    public EventHandler<MenuItem>? OnSelect
     {
         get => _onSelect;
         init
@@ -120,7 +120,7 @@ public static class MenuItemExtensions
                 {
                     return null;
                 }
-                return () => item.OnSelect(item);
+                return () => item.OnSelect.Invoke(item);
             }
         }
         return null;
@@ -171,14 +171,14 @@ public static class MenuItemExtensions
         return menuItem with { Children = children };
     }
 
-    public static MenuItem HandleSelect(this MenuItem menuItem, Action<MenuItem> onSelect)
+    public static MenuItem OnSelect(this MenuItem menuItem, Action<MenuItem> onSelect)
     {
-        return menuItem with { OnSelect = onSelect };
+        return menuItem with { OnSelect = new Func<MenuItem, ValueTask>(m => { onSelect(m); return ValueTask.CompletedTask; }) };
     }
 
-    public static MenuItem HandleSelect(this MenuItem menuItem, Action onSelect)
+    public static MenuItem OnSelect(this MenuItem menuItem, Action onSelect)
     {
-        return menuItem with { OnSelect = _ => onSelect() };
+        return menuItem with { OnSelect = new Func<MenuItem, ValueTask>(_ => { onSelect(); return ValueTask.CompletedTask; }) };
     }
 
     public static MenuItem SearchHints(this MenuItem menuItem, string[] searchHints)

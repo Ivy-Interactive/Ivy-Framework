@@ -383,14 +383,14 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var commonMenuItems = new[]
         {
             MenuItem.Default("Star on Github").Tag("$github").Icon(Icons.Github)
-                .HandleSelect(() => client.OpenUrl(Resources.IvyGitHubUrl)),
+                .OnSelect(() => client.OpenUrl(Resources.IvyGitHubUrl)),
             MenuItem.Default("Theme")
                 .Tag("$theme")
                 .Icon(Icons.SunMoon)
                 .Children(
-                    MenuItem.Checkbox("Light").Icon(Icons.Sun).HandleSelect(() => client.SetThemeMode(ThemeMode.Light)),
-                    MenuItem.Checkbox("Dark").Icon(Icons.Moon).HandleSelect(() => client.SetThemeMode(ThemeMode.Dark)),
-                    MenuItem.Checkbox("System").Icon(Icons.SunMoon).HandleSelect(() => client.SetThemeMode(ThemeMode.System))
+                    MenuItem.Checkbox("Light").Icon(Icons.Sun).OnSelect(() => client.SetThemeMode(ThemeMode.Light)),
+                    MenuItem.Checkbox("Dark").Icon(Icons.Moon).OnSelect(() => client.SetThemeMode(ThemeMode.Dark)),
+                    MenuItem.Checkbox("System").Icon(Icons.SunMoon).OnSelect(() => client.SetThemeMode(ThemeMode.System))
                 )
         };
 
@@ -431,7 +431,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 .Top();
 
             footer = footer.Items(settings.FooterMenuItemsTransformer([
-                ..commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).HandleSelect(onLogout)
+                ..commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).OnSelect(onLogout)
             ], navigator));
         }
         else
@@ -445,7 +445,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     .Variant(ButtonVariant.Ghost).Width(Size.Full());
 
             var footerMenuItems = isLoggedIn
-                ? [.. commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).HandleSelect(onLogout)]
+                ? [.. commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).OnSelect(onLogout)]
                 : commonMenuItems;
 
             footer = new DropDownMenu(
