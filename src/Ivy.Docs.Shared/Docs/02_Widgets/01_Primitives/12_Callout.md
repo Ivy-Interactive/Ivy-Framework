@@ -178,6 +178,41 @@ public class ComplexContentCalloutView : ViewBase
 }
 ```
 
+### Closable callouts
+
+When you set an `OnClose` handler, the callout shows a close (X) button in the top-right corner. Clicking it fires the handler so you can hide the callout (e.g. by updating state).
+
+```csharp demo-tabs
+public class ClosableCalloutView : ViewBase
+{
+    public override object? Build()
+    {
+        var showUpdateBanner = UseState(true);
+        var showTrialBanner = UseState(true);
+
+        return Layout.Vertical().Gap(6)
+            | (showUpdateBanner.Value
+                ? Callout.Info("A new version is available. Refresh to update.", "Update Available")
+                    .OnClose(() => showUpdateBanner.Set(false))
+                : null)
+            | (showTrialBanner.Value
+                ? Callout.Warning("Your trial expires in 3 days.")
+                    .OnClose(() => showTrialBanner.Set(false))
+                : null)
+            | (showUpdateBanner.Value || showTrialBanner.Value
+                ? null
+                : Layout.Vertical().Gap(4)
+                    | Text.P("All banners dismissed.").Muted()
+                    | new Button("Show callouts again", () =>
+                        {
+                            showUpdateBanner.Set(true);
+                            showTrialBanner.Set(true);
+                        })
+                        .Variant(ButtonVariant.Secondary));
+    }
+}
+```
+
 ### Form Integration
 
 Use callouts to contain [forms](../../01_Onboarding/02_Concepts/08_Forms.md) and provide context:

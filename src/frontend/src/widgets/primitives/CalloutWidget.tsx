@@ -100,7 +100,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
         <button
           type="button"
           onClick={() => eventHandler('OnClose', id, [])}
-          className="absolute top-3 right-3 p-1 rounded-md opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="absolute top-3 right-3 p-1 rounded-md opacity-70 hover:opacity-100"
           aria-label="Dismiss"
         >
           <X className="h-4 w-4" />
