@@ -45,6 +45,8 @@ public record Callout : WidgetBase<Callout>
 
     [Prop] public Icons? Icon { get; set; }
 
+    [Event] public EventHandler<Event<Callout>>? OnClose { get; set; }
+
     public static Callout Info(string? description = null, string? title = null) => new(description, title);
 
     public static Callout Warning(string? description = null, string? title = null) => new(description, title, CalloutVariant.Warning);
@@ -87,4 +89,7 @@ public static class CalloutExtensions
         }
         return callout;
     }
+
+    public static Callout OnClose(this Callout callout, Action onClose) =>
+        callout with { OnClose = new(_ => { onClose(); return ValueTask.CompletedTask; }) };
 }
