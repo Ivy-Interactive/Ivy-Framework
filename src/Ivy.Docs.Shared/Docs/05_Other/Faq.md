@@ -366,3 +366,28 @@ return Layout.Vertical()
     | new Button("Delete", _ => DeleteItem(itemId)).Destructive()
     | alertView; // IMPORTANT: must include alertView in the view tree
 ```
+
+## How do I create a simple Table with headers and rows in Ivy?
+
+For simple tabular display, use `.ToTable()` on a collection of records:
+
+```csharp
+var data = new[]
+{
+    new { Name = "Alice", Age = 30, City = "NYC" },
+    new { Name = "Bob", Age = 25, City = "LA" },
+};
+return data.ToTable();
+```
+
+For manual Table construction with `TableRow` and `TableCell`:
+
+```csharp
+new Table(
+    new TableRow(new TableCell("Name"), new TableCell("Age")).IsHeader(),
+    new TableRow(new TableCell("Alice"), new TableCell("30")),
+    new TableRow(new TableCell("Bob"), new TableCell("25"))
+)
+```
+
+**Important:** `Table` takes `TableRow[]`, NOT `string[]`. There is no `.Row()` method. For data-heavy tables with sorting, filtering, and pagination, use `.ToDataTable()` on `IQueryable<T>` instead.
