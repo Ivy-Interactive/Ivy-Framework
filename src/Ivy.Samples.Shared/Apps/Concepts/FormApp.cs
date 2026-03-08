@@ -290,7 +290,6 @@ public record FormValidationExamples
     public string? Comments { get; init; }
 }
 
-[App(icon: Icons.ListChecks, path: ["Concepts"], searchHints: ["allowed-values", "select", "scaffolding", "dropdown"])]
 public class AllowedValuesFormApp : ViewBase
 {
     public class SettingsModel
@@ -319,7 +318,7 @@ public class AllowedValuesFormApp : ViewBase
     }
 }
 
-[App(icon: Icons.Clipboard, path: ["Concepts"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls", "scaffolding", "forms"])]
+[App(icon: Icons.Clipboard, path: ["Concepts"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls", "scaffolding", "forms", "allowed-values", "select", "dropdown"])]
 public class FormApp : SampleBase
 {
     protected override object? BuildSample()
@@ -327,7 +326,8 @@ public class FormApp : SampleBase
         return Layout.Tabs(
             new Tab("Form", new FormExample()),
             new Tab("Scaffolding", new FormScaffoldingExample()),
-            new Tab("Validation", new FormValidationExample())
+            new Tab("Validation", new FormValidationExample()),
+            new Tab("Allowed Values", new AllowedValuesFormApp())
         ).Variant(TabsVariant.Content);
     }
 }
