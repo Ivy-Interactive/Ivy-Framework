@@ -66,7 +66,7 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 /// <summary>
 /// A dropdown list for selecting one or more options.
 /// </summary>
-public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectInput
+public record SelectInput<TValue> : SelectInputBase, IInput<TValue>
 {
     [OverloadResolutionPriority(1)]
     public SelectInput(IAnyState state, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariants variant = SelectInputVariants.Select, bool selectMany = false)
@@ -144,6 +144,7 @@ public static class SelectInputExtensions
 
         SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, state, options, placeholder, disabled, variant, selectMany)!;
         input.Nullable = type.IsNullableType();
+        
         return input;
     }
 
@@ -243,5 +244,4 @@ public static class SelectInputExtensions
         }
         throw new InvalidOperationException($"Cannot set Value: widget is not SelectInput<{typeof(T).Name}>");
     }
-
 }

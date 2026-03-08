@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Force.DeepCloner;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -17,18 +18,20 @@ public class FormBuilder<TModel> : ViewBase
     internal Scale _scale = Ivy.Scale.Medium;
     internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
-    internal FormSubmitStrategy _submitStrategy = FormSubmitStrategy.OnSubmit;
+    internal FormSubmitStrategy _submitStrategy;
     internal Func<TModel, Task>? _onSubmit;
 
     public FormBuilder(
         IState<TModel> model,
         string submitTitle = "Save",
-        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur)
+        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
+        FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit)
     {
         _model = model;
         _fields = FormScaffolder.ScaffoldFields<TModel>(_model.GetStateType());
         SubmitTitle(submitTitle);
         _validationStrategy = validationStrategy;
+        _submitStrategy = submitStrategy;
     }
 
     internal static Func<bool, Button> DefaultSubmitBuilder(string title) => (isLoading) => new Button(title).Loading(isLoading).Disabled(isLoading);
