@@ -22,7 +22,7 @@ interface TextRun {
 interface RichTextBlockWidgetProps {
   id: string;
   runs?: TextRun[];
-  stream?: string;
+  stream?: { id: string };
   textAlignment?: TextAlignment;
   noWrap?: boolean;
   overflow?: Overflow;
@@ -52,7 +52,7 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
     setStreamedRuns(prev => [...prev, run]);
   }, []);
 
-  useStream<TextRun>(stream, onData);
+  useStream<TextRun>(stream?.id, onData);
 
   const allRuns = [...runs, ...streamedRuns];
 
