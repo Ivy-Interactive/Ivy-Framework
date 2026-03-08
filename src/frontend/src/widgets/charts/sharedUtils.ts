@@ -35,16 +35,16 @@ export { generateTextStyle, generateAxisLabelStyle, type ChartThemeColors };
 
 export const getAxisDomainBound = (
   type: 'min' | 'max',
-  rawValue: any,
+  rawValue: unknown,
   allowDataOverflow: boolean,
   transform: (v: number) => number = v => v
 ) => {
   if (rawValue == null) return undefined;
 
-  const extractDomainValue = (val: any) => {
+  const extractDomainValue = (val: unknown) => {
     if (val && typeof val === 'object') {
-      if ('value' in val) return val.value;
-      if ('Value' in val) return val.Value;
+      if ('value' in val) return (val as Record<string, unknown>).value;
+      if ('Value' in val) return (val as Record<string, unknown>).Value;
     }
     return val;
   };
@@ -52,7 +52,7 @@ export const getAxisDomainBound = (
   const extracted = extractDomainValue(rawValue);
   if (extracted === 'auto' || extracted == null) return undefined; // Let ECharts auto-scale
 
-  const parseVal = (v: any) => {
+  const parseVal = (v: unknown) => {
     if (v === 'dataMin' || v === 'dataMax') return v;
     const num = Number(v);
     return isNaN(num) ? undefined : transform(num);
