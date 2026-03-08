@@ -315,6 +315,26 @@ posts.ToDataTable()
 
 This also simplifies the DataTable configuration since you don't need to `.Hidden()` navigation properties or other fields you don't want displayed.
 
+## What are the available BadgeVariant values in Ivy?
+
+The `BadgeVariant` enum has these values: `Primary`, `Destructive`, `Outline`, `Secondary`, `Success`, `Warning`, `Info`.
+
+Usage:
+```csharp
+// Via constructor:
+new Badge("Status", BadgeVariant.Success)
+
+// Via fluent Variant() method:
+new Badge("Status").Variant(BadgeVariant.Warning)
+
+// Via shortcut extension methods:
+new Badge("Status").Success()
+new Badge("Status").Destructive()
+new Badge("Status").Info()
+```
+
+There is no `BadgeVariant.Default`. Use `BadgeVariant.Primary` or omit the variant for the default appearance.
+
 ## How do I show a delete confirmation before deleting an entity?
 
 Use `UseAlert()` for confirmation dialogs:
