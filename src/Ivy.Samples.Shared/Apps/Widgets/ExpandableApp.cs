@@ -60,9 +60,9 @@ public class ExpandableApp : SampleBase
         ).Large();
 
         var switchInHeaderExpandable1 = new Expandable(
-            Layout.Horizontal()
+            Layout.Horizontal().Align(Align.Left)
             | headerSwitchState1.ToBoolInput(variant: BoolInputVariants.Switch)
-            | (Layout.Horizontal()
+            | (Layout.Horizontal().Align(Align.Left)
                | Text.Block("Apps")
                | new Icon(Icons.ChevronRight)
                | new Icon(Icons.Paperclip)
@@ -71,9 +71,9 @@ public class ExpandableApp : SampleBase
         ).Disabled(true);
 
         var switchInHeaderExpandable2 = new Expandable(
-            Layout.Horizontal()
+            Layout.Horizontal().Align(Align.Left)
             | headerSwitchState2.ToBoolInput(variant: BoolInputVariants.Switch)
-            | (Layout.Horizontal()
+            | (Layout.Horizontal().Align(Align.Left)
                | Text.Block("Apps")
                | new Icon(Icons.ChevronRight)
                | new Icon(Icons.MessageCircle)
@@ -82,9 +82,9 @@ public class ExpandableApp : SampleBase
         ).Disabled(true);
 
         var switchInHeaderExpandable3 = new Expandable(
-            Layout.Horizontal()
+            Layout.Horizontal().Align(Align.Left)
             | headerSwitchState3.ToBoolInput(variant: BoolInputVariants.Switch)
-            | (Layout.Horizontal()
+            | (Layout.Horizontal().Align(Align.Left)
                | Text.Block("Apps")
                | new Icon(Icons.ChevronRight)
                | new Icon(Icons.Bug)
@@ -93,9 +93,9 @@ public class ExpandableApp : SampleBase
         );
 
         var switchInHeaderExpandable4 = new Expandable(
-            Layout.Horizontal()
+            Layout.Horizontal().Align(Align.Left)
             | headerSwitchState4.ToBoolInput(variant: BoolInputVariants.Switch)
-            | (Layout.Horizontal()
+            | (Layout.Horizontal().Align(Align.Left)
                | Text.Block("Settings")
                | new Icon(Icons.ChevronRight)
                | new Icon(Icons.Users)
