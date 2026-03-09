@@ -30,7 +30,20 @@ public class GridView : ViewBase, IStateless
 
     public GridView Gap(int gap)
     {
-        _definition.Gap = gap;
+        _definition.RowGap = gap;
+        _definition.ColumnGap = gap;
+        return this;
+    }
+
+    public GridView RowGap(int gap)
+    {
+        _definition.RowGap = gap;
+        return this;
+    }
+
+    public GridView ColumnGap(int gap)
+    {
+        _definition.ColumnGap = gap;
         return this;
     }
 
