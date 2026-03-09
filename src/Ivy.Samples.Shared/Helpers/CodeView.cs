@@ -1,5 +1,4 @@
-﻿using Ivy;
-using Ivy.Shared;
+using Ivy;
 
 namespace Ivy.Samples.Shared.Helpers;
 
@@ -24,7 +23,7 @@ public class CodeView(Type type) : ViewBase
             }
         }
 
-        return new Code(code, Languages.Csharp)
+        return new CodeBlock(code, Languages.Csharp)
             .Height(Size.Full());
     }
 }

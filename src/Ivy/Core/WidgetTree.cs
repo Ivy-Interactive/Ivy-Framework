@@ -329,7 +329,13 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             if (view is IStateless)
             {
                 //Small optimization for stateless views to skip context creation - not sure this really matters
+#if DEBUG
+                AbstractWidget.CurrentViewCallSite.Value = view.CallSite;
+#endif
                 node = BuildObject(view.Build(), treePath.Clone(), 0, view.Id, ancestorContext, isHotReload);
+#if DEBUG
+                AbstractWidget.CurrentViewCallSite.Value = null;
+#endif
             }
             else
             {
@@ -351,14 +357,26 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                 view.BeforeBuild(context);
 
                 object? buildResult;
+#if DEBUG
+                AbstractWidget.CurrentViewCallSite.Value = view.CallSite;
                 try
                 {
-                    buildResult = view.Build();
+#endif
+                    try
+                    {
+                        buildResult = view.Build();
+                    }
+                    catch (Exception e)
+                    {
+                        buildResult = e;
+                    }
+#if DEBUG
                 }
-                catch (Exception e)
+                finally
                 {
-                    buildResult = e;
+                    AbstractWidget.CurrentViewCallSite.Value = null;
                 }
+#endif
 
                 node = BuildObject(buildResult, treePath.Clone(), 0, view.Id, context, isHotReload);
                 view.AfterBuild();
@@ -425,6 +443,9 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         treePath.Push(widget, index);
 
         widget.Id = treePath.GenerateId();
+#if DEBUG
+        widget.Path = treePath.ToString();
+#endif
 
         var children = new List<WidgetTreeNode>();
         if (widget.Children == null!) widget.Children = [];
@@ -491,19 +512,38 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         }
     }
 
+    // Sync version for use during tree building - disposes fire-and-forget
     private void DestroyNode(string nodeId, string? skipViewId = null)
     {
         if (_nodes.TryGetValue(nodeId, out var node))
         {
             if (nodeId != skipViewId)
             {
-                node.Dispose();
+                _ = node.DisposeAsync(); // Fire and forget
                 _nodes.Remove(nodeId);
                 _parents.Remove(nodeId);
             }
             foreach (var child in node.Children)
             {
                 DestroyNode(child.Id);
+            }
+        }
+    }
+
+    // Async version for proper cleanup on shutdown
+    private async ValueTask DestroyNodeAsync(string nodeId, string? skipViewId = null)
+    {
+        if (_nodes.TryGetValue(nodeId, out var node))
+        {
+            if (nodeId != skipViewId)
+            {
+                await node.DisposeAsync();
+                _nodes.Remove(nodeId);
+                _parents.Remove(nodeId);
+            }
+            foreach (var child in node.Children)
+            {
+                await DestroyNodeAsync(child.Id);
             }
         }
     }
@@ -556,14 +596,14 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     public IDisposable Subscribe(IObserver<WidgetTreeChanged[]> observer) => _treeChangedSubject.Subscribe(observer);
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _buildRequestedSemaphore.Wait();
+        await _buildRequestedSemaphore.WaitAsync();
         try
         {
             if (NodeTree != null)
             {
-                DestroyNode(NodeTree!.Id);
+                await DestroyNodeAsync(NodeTree!.Id);
             }
             _disposables.Dispose();
             _treeChangedSubject.Dispose();

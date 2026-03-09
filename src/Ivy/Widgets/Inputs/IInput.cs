@@ -1,13 +1,13 @@
 using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
-namespace Ivy.Widgets.Inputs;
+namespace Ivy;
 
 public interface IInput<T> : IAnyInput
 {
     [Prop] public T Value { get; }
 
-    [Event] public Func<Event<IInput<T>, T>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<T>, T>>? OnChange { get; }
 
     public static IInput<T> operator |(IInput<T> input, object child)
     {

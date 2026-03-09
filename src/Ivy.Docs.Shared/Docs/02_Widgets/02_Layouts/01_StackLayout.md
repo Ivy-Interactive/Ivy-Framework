@@ -14,7 +14,7 @@ searchHints:
 StackLayout arranges child elements in either a vertical or horizontal stack with configurable spacing, alignment, and styling options. It's the foundation for creating linear [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) where elements are arranged sequentially in a single direction.
 </Ingress>
 
-The `StackLayout` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is the core building block for most layout compositions, offering flexible configuration for orientation, gaps between elements, padding, margins, [background colors](../../04_ApiReference/IvyShared/Colors.md), and content [alignment](../../04_ApiReference/IvyShared/Align.md). It can be used to create simple stacks or as the foundation for more complex layout systems.
+The `StackLayout` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is the core building block for most layout compositions, offering flexible configuration for orientation, gaps between elements, padding, margins, [background colors](../../04_ApiReference/Ivy/Colors.md), and content [alignment](../../04_ApiReference/Ivy/Align.md). It can be used to create simple stacks or as the foundation for more complex layout systems.
 
 ## Basic Usage
 
@@ -58,7 +58,7 @@ public class StackLayoutExample : ViewBase
 
 ## Advanced Features
 
-Complete example showing padding, margins, background colors, and parent padding control. Use [Thickness](../../04_ApiReference/IvyShared/Thickness.md) for padding and margin, and [Colors](../../04_ApiReference/IvyShared/Colors.md) for background. Alignment options are in [Align](../../04_ApiReference/IvyShared/Align.md):
+Complete example showing padding, margins, background colors, and parent padding control. Use [Thickness](../../04_ApiReference/Ivy/Thickness.md) for padding and margin, and [Colors](../../04_ApiReference/Ivy/Colors.md) for background. Alignment options are in [Align](../../04_ApiReference/Ivy/Align.md):
 
 ```csharp demo-tabs
 public class AdvancedStackLayoutExample : ViewBase

@@ -1,11 +1,6 @@
-using Ivy.Shared;
-using Ivy.Samples.Shared.Apps;
-using Ivy.Views;
-using Ivy.Widgets;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Airplay, path: ["Tests"], searchHints: ["typography", "text", "markdown", "comparison"])]
+[App(icon: Icons.Airplay, path: ["Tests"], isVisible: false, searchHints: ["typography", "text", "markdown", "comparison"])]
 public class TypographyComparisonApp : SampleBase
 {
     protected override object? BuildSample()

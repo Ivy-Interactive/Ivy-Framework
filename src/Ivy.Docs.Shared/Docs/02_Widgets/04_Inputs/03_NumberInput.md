@@ -48,7 +48,7 @@ The `NumberInput` allows users to enter numeric values directly.
 ### Slider
 
 This variant helps create a slider that changes the value as the slider is pulled to the right.
-This creates the `NumberInputs.Slider` variant.
+This creates the `NumberInputVariants.Slider` variant.
 
 The following demo shows how a slider can be used to give a visual clue.
 
@@ -70,7 +70,7 @@ public class NumberSliderInput : ViewBase
                      .Max(500.0)
                      .Precision(2)
                      .Step(0.5)
-                     .Variant(NumberInputs.Slider)
+                     .Variant(NumberInputVariants.Slider)
                      .WithField()
                      .Label("Tapes")
                 | Text.Block(cart);
@@ -83,7 +83,7 @@ public class NumberSliderInput : ViewBase
 To enable users to enter money amounts, this variant should be used. The extension function `ToMoneyInput`
 should be used to create this variant. This is the idiomatic way to use Ivy.
 
-The following demo uses `NumberInputs.Number` with `NumberFormatStyle.Currency` to create
+The following demo uses `NumberInputVariants.Number` with `NumberFormatStyle.Currency` to create
 `NumberInput`s that can take money inputs. `ToMoneyInput` hides all these complexities.
 
 ```csharp demo-below
@@ -200,6 +200,41 @@ public class FormatStyleDemos : ViewBase
 
 ```
 
+## Prefix and Suffix
+
+In certain scenarios, it is beneficial to prepend or append static content—such as text fragments or icons—to an input field. This practice is particularly useful for displaying a currency symbol, a unit label, or an icon that denotes the expected input.
+
+```csharp demo-below
+public class NumberPrefixSuffixDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var price = UseState(99.99m);
+        var weight = UseState(5.5);
+        var temperature = UseState(22);
+
+        return Layout.Vertical()
+                | price.ToNumberInput()
+                       .Prefix("$")
+                       .Precision(2)
+                       .WithField()
+                       .Label("Price")
+                | weight.ToNumberInput()
+                        .Suffix("kg")
+                        .Precision(1)
+                        .WithField()
+                        .Label("Weight")
+                | temperature.ToNumberInput()
+                             .Prefix(Icons.Thermometer)
+                             .Suffix("°C")
+                             .WithField()
+                             .Label("Temperature");
+    }
+}
+```
+
+The `Prefix` and `Suffix` methods accept either a `string` or an `Icons` value, thereby providing flexibility for augmenting the contextual information of the input.
+
 ## Event Handling
 
 `NumberInput`s can handle change and blur events:
@@ -259,7 +294,7 @@ public class GroceryAppDemo : ViewBase
                    // Since it is disabled, no need to have an onChange event
                    | new NumberInput<decimal>(eggs.Value * eggCost + breadCost * breads.Value,_ => { })
                                      .Disabled()
-                                     .Variant(NumberInputs.Number)
+                                     .Variant(NumberInputVariants.Number)
                                      .Precision(2)
                                      .FormatStyle(NumberFormatStyle.Currency)
                                      .Currency("EUR"));

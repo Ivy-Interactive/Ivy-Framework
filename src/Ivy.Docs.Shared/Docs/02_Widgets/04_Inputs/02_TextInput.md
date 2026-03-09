@@ -45,7 +45,7 @@ The following blocks shows how to use these.
 
 ### Password
 
-For capturing passwords, `TextInputs.Password` variant needs to be used. The following code shows how to capture
+For capturing passwords, `TextInputVariants.Password` variant needs to be used. The following code shows how to capture
 a new password.
 
 See it in action here.
@@ -58,16 +58,16 @@ public class PasswordCaptureDemo: ViewBase
         var password = UseState("");
         return new TextInput(password)
                      .Placeholder("Password")
-                     .Variant(TextInputs.Password)
+                     .Variant(TextInputVariants.Password)
                      .WithField()
                      .Label("Enter Password");         
     }
 }
 ```
 
-### TextArea
+### Textarea
 
-When a multiline text is needed, `TextInputs.Textarea` variant should be used. A common use-case is for capturing address
+When a multiline text is needed, `TextInputVariants.Textarea` variant should be used. A common use-case is for capturing address
 that typically spans over multiple lines. The following demo shows how to use it.
 
 See it in action here.
@@ -80,7 +80,7 @@ public class CaptureAddressDemo: ViewBase
         var address = UseState("");
         return new TextInput(address)
                                .Placeholder("Åkervägen 9, \n132 39 Saltsjö-Boo, \nSweden")
-                               .Variant(TextInputs.Textarea)
+                               .Variant(TextInputVariants.Textarea)
                                .Height(30)
                                .Width(100)
                                .WithField()
@@ -91,10 +91,14 @@ public class CaptureAddressDemo: ViewBase
 
 Please note that how the newlines (`\n`) are recognized and used to create newlines in the textarea.
 
+<Callout Type="tip">
+A `.Multiline()` extension method on `TextInputBase` lets you turn any TextInput into a textarea without changing the variant explicitly. `notes.ToTextInput().Multiline()` is equivalent to `notes.ToTextareaInput()`.
+</Callout>
+
 ### Search
 
 When it is necessary to find an element from a collection of items, it is better to give users a visual clue.  
-Using the `TextInputs.Search` variant, this visual clue (with a looking glass icon) becomes obvious.
+Using the `TextInputVariants.Search` variant, this visual clue (with a looking glass icon) becomes obvious.
 The following demo shows how to add such an text input.
 
 See it in action here.
@@ -107,7 +111,7 @@ public class SearchBarDemo: ViewBase
         var searchThis = UseState("");
         return new TextInput(searchThis)
                                .Placeholder("search for?")
-                               .Variant(TextInputs.Search)
+                               .Variant(TextInputVariants.Search)
                                .WithField()
                                .Label("Search");
     }
@@ -116,7 +120,7 @@ public class SearchBarDemo: ViewBase
 
 ### Email
 
-To capture the emails `TextInputs.Email` variant should be used.  
+To capture the emails `TextInputVariants.Email` variant should be used.  
 
 See it in action here.
 
@@ -128,7 +132,7 @@ public class EmailEnterDemo: ViewBase
         var email = UseState("");
         return new TextInput(email)
                        .Placeholder("user@domain.com")
-                       .Variant(TextInputs.Email)
+                       .Variant(TextInputVariants.Email)
                        .WithField()
                        .Label("Email");
     }
@@ -137,7 +141,7 @@ public class EmailEnterDemo: ViewBase
 
 ### Telephone
 
-To capture the phone numbers `TextInputs.Tel` variant needs to be used.  
+To capture the phone numbers `TextInputVariants.Tel` variant needs to be used.  
 
 see it in action here.
 
@@ -149,7 +153,7 @@ public class PhoneEnterDemo: ViewBase
         var tel = UseState("");
         return new TextInput(tel)
                       .Placeholder("+1-123-3456")
-                      .Variant(TextInputs.Tel)
+                      .Variant(TextInputVariants.Tel)
                       .WithField()
                       .Label("Phone");
     }
@@ -158,7 +162,7 @@ public class PhoneEnterDemo: ViewBase
 
 ### URL
 
-To capture the URLs/Links  `TextInputs.Url` variant needs to be used.
+To capture the URLs/Links  `TextInputVariants.Url` variant needs to be used.
 
 see it in action here.
 
@@ -170,9 +174,29 @@ public class URLEnterDemo: ViewBase
         var url = UseState("");
         return new TextInput(url)
                       .Placeholder("https://ivy.app/")
-                      .Variant(TextInputs.Url)
+                      .Variant(TextInputVariants.Url)
                       .WithField()
                       .Label("Website");
+    }
+}
+```
+
+## MinLength Validation
+
+The TextInput widget and all its variants (Password, Search, Textarea) support minimum length validation with the `.MinLength()` method. Combine it with `.MaxLength()` for range constraints:
+
+```csharp demo-below
+public class MinLengthValidationDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var usernameState = UseState("");
+        return usernameState.ToTextInput()
+            .Placeholder("Between 5 and 10 characters")
+            .MinLength(5)
+            .MaxLength(10)
+            .WithField()
+            .Label("Username");
     }
 }
 ```
@@ -263,11 +287,11 @@ public class ShortCutDemo : ViewBase
                 | new TextInput(email)
                       .Placeholder("Email (Ctrl+E)")
                       .ShortcutKey("Ctrl+E")
-                      .Variant(TextInputs.Email)    
+                      .Variant(TextInputVariants.Email)    
                 | new TextInput(message)
                       .Placeholder("Message (Ctrl+M)")
                       .ShortcutKey("Ctrl+M")
-                      .Variant(TextInputs.Textarea);
+                      .Variant(TextInputVariants.Textarea);
     }
 }
 ```
@@ -306,7 +330,7 @@ public class DataCaptureUsingExtensionDemo: ViewBase
                      .Placeholder("Mobile")
                      .WithField()
                      .Label("Mobile")
-                | address.ToTextAreaInput()
+                | address.ToTextareaInput()
                          .Placeholder("Address Line1\nAddress Line2\nAddress Line 3")
                          .Height(40)
                          .Width(100)
@@ -346,7 +370,7 @@ public class BasicFilter : ViewBase
         
         return Layout.Vertical()
             | searchState.ToSearchInput().Placeholder("Which fruit you like?")
-            | result.ToTextAreaInput(content);
+            | result.ToTextareaInput(content);
     }     
 }
 ```

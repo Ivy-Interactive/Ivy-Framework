@@ -25,7 +25,7 @@ To force regenerate all the C# files (for example, if you want to ensure they're
 sh ./Regenerate.sh
 ```
 
-Clone [Ivy Framework](https://github.com/Ivy-Interactive/Ivy-Framework), then go to the `Ivy.Samples` folder and run `dotnet watch`. Navigate to the URL that is printed.
+Clone [Ivy Framework](https://github.com/Ivy-Interactive/Ivy-Framework), then go to the `Ivy.Samples` folder and run `ivy run`. Navigate to the URL that is printed.
 
 Any changes in the Markdown files are compiled and hot-reloaded as you write.
 

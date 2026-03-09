@@ -6,15 +6,24 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { getWidth } from '@/lib/styles';
+import { getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
+import './sheet.css';
+
+type SheetSide = 'left' | 'right' | 'top' | 'bottom';
+
+const normalizeSide = (side?: string): SheetSide => {
+  if (!side) return 'right';
+  return side.toLowerCase() as SheetSide;
+};
 
 interface SheetWidgetProps {
   id: string;
   title?: string;
   description?: string;
   width?: string;
+  side?: SheetSide;
   slots?: {
     Content?: React.ReactNode[];
   };
@@ -26,6 +35,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
   description,
   id,
   width,
+  side = 'right',
 }) => {
   const eventHandler = useEventHandler();
   const [isOpen, setIsOpen] = useState(true);
@@ -44,18 +54,20 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
     );
   }
 
-  const styles: React.CSSProperties = {
-    ...getWidth(width),
-  };
+  const normalizedSide = normalizeSide(side);
+  const isHorizontal = normalizedSide === 'left' || normalizedSide === 'right';
+
+  const styles: React.CSSProperties = isHorizontal
+    ? { ...getWidth(width) }
+    : { ...getHeight(width) };
 
   return (
     <Sheet open={isOpen} onOpenChange={handleClose}>
       <SheetContent
+        side={normalizedSide}
         style={styles}
-        className={cn(
-          'h-full flex flex-col p-0 gap-0',
-          isOpen ? 'sheet-animate-enter' : 'sheet-animate-exit'
-        )}
+        className={cn('flex flex-col p-0 gap-0', isHorizontal && 'h-full')}
+        data-sheet-side={normalizedSide}
         onOpenAutoFocus={e => {
           e.preventDefault();
         }}

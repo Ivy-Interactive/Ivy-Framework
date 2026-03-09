@@ -6,6 +6,9 @@ searchHints:
   - Vite
   - IIFE
   - embedded resource
+  - multiple widgets
+  - shared frontend
+  - same bundle
 ---
 
 # External Widgets
@@ -39,7 +42,6 @@ Create a record that inherits from `WidgetBase<T>` and mark it with `[ExternalWi
 ```csharp
 using Ivy.Core;
 using Ivy.Core.ExternalWidgets;
-using Ivy.Shared;
 
 namespace MyProject.Widgets;
 
@@ -69,7 +71,7 @@ public record MyWidget : WidgetBase<MyWidget>
 - **GlobalName** — Must match the Vite library `name` (and the global variable the IIFE assigns). Use the full namespace with dots replaced by underscores (e.g. `MyProject_Widgets_MyWidget`).
 
 <Callout Type="info">
-Use `[Prop]` for data and `[Event]` for callbacks. You can add extension methods for a fluent API (e.g. `.Label("...")`, `.HandleClick(...)`).
+Use `[Prop]` for data and `[Event]` for callbacks. You can add extension methods for a fluent API (e.g. `.Label("...")`, `.OnClick(...)`).
 </Callout>
 
 ## Frontend (Vite Library)
@@ -189,7 +191,7 @@ export const MyWidget: React.FC<MyWidgetProps> = ({
 };
 ```
 
-Use Ivy theme variables ([Colors](../../04_ApiReference/IvyShared/Colors.md): `--primary`, `--background`, `--foreground`, `--border`, etc.) so the widget matches the host app ([Theming](../../01_Onboarding/02_Concepts/12_Theming.md)). Size props use Ivy’s [Size](../../04_ApiReference/IvyShared/Size.md) format (e.g. `Full`, `Units:80`); you can parse them in the component or in a small helper.
+Use Ivy theme variables ([Colors](../../04_ApiReference/Ivy/Colors.md): `--primary`, `--background`, `--foreground`, `--border`, etc.) so the widget matches the host app ([Theming](../../01_Onboarding/02_Concepts/12_Theming.md)). Size props use Ivy’s [Size](../../04_ApiReference/Ivy/Size.md) format (e.g. `Full`, `Units:80`); you can parse them in the component or in a small helper.
 
 ## Project structure and build
 
@@ -243,9 +245,15 @@ When the widget lives inside the host app (e.g. `HostApp/Widgets/MyWidget/`), ad
 </ItemGroup>
 ```
 
-### Multiple widgets in one bundle
+### Multiple widgets in one bundle (same frontend)
 
-You can ship several widgets from one frontend project. Use a single entry (e.g. `src/index.ts`) that exports and assigns all of them to one global object whose name matches the Vite `name` and C# `GlobalName`:
+You can ship **several widgets from one frontend project**: one Vite build produces a single JS bundle, and multiple C# widget records point to that same script. Each widget type is resolved by `ExportName` from the same global object. The backend serves the same embedded file for all of them; the browser may cache it per URL.
+
+- **One frontend** — one `frontend/` project, one `npm run build`, one output file (e.g. `ExternalWidgets.js`).
+- **Same script path and GlobalName** — every C# widget uses the same `[ExternalWidget("frontend/dist/ExternalWidgets.js", ..., GlobalName = "MyProject_Widgets")]` so they all use the same global object.
+- **Different ExportName** — each C# record must specify the React component name explicitly: `ExportName = "MyWidget"`, `ExportName = "AnotherWidget"`, etc. Do not rely on `"default"` for multi-widget bundles.
+
+**Vite and entry point:** Use one library name for the whole bundle and assign all components to that global:
 
 ```typescript
 // vite.config.ts — one name for the whole bundle
@@ -259,7 +267,15 @@ fileName: () => 'ExternalWidgets.js',
 };
 ```
 
-Then in C# use the same `GlobalName` for each widget and different `ExportName` values.
+**C#:** Use the same `Script path` and `GlobalName` for each widget, and different `ExportName` values so the loader picks the right component from the same global:
+
+```csharp
+[ExternalWidget("frontend/dist/ExternalWidgets.js", ExportName = "MyWidget", GlobalName = "MyProject_Widgets")]
+public record MyWidget : WidgetBase<MyWidget> { ... }
+
+[ExternalWidget("frontend/dist/ExternalWidgets.js", ExportName = "AnotherWidget", GlobalName = "MyProject_Widgets")]
+public record AnotherWidget : WidgetBase<AnotherWidget> { ... }
+```
 
 ## Host requirements
 

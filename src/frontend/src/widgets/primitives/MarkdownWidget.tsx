@@ -1,26 +1,42 @@
 import { useEventHandler } from '@/components/event-handler';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
+import {
+  widgetContentOverrides,
+  subscribeToContentOverride,
+} from '@/widgets/widgetRenderer';
 
 import { Scales } from '@/types/scale';
+import { TextAlignment } from '@/types/textAlignment';
 
 interface MarkdownWidgetProps {
   id: string;
   content: string;
   scale?: Scales;
+  textAlignment?: TextAlignment;
 }
 
 const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   id,
   content = '',
   scale = Scales.Medium,
+  textAlignment,
 }) => {
   const eventHandler = useEventHandler();
+  const [, forceUpdate] = useState(0);
+
+  // Subscribe to content override changes
+  useEffect(() => {
+    return subscribeToContentOverride(id, () => forceUpdate(n => n + 1));
+  }, [id]);
 
   const handleLinkClick = useCallback(
     (href: string) => eventHandler('OnLinkClick', id, [href]),
     [eventHandler, id]
   );
+
+  // Use override content if available, otherwise use prop
+  const displayContent = widgetContentOverrides.get(id) ?? content;
 
   const getScaleStyle = (s: Scales): React.CSSProperties => {
     switch (s) {
@@ -47,6 +63,10 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
     gap: '1rem',
     wordBreak: 'normal',
     overflowWrap: 'break-word',
+    ...(textAlignment && {
+      textAlign:
+        textAlignment.toLowerCase() as React.CSSProperties['textAlign'],
+    }),
     ...getScaleStyle(scale),
   };
 
@@ -54,7 +74,7 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
     <div className="markdown-widget w-full" style={styles}>
       <MarkdownRenderer
         key={id}
-        content={content}
+        content={displayContent}
         onLinkClick={handleLinkClick}
       />
     </div>

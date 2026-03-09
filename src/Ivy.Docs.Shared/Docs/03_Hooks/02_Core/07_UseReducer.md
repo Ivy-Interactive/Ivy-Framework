@@ -45,7 +45,7 @@ public class BasicReducerDemo : ViewBase
     
     public override object? Build()
     {
-        var (count, dispatch) = this.UseReducer(CounterReducer, 0);
+        var (count, dispatch) = UseReducer(CounterReducer, 0);
         
         return Layout.Vertical(
             Text.H3($"Count: {count}"),
@@ -215,7 +215,7 @@ public class ShoppingCartDemo : ViewBase
     
     public override object? Build()
     {
-        var (cart, dispatch) = this.UseReducer(CartReducer, new CartState(new List<CartItem>(), 0m, 0m, 0m, 0m));
+        var (cart, dispatch) = UseReducer(CartReducer, new CartState(new List<CartItem>(), 0m, 0m, 0m, 0m));
         var newItemName = UseState("");
         
         return Layout.Vertical(
@@ -294,7 +294,7 @@ public class GameStateDemo : ViewBase
     
     public override object? Build()
     {
-        var (game, dispatch) = this.UseReducer(GameReducer, new GameState(0, 1, 3, 1, false));
+        var (game, dispatch) = UseReducer(GameReducer, new GameState(0, 1, 3, 1, false));
         
         return Layout.Vertical(
             Text.H3("Game State"),

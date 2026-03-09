@@ -42,7 +42,7 @@ public class BasicFooterExample : ViewBase
 
 ## Form with Footer Actions
 
-A common use case is creating forms with persistent action buttons. Use [Align](../../04_ApiReference/IvyShared/Align.md) for footer button alignment (e.g. `Align.Right`):
+A common use case is creating forms with persistent action buttons. Use [Align](../../04_ApiReference/Ivy/Align.md) for footer button alignment (e.g. `Align.Right`):
 
 ```csharp demo-tabs
 public class FormWithFooterExample : ViewBase
@@ -99,7 +99,7 @@ public class SheetWithFooterExample : ViewBase
                 content: Layout.Vertical()
                     | new Card(Layout.Vertical()
                         | new TextInput(title, "Article Title")
-                        | new TextInput(content, "Article Content").Variant(TextInputs.Textarea)
+                        | new TextInput(content, "Article Content").Variant(TextInputVariants.Textarea)
                     ).Title("Article Details")
                     | new Card("Article preview will appear here as you type...")
                         .Title("Preview")
@@ -148,7 +148,7 @@ public class ComplexFooterExample : ViewBase
                 content: Layout.Vertical()
                     | new Card(Layout.Vertical()
                         | new TextInput(docTitle, "Document Title")
-                        | new TextInput(summary, "Executive Summary").Variant(TextInputs.Textarea)
+                        | new TextInput(summary, "Executive Summary").Variant(TextInputVariants.Textarea)
                     ).Title("Document Information")
             );
     }

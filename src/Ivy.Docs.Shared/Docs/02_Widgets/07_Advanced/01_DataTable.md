@@ -76,8 +76,8 @@ sampleUsers.ToDataTable()
 **Column customization methods:**
 
 - **Header** - Set custom column header text
-- **Width** - Set column width using [Size](../../04_ApiReference/IvyShared/Size.md) (e.g. `Size.Px()`, `Size.Percent()`).
-- **Align** - Control text alignment ([Align](../../04_ApiReference/IvyShared/Align.md): Left, Right, Center)
+- **Width** - Set column width using [Size](../../04_ApiReference/Ivy/Size.md) (e.g. `Size.Px()`, `Size.Percent()`).
+- **Align** - Control text alignment ([Align](../../04_ApiReference/Ivy/Align.md): Left, Right, Center)
 - **Icon** - Add an icon to the column header
 - **Help** - Add tooltip help text to the column header
 - **Sortable** - Enable or disable sorting for specific columns
@@ -138,18 +138,55 @@ sampleUsers.ToDataTable()
 
 ## Row Actions
 
-Add contextual actions to each row using `RowActions()` and handle them via `HandleRowAction()`. Actions are rendered as icons or [buttons](../03_Common/01_Button.md) that appear when hovering over a row. Row actions support both simple menu items and nested [dropdown menus](../03_Common/11_DropDownMenu.md).
+Add contextual actions to each row using `RowActions()` and handle them via `OnRowAction()`. Actions are rendered as icons or [buttons](../03_Common/01_Button.md) that appear when hovering over a row. Row actions support both simple menu items and nested [dropdown menus](../03_Common/11_DropDownMenu.md).
 
 Use `RowActions()` to define one or more `MenuItem` objects. Each menu item can have an icon, label, tooltip, and tag. For nested menus, use `.Children()` to create a dropdown menu with sub-items. For example, you can create individual action buttons like edit, delete, or view, as well as a menu button with a dropdown containing additional actions like archive, export, or share.
 
 When creating the DataTable, specify an ID selector using `.ToDataTable(idSelector: e => e.Id)` where `Id` is the property that uniquely identifies each row. This allows the row action handler to identify which row was clicked.
 
-Use `HandleRowAction()` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
+Use `OnRowAction()` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
 
 - **Id** - The ID of the row (extracted using the `idSelector` parameter passed to `ToDataTable()`)
 - **Tag** - The tag of the menu item that was clicked (useful for identifying which action was selected, especially with nested menus)
 
 The handler can access both properties: `args.Id` to identify the row and `args.Tag` to determine which action was selected. This is particularly useful when handling nested menu items, as each child menu item can have its own tag.
+
+```csharp demo-tabs
+public class RowActionsDemo : ViewBase
+{
+    public record Employee(int Id, string Name, string Email, int Salary);
+
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        var employees = Enumerable.Range(1, 50)
+            .Select(i => new Employee(i, $"Employee {i}", $"emp{i}@company.com", 40000 + i * 1000))
+            .AsQueryable();
+
+        return employees.ToDataTable(idSelector: e => e.Id)
+            .Header(e => e.Name, "Name")
+            .Header(e => e.Email, "Email")
+            .Header(e => e.Salary, "Salary")
+            .RowActions(
+                MenuItem.Default(Icons.Pencil, "edit"),
+                MenuItem.Default(Icons.Trash2, "delete"),
+                MenuItem.Default(Icons.EllipsisVertical, "more")
+                    .Children([
+                        MenuItem.Default(Icons.Archive, "archive").Label("Archive"),
+                        MenuItem.Default(Icons.Download, "export").Label("Export"),
+                        MenuItem.Default(Icons.Share2, "share").Label("Share")
+                    ])
+            )
+            .OnRowAction(async e =>
+            {
+                var args = e.Value;
+                client.Toast($"Action: {args.Tag} on row ID: {args.Id}");
+                await ValueTask.CompletedTask;
+            })
+            .Height(Size.Units(100));
+    }
+}
+```
 
 <Callout Type="tip">
 Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Click on a link to open it. External links (http/https) open in a new focused tab, while relative URLs navigate in the same tab.
@@ -167,6 +204,39 @@ The `OnCellClick()` handler is triggered on a single click, while `OnCellActivat
 - **CellValue** - The value of the cell that was clicked
 
 These properties allow you to perform context-specific actions based on which cell was interacted with. For example, you can display a toast notification with the column name and row index, or navigate to a detail view based on the cell's value.
+
+## Triggering Refreshes
+
+You can programmatically force a DataTable to refresh its data by utilizing the `UseRefreshToken` hook and the `.RefreshToken()` fluent API. This is especially useful for reloading the table after users perform actions like creating, updating, or deleting records in a separate dialog or blade.
+
+First, obtain a token using `UseRefreshToken()`, pass it to the `DataTableBuilder`, and then call `refreshToken.Refresh()` whenever you need the table to reload:
+
+```csharp
+public class RefreshTokenDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var refreshToken = UseRefreshToken();
+        var employees = GetEmployees().AsQueryable();
+
+        // Pass the token to the builder
+        var table = employees
+            .ToDataTable(e => e.Name)
+            .RefreshToken(refreshToken)
+            .Header(e => e.Name, "Name")
+            .Width(e => e.Name, Size.Units(50))
+            .Height(Size.Units(100));
+
+        var refreshButton = new Button("Reload Table").OnClick(e =>
+        {
+            // Trigger a refresh of the DataTable
+            refreshToken.Refresh();
+        });
+
+        return new Fragment(refreshButton, table);
+    }
+}
+```
 
 ## AI-Powered Filtering
 
@@ -311,4 +381,4 @@ sampleUsers.ToDataTable()
 </Body>
 </Details>
 
-<WidgetDocs Type="Ivy.DataTable" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/DataTables/DataTable.cs"/>
+<WidgetDocs Type="Ivy.DataTable" ExtensionTypes="Ivy.DataTableWidgetExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/DataTables/DataTable.cs"/>

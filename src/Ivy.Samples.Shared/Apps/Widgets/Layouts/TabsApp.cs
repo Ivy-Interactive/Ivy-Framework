@@ -1,4 +1,4 @@
-using Ivy.Shared;
+using System.Collections.Immutable;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 

@@ -48,19 +48,19 @@ export const useDataLoading = ({
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
   const batchSize = config.batchSize ?? 20;
-  const connectionKey = `${connection.connectionId}-${connection.sourceId}`;
+  const connectionKey = `${connection.connectionId}-${connection.sourceId}-${connection.versionToken || ''}`;
+  const dataIdentityKey = `${connection.connectionId}-${connection.sourceId}`;
 
   // Reset currentRowCountRef when filter or sort changes
   useEffect(() => {
     currentRowCountRef.current = 0;
   }, [activeFilter, activeSort]);
 
-  // Reset row count when connection changes
+  // Reset row count only when connection identity changes (not on versionToken refresh)
   useEffect(() => {
     currentRowCountRef.current = 0;
-  }, [connectionKey]);
+  }, [dataIdentityKey]);
 
-  // Load initial data
   useEffect(() => {
     const loadInitialData = async () => {
       if (!connection.port || !connection.path) {
@@ -68,7 +68,9 @@ export const useDataLoading = ({
         return;
       }
 
-      setIsLoading(true);
+      if (!arrowTableRef.current || arrowTableRef.current.numRows === 0) {
+        setIsLoading(true);
+      }
       setError(null);
 
       try {

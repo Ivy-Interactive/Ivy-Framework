@@ -1,4 +1,3 @@
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -10,15 +9,17 @@ public class BoolInputApp : SampleBase
         var falseState = UseState(false);
         var trueState = UseState(true);
         var nullState = UseState((bool?)null);
+        var loadingState = UseState(true);
 
-        var variants = Layout.Grid().Columns(6)
+        var variants = Layout.Grid().Columns(7)
                        | null!
                        | Text.InlineCode("True")
                        | Text.InlineCode("False")
                        | Text.InlineCode("Disabled")
                        | Text.InlineCode("Invalid")
                        | Text.InlineCode("Nullable")
-                       | Text.InlineCode("BoolInputs.Checkbox")
+                       | Text.InlineCode("Loading")
+                       | Text.InlineCode("BoolInputVariants.Checkbox")
                        | trueState
                            .ToBoolInput()
                            .Label("Label")
@@ -45,6 +46,12 @@ public class BoolInputApp : SampleBase
                            .Label("Label")
                            .Description("Description")
                            .TestId("checkbox-null-state-width-description")
+                       | trueState
+                           .ToBoolInput()
+                           .Label("Label")
+                           .Description("Description")
+                           .Loading(loadingState.Value)
+                           .TestId("checkbox-loading-state-width-description")
                        | null!
                        | trueState
                            .ToBoolInput()
@@ -66,7 +73,12 @@ public class BoolInputApp : SampleBase
                            .ToBoolInput()
                            .Label("Label")
                            .TestId("checkbox-null-state-width")
-                       | Text.InlineCode("BoolInputs.Switch")
+                       | trueState
+                           .ToBoolInput()
+                           .Label("Label")
+                           .Loading(loadingState.Value)
+                           .TestId("checkbox-loading-state-width")
+                       | Text.InlineCode("BoolInputVariants.Switch")
                        | trueState
                            .ToSwitchInput()
                            .Label("Label")
@@ -90,6 +102,12 @@ public class BoolInputApp : SampleBase
                            .Invalid("Invalid")
                            .TestId("switch-true-state-width-description-invalid")
                        | new Box("N/A")
+                       | trueState
+                           .ToSwitchInput()
+                           .Label("Label")
+                           .Description("Description")
+                           .Loading(loadingState.Value)
+                           .TestId("switch-loading-state-width-description")
                        | null!
                        | trueState
                            .ToSwitchInput()
@@ -110,7 +128,12 @@ public class BoolInputApp : SampleBase
                            .Invalid("Invalid")
                            .TestId("switch-true-state-width-invalid")
                        | new Box("N/A")
-                       | Text.InlineCode("BoolInputs.Toggle")
+                       | trueState
+                           .ToSwitchInput()
+                           .Label("Label")
+                           .Loading(loadingState.Value)
+                           .TestId("switch-loading-state-width")
+                       | Text.InlineCode("BoolInputVariants.Toggle")
                        | trueState
                            .ToToggleInput(Icons.Magnet)
                            .Label("Label")
@@ -136,6 +159,12 @@ public class BoolInputApp : SampleBase
                            .Invalid("Invalid")
                            .TestId("toggle-true-state-width-description-invalid")
                        | new Box("N/A")
+                       | trueState
+                           .ToToggleInput(Icons.Magnet)
+                           .Label("Label")
+                           .Description("Description")
+                           .Loading(loadingState.Value)
+                           .TestId("toggle-loading-state-width-description")
                        | null!
                        | trueState
                            .ToToggleInput(Icons.Baby)
@@ -155,6 +184,11 @@ public class BoolInputApp : SampleBase
                            .Invalid("Invalid")
                            .TestId("toggle-true-state-width-invalid")
                        | new Box("N/A")
+                       | trueState
+                           .ToToggleInput(Icons.Baby)
+                           .Label("Label")
+                           .Loading(loadingState.Value)
+                           .TestId("toggle-loading-state-width")
 
             ;
 
@@ -190,10 +224,10 @@ public class BoolInputApp : SampleBase
                | anyState.ToBoolInput()
                | anyState
                    .ToBoolInput()
-                   .Variant(BoolInputs.Switch)
+                   .Variant(BoolInputVariants.Switch)
                | anyState
                    .ToBoolInput()
-                   .Variant(BoolInputs.Toggle)
+                   .Variant(BoolInputVariants.Toggle)
                    .Icon(Icons.Star);
     }
 }
@@ -298,10 +332,10 @@ public class BoolInputDataBinding : ViewBase
                | anyState.ToBoolInput()
                | anyState
                    .ToBoolInput()
-                   .Variant(BoolInputs.Switch)
+                   .Variant(BoolInputVariants.Switch)
                | anyState
                    .ToBoolInput()
-                   .Variant(BoolInputs.Toggle)
+                   .Variant(BoolInputVariants.Toggle)
                    .Icon(Icons.Star);
     }
 }
@@ -320,7 +354,7 @@ public class BoolInputSizes : ViewBase
                | Text.InlineCode("Medium")
                | Text.InlineCode("Large")
 
-               | Text.InlineCode("BoolInputs.Checkbox")
+               | Text.InlineCode("BoolInputVariants.Checkbox")
                | trueState
                    .ToBoolInput()
                    .Label("Label")
@@ -333,7 +367,7 @@ public class BoolInputSizes : ViewBase
                    .Label("Label")
                    .Large()
 
-               | Text.InlineCode("BoolInputs.Switch")
+               | Text.InlineCode("BoolInputVariants.Switch")
                | trueState
                    .ToSwitchInput()
                    .Label("Label")
@@ -346,7 +380,7 @@ public class BoolInputSizes : ViewBase
                    .Label("Label")
                    .Large()
 
-               | Text.InlineCode("BoolInputs.Toggle")
+               | Text.InlineCode("BoolInputVariants.Toggle")
                | trueState
                    .ToToggleInput(Icons.Star)
                    .Label("Label")
@@ -375,7 +409,7 @@ public class BoolInputIcons : ViewBase
                | Text.InlineCode("Moon")
                | Text.InlineCode("Star")
 
-               | Text.InlineCode("BoolInputs.Switch")
+               | Text.InlineCode("BoolInputVariants.Switch")
                | trueState
                    .ToSwitchInput(Icons.Sun)
                    .Label("Label")
@@ -386,7 +420,7 @@ public class BoolInputIcons : ViewBase
                    .ToSwitchInput(Icons.Star)
                    .Label("Label")
 
-               | Text.InlineCode("BoolInputs.Toggle")
+               | Text.InlineCode("BoolInputVariants.Toggle")
                | trueState
                    .ToToggleInput(Icons.Sun)
                    .Label("Label")

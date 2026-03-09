@@ -12,7 +12,7 @@ public record Pagination : WidgetBase<Pagination>
     {
         Page = page;
         NumPages = numPages;
-        OnChange = onChange;
+        OnChange = new(onChange);
         Disabled = disabled;
     }
 
@@ -20,7 +20,7 @@ public record Pagination : WidgetBase<Pagination>
     {
         Page = page;
         NumPages = numPages;
-        OnChange = e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = new(onChange.ToValueTask());
         Disabled = disabled;
     }
 
@@ -36,7 +36,7 @@ public record Pagination : WidgetBase<Pagination>
 
     [Prop] public bool Disabled { get; set; } = false;
 
-    [Event] public Func<Event<Pagination, int>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<Pagination, int>>? OnChange { get; }
 }
 
 public static class PaginationExtensions

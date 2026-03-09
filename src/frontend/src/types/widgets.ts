@@ -1,3 +1,11 @@
+export interface CallSite {
+  path?: string;
+  filePath?: string;
+  lineNumber?: number;
+  memberName?: string;
+  declaringType?: string;
+}
+
 export interface WidgetNode {
   type: string;
   id: string;
@@ -6,6 +14,7 @@ export interface WidgetNode {
   };
   children?: WidgetNode[];
   events: string[];
+  callSite?: CallSite;
 }
 
 export type WidgetEventHandlerType = (

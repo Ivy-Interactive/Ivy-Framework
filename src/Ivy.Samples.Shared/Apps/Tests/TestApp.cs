@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 [App(icon: Icons.Code, path: ["Tests"], isVisible: false, searchHints: ["markdown", "rendering", "spacing", "comparison", "layout", "typography"])]
@@ -16,7 +14,7 @@ public class TestApp : ViewBase
                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
                    | Text.Markdown(
                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
-                   | new Code("var x = 1;", Languages.Csharp)
+                   | new CodeBlock("var x = 1;", Languages.Csharp)
                    | Text.Markdown(
                        """"""
                        * Item 1

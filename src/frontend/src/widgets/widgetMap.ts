@@ -42,7 +42,6 @@ import {
 } from '@/widgets/inputs';
 import {
   StackLayoutWidget,
-  WrapLayoutWidget,
   GridLayoutWidget,
   HeaderLayoutWidget,
   FooterLayoutWidget,
@@ -55,6 +54,7 @@ import {
   FloatingPanelWidget,
 } from '@/widgets/layouts';
 import { ListWidget, ListItemWidget } from '@/widgets/lists';
+import { TreeWidget } from '@/widgets/tree';
 import {
   TextBlockWidget,
   HtmlWidget,
@@ -77,6 +77,7 @@ import {
   AppHostWidget,
   AudioPlayerWidget,
   VideoPlayerWidget,
+  RichTextBlockWidget,
 } from '@/widgets/primitives';
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
@@ -88,6 +89,7 @@ export const widgetMap = {
 
   // Primitives
   'Ivy.TextBlock': TextBlockWidget,
+  'Ivy.RichTextBlock': RichTextBlockWidget,
   'Ivy.Markdown': React.lazy(
     () => import('@/widgets/primitives/MarkdownWidget')
   ),
@@ -98,7 +100,9 @@ export const widgetMap = {
   'Ivy.Svg': SvgWidget,
   'Ivy.Image': ImageWidget,
   'Ivy.Iframe': IframeWidget,
-  'Ivy.Code': React.lazy(() => import('@/widgets/primitives/CodeWidget')),
+  'Ivy.CodeBlock': React.lazy(
+    () => import('@/widgets/primitives/CodeBlockWidget')
+  ),
   'Ivy.Fragment': FragmentWidget,
   'Ivy.Separator': SeparatorWidget,
   'Ivy.Skeleton': SkeletonWidget,
@@ -149,7 +153,6 @@ export const widgetMap = {
 
   // Layouts
   'Ivy.StackLayout': StackLayoutWidget,
-  'Ivy.WrapLayout': WrapLayoutWidget,
   'Ivy.GridLayout': GridLayoutWidget,
   'Ivy.HeaderLayout': HeaderLayoutWidget,
   'Ivy.FooterLayout': FooterLayoutWidget,
@@ -178,8 +181,8 @@ export const widgetMap = {
   'Ivy.CodeInput': React.lazy(
     () => import('@/widgets/inputs/code/CodeInputWidget')
   ),
-  'Ivy.AudioRecorder': React.lazy(
-    () => import('@/widgets/inputs/AudioRecorderWidget')
+  'Ivy.AudioInput': React.lazy(
+    () => import('@/widgets/inputs/AudioInputWidget')
   ),
 
   // Forms
@@ -206,6 +209,9 @@ export const widgetMap = {
   // Lists
   'Ivy.List': ListWidget,
   'Ivy.ListItem': ListItemWidget,
+
+  // Tree
+  'Ivy.Tree': TreeWidget,
 
   // Details
   'Ivy.Details': DetailsWidget,

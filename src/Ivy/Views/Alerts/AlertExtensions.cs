@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Ivy.Core;
-using Ivy.Services;
-using Ivy.Views.Forms;
 
-namespace Ivy.Views.Alerts;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class AlertExtensions
 {
@@ -55,11 +54,11 @@ public class WithConfirmView(Button button, string message, string? title = null
 
         var clonedButton = button with
         {
-            OnClick = _ =>
+            OnClick = new(_ =>
             {
                 isOpen.Value = true;
                 return ValueTask.CompletedTask;
-            }
+            })
         };
 
         return new Fragment(

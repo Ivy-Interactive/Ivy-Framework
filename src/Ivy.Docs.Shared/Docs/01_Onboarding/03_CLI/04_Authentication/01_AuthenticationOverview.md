@@ -152,6 +152,7 @@ Ivy supports the following authentication providers. Click on any provider for d
 - **[Supabase](02_Supabase.md)** - Email/password, magic links, social auth, and Row Level Security integration
 - **[Microsoft Entra](02_MicrosoftEntra.md)** - Enterprise SSO, conditional access, and Microsoft Graph integration
 - **[Authelia](02_Authelia.md)** - Self-hosted identity provider with LDAP and forward auth
+- **[Sliplane](02_Sliplane.md)** - OAuth 2.0 sign-in for apps deployed or integrated with Sliplane
 - **[Basic Auth](02_BasicAuth.md)** - Simple username/password authentication for development and internal tools
 
 ## Examples

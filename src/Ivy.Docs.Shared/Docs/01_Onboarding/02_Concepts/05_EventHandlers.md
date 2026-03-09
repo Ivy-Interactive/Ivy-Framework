@@ -32,7 +32,7 @@ public class BasicBlurExample : ViewBase
         return Layout.Vertical()
             | name.ToTextInput("Your Name")
                 .Placeholder("Enter your name...")
-                .HandleBlur(_ => message.Set($"Hello, {name.Value}!"))
+                .OnBlur(_ => message.Set($"Hello, {name.Value}!"))
             | Text.P(message.Value);
     }
 }
@@ -85,7 +85,7 @@ public class ValidationBlurExample : ViewBase
         
         return email.ToTextInput()
             .Placeholder("your.email@example.com")
-            .HandleBlur(() => 
+            .OnBlur(() => 
             {
                 error.Set(string.IsNullOrWhiteSpace(email.Value) ? "Required" 
                     : !email.Value.Contains("@") ? "Invalid email" 
@@ -114,7 +114,7 @@ public class AutoSaveFormatExample : ViewBase
             // Auto-save pattern
             | title.ToTextInput()
                 .Placeholder("Document title")
-                .HandleBlur(async () => 
+                .OnBlur(async () => 
                 {
                     await Task.Delay(500); // Save to database
                     lastSaved.Set(DateTime.Now);
@@ -125,7 +125,7 @@ public class AutoSaveFormatExample : ViewBase
             // Format pattern
             | phoneNumber.ToTextInput()
                 .Placeholder("Enter 10-digit phone")
-                .HandleBlur(() => 
+                .OnBlur(() => 
                 {
                     var digits = new string(phoneNumber.Value.Where(char.IsDigit).ToArray());
                     if (digits.Length == 10)
@@ -150,7 +150,7 @@ public class AsyncBlurExample : ViewBase
         return Layout.Vertical()
             | username.ToTextInput()
                 .Placeholder("Choose username")
-                .HandleBlur(async () =>
+                .OnBlur(async () =>
                 {
                     if (string.IsNullOrWhiteSpace(username.Value)) return;
                     
@@ -169,13 +169,13 @@ public class AsyncBlurExample : ViewBase
 
 ```csharp
 // Simple action (most common)
-input.HandleBlur(() => Validate());
+input.OnBlur(() => Validate());
 
 // With event parameter
-input.HandleBlur((Event<IAnyInput> e) => Log(e.Id));
+input.OnBlur((Event<IAnyInput> e) => Log(e.Id));
 
 // Async operation
-input.HandleBlur(async () => await SaveToApi());
+input.OnBlur(async () => await SaveToApi());
 ```
 
 ## See Also

@@ -30,8 +30,7 @@
 
 .dvn-scroller .gdg-boolean-cell input[type='checkbox']:focus-visible {
   outline: none;
-  ring: 1px;
-  ring-color: hsl(var(--ring));
+  box-shadow: 0 0 0 1px hsl(var(--ring));
 }
 
 .dvn-scroller .gdg-boolean-cell input[type='checkbox']:disabled {
@@ -62,11 +61,6 @@
   outline: none;
 }
 
-/* Reduce padding on column headers for better text alignment */
-.dvn-scroller canvas {
-  /* Headers are rendered on canvas, so we adjust via theme cellHorizontalPadding */
-}
-
 /* Adjust header icon and text positioning if rendered via DOM */
 .dvn-scroller [class*='header'] {
   padding-left: 8px !important;
@@ -89,4 +83,10 @@
 .dvn-scroller::-webkit-scrollbar-track {
   z-index: 20;
   position: relative;
+}
+
+/* When content fills container (empty rows): overflow-y hidden — no scrollbar,
+   no reserved space. When content overflows: default overflow auto — scrollbar shows. */
+[data-has-empty-rows] .dvn-scroller {
+  overflow-y: hidden !important;
 }

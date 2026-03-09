@@ -70,7 +70,7 @@ public override object? Build()
     {
         var s = UseState(false); // ❌ Error IVYHOOK001
     };
-    return new Button().HandleClick(handler);
+    return new Button().OnClick(handler);
 }
 ```
 

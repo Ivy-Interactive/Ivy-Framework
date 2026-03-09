@@ -107,7 +107,7 @@ public class CheckBoxDemo : ViewBase
         
         return Layout.Horizontal()
             | agreed.ToBoolInput()
-                .Variant(BoolInputs.Checkbox)
+                .Variant(BoolInputVariants.Checkbox)
                 .Label("Agree to terms and conditions")
             | (agreed.Value ? Text.InlineCode("You are all set!") : null);
     }
@@ -152,7 +152,7 @@ The `ToSwitchInput` extension method also supports an optional `icon` parameter,
 
 `Toggle` is a button-style boolean input that switches between two states (on/off, enabled/disabled) with a single click.
 It appears as a pressable [button](../03_Common/01_Button.md) that visually indicates its current state through styling and optional icons.
-This is represented by `BoolInputs.Toggle`
+This is represented by `BoolInputVariants.Toggle`
 
 `ToToggleInput` extension function can be used to create such a `BoolInput.Toggle` variant.
 The following is a small demo showing how such a control may be used.
@@ -175,6 +175,40 @@ public class SingleToggleDemo : ViewBase
 }
 ```
 
+## Styling and States
+
+Customize the `BoolInput` with various styling options:
+
+```csharp demo-tabs
+public class BoolInputStylingDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var normalBool = UseState(true);
+        var invalidBool = UseState(false);
+        var loadingBool = UseState(true);
+        var disabledBool = UseState(false);
+
+        var isLoading = UseState(true);
+
+        return Layout.Vertical()
+            | normalBool.ToSwitchInput()
+                .Label("Normal BoolInput")
+
+            | invalidBool.ToSwitchInput()
+                .Label("Invalid BoolInput")
+                .Invalid("This field has an error")
+
+            | loadingBool.ToSwitchInput()
+                .Label("Loading BoolInput")
+                .Loading(isLoading.Value)
+
+            | disabledBool.ToSwitchInput()
+                .Label("Disabled BoolInput")
+                .Disabled(true);
+    }
+}
+```
 
 <Callout variant="info" title="Legacy Integer Support">
 BoolInput also supports integer-based boolean values (0 = false, 1 = true) for compatibility with legacy systems. Simply use `UseState(0)` or `UseState(1)` with standard extension methods like `ToBoolInput()`, `ToSwitchInput()`, or `ToToggleInput()`.
@@ -207,13 +241,13 @@ public class SimpleFlightBooking : ViewBase
                 | isRoundTrip.ToSwitchInput().Label("Round Trip")
                 // Departure Date (always visible)
                 | departureDate.ToDateTimeInput()
-                              .Variant(DateTimeInputs.Date)
+                              .Variant(DateTimeInputVariants.Date)
                               .Placeholder("Select departure date")
                               .WithField()
                               .Label("Departure Date:")
                 // Return Date (only visible when round trip is on)
                 | returnDate.ToDateTimeInput()
-                           .Variant(DateTimeInputs.Date)
+                           .Variant(DateTimeInputVariants.Date)
                            .Placeholder("Select return date")
                            .Disabled(!isRoundTrip.Value)
                            .WithField()

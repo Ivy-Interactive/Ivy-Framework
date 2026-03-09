@@ -1,33 +1,59 @@
+using System.Reactive.Disposables;
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class UseDataTableExtensions
 {
-    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable)
+    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, RefreshToken? refreshToken = null)
     {
-        return UseDataTable(context, queryable, null);
+        return UseDataTable(context, queryable, null, refreshToken);
     }
 
-    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, Func<object, object?>? idSelector)
+    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, Func<object, object?>? idSelector, RefreshToken? refreshToken = null)
     {
-        // DON'T trigger rebuild when connection changes - we handle it manually
         var connection = context.UseState<DataTableConnection?>(buildOnChange: false);
-        var hasRun = context.UseState(false, buildOnChange: false);
+        var lastQueryable = context.UseState<object?>(buildOnChange: false);
+        var cleanup = context.UseState<IDisposable?>(buildOnChange: false);
+
+        var typeName = queryable.ElementType.Name;
+        var versionTrigger = context.UseQuery<string, string>(
+            typeName,
+            async (_, _) => Guid.NewGuid().ToString(),
+            new QueryOptions { RevalidateOnMount = false }
+        );
+
+        var versionToken = refreshToken != null ? $"{versionTrigger.Value ?? "0"}_{refreshToken.Token}" : (versionTrigger.Value ?? "0");
+
         var dataTableService = context.UseService<IDataTableService>();
 
-        // Only create connection once - check hasRun flag
-        if (!hasRun.Value && connection.Value == null)
-        {
-            var (cleanup, _connection) = dataTableService.AddQueryable(queryable, idSelector);
-            connection.Set(_connection);
-            hasRun.Set(true);
+        DataTableConnection? resultConnection = connection.Value;
 
-            // Store cleanup for later
-            context.UseEffect(() => cleanup, []);
+        if (!ReferenceEquals(lastQueryable.Value, queryable))
+        {
+            cleanup.Value?.Dispose();
+
+            var (newCleanup, newConnection) = dataTableService.AddQueryable(queryable, idSelector);
+            resultConnection = newConnection with { VersionToken = versionToken };
+
+            connection.Set(resultConnection);
+            lastQueryable.Set(queryable);
+            cleanup.Set(newCleanup);
+        }
+        else if (resultConnection != null && resultConnection.VersionToken != versionToken)
+        {
+            resultConnection = resultConnection with { VersionToken = versionToken };
+            connection.Set(resultConnection);
         }
 
-        return connection.Value!;
+        context.UseEffect(() =>
+        {
+            return Disposable.Create(() => cleanup.Value?.Dispose());
+        }, []);
+
+        return resultConnection;
     }
 }

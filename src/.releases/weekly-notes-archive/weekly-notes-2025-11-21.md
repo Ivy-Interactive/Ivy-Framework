@@ -14,7 +14,7 @@ This release introduces comprehensive URL validation and security improvements, 
 Buttons now support binding loading state directly to reactive state objects:
 
 ```csharp
-var loading = this.UseState(false);
+var loading = UseState(false);
 
 async ValueTask OnClick()
 {
@@ -46,7 +46,7 @@ Row actions support tooltips through the `Tooltip` property. The `RowAction` cla
 New simple overload for cases where you don't need to pass data:
 
 ```csharp
-var (dialogView, showDialog) = this.UseTrigger((open) =>
+var (dialogView, showDialog) = UseTrigger((open) =>
     new Dialog("Confirm", "Are you sure?")
         .OnClose(() => open.Set(false))
 );

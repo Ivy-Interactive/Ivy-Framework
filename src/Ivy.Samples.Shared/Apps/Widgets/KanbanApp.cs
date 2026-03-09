@@ -1,7 +1,3 @@
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Builders;
-using Ivy.Views.Kanban;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
@@ -61,7 +57,7 @@ public class BasicKanbanExample : ViewBase
                     .Description(Text.Muted(task.Description)))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
-                .HandleMove(moveData =>
+                .OnMove(moveData =>
                 {
                     var taskId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(taskId)) return;
@@ -174,11 +170,11 @@ public class KanbanBuilderExample : ViewBase
                 .CardBuilder(task => new Card(
                     content: task.ToDetails()
                         .Remove(x => x.Id)
-                        .MultiLine(x => x.Description)
+                        .Multiline(x => x.Description)
                 ))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
-                .HandleMove(moveData =>
+                .OnMove(moveData =>
     {
         var taskId = moveData.CardId?.ToString();
         if (string.IsNullOrEmpty(taskId)) return;
@@ -288,12 +284,12 @@ public class KanbanBuilderWithClickExample : ViewBase
                 .CardBuilder(task => new Card(
                     content: task.ToDetails()
                         .Remove(x => x.Id)
-                        .MultiLine(x => x.Description)
+                        .Multiline(x => x.Description)
                 )
-                .HandleClick(() => showTaskSheet(task.Id)))
+                .OnClick(() => showTaskSheet(task.Id)))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
-                .HandleMove(moveData =>
+                .OnMove(moveData =>
                 {
                     var taskId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(taskId)) return;
@@ -505,7 +501,7 @@ public class KanbanHeaderLayoutExample : ViewBase
         var createBtn = new Button("Add Task")
             .Icon(Icons.Plus)
             .Variant(ButtonVariant.Primary)
-            .HandleClick(OnAddTask);
+            .OnClick(OnAddTask);
 
         var kanban = tasks.Value
             .ToKanban(
@@ -518,7 +514,7 @@ public class KanbanHeaderLayoutExample : ViewBase
             .ColumnOrder(e => GetStatusOrder(e.Status))
             .Width(Size.Full())
             .Height(Size.Full())
-            .HandleMove(moveData =>
+            .OnMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 if (string.IsNullOrEmpty(taskId)) return;

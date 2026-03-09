@@ -1,9 +1,6 @@
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Alerts;
-using Ivy.Views.Blades;
-using Ivy.Views.Builders;
-using Ivy.Views.Forms;
+using System.Reactive.Linq;
+using System.ComponentModel.DataAnnotations;
+using Ivy.Samples.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Shared.Apps.Demos.Database;
@@ -227,7 +224,7 @@ public class CategoryCreateDialog(IState<bool> isOpen, RefreshToken refreshToken
 
         return category
             .ToForm()
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "Create Category", submitTitle: "Create");
 
         async Task OnSubmit(CategoryCreateRequest request)
@@ -278,7 +275,7 @@ public class CategoryEditSheet(IState<bool> isOpen, Guid id) : ViewBase
         return categoryQuery.Value!
             .ToForm()
             .Remove(e => e.Id)
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Category");
 
         async Task OnSubmit(Category? request)

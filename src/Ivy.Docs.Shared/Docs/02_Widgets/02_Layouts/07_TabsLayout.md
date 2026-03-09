@@ -142,4 +142,4 @@ Layout.Tabs(
 )
 ```
 
-<WidgetDocs Type="Ivy.TabsLayout" ExtensionTypes="Ivy.Views.Tabs.TabsLayoutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/TabsLayout.cs"/>
+<WidgetDocs Type="Ivy.TabsLayout" ExtensionTypes="Ivy.TabsLayoutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Layouts/TabsLayout.cs"/>

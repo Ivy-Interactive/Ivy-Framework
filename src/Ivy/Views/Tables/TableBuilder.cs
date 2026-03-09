@@ -4,10 +4,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Builders;
 
-namespace Ivy.Views.Tables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class TableBuilder<TModel> : ViewBase, IStateless
 {
@@ -42,7 +41,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             Removed = _initialRemoved;
             Align = _initialAlign;
         }
-        public bool IsMultiLine { get; set; }
+        public bool IsMultiline { get; set; }
         public Align Align { get; set; } = align;
         public Size? Width { get; set; }
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
@@ -108,18 +107,18 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         int order = fields.Count();
         foreach (var field in fields)
         {
-            var cellAlignment = Shared.Align.Left;
+            var cellAlignment = Ivy.Align.Left;
 
             var cellBuilder = _builderFactory.Default();
 
             if (field.Type.IsNumeric())
             {
-                cellAlignment = Shared.Align.Right;
+                cellAlignment = Ivy.Align.Right;
             }
 
             else if (field.Type == typeof(bool))
             {
-                cellAlignment = Shared.Align.Center;
+                cellAlignment = Ivy.Align.Center;
             }
 
             else if (
@@ -252,12 +251,12 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    public TableBuilder<TModel> MultiLine(params Expression<Func<TModel, object>>[] fields)
+    public TableBuilder<TModel> Multiline(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var field in fields)
         {
             var hint = GetField(field);
-            hint.IsMultiLine = true;
+            hint.IsMultiline = true;
         }
         return this;
     }
@@ -343,9 +342,9 @@ public class TableBuilder<TModel> : ViewBase, IStateless
                 .IsFooter(isFooter)
                 .Align(column.Align);
 
-            if (column.IsMultiLine)
+            if (column.IsMultiline)
             {
-                cell = cell.MultiLine(true);
+                cell = cell.Multiline(true);
             }
 
             if (isHeader)

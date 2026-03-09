@@ -35,7 +35,7 @@ user1:password1; user2:password2; ...
 Your provided passwords will be hashed, salted and peppered using the argon2id algorithm, and stored securely in [.NET user secrets](../../02_Concepts/14_Secrets.md), along with some necessary automatically-generated secret values. Ivy then finishes configuring your application automatically:
 
 1. Adds `server.UseAuth<BasicAuthProvider>()` to your [Program.cs](../../02_Concepts/01_Program.md).
-2. Adds `Ivy.Auth` to your global usings.
+2. Adds `Ivy` to your global usings.
 
 ### Advanced Configuration
 

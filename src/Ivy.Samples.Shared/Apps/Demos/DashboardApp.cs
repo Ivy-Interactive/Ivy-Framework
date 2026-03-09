@@ -1,11 +1,3 @@
-﻿using Ivy.Charts;
-using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Charts;
-using Ivy.Views.Dashboards;
-using Microsoft.EntityFrameworkCore;
-
 namespace Ivy.Samples.Shared.Apps.Demos;
 
 [App(icon: Icons.ChartArea, searchHints: ["charts", "metrics", "visualization", "analytics", "reporting", "kpi"])]
@@ -175,7 +167,7 @@ public class DonutChartWithCustomLabelsView : ViewBase
                         .FontFamily("Arial"))
                 )
                 .ColorScheme(ColorScheme.Default)
-                .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+                .Tooltip(new ChartTooltip().Animated(true))
                 .Legend(new Legend().IconType(Legend.IconTypes.Rect))
                 .Total(totalValue, "Total Budget")
         ;

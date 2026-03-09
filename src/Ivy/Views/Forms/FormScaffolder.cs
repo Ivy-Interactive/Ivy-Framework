@@ -1,11 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Ivy.Core.Hooks;
-using Ivy.Services;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 internal static class FormScaffolder
 {
@@ -143,6 +141,17 @@ internal static class FormScaffolder
             };
         }
 
+        if (nonNullableType == typeof(string) && field.GetAllowedValues() is { } allowedValues)
+        {
+            return (state) =>
+            {
+                var options = allowedValues.Cast<string>().ToOptions().Cast<IAnyOption>().ToArray();
+                var input = state.ToSelectInput(options);
+                if (field.IsNullable && !field.Required) input.Nullable = true;
+                return input;
+            };
+        }
+
         if (nonNullableType == typeof(string))
         {
             return (state) =>
@@ -151,7 +160,7 @@ internal static class FormScaffolder
 
                 if (field.HasDataTypeAttribute(DataType.MultilineText))
                 {
-                    input = input.Variant(TextInputs.Textarea);
+                    input = input.Variant(TextInputVariants.Textarea);
                 }
 
                 // If Required => don't show X button even for nullable types
@@ -185,6 +194,17 @@ internal static class FormScaffolder
             };
         }
 
+        if (type.IsCollectionType() && type.GetCollectionTypeParameter() == typeof(string) && field.GetAllowedValues() is { } allowedCollectionValues)
+        {
+            return (state) =>
+            {
+                var options = allowedCollectionValues.Cast<string>().ToOptions().Cast<IAnyOption>().ToArray();
+                var input = state.ToSelectInput(options).List();
+                if (field.IsNullable && !field.Required) input.Nullable = true;
+                return input;
+            };
+        }
+
         if (type.IsNumeric())
         {
             return (state) =>
@@ -211,11 +231,11 @@ internal static class FormScaffolder
 
                 if (field.HasDataTypeAttribute(DataType.Date))
                 {
-                    input = input.Variant(DateTimeInputs.Date);
+                    input = input.Variant(DateTimeInputVariants.Date);
                 }
                 else if (field.HasDataTypeAttribute(DataType.Time))
                 {
-                    input = input.Variant(DateTimeInputs.Time);
+                    input = input.Variant(DateTimeInputVariants.Time);
                 }
                 if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
@@ -320,6 +340,7 @@ internal static class FormScaffolder
         public FormHelpers.DisplayInfo GetDisplayInfo() => PropertyInfo != null ? FormHelpers.GetDisplayInfo(PropertyInfo) : FormHelpers.GetDisplayInfo(FieldInfo!);
         public FormHelpers.RangeInfo GetRangeInfo() => PropertyInfo != null ? FormHelpers.GetRangeInfo(PropertyInfo) : FormHelpers.GetRangeInfo(FieldInfo!);
         public int? GetMaxLength() => PropertyInfo != null ? FormHelpers.GetMaxLength(PropertyInfo) : FormHelpers.GetMaxLength(FieldInfo!);
+        public object[]? GetAllowedValues() => PropertyInfo != null ? FormHelpers.GetAllowedValues(PropertyInfo) : FormHelpers.GetAllowedValues(FieldInfo!);
 
         public bool IsEmail() =>
             NonNullableType == typeof(string) &&

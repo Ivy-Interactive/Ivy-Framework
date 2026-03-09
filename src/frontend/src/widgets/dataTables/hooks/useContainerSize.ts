@@ -1,52 +1,68 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * Hook to track container width and height using ResizeObserver
- * Debounces updates to prevent unnecessary rescaling when sheets/modals open
+ * Tracks container dimensions. Uses dvn-scroller.clientHeight for scroll area
+ * (excludes scrollbar, padding; correct across zoom/OS/browser). No magic offset.
  */
 export const useContainerSize = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const [containerHeight, setContainerHeight] = useState<number>(0);
+  const [scrollAreaHeight, setScrollAreaHeight] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastWidthRef = useRef<number>(0);
   const lastHeightRef = useRef<number>(0);
+  const hasAppliedInitialRef = useRef<boolean>(false);
+  const scrollObserverRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const observeScrollArea = () => {
+      const scroller = containerRef.current?.querySelector('.dvn-scroller');
+      if (!scroller || scrollObserverRef.current) return;
+
+      const update = () => setScrollAreaHeight(scroller.clientHeight);
+      update();
+      scrollObserverRef.current = new ResizeObserver(update);
+      scrollObserverRef.current.observe(scroller);
+    };
+
+    const apply = (width: number, height: number) => {
+      hasAppliedInitialRef.current = true;
+      lastWidthRef.current = width;
+      lastHeightRef.current = height;
+      setContainerWidth(width);
+      setContainerHeight(height);
+      requestAnimationFrame(observeScrollArea);
+    };
+
     const resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
-
-        // Only update if size actually changed meaningfully (more than 1px difference)
-        // This prevents rescaling when sheet opens/closes due to viewport changes
         const widthChanged = Math.abs(width - lastWidthRef.current) > 1;
         const heightChanged = Math.abs(height - lastHeightRef.current) > 1;
 
         if (widthChanged || heightChanged) {
-          // Clear existing timeout
-          if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
+          const isInitial = !hasAppliedInitialRef.current;
+          if (isInitial) {
+            // Defer to next frame so layout (e.g. tab/modal transition) can settle
+            requestAnimationFrame(() => apply(width, height));
+          } else {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(() => apply(width, height), 50);
           }
-
-          // Debounce updates to prevent rapid-fire rescaling
-          timeoutRef.current = setTimeout(() => {
-            lastWidthRef.current = width;
-            lastHeightRef.current = height;
-            setContainerWidth(width);
-            setContainerHeight(height);
-          }, 50); // 50ms debounce
         }
       }
     });
 
     resizeObserver.observe(containerRef.current);
+    requestAnimationFrame(observeScrollArea);
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      scrollObserverRef.current?.disconnect();
+      scrollObserverRef.current = null;
       resizeObserver.disconnect();
     };
   }, []);
@@ -55,5 +71,7 @@ export const useContainerSize = () => {
     containerRef,
     containerWidth,
     containerHeight,
+    scrollContainerHeight:
+      scrollAreaHeight > 0 ? scrollAreaHeight : containerHeight,
   };
 };

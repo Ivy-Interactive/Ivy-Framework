@@ -1,8 +1,8 @@
 using Ivy.Core;
-using Ivy.Shared;
 using Microsoft.Extensions.Logging;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class DataTableView(
     IQueryable queryable,
@@ -14,11 +14,12 @@ public class DataTableView(
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = null,
     MenuItem[]? rowActions = null,
     Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null,
-    Func<object, object?>? idSelector = null) : ViewBase, IMemoized
+    Func<object, object?>? idSelector = null,
+    RefreshToken? refreshToken = null) : ViewBase, IMemoized
 {
     public override object? Build()
     {
-        var connection = UseDataTable(queryable, idSelector);
+        var connection = UseDataTable(queryable, idSelector, refreshToken);
         if (connection == null)
         {
             return null;
@@ -26,10 +27,10 @@ public class DataTableView(
 
         var table = new DataTable(connection, width, height, columns, config)
         {
-            OnCellClick = onCellClick,
-            OnCellActivated = onCellActivated,
+            OnCellClick = onCellClick.ToEventHandler(),
+            OnCellActivated = onCellActivated.ToEventHandler(),
             RowActions = rowActions,
-            OnRowAction = onRowAction
+            OnRowAction = onRowAction.ToEventHandler()
         };
 
         return table;
@@ -40,6 +41,6 @@ public class DataTableView(
         // Memoize based on queryable and configuration
         // Don't include the queryable itself as it might change reference
         // Only memoize if all inputs are stable
-        return [(object?)width!, (object?)height!, columns, config];
+        return [(object?)width!, (object?)height!, columns, config, refreshToken?.Token!];
     }
 }

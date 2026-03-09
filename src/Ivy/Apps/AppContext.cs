@@ -1,7 +1,8 @@
 using System.Text.Json;
 using Ivy.Core.Helpers;
 
-namespace Ivy.Apps;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class AppContext
 {

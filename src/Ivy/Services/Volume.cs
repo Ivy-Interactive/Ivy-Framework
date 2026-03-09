@@ -1,11 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ivy.Services;
-
-public interface IVolume
-{
-    public string GetAbsolutePath(params string[] parts);
-}
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class FolderVolume(string? mountPath = null) : IVolume, IDescribableService
 {

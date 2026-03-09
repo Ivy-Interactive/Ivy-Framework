@@ -55,7 +55,7 @@ Layout.Horizontal()
 
 ### Icons
 
-`Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../01_Primitives/02_Icon.md) for more details. Use [Align](../../04_ApiReference/IvyShared/Align.md) for icon position (e.g. `Align.Right`).
+`Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../01_Primitives/02_Icon.md) for more details. Use [Align](../../04_ApiReference/Ivy/Align.md) for icon position (e.g. `Align.Right`).
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
@@ -72,6 +72,15 @@ Layout.Vertical().Gap(4)
     | (Layout.Horizontal().Gap(4)
         | new Badge(null, icon:Icons.Bell)
         | new Badge(null, icon:Icons.X, variant:BadgeVariant.Destructive))
+```
+
+## Click Listener
+
+Badges can be made clickable using the `OnClick` extension method. This is useful for filter chips, tag management, and toggle states.
+
+```csharp demo-below
+new Badge("Click Me", icon:Icons.MousePointer)
+    .OnClick(_ => client.Toast("Badge clicked!"))
 ```
 
 <WidgetDocs Type="Ivy.Badge" ExtensionTypes="Ivy.BadgeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Badge.cs"/>

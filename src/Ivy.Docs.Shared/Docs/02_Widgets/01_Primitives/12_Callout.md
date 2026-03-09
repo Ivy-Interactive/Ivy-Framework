@@ -170,10 +170,32 @@ public class ComplexContentCalloutView : ViewBase
             | new Callout(
                 Layout.Vertical().Gap(2)
                     | Text.P("System error details are shown below. Please contact support if this issue persists.")
-                    | new Code("Error Code: E-1001\nTimestamp: 2024-01-15 14:30:00")
+                    | new CodeBlock("Error Code: E-1001\nTimestamp: 2024-01-15 14:30:00")
                     | Text.P("Technical details for debugging"),
                 "System Error",
                 CalloutVariant.Error);
+    }
+}
+```
+
+### Closable callouts
+
+When you set an `OnClose` handler, the callout shows a close (X) button in the top-right corner. Clicking it fires the handler so you can hide the callout. Use [UseTrigger](../../03_Hooks/02_Core/17_UseTrigger.md) to control visibility.
+
+```csharp demo-tabs
+public class ClosableCalloutView : ViewBase
+{
+    public override object? Build()
+    {
+        var (calloutView, showCallout) = UseTrigger((IState<bool> isOpen) =>
+            isOpen.Value
+                ? Callout.Info("A new version is available. Refresh to update.", "Update Available")
+                    .OnClose(() => isOpen.Set(false))
+                : null);
+
+        return Layout.Vertical().Gap(6)
+            | new Button("Show callout", onClick: _ => showCallout())
+            | calloutView;
     }
 }
 ```

@@ -1,7 +1,7 @@
 using Ivy.Core;
-using Ivy.Shared;
 
-namespace Ivy.Views.Blades;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class BladesView : ViewBase
 {

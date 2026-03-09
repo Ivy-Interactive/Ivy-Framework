@@ -61,6 +61,7 @@ interface MultipleSelectorProps {
   invalid?: boolean;
   scale?: Scales;
   maxVisibleBadges?: number;
+  ghost?: boolean;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -80,14 +81,106 @@ const MultipleSelector = React.forwardRef<
       emptyIndicator,
       invalid = false,
       scale = Scales.Medium,
-      maxVisibleBadges = 2,
+      maxVisibleBadges,
+      ghost = false,
     },
     ref
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     const containerRef = React.useRef<HTMLSpanElement>(null);
+    const triggerWrapperRef = React.useRef<HTMLDivElement>(null);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
     const [open, setOpen] = React.useState(false);
+    const [openUpward, setOpenUpward] = React.useState(false);
     const [inputValue, setInputValue] = React.useState('');
+    const measureRef = React.useRef<HTMLDivElement>(null);
+    const [visibleCount, setVisibleCount] = React.useState(
+      maxVisibleBadges ?? 1
+    );
+
+    React.useEffect(() => {
+      if (open && triggerWrapperRef.current) {
+        requestAnimationFrame(() => {
+          if (!triggerWrapperRef.current) return;
+          const rect = triggerWrapperRef.current.getBoundingClientRect();
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const dropdownHeight = dropdownRef.current?.offsetHeight ?? 0;
+          setOpenUpward(spaceBelow < dropdownHeight + 8);
+        });
+      } else {
+        setOpenUpward(false);
+      }
+    }, [open]);
+
+    React.useEffect(() => {
+      if (maxVisibleBadges !== undefined) {
+        setVisibleCount(maxVisibleBadges);
+        return;
+      }
+
+      if (value.length === 0) {
+        setVisibleCount(0);
+        return;
+      }
+
+      const container = containerRef.current;
+      const measureContainer = measureRef.current;
+      if (!container || !measureContainer) return;
+
+      const gap = parseFloat(getComputedStyle(container).gap) || 4;
+      const input = container.querySelector('input');
+      const inputReserve = input
+        ? (parseFloat(getComputedStyle(input).minWidth) || 0) +
+          (parseFloat(getComputedStyle(input).marginLeft) || 0)
+        : 0;
+
+      const calculate = () => {
+        const containerWidth = container.clientWidth;
+        if (containerWidth === 0) return;
+
+        const badges = Array.from(measureContainer.children) as HTMLElement[];
+        const availableWidth = containerWidth - inputReserve;
+
+        if (availableWidth <= 0 || badges.length === 0) {
+          setVisibleCount(1);
+          return;
+        }
+
+        const overflowBadge = badges[value.length];
+        const overflowBadgeWidth = overflowBadge
+          ? overflowBadge.offsetWidth
+          : 40;
+
+        let usedWidth = 0;
+        let count = 0;
+
+        for (let i = 0; i < value.length && i < badges.length; i++) {
+          const badgeWidth = badges[i].offsetWidth;
+          const gapWidth = count > 0 ? gap : 0;
+          const newTotal = usedWidth + badgeWidth + gapWidth;
+
+          const remainingItems = value.length - count - 1;
+          const needsOverflow = remainingItems > 0;
+          const maxAllowed = needsOverflow
+            ? availableWidth - overflowBadgeWidth - gap
+            : availableWidth;
+
+          if (newTotal > maxAllowed && count > 0) break;
+
+          usedWidth = newTotal;
+          count++;
+        }
+
+        setVisibleCount(Math.max(1, count));
+      };
+
+      requestAnimationFrame(calculate);
+
+      const observer = new ResizeObserver(calculate);
+      observer.observe(container);
+
+      return () => observer.disconnect();
+    }, [value, maxVisibleBadges, scale]);
 
     const handleUnselect = React.useCallback(
       (option: Option) => {
@@ -140,7 +233,47 @@ const MultipleSelector = React.forwardRef<
         )}
         {...commandProps}
       >
-        <div className="relative w-full">
+        <div ref={triggerWrapperRef} className="relative w-full">
+          {maxVisibleBadges === undefined && value.length > 0 && (
+            <div
+              ref={measureRef}
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                visibility: 'hidden',
+                pointerEvents: 'none',
+                display: 'flex',
+                gap: '4px',
+                top: 0,
+                left: 0,
+              }}
+            >
+              {value.map(option => (
+                <Badge
+                  key={`measure-${option.value}`}
+                  variant="secondary"
+                  className={cn(badgeVariants({ scale }), 'shrink-0')}
+                >
+                  {option.label}
+                  <span
+                    className="ml-1 p-1 h-3"
+                    style={{ display: 'inline-flex' }}
+                  >
+                    <X className={xIconVariants({ scale })} />
+                  </span>
+                </Badge>
+              ))}
+              <Badge
+                variant="outline"
+                className={cn(
+                  badgeVariants({ scale }),
+                  'bg-muted text-muted-foreground shrink-0'
+                )}
+              >
+                +{Math.max(1, value.length - 1)}
+              </Badge>
+            </div>
+          )}
           <div
             className={cn(
               multipleSelectorVariants({ scale }),
@@ -148,19 +281,22 @@ const MultipleSelector = React.forwardRef<
               (!value || value.length === 0) && 'text-muted-foreground',
               invalid
                 ? 'border-destructive text-destructive-foreground focus-within:ring-destructive focus-within:border-destructive'
-                : undefined
+                : undefined,
+              ghost &&
+                'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground'
             )}
           >
             <span
               ref={containerRef}
               className="flex gap-1 items-center flex-1 min-w-0 overflow-hidden"
             >
-              {value.slice(0, maxVisibleBadges).map(option => (
+              {value.slice(0, visibleCount).map(option => (
                 <Badge
                   key={option.value}
                   variant="secondary"
                   className={cn(
                     badgeVariants({ scale }),
+                    'shrink-0',
                     invalid &&
                       'bg-destructive/10 border-destructive text-destructive'
                   )}
@@ -187,15 +323,15 @@ const MultipleSelector = React.forwardRef<
                   </button>
                 </Badge>
               ))}
-              {value.length > maxVisibleBadges && (
+              {value.length > visibleCount && (
                 <Badge
                   variant="outline"
                   className={cn(
                     badgeVariants({ scale }),
-                    'bg-muted text-muted-foreground'
+                    'bg-muted text-muted-foreground shrink-0'
                   )}
                 >
-                  +{value.length - maxVisibleBadges}
+                  +{value.length - visibleCount}
                 </Badge>
               )}
               <CommandPrimitive.Input
@@ -256,7 +392,13 @@ const MultipleSelector = React.forwardRef<
             />
           </div>
           {open && defaultOptions.length > 0 && (
-            <div className="absolute w-full z-50 top-full mt-1 rounded-box border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+            <div
+              ref={dropdownRef}
+              className={cn(
+                'absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none animate-in',
+                openUpward ? 'bottom-full mb-1' : 'top-full mt-1'
+              )}
+            >
               <CommandGroup className="h-full overflow-auto max-h-[300px]">
                 {defaultOptions.map(option => {
                   const selected = isSelected(option);
@@ -293,7 +435,12 @@ const MultipleSelector = React.forwardRef<
             </div>
           )}
           {open && defaultOptions.length === 0 && emptyIndicator && (
-            <div className="absolute w-full z-50 top-full mt-1 rounded-box border bg-popover text-popover-foreground shadow-md outline-none p-2">
+            <div
+              className={cn(
+                'absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none p-2',
+                openUpward ? 'bottom-full mb-1' : 'top-full mt-1'
+              )}
+            >
               {emptyIndicator}
             </div>
           )}

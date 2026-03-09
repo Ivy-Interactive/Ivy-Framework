@@ -1,9 +1,10 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Shared;
-using Size = Ivy.Shared.Size;
+using Size = Ivy.Size;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class Text
 {
@@ -192,6 +193,11 @@ public static class Text
     }
 
     public static TextBuilder Display(IAnyState state) => Display(state.ToString() ?? "");
+
+    /// <summary>
+    /// Create a <see cref="RichTextBuilder"/> for composing inline text with mixed formatting.
+    /// </summary>
+    public static RichTextBuilder Rich() => new();
 }
 
 public class TextBuilder(string content, TextVariant variant, Languages codeLanguage = Languages.Csharp) : ViewBase, IStateless
@@ -204,6 +210,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _bold;
     private bool _italic;
     private bool _muted;
+    private TextAlignment? _textAlignment;
 
     private Scale? _scale;
 
@@ -212,7 +219,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         switch (variant)
         {
             case TextVariant.Code:
-                return new Code(content, codeLanguage);
+                return new CodeBlock(content, codeLanguage);
             case TextVariant.Markdown:
                 return new Markdown(content);
             case TextVariant.Json:
@@ -226,7 +233,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
             default:
                 {
                     var text = new TextBlock(
-                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted)
+                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted, _textAlignment)
                     {
                         Scale = _scale
                     };
@@ -309,11 +316,25 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    public TextBuilder Small() => Scale(Ivy.Shared.Scale.Small);
+    public TextBuilder Small() => Scale(Ivy.Scale.Small);
 
-    public TextBuilder Medium() => Scale(Ivy.Shared.Scale.Medium);
+    public TextBuilder Medium() => Scale(Ivy.Scale.Medium);
 
-    public TextBuilder Large() => Scale(Ivy.Shared.Scale.Large);
+    public TextBuilder Large() => Scale(Ivy.Scale.Large);
+
+    public TextBuilder Align(TextAlignment alignment)
+    {
+        _textAlignment = alignment;
+        return this;
+    }
+
+    public TextBuilder Left() => Align(TextAlignment.Left);
+
+    public TextBuilder Center() => Align(TextAlignment.Center);
+
+    public TextBuilder Right() => Align(TextAlignment.Right);
+
+    public TextBuilder Justify() => Align(TextAlignment.Justify);
 }
 
 

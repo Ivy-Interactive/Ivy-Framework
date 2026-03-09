@@ -25,6 +25,7 @@ interface DefaultVariantProps {
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClear: (e: React.MouseEvent) => void;
+  onSubmit?: () => void;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
   scale?: Scales;
@@ -37,12 +38,13 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
   onBlur,
   onFocus,
   onClear,
+  onSubmit,
   inputRef,
   isFocused,
   scale = Scales.Medium,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
-  const handleKeyDown = useEnterKeyBlur();
+  const handleKeyDown = useEnterKeyBlur(onSubmit);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     savePosition();
@@ -94,6 +96,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             type={type}
             disabled={props.disabled}
             maxLength={props.maxLength}
+            minLength={props.minLength}
             onChange={handleChange}
             onBlur={onBlur}
             onFocus={onFocus}

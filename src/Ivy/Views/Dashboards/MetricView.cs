@@ -1,9 +1,8 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views.Dashboards;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public record MetricRecord(
     string MetricFormatted,
@@ -49,7 +48,7 @@ public class MetricView(
 
         object? footer = x.GoalAchieved != null
             ? new Progress((int)Math.Round(x.GoalAchieved.Value * 100.0))
-                .ColorVariant(Progress.ColorVariants.EmeraldGradient)
+                .Color(Colors.Amber)
                 .Goal(x.GoalFormatted)
             : null;
 

@@ -95,15 +95,8 @@ public static partial class MarkdownConverter
 
         codeBuilder.AppendLine("using System;");
         codeBuilder.AppendLine("using Ivy;");
-        codeBuilder.AppendLine("using Ivy.Apps;");
-        codeBuilder.AppendLine("using Ivy.Shared;");
-        codeBuilder.AppendLine("using Ivy.Core;");
-        codeBuilder.AppendLine("using Ivy.Docs.Shared.Helpers;");
-        codeBuilder.AppendLine("using Ivy.Views.Tables;");
-        codeBuilder.AppendLine("using Ivy.Views.Kanban;");
-        codeBuilder.AppendLine("using static Ivy.Views.Layout;");
-        codeBuilder.AppendLine("using static Ivy.Views.Text;");
-        codeBuilder.AppendLine("using Ivy.Views;");
+        codeBuilder.AppendLine("using static Ivy.Layout;");
+        codeBuilder.AppendLine("using static Ivy.Text;");
         if (appMeta.Imports != null)
         {
             foreach (var import in appMeta.Imports)
@@ -159,7 +152,7 @@ public static partial class MarkdownConverter
             }
             headingsCode.Append("}");
 
-            codeBuilder.AppendTab(2).Append("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).HandleLinkClick(onLinkClick)");
+            codeBuilder.AppendTab(2).Append("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).OnLinkClick(onLinkClick)");
             codeBuilder.AppendLine($".Headings({headingsCode})");
             codeBuilder.AppendTab(3).AppendLine("| new Ivy.Docs.Shared.Internal.SmartSearchView()");
             codeBuilder.Append(contentBuilder);
@@ -206,7 +199,7 @@ public static partial class MarkdownConverter
                 referencedApps.UnionWith(types);
                 AppendAsMultiLineStringIfNecessary(baseIndentLevel, convertedMarkdown, codeBuilder,
                     isNestedContent ? ", new Markdown(" : "| new Markdown(",
-                    ").HandleLinkClick(onLinkClick)");
+                    ").OnLinkClick(onLinkClick)");
                 sectionBuilder.Clear();
             }
         }
@@ -505,7 +498,7 @@ public static partial class MarkdownConverter
         var (types, convertedContent) = linkConverter.Convert(content);
         referencedApps.UnionWith(types);
 
-        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).HandleLinkClick(onLinkClick)");
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).OnLinkClick(onLinkClick)");
     }
 
     private static void HandleEmbedBlock(StringBuilder codeBuilder, XElement xml)
@@ -580,12 +573,12 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
             string mermaidBlock = $"```mermaid\n{codeContent}\n```";
             AppendAsMultiLineStringIfNecessary(baseIndentLevel, mermaidBlock, codeBuilder,
                 isNestedContent ? ", new Markdown(" : "| new Markdown(",
-                ").HandleLinkClick(onLinkClick)");
+                ").OnLinkClick(onLinkClick)");
         }
         else
         {
             AppendAsMultiLineStringIfNecessary(baseIndentLevel, codeContent, codeBuilder,
-                isNestedContent ? ", Code(" : "| Code(",
+                isNestedContent ? ", new CodeBlock(" : "| new CodeBlock(",
                 $",{MapLanguageToEnum(language)})");
         }
     }
@@ -610,7 +603,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
         {
             cb.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "Tabs( ");
             cb.AppendTab(baseIndentLevel + 1).AppendLine($"new Tab(\"Demo\", new Box().Content({insert})),");
-            AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "new Tab(\"Code\", new Code(", $",{MapLanguageToEnum(lang)}))")
+            AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "new Tab(\"Code\", new CodeBlock(", $",{MapLanguageToEnum(lang)}))")
                 ;
             cb.AppendTab(baseIndentLevel).AppendLine(").Height(Size.Fit()).Variant(TabsVariant.Content)");
         }
@@ -619,7 +612,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
         {
             cb.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "(Vertical() ");
             if (!demoBelow) AppendDemoContent(cb, baseIndentLevel + 1, insert);
-            AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "| Code(", $",{MapLanguageToEnum(lang)})");
+            AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "| new CodeBlock(", $",{MapLanguageToEnum(lang)})");
             if (demoBelow) AppendDemoContent(cb, baseIndentLevel + 1, insert);
             cb.AppendTab(baseIndentLevel).AppendLine(")");
         }
@@ -628,7 +621,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
         {
             cb.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "(Grid().Columns(2) ");
             if (!demoRight) AppendDemoContent(cb, baseIndentLevel + 1, insert);
-            AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "| Code(", $",{MapLanguageToEnum(lang)})");
+            AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "| new CodeBlock(", $",{MapLanguageToEnum(lang)})");
             if (demoRight) AppendDemoContent(cb, baseIndentLevel + 1, insert);
             cb.AppendTab(baseIndentLevel).AppendLine(")");
         }

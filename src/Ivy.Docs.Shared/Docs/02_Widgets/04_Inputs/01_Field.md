@@ -88,11 +88,11 @@ public class MixedInputsDemo : ViewBase
         var selectedNotice = UseState(new string[]{});
         return Layout.Vertical()
             | dateState.ToDateTimeInput()
-                .Variant(DateTimeInputs.Date)
+                .Variant(DateTimeInputVariants.Date)
                 .WithField()
                 .Label("Date of birth")
             | selectedNotice.ToSelectInput(options.ToOptions())
-                .Variant(SelectInputs.List)
+                .Variant(SelectInputVariants.List)
                 .WithField()
                 .Label("Terms & Conditions")
                 .Description("You must agree before continuing")

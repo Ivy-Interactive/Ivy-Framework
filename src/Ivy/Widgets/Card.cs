@@ -1,6 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
-using Ivy.Views;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -11,6 +9,7 @@ public enum CardHoverVariant
     Pointer,
     PointerAndTranslate,
 }
+
 
 /// <summary>
 /// A flexible container with a border and shadow for grouping related content.
@@ -25,7 +24,7 @@ public record Card : WidgetBase<Card>
             header != null ? new Slot("Header", header) : null
         }.Where(x => x != null).Cast<object>().ToArray())
     {
-        Width = Ivy.Shared.Size.Full();
+        Width = Ivy.Size.Full();
     }
 
     internal Card() { }
@@ -34,11 +33,11 @@ public record Card : WidgetBase<Card>
     internal object? Description { get; set; }
     internal object? Icon { get; set; }
 
-
-
     [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
 
-    [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
+    [Prop] public bool Disabled { get; set; }
+
+    [Event] public EventHandler<Event<Card>>? OnClick { get; set; }
 
     public static Card operator |(Card widget, object child)
     {
@@ -61,6 +60,13 @@ public record Card : WidgetBase<Card>
 public static class CardExtensions
 {
     internal static Slot? GetSlot(this Card card, string name) => card.Children.FirstOrDefault(e => e is Slot slot && slot.Name == name) as Slot;
+
+    private static object[] WithSlot(Card card, string slotName, object? value)
+    {
+        var others = card.Children.OfType<Slot>().Where(s => s.Name != slotName);
+        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
+        return result.Cast<object>().ToArray();
+    }
 
     public static Card Header(this Card card, object? title = null, object? description = null, object? icon = null)
     {
@@ -99,44 +105,51 @@ public static class CardExtensions
         return card.Header(card.Title, card.Description, icon);
     }
 
+    public static Card Content(this Card card, object? content) =>
+        card with { Children = WithSlot(card, "Content", content) };
+
+    public static Card Footer(this Card card, object? footer) =>
+        card with { Children = WithSlot(card, "Footer", footer) };
 
     public static Card Hover(this Card card, CardHoverVariant variant) => card with { HoverVariant = variant };
 
+    public static Card Disabled(this Card card, bool disabled = true) => card with { Disabled = disabled };
+
     private static CardHoverVariant HoverVariantWithClick(this Card card) => card.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : card.HoverVariant;
 
-    public static Card HandleClick(this Card card, Func<Event<Card>, ValueTask> onClick)
+    public static Card OnClick(this Card card, Func<Event<Card>, ValueTask> onClick)
     {
         return card with
         {
             HoverVariant = card.HoverVariantWithClick(),
-            OnClick = onClick
+            OnClick = new(onClick)
         };
     }
 
-    public static Card HandleClick(this Card card, Action<Event<Card>> onClick)
+    public static Card OnClick(this Card card, Action<Event<Card>> onClick)
     {
         return card with
         {
             HoverVariant = card.HoverVariantWithClick(),
-            OnClick = onClick.ToValueTask()
+            OnClick = new(onClick.ToValueTask())
         };
     }
 
-    public static Card HandleClick(this Card card, Action onClick)
+    public static Card OnClick(this Card card, Action onClick)
     {
         return card with
         {
             HoverVariant = card.HoverVariantWithClick(),
-            OnClick = _ => { onClick(); return ValueTask.CompletedTask; }
+            OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; })
         };
     }
 
-    public static Card HandleClick(this Card card, Func<ValueTask> onClick)
+    public static Card OnClick(this Card card, Func<ValueTask> onClick)
     {
         return card with
         {
             HoverVariant = card.HoverVariantWithClick(),
-            OnClick = _ => onClick()
+            OnClick = new(_ => onClick())
         };
     }
 }

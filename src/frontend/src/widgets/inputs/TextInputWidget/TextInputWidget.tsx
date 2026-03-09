@@ -26,6 +26,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   prefix,
   suffix,
   maxLength,
+  minLength,
   rows,
   'data-testid': dataTestId,
 }) => {
@@ -33,6 +34,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   // Normalize null/undefined to empty string for display (HTML inputs can't have null values)
   const [localValue, setLocalValue] = useState(value ?? '');
   const [isFocused, setIsFocused] = useState(false);
+  const [minLengthError, setMinLengthError] = useState<string | undefined>(
+    undefined
+  );
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
   // Wrapper to normalize null/undefined to empty string for useSyncServerValue
@@ -54,16 +58,32 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-      setLocalValue(e.target.value);
-      if (events.includes('OnChange'))
-        eventHandler('OnChange', id, [e.target.value]);
+      const newValue = e.target.value;
+      setLocalValue(newValue);
+      // Clear the minLength error as soon as the value satisfies the constraint
+      if (minLength !== undefined && newValue.length >= minLength) {
+        setMinLengthError(undefined);
+      }
+      if (events.includes('OnChange')) eventHandler('OnChange', id, [newValue]);
     },
-    [eventHandler, id, events]
+    [eventHandler, id, events, minLength]
   );
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
+    // Show validation error if value is non-empty but below the minimum length
+    if (
+      minLength !== undefined &&
+      localValue.length > 0 &&
+      localValue.length < minLength
+    ) {
+      setMinLengthError(`Minimum ${minLength} characters required`);
+    }
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
+  }, [eventHandler, id, events, minLength, localValue]);
+
+  const handleSubmit = useCallback(() => {
+    if (events.includes('OnSubmit')) eventHandler('OnSubmit', id, []);
   }, [eventHandler, id, events]);
 
   const handleFocus = useCallback(() => {
@@ -85,13 +105,16 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     [eventHandler, id, events, disabled, nullable]
   );
 
+  // Server-provided `invalid` takes precedence; fall back to the local minLength error
+  const effectiveInvalid = invalid ?? minLengthError;
+
   const commonProps = useMemo(
     () => ({
       id,
       placeholder,
       value: localValue,
       disabled,
-      invalid,
+      invalid: effectiveInvalid,
       nullable,
       width,
       height,
@@ -101,6 +124,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       prefix,
       suffix,
       maxLength,
+      minLength,
       rows,
       'data-testid': dataTestId,
     }),
@@ -109,7 +133,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       placeholder,
       localValue,
       disabled,
-      invalid,
+      effectiveInvalid,
       nullable,
       events,
       width,
@@ -119,6 +143,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       prefix,
       suffix,
       maxLength,
+      minLength,
       rows,
       dataTestId,
     ]
@@ -133,6 +158,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           onClear={handleClear}
+          onSubmit={handleSubmit}
           inputRef={inputRef}
           scale={scale}
         />
@@ -158,6 +184,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           onClear={handleClear}
+          onSubmit={handleSubmit}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}
@@ -172,6 +199,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           onClear={handleClear}
+          onSubmit={handleSubmit}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}

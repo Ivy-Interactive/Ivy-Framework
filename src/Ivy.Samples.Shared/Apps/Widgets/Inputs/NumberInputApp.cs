@@ -1,4 +1,3 @@
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -47,6 +46,12 @@ public class NumberInputApp : SampleBase
         var dataBinding = CreateNumericTypeTests(numericTypes);
 
         var currencyExamples = CreateCurrencyExamples((IState<decimal>)usdValue, (IState<decimal>)eurValue, (IState<decimal>)gbpValue, (IState<decimal>)jpyValue, (IState<decimal?>)nullCurrencyValue);
+
+        // Prefix and Suffix examples
+        var priceValue = UseState(99.99m);
+        var weightValue = UseState(5.5);
+        var temperatureValue = UseState(22);
+        var percentValue = UseState(0.75);
 
 
 
@@ -113,6 +118,46 @@ public class NumberInputApp : SampleBase
                | Text.H2("Data Binding")
                | dataBinding
 
+               // Prefix and Suffix Examples:
+               | Text.H2("Prefix and Suffix")
+               | (Layout.Grid().Columns(3)
+                  | Text.InlineCode("Description")
+                  | Text.InlineCode("Number Input")
+                  | Text.InlineCode("State")
+
+                  | Text.Block("Text Prefix ($)")
+                  | priceValue
+                    .ToNumberInput()
+                    .Prefix("$")
+                    .Precision(2)
+                    .TestId("number-input-prefix-text")
+                  | Text.InlineCode(priceValue.Value.ToString("F2"))
+
+                  | Text.Block("Text Suffix (kg)")
+                  | weightValue
+                    .ToNumberInput()
+                    .Suffix("kg")
+                    .Precision(1)
+                    .TestId("number-input-suffix-text")
+                  | Text.InlineCode(weightValue.Value.ToString("F1"))
+
+                  | Text.Block("Icon Prefix + Text Suffix")
+                  | temperatureValue
+                    .ToNumberInput()
+                    .Prefix(Icons.Thermometer)
+                    .Suffix("°C")
+                    .TestId("number-input-prefix-suffix-mixed")
+                  | Text.InlineCode(temperatureValue.Value.ToString())
+
+                  | Text.Block("Text Suffix (%)")
+                  | percentValue
+                    .ToNumberInput()
+                    .Suffix("%")
+                    .Precision(2)
+                    .TestId("number-input-suffix-percent")
+                  | Text.InlineCode(percentValue.Value.ToString("F2"))
+               )
+
                // Currency Examples:
                | Text.H2("Currency Examples")
                | currencyExamples
@@ -161,7 +206,7 @@ public class NumberInputApp : SampleBase
                | Layout.Horizontal(
                    onBlurState
                     .ToNumberInput()
-                    .HandleBlur(e => onBlurLabel.Set("Blur")),
+                    .OnBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
             ;
@@ -188,7 +233,7 @@ public class NumberInputApp : SampleBase
                     .Currency("USD")
                   | usdValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("USD")
 
                   | Text.Block("EUR")
@@ -197,7 +242,7 @@ public class NumberInputApp : SampleBase
                     .Currency("EUR")
                   | eurValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("EUR")
 
                   | Text.Block("GBP")
@@ -206,7 +251,7 @@ public class NumberInputApp : SampleBase
                     .Currency("GBP")
                   | gbpValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("GBP")
 
                   | Text.Block("JPY")
@@ -215,7 +260,7 @@ public class NumberInputApp : SampleBase
                     .Currency("JPY")
                   | jpyValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("JPY")
 
                   | Text.Block("Null Value")
@@ -224,7 +269,7 @@ public class NumberInputApp : SampleBase
                     .Currency("USD")
                   | nullCurrencyValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("USD")
                )
 
@@ -279,7 +324,7 @@ public class NumberInputApp : SampleBase
                     .Max(10000)
                   | usdValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("USD")
                     .Min(0)
                     .Max(10000)
@@ -291,7 +336,7 @@ public class NumberInputApp : SampleBase
                     .Step(0.01)
                   | eurValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("EUR")
                     .Step(0.01)
 
@@ -302,7 +347,7 @@ public class NumberInputApp : SampleBase
                     .Precision(2)
                   | gbpValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariants.Slider)
                     .Currency("GBP")
                     .Precision(2)
                );

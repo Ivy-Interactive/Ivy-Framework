@@ -19,18 +19,16 @@ and multiple selections, option grouping, and custom rendering of option items.
 
 ## Basic Usage
 
-Here's a simple example of a `SelectInput` with a few options. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width(Size.Full())` to make the select fill available space:
+Here's a simple example of a `SelectInput` with a few options. Use [Size](../../04_ApiReference/Ivy/Size.md) for `.Width(Size.Full())` to make the select fill available space:
 
 ```csharp demo-below
 public class SelectVariantDemo : ViewBase
 {
     public override object? Build()
     {
-        var langs = new string[]{"C#","Java","Go","JavaScript","F#","Kotlin","VB.NET","Rust"};
-        
         var favLang = UseState("C#");
-        return favLang.ToSelectInput(langs.ToOptions())
-                         .Variant(SelectInputs.Select)
+        return favLang.ToSelectInput(["C#", "Java", "Go", "JavaScript", "F#", "Kotlin", "VB.NET", "Rust"])
+                         .Variant(SelectInputVariants.Select)
                          .WithField()
                          .Label("Select your favourite programming language")
                          .Width(Size.Full());
@@ -64,22 +62,22 @@ public class MultiSelectDemo : ViewBase
         var intArray = UseState<int[]>([]);
         
         var languageOptions = typeof(ProgrammingLanguages).ToOptions();
-        var stringOptions = new[]{"Option A", "Option B", "Option C", "Option D"}.ToOptions();
-        var intOptions = new[]{1, 2, 3, 4, 5}.ToOptions();
+        var stringOptions = new[] { "Option A", "Option B", "Option C", "Option D" };
+        var intOptions = new[] { 1, 2, 3, 4, 5 }.ToOptions();
         
         return Layout.Vertical()
             | Text.InlineCode("Select Variant (Enum)")
             | languagesSelect.ToSelectInput(languageOptions)
-                .Variant(SelectInputs.Select)
+                .Variant(SelectInputVariants.Select)
                 .Placeholder("Choose languages...")
             
             | Text.InlineCode("List Variant (String Array)")
-            | stringArray.ToSelectInput(stringOptions)
-                .Variant(SelectInputs.List)
+            | stringArray.ToSelectInput(stringOptions.ToOptions())
+                .Variant(SelectInputVariants.List)
             
             | Text.InlineCode("Toggle Variant (Integer Array)")
             | intArray.ToSelectInput(intOptions)
-                .Variant(SelectInputs.Toggle);
+                .Variant(SelectInputVariants.Toggle);
     }
 }
 ```
@@ -144,27 +142,140 @@ public class SelectStylingDemo : ViewBase
     {
         var normalSelect = UseState("");
         var invalidSelect = UseState("");
+        var ghostSelect = UseState("");
+        var loadingSelect = UseState("");
         var disabledSelect = UseState("");
-        
-        var options = new[]{"Option 1", "Option 2", "Option 3"}.ToOptions();
-        
+
+        var options = new[] { "Option 1", "Option 2", "Option 3" };
+
+        var isLoading = UseState(true);
+
         return Layout.Vertical()
             | normalSelect.ToSelectInput(options)
                 .Placeholder("Choose an option...")
                 .WithField()
                 .Label("Normal SelectInput:")
-            
+
             | invalidSelect.ToSelectInput(options)
                 .Placeholder("This has an error...")
                 .Invalid("This field is required")
                 .WithField()
                 .Label("Invalid SelectInput:")
-            
+
+            | ghostSelect.ToSelectInput(options)
+                .Placeholder("This is ghost...")
+                .Ghost()
+                .WithField()
+                .Label("Ghost SelectInput:")
+
+            | loadingSelect.ToSelectInput(options)
+                .Placeholder("This is loading...")
+                .Loading(isLoading.Value)
+                .WithField()
+                .Label("Loading SelectInput")
+
             | disabledSelect.ToSelectInput(options)
                 .Placeholder("This is disabled...")
                 .Disabled(true)
                 .WithField()
                 .Label("Disabled SelectInput:");
+    }
+}
+```
+
+## Advanced Features
+
+SelectInput supports search, selection limits, and loading state. These work across all variants (Select, List, Toggle).
+
+### Search Support
+
+Enable search with `.Searchable(true)`, set the matching mode with `.SearchMode()`, and customize the empty state with `.EmptyMessage()`:
+
+```csharp demo-below
+public class SelectSearchDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selected = UseState("");
+        var options = new[] { "C#", "Java", "Python", "JavaScript", "Go", "Rust", "F#", "Kotlin", "TypeScript" };
+        return selected.ToSelectInput(options.ToOptions())
+            .Searchable(true)
+            .SearchMode(SearchMode.Fuzzy)
+            .EmptyMessage("No items found")
+            .Placeholder("Search languages...")
+            .WithField()
+            .Label("Language")
+            .Width(Size.Full());;
+    }
+}
+```
+
+`SearchMode` can be `SearchMode.Fuzzy`, `SearchMode.CaseInsensitive`, or `SearchMode.CaseSensitive`.
+
+### Selection Limits
+
+For multi-select variants, use `.MinSelections()` and `.MaxSelections()` to enforce how many options can be selected:
+
+```csharp demo-below
+public class SelectionLimitsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var colors = UseState<string[]>([]);
+        var options = new[] { "Red", "Green", "Blue", "Yellow", "Purple" }.ToOptions();
+        return colors.ToSelectInput(options)
+            .Variant(SelectInputVariants.Toggle)
+            .MinSelections(1)
+            .MaxSelections(3)
+            .Placeholder("Pick 1 to 3 colors")
+            .WithField()
+            .Label("Colors")
+            .Width(Size.Full());;
+    }
+}
+```
+
+### Disabled Options
+
+Individual options can be disabled using the fluent `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list:
+
+```csharp demo-tabs
+public class DisabledOptionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var fruit = UseState("apple");
+        var colors = UseState<string[]>([]);
+
+        var fruitOptions = new IAnyOption[]
+        {
+            new Option<string>("Apple", "apple"),
+            new Option<string>("Orange", "orange"),
+            new Option<string>("Grape (Out of Stock)", "grape").Disabled(),
+            new Option<string>("Banana", "banana"),
+            new Option<string>("Mango (Coming Soon)", "mango").Disabled(),
+        };
+
+        var colorOptions = new IAnyOption[]
+        {
+            new Option<string>("Red", "red"),
+            new Option<string>("Green", "green"),
+            new Option<string>("Blue (Premium)", "blue").Disabled(),
+            new Option<string>("Yellow", "yellow"),
+        };
+
+        return Layout.Vertical()
+            | Text.InlineCode("Select Variant")
+            | fruit.ToSelectInput(fruitOptions)
+                .Placeholder("Select a fruit...")
+
+            | Text.InlineCode("Toggle Variant")
+            | colors.ToSelectInput(colorOptions)
+                .Variant(SelectInputVariants.Toggle)
+
+            | Text.InlineCode("List Variant")
+            | colors.ToSelectInput(colorOptions)
+                .Variant(SelectInputVariants.List);
     }
 }
 ```
@@ -226,12 +337,12 @@ public class CoffeeShopDemo: ViewBase
             previousCoffee.Set(coffee.Value);
         }
         
-        var coffeeSizeMenu = coffeeSize.ToSelectInput(coffeeSizes.ToOptions())
-                                       .Variant(SelectInputs.List);
+        var coffeeSizeMenu = coffeeSize.ToSelectInput(coffeeSizes)
+                                       .Variant(SelectInputVariants.List);
         var availableCondiments = CoffeeAccompaniments[coffee.Value];
         
         var condimentMenu = selectedCondiments.ToSelectInput(availableCondiments.ToOptions())
-            .Variant(SelectInputs.Toggle);
+            .Variant(SelectInputVariants.Toggle);
         
         var orderSummary = BuildOrderSummary(coffee.Value, coffeeSize.Value, selectedCondiments.Value);
         

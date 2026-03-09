@@ -1,7 +1,3 @@
-using Ivy.Charts;
-using Ivy.Core;
-using Ivy.Shared;
-
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
@@ -32,7 +28,7 @@ public record AreaChart : WidgetBase<AreaChart>
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public ChartTooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
@@ -56,7 +52,7 @@ public record AreaChart : WidgetBase<AreaChart>
     }
 }
 
-public static class AreaChartExtensions
+public static partial class AreaChartExtensions
 {
     public static AreaChart Layout(this AreaChart chart, Layouts layout)
     {
@@ -113,14 +109,14 @@ public static class AreaChartExtensions
         return chart with { YAxis = [.. chart.YAxis, new YAxis(dataKey)] };
     }
 
-    public static AreaChart Tooltip(this AreaChart chart, Charts.Tooltip? tooltip)
+    public static AreaChart Tooltip(this AreaChart chart, ChartTooltip? tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static AreaChart Tooltip(this AreaChart chart)
     {
-        return chart with { Tooltip = new Charts.Tooltip() };
+        return chart with { Tooltip = new ChartTooltip() };
     }
 
     public static AreaChart Legend(this AreaChart chart, Legend legend)

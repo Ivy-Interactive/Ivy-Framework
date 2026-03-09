@@ -219,7 +219,11 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     // Determine border radius classes based on borderRadius prop
     const getBorderRadiusClass = () => {
       if (borderRadius === 'Full') {
-        return { container: 'rounded-full', button: 'rounded-full' };
+        return {
+          container: 'rounded-full',
+          button: 'rounded-full',
+          buttonStyle: { borderRadius: '9999px' } as React.CSSProperties,
+        };
       }
       if (borderRadius === 'Rounded') {
         return { container: 'rounded-lg', button: 'rounded-md' };
@@ -275,6 +279,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
             hasChildren &&
               'p-2 h-auto items-start justify-start text-left inline-block'
           )}
+          style={borderRadiusClasses.buttonStyle}
           tooltipText={tooltip || undefined}
           data-testid={dataTestId}
         >

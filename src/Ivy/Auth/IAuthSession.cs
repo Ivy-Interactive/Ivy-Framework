@@ -1,4 +1,5 @@
-namespace Ivy.Auth;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public interface IAuthSession
 {
