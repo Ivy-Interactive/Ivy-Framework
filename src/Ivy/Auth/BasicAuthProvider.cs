@@ -14,10 +14,7 @@ public class BasicAuthProvider : BasicAuthTokenHandler, IAuthProvider
     private readonly byte[] _hashSecret;
 
     public BasicAuthProvider(IConfiguration configuration)
-        : base(
-            configuration["BasicAuth:JwtIssuer"] ?? "ivy",
-            configuration["BasicAuth:JwtAudience"] ?? "ivy-app",
-            CreateSigningKey(configuration["BasicAuth:JwtSecret"] ?? throw new Exception("BasicAuth:JwtSecret is required")))
+        : base(configuration)
     {
         var hashSecret = configuration["BasicAuth:HashSecret"] ?? throw new Exception("BasicAuth:HashSecret is required");
 
@@ -35,19 +32,6 @@ public class BasicAuthProvider : BasicAuthTokenHandler, IAuthProvider
         catch (FormatException)
         {
             throw new Exception("BasicAuth:HashSecret is not a valid base64 string");
-        }
-    }
-
-    private static SymmetricSecurityKey CreateSigningKey(string jwtSecret)
-    {
-        try
-        {
-            var jwtSecretBytes = Convert.FromBase64String(jwtSecret);
-            return new SymmetricSecurityKey(jwtSecretBytes);
-        }
-        catch (FormatException)
-        {
-            throw new Exception("BasicAuth:JwtSecret is not a valid base64 string");
         }
     }
 

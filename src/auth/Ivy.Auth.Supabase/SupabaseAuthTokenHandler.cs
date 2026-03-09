@@ -1,6 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Supabase.Gotrue;
 
@@ -17,13 +19,35 @@ public class SupabaseAuthTokenHandler : IAuthTokenHandler
     private JsonWebKeySet? _cachedJwks = null;
     private DateTime _jwksCacheExpiry = DateTime.MinValue;
 
-    public SupabaseAuthTokenHandler(string issuer, string jwksUrl, SymmetricSecurityKey? legacyJwtKey, global::Supabase.Client client)
+    public SupabaseAuthTokenHandler(IConfiguration configuration)
     {
+        var url = configuration.GetValue<string>("Supabase:Url") ?? throw new Exception("Supabase:Url is required");
+        var apiKey = configuration.GetValue<string>("Supabase:ApiKey") ?? throw new Exception("Supabase:ApiKey is required");
+
+        Issuer = new Uri(new Uri(url), "auth/v1").ToString();
+        JwksUrl = $"{Issuer}/.well-known/jwks.json";
+
+        var legacyJwtSecret = configuration.GetValue<string?>("Supabase:LegacyJwtSecret");
+        if (!string.IsNullOrEmpty(legacyJwtSecret))
+        {
+            var keyBytes = Encoding.UTF8.GetBytes(legacyJwtSecret);
+            LegacyJwtKey = new SymmetricSecurityKey(keyBytes);
+        }
+        else
+        {
+            LegacyJwtKey = null;
+        }
+
+        var options = new global::Supabase.SupabaseOptions
+        {
+            AutoRefreshToken = false,
+            AutoConnectRealtime = false
+        };
+        Client = new global::Supabase.Client(url, apiKey, options);
+
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Supabase:UserAgent");
         HttpClient = new HttpClient();
-        Issuer = issuer;
-        JwksUrl = jwksUrl;
-        LegacyJwtKey = legacyJwtKey;
-        Client = client;
+        HttpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
     }
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)

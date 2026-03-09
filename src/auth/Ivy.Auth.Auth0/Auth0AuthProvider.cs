@@ -26,48 +26,8 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
     private DateTime _managementTokenExpiry = DateTime.MinValue;
 
     public Auth0AuthProvider(IConfiguration configuration)
-        : base(
-            CreateAuthClient(configuration),
-            GetDomain(configuration),
-            GetClientId(configuration),
-            GetClientSecret(configuration),
-            GetAudience(configuration),
-            GetNamespace(configuration),
-            CreateConfigurationManager(configuration))
+        : base(configuration)
     {
-    }
-
-    private static AuthenticationApiClient CreateAuthClient(IConfiguration configuration)
-    {
-        var domain = GetDomain(configuration);
-        return new AuthenticationApiClient(domain);
-    }
-
-    private static string GetDomain(IConfiguration configuration)
-        => configuration.GetValue<string>("Auth0:Domain") ?? throw new Exception("Auth0:Domain is required");
-
-    private static string GetClientId(IConfiguration configuration)
-        => configuration.GetValue<string>("Auth0:ClientId") ?? throw new Exception("Auth0:ClientId is required");
-
-    private static string GetClientSecret(IConfiguration configuration)
-        => configuration.GetValue<string>("Auth0:ClientSecret") ?? throw new Exception("Auth0:ClientSecret is required");
-
-    private static string GetAudience(IConfiguration configuration)
-        => configuration.GetValue<string>("Auth0:Audience") ?? throw new Exception("Auth0:Audience is required");
-
-    private static string GetNamespace(IConfiguration configuration)
-        => configuration.GetValue<string>("Auth0:Namespace") ?? "https://ivy.app/";
-
-    private static ConfigurationManager<OpenIdConnectConfiguration> CreateConfigurationManager(IConfiguration configuration)
-    {
-        var domain = GetDomain(configuration);
-        var authority = $"https://{domain}/";
-        var documentRetriever = new HttpDocumentRetriever { RequireHttps = true };
-        return new ConfigurationManager<OpenIdConnectConfiguration>(
-            $"{authority}.well-known/openid-configuration",
-            new OpenIdConnectConfigurationRetriever(),
-            documentRetriever
-        );
     }
 
     public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken)

@@ -1,8 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using Ivy.Auth.Clerk.ApiClient;
 using Ivy.Auth.Clerk.ApiClient.Models;
 using Ivy.Core;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Ivy.Auth.Clerk;
@@ -18,11 +21,46 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
     private ICollection<SecurityKey>? _signingKeys;
     private DateTime _signingKeysLastFetched = DateTime.MinValue;
 
-    public ClerkAuthTokenHandler(string frontendApiDomain, bool isProduction)
+    private static (bool IsProduction, string Key) ParseKey(string name, string type, string key)
     {
+        var tokens = key.Split('_', 3);
+        if (tokens.Length != 3 || tokens[0] != type || (tokens[1] != "test" && tokens[1] != "live"))
+        {
+            throw new Exception($"{name} is invalid");
+        }
+        return (tokens[1] == "live", tokens[2]);
+    }
+
+    public ClerkAuthTokenHandler(IConfiguration configuration)
+    {
+        var secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
+        var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
+
+        var (secretIsProduction, _) = ParseKey("Clerk:SecretKey", "sk", secretKey);
+        var (publishableIsProduction, _) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
+
+        if (secretIsProduction != publishableIsProduction)
+        {
+            throw new Exception("Clerk:SecretKey and Clerk:PublishableKey must both be for the same environment (test or live)");
+        }
+
+        IsProduction = secretIsProduction;
+
+        var (_, publishableKeyValue) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
+        try
+        {
+            var base64Decoded = WebEncoders.Base64UrlDecode(publishableKeyValue);
+            var base64DecodedString = Encoding.UTF8.GetString(base64Decoded);
+            FrontendApiDomain = base64DecodedString.Split('$', 2)[0];
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Clerk:PublishableKey contains an invalid base64 string", ex);
+        }
+
+        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Clerk:UserAgent");
         HttpClient = new HttpClient();
-        FrontendApiDomain = frontendApiDomain;
-        IsProduction = isProduction;
+        HttpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
     }
 
     public async Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)

@@ -27,58 +27,8 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
     private string? _pkceCodeVerifier = null;
 
     public SupabaseAuthProvider(IConfiguration configuration)
-        : base(
-            GetIssuer(configuration),
-            GetJwksUrl(configuration),
-            CreateLegacyJwtKey(configuration),
-            CreateClient(configuration))
+        : base(configuration)
     {
-        HttpClient = CreateHttpClient(configuration);
-    }
-
-    private static global::Supabase.Client CreateClient(IConfiguration configuration)
-    {
-        var url = configuration.GetValue<string>("Supabase:Url") ?? throw new Exception("Supabase:Url is required");
-        var apiKey = configuration.GetValue<string>("Supabase:ApiKey") ?? throw new Exception("Supabase:ApiKey is required");
-
-        var options = new SupabaseOptions
-        {
-            AutoRefreshToken = false,
-            AutoConnectRealtime = false
-        };
-
-        return new global::Supabase.Client(url, apiKey, options);
-    }
-
-    private static HttpClient CreateHttpClient(IConfiguration configuration)
-    {
-        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Supabase:UserAgent");
-        var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
-        return httpClient;
-    }
-
-    private static string GetIssuer(IConfiguration configuration)
-    {
-        var url = configuration.GetValue<string>("Supabase:Url") ?? throw new Exception("Supabase:Url is required");
-        return new Uri(new Uri(url), "auth/v1").ToString();
-    }
-
-    private static string GetJwksUrl(IConfiguration configuration)
-    {
-        var issuer = GetIssuer(configuration);
-        return $"{issuer}/.well-known/jwks.json";
-    }
-
-    private static SymmetricSecurityKey? CreateLegacyJwtKey(IConfiguration configuration)
-    {
-        var legacyJwtSecret = configuration.GetValue<string?>("Supabase:LegacyJwtSecret");
-        if (!string.IsNullOrEmpty(legacyJwtSecret))
-        {
-            var keyBytes = Encoding.UTF8.GetBytes(legacyJwtSecret);
-            return new SymmetricSecurityKey(keyBytes);
-        }
-        return null;
     }
 
     public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken)

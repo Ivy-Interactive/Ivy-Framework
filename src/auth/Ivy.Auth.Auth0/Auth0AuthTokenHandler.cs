@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -18,22 +19,23 @@ public class Auth0AuthTokenHandler : IAuthTokenHandler
     protected readonly string Namespace;
     protected readonly ConfigurationManager<OpenIdConnectConfiguration> ConfigurationManager;
 
-    public Auth0AuthTokenHandler(
-        AuthenticationApiClient authClient,
-        string domain,
-        string clientId,
-        string clientSecret,
-        string audience,
-        string namespace_,
-        ConfigurationManager<OpenIdConnectConfiguration> configurationManager)
+    public Auth0AuthTokenHandler(IConfiguration configuration)
     {
-        AuthClient = authClient;
-        Domain = domain;
-        ClientId = clientId;
-        ClientSecret = clientSecret;
-        Audience = audience;
-        Namespace = namespace_;
-        ConfigurationManager = configurationManager;
+        Domain = configuration.GetValue<string>("Auth0:Domain") ?? throw new Exception("Auth0:Domain is required");
+        ClientId = configuration.GetValue<string>("Auth0:ClientId") ?? throw new Exception("Auth0:ClientId is required");
+        ClientSecret = configuration.GetValue<string>("Auth0:ClientSecret") ?? throw new Exception("Auth0:ClientSecret is required");
+        Audience = configuration.GetValue<string>("Auth0:Audience") ?? throw new Exception("Auth0:Audience is required");
+        Namespace = configuration.GetValue<string>("Auth0:Namespace") ?? "https://ivy.app/";
+
+        AuthClient = new AuthenticationApiClient(Domain);
+
+        var authority = $"https://{Domain}/";
+        var documentRetriever = new HttpDocumentRetriever { RequireHttps = true };
+        ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            $"{authority}.well-known/openid-configuration",
+            new OpenIdConnectConfigurationRetriever(),
+            documentRetriever
+        );
     }
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)

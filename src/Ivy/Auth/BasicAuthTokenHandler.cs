@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 // ReSharper disable once CheckNamespace
@@ -13,11 +14,21 @@ public class BasicAuthTokenHandler : IAuthTokenHandler
 
     protected static string TokenUseClaim => "https://ivy.app/claims/token_use";
 
-    public BasicAuthTokenHandler(string issuer, string audience, SymmetricSecurityKey signingKey)
+    public BasicAuthTokenHandler(IConfiguration configuration)
     {
-        Issuer = issuer;
-        Audience = audience;
-        SigningKey = signingKey;
+        Issuer = configuration["BasicAuth:JwtIssuer"] ?? "ivy";
+        Audience = configuration["BasicAuth:JwtAudience"] ?? "ivy-app";
+
+        var jwtSecret = configuration["BasicAuth:JwtSecret"] ?? throw new Exception("BasicAuth:JwtSecret is required");
+        try
+        {
+            var jwtSecretBytes = Convert.FromBase64String(jwtSecret);
+            SigningKey = new SymmetricSecurityKey(jwtSecretBytes);
+        }
+        catch (FormatException)
+        {
+            throw new Exception("BasicAuth:JwtSecret is not a valid base64 string");
+        }
     }
 
     public Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)

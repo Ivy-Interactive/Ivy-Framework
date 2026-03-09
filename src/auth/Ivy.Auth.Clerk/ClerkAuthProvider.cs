@@ -25,64 +25,11 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
     public bool OpenOAuthLoginInNewTab => true;
 
-    private static (bool IsProduction, string Key) ParseKey(string name, string type, string key)
-    {
-        var tokens = key.Split('_', 3);
-        if (tokens.Length != 3 || tokens[0] != type || (tokens[1] != "test" && tokens[1] != "live"))
-        {
-            throw new Exception($"{name} is invalid");
-        }
-        return (tokens[1] == "live", tokens[2]);
-    }
-
     public ClerkAuthProvider(IConfiguration configuration)
-        : base(GetFrontendApiDomain(configuration), GetIsProduction(configuration))
+        : base(configuration)
     {
-        HttpClient = CreateHttpClient(configuration);
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
-
         _backendClient = new BackendApiClient(_secretKey);
-    }
-
-    private static bool GetIsProduction(IConfiguration configuration)
-    {
-        var secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
-        var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
-
-        var (secretIsProduction, _) = ParseKey("Clerk:SecretKey", "sk", secretKey);
-        var (publishableIsProduction, _) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
-
-        if (secretIsProduction != publishableIsProduction)
-        {
-            throw new Exception("Clerk:SecretKey and Clerk:PublishableKey must both be for the same environment (test or live)");
-        }
-
-        return secretIsProduction;
-    }
-
-    private static HttpClient CreateHttpClient(IConfiguration configuration)
-    {
-        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Clerk:UserAgent");
-        var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
-        return httpClient;
-    }
-
-    private static string GetFrontendApiDomain(IConfiguration configuration)
-    {
-        var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
-        var (_, publishableKeyValue) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
-
-        try
-        {
-            var base64Decoded = WebEncoders.Base64UrlDecode(publishableKeyValue);
-            var base64DecodedString = Encoding.UTF8.GetString(base64Decoded);
-            return base64DecodedString.Split('$', 2)[0];
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Clerk:PublishableKey contains an invalid base64 string", ex);
-        }
     }
 
     private async Task<AuthToken?> TryRestoreExistingSessionAsync(IAuthProviderSession authSession, ClerkCredentials credentials, CancellationToken cancellationToken)
