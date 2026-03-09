@@ -144,7 +144,7 @@ public static class SelectInputExtensions
 
         SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, state, options, placeholder, disabled, variant, selectMany)!;
         input.Nullable = type.IsNullableType();
-        
+
         return input;
     }
 
