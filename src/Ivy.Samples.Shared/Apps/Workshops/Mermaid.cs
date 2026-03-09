@@ -99,7 +99,7 @@ public class MermaidMarkdownRequirementsApp : SampleBase
                   - Lazy-load `mermaid` package only when needed; initialize once per theme.
                   - Observe theme changes to re-render or update Mermaid theme variables.
                 * Docs generator (`Ivy.Docs.Tools/MarkdownConverter.cs`):
-                  - No server-side rendering needed. Ensure fenced ```mermaid blocks pass through into `new Markdown("â€¦")` so frontend can render.
+                  - No server-side rendering needed. Ensure fenced ```mermaid blocks pass through into `new Markdown("...")` so frontend can render.
                 * Widgets: ensure `Article` and `Markdown` containers allow overflow handling (scroll) for large diagrams.
                 """"
             )
