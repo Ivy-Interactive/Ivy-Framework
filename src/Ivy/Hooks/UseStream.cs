@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Ivy.Core;
 using Ivy.Core.Hooks;
@@ -76,7 +77,7 @@ internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
         // Explicitly base64 encode byte arrays to ensure proper serialization
         object serializedData = data is byte[] bytes
             ? Convert.ToBase64String(bytes)
-            : data!;
+            : JsonSerializer.SerializeToNode(data, WidgetSerializer.SerializerOptions)!;
 
         if (!_bufferEnabled)
         {
