@@ -524,7 +524,7 @@ public class ThemeCustomizer : SampleBase
 
             // --- Settings / inputs / misc state -------------------------------
             var agreeTerms = UseState(true);
-            var themeSatisfaction = UseState(4); // 1Ã¢â‚¬â€œ5 stars
+            var themeSatisfaction = UseState(4);
             var uxSatisfaction = UseState((int?)null);
 
             var paginationPage = UseState(1);
@@ -643,7 +643,7 @@ public class ThemeCustomizer : SampleBase
                             2 => "Badges, borders and subtle shadows adapt instantly to your theme.",
                             3 => "Form controls, switches and sliders stay readable in every palette.",
                             4 => "Try a different theme and see how this card transforms.",
-                            _ => "YouÃ¢â‚¬â„¢ve reached the end of the tour Ã¢â‚¬â€ tweak settings and explore freely."
+                            _ => "You've reached the end of the tour - tweak settings and explore freely."
                         }).Small()
                 ).Height(Size.Fit());
 
