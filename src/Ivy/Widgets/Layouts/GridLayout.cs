@@ -17,7 +17,19 @@ public class GridDefinition
 
     public int? Rows { get; set; }
 
-    public int Gap { get; set; } = 4;
+    public int RowGap { get; set; } = 4;
+
+    public int ColumnGap { get; set; } = 4;
+
+    /// <summary>
+    /// Sets both RowGap and ColumnGap to the same value. For backward compatibility.
+    /// </summary>
+    [Obsolete("Use RowGap and ColumnGap instead")]
+    public int Gap
+    {
+        get => RowGap;
+        set { RowGap = value; ColumnGap = value; }
+    }
 
     public Thickness Padding { get; set; } = new(0);
 
@@ -47,7 +59,8 @@ public record GridLayout : WidgetBase<GridLayout>
     {
         Columns = def.Columns;
         Rows = def.Rows;
-        Gap = def.Gap;
+        RowGap = def.RowGap;
+        ColumnGap = def.ColumnGap;
         Padding = def.Padding;
         AutoFlow = def.AutoFlow;
         Width = def.Width;
@@ -64,7 +77,9 @@ public record GridLayout : WidgetBase<GridLayout>
 
     [Prop] public int? Rows { get; set; }
 
-    [Prop] public int Gap { get; set; } = 4;
+    [Prop] public int RowGap { get; set; } = 4;
+
+    [Prop] public int ColumnGap { get; set; } = 4;
 
     [Prop] public Thickness Padding { get; set; } = new(0);
 
@@ -81,6 +96,8 @@ public record GridLayout : WidgetBase<GridLayout>
     [Prop(attached: nameof(GridExtensions.GridRow))] public int?[] ChildRow { get; set; } = null!;
 
     [Prop(attached: nameof(GridExtensions.GridRowSpan))] public int?[] ChildRowSpan { get; set; } = null!;
+
+    [Prop(attached: nameof(StackLayoutExtensions.AlignSelf))] public Align?[] ChildAlignSelf { get; set; } = null!;
 }
 
 public static class GridExtensions

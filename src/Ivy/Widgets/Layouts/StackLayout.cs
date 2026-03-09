@@ -8,22 +8,26 @@ namespace Ivy;
 /// </summary>
 public record StackLayout : WidgetBase<StackLayout>
 {
-    public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? align = null, bool removeParentPadding = false) : base(children)
+    public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? align = null, bool removeParentPadding = false, bool wrap = false) : base(children)
     {
         Orientation = orientation;
-        Gap = gap;
+        RowGap = gap;
+        ColumnGap = gap;
         Padding = padding;
         Margin = margin;
         Background = background;
         Align = align;
         RemoveParentPadding = removeParentPadding;
+        Wrap = wrap;
     }
 
     internal StackLayout() { }
 
     [Prop] public Orientation Orientation { get; set; } = Orientation.Vertical;
 
-    [Prop] public int Gap { get; set; } = 4;
+    [Prop] public int RowGap { get; set; } = 4;
+
+    [Prop] public int ColumnGap { get; set; } = 4;
 
     [Prop] public Thickness? Padding { get; set; }
 
@@ -34,4 +38,18 @@ public record StackLayout : WidgetBase<StackLayout>
     [Prop] public Align? Align { get; set; }
 
     [Prop] public bool RemoveParentPadding { get; set; }
+
+    [Prop] public bool Wrap { get; set; }
+
+    [Prop(attached: nameof(StackLayoutExtensions.AlignSelf))] public Align?[] ChildAlignSelf { get; set; } = null!;
+}
+
+public static class StackLayoutExtensions
+{
+    public static WidgetBase<T> AlignSelf<T>(this WidgetBase<T> child, Align align) where T : WidgetBase<T>
+    {
+        child.SetAttachedValue(typeof(StackLayout), nameof(AlignSelf), align);
+        child.SetAttachedValue(typeof(GridLayout), nameof(AlignSelf), align);
+        return child;
+    }
 }

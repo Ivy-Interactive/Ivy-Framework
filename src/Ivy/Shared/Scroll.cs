@@ -1,8 +1,10 @@
-// ReSharper disable once CheckNamespace
-namespace Ivy;
+﻿namespace Ivy.Shared;
 
 public enum Scroll
 {
     None,
-    Auto
+    Auto,
+    Vertical,
+    Horizontal,
+    Both
 }

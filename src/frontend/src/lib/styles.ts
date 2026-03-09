@@ -390,7 +390,46 @@ export const getGap = (gap?: number): React.CSSProperties => {
   };
 };
 
-export type Overflow = 'Clip' | 'Ellipsis' | 'Auto';
+export const getRowGap = (rowGap?: number): React.CSSProperties => {
+  if (rowGap === undefined || rowGap === null) return {};
+  return {
+    rowGap: `${rowGap * 0.25}rem`,
+  };
+};
+
+export const getColumnGap = (columnGap?: number): React.CSSProperties => {
+  if (columnGap === undefined || columnGap === null) return {};
+  return {
+    columnGap: `${columnGap * 0.25}rem`,
+  };
+};
+
+export const getAlignSelf = (alignSelf?: Align): React.CSSProperties => {
+  if (!alignSelf) return {};
+
+  switch (alignSelf) {
+    case 'TopLeft':
+    case 'TopCenter':
+    case 'TopRight':
+      return { alignSelf: 'flex-start' };
+    case 'BottomLeft':
+    case 'BottomCenter':
+    case 'BottomRight':
+      return { alignSelf: 'flex-end' };
+    case 'Left':
+      return { alignSelf: 'flex-start' };
+    case 'Right':
+      return { alignSelf: 'flex-end' };
+    case 'Center':
+      return { alignSelf: 'center' };
+    case 'Stretch':
+      return { alignSelf: 'stretch' };
+    default:
+      return {};
+  }
+};
+
+export type Overflow = 'Clip' | 'Ellipsis' | 'Auto' | 'Visible' | 'Scroll';
 
 export const getOverflow = (overflow?: Overflow): React.CSSProperties => {
   if (!overflow) return {};
@@ -406,6 +445,18 @@ export const getOverflow = (overflow?: Overflow): React.CSSProperties => {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
+    };
+  }
+
+  if (overflow === 'Visible') {
+    return {
+      overflow: 'visible',
+    };
+  }
+
+  if (overflow === 'Scroll') {
+    return {
+      overflow: 'scroll',
     };
   }
 
@@ -430,7 +481,10 @@ export type Align =
   | 'Left'
   | 'Right'
   | 'Center'
-  | 'Stretch';
+  | 'Stretch'
+  | 'SpaceBetween'
+  | 'SpaceAround'
+  | 'SpaceEvenly';
 
 export const getAlign = (
   orientation: Orientation,
@@ -450,6 +504,19 @@ export const getAlign = (
     if (!align) {
       styles.justifyContent = 'flex-start';
     }
+  }
+
+  // Handle space distribution alignments (work the same for both orientations)
+  switch (align) {
+    case 'SpaceBetween':
+      styles.justifyContent = 'space-between';
+      return styles;
+    case 'SpaceAround':
+      styles.justifyContent = 'space-around';
+      return styles;
+    case 'SpaceEvenly':
+      styles.justifyContent = 'space-evenly';
+      return styles;
   }
 
   if (orientation === 'Horizontal') {

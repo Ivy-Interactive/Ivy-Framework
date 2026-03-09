@@ -1,9 +1,10 @@
-// ReSharper disable once CheckNamespace
-namespace Ivy;
+﻿namespace Ivy.Shared;
 
 public enum Overflow
 {
     Auto,
     Clip,
-    Ellipsis
+    Ellipsis,
+    Visible,
+    Scroll
 }
