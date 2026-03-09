@@ -46,7 +46,6 @@ public class RichTextApp : SampleBase
                 .UseStream(stream)
             | new Button("Generate response").OnClick(async () =>
             {
-                Console.WriteLine("[RichTextApp] OnClick handler invoked");
                 await cts.CancelAsync();
                 cts = new CancellationTokenSource();
                 var token = cts.Token;
@@ -56,12 +55,10 @@ public class RichTextApp : SampleBase
                     foreach (var word in llmWords)
                     {
                         await Task.Delay(120, token);
-                        Console.WriteLine($"[RichTextApp] Writing word: {word}");
                         stream.Write(new TextRun(word) { Word = true });
                     }
-                    Console.WriteLine("[RichTextApp] Streaming complete");
                 }
-                catch (OperationCanceledException) { Console.WriteLine("[RichTextApp] Cancelled"); }
+                catch (OperationCanceledException) { }
             });
 
         return Layout.Vertical(

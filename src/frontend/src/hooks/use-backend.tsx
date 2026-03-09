@@ -346,6 +346,7 @@ export const useBackend = (
 
   // Stream registry for server-to-client streaming
   const streamRegistryRef = useRef<Map<string, StreamHandler>>(new Map());
+  const streamBufferRef = useRef<Map<string, unknown[]>>(new Map());
 
   const isRootConnection = parentId === null;
 
@@ -820,13 +821,17 @@ export const useBackend = (
           });
 
           connection.on('StreamData', (message: StreamDataMessage) => {
-            console.debug('[StreamData] Received:', message.streamId, message.data);
             const handler = streamRegistryRef.current.get(message.streamId);
             if (handler) {
-              console.debug('[StreamData] Handler found, dispatching');
               handler(message.data);
             } else {
-              console.warn('[StreamData] No handler for stream:', message.streamId);
+              // Buffer data until handler registers (mirrors backend WriteStream buffering)
+              let buffer = streamBufferRef.current.get(message.streamId);
+              if (!buffer) {
+                buffer = [];
+                streamBufferRef.current.set(message.streamId, buffer);
+              }
+              buffer.push(message.data);
             }
           });
 
@@ -923,8 +928,17 @@ export const useBackend = (
 
   const subscribeToStream: StreamSubscriber = useCallback(
     (streamId: string, onData: StreamHandler) => {
-      console.debug('[StreamSubscribe] Subscribing to:', streamId);
       streamRegistryRef.current.set(streamId, onData);
+
+      // Flush any data that arrived before the handler was registered
+      const buffered = streamBufferRef.current.get(streamId);
+      if (buffered) {
+        streamBufferRef.current.delete(streamId);
+        for (const data of buffered) {
+          onData(data);
+        }
+      }
+
       // Notify backend that we're subscribed so it can flush any buffered data
       latestConnectionRef.current
         ?.invoke('StreamSubscribe', streamId)

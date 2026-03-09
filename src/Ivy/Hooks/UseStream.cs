@@ -29,15 +29,9 @@ public static class StreamRegistry
 
     public static void NotifySubscribed(string streamId)
     {
-        Console.WriteLine($"[StreamRegistry] NotifySubscribed: streamId={streamId}, found={Streams.ContainsKey(streamId)}");
         if (Streams.TryGetValue(streamId, out var weakRef) && weakRef.TryGetTarget(out var stream))
         {
-            Console.WriteLine($"[StreamRegistry] Stream alive, calling OnSubscribed");
             stream.OnSubscribed();
-        }
-        else
-        {
-            Console.WriteLine($"[StreamRegistry] Stream NOT found or GC'd");
         }
     }
 }
@@ -78,9 +72,7 @@ internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
 
     public void Write(T data)
     {
-        if (_disposed) { Console.WriteLine($"[WriteStream] WARN: Write called on disposed stream {Id}"); return; }
-
-        Console.WriteLine($"[WriteStream] Write: streamId={Id}, subscribed={_subscribed}, bufferEnabled={_bufferEnabled}");
+        if (_disposed) return;
 
         // Explicitly base64 encode byte arrays to ensure proper serialization
         object serializedData = data is byte[] bytes
@@ -108,7 +100,6 @@ internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
 
     public override void OnSubscribed()
     {
-        Console.WriteLine($"[WriteStream] OnSubscribed: streamId={Id}, bufferEnabled={_bufferEnabled}, bufferCount={_buffer?.Count}");
         if (!_bufferEnabled || _buffer == null) return;
 
         lock (_lock)
