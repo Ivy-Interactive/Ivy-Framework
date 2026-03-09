@@ -98,7 +98,11 @@ public class RichTextLinkDemo : ViewBase
 
 ## Streaming
 
-Use `UseStream` to dynamically append runs after the initial set. The `Runs` array provides the initial content; all streamed runs are appended after them on the frontend:
+Use `UseStream` to dynamically append `TextRun` segments in real time — ideal for LLM responses, live logs, or any incremental text output.
+
+Call `Context.UseStream<TextRun>()` to create a stream, attach it to a `RichTextBuilder` with `.UseStream(stream)`, then call `stream.Write(...)` to push runs to the frontend as they arrive. Initial `Runs` are displayed immediately; streamed runs are appended after them.
+
+### Basic Example
 
 ```csharp demo-tabs
 public class RichTextStreamDemo : ViewBase
@@ -117,6 +121,51 @@ public class RichTextStreamDemo : ViewBase
             });
     }
 }
+```
+
+### Simulated LLM Response
+
+A more realistic example that streams words with a delay, similar to an LLM response. Use `Word = true` on each run to auto-insert spaces between words:
+
+```csharp demo-tabs
+public class RichTextLLMStreamDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var stream = Context.UseStream<TextRun>();
+        var cts = new CancellationTokenSource();
+
+        return Layout.Vertical()
+            | Text.Rich()
+                .Bold("🤖 ")
+                .UseStream(stream)
+            | new Button("Generate response").OnClick(async () =>
+            {
+                await cts.CancelAsync();
+                cts = new CancellationTokenSource();
+                var token = cts.Token;
+
+                var words = "The meaning of life is to build great software.".Split(' ');
+                try
+                {
+                    foreach (var word in words)
+                    {
+                        await Task.Delay(100, token);
+                        stream.Write(new TextRun(word) { Word = true });
+                    }
+                }
+                catch (OperationCanceledException) { }
+            });
+    }
+}
+```
+
+### Buffering
+
+By default, `UseStream<T>()` buffers data until the frontend subscribes. This means you can start writing immediately — any data written before the frontend is ready is automatically flushed once the connection is established. To disable buffering, pass `buffer: false`:
+
+```csharp
+var stream = Context.UseStream<TextRun>(buffer: false);
 ```
 
 ## TextRun Properties

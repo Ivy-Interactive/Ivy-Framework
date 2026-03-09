@@ -19,18 +19,6 @@ The HtmlPipeline processes the `index.html` shell before serving it to the brows
 
 When a browser requests your Ivy application, the server serves an `index.html` shell that bootstraps the frontend. The HtmlPipeline runs a series of **filters** over this HTML document before it reaches the client. Each filter can inspect and modify the parsed HTML structure using `XDocument`.
 
-```mermaid
-graph LR
-    A["index.html"] --> B["LicenseFilter"]
-    B --> C["DevToolsFilter"]
-    C --> D["MetaDescriptionFilter"]
-    D --> E["TitleFilter"]
-    E --> F["ThemeFilter"]
-    F --> G["ManifestFilter"]
-    G --> H["Custom Filters"]
-    H --> I["Browser"]
-```
-
 ## Built-in Filters
 
 | Filter | What it injects |
