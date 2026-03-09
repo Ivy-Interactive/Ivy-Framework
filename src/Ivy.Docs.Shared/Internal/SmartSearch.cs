@@ -124,7 +124,7 @@ public class SmartSearchView : ViewBase
 
         var searchInput = inputState.ToSearchInput()
             .Placeholder("Search...");
-        var askButton = new Button("Ask", SubmitQuestion)
+        var askButton = new Button("Get an answer from Ivy Agent", SubmitQuestion)
             .Variant(ButtonVariant.Ai)
             .Small()
             .TestId("docs-smart-search-ask");
@@ -166,9 +166,7 @@ public class SmartSearchView : ViewBase
             : (object)Text.Muted("Type to search or pick a suggestion above.");
 
         var overlayBottom = !string.IsNullOrEmpty(windowQuery)
-            ? (object)(Layout.Vertical().Gap(2)
-                | Text.P("Get an answer").Small().Muted()
-                | askButton)
+            ? (object)askButton
             : null;
 
         var overlayContent = overlayBottom != null
