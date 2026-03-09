@@ -80,7 +80,7 @@ public class KanbanWithMoveExample : ViewBase
             .CardBuilder(task => new Card()
                 .Title(task.Title)
                 .Description(task.Description))
-            .HandleMove(moveData =>
+            .OnMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 if (string.IsNullOrEmpty(taskId)) return;
@@ -171,7 +171,7 @@ public class KanbanWithCustomCardsExample : ViewBase
             .ColumnOrder(e => GetStatusOrder(e.Status))
             .Width(Size.Full())
             .ColumnWidth(Size.Fraction(0.33f))
-            .HandleMove(moveData =>
+            .OnMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 if (string.IsNullOrEmpty(taskId)) return;
@@ -228,7 +228,7 @@ Use `.CardOrder()` to control how cards are sorted within each column. This is s
 
 ## Width and Column Sizing
 
-The kanban widget supports the standard `.Width()` and `.Height()` methods (using [Size](../../04_ApiReference/IvyShared/Size.md)) to control the size of the entire board. Additionally, you can use `.ColumnWidth()` to set the same width for all columns, which enables horizontal scrolling when columns exceed the container width:
+The kanban widget supports the standard `.Width()` and `.Height()` methods (using [Size](../../04_ApiReference/Ivy/Size.md)) to control the size of the entire board. Additionally, you can use `.ColumnWidth()` to set the same width for all columns, which enables horizontal scrolling when columns exceed the container width:
 
 ```csharp demo-tabs
 public class KanbanWithColumnWidthExample : ViewBase
@@ -254,7 +254,7 @@ public class KanbanWithColumnWidthExample : ViewBase
                 .Title(task.Title))
             .Width(Size.Full())  // Full width kanban board
             .ColumnWidth(Size.Units(300))  // Each column is 300 units wide - enables horizontal scroll
-            .HandleMove(moveData =>
+            .OnMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 var updatedTasks = taskState.Value.ToList();
@@ -320,7 +320,7 @@ public class FullKanbanExample : ViewBase
             .ColumnOrder(t => t.ColumnOrder)
             .Width(Size.Full())
             .Height(Size.Units(200))
-            .HandleMove(moveData =>
+            .OnMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 var updatedTasks = taskState.Value.ToList();
@@ -384,7 +384,7 @@ public class SimpleStatusBoard : ViewBase
         )
         .CardBuilder(issue => new Card()
             .Title(issue.Title))
-        .HandleMove(moveData =>
+        .OnMove(moveData =>
         {
             var issueId = moveData.CardId?.ToString();
             var updatedIssues = issueState.Value.ToList();

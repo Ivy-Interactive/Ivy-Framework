@@ -1,7 +1,7 @@
 using Ivy.Core;
-using Ivy.Views;
 
-namespace Ivy.Apps;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 [App]
 public class NotFoundApp : ViewBase

@@ -2,7 +2,8 @@ using System.Reactive.Linq;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class ObservableView<T>(IObservable<T> observable) : ViewBase
 {

@@ -1,6 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
-using Ivy.Views;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -26,7 +24,7 @@ public record Card : WidgetBase<Card>
             header != null ? new Slot("Header", header) : null
         }.Where(x => x != null).Cast<object>().ToArray())
     {
-        Width = Ivy.Shared.Size.Full();
+        Width = Ivy.Size.Full();
     }
 
     internal Card() { }
@@ -34,8 +32,6 @@ public record Card : WidgetBase<Card>
     internal object? Title { get; set; }
     internal object? Description { get; set; }
     internal object? Icon { get; set; }
-
-
 
     [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
 

@@ -1,7 +1,8 @@
-﻿using System.Globalization;
+using System.Globalization;
 using ExcelNumberFormat;
 
-namespace Ivy.Helpers;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class Format
 {

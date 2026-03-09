@@ -20,7 +20,7 @@ import {
   LuRedo2,
 } from 'react-icons/lu';
 import { getWidth, getHeight } from './styles';
-import { IvyEventHandler } from './types';
+import { EventHandler } from './types';
 
 interface TiptapInputProps {
   id: string;
@@ -34,7 +34,7 @@ interface TiptapInputProps {
   showToolbar?: boolean;
   nullable?: boolean;
   events?: string[];
-  onIvyEvent?: IvyEventHandler;
+  eventHandler?: EventHandler;
 }
 
 interface ToolbarButtonProps {
@@ -82,7 +82,7 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
   height = 'Full',
   showToolbar = true,
   events = [],
-  onIvyEvent,
+  eventHandler,
 }) => {
   const hasChangeHandler = events.includes('OnChange');
   const hasFocusHandler = events.includes('OnFocus');
@@ -121,20 +121,20 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       setLocalValue(html);
-      if (hasChangeHandler && onIvyEvent) {
-        onIvyEvent('OnChange', id, [html]);
+      if (hasChangeHandler && eventHandler) {
+        eventHandler('OnChange', id, [html]);
       }
     },
     onFocus: () => {
       setIsFocused(true);
-      if (hasFocusHandler && onIvyEvent) {
-        onIvyEvent('OnFocus', id, []);
+      if (hasFocusHandler && eventHandler) {
+        eventHandler('OnFocus', id, []);
       }
     },
     onBlur: () => {
       setIsFocused(false);
-      if (hasBlurHandler && onIvyEvent) {
-        onIvyEvent('OnBlur', id, []);
+      if (hasBlurHandler && eventHandler) {
+        eventHandler('OnBlur', id, []);
       }
     },
   });

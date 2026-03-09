@@ -1,7 +1,6 @@
 using Ivy;
 using Ivy.Core;
 using Ivy.Core.ExternalWidgets;
-using Ivy.Shared;
 
 namespace Ivy.Widgets.Leaflet;
 

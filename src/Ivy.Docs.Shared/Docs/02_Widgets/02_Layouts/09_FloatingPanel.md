@@ -37,7 +37,7 @@ public class BasicFloatingPanelView : ViewBase
 
 ## Alignment Options
 
-The `FloatingPanel` supports nine different [Align](../../04_ApiReference/IvyShared/Align.md) positions to place content exactly where you need it:
+The `FloatingPanel` supports nine different [Align](../../04_ApiReference/Ivy/Align.md) positions to place content exactly where you need it:
 
 ### Corner Positions
 

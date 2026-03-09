@@ -1,4 +1,3 @@
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -10,14 +9,16 @@ public class BoolInputApp : SampleBase
         var falseState = UseState(false);
         var trueState = UseState(true);
         var nullState = UseState((bool?)null);
+        var loadingState = UseState(true);
 
-        var variants = Layout.Grid().Columns(6)
+        var variants = Layout.Grid().Columns(7)
                        | null!
                        | Text.InlineCode("True")
                        | Text.InlineCode("False")
                        | Text.InlineCode("Disabled")
                        | Text.InlineCode("Invalid")
                        | Text.InlineCode("Nullable")
+                       | Text.InlineCode("Loading")
                        | Text.InlineCode("BoolInputVariants.Checkbox")
                        | trueState
                            .ToBoolInput()
@@ -45,6 +46,12 @@ public class BoolInputApp : SampleBase
                            .Label("Label")
                            .Description("Description")
                            .TestId("checkbox-null-state-width-description")
+                       | trueState
+                           .ToBoolInput()
+                           .Label("Label")
+                           .Description("Description")
+                           .Loading(loadingState.Value)
+                           .TestId("checkbox-loading-state-width-description")
                        | null!
                        | trueState
                            .ToBoolInput()
@@ -66,6 +73,11 @@ public class BoolInputApp : SampleBase
                            .ToBoolInput()
                            .Label("Label")
                            .TestId("checkbox-null-state-width")
+                       | trueState
+                           .ToBoolInput()
+                           .Label("Label")
+                           .Loading(loadingState.Value)
+                           .TestId("checkbox-loading-state-width")
                        | Text.InlineCode("BoolInputVariants.Switch")
                        | trueState
                            .ToSwitchInput()
@@ -90,6 +102,12 @@ public class BoolInputApp : SampleBase
                            .Invalid("Invalid")
                            .TestId("switch-true-state-width-description-invalid")
                        | new Box("N/A")
+                       | trueState
+                           .ToSwitchInput()
+                           .Label("Label")
+                           .Description("Description")
+                           .Loading(loadingState.Value)
+                           .TestId("switch-loading-state-width-description")
                        | null!
                        | trueState
                            .ToSwitchInput()
@@ -110,6 +128,11 @@ public class BoolInputApp : SampleBase
                            .Invalid("Invalid")
                            .TestId("switch-true-state-width-invalid")
                        | new Box("N/A")
+                       | trueState
+                           .ToSwitchInput()
+                           .Label("Label")
+                           .Loading(loadingState.Value)
+                           .TestId("switch-loading-state-width")
                        | Text.InlineCode("BoolInputVariants.Toggle")
                        | trueState
                            .ToToggleInput(Icons.Magnet)
@@ -136,6 +159,12 @@ public class BoolInputApp : SampleBase
                            .Invalid("Invalid")
                            .TestId("toggle-true-state-width-description-invalid")
                        | new Box("N/A")
+                       | trueState
+                           .ToToggleInput(Icons.Magnet)
+                           .Label("Label")
+                           .Description("Description")
+                           .Loading(loadingState.Value)
+                           .TestId("toggle-loading-state-width-description")
                        | null!
                        | trueState
                            .ToToggleInput(Icons.Baby)
@@ -155,6 +184,11 @@ public class BoolInputApp : SampleBase
                            .Invalid("Invalid")
                            .TestId("toggle-true-state-width-invalid")
                        | new Box("N/A")
+                       | trueState
+                           .ToToggleInput(Icons.Baby)
+                           .Label("Label")
+                           .Loading(loadingState.Value)
+                           .TestId("toggle-loading-state-width")
 
             ;
 

@@ -11,7 +11,7 @@ searchHints:
 # Icon
 
 <Ingress>
-Display crisp Lucide vector icons with customizable colors, sizes, and animation-ready styling. Use [Colors](../../04_ApiReference/IvyShared/Colors.md) and the [Animation](../05_Effects/Animation.md) widget with `.ToIcon().Color().WithAnimation()` to create expressive, interactive icons.
+Display crisp Lucide vector icons with customizable colors, sizes, and animation-ready styling. Use [Colors](../../04_ApiReference/Ivy/Colors.md) and the [Animation](../05_Effects/Animation.md) widget with `.ToIcon().Color().WithAnimation()` to create expressive, interactive icons.
 </Ingress>
 
 The `Icon` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays vector icons from Ivy's built-in icon set. Icons enhance visual communication and can be customized with different colors, sizes, and animations.
@@ -59,7 +59,7 @@ public class LucideIconsView : ViewBase
 
 ## Colors
 
-You can customize the color of the icons using the [`Color`](../../04_ApiReference/IvyShared/Colors.md) parameter.
+You can customize the color of the icons using the [`Color`](../../04_ApiReference/Ivy/Colors.md) parameter.
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -72,7 +72,7 @@ Layout.Horizontal()
 
 ## Sizes
 
-You can also customize the size of the icons using the [`Size`](../../04_ApiReference/IvyShared/Size.md) parameter.
+You can also customize the size of the icons using the [`Size`](../../04_ApiReference/Ivy/Size.md) parameter.
 
 ```csharp demo-tabs
 Layout.Horizontal()

@@ -9,6 +9,11 @@
 
 /* Hardcoded CSS variables removed - now using Ivy Design System flat CSS imports above */
 
+/* Custom element for widget inspector */
+ivy-widget {
+  display: contents;
+}
+
 /* Additional theme customization variables */
 @layer base {
   :root {
@@ -307,7 +312,19 @@
   }
 }
 
-:has(> DIV.remove-parent-padding) {
+/* 
+  Override default padding in AppHost (and potentially other containers).
+  We need to look deep into the structure because wrappers like Ivy.Fragment 
+  or other intermediate widgets might introduce extra <ivy-widget> layers 
+  between the AppHost and the layout that requests padding removal.
+*/
+:has(> .remove-parent-padding),
+:has(> ivy-widget > .remove-parent-padding),
+:has(> ivy-widget > ivy-widget > .remove-parent-padding),
+:has(> ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding),
+:has(
+  > ivy-widget > ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding
+) {
   padding: 0 !important;
 }
 

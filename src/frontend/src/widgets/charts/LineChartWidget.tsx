@@ -79,7 +79,10 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   // Memoize option configuration
   const option = useMemo(
     () => ({
-      grid: generateEChartGrid(cartesianGrid),
+      grid: generateEChartGrid(
+        cartesianGrid,
+        !!toolbox && toolbox.enabled !== false
+      ),
       xAxis: generateXAxis(
         ChartType.Line,
         categories as string[],

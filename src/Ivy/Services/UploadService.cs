@@ -3,16 +3,16 @@ using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Reactive.Disposables;
 using System.Text.Json.Serialization;
-using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Auth;
 using Ivy.Core.Hooks;
-using Ivy.Views.Builders;
-using Ivy.Helpers;
+using Ivy.Core.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ivy.Services;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public record UploadContext(string UploadUrl, Action<Guid> Cancel)
 {
@@ -367,7 +367,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
         // Validate maximum file size
         if (maxFileSize.HasValue)
         {
-            var sizeValidation = Widgets.Inputs.FileInputValidation.ValidateFileSize(fileUpload, maxFileSize);
+            var sizeValidation = FileInputValidation.ValidateFileSize(fileUpload, maxFileSize);
             if (!sizeValidation.IsValid)
             {
                 // Send toast notification for file size error
@@ -379,7 +379,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
         // Validate minimum file size
         if (minFileSize.HasValue)
         {
-            var minSizeValidation = Widgets.Inputs.FileInputValidation.ValidateMinFileSize(fileUpload, minFileSize);
+            var minSizeValidation = FileInputValidation.ValidateMinFileSize(fileUpload, minFileSize);
             if (!minSizeValidation.IsValid)
             {
                 // Send toast notification for file size error
@@ -391,7 +391,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
         // Validate file type
         if (!string.IsNullOrWhiteSpace(accept))
         {
-            var typeValidation = Widgets.Inputs.FileInputValidation.ValidateFileType(fileUpload, accept);
+            var typeValidation = FileInputValidation.ValidateFileType(fileUpload, accept);
             if (!typeValidation.IsValid)
             {
                 // Send toast notification for file type error

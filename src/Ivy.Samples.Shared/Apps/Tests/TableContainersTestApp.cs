@@ -1,12 +1,6 @@
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Blades;
-using Ivy.Views.Builders;
-using Ivy.Views.Tables;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Table, path: ["Tests"], searchHints: ["table", "blade", "sheet", "card", "box", "container", "width"])]
+[App(icon: Icons.Table, path: ["Tests"], isVisible: false, searchHints: ["table", "blade", "sheet", "card", "box", "container", "width"])]
 public class TableContainersTestApp : SampleBase
 {
     protected override object? BuildSample()

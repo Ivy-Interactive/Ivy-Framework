@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views.Blades;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public interface IBladeService
 {

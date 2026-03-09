@@ -1,7 +1,7 @@
 using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
-namespace Ivy.Widgets.Inputs;
+namespace Ivy;
 
 public interface IInput<T> : IAnyInput
 {

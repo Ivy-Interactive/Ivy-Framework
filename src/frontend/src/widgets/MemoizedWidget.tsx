@@ -7,6 +7,8 @@ import {
   isChartComponent,
   flattenChildren,
   renderWidgetTree,
+  widgetCallSiteRegistry,
+  TEXT_EDITABLE_TYPES,
 } from '@/widgets/widgetRenderer';
 
 export interface MemoizedWidgetProps {
@@ -64,10 +66,22 @@ export const MemoizedWidget = memo(
       );
     }
 
+    if (node.callSite) {
+      widgetCallSiteRegistry.set(node.id, node.callSite);
+    }
+
+    // Store raw content for text-editable widgets
+    const isTextEditable = TEXT_EDITABLE_TYPES.includes(node.type);
+    const rawContent = isTextEditable
+      ? (node.props.content as string) || (node.props.text as string) || ''
+      : undefined;
+
     const content = (
-      <Component {...props} slots={slots}>
-        {slots.default}
-      </Component>
+      <ivy-widget id={node.id} type={node.type} data-content={rawContent}>
+        <Component {...props} slots={slots}>
+          {slots.default}
+        </Component>
+      </ivy-widget>
     );
 
     if (isLazyComponent(Component) && isChartComponent(node.type)) {

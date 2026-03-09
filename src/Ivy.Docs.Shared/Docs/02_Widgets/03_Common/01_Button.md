@@ -44,7 +44,7 @@ Layout.Horizontal()
 
 ## Styling & Configuration
 
-Buttons offer extensive styling options including standard variants, states, border radius, and icon integration. Use [Align](../../04_ApiReference/IvyShared/Align.md) for icon position (e.g. `Align.Right`).
+Buttons offer extensive styling options including standard variants, states, border radius, and icon integration. Use [Align](../../04_ApiReference/Ivy/Align.md) for icon position (e.g. `Align.Right`).
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)

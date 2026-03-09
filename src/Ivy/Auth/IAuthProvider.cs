@@ -1,8 +1,9 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
-namespace Ivy.Auth;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class AuthProviderHelpers
 {

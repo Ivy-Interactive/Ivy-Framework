@@ -10,7 +10,7 @@ namespace Ivy.Core;
 
 public static class WidgetSerializer
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new()
+    internal static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
@@ -204,6 +204,31 @@ public static class WidgetSerializer
             }
             json["events"] = eventsArray;
         }
+
+#if DEBUG
+        if (widget is AbstractWidget abstractWidget)
+        {
+            var callSiteObj = new JsonObject();
+
+            if (widget.Path != null)
+            {
+                callSiteObj["path"] = widget.Path;
+            }
+
+            if (abstractWidget.CallSite is { } callSite)
+            {
+                callSiteObj["filePath"] = callSite.FilePath;
+                callSiteObj["lineNumber"] = callSite.LineNumber;
+                callSiteObj["memberName"] = callSite.MemberName;
+                callSiteObj["declaringType"] = callSite.DeclaringType;
+            }
+
+            if (callSiteObj.Count > 0)
+            {
+                json["callSite"] = callSiteObj;
+            }
+        }
+#endif
 
         return json;
     }

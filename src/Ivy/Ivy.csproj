@@ -31,23 +31,20 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
-    <None Include="../README.md" Pack="true" PackagePath="" />
+    <None Include="../../README.md" Pack="true" PackagePath="" />
     <EmbeddedResource Include="../../AGENTS.md" Link="AGENTS.md" />
     <None Include="../../AGENTS.md" Pack="true" PackagePath="" />
-    <None Include="../Ivy.Docs.Shared/Generated/**/*.md" Pack="true" PackagePath="docs/generated" />
+    <None Include="../Ivy.Docs.Shared/Generated/**/*.md" Pack="true" PackagePath="docs/generated" Visible="false" />
+    <EmbeddedResource Include="../frontend/dist/**/*" Visible="false" />
+    <EmbeddedResource Include="../frontend/src/routing-constants.json" LogicalName="RoutingConstants" Visible="false" />
   </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="../frontend/dist/**/*" />
-    <EmbeddedResource Include="../frontend/src/routing-constants.json" LogicalName="RoutingConstants" />
-    <EmbeddedResource Update="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <LogicalName>Ivy.Resources.resources</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-
+  
   <ItemGroup>
     <Protobuf Include="Protos\datatable.proto" GrpcServices="Server" />
   </ItemGroup>
@@ -79,18 +76,19 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Ivy.Test" />
     <InternalsVisibleTo Include="Ivy.Docs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
+    <InternalsVisibleTo Include="Ivy.XamlBuilder" />
+    <InternalsVisibleTo Include="Ivy.XamlBuilder.Test" />
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Ivy.Filters\Ivy.Filters.csproj" />
+    <ProjectReference Include="..\Ivy.Agent.Filter\Ivy.Agent.Filter.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Core\Apps\" />
+    <Folder Include="Core\Auth\" />
+    <Folder Include="Core\Chrome\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

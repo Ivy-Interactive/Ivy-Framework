@@ -1,5 +1,4 @@
 export { StackLayoutWidget } from './StackLayoutWidget';
-export { WrapLayoutWidget } from './WrapLayoutWidget';
 export { GridLayoutWidget } from './GridLayoutWidget';
 export { HeaderLayoutWidget } from './HeaderLayoutWidget';
 export { FooterLayoutWidget } from './FooterLayoutWidget';

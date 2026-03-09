@@ -1,4 +1,5 @@
-namespace Ivy.Views.Tables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public interface ITableColumn<in TModel>
 {

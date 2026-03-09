@@ -1,14 +1,6 @@
 using System.Runtime.CompilerServices;
-using Ivy.Chrome;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Services;
-using Ivy.Shared;
-using Ivy.Views.Blades;
-using Ivy.Views.DataTables;
-using Ivy.Views.Alerts;
-using Ivy.Views.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,10 +40,18 @@ public abstract partial class ViewBase
     protected void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
-    protected void UseEffect(Func<Task<IDisposable>> handler, params IEffectTriggerConvertible[] triggers) =>
+    [OverloadResolutionPriority(1)]
+    protected void UseEffect(Func<Task<IDisposable?>> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
-    protected void UseEffect(Func<IDisposable> handler, params IEffectTriggerConvertible[] triggers) =>
+    protected void UseEffect(Func<Task<IAsyncDisposable?>> handler, params IEffectTriggerConvertible[] triggers) =>
+        this.Context.UseEffect(handler, triggers);
+
+    [OverloadResolutionPriority(1)]
+    protected void UseEffect(Func<IDisposable?> handler, params IEffectTriggerConvertible[] triggers) =>
+        this.Context.UseEffect(handler, triggers);
+
+    protected void UseEffect(Func<IAsyncDisposable?> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
     protected void UseEffect(Action handler, params IEffectTriggerConvertible[] triggers) =>
@@ -60,9 +60,9 @@ public abstract partial class ViewBase
     protected T? UseArgs<T>() where T : class =>
         this.Context.UseArgs<T>();
 
-    public ISignalSender<TInput, TOutput> CreateSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput> => this.Context.CreateSignal<T, TInput, TOutput>();
+    public ISignal<TInput, Unit> UseSignal<T, TInput>() where T : AbstractSignal<TInput, Unit> => this.Context.UseSignal<T, TInput>();
 
-    public ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput> => this.Context.UseSignal<T, TInput, TOutput>();
+    public ISignal<TInput, TOutput> UseSignal<T, TInput, TOutput>() where T : AbstractSignal<TInput, TOutput> => this.Context.UseSignal<T, TInput, TOutput>();
 
     protected QueryResult<TValue> UseQuery<TValue, TKey>(TKey? key,
         Func<TKey, CancellationToken, Task<TValue>> fetcher,
@@ -184,4 +184,10 @@ public abstract partial class ViewBase
 
     protected (IView? alertView, ShowAlertDelegate showAlert) UseAlert() =>
         this.Context.UseAlert();
+
+    protected IWriteStream<T> UseStream<T>() =>
+        this.Context.UseStream<T>();
+
+    protected static EffectTrigger OnMount() =>
+        EffectTrigger.OnMount();
 }

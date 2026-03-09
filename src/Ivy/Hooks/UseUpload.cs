@@ -1,8 +1,8 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Services;
 
-namespace Ivy.Hooks;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class UseUploadExtensions
 {

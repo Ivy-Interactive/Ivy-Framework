@@ -1,5 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -19,7 +18,7 @@ public record Form : WidgetBase<Form>
     [Event] public EventHandler<Event<Form>>? OnSubmit { get; set; }
 }
 
-public static class FormExtensions
+public static partial class FormExtensions
 {
     public static Form OnSubmit(this Form form, Func<Event<Form>, ValueTask> onSubmit)
     {

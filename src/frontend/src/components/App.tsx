@@ -5,17 +5,20 @@ import { Toaster } from '@/components/ui/toaster';
 import { ErrorSheet } from '@/components/ErrorSheet';
 import ErrorBoundary from './ErrorBoundary';
 import MadeWithIvy from './MadeWithIvy';
+import { DevTools } from './DevTools';
 import {
   getAppArgs,
   getAppId,
   getChromeParam,
   getParentId,
   wrapAppContent,
+  isDevToolsEnabled,
 } from '@/lib/utils';
 import { hasLicensedFeature } from '@/lib/license';
 import { ConnectionModal } from './ConnectionModal';
 import { ThemeProvider } from './theme-provider';
 import { EventHandlerProvider } from './event-handler';
+import { StreamHandlerProvider } from './stream-handler';
 
 export function App() {
   const appId = getAppId();
@@ -23,12 +26,13 @@ export function App() {
   const parentId = getParentId();
   const chrome = getChromeParam();
 
-  const { connection, widgetTree, eventHandler, disconnected } = useBackend(
-    appId,
-    appArgs,
-    parentId,
-    chrome
-  );
+  const {
+    connection,
+    widgetTree,
+    eventHandler,
+    subscribeToStream,
+    disconnected,
+  } = useBackend(appId, appArgs, parentId, chrome);
   const [removeBranding, setRemoveBranding] = useState(true);
 
   useEffect(() => {
@@ -56,13 +60,16 @@ export function App() {
     <ThemeProvider defaultTheme="system" storageKey="ivy-ui-theme">
       <ErrorBoundary>
         <EventHandlerProvider eventHandler={eventHandler}>
-          <>
-            {!removeBranding && <MadeWithIvy />}
-            {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
-            <ErrorSheet />
-            <Toaster />
-            {disconnected && <ConnectionModal />}
-          </>
+          <StreamHandlerProvider subscribeToStream={subscribeToStream}>
+            <>
+              {!removeBranding && <MadeWithIvy />}
+              {isDevToolsEnabled() && <DevTools />}
+              {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
+              <ErrorSheet />
+              <Toaster />
+              {disconnected && <ConnectionModal />}
+            </>
+          </StreamHandlerProvider>
         </EventHandlerProvider>
       </ErrorBoundary>
     </ThemeProvider>

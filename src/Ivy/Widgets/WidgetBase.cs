@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -27,35 +26,35 @@ public static class WidgetBaseExtensions
 {
     public static T Width<T>(this T widget, Size? width) where T : WidgetBase<T> => widget with { Width = width };
 
-    public static T Width<T>(this T widget, int units) where T : WidgetBase<T> => widget with { Width = Shared.Size.Units(units) };
+    public static T Width<T>(this T widget, int units) where T : WidgetBase<T> => widget with { Width = Ivy.Size.Units(units) };
 
-    public static T Width<T>(this T widget, float units) where T : WidgetBase<T> => widget with { Width = Shared.Size.Fraction(units) };
+    public static T Width<T>(this T widget, float units) where T : WidgetBase<T> => widget with { Width = Ivy.Size.Fraction(units) };
 
-    public static T Width<T>(this T widget, double units) where T : WidgetBase<T> => widget with { Width = Shared.Size.Fraction(Convert.ToSingle(units)) };
+    public static T Width<T>(this T widget, double units) where T : WidgetBase<T> => widget with { Width = Ivy.Size.Fraction(Convert.ToSingle(units)) };
 
     public static T Width<T>(this T widget, string percent) where T : WidgetBase<T>
     {
         if (percent.EndsWith("%"))
         {
             if (float.TryParse(percent[..^1], out var value))
-                return widget with { Width = Shared.Size.Fraction(value / 100) };
+                return widget with { Width = Ivy.Size.Fraction(value / 100) };
         }
         throw new ArgumentException("Invalid percentage value.");
     }
 
     public static T Height<T>(this T widget, Size? height) where T : WidgetBase<T> => widget with { Height = height };
 
-    public static T Height<T>(this T widget, int units) where T : WidgetBase<T> => widget with { Height = Shared.Size.Units(units) };
+    public static T Height<T>(this T widget, int units) where T : WidgetBase<T> => widget with { Height = Ivy.Size.Units(units) };
 
-    public static T Height<T>(this T widget, float units) where T : WidgetBase<T> => widget with { Height = Shared.Size.Fraction(units) };
+    public static T Height<T>(this T widget, float units) where T : WidgetBase<T> => widget with { Height = Ivy.Size.Fraction(units) };
 
-    public static T Height<T>(this T widget, double units) where T : WidgetBase<T> => widget with { Height = Shared.Size.Fraction(Convert.ToSingle(units)) };
+    public static T Height<T>(this T widget, double units) where T : WidgetBase<T> => widget with { Height = Ivy.Size.Fraction(Convert.ToSingle(units)) };
 
     public static T Height<T>(this T widget, string percent) where T : WidgetBase<T>
     {
         if (!percent.EndsWith("%")) throw new ArgumentException("Invalid percentage value.");
         if (float.TryParse(percent[..^1], out var value))
-            return widget with { Height = Shared.Size.Fraction(value / 100) };
+            return widget with { Height = Ivy.Size.Fraction(value / 100) };
         throw new ArgumentException("Invalid percentage value.");
     }
 
@@ -71,17 +70,17 @@ public static class WidgetBaseExtensions
     {
         if (!percent.EndsWith("%")) throw new ArgumentException("Invalid percentage value.");
         if (!float.TryParse(percent[..^1], out var value)) throw new ArgumentException("Invalid percentage value.");
-        var val = Shared.Size.Fraction(value / 100);
+        var val = Ivy.Size.Fraction(value / 100);
         return widget with { Width = val, Height = val };
     }
 
     public static T Scale<T>(this T widget, Scale scale) where T : WidgetBase<T> => widget with { Scale = scale };
 
-    public static T Small<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Shared.Scale.Small };
+    public static T Small<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Ivy.Scale.Small };
 
-    public static T Medium<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Shared.Scale.Medium };
+    public static T Medium<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Ivy.Scale.Medium };
 
-    public static T Large<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Shared.Scale.Large };
+    public static T Large<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Ivy.Scale.Large };
 
     public static T Visible<T>(this T widget, bool visible = true) where T : WidgetBase<T> => widget with { Visible = visible };
 

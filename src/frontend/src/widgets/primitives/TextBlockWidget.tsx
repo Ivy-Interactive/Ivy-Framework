@@ -1,6 +1,6 @@
 import { getColor, getOverflow, getWidth, Overflow } from '@/lib/styles';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { typography } from '../../lib/styles';
 import {
   Tooltip,
@@ -9,6 +9,10 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import {
+  widgetContentOverrides,
+  subscribeToContentOverride,
+} from '@/widgets/widgetRenderer';
 import { Scales } from '@/types/scale';
 import { TextAlignment } from '@/types/textAlignment';
 
@@ -35,6 +39,7 @@ type TextBlockVariant =
   | 'Display';
 
 interface TextBlockWidgetProps {
+  id: string;
   content: string;
   variant: TextBlockVariant;
   width?: string;
@@ -196,6 +201,7 @@ const variantMap: VariantMap = {
 };
 
 export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
+  id,
   content = '',
   variant = 'Literal',
   width,
@@ -209,6 +215,16 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   scale,
   textAlignment,
 }) => {
+  const [, forceUpdate] = useState(0);
+
+  // Subscribe to content override changes
+  useEffect(() => {
+    return subscribeToContentOverride(id, () => forceUpdate(n => n + 1));
+  }, [id]);
+
+  // Use override content if available, otherwise use prop
+  const displayContent = widgetContentOverrides.get(id) ?? content;
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getColor(color, 'color', 'background'),
@@ -239,7 +255,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
         scale && scaleClasses[scale]
       )}
     >
-      {content}
+      {displayContent}
     </Component>
   );
 };

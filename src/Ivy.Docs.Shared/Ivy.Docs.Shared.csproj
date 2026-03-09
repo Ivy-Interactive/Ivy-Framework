@@ -22,7 +22,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets/**/*" />
     <EmbeddedResource Include="Generated/**/*.md" />
-    <EmbeddedResource Include="..\..\AGENTS.md" Link="Assets\AGENTS.md" />
+    <EmbeddedResource Include="../../AGENTS.md" Link="Assets/AGENTS.md" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,6 +54,10 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Ivy.Docs.Test" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Generated/" />
   </ItemGroup>
   
 </Project>

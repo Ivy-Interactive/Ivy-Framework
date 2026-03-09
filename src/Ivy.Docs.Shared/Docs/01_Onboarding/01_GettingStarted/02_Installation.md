@@ -42,7 +42,7 @@ Use the Ivy CLI to scaffold a new project:
 
 ```terminal
 >ivy init --namespace Acme.InternalProject
->dotnet watch
+>ivy run
 ```
 
 This will create a new Ivy project with the necessary structure and configuration files. For more details about the generated project structure, see [Ivy Init](../03_CLI/02_Init.md).

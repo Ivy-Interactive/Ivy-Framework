@@ -1,7 +1,5 @@
-using Ivy.Views;
-using Ivy.Views.Tables;
+
 using Ivy.Views.Builders;
-using Ivy.Shared;
 using Xunit;
 
 namespace Ivy.Test;

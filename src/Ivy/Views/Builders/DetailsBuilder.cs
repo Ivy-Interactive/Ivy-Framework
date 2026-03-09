@@ -3,9 +3,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views.Builders;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class DetailsBuilder<TModel> : ViewBase, IStateless
 {

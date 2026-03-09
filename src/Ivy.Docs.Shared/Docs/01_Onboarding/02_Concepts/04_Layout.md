@@ -143,7 +143,7 @@ The Layout class provides the following factory methods:
 | Layout.Horizontal() | Creates a horizontal stack layout |
 | Layout.Center() | Creates a centered layout with removed parent padding |
 | Layout.TopCenter() | Creates a top-center aligned layout |
-| Layout.Wrap() | Creates a wrap layout for flowing content |
+| Layout.Wrap() | Creates a wrapping stack layout for flowing content |
 | Layout.Grid() | Creates a grid layout for two-dimensional arrangements |
 | Layout.Tabs() | Creates a tabbed layout |
 
@@ -151,9 +151,8 @@ The Layout class provides the following factory methods:
 
 | Layout | Description |
 |--------|-------------|
-| [StackLayout](../../02_Widgets/02_Layouts/01_StackLayout.md) | Arranges elements vertically or horizontally in a linear sequence |
+| [StackLayout](../../02_Widgets/02_Layouts/01_StackLayout.md) | Arranges elements vertically or horizontally in a linear sequence (supports wrapping) |
 | [GridLayout](../../02_Widgets/02_Layouts/03_GridLayout.md) | Two-dimensional grid system with precise control over positioning and spanning |
-| [WrapLayout](../../02_Widgets/02_Layouts/02_WrapLayout.md) | Automatically wraps items to new lines when space is limited |
 | [TabsLayout](../../02_Widgets/02_Layouts/07_TabsLayout.md) | Organizes content into tabbed sections for easy navigation |
 | [SidebarLayout](../../02_Widgets/02_Layouts/06_SidebarLayout.md) | Main content area with a collapsible sidebar for navigation |
 | [HeaderLayout](../../02_Widgets/02_Layouts/04_HeaderLayout.md) | Page layout with a fixed header section |

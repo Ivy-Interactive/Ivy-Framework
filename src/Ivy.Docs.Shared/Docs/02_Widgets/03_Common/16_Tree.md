@@ -39,7 +39,7 @@ new Tree(
 
 ## Click Events
 
-Use `HandleSelect` on the Tree and `Tag` on each MenuItem to handle clicks. The `DefaultSelectHandler` routes events to individual `MenuItem.OnSelect` handlers.
+Use `OnSelect` on the Tree and `Tag` on each MenuItem to handle clicks. The `DefaultSelectHandler` routes events to individual `MenuItem.OnSelect` handlers.
 
 ```csharp demo-tabs
 public class TreeClickDemo : ViewBase

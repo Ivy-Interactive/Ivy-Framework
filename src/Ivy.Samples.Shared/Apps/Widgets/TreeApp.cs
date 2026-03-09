@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
 [App(icon: Icons.FolderTree, searchHints: ["tree", "hierarchy", "folder", "file", "structure", "directory", "nested"])]

@@ -1,13 +1,10 @@
 using Ivy;
-using Ivy.Auth;
-using Ivy.Chrome;
 
 var server = new Server();
 
 server.UseHotReload();
 
-server.UseAuth<BasicAuthProvider>();
-
+server.AddConnectionsFromAssembly();
 server.AddAppsFromAssembly();
 
 var settings = new ChromeSettings()

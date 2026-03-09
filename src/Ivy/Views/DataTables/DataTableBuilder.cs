@@ -1,13 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
-using Ivy.Core;
-using Ivy.Helpers;
-using Ivy.Shared;
+using Ivy.Core.Helpers;
 using Microsoft.Extensions.AI;
-using Ivy.Hooks;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class DataTableBuilder<TModel>(
     IQueryable<TModel> queryable,
@@ -22,7 +20,7 @@ public class DataTableBuilder<TModel>(
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
     private MenuItem[]? _menuItemRowActions;
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
-    private readonly Dictionary<string, Action<object>> _cellActions = [];
+    private readonly Dictionary<string, EventHandler<object>> _cellActions = [];
     private RefreshToken? _refreshToken;
 
     private readonly string? _idColumnName =
@@ -68,16 +66,16 @@ public class DataTableBuilder<TModel>(
         var order = fields.Count;
         foreach (var field in fields)
         {
-            var align = Shared.Align.Left;
+            var align = Ivy.Align.Left;
 
             if (field.Type.IsNumeric())
             {
-                align = Shared.Align.Right;
+                align = Ivy.Align.Right;
             }
 
             if (field.Type == typeof(bool))
             {
-                align = Shared.Align.Center;
+                align = Ivy.Align.Center;
             }
 
             var removed = field.Name.StartsWith($"_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]) ||
@@ -260,7 +258,7 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
-    public DataTableBuilder<TModel> HandleCellAction(Expression<Func<TModel, object>> field, Action<object> action)
+    public DataTableBuilder<TModel> OnCellAction(Expression<Func<TModel, object>> field, EventHandler<object> action)
     {
         var columnName = Utils.GetNameFromMemberExpression(field.Body);
         _cellActions[columnName] = action;
@@ -313,7 +311,7 @@ public class DataTableBuilder<TModel>(
                 var args = e.Value;
                 if (_cellActions.TryGetValue(args.ColumnName, out var action))
                 {
-                    action(args.CellValue!);
+                    await action.Invoke(args.CellValue!);
                 }
 
                 // Call original handler if it exists

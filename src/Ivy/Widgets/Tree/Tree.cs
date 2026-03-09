@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Ivy.Core;
-using Ivy.Shared;
 
 namespace Ivy;
 

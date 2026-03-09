@@ -1,7 +1,3 @@
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Builders;
-using Ivy.Views.Kanban;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
@@ -61,7 +57,7 @@ public class BasicKanbanExample : ViewBase
                     .Description(Text.Muted(task.Description)))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
-                .HandleMove(moveData =>
+                .OnMove(moveData =>
                 {
                     var taskId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(taskId)) return;
@@ -178,7 +174,7 @@ public class KanbanBuilderExample : ViewBase
                 ))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
-                .HandleMove(moveData =>
+                .OnMove(moveData =>
     {
         var taskId = moveData.CardId?.ToString();
         if (string.IsNullOrEmpty(taskId)) return;
@@ -293,7 +289,7 @@ public class KanbanBuilderWithClickExample : ViewBase
                 .OnClick(() => showTaskSheet(task.Id)))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
-                .HandleMove(moveData =>
+                .OnMove(moveData =>
                 {
                     var taskId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(taskId)) return;
@@ -518,7 +514,7 @@ public class KanbanHeaderLayoutExample : ViewBase
             .ColumnOrder(e => GetStatusOrder(e.Status))
             .Width(Size.Full())
             .Height(Size.Full())
-            .HandleMove(moveData =>
+            .OnMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 if (string.IsNullOrEmpty(taskId)) return;

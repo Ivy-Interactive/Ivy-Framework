@@ -41,7 +41,7 @@ public class BasicHeaderExample : ViewBase
 ## Common Use Cases
 
 <Callout Type="tip">
-For [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md) that handle their own scrolling (like Kanban boards), use `.Scroll(Scroll.None)` to disable the HeaderLayout's ScrollArea wrapper. Height is automatically set to [Size.Full()](../../04_ApiReference/IvyShared/Size.md) when scroll is disabled.
+For [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md) that handle their own scrolling (like Kanban boards), use `.Scroll(Scroll.None)` to disable the HeaderLayout's ScrollArea wrapper. Height is automatically set to [Size.Full()](../../04_ApiReference/Ivy/Size.md) when scroll is disabled.
 </Callout>
 
 ### Toolbar with Actions

@@ -1,5 +1,3 @@
-using Ivy.Shared;
-using Ivy.Views.Builders;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
