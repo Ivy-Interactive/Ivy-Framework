@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import '@ivy-interactive/ivy-design-system/css/fonts';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-scheme: light;
 }
@@ -23,25 +25,27 @@ ivy-widget {
     /* Additional variables not in design system yet */
     --toolbox: #38363a;
     --spacing: 0.27rem;
-    --radius: 0.5rem;
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-md:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-    --shadow-lg:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-    --shadow-xl:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-2xs: 0 1px 2px 0 hsl(0 0% 0% / 0.03);
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.03);
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.04);
+    --shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 2px 4px 0 hsl(0 0% 0% / 0.05);
+    --shadow-lg: 0 4px 6px 0 hsl(0 0% 0% / 0.05);
+    --shadow-xl: 0 6px 10px 0 hsl(0 0% 0% / 0.05);
+    --shadow-2xl: 0 8px 14px 0 hsl(0 0% 0% / 0.08);
   }
 
   .dark {
     /* Additional dark theme overrides not in design system yet */
     --toolbox: #edeaf1;
+    --shadow-2xs: none;
+    --shadow-xs: none;
+    --shadow-sm: none;
+    --shadow: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-xl: none;
+    --shadow-2xl: none;
   }
 
   @theme inline {
@@ -132,17 +136,12 @@ ivy-widget {
     --text-small-label: 12px;
 
     /* Spacing */
-    --radius-sm: calc(var(--radius) - 4px);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) + 4px);
+    --radius-boxes: var(--radius-boxes);
+    --radius-fields: var(--radius-fields);
+    --radius-selectors: var(--radius-selectors);
     --font-sans: var(--font-sans);
     --font-mono: var(--font-mono);
     --font-serif: var(--font-serif);
-    --radius-sm: calc(var(--radius) - 4px);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) + 4px);
     --shadow-2xs: var(--shadow-2xs);
     --shadow-xs: var(--shadow-xs);
     --shadow-sm: var(--shadow-sm);
@@ -203,134 +202,6 @@ ivy-widget {
   }
 }
 
-/* Sheet slide animations */
-@keyframes slideInFromRight {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideOutToRight {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes slideInFromLeft {
-  from {
-    transform: translateX(-100%);
-  }
-
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideOutToLeft {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes slideInFromTop {
-  from {
-    transform: translateY(-100%);
-  }
-
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideOutToTop {
-  from {
-    transform: translateY(0);
-  }
-
-  to {
-    transform: translateY(-100%);
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    transform: translateY(100%);
-  }
-
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideOutToBottom {
-  from {
-    transform: translateY(0);
-  }
-
-  to {
-    transform: translateY(100%);
-  }
-}
-
-/* Sheet animations using Radix UI data-state attributes */
-[data-radix-dialog-content][data-state='open'] {
-  animation: slideInFromRight 300ms ease-out;
-}
-
-[data-radix-dialog-content][data-state='closed'] {
-  animation: slideOutToRight 300ms ease-in;
-}
-
-/* Sheet overlay animations */
-[data-radix-dialog-overlay][data-state='open'] {
-  animation: fadeIn 300ms ease-out;
-}
-
-[data-radix-dialog-overlay][data-state='closed'] {
-  animation: fadeOut 300ms ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-/* Sheet animation classes */
-.sheet-animate-enter {
-  animation: slideInFromRight 300ms ease-out;
-}
-
-.sheet-animate-exit {
-  animation: slideOutToRight 300ms ease-in;
-}
-
 /* Alert animation */
 @keyframes alertGrowIn {
   from {
@@ -370,9 +241,28 @@ ivy-widget {
   animation: toastSlideIn 300ms ease-out;
 }
 
+/* Indeterminate progress bar animation */
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-indeterminate {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
 @theme inline {
   --animate-accordion-down: accordion-down 0.1s ease-out;
   --animate-accordion-up: accordion-up 0.1s ease-out;
+  --animate-indeterminate: indeterminate 1.5s ease-in-out infinite;
 }
 
 @layer base {
@@ -396,6 +286,29 @@ ivy-widget {
     height: 100vh;
     width: 100vw;
     overflow: auto;
+  }
+}
+
+/* Semantic border radius utility classes */
+@layer utilities {
+  /* For large container components: Card, Sheet, Dialog, Alert, Modal */
+  .rounded-box {
+    border-radius: var(--radius-boxes);
+  }
+
+  /* For input field components: Button, Input, Textarea, Select */
+  .rounded-field {
+    border-radius: var(--radius-fields);
+  }
+
+  /* For small selector components: Toggle, Badge, Radio */
+  .rounded-selector {
+    border-radius: var(--radius-selectors);
+  }
+
+  /* For checkboxes: half of selector radius (avoids circle when selectors use 1rem) */
+  .rounded-checkbox {
+    border-radius: calc(var(--radius-selectors) / 2);
   }
 }
 

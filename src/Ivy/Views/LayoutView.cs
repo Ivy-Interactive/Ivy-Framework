@@ -1,8 +1,8 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class LayoutView : ViewBase, IStateless
 {
@@ -27,7 +27,7 @@ public class LayoutView : ViewBase, IStateless
     private Size? _height = null;
     private Colors? _background = null;
     private Align? _alignment = null;
-    private Scroll _scroll = Shared.Scroll.None;
+    private Scroll _scroll = Ivy.Scroll.None;
     private bool _removeParentPadding = false;
     private bool _visible = true;
 
@@ -68,11 +68,11 @@ public class LayoutView : ViewBase, IStateless
     {
         if (_orientation == Orientation.Vertical)
         {
-            _height = Shared.Size.Grow();
+            _height = Ivy.Size.Grow();
         }
         else
         {
-            _width = Shared.Size.Grow();
+            _width = Ivy.Size.Grow();
         }
         return this;
     }
@@ -81,30 +81,30 @@ public class LayoutView : ViewBase, IStateless
     {
         if (_orientation == Orientation.Vertical)
         {
-            _height = Shared.Size.Shrink();
+            _height = Ivy.Size.Shrink();
         }
         else
         {
-            _width = Shared.Size.Shrink();
+            _width = Ivy.Size.Shrink();
         }
         return this;
     }
 
     public LayoutView Width(int unit)
     {
-        _width = Shared.Size.Units(unit);
+        _width = Ivy.Size.Units(unit);
         return this;
     }
 
     public LayoutView Width(float fraction)
     {
-        _width = Shared.Size.Fraction(fraction);
+        _width = Ivy.Size.Fraction(fraction);
         return this;
     }
 
     public LayoutView Width(double fraction)
     {
-        _width = Shared.Size.Fraction(Convert.ToSingle(fraction));
+        _width = Ivy.Size.Fraction(Convert.ToSingle(fraction));
         return this;
     }
 
@@ -116,19 +116,19 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Height(int unit)
     {
-        _height = Shared.Size.Units(unit);
+        _height = Ivy.Size.Units(unit);
         return this;
     }
 
     public LayoutView Height(float fraction)
     {
-        _height = Shared.Size.Fraction(fraction);
+        _height = Ivy.Size.Fraction(fraction);
         return this;
     }
 
     public LayoutView Height(double fraction)
     {
-        _height = Shared.Size.Fraction(Convert.ToSingle(fraction));
+        _height = Ivy.Size.Fraction(Convert.ToSingle(fraction));
         return this;
     }
 
@@ -141,22 +141,29 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Size(int unit)
     {
-        _width = Shared.Size.Units(unit);
-        _height = Shared.Size.Units(unit);
+        _width = Ivy.Size.Units(unit);
+        _height = Ivy.Size.Units(unit);
         return this;
     }
 
     public LayoutView Size(float fraction)
     {
-        _width = Shared.Size.Fraction(fraction);
-        _height = Shared.Size.Fraction(fraction);
+        _width = Ivy.Size.Fraction(fraction);
+        _height = Ivy.Size.Fraction(fraction);
         return this;
     }
 
     public LayoutView Size(double fraction)
     {
-        _width = Shared.Size.Fraction(Convert.ToSingle(fraction));
-        _height = Shared.Size.Fraction(Convert.ToSingle(fraction));
+        _width = Ivy.Size.Fraction(Convert.ToSingle(fraction));
+        _height = Ivy.Size.Fraction(Convert.ToSingle(fraction));
+        return this;
+    }
+
+    public LayoutView Full()
+    {
+        _width = Ivy.Size.Full();
+        _height = Ivy.Size.Full();
         return this;
     }
 
@@ -252,19 +259,19 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Center()
     {
-        _alignment = Shared.Align.Center;
+        _alignment = Ivy.Align.Center;
         return this;
     }
 
     public LayoutView Left()
     {
-        _alignment = Shared.Align.Left;
+        _alignment = Ivy.Align.Left;
         return this;
     }
 
     public LayoutView Right()
     {
-        _alignment = Shared.Align.Right;
+        _alignment = Ivy.Align.Right;
         return this;
     }
 
@@ -338,7 +345,7 @@ public class LayoutView : ViewBase, IStateless
         return Wrap(orientation, elements.ToArray());
     }
 
-    public LayoutView Scroll(Scroll scroll = Shared.Scroll.Auto)
+    public LayoutView Scroll(Scroll scroll = Ivy.Scroll.Auto)
     {
         _scroll = scroll;
         return this;

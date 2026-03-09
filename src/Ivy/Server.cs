@@ -1,13 +1,14 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Core.Auth;
 using Ivy.Core.ExternalWidgets;
 using Ivy.Core.Server;
-using Ivy.Core.Server.HtmlPipeline;
-using Ivy.Core.Server.HtmlPipeline.Filters;
+using Ivy.Core.Server.ContentPipeline;
+using Ivy.Core.Server.ContentPipeline.Filters;
 using Ivy.Core.Server.Middleware;
 using Ivy.Themes;
 using Microsoft.AspNetCore.Builder;
@@ -62,7 +63,7 @@ public class Server
     public IConfiguration Configuration { get; private set; } = ServerUtils.GetConfiguration();
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
-
+    public static Action<CookieOptions>? ConfigureAuthCookieOptions { get; set; }
     private IContentBuilder? _contentBuilder;
     private bool _useHotReload;
     private bool _useHttpRedirection;
@@ -71,7 +72,6 @@ public class Server
     private readonly List<Action<WebApplication>> _appMods = new();
     private List<string> _reservedPaths = new();
     private readonly List<IHtmlFilter> _customHtmlFilters = new();
-    private Action<HtmlPipeline>? _pipelineConfigurator;
     private ManifestOptions? _manifestOptions;
     private ServerArgs _args;
 
@@ -354,15 +354,7 @@ public class Server
         return this;
     }
 
-    public Server UseHtmlPipeline(Action<HtmlPipeline> configure)
-    {
-        _pipelineConfigurator = configure;
-        return this;
-    }
-
     internal IReadOnlyList<IHtmlFilter> GetCustomFilters() => _customHtmlFilters;
-
-    internal Action<HtmlPipeline>? GetPipelineConfigurator() => _pipelineConfigurator;
 
     internal ManifestOptions? GetManifestOptions() => _manifestOptions;
 
@@ -454,13 +446,13 @@ public class Server
 
                 if (attemptCount >= maxAttempts)
                 {
-                    Console.WriteLine($@"Could not find an available port after checking {maxAttempts} ports starting from {originalPort}.");
+                    Console.WriteLine($"\x1b[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.\x1b[0m");
                     return;
                 }
 
-                if (_args.Port != originalPort)
+                if (_args.Port != originalPort && !_args.Silent)
                 {
-                    Console.WriteLine($@"Port {originalPort} is in use. Using port {_args.Port} instead.");
+                    Console.WriteLine($"\x1b[33mPort {originalPort} is in use. Using port {_args.Port} instead.\x1b[0m");
                 }
             }
             else
@@ -468,7 +460,7 @@ public class Server
                 Console.WriteLine($@"Port {_args.Port} is already in use on this machine.");
 
                 Console.WriteLine(
-                    @"Specify a different port using '--port <number>' or '--i-kill-for-this-port' to just take it.");
+                    "Specify a different port using '--port <number>', '--find-available-port', or '--i-kill-for-this-port' to just take it.");
 
                 return;
             }
@@ -524,6 +516,7 @@ public class Server
         builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
         builder.Services.AddSingleton(_contentBuilder ?? new DefaultContentBuilder());
         builder.Services.AddSingleton(sessionStore);
+        builder.Services.AddSingleton<IOAuthCallbackRegistry, OAuthCallbackRegistry>();
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
         builder.Services.AddHealthChecks();
         builder.Services.AddQueryManager();
@@ -563,6 +556,12 @@ public class Server
         builder.Logging.AddConsole();
 
         builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
+
+        // Suppress hosting startup errors when not verbose (we handle IOException with a friendly message)
+        if (!_args.Verbose)
+        {
+            builder.Logging.AddFilter("Microsoft.Extensions.Hosting.Internal.Host", LogLevel.None);
+        }
 
         var app = builder.Build();
         ServiceProvider = app.Services;
@@ -905,8 +904,6 @@ public static class WebApplicationExtensions
 
                 foreach (var filter in server.GetCustomFilters())
                     pipeline.Use(filter);
-
-                server.GetPipelineConfigurator()?.Invoke(pipeline);
 
                 var pipelineContext = new HtmlPipelineContext
                 {

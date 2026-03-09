@@ -101,7 +101,7 @@ public class SheetWithFooterActions : ViewBase
 
 ## Different Widths
 
-Control sheet width with the `.Width()` extension. For top/bottom sides, use `.Height()` instead. Widths use [Size](../../04_ApiReference/IvyShared/Size.md) values such as `Size.Rem(20)`, `Size.Fraction(1/2f)`, and `Size.Full()`. Use `UseTrigger<Size>` so each button opens a sheet with a different width:
+Control sheet width with the `.Width()` extension. For top/bottom sides, use `.Height()` instead. Widths use [Size](../../04_ApiReference/Ivy/Size.md) values such as `Size.Rem(20)`, `Size.Fraction(1/2f)`, and `Size.Full()`. Use `UseTrigger<Size>` so each button opens a sheet with a different width:
 
 ```csharp demo-tabs
 public class SheetWidthExamples : ViewBase

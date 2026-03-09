@@ -35,6 +35,10 @@ public record Box : WidgetBase<Box>
     [Prop] public float? Opacity { get; set; }
 
     [Prop] public float? BorderOpacity { get; set; }
+
+    [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
+
+    [Event] public EventHandler<Event<Box>>? OnClick { get; set; }
 }
 
 public static class BoxExtensions
@@ -83,5 +87,45 @@ public static class BoxExtensions
             Color = null,
             ContentAlign = Align.Left
         }.Width(Size.Full()).Height(Size.Full());
+    }
+
+    public static Box Hover(this Box box, CardHoverVariant variant) => box with { HoverVariant = variant };
+
+    private static CardHoverVariant HoverVariantWithClick(this Box box) => box.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : box.HoverVariant;
+
+    public static Box OnClick(this Box box, Func<Event<Box>, ValueTask> onClick)
+    {
+        return box with
+        {
+            HoverVariant = box.HoverVariantWithClick(),
+            OnClick = new(onClick)
+        };
+    }
+
+    public static Box OnClick(this Box box, Action<Event<Box>> onClick)
+    {
+        return box with
+        {
+            HoverVariant = box.HoverVariantWithClick(),
+            OnClick = new(onClick.ToValueTask())
+        };
+    }
+
+    public static Box OnClick(this Box box, Action onClick)
+    {
+        return box with
+        {
+            HoverVariant = box.HoverVariantWithClick(),
+            OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; })
+        };
+    }
+
+    public static Box OnClick(this Box box, Func<ValueTask> onClick)
+    {
+        return box with
+        {
+            HoverVariant = box.HoverVariantWithClick(),
+            OnClick = new(_ => onClick())
+        };
     }
 }

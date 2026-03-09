@@ -13,6 +13,8 @@ import {
   widgetContentOverrides,
   subscribeToContentOverride,
 } from '@/widgets/widgetRenderer';
+import { Scales } from '@/types/scale';
+import { TextAlignment } from '@/types/textAlignment';
 
 type TextBlockVariant =
   | 'Literal'
@@ -28,15 +30,13 @@ type TextBlockVariant =
   | 'Blockquote'
   | 'InlineCode'
   | 'Lead'
-  | 'ExtraLarge'
-  | 'Large'
-  | 'Small'
   | 'Muted'
   | 'Danger'
   | 'Warning'
   | 'Success'
   | 'Label'
-  | 'Strong';
+  | 'Strong'
+  | 'Display';
 
 interface TextBlockWidgetProps {
   id: string;
@@ -50,6 +50,8 @@ interface TextBlockWidgetProps {
   bold?: boolean;
   italic?: boolean;
   muted?: boolean;
+  scale?: Scales;
+  textAlignment?: TextAlignment;
 }
 
 interface VariantMap {
@@ -161,21 +163,6 @@ const variantMap: VariantMap = {
       <MarkdownRenderer content={children} />
     </div>
   ),
-  ExtraLarge: ({ children, className, style }) => (
-    <div className={cn(typography.extralarge, className)} style={style}>
-      {children}
-    </div>
-  ),
-  Large: ({ children, className, style }) => (
-    <div className={cn(typography.large, className)} style={style}>
-      {children}
-    </div>
-  ),
-  Small: ({ children, className, style }) => (
-    <div className={cn(typography.small, className)} style={style}>
-      {children}
-    </div>
-  ),
   Muted: ({ children, className, style }) => (
     <div className={cn(typography.muted, className)} style={style}>
       {children}
@@ -206,6 +193,11 @@ const variantMap: VariantMap = {
       {children}
     </strong>
   ),
+  Display: ({ children, className, style }) => (
+    <div className={cn(typography.display, className)} style={style}>
+      {children}
+    </div>
+  ),
 };
 
 export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
@@ -220,6 +212,8 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   bold,
   italic,
   muted,
+  scale,
+  textAlignment,
 }) => {
   const [, forceUpdate] = useState(0);
 
@@ -235,6 +229,17 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
     ...getWidth(width),
     ...getColor(color, 'color', 'background'),
     ...getOverflow(overflow),
+    wordBreak: 'normal',
+    overflowWrap: 'break-word',
+    ...(textAlignment && {
+      textAlign:
+        textAlignment.toLowerCase() as React.CSSProperties['textAlign'],
+    }),
+  };
+
+  const scaleClasses: Record<string, string> = {
+    [Scales.Small]: typography.small,
+    [Scales.Large]: typography.large,
   };
 
   const Component = variantMap[variant];
@@ -246,7 +251,8 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
         noWrap && 'whitespace-nowrap',
         bold && 'font-semibold',
         italic && 'italic',
-        muted && 'text-muted-foreground'
+        muted && 'text-muted-foreground',
+        scale && scaleClasses[scale]
       )}
     >
       {displayContent}

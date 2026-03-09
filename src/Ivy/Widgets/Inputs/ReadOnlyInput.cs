@@ -18,19 +18,19 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     {
         var typedState = state.As<TValue>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public ReadOnlyInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange = null)
     {
-        OnChange = onChange;
+        OnChange = onChange?.ToEventHandler();
         Value = value;
     }
 
     public ReadOnlyInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange = null)
     {
-        OnChange = onChange == null ? null : e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = onChange == null ? null : new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
     }
 
@@ -50,9 +50,9 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput    
     [Prop] public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
-    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TValue>, TValue>>? OnChange { get; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(object)];
 }
@@ -91,11 +91,11 @@ public static class ReadOnlyInputExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static IAnyReadOnlyInput HandleBlur<T>(this IAnyReadOnlyInput widget, Func<Event<IAnyInput>, ValueTask> onBlur) where T : notnull
+    public static IAnyReadOnlyInput OnBlur<T>(this IAnyReadOnlyInput widget, Func<Event<IAnyInput>, ValueTask> onBlur) where T : notnull
     {
         if (widget is ReadOnlyInput<T> typedWidget)
         {
-            return typedWidget with { OnBlur = onBlur };
+            return typedWidget with { OnBlur = new(onBlur) };
         }
         throw new InvalidOperationException($"Widget is not of expected type ReadOnlyInput<{typeof(T).Name}>");
     }
@@ -131,14 +131,14 @@ public static class ReadOnlyInputExtensions
         return widget;
     }
 
-    public static IAnyReadOnlyInput HandleBlur<T>(this IAnyReadOnlyInput widget, Action<Event<IAnyInput>> onBlur) where T : notnull
+    public static IAnyReadOnlyInput OnBlur<T>(this IAnyReadOnlyInput widget, Action<Event<IAnyInput>> onBlur) where T : notnull
     {
-        return widget.HandleBlur<T>(onBlur.ToValueTask());
+        return widget.OnBlur<T>(onBlur.ToValueTask());
     }
 
-    public static IAnyReadOnlyInput HandleBlur<T>(this IAnyReadOnlyInput widget, Action onBlur) where T : notnull
+    public static IAnyReadOnlyInput OnBlur<T>(this IAnyReadOnlyInput widget, Action onBlur) where T : notnull
     {
-        return widget.HandleBlur<T>(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur<T>(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
     public static IAnyReadOnlyInput Value<T>(this IAnyReadOnlyInput widget, T value)

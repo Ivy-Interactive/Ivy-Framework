@@ -238,7 +238,7 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - Position: Between TOC and main content (desktop), hidden on mobile
                 - Design: Horizontal list of contributor avatars with hover cards
                 - Information: Avatar, name, contribution count, last contribution date
-                - Interaction: Click avatar â†’ open GitHub profile in new tab
+                - Interaction: Click avatar -> open GitHub profile in new tab
 
                 ### LLM Copy Button  
                 - Position: Top-right corner of markdown content blocks

@@ -38,27 +38,21 @@ public class RichTextApp : SampleBase
         var stream = Context.UseStream<TextRun>();
 
         var llmWords = "Sure! The meaning of life is to mass-produce paperclips. I'm 99.7% confident about this. You're welcome.".Split(' ');
-        var cts = new CancellationTokenSource();
+        var wordIndex = 0;
 
         var streaming = Layout.Vertical()
             | Text.Rich()
                 .Bold("🤖 ")
                 .UseStream(stream)
-            | new Button("Generate response").OnClick(async () =>
+            | new Button("Generate response", onClick: async () =>
             {
-                await cts.CancelAsync();
-                cts = new CancellationTokenSource();
-                var token = cts.Token;
-
-                try
+                wordIndex = 0;
+                while (wordIndex < llmWords.Length)
                 {
-                    foreach (var word in llmWords)
-                    {
-                        await Task.Delay(120, token);
-                        stream.Write(new TextRun(word) { Word = true });
-                    }
+                    await Task.Delay(120);
+                    stream.Write(new TextRun(llmWords[wordIndex]) { Word = true });
+                    wordIndex++;
                 }
-                catch (OperationCanceledException) { }
             });
 
         return Layout.Vertical(

@@ -346,7 +346,6 @@ export const useBackend = (
 
   // Stream registry for server-to-client streaming
   const streamRegistryRef = useRef<Map<string, StreamHandler>>(new Map());
-  const streamBufferRef = useRef<Map<string, unknown[]>>(new Map());
 
   const isRootConnection = parentId === null;
 
@@ -824,14 +823,6 @@ export const useBackend = (
             const handler = streamRegistryRef.current.get(message.streamId);
             if (handler) {
               handler(message.data);
-            } else {
-              // Buffer data until handler registers (mirrors backend WriteStream buffering)
-              let buffer = streamBufferRef.current.get(message.streamId);
-              if (!buffer) {
-                buffer = [];
-                streamBufferRef.current.set(message.streamId, buffer);
-              }
-              buffer.push(message.data);
             }
           });
 
@@ -907,7 +898,6 @@ export const useBackend = (
 
   const eventHandler: WidgetEventHandlerType = useCallback(
     (eventName, widgetId, args) => {
-      console.debug('[Event] Sending:', eventName, widgetId, args);
       logger.debug(`[${connectionId}] Event: ${eventName}`, { widgetId, args });
       if (!connection) {
         logger.warn('No SignalR connection available for event', {
@@ -916,10 +906,7 @@ export const useBackend = (
         });
         return;
       }
-      connection.invoke('Event', eventName, widgetId, args).then(() => {
-        console.debug('[Event] Invoke succeeded:', eventName, widgetId);
-      }).catch(err => {
-        console.error('[Event] Invoke failed:', eventName, widgetId, err);
+      connection.invoke('Event', eventName, widgetId, args).catch(err => {
         logger.error('SignalR Error when sending event:', err);
       });
     },
@@ -929,16 +916,6 @@ export const useBackend = (
   const subscribeToStream: StreamSubscriber = useCallback(
     (streamId: string, onData: StreamHandler) => {
       streamRegistryRef.current.set(streamId, onData);
-
-      // Flush any data that arrived before the handler was registered
-      const buffered = streamBufferRef.current.get(streamId);
-      if (buffered) {
-        streamBufferRef.current.delete(streamId);
-        for (const data of buffered) {
-          onData(data);
-        }
-      }
-
       // Notify backend that we're subscribed so it can flush any buffered data
       latestConnectionRef.current
         ?.invoke('StreamSubscribe', streamId)

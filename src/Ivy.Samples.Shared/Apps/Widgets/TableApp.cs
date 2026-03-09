@@ -26,7 +26,8 @@ public class TableApp : SampleBase
         return Layout.Tabs(
             new Tab("Table Sizes", new TableSizesExample()),
             new Tab("Column Widths", new ColumnWidthsExample()),
-            new Tab("Alignment", new AlignmentExample())
+            new Tab("Alignment", new AlignmentExample()),
+            new Tab("Progress Builder", new ProgressBuilderExample())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -82,7 +83,7 @@ public class TableSizesExample : ViewBase
                 .ToTable().Small()
                 .Builder(e => e.Url, e => e.Link())
                 .Width(Size.Full())
-                .MultiLine(e => e.Name)
+                .Multiline(e => e.Name)
                 // Add explicit column widths to test overflow
                 .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
                 .ColumnWidth(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
@@ -95,7 +96,7 @@ public class TableSizesExample : ViewBase
                 .ToTable()
                 .Builder(e => e.Url, e => e.Link())
                 .Width(Size.Full())
-                .MultiLine(e => e.Name)
+                .Multiline(e => e.Name)
                 // Add explicit column widths to test overflow
                 .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
                 .ColumnWidth(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
@@ -108,7 +109,7 @@ public class TableSizesExample : ViewBase
                 .ToTable().Large()
                 .Builder(e => e.Url, e => e.Link())
                 .Width(Size.Full())
-                .MultiLine(e => e.Name)
+                .Multiline(e => e.Name)
                 // Add explicit column widths to test overflow
                 .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
                 .ColumnWidth(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
@@ -213,7 +214,7 @@ public class ColumnWidthsExample : ViewBase
                             .ToButton()
                             .Outline()
                             .Tooltip("Copy Link")
-                            .HandleClick(() => { })
+                            .OnClick(() => { })
                 })
                 .ToTable()
                 .Width(Size.Units(100))
@@ -295,5 +296,85 @@ public class AlignmentExample : ViewBase
                 .ColumnWidth(e => e.Views, Size.Fraction(0.15f))
                 .Align(e => e.Contact, Align.Center)
                 .Align(e => e.Views, Align.Right);
+    }
+}
+
+public class ProgressBuilderExample : ViewBase
+{
+    public override object? Build()
+    {
+        var tasks = new[]
+        {
+            new { Name = "Design Review", Progress = 100, Priority = "High" },
+            new { Name = "Implementation", Progress = 75, Priority = "High" },
+            new { Name = "Testing", Progress = 45, Priority = "Medium" },
+            new { Name = "Documentation", Progress = 20, Priority = "Low" },
+            new { Name = "Deployment", Progress = 0, Priority = "High" }
+        };
+
+        var downloads = new[]
+        {
+            new { File = "report.pdf", Downloaded = 1024, Total = 1024 },
+            new { File = "data.csv", Downloaded = 750, Total = 1000 },
+            new { File = "images.zip", Downloaded = 250, Total = 500 },
+            new { File = "backup.tar", Downloaded = 100, Total = 2000 }
+        };
+
+        return Layout.Vertical()
+            | Text.H3("Progress Builder for Table Cells")
+            | Text.P("Use .Builder(column, f => f.Progress()) to render numeric values as inline progress bars.")
+
+            | Text.Label("Example 1: Basic Progress Builder")
+            | Text.P("Simple progress bars with default settings (0-100 range)")
+            | tasks
+                .ToTable()
+                .Width(Size.Full())
+                .Builder(e => e.Progress, f => f.Progress())
+                .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Progress, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Priority, Size.Fraction(0.2f))
+
+            | Text.Label("Example 2: Progress with Auto-Color")
+            | Text.P("Automatically colors progress bars based on value: green (>=75%), yellow (>=50%), orange (>=25%), red (<25%)")
+            | tasks
+                .ToTable()
+                .Width(Size.Full())
+                .Builder(e => e.Progress, f => f.Progress().AutoColor())
+                .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Progress, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Priority, Size.Fraction(0.2f))
+
+            | Text.Label("Example 3: Progress with Custom Range")
+            | Text.P("Custom min/max values for download progress (bytes downloaded out of total)")
+            | downloads
+                .Select(d => new { d.File, d.Downloaded, d.Total, Percent = (double)d.Downloaded / d.Total * 100 })
+                .ToTable()
+                .Width(Size.Full())
+                .Builder(e => e.Percent, f => f.Progress().Min(0).Max(100).AutoColor())
+                .Header(e => e.Percent, "Progress")
+                .ColumnWidth(e => e.File, Size.Fraction(0.3f))
+                .ColumnWidth(e => e.Downloaded, Size.Fraction(0.2f))
+                .ColumnWidth(e => e.Total, Size.Fraction(0.2f))
+                .ColumnWidth(e => e.Percent, Size.Fraction(0.3f))
+
+            | Text.Label("Example 4: Progress with Format String")
+            | Text.P("Display value alongside progress bar using format string")
+            | tasks
+                .ToTable()
+                .Width(Size.Full())
+                .Builder(e => e.Progress, f => f.Progress().Format("%d%").AutoColor())
+                .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Progress, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Priority, Size.Fraction(0.2f))
+
+            | Text.Label("Example 5: Progress with Explicit Color")
+            | Text.P("Set a specific color for all progress bars")
+            | tasks
+                .ToTable()
+                .Width(Size.Full())
+                .Builder(e => e.Progress, f => f.Progress().Color(Colors.Blue))
+                .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Progress, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Priority, Size.Fraction(0.2f));
     }
 }

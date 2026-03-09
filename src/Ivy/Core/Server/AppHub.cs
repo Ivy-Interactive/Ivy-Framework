@@ -289,10 +289,6 @@ public class AppHub(
             {
                 try
                 {
-                    // Dispose app state first (stops EventDispatchQueue, cleans up widget tree)
-                    // so in-flight event handlers finish before the sender is torn down.
-                    await appState.DisposeAsync();
-
                     try
                     {
                         var cp = appState.AppServices.GetService<IClientProvider>();
@@ -305,6 +301,8 @@ public class AppHub(
                     {
                         // ignored
                     }
+
+                    await appState.DisposeAsync();
                 }
                 catch (Exception ex)
                 {
@@ -577,7 +575,6 @@ public class ClientSender : IClientSender, IDisposable
     private readonly System.Threading.Channels.Channel<(string method, object? data)> _channel;
     private readonly CancellationTokenSource _cts = new();
     private readonly Task _worker;
-    private volatile bool _disposed;
 
     public ClientSender(IClientNotifier clientNotifier, string connectionId)
     {
@@ -614,24 +611,14 @@ public class ClientSender : IClientSender, IDisposable
 
     public void Send(string method, object? data)
     {
-        if (_disposed) return;
-
         if (!_channel.Writer.TryWrite((method, data)))
         {
-            // Channel full or completed — try async write, but guard against disposal race
-            if (_disposed) return;
-            try
-            {
-                _ = _channel.Writer.WriteAsync((method, data), _cts.Token);
-            }
-            catch (ObjectDisposedException) { }
+            _ = _channel.Writer.WriteAsync((method, data), _cts.Token);
         }
     }
 
     public void Dispose()
     {
-        _disposed = true;
-
         try
         {
             _cts.Cancel();

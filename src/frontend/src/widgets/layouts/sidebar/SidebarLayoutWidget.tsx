@@ -33,9 +33,34 @@ interface SidebarLayoutWidgetProps {
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
   mainContentPadding?: number; // Padding for main content area (default: 2)
-  width?: string; // Width of the sidebar (default: 256px)
+  width?: string; // Width of the sidebar (Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue")
   open?: boolean; // Whether the sidebar starts open (default: true)
+  resizable?: boolean; // Enable drag-to-resize on sidebar border
 }
+
+// Helper to parse a Size string to pixels
+const parseSizeToPixels = (
+  sizeStr: string | undefined,
+  defaultPx: number
+): number => {
+  if (!sizeStr) return defaultPx;
+  const [sizeType, value] = sizeStr.split(':');
+  const numValue = parseFloat(value);
+  if (isNaN(numValue)) return defaultPx;
+
+  switch (sizeType.toLowerCase()) {
+    case 'px':
+      return numValue;
+    case 'rem':
+      // Assume 16px base font size
+      return numValue * 16;
+    case 'units':
+      // Units are 0.25rem = 4px
+      return numValue * 4;
+    default:
+      return defaultPx;
+  }
+};
 
 // Helper function to check if a slot has meaningful content
 // Checks both props.children (legacy) and props.node (MemoizedWidget)
@@ -74,9 +99,19 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   mainContentPadding,
   width,
   open: openProp = true,
+  resizable = false,
 }) => {
+  // Parse Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue"
+  const [wantedWidth, minWidthStr, maxWidthStr] = (width ?? '').split(',');
+
   // Get sidebar width from the width prop (default set in backend)
   const sidebarWidth = getWidth(width).width as string;
+  const initialWidthPx = parseSizeToPixels(wantedWidth, 256);
+
+  // Parse min/max constraints from Size API (defaults match Streamlit: 200-600px)
+  const minWidthPx = parseSizeToPixels(minWidthStr, 200);
+  const maxWidthPx = parseSizeToPixels(maxWidthStr, 600);
+
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
     if (!mainAppSidebar) return true;
@@ -93,6 +128,63 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(getInitialSidebarState);
   const [isManuallyToggled, setIsManuallyToggled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Resizable state
+  const [currentWidth, setCurrentWidth] = useState(initialWidthPx);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  const [prevInitialWidthPx, setPrevInitialWidthPx] = useState(initialWidthPx);
+
+  if (initialWidthPx !== prevInitialWidthPx) {
+    setPrevInitialWidthPx(initialWidthPx);
+    if (!isResizing) {
+      setCurrentWidth(initialWidthPx);
+    }
+  }
+
+  // Handle resize drag
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      if (!resizable || !isSidebarOpen) return;
+
+      e.preventDefault();
+      setIsResizing(true);
+
+      const startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const startWidth = currentWidth;
+
+      const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
+        const clientX =
+          'touches' in moveEvent
+            ? moveEvent.touches[0].clientX
+            : moveEvent.clientX;
+        const delta = clientX - startX;
+        const newWidth = Math.min(
+          maxWidthPx,
+          Math.max(minWidthPx, startWidth + delta)
+        );
+        setCurrentWidth(newWidth);
+      };
+
+      const handleEnd = () => {
+        setIsResizing(false);
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('mouseup', handleEnd);
+        document.removeEventListener('touchmove', handleMove);
+        document.removeEventListener('touchend', handleEnd);
+      };
+
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchmove', handleMove);
+      document.addEventListener('touchend', handleEnd);
+    },
+    [resizable, isSidebarOpen, currentWidth, minWidthPx, maxWidthPx]
+  );
+
+  // Get the effective sidebar width (use currentWidth when resizable)
+  const effectiveSidebarWidth = resizable ? `${currentWidth}px` : sidebarWidth;
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
@@ -123,16 +215,21 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       ref={containerRef}
       className="grid h-full w-full remove-parent-padding"
       style={{
-        gridTemplateColumns: isSidebarOpen ? `${sidebarWidth} 1fr` : '0 1fr',
-        transition: 'grid-template-columns 300ms ease-in-out',
+        gridTemplateColumns: isSidebarOpen
+          ? `${effectiveSidebarWidth} 1fr`
+          : '0 1fr',
+        transition: isResizing
+          ? 'none'
+          : 'grid-template-columns 300ms ease-in-out',
       }}
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-        style={{ width: sidebarWidth }}
+        ref={sidebarRef}
+        className={`flex h-full flex-col bg-background text-foreground border-r border-border relative overflow-hidden ${
+          isResizing ? '' : 'transition-transform duration-300 ease-in-out'
+        } ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ width: effectiveSidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
           <div className="flex flex-col shrink-0 p-2 space-y-4">
@@ -151,6 +248,35 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             <div className="flex flex-col p-2 gap-4 min-h-0">
               {slots?.SidebarFooter}
             </div>
+          </div>
+        )}
+        {/* Resize Handle */}
+        {resizable && isSidebarOpen && (
+          <div
+            className={cn(
+              'absolute top-0 right-0 w-1 h-full cursor-ew-resize group'
+            )}
+            onMouseDown={handleResizeStart}
+            onTouchStart={handleResizeStart}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize sidebar"
+            tabIndex={0}
+            onKeyDown={e => {
+              if (e.key === 'ArrowLeft') {
+                setCurrentWidth(w => Math.max(minWidthPx, w - 10));
+              } else if (e.key === 'ArrowRight') {
+                setCurrentWidth(w => Math.min(maxWidthPx, w + 10));
+              }
+            }}
+          >
+            <div
+              className={cn(
+                'absolute top-1/2 -translate-y-1/2 right-0 w-1 h-8 rounded-full bg-border',
+                'opacity-0 group-hover:opacity-100 transition-opacity',
+                isResizing && 'opacity-100'
+              )}
+            />
           </div>
         )}
       </div>

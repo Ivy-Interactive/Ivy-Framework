@@ -309,9 +309,80 @@ public class FileInputValidationTests
         Assert.Equal("Invalid file type: testfile. Allowed types: .txt", result.ErrorMessage);
     }
 
-    private static FileUpload CreateTestFile(string name, string type = "text/plain")
+    private static FileUpload CreateTestFile(string name, string type = "text/plain", long length = 12345)
     {
-        return new FileUpload { FileName = name, ContentType = type, Length = 12345 };
+        return new FileUpload { FileName = name, ContentType = type, Length = length };
+    }
+
+    [Fact]
+    public void ValidateMinFileSize_WithNullMinFileSize_ReturnsSuccess()
+    {
+        // Arrange
+        var file = CreateTestFile("test.txt", "text/plain", 100);
+
+        // Act
+        var result = FileInputValidation.ValidateMinFileSize(file, null);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Null(result.ErrorMessage);
+    }
+
+    [Fact]
+    public void ValidateMinFileSize_WithFileLargerThanMin_ReturnsSuccess()
+    {
+        // Arrange
+        var file = CreateTestFile("test.txt", "text/plain", 2048);
+
+        // Act
+        var result = FileInputValidation.ValidateMinFileSize(file, 1024);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Null(result.ErrorMessage);
+    }
+
+    [Fact]
+    public void ValidateMinFileSize_WithFileEqualToMin_ReturnsSuccess()
+    {
+        // Arrange
+        var file = CreateTestFile("test.txt", "text/plain", 1024);
+
+        // Act
+        var result = FileInputValidation.ValidateMinFileSize(file, 1024);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Null(result.ErrorMessage);
+    }
+
+    [Fact]
+    public void ValidateMinFileSize_WithFileSmallerThanMin_ReturnsError()
+    {
+        // Arrange
+        var file = CreateTestFile("test.txt", "text/plain", 512);
+
+        // Act
+        var result = FileInputValidation.ValidateMinFileSize(file, 1024);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Contains("too small", result.ErrorMessage);
+        Assert.Contains("test.txt", result.ErrorMessage);
+    }
+
+    [Fact]
+    public void ValidateMinFileSize_WithEmptyFile_ReturnsError()
+    {
+        // Arrange
+        var file = CreateTestFile("empty.txt", "text/plain", 0);
+
+        // Act
+        var result = FileInputValidation.ValidateMinFileSize(file, 1);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Contains("too small", result.ErrorMessage);
     }
 
     [Fact]
@@ -448,6 +519,90 @@ public class FileInputValidationTests
 
         // Act
         var result = fileInput.ValidateValue(files);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Null(result.ErrorMessage);
+    }
+
+    [Fact]
+    public void FileInput_ValidateValue_WithValidMinFileSize_ReturnsSuccess()
+    {
+        // Arrange
+        var file = CreateTestFile("test.txt", "text/plain", 2048);
+        var fileInput = new FileInput<FileUpload?>((FileUpload?)null, "Test") with { MinFileSize = 1024 };
+
+        // Act
+        var result = fileInput.ValidateValue(file);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Null(result.ErrorMessage);
+    }
+
+    [Fact]
+    public void FileInput_ValidateValue_WithFileTooSmall_ReturnsError()
+    {
+        // Arrange
+        var file = CreateTestFile("test.txt", "text/plain", 512);
+        var fileInput = new FileInput<FileUpload?>((FileUpload?)null, "Test") with { MinFileSize = 1024 };
+
+        // Act
+        var result = fileInput.ValidateValue(file);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Contains("too small", result.ErrorMessage);
+    }
+
+    [Fact]
+    public void FileInput_ValidateValue_WithMultipleFilesAndMinFileSize_ReturnsSuccess()
+    {
+        // Arrange
+        var files = new List<FileUpload>
+        {
+            CreateTestFile("test1.txt", "text/plain", 2048),
+            CreateTestFile("test2.txt", "text/plain", 1536)
+        };
+        var fileInput = new FileInput<IEnumerable<FileUpload>?>((IEnumerable<FileUpload>?)null, "Test") with { MinFileSize = 1024 };
+
+        // Act
+        var result = fileInput.ValidateValue(files);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.Null(result.ErrorMessage);
+    }
+
+    [Fact]
+    public void FileInput_ValidateValue_WithMultipleFilesOneFileTooSmall_ReturnsError()
+    {
+        // Arrange
+        var files = new List<FileUpload>
+        {
+            CreateTestFile("test1.txt", "text/plain", 2048),
+            CreateTestFile("test2.txt", "text/plain", 256)
+        };
+        var fileInput = new FileInput<IEnumerable<FileUpload>?>((IEnumerable<FileUpload>?)null, "Test") with { MinFileSize = 1024 };
+
+        // Act
+        var result = fileInput.ValidateValue(files);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Contains("test2.txt", result.ErrorMessage);
+        Assert.Contains("too small", result.ErrorMessage);
+    }
+
+    [Fact]
+    public void FileInput_ValidateValue_WithBothMinAndMaxFileSize_ReturnsSuccess()
+    {
+        // Arrange
+        var file = CreateTestFile("test.txt", "text/plain", 2048);
+        var fileInput = new FileInput<FileUpload?>((FileUpload?)null, "Test") with { MinFileSize = 1024, MaxFileSize = 5000 };
+
+        // Act
+        var result = fileInput.ValidateValue(file);
 
         // Assert
         Assert.True(result.IsValid);
