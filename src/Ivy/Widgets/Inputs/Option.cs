@@ -1,7 +1,7 @@
 using System.ComponentModel;
-using Ivy.Shared;
 
-namespace Ivy.Widgets.Inputs;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public interface IAnyOption
 {

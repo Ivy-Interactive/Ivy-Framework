@@ -17,7 +17,7 @@ searchHints:
 
 The `TextBlock` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays text content with customizable styling. It's a fundamental building block for creating [user interfaces](../../01_Onboarding/02_Concepts/02_Views.md) with text, supporting various formatting options and layout properties.
 
-This widget is rarely used directly. Instead, we use the helper class `Ivy.Views.Text` which provides a more user-friendly API for creating text elements.
+This widget is rarely used directly. Instead, we use the helper class `Text` which provides a more user-friendly API for creating text elements.
 
 ## Basic Text Variants
 
@@ -73,7 +73,7 @@ public class CodeVariantsDemo : ViewBase
 
 ## Text Modifiers
 
-Text elements can be customized with various modifiers. Use [Colors](../../04_ApiReference/IvyShared/Colors.md) for the `Color()` modifier and [Size](../../04_ApiReference/IvyShared/Size.md) for `Width()`:
+Text elements can be customized with various modifiers. Use [Colors](../../04_ApiReference/Ivy/Colors.md) for the `Color()` modifier and [Size](../../04_ApiReference/Ivy/Size.md) for `Width()`:
 
 ```csharp demo-tabs
 public class TextModifiersDemo : ViewBase
@@ -216,8 +216,8 @@ The TextBuilder class provides several modifiers for customizing text appearance
 | `Bold()` | Apply bold styling | `Text.P("Bold text").Bold()` |
 | `Italic()` | Apply italic styling | `Text.P("Italic text").Italic()` |
 | `Muted()` | Apply muted/disabled styling | `Text.P("Muted text").Muted()` |
-| `Color()` | Set text [color](../../04_ApiReference/IvyShared/Colors.md) | `Text.P("Red text").Color(Colors.Destructive)` |
-| `Width()` | Set text width with [Size](../../04_ApiReference/IvyShared/Size.md) | `Text.P("Fixed width").Width(Size.Units(200))` |
+| `Color()` | Set text [color](../../04_ApiReference/Ivy/Colors.md) | `Text.P("Red text").Color(Colors.Destructive)` |
+| `Width()` | Set text width with [Size](../../04_ApiReference/Ivy/Size.md) | `Text.P("Fixed width").Width(Size.Units(200))` |
 | `StrikeThrough()` | Add strikethrough | `Text.P("Crossed out").StrikeThrough()` |
 | `NoWrap()` | Prevent wrapping | `Text.P("Single line").NoWrap()` |
 | `Overflow()` | Handle overflow | `Text.P("Long text").Overflow(Overflow.Clip)` |

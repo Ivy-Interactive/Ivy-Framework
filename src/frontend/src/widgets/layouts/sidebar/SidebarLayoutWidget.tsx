@@ -34,6 +34,7 @@ interface SidebarLayoutWidgetProps {
   mainAppSidebar?: boolean;
   mainContentPadding?: number; // Padding for main content area (default: 2)
   width?: string; // Width of the sidebar (Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue")
+  open?: boolean; // Whether the sidebar starts open (default: true)
   resizable?: boolean; // Enable drag-to-resize on sidebar border
 }
 
@@ -97,6 +98,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   mainAppSidebar = false,
   mainContentPadding,
   width,
+  open: openProp = true,
   resizable = false,
 }) => {
   // Parse Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue"
@@ -113,6 +115,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
     if (!mainAppSidebar) return true;
+    if (!openProp) return false;
 
     // Check if we're in a browser environment
     if (typeof window !== 'undefined') {
@@ -197,7 +200,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
       if (!isManuallyToggled) {
-        setIsSidebarOpen(e.matches);
+        setIsSidebarOpen(openProp && e.matches);
       }
     };
 
@@ -205,7 +208,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     mql.addEventListener('change', handleMediaChange);
     return () => mql.removeEventListener('change', handleMediaChange);
-  }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar]);
+  }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar, openProp]);
 
   return (
     <div

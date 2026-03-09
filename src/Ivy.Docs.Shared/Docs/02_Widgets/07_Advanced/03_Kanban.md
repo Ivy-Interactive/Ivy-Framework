@@ -228,7 +228,7 @@ Use `.CardOrder()` to control how cards are sorted within each column. This is s
 
 ## Width and Column Sizing
 
-The kanban widget supports the standard `.Width()` and `.Height()` methods (using [Size](../../04_ApiReference/IvyShared/Size.md)) to control the size of the entire board. Additionally, you can use `.ColumnWidth()` to set the same width for all columns, which enables horizontal scrolling when columns exceed the container width:
+The kanban widget supports the standard `.Width()` and `.Height()` methods (using [Size](../../04_ApiReference/Ivy/Size.md)) to control the size of the entire board. Additionally, you can use `.ColumnWidth()` to set the same width for all columns, which enables horizontal scrolling when columns exceed the container width:
 
 ```csharp demo-tabs
 public class KanbanWithColumnWidthExample : ViewBase

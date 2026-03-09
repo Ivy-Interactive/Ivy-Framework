@@ -4,8 +4,6 @@ using Ivy.Core;
 using Ivy.Core.Docs;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -138,12 +136,14 @@ public static class NumberInputExtensions
         return state.ToNumberInput(placeholder, disabled, NumberInputVariants.Slider, formatStyle);
     }
 
-    public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal, double? min = null, double? max = null)
     {
         var type = state.GetStateType();
         Type genericType = typeof(NumberInput<>).MakeGenericType(type);
         NumberInputBase input = (NumberInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant, formatStyle)!;
         input.ScaffoldDefaults(null, type);
+        if (min is not null) input = input with { Min = min };
+        if (max is not null) input = input with { Max = max };
         return input;
     }
 
@@ -216,7 +216,12 @@ public static class NumberInputExtensions
 
     public static NumberInputBase FormatStyle(this NumberInputBase widget, NumberFormatStyle formatStyle)
     {
-        return widget with { FormatStyle = formatStyle };
+        var result = widget with { FormatStyle = formatStyle };
+        if (formatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(result.Currency))
+        {
+            result = result with { Currency = "USD" };
+        }
+        return result;
     }
 
     public static NumberInputBase Currency(this NumberInputBase widget, string currency)

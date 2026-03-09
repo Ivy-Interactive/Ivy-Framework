@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -23,6 +22,8 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
 
     [Prop] public bool MainAppSidebar { get; set; } = false;
 
+    [Prop] public bool Open { get; set; } = true;
+
     [Prop] public int MainContentPadding { get; set; } = 2;
 
     [Prop] public bool Resizable { get; set; } = false;
@@ -38,6 +39,11 @@ public static class SidebarLayoutExtensions
     public static SidebarLayout MainAppSidebar(this SidebarLayout sidebar, bool isMainApp = true)
     {
         return sidebar with { MainAppSidebar = isMainApp };
+    }
+
+    public static SidebarLayout Open(this SidebarLayout sidebar, bool open = true)
+    {
+        return sidebar with { Open = open };
     }
 
     public static SidebarLayout Padding(this SidebarLayout sidebar, int padding)

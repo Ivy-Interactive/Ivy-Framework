@@ -1,15 +1,13 @@
-using Ivy.Apps;
-using Ivy.Auth;
-using Ivy.Client;
 using Ivy.Core;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views;
+using Ivy.Core.Apps;
+using Ivy.Core.Chrome;
+using Ivy.Core.Server;
 using Ivy.Widgets.Internal;
 using System.Collections.Immutable;
-using AppContext = Ivy.Apps.AppContext;
+using AppContext = Ivy.AppContext;
 
-namespace Ivy.Chrome;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 [App(isVisible: false)]
 public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
@@ -32,6 +30,20 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
         var menuItems = UseState(() => appRepository.GetMenuItems());
+
+        // Auto-default: if there's exactly one visible app, select it and close sidebar
+        var visibleApps = appRepository.GetMenuItems().FlattenWithPath().ToArray();
+        if (visibleApps.Length == 1 && visibleApps[0].Item.Tag is string singleAppId)
+        {
+            settings = settings with
+            {
+                DefaultAppId = settings.DefaultAppId ?? singleAppId,
+                SidebarOpen = false
+            };
+        }
+
+        var sidebarOpen = UseState(settings.SidebarOpen);
+
         var args = UseService<AppContext>();
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
@@ -81,7 +93,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     menuItems.Set([]);
                 }
             }
-        }, [search]);
+        }, search, appRepository.Reloaded.ToTrigger());
 
         void OpenApp(NavigateArgs navigateArgs, bool replaceHistory = false)
         {
@@ -308,6 +320,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     client.SetTitle(serverArgs.MetaTitle);
 
                     client.Redirect("/");
+                    sidebarOpen.Set(true);
                 }
             }
 
@@ -382,8 +395,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
         var commonMenuItems = new[]
         {
-            MenuItem.Default("Star on Github").Tag("$github").Icon(Icons.Github)
-                .OnSelect(() => client.OpenUrl(Resources.IvyGitHubUrl)),
+            // MenuItem.Default("Star on Github").Tag("$github").Icon(Icons.Github)
+            //     .OnSelect(() => client.OpenUrl(Resources.IvyGitHubUrl)),
             MenuItem.Default("Theme")
                 .Tag("$theme")
                 .Icon(Icons.SunMoon)
@@ -465,11 +478,11 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 | searchInput
             ,
             Layout.Vertical(
-                new SidebarNews("https://ivy.app/news.json"),
+                //new SidebarNews("https://ivy.app/news.json"),
                 settings.Footer,
                 footer
             ),
             settings.Width
-        ).MainAppSidebar(true);
+        ).Open(sidebarOpen.Value).MainAppSidebar(true);
     }
 }

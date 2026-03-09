@@ -1,0 +1,29 @@
+<Project>
+  <Target Name="CopyPhotinoNative" AfterTargets="Build;Publish">
+    <PropertyGroup>
+      <PhotinoNativePath Condition="Exists('$(OutputPath)runtimes/osx-arm64/native/Photino.Native.dylib')">$(OutputPath)runtimes/osx-arm64/native/Photino.Native.dylib</PhotinoNativePath>
+      <PhotinoNativePath Condition="'$(PhotinoNativePath)' == '' And Exists('$(OutputPath)runtimes/osx-x64/native/Photino.Native.dylib')">$(OutputPath)runtimes/osx-x64/native/Photino.Native.dylib</PhotinoNativePath>
+      <PhotinoNativePath Condition="'$(PhotinoNativePath)' == '' And Exists('$(PublishDir)runtimes/osx-arm64/native/Photino.Native.dylib')">$(PublishDir)runtimes/osx-arm64/native/Photino.Native.dylib</PhotinoNativePath>
+      <PhotinoNativePath Condition="'$(PhotinoNativePath)' == '' And Exists('$(PublishDir)runtimes/osx-x64/native/Photino.Native.dylib')">$(PublishDir)runtimes/osx-x64/native/Photino.Native.dylib</PhotinoNativePath>
+      <DestinationPath Condition="'$(PublishDir)' != ''">$(PublishDir)</DestinationPath>
+      <DestinationPath Condition="'$(DestinationPath)' == ''">$(OutputPath)</DestinationPath>
+    </PropertyGroup>
+    <Copy SourceFiles="$(PhotinoNativePath)" DestinationFolder="$(DestinationPath)" Condition="'$(PhotinoNativePath)' != ''" />
+  </Target>
+  <Target Name="CopyPhotinoNativeWindows" AfterTargets="Build;Publish">
+    <PropertyGroup>
+      <PhotinoNativePathWin Condition="Exists('$(OutputPath)runtimes/win-arm64/native/Photino.Native.dll')">$(OutputPath)runtimes/win-arm64/native/Photino.Native.dll</PhotinoNativePathWin>
+      <PhotinoNativePathWin Condition="'$(PhotinoNativePathWin)' == '' And Exists('$(OutputPath)runtimes/win-x64/native/Photino.Native.dll')">$(OutputPath)runtimes/win-x64/native/Photino.Native.dll</PhotinoNativePathWin>
+      <PhotinoNativePathWin Condition="'$(PhotinoNativePathWin)' == '' And Exists('$(PublishDir)runtimes/win-arm64/native/Photino.Native.dll')">$(PublishDir)runtimes/win-arm64/native/Photino.Native.dll</PhotinoNativePathWin>
+      <PhotinoNativePathWin Condition="'$(PhotinoNativePathWin)' == '' And Exists('$(PublishDir)runtimes/win-x64/native/Photino.Native.dll')">$(PublishDir)runtimes/win-x64/native/Photino.Native.dll</PhotinoNativePathWin>
+      <WebView2LoaderPathWin Condition="Exists('$(OutputPath)runtimes/win-arm64/native/WebView2Loader.dll')">$(OutputPath)runtimes/win-arm64/native/WebView2Loader.dll</WebView2LoaderPathWin>
+      <WebView2LoaderPathWin Condition="'$(WebView2LoaderPathWin)' == '' And Exists('$(OutputPath)runtimes/win-x64/native/WebView2Loader.dll')">$(OutputPath)runtimes/win-x64/native/WebView2Loader.dll</WebView2LoaderPathWin>
+      <WebView2LoaderPathWin Condition="'$(WebView2LoaderPathWin)' == '' And Exists('$(PublishDir)runtimes/win-arm64/native/WebView2Loader.dll')">$(PublishDir)runtimes/win-arm64/native/WebView2Loader.dll</WebView2LoaderPathWin>
+      <WebView2LoaderPathWin Condition="'$(WebView2LoaderPathWin)' == '' And Exists('$(PublishDir)runtimes/win-x64/native/WebView2Loader.dll')">$(PublishDir)runtimes/win-x64/native/WebView2Loader.dll</WebView2LoaderPathWin>
+      <DestinationPathWin Condition="'$(PublishDir)' != ''">$(PublishDir)</DestinationPathWin>
+      <DestinationPathWin Condition="'$(DestinationPathWin)' == ''">$(OutputPath)</DestinationPathWin>
+    </PropertyGroup>
+    <Copy SourceFiles="$(PhotinoNativePathWin)" DestinationFolder="$(DestinationPathWin)" Condition="'$(PhotinoNativePathWin)' != ''" />
+    <Copy SourceFiles="$(WebView2LoaderPathWin)" DestinationFolder="$(DestinationPathWin)" Condition="'$(WebView2LoaderPathWin)' != ''" />
+  </Target>
+</Project>

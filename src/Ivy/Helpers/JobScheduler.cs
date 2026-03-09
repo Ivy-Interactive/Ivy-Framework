@@ -1,7 +1,8 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Reactive.Subjects;
 
-namespace Ivy.Helpers;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum JobState
 {

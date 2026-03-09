@@ -1,7 +1,7 @@
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Widgets.Inputs;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class InputExtensions
 {

@@ -478,7 +478,7 @@ public class OneToManyDemo : ViewBase
 {
     public override object? Build()
     {
-        var signal = CreateSignal<BroadcastSignal, string, Unit>();
+        var signal = UseSignal<BroadcastSignal, string, Unit>();
         var message = UseState("");
         var receiver1Message = UseState("");
         var receiver2Message = UseState("");
@@ -493,16 +493,13 @@ public class OneToManyDemo : ViewBase
             }
         }
 
-        // Set up signal receiver
-        var receiver = UseSignal<BroadcastSignal, string, Unit>();
-
         // Process incoming messages
-        UseEffect(() => receiver.Receive(message =>
+        UseEffect(() => signal.Receive(msg =>
         {
             // Each receiver processes the same message differently
-            receiver1Message.Set($"Logged: {message}");
-            receiver2Message.Set($"Analyzed: {message.Length} characters");
-            receiver3Message.Set($"Stats: {message.Split(' ').Length} words");
+            receiver1Message.Set($"Logged: {msg}");
+            receiver2Message.Set($"Analyzed: {msg.Length} characters");
+            receiver3Message.Set($"Stats: {msg.Split(' ').Length} words");
             return new Unit();
         }));
 

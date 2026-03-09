@@ -1,9 +1,11 @@
-using Ivy.Client;
 using Ivy.Core;
-using Ivy.Helpers;
+using Ivy.Core.Auth;
+using Ivy.Core.Helpers;
+using Ivy.Core.Server;
 using Microsoft.AspNetCore.Http;
 
-namespace Ivy.Auth;
+// Resharper disable once CheckNamespace
+namespace Ivy;
 
 public class AuthService(IAuthProvider authProvider, IAuthSession authSession, IClientProvider client, AppSessionStore sessionStore) : IAuthService
 {

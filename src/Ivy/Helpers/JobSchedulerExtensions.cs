@@ -1,8 +1,7 @@
-﻿using Ivy.Core;
-using Ivy.Shared;
-using Ivy.Views;
+using Ivy.Core;
 
-namespace Ivy.Helpers;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class JobSchedulerExtensions
 {

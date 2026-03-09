@@ -1,6 +1,7 @@
-﻿using Ivy.Core.Hooks;
+using Ivy.Core.Hooks;
 
-namespace Ivy.Views.Blades;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class BladeHeader(object header) : ViewBase, IStateless
 {

@@ -1,8 +1,7 @@
-using Ivy.Client;
 using Ivy.Core;
-using Ivy.Shared;
 
-namespace Ivy.Views.Builders;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class CopyToClipboardBuilder<TModel> : IBuilder<TModel>
 {

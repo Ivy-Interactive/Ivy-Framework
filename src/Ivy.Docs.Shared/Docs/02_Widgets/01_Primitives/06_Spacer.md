@@ -52,7 +52,7 @@ public class FlexibleSpacerView : ViewBase
 ```
 
 <Callout Type="tip">
-The `Spacer` defaults to grow behavior (`flex-grow: 1`), making it take up all available space in the parent layout's direction. This effectively pushes sibling elements to opposite sides. See [Size](../../04_ApiReference/IvyShared/Size.md) for other sizing options like explicit widths or heights.
+The `Spacer` defaults to grow behavior (`flex-grow: 1`), making it take up all available space in the parent layout's direction. This effectively pushes sibling elements to opposite sides. See [Size](../../04_ApiReference/Ivy/Size.md) for other sizing options like explicit widths or heights.
 </Callout>
 
 ### Header Layout with Spacing

@@ -1,7 +1,3 @@
-using Ivy.Shared;
-using Ivy.Views.Builders;
-using Ivy.Views.Forms;
-
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 [App(icon: Icons.MessageSquare, searchHints: ["modal", "popup", "window", "dialog", "overlay", "confirm"])]

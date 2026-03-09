@@ -75,7 +75,6 @@ An Ivy project follows a standardized structure:
 YourProject/
 ├── Program.cs              # Main project entry point
 ├── YourProject.csproj      # .NET project file
-├── GlobalUsings.cs         # Global using statements
 ├── README.md               # Project documentation
 ├── Apps/                   # User interface code
 ├── Connections/            # Database connections

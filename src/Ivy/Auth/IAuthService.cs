@@ -1,7 +1,8 @@
 using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 
-namespace Ivy.Auth;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public interface IAuthService
 {

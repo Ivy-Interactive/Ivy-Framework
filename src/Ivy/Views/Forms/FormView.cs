@@ -3,11 +3,9 @@ using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 internal static class FormFieldViewHelpers
 {
@@ -33,6 +31,8 @@ public class FormValidateSignal : AbstractSignal<Unit, bool>;
 
 public class FormUpdateSignal : AbstractSignal<Unit, Unit>;
 
+public class FormSubmitSignal : AbstractSignal<Unit, Unit>;
+
 public enum FormValidationStrategy
 {
     OnBlur,
@@ -43,7 +43,7 @@ public class FormFieldView(
     IAnyState bindingState,
     Func<IAnyState, IViewContext, IAnyInput> inputFactory,
     Func<bool> visible,
-    ISignalSender<Unit, Unit> updateSender,
+    ISignal<Unit, Unit> updateSender,
     string? label = null,
     string? description = null,
     string? help = null,
@@ -52,7 +52,8 @@ public class FormFieldView(
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-    Scale scale = Scale.Medium)
+    Scale scale = Scale.Medium,
+    FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit)
     : ViewBase, IFormFieldView
 {
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
@@ -87,6 +88,7 @@ public class FormFieldView(
         var blurOnceState = UseState(false);
         var validationReceiver = UseSignal<FormValidateSignal, Unit, bool>();
         var updateReceiver = UseSignal<FormUpdateSignal, Unit, Unit>();
+        var submitSender = UseSignal<FormSubmitSignal, Unit, Unit>();
         var visibleState = UseState(visible);
 
         UseEffect(() =>
@@ -114,15 +116,23 @@ public class FormFieldView(
             }
             bindingState.As<object>().Set(value);
             updateSender.Send(new Unit());
+            if (submitStrategy == FormSubmitStrategy.OnChange)
+            {
+                submitSender.Send(new Unit());
+            }
         }, [inputState, blurOnceState]);
 
         void OnBlur(Event<IAnyInput> _)
         {
             blurOnceState.Set(true);
+            if (submitStrategy == FormSubmitStrategy.OnBlur)
+            {
+                submitSender.Send(new Unit());
+            }
         }
 
         var input = inputFactory(inputState, Context).Invalid(invalidState.Value);
-        if (validationStrategy == FormValidationStrategy.OnBlur)
+        if (validationStrategy == FormValidationStrategy.OnBlur || submitStrategy == FormSubmitStrategy.OnBlur)
         {
             input.OnBlur(OnBlur);
         }
@@ -148,7 +158,7 @@ public class FormFieldBinding<TModel>(
     Expression<Func<TModel, object>> selector,
     Func<IAnyState, IViewContext, IAnyInput> factory,
     Func<bool> visible,
-    ISignalSender<Unit, Unit> updateSignal,
+    ISignal<Unit, Unit> updateSignal,
     string? label = null,
     string? description = null,
     bool required = false,
@@ -157,13 +167,14 @@ public class FormFieldBinding<TModel>(
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
     Scale scale = Scale.Medium,
     string? help = null,
-    string? placeholder = null
+    string? placeholder = null,
+    FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit
     ) : IFormFieldBinding<TModel>
 {
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, scale);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, scale, submitStrategy);
         return (fieldView, disposable);
     }
 }

@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 [App(icon: Icons.Grid2x2, searchHints: ["toolbar", "sticky", "fixed", "navigation", "header", "scroll"])]

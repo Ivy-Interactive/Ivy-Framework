@@ -1,7 +1,7 @@
-using Ivy.Services;
 using System.Text.RegularExpressions;
 
-namespace Ivy.Widgets.Inputs;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class FileInputValidation
 {

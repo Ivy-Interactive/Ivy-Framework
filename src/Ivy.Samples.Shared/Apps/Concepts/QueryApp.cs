@@ -1,6 +1,3 @@
-using Ivy.Hooks;
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 [App(icon: Icons.Database, searchHints: ["query", "swr", "stale", "revalidate", "fetch", "async", "loading"])]
@@ -22,7 +19,8 @@ public class QueryApp : SampleBase
                    new Tab("Pagination", new PaginationTab()),
                    new Tab("Pre-Populated", new PrePopulatedTab()),
                    new Tab("Errors", new ErrorsTab()),
-                   new Tab("Auto-Key", new AutoKeyTab())
+                   new Tab("Auto-Key", new AutoKeyTab()),
+                   new Tab("Effect Trigger", new EffectTriggerTab())
                ).Variant(TabsVariant.Content);
     }
 }
@@ -676,11 +674,11 @@ public class PaginationExample : ViewBase
 
                // Pagination controls
                | (Layout.Horizontal().Gap(2)
-                  | new Button("← Previous", _ => page.Set(p => p - 1))
+                  | new Button("â† Previous", _ => page.Set(p => p - 1))
                         .Disabled(page.Value <= 1 || itemsQuery.Loading)
                         .Variant(ButtonVariant.Outline)
                   | Text.Literal($"{page.Value} / {totalPages}")
-                  | new Button("Next →", _ => page.Set(p => p + 1))
+                  | new Button("Next â†’", _ => page.Set(p => p + 1))
                         .Disabled(page.Value >= totalPages || itemsQuery.Loading)
                         .Variant(ButtonVariant.Outline))
 
@@ -697,10 +695,10 @@ public class PaginationComparisonExample : ViewBase
 
         return Layout.Vertical().Gap(4)
                | (Layout.Horizontal().Gap(2)
-                  | new Button("← Prev", _ => page.Set(p => Math.Max(1, p - 1)))
+                  | new Button("â† Prev", _ => page.Set(p => Math.Max(1, p - 1)))
                         .Variant(ButtonVariant.Outline)
                   | Text.Literal($"Page {page.Value}")
-                  | new Button("Next →", _ => page.Set(p => Math.Min(5, p + 1)))
+                  | new Button("Next â†’", _ => page.Set(p => Math.Min(5, p + 1)))
                         .Variant(ButtonVariant.Outline))
                | (Layout.Grid(2).Gap(4)
                   | new Card(new ComparisonPanelWithKeepPrevious(page.Value)).Title("With KeepPrevious")
@@ -724,7 +722,7 @@ public class ComparisonPanelWithKeepPrevious(int page) : ViewBase
             },
             options: new QueryOptions { KeepPrevious = true });
 
-        var content = itemsQuery.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
+        var content = itemsQuery.Value?.Select(item => Text.Literal($"â€¢ {item}")).ToArray() ?? [];
 
         return Layout.Vertical().Gap(2)
                | itemsQuery
@@ -748,7 +746,7 @@ public class ComparisonPanelWithoutKeepPrevious(int page) : ViewBase
             },
             options: new QueryOptions { KeepPrevious = false });
 
-        var content = itemsQuery.Value?.Select(item => Text.Literal($"• {item}")).ToArray() ?? [];
+        var content = itemsQuery.Value?.Select(item => Text.Literal($"â€¢ {item}")).ToArray() ?? [];
 
         return Layout.Vertical().Gap(2)
                | itemsQuery
@@ -1028,6 +1026,58 @@ public class RefreshIntervalExample : ViewBase
                            .Variant(ButtonVariant.Outline).Icon(Icons.RefreshCw)))
 
                | Text.Muted("The refresh timer only runs while there are active subscribers. Navigate away to stop polling.")
+            ;
+    }
+}
+
+public class EffectTriggerTab : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical()
+               | Text.H2("Query as Effect Trigger")
+               | Text.P("QueryResult implements IEffectTriggerConvertible, so you can pass it directly to UseEffect to react to query state changes.")
+               | new Card(new QueryEffectTriggerExample()).Title("UseEffect with QueryResult")
+            ;
+    }
+}
+
+public class QueryEffectTriggerExample : ViewBase
+{
+    public override object? Build()
+    {
+        var effectLog = UseState(() => new List<string>());
+
+        var query = UseQuery(
+            key: "effect-trigger-example",
+            fetcher: async ct =>
+            {
+                await Task.Delay(1000, ct);
+                return $"Fetched at {DateTime.Now:HH:mm:ss}";
+            });
+
+        // Use the query as an effect trigger — fires whenever the query state changes
+        UseEffect(() =>
+        {
+            effectLog.Set(log => [.. log, $"[{DateTime.Now:HH:mm:ss.fff}] Query changed → Loading={query.Loading}, Value={query.Value ?? "(null)"}"]);
+        }, query);
+
+        var logEntries = effectLog.Value
+            .TakeLast(10)
+            .Select(entry => Text.Muted(entry))
+            .ToArray();
+
+        return Layout.Vertical().Gap(4)
+               | Text.H3("Query State")
+               | query
+               | Text.Literal(query.Value ?? "No data")
+               | (Layout.Horizontal().Gap(2)
+                  | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
+                  | new Button("Invalidate", _ => query.Mutator.Invalidate()).Variant(ButtonVariant.Destructive)
+                  | new Button("Clear Log", _ => effectLog.Set([])).Variant(ButtonVariant.Ghost))
+               | Text.H3("Effect Log (last 10)")
+               | Text.Muted("Each entry below was logged by a UseEffect triggered by the query:")
+               | logEntries
             ;
     }
 }

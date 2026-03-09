@@ -1,48 +1,48 @@
-using Ivy.Auth;
 using Ivy.Core;
-using Ivy.Shared;
+using Ivy.Core.Auth;
 
-namespace Ivy.Client;
-
-public class ToasterMessage
-{
-    public string? Title { get; set; }
-    public string? Description { get; set; }
-}
-
-public class ErrorMessage
-{
-    public required string Title { get; set; }
-    public required string Description { get; set; }
-    public string? StackTrace { get; set; }
-}
-
-public class HistoryState
-{
-    public string? TabId { get; set; }
-}
-
-public class RedirectMessage
-{
-    public string? Url { get; set; }
-    public bool ReplaceHistory { get; set; }
-    public HistoryState? State { get; set; }
-}
-
-public class SetAuthCookiesMessage
-{
-    public required string CookieJarId { get; set; }
-    public required bool ReloadPage { get; set; }
-    public required bool TriggerMachineReload { get; set; }
-}
-
-public class SetRootAppIdMessage
-{
-    public required string RootAppId { get; set; }
-}
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class ClientExtensions
 {
+    public class ToasterMessage
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+    }
+
+    public class ErrorMessage
+    {
+        public required string Title { get; set; }
+        public required string Description { get; set; }
+        public string? StackTrace { get; set; }
+    }
+
+    public class HistoryState
+    {
+        public string? TabId { get; set; }
+    }
+
+    public class RedirectMessage
+    {
+        public string? Url { get; set; }
+        public bool ReplaceHistory { get; set; }
+        public HistoryState? State { get; set; }
+    }
+
+    public class SetAuthCookiesMessage
+    {
+        public required string CookieJarId { get; set; }
+        public required bool ReloadPage { get; set; }
+        public required bool TriggerMachineReload { get; set; }
+    }
+
+    public class SetRootAppIdMessage
+    {
+        public required string RootAppId { get; set; }
+    }
+
     public static void CopyToClipboard(this IClientProvider client, string content)
     {
         client.Sender.Send("CopyToClipboard", content);

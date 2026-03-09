@@ -265,3 +265,8 @@ export function applyDefaults<T extends object>(
   }
   return result;
 }
+
+export function isDevToolsEnabled(): boolean {
+  const meta = document.querySelector('meta[name="ivy-enable-dev-tools"]');
+  return meta?.getAttribute('content') === 'true';
+}

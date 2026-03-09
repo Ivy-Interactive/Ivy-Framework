@@ -10,6 +10,11 @@
     <NoWarn>CS1591</NoWarn>
     <UserSecretsId>c484b30a-b440-4aee-9a34-604c3ed3032e</UserSecretsId>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\Ivy.Samples.Shared\Ivy.Samples.Shared.csproj" />

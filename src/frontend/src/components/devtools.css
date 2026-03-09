@@ -1,0 +1,188 @@
+/* DevTools Styles - theme-aware using design system variables */
+.ivy-devtools-overlay {
+  position: fixed;
+  background: color-mix(in srgb, var(--primary) 25%, transparent);
+  border: 2px solid var(--primary);
+  pointer-events: none;
+  z-index: 99999;
+  box-sizing: border-box;
+}
+
+.ivy-devtools-label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: var(--font-sans);
+  border-radius: var(--radius-selectors);
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.ivy-devtools-label-type {
+  font-weight: 500;
+}
+
+.ivy-devtools-dialog {
+  position: fixed;
+  z-index: 100001;
+  background: var(--popover);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-boxes);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  width: 340px;
+  font-family: var(--font-sans);
+}
+
+.ivy-devtools-dialog-toggles {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.ivy-devtools-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--radius-selectors);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ivy-devtools-toggle-btn:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
+
+.ivy-devtools-toggle-active {
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+}
+
+.ivy-devtools-toggle-active:hover {
+  background: color-mix(in srgb, var(--primary) 22%, transparent);
+  color: var(--primary);
+}
+
+.ivy-devtools-textarea-wrapper {
+  position: relative;
+}
+
+.ivy-devtools-textarea {
+  width: 100%;
+  height: 64px;
+  padding: 10px 12px;
+  padding-right: 36px;
+  border: none;
+  border-radius: var(--radius-fields);
+  font-size: 15px;
+  resize: none;
+  font-family: var(--font-sans);
+  background: transparent;
+  color: var(--foreground);
+  box-sizing: border-box;
+}
+
+.ivy-devtools-textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+.ivy-devtools-textarea:focus {
+  outline: none;
+}
+
+.ivy-devtools-mic-btn {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-selectors);
+  background: var(--accent);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.ivy-devtools-mic-btn:hover {
+  background: var(--border);
+}
+
+.ivy-devtools-mic-active {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.ivy-devtools-dialog-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.ivy-devtools-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-fields);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.ivy-devtools-btn-muted {
+  background: transparent;
+  color: var(--muted-foreground);
+}
+
+.ivy-devtools-btn-muted:hover {
+  color: var(--foreground);
+}
+
+.ivy-devtools-btn-outlined {
+  background: var(--accent);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 20px;
+}
+
+.ivy-devtools-btn-outlined:hover {
+  background: var(--muted);
+  border-color: var(--muted-foreground);
+}

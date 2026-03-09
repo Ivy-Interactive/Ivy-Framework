@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { WidgetNode } from '@/types/widgets';
+import { WidgetNode, CallSite } from '@/types/widgets';
 import { widgetMap } from '@/widgets/widgetMap';
 import { Scales } from '@/types/scale';
 import {
@@ -9,6 +9,46 @@ import {
 } from '@/widgets/externalWidgetLoader';
 import { ExternalWidgetWrapper } from '@/widgets/ExternalWidgetWrapper';
 import { MemoizedWidget } from '@/widgets/MemoizedWidget';
+
+// Registry for widget callsite information, keyed by widget id
+export const widgetCallSiteRegistry = new Map<string, CallSite>();
+
+// Registry for widget content overrides (used by DevTools text editing)
+export const widgetContentOverrides = new Map<string, string>();
+const contentListeners = new Map<string, Set<() => void>>();
+
+export const setWidgetContentOverride = (widgetId: string, content: string) => {
+  widgetContentOverrides.set(widgetId, content);
+  // Notify listeners
+  const listeners = contentListeners.get(widgetId);
+  if (listeners) {
+    listeners.forEach(listener => listener());
+  }
+};
+
+export const clearWidgetContentOverride = (widgetId: string) => {
+  widgetContentOverrides.delete(widgetId);
+  const listeners = contentListeners.get(widgetId);
+  if (listeners) {
+    listeners.forEach(listener => listener());
+  }
+};
+
+export const subscribeToContentOverride = (
+  widgetId: string,
+  listener: () => void
+) => {
+  if (!contentListeners.has(widgetId)) {
+    contentListeners.set(widgetId, new Set());
+  }
+  contentListeners.get(widgetId)!.add(listener);
+  return () => {
+    contentListeners.get(widgetId)?.delete(listener);
+  };
+};
+
+// Types that support text editing
+export const TEXT_EDITABLE_TYPES = ['Ivy.TextBlock', 'Ivy.Markdown'];
 
 export const isLazyComponent = (
   component:
@@ -88,13 +128,18 @@ const renderExternalWidget = (
     );
   }
 
+  if (node.callSite) {
+    widgetCallSiteRegistry.set(node.id, node.callSite);
+  }
+
   const content = (
-    <ExternalWidgetWrapper Component={Component} props={props} key={node.id}>
-      {slots.default}
-    </ExternalWidgetWrapper>
+    <ivy-widget key={node.id} id={node.id} type={node.type}>
+      <ExternalWidgetWrapper Component={Component} props={props}>
+        {slots.default}
+      </ExternalWidgetWrapper>
+    </ivy-widget>
   );
 
-  // For lazy components (external widgets are typically lazy), wrap in Suspense
   return isLazyComponent(Component) ? (
     <Suspense key={node.id}>{content}</Suspense>
   ) : (

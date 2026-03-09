@@ -1,13 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
-using Ivy.Core;
-using Ivy.Helpers;
-using Ivy.Shared;
+using Ivy.Core.Helpers;
 using Microsoft.Extensions.AI;
-using Ivy.Hooks;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class DataTableBuilder<TModel>(
     IQueryable<TModel> queryable,
@@ -68,16 +66,16 @@ public class DataTableBuilder<TModel>(
         var order = fields.Count;
         foreach (var field in fields)
         {
-            var align = Shared.Align.Left;
+            var align = Ivy.Align.Left;
 
             if (field.Type.IsNumeric())
             {
-                align = Shared.Align.Right;
+                align = Ivy.Align.Right;
             }
 
             if (field.Type == typeof(bool))
             {
-                align = Shared.Align.Center;
+                align = Ivy.Align.Center;
             }
 
             var removed = field.Name.StartsWith($"_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]) ||

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEventHandler } from '@/components/event-handler';
+import { useStreamSubscriber } from '@/components/stream-handler';
 
 export interface ExternalWidgetWrapperProps {
   Component: React.ComponentType<Record<string, unknown>>;
@@ -8,8 +9,10 @@ export interface ExternalWidgetWrapperProps {
 }
 
 /**
- * Wrapper component that provides the event handler to external widgets.
- * External widgets receive the event handler as a prop called `onIvyEvent`.
+ * Wrapper component that provides the event handler and stream subscriber to external widgets.
+ * External widgets receive:
+ * - `eventHandler`: callback to trigger events to the backend
+ * - `subscribeToStream`: callback to subscribe to server-to-client streams
  */
 export const ExternalWidgetWrapper: React.FC<ExternalWidgetWrapperProps> = ({
   Component,
@@ -17,11 +20,13 @@ export const ExternalWidgetWrapper: React.FC<ExternalWidgetWrapperProps> = ({
   children,
 }) => {
   const eventHandler = useEventHandler();
+  const subscribeToStream = useStreamSubscriber();
 
-  // Pass the event handler as a prop so external widgets can trigger events
+  // Pass the event handler and stream subscriber as props so external widgets can use them
   const enhancedProps = {
     ...props,
-    onIvyEvent: eventHandler,
+    eventHandler,
+    subscribeToStream,
   };
 
   return <Component {...enhancedProps}>{children}</Component>;

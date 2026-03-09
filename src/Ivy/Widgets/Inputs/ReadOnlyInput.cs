@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -109,6 +107,26 @@ public static class ReadOnlyInputExtensions
         if (property != null && property.CanWrite)
         {
             property.SetValue(widget, nullable ?? true);
+        }
+        return widget;
+    }
+
+    public static IAnyReadOnlyInput ShowCopyButton(this IAnyReadOnlyInput widget, bool show = true)
+    {
+        var property = widget.GetType().GetProperty("ShowCopyButton");
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(widget, show);
+        }
+        return widget;
+    }
+
+    public static IAnyReadOnlyInput Placeholder(this IAnyReadOnlyInput widget, string? placeholder)
+    {
+        var property = widget.GetType().GetProperty("Placeholder");
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(widget, placeholder);
         }
         return widget;
     }
