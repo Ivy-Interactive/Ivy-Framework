@@ -1,5 +1,5 @@
-using Ivy.Apps;
-using Ivy.Chrome;
+using Ivy.Core.Apps;
+using Ivy.Core.Chrome;
 using Ivy.Docs.Shared.Services;
 
 namespace Ivy.Docs.Shared.Internal;
