@@ -4,19 +4,19 @@ namespace Ivy.Samples.Shared.Apps.Workshops;
 [App(icon: Icons.Book, path: ["Workshops"], isVisible: false, title: "Docs GitHub Integration", searchHints: ["documentation", "github", "integration", "workshop", "requirements", "design"])]
 public class DocsGitHubIntegrationApp : SampleBase
 {
-  protected override object? BuildSample()
-  {
-    return new Article()
-        | new Markdown(
-            """"
+    protected override object? BuildSample()
+    {
+        return new Article()
+            | new Markdown(
+                """"
                 # Project Idea: Enhanced Docs with GitHub Integration (11. January 2025)
 
                 We want to enhance the documentation experience by integrating GitHub features directly into our docs pages, providing better context and collaboration tools.
                 """"
-        )
-        | new Callout("This is a requirements sketch; it does not implement the feature.", icon: Icons.Info)
-        | new Markdown(
-            """"
+            )
+            | new Callout("This is a requirements sketch; it does not implement the feature.", icon: Icons.Info)
+            | new Markdown(
+                """"
                 ## Goals
 
                 * **Contributors Widget**: Display GitHub contributors for each documentation page beneath the TOC
@@ -25,9 +25,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 * **Enhanced Documentation Experience**: Provide better context about who maintains content and enable community engagement
                 * **Seamless Integration**: Work with existing `Article`, `Markdown`, and docs generation pipeline
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## Non-Goals (initial)
 
                 * Real-time GitHub notifications or webhooks
@@ -35,9 +35,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 * Full GitHub project management integration
                 * Analytics or tracking beyond basic contributor data
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## User Stories
 
                 ### Contributors Widget
@@ -55,9 +55,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 2. As a community member, I can easily navigate to relevant discussions
                 3. As a maintainer, I can see which docs pages generate the most questions
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## Current Architecture Analysis
 
                 Based on codebase exploration, the current docs system has these key components:
@@ -76,9 +76,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - GitHub OAuth via Supabase and Auth0 providers
                 - GitHub Actions for CI/CD workflows
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## Proposed Implementation
 
                 ### 1. GitHub Contributors Widget
@@ -166,9 +166,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 )}
                 ```
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## Technical Integration Points
 
                 ### 1. Documentation Generation Pipeline
@@ -194,9 +194,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - Add loading states and error handling
                 - Use existing copy functionality patterns from `MarkdownRenderer`
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## API Requirements
 
                 ### GitHub REST/GraphQL APIs Needed:
@@ -229,9 +229,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - Cache discussions for 15 minutes
                 - Use conditional requests with ETags when possible
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## UI/UX Design Requirements
 
                 ### Contributors Section
@@ -253,9 +253,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - Interaction: Click â†’ open GitHub discussion in new tab
                 - State: Loading skeleton, empty state, error handling
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## Acceptance Criteria
 
                 ### Contributors Widget
@@ -279,9 +279,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - [ ] Shows appropriate empty state when no discussions found
                 - [ ] Updates discussion data every 15 minutes
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## Risks & Considerations
 
                 ### Technical Risks
@@ -300,9 +300,9 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - **Mobile Experience**: Limited screen space for additional components
                 - **Loading States**: Network delays could create jarring user experience
                 """"
-        )
-        | new Markdown(
-            """"
+            )
+            | new Markdown(
+                """"
                 ## Open Questions
 
                 1. **Authentication Strategy**: Should we require GitHub authentication for enhanced features, or work with public API limits?
@@ -317,7 +317,7 @@ public class DocsGitHubIntegrationApp : SampleBase
 
                 6. **Fallback Strategy**: How should the system behave when GitHub is unavailable or rate-limited?
                 """"
-        )
-        ;
-  }
+            )
+            ;
+    }
 }
