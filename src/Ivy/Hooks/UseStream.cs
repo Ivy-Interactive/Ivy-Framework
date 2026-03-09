@@ -110,10 +110,10 @@ internal class WriteStream<T> : WriteStream, IWriteStream<T>, IDisposable
             // Flush buffered data
             foreach (var data in _buffer)
             {
-                // Explicitly base64 encode byte arrays to ensure proper serialization
+                // Serialize identically to Write() to ensure consistent casing/format
                 object serializedData = data is byte[] bytes
                     ? Convert.ToBase64String(bytes)
-                    : data!;
+                    : JsonSerializer.SerializeToNode(data, WidgetSerializer.SerializerOptions)!;
                 _sender.Send("StreamData", new { streamId = Id, data = serializedData });
             }
             _buffer.Clear();
