@@ -178,6 +178,28 @@ public class ComplexContentCalloutView : ViewBase
 }
 ```
 
+### Closable callouts
+
+When you set an `OnClose` handler, the callout shows a close (X) button in the top-right corner. Clicking it fires the handler so you can hide the callout. Use [UseTrigger](../../03_Hooks/02_Core/17_UseTrigger.md) to control visibility.
+
+```csharp demo-tabs
+public class ClosableCalloutView : ViewBase
+{
+    public override object? Build()
+    {
+        var (calloutView, showCallout) = UseTrigger((IState<bool> isOpen) =>
+            isOpen.Value
+                ? Callout.Info("A new version is available. Refresh to update.", "Update Available")
+                    .OnClose(() => isOpen.Set(false))
+                : null);
+
+        return Layout.Vertical().Gap(6)
+            | new Button("Show callout", onClick: _ => showCallout())
+            | calloutView;
+    }
+}
+```
+
 ### Form Integration
 
 Use callouts to contain [forms](../../01_Onboarding/02_Concepts/08_Forms.md) and provide context:
