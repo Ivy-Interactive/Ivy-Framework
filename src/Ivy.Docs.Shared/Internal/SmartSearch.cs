@@ -2,7 +2,7 @@ using Ivy.Apps;
 using Ivy.Chrome;
 using Ivy.Docs.Shared.Services;
 
-namespace Ivy.Docs.Shared.Widgets.Internal;
+namespace Ivy.Docs.Shared.Internal;
 
 /// <summary>
 /// Docs-internal widget: smart search (slots for search input, ask button, overlay trigger, etc.).

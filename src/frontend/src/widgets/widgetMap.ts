@@ -224,7 +224,7 @@ export const widgetMap = {
   ),
 
   // Internal
-  'Ivy.Docs.Shared.Widgets.Internal.SmartSearch': SmartSearchWidget,
+  'Ivy.Docs.Shared.Internal.SmartSearch': SmartSearchWidget,
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')
   ),
