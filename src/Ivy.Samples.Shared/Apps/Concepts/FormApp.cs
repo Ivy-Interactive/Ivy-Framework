@@ -557,7 +557,7 @@ public class FormExample : ViewBase
                         .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis))
                 )
                 .Width(1 / 3f)
-                .Title("Small Scale - All Inputs")
+                .Title("Small Density - All Inputs")
                 | new Card(
                     mediumModel.ToForm()
                         .Medium()
@@ -617,7 +617,7 @@ public class FormExample : ViewBase
                         .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis))
                 )
                 .Width(1 / 3f)
-                .Title("Medium Scale - All Inputs")
+                .Title("Medium Density - All Inputs")
                 | new Card(
                     largeModel.ToForm()
                         .Large()
@@ -677,7 +677,7 @@ public class FormExample : ViewBase
                         .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis))
                 )
                 .Width(1 / 3f)
-                .Title("Large Scale - All Inputs");
+                .Title("Large Density - All Inputs");
     }
 }
 

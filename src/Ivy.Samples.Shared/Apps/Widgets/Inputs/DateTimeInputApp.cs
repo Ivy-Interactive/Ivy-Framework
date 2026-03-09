@@ -55,19 +55,19 @@ public class DateTimeInputApp : SampleBase
             | dateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariants.Date)
-                .Scale(Scale.Medium)
+                .Density(Density.Medium)
                 .Placeholder("Medium date")
                 .TestId("datetime-input-date-medium")
             | dateTimeState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariants.DateTime)
-                .Scale(Scale.Medium)
+                .Density(Density.Medium)
                 .Placeholder("Medium datetime")
                 .TestId("datetime-input-datetime-medium")
             | timeState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariants.Time)
-                .Scale(Scale.Medium)
+                .Density(Density.Medium)
                 .Placeholder("Medium time")
                 .TestId("datetime-input-time-medium")
 

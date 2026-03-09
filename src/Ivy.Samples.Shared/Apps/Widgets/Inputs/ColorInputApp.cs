@@ -46,19 +46,19 @@ public class ColorInputSizeVariants : ViewBase
             | Text.InlineCode("Text and Picker")
 
             | Text.InlineCode("Small")
-            | smallTextState.ToColorInput().Variant(ColorInputVariants.Text).Scale(Scale.Small)
-            | smallPickerState.ToColorInput().Variant(ColorInputVariants.Picker).Scale(Scale.Small)
-            | smallBothState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Scale(Scale.Small)
+            | smallTextState.ToColorInput().Variant(ColorInputVariants.Text).Density(Density.Small)
+            | smallPickerState.ToColorInput().Variant(ColorInputVariants.Picker).Density(Density.Small)
+            | smallBothState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Density(Density.Small)
 
             | Text.InlineCode("Medium")
-            | mediumTextState.ToColorInput().Variant(ColorInputVariants.Text).Scale(Scale.Medium)
-            | mediumPickerState.ToColorInput().Variant(ColorInputVariants.Picker).Scale(Scale.Medium)
-            | mediumBothState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Scale(Scale.Medium)
+            | mediumTextState.ToColorInput().Variant(ColorInputVariants.Text).Density(Density.Medium)
+            | mediumPickerState.ToColorInput().Variant(ColorInputVariants.Picker).Density(Density.Medium)
+            | mediumBothState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Density(Density.Medium)
 
             | Text.InlineCode("Large")
-            | largeTextState.ToColorInput().Variant(ColorInputVariants.Text).Scale(Scale.Large)
-            | largePickerState.ToColorInput().Variant(ColorInputVariants.Picker).Scale(Scale.Large)
-            | largeBothState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Scale(Scale.Large);
+            | largeTextState.ToColorInput().Variant(ColorInputVariants.Text).Density(Density.Large)
+            | largePickerState.ToColorInput().Variant(ColorInputVariants.Picker).Density(Density.Large)
+            | largeBothState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Density(Density.Large);
     }
 }
 

@@ -1,6 +1,6 @@
 ﻿namespace Ivy.Shared;
 
-public enum Scale
+public enum Density
 {
     Medium,
     Small,

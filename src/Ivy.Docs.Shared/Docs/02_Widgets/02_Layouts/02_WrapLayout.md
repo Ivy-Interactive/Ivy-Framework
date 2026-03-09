@@ -165,13 +165,13 @@ public class SelectSliderControlDemo : ViewBase
         var gap = UseState(8); // Gap in pixels
         var mixedSizes = UseState(false);
 
-        // Convert size selection to badge size
-        Scale GetBadgeSize(string size) => size switch
+        // Convert size selection to badge density
+        Density GetBadgeDensity(string size) => size switch
         {
-            "Small" => Scale.Small,
-            "Medium" => Scale.Medium,
-            "Large" => Scale.Large,
-            _ => Scale.Medium
+            "Small" => Density.Small,
+            "Medium" => Density.Medium,
+            "Large" => Density.Large,
+            _ => Density.Medium
         };
 
         // Create badges
@@ -197,24 +197,24 @@ public class SelectSliderControlDemo : ViewBase
                 return technologies.Select((tech, index) =>
                 {
                     var sizeIndex = index % 3;
-                    var size = sizeIndex switch
+                    var density = sizeIndex switch
                     {
-                        0 => Scale.Small,
-                        1 => Scale.Medium,
-                        _ => Scale.Large
+                        0 => Density.Small,
+                        1 => Density.Medium,
+                        _ => Density.Large
                     };
                     return new Badge(tech.Item1)
-                        .Scale(size)
+                        .Density(density)
                         .Variant(tech.Item2);
                 }).Cast<object>().ToArray();
             }
             else
             {
                 // Uniform sizes
-                var uniformSize = GetBadgeSize(selectedSize.Value);
-                return technologies.Select(tech => 
+                var uniformDensity = GetBadgeDensity(selectedSize.Value);
+                return technologies.Select(tech =>
                     new Badge(tech.Item1)
-                        .Scale(uniformSize)
+                        .Density(uniformDensity)
                         .Variant(tech.Item2)
                 ).Cast<object>().ToArray();
             }
