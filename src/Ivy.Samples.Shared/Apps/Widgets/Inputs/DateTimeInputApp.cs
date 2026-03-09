@@ -10,6 +10,9 @@ public class DateTimeInputApp : SampleBase
         var dateState = UseState(DateTime.Now);
         var dateTimeState = UseState(DateTime.Now);
         var timeState = UseState(TimeOnly.FromDateTime(DateTime.Now));
+        var monthState = UseState(DateTime.Now);
+        var weekState = UseState(DateTime.Now);
+        var yearState = UseState(DateTime.Now);
         var nullableDateState = UseState<DateTime?>(() => null);
         var invalidDateState = UseState(DateTime.Now);
         var disabledDateState = UseState(DateTime.Now);
@@ -24,11 +27,14 @@ public class DateTimeInputApp : SampleBase
         var nullableDateTimeOffsetState = UseState<DateTimeOffset?>(() => null);
 
         // Size examples
-        var sizeExamplesGrid = Layout.Grid().Columns(4)
+        var sizeExamplesGrid = Layout.Grid().Columns(7)
             | Text.InlineCode("Size")
             | Text.InlineCode("Date Input")
             | Text.InlineCode("DateTime Input")
             | Text.InlineCode("Time Input")
+            | Text.InlineCode("Month Input")
+            | Text.InlineCode("Week Input")
+            | Text.InlineCode("Year Input")
 
             | Text.InlineCode("Small")
             | dateState
@@ -49,26 +55,62 @@ public class DateTimeInputApp : SampleBase
                 .Small()
                 .Placeholder("Small time")
                 .TestId("datetime-input-time-small")
+            | monthState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .Small()
+                .Placeholder("Small month")
+                .TestId("datetime-input-month-small")
+            | weekState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .Small()
+                .Placeholder("Small week")
+                .TestId("datetime-input-week-small")
+            | yearState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+                .Small()
+                .Placeholder("Small year")
+                .TestId("datetime-input-year-small")
 
             | Text.InlineCode("Medium")
             | dateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariants.Date)
-                .Scale(Scale.Medium)
+                .Medium()
                 .Placeholder("Medium date")
                 .TestId("datetime-input-date-medium")
             | dateTimeState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariants.DateTime)
-                .Scale(Scale.Medium)
+                .Medium()
                 .Placeholder("Medium datetime")
                 .TestId("datetime-input-datetime-medium")
             | timeState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariants.Time)
-                .Scale(Scale.Medium)
+                .Medium()
                 .Placeholder("Medium time")
                 .TestId("datetime-input-time-medium")
+            | monthState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .Medium()
+                .Placeholder("Medium month")
+                .TestId("datetime-input-month-medium")
+            | weekState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .Medium()
+                .Placeholder("Medium week")
+                .TestId("datetime-input-week-medium")
+            | yearState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+                .Medium()
+                .Placeholder("Medium year")
+                .TestId("datetime-input-year-medium")
 
             | Text.InlineCode("Large")
             | dateState
@@ -88,7 +130,25 @@ public class DateTimeInputApp : SampleBase
                 .Variant(DateTimeInputVariants.Time)
                 .Large()
                 .Placeholder("Large time")
-                .TestId("datetime-input-time-large");
+                .TestId("datetime-input-time-large")
+            | monthState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .Large()
+                .Placeholder("Large month")
+                .TestId("datetime-input-month-large")
+            | weekState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .Large()
+                .Placeholder("Large week")
+                .TestId("datetime-input-week-large")
+            | yearState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+                .Large()
+                .Placeholder("Large year")
+                .TestId("datetime-input-year-large");
 
         // Variants grid
         var variantsGrid = Layout.Grid().Columns(6)
@@ -187,7 +247,97 @@ public class DateTimeInputApp : SampleBase
                 .Variant(DateTimeInputVariants.Time)
                 .Placeholder("Pick a time")
                 .Invalid("Nullable invalid time")
-                .TestId("datetime-input-time-nullable-invalid-main");
+                .TestId("datetime-input-time-nullable-invalid-main")
+
+            | Text.InlineCode("Month")
+            | monthState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .Placeholder("Pick month")
+                .TestId("datetime-input-month-main")
+            | disabledDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .Placeholder("Pick month")
+                .Disabled()
+                .TestId("datetime-input-month-disabled-main")
+            | invalidDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .Placeholder("Pick month")
+                .Invalid("Invalid month")
+                .TestId("datetime-input-month-invalid-main")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .Placeholder("Pick month")
+                .TestId("datetime-input-month-nullable-main")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .Placeholder("Pick month")
+                .Invalid("Nullable invalid month")
+                .TestId("datetime-input-month-nullable-invalid-main")
+
+            | Text.InlineCode("Week")
+            | weekState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .Placeholder("Pick week")
+                .TestId("datetime-input-week-main")
+            | disabledDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .Placeholder("Pick week")
+                .Disabled()
+                .TestId("datetime-input-week-disabled-main")
+            | invalidDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .Placeholder("Pick week")
+                .Invalid("Invalid week")
+                .TestId("datetime-input-week-invalid-main")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .Placeholder("Pick week")
+                .TestId("datetime-input-week-nullable-main")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .Placeholder("Pick week")
+                .Invalid("Nullable invalid week")
+                .TestId("datetime-input-week-nullable-invalid-main")
+
+            | Text.InlineCode("Year")
+            | yearState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+                .Placeholder("Pick year")
+                .TestId("datetime-input-year-main")
+            | disabledDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+                .Placeholder("Pick year")
+                .Disabled()
+                .TestId("datetime-input-year-disabled-main")
+            | invalidDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+                .Placeholder("Pick year")
+                .Invalid("Invalid year")
+                .TestId("datetime-input-year-invalid-main")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+                .Placeholder("Pick year")
+                .TestId("datetime-input-year-nullable-main")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+                .Placeholder("Pick year")
+                .Invalid("Nullable invalid year")
+                .TestId("datetime-input-year-nullable-invalid-main");
 
         // Data binding grid
         var dataBindingGrid = Layout.Grid().Columns(3)
@@ -250,7 +400,28 @@ public class DateTimeInputApp : SampleBase
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariants.DateTime)
                 .TestId("datetime-input-datetimeoffset-nullable-binding")
-            | Text.InlineCode(nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null");
+            | Text.InlineCode(nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null")
+
+            | Text.InlineCode("Month")
+            | monthState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .TestId("datetime-input-month-binding")
+            | Text.InlineCode($"{monthState.Value:yyyy-MM}")
+
+            | Text.InlineCode("Week")
+            | weekState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .TestId("datetime-input-week-binding")
+            | Text.InlineCode($"{weekState.Value:yyyy-'W'ww}")
+
+            | Text.InlineCode("Year")
+            | yearState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+            .TestId("datetime-input-year-binding")
+            | Text.InlineCode($"{yearState.Value:yyyy}");
 
         // Placeholder examples
         var placeholderExamplesGrid = Layout.Grid().Columns(3)
@@ -304,7 +475,31 @@ public class DateTimeInputApp : SampleBase
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariants.Time)
                 .Placeholder("Lunch break")
-                .TestId("datetime-input-placeholder-lunch-time");
+                .TestId("datetime-input-placeholder-lunch-time")
+
+            | Text.InlineCode("Month")
+            | Text.InlineCode("Billing period")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Month)
+                .Placeholder("Billing period")
+                .TestId("datetime-input-placeholder-month")
+
+            | Text.InlineCode("Week")
+            | Text.InlineCode("Project week")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Week)
+                .Placeholder("Project week")
+                .TestId("datetime-input-placeholder-week")
+
+            | Text.InlineCode("Year")
+            | Text.InlineCode("Fiscal year")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariants.Year)
+                .Placeholder("Fiscal year")
+                .TestId("datetime-input-placeholder-year");
 
         // Current values section
         var currentValues = Layout.Vertical()
@@ -312,6 +507,9 @@ public class DateTimeInputApp : SampleBase
             | Text.Block($"Date: {dateState.Value:yyyy-MM-dd}")
             | Text.Block($"DateTime: {dateTimeState.Value:yyyy-MM-dd HH:mm:ss}")
             | Text.Block($"Time: {timeState.Value:HH:mm:ss}")
+            | Text.Block($"Month: {monthState.Value:yyyy-MM}")
+            | Text.Block($"Week: {weekState.Value:yyyy-'W'ww}")
+            | Text.Block($"Year: {yearState.Value:yyyy}")
             | Text.Block($"Nullable DateTime: {nullableDateState.Value?.ToString("yyyy-MM-dd HH:mm:ss") ?? "null"}")
             | Text.Block($"DateOnly: {dateOnlyState.Value:yyyy-MM-dd}")
             | Text.Block($"TimeOnly: {timeOnlyState.Value:HH:mm:ss}")
