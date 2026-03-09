@@ -821,10 +821,8 @@ export const useBackend = (
           });
 
           connection.on('StreamData', (message: StreamDataMessage) => {
-            console.debug('[StreamData] Received:', message.streamId, message.data);
             const handler = streamRegistryRef.current.get(message.streamId);
             if (handler) {
-              console.debug('[StreamData] Handler found, dispatching');
               handler(message.data);
             } else {
               // Buffer data until handler registers (mirrors backend WriteStream buffering)
@@ -834,7 +832,6 @@ export const useBackend = (
                 streamBufferRef.current.set(message.streamId, buffer);
               }
               buffer.push(message.data);
-              console.debug('[StreamData] No handler, buffered. Buffer size:', buffer.length);
             }
           });
 
@@ -931,13 +928,11 @@ export const useBackend = (
 
   const subscribeToStream: StreamSubscriber = useCallback(
     (streamId: string, onData: StreamHandler) => {
-      console.debug('[StreamSubscribe] Subscribing to:', streamId);
       streamRegistryRef.current.set(streamId, onData);
 
       // Flush any data that arrived before the handler was registered
       const buffered = streamBufferRef.current.get(streamId);
       if (buffered) {
-        console.debug('[StreamSubscribe] Flushing', buffered.length, 'buffered items for:', streamId);
         streamBufferRef.current.delete(streamId);
         for (const data of buffered) {
           onData(data);
@@ -951,7 +946,6 @@ export const useBackend = (
           logger.error('Failed to notify stream subscription:', err);
         });
       return () => {
-        console.debug('[StreamSubscribe] Unsubscribing from:', streamId);
         streamRegistryRef.current.delete(streamId);
       };
     },
