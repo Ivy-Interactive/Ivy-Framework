@@ -187,6 +187,8 @@ public static class ColorInputExtensions
     public static ColorInputBase Ghost(this ColorInputBase widget, bool ghost = true)
     {
         return widget with { Ghost = ghost };
+    }
+
     public static ColorInputBase AllowAlpha(this ColorInputBase widget, bool allowAlpha = true)
     {
         return widget with { AllowAlpha = allowAlpha };
