@@ -93,7 +93,7 @@ public class SmartSearchView : ViewBase
             var isFetching = query.Loading || query.Validating || waitingForNewResult;
             if (isFetching)
             {
-                resultsContent = Layout.Vertical().Gap(4)
+                resultsContent = Layout.Vertical()
                     | new Loading()
                     | Text.P("Finding an answer...")
                     | new Skeleton().Height(80)
@@ -102,7 +102,7 @@ public class SmartSearchView : ViewBase
             }
             else if (query.Error is { } err)
             {
-                resultsContent = Layout.Vertical().Gap(4)
+                resultsContent = Layout.Vertical()
                     | Callout.Error(err.Message)
                     | new Button("Retry", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline);
             }
@@ -114,11 +114,9 @@ public class SmartSearchView : ViewBase
             }
             else if (!query.Loading && !query.Validating && query.Error is null)
             {
-                resultsContent = Layout.Center()
-                    | (Layout.Vertical().Gap(4).Center()
+                resultsContent = Layout.Vertical().Gap(4).Center()
                         | Text.H1("No answer found :|").Bold()
-                        | Text.Muted("We couldn't find an answer to your question in the Ivy docs. Try rephrasing or browse the documentation.")
-                    );
+                        | Text.Muted("We couldn't find an answer to your question in the Ivy docs. Try rephrasing or browse the documentation.");
             }
         }
 
@@ -165,24 +163,19 @@ public class SmartSearchView : ViewBase
             ? (object)new List(suggestionListItems)
             : (object)Text.Muted("Type to search or pick a suggestion above.");
 
-        var overlayBottom = !string.IsNullOrEmpty(windowQuery)
-            ? (object)askButton
-            : null;
+        var overlayContent = Layout.Vertical()
+            | searchInput
+            | overlayListOrPlaceholder;
 
-        var overlayContent = overlayBottom != null
-            ? (object)(Layout.Vertical().Gap(4)
-                | searchInput
-                | overlayListOrPlaceholder
-                | overlayBottom)
-            : (object)(Layout.Vertical().Gap(4)
-                | searchInput
-                | overlayListOrPlaceholder);
+        var footer = string.IsNullOrEmpty(windowQuery)
+            ? null
+            : new DialogFooter(askButton);
 
         var overlayDialog = new Dialog(
             _ => { overlayOpen.Set(false); return ValueTask.CompletedTask; },
             new DialogHeader("Search"),
             new DialogBody(overlayContent),
-            new DialogFooter()).Width(Size.Rem(36));
+            footer);
 
         var baseSlots = new List<object>
         {
