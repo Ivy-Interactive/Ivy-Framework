@@ -1,14 +1,13 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Core.Auth;
 using Ivy.Core.ExternalWidgets;
 using Ivy.Core.Server;
-using Ivy.Core.Server.ContentPipeline;
-using Ivy.Core.Server.ContentPipeline.Filters;
+using Ivy.Core.Server.HtmlPipeline;
+using Ivy.Core.Server.HtmlPipeline.Filters;
 using Ivy.Core.Server.Middleware;
 using Ivy.Themes;
 using Microsoft.AspNetCore.Builder;
@@ -72,6 +71,7 @@ public class Server
     private readonly List<Action<WebApplication>> _appMods = new();
     private List<string> _reservedPaths = new();
     private readonly List<IHtmlFilter> _customHtmlFilters = new();
+    private Action<HtmlPipeline>? _pipelineConfigurator;
     private ManifestOptions? _manifestOptions;
     private ServerArgs _args;
 
@@ -354,7 +354,15 @@ public class Server
         return this;
     }
 
+    public Server UseHtmlPipeline(Action<HtmlPipeline> configure)
+    {
+        _pipelineConfigurator = configure;
+        return this;
+    }
+
     internal IReadOnlyList<IHtmlFilter> GetCustomFilters() => _customHtmlFilters;
+
+    internal Action<HtmlPipeline>? GetPipelineConfigurator() => _pipelineConfigurator;
 
     internal ManifestOptions? GetManifestOptions() => _manifestOptions;
 
@@ -897,6 +905,8 @@ public static class WebApplicationExtensions
 
                 foreach (var filter in server.GetCustomFilters())
                     pipeline.Use(filter);
+
+                server.GetPipelineConfigurator()?.Invoke(pipeline);
 
                 var pipelineContext = new HtmlPipelineContext
                 {

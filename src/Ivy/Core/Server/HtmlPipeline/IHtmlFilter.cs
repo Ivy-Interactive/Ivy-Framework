@@ -1,8 +1,10 @@
-namespace Ivy.Core.Server.ContentPipeline;
+using System.Xml.Linq;
+
+namespace Ivy.Core.Server.HtmlPipeline;
 
 public interface IHtmlFilter
 {
-    string Process(HtmlPipelineContext context, string html);
+    void Process(HtmlPipelineContext context, XDocument document);
 }
 
 public class HtmlPipelineContext
