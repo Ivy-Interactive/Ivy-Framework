@@ -1,8 +1,4 @@
 using Ivy.Samples.Shared.Apps;
-using Ivy.Shared;
-using Ivy.Views.DataTables;
-using Ivy.Hooks;
-using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 

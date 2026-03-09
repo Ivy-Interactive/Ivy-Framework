@@ -113,7 +113,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
               : 'pr-1.5'),
         isClickable && 'cursor-pointer hover:opacity-80 transition-opacity'
       )}
-      onClick={handleClick}
+      onClick={isClickable ? handleClick : undefined}
     >
       {iconPosition === 'Left' && icon && icon !== 'None' && (
         <Icon style={iconStyles} name={icon} />

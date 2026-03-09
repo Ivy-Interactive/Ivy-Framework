@@ -1,10 +1,9 @@
 using System.Linq.Expressions;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Builders;
 
-namespace Ivy.Views.Kanban;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class KanbanBuilder<TModel, TGroupKey>(
     IEnumerable<TModel> records,
@@ -65,21 +64,21 @@ public class KanbanBuilder<TModel, TGroupKey>(
         return this;
     }
 
-    public KanbanBuilder<TModel, TGroupKey> HandleMove(Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask> onMove)
+    public KanbanBuilder<TModel, TGroupKey> OnMove(EventHandler<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>> onMove)
     {
         _onMove = onMove;
         return this;
     }
 
-    public KanbanBuilder<TModel, TGroupKey> HandleMove(Action<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>> onMove)
+    public KanbanBuilder<TModel, TGroupKey> OnMove(Action<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>> onMove)
     {
-        _onMove = e => { onMove(e); return ValueTask.CompletedTask; };
+        _onMove = new Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>(e => { onMove(e); return ValueTask.CompletedTask; });
         return this;
     }
 
-    public KanbanBuilder<TModel, TGroupKey> HandleMove(Action<(object? CardId, TGroupKey ToColumn, int? TargetIndex)> onMove)
+    public KanbanBuilder<TModel, TGroupKey> OnMove(Action<(object? CardId, TGroupKey ToColumn, int? TargetIndex)> onMove)
     {
-        _onMove = e => { onMove(e.Value); return ValueTask.CompletedTask; };
+        _onMove = new Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>(e => { onMove(e.Value); return ValueTask.CompletedTask; });
         return this;
     }
 

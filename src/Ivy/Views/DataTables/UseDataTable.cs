@@ -2,9 +2,9 @@ using System.Reactive.Disposables;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy;
-using Ivy.Hooks;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class UseDataTableExtensions
 {

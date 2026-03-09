@@ -1,13 +1,13 @@
-﻿using Ivy.Core;
-using Ivy.Shared;
+using Ivy.Core;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class TabView : ViewBase
 {
     private readonly List<Tab> _tabs = new();
-    private Size _width = Shared.Size.Full();
-    private Size _height = Shared.Size.Full();
+    private Size _width = Ivy.Size.Full();
+    private Size _height = Ivy.Size.Full();
     private TabsVariant _variant = TabsVariant.Content;
     private bool _removeParentPadding = false;
     private Thickness? _padding = new Thickness(4);
@@ -25,19 +25,19 @@ public class TabView : ViewBase
 
     public TabView Width(int unit)
     {
-        _width = Shared.Size.Units(unit);
+        _width = Ivy.Size.Units(unit);
         return this;
     }
 
     public TabView Width(float fraction)
     {
-        _width = Shared.Size.Fraction(fraction);
+        _width = Ivy.Size.Fraction(fraction);
         return this;
     }
 
     public TabView Width(double fraction)
     {
-        _width = Shared.Size.Fraction(Convert.ToSingle(fraction));
+        _width = Ivy.Size.Fraction(Convert.ToSingle(fraction));
         return this;
     }
 
@@ -49,19 +49,19 @@ public class TabView : ViewBase
 
     public TabView Height(int unit)
     {
-        _height = Shared.Size.Units(unit);
+        _height = Ivy.Size.Units(unit);
         return this;
     }
 
     public TabView Height(float fraction)
     {
-        _height = Shared.Size.Fraction(fraction);
+        _height = Ivy.Size.Fraction(fraction);
         return this;
     }
 
     public TabView Height(double fraction)
     {
-        _height = Shared.Size.Fraction(Convert.ToSingle(fraction));
+        _height = Ivy.Size.Fraction(Convert.ToSingle(fraction));
         return this;
     }
 
@@ -73,36 +73,36 @@ public class TabView : ViewBase
 
     public TabView Size(int unit)
     {
-        _width = Shared.Size.Units(unit);
-        _height = Shared.Size.Units(unit);
+        _width = Ivy.Size.Units(unit);
+        _height = Ivy.Size.Units(unit);
         return this;
     }
 
     public TabView Size(float fraction)
     {
-        _width = Shared.Size.Fraction(fraction);
-        _height = Shared.Size.Fraction(fraction);
+        _width = Ivy.Size.Fraction(fraction);
+        _height = Ivy.Size.Fraction(fraction);
         return this;
     }
 
     public TabView Size(double fraction)
     {
-        _width = Shared.Size.Fraction(Convert.ToSingle(fraction));
-        _height = Shared.Size.Fraction(Convert.ToSingle(fraction));
+        _width = Ivy.Size.Fraction(Convert.ToSingle(fraction));
+        _height = Ivy.Size.Fraction(Convert.ToSingle(fraction));
         return this;
     }
 
     public TabView Grow()
     {
-        _width = Shared.Size.Grow();
-        _height = Shared.Size.Grow();
+        _width = Ivy.Size.Grow();
+        _height = Ivy.Size.Grow();
         return this;
     }
 
     public TabView Shrink()
     {
-        _width = Shared.Size.Shrink();
-        _height = Shared.Size.Shrink();
+        _width = Ivy.Size.Shrink();
+        _height = Ivy.Size.Shrink();
         return this;
     }
 

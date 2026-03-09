@@ -518,7 +518,7 @@ public abstract class ViewBase
     protected T UseMemo<T>(Func<T> factory) => default!;
     protected (T, Func<string, T>) UseReducer<T>(Func<T, string, T> reducer, T initialState) => default!;
     protected IState<T> UseRef<T>(T initialValue) => default!;
-    protected ISignalReceiver<TInput, TOutput> UseSignal<TSignal, TInput, TOutput>() => default!;
+    protected ISignal<TInput, TOutput> UseSignal<TSignal, TInput, TOutput>() => default!;
     protected (object?, Action<T>) UseTrigger<T>(Func<IState<bool>, T, object?> factory) => default!;
     protected T UseService<T>() => default!;
     protected T? UseArgs<T>() where T : class => default!;
@@ -528,7 +528,7 @@ public class Button { }
 public class MySignal { }
 public class MyService { }
 public class MyArgs { }
-public interface ISignalReceiver<out TInput, in TOutput> { }
+public interface ISignal<TInput, TOutput> { }
 public interface IState<T> { }
 ";
 

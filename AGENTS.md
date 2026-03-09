@@ -1,6 +1,3 @@
-All Ivy documentation pages are listed on: <https://docs.ivy.app/sitemap.xml>.
-Add ".md" to the end of any URL to go directly to the Markdown version of the doc.
-
 # Introduction to the Ivy Framework for LLMs
 
 - Ivy is a declarative full-stack UI framework that allows developers to build user interfaces using a component-based approach very similar to React.
@@ -32,7 +29,7 @@ public class MyView : ViewBase
   }
 }
 
-The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**:
+The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**: The attribute uses **named parameters**:
 
 [App(title: "Customers", icon: Icons.Rocket)]
 public class CustomersApp : ViewBase
@@ -191,7 +188,7 @@ Size is NOT the same as Scale. Size controls dimensions; Scale controls visual d
 
 new Button("Click Me")
   .Primary()
-  .HandleClick(() => {
+  .OnClick(() => {
     count.Set(count.Value + 1);
 })
 
@@ -218,6 +215,8 @@ UseState hook returns a state object IState<T> that provides:
 
 - .Value property to read the current state.
 - .Set(newValue) method to update the state in UseEffect or in an event handler.
+
+Always use immutable types (e.g. records) with `UseState` — mutable classes that are modified in-place and passed back via `.Set()` will not trigger a re-render because the reference hasn't changed. Instead, create a new instance (e.g. using `with` expressions on records) before calling `.Set()`.
 
 ### UseEffect
 
@@ -325,16 +324,14 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 [FeedbackInput](https://docs.ivy.app/widgets/inputs/feedback-input.md)
 [FileInput](https://docs.ivy.app/widgets/inputs/file-input.md)
 
-## Best Practices
+## Common Hallucinations
 
-(Basically the same as React best practices)
-
-1. **Keep Views Pure** - Views should be pure functions of their props and state
-2. **Use Hooks Correctly** - Call hooks at the top level, never in loops or conditions  
-3. **Minimize State** - Derive computed values instead of storing them
-4. **Handle Loading States** - Always consider loading and error states (UseQuery)
-5. **Leverage Type Safety** - Use strongly-typed widgets and state
-6. **Component Composition** - Build complex UIs from simple, reusable views
+- Base class is `ViewBase` (NOT `AppBase` there is no `AppBase` class)
+- `Text` is a static helper - use `Text.P()`, `Text.H2()`, ...
+- `UseState<T>()` returns `IState<T>`, NOT `State<T>`
+- All types are in the `Ivy` namespace
+- `Colors` is a flat enum (e.g. `Colors.Red`, `Colors.Blue`) we have no shade levels
+- `DbContext` must never be injected directly! Always resolve `IDbContextFactory<T>` via `UseService` and create scoped instances with `CreateDbContextAsync()` inside query/mutation lambdas
 
 ## Further Reading
 
@@ -347,3 +344,6 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 [Align](https://docs.ivy.app/api-reference/ivy-shared/align.md)
 [Downloads](https://docs.ivy.app/hooks/core/use-download.md)
 [Icons](https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/refs/heads/main/src/Ivy/Shared/Icons.cs)
+
+All Ivy documentation pages are listed on: <https://docs.ivy.app/sitemap.xml>.
+Add ".md" to the end of any URL to go directly to the Markdown version of the doc.

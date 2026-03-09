@@ -1,12 +1,12 @@
-﻿using System.Collections.Concurrent;
-using Ivy.Apps;
+using System.Collections.Concurrent;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using AppContext = Ivy.Apps.AppContext;
+using AppContext = Ivy.AppContext;
 
-namespace Ivy.Hooks;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class UseWebhookExtensions
 {

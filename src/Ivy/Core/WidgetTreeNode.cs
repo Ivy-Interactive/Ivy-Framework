@@ -3,7 +3,7 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Core;
 
-public class WidgetTreeNode(string id, int index, TreePath parentTreePath, WidgetTreeNode[] children, int? memoizedHashCode, IWidget? widget, IView? view, IViewContext? context, IViewContext? ancestorContext) : IDisposable
+public class WidgetTreeNode(string id, int index, TreePath parentTreePath, WidgetTreeNode[] children, int? memoizedHashCode, IWidget? widget, IView? view, IViewContext? context, IViewContext? ancestorContext) : IAsyncDisposable
 {
     public static WidgetTreeNode FromWidget(IWidget widget, int index, TreePath treePath, WidgetTreeNode[] children, IViewContext? ancestorContext)
     {
@@ -60,10 +60,13 @@ public class WidgetTreeNode(string id, int index, TreePath parentTreePath, Widge
     public bool IsWidget => Widget != null;
     public bool IsView => View != null;
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         View?.Dispose();
-        Context?.Dispose();
+        if (Context != null)
+        {
+            await Context.DisposeAsync();
+        }
     }
 
     public JsonNode? GetSerializedWidgetTree()

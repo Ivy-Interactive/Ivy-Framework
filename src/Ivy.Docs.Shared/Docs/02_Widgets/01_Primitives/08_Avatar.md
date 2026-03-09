@@ -75,7 +75,7 @@ public class IvyTeamDemo : ViewBase
 
 ### Integration with Other Widgets
 
-Avatars can be integrated into other [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md), including [cards](../03_Common/04_Card.md), add [buttons](../03_Common/01_Button.md), and more. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width()` and `.Height()` when customizing dimensions.
+Avatars can be integrated into other [widgets](../../01_Onboarding/02_Concepts/03_Widgets.md), including [cards](../03_Common/04_Card.md), add [buttons](../03_Common/01_Button.md), and more. Use [Size](../../04_ApiReference/Ivy/Size.md) for `.Width()` and `.Height()` when customizing dimensions.
 
 ```csharp demo-tabs
 public class AvatarAsFoodIcon : ViewBase

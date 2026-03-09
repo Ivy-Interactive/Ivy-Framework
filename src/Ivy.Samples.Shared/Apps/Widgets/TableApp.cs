@@ -1,7 +1,4 @@
 using System.Reflection.Emit;
-using Ivy.Shared;
-using Ivy.Views.Builders;
-using Ivy.Views.Tables;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
@@ -210,8 +207,8 @@ public class ColumnWidthsExample : ViewBase
                             .ToButton()
                             .Ghost()
                             .WithDropDown(
-                                MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(() => { }),
-                                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(() => { })
+                                MenuItem.Default("Edit").Icon(Icons.Pencil).OnSelect(() => { }),
+                                MenuItem.Default("Delete").Icon(Icons.Trash).OnSelect(() => { })
                             )
                         | Icons.Clipboard
                             .ToButton()

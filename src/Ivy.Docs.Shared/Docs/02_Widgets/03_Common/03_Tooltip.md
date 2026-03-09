@@ -43,10 +43,10 @@ Use tooltips to explain the meaning of icons, especially in toolbars or [navigat
 
 ```csharp demo-tabs
 Layout.Horizontal()
-    | new Button(null, icon: Icons.Save).WithTooltip("Save changes")
-    | new Button(null, icon: Icons.Download).WithTooltip("Download file")
-    | new Button(null, icon: Icons.Settings).WithTooltip("Open settings")
-    | new Button(null, icon: Icons.Info).WithTooltip("Get help")
+    | new Button().Icon(Icons.Save).WithTooltip("Save changes")
+    | new Button().Icon(Icons.Download).WithTooltip("Download file")
+    | new Button().Icon(Icons.Settings).WithTooltip("Open settings")
+    | new Button().Icon(Icons.Info).WithTooltip("Get help")
 ```
 
 ### Status Indicators
@@ -101,11 +101,11 @@ Help users understand navigation elements:
 
 ```csharp demo-below
 Layout.Horizontal()
-    | new Button("Dashboard", icon: Icons.House).WithTooltip("View your main dashboard")
-    | new Button("Projects", icon: Icons.Folder).WithTooltip("Manage your projects")
-    | new Button("Settings", icon: Icons.Settings).WithTooltip("Configure your account settings")
-    | new Button("Profile", icon: Icons.User).WithTooltip("View and edit your profile")
-    | new Button("Help", icon: Icons.Info).WithTooltip("Get help and support")
+    | new Button("Dashboard").Icon(Icons.House).WithTooltip("View your main dashboard")
+    | new Button("Projects").Icon(Icons.Folder).WithTooltip("Manage your projects")
+    | new Button("Settings").Icon(Icons.Settings).WithTooltip("Configure your account settings")
+    | new Button("Profile").Icon(Icons.User).WithTooltip("View and edit your profile")
+    | new Button("Help").Icon(Icons.Info).WithTooltip("Get help and support")
 ```
 
 </Body>

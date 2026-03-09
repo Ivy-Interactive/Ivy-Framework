@@ -1,12 +1,8 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Views;
-using Ivy.Views.Forms;
-using static Ivy.Views.Forms.FormHelpers;
+using static Ivy.FormHelpers;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

@@ -1,6 +1,6 @@
-using Ivy.Shared;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class DataTableBuilderHelpers
 {

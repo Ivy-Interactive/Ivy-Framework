@@ -1,5 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -21,6 +20,6 @@ public record Table : WidgetBase<Table>
     }
 }
 
-public static class TableExtensions
+public static partial class TableExtensions
 {
 }

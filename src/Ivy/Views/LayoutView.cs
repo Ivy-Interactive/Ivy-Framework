@@ -1,20 +1,14 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class LayoutView : ViewBase, IStateless
 {
-    private enum LayoutType
-    {
-        Stack,
-        Wrap
-    }
-
     private readonly List<LayoutElement> _elements = new();
     private Orientation _orientation = Orientation.Vertical;
-    private LayoutType _layoutType = LayoutType.Stack;
+    private bool _wrap = false;
 
     private class LayoutElement(object content)
     {
@@ -25,26 +19,36 @@ public class LayoutView : ViewBase, IStateless
     {
     }
 
-    private int _gap = 4;
+    private int _rowGap = 4;
+    private int _columnGap = 4;
     private Thickness? _padding = null;
     private Thickness? _margin = null;
     private Size? _width = null;
     private Size? _height = null;
     private Colors? _background = null;
     private Align? _alignment = null;
-    private Scroll _scroll = Shared.Scroll.None;
+    private Scroll _scroll = Ivy.Scroll.None;
     private bool _removeParentPadding = false;
     private bool _visible = true;
 
     public LayoutView Gap(bool gap)
     {
-        _gap = gap ? 4 : 0;
+        _rowGap = gap ? 4 : 0;
+        _columnGap = gap ? 4 : 0;
         return this;
     }
 
     public LayoutView Gap(int gap)
     {
-        _gap = gap;
+        _rowGap = gap;
+        _columnGap = gap;
+        return this;
+    }
+
+    public LayoutView Gap(int rowGap, int columnGap)
+    {
+        _rowGap = rowGap;
+        _columnGap = columnGap;
         return this;
     }
 
@@ -64,11 +68,11 @@ public class LayoutView : ViewBase, IStateless
     {
         if (_orientation == Orientation.Vertical)
         {
-            _height = Shared.Size.Grow();
+            _height = Ivy.Size.Grow();
         }
         else
         {
-            _width = Shared.Size.Grow();
+            _width = Ivy.Size.Grow();
         }
         return this;
     }
@@ -77,30 +81,30 @@ public class LayoutView : ViewBase, IStateless
     {
         if (_orientation == Orientation.Vertical)
         {
-            _height = Shared.Size.Shrink();
+            _height = Ivy.Size.Shrink();
         }
         else
         {
-            _width = Shared.Size.Shrink();
+            _width = Ivy.Size.Shrink();
         }
         return this;
     }
 
     public LayoutView Width(int unit)
     {
-        _width = Shared.Size.Units(unit);
+        _width = Ivy.Size.Units(unit);
         return this;
     }
 
     public LayoutView Width(float fraction)
     {
-        _width = Shared.Size.Fraction(fraction);
+        _width = Ivy.Size.Fraction(fraction);
         return this;
     }
 
     public LayoutView Width(double fraction)
     {
-        _width = Shared.Size.Fraction(Convert.ToSingle(fraction));
+        _width = Ivy.Size.Fraction(Convert.ToSingle(fraction));
         return this;
     }
 
@@ -112,19 +116,19 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Height(int unit)
     {
-        _height = Shared.Size.Units(unit);
+        _height = Ivy.Size.Units(unit);
         return this;
     }
 
     public LayoutView Height(float fraction)
     {
-        _height = Shared.Size.Fraction(fraction);
+        _height = Ivy.Size.Fraction(fraction);
         return this;
     }
 
     public LayoutView Height(double fraction)
     {
-        _height = Shared.Size.Fraction(Convert.ToSingle(fraction));
+        _height = Ivy.Size.Fraction(Convert.ToSingle(fraction));
         return this;
     }
 
@@ -137,22 +141,29 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Size(int unit)
     {
-        _width = Shared.Size.Units(unit);
-        _height = Shared.Size.Units(unit);
+        _width = Ivy.Size.Units(unit);
+        _height = Ivy.Size.Units(unit);
         return this;
     }
 
     public LayoutView Size(float fraction)
     {
-        _width = Shared.Size.Fraction(fraction);
-        _height = Shared.Size.Fraction(fraction);
+        _width = Ivy.Size.Fraction(fraction);
+        _height = Ivy.Size.Fraction(fraction);
         return this;
     }
 
     public LayoutView Size(double fraction)
     {
-        _width = Shared.Size.Fraction(Convert.ToSingle(fraction));
-        _height = Shared.Size.Fraction(Convert.ToSingle(fraction));
+        _width = Ivy.Size.Fraction(Convert.ToSingle(fraction));
+        _height = Ivy.Size.Fraction(Convert.ToSingle(fraction));
+        return this;
+    }
+
+    public LayoutView Full()
+    {
+        _width = Ivy.Size.Full();
+        _height = Ivy.Size.Full();
         return this;
     }
 
@@ -248,19 +259,19 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Center()
     {
-        _alignment = Shared.Align.Center;
+        _alignment = Ivy.Align.Center;
         return this;
     }
 
     public LayoutView Left()
     {
-        _alignment = Shared.Align.Left;
+        _alignment = Ivy.Align.Left;
         return this;
     }
 
     public LayoutView Right()
     {
-        _alignment = Shared.Align.Right;
+        _alignment = Ivy.Align.Right;
         return this;
     }
 
@@ -284,7 +295,7 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Vertical(params object[] elements)
     {
-        _layoutType = LayoutType.Stack;
+        _wrap = false;
         _orientation = Orientation.Vertical;
         Add(elements);
         return this;
@@ -297,7 +308,7 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Horizontal(params object[] elements)
     {
-        _layoutType = LayoutType.Stack;
+        _wrap = false;
         _orientation = Orientation.Horizontal;
         Add(elements);
         return this;
@@ -310,7 +321,8 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Wrap(params object[] elements)
     {
-        _layoutType = LayoutType.Wrap;
+        _wrap = true;
+        _orientation = Orientation.Horizontal;
         Add(elements);
         return this;
     }
@@ -320,7 +332,20 @@ public class LayoutView : ViewBase, IStateless
         return Wrap(elements.ToArray());
     }
 
-    public LayoutView Scroll(Scroll scroll = Shared.Scroll.Auto)
+    public LayoutView Wrap(Orientation orientation, params object[] elements)
+    {
+        _wrap = true;
+        _orientation = orientation;
+        Add(elements);
+        return this;
+    }
+
+    public LayoutView Wrap(Orientation orientation, IEnumerable<object> elements)
+    {
+        return Wrap(orientation, elements.ToArray());
+    }
+
+    public LayoutView Scroll(Scroll scroll = Ivy.Scroll.Auto)
     {
         _scroll = scroll;
         return this;
@@ -334,20 +359,16 @@ public class LayoutView : ViewBase, IStateless
 
     public override object? Build()
     {
-        if (_layoutType == LayoutType.Wrap)
+        var layout = new StackLayout(_elements.Select(e => e.Content).ToArray(), _orientation, _rowGap, _padding, _margin, _background,
+                _alignment, _removeParentPadding, _wrap)
         {
-            return new WrapLayout(_elements.Select(e => e.Content).ToArray(), _gap, _padding, _margin,
-                    _background, _alignment, _removeParentPadding)
-                .Width(_width)
-                .Height(_height)
-                .Visible(_visible);
+            ColumnGap = _columnGap
         }
-
-        return new StackLayout(_elements.Select(e => e.Content).ToArray(), _orientation, _gap, _padding, _margin, _background,
-                _alignment, _removeParentPadding)
             .Width(_width)
             .Height(_height)
             .Visible(_visible);
+
+        return layout;
     }
 
     public static LayoutView operator |(LayoutView view, object? child)

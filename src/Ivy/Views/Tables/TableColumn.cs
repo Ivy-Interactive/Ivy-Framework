@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
-using Ivy.Views.Builders;
 
-namespace Ivy.Views.Tables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class TableColumn<TModel, TValue>(Expression<Func<TModel, TValue>> selector, string headerText, IBuilder<TModel>? builder = null) : ITableColumn<TModel>
 {

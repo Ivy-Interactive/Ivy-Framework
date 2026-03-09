@@ -1,7 +1,8 @@
 using System.Collections.Concurrent;
 using System.Reactive.Disposables;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public interface IQueryableRegistry
 {

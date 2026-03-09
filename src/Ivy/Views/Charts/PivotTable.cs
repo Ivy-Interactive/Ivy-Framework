@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using Ivy.Charts;
 using Ivy.Core.Helpers;
 
-namespace Ivy.Views.Charts;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public record Dimension<T>(string Name, Expression<Func<T, object>> Selector);
 

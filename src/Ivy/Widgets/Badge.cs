@@ -1,7 +1,7 @@
 using Ivy.Core;
 using Ivy.Core.Docs;
-using Ivy.Shared;
 
+// ReSharper disable once CheckNamespace
 namespace Ivy;
 
 public enum BadgeVariant

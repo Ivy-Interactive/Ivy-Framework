@@ -55,7 +55,7 @@ Layout.Horizontal()
 
 ### Icons
 
-`Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../01_Primitives/02_Icon.md) for more details. Use [Align](../../04_ApiReference/IvyShared/Align.md) for icon position (e.g. `Align.Right`).
+`Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../01_Primitives/02_Icon.md) for more details. Use [Align](../../04_ApiReference/Ivy/Align.md) for icon position (e.g. `Align.Right`).
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)

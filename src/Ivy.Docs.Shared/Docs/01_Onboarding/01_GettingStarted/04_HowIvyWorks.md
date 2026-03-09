@@ -138,7 +138,7 @@ For a comprehensive technical overview of Ivy's architecture, see:
 The development workflow is incredibly smooth:
 
 ```terminal
->dotnet watch
+>ivy run
 ```
 
 That's it! Changes to your C# code instantly refresh the browser.

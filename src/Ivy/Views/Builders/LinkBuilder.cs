@@ -1,6 +1,7 @@
 using Ivy;
 
-namespace Ivy.Views.Builders;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class LinkBuilder<TModel>(string? url = null, string? label = null) : IBuilder<TModel>
 {

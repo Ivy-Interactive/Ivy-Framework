@@ -1,6 +1,5 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
 [App(icon: Icons.CircleOff, path: ["Widgets", "Inputs"], isVisible: false, searchHints: ["nullable", "null", "clear", "optional"])]

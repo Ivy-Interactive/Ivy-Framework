@@ -5,8 +5,6 @@ using Ivy.Core;
 using Ivy.Core.ExternalWidgets;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 namespace Ivy.Widgets.Tiptap;
 
@@ -30,9 +28,9 @@ public abstract record TiptapInputBase : WidgetBase<TiptapInputBase>, IAnyTiptap
 
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnFocus { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
@@ -45,21 +43,21 @@ public record TiptapInput<TString> : TiptapInputBase, IInput<TString>
     {
         var typedState = state.As<TString>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public TiptapInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
-        OnChange = onChange;
+        OnChange = onChange?.ToEventHandler();
         Value = value;
     }
 
     public TiptapInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
-        OnChange = onChange?.ToValueTask();
+        OnChange = onChange?.ToValueTask().ToEventHandler();
         Value = value;
     }
 
@@ -79,7 +77,7 @@ public record TiptapInput<TString> : TiptapInputBase, IInput<TString>
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
-    [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TString>, TString>>? OnChange { get; }
 }
 
 [ExternalWidget("frontend/dist/TiptapInput.js", ExportName = "TiptapInput")]
@@ -155,7 +153,7 @@ public static class TiptapInputExtensions
 
     [OverloadResolutionPriority(1)]
     public static TiptapInputBase HandleFocus(this TiptapInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus) =>
-        widget with { OnFocus = onFocus };
+        widget with { OnFocus = new(onFocus) };
 
     public static TiptapInputBase HandleFocus(this TiptapInputBase widget, Action<Event<IAnyInput>> onFocus) =>
         widget.HandleFocus(onFocus.ToValueTask());
@@ -165,11 +163,11 @@ public static class TiptapInputExtensions
 
     [OverloadResolutionPriority(1)]
     public static TiptapInputBase HandleBlur(this TiptapInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur) =>
-        widget with { OnBlur = onBlur };
+        widget with { OnBlur = new(onBlur) };
 
     public static TiptapInputBase HandleBlur(this TiptapInputBase widget, Action<Event<IAnyInput>> onBlur) =>
-        widget.OnBlur(onBlur.ToValueTask());
+        widget.HandleBlur(onBlur.ToValueTask());
 
     public static TiptapInputBase HandleBlur(this TiptapInputBase widget, Action handler) =>
-        widget.OnBlur(_ => { handler(); return ValueTask.CompletedTask; });
+        widget.HandleBlur(_ => { handler(); return ValueTask.CompletedTask; });
 }

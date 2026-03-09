@@ -1,8 +1,8 @@
 using System.Runtime.CompilerServices;
 using Ivy.Core;
-using Ivy.Shared;
 
-namespace Ivy.Widgets.Inputs;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public interface IAnyInput
 {

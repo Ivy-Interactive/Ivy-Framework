@@ -92,9 +92,9 @@ public class SeparatorTextAlignView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(4)
-            | new Separator("Left Aligned").TextAlign(TextAlignment.Left)
-            | new Separator("Center Aligned").TextAlign(TextAlignment.Center)
-            | new Separator("Right Aligned").TextAlign(TextAlignment.Right);
+            | new Separator("Left Aligned").TextAlign(Ivy.Shared.TextAlignment.Left)
+            | new Separator("Center Aligned").TextAlign(Ivy.Shared.TextAlignment.Center)
+            | new Separator("Right Aligned").TextAlign(Ivy.Shared.TextAlignment.Right);
     }
 }
 ```

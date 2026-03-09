@@ -1,0 +1,77 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS1591;CS1573</NoWarn>
+    <PackageId>Ivy.Widgets.Xterm</PackageId>
+    <Description>Widget for Ivy Framework</Description>
+    <Authors>Ivy Interactive</Authors>
+    <Company>Ivy Interactive</Company>
+    <PackageTags>ivy;widget</PackageTags>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework/</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CI Condition="'$(GITHUB_ACTIONS)' == 'true'">true</CI>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(CI)' != 'true'">
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="frontend\dist\**\*" />
+  </ItemGroup>
+
+  <!-- Include frontend source files in up-to-date check so changes trigger rebuild -->
+  <ItemGroup>
+    <UpToDateCheckInput Include="frontend\src\**\*" />
+    <UpToDateCheckInput Include="frontend\package.json" />
+    <UpToDateCheckInput Include="frontend\tsconfig.json" />
+    <UpToDateCheckInput Include="frontend\vite.config.ts" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove=".samples\**\*.cs" />
+    <None Include=".samples\**\*" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include=".samples\.console\" />
+  </ItemGroup>
+
+  <Target Name="NpmInstall" BeforeTargets="BuildFrontend" Condition="Exists('frontend/package.json')"
+          Inputs="frontend\package.json;frontend\package-lock.json"
+          Outputs="frontend\node_modules\.package-lock.json">
+    <Exec Command="npm install" WorkingDirectory="frontend" />
+  </Target>
+
+  <!-- Build frontend before packing -->
+  <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend\package.json')"
+          Inputs="@(FrontendSourceFiles)"
+          Outputs="frontend\dist\.build-stamp">
+    <Exec Command="npm run build" WorkingDirectory="frontend" />
+    <Touch Files="frontend\dist\.build-stamp" AlwaysCreate="true" />
+  </Target>
+
+</Project>

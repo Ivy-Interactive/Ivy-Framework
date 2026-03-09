@@ -2,7 +2,8 @@ using JsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
 using Utf8JsonReader = System.Text.Json.Utf8JsonReader;
 using Utf8JsonWriter = System.Text.Json.Utf8JsonWriter;
 
-namespace Ivy.Shared;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum Colors
 {

@@ -1,4 +1,5 @@
-namespace Ivy.Shared;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum Align
 {
@@ -11,5 +12,8 @@ public enum Align
     Left,
     Right,
     Center,
-    Stretch
+    Stretch,
+    SpaceBetween,
+    SpaceAround,
+    SpaceEvenly
 }

@@ -2,7 +2,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Ivy.Shared;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum SizeType
 {

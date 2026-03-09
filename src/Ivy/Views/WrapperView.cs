@@ -1,7 +1,7 @@
-﻿using Ivy.Core;
-using Ivy.Helpers;
+using Ivy.Core;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class WrapperView(params object[] anything) : ViewBase
 {

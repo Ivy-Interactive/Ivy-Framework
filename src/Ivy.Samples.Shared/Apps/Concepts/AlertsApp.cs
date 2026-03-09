@@ -1,5 +1,4 @@
-using Ivy.Shared;
-using Ivy.Views.Alerts;
+using Ivy;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 

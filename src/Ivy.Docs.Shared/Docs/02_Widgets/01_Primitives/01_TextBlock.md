@@ -6,13 +6,18 @@ searchHints:
   - label
   - text
   - content
+  - alignment
+  - justify
+  - center
+  - left
+  - right
 ---
 
 # TextBlock
 
 The `TextBlock` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) displays text content with customizable styling. It's a fundamental building block for creating [user interfaces](../../01_Onboarding/02_Concepts/02_Views.md) with text, supporting various formatting options and layout properties.
 
-This widget is rarely used directly. Instead, we use the helper class `Ivy.Views.Text` which provides a more user-friendly API for creating text elements.
+This widget is rarely used directly. Instead, we use the helper class `Text` which provides a more user-friendly API for creating text elements.
 
 ## Basic Text Variants
 
@@ -68,7 +73,7 @@ public class CodeVariantsDemo : ViewBase
 
 ## Text Modifiers
 
-Text elements can be customized with various modifiers. Use [Colors](../../04_ApiReference/IvyShared/Colors.md) for the `Color()` modifier and [Size](../../04_ApiReference/IvyShared/Size.md) for `Width()`:
+Text elements can be customized with various modifiers. Use [Colors](../../04_ApiReference/Ivy/Colors.md) for the `Color()` modifier and [Size](../../04_ApiReference/Ivy/Size.md) for `Width()`:
 
 ```csharp demo-tabs
 public class TextModifiersDemo : ViewBase
@@ -88,6 +93,24 @@ public class TextModifiersDemo : ViewBase
             | Text.P("Text with custom width").Width(Size.Units(200))
             | Text.P("Text with overflow clip").Overflow(Overflow.Clip).Width(Size.Units(100))
             | Text.P("Text with overflow ellipsis").Overflow(Overflow.Ellipsis).Width(Size.Units(100));
+    }
+}
+```
+
+## Text Alignment
+
+Both the Text and [Markdown](14_Markdown.md) widgets support text alignment with fluent methods that control how content is aligned within its container. You can align text left (default), center, right, or justify.
+
+```csharp demo-tabs
+public class TextAlignmentDemo : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical()
+            | Text.P("Left-aligned paragraph (default).").Left()
+            | Text.P("Centered title or callout").Center()
+            | Text.P("Right-aligned numbers or dates").Right()
+            | Text.P("Justified text that stretches to fill the full width of its container.").Justify();
     }
 }
 ```
@@ -193,14 +216,18 @@ The TextBuilder class provides several modifiers for customizing text appearance
 | `Bold()` | Apply bold styling | `Text.P("Bold text").Bold()` |
 | `Italic()` | Apply italic styling | `Text.P("Italic text").Italic()` |
 | `Muted()` | Apply muted/disabled styling | `Text.P("Muted text").Muted()` |
-| `Color()` | Set text [color](../../04_ApiReference/IvyShared/Colors.md) | `Text.P("Red text").Color(Colors.Destructive)` |
-| `Width()` | Set text width with [Size](../../04_ApiReference/IvyShared/Size.md) | `Text.P("Fixed width").Width(Size.Units(200))` |
+| `Color()` | Set text [color](../../04_ApiReference/Ivy/Colors.md) | `Text.P("Red text").Color(Colors.Destructive)` |
+| `Width()` | Set text width with [Size](../../04_ApiReference/Ivy/Size.md) | `Text.P("Fixed width").Width(Size.Units(200))` |
 | `StrikeThrough()` | Add strikethrough | `Text.P("Crossed out").StrikeThrough()` |
 | `NoWrap()` | Prevent wrapping | `Text.P("Single line").NoWrap()` |
 | `Overflow()` | Handle overflow | `Text.P("Long text").Overflow(Overflow.Clip)` |
 | `Small()` | Apply small text size | `Text.P("Small text").Small()` |
 | `Medium()` | Apply medium text size (default) | `Text.P("Normal text").Medium()` |
 | `Large()` | Apply large text size | `Text.P("Large text").Large()` |
+| `Left()` | Align text left (default) | `Text.P("Left-aligned").Left()` |
+| `Center()` | Center text | `Text.P("Centered").Center()` |
+| `Right()` | Align text right | `Text.P("Right-aligned").Right()` |
+| `Justify()` | Justify text to fill width | `Text.P("Justified").Justify()` |
 
 ## Best Practices
 

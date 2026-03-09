@@ -1,9 +1,4 @@
 using Ivy;
-using Ivy.Apps;
-using Ivy.Auth;
-using Ivy.Views;
-using Ivy.Widgets;
-using Ivy.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutheliaExample;

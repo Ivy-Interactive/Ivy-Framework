@@ -1,9 +1,5 @@
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Builders;
-using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
@@ -294,7 +290,35 @@ public record FormValidationExamples
     public string? Comments { get; init; }
 }
 
-[App(icon: Icons.Clipboard, path: ["Concepts"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls", "scaffolding", "forms"])]
+public class AllowedValuesFormApp : ViewBase
+{
+    public class SettingsModel
+    {
+        [Display(Name = "Theme")]
+        [AllowedValues("Light", "Dark", "Auto")]
+        public string Theme { get; set; } = "Auto";
+
+        [Display(Name = "Country")]
+        [AllowedValues("USA", "Canada", "UK", "Germany", "France")]
+        public string Country { get; set; } = "USA";
+
+        [Display(Name = "Interests", Description = "Select your interests")]
+        [AllowedValues("Technology", "Sports", "Music", "Art", "Travel")]
+        public string[] Interests { get; set; } = [];
+
+        [Display(Name = "Full Name")]
+        [Required]
+        public string Name { get; set; } = "";
+    }
+
+    public override object? Build()
+    {
+        var settings = UseState(() => new SettingsModel());
+        return settings.ToForm();
+    }
+}
+
+[App(icon: Icons.Clipboard, path: ["Concepts"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls", "scaffolding", "forms", "allowed-values", "select", "dropdown"])]
 public class FormApp : SampleBase
 {
     protected override object? BuildSample()
@@ -302,7 +326,8 @@ public class FormApp : SampleBase
         return Layout.Tabs(
             new Tab("Form", new FormExample()),
             new Tab("Scaffolding", new FormScaffoldingExample()),
-            new Tab("Validation", new FormValidationExample())
+            new Tab("Validation", new FormValidationExample()),
+            new Tab("Allowed Values", new AllowedValuesFormApp())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -740,17 +765,8 @@ public class FormValidationExample : ViewBase
             }
         }, model);
 
-        var countryOptions = new[] { "USA", "Canada", "UK", "Germany", "France" }.ToOptions();
-        var interestOptions = new[] { "Technology", "Sports", "Music", "Art", "Travel" }.ToOptions();
-        var themeOptions = new[] { "Light", "Dark", "Auto" }.ToOptions();
-        var imageTypeOptions = new[] { "image/png", "image/jpeg", "image/webp" }.ToOptions();
-
         var form = model.ToForm("Submit Registration")
             .Builder(m => m.Bio, s => s.ToTextareaInput())
-            .Builder(m => m.Country, s => s.ToSelectInput(countryOptions))
-            .Builder(m => m.Interests, s => s.ToSelectInput(interestOptions).List())
-            .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions))
-            .Builder(m => m.AcceptedImageTypes, s => s.ToSelectInput(imageTypeOptions))
             .Builder(m => m.Comments, s => s.ToTextareaInput())
             .Builder(m => m.BirthDate, s => s.ToDateTimeInput())
             .Builder(m => m.AppointmentDateTime, s => s.ToDateTimeInput())

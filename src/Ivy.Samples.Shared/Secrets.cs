@@ -1,4 +1,3 @@
-﻿using Ivy.Services;
 
 namespace Ivy.Samples.Shared;
 

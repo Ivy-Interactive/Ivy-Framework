@@ -1,13 +1,12 @@
 using System.Linq.Expressions;
+using Force.DeepCloner;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
-using static Ivy.Views.Forms.FormHelpers;
+using static Ivy.FormHelpers;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class FormBuilder<TModel> : ViewBase
 {
@@ -16,20 +15,23 @@ public class FormBuilder<TModel> : ViewBase
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
-    internal Scale _scale = Shared.Scale.Medium;
+    internal Scale _scale = Ivy.Scale.Medium;
     internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
+    internal FormSubmitStrategy _submitStrategy;
     internal Func<TModel, Task>? _onSubmit;
 
     public FormBuilder(
         IState<TModel> model,
         string submitTitle = "Save",
-        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur)
+        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
+        FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit)
     {
         _model = model;
         _fields = FormScaffolder.ScaffoldFields<TModel>(_model.GetStateType());
         SubmitTitle(submitTitle);
         _validationStrategy = validationStrategy;
+        _submitStrategy = submitStrategy;
     }
 
     internal static Func<bool, Button> DefaultSubmitBuilder(string title) => (isLoading) => new Button(title).Loading(isLoading).Disabled(isLoading);
@@ -49,6 +51,12 @@ public class FormBuilder<TModel> : ViewBase
     public FormBuilder<TModel> ValidationStrategy(FormValidationStrategy strategy)
     {
         _validationStrategy = strategy;
+        return this;
+    }
+
+    public FormBuilder<TModel> SubmitStrategy(FormSubmitStrategy strategy)
+    {
+        _submitStrategy = strategy;
         return this;
     }
 
@@ -302,9 +310,9 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    public FormBuilder<TModel> Small() => Scale(Shared.Scale.Small);
-    public FormBuilder<TModel> Medium() => Scale(Shared.Scale.Medium);
-    public FormBuilder<TModel> Large() => Scale(Shared.Scale.Large);
+    public FormBuilder<TModel> Small() => Scale(Ivy.Scale.Small);
+    public FormBuilder<TModel> Medium() => Scale(Ivy.Scale.Medium);
+    public FormBuilder<TModel> Large() => Scale(Ivy.Scale.Large);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
@@ -324,8 +332,8 @@ public class FormBuilder<TModel> : ViewBase
     {
         var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange: false);
 
-        var validationSignal = context.CreateSignal<FormValidateSignal, Unit, bool>();
-        var updateSignal = context.CreateSignal<FormUpdateSignal, Unit, Unit>();
+        var validationSignal = context.UseSignal<FormValidateSignal, Unit, bool>();
+        var updateSignal = context.UseSignal<FormUpdateSignal, Unit, Unit>();
         var invalidFields = context.UseState(0);
 
         var fields = _fields
@@ -346,7 +354,8 @@ public class FormBuilder<TModel> : ViewBase
                     _validationStrategy,
                     _scale,
                     e.Help,
-                    e.Placeholder
+                    e.Placeholder,
+                    _submitStrategy
                 );
                 return binding;
             })
@@ -373,6 +382,20 @@ public class FormBuilder<TModel> : ViewBase
         context.TrackDisposable(bindings.Select(e => e.disposable));
 
         var fieldViews = bindings.Select(e => e.fieldView).ToArray();
+
+        var submitReceiver = context.UseSignal<FormSubmitSignal, Unit, Unit>();
+        context.UseEffect(() =>
+        {
+            if (_submitStrategy is FormSubmitStrategy.OnBlur or FormSubmitStrategy.OnChange)
+            {
+                return submitReceiver.Receive(unit =>
+                {
+                    _ = OnSubmit();
+                    return default;
+                });
+            }
+            return null;
+        });
 
         async ValueTask HandleSubmitEvent(Event<Form> _)
         {
@@ -405,10 +428,17 @@ public class FormBuilder<TModel> : ViewBase
 
         var buttonGap = _scale switch
         {
-            Shared.Scale.Small => 4,
-            Shared.Scale.Large => 8,
+            Ivy.Scale.Small => 4,
+            Ivy.Scale.Large => 8,
             _ => 6
         };
+
+        if (_submitStrategy != FormSubmitStrategy.OnSubmit)
+        {
+            return Layout.Vertical().Gap(buttonGap)
+                   | formView
+                   | validationView;
+        }
 
         return Layout.Vertical().Gap(buttonGap)
                | formView

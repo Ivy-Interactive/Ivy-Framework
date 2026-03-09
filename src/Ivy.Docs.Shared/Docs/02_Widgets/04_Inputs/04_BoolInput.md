@@ -175,6 +175,40 @@ public class SingleToggleDemo : ViewBase
 }
 ```
 
+## Styling and States
+
+Customize the `BoolInput` with various styling options:
+
+```csharp demo-tabs
+public class BoolInputStylingDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var normalBool = UseState(true);
+        var invalidBool = UseState(false);
+        var loadingBool = UseState(true);
+        var disabledBool = UseState(false);
+
+        var isLoading = UseState(true);
+
+        return Layout.Vertical()
+            | normalBool.ToSwitchInput()
+                .Label("Normal BoolInput")
+
+            | invalidBool.ToSwitchInput()
+                .Label("Invalid BoolInput")
+                .Invalid("This field has an error")
+
+            | loadingBool.ToSwitchInput()
+                .Label("Loading BoolInput")
+                .Loading(isLoading.Value)
+
+            | disabledBool.ToSwitchInput()
+                .Label("Disabled BoolInput")
+                .Disabled(true);
+    }
+}
+```
 
 <Callout variant="info" title="Legacy Integer Support">
 BoolInput also supports integer-based boolean values (0 = false, 1 = true) for compatibility with legacy systems. Simply use `UseState(0)` or `UseState(1)` with standard extension methods like `ToBoolInput()`, `ToSwitchInput()`, or `ToToggleInput()`.

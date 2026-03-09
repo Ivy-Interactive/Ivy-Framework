@@ -1,16 +1,12 @@
 using System.Reflection;
-using Ivy.Apps;
-using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Auth;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views;
-using Ivy.Views.Forms;
 using Microsoft.AspNetCore.Mvc;
-using AppContext = Ivy.Apps.AppContext;
+using AppContext = Ivy.AppContext;
 
-namespace Ivy.Auth;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 [App()]
 public class DefaultAuthApp : ViewBase

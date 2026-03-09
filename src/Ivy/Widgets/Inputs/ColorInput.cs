@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -36,6 +34,7 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
     [Prop] public bool? Foreground { get; set; }
 
     [Prop] public bool Ghost { get; set; }
+    [Prop] public bool AllowAlpha { get; set; }
 
     [Prop] public ColorInputVariants Variant { get; set; } = ColorInputVariants.TextAndPicker;
 
@@ -188,6 +187,9 @@ public static class ColorInputExtensions
     public static ColorInputBase Ghost(this ColorInputBase widget, bool ghost = true)
     {
         return widget with { Ghost = ghost };
+    public static ColorInputBase AllowAlpha(this ColorInputBase widget, bool allowAlpha = true)
+    {
+        return widget with { AllowAlpha = allowAlpha };
     }
 
     [OverloadResolutionPriority(1)]

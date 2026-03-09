@@ -1,5 +1,5 @@
-﻿using Ivy.Apps;
 using Ivy.Core;
+using Ivy.Core.Apps;
 using Ivy.Test.Apps.FooBaz.Bar;
 using Xunit.Abstractions;
 

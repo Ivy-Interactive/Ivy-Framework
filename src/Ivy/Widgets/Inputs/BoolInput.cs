@@ -2,8 +2,6 @@ using System.Runtime.CompilerServices;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -24,6 +22,8 @@ public interface IAnyBoolInput : IAnyInput
     public BoolInputVariants Variant { get; set; }
 
     public Icons Icon { get; set; }
+
+    public bool Loading { get; set; }
 }
 
 public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
@@ -39,6 +39,8 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
     [Prop] public BoolInputVariants Variant { get; set; } = BoolInputVariants.Checkbox;
 
     [Prop] public Icons Icon { get; set; }
+
+    [Prop] public bool Loading { get; set; }
 
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput
     [Prop] public bool Nullable { get; set; }
@@ -290,6 +292,10 @@ public static class BoolInputExtensions
 
     public static BoolInputBase Invalid(this BoolInputBase widget, string? invalid) =>
         widget with { Invalid = invalid };
+
+    public static BoolInputBase Loading(this BoolInputBase widget, bool loading = true) =>
+        widget with { Loading = loading };
+
     public static BoolInputBase Nullable(this BoolInputBase widget, bool? nullable = true) =>
         widget with { Nullable = nullable ?? true };
 

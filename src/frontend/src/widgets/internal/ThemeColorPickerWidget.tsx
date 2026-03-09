@@ -24,6 +24,7 @@ interface ThemeColorPickerWidgetProps {
   events?: string[];
   scale?: Scales;
   foreground?: boolean;
+  allowAlpha?: boolean;
 }
 
 // Theme color mappings
@@ -314,6 +315,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   placeholder,
   scale = Scales.Medium,
   foreground = false,
+  allowAlpha = false,
 }) => {
   const eventHandler = useEventHandler();
   const displayValue = value ?? '';
@@ -321,10 +323,39 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   const [localInputValue, setLocalInputValue] = React.useState('');
   const [colorFormat] = React.useState<'HEX'>('HEX');
 
+  const parseAlpha = (hex: string): number => {
+    if (!hex || !hex.startsWith('#')) return 255;
+    const clean = hex.slice(1);
+    if (clean.length === 8) return parseInt(clean.slice(6, 8), 16);
+    return 255;
+  };
+
+  const [alphaValue, setAlphaValue] = React.useState(() =>
+    parseAlpha(value ?? '')
+  );
+
+  React.useEffect(() => {
+    setAlphaValue(parseAlpha(value ?? ''));
+  }, [value]);
+
+  const combineWithAlpha = (hex6: string, alpha: number): string => {
+    const base = hex6.startsWith('#') ? hex6 : '#' + hex6;
+    const clean =
+      base.length === 7
+        ? base
+        : base.length === 9
+          ? base.slice(0, 7)
+          : '#000000';
+    if (alpha >= 255) return clean;
+    const aa = Math.max(0, Math.min(255, alpha)).toString(16).padStart(2, '0');
+    return clean + aa;
+  };
+
   const getDisplayColor = React.useCallback((): string => {
     if (!displayValue) return '#000000';
-    // Basic check, assume hex if starts with #
-    return displayValue.startsWith('#') ? displayValue : '#000000';
+    if (!displayValue.startsWith('#')) return '#000000';
+    if (displayValue.length === 9) return displayValue.slice(0, 7);
+    return displayValue;
   }, [displayValue]);
 
   // Helper to determine contrast color for the "A"
@@ -371,26 +402,93 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     const newRgb = { ...rgbValues, [type]: value };
     setRgbValues(newRgb);
     const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
-    eventHandler('OnChange', id, [newHex]);
+    if (allowAlpha) {
+      eventHandler('OnChange', id, [combineWithAlpha(newHex, alphaValue)]);
+    } else {
+      eventHandler('OnChange', id, [newHex]);
+    }
   };
+
+  const handleAlphaSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalDragAlpha(Number(e.target.value));
+  };
+
+  const handleAlphaCommit = () => {
+    if (localDragAlpha !== null) {
+      const baseHex = getDisplayColor();
+      eventHandler('OnChange', id, [combineWithAlpha(baseHex, localDragAlpha)]);
+    }
+  };
+
+  const [localDragAlpha, setLocalDragAlpha] = React.useState<number | null>(
+    null
+  );
+  if (localDragAlpha !== null && alphaValue === localDragAlpha) {
+    setLocalDragAlpha(null);
+  }
+  const displayAlpha = localDragAlpha ?? alphaValue;
 
   const renderFooter = () => (
     <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
-      <div className="w-[80px] h-8 flex items-center justify-center text-xs font-medium text-muted-foreground border rounded bg-muted/50">
+      <div className="w-[50px] h-8 flex items-center justify-center text-xs font-medium text-muted-foreground border rounded bg-muted/50 shrink-0">
         HEX
       </div>
       <Input
         value={localInputValue}
         onChange={handleLocalInputChange}
-        className="h-8 text-xs font-mono"
+        className="h-8 text-xs font-mono min-w-0"
       />
+      {allowAlpha && (
+        <div
+          className="relative rounded-md overflow-hidden border border-input shrink-0"
+          style={{ width: 100, height: 24 }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)',
+              backgroundSize: '12px 12px',
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(to right, transparent, ${getDisplayColor()})`,
+            }}
+          />
+          <input
+            type="range"
+            min={0}
+            max={255}
+            value={displayAlpha}
+            onChange={handleAlphaSliderChange}
+            onPointerUp={handleAlphaCommit}
+            onKeyUp={handleAlphaCommit}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            aria-label={`Opacity: ${Math.round((displayAlpha / 255) * 100)}%`}
+          />
+          <div
+            className="absolute top-0 bottom-0 w-1 bg-white border border-foreground/40 rounded-sm pointer-events-none"
+            style={{ left: `calc(${(displayAlpha / 255) * 100}% - 2px)` }}
+          />
+        </div>
+      )}
+      {allowAlpha && (
+        <span className="text-xs text-muted-foreground w-8 text-right tabular-nums shrink-0">
+          {Math.round((displayAlpha / 255) * 100)}%
+        </span>
+      )}
       <CopyToClipboardButton
         textToCopy={localInputValue}
         className="h-8 w-8 px-0"
       />
       <div
         className="w-8 h-8 rounded-md border border-input shadow-sm shrink-0"
-        style={{ backgroundColor: getDisplayColor() }}
+        style={{
+          backgroundColor: getDisplayColor(),
+          opacity: displayAlpha / 255,
+        }}
       />
     </div>
   );
@@ -402,14 +500,32 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   }, []);
 
   React.useEffect(() => {
-    setLocalInputValue(formatColor(getDisplayColor()));
-  }, [displayValue, colorFormat, getDisplayColor, formatColor]);
+    if (allowAlpha && alphaValue < 255) {
+      setLocalInputValue(combineWithAlpha(getDisplayColor(), alphaValue));
+    } else {
+      setLocalInputValue(formatColor(getDisplayColor()));
+    }
+  }, [
+    displayValue,
+    colorFormat,
+    getDisplayColor,
+    formatColor,
+    allowAlpha,
+    alphaValue,
+  ]);
 
   const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalInputValue(e.target.value);
     const val = e.target.value;
-    // Simple validation for 6-digit hex
+    // Support both 6-digit and 8-digit hex
     if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+      if (allowAlpha) {
+        eventHandler('OnChange', id, [combineWithAlpha(val, alphaValue)]);
+      } else {
+        eventHandler('OnChange', id, [val]);
+      }
+    } else if (/^#[0-9A-Fa-f]{8}$/.test(val)) {
+      setAlphaValue(parseInt(val.slice(7, 9), 16));
       eventHandler('OnChange', id, [val]);
     }
   };
@@ -442,6 +558,9 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
                   : placeholder?.toLowerCase() === 'foreground'
                     ? 'var(--background)'
                     : getDisplayColor(),
+              ...(allowAlpha && !isForeground
+                ? { opacity: alphaValue / 255 }
+                : {}),
             }}
           >
             <span className="sr-only">Pick a color</span>

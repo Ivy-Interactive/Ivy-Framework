@@ -489,7 +489,7 @@ public static class Utils
 
     public static string EatRight(this string input, char food)
     {
-        return EatRight(input, c => c == food);
+        return input.EatRight(c => c == food);
     }
 
     public static string EatRight(this string input, Func<char, bool> foodType)
@@ -956,7 +956,7 @@ public static class Utils
         }
 
         // AppId should not contain control characters or dangerous patterns
-        if (appId.Any(c => char.IsControl(c)))
+        if (appId.Any(char.IsControl))
         {
             return false;
         }

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Ivy.Analyser.csproj" />
+  <Project Path="Ivy.Analyser.Tests/Ivy.Analyser.Tests.csproj" />
+</Solution>

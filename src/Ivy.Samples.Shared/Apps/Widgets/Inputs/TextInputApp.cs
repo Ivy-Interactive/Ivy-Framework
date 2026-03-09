@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -218,14 +217,14 @@ public class TextInputSubmitDemo : ViewBase
                | Layout.Horizontal(
                    searchQuery.ToSearchInput()
                        .Placeholder("Search...")
-                       .HandleSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}")),
+                       .OnSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}")),
                    searchResult
                )
                | Text.P("Quick-add tags (type and press Enter to add):")
                | Layout.Horizontal(
                    tag.ToTextInput()
                        .Placeholder("Add a tag...")
-                       .HandleSubmit(() =>
+                       .OnSubmit(() =>
                        {
                            if (!string.IsNullOrWhiteSpace(tag.Value))
                            {
