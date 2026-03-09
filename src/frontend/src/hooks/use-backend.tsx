@@ -820,9 +820,13 @@ export const useBackend = (
           });
 
           connection.on('StreamData', (message: StreamDataMessage) => {
+            console.debug('[StreamData] Received:', message.streamId, message.data);
             const handler = streamRegistryRef.current.get(message.streamId);
             if (handler) {
+              console.debug('[StreamData] Handler found, dispatching');
               handler(message.data);
+            } else {
+              console.warn('[StreamData] No handler for stream:', message.streamId);
             }
           });
 
@@ -898,6 +902,7 @@ export const useBackend = (
 
   const eventHandler: WidgetEventHandlerType = useCallback(
     (eventName, widgetId, args) => {
+      console.debug('[Event] Sending:', eventName, widgetId, args);
       logger.debug(`[${connectionId}] Event: ${eventName}`, { widgetId, args });
       if (!connection) {
         logger.warn('No SignalR connection available for event', {
@@ -906,7 +911,10 @@ export const useBackend = (
         });
         return;
       }
-      connection.invoke('Event', eventName, widgetId, args).catch(err => {
+      connection.invoke('Event', eventName, widgetId, args).then(() => {
+        console.debug('[Event] Invoke succeeded:', eventName, widgetId);
+      }).catch(err => {
+        console.error('[Event] Invoke failed:', eventName, widgetId, err);
         logger.error('SignalR Error when sending event:', err);
       });
     },
@@ -915,6 +923,7 @@ export const useBackend = (
 
   const subscribeToStream: StreamSubscriber = useCallback(
     (streamId: string, onData: StreamHandler) => {
+      console.debug('[StreamSubscribe] Subscribing to:', streamId);
       streamRegistryRef.current.set(streamId, onData);
       // Notify backend that we're subscribed so it can flush any buffered data
       latestConnectionRef.current

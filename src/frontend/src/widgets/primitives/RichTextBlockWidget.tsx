@@ -49,6 +49,7 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
   const eventHandler = useEventHandler();
 
   const onData = useCallback((run: TextRun) => {
+    console.debug('[RichTextBlock] Stream data received:', run);
     setStreamedRuns(prev => [...prev, run]);
   }, []);
 

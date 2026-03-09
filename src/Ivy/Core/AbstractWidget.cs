@@ -70,11 +70,13 @@ public abstract record AbstractWidget : IWidget
     {
         var type = GetType();
         var property = type.GetProperty(eventName);
+        Console.WriteLine($"[InvokeEvent] {type.Name}.{eventName}: property={property != null}");
 
         if (property == null)
             return false;
 
         var eventDelegate = property.GetValue(this);
+        Console.WriteLine($"[InvokeEvent] {type.Name}.{eventName}: delegate={eventDelegate != null}, delegateType={eventDelegate?.GetType().Name}");
 
         if (eventDelegate == null)
             return false;
@@ -93,12 +95,14 @@ public abstract record AbstractWidget : IWidget
             if (eventInstance == null) return false;
 
             // Invoke the event handler
+            Console.WriteLine($"[InvokeEvent] {type.Name}.{eventName}: invoking handler");
             var result = ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
             if (result is ValueTask valueTask)
             {
                 // Properly await the async event handler instead of blocking
                 await valueTask;
             }
+            Console.WriteLine($"[InvokeEvent] {type.Name}.{eventName}: handler completed");
             return true;
         }
 
