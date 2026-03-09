@@ -170,6 +170,18 @@ public class WriteStreamJsonConverter : JsonConverterFactory
 
 public static class UseStreamExtensions
 {
+    /// <summary>
+    /// Creates a server-to-client stream that can push data to the frontend in real time.
+    /// Attach the returned stream to a widget property (e.g. <see cref="RichTextBlock.Stream"/>)
+    /// and call <see cref="IWriteStream{T}.Write"/> to send data.
+    /// </summary>
+    /// <param name="context">The view context (typically accessed via <c>Context</c>).</param>
+    /// <param name="buffer">
+    /// When <c>true</c> (default), data written before the frontend subscribes is buffered
+    /// and automatically flushed once the subscription is established.
+    /// When <c>false</c>, data written before subscription is discarded.
+    /// </param>
+    /// <typeparam name="T">The type of data to stream (e.g. <see cref="TextRun"/>).</typeparam>
     public static IWriteStream<T> UseStream<T>(this IViewContext context, bool buffer = true)
     {
         var streamId = context.UseState(() => Guid.NewGuid().ToString(), false);

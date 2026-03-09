@@ -52,6 +52,13 @@ public record RichTextBlock : WidgetBase<RichTextBlock>
     /// the initial runs — streamed runs are appended after them on the frontend.
     /// </summary>
     [Prop] public TextRun[] Runs { get; set; } = [];
+
+    /// <summary>
+    /// Optional stream for dynamically appending runs after <see cref="Runs"/>.
+    /// Create with <c>Context.UseStream&lt;TextRun&gt;()</c> and attach via
+    /// <see cref="RichTextBuilder.UseStream"/>. Call <see cref="IWriteStream{T}.Write"/>
+    /// to push new runs to the frontend in real time.
+    /// </summary>
     [Prop] public IWriteStream<TextRun>? Stream { get; set; }
     [Prop] public TextAlignment? TextAlignment { get; set; }
     [Prop] public bool NoWrap { get; set; }
