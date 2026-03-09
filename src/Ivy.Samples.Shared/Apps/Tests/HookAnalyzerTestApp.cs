@@ -11,7 +11,7 @@ public class HookAnalyzerTestApp : ViewBase
             Text.P("This app demonstrates various hook usage violations that trigger analyzer warnings."),
             Text.P("Check the Error List or build output to see the warnings."),
             new Separator(),
-            Text.P("âš ï¸ This file intentionally contains violations for testing purposes.")
+            Text.P("NB! This file intentionally contains violations for testing purposes.")
         );
     }
 }
