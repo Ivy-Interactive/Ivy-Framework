@@ -10,6 +10,8 @@ client.CopyToClipboard(content);
 client.Toast("Copied to clipboard!");
 ```
 
+**Note:** There is no `UseClipboard` hook. Clipboard access is provided through `IClientProvider`, not through a dedicated hook. Access it via `UseService<IClientProvider>()`.
+
 ## How do I create a multiline textarea TextInput in Ivy?
 
 Use the `TextInputVariants.Textarea` variant or the dedicated `ToTextareaInput` extension:
