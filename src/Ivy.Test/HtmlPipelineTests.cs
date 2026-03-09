@@ -224,6 +224,89 @@ public class HtmlPipelineTests
         Assert.Contains("</script>", result);
     }
 
+    [Fact]
+    public void NonSelfClosedLinkTags_ParseSuccessfully()
+    {
+        var html = """
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <link rel="stylesheet" href="test.css">
+                <title>Test</title>
+              </head>
+              <body>
+                <div id="root"></div>
+              </body>
+            </html>
+            """;
+
+        var pipeline = new HtmlPipeline();
+        var context = CreateContext();
+
+        var result = pipeline.Process(context, html);
+
+        Assert.Contains("link", result);
+        Assert.Contains("test.css", result);
+    }
+
+    [Fact]
+    public void MixedSelfClosedAndNonSelfClosed_VoidElements_Survive()
+    {
+        var html = """
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="UTF-8" />
+                <link rel="stylesheet" href="x">
+                <title>Test</title>
+              </head>
+              <body>
+                <div id="root"></div>
+              </body>
+            </html>
+            """;
+
+        var pipeline = new HtmlPipeline();
+        var context = CreateContext();
+
+        var result = pipeline.Process(context, html);
+
+        Assert.Contains("meta", result);
+        Assert.Contains("link", result);
+        Assert.Contains("charset", result);
+        Assert.Contains("href=\"x\"", result);
+    }
+
+    [Fact]
+    public void DistIndexHtml_WithModulepreloadLinks_ParsesSuccessfully()
+    {
+        var html = """
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <script type="module" crossorigin src="/assets/main-abc123.js"></script>
+                <link rel="modulepreload" crossorigin href="/assets/vendor-react.CRhFMK9I.js">
+                <link rel="modulepreload" crossorigin href="/assets/vendor-signalr.D2xF4k9J.js">
+                <link rel="stylesheet" crossorigin href="/assets/main-xyz789.css">
+                <meta charset="UTF-8" />
+                <title>Ivy</title>
+              </head>
+              <body>
+                <div id="root"></div>
+              </body>
+            </html>
+            """;
+
+        var pipeline = new HtmlPipeline();
+        var context = CreateContext();
+
+        var result = pipeline.Process(context, html);
+
+        Assert.Contains("vendor-react", result);
+        Assert.Contains("vendor-signalr", result);
+        Assert.Contains("main-xyz789.css", result);
+    }
+
     private class CustomTestFilter : IHtmlFilter
     {
         public void Process(HtmlPipelineContext context, XDocument document)

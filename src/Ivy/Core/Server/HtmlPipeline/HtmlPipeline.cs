@@ -37,6 +37,14 @@ public class HtmlPipeline
         // Normalize bare boolean attributes for XML compatibility
         html = Regex.Replace(html, @"\bcrossorigin(?!=)", @"crossorigin=""anonymous""");
 
+        // Self-close void HTML elements for XML compatibility
+        html = Regex.Replace(html, @"<(link|meta|br|hr|img|input|source|track|wbr|col|area|base|embed)(\s[^>]*)?>", m =>
+        {
+            var tag = m.Value;
+            if (tag.EndsWith("/>")) return tag;
+            return tag.TrimEnd('>') + " />";
+        });
+
         var doc = XDocument.Parse(html, LoadOptions.PreserveWhitespace);
         foreach (var filter in _filters)
             filter.Process(context, doc);
