@@ -1,4 +1,6 @@
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { getHeight, getWidth } from '@/lib/styles';
+import { cn } from '@/lib/utils';
 import React, { useEffect } from 'react';
 
 interface SmartSearchSlots {
@@ -6,6 +8,8 @@ interface SmartSearchSlots {
   AskButton?: React.ReactNode[];
   ClearInputButton?: React.ReactNode[];
   OpenTrigger?: React.ReactNode[];
+  CloseOverlay?: React.ReactNode[];
+  OverlayPanel?: React.ReactNode[];
   ResultsHeader?: React.ReactNode[];
   ResultsContent?: React.ReactNode[];
   ClearButton?: React.ReactNode[];
@@ -44,6 +48,15 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   const slots = slotsProp ?? {};
   const clearInputButton = slots.ClearInputButton;
   const openTrigger = slots.OpenTrigger;
+  const overlayPanel = slots.OverlayPanel;
+
+  const closeOverlay = () => {
+    document
+      .querySelector<HTMLButtonElement>(
+        '[data-testid="docs-smart-search-close-overlay"]'
+      )
+      ?.click();
+  };
 
   // When the sidebar search is focused or ivy-docs-open-smart-search fires, open the overlay by notifying the backend.
   useEffect(() => {
@@ -82,21 +95,41 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   }, []);
 
   return (
-    <div
-      id={id}
-      role="search"
-      aria-label="Ivy docs smart search"
-      style={styles}
-      className="overflow-y-auto pt-4"
-      data-testid={dataTestId}
-    >
-      <div className="sr-only" aria-hidden>
-        {clearInputButton}
+    <>
+      {overlayPanel && overlayPanel.length > 0 && (
+        <Dialog open={true} onOpenChange={() => closeOverlay()}>
+          <DialogContent
+            style={{
+              width: '36rem',
+              maxWidth: 'min(36rem, calc(100vw - 2rem))',
+            }}
+            className={cn(
+              'alert-animate-enter',
+              '!top-4 sm:!top-8 !translate-y-0'
+            )}
+          >
+            {overlayPanel}
+          </DialogContent>
+        </Dialog>
+      )}
+      <div
+        id={id}
+        role="search"
+        aria-label="Ivy docs smart search"
+        style={styles}
+        className="overflow-y-auto pt-4"
+        data-testid={dataTestId}
+      >
+        <div className="sr-only" aria-hidden>
+          {clearInputButton}
+        </div>
+        <div className="sr-only" aria-hidden>
+          {openTrigger}
+        </div>
+        <div className="sr-only" aria-hidden>
+          {slots.CloseOverlay}
+        </div>
       </div>
-      <div className="sr-only" aria-hidden>
-        {openTrigger}
-      </div>
-      {/* Search input and ask button are used in the sidebar and in the overlay/answer Sheet content from the backend. */}
-    </div>
+    </>
   );
 };

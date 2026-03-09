@@ -159,23 +159,15 @@ public class SmartSearchView : ViewBase
                 }));
         }).ToList();
 
-        var overlayListOrPlaceholder = suggestionListItems.Count > 0
-            ? (object)new List(suggestionListItems)
-            : (object)Text.Muted("Type to search or pick a suggestion above.");
+        object overlayListOrPlaceholder = suggestionListItems.Count > 0
+            ? Layout.Vertical(suggestionListItems.ToArray()).Gap(0)
+            : Text.Muted("Type to search or pick a suggestion above.");
 
-        var overlayContent = Layout.Vertical()
+        var overlayContent = Layout.Vertical().Gap(4)
             | searchInput
             | overlayListOrPlaceholder;
 
-        var footer = string.IsNullOrEmpty(windowQuery)
-            ? null
-            : new DialogFooter(askButton);
-
-        var overlayDialog = new Dialog(
-            _ => { overlayOpen.Set(false); return ValueTask.CompletedTask; },
-            new DialogHeader("Search"),
-            new DialogBody(overlayContent),
-            footer);
+        var footer = new DialogFooter(askButton);
 
         var baseSlots = new List<object>
         {
@@ -189,9 +181,16 @@ public class SmartSearchView : ViewBase
         {
             if (!overlayOpen.Value)
                 return new SmartSearch(baseSlots.ToArray());
-            return new Fragment(
-                new SmartSearch(baseSlots.ToArray()),
-                overlayDialog);
+            baseSlots.Add(new Slot(
+                "CloseOverlay",
+                new Button("", _ => overlayOpen.Set(false))
+                    .TestId("docs-smart-search-close-overlay")));
+            baseSlots.Add(new Slot(
+                "OverlayPanel",
+                new DialogHeader("Search"),
+                new DialogBody(overlayContent),
+                footer));
+            return new SmartSearch(baseSlots.ToArray());
         }
 
         var apiTitle = query.Value is { Title: { } t } && !string.IsNullOrWhiteSpace(t) ? t : null;
