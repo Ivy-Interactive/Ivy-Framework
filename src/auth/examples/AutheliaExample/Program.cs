@@ -1,5 +1,4 @@
 using Ivy;
-using Ivy.Auth.Authelia;
 
 var server = new Server();
 
