@@ -74,9 +74,9 @@ public class XamlBuilderTests
     [Fact]
     public void Build_IntProp()
     {
-        var widget = _builder.Build("<StackLayout Gap=\"8\" />");
+        var widget = _builder.Build("<StackLayout RowGap=\"8\" />");
         var stack = Assert.IsType<StackLayout>(widget);
-        Assert.Equal(8, stack.Gap);
+        Assert.Equal(8, stack.RowGap);
     }
 
     [Fact]
@@ -138,9 +138,9 @@ public class XamlBuilderTests
     public void Build_PropsAndChildren()
     {
         var widget = _builder.Build(
-            "<StackLayout Gap=\"12\"><Badge Title=\"A\" /><Button Disabled=\"true\" /></StackLayout>");
+            "<StackLayout RowGap=\"12\"><Badge Title=\"A\" /><Button Disabled=\"true\" /></StackLayout>");
         var stack = Assert.IsType<StackLayout>(widget);
-        Assert.Equal(12, stack.Gap);
+        Assert.Equal(12, stack.RowGap);
         Assert.Equal(2, stack.Children.Length);
         Assert.Equal("A", Assert.IsType<Badge>(stack.Children[0]).Title);
         Assert.True(Assert.IsType<Button>(stack.Children[1]).Disabled);
