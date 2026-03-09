@@ -70,7 +70,7 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
         var appId = path.TrimStart('/');
 
         // Only convert if the path looks like an app ID (contains at least one segment)
-        if (!string.IsNullOrEmpty(appId) && !appId.Contains('.'))
+        if (!string.IsNullOrEmpty(appId))
         {
             logger.LogDebug("Converting path '{Path}' to appId '{AppId}'", path, appId);
 
