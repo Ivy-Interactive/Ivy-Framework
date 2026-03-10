@@ -18,7 +18,7 @@ defaultBehavior.ToSelectInput(new[] { "Refused", "Allowed", "Ignored" }.ToOption
 
 Options are passed as `IEnumerable<IAnyOption>` to `ToSelectInput(options)`, not chained via a `.Options()` method. Use the `.ToOptions()` extension method on a string array to convert to the correct type.
 
-### Found In
+**Found In:**
 4eb1799f-39b2-4325-a0bd-37b769a33432``
 
 https://github.com/Ivy-Interactive/Ivy-Framework/issues/2271
@@ -39,7 +39,7 @@ items.ToTable()
 
 `Table` is non-generic. Use the `IEnumerable<T>.ToTable()` builder pattern to create a table from a collection. The type is inferred from the collection.
 
-### Found In
+**Found In:**
 a9ee3993-1cfb-4cba-9322-80a60b56c8d2
 
 ## LayoutView.MaxWidth() — non-existent method
@@ -58,7 +58,7 @@ Layout.Vertical().Width(Size.Lg)
 
 `LayoutView` does not have a `.MaxWidth()` method. Use `.Width(Size)` instead.
 
-### Found In
+**Found In:**
 a9ee3993-1cfb-4cba-9322-80a60b56c8d2
 
 ## Callout constructor — wrong constructor + invented enum
@@ -77,7 +77,7 @@ Callout.Info("No to-do items.")
 
 `Callout` uses static factory methods: `Callout.Info()`, `Callout.Warning()`, `Callout.Error()`, `Callout.Success()`. The `CalloutType` enum does not exist.
 
-### Found In
+**Found In:**
 bd5f45ac-569d-4be8-8ef8-882451e608a1
 
 ## Callout.Destructive() — fluent method on constructor instance
@@ -96,7 +96,7 @@ Callout.Error("Error message")
 
 `Callout` uses static factory methods (`Callout.Info()`, `Callout.Warning()`, `Callout.Error()`, `Callout.Success()`), not a constructor + fluent style chain. `.Destructive()` is a `Button` style method — the agent confused the two APIs. No auto-fix is possible because the intent (error vs warning vs info) is ambiguous.
 
-### Found In
+**Found In:**
 d9116efb-830e-484a-a258-fc3193769158
 
 ## TextInputBase.OnEnter() — invented fluent method
@@ -114,7 +114,7 @@ newItemText.ToTextInput().Placeholder("Add a new to-do...").OnEnter(AddTodo)
 text.ToTextInput().OnSubmit(() => DoSomething())
 ```
 
-### Found In
+**Found In:**
 bd5f45ac-569d-4be8-8ef8-882451e608a1
 
 ## TextInputVariant — non-existent enum (wrong enum name)
@@ -133,7 +133,7 @@ new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariants.Text
 
 The enum is `TextInputVariants` (plural with "s" suffix), not `TextInputVariant` (singular). This breaks the naming convention used by other widgets (e.g., `ButtonVariant`, `BadgeVariant`, `CalloutVariant`), which causes the agent to guess `TextInputVariant` by analogy. Values: `Text`, `Textarea`, `Email`, `Tel`, `Url`, `Password`, `Search`.
 
-### Found In
+**Found In:**
 4a94f8f6-865d-4663-8f4c-d4c09913398f
 
 ## Event<T,E>.Data — non-existent property
@@ -154,7 +154,7 @@ args.Value.Tag
 
 `Event<TSender, TValue>` uses `.Value` to access the event args, not `.Data`. The agent likely confused this with other event patterns from different frameworks (e.g., WPF `DataContext`, JavaScript `event.data`).
 
-### Found In
+**Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
 
 ## UseState\<T?\>(null) — ambiguous overload call
@@ -175,7 +175,7 @@ var selectedItem = UseState(() => (InventoryItem?)null);
 
 When `T` is a reference type, `null` matches both `T?` and `Func<T>`, causing overload ambiguity. Either cast null to the explicit type or wrap it in a lambda.
 
-### Found In
+**Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
 
 ## Button("text", Icons.X) — icon as constructor argument
@@ -194,7 +194,7 @@ new Button("Add Item").Icon(Icons.Plus)
 
 The `Button` constructor signature is `Button(string label, Func<Event<Button>, ValueTask>? onClick = null, ...)`. The second parameter is a click handler, not an icon. Use the `.Icon(Icons.X)` fluent method to set an icon on a button.
 
-### Found In
+**Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
 
 ## NumberInputBase.Label() — AxisExtensions method used on input
@@ -219,7 +219,7 @@ state.ToForm().Label(m => m.Amount, "Adjustment amount")
 
 `.Label()` is an `AxisExtensions` method for chart axes, not for inputs. For labeling inputs, use `Text.Label()` as a separate element or use the form builder's `.Label()` method.
 
-### Found In
+**Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
 
 ## Tab.Content() — non-existent fluent method
@@ -242,7 +242,7 @@ new Tab("Customer Info", Layout.Vertical() | ...)
 
 **Note:** The IvyQuestion MCP tool also hallucinated this same API, returning `.Content()` as valid in two separate answers, reinforcing the agent's mistake.
 
-### Found In
+**Found In:**
 41ae072b-2845-46f1-bd0b-a4a6370c6807
 
 ## Layout.Tabs() | Tab — pipe operator on TabView
@@ -263,7 +263,7 @@ Layout.Tabs(customerInfoTab, yourInfoTab)
 
 The `|` pipe operator works on `LayoutView` (for composing children) but does NOT exist on `TabView`. Tabs must be passed as constructor arguments via `Layout.Tabs(params Tab[] tabs)`.
 
-### Found In
+**Found In:**
 41ae072b-2845-46f1-bd0b-a4a6370c6807
 
 ## ToastVariant — non-existent enum
@@ -284,7 +284,7 @@ client.Error("Something went wrong."); // error toast
 
 `ToastVariant` does not exist. The `IClientProvider.Toast()` method takes `(string message)` or `(string message, string title)`. For error toasts, use `client.Error(message)` instead.
 
-### Found In
+**Found In:**
 d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
 
 ## DateTimeVariant — wrong enum name
@@ -305,7 +305,7 @@ date.ToDateTimeInput().Variant(DateTimeInputVariants.Date)
 
 The enum is `DateTimeInputVariants` (plural with "Variants" suffix), not `DateTimeVariant` (singular). Values: `DateTime`, `Date`, `Time`, `Month`, `Week`. This follows the same naming pattern as `TextInputVariants`.
 
-### Found In
+**Found In:**
 d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
 
 ## FormBuilder.Header() — non-existent method
@@ -328,7 +328,7 @@ entity.ToForm()
 
 `FormBuilder` does not have a `.Header()` method. The title/header is set when converting the form to a dialog or sheet via `.ToDialog(title:)` or `.ToSheet(title:)`. The agent confused this with `Card.Header()` or `BladeHeader`.
 
-### Found In
+**Found In:**
 d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002, 003)
 
 ## Badge.Color(Colors.X) — non-existent fluent method
@@ -354,7 +354,7 @@ new Badge(match.Value).Variant(BadgeVariant.Info)
 
 Available `BadgeVariant` values: `Primary`, `Destructive`, `Secondary`, `Outline`, `Success`, `Warning`, `Info`. The agent confused `LabelExtensions.Color(Label, Colors)` (which exists for `Label`) with a Badge method. Badge uses `BadgeVariant`, not `Colors`.
 
-### Found In
+**Found In:**
 3c507fb4-71e1-4136-9d40-8eca6590250d
 ce144de9-0688-490a-bef6-b2766e323154
 
@@ -377,7 +377,7 @@ Callout.Success("Success message")
 
 `Callout` uses static factory methods, not a constructor + `.Color()` chain. This is a variant of the documented `Callout.Destructive()` hallucination — both stem from the agent trying to apply fluent styling to Callout instead of using the static factory pattern. To change variant after creation, use `.Variant(CalloutVariant.Warning)`.
 
-### Found In
+**Found In:**
 3c507fb4-71e1-4136-9d40-8eca6590250d
 
 ## Spacer(int) constructor — non-existent constructor overload
@@ -400,7 +400,7 @@ new Spacer().Width(6)
 
 Spacer has only a parameterless constructor. Use fluent `.Height()` or `.Width()` to set size.
 
-### Found In
+**Found In:**
 276d383f-696e-4d67-bc6e-14502c59734b
 
 ## Button.Color(Colors.X) — non-existent fluent method
@@ -415,7 +415,7 @@ new Button(label).Color(colors[i])
 **Correct API:**
 Button doesn't have `.Color()`. Use `.Variant(ButtonVariant.X)` or fluent shortcuts like `.Primary()`, `.Destructive()`. `.Color()` only exists on `Label` via `LabelExtensions`. Variant of documented `Badge.Color()` and `Callout.Color()` patterns.
 
-### Found In
+**Found In:**
 276d383f-696e-4d67-bc6e-14502c59734b
 
 ## UseAlert().ShowInfo() — wrong API usage
@@ -436,7 +436,7 @@ showAlert("message", result => { }, "title", AlertButtonSet.Ok);
 
 `UseAlert()` returns a tuple `(IView? alertView, ShowAlertDelegate showAlert)`, not an object with methods. Destructure the tuple and call the delegate directly. The `alertView` must be included in the returned view tree.
 
-### Found In
+**Found In:**
 276d383f-696e-4d67-bc6e-14502c59734b
 
 ## Size.Flex() — non-existent static method
@@ -456,7 +456,7 @@ new Spacer().Width(Size.Grow())
 
 The agent confused CSS flexbox terminology with Ivy's API.
 
-### Found In
+**Found In:**
 276d383f-696e-4d67-bc6e-14502c59734b
 
 ## RefreshToken.Version — non-existent property
@@ -473,7 +473,7 @@ refreshToken.Version
 
 Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseRefreshToken.cs`
 
-### Found In
+**Found In:**
 a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 002-005, 008-009)
 
 ## QueryResult\<T\>.Data — wrong property name
@@ -490,7 +490,7 @@ queryResult.Data
 
 Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
 
-### Found In
+**Found In:**
 a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 002, 004)
 
 ## QueryResult\<T\>.IsLoading — wrong property name
@@ -505,7 +505,7 @@ queryResult.IsLoading
 **Correct API:**
 `queryResult.Loading` — The property is `.Loading`, not `.IsLoading`. Similarly, `.Validating` not `.IsValidating`, and `.Previous` not `.IsPrevious`.
 
-### Found In
+**Found In:**
 a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 002, 004)
 
 ## ListItem.Description / ListItem.Meta / ListItem.Actions — non-existent members
@@ -524,7 +524,7 @@ ListItem.Actions(button1, button2)
 
 Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Widgets\Lists\ListItem.cs`
 
-### Found In
+**Found In:**
 a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 008, 009)
 
 ## Size.Sm — non-existent member
@@ -539,7 +539,7 @@ Size.Sm
 **Correct API:**
 `Size` does not have Tailwind-style size aliases like `Sm`, `Md`, `Lg`. Use `Size.Units(n)` for specific pixel values, or `Size.Full()`, `Size.Grow()`, `Size.Fit()` for relative sizing.
 
-### Found In
+**Found In:**
 a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 008, 009)
 
 ## String literal as Icons? — wrong type
@@ -555,7 +555,7 @@ new RowAction("Edit", icon: "edit")
 **Correct API:**
 Always use the `Icons` enum: `Icons.Pencil`, `Icons.Trash2`, `Icons.Plus`, etc. There is no implicit conversion from string to Icons. The refactoring service already handles invalid Icons enum values via LLM-based matching, but it cannot fix string-to-enum type mismatches.
 
-### Found In
+**Found In:**
 a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 002, 003, 005, 008)
 
 ## Text.Small("text") — static factory confusion
@@ -576,7 +576,7 @@ Text.Block(frequencyText).Small().Muted()
 
 `Small()` is an instance modifier on `TextBuilder` (returns `Scale(Ivy.Scale.Small)`), not a static factory. The static factories are `Text.P()`, `Text.H1()`, `Text.H2()`, `Text.H3()`, `Text.H4()`, `Text.Block()`, `Text.Label()`, etc. Chain `.Small()` after creating the text.
 
-### Found In
+**Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
 
 ## Box.BorderRadius(int) — wrong argument type
@@ -595,7 +595,7 @@ new Box(content).BorderRadius(BorderRadius.Rounded)
 
 `Box.BorderRadius()` takes a `BorderRadius` enum (`None`, `Rounded`, `Full`), not an integer. The agent ignored the IvyQuestion MCP response and used an int literal instead.
 
-### Found In
+**Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
 
 ## GridView.Background() — non-existent method
@@ -616,7 +616,7 @@ new Box(
 
 `GridView` does not have a `.Background()` method. To add a background color to a grid, wrap it in a `Box` and use `.Color()` on the Box. This pattern applies to any view that needs a background color — `Box` is the universal container for adding visual styling.
 
-### Found In
+**Found In:**
 7e97011f-41b3-42d3-98ea-3b7faad347c2
 
 ## Size.Pixels() — wrong method name
@@ -635,7 +635,7 @@ Size.Px(280)
 
 The method is `Size.Px()`, not `Size.Pixels()`. The agent expanded the abbreviated name. **Auto-fixed:** The refactoring service automatically rewrites `Size.Pixels(...)` → `Size.Px(...)`.
 
-### Found In
+**Found In:**
 7c51c481-c48e-4398-8db3-60cfac6379d5 (trace 002)
 
 ## string.ToCodeInput() — wrong receiver type
@@ -660,7 +660,7 @@ editableState.ToCodeInput().Language(Languages.Json)
 
 `.ToCodeInput()` is an extension on `IAnyState`, not on `string`. For display-only code, use `CodeBlock` instead of a code input. Only use `.ToCodeInput()` when the user needs to edit the code, and bind the string to state first.
 
-### Found In
+**Found In:**
 535f38d4-b9d5-43bf-a3d9-b4b17e6ecbb0
 
 ## State\<T\> — non-existent type
@@ -679,7 +679,7 @@ var players = UseState(new List<Player>());
 
 `State<T>` does not exist. `UseState<T>()` returns `IState<T>`. State is created inside `Build()` via hooks, not stored as fields.
 
-### Found In
+**Found In:**
 84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 006, 008)
 
 ## IRefreshToken — non-existent interface
@@ -698,7 +698,7 @@ var refreshToken = UseRefreshToken();
 
 `IRefreshToken` does not exist. `UseRefreshToken()` returns a `RefreshToken` class. Like all hooks, call inside `Build()`.
 
-### Found In
+**Found In:**
 84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 005, 006)
 
 ## DataTable\<T\> — non-generic type used with type arguments
@@ -717,7 +717,7 @@ players.ToDataTable()
 
 `DataTable` is non-generic. Use `.ToDataTable()` extension method on `IEnumerable<T>` or `IQueryable<T>`.
 
-### Found In
+**Found In:**
 84faf65a-c7df-4b5a-888b-4c49255c50ab (trace 004)
 
 ## Shrink(int) — method takes no arguments
@@ -736,7 +736,7 @@ Text.P("vs").Shrink()
 
 `.Shrink()` takes no arguments. It is a simple fluent modifier.
 
-### Found In
+**Found In:**
 84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 007)
 
 ## Card.Padding() — non-existent method
@@ -755,7 +755,7 @@ new Box(content).Padding(20)
 
 `Card` has no `.Padding()` method. Cards have built-in padding. For custom padding, wrap content in a `Box`.
 
-### Found In
+**Found In:**
 84faf65a-c7df-4b5a-888b-4c49255c50ab (trace 004)
 
 ## Server Configuration
