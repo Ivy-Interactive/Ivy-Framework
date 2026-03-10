@@ -227,6 +227,54 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
   );
 };
 
+interface CustomColorPickerProps {
+  scale: Scales;
+  disabled: boolean;
+  invalid?: string;
+  displayColor: string;
+  actualColor: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const CustomColorPicker: React.FC<CustomColorPickerProps> = ({
+  scale,
+  disabled,
+  invalid,
+  displayColor,
+  actualColor,
+  onChange,
+}) => (
+  <div
+    className={cn(
+      colorInputPickerVariant({ scale }),
+      'relative shrink-0 rounded-md overflow-hidden bg-transparent border',
+      disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+      invalid ? inputStyles.invalidInput : 'border-input shadow-sm'
+    )}
+  >
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        backgroundImage:
+          'repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)',
+        backgroundSize: '12px 12px',
+      }}
+    />
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{ backgroundColor: actualColor || 'transparent' }}
+    />
+    <input
+      type="color"
+      value={displayColor}
+      onChange={onChange}
+      disabled={disabled}
+      title="Choose color"
+      className="absolute w-[200%] h-[200%] top-[-50%] left-[-50%] opacity-0 cursor-pointer disabled:cursor-not-allowed"
+    />
+  </div>
+);
+
 export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   id,
   value,
@@ -462,20 +510,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   if (variant === 'Picker') {
     return (
       <div className="flex items-center space-x-2">
-        <div className="relative">
-          <input
-            type="color"
-            value={getDisplayColor()}
-            onChange={handleColorChange}
-            disabled={disabled}
-            className={cn(
-              colorInputPickerVariant({ scale }),
-              'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
-              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-              invalid && inputStyles.invalidInput
-            )}
-          />
-        </div>
+        <CustomColorPicker
+          scale={scale}
+          disabled={disabled}
+          invalid={invalid}
+          displayColor={getDisplayColor()}
+          actualColor={convertToHex(displayValue)}
+          onChange={handleColorChange}
+        />
         {allowAlpha && (
           <AlphaSlider
             color={getDisplayColor()}
@@ -492,20 +534,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   // Default: TextAndPicker
   return (
     <div className="flex items-center space-x-2">
-      <div className="relative">
-        <input
-          type="color"
-          value={getDisplayColor()}
-          onChange={handleColorChange}
-          disabled={disabled}
-          className={cn(
-            colorInputPickerVariant({ scale }),
-            'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
-            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-            invalid && inputStyles.invalidInput
-          )}
-        />
-      </div>
+      <CustomColorPicker
+        scale={scale}
+        disabled={disabled}
+        invalid={invalid}
+        displayColor={getDisplayColor()}
+        actualColor={convertToHex(displayValue)}
+        onChange={handleColorChange}
+      />
       <div className="relative">
         <Input
           type="text"
