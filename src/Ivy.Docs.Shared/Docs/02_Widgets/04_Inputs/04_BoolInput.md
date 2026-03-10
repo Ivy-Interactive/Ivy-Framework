@@ -107,7 +107,7 @@ public class CheckBoxDemo : ViewBase
         
         return Layout.Horizontal()
             | agreed.ToBoolInput()
-                .Variant(BoolInputVariants.Checkbox)
+                .Variant(BoolInputVariant.Checkbox)
                 .Label("Agree to terms and conditions")
             | (agreed.Value ? Text.InlineCode("You are all set!") : null);
     }
@@ -152,7 +152,7 @@ The `ToSwitchInput` extension method also supports an optional `icon` parameter,
 
 `Toggle` is a button-style boolean input that switches between two states (on/off, enabled/disabled) with a single click.
 It appears as a pressable [button](../03_Common/01_Button.md) that visually indicates its current state through styling and optional icons.
-This is represented by `BoolInputVariants.Toggle`
+This is represented by `BoolInputVariant.Toggle`
 
 `ToToggleInput` extension function can be used to create such a `BoolInput.Toggle` variant.
 The following is a small demo showing how such a control may be used.
@@ -241,13 +241,13 @@ public class SimpleFlightBooking : ViewBase
                 | isRoundTrip.ToSwitchInput().Label("Round Trip")
                 // Departure Date (always visible)
                 | departureDate.ToDateTimeInput()
-                              .Variant(DateTimeInputVariants.Date)
+                              .Variant(DateTimeInputVariant.Date)
                               .Placeholder("Select departure date")
                               .WithField()
                               .Label("Departure Date:")
                 // Return Date (only visible when round trip is on)
                 | returnDate.ToDateTimeInput()
-                           .Variant(DateTimeInputVariants.Date)
+                           .Variant(DateTimeInputVariant.Date)
                            .Placeholder("Select return date")
                            .Disabled(!isRoundTrip.Value)
                            .WithField()

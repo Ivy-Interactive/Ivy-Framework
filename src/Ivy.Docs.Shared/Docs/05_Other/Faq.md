@@ -1,4 +1,4 @@
-﻿# Faq
+# Faq
 
 ## How do I copy text to the clipboard in Ivy?
 
@@ -15,7 +15,7 @@ client.Toast("Copied to clipboard!");
 
 ## How do I create a multiline textarea TextInput in Ivy?
 
-Use the `TextInputVariants.Textarea` variant or the dedicated `ToTextareaInput` extension:
+Use the `TextInputVariant.Textarea` variant or the dedicated `ToTextareaInput` extension:
 
 ```csharp
 state.ToTextareaInput(placeholder: "Enter text...")
