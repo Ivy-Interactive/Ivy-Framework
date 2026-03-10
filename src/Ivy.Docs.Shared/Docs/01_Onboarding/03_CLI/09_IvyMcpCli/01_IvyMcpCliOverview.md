@@ -15,7 +15,7 @@ searchHints:
 Integrate AI tools directly into your workflow with the Ivy Model Context Protocol (MCP) CLI. Access deep source analysis, codebase documentation, and more directly from your terminal.
 </Ingress>
 
-Ivy MCP CLI exposes [Ivy's Model Context Protocol server Tools](../../../03_Advanced/01_MCP/01_McpOverview.md) as individual, stand-alone CLI commands. This enables both human developers and standalone agentic bots to query your project's architecture, look up documentation, and manipulate the environment.
+Ivy MCP CLI exposes [Ivy's Model Context Protocol server Tools](../../01_GettingStarted/07_IvyMCPServer/_Index.md) as individual, stand-alone CLI commands. This enables both human developers and standalone agentic bots to query your project's architecture, look up documentation, and manipulate the environment.
 
 ## Available Commands
 
