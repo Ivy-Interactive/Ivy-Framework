@@ -11,9 +11,7 @@ searchHints:
 Query the local context dynamically using integrated Local RAG features specifically tailored to your semantic `ivyVersion`.
 </Ingress>
 
-The `ivy question` command executes semantic queries across the comprehensive framework knowledge base. When asked "how" to do something or for code examples regarding Ivy internals, the underlying LLM cross-references the latest indexed state of `Ivy.Docs.Shared`.
-
-It utilizes the `QuestionsTool` from the Ivy MCP Server.
+The `ivy question` command executes semantic queries across the comprehensive framework knowledge base. When asked "how" to do something or for code examples regarding Ivy internals, the underlying engine cross-references the latest indexed state of `Ivy.Docs.Shared`.
 
 ## Usage
 
