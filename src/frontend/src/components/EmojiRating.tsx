@@ -48,7 +48,7 @@ export function EmojiRating({
       >
         {emojis.map((emoji, index) => (
           <button
-            key={index}
+            key={emoji}
             type="button"
             className={cn(
               'relative focus-visible:outline-none focus-visible:ring-2',

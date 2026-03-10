@@ -72,6 +72,8 @@ const ImageOverlay = ({
     <div
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 cursor-zoom-out"
       onClick={handleBackdropClick}
+      role="presentation"
+      onKeyDown={e => e.key === 'Escape' && onClose()}
     >
       <div className="relative max-w-[90vw] max-h-[90vh]">
         <img
@@ -409,6 +411,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                 className={cn(typography.img, 'cursor-zoom-in')}
                 loading="lazy"
                 onClick={() => setShowOverlay(true)}
+                onKeyDown={e => e.key === 'Enter' && setShowOverlay(true)}
+                role="button"
+                tabIndex={0}
               />
               {showOverlay && (
                 <ImageOverlay
@@ -462,7 +467,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               hasCodeBlocks={contentFeatures.hasCodeBlocks}
               hasMermaid={contentFeatures.hasMermaid}
             >
-              {children || ''}
+              {children}
             </CodeBlock>
           );
         }

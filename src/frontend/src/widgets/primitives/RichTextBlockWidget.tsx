@@ -35,15 +35,18 @@ const scaleClasses: Record<string, string> = {
   [Scales.Large]: typography.large,
 };
 
+const EMPTY_RUNS: TextRun[] = [];
+const EMPTY_EVENTS: string[] = [];
+
 export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
   id,
-  runs = [],
+  runs = EMPTY_RUNS,
   stream,
   textAlignment,
   noWrap,
   overflow,
   scale,
-  events = [],
+  events = EMPTY_EVENTS,
 }) => {
   const [streamedRuns, setStreamedRuns] = useState<TextRun[]>([]);
   const eventHandler = useEventHandler();
@@ -97,7 +100,7 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
           const isBlank = run.linkTarget === 'Blank';
           return (
             <a
-              key={index}
+              key={`link-${index}-${run.link}`}
               href={run.link}
               target={isBlank ? '_blank' : '_self'}
               rel={isBlank ? 'noopener noreferrer' : undefined}
@@ -116,7 +119,11 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
         }
 
         return (
-          <span key={index} className={className} style={runStyles}>
+          <span
+            key={`text-${index}-${run.content?.slice(0, 10) || ''}`}
+            className={className}
+            style={runStyles}
+          >
             {content}
           </span>
         );

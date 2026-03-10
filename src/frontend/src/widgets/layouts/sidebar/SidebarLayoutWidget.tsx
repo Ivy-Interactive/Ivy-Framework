@@ -315,6 +315,8 @@ interface SidebarMenuWidgetProps {
   searchActive?: boolean;
 }
 
+const EMPTY_ITEMS: MenuItem[] = [];
+
 const getFlatItemsInSearchRenderOrder = (items: MenuItem[]): MenuItem[] => {
   const result: MenuItem[] = [];
   for (const item of items) {
@@ -563,7 +565,7 @@ const renderMenuItems = (
 
 export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   id,
-  items = [],
+  items = EMPTY_ITEMS,
   searchActive = false,
 }) => {
   const eventHandler = useEventHandler();
@@ -850,6 +852,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         ).current = el;
         containerRef.current = el;
       }}
+      role="menu"
       tabIndex={0}
       onFocus={() => {
         if (searchActive && flatItems.length > 0) setSelectedIndex(0);

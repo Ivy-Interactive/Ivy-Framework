@@ -2,6 +2,8 @@ import { getHeight, getWidth } from '@/lib/styles';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useEventHandler } from '@/components/event-handler';
 
+const EMPTY_EVENTS: string[] = [];
+
 interface IframeWidgetProps {
   id: string;
   src: string;
@@ -19,7 +21,7 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
   width = 'Full',
   height = 'Full',
   refreshToken,
-  events = [],
+  events = EMPTY_EVENTS,
   outboundMessageType,
   outboundMessageToken,
 }) => {

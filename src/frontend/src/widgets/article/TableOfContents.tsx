@@ -1,18 +1,22 @@
 import { cn } from '@/lib/utils';
 import React, { useEffect, useState, useRef } from 'react';
 
+type HeadingNode = { id: string; text: string; level: number; offset?: number };
+
 interface TableOfContentsProps {
   articleRef: React.RefObject<HTMLElement | null>;
   show?: boolean;
   onLoadingChange?: (isLoading: boolean) => void;
-  headings?: { id: string; text: string; level: number }[];
+  headings?: HeadingNode[];
 }
+
+const EMPTY_HEADINGS: HeadingNode[] = [];
 
 export const TableOfContents: React.FC<TableOfContentsProps> = ({
   articleRef,
   show = true,
   onLoadingChange,
-  headings = [],
+  headings = EMPTY_HEADINGS,
 }) => {
   const [activeId, setActiveId] = useState<string>('');
   const [isUserNavigating, setIsUserNavigating] = useState(false);
