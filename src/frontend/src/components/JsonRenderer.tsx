@@ -54,6 +54,14 @@ export const JsonRenderer = ({ data }: JsonRendererProps) => {
       <div>
         <div
           onClick={() => toggleNode(path)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleNode(path);
+            }
+          }}
           className="flex items-center cursor-pointer hover:bg-accent rounded px-1 transition-colors"
         >
           {isExpanded ? (

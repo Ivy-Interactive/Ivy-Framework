@@ -164,6 +164,7 @@ const VariantComponents = {
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
+          role="presentation"
         >
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(checkboxElement, invalid)}
@@ -219,6 +220,7 @@ const VariantComponents = {
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
+          role="presentation"
         >
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(switchElement, invalid)}
@@ -276,6 +278,7 @@ const VariantComponents = {
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
+          role="presentation"
         >
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(toggleElement, invalid)}

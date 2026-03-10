@@ -122,6 +122,18 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
         <div
           className={`flex items-center ${hasChildren ? 'cursor-pointer hover:bg-accent rounded transition-colors' : ''} px-1`}
           onClick={hasChildren ? () => toggleNode(path) : undefined}
+          role={hasChildren ? 'button' : 'presentation'}
+          tabIndex={hasChildren ? 0 : undefined}
+          onKeyDown={
+            hasChildren
+              ? e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleNode(path);
+                  }
+                }
+              : undefined
+          }
         >
           {hasChildren &&
             (isExpanded ? (
@@ -139,9 +151,9 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
         {hasChildren && isExpanded && (
           <div className="ml-4 border-l border-border">
-            {node.children?.map((child, index) => (
-              <div key={index} className="py-1 ml-2">
-                {renderNode(child, `${path}.${index}`)}
+            {node.children?.map((child, i) => (
+              <div key={i} className="py-1 ml-2">
+                {renderNode(child, `${path}.${i}`)}
               </div>
             ))}
           </div>

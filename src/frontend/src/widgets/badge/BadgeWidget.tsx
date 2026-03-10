@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Scales } from '@/types/scale';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface BadgeWidgetProps {
   title: string;
   icon?: string;
@@ -30,7 +32,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   variant = 'Primary',
   scale = Scales.Medium,
   id,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
   const isClickable = events.includes('OnClick');

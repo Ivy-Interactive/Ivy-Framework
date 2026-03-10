@@ -48,6 +48,7 @@ export function BladeWidget({
       <div
         className="flex items-center justify-between px-4 bg-background text-foreground h-[70px] border-b border-border"
         onMouseDown={e => handleMouseDown(e)}
+        role="presentation"
       >
         <div className="flex items-center h-[70px]">
           {!slots?.BladeHeader && title && (

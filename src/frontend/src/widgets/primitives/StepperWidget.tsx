@@ -4,6 +4,8 @@ import { getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
 
+const EMPTY_ARRAY: never[] = [];
+
 export interface StepperItem {
   symbol: string;
   icon?: string;
@@ -24,10 +26,10 @@ interface StepperWidgetProps {
 export const StepperWidget: React.FC<StepperWidgetProps> = ({
   id,
   selectedIndex = 0,
-  items = [],
+  items = EMPTY_ARRAY,
   width,
   allowSelectForward = false,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
   const hasSelectHandler = events.includes('OnSelect');
@@ -66,7 +68,7 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
               (state === 'upcoming' && allowSelectForward));
 
           return (
-            <React.Fragment key={index}>
+            <React.Fragment key={item.label || item.symbol}>
               <button
                 type="button"
                 onClick={() => handleSelect(index)}
@@ -118,7 +120,7 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
           const isLast = index === items.length - 1;
 
           return (
-            <React.Fragment key={index}>
+            <React.Fragment key={item.label || item.symbol}>
               {/* Label container - same width as circle (w-8) */}
               <div
                 className={cn(

@@ -115,10 +115,11 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
               onClick={e => e.stopPropagation()}
               onKeyDown={e => e.stopPropagation()}
               onPointerDown={e => e.stopPropagation()}
+              role="toolbar"
             >
-              {rowActions.map((action, index) => (
+              {rowActions.map(action => (
                 <ActionRenderer
-                  key={`${action.label}-${index}`}
+                  key={action.tag || action.label}
                   action={action}
                   onActionClick={clickedAction =>
                     onRowActionClick(item, clickedAction)
@@ -130,9 +131,9 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
         </div>
         <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
           <div className="ivy-tree-children pl-3 ml-2 border-l border-border/50">
-            {item.children!.map((child, index) => (
+            {item.children!.map(child => (
               <TreeItem
-                key={`${child.label}-${index}`}
+                key={child.tag || child.label}
                 item={child}
                 onItemClick={onItemClick}
                 rowActions={rowActions}
@@ -176,10 +177,11 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
           onClick={e => e.stopPropagation()}
           onKeyDown={e => e.stopPropagation()}
           onPointerDown={e => e.stopPropagation()}
+          role="toolbar"
         >
-          {rowActions.map((action, index) => (
+          {rowActions.map(action => (
             <ActionRenderer
-              key={`${action.label}-${index}`}
+              key={action.tag || action.label}
               action={action}
               onActionClick={clickedAction =>
                 onRowActionClick(item, clickedAction)

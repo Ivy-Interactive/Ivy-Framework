@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { m, LazyMotion, domAnimation } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
 import { cn, getIvyHost, camelCase } from '@/lib/utils';
@@ -251,20 +251,22 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
         )}
       >
         {/* Rotating RGB gradient border - scaled up to cover entire button */}
-        <motion.div
-          className="absolute inset-[-50%] aspect-square"
-          style={{
-            background:
-              'conic-gradient(from 0deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)',
-            filter: 'blur(10px)',
-          }}
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        />
+        <LazyMotion features={domAnimation}>
+          <m.div
+            className="absolute inset-[-50%] aspect-square"
+            style={{
+              background:
+                'conic-gradient(from 0deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)',
+              filter: 'blur(10px)',
+            }}
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          />
+        </LazyMotion>
         <ButtonWithTooltip
           asChild={hasUrl}
           size={buttonSize}

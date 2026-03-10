@@ -17,11 +17,13 @@ import {
   applyDefaults,
 } from './chartDefaults';
 
+const EMPTY_ARRAY: never[] = [];
+
 const PieChartWidget: React.FC<PieChartWidgetProps> = ({
-  data = [],
+  data = EMPTY_ARRAY,
   width = 'Full',
   height = 'Full',
-  pies = [],
+  pies = EMPTY_ARRAY,
   tooltip,
   toolbox,
   legend,

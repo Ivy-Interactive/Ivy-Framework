@@ -19,6 +19,8 @@ import { MenuItem } from '@/types/widgets';
 import Icon from '@/components/Icon';
 import { camelCase } from '@/lib/utils';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface DropDownMenuWidgetProps {
   id: string;
   items: MenuItem[];
@@ -34,7 +36,7 @@ interface DropDownMenuWidgetProps {
 export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   slots,
   id,
-  items = [],
+  items = EMPTY_ARRAY,
   align = 'Start',
   side = 'Bottom',
   alignOffset = 0,
@@ -69,11 +71,11 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   };
 
   const renderMenuItems = (items: MenuItem[]) => {
-    return items.map((item, index) => {
+    return items.map((item, i) => {
       // Handle group variant
       if (item.variant === 'Group' && item.children) {
         return (
-          <React.Fragment key={`group-${index}`}>
+          <React.Fragment key={item.label || `group-${i}`}>
             {item.label && <DropdownMenuLabel>{item.label}</DropdownMenuLabel>}
             <DropdownMenuGroup>
               {renderMenuItems(item.children)}
@@ -84,7 +86,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
 
       // Handle separator variant
       if (item.variant === 'Separator') {
-        return <DropdownMenuSeparator key={`separator-${index}`} />;
+        return <DropdownMenuSeparator key={`separator-${i}`} />;
       }
 
       // Handle checkbox variant

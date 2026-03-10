@@ -100,7 +100,7 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
           const isBlank = run.linkTarget === 'Blank';
           return (
             <a
-              key={`link-${index}-${run.link}`}
+              key={run.link + (run.content || '')}
               href={run.link}
               target={isBlank ? '_blank' : '_self'}
               rel={isBlank ? 'noopener noreferrer' : undefined}
@@ -121,7 +121,7 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
 
         return (
           <span
-            key={`text-${index}-${run.content?.slice(0, 10) || ''}`}
+            key={run.content || 'empty-text'}
             className={className}
             style={runStyles}
           >

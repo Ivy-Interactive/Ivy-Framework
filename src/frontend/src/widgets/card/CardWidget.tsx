@@ -11,6 +11,8 @@ import React, { useCallback } from 'react';
 import { Scales } from '@/types/scale';
 import { cardStyles, getSizeClasses } from './styles';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface CardWidgetProps {
   id: string;
   events: string[];
@@ -29,7 +31,7 @@ interface CardWidgetProps {
 
 export const CardWidget: React.FC<CardWidgetProps> = ({
   id,
-  events = [],
+  events = EMPTY_ARRAY,
   width = 'Full',
   height,
   hoverVariant = 'None',

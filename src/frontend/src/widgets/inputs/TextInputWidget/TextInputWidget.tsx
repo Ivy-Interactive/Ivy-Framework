@@ -10,6 +10,8 @@ import {
   SearchVariant,
 } from './variants';
 
+const EMPTY_ARRAY: never[] = [];
+
 export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   id,
   placeholder,
@@ -20,7 +22,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   nullable = false,
   width,
   height,
-  events = [],
+  events = EMPTY_ARRAY,
   shortcutKey,
   scale = Scales.Medium,
   prefix,

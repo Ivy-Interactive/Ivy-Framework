@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/input/file-input-variants';
 import { validateSingleFile, validateFileCount } from './file-input-validation';
 
+const EMPTY_ARRAY: never[] = [];
+
 enum FileInputStatus {
   Pending = 'Pending',
   Aborted = 'Aborted',
@@ -54,7 +56,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  events = [],
+  events = EMPTY_ARRAY,
   width,
   accept,
   maxFileSize,
@@ -398,6 +400,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           'p-4'
         )}
         onClick={handleClick}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e as unknown as React.MouseEvent);
+          }
+        }}
       >
         <Input
           ref={inputRef}

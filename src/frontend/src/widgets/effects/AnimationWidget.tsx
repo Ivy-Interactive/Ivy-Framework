@@ -1,5 +1,12 @@
 import React from 'react';
-import { motion, AnimatePresence, Variants, Transition } from 'framer-motion';
+import {
+  m,
+  LazyMotion,
+  domAnimation,
+  AnimatePresence,
+  Variants,
+  Transition,
+} from 'framer-motion';
 
 interface AnimationWidgetProps {
   children?: React.ReactNode;
@@ -358,23 +365,25 @@ const AnimationWidget: React.FC<AnimationWidgetProps> = props => {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          initial="initial"
-          animate={isAnimating ? 'animate' : 'initial'}
-          exit="exit"
-          variants={variants}
-          onClick={handleClick}
-          onHoverStart={handleHoverStart}
-          onHoverEnd={handleHoverEnd}
-          onAnimationComplete={handleAnimationComplete}
-          style={{
-            cursor: trigger === 'Click' ? 'pointer' : 'default',
-            display: 'inline-block',
-            transformOrigin: 'center center',
-          }}
-        >
-          {children}
-        </motion.div>
+        <LazyMotion features={domAnimation}>
+          <m.div
+            initial="initial"
+            animate={isAnimating ? 'animate' : 'initial'}
+            exit="exit"
+            variants={variants}
+            onClick={handleClick}
+            onHoverStart={handleHoverStart}
+            onHoverEnd={handleHoverEnd}
+            onAnimationComplete={handleAnimationComplete}
+            style={{
+              cursor: trigger === 'Click' ? 'pointer' : 'default',
+              display: 'inline-block',
+              transformOrigin: 'center center',
+            }}
+          >
+            {children}
+          </m.div>
+        </LazyMotion>
       )}
     </AnimatePresence>
   );

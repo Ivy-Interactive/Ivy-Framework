@@ -16,6 +16,8 @@ import { cn } from '@/lib/utils';
 import React, { useCallback } from 'react';
 import { useEventHandler } from '@/components/event-handler';
 
+const EMPTY_ARRAY: never[] = [];
+
 export type BoxHoverVariant = 'None' | 'Pointer' | 'PointerAndTranslate';
 
 interface BoxWidgetProps {
@@ -54,7 +56,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   opacity,
   borderOpacity,
   className,
-  events = [],
+  events = EMPTY_ARRAY,
   hoverVariant = 'None',
 }) => {
   const eventHandler = useEventHandler();
@@ -102,16 +104,24 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
         ? 'cursor-pointer'
         : 'cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition';
   return (
-    <>
-      <div
-        style={styles}
-        className={cn(className, hoverClass)}
-        onClick={isClickable ? handleClick : undefined}
-        role={isClickable ? 'button' : undefined}
-        tabIndex={isClickable ? 0 : undefined}
-      >
-        {children}
-      </div>
-    </>
+    <div
+      style={styles}
+      className={cn(className, hoverClass)}
+      onClick={isClickable ? handleClick : undefined}
+      onKeyDown={
+        isClickable
+          ? e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleClick(e as unknown as React.MouseEvent);
+              }
+            }
+          : undefined
+      }
+      role={isClickable ? 'button' : 'presentation'}
+      tabIndex={isClickable ? 0 : undefined}
+    >
+      {children}
+    </div>
   );
 };

@@ -242,6 +242,7 @@ function MonthYearInput({
       className="flex items-center border border-input rounded-field px-1 py-0.5 gap-0.5 bg-background pointer-events-auto mx-auto w-fit"
       onMouseDown={e => e.stopPropagation()}
       onClick={e => e.stopPropagation()}
+      role="presentation"
     >
       <input
         value={monthStr}

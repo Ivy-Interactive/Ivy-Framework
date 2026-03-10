@@ -7,10 +7,12 @@ import { KanbanEmptyState } from './KanbanEmptyState';
 import { KanbanCardRenderer } from './KanbanCardRenderer';
 import type { KanbanWidgetProps } from './types';
 
+const EMPTY_ARRAY: never[] = [];
+
 export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   id,
-  columns = [],
-  tasks = [],
+  columns = EMPTY_ARRAY,
+  tasks = EMPTY_ARRAY,
   width,
   height,
   columnWidth,

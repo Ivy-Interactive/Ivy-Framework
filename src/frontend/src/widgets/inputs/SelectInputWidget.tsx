@@ -34,6 +34,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
 import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
+
+const EMPTY_ARRAY: never[] = [];
 // variants for SelectInputWidget container
 const selectContainerVariants = cva(
   'relative border border-input bg-transparent rounded-box shadow-sm focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
@@ -280,7 +282,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   selectMany = false,
   separator = ',',
@@ -514,7 +516,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   nullable = false,
   ghost = false,
@@ -632,7 +634,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   separator = ',',
   nullable = false,
@@ -910,7 +912,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   nullable = false,
   selectMany = false,

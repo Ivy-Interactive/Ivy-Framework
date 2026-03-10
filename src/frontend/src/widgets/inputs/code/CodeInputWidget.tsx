@@ -32,6 +32,8 @@ import {
 } from '@codemirror/view';
 import { history } from '@codemirror/commands';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface CodeInputWidgetProps {
   id: string;
   placeholder?: string;
@@ -73,7 +75,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   width,
   height,
   scale = Scales.Medium,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
   const [localValue, setLocalValue] = useState(value || '');

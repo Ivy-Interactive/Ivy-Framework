@@ -161,8 +161,8 @@ const CodeBlock = memo(
                 )}
                 style={shouldWrap ? {} : { overflowX: 'auto' }}
               >
-                {lines.map((line, index) => (
-                  <div key={index} className="flex">
+                {lines.map((line, i) => (
+                  <div key={i} className="flex">
                     <span className="text-muted-foreground select-none pointer-events-none mr-2">
                       {'> '}
                     </span>

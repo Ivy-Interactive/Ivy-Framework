@@ -41,6 +41,8 @@ import {
   iconInputEmptyStateVariants,
 } from '@/components/ui/input/icon-input-variants';
 
+const EMPTY_ARRAY: never[] = [];
+
 // Lucide icon names (PascalCase) - React components are typeof 'object', not 'function'
 const LUCIDE_ICON_NAMES = (Object.keys(icons) as string[]).filter(
   name =>
@@ -70,7 +72,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   invalid,
   placeholder = 'Select an icon',
   nullable = false,
-  events = [],
+  events = EMPTY_ARRAY,
   scale = Scales.Medium,
 }) => {
   const eventHandler = useEventHandler();

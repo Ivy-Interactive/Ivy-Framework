@@ -14,6 +14,8 @@ import {
 } from '@/lib/styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface StackLayoutWidgetProps {
   children: React.ReactNode;
   orientation: Orientation;
@@ -47,7 +49,7 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   removeParentPadding = false,
   visible = true,
   wrap = false,
-  childAlignSelf = [],
+  childAlignSelf = EMPTY_ARRAY,
 }) => {
   const baseStyles: React.CSSProperties = {
     ...getPadding(padding),

@@ -5,6 +5,8 @@ import { ThumbsEnum, ThumbsRating } from '@/components/ui/thumbs-rating';
 import React, { useCallback, useMemo } from 'react';
 import { Scales } from '@/types/scale';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface FeedbackInputWidgetProps {
   id: string;
   value: number | boolean | null;
@@ -22,7 +24,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   variant = 'Stars',
   disabled = false,
   invalid,
-  events = [],
+  events = EMPTY_ARRAY,
   nullable = false,
   scale = Scales.Medium,
 }) => {

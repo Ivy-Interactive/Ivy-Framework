@@ -13,6 +13,8 @@ import {
 import { Scales } from '@/types/scale';
 import { xIconVariants } from '@/components/ui/input/text-input-variants';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface ColorInputWidgetProps {
   id: string;
   value: string | null;
@@ -231,7 +233,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   invalid,
   placeholder,
   nullable = false,
-  events = [],
+  events = EMPTY_ARRAY,
   variant = 'TextAndPicker',
   scale = Scales.Medium,
   allowAlpha = false,

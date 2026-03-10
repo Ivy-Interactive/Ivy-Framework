@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 import React from 'react';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface CalloutWidgetProps {
   id: string;
   title?: string;
@@ -54,7 +56,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   icon,
   width,
   height,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
   const showCloseButton = events.includes('OnClose');

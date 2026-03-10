@@ -1,6 +1,8 @@
 import { cn } from '@/lib/utils';
 import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 
+const EMPTY_ARRAY: never[] = [];
+
 export interface TerminalLine {
   content: string;
   isCommand?: boolean;
@@ -15,7 +17,7 @@ export interface TerminalWidgetProps {
 }
 
 const TerminalWidget = ({
-  lines = [],
+  lines = EMPTY_ARRAY,
   title,
   showHeader = true,
   showCopyButton = true,
@@ -58,12 +60,12 @@ const TerminalWidget = ({
           </div>
         )}
         <div className="bg-zinc-900 p-4 font-mono text-body overflow-x-auto">
-          {lines.map((line, index) => (
+          {lines.map((line, i) => (
             <div
-              key={index}
+              key={i}
               role="log"
               aria-label={line.isCommand ? 'Command' : 'Output'}
-              className={cn('whitespace-pre-wrap', index > 0 ? 'mt-1' : '')}
+              className={cn('whitespace-pre-wrap', i > 0 ? 'mt-1' : '')}
             >
               <div className="flex">
                 <div className="w-8 flex-shrink-0 relative flex items-start mt-1">
