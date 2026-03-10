@@ -88,8 +88,8 @@ public class AppHub(
 #endif
 
                 var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
-                var authServiceLogger = server.ServiceProvider?.GetService<ILoggerFactory>()?.CreateLogger<AuthProviderService>();
-                var authService = new AuthProviderService(authProvider, authSession, clientProvider, sessionStore, machineId, server.ServiceProvider, authServiceLogger);
+                var authServiceLogger = server.ServiceProvider?.GetService<ILoggerFactory>()?.CreateLogger<AuthService>();
+                var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore, machineId, server.ServiceProvider, authServiceLogger);
 
                 var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
@@ -100,7 +100,7 @@ public class AppHub(
                     authService.SetAuthCookies(reloadPage: false);
                 }
 
-                appServices.AddSingleton<IAuthProviderService>(s => authService);
+                appServices.AddSingleton<IAuthService>(s => authService);
 
                 oldSession = authSession.TakeSnapshot();
                 try
@@ -139,7 +139,7 @@ public class AppHub(
             // Override to Auth app if authentication failed
             if (server.AuthProviderType != null)
             {
-                var authService = appServices.BuildServiceProvider().GetService<IAuthProviderService>();
+                var authService = appServices.BuildServiceProvider().GetService<IAuthService>();
                 if (authService?.GetCurrentToken() == null)
                 {
                     var authApp = server.AppRepository.GetAppOrDefault(AppIds.Auth);
@@ -256,7 +256,7 @@ public class AppHub(
                 _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted), connectionAborted);
 
                 // Start a refresh loop for each OAuth provider session
-                var authService = appState.AppServices.GetService<IAuthProviderService>();
+                var authService = appState.AppServices.GetService<IAuthService>();
                 if (authService != null)
                 {
                     var authSession = authService.GetAuthSession();
@@ -362,7 +362,7 @@ public class AppHub(
                 // Get the auth session and unsubscribe
                 if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var tempAppState))
                 {
-                    var authService = tempAppState.AppServices.GetService<IAuthProviderService>();
+                    var authService = tempAppState.AppServices.GetService<IAuthService>();
                     if (authService != null)
                     {
                         var authSession = authService.GetAuthSession();
@@ -376,7 +376,7 @@ public class AppHub(
                 // Get the auth session and unsubscribe
                 if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var tempAppState))
                 {
-                    var authService = tempAppState.AppServices.GetService<IAuthProviderService>();
+                    var authService = tempAppState.AppServices.GetService<IAuthService>();
                     if (authService != null)
                     {
                         var authSession = authService.GetAuthSession();
@@ -589,7 +589,7 @@ public class AppHub(
     private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
     {
         var session = sessionStore.Sessions[connectionId];
-        var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
+        var authService = session.AppServices.GetRequiredService<IAuthService>();
         var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
         var authSession = authService.GetAuthSession();
 
@@ -621,7 +621,7 @@ public class AppHub(
             handler = new Ivy.Core.Auth.CheckedAuthTokenHandler(handler);
 #endif
 
-            var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
+            var authService = session.AppServices.GetRequiredService<IAuthService>();
             var authSession = authService.GetAuthSession();
 
             // Get the provider's session

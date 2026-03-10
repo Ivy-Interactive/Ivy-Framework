@@ -34,7 +34,7 @@ public class AuthController() : Controller
             return BadRequest("Authentication error");
         }
 
-        var authService = appSession.AppServices.GetService<IAuthProviderService>();
+        var authService = appSession.AppServices.GetService<IAuthService>();
         if (authService == null)
         {
             logger.LogWarning("OAuth login failed: Auth service not configured for connection {ConnectionId}", connectionId);

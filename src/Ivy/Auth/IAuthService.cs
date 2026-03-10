@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public interface IAuthProviderService : IAuthTokenHandlerService
+public interface IAuthService : IAuthTokenHandlerService
 {
     Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
 

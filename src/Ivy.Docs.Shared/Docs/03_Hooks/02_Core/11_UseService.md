@@ -57,7 +57,7 @@ public class Program
         var server = new Server()
             .UseService<IMyService, MyService>()
             .UseService<IDataService, DataService>(ServiceLifetime.Singleton)
-            .UseService<IAuthProviderService, AuthService>();
+            .UseService<IAuthService, AuthService>();
     }
 }
 ```

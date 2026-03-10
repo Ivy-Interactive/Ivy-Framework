@@ -25,7 +25,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var selectedIndex = UseState<int?>();
         var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
-        var auth = UseService<IAuthProviderService?>();
+        var auth = UseService<IAuthService?>();
         var user = UseState<UserInfo?>();
         var currentApp = UseState<AppHost?>();
         var search = UseState("");

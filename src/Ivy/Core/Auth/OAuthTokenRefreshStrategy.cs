@@ -8,7 +8,7 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
 {
     private readonly string _connectionId;
     private readonly IOAuthTokenService _tokenService;
-    private readonly IAuthProviderService _authService;
+    private readonly IAuthService _authService;
     private readonly AppSessionStore _sessionStore;
     private readonly IContentBuilder _contentBuilder;
     private readonly ILogger _logger;
@@ -18,7 +18,7 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
     public OAuthTokenRefreshStrategy(
         string connectionId,
         IOAuthTokenService tokenService,
-        IAuthProviderService authService,
+        IAuthService authService,
         AppSessionStore sessionStore,
         IContentBuilder contentBuilder,
         ILogger logger)

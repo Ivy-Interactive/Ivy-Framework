@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 // Resharper disable once CheckNamespace
 namespace Ivy;
 
-public class AuthProviderService(IAuthProvider authProvider, IAuthSession authSession, IClientProvider client, AppSessionStore sessionStore, string machineId, IServiceProvider? serviceProvider = null, ILogger<AuthProviderService>? logger = null) : IAuthProviderService
+public class AuthService(IAuthProvider authProvider, IAuthSession authSession, IClientProvider client, AppSessionStore sessionStore, string machineId, IServiceProvider? serviceProvider = null, ILogger<AuthService>? logger = null) : IAuthService
 {
     // Hold removed OAuth provider sessions so they can be updated in place and restored later
     private readonly Dictionary<string, IAuthTokenHandlerSession> _removedOAuthSessions = new();

@@ -131,12 +131,12 @@ If configuration is present in both .NET user secrets and environment variables,
 3. Credentials are validated by the configured authentication provider.
 4. If valid, Ivy establishes an authenticated session for the user.
 
-## Using IAuthProviderService in Views
+## Using IAuthService in Views
 
-Use [UseService](../../02_Concepts/01_Program.md) to obtain `IAuthProviderService` in your [views](../../02_Concepts/02_Views.md):
+Use [UseService](../../02_Concepts/01_Program.md) to obtain `IAuthService` in your [views](../../02_Concepts/02_Views.md):
 
 ```csharp
-var auth = UseService<IAuthProviderService>();
+var auth = UseService<IAuthService>();
 
 await auth.LoginAsync(email, password);
 var user = await auth.GetUserInfoAsync();
