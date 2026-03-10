@@ -1,12 +1,22 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
+using Ivy.Validation;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
+
+/// <summary>Internal: set by the framework during view.Build() so state.ToEmailInput() etc. can validate on blur without this. or duplicate methods.</summary>
+internal static class TextInputBuildContext
+{
+    private static readonly AsyncLocal<IViewContext?> Current = new();
+    public static void SetCurrent(IViewContext? context) => Current.Value = context;
+    internal static IViewContext? GetCurrent() => Current.Value;
+}
 
 public record Affix
 {
@@ -151,13 +161,15 @@ public static class TextInputExtensions
 
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Search);
 
-    public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Password);
-
-    public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Email);
-
-    public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Url);
-
-    public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Tel);
+    /// <summary>Email/Password/Url/Tel input. Validates on blur when built inside a view; in forms FormView also runs validation.</summary>
+    public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
+        TextInputBuildContext.GetCurrent() is { } ctx ? BuildValidatedInput(ctx, state, TextInputVariants.Email, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Email);
+    public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
+        TextInputBuildContext.GetCurrent() is { } ctxP ? BuildValidatedInput(ctxP, state, TextInputVariants.Password, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Password);
+    public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
+        TextInputBuildContext.GetCurrent() is { } ctxU ? BuildValidatedInput(ctxU, state, TextInputVariants.Url, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Url);
+    public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
+        TextInputBuildContext.GetCurrent() is { } ctxT ? BuildValidatedInput(ctxT, state, TextInputVariants.Tel, placeholder, disabled) : state.ToTextInput(placeholder, disabled, TextInputVariants.Tel);
 
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 
@@ -217,6 +229,21 @@ public static class TextInputExtensions
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
+    private static TextInputBase BuildValidatedInput(IViewContext context, IAnyState state, TextInputVariants variant, string? placeholder, bool disabled)
+    {
+        var invalidState = context.UseState(default(string?), true);
+        var blurOnceState = context.UseState(false, true);
+        context.UseEffect(() =>
+        {
+            if (blurOnceState.Value)
+            {
+                var (_, err) = Validators.ValidateForVariant(state.As<object>().Value, variant);
+                invalidState.Set(err ?? "");
+            }
+        }, state, blurOnceState);
+        void OnBlur(Event<IAnyInput> _) => blurOnceState.Set(true);
+        return state.ToTextInput(placeholder, disabled, variant).Invalid(invalidState.Value ?? "").OnBlur(OnBlur);
+    }
     public static TextInputBase Value<T>(this TextInputBase widget, T value)
     {
         if (widget is TextInput<T> typedWidget)
