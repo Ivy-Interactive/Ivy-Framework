@@ -106,7 +106,7 @@ const withTooltip = (content: React.ReactNode, invalid?: string) => {
 const LoadingOverlay: React.FC<{
   density?: Densities;
   'data-testid'?: string;
-}> = ({  'data-testid': dataTestId }) => {
+}> = ({ density = Densities.Medium, 'data-testid': dataTestId }) => {
   const sizeClass =
     density === Densities.Small
       ? 'h-4 w-4'
@@ -136,7 +136,7 @@ const VariantComponents = {
       loading,
       nullable,
       invalid,
-      
+      density = Densities.Medium,
       onCheckedChange,
       'data-testid': dataTestId,
     }: CheckboxVariantProps) => {
@@ -150,11 +150,8 @@ const VariantComponents = {
             nullable={nullable}
             className={cn(invalid && inputStyles.invalid)}
             data-testid={dataTestId}
-            
           />
-          {loading && (
-            <LoadingOverlay  data-testid={dataTestId} />
-          )}
+          {loading && <LoadingOverlay data-testid={dataTestId} />}
         </div>
       );
 
@@ -171,12 +168,7 @@ const VariantComponents = {
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(checkboxElement, invalid)}
           </div>
-          <InputLabel
-            id={id}
-            label={label}
-            description={description}
-            
-          />
+          <InputLabel id={id} label={label} description={description} />
         </div>
       );
 
@@ -193,7 +185,7 @@ const VariantComponents = {
       disabled,
       loading,
       invalid,
-      
+      density = Densities.Medium,
       icon,
       onCheckedChange,
       'data-testid': dataTestId,
@@ -205,14 +197,11 @@ const VariantComponents = {
             checked={!!value}
             onCheckedChange={onCheckedChange}
             disabled={disabled || loading}
-            
             icon={icon}
             className={cn(invalid && inputStyles.invalid)}
             data-testid={dataTestId}
           />
-          {loading && (
-            <LoadingOverlay  data-testid={dataTestId} />
-          )}
+          {loading && <LoadingOverlay data-testid={dataTestId} />}
         </div>
       );
 
@@ -229,12 +218,7 @@ const VariantComponents = {
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(switchElement, invalid)}
           </div>
-          <InputLabel
-            id={id}
-            label={label}
-            description={description}
-            
-          />
+          <InputLabel id={id} label={label} description={description} />
         </div>
       );
 
@@ -252,7 +236,7 @@ const VariantComponents = {
       loading,
       icon,
       invalid,
-      
+      density = Densities.Medium,
       onPressedChange,
       'data-testid': dataTestId,
     }: ToggleVariantProps) => {
@@ -265,14 +249,11 @@ const VariantComponents = {
             disabled={disabled || loading}
             aria-label={label}
             className={cn(invalid && inputStyles.invalid)}
-            
             data-testid={dataTestId}
           >
             {icon && <Icon name={icon} />}
           </Toggle>
-          {loading && (
-            <LoadingOverlay  data-testid={dataTestId} />
-          )}
+          {loading && <LoadingOverlay data-testid={dataTestId} />}
         </div>
       );
 
@@ -289,12 +270,7 @@ const VariantComponents = {
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(toggleElement, invalid)}
           </div>
-          <InputLabel
-            id={id}
-            label={label}
-            description={description}
-            
-          />
+          <InputLabel id={id} label={label} description={description} />
         </div>
       );
 
@@ -314,7 +290,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   nullable = false,
   variant = 'Checkbox',
   icon,
-  
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -343,7 +319,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       nullable={nullable}
       icon={icon}
       invalid={invalid}
-      
+      density={density}
       onCheckedChange={handleChange}
       onPressedChange={handleChange}
       data-testid={dataTestId}
