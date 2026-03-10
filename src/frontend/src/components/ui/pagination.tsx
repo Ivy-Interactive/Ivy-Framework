@@ -7,7 +7,6 @@ import { buttonVariants } from '@/components/ui/button';
 
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   <nav
-    role="navigation"
     aria-label="pagination"
     className={cn('flex w-fit justify-center', className)}
     {...props}

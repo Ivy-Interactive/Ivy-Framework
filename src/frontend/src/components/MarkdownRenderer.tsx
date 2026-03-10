@@ -405,6 +405,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               <img
                 {...props}
                 src={imageSrc}
+                alt={props.alt || ''}
                 className={cn(typography.img, 'cursor-zoom-in')}
                 loading="lazy"
                 onClick={() => setShowOverlay(true)}

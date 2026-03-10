@@ -98,6 +98,7 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
       src={src}
       key={iframeKey}
       style={styles}
+      title={id}
       onLoad={handleIframeLoad}
     />
   );

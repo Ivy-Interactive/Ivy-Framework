@@ -104,6 +104,7 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
             className
           )}
           role="tab"
+          aria-selected={props['aria-selected'] ?? false}
           {...props}
         />
       );

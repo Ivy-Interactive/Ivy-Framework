@@ -52,6 +52,7 @@ export function SortableTabTrigger({
       {...listeners}
       {...props}
       role="tab"
+      aria-selected={(props as any)['aria-selected'] ?? false}
     >
       {children}
     </TabsTrigger>

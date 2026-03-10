@@ -165,7 +165,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
                 : 'text-muted-foreground'
             )}
             onClick={e => {
-              e.preventDefault();
+              e.nativeEvent.preventDefault();
 
               // Clear any existing navigation timeout
               if (navigationTimeoutRef.current) {

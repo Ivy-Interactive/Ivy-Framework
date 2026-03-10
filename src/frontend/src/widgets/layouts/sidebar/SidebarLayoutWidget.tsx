@@ -177,8 +177,8 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
       document.addEventListener('mousemove', handleMove);
       document.addEventListener('mouseup', handleEnd);
-      document.addEventListener('touchmove', handleMove);
-      document.addEventListener('touchend', handleEnd);
+      document.addEventListener('touchmove', handleMove, { passive: true });
+      document.addEventListener('touchend', handleEnd, { passive: true });
     },
     [resizable, isSidebarOpen, currentWidth, minWidthPx, maxWidthPx]
   );

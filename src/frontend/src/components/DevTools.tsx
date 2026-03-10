@@ -301,7 +301,7 @@ export function DevTools() {
       const target = e.target as HTMLElement;
       if (target.closest('.ivy-devtools')) return;
 
-      e.preventDefault();
+      e.stopPropagation();
       e.stopPropagation();
 
       const currentIndex = widgetStack.findIndex(
@@ -378,7 +378,7 @@ export function DevTools() {
       document.addEventListener('mouseover', handleMouseOver, true);
       document.addEventListener('click', handleClick, true);
       document.addEventListener('wheel', handleWheel, {
-        passive: false,
+        passive: true,
         capture: true,
       });
       document.body.style.cursor = 'crosshair';
