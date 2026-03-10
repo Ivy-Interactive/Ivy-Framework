@@ -332,7 +332,9 @@ public class FormBuilder<TModel> : ViewBase
     {
         var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange: false);
 
-        var validationSignal = context.UseSignal<FormValidateSignal, Unit, bool>();
+        // Per-form signal instances so Submit validates only this form's fields (not every field on the page).
+        var validationSignal = new FormValidateSignal();
+        var submitSignal = new FormSubmitSignal();
         var updateSignal = context.UseSignal<FormUpdateSignal, Unit, Unit>();
         var invalidFields = context.UseState(0);
 
@@ -346,6 +348,8 @@ public class FormBuilder<TModel> : ViewBase
                     e.InputFactory!,
                     () => e.Visible(currentModel.Value),
                     updateSignal,
+                    validationSignal,
+                    submitSignal,
                     e.Label,
                     e.Description,
                     e.Required,
@@ -363,7 +367,7 @@ public class FormBuilder<TModel> : ViewBase
 
         async Task<bool> OnSubmit()
         {
-            var results = await validationSignal.Send(new Unit());
+            var results = await validationSignal.Send(default);
             if (results.All(e => e))
             {
                 if (_onSubmit != null)
@@ -383,14 +387,13 @@ public class FormBuilder<TModel> : ViewBase
 
         var fieldViews = bindings.Select(e => e.fieldView).ToArray();
 
-        var submitReceiver = context.UseSignal<FormSubmitSignal, Unit, Unit>();
         context.UseEffect(() =>
         {
             if (_submitStrategy is FormSubmitStrategy.OnBlur or FormSubmitStrategy.OnChange)
             {
-                return submitReceiver.Receive(unit =>
+                return submitSignal.ReceiveWithId(Guid.NewGuid(), _ =>
                 {
-                    _ = OnSubmit();
+                    var t = OnSubmit();
                     return default;
                 });
             }
