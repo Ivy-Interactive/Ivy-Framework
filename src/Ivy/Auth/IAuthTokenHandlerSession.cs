@@ -1,5 +1,6 @@
 // ReSharper disable once CheckNamespace
 using Ivy.Core.HttpTunneling;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy;
 
@@ -15,6 +16,11 @@ public class AuthTokenHandlerSession(AuthToken? authToken = null, string? authSe
     public AuthToken? AuthToken { get; set; } = authToken;
     public string? AuthSessionData { get; set; } = authSessionData;
     public TunneledHttpMessageHandler? TunneledHttpMessageHandler { get; set; } = httpMessageHandler;
+
+    [ActivatorUtilitiesConstructor]
+    public AuthTokenHandlerSession(TunneledHttpMessageHandler? httpMessageHandler = null) : this(null, null, httpMessageHandler)
+    {
+    }
 }
 
 public readonly struct AuthTokenHandlerSessionSnapshot
