@@ -1,21 +1,21 @@
 import React, { createContext } from 'react';
 import type { VariantProps } from 'class-variance-authority';
-import { detailValueSizeVariants } from './detail-variants';
-import { Scales } from '@/types/scale';
+import { detailValueSizeVariant } from './detail-variant';
+import { Densities } from '@/types/density';
 
-type DetailContextValue = VariantProps<typeof detailValueSizeVariants>;
+type DetailContextValue = VariantProps<typeof detailValueSizeVariant>;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const DetailContext = createContext<DetailContextValue>({
-  scale: Scales.Medium,
+  density: Densities.Medium,
 });
 
 export const DetailProvider: React.FC<{
-  scale?: Scales;
+  density?: Densities;
   children: React.ReactNode;
-}> = ({ scale = Scales.Medium, children }) => {
+}> = ({ density = Densities.Medium, children }) => {
   return (
-    <DetailContext.Provider value={{ scale }}>
+    <DetailContext.Provider value={{ density }}>
       {children}
     </DetailContext.Provider>
   );

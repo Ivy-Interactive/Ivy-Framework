@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useEventHandler } from '@/components/event-handler';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { TextInputWidgetProps, TextInputVariant } from './types';
 import { useSyncServerValue, useShortcutKey } from './hooks';
 import {
@@ -9,6 +9,8 @@ import {
   PasswordVariant,
   SearchVariant,
 } from './variants';
+
+const EMPTY_ARRAY: never[] = [];
 
 export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   id,
@@ -20,9 +22,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   nullable = false,
   width,
   height,
-  events = [],
+  events = EMPTY_ARRAY,
   shortcutKey,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   prefix,
   suffix,
   maxLength,
@@ -120,7 +122,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       height,
       events,
       shortcutKey,
-      scale,
+      density,
       prefix,
       suffix,
       maxLength,
@@ -139,7 +141,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       width,
       height,
       shortcutKey,
-      scale,
+      density,
       prefix,
       suffix,
       maxLength,
@@ -160,7 +162,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onClear={handleClear}
           onSubmit={handleSubmit}
           inputRef={inputRef}
-          scale={scale}
+          density={density}
         />
       );
     case TextInputVariant.Textarea:
@@ -173,7 +175,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onClear={handleClear}
           inputRef={inputRef}
           isFocused={isFocused}
-          scale={scale}
+          density={density}
         />
       );
     case TextInputVariant.Search:
@@ -187,7 +189,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onSubmit={handleSubmit}
           inputRef={inputRef}
           isFocused={isFocused}
-          scale={scale}
+          density={density}
         />
       );
     default:
@@ -202,7 +204,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onSubmit={handleSubmit}
           inputRef={inputRef}
           isFocused={isFocused}
-          scale={scale}
+          density={density}
         />
       );
   }

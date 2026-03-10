@@ -1,20 +1,22 @@
 import React, { createContext } from 'react';
 import type { VariantProps } from 'class-variance-authority';
-import { tableCellSizeVariants } from './table-variants';
-import { Scales } from '@/types/scale';
+import { tableCellSizeVariant } from './table-variant';
+import { Densities } from '@/types/density';
 
-type TableContextValue = VariantProps<typeof tableCellSizeVariants>;
+type TableContextValue = VariantProps<typeof tableCellSizeVariant>;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const TableContext = createContext<TableContextValue>({
-  scale: Scales.Medium,
+  density: Densities.Medium,
 });
 
 export const TableProvider: React.FC<{
-  scale?: Scales;
+  density?: Densities;
   children: React.ReactNode;
-}> = ({ scale = Scales.Medium, children }) => {
+}> = ({ density = Densities.Medium, children }) => {
   return (
-    <TableContext.Provider value={{ scale }}>{children}</TableContext.Provider>
+    <TableContext.Provider value={{ density }}>
+      {children}
+    </TableContext.Provider>
   );
 };

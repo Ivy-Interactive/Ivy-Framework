@@ -3,7 +3,7 @@ import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { colorInputPickerVariants } from '@/components/ui/input/color-input-variants';
+import { colorInputPickerVariant } from '@/components/ui/input/color-input-variant';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Popover,
@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import * as SliderPrimitive from '@radix-ui/react-slider';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 
 interface ThemeColorPickerWidgetProps {
@@ -22,7 +22,7 @@ interface ThemeColorPickerWidgetProps {
   placeholder?: string;
   nullable?: boolean;
   events?: string[];
-  scale?: Scales;
+  density?: Densities;
   foreground?: boolean;
   allowAlpha?: boolean;
 }
@@ -245,8 +245,9 @@ const ThemeColorGrid: React.FC<{
             key={`${r}-${c}`}
             type="button"
             className={cn(
-              'w-7 h-7 shrink-0 rounded-full hover:scale-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5 relative flex items-center justify-center',
-              isSelected && 'ring-1 ring-offset-1 ring-black/50 z-20 scale-110'
+              'w-7 h-7 shrink-0 rounded-full hover:density-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5 relative flex items-center justify-center',
+              isSelected &&
+                'ring-1 ring-offset-1 ring-black/50 z-20 density-110'
             )}
             style={{ backgroundColor: hexColor }}
             onClick={() => onSelect(hexColor)}
@@ -313,7 +314,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   disabled = false,
   invalid,
   placeholder,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   foreground = false,
   allowAlpha = false,
 }) => {
@@ -543,7 +544,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
             type="button"
             disabled={disabled}
             className={cn(
-              colorInputPickerVariants({ scale }),
+              colorInputPickerVariant({ density }),
               'p-0 rounded-md shadow-none focus:outline-none ring-offset-1 ring-1 transition-all relative',
               'ring-offset-white ring-black',
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',

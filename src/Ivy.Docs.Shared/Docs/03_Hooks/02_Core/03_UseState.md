@@ -11,7 +11,7 @@ searchHints:
 
 # UseState
 
-Master reactive state management in Ivy using [hooks](../01_RulesOfHooks.md) like UseState, [UseSignal](./10_UseSignal.md), and [UseEffect](./04_UseEffect.md) to build dynamic, responsive [applications](../../../01_Onboarding/02_Concepts/10_Apps.md).
+Master reactive state management in Ivy using [hooks](../02_RulesOfHooks.md) like UseState, [UseSignal](./10_UseSignal.md), and [UseEffect](./04_UseEffect.md) to build dynamic, responsive [applications](../../../01_Onboarding/02_Concepts/10_Apps.md).
 
 State management is a fundamental concept in Ivy that allows you to handle and update data within your [views](../../../01_Onboarding/02_Concepts/02_Views.md). Ivy provides several mechanisms for managing state, each suited for different use cases.
 

@@ -25,7 +25,7 @@ import {
   SIDEBAR_KEYBOARD_SHORTCUT,
 } from './constants';
 import { SidebarContext, useSidebar } from './context';
-import { sidebarMenuButtonVariants } from './variants';
+import { sidebarMenuButtonVariant } from './variant';
 
 const SidebarProvider = React.forwardRef<
   HTMLDivElement,
@@ -493,7 +493,7 @@ const SidebarMenuButton = React.forwardRef<
     asChild?: boolean;
     isActive?: boolean;
     tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-  } & VariantProps<typeof sidebarMenuButtonVariants>
+  } & VariantProps<typeof sidebarMenuButtonVariant>
 >(
   (
     {
@@ -516,7 +516,7 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        className={cn(sidebarMenuButtonVariant({ variant, size }), className)}
         {...props}
       />
     );

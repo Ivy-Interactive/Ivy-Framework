@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { selectIconContainerVariants } from '@/components/ui/select/variants';
+import { selectIconContainerVariant } from '@/components/ui/select/variant';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -31,33 +31,35 @@ import {
   Option as MultiSelectOption,
 } from '@/components/ui/multiselect';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { cva } from 'class-variance-authority';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
+
+const EMPTY_ARRAY: never[] = [];
 // variants for SelectInputWidget container
-const selectContainerVariants = cva(
+const selectContainerVariant = cva(
   'relative border border-input bg-transparent rounded-box shadow-sm focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
   {
     variants: {
-      scale: {
+      density: {
         Small: 'px-2 py-1',
         Medium: 'px-3 py-2',
         Large: 'px-4 py-3',
       },
     },
     defaultVariants: {
-      scale: 'Medium',
+      density: 'Medium',
     },
   }
 );
 
-const selectTextVariants = {
+const selectTextVariant = {
   Small: 'text-xs',
   Medium: 'text-sm',
   Large: 'text-base',
 };
 
-const circleSizeVariants = {
+const circleSizeVariant = {
   Small: 'h-3 w-3',
   Medium: 'h-4 w-4',
   Large: 'h-5 w-5',
@@ -98,7 +100,7 @@ interface SelectInputWidgetProps {
   loading?: boolean;
   ghost?: boolean;
   'data-testid'?: string;
-  scale?: Scales;
+  density?: Densities;
   width?: string;
 }
 
@@ -225,9 +227,15 @@ const ToggleOptionItem: React.FC<{
   option: Option;
   isSelected: boolean;
   invalid?: string;
-  scale?: Scales;
+  density?: Densities;
   disabled?: boolean;
-}> = ({ option, isSelected, invalid, scale = Scales.Medium, disabled }) => {
+}> = ({
+  option,
+  isSelected,
+  invalid,
+  density = Densities.Medium,
+  disabled,
+}) => {
   const isInvalid = !!invalid && isSelected;
 
   const sizeClasses = {
@@ -243,7 +251,7 @@ const ToggleOptionItem: React.FC<{
       aria-label={option.label}
       className={cn(
         'hover:text-foreground',
-        sizeClasses[scale],
+        sizeClasses[density],
         isInvalid
           ? cn(
               inputStyles.invalidInput,
@@ -280,7 +288,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   selectMany = false,
   separator = ',',
@@ -292,7 +300,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   emptyMessage,
   loading = false,
   ghost = false,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -374,7 +382,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        selectContainerVariants({ scale }),
+        selectContainerVariant({ density }),
         invalid && 'border-destructive focus-within:ring-destructive',
         ghost &&
           'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
@@ -430,7 +438,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     option={option}
                     isSelected={isSelected}
                     invalid={invalid}
-                    scale={scale}
+                    density={density}
                     disabled={isDisabled}
                   />
                 );
@@ -462,7 +470,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     option={option}
                     isSelected={isSelected}
                     invalid={invalid}
-                    scale={scale}
+                    density={density}
                     disabled={isDisabled}
                   />
                 );
@@ -493,7 +501,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ density })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}
@@ -514,11 +522,11 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   nullable = false,
   ghost = false,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -544,7 +552,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        selectContainerVariants({ scale }),
+        selectContainerVariant({ density }),
         invalid && 'border-destructive focus-within:ring-destructive',
         ghost &&
           'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
@@ -570,7 +578,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                     disabled={isOptionDisabled}
                     className={cn(
                       'border-input text-input',
-                      circleSizeVariants[scale],
+                      circleSizeVariant[density],
                       stringValue === option.value.toString() && !invalid
                         ? 'border-primary text-primary'
                         : undefined,
@@ -584,7 +592,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                     htmlFor={`${id}-${option.value}`}
                     className={cn(
                       'cursor-pointer leading-none',
-                      selectTextVariants[scale],
+                      selectTextVariant[density],
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput
                         : undefined,
@@ -611,7 +619,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ density })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}
@@ -632,7 +640,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   separator = ',',
   nullable = false,
@@ -643,7 +651,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   emptyMessage,
   loading = false,
   ghost = false,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -826,7 +834,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                               className={cn(
                                 inputStyles.invalidInput,
                                 'bg-destructive/10 border-destructive text-destructive',
-                                selectTextVariants[scale]
+                                selectTextVariant[density]
                               )}
                             />
                           </TooltipTrigger>
@@ -847,7 +855,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                         disabled={isDisabled}
                         className={cn(
                           'data-[state=unchecked]:bg-transparent data-[state=unchecked]:border-border',
-                          selectTextVariants[scale],
+                          selectTextVariant[density],
                           isSelected
                             ? 'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground'
                             : undefined
@@ -858,7 +866,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                       htmlFor={`${id}-${option.value}`}
                       className={cn(
                         'flex-1 cursor-pointer',
-                        selectTextVariants[scale],
+                        selectTextVariant[density],
                         isInvalid ? inputStyles.invalidInput : undefined,
                         isDisabled && !isSelected ? 'opacity-50' : undefined
                       )}
@@ -889,7 +897,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ density })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}
@@ -910,7 +918,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   nullable = false,
   selectMany = false,
@@ -921,7 +929,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   emptyMessage,
   loading = false,
   ghost = false,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -1122,7 +1130,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             className={cn('w-full', ghost && 'ghost')}
             invalid={!!invalid}
             hidePlaceholderWhenSelected
-            scale={scale}
+            density={density}
             ghost={ghost}
             data-testid={dataTestId}
           />
@@ -1130,7 +1138,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           invalid ||
           loading ? (
             <div
-              className={selectIconContainerVariants({ scale })}
+              className={selectIconContainerVariant({ density })}
               style={{ zIndex: 2 }}
             >
               {/* Loading spinner */}
@@ -1165,7 +1173,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                     }}
                     className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
                   >
-                    <X className={xIconVariants({ scale })} />
+                    <X className={xIconVariant({ density })} />
                   </button>
                 )}
               {/* Invalid icon - rightmost */}
@@ -1205,7 +1213,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
         ghost &&
           'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground'
       )}
-      scale={scale}
+      density={density}
     >
       <SelectValue placeholder={placeholder} />
     </SelectTrigger>
@@ -1239,7 +1247,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           data-testid={dataTestId}
         >
           {selectTrigger}
-          <SelectContent scale={scale}>
+          <SelectContent density={density}>
             {searchable && (
               <div className="p-2 border-b">
                 <div className="relative">
@@ -1273,7 +1281,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                     <SelectItem
                       key={option.value}
                       value={option.value.toString()}
-                      scale={scale}
+                      density={density}
                       disabled={disabled || loading || option.disabled}
                     >
                       {option.label}
@@ -1287,7 +1295,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
         {/* Right-side icon container */}
         {(nullable && hasValue && !disabled) || invalid || loading ? (
           <div
-            className={selectIconContainerVariants({ scale })}
+            className={selectIconContainerVariant({ density })}
             style={{ zIndex: 2 }}
           >
             {/* Loading spinner */}
@@ -1320,7 +1328,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ density })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}
@@ -1343,7 +1351,7 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
   const normalizedProps = {
     ...props,
     value: props.nullable && props.value === undefined ? null : props.value,
-    scale: props.scale ?? Scales.Medium,
+    density: props.density ?? Densities.Medium,
     variant: props.variant ?? 'Select',
     separator: props.separator ?? ';',
     selectMany: props.selectMany ?? false,

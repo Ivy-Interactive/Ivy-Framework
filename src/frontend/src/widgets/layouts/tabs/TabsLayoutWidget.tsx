@@ -15,10 +15,12 @@ import { useTabManagement } from './hooks/useTabManagement';
 import { useTabCalculation } from './hooks/useTabCalculation';
 import { useDrag } from './hooks/useDrag';
 
+const EMPTY_ARRAY: never[] = [];
+
 export const TabsLayoutWidget = ({
   id,
   children,
-  events = [],
+  events = EMPTY_ARRAY,
   selectedIndex,
   removeParentPadding = false,
   variant = 'Content',

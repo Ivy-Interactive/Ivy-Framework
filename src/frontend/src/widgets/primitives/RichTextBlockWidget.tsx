@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { typography } from '@/lib/styles';
 import { useStream } from '@/components/stream-handler/hooks';
 import { useEventHandler } from '@/components/event-handler/hooks';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { TextAlignment } from '@/types/textAlignment';
 
 interface TextRun {
@@ -26,24 +26,27 @@ interface RichTextBlockWidgetProps {
   textAlignment?: TextAlignment;
   noWrap?: boolean;
   overflow?: Overflow;
-  scale?: Scales;
+  density?: Densities;
   events?: string[];
 }
 
 const scaleClasses: Record<string, string> = {
-  [Scales.Small]: typography.small,
-  [Scales.Large]: typography.large,
+  [Densities.Small]: typography.small,
+  [Densities.Large]: typography.large,
 };
+
+const EMPTY_RUNS: TextRun[] = [];
+const EMPTY_EVENTS: string[] = [];
 
 export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
   id,
-  runs = [],
+  runs = EMPTY_RUNS,
   stream,
   textAlignment,
   noWrap,
   overflow,
-  scale,
-  events = [],
+  density,
+  events = EMPTY_EVENTS,
 }) => {
   const [streamedRuns, setStreamedRuns] = useState<TextRun[]>([]);
   const eventHandler = useEventHandler();
@@ -71,7 +74,7 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
       style={styles}
       className={cn(
         noWrap && 'whitespace-nowrap',
-        scale && scaleClasses[scale]
+        density && scaleClasses[density]
       )}
     >
       {allRuns.map((run, index) => {
@@ -95,20 +98,30 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
 
         if (run.link) {
           const isBlank = run.linkTarget === 'Blank';
+          if (events.includes('OnLinkClick')) {
+            return (
+              <button
+                key={run.link + (run.content || '')}
+                type="button"
+                className={cn(className, 'underline cursor-pointer text-left')}
+                style={runStyles}
+                onClick={() => {
+                  eventHandler('OnLinkClick', id, [run.link]);
+                }}
+              >
+                {content}
+              </button>
+            );
+          }
+
           return (
             <a
-              key={index}
+              key={run.link + (run.content || '')}
               href={run.link}
               target={isBlank ? '_blank' : '_self'}
               rel={isBlank ? 'noopener noreferrer' : undefined}
               className={cn(className, 'underline')}
               style={runStyles}
-              onClick={e => {
-                if (events.includes('OnLinkClick')) {
-                  e.preventDefault();
-                  eventHandler('OnLinkClick', id, [run.link]);
-                }
-              }}
             >
               {content}
             </a>
@@ -116,7 +129,11 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
         }
 
         return (
-          <span key={index} className={className} style={runStyles}>
+          <span
+            key={run.content || 'empty-text'}
+            className={className}
+            style={runStyles}
+          >
             {content}
           </span>
         );

@@ -1,34 +1,34 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { cva } from 'class-variance-authority';
 
-const copyIconVariants = cva('', {
+const copyIconVariant = cva('', {
   variants: {
-    scale: {
+    density: {
       Small: 'h-3 w-3',
       Medium: 'h-4 w-4',
       Large: 'h-5 w-5',
     },
   },
   defaultVariants: {
-    scale: 'Medium',
+    density: 'Medium',
   },
 });
 
-const copyButtonSizeVariants = cva(
+const copyButtonSizeVariant = cva(
   'p-2 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center',
   {
     variants: {
-      scale: {
+      density: {
         Small: 'h-6',
         Medium: 'h-8',
         Large: 'h-9',
       },
     },
     defaultVariants: {
-      scale: 'Medium',
+      density: 'Medium',
     },
   }
 );
@@ -37,7 +37,7 @@ interface CopyToClipboardButtonProps {
   textToCopy?: string;
   label?: string;
   'aria-label'?: string;
-  scale?: Scales;
+  density?: Densities;
   className?: string;
 }
 
@@ -45,7 +45,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
   textToCopy = '',
   label = '',
   'aria-label': ariaLabel,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   className,
 }) => {
   const [copied, setCopied] = useState(false);
@@ -69,7 +69,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
       className={cn(
         isIconOnly
           ? cn(
-              copyButtonSizeVariants({ scale }),
+              copyButtonSizeVariant({ density }),
               copied && 'bg-primary text-primary-foreground'
             )
           : 'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer hover:bg-accent hover:shadow-sm border-0',
@@ -84,14 +84,14 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
         className
       )}
     >
-      <span className={cn('relative', copyIconVariants({ scale }))}>
+      <span className={cn('relative', copyIconVariant({ density }))}>
         <span
           className={cn(
             'absolute inset-0 transform transition-transform duration-200',
             copied ? 'scale-0' : 'scale-100'
           )}
         >
-          <Copy className={copyIconVariants({ scale })} />
+          <Copy className={copyIconVariant({ density })} />
         </span>
         <span
           className={cn(
@@ -99,7 +99,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
             copied ? 'scale-100' : 'scale-0'
           )}
         >
-          <Check className={copyIconVariants({ scale })} />
+          <Check className={copyIconVariant({ density })} />
         </span>
       </span>
       {label && (

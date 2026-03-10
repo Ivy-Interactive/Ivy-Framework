@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { m, LazyMotion, domAnimation } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
 import { cn, getIvyHost, camelCase } from '@/lib/utils';
@@ -15,7 +15,7 @@ import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
 import { BorderRadius, getColor, getWidth } from '@/lib/styles';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 const ButtonWithTooltip = withTooltip(Button);
 
@@ -24,7 +24,7 @@ interface ButtonWidgetProps {
   title: string;
   icon?: string;
   iconPosition?: 'Left' | 'Right';
-  scale?: Scales;
+  density?: Densities;
   variant?:
     | 'Primary'
     | 'Inline'
@@ -98,12 +98,12 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   width,
   children,
   borderRadius = 'Rounded',
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
 
-  // For 'Rounded' (default), rely on the 'rounded-field' class from buttonVariants.
+  // For 'Rounded' (default), rely on the 'rounded-field' class from buttonVariant.
   // Only add inline style to override the class for 'None'/'Full'.
   const borderRadiusStyle: React.CSSProperties =
     borderRadius === 'Full'
@@ -126,12 +126,12 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     buttonSize = 'icon';
   }
 
-  if (scale == Scales.Small) {
+  if (density == Densities.Small) {
     buttonSize = 'sm';
     iconSize = 3;
   }
 
-  if (scale == Scales.Large) {
+  if (density == Densities.Large) {
     buttonSize = 'lg';
     iconSize = 5;
   }
@@ -251,20 +251,22 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
         )}
       >
         {/* Rotating RGB gradient border - scaled up to cover entire button */}
-        <motion.div
-          className="absolute inset-[-50%] aspect-square"
-          style={{
-            background:
-              'conic-gradient(from 0deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)',
-            filter: 'blur(10px)',
-          }}
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        />
+        <LazyMotion features={domAnimation}>
+          <m.div
+            className="absolute inset-[-50%] aspect-square"
+            style={{
+              background:
+                'conic-gradient(from 0deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)',
+              filter: 'blur(10px)',
+            }}
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          />
+        </LazyMotion>
         <ButtonWithTooltip
           asChild={hasUrl}
           size={buttonSize}

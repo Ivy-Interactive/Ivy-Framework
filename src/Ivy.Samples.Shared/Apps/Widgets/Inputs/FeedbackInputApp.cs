@@ -27,23 +27,23 @@ public class FeedbackInputApp : SampleBase
                | Text.InlineCode("Disabled")
                | Text.InlineCode("Invalid")
 
-               | Text.InlineCode("FeedbackInputVariants.Stars")
-               | zeroState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars)
+               | Text.InlineCode("FeedbackInputVariant.Stars")
+               | zeroState.ToFeedbackInput().Stars()
                | Text.InlineCode(zeroState.Value.ToString())
-               | twoState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).Disabled()
-               | twoState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).Invalid("Invalid feedback")
+               | twoState.ToFeedbackInput().Stars().Disabled()
+               | twoState.ToFeedbackInput().Stars().Invalid("Invalid feedback")
 
-               | Text.InlineCode("FeedbackInputVariants.Emojis")
-               | zeroState.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis)
+               | Text.InlineCode("FeedbackInputVariant.Emojis")
+               | zeroState.ToFeedbackInput().Emojis()
                | Text.InlineCode(zeroState.Value.ToString())
-               | twoState.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).Disabled()
-               | twoState.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).Invalid("Invalid feedback")
+               | twoState.ToFeedbackInput().Emojis().Disabled()
+               | twoState.ToFeedbackInput().Emojis().Invalid("Invalid feedback")
 
-               | Text.InlineCode("FeedbackInputVariants.Thumbs")
-               | zeroState.ToFeedbackInput().Variant(FeedbackInputVariants.Thumbs)
+               | Text.InlineCode("FeedbackInputVariant.Thumbs")
+               | zeroState.ToFeedbackInput().Thumbs()
                | Text.InlineCode(zeroState.Value.ToString())
-               | twoState.ToFeedbackInput().Variant(FeedbackInputVariants.Thumbs).Disabled()
-               | twoState.ToFeedbackInput().Variant(FeedbackInputVariants.Thumbs).Invalid("Invalid feedback")
+               | twoState.ToFeedbackInput().Thumbs().Disabled()
+               | twoState.ToFeedbackInput().Thumbs().Invalid("Invalid feedback")
             ;
 
 
@@ -55,19 +55,19 @@ public class FeedbackInputApp : SampleBase
                           | Text.InlineCode("Large")
 
                           | Text.InlineCode("Stars")
-                          | sizeState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).Small()
-                          | sizeState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars)
-                          | sizeState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).Large()
+                          | sizeState.ToFeedbackInput().Stars().Small()
+                          | sizeState.ToFeedbackInput().Stars()
+                          | sizeState.ToFeedbackInput().Stars().Large()
 
                           | Text.InlineCode("Emojis")
-                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).Small()
-                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis)
-                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).Large()
+                          | sizeIntState.ToFeedbackInput().Emojis().Small()
+                          | sizeIntState.ToFeedbackInput().Emojis()
+                          | sizeIntState.ToFeedbackInput().Emojis().Large()
 
                           | Text.InlineCode("Thumbs")
-                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputVariants.Thumbs).Small()
-                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputVariants.Thumbs)
-                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputVariants.Thumbs).Large()
+                          | sizeBoolState.ToFeedbackInput().Thumbs().Small()
+                          | sizeBoolState.ToFeedbackInput().Thumbs()
+                          | sizeBoolState.ToFeedbackInput().Thumbs().Large()
         ;
 
 

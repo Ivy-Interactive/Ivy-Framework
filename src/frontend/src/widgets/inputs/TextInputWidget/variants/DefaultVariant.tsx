@@ -3,11 +3,11 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
-  textInputSizeVariants,
-  xIconVariants,
-} from '@/components/ui/input/text-input-variants';
+  textInputSizeVariant,
+  xIconVariant,
+} from '@/components/ui/input/text-input-variant';
 import { TextInputWidgetProps } from '../types';
 import { renderAffix } from '../utils/renderAffix';
 import {
@@ -28,7 +28,7 @@ interface DefaultVariantProps {
   onSubmit?: () => void;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-  scale?: Scales;
+  density?: Densities;
 }
 
 export const DefaultVariant: React.FC<DefaultVariantProps> = ({
@@ -41,7 +41,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
   onSubmit,
   inputRef,
   isFocused,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
   const handleKeyDown = useEnterKeyBlur(onSubmit);
@@ -103,7 +103,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
             className={cn(
-              textInputSizeVariants({ scale }),
+              textInputSizeVariant({ density }),
               props.invalid && inputStyles.invalidInput,
               (props.invalid || showClear) && 'pr-8',
               props.shortcutKey &&
@@ -146,7 +146,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                   onClick={onClear}
                   className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
                 >
-                  <X className={xIconVariants({ scale })} />
+                  <X className={xIconVariant({ density })} />
                 </button>
               )}
               {/* Invalid icon - rightmost */}

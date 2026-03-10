@@ -3,26 +3,26 @@ import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
-import { toggleVariants } from '@/components/ui/toggle';
+import { toggleVariant } from '@/components/ui/toggle';
 
 const ToggleGroupContext = React.createContext<
-  VariantProps<typeof toggleVariants>
+  VariantProps<typeof toggleVariant>
 >({
-  scale: 'Medium',
+  density: 'Medium',
   variant: 'default',
 });
 
 const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
-    VariantProps<typeof toggleVariants>
->(({ className, variant, scale, children, ...props }, ref) => (
+    VariantProps<typeof toggleVariant>
+>(({ className, variant, density, children, ...props }, ref) => (
   <ToggleGroupPrimitive.Root
     ref={ref}
     className={cn('flex items-center justify-center gap-1', className)}
     {...props}
   >
-    <ToggleGroupContext.Provider value={{ variant, scale }}>
+    <ToggleGroupContext.Provider value={{ variant, density }}>
       {children}
     </ToggleGroupContext.Provider>
   </ToggleGroupPrimitive.Root>
@@ -33,17 +33,17 @@ ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName;
 const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
-    VariantProps<typeof toggleVariants>
->(({ className, children, variant, scale, ...props }, ref) => {
+    VariantProps<typeof toggleVariant>
+>(({ className, children, variant, density, ...props }, ref) => {
   const context = React.useContext(ToggleGroupContext);
 
   return (
     <ToggleGroupPrimitive.Item
       ref={ref}
       className={cn(
-        toggleVariants({
+        toggleVariant({
           variant: context.variant || variant,
-          scale: context.scale || scale,
+          density: context.density || density,
         }),
         className
       )}

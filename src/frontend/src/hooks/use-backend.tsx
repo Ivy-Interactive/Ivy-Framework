@@ -730,10 +730,42 @@ export const useBackend = (
             handleUpdateMessage(message);
           });
 
-          connection.on('Toast', message => {
-            logger.debug(`[${connection.connectionId}] Toast`, message);
-            toast(message);
-          });
+          connection.on(
+            'Toast',
+            (message: {
+              title?: string;
+              description?: string;
+              variant?: string | number;
+            }) => {
+              logger.debug(`[${connection.connectionId}] Toast`, message);
+
+              const { variant, ...rest } = message;
+              let variantStr = 'default';
+
+              if (typeof variant === 'string') {
+                variantStr = variant.toLowerCase();
+              } else if (typeof variant === 'number') {
+                const variantMap = [
+                  'default',
+                  'destructive',
+                  'success',
+                  'warning',
+                  'info',
+                ];
+                variantStr = variantMap[variant] || 'default';
+              }
+
+              toast({
+                ...rest,
+                variant: variantStr as
+                  | 'default'
+                  | 'destructive'
+                  | 'success'
+                  | 'warning'
+                  | 'info',
+              });
+            }
+          );
 
           connection.on('Error', message => {
             logger.debug(`[${connection.connectionId}] Error`, message);

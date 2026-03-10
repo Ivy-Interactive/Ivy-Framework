@@ -11,6 +11,19 @@ export interface SidebarNewsWidgetProps {
 
 const BASE_URL = 'https://ivy.app/news/';
 
+const fetchNewsData = async (): Promise<NewsArticle[]> => {
+  try {
+    const response = await fetch(BASE_URL + 'news.json');
+    const data = await response.json();
+    if (Array.isArray(data) && data.length > 0) {
+      return data;
+    }
+  } catch (error) {
+    console.error('Failed to fetch news:', error);
+  }
+  return [];
+};
+
 const SidebarNewsWidget = ({ feedUrl }: SidebarNewsWidgetProps) => {
   const [removeBranding, setRemoveBranding] = useState(true);
   const [articles, setArticles] = useState<NewsArticle[] | null>(null);
@@ -20,21 +33,7 @@ const SidebarNewsWidget = ({ feedUrl }: SidebarNewsWidgetProps) => {
   }, []);
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const response = await fetch(BASE_URL + 'news.json');
-        const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setArticles(data);
-        } else {
-          setArticles([]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch news:', error);
-        setArticles([]);
-      }
-    };
-    fetchArticles();
+    fetchNewsData().then(setArticles);
   }, [feedUrl]);
 
   if (removeBranding) return null;

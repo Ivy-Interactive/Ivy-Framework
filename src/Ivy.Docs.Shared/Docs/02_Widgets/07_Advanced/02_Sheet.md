@@ -83,7 +83,7 @@ public class SheetWithFooterActions : ViewBase
             isOpen.Value ? new Sheet(_ => isOpen.Set(false),
                 new FooterLayout(
                     Layout.Horizontal().Gap(2)
-                        | new Button("Save").Variant(ButtonVariant.Primary).OnClick(_ => client.Toast("Profile saved successfully!"))
+                        | new Button("Save").Variant(ButtonVariant.Primary).OnClick(_ => client.Toast("Profile saved successfully!").Success())
                         | new Button("Cancel").Variant(ButtonVariant.Outline).OnClick(_ => isOpen.Set(false)),
                     new Card(
                         "This sheet has action buttons in the footer"
@@ -349,7 +349,7 @@ public class TaskFormSheet : ViewBase
                     updatedTasks[index] = task.Value;
                 }
                 _tasks.Set(updatedTasks.ToArray());
-                _client.Toast($"Updated: {task.Value.Title}");
+                _client.Toast($"Updated: {task.Value.Title}").Success();
                 _isOpen.Set(false);
             }
         }

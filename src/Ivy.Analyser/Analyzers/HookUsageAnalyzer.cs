@@ -37,6 +37,11 @@ namespace Ivy.Analyser.Analyzers
         private const string MessageFormatNotAtTop = "Ivy hook '{0}' must be called at the top of the Build() method, before any other statements";
         private const string DescriptionNotAtTop = "All hooks must be called at the very top of the Build() method, before any other non-hook statements. This ensures hooks are called in a consistent order on every render.";
 
+        public const string DiagnosticIdFieldStorage = "IVYHOOK006";
+        private const string TitleFieldStorage = "Hook Result Stored in Class Member";
+        private const string MessageFormatFieldStorage = "Ivy hook '{0}' result must not be stored in a class field or property. Use a local variable instead.";
+        private const string DescriptionFieldStorage = "Storing hook results in class fields or properties breaks the reactive system. The state object is captured once and reused across renders, causing hooks to receive wrong indices.";
+
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
             DiagnosticId,
             Title,
@@ -82,6 +87,15 @@ namespace Ivy.Analyser.Analyzers
             isEnabledByDefault: true,
             description: DescriptionNotAtTop);
 
+        private static readonly DiagnosticDescriptor RuleFieldStorage = new DiagnosticDescriptor(
+            DiagnosticIdFieldStorage,
+            TitleFieldStorage,
+            MessageFormatFieldStorage,
+            Category,
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true,
+            description: DescriptionFieldStorage);
+
         private static bool IsHookName(string methodName)
         {
             return methodName.Length > 3
@@ -111,7 +125,8 @@ namespace Ivy.Analyser.Analyzers
             RuleConditional,
             RuleLoop,
             RuleSwitch,
-            RuleNotAtTop);
+            RuleNotAtTop,
+            RuleFieldStorage);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -141,6 +156,12 @@ namespace Ivy.Analyser.Analyzers
                 var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
                 return;
+            }
+
+            if (IsStoredInClassMember(invocation, context))
+            {
+                var diagnostic = Diagnostic.Create(RuleFieldStorage, invocation.GetLocation(), methodName);
+                context.ReportDiagnostic(diagnostic);
             }
 
             // Cache results to avoid redundant syntax tree traversals
@@ -395,6 +416,56 @@ namespace Ivy.Analyser.Analyzers
             }
 
             return ContainsHookInvocation(statement);
+        }
+
+        private static bool IsStoredInClassMember(InvocationExpressionSyntax invocation, SyntaxNodeAnalysisContext context)
+        {
+            // Walk up to find the assignment expression containing this invocation
+            var current = invocation.Parent;
+
+            while (current != null)
+            {
+                if (current is AssignmentExpressionSyntax assignment &&
+                    (assignment.IsKind(SyntaxKind.SimpleAssignmentExpression) ||
+                     assignment.IsKind(SyntaxKind.CoalesceAssignmentExpression)))
+                {
+                    return IsClassMemberExpression(assignment.Left, context);
+                }
+
+                // Stop at statement level
+                if (current is StatementSyntax)
+                {
+                    break;
+                }
+
+                current = current.Parent;
+            }
+
+            return false;
+        }
+
+        private static bool IsClassMemberExpression(ExpressionSyntax expression, SyntaxNodeAnalysisContext context)
+        {
+            // this._field or this.Property
+            if (expression is MemberAccessExpressionSyntax memberAccess &&
+                memberAccess.Expression is ThisExpressionSyntax)
+            {
+                return true;
+            }
+
+            // _field or Property (resolve via semantic model)
+            if (expression is IdentifierNameSyntax identifier)
+            {
+                var symbolInfo = context.SemanticModel.GetSymbolInfo(identifier);
+                var symbol = symbolInfo.Symbol;
+
+                if (symbol is IFieldSymbol || symbol is IPropertySymbol)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool ContainsHookInvocation(SyntaxNode node)

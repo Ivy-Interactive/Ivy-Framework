@@ -3,20 +3,20 @@ import * as TogglePrimitive from '@radix-ui/react-toggle';
 import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
-import { toggleVariants } from './toggle-variants';
-import { Scales } from '@/types/scale';
+import { toggleVariant } from './toggle-variant';
+import { Densities } from '@/types/density';
 const Toggle = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
-    VariantProps<typeof toggleVariants> & {
+    VariantProps<typeof toggleVariant> & {
       dataTestId?: string;
     }
 >(
   (
-    { className, variant, scale = Scales.Medium, dataTestId, ...props },
+    { className, variant, density = Densities.Medium, dataTestId, ...props },
     ref
   ) => {
-    let toggleClass = toggleVariants({ variant, scale, className });
+    let toggleClass = toggleVariant({ variant, density, className });
     if (className?.includes('bg-red-50')) {
       toggleClass = toggleClass.replace('data-[state=on]:bg-accent', '');
     }

@@ -11,7 +11,7 @@ public class CodeBlockApp : SampleBase
                | Layout.Tabs(
                    new Tab("Variants", CreateLanguageVariants()),
                    new Tab("Options", CreateOptionsVariants()),
-                   new Tab("Scale API", CreateScaleVariants())
+                   new Tab("Density API", CreateDensityVariants())
                ).Variant(TabsVariant.Content);
     }
 
@@ -247,27 +247,27 @@ public class CodeBlockApp : SampleBase
         return variants;
     }
 
-    private object CreateScaleVariants()
+    private object CreateDensityVariants()
     {
         var sampleCode = """
-            public class ScaleDemo
+            public class DensityDemo
             {
                 public void Hello()
                 {
-                    Console.WriteLine("Testing Scale API");
+                    Console.WriteLine("Testing Density API");
                 }
             }
             """;
 
         return Layout.Vertical().Gap(6)
             | Layout.Vertical().Gap(2)
-                | Text.H3("Small Scale")
+                | Text.H3("Small Density")
                 | new CodeBlock(sampleCode, Languages.Csharp).Small()
             | Layout.Vertical().Gap(2)
-                | Text.H3("Medium Scale (Default)")
+                | Text.H3("Medium Density (Default)")
                 | new CodeBlock(sampleCode, Languages.Csharp)
             | Layout.Vertical().Gap(2)
-                | Text.H3("Large Scale")
+                | Text.H3("Large Density")
                 | new CodeBlock(sampleCode, Languages.Csharp).Large();
     }
 }

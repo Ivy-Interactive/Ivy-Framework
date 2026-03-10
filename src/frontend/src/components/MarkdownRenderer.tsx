@@ -72,6 +72,8 @@ const ImageOverlay = ({
     <div
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 cursor-zoom-out"
       onClick={handleBackdropClick}
+      role="presentation"
+      onKeyDown={e => e.key === 'Escape' && onClose()}
     >
       <div className="relative max-w-[90vw] max-h-[90vh]">
         <img
@@ -159,14 +161,17 @@ const CodeBlock = memo(
                 )}
                 style={shouldWrap ? {} : { overflowX: 'auto' }}
               >
-                {lines.map((line, index) => (
-                  <div key={index} className="flex">
-                    <span className="text-muted-foreground select-none pointer-events-none mr-2">
-                      {'> '}
-                    </span>
-                    <span className="flex-1">{line}</span>
-                  </div>
-                ))}
+                {lines.map((line, i) => {
+                  const lineKey = `md-line-${i}`;
+                  return (
+                    <div key={lineKey} className="flex">
+                      <span className="text-muted-foreground select-none pointer-events-none mr-2">
+                        {'> '}
+                      </span>
+                      <span className="flex-1">{line}</span>
+                    </div>
+                  );
+                })}
               </pre>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
@@ -405,9 +410,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               <img
                 {...props}
                 src={imageSrc}
+                alt={props.alt || ''}
                 className={cn(typography.img, 'cursor-zoom-in')}
                 loading="lazy"
                 onClick={() => setShowOverlay(true)}
+                onKeyDown={e => e.key === 'Enter' && setShowOverlay(true)}
+                role="button"
+                tabIndex={0}
               />
               {showOverlay && (
                 <ImageOverlay
@@ -452,15 +461,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   const codeComponent = useMemo(
     () => ({
       code: memo(
-        (props: React.ComponentProps<'code'> & { inline?: boolean }) => (
-          <CodeBlock
-            className={props.className}
-            children={props.children || ''}
-            inline={props.inline}
-            hasCodeBlocks={contentFeatures.hasCodeBlocks}
-            hasMermaid={contentFeatures.hasMermaid}
-          />
-        )
+        (props: React.ComponentProps<'code'> & { inline?: boolean }) => {
+          const { children, className, inline } = props;
+          return (
+            <CodeBlock
+              className={className}
+              inline={inline}
+              hasCodeBlocks={contentFeatures.hasCodeBlocks}
+              hasMermaid={contentFeatures.hasMermaid}
+            >
+              {children}
+            </CodeBlock>
+          );
+        }
       ),
     }),
     [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid]
