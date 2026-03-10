@@ -123,5 +123,9 @@ public static class FeedbackInputExtensions
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
+    public static FeedbackInputBase Stars(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Stars };
+    public static FeedbackInputBase Thumbs(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Thumbs };
+    public static FeedbackInputBase Emojis(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Emojis };
+
 
 }

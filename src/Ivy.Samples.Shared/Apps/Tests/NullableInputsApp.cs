@@ -338,10 +338,10 @@ public class NullableInputsApp : SampleBase
               | nullableFeedback.ToFeedbackInput(placeholder: "Rate us...").Nullable()
               | (nullableFeedback.Value == null ? Text.InlineCode("null") : Text.Block(nullableFeedback.Value.ToString()!))
 
-              | Text.Block("Feedback Thumbs (bool?)")
-              | nullableFeedbackBool.ToFeedbackInput(placeholder: "Give feedback...", variant: FeedbackInputVariant.Thumbs).Nullable()
-              | (nullableFeedbackBool.Value == null ? Text.InlineCode("null") : Text.Block(nullableFeedbackBool.Value.Value.ToString()))
-           )
+                | Text.Block("Feedback Thumbs (bool?)")
+                | nullableFeedbackBool.ToFeedbackInput(placeholder: "Give feedback...").Thumbs().Nullable()
+                | (nullableFeedbackBool.Value == null ? Text.InlineCode("null") : Text.Block(nullableFeedbackBool.Value.Value.ToString()))
+             )
 
            | Text.H2("With Invalid State")
            | Text.P("Nullable inputs can also display validation errors:")
