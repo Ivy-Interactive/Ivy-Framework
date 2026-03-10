@@ -1,6 +1,3 @@
-﻿using Ivy.Charts;
-using Ivy.Shared;
-using Ivy.Views.Charts;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
@@ -242,7 +239,7 @@ public class LineChart9View : ViewBase
             new { Label = "Another Extremely Long Label That Could Break Layout", Value = 200 },
             new { Label = "Short", Value = 50 },
             new { Label = "Special Chars: !@#$%^&*()", Value = 75 },
-            new { Label = "Unicode: 中文 🚀 αβγ", Value = 125 },
+            new { Label = "Unicode: ä¸­æ–‡ ðŸš€ Î±Î²Î³", Value = 125 },
         };
 
         return new Card().Title("Long Labels & Special Characters Test")

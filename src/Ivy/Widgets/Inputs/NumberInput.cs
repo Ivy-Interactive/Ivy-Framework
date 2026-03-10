@@ -4,8 +4,6 @@ using Ivy.Core;
 using Ivy.Core.Docs;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -68,7 +66,11 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public string? TargetType { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Prop] public Affix? Prefix { get; set; }
+
+    [Prop] public Affix? Suffix { get; set; }
+
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [
     typeof(short), typeof(short?),
@@ -92,21 +94,21 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
     {
         var typedState = state.As<TNumber>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public NumberInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
     {
-        OnChange = onChange;
+        OnChange = new(onChange);
         Value = value;
     }
 
     public NumberInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
     {
-        OnChange = e => { state(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { state(e.Value); return ValueTask.CompletedTask; });
         Value = value;
     }
 
@@ -124,7 +126,7 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
 
     [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
-    [Event] public Func<Event<IInput<TNumber>, TNumber>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TNumber>, TNumber>>? OnChange { get; }
 }
 
 public static class NumberInputExtensions
@@ -134,12 +136,14 @@ public static class NumberInputExtensions
         return state.ToNumberInput(placeholder, disabled, NumberInputVariants.Slider, formatStyle);
     }
 
-    public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal, double? min = null, double? max = null)
     {
         var type = state.GetStateType();
         Type genericType = typeof(NumberInput<>).MakeGenericType(type);
         NumberInputBase input = (NumberInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant, formatStyle)!;
         input.ScaffoldDefaults(null, type);
+        if (min is not null) input = input with { Min = min };
+        if (max is not null) input = input with { Max = max };
         return input;
     }
 
@@ -212,7 +216,12 @@ public static class NumberInputExtensions
 
     public static NumberInputBase FormatStyle(this NumberInputBase widget, NumberFormatStyle formatStyle)
     {
-        return widget with { FormatStyle = formatStyle };
+        var result = widget with { FormatStyle = formatStyle };
+        if (formatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(result.Currency))
+        {
+            result = result with { Currency = "USD" };
+        }
+        return result;
     }
 
     public static NumberInputBase Currency(this NumberInputBase widget, string currency)
@@ -225,20 +234,32 @@ public static class NumberInputExtensions
         return widget with { Invalid = invalid };
     }
 
+    public static NumberInputBase Prefix(this NumberInputBase widget, string prefixText)
+        => widget with { Prefix = prefixText.ToAffix() };
+
+    public static NumberInputBase Prefix(this NumberInputBase widget, Icons prefixIcon)
+        => widget with { Prefix = prefixIcon.ToAffix() };
+
+    public static NumberInputBase Suffix(this NumberInputBase widget, string suffixText)
+        => widget with { Suffix = suffixText.ToAffix() };
+
+    public static NumberInputBase Suffix(this NumberInputBase widget, Icons suffixIcon)
+        => widget with { Suffix = suffixIcon.ToAffix() };
+
     [OverloadResolutionPriority(1)]
-    public static NumberInputBase HandleBlur(this NumberInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static NumberInputBase OnBlur(this NumberInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static NumberInputBase HandleBlur(this NumberInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static NumberInputBase OnBlur(this NumberInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget with { OnBlur = new(onBlur.ToValueTask()) };
     }
 
-    public static NumberInputBase HandleBlur(this NumberInputBase widget, Action onBlur)
+    public static NumberInputBase OnBlur(this NumberInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
     public static NumberInputBase Value<T>(this NumberInputBase widget, T value)

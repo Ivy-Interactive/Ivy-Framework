@@ -3,6 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { loadingState, renderWidgetTree } from '../widgetRenderer';
 import { useBackend } from '@/hooks/use-backend';
 import { EventHandlerProvider } from '@/components/event-handler';
+import { StreamHandlerProvider } from '@/components/stream-handler';
 
 interface AppHostWidgetProps {
   id: string;
@@ -16,7 +17,7 @@ export const AppHostWidget: React.FC<AppHostWidgetProps> = ({
   appArgs,
   parentId,
 }) => {
-  const { widgetTree, eventHandler } = useBackend(
+  const { widgetTree, eventHandler, subscribeToStream } = useBackend(
     appId,
     appArgs,
     parentId,
@@ -49,7 +50,9 @@ export const AppHostWidget: React.FC<AppHostWidgetProps> = ({
     <div ref={containerRef} className="w-full h-full p-4 overflow-y-auto">
       <ErrorBoundary>
         <EventHandlerProvider eventHandler={eventHandler}>
-          <>{renderWidgetTree(widgetTree || loadingState())}</>
+          <StreamHandlerProvider subscribeToStream={subscribeToStream}>
+            <>{renderWidgetTree(widgetTree || loadingState())}</>
+          </StreamHandlerProvider>
         </EventHandlerProvider>
       </ErrorBoundary>
     </div>

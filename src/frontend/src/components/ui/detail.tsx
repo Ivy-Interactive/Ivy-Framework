@@ -39,13 +39,13 @@ Details.displayName = 'Details';
 export interface DetailItemProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'size'> {
   label: string;
-  multiLine?: boolean;
+  multiline?: boolean;
   scale?: Scales;
 }
 
 const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
   (
-    { className, label, multiLine, scale: propScale, children, ...props },
+    { className, label, multiline, scale: propScale, children, ...props },
     ref
   ) => {
     const contextScale = useDetailScale();
@@ -56,8 +56,8 @@ const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
         ref={ref}
         className={cn(
           'border-b flex',
-          multiLine && 'flex-col',
-          !multiLine && 'items-center',
+          multiline && 'flex-col',
+          !multiline && 'items-center',
           className
         )}
         {...props}
@@ -66,7 +66,7 @@ const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
         <div
           className={cn(
             detailValueSizeVariants({ scale }),
-            multiLine
+            multiline
               ? cn(
                   'whitespace-normal break-words text-left',
                   detailValueMultiLinePaddingVariants({ scale })

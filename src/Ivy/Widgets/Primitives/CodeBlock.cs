@@ -1,5 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -44,9 +43,13 @@ public record CodeBlock : WidgetBase<CodeBlock>
 
     [Prop] public bool ShowLineNumbers { get; set; }
 
+    [Prop] public int StartingLineNumber { get; set; } = 1;
+
     [Prop] public bool ShowCopyButton { get; set; } = true;
 
     [Prop] public bool ShowBorder { get; set; } = true;
+
+    [Prop] public bool WrapLines { get; set; }
 
 }
 
@@ -67,6 +70,11 @@ public static class CodeBlockExtensions
         return code with { ShowLineNumbers = showLineNumbers };
     }
 
+    public static CodeBlock StartingLineNumber(this CodeBlock code, int startingLineNumber)
+    {
+        return code with { StartingLineNumber = startingLineNumber };
+    }
+
     public static CodeBlock ShowCopyButton(this CodeBlock code, bool showCopyButton = true)
     {
         return code with { ShowCopyButton = showCopyButton };
@@ -75,6 +83,11 @@ public static class CodeBlockExtensions
     public static CodeBlock ShowBorder(this CodeBlock code, bool showBorder = true)
     {
         return code with { ShowBorder = showBorder };
+    }
+
+    public static CodeBlock WrapLines(this CodeBlock code, bool wrapLines = true)
+    {
+        return code with { WrapLines = wrapLines };
     }
 
 }

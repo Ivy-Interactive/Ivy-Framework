@@ -1,8 +1,8 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Ivy.Core.Hooks;
-using Ivy.Widgets.Inputs;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class FormBuilderField<TModel>(
     string name,

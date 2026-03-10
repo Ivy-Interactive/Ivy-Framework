@@ -2,9 +2,6 @@ using System.Runtime.CompilerServices;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Services;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -33,6 +30,8 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public long? MaxFileSize { get; set; }
 
+    [Prop] public long? MinFileSize { get; set; }
+
     [Prop] public bool Multiple { get; set; }
 
     [Prop] public int? MaxFiles { get; set; }
@@ -41,9 +40,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
-    [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnCancel { get; set; }
+    [Event] public EventHandler<Event<IAnyInput, Guid>>? OnCancel { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 
@@ -57,7 +56,11 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
             var typeValidation = FileInputValidation.ValidateFileType(file, Accept);
             if (!typeValidation.IsValid) return typeValidation;
 
-            // Validate file size
+            // Validate minimum file size
+            var minSizeValidation = FileInputValidation.ValidateMinFileSize(file, MinFileSize);
+            if (!minSizeValidation.IsValid) return minSizeValidation;
+
+            // Validate maximum file size
             return FileInputValidation.ValidateFileSize(file, MaxFileSize);
         }
 
@@ -85,6 +88,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
             // Validate file sizes
             foreach (var f in filesList)
             {
+                var minSizeValidation = FileInputValidation.ValidateMinFileSize(f, MinFileSize);
+                if (!minSizeValidation.IsValid) return minSizeValidation;
+
                 var sizeValidation = FileInputValidation.ValidateFileSize(f, MaxFileSize);
                 if (!sizeValidation.IsValid) return sizeValidation;
             }
@@ -131,7 +137,7 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 
     [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
-    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange => null;
+    [Event] public EventHandler<Event<IInput<TValue>, TValue>>? OnChange => null;
 }
 
 public static class FileInputExtensions
@@ -207,12 +213,13 @@ public static class FileInputExtensions
             UploadUrl = ctx.UploadUrl,
             Accept = ctx.Accept ?? input.Accept,
             MaxFileSize = ctx.MaxFileSize,
+            MinFileSize = ctx.MinFileSize,
             MaxFiles = ctx.MaxFiles ?? input.MaxFiles
         };
 
         input = input with
         {
-            OnCancel = e =>
+            OnCancel = new(e =>
             {
                 var fileId = e.Value;
                 uploadContext.Value.Cancel(fileId);
@@ -257,7 +264,7 @@ public static class FileInputExtensions
                 }
 
                 return ValueTask.CompletedTask;
-            }
+            })
         };
 
         return input;
@@ -307,6 +314,11 @@ public static class FileInputExtensions
         return widget with { MaxFileSize = maxFileSize };
     }
 
+    public static FileInputBase MinFileSize(this FileInputBase widget, long minFileSize)
+    {
+        return widget with { MinFileSize = minFileSize };
+    }
+
     public static FileInputBase UploadUrl(this FileInputBase widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
@@ -331,34 +343,34 @@ public static class FileInputExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static FileInputBase HandleBlur(this FileInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static FileInputBase OnBlur(this FileInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static FileInputBase HandleBlur(this FileInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static FileInputBase OnBlur(this FileInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static FileInputBase HandleBlur(this FileInputBase widget, Action onBlur)
+    public static FileInputBase OnBlur(this FileInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
-    public static FileInputBase HandleCancel(this FileInputBase widget, Func<Event<IAnyInput, Guid>, ValueTask> onCancel)
+    public static FileInputBase OnCancel(this FileInputBase widget, Func<Event<IAnyInput, Guid>, ValueTask> onCancel)
     {
-        return widget with { OnCancel = onCancel };
+        return widget with { OnCancel = new(onCancel) };
     }
 
-    public static FileInputBase HandleCancel(this FileInputBase widget, Action<Event<IAnyInput, Guid>> onCancel)
+    public static FileInputBase OnCancel(this FileInputBase widget, Action<Event<IAnyInput, Guid>> onCancel)
     {
-        return widget.HandleCancel(onCancel.ToValueTask());
+        return widget.OnCancel(onCancel.ToValueTask());
     }
 
-    public static FileInputBase HandleCancel(this FileInputBase widget, Action<Guid> onCancel)
+    public static FileInputBase OnCancel(this FileInputBase widget, Action<Guid> onCancel)
     {
-        return widget.HandleCancel(e => { onCancel(e.Value); return ValueTask.CompletedTask; });
+        return widget.OnCancel(e => { onCancel(e.Value); return ValueTask.CompletedTask; });
     }
 }

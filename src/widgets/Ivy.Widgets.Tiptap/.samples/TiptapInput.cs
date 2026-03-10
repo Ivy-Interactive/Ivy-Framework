@@ -1,7 +1,6 @@
 #:project ..\Ivy.Widgets.Tiptap.csproj
 
 using Ivy;
-using Ivy.Shared;
 using Ivy.Widgets.Tiptap;
 
 var server = new Server();

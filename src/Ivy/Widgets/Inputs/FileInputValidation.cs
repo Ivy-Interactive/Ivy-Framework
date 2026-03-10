@@ -1,7 +1,7 @@
-using Ivy.Services;
 using System.Text.RegularExpressions;
 
-namespace Ivy.Widgets.Inputs;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class FileInputValidation
 {
@@ -65,6 +65,20 @@ public static class FileInputValidation
             var maxSizeFormatted = Utils.FormatBytes(maxFileSize.Value);
             var fileSizeFormatted = Utils.FormatBytes(file.Length);
             return ValidationResult.Error($"File '{file.FileName}' is too large ({fileSizeFormatted}). Maximum allowed size is {maxSizeFormatted}.");
+        }
+
+        return ValidationResult.Success();
+    }
+
+    public static ValidationResult ValidateMinFileSize(IFileUpload file, long? minFileSize)
+    {
+        if (minFileSize == null) return ValidationResult.Success();
+
+        if (file.Length < minFileSize.Value)
+        {
+            var minSizeFormatted = Utils.FormatBytes(minFileSize.Value);
+            var fileSizeFormatted = Utils.FormatBytes(file.Length);
+            return ValidationResult.Error($"File '{file.FileName}' is too small ({fileSizeFormatted}). Minimum required size is {minSizeFormatted}.");
         }
 
         return ValidationResult.Success();

@@ -1,6 +1,3 @@
-using Ivy.Shared;
-using Ivy.Views.Blades;
-
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 [App(icon: Icons.PanelLeft, searchHints: ["panels", "sidebar", "drawer", "navigation", "stack", "layers"])]
@@ -134,7 +131,7 @@ public class LongContentTableBlade : ViewBase
                     new TableCell("API Gateway"),
                     new TableCell("Short description"),
                     new TableCell("/api/gateway"),
-                    new TableCell("MULTILINE Testing phase with comprehensive unit tests, integration tests, and end-to-end tests being executed").MultiLine()
+                    new TableCell("MULTILINE Testing phase with comprehensive unit tests, integration tests, and end-to-end tests being executed").Multiline()
                 )
             )
         );

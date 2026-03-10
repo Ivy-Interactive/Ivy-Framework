@@ -1,9 +1,8 @@
 using Ivy.Core;
-using Ivy.Shared;
 using Microsoft.Extensions.Logging;
-using Ivy.Hooks;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class DataTableView(
     IQueryable queryable,
@@ -28,10 +27,10 @@ public class DataTableView(
 
         var table = new DataTable(connection, width, height, columns, config)
         {
-            OnCellClick = onCellClick,
-            OnCellActivated = onCellActivated,
+            OnCellClick = onCellClick.ToEventHandler(),
+            OnCellActivated = onCellActivated.ToEventHandler(),
             RowActions = rowActions,
-            OnRowAction = onRowAction
+            OnRowAction = onRowAction.ToEventHandler()
         };
 
         return table;

@@ -5,11 +5,16 @@ using Ivy.Core;
 using Ivy.Core.Docs;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
+
+public enum SearchMode
+{
+    CaseInsensitive,
+    CaseSensitive,
+    Fuzzy
+}
 
 public enum SelectInputVariants
 {
@@ -39,7 +44,21 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public bool Nullable { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Prop] public int? MaxSelections { get; set; }
+
+    [Prop] public int? MinSelections { get; set; }
+
+    [Prop] public bool Searchable { get; set; }
+
+    [Prop] public SearchMode SearchMode { get; set; } = SearchMode.CaseInsensitive;
+
+    [Prop] public string? EmptyMessage { get; set; }
+
+    [Prop] public bool Loading { get; set; }
+
+    [Prop] public bool Ghost { get; set; }
+
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
@@ -47,7 +66,7 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 /// <summary>
 /// A dropdown list for selecting one or more options.
 /// </summary>
-public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectInput
+public record SelectInput<TValue> : SelectInputBase, IInput<TValue>
 {
     [OverloadResolutionPriority(1)]
     public SelectInput(IAnyState state, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariants variant = SelectInputVariants.Select, bool selectMany = false)
@@ -55,21 +74,21 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
     {
         var typedState = state.As<TValue>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     public SelectInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariants variant = SelectInputVariants.Select, bool selectMany = false)
     : this(options, placeholder, disabled, variant, selectMany)
     {
-        OnChange = onChange;
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
     public SelectInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariants variant = SelectInputVariants.Select, bool selectMany = false)
         : this(options, placeholder, disabled, variant, selectMany)
     {
-        OnChange = onChange == null ? null : e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
@@ -90,7 +109,7 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
 
     [Prop] public IAnyOption[] Options { get; set; } = [];
 
-    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TValue>, TValue>>? OnChange { get; }
 }
 
 public static class SelectInputExtensions
@@ -125,6 +144,7 @@ public static class SelectInputExtensions
 
         SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, state, options, placeholder, disabled, variant, selectMany)!;
         input.Nullable = type.IsNullableType();
+
         return input;
     }
 
@@ -150,22 +170,36 @@ public static class SelectInputExtensions
 
     public static SelectInputBase Separator(this SelectInputBase widget, char separator) => widget with { Separator = separator };
 
+    public static SelectInputBase MaxSelections(this SelectInputBase widget, int max) => widget with { MaxSelections = max };
+
+    public static SelectInputBase MinSelections(this SelectInputBase widget, int min) => widget with { MinSelections = min };
+
+    public static SelectInputBase Searchable(this SelectInputBase widget, bool searchable = true) => widget with { Searchable = searchable };
+
+    public static SelectInputBase SearchMode(this SelectInputBase widget, SearchMode mode) => widget with { SearchMode = mode };
+
+    public static SelectInputBase EmptyMessage(this SelectInputBase widget, string message) => widget with { EmptyMessage = message };
+
+    public static SelectInputBase Loading(this SelectInputBase widget, bool loading = true) => widget with { Loading = loading };
+
+    public static SelectInputBase Ghost(this SelectInputBase widget, bool ghost = true) => widget with { Ghost = ghost };
+
     public static SelectInputBase List(this SelectInputBase widget) => widget with { Variant = SelectInputVariants.List };
 
     [OverloadResolutionPriority(1)]
-    public static SelectInputBase HandleBlur(this SelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static SelectInputBase OnBlur(this SelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static SelectInputBase HandleBlur(this SelectInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static SelectInputBase OnBlur(this SelectInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget with { OnBlur = new(onBlur.ToValueTask()) };
     }
 
-    public static SelectInputBase HandleBlur(this SelectInputBase widget, Action onBlur)
+    public static SelectInputBase OnBlur(this SelectInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
     public static SelectInput<string> Options(this SelectInput<string> widget, IEnumerable<string> options)
@@ -210,5 +244,4 @@ public static class SelectInputExtensions
         }
         throw new InvalidOperationException($"Cannot set Value: widget is not SelectInput<{typeof(T).Name}>");
     }
-
 }

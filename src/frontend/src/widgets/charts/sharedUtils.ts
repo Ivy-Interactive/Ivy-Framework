@@ -73,14 +73,14 @@ export const generateDataProps = (data: Record<string, unknown>[]) => {
 
 export function generateEChartGrid(
   cartesianGrid?: CartesianGridProps,
-  hasLegend: boolean = false
+  hasToolbox: boolean = false
 ) {
   const defaultGrid = {
     show: false, // Hide grid border to remove the square frame
-    left: '4%',
+    left: '3%',
     right: '4%',
-    top: 30,
-    bottom: hasLegend ? 60 : 30, // More space for legend
+    top: hasToolbox ? 40 : 15,
+    bottom: 30, // Reduced space to remove wasted screen area, still accommodates legend
     containLabel: true,
     borderWidth: 0, // Ensure no border is drawn
   };
@@ -445,7 +445,7 @@ export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
           : 'right',
     top:
       box.verticalAlign?.toLowerCase() === 'top'
-        ? 'top'
+        ? 0
         : box.verticalAlign?.toLowerCase() === 'middle'
           ? 'middle'
           : 'bottom',

@@ -1,5 +1,6 @@
 using Ivy.Core;
 
+// ReSharper disable once CheckNamespace
 namespace Ivy;
 
 public record TerminalLine(string Content, bool IsCommand = false, string Prompt = ">");

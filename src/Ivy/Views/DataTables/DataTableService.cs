@@ -1,12 +1,14 @@
 using Grpc.Core;
-using Ivy.Filters;
+using Ivy.Core.Auth;
+using Ivy.Core.Server;
+using Ivy.Agent.Filter;
 using Ivy.Protos.DataTable;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Ivy.Helpers;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class DataTableService(
     IQueryableRegistry queryableRegistry,

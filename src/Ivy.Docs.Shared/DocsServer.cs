@@ -1,4 +1,3 @@
-﻿using Ivy.Chrome;
 using Ivy.Docs.Shared.Middleware;
 
 namespace Ivy.Docs.Shared;
@@ -7,8 +6,8 @@ public static class DocsServer
 {
     public static async Task RunAsync(ServerArgs? args = null)
     {
-        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
         var server = new Server(args);
+        server.UseCulture("en-US");
         server.AddAppsFromAssembly(typeof(DocsServer).Assembly);
         server.UseHotReload();
 

@@ -1,4 +1,3 @@
-﻿using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
@@ -30,10 +29,10 @@ public class GridLayoutApp : SampleBase
                | withValue.ToPasswordInput().Invalid("Error")
 
                | Text.InlineCode("TextVariant.TextArea")
-               | withoutValue.ToTextAreaInput().Placeholder("Placeholder")
-               | withValue.ToTextAreaInput()
-               | withValue.ToTextAreaInput().Disabled()
-               | withValue.ToTextAreaInput().Invalid("Error")
+               | withoutValue.ToTextareaInput().Placeholder("Placeholder")
+               | withValue.ToTextareaInput()
+               | withValue.ToTextareaInput().Disabled()
+               | withValue.ToTextareaInput().Invalid("Error")
 
                | Text.InlineCode("TextVariant.Search")
                | withoutValue.ToSearchInput().Placeholder("Placeholder")

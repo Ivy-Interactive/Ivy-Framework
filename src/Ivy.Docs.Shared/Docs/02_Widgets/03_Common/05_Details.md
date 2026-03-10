@@ -58,7 +58,7 @@ Mark specific fields as multi-line for better text display. This is perfect for 
 ```csharp demo-tabs
 new { Name = "Widget", Description = "Long description text" }
     .ToDetails()
-    .MultiLine(x => x.Description)
+    .Multiline(x => x.Description)
 ```
 
 ## Custom Builders
@@ -105,4 +105,4 @@ UseState(() => new { Name = "John Doe", Age = 30 })
     .ToDetails()
 ```
 
-<WidgetDocs Type="Ivy.Details" ExtensionTypes="Ivy.Views.Builders.DetailsBuilderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Views/Builders/DetailsBuilder.cs"/>
+<WidgetDocs Type="Ivy.Details" ExtensionTypes="Ivy.DetailsBuilderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Views/Builders/DetailsBuilder.cs"/>

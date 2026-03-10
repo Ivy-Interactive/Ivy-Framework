@@ -42,7 +42,7 @@ public class BasicFooterExample : ViewBase
 
 ## Form with Footer Actions
 
-A common use case is creating forms with persistent action buttons. Use [Align](../../04_ApiReference/IvyShared/Align.md) for footer button alignment (e.g. `Align.Right`):
+A common use case is creating forms with persistent action buttons. Use [Align](../../04_ApiReference/Ivy/Align.md) for footer button alignment (e.g. `Align.Right`):
 
 ```csharp demo-tabs
 public class FormWithFooterExample : ViewBase

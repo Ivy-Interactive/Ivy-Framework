@@ -82,4 +82,21 @@ public class ProfileDetailView : ViewBase
 }
 ```
 
+## Text Alignment
+
+When using a label with the separator, you can control its alignment using the `TextAlign` method:
+
+```csharp demo-tabs
+public class SeparatorTextAlignView : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical().Gap(4)
+            | new Separator("Left Aligned").TextAlign(Ivy.Shared.TextAlignment.Left)
+            | new Separator("Center Aligned").TextAlign(Ivy.Shared.TextAlignment.Center)
+            | new Separator("Right Aligned").TextAlign(Ivy.Shared.TextAlignment.Right);
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.Separator" ExtensionTypes="Ivy.SeparatorExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Separator.cs"/>

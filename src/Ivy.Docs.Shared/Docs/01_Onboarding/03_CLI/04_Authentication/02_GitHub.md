@@ -32,7 +32,7 @@ Before using GitHub authentication with Ivy, you'll need to create a GitHub OAut
    - **Authorization callback URL**: Your application's callback endpoint (e.g., `http://localhost:5010/ivy/auth/callback` for local development or `https://your-app.com/ivy/auth/callback` for production)
 4. **Click "Register application"**
 
-> **Note**: The Authorization callback URL must match your application's webhook endpoint. For local development, this is typically `http://localhost:PORT/ivy/webhook` where PORT is your application's port.
+> **Note**: The Authorization callback URL must match your application's auth callback endpoint. For local development, this is typically `http://localhost:PORT/ivy/auth/callback` where PORT is your application's port.
 
 ### Step 2: Get Your Configuration Values
 
@@ -40,7 +40,7 @@ After creating your OAuth App, you'll see the application's settings page. Copy 
 
 - **Client ID**: Found in the "Client ID" field
 - **Client Secret**: Click "Generate a new client secret" to create one, then copy it immediately (you won't be able to see it again)
-- **Redirect Uri**: The authorization callback URL you configured during OAuth App creation (e.g., `http://localhost:5010/ivy/webhook` for local development or `https://your-domain.com/ivy/webhook` for production)
+- **Redirect Uri**: The authorization callback URL you configured during OAuth App creation (e.g., `http://localhost:5010/ivy/auth/callback` for local development or `https://your-domain.com/ivy/auth/callback` for production)
 
 > **Important**: Store your Client Secret securely. The Client Secret is sensitive and won't be retrievable from GitHub after creation - if you lose it, you'll need to generate a new one. Use [.NET user secrets](../../02_Concepts/14_Secrets.md) for local development and environment variables or secure key management for production. Never commit secrets to version control.
 
@@ -100,7 +100,7 @@ $env:GitHub__UserAgent="MyApp/1.0"
 1. User clicks the "GitHub" login button in your Ivy application
 2. User is redirected to GitHub's authorization page
 3. User authorizes your application to access their GitHub account
-4. GitHub redirects back to your application's webhook endpoint (`/ivy/webhook`)
+4. GitHub redirects back to your application's auth callback endpoint (`/ivy/auth/callback`)
 5. Ivy receives the authorization code and exchanges it for an access token
 6. User is authenticated and redirected back to your application
 7. User can now access your Ivy application with their GitHub identity
@@ -142,7 +142,7 @@ The GitHub OAuth app requests the following scopes:
 
 **Callback URL Mismatch**
 
-- Verify Authorization callback URL in GitHub OAuth App settings matches your application's webhook endpoint (e.g., `http://localhost:5010/ivy/webhook`)
+- Verify Authorization callback URL in GitHub OAuth App settings matches your application's auth callback endpoint (e.g., `http://localhost:5010/ivy/auth/callback`)
 - Check that the URL matches exactly, including the protocol (`http://` vs `https://`) and port number
 - Ensure HTTPS is used in production
 

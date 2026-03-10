@@ -1,5 +1,4 @@
 using Ivy.Widgets.Internal;
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 

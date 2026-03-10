@@ -6,6 +6,8 @@ searchHints:
   - side-panel
   - layout
   - aside
+  - resizable
+  - drag-to-resize
 ---
 
 # SidebarLayout
@@ -54,7 +56,7 @@ public class SidebarWithHeaderFooterExample : ViewBase
                     | Text.P("This is the main content area with a sidebar navigation.")
                     | new Button("Action Button")
                         .Variant(ButtonVariant.Primary)
-                        .HandleClick(_ => client.Toast("Action performed!"))
+                        .OnClick(_ => client.Toast("Action performed!"))
             ).Title("Dashboard"),
             sidebarContent: Layout.Vertical().Gap(2)
                 | new Button("Home").Variant(ButtonVariant.Ghost)
@@ -159,33 +161,83 @@ public class MainAppSidebarExample : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        
+
         return new SidebarLayout(
             mainContent: Layout.Vertical().Gap(4)
                 | new Card(
                     Layout.Vertical().Gap(2)
                         | Text.P("Main Application").Large()
                         | Text.P("This sidebar is configured as the main app sidebar with toggle functionality.")
-                        | new Button("Test Action").HandleClick(_ => client.Toast("Action performed!"))
+                        | new Button("Test Action").OnClick(_ => client.Toast("Action performed!"))
                 ).Title("Welcome")
                 | new Card(
                     "Additional content can be placed here. The sidebar will automatically collapse on smaller screens."
                 ).Title("Content Area"),
             sidebarContent: Layout.Vertical().Gap(1)
-                | new Button("Dashboard").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Dashboard"))
-                | new Button("Projects").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Projects"))
-                | new Button("Team").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Team"))
-                | new Button("Calendar").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Calendar")),
+                | new Button("Dashboard").Variant(ButtonVariant.Ghost).OnClick(_ => client.Toast("Dashboard"))
+                | new Button("Projects").Variant(ButtonVariant.Ghost).OnClick(_ => client.Toast("Projects"))
+                | new Button("Team").Variant(ButtonVariant.Ghost).OnClick(_ => client.Toast("Team"))
+                | new Button("Calendar").Variant(ButtonVariant.Ghost).OnClick(_ => client.Toast("Calendar")),
             sidebarHeader: Layout.Vertical().Gap(2)
                 | Text.Lead("Workspace")
                 | new TextInput(placeholder: "Search...", variant: TextInputVariants.Search)
-        ); 
+        );
     }
 }
 ```
 
 <Callout Type="tip">
 "There is default padding of 2 in main content accessible via MainContentPadding by default."
+</Callout>
+
+### Resizable Sidebar
+
+You can make the sidebar resizable by users at runtime using the `.Resizable()` extension method. This adds a drag handle to the sidebar border that allows users to adjust the width:
+
+```csharp demo-tabs
+public class ResizableSidebarExample : ViewBase
+{
+    public override object? Build()
+    {
+        return new SidebarLayout(
+            mainContent: new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.P("Resizable Sidebar Demo").Large()
+                    | Text.P("Drag the sidebar border to resize it. The sidebar width is constrained between 200px and 600px by default.")
+            ).Title("Main Content"),
+            sidebarContent: Layout.Vertical().Gap(2)
+                | Text.P("Sidebar Content")
+                | Text.P("Drag the right edge to resize this sidebar.").Small().Color(Colors.Gray)
+        ).Resizable();
+    }
+}
+```
+
+You can customize the min/max constraints using the `Size` API with `.Min()` and `.Max()`:
+
+```csharp demo-tabs
+public class ResizableSidebarCustomConstraintsExample : ViewBase
+{
+    public override object? Build()
+    {
+        return new SidebarLayout(
+            mainContent: new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.P("Custom Constraints").Large()
+                    | Text.P("This sidebar has custom width constraints: 150px min, 400px max, starting at 250px.")
+            ).Title("Main Content"),
+            sidebarContent: Layout.Vertical().Gap(2)
+                | Text.P("Custom Width")
+                | Text.P("Min: 150px, Max: 400px").Small().Color(Colors.Gray)
+        )
+        .Width(Size.Px(250).Min(Size.Px(150)).Max(Size.Px(400)))
+        .Resizable();
+    }
+}
+```
+
+<Callout Type="tip">
+"The resize handle supports mouse drag, touch gestures, and keyboard navigation with arrow keys for accessibility."
 </Callout>
 
 ### SidebarMenu Widget

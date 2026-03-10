@@ -39,7 +39,7 @@ new Tree(
 
 ## Click Events
 
-Use `HandleSelect` on the Tree and `Tag` on each MenuItem to handle clicks. The `DefaultSelectHandler` routes events to individual `MenuItem.OnSelect` handlers.
+Use `OnSelect` on the Tree and `Tag` on each MenuItem to handle clicks. The `DefaultSelectHandler` routes events to individual `MenuItem.OnSelect` handlers.
 
 ```csharp demo-tabs
 public class TreeClickDemo : ViewBase
@@ -58,14 +58,14 @@ public class TreeClickDemo : ViewBase
                         new MenuItem("App.tsx").Icon(Icons.Code).Tag("App.tsx"),
                         new MenuItem("index.ts").Icon(Icons.Code).Tag("index.ts")
                     )
-            ).HandleSelect(e => selected.Set(e.Value?.ToString() ?? ""));
+            ).OnSelect(e => selected.Set(e.Value?.ToString() ?? ""));
     }
 }
 ```
 
 ## Row Actions
 
-**Row actions** can be defined as a set of actions (buttons or menu items) displayed for each tree row. Configure them via `.RowActions()` with one or more `MenuItem`s, and subscribe to clicks with `.HandleRowAction()`.
+**Row actions** can be defined as a set of actions (buttons or menu items) displayed for each tree row. Configure them via `.RowActions()` with one or more `MenuItem`s, and subscribe to clicks with `.OnRowAction()`.
 
 ```csharp demo-tabs
 public class TreeRowActionsDemo : ViewBase
@@ -99,7 +99,7 @@ public class TreeRowActionsDemo : ViewBase
                     new MenuItem("Delete").Icon(Icons.Trash).Tag("delete")
                 )
             )
-            .HandleRowAction(e => lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}"));
+            .OnRowAction(e => lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}"));
     }
 }
 ```

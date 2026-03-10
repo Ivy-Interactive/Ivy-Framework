@@ -42,7 +42,6 @@ import {
 } from '@/widgets/inputs';
 import {
   StackLayoutWidget,
-  WrapLayoutWidget,
   GridLayoutWidget,
   HeaderLayoutWidget,
   FooterLayoutWidget,
@@ -78,6 +77,7 @@ import {
   AppHostWidget,
   AudioPlayerWidget,
   VideoPlayerWidget,
+  RichTextBlockWidget,
 } from '@/widgets/primitives';
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
@@ -88,6 +88,7 @@ export const widgetMap = {
 
   // Primitives
   'Ivy.TextBlock': TextBlockWidget,
+  'Ivy.RichTextBlock': RichTextBlockWidget,
   'Ivy.Markdown': React.lazy(
     () => import('@/widgets/primitives/MarkdownWidget')
   ),
@@ -151,7 +152,6 @@ export const widgetMap = {
 
   // Layouts
   'Ivy.StackLayout': StackLayoutWidget,
-  'Ivy.WrapLayout': WrapLayoutWidget,
   'Ivy.GridLayout': GridLayoutWidget,
   'Ivy.HeaderLayout': HeaderLayoutWidget,
   'Ivy.FooterLayout': FooterLayoutWidget,

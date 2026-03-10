@@ -2,7 +2,8 @@ using System.Collections.Immutable;
 using System.Text;
 using Ivy.Core.Hooks;
 
-namespace Ivy.Services;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class ChunkedMemoryStreamUploadHandler
 {

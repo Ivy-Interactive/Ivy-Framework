@@ -1,5 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -19,7 +18,7 @@ public record ListItem : WidgetBase<ListItem>
         Icon = icon;
         Badge = badge?.ToString();
         Tag = tag;
-        OnClick = onClick;
+        OnClick = onClick.ToEventHandler();
     }
 
     // Overload for Action<Event<ListItem>>
@@ -30,7 +29,7 @@ public record ListItem : WidgetBase<ListItem>
         Icon = icon;
         Badge = badge?.ToString();
         Tag = tag;
-        OnClick = onClick?.ToValueTask();
+        OnClick = onClick.ToEventHandler();
     }
 
     // Overload for simple Action (no parameters)
@@ -41,7 +40,7 @@ public record ListItem : WidgetBase<ListItem>
         Icon = icon;
         Badge = badge?.ToString();
         Tag = tag;
-        OnClick = onClick == null ? null : (_ => { onClick(); return ValueTask.CompletedTask; });
+        OnClick = onClick == null ? null : new(_ => { onClick(); return ValueTask.CompletedTask; });
     }
 
     internal ListItem()
@@ -58,7 +57,7 @@ public record ListItem : WidgetBase<ListItem>
 
     public object? Tag { get; } //not a prop!
 
-    [Event] public Func<Event<ListItem>, ValueTask>? OnClick { get; set; }
+    [Event] public EventHandler<Event<ListItem>>? OnClick { get; set; }
 }
 
 public static class ListItemExtensions

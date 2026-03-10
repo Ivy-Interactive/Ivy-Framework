@@ -13,7 +13,10 @@ import {
   getWidth,
 } from '@/lib/styles';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useEventHandler } from '@/components/event-handler';
+
+export type BoxHoverVariant = 'None' | 'Pointer' | 'PointerAndTranslate';
 
 interface BoxWidgetProps {
   id: string;
@@ -22,16 +25,21 @@ interface BoxWidgetProps {
   borderRadius: BorderRadius;
   borderThickness: string;
   borderStyle: BorderStyle;
+  borderColor?: string;
   padding?: string;
   margin?: string;
   width?: string;
   height?: string;
   contentAlign: Align;
   opacity?: number;
+  borderOpacity?: number;
   className?: string;
+  events?: string[];
+  hoverVariant?: BoxHoverVariant;
 }
 
 export const BoxWidget: React.FC<BoxWidgetProps> = ({
+  id,
   children,
   width,
   height,
@@ -39,12 +47,19 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   borderRadius = 'Rounded',
   borderThickness = '1',
   color,
+  borderColor,
   padding = '2',
   margin = '0',
   contentAlign = 'TopLeft',
   opacity,
+  borderOpacity,
   className,
+  events = [],
+  hoverVariant = 'None',
 }) => {
+  const eventHandler = useEventHandler();
+  const isClickable = events.includes('OnClick');
+
   // Use semantic box radius for 'Rounded', explicit values for 'None'/'Full'
   const borderRadiusStyle: React.CSSProperties =
     borderRadius === 'Rounded'
@@ -64,13 +79,37 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
     ...getBorderThickness(borderThickness),
     ...borderRadiusStyle,
     ...getColor(color, 'backgroundColor', 'background', opacity),
-    ...getColor(color, 'borderColor', 'background'),
     ...getColor(color, 'color', 'foreground'),
+    ...getColor(borderColor, 'borderColor', 'background', borderOpacity),
   };
 
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      // Prevent event from bubbling up if not strictly necessary,
+      // but only fire if interactive.
+      if (isClickable) {
+        e.stopPropagation();
+        eventHandler('OnClick', id, []);
+      }
+    },
+    [id, isClickable, eventHandler]
+  );
+
+  const hoverClass =
+    hoverVariant === 'None'
+      ? null
+      : hoverVariant === 'Pointer'
+        ? 'cursor-pointer'
+        : 'cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition';
   return (
     <>
-      <div style={styles} className={cn(className)}>
+      <div
+        style={styles}
+        className={cn(className, hoverClass)}
+        onClick={isClickable ? handleClick : undefined}
+        role={isClickable ? 'button' : undefined}
+        tabIndex={isClickable ? 0 : undefined}
+      >
         {children}
       </div>
     </>

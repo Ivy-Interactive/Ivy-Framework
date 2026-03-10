@@ -1,6 +1,5 @@
 using System.ComponentModel.Design;
 using System.Reactive.Disposables;
-using Ivy.Apps;
 using Ivy.Core.Exceptions;
 using Ivy.Core.Helpers;
 
@@ -12,6 +11,7 @@ public class ViewContext : IViewContext
     private readonly IViewContext? _ancestor;
     private readonly IServiceProvider _appServices;
     private readonly Disposables _disposables = new();
+    private readonly AsyncDisposables _asyncDisposables = new();
     private readonly Dictionary<int, StateHook> _hooks = new();
     private readonly Dictionary<int, EffectHook> _effects = new();
     private readonly EffectQueue _effectQueue;
@@ -25,7 +25,7 @@ public class ViewContext : IViewContext
         _requestRefresh = requestRefresh;
         _ancestor = ancestor;
         _effectQueue = new EffectQueue(effectHandler);
-        _disposables.Add(_effectQueue);
+        _asyncDisposables.Add(_effectQueue);
         _appServices = appServices;
 
         var services = new ServiceContainer();
@@ -80,14 +80,25 @@ public class ViewContext : IViewContext
                 async () =>
                 {
                     await handler();
-                    return Disposable.Empty;
+                    return null;
                 },
                 triggers.Select(e => e.ToTrigger()).ToArray()
             )
         );
     }
 
-    public void UseEffect(Func<Task<IDisposable>> handler, params IEffectTriggerConvertible[] triggers)
+    public void UseEffect(Func<Task<IDisposable?>> handler, params IEffectTriggerConvertible[] triggers)
+    {
+        UseEffectHook(
+            EffectHook.Create(
+                _callingIndex++,
+                async () => new DisposableAdapter(await handler()),
+                triggers.Select(e => e.ToTrigger()).ToArray()
+            )
+        );
+    }
+
+    public void UseEffect(Func<Task<IAsyncDisposable?>> handler, params IEffectTriggerConvertible[] triggers)
     {
         UseEffectHook(
             EffectHook.Create(
@@ -98,7 +109,18 @@ public class ViewContext : IViewContext
         );
     }
 
-    public void UseEffect(Func<IDisposable> handler, params IEffectTriggerConvertible[] triggers)
+    public void UseEffect(Func<IDisposable?> handler, params IEffectTriggerConvertible[] triggers)
+    {
+        UseEffectHook(
+            EffectHook.Create(
+                _callingIndex++,
+                () => Task.Run(() => (IAsyncDisposable?)new DisposableAdapter(handler())),
+                triggers.Select(e => e.ToTrigger()).ToArray()
+            )
+        );
+    }
+
+    public void UseEffect(Func<IAsyncDisposable?> handler, params IEffectTriggerConvertible[] triggers)
     {
         UseEffectHook(
             EffectHook.Create(
@@ -117,7 +139,7 @@ public class ViewContext : IViewContext
                 () => Task.Run(() =>
                 {
                     handler();
-                    return Disposable.Empty;
+                    return (IAsyncDisposable?)null;
                 }),
                 triggers.Select(e => e.ToTrigger()).ToArray()
             )
@@ -262,9 +284,10 @@ public class ViewContext : IViewContext
         }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _disposables.Dispose();
+        await _asyncDisposables.DisposeAsync();
         _hooks.Clear();
         _effects.Clear();
     }

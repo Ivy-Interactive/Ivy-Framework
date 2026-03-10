@@ -1,6 +1,7 @@
 using System.Net.Mail;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class Validators
 {

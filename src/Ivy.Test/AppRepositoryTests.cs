@@ -1,7 +1,6 @@
-﻿using System.Text.Json;
-using Ivy.Apps;
+using System.Text.Json;
 using Ivy.Core;
-using Ivy.Shared;
+using Ivy.Core.Apps;
 using Ivy.Test.Apps.Foo.Bar;
 using Xunit.Abstractions;
 

@@ -65,7 +65,7 @@ public class PasswordCaptureDemo: ViewBase
 }
 ```
 
-### TextArea
+### Textarea
 
 When a multiline text is needed, `TextInputVariants.Textarea` variant should be used. A common use-case is for capturing address
 that typically spans over multiple lines. The following demo shows how to use it.
@@ -90,6 +90,10 @@ public class CaptureAddressDemo: ViewBase
 ```
 
 Please note that how the newlines (`\n`) are recognized and used to create newlines in the textarea.
+
+<Callout Type="tip">
+A `.Multiline()` extension method on `TextInputBase` lets you turn any TextInput into a textarea without changing the variant explicitly. `notes.ToTextInput().Multiline()` is equivalent to `notes.ToTextareaInput()`.
+</Callout>
 
 ### Search
 
@@ -173,6 +177,26 @@ public class URLEnterDemo: ViewBase
                       .Variant(TextInputVariants.Url)
                       .WithField()
                       .Label("Website");
+    }
+}
+```
+
+## MinLength Validation
+
+The TextInput widget and all its variants (Password, Search, Textarea) support minimum length validation with the `.MinLength()` method. Combine it with `.MaxLength()` for range constraints:
+
+```csharp demo-below
+public class MinLengthValidationDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var usernameState = UseState("");
+        return usernameState.ToTextInput()
+            .Placeholder("Between 5 and 10 characters")
+            .MinLength(5)
+            .MaxLength(10)
+            .WithField()
+            .Label("Username");
     }
 }
 ```
@@ -306,7 +330,7 @@ public class DataCaptureUsingExtensionDemo: ViewBase
                      .Placeholder("Mobile")
                      .WithField()
                      .Label("Mobile")
-                | address.ToTextAreaInput()
+                | address.ToTextareaInput()
                          .Placeholder("Address Line1\nAddress Line2\nAddress Line 3")
                          .Height(40)
                          .Width(100)
@@ -346,7 +370,7 @@ public class BasicFilter : ViewBase
         
         return Layout.Vertical()
             | searchState.ToSearchInput().Placeholder("Which fruit you like?")
-            | result.ToTextAreaInput(content);
+            | result.ToTextareaInput(content);
     }     
 }
 ```

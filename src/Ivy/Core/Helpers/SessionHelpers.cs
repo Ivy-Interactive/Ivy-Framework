@@ -1,9 +1,7 @@
-using Ivy.Client;
-using Ivy.Apps;
-using Ivy.Views;
+using Ivy.Core.Apps;
+using Ivy.Core.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Ivy.Auth;
 
 namespace Ivy.Core.Helpers;
 

@@ -76,8 +76,8 @@ sampleUsers.ToDataTable()
 **Column customization methods:**
 
 - **Header** - Set custom column header text
-- **Width** - Set column width using [Size](../../04_ApiReference/IvyShared/Size.md) (e.g. `Size.Px()`, `Size.Percent()`).
-- **Align** - Control text alignment ([Align](../../04_ApiReference/IvyShared/Align.md): Left, Right, Center)
+- **Width** - Set column width using [Size](../../04_ApiReference/Ivy/Size.md) (e.g. `Size.Px()`, `Size.Percent()`).
+- **Align** - Control text alignment ([Align](../../04_ApiReference/Ivy/Align.md): Left, Right, Center)
 - **Icon** - Add an icon to the column header
 - **Help** - Add tooltip help text to the column header
 - **Sortable** - Enable or disable sorting for specific columns
@@ -138,13 +138,13 @@ sampleUsers.ToDataTable()
 
 ## Row Actions
 
-Add contextual actions to each row using `RowActions()` and handle them via `HandleRowAction()`. Actions are rendered as icons or [buttons](../03_Common/01_Button.md) that appear when hovering over a row. Row actions support both simple menu items and nested [dropdown menus](../03_Common/11_DropDownMenu.md).
+Add contextual actions to each row using `RowActions()` and handle them via `OnRowAction()`. Actions are rendered as icons or [buttons](../03_Common/01_Button.md) that appear when hovering over a row. Row actions support both simple menu items and nested [dropdown menus](../03_Common/11_DropDownMenu.md).
 
 Use `RowActions()` to define one or more `MenuItem` objects. Each menu item can have an icon, label, tooltip, and tag. For nested menus, use `.Children()` to create a dropdown menu with sub-items. For example, you can create individual action buttons like edit, delete, or view, as well as a menu button with a dropdown containing additional actions like archive, export, or share.
 
 When creating the DataTable, specify an ID selector using `.ToDataTable(idSelector: e => e.Id)` where `Id` is the property that uniquely identifies each row. This allows the row action handler to identify which row was clicked.
 
-Use `HandleRowAction()` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
+Use `OnRowAction()` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
 
 - **Id** - The ID of the row (extracted using the `idSelector` parameter passed to `ToDataTable()`)
 - **Tag** - The tag of the menu item that was clicked (useful for identifying which action was selected, especially with nested menus)
@@ -177,7 +177,7 @@ public class RowActionsDemo : ViewBase
                         MenuItem.Default(Icons.Share2, "share").Label("Share")
                     ])
             )
-            .HandleRowAction(async e =>
+            .OnRowAction(async e =>
             {
                 var args = e.Value;
                 client.Toast($"Action: {args.Tag} on row ID: {args.Id}");
@@ -227,7 +227,7 @@ public class RefreshTokenDemo : ViewBase
             .Width(e => e.Name, Size.Units(50))
             .Height(Size.Units(100));
 
-        var refreshButton = new Button("Reload Table").HandleClick(e =>
+        var refreshButton = new Button("Reload Table").OnClick(e =>
         {
             // Trigger a refresh of the DataTable
             refreshToken.Refresh();

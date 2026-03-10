@@ -4,7 +4,7 @@ import { DetailItem } from '@/components/ui/detail';
 interface DetailWidgetProps {
   id: string;
   label: string;
-  multiLine?: boolean;
+  multiline?: boolean;
   children?: React.ReactNode[];
 }
 
@@ -12,10 +12,10 @@ export const DetailWidget: React.FC<DetailWidgetProps> = ({
   id,
   label,
   children,
-  multiLine,
+  multiline,
 }) => {
   return (
-    <DetailItem label={label} multiLine={multiLine} key={id}>
+    <DetailItem label={label} multiline={multiline} key={id}>
       {children}
     </DetailItem>
   );

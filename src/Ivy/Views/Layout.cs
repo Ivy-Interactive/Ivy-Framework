@@ -1,7 +1,6 @@
-using Ivy.Helpers;
-using Ivy.Shared;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class Layout
 {

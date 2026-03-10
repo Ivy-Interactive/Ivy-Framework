@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 #pragma warning disable IVYHOOK001
@@ -23,7 +21,7 @@ public class ShouldFailWithAnalyser : ViewBase
 #pragma warning restore CS8321
 
         // This code is intentionally incorrect to demonstrate the analyzer's functionality.
-        return new Button().HandleClick(handler);
+        return new Button().OnClick(handler);
     }
 
 }

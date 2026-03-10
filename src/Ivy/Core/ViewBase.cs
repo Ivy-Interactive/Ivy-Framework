@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -5,8 +6,15 @@ using Ivy.Core.Hooks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public abstract partial class ViewBase() : IView, IViewContextOwner
+public abstract partial class ViewBase : IView, IViewContextOwner
 {
+    protected ViewBase()
+    {
+#if DEBUG
+        CallSite = CallSite.From(new StackTrace(fNeedFileInfo: true));
+#endif
+    }
+
     protected ViewBase(string? key) : this()
     {
         Key = key;
@@ -44,6 +52,8 @@ public abstract partial class ViewBase() : IView, IViewContextOwner
     }
 
     public string? Key { get; set; }
+
+    public CallSite? CallSite { get; set; }
 
     public abstract object? Build();
 

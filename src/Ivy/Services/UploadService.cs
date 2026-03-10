@@ -3,22 +3,24 @@ using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Reactive.Disposables;
 using System.Text.Json.Serialization;
-using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Auth;
 using Ivy.Core.Hooks;
-using Ivy.Views.Builders;
-using Ivy.Helpers;
+using Ivy.Core.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ivy.Services;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public record UploadContext(string UploadUrl, Action<Guid> Cancel)
 {
     public string? Accept { get; init; }
 
     public long? MaxFileSize { get; init; }
+
+    public long? MinFileSize { get; init; }
 
     public int? MaxFiles { get; init; }
 }
@@ -34,6 +36,12 @@ public static class UploadContextExtensions
     public static IState<UploadContext> MaxFileSize(this IState<UploadContext> state, long maxFileSize)
     {
         state.Set(state.Value with { MaxFileSize = maxFileSize });
+        return state;
+    }
+
+    public static IState<UploadContext> MinFileSize(this IState<UploadContext> state, long minFileSize)
+    {
+        state.Set(state.Value with { MinFileSize = minFileSize });
         return state;
     }
 
@@ -295,14 +303,14 @@ public class UploadController(AppSessionStore sessionStore, Server server) : Con
 
 public class UploadService(string connectionId, IClientProvider clientProvider) : IUploadService, IDisposable
 {
-    private readonly ConcurrentDictionary<Guid, (UploadDelegate handler, CancellationTokenSource cts, string? mimeType, string? fileName, Func<(string? accept, long? maxFileSize)> getValidation)> _uploads = new();
+    private readonly ConcurrentDictionary<Guid, (UploadDelegate handler, CancellationTokenSource cts, string? mimeType, string? fileName, Func<(string? accept, long? maxFileSize, long? minFileSize)> getValidation)> _uploads = new();
     private readonly ConcurrentDictionary<Guid, CancellationTokenSource> _inflightUploads = new();
 
-    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null, string? accept = null, long? maxFileSize = null)
+    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null, string? accept = null, long? maxFileSize = null, long? minFileSize = null)
     {
         var uploadId = Guid.NewGuid();
         var cts = new CancellationTokenSource();
-        _uploads[uploadId] = (handler, cts, defaultContentType, defaultFileName, () => (accept, maxFileSize));
+        _uploads[uploadId] = (handler, cts, defaultContentType, defaultFileName, () => (accept, maxFileSize, minFileSize));
 
         var cleanup = Disposable.Create(() =>
         {
@@ -313,7 +321,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
         return (cleanup, $"/ivy/upload/{connectionId}/{uploadId}");
     }
 
-    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null)
+    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize, long? minFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null)
     {
         var uploadId = Guid.NewGuid();
         var cts = new CancellationTokenSource();
@@ -336,7 +344,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
         }
 
         var (handler, cts, defaultContentType, defaultFileName, getValidation) = upload;
-        var (accept, maxFileSize) = getValidation();
+        var (accept, maxFileSize, minFileSize) = getValidation();
 
         if (file.Length == 0)
         {
@@ -356,10 +364,10 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
             Length = file.Length
         };
 
-        // Validate file size
+        // Validate maximum file size
         if (maxFileSize.HasValue)
         {
-            var sizeValidation = Widgets.Inputs.FileInputValidation.ValidateFileSize(fileUpload, maxFileSize);
+            var sizeValidation = FileInputValidation.ValidateFileSize(fileUpload, maxFileSize);
             if (!sizeValidation.IsValid)
             {
                 // Send toast notification for file size error
@@ -368,10 +376,22 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
             }
         }
 
+        // Validate minimum file size
+        if (minFileSize.HasValue)
+        {
+            var minSizeValidation = FileInputValidation.ValidateMinFileSize(fileUpload, minFileSize);
+            if (!minSizeValidation.IsValid)
+            {
+                // Send toast notification for file size error
+                clientProvider.Toast(minSizeValidation.ErrorMessage ?? "File is too small", "File too small");
+                return new OkResult(); // Return OK to prevent frontend error handling
+            }
+        }
+
         // Validate file type
         if (!string.IsNullOrWhiteSpace(accept))
         {
-            var typeValidation = Widgets.Inputs.FileInputValidation.ValidateFileType(fileUpload, accept);
+            var typeValidation = FileInputValidation.ValidateFileType(fileUpload, accept);
             if (!typeValidation.IsValid)
             {
                 // Send toast notification for file type error
@@ -423,7 +443,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
 
 public interface IUploadService
 {
-    (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null);
+    (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize, long? minFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null);
 
     Task<IActionResult> Upload(string uploadId, IFormFile file);
 

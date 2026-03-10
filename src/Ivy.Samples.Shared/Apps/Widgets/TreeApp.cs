@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
 [App(icon: Icons.FolderTree, searchHints: ["tree", "hierarchy", "folder", "file", "structure", "directory", "nested"])]
@@ -55,8 +53,8 @@ public class TreeApp : SampleBase
                     new MenuItem("Delete").Icon(Icons.Trash).Tag("delete")
                 )
             ])
-            .HandleSelect(e => selectedItem.Set(e.Value?.ToString() ?? ""))
-            .HandleRowAction(e => lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}"))
+            .OnSelect(e => selectedItem.Set(e.Value?.ToString() ?? ""))
+            .OnRowAction(e => lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}"))
 
             | Text.H2("Disabled Items")
             | new Tree(

@@ -9,6 +9,11 @@
 
 /* Hardcoded CSS variables removed - now using Ivy Design System flat CSS imports above */
 
+/* Custom element for widget inspector */
+ivy-widget {
+  display: contents;
+}
+
 /* Additional theme customization variables */
 @layer base {
   :root {
@@ -197,134 +202,6 @@
   }
 }
 
-/* Sheet slide animations */
-@keyframes slideInFromRight {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideOutToRight {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes slideInFromLeft {
-  from {
-    transform: translateX(-100%);
-  }
-
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideOutToLeft {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes slideInFromTop {
-  from {
-    transform: translateY(-100%);
-  }
-
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideOutToTop {
-  from {
-    transform: translateY(0);
-  }
-
-  to {
-    transform: translateY(-100%);
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    transform: translateY(100%);
-  }
-
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideOutToBottom {
-  from {
-    transform: translateY(0);
-  }
-
-  to {
-    transform: translateY(100%);
-  }
-}
-
-/* Sheet animations using Radix UI data-state attributes */
-[data-radix-dialog-content][data-state='open'] {
-  animation: slideInFromRight 300ms ease-out;
-}
-
-[data-radix-dialog-content][data-state='closed'] {
-  animation: slideOutToRight 300ms ease-in;
-}
-
-/* Sheet overlay animations */
-[data-radix-dialog-overlay][data-state='open'] {
-  animation: fadeIn 300ms ease-out;
-}
-
-[data-radix-dialog-overlay][data-state='closed'] {
-  animation: fadeOut 300ms ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-/* Sheet animation classes */
-.sheet-animate-enter {
-  animation: slideInFromRight 300ms ease-out;
-}
-
-.sheet-animate-exit {
-  animation: slideOutToRight 300ms ease-in;
-}
-
 /* Alert animation */
 @keyframes alertGrowIn {
   from {
@@ -364,9 +241,28 @@
   animation: toastSlideIn 300ms ease-out;
 }
 
+/* Indeterminate progress bar animation */
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-indeterminate {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
 @theme inline {
   --animate-accordion-down: accordion-down 0.1s ease-out;
   --animate-accordion-up: accordion-up 0.1s ease-out;
+  --animate-indeterminate: indeterminate 1.5s ease-in-out infinite;
 }
 
 @layer base {
@@ -400,7 +296,7 @@
     border-radius: var(--radius-boxes);
   }
 
-  /* For input field components: Button, Input, TextArea, Select */
+  /* For input field components: Button, Input, Textarea, Select */
   .rounded-field {
     border-radius: var(--radius-fields);
   }
@@ -416,7 +312,19 @@
   }
 }
 
-:has(> DIV.remove-parent-padding) {
+/* 
+  Override default padding in AppHost (and potentially other containers).
+  We need to look deep into the structure because wrappers like Ivy.Fragment 
+  or other intermediate widgets might introduce extra <ivy-widget> layers 
+  between the AppHost and the layout that requests padding removal.
+*/
+:has(> .remove-parent-padding),
+:has(> ivy-widget > .remove-parent-padding),
+:has(> ivy-widget > ivy-widget > .remove-parent-padding),
+:has(> ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding),
+:has(
+  > ivy-widget > ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding
+) {
   padding: 0 !important;
 }
 

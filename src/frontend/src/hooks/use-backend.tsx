@@ -68,6 +68,14 @@ type HttpTunnelResponseMessage = {
   errorMessage?: string;
 };
 
+type StreamDataMessage = {
+  streamId: string;
+  data: unknown;
+};
+
+type StreamHandler = (data: unknown) => void;
+type StreamSubscriber = (streamId: string, onData: StreamHandler) => () => void;
+
 const widgetTreeToXml = (node: WidgetNode) => {
   const tagName = node.type.replace('Ivy.', '');
   const attributes: string[] = [`Id="${escapeXml(node.id)}"`];
@@ -335,6 +343,10 @@ export const useBackend = (
   }, [chrome]);
 
   const rootAppIdRef = useRef<string | undefined>(undefined);
+
+  // Stream registry for server-to-client streaming
+  const streamRegistryRef = useRef<Map<string, StreamHandler>>(new Map());
+  const streamBufferRef = useRef<Map<string, unknown[]>>(new Map());
 
   const isRootConnection = parentId === null;
 
@@ -808,6 +820,21 @@ export const useBackend = (
             handleHttpRequest(message);
           });
 
+          connection.on('StreamData', (message: StreamDataMessage) => {
+            const handler = streamRegistryRef.current.get(message.streamId);
+            if (handler) {
+              handler(message.data);
+            } else {
+              // Buffer data until handler registers (mirrors backend WriteStream buffering)
+              let buffer = streamBufferRef.current.get(message.streamId);
+              if (!buffer) {
+                buffer = [];
+                streamBufferRef.current.set(message.streamId, buffer);
+              }
+              buffer.push(message.data);
+            }
+          });
+
           connection.onreconnecting(() => {
             if (isStoppingRef.current) return;
             logger.warn(`[${connection.connectionId}] Reconnecting`);
@@ -840,6 +867,7 @@ export const useBackend = (
         connection.off('HotReload');
         connection.off('ReloadPage');
         connection.off('HttpRequest');
+        connection.off('StreamData');
         connection.off('SetAuthCookies');
         connection.off('SetRootAppId');
         connection.off('SetTheme');
@@ -879,6 +907,7 @@ export const useBackend = (
 
   const eventHandler: WidgetEventHandlerType = useCallback(
     (eventName, widgetId, args) => {
+      console.debug('[Event] Sending:', eventName, widgetId, args);
       logger.debug(`[${connectionId}] Event: ${eventName}`, { widgetId, args });
       if (!connection) {
         logger.warn('No SignalR connection available for event', {
@@ -887,17 +916,50 @@ export const useBackend = (
         });
         return;
       }
-      connection.invoke('Event', eventName, widgetId, args).catch(err => {
-        logger.error('SignalR Error when sending event:', err);
-      });
+      connection
+        .invoke('Event', eventName, widgetId, args)
+        .then(() => {
+          console.debug('[Event] Invoke succeeded:', eventName, widgetId);
+        })
+        .catch(err => {
+          console.error('[Event] Invoke failed:', eventName, widgetId, err);
+          logger.error('SignalR Error when sending event:', err);
+        });
     },
     [connection, connectionId]
+  );
+
+  const subscribeToStream: StreamSubscriber = useCallback(
+    (streamId: string, onData: StreamHandler) => {
+      streamRegistryRef.current.set(streamId, onData);
+
+      // Flush any data that arrived before the handler was registered
+      const buffered = streamBufferRef.current.get(streamId);
+      if (buffered) {
+        streamBufferRef.current.delete(streamId);
+        for (const data of buffered) {
+          onData(data);
+        }
+      }
+
+      // Notify backend that we're subscribed so it can flush any buffered data
+      latestConnectionRef.current
+        ?.invoke('StreamSubscribe', streamId)
+        .catch(err => {
+          logger.error('Failed to notify stream subscription:', err);
+        });
+      return () => {
+        streamRegistryRef.current.delete(streamId);
+      };
+    },
+    []
   );
 
   return {
     connection,
     widgetTree,
     eventHandler,
+    subscribeToStream,
     disconnected,
   };
 };

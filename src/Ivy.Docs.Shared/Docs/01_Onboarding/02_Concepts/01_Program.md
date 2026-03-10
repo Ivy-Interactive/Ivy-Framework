@@ -25,10 +25,8 @@ Want to try Ivy without a full project? You can run a [file-based app](./19_File
 Every Ivy application follows a similar startup pattern:
 
 ```csharp
-using System.Globalization;
-
-CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 var server = new Server();
+server.UseCulture("en-US");
 server.UseHotReload();
 server.AddAppsFromAssembly();
 server.UseChrome();
@@ -202,10 +200,8 @@ server.SetMetaDescription("A powerful web application built with Ivy");
 A minimal setup for development with hot reload enabled and basic chrome configuration.
 
 ```csharp
-using System.Globalization;
-
-CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 var server = new Server();
+server.UseCulture("en-US");
 server.UseHotReload();
 server.AddAppsFromAssembly();
 server.UseChrome();
@@ -217,10 +213,8 @@ await server.RunAsync();
 A specialized configuration for documentation sites with custom chrome, version display, and page-based navigation.
 
 ```csharp
-using System.Globalization;
-
-CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 var server = new Server();
+server.UseCulture("en-US");
 server.AddAppsFromAssembly(typeof(DocsServer).Assembly);
 server.UseHotReload();
 
@@ -245,14 +239,12 @@ await server.RunAsync();
 A basic setup with Supabase authentication configured for email/password and Google OAuth login.
 
 ```csharp
-using System.Globalization;
-
-CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 var server = new Server();
+server.UseCulture("en-US");
 server.UseHotReload();
 server.AddAppsFromAssembly();
 server.UseChrome();
-server.UseAuth<SupabaseAuthProvider>(c => 
+server.UseAuth<SupabaseAuthProvider>(c =>
     c.UseEmailPassword().UseGoogle());
 await server.RunAsync();
 ```
@@ -262,10 +254,8 @@ await server.RunAsync();
 A comprehensive setup with conditional compilation, HTTPS redirection, metadata configuration, and dependency injection services for production deployment.
 
 ```csharp
-using System.Globalization;
-
-CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 var server = new Server();
+server.UseCulture("en-US");
 
 #if !DEBUG
 server.UseHttpRedirection();

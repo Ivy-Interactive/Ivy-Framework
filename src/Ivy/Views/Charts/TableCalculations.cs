@@ -1,4 +1,5 @@
-namespace Ivy.Views.Charts;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class TableCalculations
 {

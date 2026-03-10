@@ -29,6 +29,9 @@ export const FloatingPanelWidget = ({
     Right: 'top-1/2 right-4 -translate-y-1/2',
     Center: 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
     Stretch: '',
+    SpaceBetween: '',
+    SpaceAround: '',
+    SpaceEvenly: '',
   };
   return (
     <div

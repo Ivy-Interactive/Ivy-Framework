@@ -1,11 +1,11 @@
-﻿
+
 
 // ReSharper disable once CheckNamespace
-namespace Ivy.Charts;
+namespace Ivy;
 
-public record Tooltip
+public record ChartTooltip
 {
-    public Tooltip()
+    public ChartTooltip()
     {
 
     }
@@ -13,9 +13,9 @@ public record Tooltip
     public bool Animated { get; set; } = false;
 }
 
-public static class TooltipExtensions
+public static class ChartTooltipExtensions
 {
-    public static Tooltip Animated(this Tooltip tooltip, bool animated)
+    public static ChartTooltip Animated(this ChartTooltip tooltip, bool animated)
     {
         return tooltip with { Animated = animated };
     }

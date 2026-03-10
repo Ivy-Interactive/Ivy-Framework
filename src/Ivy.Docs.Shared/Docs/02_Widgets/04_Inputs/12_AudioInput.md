@@ -136,7 +136,7 @@ public class CustomLabelsDemo : ViewBase
 
 ### Disabled State
 
-Disable the audio input:
+Disable the audio recorder:
 
 ```csharp demo-below
 public class AudioInputDisabledDemo : ViewBase

@@ -1,7 +1,9 @@
 using System.Text.Json;
+using Ivy.Core.Auth;
 using Ivy.Core.Helpers;
 
-namespace Ivy.Auth;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class AuthSessionExtensions
 {

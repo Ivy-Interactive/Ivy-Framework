@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Loader2 } from 'lucide-react';
 import { Scales } from '@/types/scale';
 import {
   labelSizeVariants,
@@ -28,6 +29,7 @@ interface BoolInputWidgetProps {
   description?: string;
   value: NullableBoolean;
   disabled?: boolean;
+  loading?: boolean;
   nullable?: boolean;
   invalid?: string;
   variant: VariantType;
@@ -44,6 +46,7 @@ interface BaseVariantProps {
   nullable?: boolean;
   value: NullableBoolean;
   disabled: boolean;
+  loading: boolean;
   scale?: Scales;
   'data-testid'?: string;
 }
@@ -100,6 +103,28 @@ const withTooltip = (content: React.ReactNode, invalid?: string) => {
   );
 };
 
+const LoadingOverlay: React.FC<{ scale?: Scales; 'data-testid'?: string }> = ({
+  scale = Scales.Medium,
+  'data-testid': dataTestId,
+}) => {
+  const sizeClass =
+    scale === Scales.Small
+      ? 'h-4 w-4'
+      : scale === Scales.Large
+        ? 'h-5 w-5'
+        : 'h-4 w-4';
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center rounded-md bg-background/80"
+      data-testid={dataTestId ? `${dataTestId}-loading` : undefined}
+    >
+      <Loader2
+        className={cn(sizeClass, 'animate-spin text-muted-foreground')}
+      />
+    </div>
+  );
+};
+
 const VariantComponents = {
   Checkbox: React.memo(
     ({
@@ -108,6 +133,7 @@ const VariantComponents = {
       description,
       value,
       disabled,
+      loading,
       nullable,
       invalid,
       scale = Scales.Medium,
@@ -115,16 +141,19 @@ const VariantComponents = {
       'data-testid': dataTestId,
     }: CheckboxVariantProps) => {
       const checkboxElement = (
-        <Checkbox
-          id={id}
-          checked={value}
-          onCheckedChange={onCheckedChange}
-          disabled={disabled}
-          nullable={nullable}
-          className={cn(invalid && inputStyles.invalid)}
-          data-testid={dataTestId}
-          scale={scale}
-        />
+        <div className="relative flex shrink-0">
+          <Checkbox
+            id={id}
+            checked={value}
+            onCheckedChange={onCheckedChange}
+            disabled={disabled || loading}
+            nullable={nullable}
+            className={cn(invalid && inputStyles.invalid)}
+            data-testid={dataTestId}
+            scale={scale}
+          />
+          {loading && <LoadingOverlay scale={scale} data-testid={dataTestId} />}
+        </div>
       );
 
       const content = (
@@ -159,6 +188,7 @@ const VariantComponents = {
       description,
       value,
       disabled,
+      loading,
       invalid,
       scale = Scales.Medium,
       icon,
@@ -166,16 +196,19 @@ const VariantComponents = {
       'data-testid': dataTestId,
     }: SwitchVariantProps) => {
       const switchElement = (
-        <Switch
-          id={id}
-          checked={!!value}
-          onCheckedChange={onCheckedChange}
-          disabled={disabled}
-          scale={scale}
-          icon={icon}
-          className={cn(invalid && inputStyles.invalid)}
-          data-testid={dataTestId}
-        />
+        <div className="relative flex shrink-0">
+          <Switch
+            id={id}
+            checked={!!value}
+            onCheckedChange={onCheckedChange}
+            disabled={disabled || loading}
+            scale={scale}
+            icon={icon}
+            className={cn(invalid && inputStyles.invalid)}
+            data-testid={dataTestId}
+          />
+          {loading && <LoadingOverlay scale={scale} data-testid={dataTestId} />}
+        </div>
       );
 
       const content = (
@@ -210,6 +243,7 @@ const VariantComponents = {
       description,
       value,
       disabled,
+      loading,
       icon,
       invalid,
       scale = Scales.Medium,
@@ -217,18 +251,21 @@ const VariantComponents = {
       'data-testid': dataTestId,
     }: ToggleVariantProps) => {
       const toggleElement = (
-        <Toggle
-          id={id}
-          pressed={!!value}
-          onPressedChange={onPressedChange}
-          disabled={disabled}
-          aria-label={label}
-          className={cn(invalid && inputStyles.invalid)}
-          scale={scale}
-          data-testid={dataTestId}
-        >
-          {icon && <Icon name={icon} />}
-        </Toggle>
+        <div className="relative flex shrink-0">
+          <Toggle
+            id={id}
+            pressed={!!value}
+            onPressedChange={onPressedChange}
+            disabled={disabled || loading}
+            aria-label={label}
+            className={cn(invalid && inputStyles.invalid)}
+            scale={scale}
+            data-testid={dataTestId}
+          >
+            {icon && <Icon name={icon} />}
+          </Toggle>
+          {loading && <LoadingOverlay scale={scale} data-testid={dataTestId} />}
+        </div>
       );
 
       const content = (
@@ -263,6 +300,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   description,
   value = null,
   disabled = false,
+  loading = false,
   invalid,
   nullable = false,
   variant = 'Checkbox',
@@ -277,10 +315,10 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
 
   const handleChange = useCallback(
     (newValue: boolean | null) => {
-      if (disabled) return;
+      if (disabled || loading) return;
       eventHandler('OnChange', id, [newValue]);
     },
-    [disabled, eventHandler, id]
+    [disabled, loading, eventHandler, id]
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);
@@ -292,6 +330,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       description={description}
       value={normalizedValue}
       disabled={disabled}
+      loading={loading}
       nullable={nullable}
       icon={icon}
       invalid={invalid}

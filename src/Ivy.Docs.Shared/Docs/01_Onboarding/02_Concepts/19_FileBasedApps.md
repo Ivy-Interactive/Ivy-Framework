@@ -31,7 +31,6 @@ You will receive a file-based app that you can populate with your own context as
 #: package Ivy@*
 
 using Ivy;
-using Ivy.Views;
 
 var server = new Server();
 server.AddApp<HelloApp>();
@@ -81,23 +80,14 @@ Include the namespaces you use in the file. Common ones:
 
 | Namespace | Use for |
 |-----------|---------|
-| `Ivy` | [`Server`](./01_Program.md), server configuration and `RunAsync()`. |
-| `Ivy.Apps` | [`AppDescriptor`](./10_Apps.md), `AppIds`, `AppHelpers` when you register with `AddApp(new AppDescriptor { ... })` or use app discovery. The `[App]` attribute is in the `Ivy` namespace. |
-| `Ivy.Views` | [`ViewBase`](./02_Views.md), [`Layout`](./04_Layout.md), and built-in [widgets](./03_Widgets.md) ([`Card`](../../02_Widgets/03_Common/04_Card.md), [`Text`](../../02_Widgets/01_Primitives/01_TextBlock.md), [`Button`](../../02_Widgets/03_Common/01_Button.md), etc.). |
+| `Ivy` | [`Server`](./01_Program.md), server configuration and `RunAsync()`. [`AppDescriptor`](./10_Apps.md), `AppIds`, `AppHelpers`, the `[App]` attribute. [`UseService`](../../03_Hooks/02_Core/11_UseService.md), service registration and resolution. Helper utilities. [`ViewBase`](./02_Views.md), [`Layout`](./04_Layout.md), and built-in [widgets](./03_Widgets.md) ([`Card`](../../02_Widgets/03_Common/04_Card.md), [`Text`](../../02_Widgets/01_Primitives/01_TextBlock.md), [`Button`](../../02_Widgets/03_Common/01_Button.md), etc.). [Chrome](./11_Chrome.md), sidebar, and layout configuration. [Client](./13_Clients.md) and API usage. [Authentication](../03_CLI/04_Authentication/01_AuthenticationOverview.md) providers. [Input widgets](../../02_Widgets/04_Inputs/_Index.md) ([`TextInput`](../../02_Widgets/04_Inputs/02_TextInput.md), [`SelectInput`](../../02_Widgets/04_Inputs/05_SelectInput.md), etc.). |
 | `Ivy.Core` | Core Ivy types. |
 | `Ivy.Core.Hooks` | [Hooks](../../03_Hooks/01_HookIntroduction.md) ([UseState](../../03_Hooks/02_Core/03_UseState.md), [UseEffect](../../03_Hooks/02_Core/04_UseEffect.md), [UseMemo](../../03_Hooks/02_Core/05_UseMemo.md), etc.). |
-| `Ivy.Chrome` | [Chrome](./11_Chrome.md), sidebar, and layout configuration. |
-| `Ivy.Helpers` | Helper utilities. |
-| `Ivy.Services` | [`UseService`](../../03_Hooks/02_Core/11_UseService.md), service registration and resolution. |
-| `Ivy.Client` | [Client](./13_Clients.md) and API usage. |
-| `Ivy.Auth` | [Authentication](../03_CLI/04_Authentication/01_AuthenticationOverview.md) providers. |
-| `Ivy.Widgets.Inputs` | [Input widgets](../../02_Widgets/04_Inputs/_Index.md) ([`TextInput`](../../02_Widgets/04_Inputs/02_TextInput.md), [`SelectInput`](../../02_Widgets/04_Inputs/05_SelectInput.md), etc.). |
 
 Example (minimal for a simple app):
 
 ```csharp
 using Ivy;
-using Ivy.Views;
 ```
 
 If you use only certain widgets or types, you might need extra namespaces (for example from other Ivy packages). Add `using` directives as you would in a normal C# project.

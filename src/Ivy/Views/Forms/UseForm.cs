@@ -1,9 +1,9 @@
-using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using static Ivy.Views.Forms.FormHelpers;
+using static Ivy.FormHelpers;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class UseFormExtensions
 {

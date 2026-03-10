@@ -1,4 +1,7 @@
-namespace Ivy.Views.Builders;
+using Ivy.Views.Builders;
+
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public interface IBuilderFactory<TModel>
 {
@@ -33,5 +36,11 @@ public static class BuilderFactoryExtensions
     public static IBuilder<TModel> Func<TModel, TIn>(this IBuilderFactory<TModel> factory, Func<TIn, object?> func)
     {
         return new FuncBuilder<TModel, TIn>(func);
+    }
+
+    public static ProgressBuilder<TModel> Progress<TModel>(
+        this IBuilderFactory<TModel> factory)
+    {
+        return new ProgressBuilder<TModel>();
     }
 }

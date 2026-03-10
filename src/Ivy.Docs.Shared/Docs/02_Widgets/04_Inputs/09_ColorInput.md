@@ -146,6 +146,23 @@ public class ColorStylingDemo : ViewBase
 }
 ```
 
+## Alpha Channel
+
+When building apps that require semi-transparent colors (e.g., overlays, backgrounds with opacity), you can enable the `AllowAlpha` option. This adds an opacity slider next to the color picker, and the value is stored in `#RRGGBBAA` format.
+
+```csharp demo-below
+public class ColorAlphaDemo : ViewBase
+{
+    public override object? Build()
+    {    
+        var colorState = UseState("#ff000080");
+        return Layout.Vertical()
+            | colorState.ToColorInput().AllowAlpha()
+            | Text.P($"Selected: {colorState.Value}");
+    }   
+}
+```
+
 <WidgetDocs Type="Ivy.ColorInput" ExtensionTypes="Ivy.ColorInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/ColorInput.cs"/>
 
 ## Examples

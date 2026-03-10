@@ -49,6 +49,12 @@ public static class Utils
             return ValueTask.CompletedTask;
         };
 
+    public static EventHandler<T>? ToEventHandler<T>(this Func<T, ValueTask>? func)
+        => func == null ? null : new(func);
+
+    public static EventHandler<T>? ToEventHandler<T>(this Action<T>? action)
+        => action == null ? null : new(action.ToValueTask());
+
     public static object? ConvertJsonNode(JsonNode? jsonNode, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type valueType)
     {
         if (jsonNode is null) return null;

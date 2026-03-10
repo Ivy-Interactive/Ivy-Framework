@@ -1,7 +1,8 @@
 using System.Reactive.Disposables;
 using Microsoft.Extensions.Logging;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public interface IDataTableService
 {

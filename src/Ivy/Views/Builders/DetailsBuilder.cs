@@ -3,9 +3,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views.Builders;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class DetailsBuilder<TModel> : ViewBase, IStateless
 {
@@ -16,7 +16,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
         public bool IsRemoved { get; set; }
 
-        public bool IsMultiLine { get; set; }
+        public bool IsMultiline { get; set; }
 
         public IBuilder<TModel> Builder { get; set; } = builder;
 
@@ -121,12 +121,12 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    public DetailsBuilder<TModel> MultiLine(params Expression<Func<TModel, object>>[] fields)
+    public DetailsBuilder<TModel> Multiline(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var expr in fields)
         {
             var prop = GetField(expr);
-            prop.IsMultiLine = true;
+            prop.IsMultiline = true;
         }
         return this;
     }
@@ -190,7 +190,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
         Detail BuildDetail(Item item)
         {
-            return new Detail(item.Label, item.Builder.Build(item.GetValue(_model), _model), item.IsMultiLine);
+            return new Detail(item.Label, item.Builder.Build(item.GetValue(_model), _model), item.IsMultiline);
         }
     }
 }

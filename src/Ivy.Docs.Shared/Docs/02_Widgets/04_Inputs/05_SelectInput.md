@@ -19,7 +19,7 @@ and multiple selections, option grouping, and custom rendering of option items.
 
 ## Basic Usage
 
-Here's a simple example of a `SelectInput` with a few options. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width(Size.Full())` to make the select fill available space:
+Here's a simple example of a `SelectInput` with a few options. Use [Size](../../04_ApiReference/Ivy/Size.md) for `.Width(Size.Full())` to make the select fill available space:
 
 ```csharp demo-below
 public class SelectVariantDemo : ViewBase
@@ -142,27 +142,140 @@ public class SelectStylingDemo : ViewBase
     {
         var normalSelect = UseState("");
         var invalidSelect = UseState("");
+        var ghostSelect = UseState("");
+        var loadingSelect = UseState("");
         var disabledSelect = UseState("");
-        
+
         var options = new[] { "Option 1", "Option 2", "Option 3" };
-        
+
+        var isLoading = UseState(true);
+
         return Layout.Vertical()
             | normalSelect.ToSelectInput(options)
                 .Placeholder("Choose an option...")
                 .WithField()
                 .Label("Normal SelectInput:")
-            
+
             | invalidSelect.ToSelectInput(options)
                 .Placeholder("This has an error...")
                 .Invalid("This field is required")
                 .WithField()
                 .Label("Invalid SelectInput:")
-            
+
+            | ghostSelect.ToSelectInput(options)
+                .Placeholder("This is ghost...")
+                .Ghost()
+                .WithField()
+                .Label("Ghost SelectInput:")
+
+            | loadingSelect.ToSelectInput(options)
+                .Placeholder("This is loading...")
+                .Loading(isLoading.Value)
+                .WithField()
+                .Label("Loading SelectInput")
+
             | disabledSelect.ToSelectInput(options)
                 .Placeholder("This is disabled...")
                 .Disabled(true)
                 .WithField()
                 .Label("Disabled SelectInput:");
+    }
+}
+```
+
+## Advanced Features
+
+SelectInput supports search, selection limits, and loading state. These work across all variants (Select, List, Toggle).
+
+### Search Support
+
+Enable search with `.Searchable(true)`, set the matching mode with `.SearchMode()`, and customize the empty state with `.EmptyMessage()`:
+
+```csharp demo-below
+public class SelectSearchDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selected = UseState("");
+        var options = new[] { "C#", "Java", "Python", "JavaScript", "Go", "Rust", "F#", "Kotlin", "TypeScript" };
+        return selected.ToSelectInput(options.ToOptions())
+            .Searchable(true)
+            .SearchMode(SearchMode.Fuzzy)
+            .EmptyMessage("No items found")
+            .Placeholder("Search languages...")
+            .WithField()
+            .Label("Language")
+            .Width(Size.Full());;
+    }
+}
+```
+
+`SearchMode` can be `SearchMode.Fuzzy`, `SearchMode.CaseInsensitive`, or `SearchMode.CaseSensitive`.
+
+### Selection Limits
+
+For multi-select variants, use `.MinSelections()` and `.MaxSelections()` to enforce how many options can be selected:
+
+```csharp demo-below
+public class SelectionLimitsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var colors = UseState<string[]>([]);
+        var options = new[] { "Red", "Green", "Blue", "Yellow", "Purple" }.ToOptions();
+        return colors.ToSelectInput(options)
+            .Variant(SelectInputVariants.Toggle)
+            .MinSelections(1)
+            .MaxSelections(3)
+            .Placeholder("Pick 1 to 3 colors")
+            .WithField()
+            .Label("Colors")
+            .Width(Size.Full());;
+    }
+}
+```
+
+### Disabled Options
+
+Individual options can be disabled using the fluent `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list:
+
+```csharp demo-tabs
+public class DisabledOptionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var fruit = UseState("apple");
+        var colors = UseState<string[]>([]);
+
+        var fruitOptions = new IAnyOption[]
+        {
+            new Option<string>("Apple", "apple"),
+            new Option<string>("Orange", "orange"),
+            new Option<string>("Grape (Out of Stock)", "grape").Disabled(),
+            new Option<string>("Banana", "banana"),
+            new Option<string>("Mango (Coming Soon)", "mango").Disabled(),
+        };
+
+        var colorOptions = new IAnyOption[]
+        {
+            new Option<string>("Red", "red"),
+            new Option<string>("Green", "green"),
+            new Option<string>("Blue (Premium)", "blue").Disabled(),
+            new Option<string>("Yellow", "yellow"),
+        };
+
+        return Layout.Vertical()
+            | Text.InlineCode("Select Variant")
+            | fruit.ToSelectInput(fruitOptions)
+                .Placeholder("Select a fruit...")
+
+            | Text.InlineCode("Toggle Variant")
+            | colors.ToSelectInput(colorOptions)
+                .Variant(SelectInputVariants.Toggle)
+
+            | Text.InlineCode("List Variant")
+            | colors.ToSelectInput(colorOptions)
+                .Variant(SelectInputVariants.List);
     }
 }
 ```

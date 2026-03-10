@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Demos;
 
 [App(icon: Icons.PartyPopper, title: "Hello", searchHints: ["welcome", "getting-started", "introduction", "first", "tutorial", "example"])]

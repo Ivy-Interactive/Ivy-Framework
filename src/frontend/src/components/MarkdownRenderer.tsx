@@ -195,7 +195,7 @@ const CodeBlock = memo(
             <div className="absolute top-2 right-2 z-10">
               <CopyToClipboardButton textToCopy={content} />
             </div>
-            <ScrollArea className="w-full">
+            <ScrollArea className="w-full border border-border rounded-md">
               <SyntaxHighlighter
                 language={match[1]}
                 style={dynamicTheme}

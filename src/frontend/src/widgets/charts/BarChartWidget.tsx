@@ -222,7 +222,10 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   // Memoize option configuration
   const option = useMemo(
     () => ({
-      grid: generateEChartGrid(cartesianGrid),
+      grid: generateEChartGrid(
+        cartesianGrid,
+        !!toolbox && toolbox.enabled !== false
+      ),
       color: chartColors,
       textStyle: generateTextStyle(
         themeColors.foreground,

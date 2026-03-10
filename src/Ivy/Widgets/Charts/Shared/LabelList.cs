@@ -1,7 +1,6 @@
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
-namespace Ivy.Charts;
+namespace Ivy;
 
 public record LabelList
 {

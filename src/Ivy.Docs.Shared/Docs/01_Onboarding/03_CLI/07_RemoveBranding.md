@@ -88,6 +88,7 @@ After running the command successfully, verify the configuration:
 ```
 
 You should see:
+
 ```
 Ivy:License = your-unique-license-token
 ```
@@ -97,7 +98,7 @@ Ivy:License = your-unique-license-token
 Run your project locally to verify branding has been removed:
 
 ```terminal
->dotnet watch
+>ivy run
 ```
 
 ## Troubleshooting
