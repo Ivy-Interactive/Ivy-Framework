@@ -52,18 +52,24 @@ const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
   alignSelf,
   className,
 }) => {
+  const hasRowSpan = rowSpan != null && rowSpan > 1;
+  const hasColumnSpan = columnSpan != null && columnSpan > 1;
+
   const styles: React.CSSProperties = {
     gridColumn: columnSpan ? `span ${columnSpan}` : undefined,
     gridRow: rowSpan ? `span ${rowSpan}` : undefined,
     gridColumnStart: column,
     gridRowStart: row,
     ...getAlignSelf(alignSelf),
+    // Override grid's place-items-center for spanning cells so they fill their grid area
+    ...(hasRowSpan && !alignSelf ? { alignSelf: 'stretch' } : {}),
+    ...(hasColumnSpan ? { justifySelf: 'stretch' } : {}),
   };
 
   return (
     <div
       style={styles}
-      className={`relative flex items-center h-full w-full min-w-0 ${gridCellOverflow.ellipsis} ${className}`}
+      className={`relative flex ${hasRowSpan ? 'items-stretch' : 'items-center'} h-full w-full min-w-0 ${gridCellOverflow.ellipsis} ${className}`}
     >
       {children}
     </div>
