@@ -13,10 +13,10 @@ import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
 import { Scales } from '@/types/scale';
 import {
-  dateTimeInputVariants,
-  dateTimeInputIconVariants,
-  dateTimeInputTextVariants,
-} from '@/components/ui/input/date-time-input-variants';
+  dateTimeInputVariant,
+  dateTimeInputIconVariant,
+  dateTimeInputTextVariant,
+} from '@/components/ui/input/date-time-input-variant';
 import { WeekVariantProps } from './types';
 import { ClearAndInvalidIcons } from './shared';
 
@@ -94,7 +94,7 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
             variant="outline"
             data-slot="calendar"
             className={cn(
-              dateTimeInputVariants({ scale }),
+              dateTimeInputVariant({ scale }),
               'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
@@ -110,13 +110,13 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
             <CalendarIcon
               className={cn(
                 'mr-2 shrink-0',
-                dateTimeInputIconVariants({ scale })
+                dateTimeInputIconVariant({ scale })
               )}
             />
             <span
               className={cn(
                 'truncate',
-                dateTimeInputTextVariants({ scale }),
+                dateTimeInputTextVariant({ scale }),
                 !date && 'text-muted-foreground'
               )}
             >

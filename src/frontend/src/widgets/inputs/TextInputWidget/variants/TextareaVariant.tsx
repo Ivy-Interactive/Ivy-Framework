@@ -5,9 +5,9 @@ import { getWidth, getHeight, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
 import {
-  textareaSizeVariants,
-  xIconVariants,
-} from '@/components/ui/input/text-input-variants';
+  textareaSizeVariant,
+  xIconVariant,
+} from '@/components/ui/input/text-input-variant';
 import { TextInputWidgetProps } from '../types';
 import {
   useCursorPosition,
@@ -83,7 +83,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           onFocus={onFocus}
           onPaste={handlePaste}
           className={cn(
-            textareaSizeVariants({ scale }),
+            textareaSizeVariant({ scale }),
             'border-0 shadow-none dark:bg-transparent h-full',
             props.invalid && inputStyles.invalidInput,
             (props.invalid || showClear) && 'pr-8',
@@ -109,7 +109,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
             className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center"
             style={{ pointerEvents: 'auto' }}
           >
-            <X className={xIconVariants({ scale })} />
+            <X className={xIconVariant({ scale })} />
           </button>
         )}
         {props.shortcutKey && !isFocused && !hasValue && (

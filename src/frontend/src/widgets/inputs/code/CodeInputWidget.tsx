@@ -23,7 +23,7 @@ import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
 import { Scales } from '@/types/scale';
 import { X, Copy } from 'lucide-react';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
 import {
   keymap,
   EditorView,
@@ -173,7 +173,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
               aria-label="Copy to clipboard"
               className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
             >
-              <Copy className={xIconVariants({ scale })} />
+              <Copy className={xIconVariant({ scale })} />
             </button>
           )}
           {showClear && (
@@ -184,7 +184,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
               onClick={handleClear}
               className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
             >
-              <X className={xIconVariants({ scale })} />
+              <X className={xIconVariant({ scale })} />
             </button>
           )}
           {/* Invalid icon - rightmost */}

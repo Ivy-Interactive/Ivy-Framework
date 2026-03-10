@@ -6,10 +6,10 @@ import { getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
 import {
-  textInputSizeVariants,
-  eyeIconVariants,
-  xIconVariants,
-} from '@/components/ui/input/text-input-variants';
+  textInputSizeVariant,
+  eyeIconVariant,
+  xIconVariant,
+} from '@/components/ui/input/text-input-variant';
 import { TextInputWidgetProps } from '../types';
 import {
   useCursorPosition,
@@ -108,7 +108,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           className={cn(
-            textInputSizeVariants({ scale }),
+            textInputSizeVariant({ scale }),
             'border-0 shadow-none dark:bg-transparent',
             props.invalid && inputStyles.invalidInput,
             props.invalid || showClear ? 'pr-14' : 'pr-8',
@@ -130,13 +130,13 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           <div className="pointer-events-auto flex items-center h-6">
             <button
               type="button"
-              className={eyeIconVariants({ scale })}
+              className={eyeIconVariant({ scale })}
               onClick={togglePassword}
             >
               {showPassword ? (
-                <EyeOffIcon className={eyeIconVariants({ scale })} />
+                <EyeOffIcon className={eyeIconVariant({ scale })} />
               ) : (
-                <EyeIcon className={eyeIconVariants({ scale })} />
+                <EyeIcon className={eyeIconVariant({ scale })} />
               )}
             </button>
           </div>
@@ -148,7 +148,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
               onClick={onClear}
               className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
             >
-              <X className={xIconVariants({ scale })} />
+              <X className={xIconVariant({ scale })} />
             </button>
           )}
           {props.shortcutKey && !hasValue && !showClear && !props.invalid && (

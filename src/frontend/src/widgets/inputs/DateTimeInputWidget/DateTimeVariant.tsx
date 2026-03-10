@@ -14,10 +14,10 @@ import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
 import { Scales } from '@/types/scale';
 import {
-  dateTimeInputVariants,
-  dateTimeInputIconVariants,
-  dateTimeInputTextVariants,
-} from '@/components/ui/input/date-time-input-variants';
+  dateTimeInputVariant,
+  dateTimeInputIconVariant,
+  dateTimeInputTextVariant,
+} from '@/components/ui/input/date-time-input-variant';
 import { DateTimeVariantProps } from './types';
 import { ClearAndInvalidIcons } from './shared';
 
@@ -156,7 +156,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             variant="outline"
             data-slot="calendar"
             className={cn(
-              dateTimeInputVariants({ scale }),
+              dateTimeInputVariant({ scale }),
               'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
@@ -172,19 +172,19 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             <CalendarIcon
               className={cn(
                 'mr-2 shrink-0',
-                dateTimeInputIconVariants({ scale })
+                dateTimeInputIconVariant({ scale })
               )}
             />
             <Clock
               className={cn(
                 'mr-2 shrink-0',
-                dateTimeInputIconVariants({ scale })
+                dateTimeInputIconVariant({ scale })
               )}
             />
             <span
               className={cn(
                 'truncate',
-                dateTimeInputTextVariants({ scale }),
+                dateTimeInputTextVariant({ scale }),
                 !date && 'text-muted-foreground'
               )}
             >
@@ -206,7 +206,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             <div className="flex items-center gap-2">
               <Clock
                 className={cn(
-                  dateTimeInputIconVariants({ scale }),
+                  dateTimeInputIconVariant({ scale }),
                   'text-muted-foreground'
                 )}
               />
@@ -221,7 +221,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                 disabled={disabled}
                 className={cn(
                   'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden',
-                  dateTimeInputTextVariants({ scale }),
+                  dateTimeInputTextVariant({ scale }),
                   invalid && inputStyles.invalidInput
                 )}
                 data-testid={dataTestId ? `${dataTestId}-time` : undefined}

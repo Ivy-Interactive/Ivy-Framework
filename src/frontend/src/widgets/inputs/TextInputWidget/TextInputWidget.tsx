@@ -8,7 +8,7 @@ import {
   TextareaVariant,
   PasswordVariant,
   SearchVariant,
-} from './variants';
+} from './variant';
 
 const EMPTY_ARRAY: never[] = [];
 

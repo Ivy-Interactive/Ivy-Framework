@@ -14,7 +14,7 @@ import { useRef, useEffect, useState } from 'react';
 import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
 
-const asyncSelectContainerVariants = cva(
+const asyncSelectContainerVariant = cva(
   'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-field border border-input bg-transparent shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer relative dark:border-white/10',
   {
     variants: {
@@ -30,19 +30,19 @@ const asyncSelectContainerVariants = cva(
   }
 );
 
-const asyncSelectTextVariants = {
+const asyncSelectTextVariant = {
   Small: 'text-xs',
   Medium: 'text-sm',
   Large: 'text-base',
 };
 
-const asyncSelectIconContainerVariants = {
+const asyncSelectIconContainerVariant = {
   Small: 'w-7 right-0 px-2',
   Medium: 'w-8 right-0 px-2',
   Large: 'w-10 right-0 px-2',
 };
 
-const asyncSelectIconVariants = {
+const asyncSelectIconVariant = {
   Small: 'h-3 w-3',
   Medium: 'h-4 w-4',
   Large: 'h-5 w-5',
@@ -120,7 +120,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
       ref={displayValueRef}
       className={cn(
         'grow overflow-hidden text-ellipsis whitespace-nowrap',
-        asyncSelectTextVariants[scale],
+        asyncSelectTextVariant[scale],
         !loading && 'text-primary font-semibold underline',
         loading && 'text-muted-foreground'
       )}
@@ -153,7 +153,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         disabled={disabled}
         onClick={handleSelect}
         className={cn(
-          asyncSelectContainerVariants({ scale }),
+          asyncSelectContainerVariant({ scale }),
           invalid && inputStyles.invalidInput,
           ghost && 'border-transparent shadow-none'
         )}
@@ -163,7 +163,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
           <span
             className={cn(
               'grow text-muted-foreground',
-              asyncSelectTextVariants[scale]
+              asyncSelectTextVariant[scale]
             )}
           >
             {placeholder}
@@ -177,14 +177,11 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         <div
           className={cn(
             'absolute top-0 bottom-0 border-l flex items-center justify-center',
-            asyncSelectIconContainerVariants[scale]
+            asyncSelectIconContainerVariant[scale]
           )}
         >
           <ChevronRight
-            className={cn(
-              'opacity-50 shrink-0',
-              asyncSelectIconVariants[scale]
-            )}
+            className={cn('opacity-50 shrink-0', asyncSelectIconVariant[scale])}
           />
         </div>
       </button>

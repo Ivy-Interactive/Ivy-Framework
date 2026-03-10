@@ -3,18 +3,18 @@ import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 import {
-  detailLabelSizeVariants,
-  detailValueSizeVariants,
-  detailValueMultiLinePaddingVariants,
-  detailsSizeVariants,
-} from './detail/detail-variants';
+  detailLabelSizeVariant,
+  detailValueSizeVariant,
+  detailValueMultiLinePaddingVariant,
+  detailsSizeVariant,
+} from './detail/detail-variant';
 import { DetailProvider } from './detail/DetailContext';
 import { useDetailScale } from './detail/useDetailScale';
 import { Scales } from '@/types/scale';
 
 export interface DetailsProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'size'>,
-    VariantProps<typeof detailsSizeVariants> {}
+    VariantProps<typeof detailsSizeVariant> {}
 
 const Details = React.forwardRef<HTMLDivElement, DetailsProps>(
   ({ className, scale: propScale, children, ...props }, ref) => {
@@ -62,14 +62,14 @@ const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
         )}
         {...props}
       >
-        <div className={cn(detailLabelSizeVariants({ scale }))}>{label}</div>
+        <div className={cn(detailLabelSizeVariant({ scale }))}>{label}</div>
         <div
           className={cn(
-            detailValueSizeVariants({ scale }),
+            detailValueSizeVariant({ scale }),
             multiline
               ? cn(
                   'whitespace-normal break-words text-left',
-                  detailValueMultiLinePaddingVariants({ scale })
+                  detailValueMultiLinePaddingVariant({ scale })
                 )
               : 'truncate text-right ml-auto'
           )}

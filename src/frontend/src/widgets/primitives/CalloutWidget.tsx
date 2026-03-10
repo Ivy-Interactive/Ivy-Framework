@@ -18,7 +18,7 @@ interface CalloutWidgetProps {
   events?: string[];
 }
 
-const calloutVariants = {
+const calloutVariant = {
   Info: {
     container:
       'border-cyan/20 bg-cyan/5 text-foreground dark:border-cyan/30 dark:bg-cyan/10',
@@ -71,7 +71,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   }
 
   const variantKey = variant || 'Info';
-  const variantStyles = calloutVariants[variantKey];
+  const variantStyles = calloutVariant[variantKey];
 
   return (
     <div

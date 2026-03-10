@@ -3,17 +3,17 @@ import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 import {
-  tableCellSizeVariants,
-  tableHeadSizeVariants,
-  tableSizeVariants,
-} from './table/table-variants';
+  tableCellSizeVariant,
+  tableHeadSizeVariant,
+  tableSizeVariant,
+} from './table/table-variant';
 import { TableProvider } from './table/TableContext';
 import { useTableScale } from './table/useTableSize';
 import { Scales } from '@/types/scale';
 
 export interface TableProps
   extends Omit<React.HTMLAttributes<HTMLTableElement>, 'size'>,
-    VariantProps<typeof tableSizeVariants> {}
+    VariantProps<typeof tableSizeVariant> {}
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
   ({ className, scale = Scales.Medium, children, ...props }, ref) => (
@@ -23,7 +23,7 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(
           ref={ref}
           className={cn(
             'w-full caption-bottom',
-            tableSizeVariants({ scale }),
+            tableSizeVariant({ scale }),
             className
           )}
           {...props}
@@ -88,7 +88,7 @@ TableRow.displayName = 'TableRow';
 
 export interface TableHeadProps
   extends Omit<React.ThHTMLAttributes<HTMLTableCellElement>, 'size'>,
-    VariantProps<typeof tableHeadSizeVariants> {}
+    VariantProps<typeof tableHeadSizeVariant> {}
 
 const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
   ({ className, scale: propScale, ...props }, ref) => {
@@ -99,7 +99,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
       <th
         ref={ref}
         className={cn(
-          tableHeadSizeVariants({ scale }),
+          tableHeadSizeVariant({ scale }),
           'text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
           className
         )}
@@ -112,7 +112,7 @@ TableHead.displayName = 'TableHead';
 
 export interface TableCellProps
   extends Omit<React.TdHTMLAttributes<HTMLTableCellElement>, 'size'>,
-    VariantProps<typeof tableCellSizeVariants> {}
+    VariantProps<typeof tableCellSizeVariant> {}
 
 const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
   ({ className, scale: propScale, ...props }, ref) => {
@@ -123,7 +123,7 @@ const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
       <td
         ref={ref}
         className={cn(
-          tableCellSizeVariants({ scale }),
+          tableCellSizeVariant({ scale }),
           'align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
           className
         )}

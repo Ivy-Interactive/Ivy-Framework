@@ -3,7 +3,7 @@ import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { colorInputPickerVariants } from '@/components/ui/input/color-input-variants';
+import { colorInputPickerVariant } from '@/components/ui/input/color-input-variant';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Popover,
@@ -543,7 +543,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
             type="button"
             disabled={disabled}
             className={cn(
-              colorInputPickerVariants({ scale }),
+              colorInputPickerVariant({ scale }),
               'p-0 rounded-md shadow-none focus:outline-none ring-offset-1 ring-1 transition-all relative',
               'ring-offset-white ring-black',
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',

@@ -4,12 +4,12 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {
-  expandableTriggerVariants,
-  expandableHeaderVariants,
-  expandableChevronContainerVariants,
-  expandableChevronVariants,
-  expandableContentVariants,
-} from '@/components/ui/expandable/expandable-variants';
+  expandableTriggerVariant,
+  expandableHeaderVariant,
+  expandableChevronContainerVariant,
+  expandableChevronVariant,
+  expandableContentVariant,
+} from '@/components/ui/expandable/expandable-variant';
 import { ChevronRight } from 'lucide-react';
 import React from 'react';
 import Icon from '@/components/Icon';
@@ -112,7 +112,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       <CollapsibleTrigger asChild>
         <div
           className={cn(
-            expandableTriggerVariants({ scale }),
+            expandableTriggerVariant({ scale }),
             'relative cursor-pointer data-[disabled=true]:cursor-not-allowed'
           )}
           onClick={handleTriggerClick}
@@ -129,7 +129,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         >
           <div
             className={cn(
-              expandableHeaderVariants({ scale }),
+              expandableHeaderVariant({ scale }),
               disabled && 'text-muted-foreground',
               'flex items-center gap-2'
             )}
@@ -140,14 +140,14 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
           </div>
           <span
             className={cn(
-              expandableChevronContainerVariants({ scale }),
+              expandableChevronContainerVariant({ scale }),
               disabled && 'opacity-50'
             )}
             aria-hidden="true"
           >
             <ChevronRight
               className={cn(
-                expandableChevronVariants({ scale }),
+                expandableChevronVariant({ scale }),
                 isOpen ? 'rotate-90' : 'rotate-0'
               )}
             />
@@ -155,7 +155,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className={expandableContentVariants({ scale })}>
+        <div className={expandableContentVariant({ scale })}>
           {slots?.Content}
         </div>
       </CollapsibleContent>

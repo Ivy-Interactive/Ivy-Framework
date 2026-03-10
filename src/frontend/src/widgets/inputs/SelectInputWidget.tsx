@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { selectIconContainerVariants } from '@/components/ui/select/variants';
+import { selectIconContainerVariant } from '@/components/ui/select/variant';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -33,11 +33,11 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
 import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
 
 const EMPTY_ARRAY: never[] = [];
 // variants for SelectInputWidget container
-const selectContainerVariants = cva(
+const selectContainerVariant = cva(
   'relative border border-input bg-transparent rounded-box shadow-sm focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
   {
     variants: {
@@ -53,13 +53,13 @@ const selectContainerVariants = cva(
   }
 );
 
-const selectTextVariants = {
+const selectTextVariant = {
   Small: 'text-xs',
   Medium: 'text-sm',
   Large: 'text-base',
 };
 
-const circleSizeVariants = {
+const circleSizeVariant = {
   Small: 'h-3 w-3',
   Medium: 'h-4 w-4',
   Large: 'h-5 w-5',
@@ -376,7 +376,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        selectContainerVariants({ scale }),
+        selectContainerVariant({ scale }),
         invalid && 'border-destructive focus-within:ring-destructive',
         ghost &&
           'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
@@ -495,7 +495,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ scale })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}
@@ -546,7 +546,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        selectContainerVariants({ scale }),
+        selectContainerVariant({ scale }),
         invalid && 'border-destructive focus-within:ring-destructive',
         ghost &&
           'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
@@ -572,7 +572,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                     disabled={isOptionDisabled}
                     className={cn(
                       'border-input text-input',
-                      circleSizeVariants[scale],
+                      circleSizeVariant[scale],
                       stringValue === option.value.toString() && !invalid
                         ? 'border-primary text-primary'
                         : undefined,
@@ -586,7 +586,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                     htmlFor={`${id}-${option.value}`}
                     className={cn(
                       'cursor-pointer leading-none',
-                      selectTextVariants[scale],
+                      selectTextVariant[scale],
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput
                         : undefined,
@@ -613,7 +613,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ scale })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}
@@ -828,7 +828,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                               className={cn(
                                 inputStyles.invalidInput,
                                 'bg-destructive/10 border-destructive text-destructive',
-                                selectTextVariants[scale]
+                                selectTextVariant[scale]
                               )}
                             />
                           </TooltipTrigger>
@@ -849,7 +849,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                         disabled={isDisabled}
                         className={cn(
                           'data-[state=unchecked]:bg-transparent data-[state=unchecked]:border-border',
-                          selectTextVariants[scale],
+                          selectTextVariant[scale],
                           isSelected
                             ? 'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground'
                             : undefined
@@ -860,7 +860,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                       htmlFor={`${id}-${option.value}`}
                       className={cn(
                         'flex-1 cursor-pointer',
-                        selectTextVariants[scale],
+                        selectTextVariant[scale],
                         isInvalid ? inputStyles.invalidInput : undefined,
                         isDisabled && !isSelected ? 'opacity-50' : undefined
                       )}
@@ -891,7 +891,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ scale })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}
@@ -1132,7 +1132,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           invalid ||
           loading ? (
             <div
-              className={selectIconContainerVariants({ scale })}
+              className={selectIconContainerVariant({ scale })}
               style={{ zIndex: 2 }}
             >
               {/* Loading spinner */}
@@ -1167,7 +1167,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                     }}
                     className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
                   >
-                    <X className={xIconVariants({ scale })} />
+                    <X className={xIconVariant({ scale })} />
                   </button>
                 )}
               {/* Invalid icon - rightmost */}
@@ -1289,7 +1289,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
         {/* Right-side icon container */}
         {(nullable && hasValue && !disabled) || invalid || loading ? (
           <div
-            className={selectIconContainerVariants({ scale })}
+            className={selectIconContainerVariant({ scale })}
             style={{ zIndex: 2 }}
           >
             {/* Loading spinner */}
@@ -1322,7 +1322,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ scale })} />
               </button>
             )}
             {/* Invalid icon - rightmost */}

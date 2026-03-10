@@ -9,10 +9,10 @@ import { Scales } from '@/types/scale';
 import { useEventHandler } from '@/components/event-handler';
 import { toast } from '@/hooks/use-toast';
 import {
-  fileInputVariants,
-  uploadIconVariants,
-  textVariants,
-} from '@/components/ui/input/file-input-variants';
+  fileInputVariant,
+  uploadIconVariant,
+  textVariant,
+} from '@/components/ui/input/file-input-variant';
 import { validateSingleFile, validateFileCount } from './file-input-validation';
 
 const EMPTY_ARRAY: never[] = [];
@@ -391,7 +391,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       )}
       <div
         className={cn(
-          fileInputVariants({ scale }),
+          fileInputVariant({ scale }),
           isDragging && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
@@ -422,9 +422,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
         {/* Always show upload icon */}
         <div className="flex flex-col items-center justify-center text-center w-full">
-          <Upload className={uploadIconVariants({ scale })} />
+          <Upload className={uploadIconVariant({ scale })} />
           {!hasFiles && (
-            <p className={textVariants({ scale })}>
+            <p className={textVariant({ scale })}>
               {placeholder ||
                 `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
             </p>

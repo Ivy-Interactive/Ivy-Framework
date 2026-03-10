@@ -28,10 +28,10 @@ import { useEventHandler } from '@/components/event-handler';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
 import {
-  dateRangeInputVariants,
-  dateRangeInputIconVariants,
-  dateRangeInputTextVariants,
-} from '@/components/ui/input/date-range-input-variants';
+  dateRangeInputVariant,
+  dateRangeInputIconVariant,
+  dateRangeInputTextVariant,
+} from '@/components/ui/input/date-range-input-variant';
 
 interface DateRangeInputWidgetProps {
   id: string;
@@ -174,7 +174,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             data-testid={dataTestId}
             data-slot="calendar"
             className={cn(
-              dateRangeInputVariants({ scale }),
+              dateRangeInputVariant({ scale }),
               'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && 'border-destructive focus-visible:ring-destructive',
@@ -188,7 +188,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             <CalendarIcon
               className={cn(
                 'mr-2 shrink-0',
-                dateRangeInputIconVariants({ scale })
+                dateRangeInputIconVariant({ scale })
               )}
             />
             {date?.from ? (
@@ -196,7 +196,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                 <span
                   className={cn(
                     'truncate',
-                    dateRangeInputTextVariants({ scale })
+                    dateRangeInputTextVariant({ scale })
                   )}
                 >
                   {format(date.from, displayFormat)} -{' '}
@@ -206,7 +206,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                 <span
                   className={cn(
                     'truncate',
-                    dateRangeInputTextVariants({ scale })
+                    dateRangeInputTextVariant({ scale })
                   )}
                 >
                   {format(date.from, displayFormat)}
@@ -216,7 +216,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
               <span
                 className={cn(
                   'truncate',
-                  dateRangeInputTextVariants({ scale }),
+                  dateRangeInputTextVariant({ scale }),
                   'text-muted-foreground'
                 )}
               >
@@ -236,7 +236,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ scale })
                       )}
                       onClick={() => {
                         handleChange({
@@ -255,7 +255,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ scale })
                       )}
                       onClick={() => {
                         handleChange(yesterday);
@@ -271,7 +271,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ scale })
                       )}
                       onClick={() => {
                         handleChange(last7Days);
@@ -287,7 +287,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ scale })
                       )}
                       onClick={() => {
                         handleChange(last30Days);
@@ -303,7 +303,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ scale })
                       )}
                       onClick={() => {
                         handleChange(monthToDate);
@@ -319,7 +319,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ scale })
                       )}
                       onClick={() => {
                         handleChange(lastMonth);
@@ -335,7 +335,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ scale })
                       )}
                       onClick={() => {
                         handleChange(yearToDate);
@@ -351,7 +351,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ scale })
                       )}
                       onClick={() => {
                         handleChange(lastYear);
@@ -405,7 +405,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             >
               <X
                 className={cn(
-                  dateRangeInputIconVariants({ scale }),
+                  dateRangeInputIconVariant({ scale }),
                   'text-muted-foreground hover:text-foreground'
                 )}
               />

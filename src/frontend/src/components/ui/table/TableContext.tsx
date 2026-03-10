@@ -1,9 +1,9 @@
 import React, { createContext } from 'react';
 import type { VariantProps } from 'class-variance-authority';
-import { tableCellSizeVariants } from './table-variants';
+import { tableCellSizeVariant } from './table-variant';
 import { Scales } from '@/types/scale';
 
-type TableContextValue = VariantProps<typeof tableCellSizeVariants>;
+type TableContextValue = VariantProps<typeof tableCellSizeVariant>;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const TableContext = createContext<TableContextValue>({

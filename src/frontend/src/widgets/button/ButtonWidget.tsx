@@ -103,7 +103,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
-  // For 'Rounded' (default), rely on the 'rounded-field' class from buttonVariants.
+  // For 'Rounded' (default), rely on the 'rounded-field' class from buttonVariant.
   // Only add inline style to override the class for 'None'/'Full'.
   const borderRadiusStyle: React.CSSProperties =
     borderRadius === 'Full'

@@ -121,7 +121,7 @@ const getDirectionOffset = (direction?: string, distance: number = 100) => {
   }
 };
 
-const getAnimationVariants = (props: AnimationWidgetProps): Variants => {
+const getAnimationVariant = (props: AnimationWidgetProps): Variants => {
   const {
     type,
     duration = 0.5,
@@ -336,7 +336,7 @@ const AnimationWidget: React.FC<AnimationWidgetProps> = props => {
   const { children, visible, trigger } = merged;
 
   const [isAnimating, setIsAnimating] = React.useState(trigger === 'Auto');
-  const variants = getAnimationVariants(merged);
+  const variants = getAnimationVariant(merged);
 
   const handleClick = () => {
     if (trigger === 'Click') {

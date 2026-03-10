@@ -12,11 +12,11 @@ import { getWidth } from '@/lib/styles';
 import { logger } from '@/lib/logger';
 import { Scales } from '@/types/scale';
 import {
-  audioInputVariants,
-  textSizeVariants,
-  timerSizeVariants,
-  iconSizeVariants,
-} from '@/components/ui/input/audio-input-variants';
+  audioInputVariant,
+  textSizeVariant,
+  timerSizeVariant,
+  iconSizeVariant,
+} from '@/components/ui/input/audio-input-variant';
 
 interface AudioInputWidgetProps {
   label?: string;
@@ -227,7 +227,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
     <div className="relative" style={{ ...getWidth(width) }}>
       <div
         className={cn(
-          audioInputVariants({ scale }),
+          audioInputVariant({ scale }),
           disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         )}
         onClick={
@@ -275,9 +275,9 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
           className={'mt-2 h-6 w-fit z-10 mx-auto block'}
         >
           {recording ? (
-            <Square className={iconSizeVariants({ scale })} />
+            <Square className={iconSizeVariant({ scale })} />
           ) : (
-            <Mic className={iconSizeVariants({ scale })} />
+            <Mic className={iconSizeVariant({ scale })} />
           )}
         </Button>
         <SecondsCounter
@@ -289,7 +289,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
           <p
             className={cn(
               'text-center mt-1 text-muted-foreground',
-              textSizeVariants({ scale })
+              textSizeVariant({ scale })
             )}
           >
             {recording ? recordingLabel : label}
@@ -299,7 +299,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
           <p
             className={cn(
               'text-muted-foreground text-center',
-              textSizeVariants({ scale })
+              textSizeVariant({ scale })
             )}
           >
             {mimeSupportError
@@ -340,7 +340,7 @@ function SecondsCounter(props: {
     };
   }, [props.start, props.stopped]);
   return (
-    <p className={cn('text-center', timerSizeVariants({ scale: props.scale }))}>
+    <p className={cn('text-center', timerSizeVariant({ scale: props.scale }))}>
       {Math.floor(seconds / 60)
         .toString()
         .padStart(2, '0')}

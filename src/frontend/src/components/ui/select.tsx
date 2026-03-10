@@ -5,10 +5,10 @@ import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 import {
-  selectTriggerVariants,
-  selectContentVariants,
-  selectItemVariants,
-} from './select/variants';
+  selectTriggerVariant,
+  selectContentVariant,
+  selectItemVariant,
+} from './select/variant';
 
 const Select = SelectPrimitive.Root;
 
@@ -19,11 +19,11 @@ const SelectValue = SelectPrimitive.Value;
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> &
-    VariantProps<typeof selectTriggerVariants>
+    VariantProps<typeof selectTriggerVariant>
 >(({ className, scale, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(selectTriggerVariants({ scale, className }))}
+    className={cn(selectTriggerVariant({ scale, className }))}
     {...props}
   >
     {children}
@@ -72,13 +72,13 @@ SelectScrollDownButton.displayName =
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> &
-    VariantProps<typeof selectContentVariants>
+    VariantProps<typeof selectContentVariant>
 >(({ className, scale, children, position = 'popper', ...props }, ref) => (
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        selectContentVariants({ scale }),
+        selectContentVariant({ scale }),
         position === 'popper' &&
           'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
         className
@@ -117,11 +117,11 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName;
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> &
-    VariantProps<typeof selectItemVariants>
+    VariantProps<typeof selectItemVariant>
 >(({ className, scale, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
-    className={cn(selectItemVariants({ scale, className }))}
+    className={cn(selectItemVariant({ scale, className }))}
     {...props}
   >
     <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
