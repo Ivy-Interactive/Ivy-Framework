@@ -1,11 +1,10 @@
 ---
-title: MCP Questions Command
 searchHints:
   - mcp
   - question
 ---
 
-# `ivy question`
+# ivy question
 
 <Ingress>
 Query the local context dynamically using integrated Local RAG features specifically tailored to your semantic `ivyVersion`.

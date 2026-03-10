@@ -1,5 +1,4 @@
 ---
-title: Docs Command
 searchHints:
   - docs
   - documentation
@@ -8,7 +7,7 @@ searchHints:
   - list docs
 ---
 
-# `ivy docs`
+# ivy docs
 
 <Ingress>
 Access and retrieve Ivy Framework documentation directly from your terminal.
@@ -18,13 +17,13 @@ The `ivy docs` command set provides built-in tools for exploring the comprehensi
 
 ## Commands
 
-### `ivy docs list`
+### ivy docs list
 
 Lists all available documentation paths natively registered inside the Ivy framework for subsequent manual or automated investigation.
 
 The command outputs a structured YAML representation of all discoverable document titles and relative paths. Use this list to find valid `<path>` arguments for the `ivy docs <path>` sibling command.
 
-#### `list` Usage
+#### list Usage
 
 ```terminal
 >ivy docs list
@@ -32,16 +31,16 @@ The command outputs a structured YAML representation of all discoverable documen
 
 ---
 
-### `ivy docs <path>`
+### ivy docs [path]
 
 Retrieves the raw Markdown payload of a specific framework documentation page.
 
 This command resolves and standardizes versioning logically, ensuring you always retrieve documentation relevant to the specific framework instantiation you have targeted.
 
-#### `path` Usage
+#### path Usage
 
 ```terminal
->ivy docs <path>
+>ivy docs [path]
 ```
 
 #### Arguments
