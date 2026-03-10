@@ -8,10 +8,10 @@ import { useFocusable } from '@/hooks/use-focus-management';
 import { sidebarMenuRef } from '@/widgets/layouts/sidebar';
 import { Scales } from '@/types/scale';
 import {
-  textInputSizeVariants,
-  searchIconVariants,
-  xIconVariants,
-} from '@/components/ui/input/text-input-variants';
+  textInputSizeVariant,
+  searchIconVariant,
+  xIconVariant,
+} from '@/components/ui/input/text-input-variant';
 import { TextInputWidgetProps } from '../types';
 import {
   useCursorPosition,
@@ -106,7 +106,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" style={styles}>
-      <Search className={searchIconVariants({ scale })} />
+      <Search className={searchIconVariant({ scale })} />
       <div className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
         <Input
           ref={mergedRef}
@@ -124,7 +124,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           onPaste={handlePaste}
           autoComplete="off"
           className={cn(
-            textInputSizeVariants({ scale }),
+            textInputSizeVariant({ scale }),
             'pl-8 cursor-pointer border-0 shadow-none dark:bg-transparent',
             props.invalid && inputStyles.invalidInput,
             (props.invalid || showClear) && 'pr-8',
@@ -151,7 +151,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
             style={{ pointerEvents: 'auto' }}
           >
-            <X className={xIconVariants({ scale })} />
+            <X className={xIconVariant({ scale })} />
           </button>
         )}
         {props.shortcutKey && !isFocused && !hasValue && (

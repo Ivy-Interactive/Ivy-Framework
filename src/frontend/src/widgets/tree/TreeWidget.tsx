@@ -4,6 +4,8 @@ import { MenuItem } from '@/types/widgets';
 import { TreeItem } from './TreeItem';
 import { useEventHandler } from '@/components/event-handler';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface TreeWidgetProps {
   id: string;
   items?: MenuItem[];
@@ -12,7 +14,7 @@ interface TreeWidgetProps {
 
 export const TreeWidget: React.FC<TreeWidgetProps> = ({
   id,
-  items = [],
+  items = EMPTY_ARRAY,
   rowActions,
 }) => {
   const eventHandler = useEventHandler();
@@ -41,9 +43,9 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({
 
   return (
     <div className={cn('ivy-tree w-full')} role="tree">
-      {items.map((item, index) => (
+      {items.map(item => (
         <TreeItem
-          key={`${item.label}-${index}`}
+          key={item.tag || item.label}
           item={item}
           onItemClick={onItemClick}
           rowActions={rowActions}

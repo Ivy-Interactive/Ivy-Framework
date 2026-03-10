@@ -60,7 +60,7 @@ public class ToolbarExample : ViewBase
             Layout.Horizontal().Gap(4)
                 | searchText.ToTextInput()
                     .Placeholder("Search items...")
-                    .Variant(TextInputVariants.Search)
+                    .Variant(TextInputVariant.Search)
                 | new Button("Add Item")
                     .Icon(Icons.Plus)
                     .Variant(ButtonVariant.Primary)
@@ -236,7 +236,7 @@ public class FormHeaderExample : ViewBase
                     | Text.P("Personal Information").Small()
                     | name.ToTextInput().Placeholder("Full Name")
                     | email.ToTextInput().Placeholder("Email")
-                    | bio.ToTextInput().Placeholder("Bio").Variant(TextInputVariants.Textarea)
+                    | bio.ToTextInput().Placeholder("Bio").Variant(TextInputVariant.Textarea)
             )
             | new Card(
                 Layout.Vertical().Gap(3)

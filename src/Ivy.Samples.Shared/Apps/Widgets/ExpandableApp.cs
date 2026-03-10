@@ -61,7 +61,7 @@ public class ExpandableApp : SampleBase
 
         var switchInHeaderExpandable1 = new Expandable(
             Layout.Horizontal().Align(Align.Left)
-            | headerSwitchState1.ToBoolInput(variant: BoolInputVariants.Switch)
+            | headerSwitchState1.ToBoolInput(variant: BoolInputVariant.Switch)
             | (Layout.Horizontal().Align(Align.Left)
                | Text.Block("Apps")
                | new Icon(Icons.ChevronRight)
@@ -72,7 +72,7 @@ public class ExpandableApp : SampleBase
 
         var switchInHeaderExpandable2 = new Expandable(
             Layout.Horizontal().Align(Align.Left)
-            | headerSwitchState2.ToBoolInput(variant: BoolInputVariants.Switch)
+            | headerSwitchState2.ToBoolInput(variant: BoolInputVariant.Switch)
             | (Layout.Horizontal().Align(Align.Left)
                | Text.Block("Apps")
                | new Icon(Icons.ChevronRight)
@@ -83,7 +83,7 @@ public class ExpandableApp : SampleBase
 
         var switchInHeaderExpandable3 = new Expandable(
             Layout.Horizontal().Align(Align.Left)
-            | headerSwitchState3.ToBoolInput(variant: BoolInputVariants.Switch)
+            | headerSwitchState3.ToBoolInput(variant: BoolInputVariant.Switch)
             | (Layout.Horizontal().Align(Align.Left)
                | Text.Block("Apps")
                | new Icon(Icons.ChevronRight)
@@ -94,7 +94,7 @@ public class ExpandableApp : SampleBase
 
         var switchInHeaderExpandable4 = new Expandable(
             Layout.Horizontal().Align(Align.Left)
-            | headerSwitchState4.ToBoolInput(variant: BoolInputVariants.Switch)
+            | headerSwitchState4.ToBoolInput(variant: BoolInputVariant.Switch)
             | (Layout.Horizontal().Align(Align.Left)
                | Text.Block("Settings")
                | new Icon(Icons.ChevronRight)

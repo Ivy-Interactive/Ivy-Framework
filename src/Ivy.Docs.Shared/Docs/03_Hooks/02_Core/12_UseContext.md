@@ -11,12 +11,12 @@ searchHints:
 # UseContext
 
 <Ingress>
-The `UseContext` and `CreateContext` [hooks](../01_RulesOfHooks.md) enable component-level context management, allowing you to share data and services within a component tree without prop drilling.
+The `UseContext` and `CreateContext` [hooks](../02_RulesOfHooks.md) enable component-level context management, allowing you to share data and services within a component tree without prop drilling.
 </Ingress>
 
 ## Overview
 
-Context [hooks](../01_RulesOfHooks.md) provide a way to share data and services across a component tree:
+Context [hooks](../02_RulesOfHooks.md) provide a way to share data and services across a component tree:
 
 - **Component Scoping** - Context values are scoped to the component and its children
 - **Avoid Prop Drilling** - Share data without passing props through every level

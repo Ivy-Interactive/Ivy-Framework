@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
 import { Scales } from '@/types/scale';
 import {
-  dateTimeInputIconVariants,
-  dateTimeInputTextVariants,
-} from '@/components/ui/input/date-time-input-variants';
+  dateTimeInputIconVariant,
+  dateTimeInputTextVariant,
+} from '@/components/ui/input/date-time-input-variant';
 import { TimeVariantProps } from './types';
 import { ClearAndInvalidIcons } from './shared';
 
@@ -113,7 +113,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
         <Clock
           className={cn(
             'ml-3 shrink-0',
-            dateTimeInputIconVariants({ scale }),
+            dateTimeInputIconVariant({ scale }),
             disabled && 'opacity-50'
           )}
         />
@@ -129,7 +129,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
           placeholder={placeholder || 'Select time'}
           className={cn(
             'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0',
-            dateTimeInputTextVariants({ scale }),
+            dateTimeInputTextVariant({ scale }),
             invalid && inputStyles.invalidInput,
             disabled && 'cursor-not-allowed',
             showClear && invalid ? 'pr-16' : showClear || invalid ? 'pr-8' : ''

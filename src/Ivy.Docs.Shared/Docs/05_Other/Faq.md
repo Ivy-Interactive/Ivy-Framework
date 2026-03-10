@@ -1,4 +1,4 @@
-﻿# Faq
+# Faq
 
 ## How do I copy text to the clipboard in Ivy?
 
@@ -15,7 +15,7 @@ client.Toast("Copied to clipboard!");
 
 ## How do I create a multiline textarea TextInput in Ivy?
 
-Use the `TextInputVariants.Textarea` variant or the dedicated `ToTextareaInput` extension:
+Use the `TextInputVariant.Textarea` variant or the dedicated `ToTextareaInput` extension:
 
 ```csharp
 state.ToTextareaInput(placeholder: "Enter text...")
@@ -469,3 +469,23 @@ price.ToNumberInput().FormatStyle(NumberFormatStyle.Decimal)
 ```
 
 Available `NumberFormatStyle` values: `Decimal` (default), `Currency`, `Percent`. For currency inputs, the recommended state type is `decimal`. Use `.Currency("USD")` to specify the currency code.
+
+## How do I customize field labels in Details.ToDetails()?
+
+By default, `ToDetails()` generates labels from property names using PascalCase splitting (e.g., `NetBurn` becomes "Net Burn"). To override a label, use the `.Label()` method:
+
+```csharp
+var data = new RunwayData(5000m, 10000m, 12, new DateTime(2027, 3, 1));
+data.ToDetails()
+    .Label(x => x.NetBurn, "Net Monthly Burn")
+    .Label(x => x.RunwayDate, "Projected Runway End")
+    .Build();
+```
+
+Alternatively, for simple cases you can use anonymous types where property names become the labels:
+
+```csharp
+new { NetBurn = "$5,000", GrossBurn = "$10,000" }.ToDetails()
+```
+
+Use `.Builder(x => x.Field, b => ...)` to customize how a value is *rendered*, not to change the label text.

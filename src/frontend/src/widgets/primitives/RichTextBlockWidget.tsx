@@ -35,15 +35,18 @@ const scaleClasses: Record<string, string> = {
   [Scales.Large]: typography.large,
 };
 
+const EMPTY_RUNS: TextRun[] = [];
+const EMPTY_EVENTS: string[] = [];
+
 export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
   id,
-  runs = [],
+  runs = EMPTY_RUNS,
   stream,
   textAlignment,
   noWrap,
   overflow,
   scale,
-  events = [],
+  events = EMPTY_EVENTS,
 }) => {
   const [streamedRuns, setStreamedRuns] = useState<TextRun[]>([]);
   const eventHandler = useEventHandler();
@@ -95,20 +98,30 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
 
         if (run.link) {
           const isBlank = run.linkTarget === 'Blank';
+          if (events.includes('OnLinkClick')) {
+            return (
+              <button
+                key={run.link + (run.content || '')}
+                type="button"
+                className={cn(className, 'underline cursor-pointer text-left')}
+                style={runStyles}
+                onClick={() => {
+                  eventHandler('OnLinkClick', id, [run.link]);
+                }}
+              >
+                {content}
+              </button>
+            );
+          }
+
           return (
             <a
-              key={index}
+              key={run.link + (run.content || '')}
               href={run.link}
               target={isBlank ? '_blank' : '_self'}
               rel={isBlank ? 'noopener noreferrer' : undefined}
               className={cn(className, 'underline')}
               style={runStyles}
-              onClick={e => {
-                if (events.includes('OnLinkClick')) {
-                  e.preventDefault();
-                  eventHandler('OnLinkClick', id, [run.link]);
-                }
-              }}
             >
               {content}
             </a>
@@ -116,7 +129,11 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
         }
 
         return (
-          <span key={index} className={className} style={runStyles}>
+          <span
+            key={run.content || 'empty-text'}
+            className={className}
+            style={runStyles}
+          >
             {content}
           </span>
         );

@@ -16,10 +16,10 @@ import {
 import { Loader2 } from 'lucide-react';
 import { Scales } from '@/types/scale';
 import {
-  labelSizeVariants,
-  descriptionSizeVariants,
-  boolInputRowMinHeightVariants,
-} from '@/components/ui/input/bool-input-variants';
+  labelSizeVariant,
+  descriptionSizeVariant,
+  boolInputRowMinHeightVariant,
+} from '@/components/ui/input/bool-input-variant';
 
 type VariantType = 'Checkbox' | 'Switch' | 'Toggle';
 
@@ -77,12 +77,12 @@ const InputLabel: React.FC<{
   return (
     <div>
       {label && (
-        <Label htmlFor={id} className={labelSizeVariants({ scale })}>
+        <Label htmlFor={id} className={labelSizeVariant({ scale })}>
           {label}
         </Label>
       )}
       {description && (
-        <p className={descriptionSizeVariants({ scale })}>{description}</p>
+        <p className={descriptionSizeVariant({ scale })}>{description}</p>
       )}
     </div>
   );
@@ -160,10 +160,11 @@ const VariantComponents = {
         <div
           className={cn(
             'flex gap-2 items-center',
-            boolInputRowMinHeightVariants({ scale }),
+            boolInputRowMinHeightVariant({ scale }),
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
+          role="presentation"
         >
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(checkboxElement, invalid)}
@@ -215,10 +216,11 @@ const VariantComponents = {
         <div
           className={cn(
             'flex gap-2 items-center',
-            boolInputRowMinHeightVariants({ scale }),
+            boolInputRowMinHeightVariant({ scale }),
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
+          role="presentation"
         >
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(switchElement, invalid)}
@@ -272,10 +274,11 @@ const VariantComponents = {
         <div
           className={cn(
             'flex space-x-2 items-center',
-            boolInputRowMinHeightVariants({ scale }),
+            boolInputRowMinHeightVariant({ scale }),
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
+          role="presentation"
         >
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(toggleElement, invalid)}

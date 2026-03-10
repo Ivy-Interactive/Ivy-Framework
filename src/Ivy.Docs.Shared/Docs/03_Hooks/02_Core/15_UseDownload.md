@@ -11,12 +11,12 @@ searchHints:
 # UseDownload
 
 <Ingress>
-The `UseDownload` [hook](../01_RulesOfHooks.md) enables file downloads in your [application](../../../01_Onboarding/02_Concepts/10_Apps.md), generating download links for files created on-demand.
+The `UseDownload` [hook](../02_RulesOfHooks.md) enables file downloads in your [application](../../../01_Onboarding/02_Concepts/10_Apps.md), generating download links for files created on-demand.
 </Ingress>
 
 ## Overview
 
-The `UseDownload` [hook](../01_RulesOfHooks.md) provides file download functionality:
+The `UseDownload` [hook](../02_RulesOfHooks.md) provides file download functionality:
 
 - **On-Demand Generation** - Generate files dynamically when needed
 - **Async Support** - Support for asynchronous file generation

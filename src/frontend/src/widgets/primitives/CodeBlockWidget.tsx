@@ -8,7 +8,7 @@ import { createPrismTheme } from '@/lib/prismTheme';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Scales } from '@/types/scale';
-import { codeCopyButtonVariants } from '@/components/ui/code-variants';
+import { codeCopyButtonVariant } from '@/components/ui/code-variant';
 
 interface CodeWidgetProps {
   id: string;
@@ -51,7 +51,7 @@ const mapLanguageToPrism = (language: string): string | undefined => {
 
 const MemoizedCopyButton = memo(
   ({ textToCopy, scale }: { textToCopy: string; scale: Scales }) => (
-    <div className={codeCopyButtonVariants({ scale })}>
+    <div className={codeCopyButtonVariant({ scale })}>
       <CopyToClipboardButton textToCopy={textToCopy} scale={scale} />
     </div>
   )

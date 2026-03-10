@@ -6,14 +6,14 @@ import { Command as CommandPrimitive } from 'cmdk';
 import { cn } from '@/lib/utils';
 import { cva } from 'class-variance-authority';
 import { Scales } from '@/types/scale';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
-import { selectTriggerVariants } from '@/components/ui/select/variants';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
+import { selectTriggerVariant } from '@/components/ui/select/variant';
 
-// Variants for MultipleSelector - matches selectTriggerVariants exactly
-const multipleSelectorVariants = selectTriggerVariants;
+// Variants for MultipleSelector - matches selectTriggerVariant exactly
+const multipleSelectorVariant = selectTriggerVariant;
 
 // Variants for menu items
-const menuItemVariants = cva('cursor-pointer', {
+const menuItemVariant = cva('cursor-pointer', {
   variants: {
     scale: {
       Small: 'px-2 py-1 text-xs',
@@ -27,7 +27,7 @@ const menuItemVariants = cva('cursor-pointer', {
 });
 
 // Variants for Badge components
-const badgeVariants = cva('hover:bg-secondary', {
+const badgeVariant = cva('hover:bg-secondary', {
   variants: {
     scale: {
       Small: 'text-xs',
@@ -252,21 +252,21 @@ const MultipleSelector = React.forwardRef<
                 <Badge
                   key={`measure-${option.value}`}
                   variant="secondary"
-                  className={cn(badgeVariants({ scale }), 'shrink-0')}
+                  className={cn(badgeVariant({ scale }), 'shrink-0')}
                 >
                   {option.label}
                   <span
                     className="ml-1 p-1 h-3"
                     style={{ display: 'inline-flex' }}
                   >
-                    <X className={xIconVariants({ scale })} />
+                    <X className={xIconVariant({ scale })} />
                   </span>
                 </Badge>
               ))}
               <Badge
                 variant="outline"
                 className={cn(
-                  badgeVariants({ scale }),
+                  badgeVariant({ scale }),
                   'bg-muted text-muted-foreground shrink-0'
                 )}
               >
@@ -276,7 +276,7 @@ const MultipleSelector = React.forwardRef<
           )}
           <div
             className={cn(
-              multipleSelectorVariants({ scale }),
+              multipleSelectorVariant({ scale }),
               disabled && 'cursor-not-allowed opacity-50',
               (!value || value.length === 0) && 'text-muted-foreground',
               invalid
@@ -295,7 +295,7 @@ const MultipleSelector = React.forwardRef<
                   key={option.value}
                   variant="secondary"
                   className={cn(
-                    badgeVariants({ scale }),
+                    badgeVariant({ scale }),
                     'shrink-0',
                     invalid &&
                       'bg-destructive/10 border-destructive text-destructive'
@@ -319,7 +319,7 @@ const MultipleSelector = React.forwardRef<
                     }}
                     onClick={() => handleUnselect(option)}
                   >
-                    <X className={xIconVariants({ scale })} />
+                    <X className={xIconVariant({ scale })} />
                   </button>
                 </Badge>
               ))}
@@ -327,7 +327,7 @@ const MultipleSelector = React.forwardRef<
                 <Badge
                   variant="outline"
                   className={cn(
-                    badgeVariants({ scale }),
+                    badgeVariant({ scale }),
                     'bg-muted text-muted-foreground shrink-0'
                   )}
                 >
@@ -414,7 +414,7 @@ const MultipleSelector = React.forwardRef<
                         toggleOption(option);
                       }}
                       className={cn(
-                        menuItemVariants({ scale }),
+                        menuItemVariant({ scale }),
                         'flex items-center justify-between'
                       )}
                       disabled={option.disable}
@@ -423,7 +423,7 @@ const MultipleSelector = React.forwardRef<
                       {selected && (
                         <X
                           className={cn(
-                            xIconVariants({ scale }),
+                            xIconVariant({ scale }),
                             'text-muted-foreground hover:text-foreground'
                           )}
                         />

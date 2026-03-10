@@ -131,6 +131,13 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    public DetailsBuilder<TModel> Label(Expression<Func<TModel, object>> field, string label)
+    {
+        var item = GetField(field);
+        item.Label = label;
+        return this;
+    }
+
     public DetailsBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         var column = GetField(field);

@@ -40,38 +40,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="frontend\dist\**\*" />
-  </ItemGroup>
-
-  <!-- Include frontend source files in up-to-date check so changes trigger rebuild -->
-  <ItemGroup>
-    <UpToDateCheckInput Include="frontend\src\**\*" />
-    <UpToDateCheckInput Include="frontend\package.json" />
-    <UpToDateCheckInput Include="frontend\tsconfig.json" />
-    <UpToDateCheckInput Include="frontend\vite.config.ts" />
-  </ItemGroup>
-  
-  <ItemGroup>
     <Compile Remove=".samples\**\*.cs" />
     <None Include=".samples\**\*" CopyToOutputDirectory="Never" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Folder Include=".samples\.console\" />
   </ItemGroup>
 
-  <Target Name="NpmInstall" BeforeTargets="BuildFrontend" Condition="Exists('frontend/package.json')"
-          Inputs="frontend\package.json;frontend\package-lock.json"
-          Outputs="frontend\node_modules\.package-lock.json">
-    <Exec Command="npm install" WorkingDirectory="frontend" />
-  </Target>
-
-  <!-- Build frontend before packing -->
-  <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend\package.json')"
-          Inputs="@(FrontendSourceFiles)"
-          Outputs="frontend\dist\.build-stamp">
-    <Exec Command="npm run build" WorkingDirectory="frontend" />
-    <Touch Files="frontend\dist\.build-stamp" AlwaysCreate="true" />
-  </Target>
+  <Import Project="..\..\Ivy\Build\Ivy.ExternalWidget.targets" />
 
 </Project>

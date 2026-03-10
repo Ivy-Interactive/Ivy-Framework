@@ -11,10 +11,10 @@ searchHints:
 # UseEffect
 
 <Ingress>
-Perform side effects in your Ivy [views](../../../01_Onboarding/02_Concepts/02_Views.md) with the UseEffect [hook](../01_RulesOfHooks.md), similar to React's useEffect but optimized for server-side architecture.
+Perform side effects in your Ivy [views](../../../01_Onboarding/02_Concepts/02_Views.md) with the UseEffect [hook](../02_RulesOfHooks.md), similar to React's useEffect but optimized for server-side architecture.
 </Ingress>
 
-The `UseEffect` [hook](../01_RulesOfHooks.md) is a powerful feature in Ivy that allows you to perform side effects in your [views](../../../01_Onboarding/02_Concepts/02_Views.md). It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
+The `UseEffect` [hook](../02_RulesOfHooks.md) is a powerful feature in Ivy that allows you to perform side effects in your [views](../../../01_Onboarding/02_Concepts/02_Views.md). It's similar to React's useEffect hook but adapted for Ivy's architecture and patterns.
 
 Effects are essential for handling operations that don't directly relate to rendering, such as working with [state](./03_UseState.md) updates, [async operations](../../../01_Onboarding/02_Concepts/06_TasksAndObservables.md), and external services:
 
@@ -337,7 +337,7 @@ public class ConditionalEffectView : ViewBase
 ## See Also
 
 - [State Management](./03_UseState.md) - Managing component state
-- [Rules of Hooks](../01_RulesOfHooks.md) - Understanding hook rules and best practices
+- [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Memoization](./05_UseMemo.md) - Optimizing performance with memoization
 - [UseCallback](./06_UseCallback.md) - Memoizing callback functions
 - [Signals](./10_UseSignal.md) - Reactive state management

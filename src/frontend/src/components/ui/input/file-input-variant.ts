@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 // Size variants for FileInput
-export const fileInputVariants = cva(
+export const fileInputVariant = cva(
   'relative rounded-field border-dashed transition-colors',
   {
     variants: {
@@ -18,7 +18,7 @@ export const fileInputVariants = cva(
 );
 
 // Size variants for upload icon
-export const uploadIconVariants = cva('text-primary', {
+export const uploadIconVariant = cva('text-primary', {
   variants: {
     scale: {
       Small: 'h-4 w-4 mb-1',
@@ -32,7 +32,7 @@ export const uploadIconVariants = cva('text-primary', {
 });
 
 // Size variants for text
-export const textVariants = cva('text-muted-foreground', {
+export const textVariant = cva('text-muted-foreground', {
   variants: {
     scale: {
       Small: 'text-xs px-2',

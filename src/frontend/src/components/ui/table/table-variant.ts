@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 // Size variants for TableHead padding
-export const tableHeadSizeVariants = cva('w-full caption-bottom', {
+export const tableHeadSizeVariant = cva('w-full caption-bottom', {
   variants: {
     scale: {
       Small: 'h-8 px-1 text-xs',
@@ -15,7 +15,7 @@ export const tableHeadSizeVariants = cva('w-full caption-bottom', {
 });
 
 // Size variants for TableCell padding
-export const tableCellSizeVariants = cva('align-middle', {
+export const tableCellSizeVariant = cva('align-middle', {
   variants: {
     scale: {
       Small: 'p-1 text-xs',
@@ -28,7 +28,7 @@ export const tableCellSizeVariants = cva('align-middle', {
   },
 });
 
-export const tableSizeVariants = cva('', {
+export const tableSizeVariant = cva('', {
   variants: {
     scale: {
       Small: 'text-xs',

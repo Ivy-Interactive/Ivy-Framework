@@ -30,7 +30,7 @@ const SheetOverlay = React.forwardRef<
 ));
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
-const sheetVariants = cva(
+const sheetVariant = cva(
   'fixed z-50 gap-4 bg-background p-6 shadow-lg outline-none',
   {
     variants: {
@@ -49,7 +49,7 @@ const sheetVariants = cva(
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+    VariantProps<typeof sheetVariant> {}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
@@ -59,7 +59,7 @@ const SheetContent = React.forwardRef<
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
-      className={cn(sheetVariants({ side }), className)}
+      className={cn(sheetVariant({ side }), className)}
       {...props}
     >
       <SheetPrimitive.Close className="absolute right-4 top-4 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer">

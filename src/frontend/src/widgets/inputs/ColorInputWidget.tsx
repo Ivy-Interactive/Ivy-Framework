@@ -7,11 +7,13 @@ import React, { useMemo, useState } from 'react';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import {
-  colorInputVariants,
-  colorInputPickerVariants,
-} from '@/components/ui/input/color-input-variants';
+  colorInputVariant,
+  colorInputPickerVariant,
+} from '@/components/ui/input/color-input-variant';
 import { Scales } from '@/types/scale';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
+
+const EMPTY_ARRAY: never[] = [];
 
 interface ColorInputWidgetProps {
   id: string;
@@ -232,7 +234,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   invalid,
   placeholder,
   nullable = false,
-  events = [],
+  events = EMPTY_ARRAY,
   variant = 'TextAndPicker',
   scale = Scales.Medium,
   ghost = false,
@@ -396,7 +398,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             }
             disabled={disabled}
             className={cn(
-              colorInputVariants({ scale }),
+              colorInputVariant({ scale }),
               ghost &&
                 'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
               invalid && inputStyles.invalidInput,
@@ -467,7 +469,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             onChange={handleColorChange}
             disabled={disabled}
             className={cn(
-              colorInputPickerVariants({ scale }),
+              colorInputPickerVariant({ scale }),
               'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
               invalid && inputStyles.invalidInput
@@ -497,7 +499,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           onChange={handleColorChange}
           disabled={disabled}
           className={cn(
-            colorInputPickerVariants({ scale }),
+            colorInputPickerVariant({ scale }),
             'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
             disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
             invalid && inputStyles.invalidInput
@@ -517,7 +519,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           }
           disabled={disabled}
           className={cn(
-            colorInputVariants({ scale }),
+            colorInputVariant({ scale }),
             ghost &&
               'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
             invalid && inputStyles.invalidInput,
@@ -541,7 +543,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                 onClick={handleClear}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ scale })} />
               </button>
             )}
           </div>

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
 
-const copyIconVariants = cva('', {
+const copyIconVariant = cva('', {
   variants: {
     scale: {
       Small: 'h-3 w-3',
@@ -17,7 +17,7 @@ const copyIconVariants = cva('', {
   },
 });
 
-const copyButtonSizeVariants = cva(
+const copyButtonSizeVariant = cva(
   'p-2 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center',
   {
     variants: {
@@ -69,7 +69,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
       className={cn(
         isIconOnly
           ? cn(
-              copyButtonSizeVariants({ scale }),
+              copyButtonSizeVariant({ scale }),
               copied && 'bg-primary text-primary-foreground'
             )
           : 'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer hover:bg-accent hover:shadow-sm border-0',
@@ -84,14 +84,14 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
         className
       )}
     >
-      <span className={cn('relative', copyIconVariants({ scale }))}>
+      <span className={cn('relative', copyIconVariant({ scale }))}>
         <span
           className={cn(
             'absolute inset-0 transform transition-transform duration-200',
             copied ? 'scale-0' : 'scale-100'
           )}
         >
-          <Copy className={copyIconVariants({ scale })} />
+          <Copy className={copyIconVariant({ scale })} />
         </span>
         <span
           className={cn(
@@ -99,7 +99,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
             copied ? 'scale-100' : 'scale-0'
           )}
         >
-          <Check className={copyIconVariants({ scale })} />
+          <Check className={copyIconVariant({ scale })} />
         </span>
       </span>
       {label && (

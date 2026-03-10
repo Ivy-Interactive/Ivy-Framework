@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 
-export const colorInputVariants = cva(
+export const colorInputVariant = cva(
   'w-full justify-start text-left cursor-pointer bg-transparent',
   {
     variants: {
@@ -16,7 +16,7 @@ export const colorInputVariants = cva(
   }
 );
 
-export const colorInputPickerVariants = cva('', {
+export const colorInputPickerVariant = cva('', {
   variants: {
     scale: {
       Small: 'w-8 h-8',

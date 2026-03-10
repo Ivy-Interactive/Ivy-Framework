@@ -20,7 +20,7 @@ public static class AffixExtensions
     public static Affix ToAffix(this string text) => new() { Text = text };
 }
 
-public enum TextInputVariants
+public enum TextInputVariant
 {
     Text,
     Textarea,
@@ -33,7 +33,7 @@ public enum TextInputVariants
 
 public interface IAnyTextInput : IAnyInput
 {
-    public TextInputVariants Variant { get; set; }
+    public TextInputVariant Variant { get; set; }
 }
 
 public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
@@ -44,7 +44,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public TextInputVariants Variant { get; set; } = TextInputVariants.Text;
+    [Prop] public TextInputVariant Variant { get; set; } = TextInputVariant.Text;
 
     [Prop] public string? ShortcutKey { get; set; }
 
@@ -69,7 +69,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
 public record TextInput<TString> : TextInputBase, IInput<TString>
 {
-    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TString>();
@@ -78,21 +78,21 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
     }
 
     [OverloadResolutionPriority(1)]
-    public TextInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public TextInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public TextInput(string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
     {
         Placeholder = placeholder;
         Variant = variant;
@@ -113,23 +113,23 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
 /// </summary>
 public record TextInput : TextInput<string>
 {
-    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : base(state, placeholder, disabled, variant)
     {
     }
 
     [OverloadResolutionPriority(1)]
-    public TextInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : base(value, onChange, placeholder, disabled, variant)
     {
     }
 
-    public TextInput(string value, Action<Event<IInput<string>, string>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(string value, Action<Event<IInput<string>, string>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : base(value, onChange?.ToValueTask(), placeholder, disabled, variant)
     {
     }
 
-    public TextInput(string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public TextInput(string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : base(placeholder, disabled, variant)
     {
     }
@@ -137,7 +137,7 @@ public record TextInput : TextInput<string>
 
 public static class TextInputExtensions
 {
-    public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
     {
         var type = state.GetStateType();
         Type genericType = typeof(TextInput<>).MakeGenericType(type);
@@ -147,26 +147,26 @@ public static class TextInputExtensions
         return input;
     }
 
-    public static TextInputBase ToTextareaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Textarea);
+    public static TextInputBase ToTextareaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Textarea);
 
-    public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Search);
+    public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Search);
 
-    public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Password);
+    public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Password);
 
-    public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Email);
+    public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Email);
 
-    public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Url);
+    public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Url);
 
-    public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Tel);
+    public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Tel);
 
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 
     public static TextInputBase Disabled(this TextInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
 
-    public static TextInputBase Variant(this TextInputBase widget, TextInputVariants variant) => widget with { Variant = variant };
+    public static TextInputBase Variant(this TextInputBase widget, TextInputVariant variant) => widget with { Variant = variant };
 
     public static TextInputBase Multiline(this TextInputBase widget, bool multiline = true)
-        => widget with { Variant = multiline ? TextInputVariants.Textarea : TextInputVariants.Text };
+        => widget with { Variant = multiline ? TextInputVariant.Textarea : TextInputVariant.Text };
 
     public static TextInputBase Invalid(this TextInputBase widget, string invalid) => widget with { Invalid = invalid };
 
