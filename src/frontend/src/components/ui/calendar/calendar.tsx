@@ -13,7 +13,10 @@ import {
 import { parse } from 'date-fns';
 
 import { cn } from '@/lib/utils';
-import { Button, buttonVariant } from '@/components/ui/button';
+import {
+  Button,
+  buttonVariant as buttonVariantStyles,
+} from '@/components/ui/button';
 import {
   calendarVariant,
   calendarButtonVariant,
@@ -66,13 +69,13 @@ export function Calendar({
           defaultClassNames.nav
         ),
         button_previous: cn(
-          buttonVariant({ variant: buttonVariant }),
+          buttonVariantStyles({ variant: buttonVariant }),
           calendarButtonVariant({ scale }),
           'pointer-events-auto',
           defaultClassNames.button_previous
         ),
         button_next: cn(
-          buttonVariant({ variant: buttonVariant }),
+          buttonVariantStyles({ variant: buttonVariant }),
           calendarButtonVariant({ scale }),
           'pointer-events-auto',
           defaultClassNames.button_next
