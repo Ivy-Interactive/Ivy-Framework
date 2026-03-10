@@ -109,3 +109,4 @@ For detailed information on each feature, see the specific documentation files:
 - [Database Integration](05_DatabaseIntegration/01_DatabaseOverview.md)
 - [Authentication Setup](04_Authentication/01_AuthenticationOverview.md)
 - [Deployment Guide](06_Deployment/01_DeploymentOverview.md)
+- [Ivy MCP CLI Tools](09_IvyMcpCli/01_IvyMcpCliOverview.md)
