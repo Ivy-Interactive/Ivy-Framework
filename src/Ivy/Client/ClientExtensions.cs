@@ -21,6 +21,12 @@ public static class ClientExtensions
         public string? Title { get; set; }
         public string? Description { get; set; }
         public ToastVariant Variant { get; set; } = ToastVariant.Default;
+
+        public ToasterMessage Default() { Variant = ToastVariant.Default; return this; }
+        public ToasterMessage Destructive() { Variant = ToastVariant.Destructive; return this; }
+        public ToasterMessage Success() { Variant = ToastVariant.Success; return this; }
+        public ToasterMessage Warning() { Variant = ToastVariant.Warning; return this; }
+        public ToasterMessage Info() { Variant = ToastVariant.Info; return this; }
     }
 
     public class ErrorMessage
@@ -150,15 +156,19 @@ public static class ClientExtensions
         client.Sender.Send("ApplyTheme", css);
     }
 
-    public static void Toast(this IClientProvider client, string description, string? title = null, ToastVariant variant = ToastVariant.Default)
+    public static ToasterMessage Toast(this IClientProvider client, string description, string? title = null, ToastVariant variant = ToastVariant.Default)
     {
-        client.Sender.Send("Toast", new ToasterMessage { Description = description, Title = title, Variant = variant });
+        var message = new ToasterMessage { Description = description, Title = title, Variant = variant };
+        client.Sender.Send("Toast", message);
+        return message;
     }
 
-    public static void Toast(this IClientProvider client, Exception ex, ToastVariant variant = ToastVariant.Default)
+    public static ToasterMessage Toast(this IClientProvider client, Exception ex, ToastVariant variant = ToastVariant.Default)
     {
         var innerException = Utils.GetInnerMostException(ex);
-        client.Sender.Send("Toast", new ToasterMessage { Description = innerException.Message, Title = "Failed", Variant = variant });
+        var message = new ToasterMessage { Description = innerException.Message, Title = "Failed", Variant = variant };
+        client.Sender.Send("Toast", message);
+        return message;
     }
 
     public static void Error(this IClientProvider client, Exception ex)
