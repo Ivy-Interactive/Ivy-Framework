@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { typography } from '@/lib/styles';
 import { useStream } from '@/components/stream-handler/hooks';
 import { useEventHandler } from '@/components/event-handler/hooks';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { TextAlignment } from '@/types/textAlignment';
 
 interface TextRun {
@@ -26,13 +26,13 @@ interface RichTextBlockWidgetProps {
   textAlignment?: TextAlignment;
   noWrap?: boolean;
   overflow?: Overflow;
-  scale?: Scales;
+  density?: Densities;
   events?: string[];
 }
 
 const scaleClasses: Record<string, string> = {
-  [Scales.Small]: typography.small,
-  [Scales.Large]: typography.large,
+  [Densities.Small]: typography.small,
+  [Densities.Large]: typography.large,
 };
 
 const EMPTY_RUNS: TextRun[] = [];
@@ -45,7 +45,7 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
   textAlignment,
   noWrap,
   overflow,
-  scale,
+  density,
   events = EMPTY_EVENTS,
 }) => {
   const [streamedRuns, setStreamedRuns] = useState<TextRun[]>([]);
@@ -74,7 +74,7 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
       style={styles}
       className={cn(
         noWrap && 'whitespace-nowrap',
-        scale && scaleClasses[scale]
+        density && scaleClasses[density]
       )}
     >
       {allRuns.map((run, index) => {

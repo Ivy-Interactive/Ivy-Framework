@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
   dateTimeInputVariant,
   dateTimeInputIconVariant,
@@ -30,7 +30,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onDateChange,
   onTimeChange,
   format: formatProp,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -156,7 +156,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             variant="outline"
             data-slot="calendar"
             className={cn(
-              dateTimeInputVariant({ scale }),
+              dateTimeInputVariant({ density }),
               'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
@@ -172,19 +172,19 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             <CalendarIcon
               className={cn(
                 'mr-2 shrink-0',
-                dateTimeInputIconVariant({ scale })
+                dateTimeInputIconVariant({ density })
               )}
             />
             <Clock
               className={cn(
                 'mr-2 shrink-0',
-                dateTimeInputIconVariant({ scale })
+                dateTimeInputIconVariant({ density })
               )}
             />
             <span
               className={cn(
                 'truncate',
-                dateTimeInputTextVariant({ scale }),
+                dateTimeInputTextVariant({ density }),
                 !date && 'text-muted-foreground'
               )}
             >
@@ -201,12 +201,12 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               selected={date}
               onSelect={handleDateSelect}
               initialFocus
-              scale={scale}
+              density={density}
             />
             <div className="flex items-center gap-2">
               <Clock
                 className={cn(
-                  dateTimeInputIconVariant({ scale }),
+                  dateTimeInputIconVariant({ density }),
                   'text-muted-foreground'
                 )}
               />
@@ -221,7 +221,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                 disabled={disabled}
                 className={cn(
                   'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden',
-                  dateTimeInputTextVariant({ scale }),
+                  dateTimeInputTextVariant({ density }),
                   invalid && inputStyles.invalidInput
                 )}
                 data-testid={dataTestId ? `${dataTestId}-time` : undefined}
@@ -233,7 +233,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
       <ClearAndInvalidIcons
         showClear={showClear}
         invalid={invalid}
-        scale={scale}
+        density={density}
         onClear={handleClear}
       />
     </div>

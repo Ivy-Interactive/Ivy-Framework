@@ -10,7 +10,7 @@ import {
   colorInputVariant,
   colorInputPickerVariant,
 } from '@/components/ui/input/color-input-variant';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { xIconVariant } from '@/components/ui/input/text-input-variant';
 
 const EMPTY_ARRAY: never[] = [];
@@ -25,7 +25,7 @@ interface ColorInputWidgetProps {
   nullable?: boolean;
   events?: string[];
   variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch';
-  scale?: Scales;
+  density?: Densities;
   foreground?: boolean;
   ghost?: boolean;
   allowAlpha?: boolean;
@@ -149,7 +149,7 @@ interface AlphaSliderProps {
   alpha: number;
   onChange: (alpha: number) => void;
   disabled?: boolean;
-  scale?: Scales;
+  density?: Densities;
 }
 
 const AlphaSlider: React.FC<AlphaSliderProps> = ({
@@ -157,14 +157,15 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
   alpha,
   onChange,
   disabled = false,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const [localAlpha, setLocalAlpha] = useState<number | null>(null);
   if (localAlpha !== null && alpha === localAlpha) {
     setLocalAlpha(null);
   }
   const displayAlpha = localAlpha ?? alpha;
-  const height = scale === Scales.Small ? 24 : scale === Scales.Large ? 36 : 30;
+  const height =
+    density === Densities.Small ? 24 : density === Densities.Large ? 36 : 30;
   const percentage = Math.round((displayAlpha / 255) * 100);
 
   const gradientStyle: React.CSSProperties = useMemo(
@@ -228,7 +229,7 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
 };
 
 interface CustomColorPickerProps {
-  scale: Scales;
+  density: Densities;
   disabled: boolean;
   invalid?: string;
   displayColor: string;
@@ -237,7 +238,7 @@ interface CustomColorPickerProps {
 }
 
 const CustomColorPicker: React.FC<CustomColorPickerProps> = ({
-  scale,
+  density,
   disabled,
   invalid,
   displayColor,
@@ -246,7 +247,7 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({
 }) => (
   <div
     className={cn(
-      colorInputPickerVariant({ scale }),
+      colorInputPickerVariant({ density }),
       'relative shrink-0 rounded-md overflow-hidden bg-transparent border',
       disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
       invalid ? inputStyles.invalidInput : 'border-input shadow-sm'
@@ -284,7 +285,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   nullable = false,
   events = EMPTY_ARRAY,
   variant = 'TextAndPicker',
-  scale = Scales.Medium,
+  density = Densities.Medium,
   ghost = false,
   allowAlpha = false,
 }) => {
@@ -446,7 +447,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             }
             disabled={disabled}
             className={cn(
-              colorInputVariant({ scale }),
+              colorInputVariant({ density }),
               ghost &&
                 'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
               invalid && inputStyles.invalidInput,
@@ -483,7 +484,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             alpha={currentAlpha}
             onChange={handleAlphaChange}
             disabled={disabled}
-            scale={scale}
+            density={density}
           />
         )}
       </div>
@@ -511,7 +512,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     return (
       <div className="flex items-center space-x-2">
         <CustomColorPicker
-          scale={scale}
+          density={density}
           disabled={disabled}
           invalid={invalid}
           displayColor={getDisplayColor()}
@@ -524,7 +525,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             alpha={currentAlpha}
             onChange={handleAlphaChange}
             disabled={disabled}
-            scale={scale}
+            density={density}
           />
         )}
       </div>
@@ -535,7 +536,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   return (
     <div className="flex items-center space-x-2">
       <CustomColorPicker
-        scale={scale}
+        density={density}
         disabled={disabled}
         invalid={invalid}
         displayColor={getDisplayColor()}
@@ -555,7 +556,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           }
           disabled={disabled}
           className={cn(
-            colorInputVariant({ scale }),
+            colorInputVariant({ density }),
             ghost &&
               'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
             invalid && inputStyles.invalidInput,
@@ -579,7 +580,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                 onClick={handleClear}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className={xIconVariant({ scale })} />
+                <X className={xIconVariant({ density })} />
               </button>
             )}
           </div>
@@ -591,7 +592,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           alpha={currentAlpha}
           onChange={handleAlphaChange}
           disabled={disabled}
-          scale={scale}
+          density={density}
         />
       )}
     </div>

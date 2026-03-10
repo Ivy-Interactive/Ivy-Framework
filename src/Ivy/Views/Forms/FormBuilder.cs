@@ -15,7 +15,7 @@ public class FormBuilder<TModel> : ViewBase
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
-    internal Scale _scale = Ivy.Scale.Medium;
+    internal Density _density = Ivy.Density.Medium;
     internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
     internal FormSubmitStrategy _submitStrategy;
@@ -304,15 +304,15 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    public FormBuilder<TModel> Scale(Scale scale)
+    public FormBuilder<TModel> Density(Density density)
     {
-        _scale = scale;
+        _density = density;
         return this;
     }
 
-    public FormBuilder<TModel> Small() => Scale(Ivy.Scale.Small);
-    public FormBuilder<TModel> Medium() => Scale(Ivy.Scale.Medium);
-    public FormBuilder<TModel> Large() => Scale(Ivy.Scale.Large);
+    public FormBuilder<TModel> Small() => Density(Ivy.Density.Small);
+    public FormBuilder<TModel> Medium() => Density(Ivy.Density.Medium);
+    public FormBuilder<TModel> Large() => Density(Ivy.Density.Large);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
@@ -352,7 +352,7 @@ public class FormBuilder<TModel> : ViewBase
                     new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                     e.Validators.ToArray(),
                     _validationStrategy,
-                    _scale,
+                    _density,
                     e.Help,
                     e.Placeholder,
                     _submitStrategy
@@ -405,7 +405,7 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            _scale,
+            _density,
             _groupOpenStates
         );
 
@@ -426,10 +426,10 @@ public class FormBuilder<TModel> : ViewBase
 
         var (handleSubmit, isUploading) = Context.UseUploadAwareSubmit(_model, onSubmit);
 
-        var buttonGap = _scale switch
+        var buttonGap = _density switch
         {
-            Ivy.Scale.Small => 4,
-            Ivy.Scale.Large => 8,
+            Ivy.Density.Small => 4,
+            Ivy.Density.Large => 8,
             _ => 6
         };
 
@@ -443,7 +443,7 @@ public class FormBuilder<TModel> : ViewBase
         return Layout.Vertical().Gap(buttonGap)
                | formView
                | Layout.Horizontal(
-                   _submitBuilder(submitting || isUploading).OnClick(_ => handleSubmit()).Scale(_scale),
+                   _submitBuilder(submitting || isUploading).OnClick(_ => handleSubmit()).Density(_density),
                    validationView
                 );
     }

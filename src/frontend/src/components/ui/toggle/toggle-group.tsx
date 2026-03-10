@@ -8,7 +8,7 @@ import { toggleVariant } from '@/components/ui/toggle';
 const ToggleGroupContext = React.createContext<
   VariantProps<typeof toggleVariant>
 >({
-  scale: 'Medium',
+  density: 'Medium',
   variant: 'default',
 });
 
@@ -16,13 +16,13 @@ const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
     VariantProps<typeof toggleVariant>
->(({ className, variant, scale, children, ...props }, ref) => (
+>(({ className, variant, density, children, ...props }, ref) => (
   <ToggleGroupPrimitive.Root
     ref={ref}
     className={cn('flex items-center justify-center gap-1', className)}
     {...props}
   >
-    <ToggleGroupContext.Provider value={{ variant, scale }}>
+    <ToggleGroupContext.Provider value={{ variant, density }}>
       {children}
     </ToggleGroupContext.Provider>
   </ToggleGroupPrimitive.Root>
@@ -34,7 +34,7 @@ const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
     VariantProps<typeof toggleVariant>
->(({ className, children, variant, scale, ...props }, ref) => {
+>(({ className, children, variant, density, ...props }, ref) => {
   const context = React.useContext(ToggleGroupContext);
 
   return (
@@ -43,7 +43,7 @@ const ToggleGroupItem = React.forwardRef<
       className={cn(
         toggleVariant({
           variant: context.variant || variant,
-          scale: context.scale || scale,
+          density: context.density || density,
         }),
         className
       )}

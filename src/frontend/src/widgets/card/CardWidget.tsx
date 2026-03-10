@@ -8,7 +8,7 @@ import { getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import React, { useCallback } from 'react';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { cardStyles, getSizeClasses } from './styles';
 
 const EMPTY_ARRAY: never[] = [];
@@ -19,7 +19,7 @@ interface CardWidgetProps {
   width?: string;
   height?: string;
   hoverVariant?: 'None' | 'Pointer' | 'PointerAndTranslate';
-  scale?: Scales;
+  density?: Densities;
   disabled?: boolean;
   'data-testid'?: string;
   slots?: {
@@ -35,13 +35,13 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   width = 'Full',
   height,
   hoverVariant = 'None',
-  scale = Scales.Medium,
+  density = Densities.Medium,
   disabled,
   slots,
   'data-testid': testId,
 }) => {
   const eventHandler = useEventHandler();
-  const sizeClasses = getSizeClasses(scale);
+  const sizeClasses = getSizeClasses(density);
 
   const styles = {
     ...getWidth(width),

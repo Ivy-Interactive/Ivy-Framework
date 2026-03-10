@@ -15,7 +15,7 @@ public class RichTextBuilder : ViewBase, IStateless
     private TextAlignment? _textAlignment;
     private bool _noWrap;
     private Overflow? _overflow;
-    private Scale? _scale;
+    private Density? _density;
     private IWriteStream<TextRun>? _stream;
     private Func<Event<RichTextBlock, string>, ValueTask>? _onLinkClick;
 
@@ -83,11 +83,11 @@ public class RichTextBuilder : ViewBase, IStateless
     /// <summary>Set overflow behavior.</summary>
     public RichTextBuilder Overflow(Overflow overflow) { _overflow = overflow; return this; }
 
-    /// <summary>Set the scale of the rich text block.</summary>
-    public RichTextBuilder Scale(Scale scale) { _scale = scale; return this; }
-    public RichTextBuilder Small() => Scale(Ivy.Scale.Small);
-    public RichTextBuilder Medium() => Scale(Ivy.Scale.Medium);
-    public RichTextBuilder Large() => Scale(Ivy.Scale.Large);
+    /// <summary>Set the density of the rich text block.</summary>
+    public RichTextBuilder Density(Density density) { _density = density; return this; }
+    public RichTextBuilder Small() => Density(Ivy.Density.Small);
+    public RichTextBuilder Medium() => Density(Ivy.Density.Medium);
+    public RichTextBuilder Large() => Density(Ivy.Density.Large);
 
     /// <summary>Set text alignment.</summary>
     public RichTextBuilder Align(TextAlignment alignment) { _textAlignment = alignment; return this; }
@@ -118,7 +118,7 @@ public class RichTextBuilder : ViewBase, IStateless
             TextAlignment = _textAlignment,
             NoWrap = _noWrap,
             Overflow = _overflow,
-            Scale = _scale,
+            Density = _density,
             Stream = _stream,
             OnLinkClick = _onLinkClick
         };

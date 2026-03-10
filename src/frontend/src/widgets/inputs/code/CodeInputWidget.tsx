@@ -21,7 +21,7 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { X, Copy } from 'lucide-react';
 import { xIconVariant } from '@/components/ui/input/text-input-variant';
 import {
@@ -45,7 +45,7 @@ interface CodeInputWidgetProps {
   events: string[];
   width?: string;
   height?: string;
-  scale?: Scales;
+  density?: Densities;
 }
 
 const languageExtensions = {
@@ -74,7 +74,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   nullable = false,
   width,
   height,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
@@ -136,7 +136,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   };
 
   // Create theme extension once and reuse it
-  const themeExtension = useMemo(() => createIvyCodeTheme(scale), [scale]);
+  const themeExtension = useMemo(() => createIvyCodeTheme(density), [density]);
 
   // Minimal setup without search features
   const minimalSetup = useMemo(() => {
@@ -173,7 +173,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
               aria-label="Copy to clipboard"
               className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
             >
-              <Copy className={xIconVariant({ scale })} />
+              <Copy className={xIconVariant({ density })} />
             </button>
           )}
           {showClear && (
@@ -184,7 +184,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
               onClick={handleClear}
               className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
             >
-              <X className={xIconVariant({ scale })} />
+              <X className={xIconVariant({ density })} />
             </button>
           )}
           {/* Invalid icon - rightmost */}

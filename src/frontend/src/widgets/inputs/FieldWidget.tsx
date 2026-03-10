@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { getWidth, getHeight } from '@/lib/styles';
 import Icon from '@/components/Icon';
 import {
@@ -16,7 +16,7 @@ interface FieldWidgetProps {
   required: boolean;
   help?: string;
   children?: React.ReactNode;
-  scale?: Scales;
+  density?: Densities;
   width?: string;
   height?: string;
 }
@@ -27,27 +27,27 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
   required,
   help,
   children,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   width,
   height,
 }) => {
   const labelSizeClass =
-    scale === Scales.Small
+    density === Densities.Small
       ? 'text-xs'
-      : scale === Scales.Large
+      : density === Densities.Large
         ? 'text-base'
         : 'text-sm';
   const descriptionSizeClass =
-    scale === Scales.Small
+    density === Densities.Small
       ? 'text-xs'
-      : scale === Scales.Large
+      : density === Densities.Large
         ? 'text-sm'
         : 'text-xs';
 
   const gapClass =
-    scale === Scales.Small
+    density === Densities.Small
       ? 'gap-1'
-      : scale === Scales.Large
+      : density === Densities.Large
         ? 'gap-3'
         : 'gap-2';
 

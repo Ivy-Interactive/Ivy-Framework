@@ -69,7 +69,7 @@ public class NullableInputsApp : SampleBase
              | Text.H1("Nullable Inputs")
              | Text.P("This app demonstrates nullable input functionality. When an input is nullable and has a value, you'll see a clear (X) button to reset it to null.")
 
-             | Text.H2("Scale Examples with Nullable Inputs")
+             | Text.H2("Density Examples with Nullable Inputs")
              | Text.P("These inputs demonstrate how the X button appears at different scales (Small, Medium, Large). All inputs have values and are nullable.")
 
              | Text.H3("Text Inputs - Scale Comparison")

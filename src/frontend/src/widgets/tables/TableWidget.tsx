@@ -1,26 +1,26 @@
 import React from 'react';
 import { Table, TableBody } from '@/components/ui/table';
 import { getWidth } from '@/lib/styles';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { cn } from '@/lib/utils';
 
 interface TableWidgetProps {
   id: string;
   children?: React.ReactNode;
   width?: string;
-  scale?: Scales;
+  density?: Densities;
 }
 
 export const TableWidget: React.FC<TableWidgetProps> = ({
   children,
   width,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const widthStyles = getWidth(width || 'Full');
 
   return (
     <Table
-      scale={scale}
+      density={density}
       className={cn('w-full caption-bottom')}
       style={{
         ...widthStyles,

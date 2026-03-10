@@ -3,14 +3,14 @@ import { cva } from 'class-variance-authority';
 // Row min-height variants - matches TextInput heights for consistent form field alignment
 export const boolInputRowMinHeightVariant = cva('', {
   variants: {
-    scale: {
+    density: {
       Small: 'min-h-7',
       Medium: 'min-h-9',
       Large: 'min-h-11',
     },
   },
   defaultVariants: {
-    scale: 'Medium',
+    density: 'Medium',
   },
 });
 
@@ -26,14 +26,14 @@ export const labelSizeVariant = cva(
   'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
   {
     variants: {
-      scale: {
+      density: {
         Small: 'text-xs',
         Medium: 'text-sm',
         Large: 'text-base',
       },
     },
     defaultVariants: {
-      scale: 'Medium',
+      density: 'Medium',
     },
   }
 );
@@ -41,13 +41,13 @@ export const labelSizeVariant = cva(
 // Description size variants
 export const descriptionSizeVariant = cva('text-muted-foreground', {
   variants: {
-    scale: {
+    density: {
       Small: 'text-xs',
       Medium: 'text-sm',
       Large: 'text-base',
     },
   },
   defaultVariants: {
-    scale: 'Medium',
+    density: 'Medium',
   },
 });

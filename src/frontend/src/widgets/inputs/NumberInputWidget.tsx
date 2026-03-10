@@ -7,7 +7,7 @@ import { inputStyles, getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { X } from 'lucide-react';
 import React from 'react';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { xIconVariant } from '@/components/ui/input/text-input-variant';
 import Icon from '@/components/Icon';
 
@@ -73,7 +73,7 @@ interface NumberInputBaseProps {
   'data-testid'?: string;
   // Add type information for validation
   targetType?: string;
-  scale?: Scales;
+  density?: Densities;
   prefix?: Affix;
   suffix?: Affix;
 }
@@ -140,7 +140,7 @@ const SliderVariant = memo(
     disabled = false,
     invalid,
     currency,
-    scale = Scales.Medium,
+    density = Densities.Medium,
     onValueChange,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
@@ -182,7 +182,7 @@ const SliderVariant = memo(
           value={[sliderValue]}
           disabled={disabled}
           currency={currency}
-          scale={scale}
+          density={density}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
           className={cn(invalid && inputStyles.invalidInput)}
@@ -191,7 +191,7 @@ const SliderVariant = memo(
         <span
           className={cn(
             'flex w-full items-center justify-between gap-1',
-            sizeVariant[String(scale)].text
+            sizeVariant[String(density)].text
           )}
           aria-hidden="true"
         >
@@ -228,7 +228,7 @@ const NumberVariant = memo(
     nullable = false,
     onValueChange,
     currency,
-    scale = Scales.Medium,
+    density = Densities.Medium,
     prefix,
     suffix,
     'data-testid': dataTestId,
@@ -283,7 +283,7 @@ const NumberVariant = memo(
             placeholder={placeholder}
             value={value ?? (nullable ? null : 0)}
             disabled={disabled}
-            scale={scale}
+            density={density}
             onChange={handleNumberChange}
             className={cn(
               'border-0 shadow-none',
@@ -307,7 +307,7 @@ const NumberVariant = memo(
                   onClick={() => onValueChange(null)}
                   className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
                 >
-                  <X className={xIconVariant({ scale })} />
+                  <X className={xIconVariant({ density })} />
                 </button>
               )}
               {/* Invalid icon - rightmost */}

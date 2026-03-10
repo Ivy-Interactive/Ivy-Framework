@@ -48,7 +48,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
     private bool _removeEmpty;
     private readonly Dictionary<string, Item> _items;
     private readonly TModel _model;
-    private Scale _scale = Scale.Medium;
+    private Density _density = Density.Medium;
 
     public DetailsBuilder(TModel model)
     {
@@ -95,19 +95,19 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
     public DetailsBuilder<TModel> Large()
     {
-        _scale = Scale.Large;
+        _density = Density.Large;
         return this;
     }
 
     public DetailsBuilder<TModel> Small()
     {
-        _scale = Scale.Small;
+        _density = Density.Small;
         return this;
     }
 
     public DetailsBuilder<TModel> Medium()
     {
-        _scale = Scale.Medium;
+        _density = Density.Medium;
         return this;
     }
 
@@ -191,7 +191,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
             items = items.Where(e => !Utils.IsEmptyContent(e.GetValue(_model))).ToArray();
         }
 
-        var details = new Details(items.Select(BuildDetail).ToArray()).Scale(_scale);
+        var details = new Details(items.Select(BuildDetail).ToArray()).Density(_density);
 
         return details;
 

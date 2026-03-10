@@ -72,7 +72,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public string? Placeholder { get; set; }
 
-    public Scale Scale { get; set; } = Scale.Medium;
+    public Density Density { get; set; } = Density.Medium;
 
     public bool Ghost { get; set; }
 
@@ -119,7 +119,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 DisplayValue = displayValue,
                 OnSelect = HandleSelect,
                 Loading = loading,
-                Scale = Scale,
+                Density = Density,
                 Ghost = Ghost
             },
             open.Value ? new Sheet(

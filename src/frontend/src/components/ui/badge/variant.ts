@@ -14,7 +14,7 @@ export const badgeVariant = cva(
         warning: 'border-transparent bg-warning text-warning-foreground shadow',
         info: 'border-transparent bg-info text-info-foreground shadow',
       },
-      scale: {
+      density: {
         medium: 'px-2 py-0.5 text-xs',
         small: 'px-1 py-0 text-[10px]',
         large: 'px-3 py-1 text-sm',
@@ -22,7 +22,7 @@ export const badgeVariant = cva(
     },
     defaultVariants: {
       variant: 'primary',
-      scale: 'medium',
+      density: 'medium',
     },
   }
 );

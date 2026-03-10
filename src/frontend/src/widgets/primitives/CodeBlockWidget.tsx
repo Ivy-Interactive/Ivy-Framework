@@ -7,7 +7,7 @@ const SyntaxHighlighter = lazy(() =>
 import { createPrismTheme } from '@/lib/prismTheme';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { codeCopyButtonVariant } from '@/components/ui/code-variant';
 
 interface CodeWidgetProps {
@@ -21,7 +21,7 @@ interface CodeWidgetProps {
   wrapLines?: boolean;
   width?: string;
   height?: string;
-  scale?: Scales;
+  density?: Densities;
 }
 
 const languageMap: Record<string, string> = {
@@ -50,9 +50,9 @@ const mapLanguageToPrism = (language: string): string | undefined => {
 };
 
 const MemoizedCopyButton = memo(
-  ({ textToCopy, scale }: { textToCopy: string; scale: Scales }) => (
-    <div className={codeCopyButtonVariant({ scale })}>
-      <CopyToClipboardButton textToCopy={textToCopy} scale={scale} />
+  ({ textToCopy, density }: { textToCopy: string; density: Densities }) => (
+    <div className={codeCopyButtonVariant({ density })}>
+      <CopyToClipboardButton textToCopy={textToCopy} density={density} />
     </div>
   )
 );
@@ -69,10 +69,10 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     wrapLines = false,
     width = 'Full',
     height = 'MaxContent,,Px:800',
-    scale = Scales.Medium,
+    density = Densities.Medium,
   }) => {
     const scaleStyles: Record<
-      Scales,
+      Densities,
       {
         fontSize: string;
         padding: string;
@@ -82,21 +82,21 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       }
     > = useMemo(
       () => ({
-        [Scales.Small]: {
+        [Densities.Small]: {
           fontSize: '0.75rem',
           padding: '0.5rem',
           lineHeight: '1.4',
           lineNumberMinWidth: '1.5rem',
           lineNumberPaddingRight: '0.5rem',
         },
-        [Scales.Medium]: {
+        [Densities.Medium]: {
           fontSize: '0.875rem',
           padding: '0.75rem',
           lineHeight: '1.5',
           lineNumberMinWidth: '2.25rem',
           lineNumberPaddingRight: '0.75rem',
         },
-        [Scales.Large]: {
+        [Densities.Large]: {
           fontSize: '1rem',
           padding: '1rem',
           lineHeight: '1.6',
@@ -107,7 +107,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       []
     );
 
-    const currentScale = scaleStyles[scale];
+    const currentScale = scaleStyles[density];
 
     /** Pre (container): padding, dimensions, typography. Padding here applies to all lines. */
     const preStyle = useMemo<CSSProperties>(() => {
@@ -161,7 +161,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     return (
       <div className="relative" style={containerStyles}>
         {showCopyButton && (
-          <MemoizedCopyButton textToCopy={content} scale={scale} />
+          <MemoizedCopyButton textToCopy={content} density={density} />
         )}
         <ScrollArea
           className={cn(

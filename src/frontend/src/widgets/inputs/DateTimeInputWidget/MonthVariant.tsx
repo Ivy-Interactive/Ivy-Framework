@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
   dateTimeInputVariant,
   dateTimeInputIconVariant,
@@ -46,7 +46,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   invalid,
   onDateChange,
   format: formatProp,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -95,7 +95,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
             variant="outline"
             data-slot="calendar"
             className={cn(
-              dateTimeInputVariant({ scale }),
+              dateTimeInputVariant({ density }),
               'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
@@ -111,13 +111,13 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
             <CalendarIcon
               className={cn(
                 'mr-2 shrink-0',
-                dateTimeInputIconVariant({ scale })
+                dateTimeInputIconVariant({ density })
               )}
             />
             <span
               className={cn(
                 'truncate',
-                dateTimeInputTextVariant({ scale }),
+                dateTimeInputTextVariant({ density }),
                 !date && 'text-muted-foreground'
               )}
             >
@@ -176,7 +176,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
       <ClearAndInvalidIcons
         showClear={showClear}
         invalid={invalid}
-        scale={scale}
+        density={density}
         onClear={handleClear}
       />
     </div>
