@@ -72,7 +72,7 @@ public class NullableInputsApp : SampleBase
            | Text.H2("Density Examples with Nullable Inputs")
            | Text.P("These inputs demonstrate how the X button appears at different scales (Small, Medium, Large). All inputs have values and are nullable.")
 
-           | Text.H3("Text Inputs - Scale Comparison")
+           | Text.H3("Text Inputs - Density Comparison")
            | (Layout.Grid().Columns(6)
               | Text.InlineCode("Density")
               | Text.InlineCode("Text")
@@ -103,7 +103,7 @@ public class NullableInputsApp : SampleBase
               | scaleEmail.ToEmailInput().Placeholder("Large...").Nullable().Large()
            )
 
-           | Text.H3("Number Inputs - Scale Comparison")
+           | Text.H3("Number Inputs - Density Comparison")
            | (Layout.Grid().Columns(4)
               | Text.InlineCode("Density")
               | Text.InlineCode("Integer")
@@ -126,7 +126,7 @@ public class NullableInputsApp : SampleBase
               | scaleNumber.ToSliderInput().Placeholder("Large...").Nullable().Large()
            )
 
-           | Text.H3("DateTime Inputs - Scale Comparison")
+           | Text.H3("DateTime Inputs - Density Comparison")
            | (Layout.Grid().Columns(4)
               | Text.InlineCode("Density")
               | Text.InlineCode("Date")
@@ -148,7 +148,7 @@ public class NullableInputsApp : SampleBase
               | scaleDateTime.ToDateTimeInput().Placeholder("Large...").Nullable().Large()
               | scaleTime.ToTimeInput().Placeholder("Large...").Nullable().Large()
            )
-           | Text.H3("Code Inputs - Scale Comparison")
+           | Text.H3("Code Inputs - Density Comparison")
            | (Layout.Grid().Columns(4)
              | Text.Block("Without .Nullable - render only copy to clipboard button if there is a value")
                 | scaleCode.ToCodeInput().Placeholder("Small...").Small()
@@ -160,7 +160,7 @@ public class NullableInputsApp : SampleBase
                 | scaleCode.ToCodeInput().Placeholder("Large...").Nullable().Large()
 
            )
-           | Text.H3("Select & Other Inputs - Scale Comparison")
+           | Text.H3("Select & Other Inputs - Density Comparison")
            | (Layout.Grid().Columns(5)
               | Text.InlineCode("Density")
               | Text.InlineCode("Select")
