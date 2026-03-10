@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface SmartSearchSlots {
   SearchInput?: React.ReactNode[];
@@ -49,6 +49,46 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
   const clearInputButton = slots.ClearInputButton;
   const openTrigger = slots.OpenTrigger;
   const overlayPanel = slots.OverlayPanel;
+  const dialogContentRef = useRef<HTMLDivElement>(null);
+  const focusRafRef = useRef<number | null>(null);
+
+  // Focus search input when overlay opens. Portal/async tree: rAF loop stops when input exists or effect cleans up.
+  useEffect(() => {
+    if (!overlayPanel || overlayPanel.length === 0) return;
+
+    let cancelled = false;
+
+    const tryFocus = () => {
+      if (cancelled) return;
+      if (focusRafRef.current != null) {
+        cancelAnimationFrame(focusRafRef.current);
+        focusRafRef.current = null;
+      }
+
+      const root = dialogContentRef.current;
+      if (root) {
+        const input = root.querySelector<HTMLInputElement>(
+          'input:not([type="hidden"]):not([disabled])'
+        );
+        if (input) {
+          input.focus();
+          return;
+        }
+      }
+
+      focusRafRef.current = requestAnimationFrame(tryFocus);
+    };
+
+    focusRafRef.current = requestAnimationFrame(tryFocus);
+
+    return () => {
+      cancelled = true;
+      if (focusRafRef.current != null) {
+        cancelAnimationFrame(focusRafRef.current);
+        focusRafRef.current = null;
+      }
+    };
+  }, [overlayPanel]);
 
   const closeOverlay = () => {
     document
@@ -99,6 +139,7 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
       {overlayPanel && overlayPanel.length > 0 && (
         <Dialog open={true} onOpenChange={() => closeOverlay()}>
           <DialogContent
+            ref={dialogContentRef}
             style={{
               width: '36rem',
               maxWidth: 'min(36rem, calc(100vw - 2rem))',
