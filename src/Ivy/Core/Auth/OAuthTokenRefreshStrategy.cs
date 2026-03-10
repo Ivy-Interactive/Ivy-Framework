@@ -68,7 +68,7 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
                     _tokenService.Provider, attempt, maxRetries, _connectionId);
 
                 // Try to re-fetch OAuth provider sessions from the main auth provider (skip cache to force fresh fetch)
-                var result = await _authService.GetOAuthProviderSessionsAsync(skipCache: true, CancellationToken.None);
+                var result = await _authService.GetOAuthSessionsAsync(skipCache: true, CancellationToken.None);
 
                 if (result.Sessions != null && result.Sessions.ContainsKey(_tokenService.Provider))
                 {

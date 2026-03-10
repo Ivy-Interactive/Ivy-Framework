@@ -32,7 +32,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         _backendClient = new BackendApiClient(_secretKey);
     }
 
-    private async Task<AuthToken?> TryRestoreExistingSessionAsync(IAuthProviderSession authSession, ClerkCredentials credentials, CancellationToken cancellationToken)
+    private async Task<AuthToken?> TryRestoreExistingSessionAsync(IAuthSession authSession, ClerkCredentials credentials, CancellationToken cancellationToken)
     {
         try
         {
@@ -63,7 +63,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         => ex.Errors?.Any(e => e.Code == "session_exists") == true;
 
 
-    public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -107,7 +107,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         }
     }
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_origin) || string.IsNullOrEmpty(_callbackBaseUrl))
         {
@@ -154,7 +154,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         return new Uri(oauthUri);
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_origin) || string.IsNullOrEmpty(_callbackBaseUrl))
         {
@@ -221,7 +221,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         }
     }
 
-    public async Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
         var jwt = authSession.AuthToken?.AccessToken;
@@ -286,13 +286,13 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     }
 
 
-    public async Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    public async Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
         // Return stored sessions if available and not skipping cache
-        if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
+        if (!skipCache && authSession.OAuthSessions.Count > 0)
         {
-            return OAuthProviderSessionsResult.Success(
-                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
+            return OAuthSessionsResult.Success(
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions));
         }
 
         try
@@ -300,13 +300,13 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
             // Get user ID from the current session token
             if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) is not var (claims, _))
             {
-                return OAuthProviderSessionsResult.Failure();
+                return OAuthSessionsResult.Failure();
             }
 
             var userId = claims.FindFirst("sub")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return OAuthProviderSessionsResult.Failure();
+                return OAuthSessionsResult.Failure();
             }
 
             // Get user details to find their external accounts
@@ -314,7 +314,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
             if (user?.ExternalAccounts == null || user.ExternalAccounts.Count == 0)
             {
-                return OAuthProviderSessionsResult.Success(new Dictionary<string, IAuthTokenHandlerSession>());
+                return OAuthSessionsResult.Success(new Dictionary<string, IAuthTokenHandlerSession>());
             }
 
             var sessions = new Dictionary<string, IAuthTokenHandlerSession>();
@@ -364,11 +364,11 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                 }
             }
 
-            return OAuthProviderSessionsResult.Success(sessions);
+            return OAuthSessionsResult.Success(sessions);
         }
         catch (Exception)
         {
-            return OAuthProviderSessionsResult.Failure();
+            return OAuthSessionsResult.Failure();
         }
     }
 }

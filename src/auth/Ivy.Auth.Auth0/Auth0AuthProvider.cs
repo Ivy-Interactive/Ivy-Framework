@@ -30,7 +30,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
     {
     }
 
-    public async Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken)
+    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
     {
         var request = new ResourceOwnerTokenRequest
         {
@@ -47,7 +47,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         return new AuthToken(response.AccessToken, response.RefreshToken);
     }
 
-    public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         var connection = option.Id switch
         {
@@ -76,7 +76,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         return Task.FromResult(authorizationUrl.Build());
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -112,7 +112,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         }
     }
 
-    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken)
+    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
         => Task.CompletedTask;
 
     public AuthOption[] GetAuthOptions()
@@ -186,25 +186,25 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         return _managementClient;
     }
 
-    public async Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    public async Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
         // Return stored sessions if available and not skipping cache
-        if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
+        if (!skipCache && authSession.OAuthSessions.Count > 0)
         {
-            return OAuthProviderSessionsResult.Success(
-                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
+            return OAuthSessionsResult.Success(
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions));
         }
 
         // Get user ID from the current access token
         if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
         {
-            return OAuthProviderSessionsResult.Failure();
+            return OAuthSessionsResult.Failure();
         }
 
         var userId = claims.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId))
         {
-            return OAuthProviderSessionsResult.Failure();
+            return OAuthSessionsResult.Failure();
         }
 
         // Get management API client
@@ -215,7 +215,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
 
         if (user.Identities == null || !user.Identities.Any())
         {
-            return OAuthProviderSessionsResult.Success(new Dictionary<string, IAuthTokenHandlerSession>());
+            return OAuthSessionsResult.Success(new Dictionary<string, IAuthTokenHandlerSession>());
         }
 
         var sessions = new Dictionary<string, IAuthTokenHandlerSession>();
@@ -249,6 +249,6 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
             sessions[provider] = session;
         }
 
-        return OAuthProviderSessionsResult.Success(sessions);
+        return OAuthSessionsResult.Success(sessions);
     }
 }

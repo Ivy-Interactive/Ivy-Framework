@@ -11,7 +11,7 @@ public static class AuthSessionExtensions
     internal static CheckedAuthTokenHandlerSessionBuilder WithCheckedAccess(this IAuthTokenHandlerSession authSession)
         => new(authSession);
 
-    internal static CheckedAuthSessionBuilder WithCheckedAccess(this IAuthProviderSession authSession)
+    internal static CheckedAuthSessionBuilder WithCheckedAccess(this IAuthSession authSession)
         => new(authSession);
 #endif
 
@@ -26,20 +26,20 @@ public static class AuthSessionExtensions
         => authSession.AuthToken != snapshot.AuthToken ||
            authSession.AuthSessionData != snapshot.AuthSessionData;
 
-    public static AuthProviderSessionSnapshot TakeSnapshot(this IAuthProviderSession authSession)
+    public static AuthSessionSnapshot TakeSnapshot(this IAuthSession authSession)
         => new()
         {
             AuthToken = authSession.AuthToken,
-            OAuthProviderSessions = new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions),
+            OAuthSessions = new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions),
             AuthSessionData = authSession.AuthSessionData,
         };
 
-    public static bool HasChangedSince(this IAuthProviderSession authSession, AuthProviderSessionSnapshot snapshot)
+    public static bool HasChangedSince(this IAuthSession authSession, AuthSessionSnapshot snapshot)
         => authSession.AuthToken != snapshot.AuthToken ||
            authSession.AuthSessionData != snapshot.AuthSessionData ||
-           !OAuthProviderSessionsEqual(authSession.OAuthProviderSessions, snapshot.OAuthProviderSessions);
+           !OAuthSessionsEqual(authSession.OAuthSessions, snapshot.OAuthSessions);
 
-    private static bool OAuthProviderSessionsEqual(
+    private static bool OAuthSessionsEqual(
         IReadOnlyDictionary<string, IAuthTokenHandlerSession> current,
         IReadOnlyDictionary<string, IAuthTokenHandlerSession> snapshot)
     {

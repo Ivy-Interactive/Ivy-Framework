@@ -135,7 +135,7 @@ public class AuthController() : Controller
 
             var cookies = new CookieJar();
             cookies.AddCookiesForAuthToken(token);
-            cookies.AddCookiesForOAuthProviderSessions(tempSession.OAuthProviderSessions);
+            cookies.AddCookiesForOAuthSessions(tempSession.OAuthSessions);
             cookies.WriteToResponse(Response);
 
             return Redirect("/");

@@ -9,7 +9,7 @@ public class MainAuthTokenRefreshStrategy : ITokenRefreshStrategy
     private readonly string _connectionId;
     private readonly IAuthProvider _authProvider;
     private readonly IAuthTokenHandlerService _authService;
-    private readonly IAuthProviderSession _authSession;
+    private readonly IAuthSession _authSession;
     private readonly AppSessionStore _sessionStore;
     private readonly IContentBuilder _contentBuilder;
     private readonly ILogger _logger;
@@ -20,7 +20,7 @@ public class MainAuthTokenRefreshStrategy : ITokenRefreshStrategy
         string connectionId,
         IAuthProvider authProvider,
         IAuthTokenHandlerService authService,
-        IAuthProviderSession authSession,
+        IAuthSession authSession,
         AppSessionStore sessionStore,
         IContentBuilder contentBuilder,
         ILogger logger)

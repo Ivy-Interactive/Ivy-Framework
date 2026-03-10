@@ -407,7 +407,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 )
         };
 
-        var authSession = auth?.GetAuthProviderSession();
+        var authSession = auth?.GetAuthSession();
         var isLoggedIn = authSession != null;
 
         var onLogout = new Action(async () =>

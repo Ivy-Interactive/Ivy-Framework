@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 // Resharper disable once CheckNamespace
 namespace Ivy;
 
-public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSession authSession, IClientProvider client, AppSessionStore sessionStore, string machineId, IServiceProvider? serviceProvider = null, ILogger<AuthProviderService>? logger = null) : IAuthProviderService
+public class AuthProviderService(IAuthProvider authProvider, IAuthSession authSession, IClientProvider client, AppSessionStore sessionStore, string machineId, IServiceProvider? serviceProvider = null, ILogger<AuthProviderService>? logger = null) : IAuthProviderService
 {
     // Hold removed OAuth provider sessions so they can be updated in place and restored later
     private readonly Dictionary<string, IAuthTokenHandlerSession> _removedOAuthSessions = new();
@@ -75,7 +75,7 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
         }
 
         // Capture OAuth providers before clearing so we can delete their cookies
-        var providersToDelete = authSession.OAuthProviderSessions.Keys.ToList();
+        var providersToDelete = authSession.OAuthSessions.Keys.ToList();
 
         // Mark OAuth providers as removed globally so other tabs know not to re-add them
         foreach (var provider in providersToDelete)
@@ -84,7 +84,7 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
         }
 
         authSession.AuthToken = null;
-        authSession.ClearOAuthProviderSessions();
+        authSession.ClearOAuthSessions();
         _removedOAuthSessions.Clear();
 
         // Pass the captured providers to delete their cookies
@@ -160,12 +160,12 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
 
     public IAuthTokenHandlerSession GetAuthTokenHandlerSession() => authSession;
 
-    public IAuthProviderSession GetAuthProviderSession() => authSession;
+    public IAuthSession GetAuthSession() => authSession;
 
-    public async Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default)
+    public async Task<OAuthSessionsResult> GetOAuthSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default)
     {
         var result = await TimeoutHelper.WithTimeoutAsync(ct =>
-            authProvider.GetOAuthProviderSessionsAsync(authSession, skipCache, ct), cancellationToken);
+            authProvider.GetOAuthSessionsAsync(authSession, skipCache, ct), cancellationToken);
 
         if (result.Sessions == null)
         {
@@ -183,18 +183,18 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
             logger?.LogWarning("The following OAuth provider sessions are available but have no registered handler and will be ignored: {UnhandledProviders}", string.Join(", ", unhandledSessions));
         }
 
-        // Diff and update authSession.OAuthProviderSessions
-        var currentProviders = authSession.OAuthProviderSessions.Keys.ToHashSet();
+        // Diff and update authSession.OAuthSessions
+        var currentProviders = authSession.OAuthSessions.Keys.ToHashSet();
         var newProviders = filteredSessions.Keys.ToHashSet();
 
         // Remove providers that are no longer present, but keep them in _removedOAuthSessions
         foreach (var provider in currentProviders.Where(p => !newProviders.Contains(p)))
         {
-            if (authSession.OAuthProviderSessions.TryGetValue(provider, out var sessionToRemove))
+            if (authSession.OAuthSessions.TryGetValue(provider, out var sessionToRemove))
             {
                 _removedOAuthSessions[provider] = sessionToRemove;
             }
-            authSession.RemoveOAuthProviderSession(provider);
+            authSession.RemoveOAuthSession(provider);
         }
 
         // Add or update sessions
@@ -202,7 +202,7 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
         foreach (var kvp in filteredSessions)
         {
             // Check if session exists in active sessions
-            if (authSession.OAuthProviderSessions.TryGetValue(kvp.Key, out var existingSession))
+            if (authSession.OAuthSessions.TryGetValue(kvp.Key, out var existingSession))
             {
                 // Update existing active session in place to preserve references
                 existingSession.AuthToken = kvp.Value.AuthToken;
@@ -214,13 +214,13 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
                 // Update the removed session in place and restore it to active sessions
                 removedSession.AuthToken = kvp.Value.AuthToken;
                 removedSession.AuthSessionData = kvp.Value.AuthSessionData;
-                authSession.AddOAuthProviderSession(kvp.Key, removedSession);
+                authSession.AddOAuthSession(kvp.Key, removedSession);
                 hasChanges = true;
             }
             else
             {
                 // New session, add it
-                authSession.AddOAuthProviderSession(kvp.Key, kvp.Value);
+                authSession.AddOAuthSession(kvp.Key, kvp.Value);
                 hasChanges = true;
             }
         }
@@ -230,7 +230,7 @@ public class AuthProviderService(IAuthProvider authProvider, IAuthProviderSessio
             SetAuthCookies(reloadPage: false);
         }
 
-        return OAuthProviderSessionsResult.Success(filteredSessions);
+        return OAuthSessionsResult.Success(filteredSessions);
     }
 
     public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)

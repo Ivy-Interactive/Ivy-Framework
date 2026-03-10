@@ -114,7 +114,7 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
     }
 
     protected FrontendApiClient MakeFrontendApiClient(IAuthTokenHandlerSession authSession)
-        => new(FrontendApiDomain, ((IAuthProviderSession)authSession).HttpMessageHandler);
+        => new(FrontendApiDomain, ((IAuthSession)authSession).HttpMessageHandler);
 
     protected static ClerkSession? GetActiveSession(ClerkClient client)
     {

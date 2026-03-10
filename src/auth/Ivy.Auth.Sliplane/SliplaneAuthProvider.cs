@@ -28,13 +28,13 @@ public class SliplaneAuthProvider : SliplaneAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>Not supported — Sliplane only supports OAuth flow</summary>
-    public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         throw new NotSupportedException("Sliplane authentication only supports OAuth flow. Use GetOAuthUriAsync and HandleOAuthCallbackAsync instead.");
     }
 
     /// <summary>No-op logout — Sliplane tokens are stateless</summary>
-    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }
@@ -46,7 +46,7 @@ public class SliplaneAuthProvider : SliplaneAuthTokenHandler, IAuthProvider
         [new AuthOption(AuthFlow.OAuth, "Sliplane", "sliplane", Icons.Rocket)];
 
     /// <summary>Build the Sliplane OAuth authorization URI</summary>
-    public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         if (option.Id != "sliplane")
         {
@@ -71,7 +71,7 @@ public class SliplaneAuthProvider : SliplaneAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>Handle the OAuth callback and exchange the authorization code for tokens</summary>
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();

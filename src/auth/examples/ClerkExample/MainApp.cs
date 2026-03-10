@@ -18,7 +18,7 @@ public class MainApp : ViewBase
             userInfo.Set(info);
 
             // Get OAuth provider sessions
-            var result = await auth.GetOAuthProviderSessionsAsync();
+            var result = await auth.GetOAuthSessionsAsync();
             oauthSessions.Set(result.Sessions);
         });
 

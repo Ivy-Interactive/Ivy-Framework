@@ -33,13 +33,13 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>Not supported - use OAuth flow</summary>
-    public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         throw new NotSupportedException("GitHub authentication only supports OAuth flow. Use GetOAuthUriAsync and HandleOAuthCallbackAsync instead.");
     }
 
     /// <summary>Generate OAuth authorization URI</summary>
-    public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         var callbackUri = callback.GetUri(includeIdInPath: false);
 
@@ -59,7 +59,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>Handle OAuth callback and exchange code for token</summary>
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -100,7 +100,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>No-op logout</summary>
-    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }
@@ -113,20 +113,20 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     public GitHubAuthProvider UseGitHub() => this;
 
     /// <summary>Get OAuth provider sessions - returns live session references that stay up-to-date</summary>
-    public Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    public Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
         // Return stored sessions if available and not skipping cache
-        if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
+        if (!skipCache && authSession.OAuthSessions.Count > 0)
         {
-            return Task.FromResult(OAuthProviderSessionsResult.Success(
-                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions)));
+            return Task.FromResult(OAuthSessionsResult.Success(
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions)));
         }
 
         // If no stored sessions, create one from the main auth token (GitHub uses the main token)
         var token = authSession.AuthToken?.AccessToken;
         if (string.IsNullOrWhiteSpace(token))
         {
-            return Task.FromResult(OAuthProviderSessionsResult.Failure());
+            return Task.FromResult(OAuthSessionsResult.Failure());
         }
 
         // Create the session
@@ -137,7 +137,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
             [OAuthProviders.GitHub] = session
         };
 
-        return Task.FromResult(OAuthProviderSessionsResult.Success(sessions));
+        return Task.FromResult(OAuthSessionsResult.Success(sessions));
     }
 
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)

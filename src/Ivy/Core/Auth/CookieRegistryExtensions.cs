@@ -21,14 +21,14 @@ public static class CookieRegistryExtensions
         return null;
     }
 
-    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthProviderSession authSession, string? machineId = null, IEnumerable<string>? providersToDelete = null)
+    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession, string? machineId = null, IEnumerable<string>? providersToDelete = null)
     {
         var cookies = new CookieJar();
         cookies.AddCookiesForAuthToken(authSession.AuthToken, providersToDelete);
         cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData);
 
         // Filter out OAuth providers that have been globally removed (if machineId is provided)
-        IReadOnlyDictionary<string, IAuthTokenHandlerSession> sessionsToWrite = authSession.OAuthProviderSessions;
+        IReadOnlyDictionary<string, IAuthTokenHandlerSession> sessionsToWrite = authSession.OAuthSessions;
         HashSet<string> removedProviders = new();
 
         if (machineId != null)
@@ -36,13 +36,13 @@ public static class CookieRegistryExtensions
             removedProviders = sessionStore.GetRemovedOAuthProviders(machineId);
             if (removedProviders.Count > 0)
             {
-                sessionsToWrite = authSession.OAuthProviderSessions
+                sessionsToWrite = authSession.OAuthSessions
                     .Where(kvp => !removedProviders.Contains(kvp.Key))
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             }
         }
 
-        cookies.AddCookiesForOAuthProviderSessions(sessionsToWrite);
+        cookies.AddCookiesForOAuthSessions(sessionsToWrite);
 
         // Also delete cookies for removed providers
         if (removedProviders.Count > 0)
@@ -140,11 +140,11 @@ public static class CookieRegistryExtensions
         }
     }
 
-    public static void AddCookiesForOAuthProviderSessions(this CookieJar cookies, IReadOnlyDictionary<string, IAuthTokenHandlerSession> oauthProviderSessions)
+    public static void AddCookiesForOAuthSessions(this CookieJar cookies, IReadOnlyDictionary<string, IAuthTokenHandlerSession> oauthSessions)
     {
         var cookieOptions = CreateAuthCookieOptions();
 
-        foreach (var (provider, session) in oauthProviderSessions)
+        foreach (var (provider, session) in oauthSessions)
         {
             var accessTokenName = $"{provider}_access_token";
             var refreshTokenName = $"{provider}_refresh_token";

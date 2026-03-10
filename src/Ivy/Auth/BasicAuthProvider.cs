@@ -35,7 +35,7 @@ public class BasicAuthProvider : BasicAuthTokenHandler, IAuthProvider
         }
     }
 
-    public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string user, string password, CancellationToken cancellationToken)
+    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string user, string password, CancellationToken cancellationToken)
     {
         var found = _users.Any(u => u.user == user && PasswordMatches(user, password, u.hash));
         if (!found) return Task.FromResult<AuthToken?>(null);
@@ -54,18 +54,18 @@ public class BasicAuthProvider : BasicAuthTokenHandler, IAuthProvider
         });
     }
 
-    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken)
+    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         // No server-side state to invalidate
         return Task.CompletedTask;
     }
 
-    public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

@@ -12,15 +12,15 @@ namespace Ivy.Core.Auth;
 
 public static class AuthHelper
 {
-    public static AuthProviderSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
+    public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
     => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var oauthSessions)
         ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, oauthSessions, httpMessageHandler)
-        : new AuthProviderSession(httpMessageHandler);
+        : new AuthSession(httpMessageHandler);
 
-    public static AuthProviderSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
+    public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
     => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var oauthSessions)
         ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, oauthSessions, httpMessageHandler)
-        : new AuthProviderSession(httpMessageHandler);
+        : new AuthSession(httpMessageHandler);
 
     public static async Task ValidateAuthIfRequired(global::Ivy.Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
     {
@@ -110,7 +110,7 @@ public static class AuthHelper
         return null;
     }
 
-    private static async Task ValidateAuth(IServiceProvider serviceProvider, AuthProviderSession authSession, CancellationToken cancellationToken)
+    private static async Task ValidateAuth(IServiceProvider serviceProvider, AuthSession authSession, CancellationToken cancellationToken)
     {
         if (authSession.AuthToken == null || string.IsNullOrEmpty(authSession.AuthToken.AccessToken))
         {
@@ -147,7 +147,7 @@ public static class AuthHelper
         var tag = cookies["auth_tag"].NullIfEmpty();
         var authSessionDataValue = cookies["auth_session_data"].NullIfEmpty();
 
-        var oauthSessions = ExtractOAuthProviderSessionsFromCookies(cookies);
+        var oauthSessions = ExtractOAuthSessionsFromCookies(cookies);
 
         return (accessToken, refreshToken, tag, authSessionDataValue, oauthSessions);
     }
@@ -176,12 +176,12 @@ public static class AuthHelper
         var tag = GetCookie("auth_tag");
         var authSessionDataValue = GetCookie("auth_session_data");
 
-        var oauthSessions = ExtractOAuthProviderSessionsFromCookieHeader(cookieHeader);
+        var oauthSessions = ExtractOAuthSessionsFromCookieHeader(cookieHeader);
 
         return (accessToken, refreshToken, tag, authSessionDataValue, oauthSessions);
     }
 
-    private static AuthProviderSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> oauthSessions, HttpMessageHandler httpMessageHandler)
+    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> oauthSessions, HttpMessageHandler httpMessageHandler)
     {
         if (accessToken == null)
         {
@@ -212,7 +212,7 @@ public static class AuthHelper
         }
     }
 
-    private static Dictionary<string, IAuthTokenHandlerSession> ExtractOAuthProviderSessionsFromCookies(IRequestCookieCollection cookies)
+    private static Dictionary<string, IAuthTokenHandlerSession> ExtractOAuthSessionsFromCookies(IRequestCookieCollection cookies)
     {
         var oauthSessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
@@ -257,7 +257,7 @@ public static class AuthHelper
         return oauthSessions;
     }
 
-    private static Dictionary<string, IAuthTokenHandlerSession> ExtractOAuthProviderSessionsFromCookieHeader(List<CookieHeaderValue> cookieHeader)
+    private static Dictionary<string, IAuthTokenHandlerSession> ExtractOAuthSessionsFromCookieHeader(List<CookieHeaderValue> cookieHeader)
     {
         var oauthSessions = new Dictionary<string, IAuthTokenHandlerSession>();
 

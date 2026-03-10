@@ -224,7 +224,7 @@ Once configured, you can access OAuth provider tokens in your Ivy application:
 var authService = UseService<IAuthProviderService>();
 
 // Get all OAuth provider sessions
-var result = await authService.GetOAuthProviderSessionsAsync();
+var result = await authService.GetOAuthSessionsAsync();
 
 if (result.Sessions?.TryGetValue(OAuthProviders.Google, out var googleSession) == true)
 {
@@ -245,7 +245,7 @@ if (result.Sessions?.TryGetValue(OAuthProviders.Google, out var googleSession) =
 - `OAuthProviders.Apple` - Apple
 - `OAuthProviders.Microsoft` - Microsoft
 
-> **Note:** If Management API access is not configured, `GetOAuthProviderSessionsAsync()` will throw an exception.
+> **Note:** If Management API access is not configured, `GetOAuthSessionsAsync()` will throw an exception.
 
 ## Adding Authentication
 

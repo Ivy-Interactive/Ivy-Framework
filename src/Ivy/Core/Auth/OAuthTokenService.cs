@@ -9,7 +9,7 @@ public class OAuthTokenService : IOAuthTokenService
     private readonly string _provider;
     private readonly IAuthTokenHandler _handler;
     private readonly IAuthTokenHandlerSession _session;
-    private readonly IAuthProviderSession _parentSession;
+    private readonly IAuthSession _parentSession;
     private readonly IClientProvider _client;
     private readonly AppSessionStore _sessionStore;
     private readonly string _machineId;
@@ -21,7 +21,7 @@ public class OAuthTokenService : IOAuthTokenService
         string provider,
         IAuthTokenHandler handler,
         IAuthTokenHandlerSession session,
-        IAuthProviderSession parentSession,
+        IAuthSession parentSession,
         IClientProvider client,
         AppSessionStore sessionStore,
         string machineId,
@@ -153,7 +153,7 @@ public class OAuthTokenService : IOAuthTokenService
     public void RemoveToken()
     {
         _logger.LogInformation("Removing OAuth token for {Provider}", _provider);
-        _parentSession.RemoveOAuthProviderSession(_provider);
+        _parentSession.RemoveOAuthSession(_provider);
 
         // Update cookies to reflect removal (don't reload page)
         var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession, _machineId);

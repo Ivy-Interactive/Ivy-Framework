@@ -7,16 +7,16 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : CheckedAuthT
 {
     private readonly IAuthProvider _innerAuthProvider = innerAuthProvider;
 
-    public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
+            .WithOAuthSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.LoginAsync(authSession, email, password, cancellationToken);
     }
 
-    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default)
+    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {
@@ -26,7 +26,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : CheckedAuthT
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
+            .WithOAuthSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.LogoutAsync(authSession, cancellationToken);
     }
@@ -34,27 +34,27 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : CheckedAuthT
     public AuthOption[] GetAuthOptions()
         => _innerAuthProvider.GetAuthOptions();
 
-    public Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadOnly)
+            .WithOAuthSessionsAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
         return _innerAuthProvider.GetOAuthUriAsync(authSession, option, callback, cancellationToken);
     }
 
-    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadWrite)
+            .WithOAuthSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.HandleOAuthCallbackAsync(authSession, request, cancellationToken);
     }
 
-    public Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    public Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {
@@ -64,9 +64,9 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : CheckedAuthT
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
-            .WithOAuthProviderSessionsAccess(AuthSessionAccessMode.ReadOnly)
+            .WithOAuthSessionsAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
-        return _innerAuthProvider.GetOAuthProviderSessionsAsync(authSession, skipCache, cancellationToken);
+        return _innerAuthProvider.GetOAuthSessionsAsync(authSession, skipCache, cancellationToken);
     }
 }
 #endif

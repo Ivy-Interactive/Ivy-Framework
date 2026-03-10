@@ -29,10 +29,10 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
     {
     }
 
-    public Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken)
+    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
         => throw new InvalidOperationException("Microsoft Entra login with email/password is not supported");
 
-    public async Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         _codeVerifier = GenerateCodeVerifier();
         var codeChallenge = GenerateCodeChallenge(_codeVerifier);
@@ -51,7 +51,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
         return authUrl;
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -83,7 +83,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
         );
     }
 
-    public Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken)
+    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         ClearApp();
         return Task.CompletedTask;
@@ -94,18 +94,18 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
     [Obsolete("Microsoft Entra OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public MicrosoftEntraAuthProvider UseMicrosoftEntra() => this;
 
-    public async Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    public async Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
         // Return stored sessions if available and not skipping cache
-        if (!skipCache && authSession.OAuthProviderSessions.Count > 0)
+        if (!skipCache && authSession.OAuthSessions.Count > 0)
         {
-            return OAuthProviderSessionsResult.Success(
-                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthProviderSessions));
+            return OAuthSessionsResult.Success(
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions));
         }
 
         if (authSession.AuthToken is not { } token)
         {
-            return OAuthProviderSessionsResult.Failure();
+            return OAuthSessionsResult.Failure();
         }
 
         try
@@ -118,7 +118,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
                 || accountId.Length <= 0
                 || token.RefreshToken == null)
             {
-                return OAuthProviderSessionsResult.Failure();
+                return OAuthSessionsResult.Failure();
             }
 
             // Use refresh token to get a fresh access token for Microsoft Graph
@@ -127,7 +127,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
 
             if (result?.AccessToken == null)
             {
-                return OAuthProviderSessionsResult.Failure();
+                return OAuthSessionsResult.Failure();
             }
 
             // Create the session
@@ -138,11 +138,11 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
                 [OAuthProviders.Microsoft] = session
             };
 
-            return OAuthProviderSessionsResult.Success(sessions);
+            return OAuthSessionsResult.Success(sessions);
         }
         catch (Exception)
         {
-            return OAuthProviderSessionsResult.Failure();
+            return OAuthSessionsResult.Failure();
         }
     }
 

@@ -259,8 +259,8 @@ public class AppHub(
                 var authService = appState.AppServices.GetService<IAuthProviderService>();
                 if (authService != null)
                 {
-                    var authSession = authService.GetAuthProviderSession();
-                    var oauthProviders = authSession.OAuthProviderSessions.Keys.ToList();
+                    var authSession = authService.GetAuthSession();
+                    var oauthProviders = authSession.OAuthSessions.Keys.ToList();
 
                     // Track active OAuth refresh loops and their cancellation tokens for this connection
                     var activeProviders = _activeOAuthRefreshLoops.GetOrAdd(connectionId, _ => new HashSet<string>());
@@ -315,8 +315,8 @@ public class AppHub(
 
                     _oauthTokenAddedHandlers[connectionId] = addedHandler;
                     _oauthTokenRemovedHandlers[connectionId] = removedHandler;
-                    authSession.OAuthProviderSessionAdded += addedHandler;
-                    authSession.OAuthProviderSessionRemoved += removedHandler;
+                    authSession.OAuthSessionAdded += addedHandler;
+                    authSession.OAuthSessionRemoved += removedHandler;
                 }
             }
         }
@@ -365,8 +365,8 @@ public class AppHub(
                     var authService = tempAppState.AppServices.GetService<IAuthProviderService>();
                     if (authService != null)
                     {
-                        var authSession = authService.GetAuthProviderSession();
-                        authSession.OAuthProviderSessionAdded -= addedHandler;
+                        var authSession = authService.GetAuthSession();
+                        authSession.OAuthSessionAdded -= addedHandler;
                     }
                 }
             }
@@ -379,8 +379,8 @@ public class AppHub(
                     var authService = tempAppState.AppServices.GetService<IAuthProviderService>();
                     if (authService != null)
                     {
-                        var authSession = authService.GetAuthProviderSession();
-                        authSession.OAuthProviderSessionRemoved -= removedHandler;
+                        var authSession = authService.GetAuthSession();
+                        authSession.OAuthSessionRemoved -= removedHandler;
                     }
                 }
             }
@@ -591,7 +591,7 @@ public class AppHub(
         var session = sessionStore.Sessions[connectionId];
         var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
         var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
-        var authSession = authService.GetAuthProviderSession();
+        var authSession = authService.GetAuthSession();
 
         var strategy = new MainAuthTokenRefreshStrategy(
             connectionId,
@@ -622,10 +622,10 @@ public class AppHub(
 #endif
 
             var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
-            var authSession = authService.GetAuthProviderSession();
+            var authSession = authService.GetAuthSession();
 
             // Get the provider's session
-            if (!authSession.OAuthProviderSessions.TryGetValue(provider, out var providerSession))
+            if (!authSession.OAuthSessions.TryGetValue(provider, out var providerSession))
             {
                 logger.LogError("OAuthTokenRefreshLoop[{Provider}]: No session found for {ConnectionId}, exiting loop.", provider, connectionId);
                 return;

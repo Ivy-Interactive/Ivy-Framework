@@ -20,19 +20,19 @@ public static class AuthProviderHelpers
 
 public interface IAuthProvider : IAuthTokenHandler
 {
-    Task<AuthToken?> LoginAsync(IAuthProviderSession authSession, string email, string password, CancellationToken cancellationToken = default);
+    Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default);
 
-    Task LogoutAsync(IAuthProviderSession authSession, CancellationToken cancellationToken = default);
+    Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
 
     AuthOption[] GetAuthOptions();
 
-    Task<Uri> GetOAuthUriAsync(IAuthProviderSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
+    Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
 
-    Task<AuthToken?> HandleOAuthCallbackAsync(IAuthProviderSession authSession, HttpRequest request, CancellationToken cancellationToken = default);
+    Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default);
 
-    Task<OAuthProviderSessionsResult> GetOAuthProviderSessionsAsync(IAuthProviderSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(OAuthProviderSessionsResult.Failure(canRetry: false));
+        return Task.FromResult(OAuthSessionsResult.Failure(canRetry: false));
     }
 
     bool OpenOAuthLoginInNewTab => false;
