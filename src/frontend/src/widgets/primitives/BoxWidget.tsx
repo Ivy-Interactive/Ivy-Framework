@@ -103,23 +103,31 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
       : hoverVariant === 'Pointer'
         ? 'cursor-pointer'
         : 'cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition';
+  if (isClickable) {
+    return (
+      <div
+        style={styles}
+        className={cn(className, hoverClass)}
+        onClick={handleClick}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e as unknown as React.MouseEvent);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div
       style={styles}
       className={cn(className, hoverClass)}
-      onClick={isClickable ? handleClick : undefined}
-      onKeyDown={
-        isClickable
-          ? e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleClick(e as unknown as React.MouseEvent);
-              }
-            }
-          : undefined
-      }
-      role={isClickable ? 'button' : 'presentation'}
-      tabIndex={isClickable ? 0 : undefined}
+      role="presentation"
     >
       {children}
     </div>

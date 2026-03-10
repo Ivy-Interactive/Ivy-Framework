@@ -161,14 +161,17 @@ const CodeBlock = memo(
                 )}
                 style={shouldWrap ? {} : { overflowX: 'auto' }}
               >
-                {lines.map((line, i) => (
-                  <div key={i} className="flex">
-                    <span className="text-muted-foreground select-none pointer-events-none mr-2">
-                      {'> '}
-                    </span>
-                    <span className="flex-1">{line}</span>
-                  </div>
-                ))}
+                {lines.map((line, i) => {
+                  const lineKey = `md-line-${i}`;
+                  return (
+                    <div key={lineKey} className="flex">
+                      <span className="text-muted-foreground select-none pointer-events-none mr-2">
+                        {'> '}
+                      </span>
+                      <span className="flex-1">{line}</span>
+                    </div>
+                  );
+                })}
               </pre>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>

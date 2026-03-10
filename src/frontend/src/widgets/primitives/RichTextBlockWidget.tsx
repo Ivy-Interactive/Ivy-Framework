@@ -98,6 +98,22 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
 
         if (run.link) {
           const isBlank = run.linkTarget === 'Blank';
+          if (events.includes('OnLinkClick')) {
+            return (
+              <button
+                key={run.link + (run.content || '')}
+                type="button"
+                className={cn(className, 'underline cursor-pointer text-left')}
+                style={runStyles}
+                onClick={() => {
+                  eventHandler('OnLinkClick', id, [run.link]);
+                }}
+              >
+                {content}
+              </button>
+            );
+          }
+
           return (
             <a
               key={run.link + (run.content || '')}
@@ -106,13 +122,6 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
               rel={isBlank ? 'noopener noreferrer' : undefined}
               className={cn(className, 'underline')}
               style={runStyles}
-              onClick={e => {
-                if (events.includes('OnLinkClick')) {
-                  const eventNative = e.nativeEvent;
-                  eventNative.preventDefault();
-                  eventHandler('OnLinkClick', id, [run.link]);
-                }
-              }}
             >
               {content}
             </a>

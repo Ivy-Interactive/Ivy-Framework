@@ -79,15 +79,23 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({
     }
   }, [trigger, confettiConfig]);
 
+  if (trigger === 'Click') {
+    return (
+      <div
+        ref={elementRef}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        role="button"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+      >
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <div
-      ref={elementRef}
-      onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      role={trigger === 'Click' ? 'button' : 'presentation'}
-      tabIndex={trigger === 'Click' ? 0 : undefined}
-      onKeyDown={trigger === 'Click' ? handleKeyDown : undefined}
-    >
+    <div ref={elementRef} onMouseEnter={handleMouseEnter} role="presentation">
       {children}
     </div>
   );

@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo } from 'react';
+
 import { m, LazyMotion, domAnimation } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -36,9 +36,7 @@ export function TextShimmer({
       (Component as unknown as string) || 'p'
     ] ?? m.p;
 
-  const dynamicSpread = useMemo(() => {
-    return children.length * spread;
-  }, [children, spread]);
+  const dynamicSpread = children.length * spread;
 
   return (
     <LazyMotion features={domAnimation}>

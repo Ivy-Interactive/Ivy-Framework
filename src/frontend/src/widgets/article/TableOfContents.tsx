@@ -152,12 +152,12 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     >
       <nav className="relative pr-2">
         {headings.map(heading => (
-          <a
+          <button
             key={heading.id}
-            href={`#${heading.id}`}
+            type="button"
             data-toc-link
             className={cn(
-              'block text-sm py-1 hover:text-foreground transition-colors',
+              'block text-sm py-1 hover:text-foreground transition-colors w-full text-left',
               heading.level === 1
                 ? 'pl-0'
                 : heading.level === 2
@@ -173,10 +173,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
                 ? 'text-foreground'
                 : 'text-muted-foreground'
             )}
-            onClick={e => {
-              const eventNative = e.nativeEvent;
-              eventNative.preventDefault();
-
+            onClick={() => {
               // Clear any existing navigation timeout
               if (navigationTimeoutRef.current) {
                 clearTimeout(navigationTimeoutRef.current);
@@ -204,7 +201,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             }}
           >
             {heading.text}
-          </a>
+          </button>
         ))}
       </nav>
     </div>
