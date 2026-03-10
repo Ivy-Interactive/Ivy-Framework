@@ -153,11 +153,11 @@ public static class TextInputExtensions
     internal const string AttachedValidationState = "ValidationState";
     internal const string AttachedValidatedVariant = "ValidatedVariant";
 
-    private static bool VariantHasBuiltInValidation(TextInputVariants variant) =>
-        variant is TextInputVariants.Email or TextInputVariants.Tel or TextInputVariants.Url or TextInputVariants.Password;
+    private static bool VariantHasBuiltInValidation(TextInputVariant variant) =>
+        variant is TextInputVariant.Email or TextInputVariant.Tel or TextInputVariant.Url or TextInputVariant.Password;
 
     /// <summary>Creates the text input without blur-validation wiring (used to avoid recursion when wrapping).</summary>
-    private static TextInputBase CreateTextInputCore(IAnyState state, string? placeholder, bool disabled, TextInputVariants variant)
+    private static TextInputBase CreateTextInputCore(IAnyState state, string? placeholder, bool disabled, TextInputVariant variant)
     {
         var type = state.GetStateType();
         Type genericType = typeof(TextInput<>).MakeGenericType(type);
@@ -168,7 +168,7 @@ public static class TextInputExtensions
     }
 
     /// <summary>Wire blur validation for variant; <paramref name="widget"/> must already be bound to <paramref name="state"/>.</summary>
-    private static TextInputBase ApplyVariantValidation(IViewContext context, IAnyState state, TextInputBase widget, TextInputVariants variant)
+    private static TextInputBase ApplyVariantValidation(IViewContext context, IAnyState state, TextInputBase widget, TextInputVariant variant)
     {
         if (!VariantHasBuiltInValidation(variant))
             return widget;
@@ -202,7 +202,7 @@ public static class TextInputExtensions
         return withInvalid;
     }
 
-    public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariants variant = TextInputVariants.Text)
+    public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
     {
         var input = CreateTextInputCore(state, placeholder, disabled, variant);
         // Allow .Variant(Email) later to pick up the same state for validation
@@ -215,35 +215,35 @@ public static class TextInputExtensions
         return input;
     }
 
-    public static TextInputBase ToTextareaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Textarea);
+    public static TextInputBase ToTextareaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Textarea);
 
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Search);
 
     /// <summary>Email/Password/Url/Tel: validates on blur when built inside a view (context set). Same as ToTextInput(..., variant).</summary>
     public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
-        state.ToTextInput(placeholder, disabled, TextInputVariants.Email);
+        state.ToTextInput(placeholder, disabled, TextInputVariant.Email);
 
     public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
-        state.ToTextInput(placeholder, disabled, TextInputVariants.Password);
+        state.ToTextInput(placeholder, disabled, TextInputVariant.Password);
 
     public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
-        state.ToTextInput(placeholder, disabled, TextInputVariants.Url);
+        state.ToTextInput(placeholder, disabled, TextInputVariant.Url);
 
     public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
-        state.ToTextInput(placeholder, disabled, TextInputVariants.Tel);
+        state.ToTextInput(placeholder, disabled, TextInputVariant.Tel);
 
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 
     public static TextInputBase Disabled(this TextInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
 
-    public static TextInputBase Variant(this TextInputBase widget, TextInputVariants variant)
+    public static TextInputBase Variant(this TextInputBase widget, TextInputVariant variant)
     {
         var w = widget with { Variant = variant };
         if (!VariantHasBuiltInValidation(variant))
             return w;
         if (TextInputBuildContext.GetCurrent() is not { } ctx)
             return w;
-        if (w.GetAttachedValue(ValidationOwner, AttachedValidatedVariant) is TextInputVariants v && v == variant)
+        if (w.GetAttachedValue(ValidationOwner, AttachedValidatedVariant) is TextInputVariant v && v == variant)
             return w;
         if (w.GetAttachedValue(ValidationOwner, AttachedValidationState) is not IAnyState state)
             return w;

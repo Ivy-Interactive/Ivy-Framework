@@ -106,26 +106,25 @@ public class ManualFieldTab : ViewBase
 
         var emailInput = new TextInput(email)
             .Placeholder("user@domain.com")
-            .Variant(TextInputVariants.Email)
+            .Variant(TextInputVariant.Email)
             .WithField()
             .Label("Email");
 
         var passwordInput = new TextInput(password)
             .Placeholder("Min 8 characters")
-            .Variant(TextInputVariants.Password)
+            .Variant(TextInputVariant.Password)
             .WithField()
             .Label("Password");
 
         var telInput = new TextInput(tel)
             .Placeholder("tel")
-            .Variant(TextInputVariants.Tel)
+            .Variant(TextInputVariant.Tel)
             .WithField()
             .Label("Tel");
 
-
         var websiteInput = new TextInput(website)
             .Placeholder("https://example.com")
-            .Variant(TextInputVariants.Url)
+            .Variant(TextInputVariant.Url)
             .WithField()
             .Label("Website");
 
