@@ -1,9 +1,9 @@
 ---
 title: MCP Questions Command
 searchHints:
-
-- mcp
-- question
+  - mcp
+  - question
+---
 
 # `ivy question`
 

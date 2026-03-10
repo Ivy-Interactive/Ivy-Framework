@@ -24,7 +24,7 @@ Lists all available documentation paths natively registered inside the Ivy frame
 
 The command outputs a structured YAML representation of all discoverable document titles and relative paths. Use this list to find valid `<path>` arguments for the `ivy docs <path>` sibling command.
 
-#### Usage
+#### `list` Usage
 
 ```terminal
 >ivy docs list
@@ -38,7 +38,7 @@ Retrieves the raw Markdown payload of a specific framework documentation page.
 
 This command resolves and standardizes versioning logically, ensuring you always retrieve documentation relevant to the specific framework instantiation you have targeted.
 
-#### Usage
+#### `path` Usage
 
 ```terminal
 >ivy docs <path>
