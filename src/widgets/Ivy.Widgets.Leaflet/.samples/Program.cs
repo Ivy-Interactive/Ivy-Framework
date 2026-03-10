@@ -1,5 +1,3 @@
-#:project ..\Ivy.Widgets.Leaflet.csproj
-
 using Ivy;
 using Ivy.Widgets.Leaflet;
 

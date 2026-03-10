@@ -3,11 +3,10 @@ import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { ButtonProps } from '@/components/ui/button/button';
-import { buttonVariants } from '@/components/ui/button';
+import { buttonVariant } from '@/components/ui/button';
 
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   <nav
-    role="navigation"
     aria-label="pagination"
     className={cn('flex w-fit justify-center', className)}
     {...props}
@@ -49,7 +48,7 @@ const PaginationLink = ({
   <a
     aria-current={isActive ? 'page' : undefined}
     className={cn(
-      buttonVariants({
+      buttonVariant({
         variant: isActive ? 'outline' : 'ghost',
         size,
       }),

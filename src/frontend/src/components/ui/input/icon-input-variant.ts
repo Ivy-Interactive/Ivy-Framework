@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 
-export const iconInputTriggerVariants = cva(
+export const iconInputTriggerVariant = cva(
   'justify-start font-normal min-w-[120px] max-w-[200px]',
   {
     variants: {
@@ -16,7 +16,7 @@ export const iconInputTriggerVariants = cva(
   }
 );
 
-export const iconInputIconVariants = cva('', {
+export const iconInputIconVariant = cva('', {
   variants: {
     scale: {
       Small: 'h-3 w-3',
@@ -29,7 +29,7 @@ export const iconInputIconVariants = cva('', {
   },
 });
 
-export const iconInputTextVariants = cva('', {
+export const iconInputTextVariant = cva('', {
   variants: {
     scale: {
       Small: 'text-xs',
@@ -42,7 +42,7 @@ export const iconInputTextVariants = cva('', {
   },
 });
 
-export const iconInputPopoverVariants = cva('p-0', {
+export const iconInputPopoverVariant = cva('p-0', {
   variants: {
     scale: {
       Small: 'w-[280px]',
@@ -55,7 +55,7 @@ export const iconInputPopoverVariants = cva('p-0', {
   },
 });
 
-export const iconInputPopoverScrollVariants = cva('overflow-auto', {
+export const iconInputPopoverScrollVariant = cva('overflow-auto', {
   variants: {
     scale: {
       Small: 'h-[240px]',
@@ -68,7 +68,7 @@ export const iconInputPopoverScrollVariants = cva('overflow-auto', {
   },
 });
 
-export const iconInputPopoverHeaderVariants = cva('border-b', {
+export const iconInputPopoverHeaderVariant = cva('border-b', {
   variants: {
     scale: {
       Small: 'p-1',
@@ -81,7 +81,7 @@ export const iconInputPopoverHeaderVariants = cva('border-b', {
   },
 });
 
-export const iconInputPopoverFooterVariants = cva('border-t', {
+export const iconInputPopoverFooterVariant = cva('border-t', {
   variants: {
     scale: {
       Small: 'p-1',
@@ -94,7 +94,7 @@ export const iconInputPopoverFooterVariants = cva('border-t', {
   },
 });
 
-export const iconInputGridVariants = cva('grid', {
+export const iconInputGridVariant = cva('grid', {
   variants: {
     scale: {
       Small: 'gap-1 p-1',
@@ -107,7 +107,7 @@ export const iconInputGridVariants = cva('grid', {
   },
 });
 
-export const iconInputSearchIconVariants = cva(
+export const iconInputSearchIconVariant = cva(
   'absolute top-1/2 -translate-y-1/2 text-muted-foreground',
   {
     variants: {
@@ -123,7 +123,7 @@ export const iconInputSearchIconVariants = cva(
   }
 );
 
-export const iconInputSearchInputVariants = cva('', {
+export const iconInputSearchInputVariant = cva('', {
   variants: {
     scale: {
       Small: 'pl-6',
@@ -136,7 +136,7 @@ export const iconInputSearchInputVariants = cva('', {
   },
 });
 
-export const iconInputEmptyStateVariants = cva(
+export const iconInputEmptyStateVariant = cva(
   'flex items-center justify-center text-muted-foreground',
   {
     variants: {

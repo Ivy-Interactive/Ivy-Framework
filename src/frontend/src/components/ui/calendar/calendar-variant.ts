@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 
-export const calendarVariants = cva(
+export const calendarVariant = cva(
   'bg-background group/calendar p-3 [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
   {
     variants: {
@@ -16,7 +16,7 @@ export const calendarVariants = cva(
   }
 );
 
-export const calendarButtonVariants = cva(
+export const calendarButtonVariant = cva(
   'aria-disabled:opacity-50 p-0 select-none',
   {
     variants: {
@@ -32,7 +32,7 @@ export const calendarButtonVariants = cva(
   }
 );
 
-export const calendarCaptionVariants = cva(
+export const calendarCaptionVariant = cva(
   'flex items-center justify-center w-full px-(--cell-size)',
   {
     variants: {
@@ -48,7 +48,7 @@ export const calendarCaptionVariants = cva(
   }
 );
 
-export const calendarWeekdayVariants = cva(
+export const calendarWeekdayVariant = cva(
   'text-muted-foreground rounded-md flex-1 font-normal select-none',
   {
     variants: {
@@ -64,7 +64,7 @@ export const calendarWeekdayVariants = cva(
   }
 );
 
-export const calendarDayVariants = cva(
+export const calendarDayVariant = cva(
   'items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer hover:bg-accent data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-r-[var(--radius-fields)] data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-l-[var(--radius-fields)]',
   {
     variants: {

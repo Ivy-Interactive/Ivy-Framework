@@ -13,14 +13,17 @@ import {
 import { parse } from 'date-fns';
 
 import { cn } from '@/lib/utils';
-import { Button, buttonVariants } from '@/components/ui/button';
 import {
-  calendarVariants,
-  calendarButtonVariants,
-  calendarCaptionVariants,
-  calendarWeekdayVariants,
-  calendarDayVariants,
-} from './calendar-variants';
+  Button,
+  buttonVariant as buttonVariantStyles,
+} from '@/components/ui/button';
+import {
+  calendarVariant,
+  calendarButtonVariant,
+  calendarCaptionVariant,
+  calendarWeekdayVariant,
+  calendarDayVariant,
+} from './calendar-variant';
 import { Scales } from '@/types/scale';
 
 export function Calendar({
@@ -43,7 +46,7 @@ export function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        calendarVariants({ scale }),
+        calendarVariant({ scale }),
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -66,19 +69,19 @@ export function Calendar({
           defaultClassNames.nav
         ),
         button_previous: cn(
-          buttonVariants({ variant: buttonVariant }),
-          calendarButtonVariants({ scale }),
+          buttonVariantStyles({ variant: buttonVariant }),
+          calendarButtonVariant({ scale }),
           'pointer-events-auto',
           defaultClassNames.button_previous
         ),
         button_next: cn(
-          buttonVariants({ variant: buttonVariant }),
-          calendarButtonVariants({ scale }),
+          buttonVariantStyles({ variant: buttonVariant }),
+          calendarButtonVariant({ scale }),
           'pointer-events-auto',
           defaultClassNames.button_next
         ),
         month_caption: cn(
-          calendarCaptionVariants({ scale }),
+          calendarCaptionVariant({ scale }),
           defaultClassNames.month_caption
         ),
         dropdowns: cn(
@@ -100,7 +103,7 @@ export function Calendar({
         table: 'w-full border-collapse',
         weekdays: cn('flex', defaultClassNames.weekdays),
         weekday: cn(
-          calendarWeekdayVariants({ scale }),
+          calendarWeekdayVariant({ scale }),
           defaultClassNames.weekday
         ),
         week: cn('flex w-full mt-2', defaultClassNames.week),
@@ -242,6 +245,7 @@ function MonthYearInput({
       className="flex items-center border border-input rounded-field px-1 py-0.5 gap-0.5 bg-background pointer-events-auto mx-auto w-fit"
       onMouseDown={e => e.stopPropagation()}
       onClick={e => e.stopPropagation()}
+      role="presentation"
     >
       <input
         value={monthStr}
@@ -300,7 +304,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        calendarDayVariants({ scale }),
+        calendarDayVariant({ scale }),
         defaultClassNames.day,
         className
       )}

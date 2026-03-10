@@ -29,7 +29,7 @@ const Slider = React.forwardRef<
   }, [currentValue, currency]);
 
   // Size variants for track and thumb
-  const sizeVariants: Record<
+  const sizeVariant: Record<
     string,
     { track: string; thumb: string; tooltip: string }
   > = {
@@ -50,7 +50,7 @@ const Slider = React.forwardRef<
     },
   };
 
-  const variant = sizeVariants[String(scale)];
+  const variant = sizeVariant[String(scale)];
 
   return (
     <SliderPrimitive.Root

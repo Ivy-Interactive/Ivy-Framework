@@ -1,5 +1,3 @@
-#:project ..\Ivy.Widgets.Tiptap.csproj
-
 using Ivy;
 using Ivy.Widgets.Tiptap;
 
@@ -10,7 +8,7 @@ await server.RunAsync();
 [App]
 class TiptapInputView : ViewBase
 {
-    public override object Build() 
+    public override object Build()
     {
         var state = UseState("<p>Hello <strong>World</strong>!</p>");
         return state.ToTiptapInput();

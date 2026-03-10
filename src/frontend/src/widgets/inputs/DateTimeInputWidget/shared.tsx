@@ -2,7 +2,7 @@ import * as React from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { dateTimeInputIconVariants } from '@/components/ui/input/date-time-input-variants';
+import { dateTimeInputIconVariant } from '@/components/ui/input/date-time-input-variant';
 import { Scales } from '@/types/scale';
 
 interface ClearAndInvalidIconsProps {
@@ -34,7 +34,7 @@ export const ClearAndInvalidIcons: React.FC<ClearAndInvalidIconsProps> = ({
         >
           <X
             className={cn(
-              dateTimeInputIconVariants({ scale }),
+              dateTimeInputIconVariant({ scale }),
               'text-muted-foreground hover:text-foreground'
             )}
           />

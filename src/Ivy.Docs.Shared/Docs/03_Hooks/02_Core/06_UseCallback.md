@@ -13,12 +13,12 @@ searchHints:
 # UseCallback
 
 <Ingress>
-The `UseCallback` [hook](../01_RulesOfHooks.md) memoizes callback functions, preventing unnecessary re-renders when callbacks are passed as props to [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md) or used as dependencies in other [hooks](../01_RulesOfHooks.md).
+The `UseCallback` [hook](../02_RulesOfHooks.md) memoizes callback functions, preventing unnecessary re-renders when callbacks are passed as props to [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md) or used as dependencies in other [hooks](../02_RulesOfHooks.md).
 </Ingress>
 
 ## Overview
 
-The `UseCallback` [hook](../01_RulesOfHooks.md) provides a way to optimize callback functions in Ivy [applications](../../../01_Onboarding/02_Concepts/10_Apps.md):
+The `UseCallback` [hook](../02_RulesOfHooks.md) provides a way to optimize callback functions in Ivy [applications](../../../01_Onboarding/02_Concepts/10_Apps.md):
 
 - **Stable Function References** - Returns the same function reference when [state](./03_UseState.md) dependencies haven't changed
 - **Prevents Re-renders** - [Child components](../../../01_Onboarding/02_Concepts/03_Widgets.md) won't re-render unnecessarily when receiving memoized callbacks
@@ -80,7 +80,7 @@ flowchart TD
     J --> N[" List items optimized<br/> Better scrolling<br/> Smoother UI"]
 ```
 
-The `UseCallback` [hook](../01_RulesOfHooks.md) memoizes callback functions and only recreates them when their [state](./03_UseState.md) dependencies change.
+The `UseCallback` [hook](../02_RulesOfHooks.md) memoizes callback functions and only recreates them when their [state](./03_UseState.md) dependencies change.
 
 <Callout type="Tip">
 `UseCallback` hook stores only the most recent dependency values for comparison; older values are discarded.

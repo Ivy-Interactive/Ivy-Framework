@@ -1,21 +1,31 @@
 import { cn } from '@/lib/utils';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+
+type HeadingNode = { id: string; text: string; level: number; offset?: number };
 
 interface TableOfContentsProps {
   articleRef: React.RefObject<HTMLElement | null>;
   show?: boolean;
   onLoadingChange?: (isLoading: boolean) => void;
-  headings?: { id: string; text: string; level: number }[];
+  headings?: HeadingNode[];
 }
+
+const EMPTY_HEADINGS: HeadingNode[] = [];
 
 export const TableOfContents: React.FC<TableOfContentsProps> = ({
   articleRef,
   show = true,
   onLoadingChange,
-  headings = [],
+  headings = EMPTY_HEADINGS,
 }) => {
-  const [activeId, setActiveId] = useState<string>('');
-  const [isUserNavigating, setIsUserNavigating] = useState(false);
+  const [navState, dispatchNav] = React.useReducer(
+    (
+      state: { activeId: string; isUserNavigating: boolean },
+      action: Partial<{ activeId: string; isUserNavigating: boolean }>
+    ) => ({ ...state, ...action }),
+    { activeId: '', isUserNavigating: false }
+  );
+  const { activeId, isUserNavigating } = navState;
   const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Notify parent about loading state (always loaded since we use props)
@@ -44,12 +54,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             }
 
             // Set as active immediately and mark as user navigating
-            setActiveId(targetId);
-            setIsUserNavigating(true);
+            dispatchNav({ activeId: targetId, isUserNavigating: true });
 
             // Reset navigation state after scroll completes
             navigationTimeoutRef.current = setTimeout(() => {
-              setIsUserNavigating(false);
+              dispatchNav({ isUserNavigating: false });
             }, 1000);
 
             // Let the browser handle the default scroll behavior for regular links
@@ -73,7 +82,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         if (!isUserNavigating) {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              setActiveId(entry.target.id);
+              dispatchNav({ activeId: entry.target.id });
             }
           });
         }
@@ -143,12 +152,12 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     >
       <nav className="relative pr-2">
         {headings.map(heading => (
-          <a
+          <button
             key={heading.id}
-            href={`#${heading.id}`}
+            type="button"
             data-toc-link
             className={cn(
-              'block text-sm py-1 hover:text-foreground transition-colors',
+              'block text-sm py-1 hover:text-foreground transition-colors w-full text-left',
               heading.level === 1
                 ? 'pl-0'
                 : heading.level === 2
@@ -164,21 +173,18 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
                 ? 'text-foreground'
                 : 'text-muted-foreground'
             )}
-            onClick={e => {
-              e.preventDefault();
-
+            onClick={() => {
               // Clear any existing navigation timeout
               if (navigationTimeoutRef.current) {
                 clearTimeout(navigationTimeoutRef.current);
               }
 
               // Set as active immediately and mark as user navigating
-              setActiveId(heading.id);
-              setIsUserNavigating(true);
+              dispatchNav({ activeId: heading.id, isUserNavigating: true });
 
               // Reset navigation state after scroll completes
               navigationTimeoutRef.current = setTimeout(() => {
-                setIsUserNavigating(false);
+                dispatchNav({ isUserNavigating: false });
               }, 1000);
 
               // Scroll to the target element with error handling
@@ -195,7 +201,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             }}
           >
             {heading.text}
-          </a>
+          </button>
         ))}
       </nav>
     </div>

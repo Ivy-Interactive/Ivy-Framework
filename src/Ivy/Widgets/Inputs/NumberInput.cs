@@ -8,7 +8,7 @@ using Ivy.Core.Hooks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum NumberInputVariants
+public enum NumberInputVariant
 {
     Number,
     Slider
@@ -31,7 +31,7 @@ public interface IAnyNumberInput : IAnyInput
 
     public int? Precision { get; set; }
 
-    public NumberInputVariants Variant { get; set; }
+    public NumberInputVariant Variant { get; set; }
 
     public NumberFormatStyle FormatStyle { get; set; }
 
@@ -58,7 +58,7 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public int? Precision { get; set; }
 
-    [Prop] public NumberInputVariants Variant { get; set; } = NumberInputVariants.Number;
+    [Prop] public NumberInputVariant Variant { get; set; } = NumberInputVariant.Number;
 
     [Prop] public NumberFormatStyle FormatStyle { get; set; } = NumberFormatStyle.Decimal;
 
@@ -89,7 +89,7 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumberInput
 {
     [OverloadResolutionPriority(1)]
-    public NumberInput(IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    public NumberInput(IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
     {
         var typedState = state.As<TNumber>();
@@ -98,21 +98,21 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
     }
 
     [OverloadResolutionPriority(1)]
-    public NumberInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    public NumberInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
     {
         OnChange = new(onChange);
         Value = value;
     }
 
-    public NumberInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    public NumberInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
     {
         OnChange = new(e => { state(e.Value); return ValueTask.CompletedTask; });
         Value = value;
     }
 
-    public NumberInput(string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    public NumberInput(string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
     {
         Placeholder = placeholder;
         Disabled = disabled;
@@ -133,10 +133,10 @@ public static class NumberInputExtensions
 {
     public static NumberInputBase ToSliderInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
     {
-        return state.ToNumberInput(placeholder, disabled, NumberInputVariants.Slider, formatStyle);
+        return state.ToNumberInput(placeholder, disabled, NumberInputVariant.Slider, formatStyle);
     }
 
-    public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal, double? min = null, double? max = null)
+    public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal, double? min = null, double? max = null)
     {
         var type = state.GetStateType();
         Type genericType = typeof(NumberInput<>).MakeGenericType(type);
@@ -147,7 +147,7 @@ public static class NumberInputExtensions
         return input;
     }
 
-    public static NumberInputBase ToMoneyInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariants variant = NumberInputVariants.Number, string currency = "USD")
+    public static NumberInputBase ToMoneyInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, string currency = "USD")
     => state.ToNumberInput(placeholder, disabled, variant, NumberFormatStyle.Currency).Currency(currency);
 
     internal static IAnyNumberInput ScaffoldDefaults(this IAnyNumberInput input, string? name, Type type)
@@ -204,7 +204,7 @@ public static class NumberInputExtensions
         return widget with { Step = step };
     }
 
-    public static NumberInputBase Variant(this NumberInputBase widget, NumberInputVariants variant)
+    public static NumberInputBase Variant(this NumberInputBase widget, NumberInputVariant variant)
     {
         return widget with { Variant = variant };
     }

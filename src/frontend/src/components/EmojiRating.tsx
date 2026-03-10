@@ -48,7 +48,7 @@ export function EmojiRating({
       >
         {emojis.map((emoji, index) => (
           <button
-            key={index}
+            key={emoji}
             type="button"
             className={cn(
               'relative focus-visible:outline-none focus-visible:ring-2',
@@ -59,7 +59,7 @@ export function EmojiRating({
               emojiSizes[scale]
             )}
             onClick={() => handleRating(index + 1)}
-            onMouseEnter={() => !disabled && setHover(index + 1)}
+            onMouseEnter={() => !disabled && setHover(() => index + 1)}
             onMouseLeave={() => !disabled && setHover(0)}
             disabled={disabled}
           >

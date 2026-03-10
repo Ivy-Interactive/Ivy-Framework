@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Formats.Asn1" Version="10.0.1" />
     <ProjectReference Include="..\Ivy.Analyser.csproj" />
   </ItemGroup>
 

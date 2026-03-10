@@ -45,6 +45,17 @@ export default function MadeWithIvy() {
             '_blank'
           );
         }}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            window.open(
+              'https://github.com/Ivy-Interactive/Ivy-Framework',
+              '_blank'
+            );
+          }
+        }}
       >
         <div
           style={{ color: 'var(--primary)' }}

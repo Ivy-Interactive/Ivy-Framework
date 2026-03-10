@@ -11,6 +11,8 @@ import {
   getAlignSelf,
 } from '../../lib/styles';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface GridLayoutWidgetProps {
   columns?: number;
   rows?: number;
@@ -80,11 +82,11 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   padding = '0,0,0,0',
   columnWidths,
   rowHeights,
-  childColumn = [],
-  childColumnSpan = [],
-  childRow = [],
-  childRowSpan = [],
-  childAlignSelf = [],
+  childColumn = EMPTY_ARRAY,
+  childColumnSpan = EMPTY_ARRAY,
+  childRow = EMPTY_ARRAY,
+  childRowSpan = EMPTY_ARRAY,
+  childAlignSelf = EMPTY_ARRAY,
   className = '',
 }) => {
   const styles: React.CSSProperties = {

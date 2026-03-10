@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 
-export const codeContainerVariants = cva('', {
+export const codeContainerVariant = cva('', {
   variants: {
     scale: {
       Small: 'text-xs',
@@ -13,7 +13,7 @@ export const codeContainerVariants = cva('', {
   },
 });
 
-export const codeCopyButtonVariants = cva('absolute z-50', {
+export const codeCopyButtonVariant = cva('absolute z-50', {
   variants: {
     scale: {
       Small: 'top-1 right-1',

@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 // Size variants for AudioInputWidget
-export const audioRecorderVariants = cva(
+export const audioInputVariant = cva(
   'relative rounded-field border-dashed transition-colors border-muted-foreground/25',
   {
     variants: {
@@ -18,7 +18,7 @@ export const audioRecorderVariants = cva(
 );
 
 // Size variants for text
-export const textSizeVariants = cva('', {
+export const textSizeVariant = cva('', {
   variants: {
     scale: {
       Small: 'text-xs',
@@ -32,7 +32,7 @@ export const textSizeVariants = cva('', {
 });
 
 // Size variants for timer
-export const timerSizeVariants = cva('', {
+export const timerSizeVariant = cva('', {
   variants: {
     scale: {
       Small: 'text-sm',
@@ -46,7 +46,7 @@ export const timerSizeVariants = cva('', {
 });
 
 // Size variants for icons
-export const iconSizeVariants = cva('', {
+export const iconSizeVariant = cva('', {
   variants: {
     scale: {
       Small: '!size-4',

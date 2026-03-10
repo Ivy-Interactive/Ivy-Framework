@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 // Size variants for Detail label
-export const detailLabelSizeVariants = cva(
+export const detailLabelSizeVariant = cva(
   'align-middle font-bold whitespace-nowrap pl-0',
   {
     variants: {
@@ -18,7 +18,7 @@ export const detailLabelSizeVariants = cva(
 );
 
 // Size variants for Detail value
-export const detailValueSizeVariants = cva('align-middle min-w-0', {
+export const detailValueSizeVariant = cva('align-middle min-w-0', {
   variants: {
     scale: {
       Small: 'p-2 pl-0 pr-0 text-xs',
@@ -32,7 +32,7 @@ export const detailValueSizeVariants = cva('align-middle min-w-0', {
 });
 
 // Size variants for Detail value multiline padding bottom
-export const detailValueMultiLinePaddingVariants = cva('', {
+export const detailValueMultiLinePaddingVariant = cva('', {
   variants: {
     scale: {
       Small: 'pb-2 pt-0',
@@ -46,7 +46,7 @@ export const detailValueMultiLinePaddingVariants = cva('', {
 });
 
 // Size variants for Details container
-export const detailsSizeVariants = cva('', {
+export const detailsSizeVariant = cva('', {
   variants: {
     scale: {
       Small: 'text-xs',

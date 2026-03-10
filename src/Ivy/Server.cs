@@ -506,7 +506,7 @@ public class Server
 
         // CLI-only commands need DI but never call app.StartAsync(),
         // so use port 0 to avoid conflicts with a running instance.
-        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://*:{_args.Port}";
+        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://localhost:{_args.Port}";
         builder.WebHost.UseUrls(bindUrl);
 
         builder.Services.AddSignalR(options =>

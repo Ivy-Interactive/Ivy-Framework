@@ -60,5 +60,5 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
     );
   }
 
-  return <img src={validatedImageSrc} key={id} style={styles} />;
+  return <img src={validatedImageSrc} key={id} style={styles} alt="" />;
 };

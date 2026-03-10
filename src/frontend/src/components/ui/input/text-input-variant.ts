@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 // Size variants for TextInputWidget
-export const textInputSizeVariants = cva('w-full', {
+export const textInputSizeVariant = cva('w-full', {
   variants: {
     scale: {
       Small: 'text-xs px-2 h-7',
@@ -15,7 +15,7 @@ export const textInputSizeVariants = cva('w-full', {
 });
 
 // Size variants for Textarea (minimum height and padding scale; no fixed height)
-export const textareaSizeVariants = cva('w-full', {
+export const textareaSizeVariant = cva('w-full', {
   variants: {
     scale: {
       Small: 'min-h-[52px] py-2 px-2 text-xs',
@@ -29,7 +29,7 @@ export const textareaSizeVariants = cva('w-full', {
 });
 
 // Size variants for search icon
-export const searchIconVariants = cva('absolute text-muted-foreground', {
+export const searchIconVariant = cva('absolute text-muted-foreground', {
   variants: {
     scale: {
       Small: 'left-3 top-2 h-3 w-3',
@@ -43,24 +43,21 @@ export const searchIconVariants = cva('absolute text-muted-foreground', {
 });
 
 // Size variants for X icon
-export const xIconVariants = cva(
-  'text-muted-foreground hover:text-foreground',
-  {
-    variants: {
-      scale: {
-        Small: 'top-2 h-3 w-3',
-        Medium: 'top-2.5 h-4 w-4',
-        Large: 'top-3 h-5 w-5',
-      },
+export const xIconVariant = cva('text-muted-foreground hover:text-foreground', {
+  variants: {
+    scale: {
+      Small: 'top-2 h-3 w-3',
+      Medium: 'top-2.5 h-4 w-4',
+      Large: 'top-3 h-5 w-5',
     },
-    defaultVariants: {
-      scale: 'Medium',
-    },
-  }
-);
+  },
+  defaultVariants: {
+    scale: 'Medium',
+  },
+});
 
 // Size variants for eye icons (password toggle)
-export const eyeIconVariants = cva('', {
+export const eyeIconVariant = cva('', {
   variants: {
     scale: {
       Small: 'h-3 w-3',

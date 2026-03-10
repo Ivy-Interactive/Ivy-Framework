@@ -107,6 +107,8 @@ public class LineChartBuilder<TSource>(
     private Func<Toolbox, Toolbox>? _toolboxFactory;
     private Expression<Func<TSource, object>>? _sortSelector;
     private SortOrder _sortOrder = SortOrder.None;
+    private Size? _height;
+    private Size? _width;
 
     public override object? Build()
     {
@@ -173,7 +175,26 @@ public class LineChartBuilder<TSource>(
             configuredChart = configuredChart.Toolbox(_toolboxFactory(baseToolbox));
         }
 
-        return polish?.Invoke(configuredChart) ?? configuredChart;
+        var result = polish?.Invoke(configuredChart) ?? configuredChart;
+
+        if (_height is not null)
+            result = result with { Height = _height };
+        if (_width is not null)
+            result = result with { Width = _width };
+
+        return result;
+    }
+
+    public LineChartBuilder<TSource> Height(Size size)
+    {
+        _height = size;
+        return this;
+    }
+
+    public LineChartBuilder<TSource> Width(Size size)
+    {
+        _width = size;
+        return this;
     }
 
     public LineChartBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)

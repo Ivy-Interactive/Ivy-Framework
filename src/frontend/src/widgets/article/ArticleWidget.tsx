@@ -20,6 +20,8 @@ interface ArticleWidgetProps {
 import { TypographyContext } from '@/contexts/TypographyContext';
 import { articleTypography } from '@/lib/styles';
 
+const EMPTY_ARRAY: never[] = [];
+
 export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   id,
   children,
@@ -29,7 +31,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   showFooter = true,
   showToc = true,
   title,
-  headings = [],
+  headings = EMPTY_ARRAY,
   gap = 4,
 }) => {
   const eventHandler = useEventHandler();

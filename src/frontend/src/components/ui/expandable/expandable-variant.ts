@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 
-export const expandableTriggerVariants = cva(
+export const expandableTriggerVariant = cva(
   'w-full flex justify-between items-center cursor-pointer hover:bg-accent/50 rounded-box transition-colors disabled:cursor-not-allowed disabled:hover:bg-transparent overflow-hidden box-border shrink-0',
   {
     variants: {
@@ -16,7 +16,7 @@ export const expandableTriggerVariants = cva(
   }
 );
 
-export const expandableHeaderVariants = cva(
+export const expandableHeaderVariant = cva(
   'flex-1 min-w-0 pointer-events-none [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_[role="button"]]:pointer-events-auto [&_[role="switch"]]:pointer-events-auto [&_[role="checkbox"]]:pointer-events-auto [&_a[href]]:pointer-events-auto [&_button]:cursor-pointer [&_input]:cursor-default [&_[role="switch"]]:cursor-pointer [&_[role="checkbox"]]:cursor-pointer [&_button]:text-foreground [&_[role="switch"]]:text-foreground [&_input]:text-foreground',
   {
     variants: {
@@ -32,7 +32,7 @@ export const expandableHeaderVariants = cva(
   }
 );
 
-export const expandableChevronContainerVariants = cva(
+export const expandableChevronContainerVariant = cva(
   'absolute top-0 bottom-0 right-0 flex items-center justify-center pointer-events-none shrink-0 z-10',
   {
     variants: {
@@ -48,7 +48,7 @@ export const expandableChevronContainerVariants = cva(
   }
 );
 
-export const expandableChevronVariants = cva(
+export const expandableChevronVariant = cva(
   'opacity-50 shrink-0 transition-transform duration-200 ease-in-out',
   {
     variants: {
@@ -64,7 +64,7 @@ export const expandableChevronVariants = cva(
   }
 );
 
-export const expandableContentVariants = cva('overflow-hidden transition-all', {
+export const expandableContentVariant = cva('overflow-hidden transition-all', {
   variants: {
     scale: {
       Small: 'pl-3 pr-2 py-2 space-y-2 [&_*]:text-xs',

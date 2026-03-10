@@ -13,6 +13,116 @@ interface XmlNode {
   value?: string;
 }
 
+const renderAttributes = (attributes: Record<string, string>) => {
+  return Object.entries(attributes).map(([key, value]) => (
+    <span key={key} className="ml-2">
+      {' '}
+      <span className="text-purple">{key}</span>
+      <span className="text-muted-foreground">=</span>
+      <span className="text-primary">"{value}"</span>
+    </span>
+  ));
+};
+
+interface XmlNodeComponentProps {
+  node: XmlNode;
+  path: string;
+  expanded: Set<unknown>;
+  toggleNode: (path: string) => void;
+}
+
+const XmlNodeComponent = ({
+  node,
+  path,
+  expanded,
+  toggleNode,
+}: XmlNodeComponentProps): React.ReactElement => {
+  if (node.type === 'text') {
+    return <span className="text-foreground">{node.value}</span>;
+  }
+
+  if (node.type === 'comment') {
+    return (
+      <span className="text-muted-foreground">{`<!--${node.value}-->`}</span>
+    );
+  }
+
+  if (node.type === 'cdata') {
+    return (
+      <span className="text-muted-foreground">{`<![CDATA[${node.value}]]>`}</span>
+    );
+  }
+
+  const hasChildren = node.children && node.children.length > 0;
+  const isExpanded = expanded.has(path);
+
+  if (hasChildren) {
+    return (
+      <div>
+        <div
+          className="flex items-center cursor-pointer hover:bg-accent rounded transition-colors px-1"
+          onClick={() => toggleNode(path)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleNode(path);
+            }
+          }}
+        >
+          {isExpanded ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+          <span className="text-muted-foreground">{'<'}</span>
+          <span className="text-cyan">{node.name}</span>
+          {node.attributes && renderAttributes(node.attributes)}
+          <span className="text-muted-foreground">{'>'}</span>
+        </div>
+
+        {isExpanded && (
+          <div className="ml-4 border-l border-border">
+            {node.children?.map((child, i) => {
+              const childKey = `xml-node-${i}`;
+              return (
+                <div key={childKey} className="py-1 ml-2">
+                  <XmlNodeComponent
+                    node={child}
+                    path={`${path}.${i}`}
+                    expanded={expanded}
+                    toggleNode={toggleNode}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {isExpanded && (
+          <div className="text-muted-foreground ml-1">
+            {'</'}
+            <span className="text-cyan">{node.name}</span>
+            {'>'}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center px-1" role="presentation">
+        <span className="text-muted-foreground">{'<'}</span>
+        <span className="text-cyan">{node.name}</span>
+        {node.attributes && renderAttributes(node.attributes)}
+        <span className="text-muted-foreground">{' />'}</span>
+      </div>
+    </div>
+  );
+};
+
 export const XmlRenderer = ({ data }: XmlRendererProps) => {
   const [expanded, setExpanded] = useState(new Set());
 
@@ -86,78 +196,6 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     setExpanded(newExpanded);
   };
 
-  const renderAttributes = (attributes: Record<string, string>) => {
-    return Object.entries(attributes).map(([key, value]) => (
-      <span key={key} className="ml-2">
-        {' '}
-        <span className="text-purple">{key}</span>
-        <span className="text-muted-foreground">=</span>
-        <span className="text-primary">"{value}"</span>
-      </span>
-    ));
-  };
-
-  const renderNode = (node: XmlNode, path: string): React.ReactElement => {
-    if (node.type === 'text') {
-      return <span className="text-foreground">{node.value}</span>;
-    }
-
-    if (node.type === 'comment') {
-      return (
-        <span className="text-muted-foreground">{`<!--${node.value}-->`}</span>
-      );
-    }
-
-    if (node.type === 'cdata') {
-      return (
-        <span className="text-muted-foreground">{`<![CDATA[${node.value}]]>`}</span>
-      );
-    }
-
-    const hasChildren = node.children && node.children.length > 0;
-    const isExpanded = expanded.has(path);
-
-    return (
-      <div>
-        <div
-          className={`flex items-center ${hasChildren ? 'cursor-pointer hover:bg-accent rounded transition-colors' : ''} px-1`}
-          onClick={hasChildren ? () => toggleNode(path) : undefined}
-        >
-          {hasChildren &&
-            (isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            ))}
-          <span className="text-muted-foreground">{'<'}</span>
-          <span className="text-cyan">{node.name}</span>
-          {node.attributes && renderAttributes(node.attributes)}
-          <span className="text-muted-foreground">
-            {hasChildren ? '>' : ' />'}
-          </span>
-        </div>
-
-        {hasChildren && isExpanded && (
-          <div className="ml-4 border-l border-border">
-            {node.children?.map((child, index) => (
-              <div key={index} className="py-1 ml-2">
-                {renderNode(child, `${path}.${index}`)}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {hasChildren && isExpanded && (
-          <div className="text-muted-foreground ml-1">
-            {'</'}
-            <span className="text-cyan">{node.name}</span>
-            {'>'}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   const parsedXml = parseXml(data);
 
   if (!parsedXml) {
@@ -166,7 +204,14 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
   return (
     <div className="w-full max-w-2xl">
-      <div className="font-mono text-sm">{renderNode(parsedXml, 'root')}</div>
+      <div className="font-mono text-sm">
+        <XmlNodeComponent
+          node={parsedXml}
+          path="root"
+          expanded={expanded}
+          toggleNode={toggleNode}
+        />
+      </div>
     </div>
   );
 };

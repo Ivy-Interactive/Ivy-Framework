@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 // Row min-height variants - matches TextInput heights for consistent form field alignment
-export const boolInputRowMinHeightVariants = cva('', {
+export const boolInputRowMinHeightVariant = cva('', {
   variants: {
     scale: {
       Small: 'min-h-7',
@@ -15,14 +15,14 @@ export const boolInputRowMinHeightVariants = cva('', {
 });
 
 // Size variants for BoolInput components
-export const boolInputSizeVariants = {
+export const boolInputSizeVariant = {
   Small: 'text-xs',
   Medium: 'text-sm',
   Large: 'text-base',
 };
 
 // Label size variants
-export const labelSizeVariants = cva(
+export const labelSizeVariant = cva(
   'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
   {
     variants: {
@@ -39,7 +39,7 @@ export const labelSizeVariants = cva(
 );
 
 // Description size variants
-export const descriptionSizeVariants = cva('text-muted-foreground', {
+export const descriptionSizeVariant = cva('text-muted-foreground', {
   variants: {
     scale: {
       Small: 'text-xs',

@@ -204,8 +204,6 @@ public class ColorExamplesView : ViewBase
 
 For more colors, see the [Colors](../../04_ApiReference/Ivy/Colors.md) reference.
 
-<WidgetDocs Type="Ivy.Box" ExtensionTypes="Ivy.BoxExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Box.cs"/>
-
 ## Examples
 
 <Details>

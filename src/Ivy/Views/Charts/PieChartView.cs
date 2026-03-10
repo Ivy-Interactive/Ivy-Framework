@@ -102,6 +102,8 @@ public class PieChartBuilder<TSource>(
 {
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
+    private Size? _height;
+    private Size? _width;
 
     public override object? Build()
     {
@@ -158,7 +160,26 @@ public class PieChartBuilder<TSource>(
             configuredChart = configuredChart.Toolbox(_toolboxFactory(baseToolbox));
         }
 
-        return polish?.Invoke(configuredChart) ?? configuredChart;
+        var result = polish?.Invoke(configuredChart) ?? configuredChart;
+
+        if (_height is not null)
+            result = result with { Height = _height };
+        if (_width is not null)
+            result = result with { Width = _width };
+
+        return result;
+    }
+
+    public PieChartBuilder<TSource> Height(Size size)
+    {
+        _height = size;
+        return this;
+    }
+
+    public PieChartBuilder<TSource> Width(Size size)
+    {
+        _width = size;
+        return this;
     }
 
     public PieChartBuilder<TSource> Toolbox(Toolbox toolbox)

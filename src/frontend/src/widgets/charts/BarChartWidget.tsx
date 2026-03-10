@@ -37,6 +37,8 @@ import {
   applyDefaults,
 } from './chartDefaults';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface BarChartWidgetProps {
   id: string;
   data: ChartData[];
@@ -61,19 +63,19 @@ interface BarChartWidgetProps {
 }
 
 const BarChartWidget: React.FC<BarChartWidgetProps> = ({
-  data = [],
+  data = EMPTY_ARRAY,
   width = 'Full',
   height = 'Full',
   bars,
   cartesianGrid,
-  xAxis = [],
-  yAxis = [],
+  xAxis = EMPTY_ARRAY,
+  yAxis = EMPTY_ARRAY,
   tooltip,
   legend,
   toolbox,
-  referenceLines = [],
-  referenceAreas = [],
-  referenceDots = [],
+  referenceLines = EMPTY_ARRAY,
+  referenceAreas = EMPTY_ARRAY,
+  referenceDots = EMPTY_ARRAY,
   colorScheme = 'Default',
   //stackOffset,
   barGap = 4,
