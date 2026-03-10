@@ -149,7 +149,6 @@ public record TextInput : TextInput<string>
 
 public static class TextInputExtensions
 {
-<<<<<<< imrove-validation-strategy
     internal static readonly Type ValidationOwner = typeof(TextInputExtensions);
     internal const string AttachedValidationState = "ValidationState";
     internal const string AttachedValidatedVariant = "ValidatedVariant";
@@ -159,9 +158,6 @@ public static class TextInputExtensions
 
     /// <summary>Creates the text input without blur-validation wiring (used to avoid recursion when wrapping).</summary>
     private static TextInputBase CreateTextInputCore(IAnyState state, string? placeholder, bool disabled, TextInputVariants variant)
-=======
-    public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
->>>>>>> main
     {
         var type = state.GetStateType();
         Type genericType = typeof(TextInput<>).MakeGenericType(type);
@@ -171,7 +167,6 @@ public static class TextInputExtensions
         return input;
     }
 
-<<<<<<< imrove-validation-strategy
     /// <summary>Wire blur validation for variant; <paramref name="widget"/> must already be bound to <paramref name="state"/>.</summary>
     private static TextInputBase ApplyVariantValidation(IViewContext context, IAnyState state, TextInputBase widget, TextInputVariants variant)
     {
@@ -221,13 +216,9 @@ public static class TextInputExtensions
     }
 
     public static TextInputBase ToTextareaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariants.Textarea);
-=======
-    public static TextInputBase ToTextareaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Textarea);
->>>>>>> main
 
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Search);
 
-<<<<<<< imrove-validation-strategy
     /// <summary>Email/Password/Url/Tel: validates on blur when built inside a view (context set). Same as ToTextInput(..., variant).</summary>
     public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
         state.ToTextInput(placeholder, disabled, TextInputVariants.Email);
@@ -240,21 +231,11 @@ public static class TextInputExtensions
 
     public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) =>
         state.ToTextInput(placeholder, disabled, TextInputVariants.Tel);
-=======
-    public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Password);
-
-    public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Email);
-
-    public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Url);
-
-    public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputVariant.Tel);
->>>>>>> main
 
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 
     public static TextInputBase Disabled(this TextInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
 
-<<<<<<< imrove-validation-strategy
     public static TextInputBase Variant(this TextInputBase widget, TextInputVariants variant)
     {
         var w = widget with { Variant = variant };
@@ -268,9 +249,6 @@ public static class TextInputExtensions
             return w;
         return ApplyVariantValidation(ctx, state, w, variant);
     }
-=======
-    public static TextInputBase Variant(this TextInputBase widget, TextInputVariant variant) => widget with { Variant = variant };
->>>>>>> main
 
     public static TextInputBase Multiline(this TextInputBase widget, bool multiline = true)
         => widget with { Variant = multiline ? TextInputVariant.Textarea : TextInputVariant.Text };
