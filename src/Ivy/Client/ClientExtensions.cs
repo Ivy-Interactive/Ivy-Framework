@@ -4,12 +4,23 @@ using Ivy.Core.Auth;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public enum ToastVariant
+{
+    Default,
+    Destructive,
+    Success,
+    Warning,
+    Info
+}
+
 public static class ClientExtensions
 {
+
     public class ToasterMessage
     {
         public string? Title { get; set; }
         public string? Description { get; set; }
+        public ToastVariant Variant { get; set; } = ToastVariant.Default;
     }
 
     public class ErrorMessage
@@ -139,15 +150,15 @@ public static class ClientExtensions
         client.Sender.Send("ApplyTheme", css);
     }
 
-    public static void Toast(this IClientProvider client, string description, string? title = null)
+    public static void Toast(this IClientProvider client, string description, string? title = null, ToastVariant variant = ToastVariant.Default)
     {
-        client.Sender.Send("Toast", new ToasterMessage { Description = description, Title = title });
+        client.Sender.Send("Toast", new ToasterMessage { Description = description, Title = title, Variant = variant });
     }
 
-    public static void Toast(this IClientProvider client, Exception ex)
+    public static void Toast(this IClientProvider client, Exception ex, ToastVariant variant = ToastVariant.Default)
     {
         var innerException = Utils.GetInnerMostException(ex);
-        client.Sender.Send("Toast", new ToasterMessage { Description = innerException.Message, Title = "Failed" });
+        client.Sender.Send("Toast", new ToasterMessage { Description = innerException.Message, Title = "Failed", Variant = variant });
     }
 
     public static void Error(this IClientProvider client, Exception ex)

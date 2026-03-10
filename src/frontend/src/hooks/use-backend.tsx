@@ -730,10 +730,26 @@ export const useBackend = (
             handleUpdateMessage(message);
           });
 
-          connection.on('Toast', message => {
-            logger.debug(`[${connection.connectionId}] Toast`, message);
-            toast(message);
-          });
+          connection.on(
+            'Toast',
+            (message: {
+              title?: string;
+              description?: string;
+              variant?: string;
+            }) => {
+              logger.debug(`[${connection.connectionId}] Toast`, message);
+              toast({
+                ...message,
+                variant:
+                  (message.variant?.toLowerCase() as
+                    | 'default'
+                    | 'destructive'
+                    | 'success'
+                    | 'warning'
+                    | 'info') || 'default',
+              });
+            }
+          );
 
           connection.on('Error', message => {
             logger.debug(`[${connection.connectionId}] Error`, message);
