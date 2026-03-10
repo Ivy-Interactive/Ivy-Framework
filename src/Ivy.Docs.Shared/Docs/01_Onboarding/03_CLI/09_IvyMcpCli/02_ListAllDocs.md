@@ -1,34 +1,36 @@
 ---
 title: MCP List All Docs Command
+searchHints:
+  - mcp
+  - list docs
 ---
 
-# `ivy mcp tool list-all-docs`
+# `ivy docs list`
 
 <Ingress>
-Yield the total corpus mapping of Ivy Framework documentation context.
+List all available context documentation paths registered inside the MCP framework for subsequent manual investigation.
 </Ingress>
 
 ## Overview
 
-The `ivy mcp tool list-all-docs` command provides a structured YAML representation of all available documents indexed by the `Ivy.Mcp.Api`. Use this command to discover `DOC_PATH` arguments available for the `get-doc-content` sibling command.
+The `ivy docs list` command provides a structured YAML representation of all available documents indexed by the `Ivy.Mcp.Api`. Use this command to discover `DOC_PATH` arguments available for the `ivy docs <path>` sibling command.
 
 It utilizes the `ListAllDocsTool` from the Ivy MCP Server.
 
 ## Usage
 
 ```terminal
->ivy mcp tool list-all-docs
+>ivy docs list
 ```
 
-## Options
+### Arguments
 
-### General Options
+N/A - This command takes no arguments.
 
-- `--help`, `-h`: Show help and usage information.
-- `--path`, `-p`: Path to the project directory.
+## Examples
 
-## Example
+Retrieve the documentation manifest:
 
 ```terminal
->ivy mcp tool list-all-docs
+>ivy docs list
 ```

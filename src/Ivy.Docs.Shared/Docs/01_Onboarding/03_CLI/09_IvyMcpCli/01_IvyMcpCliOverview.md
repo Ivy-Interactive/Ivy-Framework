@@ -23,13 +23,13 @@ All MCP CLI tools exist under the `ivy mcp tool <command>` namespace. The availa
 
 - [**`build`**](02_Build.md): Performs an isolated build of your application.
 - [**`feedback`**](02_Feedback.md): Submits contextual feedback about agent interactions.
-- [**`get-doc-content`**](02_GetDocContent.md): Retrieves the exact markdown content of a documentation page.
-- [**`list-all-docs`**](02_ListAllDocs.md): Lists all available comprehensive documentation topics.
 - [**`list-all-widgets`**](02_ListAllWidgets.md): Lists all exposed external widgets.
-- [**`lsp-definition`**](02_LspDefinition.md): Finds symbol definitions securely.
-- [**`lsp-hover`**](02_LspHover.md): Extracts code documentation blocks (intellisense tooltips).
-- [**`lsp-completion`**](02_LspCompletion.md): Suggests automated completions based on scope.
-- [**`questions`**](02_Questions.md): Queries the AI framework logic against Ivy documentation context.
+
+In addition, standard CLI commands powered by the Server exist at the root level:
+
+- [**`ivy docs list`**](02_ListAllDocs.md): Lists all available comprehensive documentation topics.
+- [**`ivy docs <path>`**](02_GetDocContent.md): Retrieves the exact markdown content of a documentation page.
+- [**`ivy question`**](02_Questions.md): Queries the AI framework logic against Ivy documentation context.
 
 ## Discovery via Help
 
@@ -48,7 +48,7 @@ CLI tools natively bridge STDIO payloads to full structured JSON invocations aga
 For instance, checking how an Ivy element works:
 
 ```terminal
->ivy mcp tool questions "How do I create a database connection in Ivy?"
+>ivy question "How do I create a database connection in Ivy?"
 ```
 
 This leverages the `QuestionsTool` connected to the `Ivy.Mcp.Api` RAG system, securely analyzing the context specific to your local application structure.
