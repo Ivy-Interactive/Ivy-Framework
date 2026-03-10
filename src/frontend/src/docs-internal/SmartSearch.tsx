@@ -1,3 +1,7 @@
+/**
+ * Renderer for Ivy.Docs.Shared.Internal.SmartSearch (C#). Docs-only overlay + sidebar
+ * hijack; not a reusable widget, so it lives under docs-internal instead of widgets/.
+ */
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
@@ -24,7 +28,7 @@ interface SmartSearchSlots {
   FollowUpChat?: React.ReactNode[];
 }
 
-interface SmartSearchWidgetProps {
+export interface SmartSearchProps {
   id: string;
   slots?: SmartSearchSlots;
   width?: string;
@@ -41,7 +45,8 @@ function openSmartSearchOverlay(): void {
     ?.click();
 }
 
-export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
+/** Registered in widgetMap as Ivy.Docs.Shared.Internal.SmartSearch */
+export const SmartSearch: React.FC<SmartSearchProps> = ({
   id,
   slots: slotsProp,
   width = 'Full',
@@ -249,7 +254,6 @@ export const SmartSearchWidget: React.FC<SmartSearchWidgetProps> = ({
               '!top-4 sm:!top-8 !translate-y-0'
             )}
           >
-            {/* Wrapper so SearchVariant can query list buttons for ↑↓ navigation (same idea as sidebar search). */}
             <div data-smart-search-list>{overlayPanel}</div>
           </DialogContent>
         </Dialog>
