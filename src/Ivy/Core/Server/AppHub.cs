@@ -617,6 +617,10 @@ public class AppHub(
                 return;
             }
 
+#if DEBUG
+            handler = new Ivy.Core.Auth.CheckedAuthTokenHandler(handler);
+#endif
+
             var authService = session.AppServices.GetRequiredService<IAuthProviderService>();
             var authSession = authService.GetAuthProviderSession();
 

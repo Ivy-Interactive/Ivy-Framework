@@ -8,9 +8,23 @@ namespace Ivy;
 public static class AuthSessionExtensions
 {
 #if DEBUG
+    internal static CheckedAuthTokenHandlerSessionBuilder WithCheckedAccess(this IAuthTokenHandlerSession authSession)
+        => new(authSession);
+
     internal static CheckedAuthSessionBuilder WithCheckedAccess(this IAuthProviderSession authSession)
         => new(authSession);
 #endif
+
+    public static AuthTokenHandlerSessionSnapshot TakeSnapshot(this IAuthTokenHandlerSession authSession)
+        => new()
+        {
+            AuthToken = authSession.AuthToken,
+            AuthSessionData = authSession.AuthSessionData,
+        };
+
+    public static bool HasChangedSince(this IAuthTokenHandlerSession authSession, AuthTokenHandlerSessionSnapshot snapshot)
+        => authSession.AuthToken != snapshot.AuthToken ||
+           authSession.AuthSessionData != snapshot.AuthSessionData;
 
     public static AuthProviderSessionSnapshot TakeSnapshot(this IAuthProviderSession authSession)
         => new()
