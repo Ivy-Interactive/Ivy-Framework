@@ -390,7 +390,7 @@ public class FormBuilder<TModel> : ViewBase
             {
                 return submitReceiver.Receive(unit =>
                 {
-                     _ = OnSubmit();
+                    _ = OnSubmit();
                 });
             }
             return null;
