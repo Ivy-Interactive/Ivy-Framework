@@ -735,18 +735,34 @@ export const useBackend = (
             (message: {
               title?: string;
               description?: string;
-              variant?: string;
+              variant?: string | number;
             }) => {
               logger.debug(`[${connection.connectionId}] Toast`, message);
+
+              const { variant, ...rest } = message;
+              let variantStr = 'default';
+
+              if (typeof variant === 'string') {
+                variantStr = variant.toLowerCase();
+              } else if (typeof variant === 'number') {
+                const variantMap = [
+                  'default',
+                  'destructive',
+                  'success',
+                  'warning',
+                  'info',
+                ];
+                variantStr = variantMap[variant] || 'default';
+              }
+
               toast({
-                ...message,
-                variant:
-                  (message.variant?.toLowerCase() as
-                    | 'default'
-                    | 'destructive'
-                    | 'success'
-                    | 'warning'
-                    | 'info') || 'default',
+                ...rest,
+                variant: variantStr as
+                  | 'default'
+                  | 'destructive'
+                  | 'success'
+                  | 'warning'
+                  | 'info',
               });
             }
           );
