@@ -13,7 +13,8 @@ public class ValidationTestApp : SampleBase
             | Layout.Tabs(
                 new Tab("Text input variants", new TextInputVariantsTab()),
                 new Tab("Field variants", new FieldVariantsTab()),
-                new Tab("Form fields", new FormFieldsTab())
+                new Tab("Form fields", new FormFieldsTab()),
+                new Tab("Manual field wiring", new ManualFieldTab())
             ).Variant(TabsVariant.Content);
     }
 }
@@ -89,6 +90,53 @@ public class FormFieldsTab : ViewBase
                 | Text.H3("Form with validated fields")
                 | Text.P("Email, password, phone, and URL are validated on blur and before submit.")
                 | form
+        ).Width(Size.Full());
+    }
+}
+
+/// <summary>Manually constructed TextInput wrapped in Field, still using validation.</summary>
+public class ManualFieldTab : ViewBase
+{
+    public override object? Build()
+    {
+        var email = UseState("");
+        var password = UseState("");
+        var tel = UseState("");
+        var website = UseState("");
+
+        var emailInput = new TextInput(email)
+            .Placeholder("user@domain.com")
+            .Variant(TextInputVariants.Email)
+            .WithField()
+            .Label("Email");
+
+        var passwordInput = new TextInput(password)
+            .Placeholder("Min 8 characters")
+            .Variant(TextInputVariants.Password)
+            .WithField()
+            .Label("Password");
+
+        var telInput = new TextInput(tel)
+            .Placeholder("tel")
+            .Variant(TextInputVariants.Tel)
+            .WithField()
+            .Label("Tel");
+
+
+        var websiteInput = new TextInput(website)
+            .Placeholder("https://example.com")
+            .Variant(TextInputVariants.Url)
+            .WithField()
+            .Label("Website");
+
+        return new Card(
+            Layout.Vertical().Gap(4)
+                | Text.H3("Manual TextInput + Field")
+                | Text.P("new TextInput(state).Variant(...).WithField() — same blur validation as To*Input().")
+                | emailInput
+                | passwordInput
+                | telInput
+                | websiteInput
         ).Width(Size.Full());
     }
 }
