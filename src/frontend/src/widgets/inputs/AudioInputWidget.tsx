@@ -12,7 +12,7 @@ import { getWidth } from '@/lib/styles';
 import { logger } from '@/lib/logger';
 import { Scales } from '@/types/scale';
 import {
-  audioRecorderVariants,
+  audioInputVariants,
   textSizeVariants,
   timerSizeVariants,
   iconSizeVariants,
@@ -227,7 +227,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
     <div className="relative" style={{ ...getWidth(width) }}>
       <div
         className={cn(
-          audioRecorderVariants({ scale }),
+          audioInputVariants({ scale }),
           disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         )}
         onClick={
