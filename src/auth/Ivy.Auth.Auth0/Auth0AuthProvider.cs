@@ -245,7 +245,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
             }
 
             // Create the session
-            var session = new AuthTokenHandlerSession(new AuthToken(identity.AccessToken), null);
+            var session = new AuthTokenHandlerSession(authToken: new AuthToken(identity.AccessToken));
             sessions[provider] = session;
         }
 

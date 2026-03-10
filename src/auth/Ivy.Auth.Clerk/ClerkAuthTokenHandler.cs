@@ -21,6 +21,8 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
     private ICollection<SecurityKey>? _signingKeys;
     private DateTime _signingKeysLastFetched = DateTime.MinValue;
 
+    private readonly HttpMessageHandler _defaultHttpMessageHandler = new HttpClientHandler();
+
     private static (bool IsProduction, string Key) ParseKey(string name, string type, string key)
     {
         var tokens = key.Split('_', 3);
@@ -114,7 +116,7 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
     }
 
     protected FrontendApiClient MakeFrontendApiClient(IAuthTokenHandlerSession authSession)
-        => new(FrontendApiDomain, ((IAuthSession)authSession).HttpMessageHandler);
+        => new(FrontendApiDomain, authSession.TunneledHttpMessageHandler ?? _defaultHttpMessageHandler);
 
     protected static ClerkSession? GetActiveSession(ClerkClient client)
     {

@@ -131,7 +131,7 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
             }
 
             // Create the session
-            var session = new AuthTokenHandlerSession(new AuthToken(result.AccessToken), null);
+            var session = new AuthTokenHandlerSession(authToken: new AuthToken(result.AccessToken));
 
             var sessions = new Dictionary<string, IAuthTokenHandlerSession>
             {

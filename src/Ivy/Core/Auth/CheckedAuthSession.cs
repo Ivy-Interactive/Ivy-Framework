@@ -1,4 +1,6 @@
 #if DEBUG
+using Ivy.Core.HttpTunneling;
+
 namespace Ivy.Core.Auth;
 
 public enum AuthSessionProperty
@@ -73,7 +75,7 @@ public class CheckedAuthSessionBuilder(IAuthSession innerAuthSession)
 
 public class CheckedAuthTokenHandlerSession(IAuthTokenHandlerSession innerAuthSession, Dictionary<AuthSessionProperty, AuthSessionAccessMode> propertyAccessModes) : IAuthTokenHandlerSession
 {
-    protected readonly IAuthTokenHandlerSession _innerAuthSession = innerAuthSession;
+    private readonly IAuthTokenHandlerSession _innerAuthSession = innerAuthSession;
     protected readonly Dictionary<AuthSessionProperty, AuthSessionAccessMode> _propertyAccessModes = propertyAccessModes;
 
     protected void CheckRead(AuthSessionProperty property)
@@ -119,56 +121,56 @@ public class CheckedAuthTokenHandlerSession(IAuthTokenHandlerSession innerAuthSe
             _innerAuthSession.AuthSessionData = value;
         }
     }
+
+    public TunneledHttpMessageHandler? TunneledHttpMessageHandler
+    {
+        get => _innerAuthSession.TunneledHttpMessageHandler;
+        set => _innerAuthSession.TunneledHttpMessageHandler = value;
+    }
 }
 
 public class CheckedAuthSession(IAuthSession innerAuthSession, Dictionary<AuthSessionProperty, AuthSessionAccessMode> propertyAccessModes)
     : CheckedAuthTokenHandlerSession(innerAuthSession, propertyAccessModes), IAuthSession
 {
-    private readonly IAuthSession _innerProviderSession = innerAuthSession;
+    private readonly IAuthSession _innerAuthSession = innerAuthSession;
 
     public IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthSessions
     {
         get
         {
             CheckRead(AuthSessionProperty.OAuthSessions);
-            return _innerProviderSession.OAuthSessions;
+            return _innerAuthSession.OAuthSessions;
         }
     }
 
     public void AddOAuthSession(string provider, IAuthTokenHandlerSession session)
     {
         CheckWrite(AuthSessionProperty.OAuthSessions);
-        _innerProviderSession.AddOAuthSession(provider, session);
+        _innerAuthSession.AddOAuthSession(provider, session);
     }
 
     public void RemoveOAuthSession(string provider)
     {
         CheckWrite(AuthSessionProperty.OAuthSessions);
-        _innerProviderSession.RemoveOAuthSession(provider);
+        _innerAuthSession.RemoveOAuthSession(provider);
     }
 
     public void ClearOAuthSessions()
     {
         CheckWrite(AuthSessionProperty.OAuthSessions);
-        _innerProviderSession.ClearOAuthSessions();
-    }
-
-    public HttpMessageHandler HttpMessageHandler
-    {
-        get => _innerProviderSession.HttpMessageHandler;
-        set => _innerProviderSession.HttpMessageHandler = value;
+        _innerAuthSession.ClearOAuthSessions();
     }
 
     public event Action<string>? OAuthSessionAdded
     {
-        add => _innerProviderSession.OAuthSessionAdded += value;
-        remove => _innerProviderSession.OAuthSessionAdded -= value;
+        add => _innerAuthSession.OAuthSessionAdded += value;
+        remove => _innerAuthSession.OAuthSessionAdded -= value;
     }
 
     public event Action<string>? OAuthSessionRemoved
     {
-        add => _innerProviderSession.OAuthSessionRemoved += value;
-        remove => _innerProviderSession.OAuthSessionRemoved -= value;
+        add => _innerAuthSession.OAuthSessionRemoved += value;
+        remove => _innerAuthSession.OAuthSessionRemoved -= value;
     }
 }
 #endif

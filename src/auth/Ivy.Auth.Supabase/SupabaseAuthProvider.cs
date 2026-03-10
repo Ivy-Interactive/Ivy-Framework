@@ -271,7 +271,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
             session.ProviderToken,
             session.ProviderRefreshToken);
 
-        var providerSession = new AuthTokenHandlerSession(providerAuthToken, null);
+        var providerSession = new AuthTokenHandlerSession(authToken: providerAuthToken);
         authSession.AddOAuthSession(oauthProvider, providerSession);
     }
 

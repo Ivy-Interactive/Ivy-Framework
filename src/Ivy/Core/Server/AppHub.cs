@@ -69,7 +69,7 @@ public class AppHub(
             appServices.AddSingleton<IUploadService>(new UploadService(Context.ConnectionId, clientProvider));
 
             var tunneledHttpHandler = new TunneledHttpMessageHandler(clientProvider, Context.ConnectionId);
-            appServices.AddSingleton<HttpMessageHandler>(tunneledHttpHandler);
+            appServices.AddSingleton(tunneledHttpHandler);
 
             var request = httpContext.Request;
             var requestScheme = request.Scheme;

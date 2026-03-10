@@ -353,7 +353,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                     if (tokenResponse != null)
                     {
                         // Create the session
-                        var session = new AuthTokenHandlerSession(new AuthToken(tokenResponse.Token), null);
+                        var session = new AuthTokenHandlerSession(authToken: new AuthToken(tokenResponse.Token));
                         sessions[provider] = session;
                     }
                 }

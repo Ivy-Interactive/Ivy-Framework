@@ -130,7 +130,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
         }
 
         // Create the session
-        var session = new AuthTokenHandlerSession(new AuthToken(token), null);
+        var session = new AuthTokenHandlerSession(authToken: new AuthToken(token));
 
         var sessions = new Dictionary<string, IAuthTokenHandlerSession>
         {

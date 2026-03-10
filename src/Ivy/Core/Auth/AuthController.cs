@@ -1,6 +1,7 @@
 using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Core.Helpers;
+using Ivy.Core.HttpTunneling;
 using Ivy.Core.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -109,16 +110,16 @@ public class AuthController() : Controller
 
         try
         {
-            HttpMessageHandler httpMessageHandler;
+            TunneledHttpMessageHandler? httpMessageHandler;
             // Get the session and its HttpMessageHandler using the connectionId from the pending callback
             if (sessionStore.Sessions.TryGetValue(pending.ConnectionId, out var appSession))
             {
-                httpMessageHandler = appSession.AppServices.GetRequiredService<HttpMessageHandler>();
+                httpMessageHandler = appSession.AppServices.GetService<TunneledHttpMessageHandler>();
             }
             else
             {
-                logger.LogDebug("OAuth callback: session not found for connection {ConnectionId} (expected during redirect flow). Using default HttpMessageHandler; Clerk auth provider may be affected.", pending.ConnectionId);
-                httpMessageHandler = new HttpClientHandler();
+                logger.LogDebug("OAuth callback: session not found for connection {ConnectionId} (expected during redirect flow). Unable to retrieve frontend-tunneled HttpMessageHandler; Clerk auth provider may be affected.", pending.ConnectionId);
+                httpMessageHandler = null;
             }
 
             var tempSession = AuthHelper.GetAuthSession(HttpContext, httpMessageHandler);

@@ -1,10 +1,12 @@
 // ReSharper disable once CheckNamespace
+
+using Ivy.Core.HttpTunneling;
+
 namespace Ivy;
 
 public interface IAuthSession : IAuthTokenHandlerSession
 {
     public IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthSessions { get; }
-    public HttpMessageHandler HttpMessageHandler { get; set; }
 
     public void AddOAuthSession(string provider, IAuthTokenHandlerSession session);
     public void RemoveOAuthSession(string provider);
@@ -14,23 +16,15 @@ public interface IAuthSession : IAuthTokenHandlerSession
     public event Action<string>? OAuthSessionRemoved;
 }
 
-public class AuthSession : AuthTokenHandlerSession, IAuthSession
+public class AuthSession(
+    AuthToken? authToken = null,
+    string? authSessionData = null,
+    TunneledHttpMessageHandler? httpMessageHandler = null,
+    Dictionary<string, IAuthTokenHandlerSession>? oauthSessions = null) : AuthTokenHandlerSession(authToken, authSessionData, httpMessageHandler), IAuthSession
 {
-    private readonly Dictionary<string, IAuthTokenHandlerSession> _oauthSessions;
-
-    public AuthSession(
-        HttpMessageHandler httpMessageHandler,
-        AuthToken? authToken = null,
-        Dictionary<string, IAuthTokenHandlerSession>? oauthSessions = null,
-        string? authSessionData = null)
-        : base(authToken, authSessionData)
-    {
-        HttpMessageHandler = httpMessageHandler;
-        _oauthSessions = oauthSessions ?? [];
-    }
+    private readonly Dictionary<string, IAuthTokenHandlerSession> _oauthSessions = oauthSessions ?? [];
 
     public IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthSessions => _oauthSessions;
-    public HttpMessageHandler HttpMessageHandler { get; set; }
 
     public event Action<string>? OAuthSessionAdded;
     public event Action<string>? OAuthSessionRemoved;

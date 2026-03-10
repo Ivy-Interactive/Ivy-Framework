@@ -3,6 +3,7 @@ using System.Text.Json;
 using Grpc.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Server;
+using Ivy.Core.HttpTunneling;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
@@ -12,15 +13,15 @@ namespace Ivy.Core.Auth;
 
 public static class AuthHelper
 {
-    public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
+    public static AuthSession GetAuthSession(HttpContext context, TunneledHttpMessageHandler? httpMessageHandler)
     => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var oauthSessions)
         ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, oauthSessions, httpMessageHandler)
-        : new AuthSession(httpMessageHandler);
+        : new AuthSession(httpMessageHandler: httpMessageHandler);
 
-    public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
+    public static AuthSession GetAuthSession(ServerCallContext context, TunneledHttpMessageHandler? httpMessageHandler)
     => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var oauthSessions)
         ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, oauthSessions, httpMessageHandler)
-        : new AuthSession(httpMessageHandler);
+        : new AuthSession(httpMessageHandler: httpMessageHandler);
 
     public static async Task ValidateAuthIfRequired(global::Ivy.Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
     {
@@ -43,7 +44,7 @@ public static class AuthHelper
 
         var serviceProvider = session.AppServices;
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
-        var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
+        var httpMessageHandler = serviceProvider.GetService<TunneledHttpMessageHandler>();
         var authSession = GetAuthSession(context, httpMessageHandler);
         try
         {
@@ -82,7 +83,7 @@ public static class AuthHelper
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         try
         {
-            var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
+            var httpMessageHandler = serviceProvider.GetService<TunneledHttpMessageHandler>();
             var authSession = GetAuthSession(controller.HttpContext, httpMessageHandler);
             await ValidateAuth(serviceProvider, authSession, controller.HttpContext.RequestAborted);
         }
@@ -181,11 +182,11 @@ public static class AuthHelper
         return (accessToken, refreshToken, tag, authSessionDataValue, oauthSessions);
     }
 
-    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> oauthSessions, HttpMessageHandler httpMessageHandler)
+    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> oauthSessions, TunneledHttpMessageHandler? httpMessageHandler)
     {
         if (accessToken == null)
         {
-            return new(httpMessageHandler, null, oauthSessions, authSessionDataValue);
+            return new(null, authSessionDataValue, httpMessageHandler, oauthSessions);
         }
 
         try
@@ -204,11 +205,11 @@ public static class AuthHelper
             }
 
             var token = new AuthToken(accessToken, refreshToken, tag);
-            return new(httpMessageHandler, token, oauthSessions, authSessionDataValue);
+            return new(token, authSessionDataValue, httpMessageHandler, oauthSessions);
         }
         catch (Exception)
         {
-            return new(httpMessageHandler, null, oauthSessions, authSessionDataValue);
+            return new(null, authSessionDataValue, httpMessageHandler, oauthSessions);
         }
     }
 
@@ -250,7 +251,7 @@ public static class AuthHelper
             }
 
             var authToken = new AuthToken(accessToken, refreshToken, tag);
-            var session = new AuthTokenHandlerSession(authToken, null);
+            var session = new AuthTokenHandlerSession(authToken: authToken);
             oauthSessions[provider] = session;
         }
 
@@ -305,7 +306,7 @@ public static class AuthHelper
             }
 
             var authToken = new AuthToken(accessToken, refreshToken, tag);
-            var session = new AuthTokenHandlerSession(authToken, null);
+            var session = new AuthTokenHandlerSession(authToken: authToken);
             oauthSessions[provider] = session;
         }
 
