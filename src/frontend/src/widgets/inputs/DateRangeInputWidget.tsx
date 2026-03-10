@@ -136,8 +136,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
     to: parseDate(value?.item2),
   };
 
-  const [leftMonth, setLeftMonth] = useState(today);
-  const [rightMonth, setRightMonth] = useState(addMonths(today, 1));
+  const [leftMonth, setLeftMonth] = useState(() => new Date());
+  const [rightMonth, setRightMonth] = useState(() => addMonths(new Date(), 1));
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLeftMonthChange = (newLeft: Date) => {

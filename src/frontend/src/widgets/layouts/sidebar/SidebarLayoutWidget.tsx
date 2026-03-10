@@ -366,13 +366,14 @@ const CollapsibleMenuItem: React.FC<{
   const shouldBeOpen =
     expandedSections.has(item.label) || (item.expanded ?? false);
   const [isOpen, setIsOpen] = useState(shouldBeOpen);
+  const [prevShouldBeOpen, setPrevShouldBeOpen] = useState(shouldBeOpen);
   const itemRef = useRef<HTMLLIElement>(null);
 
-  // Sync local state with derived state when expandedSections changes
-  // Using useEffect to avoid setState during render
-  useEffect(() => {
+  // Sync local state with derived state
+  if (shouldBeOpen !== prevShouldBeOpen) {
+    setPrevShouldBeOpen(shouldBeOpen);
     setIsOpen(shouldBeOpen);
-  }, [shouldBeOpen]);
+  }
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);

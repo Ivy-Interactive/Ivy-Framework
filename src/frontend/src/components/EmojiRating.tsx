@@ -59,7 +59,7 @@ export function EmojiRating({
               emojiSizes[scale]
             )}
             onClick={() => handleRating(index + 1)}
-            onMouseEnter={() => !disabled && setHover(index + 1)}
+            onMouseEnter={() => !disabled && setHover(() => index + 1)}
             onMouseLeave={() => !disabled && setHover(0)}
             disabled={disabled}
           >

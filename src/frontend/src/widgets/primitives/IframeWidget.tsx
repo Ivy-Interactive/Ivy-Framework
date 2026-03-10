@@ -1,5 +1,5 @@
 import { getHeight, getWidth } from '@/lib/styles';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useEventHandler } from '@/components/event-handler';
 
 interface IframeWidgetProps {
@@ -23,7 +23,7 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
   outboundMessageType,
   outboundMessageToken,
 }) => {
-  const [iframeKey, setIframeKey] = useState(id);
+  const iframeKey = `${id}-${refreshToken}`;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const eventHandler = useEventHandler();
 
@@ -32,10 +32,6 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
     ...getHeight(height),
     maxWidth: '100%',
   };
-
-  useEffect(() => {
-    setIframeKey(`${id}-${refreshToken}`);
-  }, [refreshToken, id]);
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {

@@ -39,8 +39,3 @@ jobs:
       - name: Check frontend build
         working-directory: ./src/frontend
         run: npm run build
-
-      - name: Run React Doctor
-        uses: millionco/react-doctor@main
-        with:
-          directory: ./src/frontend

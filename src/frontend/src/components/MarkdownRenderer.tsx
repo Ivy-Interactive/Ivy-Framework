@@ -453,15 +453,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   const codeComponent = useMemo(
     () => ({
       code: memo(
-        (props: React.ComponentProps<'code'> & { inline?: boolean }) => (
-          <CodeBlock
-            className={props.className}
-            children={props.children || ''}
-            inline={props.inline}
-            hasCodeBlocks={contentFeatures.hasCodeBlocks}
-            hasMermaid={contentFeatures.hasMermaid}
-          />
-        )
+        (props: React.ComponentProps<'code'> & { inline?: boolean }) => {
+          const { children, className, inline } = props;
+          return (
+            <CodeBlock
+              className={className}
+              inline={inline}
+              hasCodeBlocks={contentFeatures.hasCodeBlocks}
+              hasMermaid={contentFeatures.hasMermaid}
+            >
+              {children || ''}
+            </CodeBlock>
+          );
+        }
       ),
     }),
     [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid]
