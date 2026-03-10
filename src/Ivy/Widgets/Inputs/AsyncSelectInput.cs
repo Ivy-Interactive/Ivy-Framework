@@ -247,25 +247,6 @@ public static class AsyncSelectInputViewExtensions
         throw new InvalidOperationException("Unable to set ghost on async select input");
     }
 
-    public static IAnyAsyncSelectInputBase Value<T>(this IAnyAsyncSelectInputBase widget, T value)
-    {
-        if (widget is AsyncSelectInputView<T> typedWidget)
-        {
-            var clone = new AsyncSelectInputView<T>(typedWidget.Search, typedWidget.Lookup, typedWidget.Placeholder, typedWidget.Disabled)
-            {
-                Value = value,
-                OnChange = typedWidget.OnChange,
-                Nullable = typedWidget.Nullable,
-                OnBlur = typedWidget.OnBlur,
-                Invalid = typedWidget.Invalid,
-                Scale = typedWidget.Scale,
-                Ghost = typedWidget.Ghost,
-            };
-            return clone;
-        }
-
-        throw new InvalidOperationException($"Cannot set Value: widget is not AsyncSelectInputView<{typeof(T).Name}>");
-    }
 
 }
 

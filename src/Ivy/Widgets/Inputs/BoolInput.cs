@@ -315,13 +315,5 @@ public static class BoolInputExtensions
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
-    public static BoolInputBase Value<T>(this BoolInputBase widget, T value)
-    {
-        if (widget is BoolInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not BoolInput<{typeof(T).Name}>");
-    }
 
 }

@@ -204,13 +204,5 @@ public static class ColorInputExtensions
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
-    public static ColorInputBase Value<T>(this ColorInputBase widget, T value)
-    {
-        if (widget is ColorInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not ColorInput<{typeof(T).Name}>");
-    }
 
 }
