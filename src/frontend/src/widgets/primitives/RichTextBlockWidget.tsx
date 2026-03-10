@@ -108,7 +108,8 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
               style={runStyles}
               onClick={e => {
                 if (events.includes('OnLinkClick')) {
-                  e.nativeEvent.preventDefault();
+                  const eventNative = e.nativeEvent;
+                  eventNative.preventDefault();
                   eventHandler('OnLinkClick', id, [run.link]);
                 }
               }}

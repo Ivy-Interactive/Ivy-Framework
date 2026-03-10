@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 type HeadingNode = { id: string; text: string; level: number; offset?: number };
 
@@ -18,8 +18,14 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   onLoadingChange,
   headings = EMPTY_HEADINGS,
 }) => {
-  const [activeId, setActiveId] = useState<string>('');
-  const [isUserNavigating, setIsUserNavigating] = useState(false);
+  const [navState, dispatchNav] = React.useReducer(
+    (
+      state: { activeId: string; isUserNavigating: boolean },
+      action: Partial<{ activeId: string; isUserNavigating: boolean }>
+    ) => ({ ...state, ...action }),
+    { activeId: '', isUserNavigating: false }
+  );
+  const { activeId, isUserNavigating } = navState;
   const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Notify parent about loading state (always loaded since we use props)
@@ -48,12 +54,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             }
 
             // Set as active immediately and mark as user navigating
-            setActiveId(targetId);
-            setIsUserNavigating(true);
+            dispatchNav({ activeId: targetId, isUserNavigating: true });
 
             // Reset navigation state after scroll completes
             navigationTimeoutRef.current = setTimeout(() => {
-              setIsUserNavigating(false);
+              dispatchNav({ isUserNavigating: false });
             }, 1000);
 
             // Let the browser handle the default scroll behavior for regular links
@@ -77,7 +82,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         if (!isUserNavigating) {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              setActiveId(entry.target.id);
+              dispatchNav({ activeId: entry.target.id });
             }
           });
         }
@@ -169,7 +174,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
                 : 'text-muted-foreground'
             )}
             onClick={e => {
-              e.nativeEvent.preventDefault();
+              const eventNative = e.nativeEvent;
+              eventNative.preventDefault();
 
               // Clear any existing navigation timeout
               if (navigationTimeoutRef.current) {
@@ -177,12 +183,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
               }
 
               // Set as active immediately and mark as user navigating
-              setActiveId(heading.id);
-              setIsUserNavigating(true);
+              dispatchNav({ activeId: heading.id, isUserNavigating: true });
 
               // Reset navigation state after scroll completes
               navigationTimeoutRef.current = setTimeout(() => {
-                setIsUserNavigating(false);
+                dispatchNav({ isUserNavigating: false });
               }, 1000);
 
               // Scroll to the target element with error handling
