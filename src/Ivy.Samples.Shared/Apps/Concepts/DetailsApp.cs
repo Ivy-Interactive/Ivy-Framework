@@ -12,7 +12,7 @@ public class DetailsApp : SampleBase
                    new Tab("Basic", new DetailsBasicExample()),
                    new Tab("Nested", new DetailsNestedExample()),
                    new Tab("Multiline", new DetailsMultilineExample()),
-                   new Tab("Scale", new DetailsDensityExample())
+                   new Tab("Density", new DetailsDensityExample())
                ).Variant(TabsVariant.Content);
     }
 }
