@@ -12,12 +12,12 @@ searchHints:
 # UseTrigger
 
 <Ingress>
-The `UseTrigger` [hook](../01_RulesOfHooks.md) provides a way to conditionally render [components](../../../01_Onboarding/02_Concepts/02_Views.md) based on trigger state, commonly used for modals, dialogs, and other conditional UI elements. It manages visibility state and provides a callback to show the triggered component.
+The `UseTrigger` [hook](../02_RulesOfHooks.md) provides a way to conditionally render [components](../../../01_Onboarding/02_Concepts/02_Views.md) based on trigger state, commonly used for modals, dialogs, and other conditional UI elements. It manages visibility state and provides a callback to show the triggered component.
 </Ingress>
 
 ## Overview
 
-The `UseTrigger` [hook](../01_RulesOfHooks.md) enables conditional component rendering:
+The `UseTrigger` [hook](../02_RulesOfHooks.md) enables conditional component rendering:
 
 - **Conditional Rendering** - Show or hide components based on trigger state
 - **Modal Support** - Perfect for modals, dialogs, and popups

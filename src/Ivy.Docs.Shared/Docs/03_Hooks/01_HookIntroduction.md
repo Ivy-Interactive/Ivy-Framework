@@ -837,7 +837,7 @@ public static IState<string> UseLocalStorage(string key, string defaultValue)
 
 ## See Also
 
-- [Rules of Hooks](./01_RulesOfHooks.md) - Essential rules for using hooks correctly
+- [Rules of Hooks](./02_RulesOfHooks.md) - Essential rules for using hooks correctly
 - [Views](../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views
 - [Forms](../01_Onboarding/02_Concepts/08_Forms.md) - Working with forms in Ivy
 - [Layout](../01_Onboarding/02_Concepts/04_Layout.md) - Structuring UI with layouts

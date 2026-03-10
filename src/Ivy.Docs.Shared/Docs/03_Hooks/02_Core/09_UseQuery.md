@@ -13,10 +13,10 @@ searchHints:
 # UseQuery
 
 <Ingress>
-Fetch, cache, and synchronize server data with the [UseQuery](../01_RulesOfHooks.md) hook.
+Fetch, cache, and synchronize server data with the [UseQuery](../02_RulesOfHooks.md) hook.
 </Ingress>
 
-The `UseQuery` [hook](../01_RulesOfHooks.md) provides a powerful way to fetch and cache asynchronous data. Inspired by [SWR](https://swr.vercel.app/) (stale-while-revalidate), it returns cached data immediately while revalidating in the background, keeping your [views](../../../01_Onboarding/02_Concepts/02_Views.md) fast and your data fresh.
+The `UseQuery` [hook](../02_RulesOfHooks.md) provides a powerful way to fetch and cache asynchronous data. Inspired by [SWR](https://swr.vercel.app/) (stale-while-revalidate), it returns cached data immediately while revalidating in the background, keeping your [views](../../../01_Onboarding/02_Concepts/02_Views.md) fast and your data fresh.
 
 ## Basic Usage
 
