@@ -58,27 +58,36 @@ public class FormFieldView(
 {
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
 
-    private bool Validate<T>(T value, IState<string> invalid)
+    private bool Validate<T>(T value, IState<string> invalid, IAnyInput? input = null)
     {
         if (!visible()) return true;
 
-        if (validators != null)
-        {
+        if (validators == null && input == null)
+            return true;
 
-            var isValid = true;
-            var message = string.Empty;
-            foreach (var validator in validators)
+        bool isValid;
+        string? message;
+        if (input != null)
+        {
+            (isValid, message) = Validators.RunValidation(value, input, label, validators);
+        }
+        else
+        {
+            isValid = true;
+            message = null;
+            foreach (var validator in validators!)
             {
-                (isValid, message) = validator(value);
+                (isValid, var msg) = validator(value);
                 if (!isValid)
                 {
+                    message = string.IsNullOrEmpty(msg) ? "Invalid value" : msg;
                     break;
                 }
             }
-            invalid?.Set(isValid ? null! : message);
-            return isValid;
         }
-        return true;
+
+        invalid.Set(isValid ? null! : message ?? "");
+        return isValid;
     }
 
     public override object? Build()
@@ -91,6 +100,8 @@ public class FormFieldView(
         var submitSender = UseSignal<FormSubmitSignal, Unit, Unit>();
         var visibleState = UseState(visible);
 
+        var inputRef = UseRef<IAnyInput?>(() => default);
+
         UseEffect(() =>
         {
             return new Disposables(
@@ -102,7 +113,7 @@ public class FormFieldView(
                 validationReceiver.Receive(_ =>
                 {
                     var value = inputState.As<object>().Value;
-                    return Validate(value, invalidState);
+                    return Validate(value, invalidState, inputRef.Value);
                 })
             );
         });
@@ -112,7 +123,7 @@ public class FormFieldView(
             var value = inputState.As<object>().Value;
             if (blurOnceState.Value)
             {
-                Validate(value, invalidState);
+                Validate(value, invalidState, inputRef.Value);
             }
             bindingState.As<object>().Set(value);
             updateSender.Send(new Unit());
@@ -131,7 +142,9 @@ public class FormFieldView(
             }
         }
 
-        var input = inputFactory(inputState, Context).Invalid(invalidState.Value);
+        var input = inputFactory(inputState, Context);
+        inputRef.Set(input);
+        input = input.Invalid(invalidState.Value ?? "");
         if (validationStrategy == FormValidationStrategy.OnBlur || submitStrategy == FormSubmitStrategy.OnBlur)
         {
             input.OnBlur(OnBlur);
