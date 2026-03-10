@@ -11,7 +11,7 @@ namespace Ivy;
 public record ListItem : WidgetBase<ListItem>
 {
     [OverloadResolutionPriority(1)]
-    public ListItem(string? title = null, string? subtitle = null, Func<Event<ListItem>, ValueTask>? onClick = null, Icons? icon = null, object? badge = null, object? tag = null, object[]? items = null) : base(items ?? [])
+    public ListItem(string? title = null, string? subtitle = null, Func<Event<ListItem>, ValueTask>? onClick = null, Icons? icon = null, object? badge = null, object? tag = null, object[]? items = null, bool disabled = false) : base(items ?? [])
     {
         Title = title;
         Subtitle = subtitle;
@@ -19,10 +19,11 @@ public record ListItem : WidgetBase<ListItem>
         Badge = badge?.ToString();
         Tag = tag;
         OnClick = onClick.ToEventHandler();
+        Disabled = disabled;
     }
 
     // Overload for Action<Event<ListItem>>
-    public ListItem(string? title = null, string? subtitle = null, Action<Event<ListItem>>? onClick = null, Icons? icon = null, object? badge = null, object? tag = null, object[]? items = null) : base(items ?? [])
+    public ListItem(string? title = null, string? subtitle = null, Action<Event<ListItem>>? onClick = null, Icons? icon = null, object? badge = null, object? tag = null, object[]? items = null, bool disabled = false) : base(items ?? [])
     {
         Title = title;
         Subtitle = subtitle;
@@ -30,10 +31,11 @@ public record ListItem : WidgetBase<ListItem>
         Badge = badge?.ToString();
         Tag = tag;
         OnClick = onClick.ToEventHandler();
+        Disabled = disabled;
     }
 
     // Overload for simple Action (no parameters)
-    public ListItem(string? title = null, string? subtitle = null, Action? onClick = null, Icons? icon = null, object? badge = null, object? tag = null, object[]? items = null) : base(items ?? [])
+    public ListItem(string? title = null, string? subtitle = null, Action? onClick = null, Icons? icon = null, object? badge = null, object? tag = null, object[]? items = null, bool disabled = false) : base(items ?? [])
     {
         Title = title;
         Subtitle = subtitle;
@@ -41,6 +43,7 @@ public record ListItem : WidgetBase<ListItem>
         Badge = badge?.ToString();
         Tag = tag;
         OnClick = onClick == null ? null : new(_ => { onClick(); return ValueTask.CompletedTask; });
+        Disabled = disabled;
     }
 
     internal ListItem()
@@ -57,10 +60,14 @@ public record ListItem : WidgetBase<ListItem>
 
     public object? Tag { get; } //not a prop!
 
+    [Prop] public bool Disabled { get; set; }
+
     [Event] public EventHandler<Event<ListItem>>? OnClick { get; set; }
 }
 
 public static class ListItemExtensions
 {
     public static ListItem Content(this ListItem listItem, object child) => listItem with { Children = [child] };
+
+    public static ListItem Disabled(this ListItem listItem, bool disabled = true) => listItem with { Disabled = disabled };
 }
