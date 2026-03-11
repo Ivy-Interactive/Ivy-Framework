@@ -33,6 +33,7 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     [Prop] public bool? Foreground { get; set; }
 
+    [Prop] public bool Ghost { get; set; }
     [Prop] public bool AllowAlpha { get; set; }
 
     [Prop] public ColorInputVariant Variant { get; set; } = ColorInputVariant.TextAndPicker;
@@ -183,6 +184,11 @@ public static class ColorInputExtensions
         return widget with { Foreground = foreground };
     }
 
+    public static ColorInputBase Ghost(this ColorInputBase widget, bool ghost = true)
+    {
+        return widget with { Ghost = ghost };
+    }
+
     public static ColorInputBase AllowAlpha(this ColorInputBase widget, bool allowAlpha = true)
     {
         return widget with { AllowAlpha = allowAlpha };
@@ -204,13 +210,5 @@ public static class ColorInputExtensions
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
-    public static ColorInputBase Value<T>(this ColorInputBase widget, T value)
-    {
-        if (widget is ColorInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not ColorInput<{typeof(T).Name}>");
-    }
 
 }

@@ -12,8 +12,8 @@ const Switch = React.forwardRef<
     VariantProps<typeof switchVariant> & {
       icon?: string;
     }
->(({ className, scale, icon, ...props }, ref) => {
-  const baseClass = switchVariant({ scale });
+>(({ className, density, icon, ...props }, ref) => {
+  const baseClass = switchVariant({ density });
   const finalClass = className?.includes('bg-red-50')
     ? baseClass.replace('data-[state=checked]:bg-primary', '')
     : baseClass;
@@ -23,7 +23,7 @@ const Switch = React.forwardRef<
       {...props}
       ref={ref}
     >
-      <SwitchPrimitives.Thumb className={cn(switchThumbVariant({ scale }))}>
+      <SwitchPrimitives.Thumb className={cn(switchThumbVariant({ density }))}>
         {icon && (
           <div className="flex items-center justify-center w-full h-full">
             <Icon name={icon} className="w-[12px] h-[12px]" />

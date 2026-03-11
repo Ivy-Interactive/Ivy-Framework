@@ -262,13 +262,5 @@ public static class NumberInputExtensions
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
-    public static NumberInputBase Value<T>(this NumberInputBase widget, T value)
-    {
-        if (widget is NumberInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not NumberInput<{typeof(T).Name}>");
-    }
 
 }

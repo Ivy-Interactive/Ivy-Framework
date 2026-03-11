@@ -236,12 +236,4 @@ public static class SelectInputExtensions
         return new SelectInput<string[]>(state, options.ToOptions(), placeholder ?? "Select options...", disabled, variant, true);
     }
 
-    public static SelectInputBase Value<T>(this SelectInputBase widget, T value)
-    {
-        if (widget is SelectInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not SelectInput<{typeof(T).Name}>");
-    }
 }

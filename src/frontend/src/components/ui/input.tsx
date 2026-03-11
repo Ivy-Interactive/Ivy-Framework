@@ -9,13 +9,13 @@ export interface InputProps
     VariantProps<typeof inputVariant> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, scale, ...props }, ref) => {
+  ({ className, type, density, ...props }, ref) => {
     return (
       <input
         type={type}
         data-1p-ignore
         autoComplete="off"
-        className={cn(inputVariant({ scale, className }))}
+        className={cn(inputVariant({ density, className }))}
         ref={ref}
         {...props}
       />

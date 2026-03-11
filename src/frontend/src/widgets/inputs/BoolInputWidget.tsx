@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Loader2 } from 'lucide-react';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
   labelSizeVariant,
   descriptionSizeVariant,
@@ -34,7 +34,7 @@ interface BoolInputWidgetProps {
   invalid?: string;
   variant: VariantType;
   icon?: string;
-  scale?: Scales;
+  density?: Densities;
   'data-testid'?: string;
 }
 
@@ -47,7 +47,7 @@ interface BaseVariantProps {
   value: NullableBoolean;
   disabled: boolean;
   loading: boolean;
-  scale?: Scales;
+  density?: Densities;
   'data-testid'?: string;
 }
 
@@ -70,19 +70,19 @@ const InputLabel: React.FC<{
   id: string;
   label?: string;
   description?: string;
-  scale?: Scales;
-}> = React.memo(({ id, label, description, scale = Scales.Medium }) => {
+  density?: Densities;
+}> = React.memo(({ id, label, description, density = Densities.Medium }) => {
   if (!label && !description) return null;
 
   return (
     <div>
       {label && (
-        <Label htmlFor={id} className={labelSizeVariant({ scale })}>
+        <Label htmlFor={id} className={labelSizeVariant({ density })}>
           {label}
         </Label>
       )}
       {description && (
-        <p className={descriptionSizeVariant({ scale })}>{description}</p>
+        <p className={descriptionSizeVariant({ density })}>{description}</p>
       )}
     </div>
   );
@@ -103,14 +103,14 @@ const withTooltip = (content: React.ReactNode, invalid?: string) => {
   );
 };
 
-const LoadingOverlay: React.FC<{ scale?: Scales; 'data-testid'?: string }> = ({
-  scale = Scales.Medium,
-  'data-testid': dataTestId,
-}) => {
+const LoadingOverlay: React.FC<{
+  density?: Densities;
+  'data-testid'?: string;
+}> = ({ density = Densities.Medium, 'data-testid': dataTestId }) => {
   const sizeClass =
-    scale === Scales.Small
+    density === Densities.Small
       ? 'h-4 w-4'
-      : scale === Scales.Large
+      : density === Densities.Large
         ? 'h-5 w-5'
         : 'h-4 w-4';
   return (
@@ -136,7 +136,7 @@ const VariantComponents = {
       loading,
       nullable,
       invalid,
-      scale = Scales.Medium,
+      density = Densities.Medium,
       onCheckedChange,
       'data-testid': dataTestId,
     }: CheckboxVariantProps) => {
@@ -150,9 +150,8 @@ const VariantComponents = {
             nullable={nullable}
             className={cn(invalid && inputStyles.invalid)}
             data-testid={dataTestId}
-            scale={scale}
           />
-          {loading && <LoadingOverlay scale={scale} data-testid={dataTestId} />}
+          {loading && <LoadingOverlay data-testid={dataTestId} />}
         </div>
       );
 
@@ -160,7 +159,7 @@ const VariantComponents = {
         <div
           className={cn(
             'flex gap-2 items-center',
-            boolInputRowMinHeightVariant({ scale }),
+            boolInputRowMinHeightVariant({ density }),
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
@@ -169,12 +168,7 @@ const VariantComponents = {
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(checkboxElement, invalid)}
           </div>
-          <InputLabel
-            id={id}
-            label={label}
-            description={description}
-            scale={scale}
-          />
+          <InputLabel id={id} label={label} description={description} />
         </div>
       );
 
@@ -191,7 +185,7 @@ const VariantComponents = {
       disabled,
       loading,
       invalid,
-      scale = Scales.Medium,
+      density = Densities.Medium,
       icon,
       onCheckedChange,
       'data-testid': dataTestId,
@@ -203,12 +197,11 @@ const VariantComponents = {
             checked={!!value}
             onCheckedChange={onCheckedChange}
             disabled={disabled || loading}
-            scale={scale}
             icon={icon}
             className={cn(invalid && inputStyles.invalid)}
             data-testid={dataTestId}
           />
-          {loading && <LoadingOverlay scale={scale} data-testid={dataTestId} />}
+          {loading && <LoadingOverlay data-testid={dataTestId} />}
         </div>
       );
 
@@ -216,7 +209,7 @@ const VariantComponents = {
         <div
           className={cn(
             'flex gap-2 items-center',
-            boolInputRowMinHeightVariant({ scale }),
+            boolInputRowMinHeightVariant({ density }),
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
@@ -225,12 +218,7 @@ const VariantComponents = {
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(switchElement, invalid)}
           </div>
-          <InputLabel
-            id={id}
-            label={label}
-            description={description}
-            scale={scale}
-          />
+          <InputLabel id={id} label={label} description={description} />
         </div>
       );
 
@@ -248,7 +236,7 @@ const VariantComponents = {
       loading,
       icon,
       invalid,
-      scale = Scales.Medium,
+      density = Densities.Medium,
       onPressedChange,
       'data-testid': dataTestId,
     }: ToggleVariantProps) => {
@@ -261,12 +249,11 @@ const VariantComponents = {
             disabled={disabled || loading}
             aria-label={label}
             className={cn(invalid && inputStyles.invalid)}
-            scale={scale}
             data-testid={dataTestId}
           >
             {icon && <Icon name={icon} />}
           </Toggle>
-          {loading && <LoadingOverlay scale={scale} data-testid={dataTestId} />}
+          {loading && <LoadingOverlay data-testid={dataTestId} />}
         </div>
       );
 
@@ -274,7 +261,7 @@ const VariantComponents = {
         <div
           className={cn(
             'flex space-x-2 items-center',
-            boolInputRowMinHeightVariant({ scale }),
+            boolInputRowMinHeightVariant({ density }),
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
@@ -283,12 +270,7 @@ const VariantComponents = {
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(toggleElement, invalid)}
           </div>
-          <InputLabel
-            id={id}
-            label={label}
-            description={description}
-            scale={scale}
-          />
+          <InputLabel id={id} label={label} description={description} />
         </div>
       );
 
@@ -308,7 +290,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   nullable = false,
   variant = 'Checkbox',
   icon,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -337,7 +319,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       nullable={nullable}
       icon={icon}
       invalid={invalid}
-      scale={scale}
+      density={density}
       onCheckedChange={handleChange}
       onPressedChange={handleChange}
       data-testid={dataTestId}

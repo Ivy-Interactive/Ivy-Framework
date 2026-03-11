@@ -489,3 +489,20 @@ new { NetBurn = "$5,000", GrossBurn = "$10,000" }.ToDetails()
 ```
 
 Use `.Builder(x => x.Field, b => ...)` to customize how a value is *rendered*, not to change the label text.
+
+## What is the base class for Ivy apps?
+
+All Ivy apps inherit from `ViewBase` and override `Build()`. Mark them with the `[App]` attribute. Both `ViewBase` and `[App]` are in the `Ivy` namespace (`using Ivy;`). There is no `AppBase` or `IClient` class — use `ViewBase` and `IClientProvider`.
+
+```csharp
+using Ivy;
+
+[App]
+public class MyApp : ViewBase
+{
+    public override ViewSpec Build()
+    {
+        return Text.H1("Hello");
+    }
+}
+```

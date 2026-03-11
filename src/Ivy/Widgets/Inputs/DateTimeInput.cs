@@ -260,13 +260,5 @@ public static class DateTimeInputExtensions
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
-    public static DateTimeInputBase Value<T>(this DateTimeInputBase widget, T value)
-    {
-        if (widget is DateTimeInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not DateTimeInput<{typeof(T).Name}>");
-    }
 
 }

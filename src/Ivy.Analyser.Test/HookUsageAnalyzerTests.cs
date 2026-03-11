@@ -4,7 +4,7 @@ using Xunit;
 using VerifyCS = Microsoft.CodeAnalysis.CSharp.Testing.XUnit.AnalyzerVerifier<
     Ivy.Analyser.Analyzers.HookUsageAnalyzer>;
 
-namespace Ivy.Analyser.Tests
+namespace Ivy.Analyser.Test
 {
     public class HookUsageAnalyzerTests
     {
@@ -1090,6 +1090,176 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
     protected void UseEffect(Action effect) { }
     protected T UseMemo<T>(Func<T> factory) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookStoredInFieldShouldError()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    private object? _count;
+
+    public override object? Build()
+    {
+        _count = {|IVYHOOK006:UseState(0)|};
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookStoredInFieldWithThisShouldError()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    private object? _count;
+
+    public override object? Build()
+    {
+        this._count = {|IVYHOOK006:UseState(0)|};
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookStoredInPropertyShouldError()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public object? Count { get; set; }
+
+    public override object? Build()
+    {
+        Count = {|IVYHOOK006:UseState(0)|};
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookStoredInFieldWithCoalesceAssignmentShouldError()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    private object? _count;
+
+    public override object? Build()
+    {
+        _count ??= {|IVYHOOK006:UseState(0)|};
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookStoredInLocalVariableShouldNotError()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        var local = UseState(0);
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookDiscardedShouldNotError()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        UseState(0);
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
 }
 
 public class Button { }

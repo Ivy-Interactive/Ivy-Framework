@@ -579,6 +579,30 @@ Text.Block(frequencyText).Small().Muted()
 **Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
 
+## Text.Secondary("text") — non-existent static factory
+
+**Hallucinated API:**
+```csharp
+Text.Secondary("some text")
+```
+
+**Error:** `CS1501: No overload for method 'Secondary' takes 1 arguments`
+
+**Correct API:**
+```csharp
+// Use Text.Muted() for secondary/muted appearance:
+Text.Muted("some text")
+// Or use Text.P() with .Muted() chained:
+Text.P("some text").Muted()
+// Or use Text.P() with Colors.Secondary color:
+Text.P("some text").Color(Colors.Secondary)
+```
+
+`Text.Secondary()` does not exist as a static factory method. The static factories on `Text` are: `H1`, `H2`, `H3`, `H4`, `H5`, `H6`, `P`, `Inline`, `Block`, `Blockquote`, `InlineCode`, `Lead`, `Label`, `Muted`, `Strong`, `Bold`, `Danger`, `Warning`, `Success`, `Code`, `Markdown`, `Json`, `Xml`, `Html`, `Latex`, `Display`, `Literal`, `Rich`. The agent likely confused `Secondary` from `ButtonVariant.Secondary` / `Button.Secondary()` or `BadgeVariant.Secondary` / `Badge.Secondary()` with the `Text` API. `.Secondary()` is a fluent method on `Button` and `Badge`, not on `Text`.
+
+**Found In:**
+(session not yet recorded)
+
 ## Box.BorderRadius(int) — wrong argument type
 
 **Hallucinated API:**
@@ -780,6 +804,31 @@ new Box(language.ToSelectInput(options)).Width(Size.Px(200))
 ### Found In
 852f6bec-756c-48f8-93da-ad426af73fab
 
+## Align.End / Align.Start — CSS-inspired enum values
+
+**Hallucinated API:**
+```csharp
+Align.End
+Align.Start
+Align.FlexEnd
+Align.FlexStart
+```
+
+**Error:** `'Align' does not contain a definition for 'End'` (CS0117)
+
+**Correct API:**
+```csharp
+Align.Right   // instead of Align.End or Align.FlexEnd
+Align.Left    // instead of Align.Start or Align.FlexStart
+```
+
+Valid `Align` values: `TopLeft`, `TopRight`, `TopCenter`, `BottomLeft`, `BottomRight`, `BottomCenter`, `Left`, `Right`, `Center`, `Stretch`, `SpaceBetween`, `SpaceAround`, `SpaceEvenly`.
+
+The agent draws from CSS `justify-content: flex-end` / `align-items: flex-end` terminology. **Auto-fixed:** The refactoring service automatically rewrites `Align.End` → `Align.Right`, `Align.Start` → `Align.Left`, etc.
+
+**Found In:**
+DecisionMatrixApp.cs (two occurrences of `Align.End`)
+
 ## Server Configuration
 
 | Hallucinated API | Correct API |
@@ -787,3 +836,63 @@ new Box(language.ToSelectInput(options)).Width(Size.Px(200))
 | `server.UseSingleApp()` | `server.UseDefaultApp(typeof(AppType))` |
 | `server.UseNoChrome()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseChrome()` instead |
 | `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
+
+## TextBuilder.AlignCenter() — non-existent method
+
+**Hallucinated API:**
+```csharp
+Text.H1("$0.00").AlignCenter()
+Text.H3("00:00:00").AlignCenter()
+Text.P("Rate: $50.00/hour").AlignCenter()
+```
+
+**Error:** `CS1061: 'TextBuilder' does not contain a definition for 'AlignCenter'`
+
+**Correct API:**
+```csharp
+// TextBuilder does not have alignment methods.
+// To center text, wrap it in a layout:
+Layout.Vertical().AlignItems(Align.Center)
+    | Text.H1("$0.00")
+    | Text.H3("00:00:00")
+
+// Or use a Box:
+new Box(Text.H1("$0.00")).AlignItems(Align.Center)
+```
+
+`TextBuilder` has no `.AlignCenter()` method. Text alignment is controlled at the layout/container level, not on individual text elements.
+
+**Found In:**
+713546f7-32fb-4961-ab78-def91e7c010d
+
+## Server.OnReady / Server.OnStartup — non-existent lifecycle callbacks
+
+**Hallucinated API:**
+```csharp
+server.OnReady(() => { /* seed data */ });
+server.OnStartup(() => { /* initialize */ });
+```
+
+**Error:** `CS1061: 'Server' does not contain a definition for 'OnReady'`
+
+**Correct API:**
+```csharp
+// Seed data via the context factory pattern:
+var connection = server.UseConnection<MyDbContext>(options =>
+    options.ContextFactory = () =>
+    {
+        var ctx = new MyDbContext();
+        ctx.Database.EnsureCreated();
+        SeedData(ctx);
+        return ctx;
+    });
+
+// Or resolve services directly in Program.cs:
+var myService = server.Services.GetRequiredService<IMyService>();
+myService.Initialize();
+```
+
+The `Server` class does not have `OnReady`, `OnStartup`, or similar lifecycle callback methods. To run initialization code (e.g., database seeding), use the connection's context factory pattern — seed data in the factory's `CreateContext` method or use `server.Services` to resolve and call services directly in `Program.cs`.
+
+**Found In:**
+(session not yet recorded)

@@ -102,10 +102,13 @@ public class BasicToastDemo : ViewBase
 
         return Layout.Horizontal(
             new Button("Success Toast", _ => 
-                client.Toast("Operation completed successfully!", "Success")
+                client.Toast("Operation completed successfully!", "Success").Success()
+            ),
+            new Button("Error Toast", _ => 
+                client.Toast("Something went wrong!", "Error").Destructive()
             ),
             new Button("Info Toast", _ => 
-                client.Toast("Here's some helpful information", "Info")
+                client.Toast("Here's some helpful information", "Info").Info()
             ),
             new Button("Simple Toast", _ => 
                 client.Toast("Just a simple message")

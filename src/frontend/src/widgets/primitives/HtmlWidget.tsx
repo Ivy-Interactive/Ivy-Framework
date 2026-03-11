@@ -1,29 +1,29 @@
 import { HtmlRenderer } from '@/components/HtmlRenderer';
 import React, { useEffect, useRef } from 'react';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 interface HtmlWidgetProps {
   id: string;
   content: string;
-  scale?: Scales;
+  density?: Densities;
   dangerouslyAllowScripts?: boolean;
 }
 
 export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
   id,
   content,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   dangerouslyAllowScripts = false,
 }) => {
-  const getScaleStyle = (s: Scales): React.CSSProperties => {
+  const getScaleStyle = (s: Densities): React.CSSProperties => {
     switch (s) {
-      case Scales.Small:
+      case Densities.Small:
         return {
           transform: 'scale(0.85)',
           width: '117.65%',
           transformOrigin: 'top left',
         };
-      case Scales.Large:
+      case Densities.Large:
         return {
           transform: 'scale(1.15)',
           width: '86.96%',
@@ -38,7 +38,7 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
     display: 'flex',
     flexDirection: 'column',
     gap: '1rem',
-    ...getScaleStyle(scale),
+    ...getScaleStyle(density),
   };
 
   const containerRef = useRef<HTMLDivElement>(null);

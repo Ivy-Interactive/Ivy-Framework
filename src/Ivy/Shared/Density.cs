@@ -1,7 +1,7 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum Scale
+public enum Density
 {
     Medium,
     Small,

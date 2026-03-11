@@ -25,7 +25,7 @@ import Icon from '@/components/Icon';
 import { icons } from 'lucide-react';
 import { X, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { xIconVariant } from '@/components/ui/input/text-input-variant';
 import {
   iconInputTriggerVariant,
@@ -60,7 +60,7 @@ interface IconInputWidgetProps {
   placeholder?: string;
   nullable?: boolean;
   events?: string[];
-  scale?: Scales;
+  density?: Densities;
 }
 
 const ICONS_PER_ROW = 8;
@@ -73,7 +73,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   placeholder = 'Select an icon',
   nullable = false,
   events = EMPTY_ARRAY,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
@@ -142,7 +142,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
       ref={valueTextRef}
       className={cn(
         'min-w-0 overflow-hidden text-ellipsis whitespace-nowrap',
-        iconInputTextVariant({ scale })
+        iconInputTextVariant({ density })
       )}
     >
       {value}
@@ -172,7 +172,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             variant="outline"
             disabled={disabled}
             className={cn(
-              iconInputTriggerVariant({ scale }),
+              iconInputTriggerVariant({ density }),
               !hasValue && 'text-muted-foreground',
               invalid && inputStyles.invalidInput
             )}
@@ -181,45 +181,45 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
               <span className="flex items-center gap-2 min-w-0">
                 <Icon
                   name={value}
-                  className={cn('shrink-0', iconInputIconVariant({ scale }))}
+                  className={cn('shrink-0', iconInputIconVariant({ density }))}
                 />
                 {wrappedValueText}
               </span>
             ) : (
-              <span className={cn(iconInputTextVariant({ scale }))}>
+              <span className={cn(iconInputTextVariant({ density }))}>
                 {placeholder}
               </span>
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className={cn(iconInputPopoverVariant({ scale }))}
+          className={cn(iconInputPopoverVariant({ density }))}
           align="start"
           onOpenAutoFocus={e => e.preventDefault()}
         >
-          <div className={cn(iconInputPopoverHeaderVariant({ scale }))}>
+          <div className={cn(iconInputPopoverHeaderVariant({ density }))}>
             <div className="relative">
               <Search
-                className={cn(iconInputSearchIconVariant({ scale }))}
+                className={cn(iconInputSearchIconVariant({ density }))}
                 strokeWidth={2}
               />
               <Input
                 placeholder="Search icons..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                scale={scale}
-                className={iconInputSearchInputVariant({ scale })}
+                density={density}
+                className={iconInputSearchInputVariant({ density })}
               />
             </div>
           </div>
-          <div className={iconInputPopoverScrollVariant({ scale })}>
+          <div className={iconInputPopoverScrollVariant({ density })}>
             {filteredIcons.length === 0 ? (
-              <div className={iconInputEmptyStateVariant({ scale })}>
+              <div className={iconInputEmptyStateVariant({ density })}>
                 No icons found
               </div>
             ) : (
               <div
-                className={cn(iconInputGridVariant({ scale }))}
+                className={cn(iconInputGridVariant({ density }))}
                 style={{
                   gridTemplateColumns: `repeat(${ICONS_PER_ROW}, minmax(0, 1fr))`,
                 }}
@@ -242,7 +242,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
                         name={iconName}
                         className={cn(
                           'shrink-0',
-                          iconInputIconVariant({ scale })
+                          iconInputIconVariant({ density })
                         )}
                       />
                     </button>
@@ -252,14 +252,14 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             )}
           </div>
           {nullable && (
-            <div className={cn(iconInputPopoverFooterVariant({ scale }))}>
+            <div className={cn(iconInputPopoverFooterVariant({ density }))}>
               <Button
                 type="button"
                 variant="ghost"
-                size={scale === Scales.Large ? 'default' : 'sm'}
+                size={density === Densities.Large ? 'default' : 'sm'}
                 className={cn(
                   'w-full justify-center text-muted-foreground',
-                  iconInputTextVariant({ scale })
+                  iconInputTextVariant({ density })
                 )}
                 onClick={() => {
                   eventHandler('OnChange', id, [null]);
@@ -287,7 +287,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
               onClick={handleClear}
               className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
             >
-              <X className={xIconVariant({ scale })} />
+              <X className={xIconVariant({ density })} />
             </button>
           )}
         </div>

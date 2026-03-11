@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { WidgetNode, CallSite } from '@/types/widgets';
 import { widgetMap } from '@/widgets/widgetMap';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
   isExternalWidget,
   createLazyExternalWidget,
@@ -10,7 +10,7 @@ import {
 import { ExternalWidgetWrapper } from '@/widgets/ExternalWidgetWrapper';
 export interface MemoizedWidgetProps {
   node: WidgetNode;
-  inheritedScale?: Scales;
+  inheritedScale?: Densities;
 }
 
 export const MemoizedWidget = React.memo(
@@ -30,7 +30,7 @@ export const MemoizedWidget = React.memo(
     };
 
     if (inheritedScale) {
-      props.scale = inheritedScale;
+      props.density = inheritedScale;
     }
 
     if ('testId' in props && props.testId) {
@@ -39,7 +39,7 @@ export const MemoizedWidget = React.memo(
     }
 
     const children = flattenChildren(node.children || []);
-    const scaleForChildren = (props.scale as Scales) || inheritedScale;
+    const scaleForChildren = (props.density as Densities) || inheritedScale;
 
     const slots = children.reduce<Record<string, React.ReactNode[]>>(
       (acc, child: WidgetNode) => {
@@ -179,7 +179,7 @@ export const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
  */
 const renderExternalWidget = (
   node: WidgetNode,
-  inheritedScale?: Scales
+  inheritedScale?: Densities
 ): React.ReactNode => {
   let Component = getCachedExternalWidget(node.type);
   if (!Component) {
@@ -193,7 +193,7 @@ const renderExternalWidget = (
   };
 
   if (inheritedScale) {
-    props.scale = inheritedScale;
+    props.density = inheritedScale;
   }
 
   if ('testId' in props && props.testId) {
@@ -202,7 +202,7 @@ const renderExternalWidget = (
   }
 
   const children = flattenChildren(node.children || []);
-  const scaleForChildren = (props.scale as Scales) || inheritedScale;
+  const scaleForChildren = (props.density as Densities) || inheritedScale;
 
   // Process children, grouping by Slot widgets
   const slots = children.reduce<Record<string, React.ReactNode[]>>(
@@ -253,7 +253,7 @@ const renderExternalWidget = (
  */
 export const renderWidgetTree = (
   node: WidgetNode,
-  inheritedScale?: Scales
+  inheritedScale?: Densities
 ): React.ReactNode => {
   // Check if it's a built-in widget first
   const isBuiltIn = node.type in widgetMap;

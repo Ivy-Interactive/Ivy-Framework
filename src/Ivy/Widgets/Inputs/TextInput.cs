@@ -217,14 +217,6 @@ public static class TextInputExtensions
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
-    public static TextInputBase Value<T>(this TextInputBase widget, T value)
-    {
-        if (widget is TextInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not TextInput<{typeof(T).Name}>");
-    }
 
     [OverloadResolutionPriority(1)]
     public static TextInputBase OnSubmit(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onSubmit)

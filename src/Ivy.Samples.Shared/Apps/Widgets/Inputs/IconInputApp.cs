@@ -58,15 +58,15 @@ public class IconInputSizeVariants : ViewBase
                | Layout.Vertical().Gap(6)
                   | (Layout.Horizontal().Gap(6)
                      | Text.InlineCode("Small")
-                     | smallState.ToIconInput().Scale(Scale.Small)
+                     | smallState.ToIconInput().Density(Density.Small)
                      | new Icon(smallState.Value).Small())
                   | (Layout.Horizontal().Gap(6)
                      | Text.InlineCode("Medium")
-                     | mediumState.ToIconInput().Scale(Scale.Medium)
+                     | mediumState.ToIconInput().Density(Density.Medium)
                      | new Icon(mediumState.Value).Medium())
                   | (Layout.Horizontal().Gap(6)
                      | Text.InlineCode("Large")
-                     | largeState.ToIconInput().Scale(Scale.Large)
+                     | largeState.ToIconInput().Density(Density.Large)
                      | new Icon(largeState.Value).Large());
     }
 }

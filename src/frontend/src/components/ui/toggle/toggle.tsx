@@ -4,7 +4,7 @@ import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 import { toggleVariant } from './toggle-variant';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 const Toggle = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
@@ -13,10 +13,10 @@ const Toggle = React.forwardRef<
     }
 >(
   (
-    { className, variant, scale = Scales.Medium, dataTestId, ...props },
+    { className, variant, density = Densities.Medium, dataTestId, ...props },
     ref
   ) => {
-    let toggleClass = toggleVariant({ variant, scale, className });
+    let toggleClass = toggleVariant({ variant, density, className });
     if (className?.includes('bg-red-50')) {
       toggleClass = toggleClass.replace('data-[state=on]:bg-accent', '');
     }

@@ -35,6 +35,7 @@
   <ItemGroup>
     <None Include="build/Ivy.Desktop.targets" Pack="true" PackagePath="build/Ivy.Desktop.targets" />
     <None Include="build/Ivy.Desktop.targets" Pack="true" PackagePath="buildTransitive/Ivy.Desktop.targets" />
+    <None Include="../assets/ivy.ico" Pack="true" PackagePath="build/ivy.ico" />
   </ItemGroup>
 
   <Import Project="build/Ivy.Desktop.targets" />

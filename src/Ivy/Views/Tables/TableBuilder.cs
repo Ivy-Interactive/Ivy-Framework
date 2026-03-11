@@ -72,7 +72,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 
     private Size? _width;
-    private Scale _scale = Scale.Medium;
+    private Density _density = Density.Medium;
     private readonly IEnumerable<TModel> _records;
     private readonly Dictionary<string, TableBuilderColumn> _columns;
     private readonly BuilderFactory<TModel> _builderFactory;
@@ -163,19 +163,19 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
     public TableBuilder<TModel> Large()
     {
-        _scale = Scale.Large;
+        _density = Density.Large;
         return this;
     }
 
     public TableBuilder<TModel> Small()
     {
-        _scale = Scale.Small;
+        _density = Density.Small;
         return this;
     }
 
     public TableBuilder<TModel> Medium()
     {
-        _scale = Scale.Medium;
+        _density = Density.Medium;
         return this;
     }
 
@@ -331,7 +331,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         Table RenderTable(TableRow[] tableRows)
         {
             var tableWidth = _width ?? Size.Full();
-            var table = new Table(tableRows).Width(tableWidth).Scale(_scale);
+            var table = new Table(tableRows).Width(tableWidth).Density(_density);
             return table;
         }
 

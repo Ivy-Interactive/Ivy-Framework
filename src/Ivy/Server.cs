@@ -201,7 +201,7 @@ public class Server
         return UseChrome(() => new DefaultSidebarChrome(settings));
     }
 
-    public Server UseChrome<T>() where T : ViewBase
+    public Server UseChrome<T>() where T : ViewBase, new()
     {
         return UseChrome((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
     }
@@ -248,7 +248,7 @@ public class Server
         return this;
     }
 
-    public Server UseErrorNotFound<T>() where T : ViewBase
+    public Server UseErrorNotFound<T>() where T : ViewBase, new()
     {
         return UseErrorNotFound((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
     }

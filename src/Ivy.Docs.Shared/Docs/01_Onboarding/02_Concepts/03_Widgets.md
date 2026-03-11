@@ -209,7 +209,7 @@ public class InputWidgetsDemo : ViewBase
                 new DateTimeInput<DateTime>(dateState).Placeholder("Select date")
             ).Title("DateTimeInput").Description("Date and time picker").Height(Size.Units(40))
             | new Card(
-                new FeedbackInput<int>(feedbackState).Variant(FeedbackInputVariant.Stars)
+                new FeedbackInput<int>(feedbackState).Stars()
             ).Title("Feedback").Description("Star rating").Height(Size.Units(40))
             | new Card(
                 colorState.ToColorInput().Variant(ColorInputVariant.Picker)

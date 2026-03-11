@@ -131,13 +131,5 @@ public static class DateRangeInputExtensions
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
-    public static DateRangeInputBase Value<T>(this DateRangeInputBase widget, T value)
-    {
-        if (widget is DateRangeInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not DateRangeInput<{typeof(T).Name}>");
-    }
 
 }

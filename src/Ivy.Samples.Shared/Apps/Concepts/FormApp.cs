@@ -577,12 +577,12 @@ public class FormExample : ViewBase
                         .Builder(m => m.ColorField, s => s.ToColorInput())
                         .Description(m => m.ColorField, "Pick a color that suits you.")
                         .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Json))
-                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputVariant.Stars))
-                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs))
-                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis))
+                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Stars())
+                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Thumbs())
+                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Emojis())
                 )
                 .Width(1 / 3f)
-                .Title("Small Scale - All Inputs")
+                .Title("Small Density - All Inputs")
                 | new Card(
                     mediumModel.ToForm()
                         .Medium()
@@ -637,12 +637,12 @@ public class FormExample : ViewBase
                         .Builder(m => m.ColorField, s => s.ToColorInput())
                         .Description(m => m.ColorField, "Pick a color that suits you.")
                         .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Javascript))
-                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputVariant.Stars))
-                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs))
-                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis))
+                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Stars())
+                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Thumbs())
+                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Emojis())
                 )
                 .Width(1 / 3f)
-                .Title("Medium Scale - All Inputs")
+                .Title("Medium Density - All Inputs")
                 | new Card(
                     largeModel.ToForm()
                         .Large()
@@ -697,12 +697,12 @@ public class FormExample : ViewBase
                         .Builder(m => m.ColorField, s => s.ToColorInput())
                         .Description(m => m.ColorField, "Pick a color that suits you.")
                         .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Sql))
-                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputVariant.Stars))
-                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs))
-                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis))
+                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Stars())
+                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Thumbs())
+                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Emojis())
                 )
                 .Width(1 / 3f)
-                .Title("Large Scale - All Inputs");
+                .Title("Large Density - All Inputs");
     }
 }
 

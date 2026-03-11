@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useCallback, useMemo } from 'react';
 import { useEventHandler } from '@/components/event-handler';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
   DateTimeInputWidgetProps,
   BaseVariantProps,
@@ -37,7 +37,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   nullable = false,
   invalid,
   format: formatProp,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -84,7 +84,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       nullable={nullable}
       invalid={invalid}
       format={formatProp}
-      scale={scale}
+      density={density}
       onDateChange={handleDateChange}
       onTimeChange={handleTimeChange}
       data-testid={dataTestId}

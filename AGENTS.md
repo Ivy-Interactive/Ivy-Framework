@@ -161,12 +161,12 @@ Ivy.Colors enum has the following values:
 
 Black, White, Slate, Gray, Zinc, Neutral, Stone, Red, Orange, Amber, Yellow, Lime, Green, Emerald, Teal, Cyan, Sky, Blue, Indigo, Violet, Purple, Fuchsia, Pink, Rose, Primary, Secondary, Destructive, Success, Warning, Info, Muted
 
-## Scale
+## Density
 
-All widgets support `.Scale(Scale.Small)`, `.Scale(Scale.Medium)`, `.Scale(Scale.Large)`.
+All widgets support `.Density(Density.Small)`, `.Density(Density.Medium)`, `.Density(Density.Large)`.
 Convenience methods: `.Small()`, `.Medium()`, `.Large()`.
-Scale adjusts the overall visual size of a widget (text, padding, etc.).
-There is no `ButtonSize` enum — use `Scale` for all widgets.
+Density adjusts the overall visual size of a widget (text, padding, etc.).
+There is no `ButtonSize` enum — use `Density` for all widgets.
 
 ## Size
 
@@ -182,7 +182,7 @@ Common Size values:
 - Size.Px(n) — exact pixels
 - Size.Fraction(0.5f) — percentage, Size.Half(), Size.Third()
 
-Size is NOT the same as Scale. Size controls dimensions; Scale controls visual density.
+Size is NOT the same as Density. Size controls dimensions; Density controls visual density.
 
 ## Event Handling
 

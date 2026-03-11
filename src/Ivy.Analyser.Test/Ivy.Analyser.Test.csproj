@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ivy.Analyser.csproj" />
+    <ProjectReference Include="..\Ivy.Analyser\Ivy.Analyser.csproj" />
   </ItemGroup>
 
 </Project>

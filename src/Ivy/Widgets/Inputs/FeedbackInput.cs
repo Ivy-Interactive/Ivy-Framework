@@ -123,13 +123,9 @@ public static class FeedbackInputExtensions
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
-    public static FeedbackInputBase Value<T>(this FeedbackInputBase widget, T value)
-    {
-        if (widget is FeedbackInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not FeedbackInput<{typeof(T).Name}>");
-    }
+    public static FeedbackInputBase Stars(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Stars };
+    public static FeedbackInputBase Thumbs(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Thumbs };
+    public static FeedbackInputBase Emojis(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Emojis };
+
 
 }

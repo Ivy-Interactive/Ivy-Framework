@@ -15,7 +15,7 @@ public abstract record WidgetBase<T> : AbstractWidget where T : WidgetBase<T>
 
     [Prop] public Size? Height { get; set; }
 
-    [Prop] public Scale? Scale { get; set; }
+    [Prop] public Density? Density { get; set; }
 
     [Prop, ScaffoldColumn(false)] public bool Visible { get; set; } = true;
 
@@ -74,13 +74,13 @@ public static class WidgetBaseExtensions
         return widget with { Width = val, Height = val };
     }
 
-    public static T Scale<T>(this T widget, Scale scale) where T : WidgetBase<T> => widget with { Scale = scale };
+    public static T Density<T>(this T widget, Density density) where T : WidgetBase<T> => widget with { Density = density };
 
-    public static T Small<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Ivy.Scale.Small };
+    public static T Small<T>(this T widget) where T : WidgetBase<T> => widget with { Density = Ivy.Density.Small };
 
-    public static T Medium<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Ivy.Scale.Medium };
+    public static T Medium<T>(this T widget) where T : WidgetBase<T> => widget with { Density = Ivy.Density.Medium };
 
-    public static T Large<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Ivy.Scale.Large };
+    public static T Large<T>(this T widget) where T : WidgetBase<T> => widget with { Density = Ivy.Density.Large };
 
     public static T Visible<T>(this T widget, bool visible = true) where T : WidgetBase<T> => widget with { Visible = visible };
 
@@ -90,18 +90,18 @@ public static class WidgetBaseExtensions
 
     public static T TestId<T>(this T widget, string testId) where T : WidgetBase<T> => widget with { TestId = testId };
 
-    internal static void SetScaleViaReflection(object input, Scale? scale)
+    internal static void SetDensityViaReflection(object input, Density? density)
     {
         var type = input.GetType();
         var prop = type.GetProperty(
-            nameof(Scale),
+            nameof(Density),
             BindingFlags.Instance | BindingFlags.Public
         );
 
         if (prop is null) return;
         if (!prop.CanWrite) return;
-        if (!prop.PropertyType.IsAssignableFrom(typeof(Scale))) return;
+        if (!prop.PropertyType.IsAssignableFrom(typeof(Density))) return;
 
-        prop.SetValue(input, scale);
+        prop.SetValue(input, density);
     }
 }

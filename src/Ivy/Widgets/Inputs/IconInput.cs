@@ -110,13 +110,5 @@ public static class IconInputExtensions
             return ValueTask.CompletedTask;
         });
 
-    public static IconInputBase Value<T>(this IconInputBase widget, T value)
-    {
-        if (widget is IconInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not IconInput<{typeof(T).Name}>");
-    }
 
 }
