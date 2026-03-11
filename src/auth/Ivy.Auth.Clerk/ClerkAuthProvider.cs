@@ -2,11 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Ivy.Auth.Clerk.ApiClient;
-using System.Text;
-using Microsoft.AspNetCore.WebUtilities;
-using Ivy.Auth.Clerk.ApiClient.Models;
 using Ivy.Auth.Clerk.ApiClient.Responses;
-using System.Text.Json;
 
 namespace Ivy.Auth.Clerk;
 
