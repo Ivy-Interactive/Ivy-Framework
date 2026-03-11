@@ -222,6 +222,10 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
         var jwt = authSession.AuthToken?.AccessToken;
 
+        var sessionData = authSession.GetAuthSessionData<ClerkAuthSessionData>() ?? new();
+        sessionData.PendingSignInId = null;
+        authSession.SetAuthSessionData(sessionData);
+
         try
         {
             var (principal, _) = await ValidateToken(jwt, lenientLifetimeValidation: true, cancellationToken)
