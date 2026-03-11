@@ -63,19 +63,31 @@ public static class AuthSessionExtensions
         return true;
     }
 
-    public static T? GetAuthSessionData<T>(this IAuthTokenHandlerSession authSession)
+    public static T? GetAuthSessionData<T>(this IAuthTokenHandlerSession authSession) where T : class
     {
         if (string.IsNullOrEmpty(authSession.AuthSessionData))
         {
-            return default;
+            return null;
         }
 
-        return typeof(T) == typeof(string)
-            ? (T)(object)authSession.AuthSessionData
-            : JsonSerializer.Deserialize<T>(authSession.AuthSessionData, JsonHelper.DefaultOptions);
+        if (typeof(T) == typeof(string))
+        {
+            return (T)(object)authSession.AuthSessionData;
+        }
+        else
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<T>(authSession.AuthSessionData, JsonHelper.DefaultOptions);
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
+        }
     }
 
-    public static void SetAuthSessionData<T>(this IAuthTokenHandlerSession authSession, T? data)
+    public static void SetAuthSessionData<T>(this IAuthTokenHandlerSession authSession, T? data) where T : class
     {
         if (data == null)
         {
