@@ -159,7 +159,6 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
         // Then abandon the session (show error view)
         var session = _sessionStore.Sessions[_connectionId];
         await SessionHelpers.AbandonSessionAsync(
-            _sessionStore,
             session,
             _contentBuilder,
             resetTokenAndReload: true,

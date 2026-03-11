@@ -255,7 +255,7 @@ public class AuthController() : Controller
     {
         foreach (var session in GetMachineSessions(sessionStore, machineId, excludeConnectionId))
         {
-            await SessionHelpers.AbandonSessionAsync(sessionStore, session, contentBuilder, resetTokenAndReload: true, triggerMachineReload: false, logger, "TriggerMachineLogout");
+            await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload: true, triggerMachineReload: false, logger, "TriggerMachineLogout");
         }
     }
 }

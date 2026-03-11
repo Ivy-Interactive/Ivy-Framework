@@ -594,11 +594,10 @@ public class AppHub(
         var authSession = authService.GetAuthSession();
 
         var strategy = new MainAuthTokenRefreshStrategy(
-            connectionId,
             authProvider,
             authService,
             authSession,
-            sessionStore,
+            session,
             contentBuilder,
             logger);
 
