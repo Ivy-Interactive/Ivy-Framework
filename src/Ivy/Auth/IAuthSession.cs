@@ -1,8 +1,7 @@
-// ReSharper disable once CheckNamespace
-
 using Ivy.Core.HttpTunneling;
 using Microsoft.Extensions.DependencyInjection;
 
+// ReSharper disable once CheckNamespace
 namespace Ivy;
 
 public interface IAuthSession : IAuthTokenHandlerSession
