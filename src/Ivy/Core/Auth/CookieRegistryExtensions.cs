@@ -114,7 +114,7 @@ public static class CookieRegistryExtensions
 
             if (authToken.Tag != null)
             {
-                var tagJson = JsonSerializer.Serialize(authToken.Tag, JsonHelper.DefaultOptions);
+                var tagJson = JsonSerializer.Serialize(authToken.Tag, JsonHelper.IgnoreNullOptions);
                 cookies.Append(tagName, tagJson, cookieOptions);
             }
             else
@@ -124,7 +124,7 @@ public static class CookieRegistryExtensions
         }
     }
 
-    private static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData)
+    public static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData)
     {
         var authSessionDataName = "auth_session_data";
 
@@ -173,7 +173,7 @@ public static class CookieRegistryExtensions
             // Store tag if present
             if (session.AuthToken?.Tag != null)
             {
-                var tagJson = JsonSerializer.Serialize(session.AuthToken.Tag, JsonHelper.DefaultOptions);
+                var tagJson = JsonSerializer.Serialize(session.AuthToken.Tag, JsonHelper.IgnoreNullOptions);
                 cookies.Append(tagName, tagJson, cookieOptions);
             }
             else

@@ -78,7 +78,7 @@ public static class AuthSessionExtensions
         {
             try
             {
-                return JsonSerializer.Deserialize<T>(authSession.AuthSessionData, JsonHelper.DefaultOptions);
+                return JsonSerializer.Deserialize<T>(authSession.AuthSessionData, JsonHelper.IgnoreNullOptions);
             }
             catch (JsonException)
             {
@@ -99,7 +99,7 @@ public static class AuthSessionExtensions
         }
         else
         {
-            authSession.AuthSessionData = JsonSerializer.Serialize(data, JsonHelper.DefaultOptions);
+            authSession.AuthSessionData = JsonSerializer.Serialize(data, JsonHelper.IgnoreNullOptions);
         }
     }
 }
