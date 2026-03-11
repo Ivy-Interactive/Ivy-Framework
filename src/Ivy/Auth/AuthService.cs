@@ -42,12 +42,6 @@ public class AuthService : AuthTokenHandlerService, IAuthService
             _authProvider.LoginAsync(_authSession, email, password, ct), cancellationToken);
         _authSession.AuthToken = token;
 
-        // Clear removed OAuth providers list on successful login
-        if (token != null)
-        {
-            _sessionStore.ClearRemovedOAuthProviders(_machineId!);
-        }
-
         if (_authSession.HasChangedSince(oldSession))
         {
             SetAuthCookies(reloadPage: _authSession.AuthToken != oldSession.AuthToken);
@@ -97,18 +91,12 @@ public class AuthService : AuthTokenHandlerService, IAuthService
         // Capture OAuth providers before clearing so we can delete their cookies
         var providersToDelete = _authSession.OAuthSessions.Keys.ToList();
 
-        // Mark OAuth providers as removed globally so other tabs know not to re-add them
-        foreach (var provider in providersToDelete)
-        {
-            _sessionStore.MarkOAuthProviderRemoved(_machineId!, provider);
-        }
-
         _authSession.AuthToken = null;
         _authSession.ClearOAuthSessions();
         _removedOAuthSessions.Clear();
 
         // Pass the captured providers to delete their cookies
-        var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession, _machineId!, providersToDelete);
+        var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession, providersToDelete);
         _client.SetAuthCookies(cookieJarId, reloadPage: true, triggerMachineReload: null);
     }
 
@@ -205,7 +193,7 @@ public class AuthService : AuthTokenHandlerService, IAuthService
 
     public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession, _machineId!);
+        var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession);
         _client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 }

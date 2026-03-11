@@ -70,7 +70,7 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
             _logger.LogInformation("Successfully refreshed OAuth token for {Provider}", _provider);
 
             // Update parent session cookies to include the refreshed OAuth token
-            var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession, _machineId);
+            var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession);
             _client.SetAuthCookies(cookieJarId, reloadPage: false, triggerMachineReload: null);
 
             return true;

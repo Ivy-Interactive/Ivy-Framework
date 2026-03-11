@@ -17,7 +17,6 @@ public class AppSessionStore : IDisposable
 {
     public readonly ConcurrentDictionary<string, AppSession> Sessions = new();
     private readonly ConcurrentDictionary<string, CookieJarEntry> _cookieJarEntries = new();
-    private readonly ConcurrentDictionary<string, HashSet<string>> _removedOAuthProviders = new(); // machineId -> set of removed providers
     private readonly TimeSpan _cookieJarLifetime = TimeSpan.FromMinutes(1);
     private readonly Timer _cookieJarCleanupTimer;
 
@@ -70,32 +69,6 @@ public class AppSessionStore : IDisposable
         {
             _cookieJarEntries.TryRemove(key, out _);
         }
-    }
-
-    public void MarkOAuthProviderRemoved(string machineId, string provider)
-    {
-        var removed = _removedOAuthProviders.GetOrAdd(machineId, _ => new HashSet<string>());
-        lock (removed)
-        {
-            removed.Add(provider);
-        }
-    }
-
-    public void ClearRemovedOAuthProviders(string machineId)
-    {
-        _removedOAuthProviders.TryRemove(machineId, out _);
-    }
-
-    public HashSet<string> GetRemovedOAuthProviders(string machineId)
-    {
-        if (_removedOAuthProviders.TryGetValue(machineId, out var removed))
-        {
-            lock (removed)
-            {
-                return new HashSet<string>(removed);
-            }
-        }
-        return new HashSet<string>();
     }
 
     public void Dispose()

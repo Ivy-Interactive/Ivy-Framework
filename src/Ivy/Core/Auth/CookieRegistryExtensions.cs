@@ -21,7 +21,7 @@ public static class CookieRegistryExtensions
         return null;
     }
 
-    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession, string? machineId = null, IEnumerable<string>? providersToDelete = null)
+    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession, IEnumerable<string>? providersToDelete = null)
     {
         var cookies = new CookieJar();
         cookies.AddCookiesForAuthToken(authSession.AuthToken, providersToDelete);
@@ -29,23 +29,21 @@ public static class CookieRegistryExtensions
 
         // Filter out OAuth providers that have been globally removed (if machineId is provided)
         IReadOnlyDictionary<string, IAuthTokenHandlerSession> sessionsToWrite = authSession.OAuthSessions;
-        HashSet<string> removedProviders = new();
+        HashSet<string>? removedProviders = providersToDelete != null
+            ? new(providersToDelete)
+            : null;
 
-        if (machineId != null)
+        if (removedProviders != null && removedProviders.Count > 0)
         {
-            removedProviders = sessionStore.GetRemovedOAuthProviders(machineId);
-            if (removedProviders.Count > 0)
-            {
-                sessionsToWrite = authSession.OAuthSessions
-                    .Where(kvp => !removedProviders.Contains(kvp.Key))
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            }
+            sessionsToWrite = authSession.OAuthSessions
+                .Where(kvp => !removedProviders.Contains(kvp.Key))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
         cookies.AddCookiesForOAuthSessions(sessionsToWrite);
 
         // Also delete cookies for removed providers
-        if (removedProviders.Count > 0)
+        if (removedProviders != null && removedProviders.Count > 0)
         {
             var cookieOptions = CreateAuthCookieOptions();
             foreach (var provider in removedProviders)
@@ -91,6 +89,7 @@ public static class CookieRegistryExtensions
                 var cookieOptions = CreateAuthCookieOptions();
                 foreach (var provider in providersToDelete)
                 {
+                    Console.WriteLine($"Deleting cookies for removed OAuth provider: {provider}");
                     cookies.Delete($"{provider}_access_token", cookieOptions);
                     cookies.Delete($"{provider}_refresh_token", cookieOptions);
                     cookies.Delete($"{provider}_auth_tag", cookieOptions);
@@ -144,11 +143,14 @@ public static class CookieRegistryExtensions
     {
         var cookieOptions = CreateAuthCookieOptions();
 
+        Console.WriteLine("blah:");
+
         foreach (var (provider, session) in oauthSessions)
         {
             var accessTokenName = $"{provider}_access_token";
             var refreshTokenName = $"{provider}_refresh_token";
             var tagName = $"{provider}_auth_tag";
+            Console.WriteLine($"    Adding cookies for OAuth session: provider={provider}, accessToken={(string.IsNullOrEmpty(session.AuthToken?.AccessToken) ? "null/empty" : "present")}");
 
             // Store access token
             if (!string.IsNullOrEmpty(session.AuthToken?.AccessToken))
