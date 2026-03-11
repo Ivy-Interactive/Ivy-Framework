@@ -332,9 +332,9 @@ public class FormBuilder<TModel> : ViewBase
     {
         var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange: false);
 
-         // Per-form signal instances so Submit validates only this form's fields (not every field on the page).
-        var validationSignal = new FormValidateSignal();
-        var submitSignal = new FormSubmitSignal();
+        // Per-form signal instances (stable across builds via UseRef) so Submit validates only this form's fields.
+        var validationSignal = context.UseRef(() => new FormValidateSignal()).Value;
+        var submitSignal = context.UseRef(() => new FormSubmitSignal()).Value;
         var updateSignal = context.UseSignal<FormUpdateSignal, Unit, Unit>();
         var invalidFields = context.UseState(0);
         var fields = _fields
@@ -367,7 +367,8 @@ public class FormBuilder<TModel> : ViewBase
         async Task<bool> OnSubmit()
         {
             var results = await validationSignal.Send(default);
-            if (results.All(e => e))
+            var allValid = results.Length == fields.Length && results.All(e => e);
+            if (allValid)
             {
                 if (_onSubmit != null)
                 {
@@ -377,7 +378,10 @@ public class FormBuilder<TModel> : ViewBase
                 invalidFields.Set(0);
                 return true;
             }
-            invalidFields.Set(results.Count(e => !e));
+            var invalidCount = results.Length == fields.Length
+                ? results.Count(e => !e)
+                : fields.Length;
+            invalidFields.Set(invalidCount);
             return false;
         }
 
