@@ -7,34 +7,46 @@ namespace Ivy.Core.Auth;
 public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
 {
     private readonly string _connectionId;
-    private readonly IOAuthTokenService _tokenService;
+    private readonly string _provider;
+    private readonly IAuthTokenHandlerService _tokenService;
+    private readonly IAuthSession _parentSession;
+    private readonly string _machineId;
     private readonly IAuthService _authService;
     private readonly AppSessionStore _sessionStore;
     private readonly IContentBuilder _contentBuilder;
+    private readonly IClientProvider _client;
     private readonly ILogger _logger;
 
     public string LoggingName { get; }
 
     public OAuthTokenRefreshStrategy(
         string connectionId,
-        IOAuthTokenService tokenService,
+        string provider,
+        IAuthTokenHandlerService tokenService,
+        IAuthSession parentSession,
+        string machineId,
+        IClientProvider client,
         IAuthService authService,
         AppSessionStore sessionStore,
         IContentBuilder contentBuilder,
         ILogger logger)
     {
         _connectionId = connectionId;
+        _provider = provider;
         _tokenService = tokenService;
+        _parentSession = parentSession;
+        _machineId = machineId;
+        _client = client;
         _authService = authService;
         _sessionStore = sessionStore;
         _contentBuilder = contentBuilder;
         _logger = logger;
-        LoggingName = $"OAuth[{tokenService.Provider}]";
+        LoggingName = $"OAuth[{provider}]";
     }
 
     public bool HasToken()
     {
-        return _tokenService.HasToken();
+        return _tokenService.GetCurrentToken() != null;
     }
 
     public async Task<bool> ValidateTokenAsync(CancellationToken cancellationToken = default)
@@ -49,13 +61,30 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
 
     public async Task<bool> RefreshTokenAsync(CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("Attempting to refresh OAuth token for {Provider}", _provider);
+
         var result = await _tokenService.RefreshAccessTokenAsync(cancellationToken);
-        return result != null;
+
+        if (result != null)
+        {
+            _logger.LogInformation("Successfully refreshed OAuth token for {Provider}", _provider);
+
+            // Update parent session cookies to include the refreshed OAuth token
+            var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession, _machineId);
+            _client.SetAuthCookies(cookieJarId, reloadPage: false, triggerMachineReload: null);
+
+            return true;
+        }
+        else
+        {
+            _logger.LogWarning("Failed to refresh OAuth token for {Provider}", _provider);
+            return false;
+        }
     }
 
     public async Task<bool> OnRefreshFailedAsync()
     {
-        _logger.LogWarning("OAuthTokenRefreshLoop[{Provider}]: Failed to refresh token for {ConnectionId}, attempting recovery", _tokenService.Provider, _connectionId);
+        _logger.LogWarning("OAuthTokenRefreshLoop[{Provider}]: Failed to refresh token for {ConnectionId}, attempting recovery", _provider, _connectionId);
 
         const int maxRetries = 3;
         const int retryDelaySeconds = 5;
@@ -65,15 +94,15 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
             try
             {
                 _logger.LogInformation("OAuthTokenRefreshLoop[{Provider}]: Recovery attempt {Attempt}/{MaxRetries} for {ConnectionId}",
-                    _tokenService.Provider, attempt, maxRetries, _connectionId);
+                    _provider, attempt, maxRetries, _connectionId);
 
                 // Try to re-fetch OAuth provider sessions from the main auth provider (skip cache to force fresh fetch)
                 var result = await _authService.GetOAuthSessionsAsync(skipCache: true, CancellationToken.None);
 
-                if (result.Sessions != null && result.Sessions.ContainsKey(_tokenService.Provider))
+                if (result.Sessions != null && result.Sessions.ContainsKey(_provider))
                 {
                     _logger.LogInformation("OAuthTokenRefreshLoop[{Provider}]: Successfully recovered token for {ConnectionId}, continuing loop",
-                        _tokenService.Provider, _connectionId);
+                        _provider, _connectionId);
                     return true; // Continue the loop with the recovered token
                 }
 
@@ -81,13 +110,13 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
                 if (!result.CanRetry)
                 {
                     _logger.LogError("OAuthTokenRefreshLoop[{Provider}]: Provider indicates retry will not succeed for {ConnectionId}, abandoning session",
-                        _tokenService.Provider, _connectionId);
+                        _provider, _connectionId);
                     await LogoutAsync();
                     return false; // Exit the loop
                 }
 
                 _logger.LogWarning("OAuthTokenRefreshLoop[{Provider}]: Recovery attempt {Attempt} failed - provider not in returned sessions for {ConnectionId}",
-                    _tokenService.Provider, attempt, _connectionId);
+                    _provider, attempt, _connectionId);
 
                 if (attempt < maxRetries)
                 {
@@ -97,11 +126,11 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
             catch (Exception ex)
             {
                 _logger.LogError(ex, "OAuthTokenRefreshLoop[{Provider}]: Recovery attempt {Attempt} threw exception for {ConnectionId}",
-                    _tokenService.Provider, attempt, _connectionId);
+                    _provider, attempt, _connectionId);
 
                 // If we can't even contact the auth provider, the main session is likely invalid
                 _logger.LogError("OAuthTokenRefreshLoop[{Provider}]: Cannot communicate with auth provider for {ConnectionId}, abandoning session",
-                    _tokenService.Provider, _connectionId);
+                    _provider, _connectionId);
                 await LogoutAsync();
                 return false; // Exit the loop
             }
@@ -109,7 +138,7 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
 
         // All recovery attempts failed - log out the main auth provider
         _logger.LogError("OAuthTokenRefreshLoop[{Provider}]: All recovery attempts failed for {ConnectionId}, abandoning session",
-            _tokenService.Provider, _connectionId);
+            _provider, _connectionId);
         await LogoutAsync();
         return false; // Exit the loop
     }
@@ -124,7 +153,7 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
         catch (Exception ex)
         {
             _logger.LogError(ex, "OAuthTokenRefreshLoop[{Provider}]: Error during logout for {ConnectionId}",
-                _tokenService.Provider, _connectionId);
+                _provider, _connectionId);
         }
 
         // Then abandon the session (show error view)
@@ -136,12 +165,12 @@ public class OAuthTokenRefreshStrategy : ITokenRefreshStrategy
             resetTokenAndReload: true,
             triggerMachineReload: true,
             _logger,
-            $"OAuthTokenRefreshLoop[{_tokenService.Provider}]");
+            $"OAuthTokenRefreshLoop[{_provider}]");
     }
 
     public Task<bool> OnTokenLostAsync()
     {
-        _logger.LogInformation("OAuthTokenRefreshLoop[{Provider}]: Token lost for {ConnectionId}, exiting loop", _tokenService.Provider, _connectionId);
+        _logger.LogInformation("OAuthTokenRefreshLoop[{Provider}]: Token lost for {ConnectionId}, exiting loop", _provider, _connectionId);
         return Task.FromResult(false); // Exit the loop
     }
 }

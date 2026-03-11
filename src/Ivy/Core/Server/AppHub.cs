@@ -640,14 +640,12 @@ public class AppHub(
 
             var client = session.AppServices.GetRequiredService<IClientProvider>();
             var oauthLogger = session.AppServices.GetRequiredService<ILoggerFactory>()
-                .CreateLogger<OAuthTokenService>();
+                .CreateLogger<AuthTokenHandlerService>();
 
             // Create a service instance for this provider
-            var oauthTokenService = new OAuthTokenService(
-                provider,
+            var tokenService = new AuthTokenHandlerService(
                 handler,
                 providerSession,
-                authSession,
                 client,
                 sessionStore,
                 session.MachineId,
@@ -655,7 +653,11 @@ public class AppHub(
 
             var strategy = new OAuthTokenRefreshStrategy(
                 connectionId,
-                oauthTokenService,
+                provider,
+                tokenService,
+                authSession,
+                session.MachineId,
+                client,
                 authService,
                 sessionStore,
                 contentBuilder,
