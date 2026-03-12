@@ -630,6 +630,7 @@ public class Server
             HotReloadService.UpdateApplicationEvent += (types) =>
             {
                 AppRepository.Reload();
+                CheckForAppIdCollisions(app);
                 var hubContext = app.Services.GetService<IHubContext<AppHub>>()!;
                 hubContext.Clients.All.SendAsync("HotReload", cancellationToken: cts.Token);
 
