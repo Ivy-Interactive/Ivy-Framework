@@ -8,25 +8,23 @@ public class NumberInputApp : SampleBase
     {
         var nullIntValue = UseState<int?>();
         var intValue = UseState(12345);
-
         var onChangedState = UseState(0);
         var onChangeLabel = UseState("");
         var onBlurState = UseState(0);
         var onBlurLabel = UseState("");
-
-        // Moved from CreateCurrencyExamples
         var usdValue = UseState(1234.56m);
         var eurValue = UseState(987.65m);
         var gbpValue = UseState(567.89m);
         var jpyValue = UseState(12345m);
         var nullCurrencyValue = UseState<decimal?>(() => null);
-
         var nullIntInvalid = UseState<int?>();
-
-        // Create a currency value for size examples
         var sizeExampleCurrency = UseState(1234.56m);
+        var priceValue = UseState(99.99m);
+        var weightValue = UseState(5.5);
+        var temperatureValue = UseState(22);
+        var percentValue = UseState(0.75);
 
-        // Moved from CreateNumericTypeTests
+        // Numeric type test states
         var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
             // Signed integer types
@@ -44,14 +42,7 @@ public class NumberInputApp : SampleBase
         };
 
         var dataBinding = CreateNumericTypeTests(numericTypes);
-
         var currencyExamples = CreateCurrencyExamples((IState<decimal>)usdValue, (IState<decimal>)eurValue, (IState<decimal>)gbpValue, (IState<decimal>)jpyValue, (IState<decimal?>)nullCurrencyValue);
-
-        // Prefix and Suffix examples
-        var priceValue = UseState(99.99m);
-        var weightValue = UseState(5.5);
-        var temperatureValue = UseState(22);
-        var percentValue = UseState(0.75);
 
 
 

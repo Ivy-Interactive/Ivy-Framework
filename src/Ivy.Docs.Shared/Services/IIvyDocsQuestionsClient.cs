@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Ivy.Docs.Shared.Services;
 
 /// <summary>
-/// Client for the Ivy docs AI questions API (e.g. staging.mcp.ivy.app/questions).
+/// Client for the Ivy docs AI questions API (e.g. mcp.ivy.app/questions).
 /// </summary>
 public interface IIvyDocsQuestionsClient
 {

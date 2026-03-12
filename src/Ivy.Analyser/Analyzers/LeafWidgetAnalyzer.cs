@@ -44,8 +44,8 @@ namespace Ivy.Analyser.Analyzers
             description:
             "This widget only accepts children of a specific type. Passing a different type via the | operator will throw NotSupportedException at runtime.");
 
-        private static readonly HashSet<string> LeafWidgetTypes = new HashSet<string>
-        {
+        private static readonly HashSet<string> LeafWidgetTypes =
+        [
             "Ivy.Button",
             "Ivy.Badge",
             "Ivy.Progress",
@@ -62,15 +62,15 @@ namespace Ivy.Analyser.Analyzers
             "Ivy.PieChart",
             "Ivy.BarChart",
             "Ivy.AreaChart",
-            "Ivy.Tooltip",
-        };
+            "Ivy.Tooltip"
+        ];
 
-        private static readonly HashSet<string> LeafInterfaceTypes = new HashSet<string>
+        private static readonly HashSet<string> LeafInterfaceTypes = new()
         {
             "Ivy.IInput",
         };
 
-        private static readonly HashSet<string> SingleChildWidgetTypes = new HashSet<string>
+        private static readonly HashSet<string> SingleChildWidgetTypes = new()
         {
             "Ivy.Card",
             "Ivy.Sheet",
@@ -187,12 +187,12 @@ namespace Ivy.Analyser.Analyzers
             {
                 foreach (var attr in current.GetAttributes())
                 {
-                    if (attr.AttributeClass != null
-                        && attr.AttributeClass.Name == "ChildTypeAttribute"
-                        && attr.ConstructorArguments.Length == 1
-                        && attr.ConstructorArguments[0].Value is ITypeSymbol allowedType)
+                    if (attr.AttributeClass is { Name: "ChildTypeAttribute" })
                     {
-                        return allowedType;
+                        if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol allowedType)
+                        {
+                            return allowedType;
+                        }
                     }
                 }
 

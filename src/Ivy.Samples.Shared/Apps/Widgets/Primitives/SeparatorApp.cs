@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.Minus, path: ["Widgets", "Primitives"], searchHints: ["divider", "line", "horizontal", "vertical", "separator", "hr"])]

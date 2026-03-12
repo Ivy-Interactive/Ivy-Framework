@@ -172,7 +172,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
             .Variant(ButtonVariant.Destructive)
             .Icon(Icons.Trash)
             .Width(Size.Grow())
-            .WithConfirm($"Are you sure you want to delete product '{product.Name}'?", "Delete Product");
+            .WithConfirm($"Are you sure you want to delete product '{product.Name}'?", "Delete Product", confirmLabel: "Delete", destructive: true);
 
         var editBtn = new Button("Edit")
             .Variant(ButtonVariant.Outline)

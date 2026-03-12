@@ -74,6 +74,8 @@ public static class WidgetBaseExtensions
         return widget with { Width = val, Height = val };
     }
 
+    public static T Grow<T>(this T widget) where T : WidgetBase<T> => widget.Width(Ivy.Size.Grow());
+
     public static T Density<T>(this T widget, Density density) where T : WidgetBase<T> => widget with { Density = density };
 
     public static T Small<T>(this T widget) where T : WidgetBase<T> => widget with { Density = Ivy.Density.Small };

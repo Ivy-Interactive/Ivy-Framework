@@ -115,7 +115,7 @@ var mutator = UseMutation("user-profile");
 - [UseQuery](./09_UseQuery.md)
 - [Rules of Hooks](../02_RulesOfHooks.md)
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -218,6 +218,33 @@ public class StatsDisplay : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I use UseMutation for async operations in Ivy?
+</Summary>
+<Body>
+
+`UseMutation` runs an async function on demand (e.g., when a button is clicked) and tracks loading/error state:
+
+```csharp
+var mutation = UseMutation(async () =>
+{
+    var result = await myService.CallApiAsync(input.Value);
+    output.Set(result);
+});
+
+return Layout.Vertical()
+    | input.ToTextInput().Placeholder("Enter input")
+    | new Button("Submit", mutation.Trigger).Loading(mutation.IsLoading)
+    | (mutation.Error != null ? Callout.Error(mutation.Error.Message) : null)
+    | Text.P(output.Value);
+```
+
+`mutation.Trigger` is the action to invoke. `mutation.IsLoading` indicates if the operation is in progress. `mutation.Error` contains any exception that was thrown.
 
 </Body>
 </Details>

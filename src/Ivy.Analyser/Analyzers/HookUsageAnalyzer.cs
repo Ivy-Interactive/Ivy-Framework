@@ -13,8 +13,13 @@ namespace Ivy.Analyser.Analyzers
     {
         public const string DiagnosticId = "IVYHOOK001";
         private const string Title = "Invalid Ivy Hook Usage";
-        private const string MessageFormat = "Ivy hook '{0}' can only be used directly inside the Build() method";
+        private const string MessageFormat = "Ivy hook '{0}' must be called at the top level of the Build() method — not inside lambdas, local functions, or helper methods. Hooks must always execute in the same order on every render.";
         private const string Description = "Ivy hooks must be called directly inside the Build() method, not inside lambdas, local functions, or other methods.";
+
+        public const string DiagnosticIdNestedClosure = "IVYHOOK001B";
+        private const string TitleNestedClosure = "Ivy Hook Used in Nested Closure";
+        private const string MessageFormatNestedClosure = "Ivy hook '{0}' is inside a {1} within Build() — move it to the top level of Build(). Hooks must always execute in the same order on every render.";
+        private const string DescriptionNestedClosure = "Ivy hooks cannot be called inside lambdas, local functions, or anonymous methods even when those are defined within Build(). Move the hook call to the top level of Build().";
         private const string Category = "Usage";
 
         public const string DiagnosticIdConditional = "IVYHOOK002";
@@ -50,6 +55,15 @@ namespace Ivy.Analyser.Analyzers
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: Description);
+
+        private static readonly DiagnosticDescriptor RuleNestedClosure = new DiagnosticDescriptor(
+            DiagnosticIdNestedClosure,
+            TitleNestedClosure,
+            MessageFormatNestedClosure,
+            Category,
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true,
+            description: DescriptionNestedClosure);
 
         private static readonly DiagnosticDescriptor RuleConditional = new DiagnosticDescriptor(
             DiagnosticIdConditional,
@@ -122,6 +136,7 @@ namespace Ivy.Analyser.Analyzers
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
             Rule,
+            RuleNestedClosure,
             RuleConditional,
             RuleLoop,
             RuleSwitch,
@@ -151,10 +166,26 @@ namespace Ivy.Analyser.Analyzers
                 return;
             }
 
-            if (!IsValidHookUsage(invocation))
+            var hookUsage = CheckHookUsage(invocation);
+            if (hookUsage != HookUsageResult.Valid)
             {
-                var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), methodName);
-                context.ReportDiagnostic(diagnostic);
+                if (hookUsage == HookUsageResult.OutsideBuildMethod)
+                {
+                    var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), methodName);
+                    context.ReportDiagnostic(diagnostic);
+                }
+                else
+                {
+                    var closureKind = hookUsage switch
+                    {
+                        HookUsageResult.NestedInLambda => "lambda",
+                        HookUsageResult.NestedInLocalFunction => "local function",
+                        HookUsageResult.NestedInAnonymousMethod => "anonymous method",
+                        _ => "closure"
+                    };
+                    var diagnostic = Diagnostic.Create(RuleNestedClosure, invocation.GetLocation(), methodName, closureKind);
+                    context.ReportDiagnostic(diagnostic);
+                }
                 return;
             }
 
@@ -222,32 +253,72 @@ namespace Ivy.Analyser.Analyzers
             return null;
         }
 
+        private enum HookUsageResult
+        {
+            Valid,
+            OutsideBuildMethod,
+            NestedInLambda,
+            NestedInLocalFunction,
+            NestedInAnonymousMethod,
+        }
+
         private static bool IsValidHookMethod(string methodName)
         {
             return methodName == "Build" || methodName == "BuildSample";
         }
 
-        private static bool IsValidHookUsage(InvocationExpressionSyntax invocation)
+        private static HookUsageResult CheckHookUsage(InvocationExpressionSyntax invocation)
         {
             var current = invocation.Parent;
 
             while (current != null)
             {
-                if (current is LambdaExpressionSyntax ||
-                    current is LocalFunctionStatementSyntax ||
-                    current is AnonymousMethodExpressionSyntax)
+                if (current is LambdaExpressionSyntax lambda)
                 {
-                    return false;
+                    // FuncView/MemoizedFuncView lambdas ARE Build methods — hooks are valid inside them
+                    if (IsFuncViewBuilderLambda(lambda))
+                    {
+                        return HookUsageResult.Valid;
+                    }
+                    return HookUsageResult.NestedInLambda;
+                }
+
+                if (current is LocalFunctionStatementSyntax)
+                {
+                    return HookUsageResult.NestedInLocalFunction;
+                }
+
+                if (current is AnonymousMethodExpressionSyntax)
+                {
+                    return HookUsageResult.NestedInAnonymousMethod;
                 }
 
                 if (current is MethodDeclarationSyntax method)
                 {
-                    return IsValidHookMethod(method.Identifier.Text);
+                    return IsValidHookMethod(method.Identifier.Text)
+                        ? HookUsageResult.Valid
+                        : HookUsageResult.OutsideBuildMethod;
                 }
 
                 current = current.Parent;
             }
 
+            return HookUsageResult.OutsideBuildMethod;
+        }
+
+        private static bool IsFuncViewBuilderLambda(LambdaExpressionSyntax lambda)
+        {
+            // Check if lambda is an argument to: new FuncView(...) or new MemoizedFuncView(...)
+            if (lambda.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: ObjectCreationExpressionSyntax creation } })
+            {
+                var typeName = creation.Type switch
+                {
+                    IdentifierNameSyntax id => id.Identifier.Text,
+                    QualifiedNameSyntax qualified => qualified.Right.Identifier.Text,
+                    _ => null
+                };
+                return typeName is "FuncView" or "MemoizedFuncView";
+            }
             return false;
         }
 
@@ -267,6 +338,11 @@ namespace Ivy.Analyser.Analyzers
                 }
 
                 if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
+                {
+                    return false;
+                }
+
+                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
                 {
                     return false;
                 }
@@ -296,6 +372,11 @@ namespace Ivy.Analyser.Analyzers
                     return false;
                 }
 
+                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
+                {
+                    return false;
+                }
+
                 current = current.Parent;
             }
 
@@ -318,6 +399,11 @@ namespace Ivy.Analyser.Analyzers
                     return false;
                 }
 
+                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
+                {
+                    return false;
+                }
+
                 current = current.Parent;
             }
 
@@ -327,30 +413,31 @@ namespace Ivy.Analyser.Analyzers
         private static bool IsNotAtTopOfMethod(InvocationExpressionSyntax invocation)
         {
             var current = invocation.Parent;
-            MethodDeclarationSyntax? buildMethod = null;
 
             while (current != null)
             {
                 if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
                 {
-                    buildMethod = method;
-                    break;
+                    return method.Body != null && CheckNotAtTop(invocation, method.Body.Statements);
                 }
+
+                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
+                {
+                    if (lambda.Body is BlockSyntax lambdaBlock)
+                    {
+                        return CheckNotAtTop(invocation, lambdaBlock.Statements);
+                    }
+                    return false;
+                }
+
                 current = current.Parent;
             }
 
-            if (buildMethod == null)
-            {
-                return false;
-            }
+            return false;
+        }
 
-            var body = buildMethod.Body;
-            if (body == null)
-            {
-                return false;
-            }
-
-            var statements = body.Statements;
+        private static bool CheckNotAtTop(InvocationExpressionSyntax invocation, SyntaxList<StatementSyntax> statements)
+        {
             var invocationSpan = invocation.Span;
             var statementIndex = -1;
 

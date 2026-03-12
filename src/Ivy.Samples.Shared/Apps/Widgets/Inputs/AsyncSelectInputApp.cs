@@ -9,7 +9,7 @@ public class AsyncSelectInputApp : SampleBase
     protected override object? BuildSample()
     {
         var guidState = UseState(default(Guid?));
-
+        var guidStateGhost = UseState(default(Guid?));
         var factory = UseService<SampleDbContextFactory>();
 
         QueryResult<Option<Guid?>[]> QueryCategories(IViewContext context, string query)
@@ -45,8 +45,6 @@ public class AsyncSelectInputApp : SampleBase
                     return new Option<Guid?>(category!.Name, category!.Id);
                 });
         }
-
-        var guidStateGhost = UseState(default(Guid?));
 
         return Layout.Vertical().Gap(6)
             | Text.H3("Basic")

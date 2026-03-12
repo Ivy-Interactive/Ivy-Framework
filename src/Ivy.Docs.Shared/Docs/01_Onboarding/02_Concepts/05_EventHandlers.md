@@ -165,7 +165,7 @@ public class AsyncBlurExample : ViewBase
 }
 ```
 
-## HandleBlur Method Signatures
+## OnBlur Method Signatures
 
 ```csharp
 // Simple action (most common)

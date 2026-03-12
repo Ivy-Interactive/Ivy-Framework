@@ -25,14 +25,14 @@
   </ItemGroup>
   
   <!-- enable ivy analyzer for samples -->
-  <!-- <ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../Ivy.Analyser/Ivy.Analyser.csproj">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Analyzer</OutputItemType>
     </ProjectReference>
-  </ItemGroup> -->
+  </ItemGroup>
   
   <ItemGroup>
     <EmbeddedResource Include="Assets/**/*" />

@@ -19,7 +19,6 @@ Create a new `.cs` file with a record that inherits from `WidgetBase<T>`:
 ```csharp
 using Ivy;
 using Ivy.Core;
-using Ivy.Core.ExternalWidgets;
 
 namespace Ivy.Widgets.Xterm;
 
