@@ -12,6 +12,25 @@ interface TableOfContentsProps {
 
 const EMPTY_HEADINGS: HeadingNode[] = [];
 
+/** Find the element that actually scrolls (has overflow and scrollable content). */
+function getScrollParent(el: HTMLElement | null): HTMLElement | Window {
+  if (!el) return window;
+  let parent: HTMLElement | null = el.parentElement;
+  while (parent) {
+    const { overflowY } = getComputedStyle(parent);
+    if (
+      (overflowY === 'auto' ||
+        overflowY === 'scroll' ||
+        overflowY === 'overlay') &&
+      parent.scrollHeight > parent.clientHeight
+    ) {
+      return parent;
+    }
+    parent = parent.parentElement;
+  }
+  return window;
+}
+
 export const TableOfContents: React.FC<TableOfContentsProps> = ({
   articleRef,
   show = true,
@@ -27,6 +46,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   );
   const { activeId, isUserNavigating } = navState;
   const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isUserNavigatingRef = useRef(isUserNavigating);
+  const computeActiveIdRef = useRef<() => string>(() => '');
+  const SCROLL_DEBOUNCE_MS = 120;
+  const ACTIVE_TOP_THRESHOLD = 100; // px from top of viewport
 
   // Notify parent about loading state (always loaded since we use props)
   useEffect(() => {
@@ -72,34 +96,72 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     return () => document.removeEventListener('click', handleClick);
   }, []);
 
-  // Handle active heading highlighting
+  // Compute active heading from current scroll position (used after debounce)
+  const computeActiveId = React.useCallback(() => {
+    for (let i = headings.length - 1; i >= 0; i--) {
+      const el = document.getElementById(headings[i].id);
+      if (el) {
+        const top = el.getBoundingClientRect().top;
+        if (top <= ACTIVE_TOP_THRESHOLD) return headings[i].id;
+      }
+    }
+    return headings[0]?.id ?? '';
+  }, [headings]);
+
+  useEffect(() => {
+    isUserNavigatingRef.current = isUserNavigating;
+  }, [isUserNavigating]);
+
+  useEffect(() => {
+    computeActiveIdRef.current = computeActiveId;
+  }, [computeActiveId]);
+
+  // Handle active heading highlighting with debounce to avoid jank during fast scroll
   useEffect(() => {
     if (!articleRef.current || headings.length === 0) return;
 
+    const scheduleScrollUpdate = () => {
+      if (scrollUpdateTimeoutRef.current) {
+        clearTimeout(scrollUpdateTimeoutRef.current);
+      }
+      scrollUpdateTimeoutRef.current = setTimeout(() => {
+        scrollUpdateTimeoutRef.current = null;
+        if (!isUserNavigatingRef.current) {
+          dispatchNav({ activeId: computeActiveIdRef.current() });
+        }
+      }, SCROLL_DEBOUNCE_MS);
+    };
+
     const observer = new IntersectionObserver(
       entries => {
-        // Don't update active ID if user is currently navigating
-        if (!isUserNavigating) {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              dispatchNav({ activeId: entry.target.id });
-            }
-          });
-        }
+        if (entries.some(e => e.isIntersecting)) scheduleScrollUpdate();
       },
       { rootMargin: '0px 0px -80% 0px' }
     );
 
-    // Observe elements corresponding to the headings
     headings.forEach(heading => {
       const element = document.getElementById(heading.id);
-      if (element) {
-        observer.observe(element);
-      }
+      if (element) observer.observe(element);
     });
 
-    return () => observer.disconnect();
-  }, [headings, articleRef, isUserNavigating]);
+    // Listen on the actual scroll container (main content div), not window
+    const scrollTarget = getScrollParent(articleRef.current);
+    scrollTarget.addEventListener('scroll', scheduleScrollUpdate, {
+      passive: true,
+    });
+
+    // Set initial active section on mount/headings change
+    scheduleScrollUpdate();
+
+    return () => {
+      observer.disconnect();
+      scrollTarget.removeEventListener('scroll', scheduleScrollUpdate);
+      if (scrollUpdateTimeoutRef.current) {
+        clearTimeout(scrollUpdateTimeoutRef.current);
+        scrollUpdateTimeoutRef.current = null;
+      }
+    };
+  }, [headings, articleRef]);
 
   // Smart TOC auto-scroll - scroll TOC to show active item
   useEffect(() => {
