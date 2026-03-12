@@ -281,8 +281,19 @@ public class Server
 
     public Server ReservePaths(params string[] paths)
     {
-        _fluentApiReservedPaths.UnionWith(paths);
-        _reservedPaths.UnionWith(paths);
+        if (paths != null)
+        {
+            foreach (var path in paths)
+            {
+                if (string.IsNullOrEmpty(path))
+                {
+                    continue;
+                }
+                var normalizedPath = path.StartsWith('/') ? path : "/" + path;
+                _fluentApiReservedPaths.Add(normalizedPath);
+                _reservedPaths.Add(normalizedPath);
+            }
+        }
         return this;
     }
 
