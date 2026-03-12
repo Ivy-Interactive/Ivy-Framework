@@ -616,9 +616,9 @@ public class Server
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
 
-        app.UsePathToAppId();
-
-        app.UseRouting();
+        app.UseRouting(); // First routing pass - match explicit routes (gRPC, controllers)
+        app.UsePathToAppId(); // Rewrite path to appId if no endpoint matched
+        app.UseRouting(); // Second routing pass - route the rewritten path
         app.UseCors();
         app.UseGrpcWeb();
 

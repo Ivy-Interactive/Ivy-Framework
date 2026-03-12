@@ -11,6 +11,13 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
     {
         var path = context.Request.Path.Value ?? "";
 
+        // Skip if an endpoint has already been matched (e.g., MVC controller, gRPC service)
+        if (context.GetEndpoint() != null)
+        {
+            await next(context);
+            return;
+        }
+
         // Convert path to appId
         // Remove leading slash and use the rest as appId
         var appId = path.TrimStart('/');
