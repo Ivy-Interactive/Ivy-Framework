@@ -244,22 +244,22 @@ public class AppRepository : IAppRepository
             case AppIdValidationResult.Valid:
                 return true;
             case AppIdValidationResult.Empty:
-                Console.Error.WriteLine($"[ERROR] App ID is empty. Please provide a valid App ID.");
+                Console.WriteLine($"[ERROR] App ID is empty. Please provide a valid App ID.");
                 break;
             case AppIdValidationResult.StartsWithSlash:
-                Console.Error.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs should not start with '/'.");
+                Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs should not start with '/'.");
                 break;
             case AppIdValidationResult.UnsafeCharacters:
-                Console.Error.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs must be URL-friendly (alphanumeric, dashes, underscores, dots).");
+                Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs must be URL-friendly (alphanumeric, dashes, underscores, dots).");
                 break;
             case AppIdValidationResult.ReservedPathConflict:
-                Console.Error.WriteLine($"[ERROR] App ID '{appId}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
+                Console.WriteLine($"[ERROR] App ID '{appId}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
                 break;
             case AppIdValidationResult.StaticFileExtensionConflict:
-                Console.Error.WriteLine($"[ERROR] App ID '{appId}' collides with a static file extension. Please choose a different App ID.");
+                Console.WriteLine($"[ERROR] App ID '{appId}' collides with a static file extension. Please choose a different App ID.");
                 break;
             default:
-                Console.Error.WriteLine($"[ERROR] App ID '{appId}' is invalid. Please choose a different App ID.");
+                Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. Please choose a different App ID.");
                 break;
         }
 
