@@ -132,7 +132,7 @@ public class ExternalWidgetRegistry
         var canonicalScripts = _widgets.Values
             .GroupBy(w => new { w.Assembly, w.ScriptPath })
             .ToDictionary(g => g.Key, g => g.First().TypeName);
-            
+
         var canonicalStyles = _widgets.Values
             .Where(w => w.StylePath != null)
             .GroupBy(w => new { w.Assembly, StylePath = w.StylePath! })
@@ -142,7 +142,7 @@ public class ExternalWidgetRegistry
         {
             var version = w.Assembly.GetName().Version?.ToString() ?? "0";
             var canonicalScriptType = canonicalScripts[new { w.Assembly, w.ScriptPath }];
-            
+
             string? canonicalStyleType = null;
             if (w.StylePath != null)
             {
