@@ -63,6 +63,10 @@ public class AppRepository : IAppRepository
 
     private Dictionary<string, AppDescriptor> Apps { get; } = new();
 
+    public IReadOnlySet<string> InvalidAppIds => _invalidAppIds;
+
+    private HashSet<string> _invalidAppIds { get; } = new(StringComparer.OrdinalIgnoreCase);
+
     public void Reload(IReadOnlySet<string> reservedPaths)
     {
         Root = new AppRepositoryGroup("Root");
@@ -74,6 +78,7 @@ public class AppRepository : IAppRepository
         {
             if (!ValidateAppId(appDescriptor.Id, reservedPaths))
             {
+                _invalidAppIds.Add(appDescriptor.Id);
                 // Do not add invalid apps to repository
                 continue;
             }
@@ -224,8 +229,13 @@ public class AppRepository : IAppRepository
         return Apps.Values;
     }
 
-    private static bool ValidateAppId(string appId, IReadOnlySet<string> reservedPaths)
+    private bool ValidateAppId(string appId, IReadOnlySet<string> reservedPaths)
     {
+        if (_invalidAppIds.Contains(appId))
+        {
+            return false;
+        }
+
         var appIdPath = "/" + appId;
         var validationResult = AppRoutingHelpers.ValidateAppId(appId, reservedPaths);
 

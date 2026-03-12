@@ -578,6 +578,11 @@ public class Server
         // Update reserved paths with discovered controller routes before reloading apps
         UpdateReservedPaths(app);
         AppRepository.Reload(_reservedPaths);
+        if (AppRepository.InvalidAppIds.Count > 0)
+        {
+            Console.WriteLine($@"[CRITICAL] Failed to start Ivy server due to {AppRepository.InvalidAppIds.Count} invalid app ID(s).");
+            return;
+        }
 
         app.UseExceptionHandler(error =>
         {
