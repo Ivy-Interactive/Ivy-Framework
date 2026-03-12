@@ -245,7 +245,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     {
         foreach (var field in fields)
         {
-            var hint = GetField(field);
+            var name = Utils.GetNameFromMemberExpression(field.Body);
+            if (!_columns.TryGetValue(name, out var hint)) continue;
             hint.Removed = true;
         }
         return this;

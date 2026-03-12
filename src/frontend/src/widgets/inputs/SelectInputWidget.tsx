@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip';
+import Icon from '@/components/Icon';
 import { X, Search, Loader2 } from 'lucide-react';
 import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
@@ -75,8 +76,9 @@ export type NullableSelectValue =
 
 interface Option {
   value: string | number;
-  label: string;
+  label?: string;
   group?: string;
+  icon?: string;
   disabled?: boolean;
 }
 
@@ -244,13 +246,20 @@ const ToggleOptionItem: React.FC<{
     Large: 'px-5 py-3 text-base',
   };
 
+  const iconClasses = {
+    Small: 'h-3 w-3',
+    Medium: 'h-4 w-4',
+    Large: 'h-5 w-5',
+  };
+
   const toggleItem = (
     <ToggleGroupItem
       key={option.value}
       value={option.value.toString()}
-      aria-label={option.label}
+      aria-label={option.label || option.value.toString()}
+      title={option.label}
       className={cn(
-        'hover:text-foreground',
+        'hover:text-foreground gap-2',
         sizeClasses[density],
         isInvalid
           ? cn(
@@ -263,6 +272,12 @@ const ToggleOptionItem: React.FC<{
       )}
       disabled={disabled}
     >
+      {option.icon && (
+        <Icon
+          name={option.icon}
+          className={cn(iconClasses[density], !option.label && 'mx-auto')}
+        />
+      )}
       {option.label}
     </ToggleGroupItem>
   );
@@ -349,7 +364,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
         let i = 0;
         let j = 0;
         const searchLower = searchTerm.toLowerCase();
-        const labelLower = option.label.toLowerCase();
+        const labelLower = (option.label || '').toLowerCase();
         while (i < searchLower.length && j < labelLower.length) {
           if (searchLower[i] === labelLower[j]) i++;
           j++;
@@ -362,8 +377,8 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
           : searchTerm;
       const label =
         searchMode === 'CaseInsensitive'
-          ? option.label.toLowerCase()
-          : option.label;
+          ? (option.label || '').toLowerCase()
+          : option.label || '';
       return label.includes(term);
     });
   }, [validOptions, searchable, searchTerm, searchMode]);
@@ -591,7 +606,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                   <Label
                     htmlFor={`${id}-${option.value}`}
                     className={cn(
-                      'cursor-pointer leading-none',
+                      'cursor-pointer leading-none flex items-center gap-2',
                       selectTextVariant[density],
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput
@@ -599,6 +614,12 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                       isOptionDisabled && 'opacity-50 cursor-not-allowed'
                     )}
                   >
+                    {option.icon && (
+                      <Icon
+                        name={option.icon}
+                        className="h-4 w-4 flex-shrink-0"
+                      />
+                    )}
                     {option.label}
                   </Label>
                 </div>
@@ -735,7 +756,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
         let i = 0;
         let j = 0;
         const searchLower = searchTerm.toLowerCase();
-        const labelLower = option.label.toLowerCase();
+        const labelLower = (option.label || '').toLowerCase();
         while (i < searchLower.length && j < labelLower.length) {
           if (searchLower[i] === labelLower[j]) i++;
           j++;
@@ -748,8 +769,8 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
           : searchTerm;
       const label =
         searchMode === 'CaseInsensitive'
-          ? option.label.toLowerCase()
-          : option.label;
+          ? (option.label || '').toLowerCase()
+          : option.label || '';
       return label.includes(term);
     });
   }, [validOptions, searchable, searchTerm, searchMode]);
@@ -865,12 +886,18 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                     <Label
                       htmlFor={`${id}-${option.value}`}
                       className={cn(
-                        'flex-1 cursor-pointer',
+                        'flex-1 cursor-pointer flex items-center gap-2',
                         selectTextVariant[density],
                         isInvalid ? inputStyles.invalidInput : undefined,
                         isDisabled && !isSelected ? 'opacity-50' : undefined
                       )}
                     >
+                      {option.icon && (
+                        <Icon
+                          name={option.icon}
+                          className="h-4 w-4 flex-shrink-0"
+                        />
+                      )}
                       {option.label}
                     </Label>
                   </div>
@@ -966,7 +993,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
     const isAtMax =
       maxSelections != null && selectedValues.length >= maxSelections;
     return validOptions.map(option => ({
-      label: option.label,
+      label: option.label || option.value.toString(),
       value: option.value.toString(),
       disable:
         disabled ||
@@ -1075,7 +1102,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
         let i = 0;
         let j = 0;
         const searchLower = searchTerm.toLowerCase();
-        const labelLower = option.label.toLowerCase();
+        const labelLower = (option.label || '').toLowerCase();
         while (i < searchLower.length && j < labelLower.length) {
           if (searchLower[i] === labelLower[j]) i++;
           j++;
@@ -1088,8 +1115,8 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           : searchTerm;
       const label =
         searchMode === 'CaseInsensitive'
-          ? option.label.toLowerCase()
-          : option.label;
+          ? (option.label || '').toLowerCase()
+          : option.label || '';
       return label.includes(term);
     });
   }, [validOptions, searchable, searchTerm, searchMode]);
@@ -1284,7 +1311,15 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                       density={density}
                       disabled={disabled || loading || option.disabled}
                     >
-                      {option.label}
+                      <div className="flex items-center gap-2">
+                        {option.icon && (
+                          <Icon
+                            name={option.icon}
+                            className="h-4 w-4 flex-shrink-0"
+                          />
+                        )}
+                        {option.label}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectGroup>

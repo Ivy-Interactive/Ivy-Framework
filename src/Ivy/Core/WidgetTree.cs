@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.JsonDiffPatch;
 using System.Text.Json.JsonDiffPatch.Diffs.Formatters;
 using System.Text.Json.Nodes;
+using Ivy;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 
@@ -332,7 +333,15 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 #if DEBUG
                 AbstractWidget.CurrentViewCallSite.Value = view.CallSite;
 #endif
-                node = BuildObject(view.Build(), treePath.Clone(), 0, view.Id, ancestorContext, isHotReload);
+                TextInputBuildContext.SetCurrent(ancestorContext);
+                try
+                {
+                    node = BuildObject(view.Build(), treePath.Clone(), 0, view.Id, ancestorContext, isHotReload);
+                }
+                finally
+                {
+                    TextInputBuildContext.SetCurrent(null);
+                }
 #if DEBUG
                 AbstractWidget.CurrentViewCallSite.Value = null;
 #endif
@@ -362,6 +371,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                 try
                 {
 #endif
+                    TextInputBuildContext.SetCurrent(context);
                     try
                     {
                         buildResult = view.Build();
@@ -369,6 +379,10 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                     catch (Exception e)
                     {
                         buildResult = e;
+                    }
+                    finally
+                    {
+                        TextInputBuildContext.SetCurrent(null);
                     }
 #if DEBUG
                 }

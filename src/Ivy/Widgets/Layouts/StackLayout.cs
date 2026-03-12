@@ -41,6 +41,11 @@ public record StackLayout : WidgetBase<StackLayout>
 
     [Prop] public bool Wrap { get; set; }
 
+    [Prop] public Colors? BorderColor { get; set; } = null;
+    [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.None;
+    [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.None;
+    [Prop] public Thickness BorderThickness { get; set; } = new(0);
+
     [Prop(attached: nameof(StackLayoutExtensions.AlignSelf))] public Align?[] ChildAlignSelf { get; set; } = null!;
 }
 

@@ -391,7 +391,6 @@ public class FormBuilder<TModel> : ViewBase
                 return submitReceiver.Receive(unit =>
                 {
                     _ = OnSubmit();
-                    return default;
                 });
             }
             return null;

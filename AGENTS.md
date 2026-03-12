@@ -29,7 +29,7 @@ public class MyView : ViewBase
   }
 }
 
-The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**: The attribute uses **named parameters**:
+The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**: 
 
 [App(title: "Customers", icon: Icons.Rocket)]
 public class CustomersApp : ViewBase
@@ -121,15 +121,6 @@ Layout.Grid()
 Align values: TopLeft, TopCenter, TopRight, Left, Center, Right, BottomLeft, BottomCenter, BottomRight, Stretch
 
 [Layouts](https://docs.ivy.app/onboarding/concepts/layout.md)
-
-### Centered Max-Width Layout
-
-For simpler tools and apps, it's quite nice to give the app a max width and position it in the center:
-
-return Layout.TopCenter()
-    | (Layout.Vertical().Width(Size.Full().Max(200)).TopMargin(10)
-        | ...
-        );
 
 ## Text
 

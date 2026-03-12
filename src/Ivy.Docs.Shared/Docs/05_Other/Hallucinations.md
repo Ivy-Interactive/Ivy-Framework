@@ -61,6 +61,25 @@ Layout.Vertical().Width(Size.Lg)
 **Found In:**
 a9ee3993-1cfb-4cba-9322-80a60b56c8d2
 
+## LayoutView.SpaceBetween() — non-existent method
+
+**Hallucinated API:**
+```csharp
+Layout.Horizontal().SpaceBetween()
+```
+
+**Error:** `'LayoutView' does not contain a definition for 'SpaceBetween'` (CS1061)
+
+**Correct API:**
+```csharp
+Layout.Horizontal(Align.SpaceBetween)
+```
+
+`SpaceBetween` is an `Align` enum value passed to the layout constructor, not a fluent method. The same applies to `SpaceAround` and `SpaceEvenly`.
+
+**Found In:**
+f6d6e841-9a14-4475-9fa5-0791be30e578
+
 ## Callout constructor — wrong constructor + invented enum
 
 **Hallucinated API:**
@@ -174,6 +193,8 @@ var selectedItem = UseState(() => (InventoryItem?)null);
 ```
 
 When `T` is a reference type, `null` matches both `T?` and `Func<T>`, causing overload ambiguity. Either cast null to the explicit type or wrap it in a lambda.
+
+**Note:** The related `IState<T>.Set(null)` ambiguity has been fixed via `[OverloadResolutionPriority(1)]` on the `Set(T value)` overload. `.Set(null)` now resolves correctly without casting.
 
 **Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
@@ -357,6 +378,7 @@ Available `BadgeVariant` values: `Primary`, `Destructive`, `Secondary`, `Outline
 **Found In:**
 3c507fb4-71e1-4136-9d40-8eca6590250d
 ce144de9-0688-490a-bef6-b2766e323154
+642d3167-790d-48c4-a381-bfab78f928cc
 
 ## Callout.Color(Colors.X) — non-existent fluent method
 
@@ -829,6 +851,21 @@ The agent draws from CSS `justify-content: flex-end` / `align-items: flex-end` t
 **Found In:**
 DecisionMatrixApp.cs (two occurrences of `Align.End`)
 
+## LayoutView.Border() — now supported
+
+LayoutView supports `.Border(color, thickness)` for adding borders. Example:
+
+```csharp
+new LayoutView()
+    .Border(Colors.Gray, 1)
+    .Padding(4)
+    .Vertical(content);
+```
+
+Individual properties are also available: `.BorderColor()`, `.BorderThickness()`, `.BorderStyle()`, `.BorderRadius()`.
+
+Note: `.Border()` expects a `Colors` enum as the first argument, not a string. Thickness accepts `int` (uniform) or `Thickness` struct — do NOT pass `Ivy.Thickness` where `int` is expected.
+
 ## Server Configuration
 
 | Hallucinated API | Correct API |
@@ -836,6 +873,29 @@ DecisionMatrixApp.cs (two occurrences of `Align.End`)
 | `server.UseSingleApp()` | `server.UseDefaultApp(typeof(AppType))` |
 | `server.UseNoChrome()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseChrome()` instead |
 | `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
+
+## TextBuilder.Style() — non-existent styling method
+
+**Hallucinated API:**
+```csharp
+Text.P("🐶").Style("font-size: 48px")
+```
+
+**Error:** `'TextBuilder' does not contain a definition for 'Style'`
+
+**Correct API:**
+```csharp
+Text.P("🐶").Large()
+Text.P("text").Medium()
+Text.P("text").Small()
+```
+
+`TextBuilder` does not have a `.Style()` method for arbitrary CSS. Use `.Large()`, `.Medium()`, or `.Small()` fluent modifiers. The agent invented a CSS-style `.Style()` method similar to JSX `style` props. Variant of the documented `WithFontSize()` hallucination.
+
+Also hallucinated: `Text.Code(expr).FontSize(24)` — CS1929: `.FontSize()` is an extension on `LabelList`, not `TextBuilder`.
+
+**Found In:**
+88e4f0bb-d358-4b34-9458-bc7eb98845e5, 625c285f-068b-4de3-b01c-ae2f7286a5d8
 
 ## TextBuilder.AlignCenter() — non-existent method
 
@@ -864,6 +924,49 @@ new Box(Text.H1("$0.00")).AlignItems(Align.Center)
 
 **Found In:**
 713546f7-32fb-4961-ab78-def91e7c010d
+
+## FileUploadStatus.Completed — non-existent enum value
+
+**Hallucinated API:**
+```csharp
+if (upload.Status == FileUploadStatus.Completed)
+```
+
+**Error:** `'FileUploadStatus' does not contain a definition for 'Completed'`
+
+**Correct API:**
+```csharp
+if (upload.Status == FileUploadStatus.Finished)
+```
+
+`FileUploadStatus` values are: `Pending`, `Aborted`, `Loading`, `Failed`, `Finished`. There is no `Completed` value. **Auto-fixed:** The refactoring service automatically rewrites `FileUploadStatus.Completed` → `FileUploadStatus.Finished`.
+
+**Found In:**
+(session not yet recorded)
+
+## UseDownload — ambiguous overload between sync and async
+
+**Hallucinated API:**
+```csharp
+UseDownload(() => bytes, "file.txt", "text/plain")
+```
+
+**Error:** `CS0121: The call is ambiguous between 'ViewBase.UseDownload(Func<byte[]>, string, string)' and 'ViewBase.UseDownload(Func<Task<byte[]>>, string, string)'`
+
+**Correct API:**
+```csharp
+// For sync: explicitly type the delegate
+UseDownload((Func<byte[]>)(() => bytes), "file.txt", "text/plain")
+
+// Or use a named method:
+byte[] GetBytes() => bytes;
+UseDownload(GetBytes, "file.txt", "text/plain")
+```
+
+When using `UseDownload` with a lambda, you must explicitly cast to `Func<byte[]>` or `Func<Task<byte[]>>` to avoid ambiguity.
+
+**Found In:**
+(session not yet recorded)
 
 ## Server.OnReady / Server.OnStartup — non-existent lifecycle callbacks
 
@@ -896,3 +999,22 @@ The `Server` class does not have `OnReady`, `OnStartup`, or similar lifecycle ca
 
 **Found In:**
 (session not yet recorded)
+
+## MetricCard — non-existent class name
+
+**Hallucinated API:**
+```csharp
+new MetricCard("Title", "Value", Icons.Activity)
+```
+
+**Error:** `CS0246: The type or namespace name 'MetricCard' could not be found`
+
+**Correct API:**
+```csharp
+new MetricView("Title", "Value", icon: Icons.Activity)
+```
+
+`MetricCard` does not exist. The correct class is `MetricView`. Constructor: `MetricView(string title, string value, string? description = null, Icons? icon = null, IView? chart = null)`.
+
+**Found In:**
+c008af27-1cb1-4ab3-b41a-36aa711c6a41

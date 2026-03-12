@@ -448,7 +448,7 @@ Text.P("Small text").Small()
 Text.P("Small muted text").Small().Muted()
 ```
 
-These modifiers work with all text factory methods (`Text.P()`, `Text.H1()`, `Text.Block()`, `Text.Label()`, etc.). **Important:** There is no `.WithFontSize()` method or `FontSize` enum.
+These modifiers work with all text factory methods (`Text.P()`, `Text.H1()`, `Text.Block()`, `Text.Label()`, etc.). **Important:** There is no `.WithFontSize()` method or `FontSize` enum. **There is no `.Style()` method for arbitrary CSS styling.**
 
 ## How do I format a NumberInput as currency, percent, or decimal?
 

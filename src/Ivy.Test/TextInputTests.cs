@@ -1,4 +1,5 @@
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 
@@ -256,6 +257,7 @@ public class TextInputTests
 
         public T Value { get; set; } = value;
 
+        [OverloadResolutionPriority(1)]
         public T Set(T value)
         {
             Value = value;
