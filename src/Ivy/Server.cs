@@ -46,6 +46,8 @@ public record ServerArgs
     public bool FindAvailablePort { get; set; } = false;
 #endif
 
+    public bool BindAll { get; set; } = false;
+
     /// <summary>
     /// True when the process is running a CLI-only command (--describe, --describe-connection, --test-connection)
     /// that needs DI but should not bind a real port.
@@ -506,7 +508,8 @@ public class Server
 
         // CLI-only commands need DI but never call app.StartAsync(),
         // so use port 0 to avoid conflicts with a running instance.
-        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://localhost:{_args.Port}";
+        var bindHost = (!_args.IsCliCommand && _args.BindAll) ? "0.0.0.0" : "localhost";
+        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://{bindHost}:{_args.Port}";
         builder.WebHost.UseUrls(bindUrl);
 
         builder.Services.AddSignalR(options =>
