@@ -16,7 +16,7 @@ namespace Ivy.Test
                 AppHelpers.GetApp(typeof(X1)),
                 AppHelpers.GetApp(typeof(_Index))
             ]);
-            repository.Reload();
+            repository.Reload(new HashSet<string>());
             var menuItems = repository.GetMenuItems();
             output.WriteLine(JsonSerializer.Serialize(menuItems, new JsonSerializerOptions() { WriteIndented = true }));
         }
@@ -43,5 +43,3 @@ namespace Ivy.Test.Apps.Foo.Bar
         }
     }
 }
-
-
