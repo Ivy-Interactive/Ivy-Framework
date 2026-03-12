@@ -10,7 +10,8 @@ public record AppRouteResult(
     AppDescriptor AppDescriptor,
     IAppRepository AppRepository,
     bool ShowChrome,
-    int? HttpStatusCode
+    int? HttpStatusCode,
+    string? ArgsJson = null
 );
 
 public class AppRouter(Server server)
@@ -97,7 +98,28 @@ public class AppRouter(Server server)
 
     private AppRouteResult ResolveDefaultApp(string? navigationAppId, string? parentId, bool chrome)
     {
-        var appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
+        AppDescriptor defaultAppDescriptor;
+        string? appId;
+        try
+        {
+            defaultAppDescriptor = server.AppRepository.GetAppOrDefault(null);
+            appId = server.DefaultAppId ?? defaultAppDescriptor.Id;
+        }
+        catch (InvalidOperationException)
+        {
+            var errorApp = server.AppRepository.GetApp(AppIds.ErrorNotFound);
+            if (errorApp == null) throw;
+            return new AppRouteResult(
+                AppIds.ErrorNotFound,
+                null,
+                errorApp,
+                server.AppRepository,
+                chrome,
+                (int)HttpStatusCode.ServiceUnavailable,
+                ErrorAppArgs.ToArgsJson(ErrorAppArgs.ForNoApps())
+            );
+        }
+
         var chromeApp = server.AppRepository.GetAppOrDefault(AppIds.Chrome);
 
         string? resolvedNavigationAppId = navigationAppId;
@@ -137,19 +159,6 @@ public class AppRouter(Server server)
     {
         var resolvedApp = server.AppRepository.GetAppOrDefault(navigationAppId);
 
-        if (resolvedApp.Id == AppIds.NoAppsRegistered)
-        {
-            var scopedRepository = new ScopedAppRepository(server.AppRepository, navigationAppId, resolvedApp);
-            return new AppRouteResult(
-                appId ?? AppIds.Default,
-                navigationAppId,
-                resolvedApp,
-                scopedRepository,
-                chrome,
-                503
-            );
-        }
-
         if (resolvedApp.Id != navigationAppId)
         {
             var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.ErrorNotFound);
@@ -157,6 +166,7 @@ public class AppRouter(Server server)
             if (notFoundApp.Id == AppIds.ErrorNotFound)
             {
                 var scopedRepository = new ScopedAppRepository(server.AppRepository, navigationAppId, notFoundApp);
+                var notFoundArgs = ErrorAppArgs.ToArgsJson(ErrorAppArgs.ForNotFound());
 
                 if (chromeApp?.Id != AppIds.Chrome)
                 {
@@ -166,7 +176,8 @@ public class AppRouter(Server server)
                         notFoundApp,
                         scopedRepository,
                         chrome,
-                        (int)HttpStatusCode.NotFound
+                        (int)HttpStatusCode.NotFound,
+                        notFoundArgs
                     );
                 }
 
@@ -177,7 +188,8 @@ public class AppRouter(Server server)
                     appDescriptor,
                     scopedRepository,
                     chrome,
-                    (int)HttpStatusCode.NotFound
+                    (int)HttpStatusCode.NotFound,
+                    notFoundArgs
                 );
             }
         }
@@ -197,18 +209,6 @@ public class AppRouter(Server server)
     {
         var resolvedApp = server.AppRepository.GetAppOrDefault(appId);
 
-        if (resolvedApp.Id == AppIds.NoAppsRegistered)
-        {
-            return new AppRouteResult(
-                appId,
-                null,
-                resolvedApp,
-                server.AppRepository,
-                chrome,
-                503
-            );
-        }
-
         if (resolvedApp.Id != appId)
         {
             var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.ErrorNotFound);
@@ -216,13 +216,15 @@ public class AppRouter(Server server)
             if (notFoundApp.Id == AppIds.ErrorNotFound)
             {
                 var scopedRepository = new ScopedAppRepository(server.AppRepository, appId, notFoundApp);
+                var notFoundArgs = ErrorAppArgs.ToArgsJson(ErrorAppArgs.ForNotFound());
                 return new AppRouteResult(
                     appId,
                     null,
                     notFoundApp,
                     scopedRepository,
                     chrome,
-                    (int)HttpStatusCode.NotFound
+                    (int)HttpStatusCode.NotFound,
+                    notFoundArgs
                 );
             }
         }

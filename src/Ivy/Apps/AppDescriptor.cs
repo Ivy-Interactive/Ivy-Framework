@@ -11,15 +11,13 @@ public static class AppIds
     [
         Auth,
         Chrome, //only default if we use chrome
-        ErrorNotFound,
-        NoAppsRegistered
+        ErrorNotFound
     ];
 
     public const string Auth = "$auth";
     public const string Chrome = "$chrome";
     public const string Default = "$default";
     public const string ErrorNotFound = "$error-not-found";
-    public const string NoAppsRegistered = "$no-apps-registered";
 }
 
 public class AppDescriptor : IAppRepositoryNode

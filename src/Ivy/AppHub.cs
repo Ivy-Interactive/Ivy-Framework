@@ -159,6 +159,10 @@ public class AppHub(
             var machineId = AppRouter.GetMachineId(httpContext);
 
             var appArgs = GetAppArgs(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
+            if (routeResult.ArgsJson != null)
+            {
+                appArgs = new AppContext(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, routeResult.ArgsJson, requestScheme, httpContext.Request.Host.Value!);
+            }
 
             logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
 
