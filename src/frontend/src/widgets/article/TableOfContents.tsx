@@ -49,8 +49,6 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   const scrollUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isUserNavigatingRef = useRef(isUserNavigating);
   const computeActiveIdRef = useRef<() => string>(() => '');
-  const SCROLL_DEBOUNCE_MS = 120;
-  const ACTIVE_TOP_THRESHOLD = 100; // px from top of viewport
 
   // Notify parent about loading state (always loaded since we use props)
   useEffect(() => {
@@ -102,7 +100,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       const el = document.getElementById(headings[i].id);
       if (el) {
         const top = el.getBoundingClientRect().top;
-        if (top <= ACTIVE_TOP_THRESHOLD) return headings[i].id;
+        if (top <= 100) return headings[i].id;
       }
     }
     return headings[0]?.id ?? '';
@@ -129,7 +127,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         if (!isUserNavigatingRef.current) {
           dispatchNav({ activeId: computeActiveIdRef.current() });
         }
-      }, SCROLL_DEBOUNCE_MS);
+      }, 120);
     };
 
     const observer = new IntersectionObserver(
