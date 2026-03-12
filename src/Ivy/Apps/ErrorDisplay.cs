@@ -45,16 +45,19 @@ internal static class ErrorDisplay
     public const string SheetTitle = "Error details";
     public const string SheetDescription = "Full error as returned by the server";
 
-    public static object Build(string title, string message, Func<object> sheetContent, CalloutVariant variant = CalloutVariant.Warning, Icons? icon = null)
+    /// <param name="sheetContent">When null, no "View details" button is shown (e.g. for NotFound, NoApps, or ServerError without details).</param>
+    public static object Build(string title, string message, Func<object>? sheetContent = null, CalloutVariant variant = CalloutVariant.Warning, Icons? icon = null)
     {
         var callout = CalloutForVariant(variant, title, message, icon);
-        return Layout.Center()
-               | (Layout.Vertical().Center()
-                   | callout
-                   | new Button("View details")
-                       .Variant(ButtonVariant.Outline)
-                       .Icon(Icons.FileCode)
-                       .WithSheet(sheetContent, title: SheetTitle, description: SheetDescription));
+        var content = sheetContent != null
+            ? (Layout.Vertical().Center()
+                | callout
+                | new Button("View details")
+                    .Variant(ButtonVariant.Outline)
+                    .Icon(Icons.FileCode)
+                    .WithSheet(sheetContent, title: SheetTitle, description: SheetDescription))
+            : (object)(Layout.Vertical().Center() | callout);
+        return Layout.Center() | content;
     }
 
     public static object SheetContentForServerResponse(string title, string message, string? details)
@@ -111,7 +114,7 @@ public class ErrorApp : ViewBase
         return ErrorDisplay.Build(
             title,
             message,
-            () => ErrorDisplay.SheetContentForServerResponse(title, message, args?.Details),
+            sheetContent: !string.IsNullOrWhiteSpace(args?.Details) ? () => ErrorDisplay.SheetContentForServerResponse(title, message, args?.Details) : null,
             variant,
             icon
         );
