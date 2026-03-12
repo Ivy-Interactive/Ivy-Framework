@@ -55,7 +55,7 @@ public record ServerArgs
 
 public class Server
 {
-    public IReadOnlyList<string> ReservedPaths => _reservedPaths;
+    public IReadOnlySet<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
     public IServiceCollection Services { get; } = new ServiceCollection();
@@ -69,7 +69,8 @@ public class Server
     internal IServiceProvider? ServiceProvider;
     private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
     private readonly List<Action<WebApplication>> _appMods = new();
-    private List<string> _reservedPaths = new();
+    private HashSet<string> _reservedPaths = new(StringComparer.OrdinalIgnoreCase);
+    private HashSet<string> _fluentApiReservedPaths = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<IHtmlFilter> _customHtmlFilters = new();
     private Action<HtmlPipeline>? _pipelineConfigurator;
     private ManifestOptions? _manifestOptions;
@@ -280,7 +281,8 @@ public class Server
 
     public Server ReservePaths(params string[] paths)
     {
-        _reservedPaths.AddRange(paths);
+        _fluentApiReservedPaths.UnionWith(paths);
+        _reservedPaths.UnionWith(paths);
         return this;
     }
 
@@ -832,10 +834,7 @@ public class Server
         var reservedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // 1. Add existing reserved paths (from fluent API)
-        foreach (var path in _reservedPaths)
-        {
-            reservedPaths.Add(path);
-        }
+        reservedPaths.UnionWith(_fluentApiReservedPaths);
 
         // 2. Add auto-discovered controller routes
         foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)
@@ -854,20 +853,20 @@ public class Server
         }
 
         // 3. Add system excluded paths
-        foreach (var path in PathToAppIdMiddleware.ExcludedPaths)
+        foreach (var path in AppRoutingHelpers.ExcludedPaths)
         {
-            reservedPaths.Add(path.StartsWith("/") ? path : "/" + path);
+            reservedPaths.Add(path.StartsWith('/') ? path : "/" + path);
         }
 
-        // Atomically update the shared list (thread safety for startup)
-        _reservedPaths = reservedPaths.ToList();
+        // Atomically update the shared set (thread safety for startup)
+        _reservedPaths = reservedPaths;
 
         // 4. Check for collisions
         foreach (var appDescriptor in AppRepository.All())
         {
             var appIdPath = "/" + appDescriptor.Id;
 
-            if (reservedPaths.Contains(appIdPath))
+            if (!this.ValidateAppId(appDescriptor.Id))
             {
                 throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
             }
