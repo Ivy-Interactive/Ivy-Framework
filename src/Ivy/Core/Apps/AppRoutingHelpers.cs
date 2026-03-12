@@ -13,6 +13,15 @@ public class RoutingConstantData
     public string[] StaticFileExtensions { get; set; } = [];
 }
 
+public enum AppIdValidationResult
+{
+    Valid,
+    Empty,
+    UnsafeCharacters,
+    ReservedPathConflict,
+    StaticFileExtensionConflict
+}
+
 [JsonSerializable(typeof(RoutingConstantData))]
 internal partial class RoutingConstantDataContext : JsonSerializerContext;
 
@@ -30,29 +39,36 @@ public static class AppRoutingHelpers
     }
 
     // PRECONDITION: RoutingConstants.ExcludedPaths have already been added to server.ReservedPaths.
-    public static bool ValidateAppId(this global::Ivy.Server server, string appId)
+    public static AppIdValidationResult ValidateAppId(this global::Ivy.Server server, string appId)
     {
-        var path = "/" + appId.Trim('/');
+        appId = appId.Trim('/');
 
-        // Invalid if path is empty
         if (string.IsNullOrEmpty(appId))
         {
-            return false;
+            return AppIdValidationResult.Empty;
         }
+
+        // Invalid if app ID contains unsafe characters
+        if (!Ivy.Utils.IsSafeAppId(appId))
+        {
+            return AppIdValidationResult.UnsafeCharacters;
+        }
+
+        var path = "/" + appId;
 
         // Invalid if path starts with any excluded pattern (must be exact segment match)
         if (server.ReservedPaths.Contains(path) ||
             server.ReservedPaths.Any(reserved => path.StartsWith(reserved + "/", StringComparison.OrdinalIgnoreCase)))
         {
-            return false;
+            return AppIdValidationResult.ReservedPathConflict;
         }
 
         // Invalid if path has a static file extension
         if (RoutingConstants.StaticFileExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
         {
-            return false;
+            return AppIdValidationResult.StaticFileExtensionConflict;
         }
 
-        return true;
+        return AppIdValidationResult.Valid;
     }
 }

@@ -11,7 +11,7 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
     {
         var path = context.Request.Path.Value ?? "";
 
-        if (!server.ValidateAppId(path.TrimStart('/')))
+        if (server.ValidateAppId(path.TrimStart('/')) != AppIdValidationResult.Valid)
         {
             await next(context);
             return;

@@ -867,9 +867,20 @@ public class Server
         {
             var appIdPath = "/" + appDescriptor.Id;
 
-            if (!this.ValidateAppId(appDescriptor.Id))
+            switch (this.ValidateAppId(appDescriptor.Id))
             {
-                throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
+                case AppIdValidationResult.Valid:
+                    break;
+                case AppIdValidationResult.Empty:
+                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' is empty. Please provide a valid App ID.");
+                case AppIdValidationResult.UnsafeCharacters:
+                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' contains unsafe characters. App IDs must be URL-friendly (alphanumeric, dashes, underscores).");
+                case AppIdValidationResult.ReservedPathConflict:
+                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
+                case AppIdValidationResult.StaticFileExtensionConflict:
+                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a static file extension. Please choose a different App ID.");
+                default:
+                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' is invalid. Please choose a different App ID.");
             }
         }
     }
