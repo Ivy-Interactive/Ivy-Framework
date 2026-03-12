@@ -129,4 +129,25 @@ Layout.Horizontal().Align(Align.Center)
         .Duration(0.7)
 ```
 
+## Faq
+
+<Details>
+<Summary>
+How do I change the size of an Icon?
+</Summary>
+<Body>
+
+Use the `.Small()` or `.Large()` extension methods:
+
+```csharp
+new Icon(Icons.Star).Small()   // small icon
+new Icon(Icons.Star)            // default size
+new Icon(Icons.Star).Large()   // large icon
+```
+
+**Important:** There is no `.WithIconSize()` method or `IconSize` enum. Use the simple `.Small()` and `.Large()` fluent modifiers.
+
+</Body>
+</Details>
+
 <WidgetDocs Type="Ivy.Icon" ExtensionTypes="Ivy.IconExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Icon.cs" Docs="../../02_Widgets/05_Effects/Animation.md"/>

@@ -148,7 +148,7 @@ public class FormSpacerView : ViewBase
 
 <WidgetDocs Type="Ivy.Spacer" ExtensionTypes="Ivy.SpacerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Spacer.cs"/>
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -196,6 +196,31 @@ public class DashboardSpacerView : ViewBase
             | new Card("Main Content Area").Height(Size.Units(50));
     }
 }
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I create a horizontal layout with items spaced between?
+</Summary>
+<Body>
+
+Instead, use a `Spacer` with `Size.Grow()` to push items apart:
+
+```csharp
+Layout.Horizontal().Align(Align.Center)
+    | Text.H1("Title")
+    | new Spacer().Width(Size.Grow())
+    | new Button("Action", handler)
+```
+
+The `Spacer` takes up all remaining space, pushing elements before it to the left and elements after it to the right. You can also use `.Right()` on the layout to align all children to the right:
+
+```csharp
+Layout.Horizontal().Right()
+    | new Button("Right-aligned", handler)
 ```
 
 </Body>

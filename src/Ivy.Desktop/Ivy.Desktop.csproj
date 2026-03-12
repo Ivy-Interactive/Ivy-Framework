@@ -38,6 +38,10 @@
     <None Include="../assets/ivy.ico" Pack="true" PackagePath="build/ivy.ico" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="../assets/ivy.ico" LogicalName="Ivy.Desktop.ivy.ico" />
+  </ItemGroup>
+
   <Import Project="build/Ivy.Desktop.targets" />
 
 </Project>

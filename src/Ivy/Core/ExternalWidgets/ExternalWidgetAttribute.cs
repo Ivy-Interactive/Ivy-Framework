@@ -1,4 +1,4 @@
-namespace Ivy.Core.ExternalWidgets;
+namespace Ivy;
 
 /// <summary>
 /// Marks a widget as an external widget with frontend assets bundled in the assembly.
