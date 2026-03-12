@@ -236,10 +236,7 @@ public class AppRepository : IAppRepository
             return false;
         }
 
-        var appIdPath = "/" + appId;
-        var validationResult = AppRoutingHelpers.ValidateAppId(appId, reservedPaths);
-
-        switch (validationResult)
+        switch (AppRoutingHelpers.ValidateAppId(appId, reservedPaths))
         {
             case AppIdValidationResult.Valid:
                 return true;
@@ -253,7 +250,7 @@ public class AppRepository : IAppRepository
                 Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs must be URL-friendly (alphanumeric, dashes, underscores, dots).");
                 break;
             case AppIdValidationResult.ReservedPathConflict:
-                Console.WriteLine($"[ERROR] App ID '{appId}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
+                Console.WriteLine($"[ERROR] App ID '{appId}' collides with a reserved path '/{appId}'. Please choose a different App ID.");
                 break;
             case AppIdValidationResult.StaticFileExtensionConflict:
                 Console.WriteLine($"[ERROR] App ID '{appId}' collides with a static file extension. Please choose a different App ID.");
