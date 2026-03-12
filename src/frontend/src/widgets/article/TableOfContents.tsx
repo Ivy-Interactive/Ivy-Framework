@@ -161,39 +161,33 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     };
   }, [headings, articleRef]);
 
-  // Smart TOC auto-scroll - scroll TOC to show active item
+  // Auto-scroll TOC so the active heading is visible when the TOC is scrollable
   useEffect(() => {
     if (!activeId) return;
 
-    // Find the TOC link for the active heading
     const tocContainer = document.querySelector('[data-toc-container]');
-    if (!tocContainer) {
-      return;
-    }
+    if (!tocContainer) return;
 
-    const activeElement = tocContainer.querySelector(`a[href="#${activeId}"]`);
-    if (!activeElement) {
-      return;
-    }
+    const activeButton = tocContainer.querySelector(
+      `[data-toc-link][data-heading-id="${activeId}"]`
+    ) as HTMLElement | null;
+    if (!activeButton) return;
 
     try {
-      // Check if the active element is already visible in the TOC
       const containerRect = tocContainer.getBoundingClientRect();
-      const elementRect = activeElement.getBoundingClientRect();
-
+      const elementRect = activeButton.getBoundingClientRect();
       const isVisible =
         elementRect.top >= containerRect.top &&
         elementRect.bottom <= containerRect.bottom;
 
-      // Only scroll if the active element is not visible
       if (!isVisible) {
-        activeElement.scrollIntoView({
+        activeButton.scrollIntoView({
           behavior: 'smooth',
           block: 'nearest',
         });
       }
     } catch (error) {
-      console.error('TableOfContents: Error during auto-scroll:', error);
+      console.error('TableOfContents: Error during TOC auto-scroll:', error);
     }
   }, [activeId]);
 
@@ -216,6 +210,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             key={heading.id}
             type="button"
             data-toc-link
+            data-heading-id={heading.id}
             className={cn(
               'block text-sm py-1 hover:text-foreground transition-colors w-full text-left',
               heading.level === 1
