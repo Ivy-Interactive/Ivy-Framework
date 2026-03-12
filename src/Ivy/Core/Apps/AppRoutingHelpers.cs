@@ -17,6 +17,7 @@ public enum AppIdValidationResult
 {
     Valid,
     Empty,
+    StartsWithSlash,
     UnsafeCharacters,
     ReservedPathConflict,
     StaticFileExtensionConflict
@@ -38,14 +39,16 @@ public static class AppRoutingHelpers
         RoutingConstants = JsonSerializer.Deserialize(stream, RoutingConstantDataContext.Default.RoutingConstantData)!;
     }
 
-    // PRECONDITION: RoutingConstants.ExcludedPaths have already been added to server.ReservedPaths.
-    public static AppIdValidationResult ValidateAppId(this global::Ivy.Server server, string appId)
+    public static AppIdValidationResult ValidateAppId(string appId, IReadOnlySet<string> reservedPaths)
     {
-        appId = appId.Trim('/');
-
         if (string.IsNullOrEmpty(appId))
         {
             return AppIdValidationResult.Empty;
+        }
+
+        if (appId.StartsWith('/'))
+        {
+            return AppIdValidationResult.StartsWithSlash;
         }
 
         // Invalid if app ID contains unsafe characters
@@ -57,8 +60,8 @@ public static class AppRoutingHelpers
         var path = "/" + appId;
 
         // Invalid if path starts with any excluded pattern (must be exact segment match)
-        if (server.ReservedPaths.Contains(path) ||
-            server.ReservedPaths.Any(reserved => path.StartsWith(reserved + "/", StringComparison.OrdinalIgnoreCase)))
+        if (reservedPaths.Contains(path) ||
+            reservedPaths.Any(reserved => path.StartsWith(reserved + "/", StringComparison.OrdinalIgnoreCase)))
         {
             return AppIdValidationResult.ReservedPathConflict;
         }

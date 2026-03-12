@@ -11,7 +11,11 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
     {
         var path = context.Request.Path.Value ?? "";
 
-        if (server.ValidateAppId(path.TrimStart('/')) != AppIdValidationResult.Valid)
+        // Convert path to appId
+        // Remove leading slash and use the rest as appId
+        var appId = path.TrimStart('/');
+
+        if (AppRoutingHelpers.ValidateAppId(appId, server.ReservedPaths) != AppIdValidationResult.Valid)
         {
             await next(context);
             return;
@@ -24,9 +28,6 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
             return;
         }
 
-        // Convert path to appId
-        // Remove leading slash and use the rest as appId
-        var appId = path.TrimStart('/');
 
         // Only convert if the path looks like an app ID (contains at least one segment)
         if (!string.IsNullOrEmpty(appId))

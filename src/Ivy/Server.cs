@@ -482,8 +482,6 @@ public class Server
             DefaultAppId = _args.DefaultAppId;
         }
 
-        AppRepository.Reload();
-
         // Initialize external widget registry by scanning loaded assemblies
         ExternalWidgetRegistry.Instance.Initialize();
 
@@ -577,6 +575,10 @@ public class Server
         var app = builder.Build();
         ServiceProvider = app.Services;
 
+        // Update reserved paths with discovered controller routes before reloading apps
+        UpdateReservedPaths(app);
+        AppRepository.Reload(_reservedPaths);
+
         app.UseExceptionHandler(error =>
         {
             error.Run(async context =>
@@ -629,8 +631,8 @@ public class Server
         {
             HotReloadService.UpdateApplicationEvent += (types) =>
             {
-                AppRepository.Reload();
-                ValidateAppIds(app);
+                UpdateReservedPaths(app);
+                AppRepository.Reload(_reservedPaths);
                 var hubContext = app.Services.GetService<IHubContext<AppHub>>()!;
                 hubContext.Clients.All.SendAsync("HotReload", cancellationToken: cts.Token);
 
@@ -756,7 +758,6 @@ public class Server
 
         try
         {
-            ValidateAppIds(app);
             await app.StartAsync(cts.Token);
             await app.WaitForShutdownAsync(cts.Token);
         }
@@ -827,7 +828,7 @@ public class Server
             missingByProvider[provider.GetType().Name] = missing;
     }
 
-    private void ValidateAppIds(WebApplication app)
+    private void UpdateReservedPaths(WebApplication app)
     {
         var actionDescriptorCollectionProvider = app.Services.GetRequiredService<Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider>();
 
@@ -861,28 +862,6 @@ public class Server
 
         // Atomically update the shared set (thread safety for startup)
         _reservedPaths = reservedPaths;
-
-        // 4. Validate app IDs
-        foreach (var appDescriptor in AppRepository.All())
-        {
-            var appIdPath = "/" + appDescriptor.Id;
-
-            switch (this.ValidateAppId(appDescriptor.Id))
-            {
-                case AppIdValidationResult.Valid:
-                    break;
-                case AppIdValidationResult.Empty:
-                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' is empty. Please provide a valid App ID.");
-                case AppIdValidationResult.UnsafeCharacters:
-                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' contains unsafe characters. App IDs must be URL-friendly (alphanumeric, dashes, underscores).");
-                case AppIdValidationResult.ReservedPathConflict:
-                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
-                case AppIdValidationResult.StaticFileExtensionConflict:
-                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a static file extension. Please choose a different App ID.");
-                default:
-                    throw new InvalidOperationException($"App ID '{appDescriptor.Id}' is invalid. Please choose a different App ID.");
-            }
-        }
     }
 }
 
