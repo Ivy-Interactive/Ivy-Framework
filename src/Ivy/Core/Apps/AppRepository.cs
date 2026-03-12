@@ -262,4 +262,9 @@ public class AppRepository : IAppRepository
 
         return false;
     }
+
+    public void ClearInvalidAppIds()
+    {
+        _invalidAppIds.Clear();
+    }
 }

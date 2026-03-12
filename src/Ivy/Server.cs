@@ -577,6 +577,7 @@ public class Server
 
         // Update reserved paths with discovered controller routes before reloading apps
         UpdateReservedPaths(app);
+        AppRepository.ClearInvalidAppIds();
         AppRepository.Reload(_reservedPaths);
         if (AppRepository.InvalidAppIds.Count > 0)
         {
