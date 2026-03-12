@@ -247,7 +247,7 @@ public class AppRepository : IAppRepository
                 Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs should not start with '/'.");
                 break;
             case AppIdValidationResult.UnsafeCharacters:
-                Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs must be URL-friendly (alphanumeric, dashes, underscores, dots).");
+                Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs must be URL-friendly (alphanumeric, dashes, underscores, etc.).");
                 break;
             case AppIdValidationResult.ReservedPathConflict:
                 Console.WriteLine($"[ERROR] App ID '{appId}' collides with a reserved path '/{appId}'. Please choose a different App ID.");
