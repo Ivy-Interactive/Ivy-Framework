@@ -630,7 +630,7 @@ public class Server
             HotReloadService.UpdateApplicationEvent += (types) =>
             {
                 AppRepository.Reload();
-                CheckForAppIdCollisions(app);
+                ValidateAppIds(app);
                 var hubContext = app.Services.GetService<IHubContext<AppHub>>()!;
                 hubContext.Clients.All.SendAsync("HotReload", cancellationToken: cts.Token);
 
@@ -756,7 +756,7 @@ public class Server
 
         try
         {
-            CheckForAppIdCollisions(app);
+            ValidateAppIds(app);
             await app.StartAsync(cts.Token);
             await app.WaitForShutdownAsync(cts.Token);
         }
@@ -827,7 +827,7 @@ public class Server
             missingByProvider[provider.GetType().Name] = missing;
     }
 
-    private void CheckForAppIdCollisions(WebApplication app)
+    private void ValidateAppIds(WebApplication app)
     {
         var actionDescriptorCollectionProvider = app.Services.GetRequiredService<Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider>();
 
@@ -862,7 +862,7 @@ public class Server
         // Atomically update the shared set (thread safety for startup)
         _reservedPaths = reservedPaths;
 
-        // 4. Check for collisions
+        // 4. Validate app IDs
         foreach (var appDescriptor in AppRepository.All())
         {
             var appIdPath = "/" + appDescriptor.Id;
