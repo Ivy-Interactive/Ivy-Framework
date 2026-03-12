@@ -944,7 +944,8 @@ public static class Utils
         }
 
         // AppId should not contain protocol separators, query parameters, or other URL components
-        if (appId.Contains(':') || appId.Contains('?') || appId.Contains('#') || appId.Contains('&'))
+        if (appId.Contains(':') || appId.Contains('?') || appId.Contains('#') || appId.Contains('&') ||
+            appId.Contains('%') || appId.Contains('\\'))
         {
             return false;
         }
