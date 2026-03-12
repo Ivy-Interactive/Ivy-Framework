@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 interface EmojiRatingProps {
   value: number;
   onRate?: (rating: number) => void;
-  scale?: Scales;
+  density?: Densities;
   className?: string;
   disabled?: boolean;
   invalid?: string;
@@ -19,7 +19,7 @@ const emojis = ['😢', '😕', '😐', '🙂', '😊'];
 export function EmojiRating({
   value = 0,
   onRate,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   className,
   disabled = false,
   invalid,
@@ -48,7 +48,7 @@ export function EmojiRating({
       >
         {emojis.map((emoji, index) => (
           <button
-            key={index}
+            key={emoji}
             type="button"
             className={cn(
               'relative focus-visible:outline-none focus-visible:ring-2',
@@ -56,10 +56,10 @@ export function EmojiRating({
               'transition-transform duration-200',
               'hover:scale-125 active:scale-90 cursor-pointer',
               disabled && 'cursor-not-allowed hover:scale-100',
-              emojiSizes[scale]
+              emojiSizes[density]
             )}
             onClick={() => handleRating(index + 1)}
-            onMouseEnter={() => !disabled && setHover(index + 1)}
+            onMouseEnter={() => !disabled && setHover(() => index + 1)}
             onMouseLeave={() => !disabled && setHover(0)}
             disabled={disabled}
           >

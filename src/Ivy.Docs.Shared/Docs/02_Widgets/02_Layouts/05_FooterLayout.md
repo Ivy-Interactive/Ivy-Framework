@@ -99,7 +99,7 @@ public class SheetWithFooterExample : ViewBase
                 content: Layout.Vertical()
                     | new Card(Layout.Vertical()
                         | new TextInput(title, "Article Title")
-                        | new TextInput(content, "Article Content").Variant(TextInputVariants.Textarea)
+                        | new TextInput(content, "Article Content").Variant(TextInputVariant.Textarea)
                     ).Title("Article Details")
                     | new Card("Article preview will appear here as you type...")
                         .Title("Preview")
@@ -148,7 +148,7 @@ public class ComplexFooterExample : ViewBase
                 content: Layout.Vertical()
                     | new Card(Layout.Vertical()
                         | new TextInput(docTitle, "Document Title")
-                        | new TextInput(summary, "Executive Summary").Variant(TextInputVariants.Textarea)
+                        | new TextInput(summary, "Executive Summary").Variant(TextInputVariant.Textarea)
                     ).Title("Document Information")
             );
     }

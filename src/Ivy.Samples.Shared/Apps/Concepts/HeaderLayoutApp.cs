@@ -40,7 +40,7 @@ public class HeaderLayoutView : ViewBase
             Layout.Horizontal().Gap(4)
                 | searchText.ToTextInput()
                     .Placeholder("Search items...")
-                    .Variant(TextInputVariants.Search)
+                    .Variant(TextInputVariant.Search)
                 | new Button("Add Item")
                     .Icon(Icons.Plus)
                     .Variant(ButtonVariant.Primary)

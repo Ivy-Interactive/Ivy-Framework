@@ -6,14 +6,14 @@ using Ivy.Core.Hooks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum FileInputVariants
+public enum FileInputVariant
 {
     Drop
 }
 
 public interface IAnyFileInput : IAnyInput
 {
-    public FileInputVariants Variant { get; set; }
+    public FileInputVariant Variant { get; set; }
 }
 
 public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
@@ -24,7 +24,7 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public FileInputVariants Variant { get; set; } = FileInputVariants.Drop;
+    [Prop] public FileInputVariant Variant { get; set; } = FileInputVariant.Drop;
 
     [Prop] public string? Accept { get; set; }
 
@@ -106,7 +106,7 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 {
     [OverloadResolutionPriority(1)]
-    public FileInput(IAnyState state, string? placeholder = null, bool disabled = false, FileInputVariants variant = FileInputVariants.Drop)
+    public FileInput(IAnyState state, string? placeholder = null, bool disabled = false, FileInputVariant variant = FileInputVariant.Drop)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TValue>();
@@ -114,13 +114,13 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
     }
 
     [OverloadResolutionPriority(1)]
-    public FileInput(TValue value, string? placeholder = null, bool disabled = false, FileInputVariants variant = FileInputVariants.Drop)
+    public FileInput(TValue value, string? placeholder = null, bool disabled = false, FileInputVariant variant = FileInputVariant.Drop)
         : this(placeholder, disabled, variant)
     {
         Value = value;
     }
 
-    public FileInput(string? placeholder = null, bool disabled = false, FileInputVariants variant = FileInputVariants.Drop) : this()
+    public FileInput(string? placeholder = null, bool disabled = false, FileInputVariant variant = FileInputVariant.Drop) : this()
     {
         Placeholder = placeholder;
         Variant = variant;
@@ -143,12 +143,12 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 public static class FileInputExtensions
 {
     [Obsolete("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).", true)]
-    public static FileInputBase ToFileInput(this IAnyState state, string? placeholder = null, bool disabled = false, FileInputVariants variant = FileInputVariants.Drop)
+    public static FileInputBase ToFileInput(this IAnyState state, string? placeholder = null, bool disabled = false, FileInputVariant variant = FileInputVariant.Drop)
     {
         throw new NotSupportedException("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).");
     }
 
-    public static FileInputBase ToFileInput(this IAnyState state, IState<UploadContext> uploadContext, string? placeholder = null, bool disabled = false, FileInputVariants variant = FileInputVariants.Drop)
+    public static FileInputBase ToFileInput(this IAnyState state, IState<UploadContext> uploadContext, string? placeholder = null, bool disabled = false, FileInputVariant variant = FileInputVariant.Drop)
     {
         static bool IsFileUploadType(Type t)
         {
@@ -280,7 +280,7 @@ public static class FileInputExtensions
         return widget with { Disabled = disabled };
     }
 
-    public static FileInputBase Variant(this FileInputBase widget, FileInputVariants variant)
+    public static FileInputBase Variant(this FileInputBase widget, FileInputVariant variant)
     {
         return widget with { Variant = variant };
     }

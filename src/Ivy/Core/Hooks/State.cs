@@ -1,4 +1,5 @@
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 
 namespace Ivy.Core.Hooks;
 
@@ -42,6 +43,7 @@ public class State<T> : IState<T>
         }
     }
 
+    [OverloadResolutionPriority(1)]
     public T Set(T value)
     {
         Value = value;

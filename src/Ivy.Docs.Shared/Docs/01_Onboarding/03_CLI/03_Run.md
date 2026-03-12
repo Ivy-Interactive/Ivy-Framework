@@ -37,6 +37,41 @@ You can also run the command with various options to customize its behavior:
 | `--verbose` | Enable detailed logging for debugging. | `ivy run --verbose` |
 | `--silent` | Start without the welcome banner. | `ivy run --silent` |
 
+## Configuring the Port
+
+By default, Ivy starts on port **5010**. There are several ways to change it:
+
+### CLI Flag
+
+The simplest approach—pass the `--port` flag:
+
+```terminal
+>ivy run --port 5011
+```
+
+### Server Configuration in Code
+
+Set the port directly in `Program.cs` (or in a [file-based app](../02_Concepts/19_FileBasedApps.md)):
+
+```csharp
+var server = new Server(new ServerArgs { Port = 5011 });
+```
+
+This is the recommended approach when running with `dotnet run` or `dotnet watch` directly, since those commands do not support the `--port` flag.
+
+### Environment Variable
+
+Set the `PORT` environment variable before starting the app:
+
+```terminal
+>set PORT=5011
+>dotnet run
+```
+
+This works with any launch method (`ivy run`, `dotnet run`, file-based apps).
+
+See [Program](../02_Concepts/01_Program.md) for more details on server configuration.
+
 ## Conflict Resolution & Debugging
 
 | Flag | Description |

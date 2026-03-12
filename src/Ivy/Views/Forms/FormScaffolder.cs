@@ -160,7 +160,7 @@ internal static class FormScaffolder
 
                 if (field.HasDataTypeAttribute(DataType.MultilineText))
                 {
-                    input = input.Variant(TextInputVariants.Textarea);
+                    input = input.Variant(TextInputVariant.Textarea);
                 }
 
                 // If Required => don't show X button even for nullable types
@@ -231,11 +231,11 @@ internal static class FormScaffolder
 
                 if (field.HasDataTypeAttribute(DataType.Date))
                 {
-                    input = input.Variant(DateTimeInputVariants.Date);
+                    input = input.Variant(DateTimeInputVariant.Date);
                 }
                 else if (field.HasDataTypeAttribute(DataType.Time))
                 {
-                    input = input.Variant(DateTimeInputVariants.Time);
+                    input = input.Variant(DateTimeInputVariant.Time);
                 }
                 if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
@@ -303,11 +303,14 @@ internal static class FormScaffolder
             validators.AddRange(FormHelpers.GetValidators(field.FieldInfo));
         }
 
-        var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
-        if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
-        {
+        if (field.IsEmail())
             validators.Add(Validators.CreateEmailValidator(field.Name));
-        }
+        if (field.IsPhone())
+            validators.Add(Validators.CreateTelValidator(field.Name));
+        if (field.IsUrl())
+            validators.Add(Validators.CreateUrlValidator(field.Name));
+        if (field.IsPassword())
+            validators.Add(Validators.CreatePasswordValidator(field.Name));
 
         return validators;
     }

@@ -53,6 +53,26 @@ A `Field` supports the following common properties:
 * **Help(string)** - An optional help text displayed as a tooltip on an info icon next to the label.
 * **Required(bool)** - Marks the input as required (adds an asterisk or style cue).
 
+### Layout Configuration
+
+* **LabelPosition(LabelPosition)** - Controls whether the label is positioned above the input (`Top`) or beside it (`Left`).
+
+```csharp demo-below
+public class LabelPositionExample : ViewBase
+{
+    public override object? Build()
+    {
+        var email = UseState("");
+        return email.ToTextInput()
+            .Placeholder("admin@company.com")
+            .WithField()
+            .Label("Work Email")
+            .LabelPosition(LabelPosition.Left)
+            .Description("We'll use this for account recovery");
+    }
+}
+```
+
 ### Properties Usage
 
 ```csharp demo-below
@@ -88,11 +108,11 @@ public class MixedInputsDemo : ViewBase
         var selectedNotice = UseState(new string[]{});
         return Layout.Vertical()
             | dateState.ToDateTimeInput()
-                .Variant(DateTimeInputVariants.Date)
+                .Variant(DateTimeInputVariant.Date)
                 .WithField()
                 .Label("Date of birth")
             | selectedNotice.ToSelectInput(options.ToOptions())
-                .Variant(SelectInputVariants.List)
+                .Variant(SelectInputVariant.List)
                 .WithField()
                 .Label("Terms & Conditions")
                 .Description("You must agree before continuing")

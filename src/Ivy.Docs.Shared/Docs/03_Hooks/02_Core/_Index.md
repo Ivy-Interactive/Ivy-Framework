@@ -1,10 +1,10 @@
 ---
-title: Hooks
+title: Core
 ---
 
 # Hooks
 
-Hooks are functions that let you "hook into" Ivy state and lifecycle features from [views](../../../01_Onboarding/02_Concepts/02_Views.md). They allow you to use state and other features without writing a class. See the [Rules of Hooks](../01_RulesOfHooks.md) for call order and context rules.
+Hooks are functions that let you "hook into" Ivy state and lifecycle features from [views](../../../01_Onboarding/02_Concepts/02_Views.md). They allow you to use state and other features without writing a class. See the [Rules of Hooks](../02_RulesOfHooks.md) for call order and context rules.
 
 ## Core Hooks
 

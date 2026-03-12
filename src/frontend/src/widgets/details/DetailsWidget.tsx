@@ -1,16 +1,20 @@
 import React from 'react';
 import { Details } from '@/components/ui/detail';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 type DetailsWidgetProps = {
   id: string;
   children: React.ReactNode;
-  scale?: Scales;
+  density?: Densities;
 };
 
-export const DetailsWidget = ({ id, children, scale }: DetailsWidgetProps) => {
+export const DetailsWidget = ({
+  id,
+  children,
+  density,
+}: DetailsWidgetProps) => {
   return (
-    <Details scale={scale} key={id}>
+    <Details density={density} key={id}>
       {children}
     </Details>
   );

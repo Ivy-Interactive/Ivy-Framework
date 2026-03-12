@@ -9,6 +9,7 @@ namespace Ivy;
 /// <summary>
 /// A menu that appears when an element is clicked.
 /// </summary>
+[ChildType(typeof(MenuItem))]
 public record DropDownMenu : WidgetBase<DropDownMenu>
 {
     public enum SideOptions

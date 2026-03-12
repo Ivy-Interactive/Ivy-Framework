@@ -89,10 +89,10 @@ public static class DialogExtensions
                 ),
                 new DialogFooter(
                     validationView,
-                    new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Scale(formBuilder._scale),
+                    new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Density(formBuilder._density),
                     FormBuilder<TModel>.DefaultSubmitBuilder(submitTitle ?? "Save")(isLoading)
                         .OnClick(_ => HandleSubmitAndClose())
-                        .Scale(formBuilder._scale)
+                        .Density(formBuilder._density)
                 )
             ).Width(width ?? Dialog.DefaultWidth);
         });

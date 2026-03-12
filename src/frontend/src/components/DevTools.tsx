@@ -1,7 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from 'react-speech-recognition';
+import { useState, useEffect, useCallback, useRef, useReducer } from 'react';
 import './devtools.css';
 import { CallSite } from '@/types/widgets';
 import {
@@ -73,36 +70,6 @@ function getTextContent(
   return trimmed;
 }
 
-function MicButton({
-  listening,
-  onClick,
-}: {
-  listening: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`ivy-devtools-mic-btn ${listening ? 'ivy-devtools-mic-active' : ''}`}
-      title={listening ? 'Stop dictation' : 'Start dictation'}
-      type="button"
-    >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-        <line x1="12" x2="12" y1="19" y2="22" />
-      </svg>
-    </button>
-  );
-}
-
 export function DevTools() {
   const [enabled, setEnabled] = useState(false);
 
@@ -116,24 +83,42 @@ export function DevTools() {
     return () => window.removeEventListener('message', handler);
   }, []);
 
-  const [highlightedWidget, setHighlightedWidget] = useState<WidgetInfo | null>(
-    null
+  const [devState, dispatchDev] = useReducer(
+    (
+      state: {
+        highlightedWidget: WidgetInfo | null;
+        widgetStack: HTMLElement[];
+        dialogWidget: WidgetInfo | null;
+        dialogAction: DialogAction;
+        dialogText: string;
+        clickPosition: { x: number; y: number };
+      },
+      action:
+        | Partial<typeof state>
+        | ((prev: typeof state) => Partial<typeof state>)
+    ) => {
+      const updates = typeof action === 'function' ? action(state) : action;
+      return { ...state, ...updates };
+    },
+    {
+      highlightedWidget: null,
+      widgetStack: [],
+      dialogWidget: null,
+      dialogAction: 'modify',
+      dialogText: '',
+      clickPosition: { x: 0, y: 0 },
+    }
   );
-  const [widgetStack, setWidgetStack] = useState<HTMLElement[]>([]);
-
-  const [dialogWidget, setDialogWidget] = useState<WidgetInfo | null>(null);
-  const [dialogAction, setDialogAction] = useState<DialogAction>('modify');
-  const [dialogText, setDialogText] = useState('');
-  const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
+  const {
+    highlightedWidget,
+    widgetStack,
+    dialogWidget,
+    dialogAction,
+    dialogText,
+    clickPosition,
+  } = devState;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const {
-    transcript,
-    listening,
-    resetTranscript,
-    browserSupportsSpeechRecognition,
-  } = useSpeechRecognition();
 
   const getWidgetInfo = useCallback((element: HTMLElement): WidgetInfo => {
     const widgetId = element.getAttribute('id')!;
@@ -144,44 +129,21 @@ export function DevTools() {
   }, []);
 
   const closeDialog = useCallback(() => {
-    if (listening) {
-      SpeechRecognition.stopListening();
-      resetTranscript();
-    }
     if (dialogWidget && dialogAction === 'text-edit') {
       clearWidgetContentOverride(dialogWidget.id);
     }
-    setDialogWidget(null);
-    setDialogText('');
-    setDialogAction('modify');
-    setHighlightedWidget(null);
-  }, [listening, resetTranscript, dialogWidget, dialogAction]);
-
-  const toggleDictation = useCallback(() => {
-    if (listening) {
-      SpeechRecognition.stopListening();
-      if (transcript) {
-        setDialogText(prev => (prev ? prev + ' ' : '') + transcript);
-        if (dialogAction === 'text-edit' && dialogWidget) {
-          setDialogText(prev => {
-            setWidgetContentOverride(dialogWidget.id, prev);
-            return prev;
-          });
-        }
-        resetTranscript();
-      }
-    } else {
-      resetTranscript();
-      SpeechRecognition.startListening({ continuous: true });
-    }
-  }, [listening, transcript, resetTranscript, dialogAction, dialogWidget]);
+    dispatchDev({
+      dialogWidget: null,
+      dialogText: '',
+      dialogAction: 'modify',
+      highlightedWidget: null,
+    });
+  }, [dialogWidget, dialogAction, dispatchDev]);
 
   const postChange = useCallback(
     (forward: boolean) => {
       if (!dialogWidget) return;
-      if (listening) SpeechRecognition.stopListening();
-      const finalText = dialogText + (transcript ? ' ' + transcript : '');
-      resetTranscript();
+      const finalText = dialogText;
 
       const prompt =
         dialogAction === 'delete'
@@ -214,15 +176,7 @@ export function DevTools() {
       );
       closeDialog();
     },
-    [
-      dialogWidget,
-      dialogAction,
-      dialogText,
-      listening,
-      transcript,
-      resetTranscript,
-      closeDialog,
-    ]
+    [dialogWidget, dialogAction, dialogText, closeDialog]
   );
 
   const handleAdd = useCallback(() => postChange(false), [postChange]);
@@ -241,27 +195,27 @@ export function DevTools() {
           dialogWidget.element.getAttribute('data-content') ||
           dialogWidget.element.textContent ||
           '';
-        setDialogText(text);
+        dispatchDev({ dialogText: text });
         setWidgetContentOverride(dialogWidget.id, text);
       } else if (dialogAction === action) {
         return;
       } else {
-        setDialogText('');
+        dispatchDev({ dialogText: '' });
       }
 
-      setDialogAction(action);
+      dispatchDev({ dialogAction: action });
     },
-    [dialogWidget, dialogAction]
+    [dialogWidget, dialogAction, dispatchDev]
   );
 
   const handleTextChange = useCallback(
     (value: string) => {
-      setDialogText(value);
+      dispatchDev({ dialogText: value });
       if (dialogAction === 'text-edit' && dialogWidget) {
         setWidgetContentOverride(dialogWidget.id, value);
       }
     },
-    [dialogAction, dialogWidget]
+    [dialogAction, dialogWidget, dispatchDev]
   );
 
   const handleMouseOver = useCallback(
@@ -275,8 +229,7 @@ export function DevTools() {
 
       const widgetWrapper = target.closest('ivy-widget') as HTMLElement | null;
       if (!widgetWrapper) {
-        setHighlightedWidget(null);
-        setWidgetStack([]);
+        dispatchDev({ highlightedWidget: null, widgetStack: [] });
         return;
       }
 
@@ -288,10 +241,12 @@ export function DevTools() {
           'ivy-widget'
         ) as HTMLElement | null;
       }
-      setWidgetStack(stack);
-      setHighlightedWidget(getWidgetInfo(widgetWrapper));
+      dispatchDev({
+        widgetStack: stack,
+        highlightedWidget: getWidgetInfo(widgetWrapper),
+      });
     },
-    [dialogWidget, getWidgetInfo]
+    [dialogWidget, getWidgetInfo, dispatchDev]
   );
 
   const handleWheel = useCallback(
@@ -301,7 +256,7 @@ export function DevTools() {
       const target = e.target as HTMLElement;
       if (target.closest('.ivy-devtools')) return;
 
-      e.preventDefault();
+      e.stopPropagation();
       e.stopPropagation();
 
       const currentIndex = widgetStack.findIndex(
@@ -309,16 +264,20 @@ export function DevTools() {
       );
       if (currentIndex === -1) return;
 
-      const newIndex =
-        e.deltaY < 0
-          ? Math.min(currentIndex + 1, widgetStack.length - 1)
-          : Math.max(currentIndex - 1, 0);
+      let newIndex = currentIndex;
+      if (e.deltaY < 0) {
+        newIndex = Math.min(currentIndex + 1, widgetStack.length - 1);
+      } else {
+        newIndex = Math.max(currentIndex - 1, 0);
+      }
 
       if (newIndex !== currentIndex) {
-        setHighlightedWidget(getWidgetInfo(widgetStack[newIndex]));
+        dispatchDev({
+          highlightedWidget: getWidgetInfo(widgetStack[newIndex]),
+        });
       }
     },
-    [widgetStack, highlightedWidget, dialogWidget, getWidgetInfo]
+    [widgetStack, highlightedWidget, dialogWidget, getWidgetInfo, dispatchDev]
   );
 
   const handleClick = useCallback(
@@ -333,14 +292,15 @@ export function DevTools() {
 
       if (!highlightedWidget) return;
 
-      setClickPosition({ x: e.clientX, y: e.clientY });
-      setDialogWidget(highlightedWidget);
-      setDialogAction('modify');
-      setDialogText('');
-      resetTranscript();
+      dispatchDev({
+        clickPosition: { x: e.clientX, y: e.clientY },
+        dialogWidget: highlightedWidget,
+        dialogAction: 'modify',
+        dialogText: '',
+      });
       setTimeout(() => textareaRef.current?.focus(), 0);
     },
-    [highlightedWidget, dialogWidget, resetTranscript]
+    [highlightedWidget, dialogWidget, dispatchDev]
   );
 
   const handleKeyDown = useCallback(
@@ -352,23 +312,8 @@ export function DevTools() {
         e.preventDefault();
         handleAdd();
       }
-      if (
-        e.key === ' ' &&
-        e.ctrlKey &&
-        dialogWidget &&
-        browserSupportsSpeechRecognition
-      ) {
-        e.preventDefault();
-        toggleDictation();
-      }
     },
-    [
-      dialogWidget,
-      closeDialog,
-      handleAdd,
-      browserSupportsSpeechRecognition,
-      toggleDictation,
-    ]
+    [dialogWidget, closeDialog, handleAdd]
   );
 
   useEffect(() => {
@@ -378,7 +323,7 @@ export function DevTools() {
       document.addEventListener('mouseover', handleMouseOver, true);
       document.addEventListener('click', handleClick, true);
       document.addEventListener('wheel', handleWheel, {
-        passive: false,
+        passive: true,
         capture: true,
       });
       document.body.style.cursor = 'crosshair';
@@ -426,9 +371,7 @@ export function DevTools() {
     return () => overlay.remove();
   }, [enabled, highlightedWidget, dialogWidget]);
 
-  const displayValue = listening
-    ? dialogText + (transcript ? ' ' + transcript : '')
-    : dialogText;
+  const displayValue = dialogText;
 
   if (!enabled) return null;
 
@@ -469,11 +412,7 @@ export function DevTools() {
               onChange={e => handleTextChange(e.target.value)}
               placeholder="Write anything..."
               className="ivy-devtools-textarea"
-              readOnly={listening}
             />
-            {browserSupportsSpeechRecognition && (
-              <MicButton listening={listening} onClick={toggleDictation} />
-            )}
           </div>
           <div className="ivy-devtools-dialog-actions">
             <button

@@ -25,7 +25,7 @@ export {
 } from './sidebar';
 
 export { useSidebar } from './context';
-export { sidebarMenuButtonVariants } from './variants';
+export { sidebarMenuButtonVariant } from './variant';
 export {
   SIDEBAR_COOKIE_NAME,
   SIDEBAR_COOKIE_MAX_AGE,

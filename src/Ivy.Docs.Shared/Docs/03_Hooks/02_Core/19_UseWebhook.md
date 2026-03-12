@@ -13,7 +13,7 @@ imports:
 # UseWebhook
 
 <Ingress>
-The `UseWebhook` [hook](../01_RulesOfHooks.md) creates HTTP endpoints that can be called from external systems, enabling integration with third-party services, webhooks, and external callbacks.
+The `UseWebhook` [hook](../02_RulesOfHooks.md) creates HTTP endpoints that can be called from external systems, enabling integration with third-party services, webhooks, and external callbacks.
 </Ingress>
 
 ## Overview

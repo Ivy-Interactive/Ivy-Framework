@@ -1,0 +1,24 @@
+name: React Doctor Checks
+permissions:
+  contents: read
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "src/frontend/**"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "src/frontend/**"
+  workflow_dispatch:
+
+jobs:
+  react-doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run React Doctor
+        uses: millionco/react-doctor@main
+        with:
+          directory: ./src/frontend

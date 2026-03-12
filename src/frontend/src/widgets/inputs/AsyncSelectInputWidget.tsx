@@ -11,38 +11,38 @@ import {
   TooltipContent,
 } from '@/components/ui/tooltip';
 import { useRef, useEffect, useState } from 'react';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { cva } from 'class-variance-authority';
 
-const asyncSelectContainerVariants = cva(
+const asyncSelectContainerVariant = cva(
   'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-field border border-input bg-transparent shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer relative dark:border-white/10',
   {
     variants: {
-      scale: {
+      density: {
         Small: 'h-7 px-2 py-1 pr-7',
         Medium: 'h-9 px-3 py-2 pr-9',
         Large: 'h-11 px-4 py-3 pr-11',
       },
     },
     defaultVariants: {
-      scale: 'Medium',
+      density: 'Medium',
     },
   }
 );
 
-const asyncSelectTextVariants = {
+const asyncSelectTextVariant = {
   Small: 'text-xs',
   Medium: 'text-sm',
   Large: 'text-base',
 };
 
-const asyncSelectIconContainerVariants = {
+const asyncSelectIconContainerVariant = {
   Small: 'w-7 right-0 px-2',
   Medium: 'w-8 right-0 px-2',
   Large: 'w-10 right-0 px-2',
 };
 
-const asyncSelectIconVariants = {
+const asyncSelectIconVariant = {
   Small: 'h-3 w-3',
   Medium: 'h-4 w-4',
   Large: 'h-5 w-5',
@@ -55,7 +55,7 @@ interface AsyncSelectInputWidgetProps {
   disabled?: boolean;
   loading?: boolean;
   invalid?: string;
-  scale?: Scales;
+  density?: Densities;
   ghost?: boolean;
 }
 
@@ -66,7 +66,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   disabled = false,
   invalid,
   loading,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   ghost = false,
 }) => {
   const eventHandler = useEventHandler();
@@ -120,7 +120,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
       ref={displayValueRef}
       className={cn(
         'grow overflow-hidden text-ellipsis whitespace-nowrap',
-        asyncSelectTextVariants[scale],
+        asyncSelectTextVariant[density],
         !loading && 'text-primary font-semibold underline',
         loading && 'text-muted-foreground'
       )}
@@ -153,7 +153,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         disabled={disabled}
         onClick={handleSelect}
         className={cn(
-          asyncSelectContainerVariants({ scale }),
+          asyncSelectContainerVariant({ density }),
           invalid && inputStyles.invalidInput,
           ghost && 'border-transparent shadow-none'
         )}
@@ -163,7 +163,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
           <span
             className={cn(
               'grow text-muted-foreground',
-              asyncSelectTextVariants[scale]
+              asyncSelectTextVariant[density]
             )}
           >
             {placeholder}
@@ -177,13 +177,13 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         <div
           className={cn(
             'absolute top-0 bottom-0 border-l flex items-center justify-center',
-            asyncSelectIconContainerVariants[scale]
+            asyncSelectIconContainerVariant[density]
           )}
         >
           <ChevronRight
             className={cn(
               'opacity-50 shrink-0',
-              asyncSelectIconVariants[scale]
+              asyncSelectIconVariant[density]
             )}
           />
         </div>

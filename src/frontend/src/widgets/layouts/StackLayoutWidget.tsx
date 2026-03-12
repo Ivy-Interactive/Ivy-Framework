@@ -1,6 +1,8 @@
 import React from 'react';
 import {
   Align,
+  BorderRadius,
+  BorderStyle,
   getRowGap,
   getColumnGap,
   getHeight,
@@ -11,8 +13,13 @@ import {
   getColor,
   getMargin,
   getAlignSelf,
+  getBorderStyle,
+  getBorderThickness,
+  getBoxRadius,
 } from '@/lib/styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
+const EMPTY_ARRAY: never[] = [];
 
 interface StackLayoutWidgetProps {
   children: React.ReactNode;
@@ -30,6 +37,10 @@ interface StackLayoutWidgetProps {
   visible?: boolean;
   wrap?: boolean;
   childAlignSelf?: (Align | undefined)[];
+  borderColor?: string;
+  borderRadius?: BorderRadius;
+  borderStyle?: BorderStyle;
+  borderThickness?: string;
 }
 
 export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
@@ -47,7 +58,11 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   removeParentPadding = false,
   visible = true,
   wrap = false,
-  childAlignSelf = [],
+  childAlignSelf = EMPTY_ARRAY,
+  borderColor,
+  borderRadius = 'None',
+  borderStyle = 'None',
+  borderThickness,
 }) => {
   const baseStyles: React.CSSProperties = {
     ...getPadding(padding),
@@ -58,6 +73,14 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     ...getWidth(width),
     ...getHeight(height),
     ...getColor(background, 'backgroundColor', 'background'),
+    ...(borderStyle !== 'None' ? getBorderStyle(borderStyle) : {}),
+    ...(borderThickness ? getBorderThickness(borderThickness) : {}),
+    ...(borderColor ? getColor(borderColor, 'borderColor', 'background') : {}),
+    ...(borderRadius === 'Rounded'
+      ? getBoxRadius()
+      : borderRadius === 'Full'
+        ? { borderRadius: '9999px' }
+        : {}),
   };
 
   // Override flexWrap if wrap is enabled

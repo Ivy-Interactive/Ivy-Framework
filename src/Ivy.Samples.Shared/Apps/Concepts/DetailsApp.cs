@@ -12,7 +12,7 @@ public class DetailsApp : SampleBase
                    new Tab("Basic", new DetailsBasicExample()),
                    new Tab("Nested", new DetailsNestedExample()),
                    new Tab("Multiline", new DetailsMultilineExample()),
-                   new Tab("Scale", new DetailsScaleExample())
+                   new Tab("Density", new DetailsDensityExample())
                ).Variant(TabsVariant.Content);
     }
 }
@@ -118,7 +118,7 @@ public class DetailsMultilineExample : ViewBase
     }
 }
 
-public class DetailsScaleExample : ViewBase
+public class DetailsDensityExample : ViewBase
 {
     public override object? Build()
     {
@@ -191,18 +191,18 @@ public class DetailsScaleExample : ViewBase
         };
 
         return Layout.Vertical().Gap(2)
-                | Text.H1("Details Scale")
+                | Text.H1("Details Density")
                 | (Layout.Horizontal().Gap(2)
                     | (Layout.Vertical()
-                        | Text.Label("Small Scale").Bold()
+                        | Text.Label("Small Density").Bold()
                         | new Card(record_small.ToDetails().RemoveEmpty().Small())
                         | new Card(record.ToDetails().Multiline(x => x.LastName).RemoveEmpty().Small()))
                     | (Layout.Vertical()
-                        | Text.Label("Medium Scale").Bold()
+                        | Text.Label("Medium Density").Bold()
                         | new Card(record_medium.ToDetails().RemoveEmpty())
                         | new Card(record.ToDetails().Multiline(x => x.LastName).RemoveEmpty()))
                     | (Layout.Vertical()
-                        | Text.Label("Large Scale").Bold()
+                        | Text.Label("Large Density").Bold()
                         | new Card(record_large.ToDetails().RemoveEmpty().Large())
                         | new Card(record.ToDetails().Multiline(x => x.LastName).RemoveEmpty().Large())))
                 ;

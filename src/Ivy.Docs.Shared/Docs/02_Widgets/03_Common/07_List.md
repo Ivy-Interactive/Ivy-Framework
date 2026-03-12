@@ -52,33 +52,33 @@ public class ListConfigDemo : ViewBase
             | Text.P("Title and Subtitle").Large()
             | new List(new[]
             {
-                new ListItem("John Doe", subtitle: "Software Engineer"),
-                new ListItem("Jane Smith", subtitle: "Product Manager")
+                new ListItem("John Doe").Subtitle("Software Engineer"),
+                new ListItem("Jane Smith").Subtitle("Product Manager")
             })
             | Text.P("Icons").Large()
             | new List(new[]
             {
-                new ListItem("Dashboard", icon: Icons.House, subtitle: "Main overview"),
-                new ListItem("Settings", icon: Icons.Settings, subtitle: "Configuration")
+                new ListItem("Dashboard").Icon(Icons.House).Subtitle("Main overview"),
+                new ListItem("Settings").Icon(Icons.Settings).Subtitle("Configuration")
             })
             | Text.P("Badges").Large()
             | new List(new[]
             {
-                new ListItem("New Message", subtitle: "From John Doe", badge: "3"),
-                new ListItem("System Update", subtitle: "Available now", badge: "!")
+                new ListItem("New Message").Subtitle("From John Doe").Badge("3"),
+                new ListItem("System Update").Subtitle("Available now").Badge("!")
             })
             | Text.P("Custom Content").Large()
             | new List(new[]
             {
-                new ListItem("Notifications", icon: Icons.Bell)
-                    .Content(new BoolInput(notifications, variant: BoolInputVariants.Switch)),
-                new ListItem("Status", icon: Icons.Activity)
+                new ListItem("Notifications").Icon(Icons.Bell)
+                    .Content(new BoolInput(notifications, variant: BoolInputVariant.Switch)),
+                new ListItem("Status").Icon(Icons.Activity)
                     .Content(
                         Layout.Horizontal().Gap(2)
                             | new Badge("Online", BadgeVariant.Success)
                             | Text.Muted("Last seen 2 min ago")
                     ),
-                new ListItem("Search", icon: Icons.Search)
+                new ListItem("Search").Icon(Icons.Search)
                     .Content(new TextInput("", placeholder: "Type to search..."))
             });
     }
@@ -106,8 +106,9 @@ public class InteractiveListDemo : ViewBase
         
         var items = new[]
         {
-            new ListItem("Click me!", onClick: onItemClick, icon: Icons.MousePointer),
-            new ListItem("Me too!", onClick: onItemClick, icon: Icons.MousePointer)
+            new ListItem("Click me!").OnClick(onItemClick).Icon(Icons.MousePointer),
+            new ListItem("Me too!").OnClick(onItemClick).Icon(Icons.MousePointer),
+            new ListItem("Unavailable action").OnClick(onItemClick).Icon(Icons.Ban).Disabled()
         };
 
         return new List(items);
@@ -150,7 +151,7 @@ public class DynamicListDemo : ViewBase
 }
 ```
 
-Lists in Ivy are highly customizable. You can combine them with other widgets like Cards, Badges, and Buttons to create rich, interactive [interfaces](../../01_Onboarding/02_Concepts/02_Views.md). The `onClick` event on ListItems makes it easy to build [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md) and user interactions.
+Lists in Ivy are highly customizable. You can combine them with other widgets like Cards, Badges, and Buttons to create rich, interactive [interfaces](../../01_Onboarding/02_Concepts/02_Views.md). The `OnClick` event on ListItems makes it easy to build [navigation](../../01_Onboarding/02_Concepts/14_Navigation.md) and user interactions.
 
 ### Search and Filter
 
@@ -197,22 +198,18 @@ public class ExamplesListDemo : ViewBase
             new { Name = "Mouse", Price = 29.99m, Stock = 50 }
         };
         
-        var customItems = products.Select(product => new ListItem(
-            title: product.Name,
-            subtitle: $"${product.Price} - {product.Stock} in stock",
-            items: new object[]
-            {
+        var customItems = products.Select(product => new ListItem(product.Name)
+            .Subtitle($"${product.Price} - {product.Stock} in stock")
+            .Content(
                 Layout.Horizontal().Gap(2)
                     | Text.Block($"${product.Price}")
                     | new Badge(product.Stock.ToString()).Variant(BadgeVariant.Secondary)
-            }
-        ));
+            )
+        );
 
         // Time Rendering Data
-        var timeItem = new ListItem(
-            title: "Task created",
-            subtitle: $"Created at {DateTime.Now:HH:mm:ss}"
-        );
+        var timeItem = new ListItem("Task created")
+            .Subtitle($"Created at {DateTime.Now:HH:mm:ss}");
 
         return Layout.Vertical().Gap(4)
             | Text.P("Custom Item Rendering").Large()

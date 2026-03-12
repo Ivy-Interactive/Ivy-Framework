@@ -4,16 +4,16 @@ import * as SwitchPrimitives from '@radix-ui/react-switch';
 import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
-import { switchVariants, switchThumbVariants } from './input/switch-variants';
+import { switchVariant, switchThumbVariant } from './input/switch-variant';
 
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> &
-    VariantProps<typeof switchVariants> & {
+    VariantProps<typeof switchVariant> & {
       icon?: string;
     }
->(({ className, scale, icon, ...props }, ref) => {
-  const baseClass = switchVariants({ scale });
+>(({ className, density, icon, ...props }, ref) => {
+  const baseClass = switchVariant({ density });
   const finalClass = className?.includes('bg-red-50')
     ? baseClass.replace('data-[state=checked]:bg-primary', '')
     : baseClass;
@@ -23,7 +23,7 @@ const Switch = React.forwardRef<
       {...props}
       ref={ref}
     >
-      <SwitchPrimitives.Thumb className={cn(switchThumbVariants({ scale }))}>
+      <SwitchPrimitives.Thumb className={cn(switchThumbVariant({ density }))}>
         {icon && (
           <div className="flex items-center justify-center w-full h-full">
             <Icon name={icon} className="w-[12px] h-[12px]" />

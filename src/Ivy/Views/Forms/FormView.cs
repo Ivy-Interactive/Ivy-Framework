@@ -52,33 +52,42 @@ public class FormFieldView(
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-    Scale scale = Scale.Medium,
+    Density density = Density.Medium,
     FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit)
     : ViewBase, IFormFieldView
 {
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
 
-    private bool Validate<T>(T value, IState<string> invalid)
+    private bool Validate<T>(T value, IState<string> invalid, IAnyInput? input = null)
     {
         if (!visible()) return true;
 
-        if (validators != null)
-        {
+        if (validators == null && input == null)
+            return true;
 
-            var isValid = true;
-            var message = string.Empty;
-            foreach (var validator in validators)
+        bool isValid;
+        string? message;
+        if (input != null)
+        {
+            (isValid, message) = Validators.RunValidation(value, input, label, validators);
+        }
+        else
+        {
+            isValid = true;
+            message = null;
+            foreach (var validator in validators!)
             {
-                (isValid, message) = validator(value);
+                (isValid, var msg) = validator(value);
                 if (!isValid)
                 {
+                    message = string.IsNullOrEmpty(msg) ? "Invalid value" : msg;
                     break;
                 }
             }
-            invalid?.Set(isValid ? null! : message);
-            return isValid;
         }
-        return true;
+
+        invalid.Set(isValid ? null! : message ?? "");
+        return isValid;
     }
 
     public override object? Build()
@@ -91,6 +100,8 @@ public class FormFieldView(
         var submitSender = UseSignal<FormSubmitSignal, Unit, Unit>();
         var visibleState = UseState(visible);
 
+        var inputRef = UseRef<IAnyInput?>(() => default);
+
         UseEffect(() =>
         {
             return new Disposables(
@@ -102,7 +113,7 @@ public class FormFieldView(
                 validationReceiver.Receive(_ =>
                 {
                     var value = inputState.As<object>().Value;
-                    return Validate(value, invalidState);
+                    return Validate(value, invalidState, inputRef.Value);
                 })
             );
         });
@@ -112,7 +123,7 @@ public class FormFieldView(
             var value = inputState.As<object>().Value;
             if (blurOnceState.Value)
             {
-                Validate(value, invalidState);
+                Validate(value, invalidState, inputRef.Value);
             }
             bindingState.As<object>().Set(value);
             updateSender.Send(new Unit());
@@ -131,7 +142,9 @@ public class FormFieldView(
             }
         }
 
-        var input = inputFactory(inputState, Context).Invalid(invalidState.Value);
+        var input = inputFactory(inputState, Context);
+        inputRef.Set(input);
+        input = input.Invalid(invalidState.Value ?? "");
         if (validationStrategy == FormValidationStrategy.OnBlur || submitStrategy == FormSubmitStrategy.OnBlur)
         {
             input.OnBlur(OnBlur);
@@ -143,12 +156,12 @@ public class FormFieldView(
             input.Placeholder = placeholder;
         }
 
-        if (scale != Scale.Medium)
+        if (density != Density.Medium)
         {
-            WidgetBaseExtensions.SetScaleViaReflection(input, scale);
+            WidgetBaseExtensions.SetDensityViaReflection(input, density);
         }
 
-        return visibleState.Value ? new Field(input, label, description, required, help, scale) : null;
+        return visibleState.Value ? new Field(input, label, description, required, help, density) : null;
     }
 }
 
@@ -165,7 +178,7 @@ public class FormFieldBinding<TModel>(
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-    Scale scale = Scale.Medium,
+    Density density = Density.Medium,
     string? help = null,
     string? placeholder = null,
     FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit
@@ -174,7 +187,7 @@ public class FormFieldBinding<TModel>(
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, scale, submitStrategy);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, density, submitStrategy);
         return (fieldView, disposable);
     }
 }
@@ -189,7 +202,7 @@ public interface IFormFieldBinding<TModel>
     (IFormFieldView fieldView, IDisposable disposable) Bind(IState<TModel> model);
 }
 
-public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Scale scale = Scale.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
+public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Density density = Density.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
 {
     public override object? Build()
     {
@@ -202,11 +215,11 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
 
         object RenderRows(IFormFieldView[] fs)
         {
-            var gap = scale switch
+            var gap = density switch
             {
-                Scale.Medium => 5,
-                Scale.Small => 4,
-                Scale.Large => 6,
+                Density.Medium => 5,
+                Density.Small => 4,
+                Density.Large => 6,
                 _ => 5
             };
 
@@ -228,7 +241,7 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
                                 ? RenderRows(f.Select(g => g).ToArray())
                                 : new Expandable(f.Key, RenderRows(f.ToArray()))
                                     .Open(groupOpenStates?.GetValueOrDefault(f.Key, false) ?? false)
-                                    .Scale(scale)
+                                    .Density(density)
                         )).Cast<object>().ToArray()));
 
         var form = new Form(Layout.Horizontal(columns));
