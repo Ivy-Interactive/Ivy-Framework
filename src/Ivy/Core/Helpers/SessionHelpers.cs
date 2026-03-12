@@ -31,7 +31,7 @@ public static class SessionHelpers
                 authService.SetAuthTokenCookies(reloadPage: true, triggerMachineReload: triggerMachineReload);
             }
 
-            session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);
+            session.WidgetTree = new WidgetTree(new ExceptionErrorView(displayException), contentBuilder, session.AppServices);
             await session.WidgetTree.BuildAsync();
             try
             {

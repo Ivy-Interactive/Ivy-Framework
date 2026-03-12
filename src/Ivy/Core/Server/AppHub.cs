@@ -239,7 +239,7 @@ public class AppHub(
             }
             catch (Exception e)
             {
-                var tree = new WidgetTree(new ErrorView(e), contentBuilder, serviceProvider);
+                var tree = new WidgetTree(new ExceptionErrorView(e), contentBuilder, serviceProvider);
                 await tree.BuildAsync();
                 await Clients.Caller.SendAsync("Refresh", new
                 {
