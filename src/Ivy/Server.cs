@@ -101,7 +101,7 @@ public class Server
 
     private void AddDefaultApps()
     {
-        UseErrorNotFound<NotFoundApp>();
+        UseErrorNotFound<ErrorApp>();
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
