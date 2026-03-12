@@ -252,7 +252,7 @@ new NumberInput<int>(onChangedState.Value, e =>
 
 <WidgetDocs Type="Ivy.NumberInput" ExtensionTypes="Ivy.NumberInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/NumberInput.cs"/>
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -303,6 +303,55 @@ public class GroceryAppDemo : ViewBase
 }
 
 ```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I set min/max values on a NumberInput?
+</Summary>
+<Body>
+
+You can pass `min` and `max` directly as optional parameters to `ToNumberInput()`:
+
+```csharp
+var count = UseState(1);
+count.ToNumberInput(min: 1, max: 100).Placeholder("Enter count")
+```
+
+Alternatively, use the `.Min()` and `.Max()` fluent extension methods:
+
+```csharp
+count.ToNumberInput().Min(1).Max(100)
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I format a NumberInput as currency, percent, or decimal?
+</Summary>
+<Body>
+
+Use the `.FormatStyle()` fluent method with the `NumberFormatStyle` enum:
+
+```csharp
+var price = UseState(99.99m);
+var taxRate = UseState(0.08);
+
+// Currency formatting
+price.ToNumberInput().FormatStyle(NumberFormatStyle.Currency).Currency("USD")
+
+// Percent formatting
+taxRate.ToNumberInput().FormatStyle(NumberFormatStyle.Percent)
+
+// Decimal formatting (default)
+price.ToNumberInput().FormatStyle(NumberFormatStyle.Decimal)
+```
+
+Available `NumberFormatStyle` values: `Decimal` (default), `Currency`, `Percent`. For currency inputs, the recommended state type is `decimal`. Use `.Currency("USD")` to specify the currency code.
 
 </Body>
 </Details>

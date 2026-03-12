@@ -85,7 +85,7 @@ new Badge("Click Me", icon:Icons.MousePointer)
 
 <WidgetDocs Type="Ivy.Badge" ExtensionTypes="Ivy.BadgeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Badge.cs"/>
 
-## Examples
+## Faq
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
@@ -102,3 +102,30 @@ Layout.Vertical().Gap(4)
         | new Badge("Design", icon:Icons.Palette)
         | new Badge("Development", icon:Icons.Code))
 ```
+
+<Details>
+<Summary>
+What are the available BadgeVariant values in Ivy?
+</Summary>
+<Body>
+
+The `BadgeVariant` enum has these values: `Primary`, `Destructive`, `Outline`, `Secondary`, `Success`, `Warning`, `Info`.
+
+Usage:
+```csharp
+// Via constructor:
+new Badge("Status", BadgeVariant.Success)
+
+// Via fluent Variant() method:
+new Badge("Status").Variant(BadgeVariant.Warning)
+
+// Via shortcut extension methods:
+new Badge("Status").Success()
+new Badge("Status").Destructive()
+new Badge("Status").Info()
+```
+
+There is no `BadgeVariant.Default`. Use `BadgeVariant.Primary` or omit the variant for the default appearance.
+
+</Body>
+</Details>

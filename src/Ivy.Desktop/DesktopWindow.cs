@@ -7,7 +7,7 @@ namespace Ivy.Desktop;
 
 public class DesktopWindow(Server server)
 {
-    private string _title = "Ivy App";
+    private string _title = Assembly.GetEntryAssembly()?.GetName().Name ?? "Ivy App";
     private int _width = 1280;
     private int _height = 800;
     private bool _resizable = true;
@@ -17,6 +17,7 @@ public class DesktopWindow(Server server)
     private bool _devTools = false;
     private Assembly? _iconAssembly = null;
     private string? _iconResourceName = null;
+    private bool _iconSet = false;
 
     public DesktopWindow Title(string title) { _title = title; return this; }
     public DesktopWindow Size(int width, int height) { _width = width; _height = height; return this; }
@@ -36,6 +37,7 @@ public class DesktopWindow(Server server)
     {
         _iconAssembly = typeInAssembly.Assembly;
         _iconResourceName = resourceName;
+        _iconSet = true;
         return this;
     }
 
@@ -123,9 +125,15 @@ public class DesktopWindow(Server server)
             .SetIgnoreCertificateErrorsEnabled(true)
             .SetWebSecurityEnabled(false);
 
-        if (_iconAssembly != null && _iconResourceName != null)
+        if (_iconSet && _iconAssembly != null && _iconResourceName != null)
         {
             var iconPath = ExtractEmbeddedIcon(_iconAssembly, _iconResourceName);
+            if (iconPath != null) window.SetIconFile(iconPath);
+        }
+        else if (!_iconSet)
+        {
+            var iconPath = ExtractEmbeddedIcon(
+                typeof(DesktopWindow).Assembly, "Ivy.Desktop.ivy.ico");
             if (iconPath != null) window.SetIconFile(iconPath);
         }
 

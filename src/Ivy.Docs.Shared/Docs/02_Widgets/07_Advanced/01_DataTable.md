@@ -381,4 +381,85 @@ sampleUsers.ToDataTable()
 </Body>
 </Details>
 
+## Faq
+
+<Details>
+<Summary>
+How do I handle row actions on a DataTable?
+</Summary>
+<Body>
+
+Use `.RowActions()` to define actions and `.OnRowAction()` to handle clicks:
+
+```csharp
+items.ToDataTable()
+    .RowActions(
+        new RowAction("edit", "Edit", Icons.Pencil),
+        new RowAction("delete", "Delete", Icons.Trash2))
+    .OnRowAction("edit", e => EditItem(e.Value))
+    .OnRowAction("delete", async e => await DeleteItem(e.Value))
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I show navigation properties in a DataTable?
+</Summary>
+<Body>
+
+`DataTableBuilder` only supports top-level properties of the model type. Nested property access like `p.Author.Username` will throw a `KeyNotFoundException` at runtime because only direct properties are scaffolded as columns.
+
+**Solution:** Project your query into a flat DTO with all needed fields as direct properties:
+
+```csharp
+// BAD - nested property access will fail at runtime
+var posts = db.Posts.Include(p => p.Author).AsQueryable();
+posts.ToDataTable()
+    .Header(p => p.Author.Username, "Author"); // KeyNotFoundException!
+
+// GOOD - project into a flat DTO
+record PostListItem(int Id, string Title, string AuthorName, string Status);
+
+var posts = db.Posts
+    .Include(p => p.Author)
+    .Select(p => new PostListItem(p.Id, p.Title, p.Author.Username, p.Status.ToString()))
+    .AsQueryable();
+
+posts.ToDataTable()
+    .Header(p => p.AuthorName, "Author"); // Works!
+```
+
+This also simplifies the DataTable configuration since you don't need to `.Hidden()` navigation properties or other fields you don't want displayed.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I display dictionary or dynamic data in a DataTable?
+</Summary>
+<Body>
+
+`ToDataTable()` uses reflection to discover columns from the model type's top-level properties. It does not expand `Dictionary<TKey, TValue>` properties into separate columns.
+
+To display dynamic data, project it into a flat record first:
+
+```csharp
+// Instead of this:
+record DataRow(int Id, Dictionary<string, string> Values);
+rows.AsQueryable().ToDataTable(); // Shows "Id" and "Values" columns
+
+// Do this — project into a flat anonymous type or record:
+record FlatRow(string Name, int Age, string City);
+var flat = rows.Select(r => new FlatRow(r.Values["Name"], int.Parse(r.Values["Age"]), r.Values["City"]));
+flat.AsQueryable().ToDataTable(); // Shows Name, Age, City columns
+```
+
+If columns are truly dynamic (unknown at compile time), consider building a `List<Dictionary<string, object>>` and using `.ToTable()` with explicit column definitions instead.
+
+</Body>
+</Details>
+
 <WidgetDocs Type="Ivy.DataTable" ExtensionTypes="Ivy.DataTableWidgetExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/DataTables/DataTable.cs"/>

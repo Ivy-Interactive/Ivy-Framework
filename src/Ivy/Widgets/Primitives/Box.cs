@@ -89,6 +89,8 @@ public static class BoxExtensions
         }.Width(Size.Full()).Height(Size.Full());
     }
 
+    public static Box Grow(this Box box) => box.Width(Size.Grow());
+
     public static Box Hover(this Box box, CardHoverVariant variant) => box with { HoverVariant = variant };
 
     private static CardHoverVariant HoverVariantWithClick(this Box box) => box.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : box.HoverVariant;

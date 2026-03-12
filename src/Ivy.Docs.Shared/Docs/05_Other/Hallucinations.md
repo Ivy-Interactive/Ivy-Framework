@@ -118,6 +118,29 @@ Callout.Error("Error message")
 **Found In:**
 d9116efb-830e-484a-a258-fc3193769158
 
+## HandleSubmit / Handle* — renamed event handler methods
+
+**Hallucinated API:**
+```csharp
+input.ToTextInput().HandleSubmit(() => Save())
+button.HandleClick(() => DoSomething())
+input.HandleBlur(() => Validate())
+```
+
+**Error:** `does not contain a definition for 'HandleSubmit'` (or `HandleClick`, `HandleBlur`, etc.)
+
+**Correct API:**
+```csharp
+input.ToTextInput().OnSubmit(() => Save())
+button.OnClick(() => DoSomething())
+input.OnBlur(() => Validate())
+```
+
+All `Handle*` event handler extension methods were renamed to `On*` in v1.2.17 (Ivy-Framework#2459, #2510): `HandleClick` → `OnClick`, `HandleSubmit` → `OnSubmit`, `HandleChange` → `OnChange`, `HandleSelect` → `OnSelect`, `HandleClose` → `OnClose`, `HandleBlur` → `OnBlur`, `HandleRowAction` → `OnRowAction`, `HandleCardMove` → `OnCardMove`, `HandleExpand` → `OnExpand`, `HandleCollapse` → `OnCollapse`, `HandlePageChange` → `OnPageChange`, `HandleUpload` → `OnUpload`, `HandleDownload` → `OnDownload`. **Auto-fixed:** The refactoring service automatically rewrites all `Handle*` calls to `On*`.
+
+**Found In:**
+(multiple sessions — agent uses old API names from training data)
+
 ## TextInputBase.OnEnter() — invented fluent method
 
 **Hallucinated API:**
@@ -136,21 +159,21 @@ text.ToTextInput().OnSubmit(() => DoSomething())
 **Found In:**
 bd5f45ac-569d-4be8-8ef8-882451e608a1
 
-## TextInputVariant — non-existent enum (wrong enum name)
+## TextInputVariants — old plural enum name
 
 **Hallucinated API:**
-```csharp
-new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariant.Textarea)
-```
-
-**Error:** `The name 'TextInputVariant' does not exist in the current context`
-
-**Correct API:**
 ```csharp
 new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariants.Textarea)
 ```
 
-The enum is `TextInputVariants` (plural with "s" suffix), not `TextInputVariant` (singular). This breaks the naming convention used by other widgets (e.g., `ButtonVariant`, `BadgeVariant`, `CalloutVariant`), which causes the agent to guess `TextInputVariant` by analogy. Values: `Text`, `Textarea`, `Email`, `Tel`, `Url`, `Password`, `Search`.
+**Error:** `The name 'TextInputVariants' does not exist in the current context`
+
+**Correct API:**
+```csharp
+new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariant.Textarea)
+```
+
+The enum is `TextInputVariant` (singular), not `TextInputVariants` (plural). All input variant enums were renamed from plural to singular in Ivy-Framework#2546 (e.g., `TextInputVariants` → `TextInputVariant`, `ColorInputVariants` → `ColorInputVariant`, etc.). **Auto-fixed:** The refactoring service automatically rewrites `TextInputVariants` → `TextInputVariant`. Values: `Text`, `Textarea`, `Email`, `Tel`, `Url`, `Password`, `Search`.
 
 **Found In:**
 4a94f8f6-865d-4663-8f4c-d4c09913398f
@@ -187,14 +210,17 @@ var selectedItem = UseState<InventoryItem?>(null);
 
 **Correct API:**
 ```csharp
+// Best: omit the null argument — the default is already null:
+var selectedItem = UseState<InventoryItem?>();
+// Or cast null to the explicit type:
 var selectedItem = UseState<InventoryItem?>((InventoryItem?)null);
-// or use a lambda:
+// Or use a lambda:
 var selectedItem = UseState(() => (InventoryItem?)null);
 ```
 
-When `T` is a reference type, `null` matches both `T?` and `Func<T>`, causing overload ambiguity. Either cast null to the explicit type or wrap it in a lambda.
+When `T` is a reference type, `null` matches both `T?` and `Func<T>`, causing overload ambiguity. The simplest fix is to omit the `null` argument entirely — the default parameter is already `null`/`default`. Alternatively, cast null to the explicit type or wrap it in a lambda.
 
-**Note:** The related `IState<T>.Set(null)` ambiguity has been fixed via `[OverloadResolutionPriority(1)]` on the `Set(T value)` overload. `.Set(null)` now resolves correctly without casting.
+**Note:** Unlike `IState<T>.Set(null)` (which was fixed via `[OverloadResolutionPriority(1)]`), `UseState` cannot use the same approach because T is inferred from the argument — C# 10+ lambda natural types cause the `T?` overload to steal ALL lambda calls when given higher priority, breaking `UseState(() => expr)` throughout the codebase.
 
 **Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
@@ -321,10 +347,10 @@ date.ToDateTimeInput().Variant(DateTimeVariant.Date)
 ```csharp
 date.ToDateInput()
 // or:
-date.ToDateTimeInput().Variant(DateTimeInputVariants.Date)
+date.ToDateTimeInput().Variant(DateTimeInputVariant.Date)
 ```
 
-The enum is `DateTimeInputVariants` (plural with "Variants" suffix), not `DateTimeVariant` (singular). Values: `DateTime`, `Date`, `Time`, `Month`, `Week`. This follows the same naming pattern as `TextInputVariants`.
+The enum is `DateTimeInputVariant` (singular), not `DateTimeVariant` (missing "Input") or `DateTimeInputVariants` (old plural name). All input variant enums were renamed from plural to singular in Ivy-Framework#2546. Values: `DateTime`, `Date`, `Time`, `Month`, `Week`. **Auto-fixed:** The refactoring service automatically rewrites both `DateTimeVariant` and `DateTimeInputVariants` to `DateTimeInputVariant`.
 
 **Found In:**
 d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
@@ -1018,3 +1044,50 @@ new MetricView("Title", "Value", icon: Icons.Activity)
 
 **Found In:**
 c008af27-1cb1-4ab3-b41a-36aa711c6a41
+
+## Disposable.Create() — missing using statement
+
+**Hallucinated usage (missing using):**
+```csharp
+return Disposable.Create(() => timer?.Dispose());
+```
+
+**Error:** `CS0103: The name 'Disposable' does not exist in the current context`
+
+**Fix:** Add the using statement — the package IS available as a transitive dependency:
+```csharp
+using System.Reactive.Disposables;
+
+return Disposable.Create(() => timer?.Dispose());
+```
+
+`System.Reactive` is a transitive dependency of Ivy Framework. The error occurs because the agent omits the `using System.Reactive.Disposables;` directive, not because the package is missing.
+
+**Found In:**
+fb184b5b-8254-4a1f-b8f2-ab8e8657fdbc
+
+## Fragment.Empty — non-existent static member
+
+**Hallucinated API:**
+```csharp
+return Fragment.Empty;
+```
+
+**Error:** `'Fragment' does not contain a definition for 'Empty'`
+
+**Correct API:**
+```csharp
+// Use ViewBase.Empty:
+return ViewBase.Empty;
+
+// Or return an empty Fragment:
+return new Fragment();
+
+// Or just return null:
+return null;
+```
+
+`Fragment` does not have an `Empty` static member. To return nothing from a view, use `ViewBase.Empty`, `new Fragment()`, or `null`.
+
+**Found In:**
+(session not yet recorded)

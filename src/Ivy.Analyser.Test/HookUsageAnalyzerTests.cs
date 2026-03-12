@@ -1214,6 +1214,280 @@ public class Button { }
             await VerifyCS.VerifyAnalyzerAsync(test);
         }
 
+        // FuncView lambda tests
+
+        [Fact]
+        public async Task HookInFuncViewLambdaShouldPass()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return new FuncView(context =>
+        {
+            var state = UseHelper(context);
+            return null;
+        });
+    }
+
+    private static object UseHelper(IViewContext context) => context.UseState(0);
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+}
+
+public class FuncView : ViewBase
+{
+    public FuncView(Func<IViewContext, object?> viewFactory) { }
+    public override object? Build() => null;
+}
+
+public interface IViewContext
+{
+    T UseState<T>(T initialValue);
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task StaticComposedHookInFuncViewLambdaShouldPass()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return new FuncView(context =>
+        {
+            var result = UseProductListRecord(context);
+            return null;
+        });
+    }
+
+    private static object UseProductListRecord(IViewContext context) => context.UseState(0);
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+}
+
+public class FuncView : ViewBase
+{
+    public FuncView(Func<IViewContext, object?> viewFactory) { }
+    public override object? Build() => null;
+}
+
+public interface IViewContext
+{
+    T UseState<T>(T initialValue);
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookInMemoizedFuncViewLambdaShouldPass()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return new MemoizedFuncView(context =>
+        {
+            var state = UseHelper(context);
+            return null;
+        });
+    }
+
+    private static object UseHelper(IViewContext context) => context.UseState(0);
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+}
+
+public class MemoizedFuncView : ViewBase
+{
+    public MemoizedFuncView(Func<IViewContext, object?> viewFactory) { }
+    public override object? Build() => null;
+}
+
+public interface IViewContext
+{
+    T UseState<T>(T initialValue);
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookInRegularLambdaStillFails()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        Action a = () => { var s = {|IVYHOOK001:UseState("""")|};  };
+        return null;
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task ConditionalHookInFuncViewLambdaShouldWarn()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return new FuncView(context =>
+        {
+            if (true)
+            {
+                var state = {|IVYHOOK002:UseHelper(context)|};
+            }
+            return null;
+        });
+    }
+
+    private static object UseHelper(IViewContext context) => context.UseState(0);
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+}
+
+public class FuncView : ViewBase
+{
+    public FuncView(Func<IViewContext, object?> viewFactory) { }
+    public override object? Build() => null;
+}
+
+public interface IViewContext
+{
+    T UseState<T>(T initialValue);
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HooksAtTopOfFuncViewLambdaShouldPass()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return new FuncView(context =>
+        {
+            var state = UseHelper(context);
+            DoSomething();
+            return null;
+        });
+    }
+
+    private static void DoSomething() { }
+    private static object UseHelper(IViewContext context) => context.UseState(0);
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+}
+
+public class FuncView : ViewBase
+{
+    public FuncView(Func<IViewContext, object?> viewFactory) { }
+    public override object? Build() => null;
+}
+
+public interface IViewContext
+{
+    T UseState<T>(T initialValue);
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookAfterNonHookInFuncViewLambdaShouldWarn()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return new FuncView(context =>
+        {
+            DoSomething();
+            var state = {|IVYHOOK005:UseHelper(context)|};
+            return null;
+        });
+    }
+
+    private static void DoSomething() { }
+    private static object UseHelper(IViewContext context) => context.UseState(0);
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+}
+
+public class FuncView : ViewBase
+{
+    public FuncView(Func<IViewContext, object?> viewFactory) { }
+    public override object? Build() => null;
+}
+
+public interface IViewContext
+{
+    T UseState<T>(T initialValue);
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
         [Fact]
         public async Task HookStoredInLocalVariableShouldNotError()
         {

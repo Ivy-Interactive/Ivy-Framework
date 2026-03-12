@@ -377,7 +377,7 @@ public class BasicFilter : ViewBase
 
 <WidgetDocs Type="Ivy.TextInput" ExtensionTypes="Ivy.TextInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/TextInput.cs"/>
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -461,10 +461,45 @@ public class LoginForm : ViewBase
                     .Label("Password")
                 | new Button("Login")
                     .Disabled(string.IsNullOrWhiteSpace(usernameState.Value) || 
-                        string.IsNullOrWhiteSpace(passwordState.Value));                             
-    }     
+                        string.IsNullOrWhiteSpace(passwordState.Value));
+    }
 }
 ```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I create a multiline textarea TextInput in Ivy?
+</Summary>
+<Body>
+
+Use the `TextInputVariant.Textarea` variant or the dedicated `ToTextareaInput` extension:
+
+```csharp
+state.ToTextareaInput(placeholder: "Enter text...")
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I handle enter key press on a TextInput?
+</Summary>
+<Body>
+
+Single-line TextInputs automatically blur when the user presses Enter, so use `OnBlur` to react to the Enter key:
+
+```csharp
+var input = UseState("");
+input.ToTextInput()
+    .Placeholder("Type and press Enter")
+    .OnBlur(() => DoSomething(input.Value))
+```
+
+`OnBlur` takes an `Action` that is invoked when the input loses focus — which happens automatically on Enter for single-line text inputs.
 
 </Body>
 </Details>

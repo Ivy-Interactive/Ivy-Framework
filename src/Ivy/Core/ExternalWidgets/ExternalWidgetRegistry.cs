@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using Ivy;
 
 namespace Ivy.Core.ExternalWidgets;
 

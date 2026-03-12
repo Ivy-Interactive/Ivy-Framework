@@ -169,7 +169,7 @@ public class CategoryDetailsBlade(Guid categoryId) : ViewBase
             .Variant(ButtonVariant.Destructive)
             .Icon(Icons.Trash)
             .Width(Size.Grow())
-            .WithConfirm($"Are you sure you want to delete category '{category.Name}'?", "Delete Category");
+            .WithConfirm($"Are you sure you want to delete category '{category.Name}'?", "Delete Category", confirmLabel: "Delete", destructive: true);
 
         var editBtn = new Button("Edit")
             .Variant(ButtonVariant.Outline)

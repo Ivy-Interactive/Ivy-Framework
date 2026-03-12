@@ -233,10 +233,15 @@ namespace Ivy.Analyser.Analyzers
 
             while (current != null)
             {
-                if (current is LambdaExpressionSyntax ||
-                    current is LocalFunctionStatementSyntax ||
-                    current is AnonymousMethodExpressionSyntax)
+                if (current is LambdaExpressionSyntax or
+                    LocalFunctionStatementSyntax or
+                    AnonymousMethodExpressionSyntax)
                 {
+                    // FuncView/MemoizedFuncView lambdas ARE Build methods — hooks are valid inside them
+                    if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
+                    {
+                        return true;
+                    }
                     return false;
                 }
 
@@ -248,6 +253,22 @@ namespace Ivy.Analyser.Analyzers
                 current = current.Parent;
             }
 
+            return false;
+        }
+
+        private static bool IsFuncViewBuilderLambda(LambdaExpressionSyntax lambda)
+        {
+            // Check if lambda is an argument to: new FuncView(...) or new MemoizedFuncView(...)
+            if (lambda.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: ObjectCreationExpressionSyntax creation } })
+            {
+                var typeName = creation.Type switch
+                {
+                    IdentifierNameSyntax id => id.Identifier.Text,
+                    QualifiedNameSyntax qualified => qualified.Right.Identifier.Text,
+                    _ => null
+                };
+                return typeName is "FuncView" or "MemoizedFuncView";
+            }
             return false;
         }
 
@@ -267,6 +288,11 @@ namespace Ivy.Analyser.Analyzers
                 }
 
                 if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
+                {
+                    return false;
+                }
+
+                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
                 {
                     return false;
                 }
@@ -296,6 +322,11 @@ namespace Ivy.Analyser.Analyzers
                     return false;
                 }
 
+                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
+                {
+                    return false;
+                }
+
                 current = current.Parent;
             }
 
@@ -318,6 +349,11 @@ namespace Ivy.Analyser.Analyzers
                     return false;
                 }
 
+                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
+                {
+                    return false;
+                }
+
                 current = current.Parent;
             }
 
@@ -327,30 +363,31 @@ namespace Ivy.Analyser.Analyzers
         private static bool IsNotAtTopOfMethod(InvocationExpressionSyntax invocation)
         {
             var current = invocation.Parent;
-            MethodDeclarationSyntax? buildMethod = null;
 
             while (current != null)
             {
                 if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
                 {
-                    buildMethod = method;
-                    break;
+                    return method.Body != null && CheckNotAtTop(invocation, method.Body.Statements);
                 }
+
+                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
+                {
+                    if (lambda.Body is BlockSyntax lambdaBlock)
+                    {
+                        return CheckNotAtTop(invocation, lambdaBlock.Statements);
+                    }
+                    return false;
+                }
+
                 current = current.Parent;
             }
 
-            if (buildMethod == null)
-            {
-                return false;
-            }
+            return false;
+        }
 
-            var body = buildMethod.Body;
-            if (body == null)
-            {
-                return false;
-            }
-
-            var statements = body.Statements;
+        private static bool CheckNotAtTop(InvocationExpressionSyntax invocation, SyntaxList<StatementSyntax> statements)
+        {
             var invocationSpan = invocation.Span;
             var statementIndex = -1;
 
