@@ -13,6 +13,7 @@ public class SelectInputApp : SampleBase
             new Tab("Basic", new SelectInputBasicExample()),
             new Tab("Sizes", new SelectInputSizesExample()),
             new Tab("Variants", new SelectInputVariantsExample()),
+            new Tab("Slider", new SelectInputSliderExample()),
             new Tab("Disabled Options", new SelectInputDisabledOptionsExample()),
             new Tab("Nullable & Edge Cases", new SelectInputAdvancedExample()),
             new Tab("Advanced Props", new SelectInputAdvancedPropsExample()),
@@ -181,6 +182,38 @@ public class SelectInputVariantsExample : ViewBase
                 | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Invalid("Invalid")
                 | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Placeholder("Select colors")
                 | Text.Monospaced($"[{string.Join(", ", colorStateToggle.Value)}]"));
+    }
+}
+
+public class SelectInputSliderExample : ViewBase
+{
+    private enum Priority { Low, Medium, High, Critical }
+
+    public override object? Build()
+    {
+        var sizeState = UseState("M");
+        var sizeOptions = new[] { "XS", "S", "M", "L", "XL", "XXL" }.ToOptions();
+
+        var priorityState = UseState(Priority.Medium);
+
+        return Layout.Vertical()
+            | Text.H3("Slider Variant")
+            | Text.P("The Slider variant is ideal for selecting from an ordered list of discrete options.")
+            | Layout.Vertical().Gap(6)
+                | sizeState.ToSelectInput(sizeOptions).Slider()
+                    .WithField().Label("T-Shirt Size")
+                | priorityState.ToSelectInput().Slider()
+                    .WithField().Label("Priority (Enum)")
+                | sizeState.ToSelectInput(sizeOptions).Slider().Disabled()
+                    .WithField().Label("Disabled Slider")
+            | Text.H3("Densities")
+            | Layout.Grid().Columns(3).Gap(6)
+                | sizeState.ToSelectInput(sizeOptions).Slider().Small()
+                    .WithField().Label("Small")
+                | sizeState.ToSelectInput(sizeOptions).Slider().Medium()
+                    .WithField().Label("Medium")
+                | sizeState.ToSelectInput(sizeOptions).Slider().Large()
+                    .WithField().Label("Large");
     }
 }
 

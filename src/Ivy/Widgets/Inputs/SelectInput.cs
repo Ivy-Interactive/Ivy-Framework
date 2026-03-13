@@ -20,7 +20,8 @@ public enum SelectInputVariant
 {
     Select,
     List,
-    Toggle
+    Toggle,
+    Slider
 }
 
 public interface IAnySelectInput : IAnyInput
@@ -185,6 +186,8 @@ public static class SelectInputExtensions
     public static SelectInputBase Ghost(this SelectInputBase widget, bool ghost = true) => widget with { Ghost = ghost };
 
     public static SelectInputBase List(this SelectInputBase widget) => widget with { Variant = SelectInputVariant.List };
+
+    public static SelectInputBase Slider(this SelectInputBase widget) => widget with { Variant = SelectInputVariant.Slider };
 
     [OverloadResolutionPriority(1)]
     public static SelectInputBase OnBlur(this SelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

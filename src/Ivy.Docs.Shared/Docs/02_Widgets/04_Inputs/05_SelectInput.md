@@ -40,7 +40,7 @@ public class SelectVariantDemo : ViewBase
 
 Multiple selection is automatically enabled when you use a collection type (array, List, etc.) as your state. The framework automatically detects this and enables multi-select functionality.
 
-`SelectInput` supports three variants: **Select** (dropdown), **List** (checkboxes), and **Toggle** (button toggles). Multi-select works with all variants and data types. Here's an example demonstrating different combinations:
+`SelectInput` supports four variants: **Select** (dropdown), **List** (checkboxes), **Toggle** (button toggles), and **Slider** (range slider for ordered options). Multi-select works with all variants except Slider. Here's an example demonstrating different combinations:
 
 ```csharp demo-tabs
 public class MultiSelectDemo : ViewBase
@@ -182,6 +182,39 @@ public class SelectStylingDemo : ViewBase
     }
 }
 ```
+
+## Slider Variant
+
+The **Slider** variant is ideal for selecting from an ordered list of discrete options, such as T-shirt sizes, quality levels, or priority levels. It renders a range slider that snaps to each option.
+
+```csharp demo-below
+public class SliderVariantDemo : ViewBase
+{
+    private enum Priority { Low, Medium, High, Critical }
+
+    public override object? Build()
+    {
+        var size = UseState("M");
+        var priority = UseState(Priority.Medium);
+
+        return Layout.Vertical()
+            | size.ToSelectInput(new[] { "XS", "S", "M", "L", "XL", "XXL" }.ToOptions())
+                .Slider()
+                .WithField()
+                .Label("T-Shirt Size")
+                .Width(Size.Full())
+            | priority.ToSelectInput()
+                .Slider()
+                .WithField()
+                .Label("Priority")
+                .Width(Size.Full());
+    }
+}
+```
+
+<Callout Type="info">
+The Slider variant only supports single-select. If used with a collection state type, it will fall back to single-select behavior with a console warning.
+</Callout>
 
 ## Advanced Features
 
