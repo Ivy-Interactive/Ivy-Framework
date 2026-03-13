@@ -194,42 +194,11 @@ The `Color()` method and property on the `Box` widget have been renamed to `Back
 
 The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been renamed to `Text.Monospaced()` and `TextVariant.Monospaced` to better reflect what they actually do—render text in a monospace font.
 
+
+
 ### Explicit Size API for Width, Height, and Size Methods
 
 The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use `Size.Units()` or `Size.Fraction()` to specify sizing.
-
-### ToTextAreaInput() Renamed to ToTextareaInput()
-
-The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()` (lowercase 'a') to standardize naming across the codebase.
-
-### Chart Data Syntax Changed from DataPoint Elements to JSON CDATA
-
-The chart data format has been completely redesigned to use JSON arrays within CDATA sections instead of XML `<DataPoint>` elements.
-
-### CreateSignal Renamed to UseSignal and ISignal Interface Unified
-
-The signal creation API has been simplified and made more consistent with other Ivy hooks. `CreateSignal` has been renamed to `UseSignal`, and the separate `ISignalSender` and `ISignalReceiver` interfaces have been unified into a single `ISignal` interface.
-
-### ContentPipeline Renamed to HtmlPipeline with XDocument-Based Filters
-
-The HTML processing pipeline has been refactored for better performance and maintainability. The namespace was renamed from `ContentPipeline` to `HtmlPipeline`, and filters now operate on parsed `XDocument` objects instead of raw HTML strings.
-
-You can now fully customize the HTML pipeline, including clearing and replacing all built-in filters:
-
-```csharp
-// Replace the entire pipeline
-server.UseHtmlPipeline(pipeline =>
-{
-    pipeline.Clear();  // Remove all built-in filters
-    pipeline.Use<MyCustomFilter>();
-});
-
-// Or append to the existing pipeline
-server.UseHtmlPipeline(pipeline =>
-{
-    pipeline.Use<OpenGraphFilter>();
-});
-```
 
 ## New Features
 
@@ -545,32 +514,7 @@ public class MyApp : AppBase
 }
 ```
 
-### JavaScript Execution in Html Widget with DangerouslyAllowScripts
 
-The `Html` widget now supports opt-in JavaScript execution through the new `DangerouslyAllowScripts` property. By default, the Html widget sanitizes all JavaScript for security, but you can now bypass this when rendering trusted HTML content that requires script execution.
-
-**⚠️ Security Warning:** Only enable `DangerouslyAllowScripts` for HTML content you completely trust. Rendering untrusted or user-generated content with this flag enabled exposes your application to Cross-Site Scripting (XSS) attacks.
-
-**Usage Example:**
-
-```csharp
-public class ScriptHtmlView : ViewBase
-{
-    public override object? Build()
-    {
-        var htmlWithScript =
-            """
-            <div id="target-div">Loading...</div>
-            <script>
-                document.getElementById('target-div').innerText = 'Script executed successfully!';
-            </script>
-            """;
-
-        // Enable script execution using the fluent method
-        return new Html(htmlWithScript).DangerouslyAllowScripts();
-    }
-}
-```
 
 ### HtmlPipeline - XDocument-Based Filters and Full Customization
 
@@ -899,25 +843,7 @@ new Table(downloads)
         .Format("%d bytes"));
 ```
 
-### Native Desktop Applications with Ivy.Desktop
 
-Ivy apps can now run as native desktop applications across Windows, macOS, and Linux using the new `Ivy.Desktop` library. Built on Photino.NET, it provides a simple builder API for wrapping your Ivy web apps in native windows with automatic DPI detection and scaling.
-
-**Getting Started:**
-
-Add the `Ivy.Desktop` package to your project and use the `DesktopWindow` builder to configure and launch your app:
-
-```csharp
-using Ivy.Desktop;
-
-var server = new Server(args);
-var exitCode = new DesktopWindow(server)
-    .Title("My Ivy App")
-    .Size(1280, 800)
-    .Run();
-
-return exitCode;
-```
 
 ### Icons in Select Options
 
@@ -1339,23 +1265,7 @@ return fruit.ToSelectInput(fruitOptions)
     .Placeholder("Select a fruit...");
 ```
 
-### SelectInput - Optional Icons and Labels
 
-Select options now support optional icons and labels
-
-```csharp
-var theme = UseState("light");
-
-var themeOptions = new IAnyOption[]
-{
-    new Option<string>("Light", "light") { Icon = "sun" },
-    new Option<string>("Dark", "dark") { Icon = "moon" },
-    new Option<string>("Auto", "auto") { Icon = "laptop" },
-};
-
-return theme.ToSelectInput(themeOptions)
-    .Placeholder("Select theme...");
-```
 
 ### Forms - Auto-Scaffold [AllowedValues] as SelectInput
 
@@ -1378,22 +1288,7 @@ public override object? Build()
 }
 ```
 
-### Table - Progress Builder for Inline Progress Bars
 
-The `Table` widget now supports rendering numeric values as inline progress bars through the new `Progress()` builder.
-
-```csharp
-var tasks = new[]
-{
-    new { Name = "Design Review", Progress = 100 },
-    new { Name = "Implementation", Progress = 75 },
-    new { Name = "Testing", Progress = 45 },
-    new { Name = "Documentation", Progress = 20 }
-};
-
-return tasks.ToTable()
-    .Builder(t => t.Progress, f => f.Progress());
-```
 
 ### Html - JavaScript Execution with DangerouslyAllowScripts
 
@@ -2566,6 +2461,3 @@ Ivy apps now bind to `localhost` instead of the wildcard address (`*`), eliminat
 
 ---
 
-### Ivy.Desktop Now Available on NuGet
-
-The `Ivy.Desktop` package is now published to NuGet, making it easier to add desktop application support to your Ivy projects.
