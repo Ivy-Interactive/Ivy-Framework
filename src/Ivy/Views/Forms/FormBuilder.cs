@@ -332,10 +332,11 @@ public class FormBuilder<TModel> : ViewBase
     {
         var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange: false);
 
-        var validationSignal = context.UseSignal<FormValidateSignal, Unit, bool>();
+        // Per-form signal instances (stable across builds via UseRef) so Submit validates only this form's fields.
+        var validationSignal = context.UseRef(() => new FormValidateSignal()).Value;
+        var submitSignal = context.UseRef(() => new FormSubmitSignal()).Value;
         var updateSignal = context.UseSignal<FormUpdateSignal, Unit, Unit>();
         var invalidFields = context.UseState(0);
-
         var fields = _fields
             .Values
             .Where(e => e is { Removed: false, InputFactory: not null })
@@ -346,6 +347,8 @@ public class FormBuilder<TModel> : ViewBase
                     e.InputFactory!,
                     () => e.Visible(currentModel.Value),
                     updateSignal,
+                    validationSignal,
+                    submitSignal,
                     e.Label,
                     e.Description,
                     e.Required,
@@ -363,8 +366,9 @@ public class FormBuilder<TModel> : ViewBase
 
         async Task<bool> OnSubmit()
         {
-            var results = await validationSignal.Send(new Unit());
-            if (results.All(e => e))
+            var results = await validationSignal.Send(default);
+            var allValid = results.Length == fields.Length && results.All(e => e);
+            if (allValid)
             {
                 if (_onSubmit != null)
                 {
@@ -374,7 +378,10 @@ public class FormBuilder<TModel> : ViewBase
                 invalidFields.Set(0);
                 return true;
             }
-            invalidFields.Set(results.Count(e => !e));
+            var invalidCount = results.Length == fields.Length
+                ? results.Count(e => !e)
+                : fields.Length;
+            invalidFields.Set(invalidCount);
             return false;
         }
 
@@ -388,9 +395,10 @@ public class FormBuilder<TModel> : ViewBase
         {
             if (_submitStrategy is FormSubmitStrategy.OnBlur or FormSubmitStrategy.OnChange)
             {
-                return submitReceiver.Receive(unit =>
+                return submitSignal.ReceiveWithId(Guid.NewGuid(), _ =>
                 {
-                    _ = OnSubmit();
+                    var t = OnSubmit();
+                    return default;
                 });
             }
             return null;
