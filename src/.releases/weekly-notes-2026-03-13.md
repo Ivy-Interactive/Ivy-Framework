@@ -173,8 +173,6 @@ return Layout.Vertical().Gap(4)
         : Text.Muted("No screenshot captured yet."));
 ```
 
-
-
 ### Server-to-Client Streaming with UseStream Hook
 
 Ivy now supports efficient server-to-client streaming with the new `UseStream` hook. Stream real-time data from your backend to the frontend without triggering full state re-renders for every chunk. This is perfect for LLM text streaming, progress updates, or any scenario where you need to push data continuously to a single widget.
@@ -244,8 +242,6 @@ var server = new Server()
     .EnableDevTools()  // Only in development builds
     .Run();
 ```
-
-
 
 ### Enhanced Layout System with Figma-Style Options
 
@@ -440,8 +436,6 @@ public class MyApp : AppBase
     }
 }
 ```
-
-
 
 ### JavaScript Execution in Html Widget with DangerouslyAllowScripts
 
@@ -807,8 +801,6 @@ new { NetBurn = "$5,000", GrossBurn = "$10,000" }.ToDetails()
 
 **Note:** Use `.Builder(x => x.Field, b => ...)` to customize how a value is *rendered*, not to change the label text. The `.Label()` method is specifically for changing the displayed label.
 
-
-
 ---
 
 ### Dots Now Allowed in App IDs
@@ -834,8 +826,6 @@ public class AdminApp : AppBase { }
 [App(Id = "api.v1.users")]
 public class ApiUsersV1 : AppBase { }
 ```
-
-
 
 ---
 
@@ -915,10 +905,6 @@ var exitCode = new DesktopWindow(server)
 
 return exitCode;
 ```
-
-
-
----
 
 ### Horizontal Label Layout for Field Widget
 
@@ -1240,8 +1226,6 @@ new StackLayout([
 ], wrap: true, gap: 4);
 ```
 
-
-
 ---
 
 ### TextArea → Textarea API Standardization
@@ -1261,8 +1245,6 @@ return description.ToTextAreaInput(placeholder: "Enter description...");
 var description = UseState("");
 return description.ToTextareaInput(placeholder: "Enter description...");
 ```
-
-
 
 ---
 
@@ -1315,8 +1297,6 @@ myTextInput.Multiline(true);   // Enable multiline
 myTextInput.Multiline(false);  // Disable multiline
 ```
 
-
-
 ---
 
 ### Spacer Default Behavior Change
@@ -1342,8 +1322,6 @@ return Layout.Horizontal().Gap(4)
     | new Spacer()
     | new Button("Right Button");
 ```
-
-
 
 ---
 
@@ -1372,8 +1350,6 @@ new Button("Hover").Icon(Icons.Info).WithTooltip("This is a tooltip")
 // Icon-only button
 new Button().Icon(Icons.Settings).WithTooltip("Open settings")
 ```
-
-
 
 ---
 
@@ -1405,8 +1381,6 @@ The OAuth authentication callback URL has changed from `/ivy/webhook` to `/ivy/a
 
 - Local development: `http://localhost:5010/ivy/auth/callback`
 - Production: `https://your-app.com/ivy/auth/callback`
-
-
 
 ---
 
@@ -1448,8 +1422,6 @@ new DesktopWindow(server)
     .UseDevTools()      // Same as .UseDevTools(true)
     .Run();
 ```
-
-
 
 ---
 
@@ -1495,8 +1467,6 @@ var xml = """
 var chart = builder.Build(xml);
 ```
 
-
-
 ---
 
 ### CreateSignal Renamed to UseSignal and ISignal Unified
@@ -1523,8 +1493,6 @@ ISignal<string, bool> mySignal = context.UseSignal<MySignal, string, bool>();
 mySignal.Send(input);           // Send data through the signal
 mySignal.Receive(callback);     // Register a callback to receive data
 ```
-
-
 
 ---
 
@@ -1679,8 +1647,6 @@ return result.ToReadOnlyInput()
     .Placeholder("No data available");
 ```
 
-
-
 ---
 
 ### BoolInput - Loading State Support
@@ -1720,8 +1686,6 @@ return toggleValue.ToToggleInput(Icons.Bell)
     .Loading(isSaving.Value);
 ```
 
-
-
 ---
 
 ### TextInput - OnSubmit Event for Enter Key Handling
@@ -1737,8 +1701,6 @@ return searchQuery.ToTextInput()
     .Placeholder("Search...")
     .HandleSubmit(() => PerformSearch(searchQuery.Value));
 ```
-
-
 
 ### NumberInput - Prefix and Suffix Support
 
@@ -2005,8 +1967,6 @@ new Box("Static Box")
     .Hover(CardHoverVariant.None);
 ```
 
-
-
 **Grow Extension Method**
 
 The `Box` widget now includes a convenient `Grow()` extension method for making boxes expand to fill available width. This is a shorthand for `.Width(Size.Grow())`.
@@ -2039,8 +1999,6 @@ return Layout.Vertical().Gap(6)
     | calloutView;
 ```
 
-
-
 ---
 
 ### Card - Disabled State for Preventing Interaction
@@ -2057,8 +2015,6 @@ new Card("This card cannot be clicked.")
     .Disabled()
     .Width(Size.Units(100));
 ```
-
-
 
 ---
 
@@ -2077,8 +2033,6 @@ var upload = UseUpload(MemoryStreamUploadHandler.Create(file))
 return file.ToFileInput(upload)
     .Placeholder("Min 1 KB, Max 10 MB");
 ```
-
-
 
 ---
 
@@ -2099,8 +2053,6 @@ new CodeBlock(@"    private static int Calculate(int input)
     .Language(Languages.Csharp);
 ```
 
-
-
 ---
 
 ### Expandable - Icon Support
@@ -2113,8 +2065,6 @@ The `Expandable` widget now supports icons in the header, following the same pat
 new Expandable("Settings", "Configure your application preferences here.")
     .Icon(Icons.Settings);
 ```
-
-
 
 ---
 
@@ -2130,8 +2080,6 @@ new Progress()
     .Indeterminate()
     .Goal("Loading...");
 ```
-
-
 
 ---
 
@@ -2185,8 +2133,6 @@ return frameworks.ToSelectInput(options)
     .MaxSelections(3);  // Can't select more than 3
 ```
 
-
-
 ---
 
 ---
@@ -2212,8 +2158,6 @@ var fruitOptions = new IAnyOption[]
 return fruit.ToSelectInput(fruitOptions)
     .Placeholder("Select a fruit...");
 ```
-
-
 
 ---
 
@@ -2257,8 +2201,6 @@ var alignmentOptions = new IAnyOption[]
 return alignment.ToSelectInput(alignmentOptions)
     .Variant(SelectInputVariant.Toggle);
 ```
-
-
 
 ---
 
@@ -2319,8 +2261,6 @@ public override object? Build()
 - Respects nullable types and `[Required]` attributes
 - Works seamlessly with other form scaffolding features
 
-
-
 ---
 
 ### Table - Progress Builder for Inline Progress Bars
@@ -2367,8 +2307,6 @@ tasks.ToTable()
     .Builder(t => t.Progress, f => f.Progress().Color(Colors.Blue));
 ```
 
-
-
 ---
 
 ### Html - JavaScript Execution with DangerouslyAllowScripts
@@ -2390,8 +2328,6 @@ var htmlWithScript = """
 return new Html(htmlWithScript)
     .DangerouslyAllowScripts();
 ```
-
-
 
 - Embedding trusted third-party widgets (analytics, chat, etc.)
 - Rendering HTML from your own backend templates
@@ -2511,8 +2447,6 @@ return content.ToSheet(isOpen,
     side: SheetSide.Left);
 ```
 
-
-
 ---
 
 ### Separator - Text Alignment Control
@@ -2532,8 +2466,6 @@ new Separator("Center Aligned").TextAlign(TextAlignment.Center);
 new Separator("Right Aligned").TextAlign(TextAlignment.Right);
 ```
 
-
-
 ---
 
 ### CodeBlock - WrapLines Option for Long Lines
@@ -2552,8 +2484,6 @@ var longCode = @"public class VeryLongClassName {
 return new CodeBlock(longCode, Languages.Csharp)
     .WrapLines();
 ```
-
-
 
 ---
 
@@ -2581,8 +2511,6 @@ var window = new DesktopWindow(server)
     .Run();
 ```
 
-
-
 ---
 
 ### Server Configuration - External Configuration Providers
@@ -2599,13 +2527,9 @@ server.UseConfiguration(config => {
 });
 ```
 
-
-
 ---
 
 ## Improvements
-
-
 
 ---
 
@@ -2613,27 +2537,19 @@ server.UseConfiguration(config => {
 
 GridView now offers granular control over grid spacing with dedicated `RowGap()` and `ColumnGap()` methods. The existing `Gap()` method now sets both row and column gaps simultaneously, while the new methods let you control each axis independently.
 
-
-
 ---
 
 ### Theme Defaults to System Preference
 
 The framework now defaults to `system` theme instead of `light` theme, automatically respecting users' system-wide dark/light mode preferences. Apps will now adapt to the operating system's appearance settings by default, providing a better out-of-the-box experience.
 
-
-
 ---
-
-
 
 ---
 
 ### DataTableBuilder - Remove() Method for API Consistency
 
 The `DataTableBuilder` now supports the `.Remove()` method, bringing it in line with other builders like `FormBuilder`, `TableBuilder`, and `DetailsBuilder`. This method allows you to completely exclude columns from your data tables.
-
-
 
 ---
 
@@ -2648,8 +2564,6 @@ The Clerk authentication provider now gracefully handles scenarios where a sessi
 ### WithConfirm: Customizable Button Labels and Destructive Styling
 
 The `WithConfirm` helper method now supports customizable confirm button labels and destructive styling, making confirmation dialogs more appropriate for delete operations and other critical actions.
-
-
 
 ---
 
@@ -2674,8 +2588,6 @@ App IDs can now contain dots, enabling more flexible naming schemes for versioni
 "datatable.DataTableService"
 "grpc.ServiceName"
 ```
-
-
 
 ---
 
@@ -3000,23 +2912,17 @@ No code changes needed - this improvement applies automatically to all SelectInp
 
 The `MetricView` component now intelligently colors its progress bar based on achievement percentage, providing instant visual feedback about goal performance.
 
-
-
 ---
 
 ### ListItem Improved Vertical Spacing
 
 The `ListItem` widget now includes vertical padding for better content spacing and visual comfort.
 
-
-
 ---
 
 ### Size.Fraction and Size.FractionGap Now Accept Decimal and Double
 
 The `Size.Fraction()` and `Size.FractionGap()` methods now accept `decimal` and `double` values in addition to `float`, eliminating common type mismatch errors when using numeric literals or variables.
-
-
 
 ---
 
@@ -3026,15 +2932,11 @@ The `Size.Fraction()` and `Size.FractionGap()` methods now accept `decimal` and 
 
 Fixed a port conflict issue where CLI-only commands (`--describe`, `--describe-connection`, `--test-connection`) would fail if an Ivy application was already running on the configured port. These commands need dependency injection but never actually start the web host, making port binding unnecessary.
 
-
-
 ---
 
 ### Form Submit Strategy Hook Ordering
 
 Fixed a critical bug in `FormBuilder` where changing the form submit strategy at runtime would cause an `InvalidOperationException`. The issue occurred when using `OnBlur` or `OnChange` strategies, as internal hooks were called conditionally, violating hook ordering rules.
-
-
 
 ---
 
@@ -3042,15 +2944,11 @@ Fixed a critical bug in `FormBuilder` where changing the form submit strategy at
 
 Fixed a bug in `RichTextBlock` where streaming text content would fail to display. The frontend component expected the `stream` property to be a plain string, but the backend serializer was producing an object with an `id` property (`{ id: "..." }`), causing stream subscriptions to silently fail.
 
-
-
 ---
 
 ### NumberInput Currency Format Default
 
 Fixed a runtime `TypeError` that occurred when using `.FormatStyle(NumberFormatStyle.Currency)` on `NumberInput` without explicitly setting a currency code. The framework now automatically defaults to "USD" when no currency is specified.
-
-
 
 ---
 
@@ -3058,15 +2956,11 @@ Fixed a runtime `TypeError` that occurred when using `.FormatStyle(NumberFormatS
 
 Fixed a bug where streamed data (like `TextRun` objects in `RichText`) was not properly serialized when sent to the client. Stream data was passed as raw objects through SignalR, bypassing the camelCase naming policy and enum converters used by `WidgetSerializer`, causing property names and enum values to be incorrectly formatted on the client side.
 
-
-
 ---
 
 ### Stream Data Buffering - Preventing Dropped Messages
 
 Fixed a race condition where `StreamData` messages could be dropped if they arrived before the frontend stream handler was ready. This could happen during React re-render cycles when stream data arrives while the component is still mounting or updating.
-
-
 
 ---
 
@@ -3074,15 +2968,11 @@ Fixed a race condition where `StreamData` messages could be dropped if they arri
 
 Fixed a parsing issue in `HtmlPipeline` where void HTML elements (like `<link>`, `<meta>`, `<br>`, etc.) generated by Vite without self-closing slashes would cause `XDocument.Parse` to fail. While these elements are valid HTML5, XML parsing requires them to be self-closed.
 
-
-
 ---
 
 ### ClientSender Disposal Race Condition
 
 Fixed a race condition that could occur when a client connection is closed while event handlers are still processing. Previously, the `ClientSender` could be torn down before in-flight event handlers finished executing, potentially causing errors or lost messages during disconnection.
-
-
 
 ---
 
@@ -3090,15 +2980,11 @@ Fixed a race condition that could occur when a client connection is closed while
 
 Fixed a visual bug where chart content (area charts, bar charts, and line charts) would overlap with the toolbox controls when the toolbox was enabled. The chart grid now properly adjusts its top spacing to accommodate the toolbox.
 
-
-
 ---
 
 ### Missing HttpClient Dependency Fix
 
 Fixed a compilation error (CS1061) that occurred when using `server.Services.AddHttpClient()`. The Ivy package now includes `Microsoft.Extensions.Http` as a transitive dependency.
-
-
 
 ---
 
@@ -3106,15 +2992,11 @@ Fixed a compilation error (CS1061) that occurred when using `server.Services.Add
 
 Fixed incorrect property usage in the XAML Builder sample application where `StackLayout` examples were using a non-existent `Gap` property. The examples now correctly use `RowGap` and `ColumnGap` properties.
 
-
-
 ---
 
 ### TableBuilder.Remove() - Non-Displayable Property Types
 
 Fixed a `KeyNotFoundException` that occurred when calling `.Remove()` on `TableBuilder` for properties that cannot be displayed in tables, such as `byte[]` arrays. These properties are never registered as columns in the table, so attempting to remove them would throw an exception.
-
-
 
 ---
 
@@ -3122,15 +3004,11 @@ Fixed a `KeyNotFoundException` that occurred when calling `.Remove()` on `TableB
 
 Fixed visual glitches in the `TableOfContents` widget that would cause incorrect highlighting and "junk" to appear when users scroll quickly through content. The component now uses a debounced update mechanism to ensure smooth, accurate highlighting even during rapid scrolling.
 
-
-
 ---
 
 ### IState<T>.Set(null) Ambiguity Resolved
 
 Fixed a compiler ambiguity error that occurred when calling `.Set(null)` on state objects with nullable reference types. Previously, passing `null` to `.Set()` would match both the `Set(T value)` and `Set(Func<T,T> setter)` overloads, causing a compilation error.
-
-
 
 ---
 
@@ -3138,15 +3016,11 @@ Fixed a compiler ambiguity error that occurred when calling `.Set(null)` on stat
 
 Fixed the default window title for Ivy desktop applications. Instead of showing a generic "Ivy App" title, desktop windows now automatically display the application's assembly name, providing a more professional and context-appropriate default.
 
-
-
 ---
 
 ### Hook Usage Analyzer: FuncView and MemoizedFuncView Lambda Support
 
 Fixed the hook usage analyzer (`IVYHOOK001`) to correctly recognize lambdas passed to `FuncView` and `MemoizedFuncView` constructors as valid locations for hooks. Previously, the analyzer would incorrectly flag these as errors, even though these lambdas function as Build methods.
-
-
 
 ---
 
@@ -3154,15 +3028,11 @@ Fixed the hook usage analyzer (`IVYHOOK001`) to correctly recognize lambdas pass
 
 Fixed improper capitalization in chart legends when using camelCase property names. The `SplitPascalCase` utility now properly title-cases each word, producing professional-looking chart labels.
 
-
-
 ---
 
 ### Semantic Color Mapping for Text
 
 Fixed incorrect color mapping when using semantic surface colors (like `Colors.Muted`, `Colors.Background`, `Colors.Card`) for text. These colors were previously mapping to their base CSS variables, which are designed for backgrounds, resulting in poor readability and contrast issues.
-
-
 
 ---
 
@@ -3170,16 +3040,11 @@ Fixed incorrect color mapping when using semantic surface colors (like `Colors.M
 
 Fixed a bug in `SidebarLayoutWidget` where the `.Open(false)` property was being overridden by the media query handler on component mount. When a sidebar was explicitly set to closed, the auto-collapse media query would incorrectly force it open if the viewport was wide enough.
 
-
-
 ---
 
 ### MarkdownRenderer Code Block Borders
 
 Fixed a visual bug in the `MarkdownRenderer` where code blocks were missing their borders. The `ScrollArea` component wrapping the syntax highlighter was missing the border styling classes that were present in the fallback block, causing rendered code blocks to appear without visible borders.
-
-
-
 
 ---
 
@@ -3789,7 +3654,6 @@ This improvement makes it easier to work with database connections during develo
 
 ---
 
-
 ### CLI Commands Work Alongside Running Instances
 
 CLI diagnostic commands (`--describe`, `--describe-connection`, `--test-connection`) now run successfully even when an Ivy app instance is already running on the configured port.
@@ -3797,32 +3661,23 @@ CLI diagnostic commands (`--describe`, `--describe-connection`, `--test-connecti
 **What was the problem:**
 These commands need dependency injection but don't actually start a web server. Previously, they would fail with port-in-use errors if you tried to run them while your app was already running, even though they never needed the port.
 
-
-
 ---
 
 ### Server Binds to Localhost - No More Windows Firewall Prompts
 
 Ivy apps now bind to `localhost` instead of the wildcard address (`*`), eliminating Windows Firewall prompts during development.
 
-
-
 ---
-
 
 ### Ivy.Desktop Now Available on NuGet
 
 The `Ivy.Desktop` package is now published to NuGet, making it easier to add desktop application support to your Ivy projects.
-
-
 
 ---
 
 ### XamlBuilder Live Preview Sample
 
 A new interactive sample app has been added to demonstrate the `XamlBuilder` API. This sample provides a live XAML editor with instant preview, making it easy to experiment with XAML-based layouts and learn the XamlBuilder syntax.
-
-
 
 ---
 
@@ -3849,8 +3704,6 @@ New PowerShell launcher scripts have been added to make it easier to run the Ivy
 # Build frontend first, then run documentation
 ./IvyDocs.ps1 -BuildFrontend
 ```
-
-
 
 ---
 
@@ -3957,8 +3810,6 @@ Both syntaxes work, but the documentation now consistently uses the simpler form
 
 The Ivy documentation site now features an intelligent AI-powered search system that helps you find answers faster and more accurately.
 
-
-
 ---
 
 ### Common API Mistake Documented: LayoutView.SpaceBetween()
@@ -3972,8 +3823,6 @@ A new entry has been added to the Hallucinations documentation page to help user
 ### Common API Mistake Documented: InputBase.Label()
 
 The hallucinations documentation has been updated to clarify that the `.Label()` mistake applies to **all input types**, not just `NumberInputBase`.
-
-
 
 ---
 
@@ -4013,23 +3862,17 @@ public class MyApp : ViewBase
 
 A new FAQ entry has been added clarifying that the `[App]` attribute does not have a layout parameter. This addresses a common misconception where developers might try to configure layout through the attribute itself.
 
-
-
 ---
 
 ### Enhanced Ivy.Desktop README
 
 The Ivy.Desktop package now has a comprehensive README with quick start instructions, code examples, and visual branding to help developers get started with building native desktop applications.
 
-
-
 ---
 
 ### AI Agent Hallucinations Reference
 
 A new documentation file has been added that catalogs common API mistakes made by AI coding assistants when generating Ivy Framework code. This reference helps developers quickly identify and fix build errors that result from AI-generated code.
-
-
 
 ---
 
@@ -4065,23 +3908,17 @@ return Layout.Vertical()
 
 The FAQ documentation now includes a complete example of implementing delete confirmations, demonstrating a common pattern for confirming destructive actions before executing them.
 
-
-
 ---
 
 ### UseQuery with EF Core FAQ Entry
 
 The FAQ documentation now includes comprehensive guidance on using `UseQuery` with Entity Framework Core, covering the proper patterns for reactive database queries in Ivy applications.
 
-
-
 ---
 
 ### DataTable Navigation Properties FAQ Entry
 
 The FAQ documentation now includes guidance on working with navigation properties in DataTable, explaining a common limitation and the recommended solution.
-
-
 
 ---
 
@@ -4129,10 +3966,7 @@ These examples are available in the XamlBuilder sample app and provide ready-to-
 
 The FAQ documentation now includes comprehensive guidance on creating Tables in Ivy, covering both simple data-driven tables and manual table construction.
 
-
-
 ---
-
 
 ### NumberInput Format Styles FAQ Entry
 
@@ -4611,15 +4445,11 @@ new Box(Text.P("A"))
     .BorderRadius(BorderRadius.Full)
 ```
 
-
-
 ---
 
 ### UseState Immutable Type Guidance
 
 The `UseState` hook documentation and AI agent guidelines have been updated with critical guidance about using immutable types to prevent silent re-render failures.
-
-
 
 ---
 
@@ -4627,15 +4457,11 @@ The `UseState` hook documentation and AI agent guidelines have been updated with
 
 The FAQ documentation now includes guidance on how to change the size of icons, addressing a common question about icon sizing.
 
-
-
 ---
 
 ### Text Sizing FAQ Entry
 
 The FAQ documentation now includes guidance on how to change the font size of text, addressing a common question about text sizing.
-
-
 
 ---
 
@@ -4643,15 +4469,11 @@ The FAQ documentation now includes guidance on how to change the font size of te
 
 The `RichTextBlock` streaming documentation has been significantly enhanced with more comprehensive examples and explanations, making it easier to implement real-time text streaming scenarios like LLM responses.
 
-
-
 ---
 
 ### Complete Port Configuration Guide
 
 The documentation now includes a comprehensive guide for all the ways to configure the port when running Ivy applications. Whether you're using the CLI, running with `dotnet run`, or working with file-based apps, you now have clear examples for each scenario.
-
-
 
 ---
 
@@ -4659,20 +4481,14 @@ The documentation now includes a comprehensive guide for all the ways to configu
 
 A new sample has been added demonstrating the correct way to build a full-height layout with header, content, and footer using `Layout.Vertical().Height(Size.Full())`.
 
-
-
 ---
 
 ### Component Styling Guide - FAQ Entry
 
 A new FAQ entry has been added explaining how to apply styling (width, height, color, padding) to Ivy components. This addresses a common question from developers trying to apply custom styles to widgets.
 
-
-
 ---
 
 ### Dynamic Form Fields - FAQ Entry
 
 A new FAQ entry has been added to the TextInput documentation explaining how to create forms with a dynamic number of fields, such as dictionary-style inputs. This addresses a common challenge developers face when trying to use hooks inside loops.
-
-
