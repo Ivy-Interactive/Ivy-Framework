@@ -227,7 +227,6 @@ The Layout class provides the following factory methods:
 | Layout.Grid() | Creates a grid layout for two-dimensional arrangements |
 | Layout.Tabs() | Creates a tabbed layout |
 
-
 ## Available Layouts
 
 | Layout | Description |
