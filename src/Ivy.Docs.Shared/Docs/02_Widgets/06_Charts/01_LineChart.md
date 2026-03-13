@@ -65,7 +65,7 @@ public class LineStylesDemo: ViewBase
         var selectedStyle = UseState(styles[0]);
         var style = styleMap[selectedStyle.Value];
         var styleInput = selectedStyle.ToSelectInput(styles.ToOptions())
-                                   .Width(20);
+                                   .Width(Size.Units(20));
         
         var data = new[]
         {

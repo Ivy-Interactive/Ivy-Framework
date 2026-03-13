@@ -13,8 +13,13 @@ namespace Ivy.Analyser.Analyzers
     {
         public const string DiagnosticId = "IVYHOOK001";
         private const string Title = "Invalid Ivy Hook Usage";
-        private const string MessageFormat = "Ivy hook '{0}' can only be used directly inside the Build() method";
+        private const string MessageFormat = "Ivy hook '{0}' must be called at the top level of the Build() method — not inside lambdas, local functions, or helper methods. Hooks must always execute in the same order on every render.";
         private const string Description = "Ivy hooks must be called directly inside the Build() method, not inside lambdas, local functions, or other methods.";
+
+        public const string DiagnosticIdNestedClosure = "IVYHOOK001B";
+        private const string TitleNestedClosure = "Ivy Hook Used in Nested Closure";
+        private const string MessageFormatNestedClosure = "Ivy hook '{0}' is inside a {1} within Build() — move it to the top level of Build(). Hooks must always execute in the same order on every render.";
+        private const string DescriptionNestedClosure = "Ivy hooks cannot be called inside lambdas, local functions, or anonymous methods even when those are defined within Build(). Move the hook call to the top level of Build().";
         private const string Category = "Usage";
 
         public const string DiagnosticIdConditional = "IVYHOOK002";
@@ -50,6 +55,15 @@ namespace Ivy.Analyser.Analyzers
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: Description);
+
+        private static readonly DiagnosticDescriptor RuleNestedClosure = new DiagnosticDescriptor(
+            DiagnosticIdNestedClosure,
+            TitleNestedClosure,
+            MessageFormatNestedClosure,
+            Category,
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true,
+            description: DescriptionNestedClosure);
 
         private static readonly DiagnosticDescriptor RuleConditional = new DiagnosticDescriptor(
             DiagnosticIdConditional,
@@ -122,6 +136,7 @@ namespace Ivy.Analyser.Analyzers
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
             Rule,
+            RuleNestedClosure,
             RuleConditional,
             RuleLoop,
             RuleSwitch,
@@ -151,10 +166,26 @@ namespace Ivy.Analyser.Analyzers
                 return;
             }
 
-            if (!IsValidHookUsage(invocation))
+            var hookUsage = CheckHookUsage(invocation);
+            if (hookUsage != HookUsageResult.Valid)
             {
-                var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), methodName);
-                context.ReportDiagnostic(diagnostic);
+                if (hookUsage == HookUsageResult.OutsideBuildMethod)
+                {
+                    var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), methodName);
+                    context.ReportDiagnostic(diagnostic);
+                }
+                else
+                {
+                    var closureKind = hookUsage switch
+                    {
+                        HookUsageResult.NestedInLambda => "lambda",
+                        HookUsageResult.NestedInLocalFunction => "local function",
+                        HookUsageResult.NestedInAnonymousMethod => "anonymous method",
+                        _ => "closure"
+                    };
+                    var diagnostic = Diagnostic.Create(RuleNestedClosure, invocation.GetLocation(), methodName, closureKind);
+                    context.ReportDiagnostic(diagnostic);
+                }
                 return;
             }
 
@@ -222,38 +253,57 @@ namespace Ivy.Analyser.Analyzers
             return null;
         }
 
+        private enum HookUsageResult
+        {
+            Valid,
+            OutsideBuildMethod,
+            NestedInLambda,
+            NestedInLocalFunction,
+            NestedInAnonymousMethod,
+        }
+
         private static bool IsValidHookMethod(string methodName)
         {
             return methodName == "Build" || methodName == "BuildSample";
         }
 
-        private static bool IsValidHookUsage(InvocationExpressionSyntax invocation)
+        private static HookUsageResult CheckHookUsage(InvocationExpressionSyntax invocation)
         {
             var current = invocation.Parent;
 
             while (current != null)
             {
-                if (current is LambdaExpressionSyntax or
-                    LocalFunctionStatementSyntax or
-                    AnonymousMethodExpressionSyntax)
+                if (current is LambdaExpressionSyntax lambda)
                 {
                     // FuncView/MemoizedFuncView lambdas ARE Build methods — hooks are valid inside them
-                    if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
+                    if (IsFuncViewBuilderLambda(lambda))
                     {
-                        return true;
+                        return HookUsageResult.Valid;
                     }
-                    return false;
+                    return HookUsageResult.NestedInLambda;
+                }
+
+                if (current is LocalFunctionStatementSyntax)
+                {
+                    return HookUsageResult.NestedInLocalFunction;
+                }
+
+                if (current is AnonymousMethodExpressionSyntax)
+                {
+                    return HookUsageResult.NestedInAnonymousMethod;
                 }
 
                 if (current is MethodDeclarationSyntax method)
                 {
-                    return IsValidHookMethod(method.Identifier.Text);
+                    return IsValidHookMethod(method.Identifier.Text)
+                        ? HookUsageResult.Valid
+                        : HookUsageResult.OutsideBuildMethod;
                 }
 
                 current = current.Parent;
             }
 
-            return false;
+            return HookUsageResult.OutsideBuildMethod;
         }
 
         private static bool IsFuncViewBuilderLambda(LambdaExpressionSyntax lambda)

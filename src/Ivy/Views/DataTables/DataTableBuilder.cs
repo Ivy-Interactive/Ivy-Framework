@@ -205,6 +205,17 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+    public DataTableBuilder<TModel> Remove(params IEnumerable<Expression<Func<TModel, object>>> fields)
+    {
+        foreach (var field in fields)
+        {
+            var name = Utils.GetNameFromMemberExpression(field.Body);
+            if (!_columns.TryGetValue(name, out var hint)) continue;
+            hint.Removed = true;
+        }
+        return this;
+    }
+
     public DataTableBuilder<TModel> Hidden(params IEnumerable<Expression<Func<TModel, object>>> fields)
     {
         foreach (var field in fields)

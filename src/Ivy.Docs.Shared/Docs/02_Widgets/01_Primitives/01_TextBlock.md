@@ -37,7 +37,7 @@ public class TextVariantsDemo : ViewBase
             | Text.P("Paragraph text")
             | Text.Block("Block text")
             | Text.Blockquote("Blockquote text")
-            | Text.InlineCode("InlineCode")
+            | Text.Monospaced("Monospaced")
             | Text.Lead("Lead text for prominent display")
             | Text.P("Large text").Large()
             | Text.P("Small text").Small()
@@ -135,9 +135,9 @@ public class ArticleDemo : ViewBase
             | Text.Block("• Basic knowledge of C#")
             | Text.H2("Installation")
             | Text.P("Install Ivy using the .NET CLI:")
-            | Text.InlineCode("dotnet tool install -g Ivy.Console")
+            | Text.Monospaced("dotnet tool install -g Ivy.Console")
             | Text.P("Create a new project:")
-            | Text.InlineCode("ivy init --namespace MyFirstProject");
+            | Text.Monospaced("ivy init --namespace MyFirstProject");
     }
 }
 ```

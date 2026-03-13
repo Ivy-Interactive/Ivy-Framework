@@ -11,7 +11,7 @@ namespace Ivy.Docs.Shared.Services;
 /// </summary>
 public class IvyDocsQuestionsClient : IIvyDocsQuestionsClient
 {
-    private const string DefaultBaseUrl = "https://staging.mcp.ivy.app";
+    private const string DefaultBaseUrl = "https://mcp.ivy.app";
     private const string PackageId = "Ivy";
     private const string ClientName = "ivyDocs";
 

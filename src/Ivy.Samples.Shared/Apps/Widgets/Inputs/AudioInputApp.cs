@@ -29,17 +29,17 @@ public class AudioInputApp() : SampleBase
     private object CreateSizesSection(UploadContext upload)
     {
         return Layout.Grid().Columns(4)
-               | Text.InlineCode("Description")
-               | Text.InlineCode("Small")
-               | Text.InlineCode("Medium")
-               | Text.InlineCode("Large")
+               | Text.Monospaced("Description")
+               | Text.Monospaced("Small")
+               | Text.Monospaced("Medium")
+               | Text.Monospaced("Large")
 
-               | Text.InlineCode("Audio Input")
+               | Text.Monospaced("Audio Input")
                | new AudioInput(upload, "Start recording", "Recording audio...").Small()
                | new AudioInput(upload, "Start recording", "Recording audio...")
                | new AudioInput(upload, "Start recording", "Recording audio...").Large()
 
-               | Text.InlineCode("Disabled State")
+               | Text.Monospaced("Disabled State")
                | new AudioInput(upload, "Start recording", "Recording audio...", disabled: true).Small()
                | new AudioInput(upload, "Start recording", "Recording audio...", disabled: true)
                | new AudioInput(upload, "Start recording", "Recording audio...", disabled: true).Large();

@@ -41,8 +41,8 @@ export function getAppId(): string | null {
   // Remove leading slash and use the rest as appId
   const appId = originalPath.replace(/^\/+/, '');
 
-  // Only convert if the path looks like an app ID (contains at least one segment and no dots)
-  if (appId && !appId.includes('.')) {
+  // Only convert if the path looks like an app ID (contains at least one segment)
+  if (appId) {
     return appId;
   }
 

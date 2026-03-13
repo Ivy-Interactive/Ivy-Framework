@@ -1104,12 +1104,12 @@ public class RealTimeFormExample : ViewBase
                     .Label(m => m.Number1, "First Number")
                     .Label(m => m.Number2, "Second Number")
                     .Label(m => m.Operation, "Operation")
-            ).Title("Calculator").Width(1/2f)
+            ).Title("Calculator").Width(Size.Fraction(1 / 2f))
             | new Card(
                 Layout.Vertical()
                     | Text.H3("Result")
                     | Text.Block($"{calculator.Value.Number1} {calculator.Value.Operation} {calculator.Value.Number2} = {CalculateResult()}")
-            ).Title("Result").Width(1/2f);
+            ).Title("Result").Width(Size.Fraction(1 / 2f));
     }
 }
 ```

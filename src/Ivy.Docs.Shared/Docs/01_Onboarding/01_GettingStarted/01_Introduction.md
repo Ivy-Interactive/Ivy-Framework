@@ -21,7 +21,7 @@ Ivy eliminates the traditional frontend/backend split by bringing React-like dec
 - **[Database Integration](https://docs.ivy.app/onboarding/cli/database-integration/database-overview)**: Connect to SQL Server, PostgreSQL, Supabase, and more with `ivy db add`.
 - **[Authentication](https://docs.ivy.app/onboarding/cli/authentication/authentication-overview)**: Add Auth0, Clerk, or Microsoft Entra with `ivy auth add`.
 - **[Deployment](https://docs.ivy.app/onboarding/cli/deploy)**: Deploy to AWS, Azure, GCP, or Sliplane with `ivy deploy`.
-- **AI Agentic Features** : Generate entire back-office applications from your database schema using `ivy app create`. You can also try and generate an entire application with a DB using the `ivy db generate` command.
+- **AI Agentic Features** : Generate entire back-office applications from your database schema using `ivy app create`.
 
 ## Getting Started
 

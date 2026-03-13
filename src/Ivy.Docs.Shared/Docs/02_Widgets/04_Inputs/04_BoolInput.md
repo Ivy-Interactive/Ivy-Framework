@@ -109,7 +109,7 @@ public class CheckBoxDemo : ViewBase
             | agreed.ToBoolInput()
                 .Variant(BoolInputVariant.Checkbox)
                 .Label("Agree to terms and conditions")
-            | (agreed.Value ? Text.InlineCode("You are all set!") : null);
+            | (agreed.Value ? Text.Monospaced("You are all set!") : null);
     }
 }
 ```

@@ -1,3 +1,3 @@
-﻿---
+---
 icon: LibraryBig
 ---

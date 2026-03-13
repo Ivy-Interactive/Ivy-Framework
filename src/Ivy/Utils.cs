@@ -212,7 +212,7 @@ public static class Utils
         if (input == null) return null;
         string[] words = Regex
             .Matches(input, "([A-Z]+[a-z]+|[0-9]+|[a-z]+|[A-Z]+)")
-            .Select(m => m.Value)
+            .Select(m => char.ToUpper(m.Value[0]) + m.Value[1..])
             .ToArray();
         return string.Join(" ", words);
     }
@@ -944,7 +944,8 @@ public static class Utils
         }
 
         // AppId should not contain protocol separators, query parameters, or other URL components
-        if (appId.Contains(':') || appId.Contains('?') || appId.Contains('#') || appId.Contains('&'))
+        if (appId.Contains(':') || appId.Contains('?') || appId.Contains('#') || appId.Contains('&') ||
+            appId.Contains('%') || appId.Contains('\\'))
         {
             return false;
         }

@@ -1,58 +1,28 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Ivy.Core.Apps;
 
 namespace Ivy.Core.Server.Middleware;
 
-public class RoutingConstantData
-{
-    [JsonPropertyName("excludedPaths")]
-    public string[] ExcludedPaths { get; set; } = [];
-
-    [JsonPropertyName("staticFileExtensions")]
-    public string[] StaticFileExtensions { get; set; } = [];
-}
-
-[JsonSerializable(typeof(RoutingConstantData))]
-internal partial class RoutingConstantDataContext : JsonSerializerContext;
-
 public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMiddleware> logger, global::Ivy.Server server)
 {
-    public static string[] ExcludedPaths => RoutingConstants.ExcludedPaths;
-
-    private static readonly RoutingConstantData RoutingConstants;
-
-    static PathToAppIdMiddleware()
-    {
-        using var stream = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream("RoutingConstants")!;
-        RoutingConstants = JsonSerializer.Deserialize(stream, RoutingConstantDataContext.Default.RoutingConstantData)!;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value ?? "";
 
-        // Skip if path is empty or just "/"
-        if (string.IsNullOrEmpty(path) || path == "/")
+        // Skip if an endpoint has already been matched (e.g., MVC controller, gRPC service)
+        if (context.GetEndpoint() != null)
         {
             await next(context);
             return;
         }
 
-        // Skip if path starts with any excluded pattern (must be exact segment match)
-        if (IsPathReserved(path, RoutingConstants.ExcludedPaths) ||
-            IsPathReserved(path, server.ReservedPaths))
-        {
-            await next(context);
-            return;
-        }
+        // Convert path to appId
+        // Remove leading slash and use the rest as appId
+        var appId = path.TrimStart('/');
 
-        // Skip if path has a static file extension
-        if (RoutingConstants.StaticFileExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
+        if (AppRoutingHelpers.ValidateAppId(appId, server.ReservedPaths) != AppIdValidationResult.Valid)
         {
             await next(context);
             return;
@@ -65,12 +35,9 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
             return;
         }
 
-        // Convert path to appId
-        // Remove leading slash and use the rest as appId
-        var appId = path.TrimStart('/');
 
         // Only convert if the path looks like an app ID (contains at least one segment)
-        if (!string.IsNullOrEmpty(appId) && !appId.Contains('.'))
+        if (!string.IsNullOrEmpty(appId))
         {
             logger.LogDebug("Converting path '{Path}' to appId '{AppId}'", path, appId);
 
@@ -85,12 +52,6 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
         }
 
         await next(context);
-    }
-    private static bool IsPathReserved(string path, IEnumerable<string> reservedPaths)
-    {
-        return reservedPaths.Any(reserved =>
-            path.Equals(reserved, StringComparison.OrdinalIgnoreCase) ||
-            path.StartsWith(reserved + "/", StringComparison.OrdinalIgnoreCase));
     }
 }
 

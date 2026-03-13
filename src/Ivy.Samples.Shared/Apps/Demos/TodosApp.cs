@@ -43,7 +43,7 @@ public class TodosApp : SampleBase
                         ))
                     )
                 )
-            ).Title("Todos").Width(1 / 2f)
+            ).Title("Todos").Width(Size.Fraction(1 / 2f))
         );
     }
 }

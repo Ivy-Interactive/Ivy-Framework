@@ -174,7 +174,7 @@ public class InteractiveBoxView : ViewBase
     {
         var isSelected = selected.Value == label;
         return new Box(label)
-            .Color(isSelected ? Colors.Primary : Colors.Muted)
+            .Background(isSelected ? Colors.Primary : Colors.Muted)
             .BorderThickness(isSelected ? 2 : 1)
             .Hover(CardHoverVariant.Pointer)
             .OnClick(_ => {
@@ -197,7 +197,7 @@ public class ColorExamplesView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(4)
-            | new Box("Primary Color").Color(Colors.Primary).Padding(8);
+            | new Box("Primary Color").Background(Colors.Primary).Padding(8);
     }
 }
 ```
@@ -220,19 +220,19 @@ public class StatusDashboardView : ViewBase
     {
         return Layout.Horizontal().Gap(4)
             | new Box("System Online")
-                .Color(Colors.Green)
+                .Background(Colors.Green)
                 .BorderRadius(BorderRadius.Rounded)
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
             | new Box("Warning: High CPU Usage")
-                .Color(Colors.Yellow)
+                .Background(Colors.Yellow)
                 .BorderStyle(BorderStyle.Dashed)
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
             | new Box("Database Error")
-                .Color(Colors.Red)
+                .Background(Colors.Red)
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f));
@@ -257,7 +257,7 @@ public class CardLayoutView : ViewBase
     {
         return Layout.Grid().Columns(2).Gap(8)
             | new Box()
-                .Color(Colors.White)
+                .Background(Colors.White)
                 .BorderRadius(BorderRadius.Rounded)
                 .BorderThickness(1)
                 .Padding(12)
@@ -272,7 +272,7 @@ public class CardLayoutView : ViewBase
     {
         var isSelected = selected.Value == label;
         return new Box(label)
-            .Color(isSelected ? Colors.Primary : Colors.Muted)
+            .Background(isSelected ? Colors.Primary : Colors.Muted)
             .BorderThickness(isSelected ? 2 : 1)
             .Hover(CardHoverVariant.Pointer)
             .OnClick(_ => {
@@ -299,7 +299,7 @@ There is no dedicated Shape or Circle widget. Use a `Box` with `BorderRadius.Ful
 ```csharp
 // A colored circle
 new Box()
-    .Color(Colors.Primary)
+    .Background(Colors.Primary)
     .Width(Size.Px(36))
     .Height(Size.Px(36))
     .BorderRadius(BorderRadius.Full)
@@ -330,7 +330,7 @@ Ivy uses a fluent API for styling — there is no `.Style()` method for arbitrar
 new Box(content)
     .Width(Size.Px(200))
     .Height(Size.Px(100))
-    .Color(Colors.Blue)
+    .Background(Colors.Blue)
     .Padding(16)
     .Margin(8)
     .BorderRadius(BorderRadius.Rounded)

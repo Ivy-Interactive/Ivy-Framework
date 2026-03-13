@@ -65,7 +65,7 @@ End of the typography test.
                     | Text.P("and")
                     | Text.Inline("Italic Text").Italic()
                     | Text.P("and")
-                    | Text.InlineCode("Inline Code").Color(Colors.Red)
+                    | Text.Monospaced("Inline Code").Color(Colors.Red)
                   )
                  | new Separator()
                  | Text.P("End of the typography test.")
