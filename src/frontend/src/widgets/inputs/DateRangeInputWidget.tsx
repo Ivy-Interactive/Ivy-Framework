@@ -41,6 +41,8 @@ interface DateRangeInputWidgetProps {
   } | null;
   disabled?: boolean;
   placeholder?: string;
+  startPlaceholder?: string;
+  endPlaceholder?: string;
   format?: string;
   invalid?: string;
   nullable?: boolean;
@@ -56,6 +58,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   value,
   disabled = false,
   placeholder = 'Pick a date range',
+  startPlaceholder,
+  endPlaceholder,
   format: formatProp,
   invalid,
   nullable = false,
@@ -210,8 +214,21 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   )}
                 >
                   {format(date.from, displayFormat)}
+                  {(endPlaceholder || startPlaceholder) && (
+                    <span className="text-muted-foreground"> - {endPlaceholder || placeholder || 'Pick a date range'}</span>
+                  )}
                 </span>
               )
+            ) : startPlaceholder || endPlaceholder ? (
+              <span
+                className={cn(
+                  'truncate',
+                  dateRangeInputTextVariant({ density }),
+                  'text-muted-foreground'
+                )}
+              >
+                {startPlaceholder || placeholder || 'Start'} - {endPlaceholder || placeholder || 'End'}
+              </span>
             ) : (
               <span
                 className={cn(

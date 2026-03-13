@@ -16,6 +16,10 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 {
     [Prop] public string? Placeholder { get; set; }
 
+    [Prop] public string? StartPlaceholder { get; set; }
+
+    [Prop] public string? EndPlaceholder { get; set; }
+
     [Prop] public string? Format { get; set; }
 
     [Prop] public bool Disabled { get; set; }
@@ -98,6 +102,16 @@ public static class DateRangeInputExtensions
     public static DateRangeInputBase Placeholder(this DateRangeInputBase widget, string placeholder)
     {
         return widget with { Placeholder = placeholder };
+    }
+
+    public static DateRangeInputBase StartPlaceholder(this DateRangeInputBase widget, string placeholder)
+    {
+        return widget with { StartPlaceholder = placeholder };
+    }
+
+    public static DateRangeInputBase EndPlaceholder(this DateRangeInputBase widget, string placeholder)
+    {
+        return widget with { EndPlaceholder = placeholder };
     }
 
     public static DateRangeInputBase Format(this DateRangeInputBase widget, string format)
