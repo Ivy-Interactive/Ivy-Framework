@@ -36,6 +36,8 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 
     [Prop] public string? Invalid { get; set; }
 
+    [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
@@ -242,6 +244,7 @@ public static class DateTimeInputExtensions
     public static DateTimeInputBase Format(this DateTimeInputBase widget, string format) => widget with { Format = format };
 
     public static DateTimeInputBase Invalid(this DateTimeInputBase widget, string? invalid) => widget with { Invalid = invalid };
+    public static DateTimeInputBase FirstDayOfWeek(this DateTimeInputBase widget, DayOfWeek day) => widget with { FirstDayOfWeek = day };
     public static DateTimeInputBase Nullable(this DateTimeInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]

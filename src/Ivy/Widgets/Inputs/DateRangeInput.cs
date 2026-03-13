@@ -28,6 +28,8 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
@@ -127,6 +129,11 @@ public static class DateRangeInputExtensions
     public static DateRangeInputBase Nullable(this DateRangeInputBase widget, bool nullable = true)
     {
         return widget with { Nullable = nullable };
+    }
+
+    public static DateRangeInputBase FirstDayOfWeek(this DateRangeInputBase widget, DayOfWeek day)
+    {
+        return widget with { FirstDayOfWeek = day };
     }
 
     [OverloadResolutionPriority(1)]

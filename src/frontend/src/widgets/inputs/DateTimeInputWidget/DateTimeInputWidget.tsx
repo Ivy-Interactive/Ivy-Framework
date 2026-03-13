@@ -37,6 +37,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   nullable = false,
   invalid,
   format: formatProp,
+  firstDayOfWeek,
   density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
@@ -84,6 +85,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       nullable={nullable}
       invalid={invalid}
       format={formatProp}
+      firstDayOfWeek={firstDayOfWeek}
       density={density}
       onDateChange={handleDateChange}
       onTimeChange={handleTimeChange}

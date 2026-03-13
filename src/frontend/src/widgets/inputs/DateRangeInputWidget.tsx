@@ -46,6 +46,7 @@ interface DateRangeInputWidgetProps {
   format?: string;
   invalid?: string;
   nullable?: boolean;
+  firstDayOfWeek?: number;
   density?: Densities;
   events: string[];
   'data-testid'?: string;
@@ -63,6 +64,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   format: formatProp,
   invalid,
   nullable = false,
+  firstDayOfWeek,
   density = Densities.Medium,
   events = EMPTY_EVENTS,
   'data-testid': dataTestId,
@@ -391,6 +393,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   onMonthChange={handleLeftMonthChange}
                   className="p-2 bg-background"
                   disabled={[{ after: today }]}
+                  weekStartsOn={firstDayOfWeek}
                   density={density}
                 />
 
@@ -402,6 +405,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   onMonthChange={handleRightMonthChange}
                   className="p-2 bg-background"
                   disabled={[{ after: today }]}
+                  weekStartsOn={firstDayOfWeek}
                   density={density}
                 />
               </div>
