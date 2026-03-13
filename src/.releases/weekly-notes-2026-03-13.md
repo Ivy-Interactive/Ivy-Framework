@@ -837,18 +837,6 @@ return isEnabled.ToSwitchInput()
     .Loading(isLoading.Value);
 ```
 
-### TextInput - OnSubmit Event for Enter Key Handling
-
-The `TextInput` widget now supports an `OnSubmit` event that fires when the user presses Enter in a single-line text input.
-
-```csharp
-var searchQuery = UseState("");
-
-return searchQuery.ToTextInput()
-    .Placeholder("Search...")
-    .OnSubmit(() => PerformSearch(searchQuery.Value));
-```
-
 ### DateTimeInput - Month, Week, and Year Pickers
 
 The `DateTimeInput` widget now supports three additional variants for selecting time periods: Month, Week, and Year.
@@ -1123,9 +1111,7 @@ No code changes needed - this improvement applies automatically to all SelectInp
 
 The `MetricView` component now colors its progress bar based on achievement percentage.
 
-### Size.Fraction and Size.FractionGap Now Accept Decimal and Double
-
-The `Size.Fraction()` and `Size.FractionGap()` methods now accept `decimal` and `double` values in addition to `float`.
+### Bug Fixes
 
 - Form Submit Strategy Hook Ordering
 - RichTextBlock Stream Subscription Fix
