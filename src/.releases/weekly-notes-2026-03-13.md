@@ -74,7 +74,7 @@ The OAuth authentication callback URL has changed from `/ivy/webhook` to `/ivy/a
 
 Two `DesktopWindow` methods have been renamed to follow the `Use*` pattern:
 
-**DpiScaling → UseDpiScaling and DevToolsEnabled → UseDevTools:**
+**DpiScaling  to  UseDpiScaling and DevToolsEnabled  to  UseDevTools:**
 
 ```csharp
 new DesktopWindow(server)
@@ -144,8 +144,8 @@ The fluent `.Value()` extension method has been removed from all input widgets. 
 
 The `Scale` enum and all associated APIs have been renamed to `Density`.
 
-- `Ivy.Scale` enum → `Ivy.Density` enum
-- `.Scale()` fluent method → `.Density()` method
+- `Ivy.Scale` enum  to  `Ivy.Density` enum
+- `.Scale()` fluent method  to  `.Density()` method
 - Enum values remain unchanged: `Small`, `Medium`, `Large`
 - Shortcut methods `.Small()`, `.Medium()`, `.Large()` are unchanged
 
@@ -160,6 +160,32 @@ The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been
 ### Explicit Size API for Width, Height, and Size Methods
 
 The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use `Size.Units()` or `Size.Fraction()` to specify sizing.
+
+### Size.Fraction and Size.FractionGap - Decimal/Double Overloads Removed
+
+The `decimal` and `double` overloads for `Size.Fraction()` and `Size.FractionGap()` have been removed to fix ambiguous call compilation errors (CS0121). You must now use `float` values with the `f` suffix.
+
+```csharp
+// Use explicit float literals with 'f' suffix
+.Width(Size.Fraction(0.5f))
+.Height(Size.FractionGap(0.25f))
+
+// Or cast explicitly if using decimal/double variables
+decimal ratio = 0.333m;
+.Width(Size.Fraction((float)ratio))
+```
+
+### Size.Percent() - Intuitive Percentage-Based Sizing
+
+New `Size.Percent()` overloads allow you to specify percentage-based sizes.
+
+**New overloads:**
+
+```csharp
+// Integer percentage
+.Width(Size.Percent(50))    // 50% width
+.Height(Size.Percent(100))  // 100% height
+```
 
 ## New Features
 
@@ -248,44 +274,6 @@ return Layout.Vertical().Gap(4)
     | (screenshot.Value?.Status == FileUploadStatus.Finished && screenshot.Value.Content != null
         ? new Image("data:image/png;base64," + Convert.ToBase64String(screenshot.Value.Content))
         : Text.Muted("No screenshot captured yet."));
-```
-
-### Server-to-Client Streaming with UseStream Hook
-
-Ivy now supports efficient server-to-client streaming with the new `UseStream` hook.
-
-**Example: Streaming Rich Text from an LLM**
-
-Attach the stream to widgets that support streaming (like `Text.Rich()`):
-
-```csharp
-public class StreamingApp : ViewBase
-{
-    protected override object? Build()
-    {
-        // 1. Create a stream for text runs
-        var stream = Context.UseStream<TextRun>();
-
-        return Layout.Vertical(
-            Text.Rich()
-                .Bold("🤖 ")
-                // 2. Attach the stream to the widget
-                .UseStream(stream),
-
-            new Button("Generate").OnClick(async () =>
-            {
-                var words = new[] { "Hello", "world", "from", "the", "stream!" };
-
-                foreach (var word in words)
-                {
-                    await Task.Delay(200);
-                    // 3. Write data to the stream which gets pushed to the frontend in real-time
-                    stream.Write(new TextRun(word) { Word = true });
-                }
-            })
-        );
-    }
-}
 ```
 
 ### Async Cleanup in UseEffect with IAsyncDisposable
@@ -433,8 +421,6 @@ Layout.Vertical()
 
 Ivy now supports Progressive Web Apps with built-in manifest configuration. Configure your app's PWA settings using the new `UseManifest()` API.
 
-**Basic Usage:**
-
 ```csharp
 var server = new Server()
     .UseManifest(manifest =>
@@ -456,8 +442,6 @@ The manifest is automatically served at `/manifest.json` and linked in your app'
 ### AppBase - Semantic Base Class for Apps
 
 Ivy now includes an `AppBase` class that provides a base foundation for building apps.
-
-**Usage:**
 
 ```csharp
 [App(Title = "My Application", Icon = "🚀")]
@@ -640,8 +624,6 @@ data.ToDetails()
 
 App IDs can now include dots. Previously, app IDs like `app.v2` or `users.profile` were not allowed.
 
-**New Capabilities:**
-
 ```csharp
 // Version namespacing
 [App(Id = "dashboard.v2")]
@@ -651,14 +633,6 @@ public class DashboardV2 : AppBase { }
 ### Icons in Select Options
 
 Select inputs now support optional icons for each option. Additionally, labels are now optional—if omitted, the option value will be displayed instead.
-
-**What's New:**
-
-- Added `icon` property to select options (supports any icon name from your icon library)
-- Made `label` property optional (falls back to displaying the value)
-- Icons are supported across all select variants: Toggle, Radio, Checkbox, and Dropdown
-
-**Usage:**
 
 ```csharp
 // Add icons to select options
@@ -963,149 +937,23 @@ The `WithConfirm` helper method now supports customizable confirm button labels 
 
 ### Desktop Apps: Default Ivy Icon for Windows
 
-Desktop applications now automatically display the Ivy logo in the taskbar and title bar when no custom icon is explicitly set.
-
-- When you create a desktop window without calling `.Icon()`, it now automatically uses the embedded Ivy icon
-- The ivy.ico resource is embedded directly in the `Ivy.Desktop` package
-- Your app's window will show the Ivy logo in the taskbar and window title bar by default
-
-```csharp
-// No icon set = Ivy logo appears in taskbar automatically
-new DesktopWindow(server)
-    .Title("My App")
-    .Run();
-```
-
-**Setting a custom icon still works as before:**
-
-```csharp
-// Custom icon overrides the default
-new DesktopWindow(server)
-    .Title("My App")
-    .Icon<MyApp>("MyApp.Resources.custom-icon.ico")
-    .Run();
-```
+Desktop windows without a custom `.Icon()` now show the Ivy logo in the taskbar and title bar. Set `ApplicationIcon` in `.csproj` to use your own icon.
 
 ### DefaultSidebarChrome: Auto-Open Sidebar When Last Tab Closes
 
-The `DefaultSidebarChrome` now automatically opens the sidebar when you close the last tab, preventing an empty state where both the sidebar and all tabs are closed.
-
-- When closing the final tab (which redirects to the home page), the sidebar automatically opens
-- This ensures users always have navigation options visible
-- The sidebar state is now dynamically managed to respond to tab closure events
+Closing the last tab now auto-opens the sidebar so navigation stays visible.
 
 ### Nested App Streaming Support
 
-The `UseStream` hook now works seamlessly in nested apps hosted via `AppHostWidget`. Previously, streaming functionality might not have worked correctly when using `UseStream` within an app that's hosted inside another app.
-
-- `AppHostWidget` now provides the necessary streaming infrastructure to child apps
-- Stream subscriptions are properly propagated through nested app boundaries
-- Both `RichTextBlock.UseStream()` and `Terminal.UseStream()` work correctly in nested contexts
-
-No code changes needed - this improvement applies automatically to applications using `DefaultSidebarChrome`.
+`UseStream` works in nested apps via `AppHostWidget`; stream subscriptions propagate to child apps. `RichTextBlock.UseStream()` and `Terminal.UseStream()` work in nested contexts.
 
 ### Desktop Apps: Error Dialog for Unhandled Exceptions
 
-Desktop applications now show a proper error dialog when unhandled exceptions occur, instead of silently failing or writing to an invisible console.
-
-- The `DesktopWindow.Run()` method now wraps execution in error handling
-- Unhandled exceptions trigger a native error dialog window with the error message and full stack trace
-- The error dialog features a clean, modern design using the **Geist font** and light theme
-- Light background with a subtle bordered code block for stack traces
-- This replaces the previous `Console.WriteLine` approach which was invisible in Windows GUI apps
-
-**Example error scenarios now handled:**
-
-- Server fails to start on the expected port
-- Initialization errors during app startup
-- Any unhandled exceptions during the window lifecycle
-
-No code changes needed - this protection applies automatically to all Ivy desktop applications.
-
-### Desktop Apps: WebView2 Threading Fix for Windows
-
-Desktop applications now automatically handle threading requirements for WebView2 on Windows, fixing an issue where windows would open but display blank content.
-
-- `DesktopWindow.Run()` automatically detects the thread apartment state on Windows
-- If not on an STA thread, it creates and switches to an STA thread automatically
-- Works seamlessly without any code changes or performance impact
-
-No code changes needed - this fix applies automatically to all Ivy desktop applications.
-
-### Desktop Apps: Automatic Ivy Icon Embedding
-
-Desktop applications now automatically include the Ivy icon in their executable files.
-
-- The Ivy.Desktop package now includes an `ivy.ico` icon file
-- MSBuild automatically sets the `ApplicationIcon` property during build if you haven't specified a custom icon
-- The icon is embedded in your compiled `.exe` file on all platforms
-
-- In the Windows taskbar when your app is running
-- In the file explorer alongside your `.exe` file
-- In the window title bar (on supported platforms)
-- In Alt+Tab and other OS-level application switchers
-
-**Using a custom icon:**
-If you want to use your own icon instead, simply set the `ApplicationIcon` property in your `.csproj` file - the automatic Ivy icon will be skipped in favor of your custom one:
-
-```xml
-<PropertyGroup>
-  <ApplicationIcon>path/to/your/icon.ico</ApplicationIcon>
-</PropertyGroup>
-```
-
-No code changes needed - this enhancement applies automatically to all new and existing Ivy desktop applications.
-
-### Desktop Apps: Server Readiness Check Prevents Premature Loading
-
-Desktop applications now wait for the server to be fully ready before loading the UI.
-
-- The port was read before the server had actually bound to it, potentially using the wrong port number
-- The WebView could navigate to the URL before the server was accepting requests, causing connection failures
-
-- The actual bound port is now read after `RunAsync()` returns, ensuring the correct port is used
-- A new `WaitForServerReady()` method polls the server's `/ivy/health` endpoint before the window loads
-- Detects if the server task faults or exits early (e.g., missing secrets, port conflicts)
-- 30-second timeout with clear error message if the server doesn't become ready
-
-- The server takes a moment to initialize and bind to a port
-- The server fails early due to configuration issues (missing secrets, invalid configuration)
-- Port conflicts or other startup issues occur
-
-The window will only display your app once the server is confirmed to be accepting HTTP requests, eliminating "connection refused" errors during startup.
-
-**Technical details:**
-The health check polls `/ivy/health` every 250ms with a 2-second request timeout. The check runs on the main thread before the WebView is navigated, ensuring synchronous startup flow with proper error handling.
-
-No code changes needed - this reliability improvement applies automatically to all Ivy desktop applications.
-
-### Graceful Handling of Missing Assembly References
-
-The framework now gracefully handles situations where your application references assemblies that aren't deployed, preventing crashes during assembly scanning operations.
-
-- Assembly scanning operations (for apps, widgets, connections, and extensions) now use a new `GetLoadableTypes()` extension method
-- When an assembly references other assemblies that aren't available (e.g., optional packages like `Ivy.Filters`), the framework loads only the types that are available
-- Previously, these situations would throw a `ReflectionTypeLoadException` and crash your application
-- This affects automatic discovery of: app classes, external widgets, database connections, and extension methods
-
-This is particularly useful for:
-
-- Deploying minimal production builds without optional dependencies
-- Development scenarios where not all packages are installed
-- Modular applications where certain features are conditionally deployed
-
-No code changes needed - this protection applies automatically throughout the framework.
+Unhandled exceptions now show a native error dialog (message + stack trace) instead of failing silently or using `Console.WriteLine`.
 
 ### SelectInput: Auto-Flip Dropdown Near Viewport Edge
 
-The `SelectInput` dropdown now automatically detects when it would extend beyond the bottom of the viewport and intelligently flips to open upward instead.
-
-- The dropdown calculates available space below the trigger element when opening
-- If insufficient space exists (less than the dropdown height + 8px), it automatically opens upward
-- The dropdown smoothly positions itself above the input with appropriate spacing
-- Works seamlessly across all SelectInput variants (Select, List, Toggle, etc.)
-
-No code changes needed - this improvement applies automatically to all SelectInput widgets.
+SelectInput dropdown opens upward when there isn’t enough space below; works for all variants.
 
 ### Dynamic Metric Progress Colors
 
@@ -1136,327 +984,3 @@ The `MetricView` component now colors its progress bar based on achievement perc
 - Assembly Scanning - Missing Reference Resilience
 - Outline Button Missing Background
 - Semantic Color Text Readability Fix
-
-## Developer Experience Improvements
-
-### Compile-Time Analyzer for App Constructor Requirements
-
-A new Roslyn analyzer (`IVYAPP001`) now provides compile-time feedback when `[App]`-attributed classes don't have a parameterless constructor.
-
-**What It Catches:**
-
-The analyzer flags App classes that use constructor injection, which isn't supported because Ivy instantiates apps via `Activator.CreateInstance`:
-
-```csharp
-// ❌ This now shows a compile error
-[App]
-public class MyApp : AppBase
-{
-    private readonly IClientProvider _client;
-
-    public MyApp(IClientProvider client)  // IVYAPP001 error here
-    {
-        _client = client;
-    }
-
-    public override object Build() => ...;
-}
-```
-
-**The Fix:**
-
-The error message guides you to use `UseService<T>()` inside the `Build()` method instead:
-
-```csharp
-// ✅ Correct approach
-[App]
-public class MyApp : AppBase
-{
-    public override object Build()
-    {
-        var client = UseService<IClientProvider>();
-        // Use client...
-    }
-}
-```
-
-**Additional Safety:**
-
-- Generic methods `Server.UseChrome<T>()` and `Server.UseErrorNotFound<T>()` now have `new()` constraints for compile-time safety
-- Runtime validation in `AppDescriptor.CreateApp()` provides a clear error message if issues are missed
-
-### Compile-Time Analyzer for Widget Child Misuse
-
-New Roslyn analyzers (`IVYCHILD001`, `IVYCHILD002`, and `IVYCHILD003`) now catch widget child misuse at compile time.
-
-**IVYCHILD001 - Leaf Widgets Don't Support Children:**
-
-The analyzer flags attempts to add children to leaf widgets that don't support any children:
-
-```csharp
-// ❌ Compile error - Button doesn't support children
-var result = new Button("Click") | new Text("child");
-
-// ❌ Compile error - Badge doesn't support children
-var result = new Badge("Status") | "child";
-
-// ❌ Compile error - Input widgets don't support children
-var input = new TextInput();
-var result = input | "child";
-```
-
-**Affected Leaf Widgets:**
-
-- **UI Components:** `Button`, `Badge`, `Progress`, `Field`, `Detail`, `Tooltip`
-- **Inputs:** All widgets implementing `IInput<T>` (TextInput, SelectInput, NumberInput, etc.)
-- **Layouts:** `Dialog`, `DialogHeader`, `HeaderLayout`, `SidebarLayout`, `FooterLayout`, `SidebarMenu`
-- **Charts:** `DataTable`, `LineChart`, `PieChart`, `BarChart`, `AreaChart`
-
-**IVYCHILD002 - Single-Child Widgets (Warning):**
-
-The analyzer warns when adding multiple children to widgets that only support one child:
-
-```csharp
-// ⚠️ Warning - Card only supports a single child
-var card = new Card()
-    | new Text("First child")
-    | new Text("Second child");  // Warning here
-
-// ✅ Correct - wrap multiple children in a layout
-var card = new Card()
-    | Layout.Vertical()
-        | new Text("First child")
-        | new Text("Second child");
-```
-
-**Single-Child Widgets:** `Card`, `Sheet`, `Confetti`, `FloatingPanel`
-
-**IVYCHILD003 - Type-Restricted Children:**
-
-The analyzer enforces type restrictions on widgets that only accept specific child types via the new `[ChildType]` attribute. This prevents mismatches at compile time rather than runtime.
-
-```csharp
-// ❌ Compile error - DropDownMenu only accepts MenuItem children
-var menu = new DropDownMenu() | new Text("Invalid");
-
-// ❌ Compile error - string children not allowed
-var menu = new DropDownMenu() | "Invalid";
-
-// ✅ Correct - MenuItem is the allowed type
-var menu = new DropDownMenu()
-    | new MenuItem("Option 1")
-    | new MenuItem("Option 2");
-
-// ✅ Also works with arrays and IEnumerable
-var items = new MenuItem[] {
-    new MenuItem("Option 1"),
-    new MenuItem("Option 2")
-};
-var menu = new DropDownMenu() | items;
-```
-
-**The ChildType Attribute:**
-
-Widget authors can now use `[ChildType(typeof(T))]` to specify allowed child types. The analyzer checks direct children, arrays, and `IEnumerable<T>` collections, supporting both exact type matches and derived types.
-
-### Compile-Time Analyzer for Hook Results Stored in Class Members
-
-A new Roslyn analyzer (`IVYHOOK006`) now detects when hook results are incorrectly stored in class fields or properties.
-
-**What It Catches:**
-
-The analyzer flags when `Use*` hook results (like `UseState`, `UseMemo`, etc.) are assigned to class fields or properties instead of local variables:
-
-```csharp
-// ❌ This now shows a compile error
-public class TestView : ViewBase
-{
-    private object? _count;  // Field
-
-    public override object? Build()
-    {
-        _count = UseState(0);  // IVYHOOK006 error here
-        return new Button("Click");
-    }
-}
-
-// ❌ Also catches assignments with 'this.'
-public class TestView : ViewBase
-{
-    private object? _count;
-
-    public override object? Build()
-    {
-        this._count = UseState(0);  // IVYHOOK006 error here
-        return new Button("Click");
-    }
-}
-
-// ❌ Also catches property assignments
-public class TestView : ViewBase
-{
-    public object? Count { get; set; }
-
-    public override object? Build()
-    {
-        Count = UseState(0);  // IVYHOOK006 error here
-        return new Button("Click");
-    }
-}
-```
-
-**Why This Matters:**
-
-Storing hook results in class members breaks Ivy's reactive hook indexing system. The state object gets cached once and reused across renders, causing hooks to receive wrong indices and leading to unpredictable behavior.
-
-**The Fix:**
-
-Always store hook results in local variables:
-
-```csharp
-// ✅ Correct approach
-public class TestView : ViewBase
-{
-    public override object? Build()
-    {
-        var count = UseState(0);  // Store in local variable
-        return new Button("Click");
-    }
-}
-
-// ✅ Or discard the result if not needed
-public class TestView : ViewBase
-{
-    public override object? Build()
-    {
-        UseState(0);  // Discarded - also fine
-        return new Button("Click");
-    }
-}
-```
-
-### Hook Usage Analyzer - Clearer Error Messages with Sub-Types
-
-The hook usage analyzer now provides more specific error messages by splitting `IVYHOOK001` into sub-types.
-
-- `IVYHOOK001` now only fires for hooks called outside `Build()` entirely (e.g., in helper methods)
-- New `IVYHOOK001B` fires for hooks nested in lambdas, local functions, or anonymous methods within `Build()`
-- Error messages now explain the "same order on every render" constraint
-- `IVYHOOK001B` messages specifically name the closure type causing the issue
-
-**Examples:**
-
-```csharp
-// IVYHOOK001 - Hook in helper method (outside Build)
-public class TestView : ViewBase
-{
-    public override object Build()
-    {
-        Helper();
-        return new Button("Click");
-    }
-
-    private void Helper()
-    {
-        var state = UseState(0);  // IVYHOOK001: Must be at top level of Build()
-    }
-}
-
-// IVYHOOK001B - Hook in lambda (inside Build)
-public class TestView : ViewBase
-{
-    public override object Build()
-    {
-        var handler = (Event<Button> e) =>
-        {
-            var state = UseState(false);  // IVYHOOK001B: inside a lambda
-        };
-        return new Button().OnClick(handler);
-    }
-}
-
-// IVYHOOK001B - Hook in local function (inside Build)
-public class TestView : ViewBase
-{
-    public override object Build()
-    {
-        void LocalFunction()
-        {
-            var state = UseState(false);  // IVYHOOK001B: inside a local function
-        }
-
-        LocalFunction();
-        return new Button("Click");
-    }
-}
-
-// IVYHOOK001B - Hook in anonymous method (inside Build)
-public class TestView : ViewBase
-{
-    public override object Build()
-    {
-        Action action = delegate()
-        {
-            var state = UseState(false);  // IVYHOOK001B: inside an anonymous method
-        };
-
-        return new Button("Click");
-    }
-}
-```
-
-### Size.Fraction and Size.FractionGap - Decimal/Double Overloads Removed
-
-The `decimal` and `double` overloads for `Size.Fraction()` and `Size.FractionGap()` have been removed to fix ambiguous call compilation errors (CS0121). You must now use `float` values with the `f` suffix.
-
-```csharp
-// Use explicit float literals with 'f' suffix
-.Width(Size.Fraction(0.5f))
-.Height(Size.FractionGap(0.25f))
-
-// Or cast explicitly if using decimal/double variables
-decimal ratio = 0.333m;
-.Width(Size.Fraction((float)ratio))
-```
-
-### Size.Percent() - Intuitive Percentage-Based Sizing
-
-New `Size.Percent()` overloads allow you to specify percentage-based sizes.
-
-**New overloads:**
-
-```csharp
-// Integer percentage
-.Width(Size.Percent(50))    // 50% width
-.Height(Size.Percent(100))  // 100% height
-```
-
-### Connection Name Error Messages
-
-When using `--test-connection` or `--describe-connection` command-line arguments with a connection name that doesn't exist, the error message now lists all available connections.
-
-```
-Connection 'mytypo' not found. Available connections: postgres, mysql, redis
-```
-
-**Usage example:**
-
-```bash
-# Test a connection
-dotnet run --test-connection postgres
-
-# Describe a connection (shows connection details)
-dotnet run --describe-connection mysql
-
-# Typo in connection name now shows helpful error
-dotnet run --test-connection postgress
-# Output: Connection 'postgress' not found. Available connections: postgres, mysql, redis
-```
-
-### CLI Commands Work Alongside Running Instances
-
-CLI diagnostic commands (`--describe`, `--describe-connection`, `--test-connection`) now run successfully even when an Ivy app instance is already running on the configured port.
-
-### Server Binds to Localhost - No More Windows Firewall Prompts
-
-Ivy apps now bind to `localhost` instead of the wildcard address (`*`), eliminating Windows Firewall prompts during development.
