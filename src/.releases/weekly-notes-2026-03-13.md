@@ -6,23 +6,6 @@
 
 The `IHtmlFilter.Process` method now takes an `XDocument` instead of a raw HTML string, and returns `void` instead of `string`. The namespace has also changed from `Ivy.Core.Server.ContentPipeline` to `Ivy.Core.Server.HtmlPipeline`. This provides safer, more structured HTML manipulation.
 
-**Before (v1.2.17 and earlier):**
-
-```csharp
-using Ivy.Core.Server.ContentPipeline;
-
-public class MyFilter : IHtmlFilter
-{
-    public string Process(HtmlPipelineContext context, string html)
-    {
-        html = html.Replace("</head>", "  <meta name=\"custom\" content=\"value\" />\n</head>");
-        return html;
-    }
-}
-```
-
-**After (v1.2.18+):**
-
 ```csharp
 using System.Xml.Linq;
 using Ivy.Core.Server.HtmlPipeline;
@@ -39,43 +22,9 @@ public class MyFilter : IHtmlFilter
 }
 ```
 
-**Benefits:**
-
-- Safer manipulation using structured XML instead of string replacement
-- Single parse/serialize pass for better performance
-- Eliminates potential HTML corruption from naive string replacement
-- Access to LINQ to XML for powerful querying and manipulation
-
-**Migration:**
-
-1. Update `using` statements from `Ivy.Core.Server.ContentPipeline` to `Ivy.Core.Server.HtmlPipeline`
-2. Add `using System.Xml.Linq;` to filter files
-3. Change return type from `string` to `void`
-4. Change second parameter from `string html` to `XDocument document`
-5. Replace string manipulation with `XElement` operations on the document
-6. Run `dotnet build` to verify
-
----
-
 ### IConnection.RegisterServices - Server Parameter Instead of IServiceCollection
 
-The `IConnection.RegisterServices` method signature has changed to accept a `Server` instance instead of an `IServiceCollection`. This is a compile-time breaking change for all custom connection implementations.
-
-**Before (v1.2.17 and earlier):**
-
-```csharp
-using Microsoft.Extensions.DependencyInjection;
-
-public class MyConnection : IConnection
-{
-    public void RegisterServices(IServiceCollection services)
-    {
-        services.AddScoped<IMyService, MyService>();
-    }
-}
-```
-
-**After (v1.2.18+):**
+The `IConnection.RegisterServices` method signature has changed to accept a `Server` instance instead of an `IServiceCollection`.
 
 ```csharp
 using Ivy;
@@ -92,33 +41,9 @@ public class MyConnection : IConnection
 }
 ```
 
-**Why this change:**
-The new signature gives connection implementations access to the full `Server` API, not just the service collection. This enables connections to use server-level configuration methods like `UseAuth()`, `UseDatabase()`, and other framework features.
-
-**Migration:**
-
-1. Update the method signature from `RegisterServices(IServiceCollection services)` to `RegisterServices(Server server)`
-2. Replace `services.` calls with `server.Services.`
-3. Consider using server-level APIs (e.g., `server.UseAuth()`) instead of direct service registration where appropriate
-4. Run `dotnet clean && dotnet build` to recompile
-
----
-
 ### WrapLayout Removed - Use StackLayout with Wrap Instead
 
-The `WrapLayout` widget has been removed. Use `StackLayout` with the new `.Wrap()` method instead, which provides the same functionality with more flexibility and consistency.
-
-**Before (v1.2.17 and earlier):**
-
-```csharp
-new WrapLayout([
-    new Badge("React"),
-    new Badge("Vue"),
-    new Badge("Angular")
-], gap: 4);
-```
-
-**After (v1.2.18+):**
+The `WrapLayout` widget has been removed. Use `StackLayout` with the new `.Wrap()` method instead.
 
 ```csharp
 Layout.Horizontal()
@@ -127,130 +52,23 @@ Layout.Horizontal()
     | new Badge("React")
     | new Badge("Vue")
     | new Badge("Angular");
-
-// Or using the constructor
-new StackLayout([
-    new Badge("React"),
-    new Badge("Vue"),
-    new Badge("Angular")
-], wrap: true, gap: 4);
 ```
-
----
 
 ### TextArea → Textarea API Standardization
 
 The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()` to align with HTML standards and framework conventions.
 
-**Before (v1.2.16 and earlier):**
-
-```csharp
-var description = UseState("");
-return description.ToTextAreaInput(placeholder: "Enter description...");
-```
-
-**After (v1.2.17+):**
-
-```csharp
-var description = UseState("");
-return description.ToTextareaInput(placeholder: "Enter description...");
-```
-
----
-
 ### MultiLine → Multiline Property and Method Rename
 
 The `MultiLine` property and method have been renamed to `Multiline` (lowercase 'l') across `Detail`, `TableCell`, `DetailsBuilder`, and `TableBuilder` for consistency with .NET naming conventions.
-
-**Before (v1.2.16 and earlier):**
-
-```csharp
-// Detail widget
-new Detail("Description", content, multiLine: true);
-
-// DetailsBuilder
-model.ToDetails()
-    .MultiLine(e => e.Description, e => e.Notes);
-
-// TableBuilder
-records.ToTable()
-    .MultiLine(e => e.Content);
-
-// TableCell
-new TableCell(content).MultiLine();
-```
-
-**After (v1.2.17+):**
-
-```csharp
-// Detail widget
-new Detail("Description", content, multiline: true);
-
-// DetailsBuilder
-model.ToDetails()
-    .Multiline(e => e.Description, e => e.Notes);
-
-// TableBuilder
-records.ToTable()
-    .Multiline(e => e.Content);
-
-// TableCell
-new TableCell(content).Multiline();
-```
-
-**New Feature:** A `Multiline()` extension method has been added for `TextInputBase`:
-
-```csharp
-// New in v1.2.17
-myTextInput.Multiline();       // Enable multiline
-myTextInput.Multiline(true);   // Enable multiline
-myTextInput.Multiline(false);  // Disable multiline
-```
-
----
 
 ### Spacer Default Behavior Change
 
 The `Spacer` widget now defaults to grow behavior (`flex-grow: 1`) without requiring explicit `.Width(Size.Grow())`. A bare `new Spacer()` will automatically fill available space in the parent layout's direction, matching the most common use case of pushing sibling elements apart.
 
-**Before (v1.2.16 and earlier):**
-
-```csharp
-// Required explicit Width(Size.Grow()) to push elements apart
-return Layout.Horizontal().Gap(4)
-    | new Button("Left Button")
-    | new Spacer().Width(Size.Grow())
-    | new Button("Right Button");
-```
-
-**After (v1.2.17+):**
-
-```csharp
-// Spacer grows by default
-return Layout.Horizontal().Gap(4)
-    | new Button("Left Button")
-    | new Spacer()
-    | new Button("Right Button");
-```
-
----
-
 ### Button Icon API - Constructor Parameter Removed
 
 The `Button` widget no longer accepts an `icon` constructor parameter. Use the fluent `.Icon()` method instead to add icons to buttons.
-
-**Before (v1.2.14 and earlier):**
-
-```csharp
-// Icon via constructor parameter
-new Button("Save", icon: Icons.Save)
-new Button("Hover", icon: Icons.Info).WithTooltip("This is a tooltip")
-
-// Icon-only button
-new Button(null, icon: Icons.Settings).WithTooltip("Open settings")
-```
-
-**After (v1.2.15+):**
 
 ```csharp
 // Icon via fluent method
@@ -260,8 +78,6 @@ new Button("Hover").Icon(Icons.Info).WithTooltip("This is a tooltip")
 // Icon-only button
 new Button().Icon(Icons.Settings).WithTooltip("Open settings")
 ```
-
----
 
 ### Event Handler Naming Standardization
 
@@ -276,23 +92,12 @@ tasks.ToKanban().OnMove(moveData => { /* ... */ })
 records.ToTable().OnCellAction(e => e.Name, value => OpenDetails(value))
 ```
 
----
-
 ### OAuth Callback URL Path Change
 
 The OAuth authentication callback URL has changed from `/ivy/webhook` to `/ivy/auth/callback` to better reflect its purpose and avoid confusion with actual webhook endpoints.
 
-**Before (v1.2.14 and earlier):**
-
-- Local development: `http://localhost:5010/ivy/webhook`
-- Production: `https://your-app.com/ivy/webhook`
-
-**After (v1.2.15+):**
-
 - Local development: `http://localhost:5010/ivy/auth/callback`
 - Production: `https://your-app.com/ivy/auth/callback`
-
----
 
 ### DesktopWindow API Improvements
 
@@ -301,15 +106,6 @@ The `DesktopWindow` fluent API has been improved with better naming consistency 
 **DpiScaling → UseDpiScaling and DevToolsEnabled → UseDevTools:**
 
 ```csharp
-// Before (v1.2.16 and earlier)
-new DesktopWindow(server)
-    .Title("My App")
-    .Size(1280, 720)
-    .DpiScaling(true)
-    .DevToolsEnabled(true)
-    .Run();
-
-// After (v1.2.17+)
 new DesktopWindow(server)
     .Title("My App")
     .Size(1280, 720)
@@ -318,46 +114,9 @@ new DesktopWindow(server)
     .Run();
 ```
 
-**New Default Parameters:** All boolean fluent methods now default to `true`, allowing for simpler method calls:
-
-```csharp
-// Simplified calls (v1.2.17+)
-new DesktopWindow(server)
-    .Title("My App")
-    .Size(1280, 720)
-    .Resizable()        // Same as .Resizable(true)
-    .Center()           // Same as .Center(true)
-    .TopMost()          // Same as .TopMost(true)
-    .UseDpiScaling()    // Same as .UseDpiScaling(true)
-    .UseDevTools()      // Same as .UseDevTools(true)
-    .Run();
-```
-
----
-
 ### Chart Data Syntax - XML DataPoint Replaced by JSON
 
-Chart data in XAML now uses JSON arrays inside CDATA sections instead of `<DataPoint>` XML elements. This provides native type preservation for strings, numbers, and booleans, eliminating ambiguity from automatic type parsing.
-
-**Before (v1.2.17 and earlier):**
-
-```csharp
-var xml = """
-    <LineChart>
-        <LineChart.Data>
-            <DataPoint Month="Jan" Revenue="100" Costs="80" />
-            <DataPoint Month="Feb" Revenue="120" Costs="90" />
-        </LineChart.Data>
-        <LineChart.Lines>
-            <Line DataKey="Revenue" />
-            <Line DataKey="Costs" />
-        </LineChart.Lines>
-    </LineChart>
-    """;
-var chart = builder.Build(xml);
-```
-
-**After (v1.2.18+):**
+Chart data in XAML now uses JSON arrays inside CDATA sections instead of `<DataPoint>` XML elements.
 
 ```csharp
 var xml = """
@@ -377,23 +136,9 @@ var xml = """
 var chart = builder.Build(xml);
 ```
 
----
-
 ### CreateSignal Renamed to UseSignal and ISignal Unified
 
 The `CreateSignal<T, TInput, TOutput>()` method has been removed and replaced by `UseSignal<T, TInput, TOutput>()`. Additionally, the separate `ISignalSender` and `ISignalReceiver` interfaces have been unified into a single `ISignal` interface that provides both sending and receiving capabilities.
-
-**Before (v1.2.17 and earlier):**
-
-```csharp
-// Create signal sender
-ISignalSender<string, bool> mySender = context.CreateSignal<MySignal, string, bool>();
-
-// Get signal receiver
-ISignalReceiver<string, bool> myReceiver = context.UseSignal<MySignal, string, bool>();
-```
-
-**After (v1.2.18+):**
 
 ```csharp
 // Both sending and receiving are now handled by ISignal
@@ -403,8 +148,6 @@ ISignal<string, bool> mySignal = context.UseSignal<MySignal, string, bool>();
 mySignal.Send(input);           // Send data through the signal
 mySignal.Receive(callback);     // Register a callback to receive data
 ```
-
----
 
 ### Input Variant Enums Renamed to Singular
 
@@ -1255,8 +998,6 @@ return theme.ToSelectInput()
     })
     .Variant(SelectInputVariant.Toggle);
 ```
-
-
 
 ## New Features
 
