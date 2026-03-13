@@ -111,6 +111,7 @@ export const widgetMap = {
   'Ivy.Icon': IconWidget,
   'Ivy.Box': BoxWidget,
   'Ivy.Embed': React.lazy(() => import('@/widgets/primitives/EmbedWidget')),
+  'Ivy.Script': React.lazy(() => import('@/widgets/primitives/ScriptWidget')),
   'Ivy.Callout': CalloutWidget,
   'Ivy.Kbd': KbdWidget,
   'Ivy.Empty': EmptyWidget,
