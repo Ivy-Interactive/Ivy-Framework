@@ -25,6 +25,12 @@ public class JsonApp : SampleBase
                 "555-5678"
             }
         };
-        return json;
+        return Layout.Vertical().Gap(4)
+            | new Text("Default (collapsed):")
+            | new Json(json)
+            | new Text("Expanded to depth 2:")
+            | new Json(json) { Expanded = 2 }
+            | new Text("Fully expanded:")
+            | new Json(json) { Expanded = -1 };
     }
 }

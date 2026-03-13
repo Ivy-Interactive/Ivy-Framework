@@ -21,4 +21,5 @@ public record Json : WidgetBase<Json>
     internal Json() { }
 
     [Prop] public string Content { get; set; } = string.Empty;
+    [Prop] public int? Expanded { get; set; }
 }
