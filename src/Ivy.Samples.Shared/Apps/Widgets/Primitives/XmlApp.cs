@@ -25,6 +25,12 @@ public class XmlApp : SampleBase
                 new XElement("phoneNumber", "555-5678")
             )
         );
-        return xml;
+        return Layout.Vertical().Gap(4)
+            | new Text("Default (collapsed):")
+            | new Xml(xml)
+            | new Text("Expanded to depth 2:")
+            | new Xml(xml) { Expanded = 2 }
+            | new Text("Fully expanded:")
+            | new Xml(xml) { Expanded = -1 };
     }
 }

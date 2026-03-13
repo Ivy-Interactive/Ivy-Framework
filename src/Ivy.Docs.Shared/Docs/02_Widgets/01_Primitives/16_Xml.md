@@ -91,6 +91,38 @@ public class XObjectXmlExample : ViewBase
 }
 ```
 
+## Expansion Control
+
+Control how deeply the XML tree is initially expanded:
+
+```csharp demo-tabs
+public class ExpandedXmlExample : ViewBase
+{
+    public override object? Build()
+    {
+        var xml = new System.Xml.Linq.XElement("person",
+            new System.Xml.Linq.XElement("name", "John Doe"),
+            new System.Xml.Linq.XElement("address",
+                new System.Xml.Linq.XElement("street", "123 Main St"),
+                new System.Xml.Linq.XElement("city", "Anytown")
+            ),
+            new System.Xml.Linq.XElement("phoneNumbers",
+                new System.Xml.Linq.XElement("phoneNumber", "555-1234"),
+                new System.Xml.Linq.XElement("phoneNumber", "555-5678")
+            )
+        );
+
+        return Layout.Vertical().Gap(4)
+            | new Text("Collapsed (default):")
+            | new Xml(xml)
+            | new Text("Expanded 1 level:")
+            | new Xml(xml) { Expanded = 1 }
+            | new Text("Fully expanded:")
+            | new Xml(xml) { Expanded = -1 };
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.Xml" ExtensionTypes="Ivy.XmlExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Xml.cs"/>
 
 ## Examples

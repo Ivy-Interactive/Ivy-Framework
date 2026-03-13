@@ -21,4 +21,5 @@ public record Xml : WidgetBase<Xml>
     internal Xml() { }
 
     [Prop] public string Content { get; set; } = string.Empty;
+    [Prop] public int? Expanded { get; set; }
 }
