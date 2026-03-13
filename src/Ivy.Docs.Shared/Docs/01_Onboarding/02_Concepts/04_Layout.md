@@ -227,21 +227,6 @@ The Layout class provides the following factory methods:
 | Layout.Grid() | Creates a grid layout for two-dimensional arrangements |
 | Layout.Tabs() | Creates a tabbed layout |
 
-### Configuration Methods
-
-| Method | Description |
-|--------|-------------|
-| .Gap(int) | Sets both row and column gap |
-| .Gap(int, int) | Sets row gap and column gap independently |
-| .Gap(bool) | Toggles default gap (4) on/off |
-| .Align(Align) | Sets content alignment (TopLeft, Center, SpaceBetween, etc.) |
-| .Width(int) / .Width(Size) | Sets the layout width |
-| .Height(int) / .Height(Size) | Sets the layout height |
-| .Padding(int) | Sets internal padding |
-| .Margin(int) | Sets external margin |
-| .Background(Colors) | Sets background color |
-| .Scroll(Scroll) | Enables scrolling (Auto, Vertical, Horizontal, Both) |
-| .AlignSelf(Align) | Overrides alignment for a specific child element |
 
 ## Available Layouts
 
