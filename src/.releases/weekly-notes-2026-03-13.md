@@ -24,21 +24,9 @@ To maintain consistency across the Ivy Framework, all input variant enums have b
 
 Several core types such as `ExternalWidgetAttribute` and `TextAlignment` have been moved to the root `Ivy` namespace to simplify using directives and prevent refactoring issues (like the `RemoveInvalidIvyUsings` rule incorrectly stripping them).
 
-**Migration:**
-
-Since `using Ivy;` is typically already present in your files, you can simply remove `using Ivy.Core.ExternalWidgets;` and `using Ivy.Shared;`. Internal types like `ExternalWidgetRegistry` and `ExternalWidgetController` remain in `Ivy.Core.ExternalWidgets`.
-
 ### Removal of `.Value()` API from Input Widgets
 
-The fluent `.Value()` extension method has been removed from all input widgets as it conflicted with Ivy's state-driven architecture.
-
-**What Changed:**
-
-The `.Value()` method was previously used to set initial values inline directly on the widget, but this approach doesn't align with Ivy's state management philosophy where values should be managed through state.
-
-**Affected Widgets:**
-
-All input widgets are affected: `TextInput`, `SelectInput`, `AsyncSelectInput`, `NumberInput`, `BoolInput`, `CodeInput`, `ColorInput`, `DateRangeInput`, `DateTimeInput`, `FeedbackInput`, `IconInput`, and `ReadOnlyInput`.
+The fluent `.Value()` extension method has been removed from all input widgets. All input widgets are affected (`TextInput`, `SelectInput`, `AsyncSelectInput`, `NumberInput`, `BoolInput`, `CodeInput`, `ColorInput`, `DateRangeInput`, `DateTimeInput`, `FeedbackInput`, `IconInput`, and `ReadOnlyInput`).
 
 ### Scale Renamed to Density
 
@@ -59,19 +47,9 @@ The `Color()` method and property on the `Box` widget have been renamed to `Back
 
 The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been renamed to `Text.Monospaced()` and `TextVariant.Monospaced` to better reflect what they actually do—render text in a monospace font.
 
-**What Changed:**
-
-- `Text.InlineCode()` → `Text.Monospaced()`
-- `TextVariant.InlineCode` → `TextVariant.Monospaced`
-
 ### Explicit Size API for Width, Height, and Size Methods
 
 The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use `Size.Units()` or `Size.Fraction()` to specify sizing.
-
-**What Changed:**
-
-- Removed `Width(int)`, `Width(float)`, `Height(int)`, `Height(float)`, and `Size(int)` overloads
-- All sizing now requires explicit `Size` struct usage via `Size.Units()` or `Size.Fraction()`
 
 ### ToTextAreaInput() Renamed to ToTextareaInput()
 
@@ -81,35 +59,13 @@ The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()`
 
 The chart data format has been completely redesigned to use JSON arrays within CDATA sections instead of XML `<DataPoint>` elements.
 
-**What Changed:**
-
-- Removed: `<DataPoint>` XML elements with attributes
-- Added: JSON arrays using `<Data><![CDATA[...]]></Data>` syntax
-- Type handling now preserves strings, numbers, and booleans exactly as specified in JSON
-
 ### CreateSignal Renamed to UseSignal and ISignal Interface Unified
 
 The signal creation API has been simplified and made more consistent with other Ivy hooks. `CreateSignal` has been renamed to `UseSignal`, and the separate `ISignalSender` and `ISignalReceiver` interfaces have been unified into a single `ISignal` interface.
 
-**What Changed:**
-
-- `context.CreateSignal<T, TInput, TOutput>()` → `context.UseSignal<T, TInput, TOutput>()`
-- `ISignalSender<TInput, TOutput>` interface removed
-- `ISignalReceiver<TInput, TOutput>` interface removed
-- New unified `ISignal<TInput, TOutput>` interface with both `.Send()` and `.Receive()` methods
-
 ### ContentPipeline Renamed to HtmlPipeline with XDocument-Based Filters
 
 The HTML processing pipeline has been refactored for better performance and maintainability. The namespace was renamed from `ContentPipeline` to `HtmlPipeline`, and filters now operate on parsed `XDocument` objects instead of raw HTML strings.
-
-**What Changed:**
-
-- **Namespace renamed:** `Ivy.Core.Server.ContentPipeline` → `Ivy.Core.Server.HtmlPipeline`
-- **Filter interface updated:** `IHtmlFilter.Process` now returns `void` and takes an `XDocument` parameter instead of returning a modified HTML string
-- **New pipeline customization API:** `Server.UseHtmlPipeline()` allows full control over the filter pipeline
-- **New inspection methods:** `HtmlPipeline.Filters` (read-only list) and `HtmlPipeline.Clear()` for pipeline management
-
-**New Customization API:**
 
 You can now fully customize the HTML pipeline, including clearing and replacing all built-in filters:
 
@@ -138,17 +94,6 @@ Ivy now includes a powerful terminal emulator widget through the `Ivy.Widgets.Xt
 
 ```bash
 dotnet add package Ivy.Widgets.Xterm
-```
-
-**Basic Usage:**
-
-```csharp
-using Ivy.Widgets.Xterm;
-
-// Display terminal output
-var terminal = new Terminal()
-    .Write("Hello from the terminal!\r\n")
-    .Write("This is a fully featured terminal emulator.\r\n");
 ```
 
 **Interactive Terminal with PTY:**
@@ -228,12 +173,7 @@ return Layout.Vertical().Gap(4)
         : Text.Muted("No screenshot captured yet."));
 ```
 
-**Features:**
 
-- Captures full window screenshots using html2canvas
-- Drawing tools: freehand, line, rectangle, circle, text
-- Integrates with Ivy's `UseUpload` infrastructure
-- Modal interface with save/cancel actions
 
 ### Server-to-Client Streaming with UseStream Hook
 
@@ -273,18 +213,6 @@ public class StreamingApp : ViewBase
 }
 ```
 
-**Buffering Behavior:**
-
-By default (`buffer = true`), if you start writing to the stream before the frontend component has fully rendered and subscribed via WebSockets, the data will be buffered in memory on the server. Once the client establishes the subscription, all buffered data will be flushed immediately.
-
-**Features:**
-
-- No full state re-renders for each data chunk
-- Automatic buffering until client subscribes
-- Type-safe streaming with generics
-- Works with widgets like `Text.Rich()` and `Terminal`
-- No polling required - true push-based streaming
-
 ### Async Cleanup in UseEffect with IAsyncDisposable
 
 `UseEffect` now supports asynchronous cleanup through `IAsyncDisposable`, making it easier to manage async resources like database connections, streams, and network sockets.
@@ -317,14 +245,7 @@ var server = new Server()
     .Run();
 ```
 
-**Features:**
 
-- Visual widget inspector with highlighting
-- Widget callsite information (source file and line number)
-- Live text editing for TextBlock and Markdown widgets
-- Widget tree visualization
-
-DevTools are designed for development environments only and should not be enabled in production.
 
 ### Enhanced Layout System with Figma-Style Options
 
@@ -335,26 +256,12 @@ Ivy's layout system now supports advanced Figma-style layout options, including 
 The `Align` enum now includes space distribution options that work with both `StackLayout` and `GridLayout`:
 
 ```csharp
-// Space between items
+// Space distribution
 Layout.Horizontal()
     .Align(Align.SpaceBetween)
     | new Button("Left")
     | new Button("Middle")
     | new Button("Right");
-
-// Space around items
-Layout.Horizontal()
-    .Align(Align.SpaceAround)
-    | new Badge("Tag 1")
-    | new Badge("Tag 2")
-    | new Badge("Tag 3");
-
-// Space evenly distributed
-Layout.Vertical()
-    .Align(Align.SpaceEvenly)
-    | Text.Literal("First")
-    | Text.Literal("Second")
-    | Text.Literal("Third");
 ```
 
 **Independent Row and Column Gaps:**
@@ -486,21 +393,6 @@ Layout.Vertical()
     .BorderStyle(BorderStyle.Solid)
     .BorderRadius(BorderRadius.Rounded)
     | new Text("Fully customized border");
-
-// Different border styles
-Layout.Horizontal()
-    .BorderColor(Colors.Gray)
-    .BorderThickness(1)
-    .BorderStyle(BorderStyle.Dashed)
-    .BorderRadius(BorderRadius.None)
-    | new Text("Dashed border");
-
-// Fully rounded border
-Layout.Vertical()
-    .BorderColor(Colors.Success)
-    .BorderThickness(2)
-    .BorderRadius(BorderRadius.Full)
-    | new Badge("Pill-shaped layout");
 ```
 
 ### PWA (Progressive Web App) Manifest Support
@@ -549,12 +441,7 @@ public class MyApp : AppBase
 }
 ```
 
-**Key Points:**
 
-- `AppBase` extends `ViewBase` - no behavioral differences
-- Provides semantic clarity that a class represents an app rather than a generic view
-- Works seamlessly with the `[App]` attribute for metadata configuration
-- Use `AppBase` for top-level application classes and `ViewBase` for reusable view components
 
 ### JavaScript Execution in Html Widget with DangerouslyAllowScripts
 
@@ -645,21 +532,6 @@ server.UseHtmlPipeline(pipeline =>
     pipeline.Use<OpenGraphFilter>();
     pipeline.Use<CustomAnalyticsFilter>();
 });
-
-// Append to the default pipeline
-server.UseHtmlPipeline(pipeline =>
-{
-    pipeline.Use<ExtraFilter>();
-});
-
-// Inspect registered filters
-server.UseHtmlPipeline(pipeline =>
-{
-    foreach (var filter in pipeline.Filters)
-    {
-        Console.WriteLine(filter.GetType().Name);
-    }
-});
 ```
 
 The pipeline configurator runs after all built-in and custom filters have been added, so `Clear()` removes everything for complete control.
@@ -667,22 +539,6 @@ The pipeline configurator runs after all built-in and custom filters have been a
 ### XamlBuilder: DataPoint Support for Charts
 
 XamlBuilder now supports defining chart data inline using `<DataPoint>` elements, making it easier to work with charts without needing to create separate data classes.
-
-**Basic Usage:**
-
-```csharp
-var xaml = """
-    <LineChart>
-        <LineChart.Data>
-            <DataPoint Month="Jan" Value="100" />
-            <DataPoint Month="Feb" Value="200" />
-            <DataPoint Month="Mar" Value="150" />
-        </LineChart.Data>
-    </LineChart>
-    """;
-
-var chart = builder.Build(xaml);
-```
 
 **Complete Chart Example:**
 
@@ -951,336 +807,7 @@ new { NetBurn = "$5,000", GrossBurn = "$10,000" }.ToDetails()
 
 **Note:** Use `.Builder(x => x.Field, b => ...)` to customize how a value is *rendered*, not to change the label text. The `.Label()` method is specifically for changing the displayed label.
 
----
 
-### Ivy Studio (DevTools) - Visual Debugging and Interactive Development
-
-Ivy Studio is a new integrated development tool that helps you debug and build UIs interactively within your running Ivy applications. It provides visual inspection, live editing, and widget callsite tracking for a faster development workflow.
-
-**Key Features:**
-
-**Widget Inspector:**
-
-- Visually inspect widgets in your running application
-- See widget hierarchy and properties
-- Visual markers and overlays for proposed UI changes
-
-**Widget Callsite Tracking (DEBUG builds):**
-
-- Automatically captures where each widget is defined in your source code
-- Maps UI elements back to code locations for easier debugging
-- Exposed in DevTools overlay for quick navigation
-
-**Text Edit Mode:**
-
-- Live content overrides for `TextBlock` and `Markdown` widgets
-- Edit text content in real-time without restarting your app
-- Change request tracking for text content
-- Inline editing with immediate visual feedback
-
-**Enhanced UI:**
-
-- Improved DevTools toolbar with better styling
-- Widget overlay UX for easier interaction
-- Speech-to-text change request interface
-
-**Enabling DevTools:**
-
-Use the `EnableDevTools` server argument to control visibility:
-
-```csharp
-var server = new Server(args)
-    .EnableDevTools(isDevelopment);  // Enable in development only
-```
-
-Or enable it via desktop window:
-
-```csharp
-new DesktopWindow(server)
-    .Title("My App")
-    .UseDevTools(isDevelopment)
-    .Run();
-```
-
-DevTools functionality is automatically detected in the frontend through meta tags. Note that callsite information is only captured in DEBUG builds to avoid performance overhead in production.
-
----
-
-### Ivy.Widgets.ScreenshotFeedback - In-App Screenshot Annotation
-
-The new `Ivy.Widgets.ScreenshotFeedback` package provides a powerful screenshot capture and annotation tool for collecting visual feedback directly within your Ivy applications. Users can capture the current window, annotate it with drawing tools, and upload the result.
-
-**Installation:**
-
-```bash
-dotnet add package Ivy.Widgets.ScreenshotFeedback
-```
-
-**Basic Usage:**
-
-```csharp
-using Ivy;
-using Ivy.Widgets.ScreenshotFeedback;
-
-public class FeedbackDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var screenshot = UseState<FileUpload<byte[]>?>();
-        var uploadCtx = UseUpload(MemoryStreamUploadHandler.Create(screenshot));
-        var isOpen = UseState(false);
-
-        return Layout.Vertical().Gap(4)
-            | new Button("Take Screenshot", () => isOpen.Set(true), icon: Icons.Camera)
-            | new ScreenshotFeedback()
-                .UploadUrl(uploadCtx.Value.UploadUrl)
-                .Open(isOpen.Value)
-                .HandleSave(() => isOpen.Set(false))
-                .HandleCancel(() => isOpen.Set(false))
-            | (screenshot.Value?.Status == FileUploadStatus.Finished
-                ? new Image("data:image/png;base64," +
-                    Convert.ToBase64String(screenshot.Value.Content))
-                : Text.Muted("No screenshot captured yet."));
-    }
-}
-```
-
-**Features:**
-
-- **Screenshot Capture**: Uses html2canvas to capture the current Ivy window
-- **Annotation Tools**: Freehand drawing, lines, rectangles, circles, and text
-- **Canvas-Based Overlay**: Intuitive drawing interface over the screenshot
-- **Upload Integration**: Works with `UseUpload` and `MemoryStreamUploadHandler`
-- **Modal Interface**: Opens in a modal for focused annotation workflow
-
-**API:**
-
-```csharp
-new ScreenshotFeedback()
-    .UploadUrl(url)              // Upload endpoint URL
-    .Open(isOpen)                // Control visibility (boolean)
-    .HandleSave(callback)        // Called when user saves
-    .HandleCancel(callback);     // Called when user cancels
-```
-
-**Use Cases:**
-
-- Bug reporting with visual annotations
-- User feedback collection
-- Visual documentation and issue tracking
-- Design review and markup
-- Support ticket screenshots
-
-The widget handles all aspects of screenshot capture, annotation UI, and file upload, making it easy to add professional feedback collection to your application.
-
----
-
-### Ivy.Widgets.Xterm - Terminal Emulator Widget
-
-The new `Ivy.Widgets.Xterm` package provides a fully-featured terminal emulator widget built on xterm.js, enabling you to display and interact with terminal output directly in your Ivy web applications.
-
-**Installation:**
-
-```bash
-dotnet add package Ivy.Widgets.Xterm
-```
-
-**Basic Usage:**
-
-```csharp
-using Ivy.Widgets.Xterm;
-
-public class TerminalDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var output = UseState("");
-
-        return new Terminal()
-            .Content(output.Value)
-            .Width(Size.Percent(100))
-            .Height(Size.Units(400));
-    }
-}
-```
-
-**Streaming Terminal Output:**
-
-Combine with the `UseStream` hook for real-time output:
-
-```csharp
-var stream = UseStream<string>();
-
-var terminal = new Terminal()
-    .UseStream(stream)
-    .Width(Size.Percent(100))
-    .Height(Size.Units(400));
-
-// In an async handler
-await foreach (var line in ExecuteCommand())
-{
-    stream.Write(line);
-}
-```
-
-**PTY Integration with Ivy.Hooks.Pty:**
-
-For interactive shell sessions, use the new `Ivy.Hooks.Pty` hook:
-
-```csharp
-using Ivy.Hooks.Pty;
-
-public class InteractiveShell : ViewBase
-{
-    public override object? Build()
-    {
-        var pty = UsePty("/bin/bash");  // Or "cmd.exe" on Windows
-
-        return new Terminal()
-            .UseStream(pty.Output)
-            .OnInput(input => pty.Write(input))
-            .Width(Size.Percent(100))
-            .Height(Size.Percent(100));
-    }
-}
-```
-
-**Features:**
-
-- **Unicode Support**: Full Unicode character rendering
-- **Web Links**: Clickable URLs in terminal output
-- **Clipboard Integration**: Copy/paste support
-- **Theme-Aware**: Automatically adapts to your Ivy theme
-- **Resizing**: Terminal resizes with widget dimensions
-- **Base64 Encoding**: Preserves raw terminal data including control sequences
-- **Streaming Support**: Progressive output rendering via `UseStream`
-
-**Terminal Properties:**
-
-```csharp
-new Terminal()
-    .Content("Hello, terminal!")           // Initial content
-    .UseStream(streamInstance)              // Connect to stream
-    .OnInput(data => HandleInput(data))    // Handle user input
-    .Cols(80)                              // Column count
-    .Rows(24)                              // Row count
-    .Width(Size.Percent(100))              // Widget width
-    .Height(Size.Units(400));              // Widget height
-```
-
-**Use Cases:**
-
-- Command execution and output display
-- Interactive shell sessions (SSH, local terminal)
-- Build logs and CI/CD output
-- Container logs and monitoring
-- Interactive CLI tools within web apps
-- Real-time log streaming
-
-The widget handles all the complexity of terminal emulation, ANSI escape codes, and cursor positioning, providing a native terminal experience in the browser.
-
-### UseStream - Server-to-Client Streaming
-
-The new `UseStream<T>` hook enables server-to-client streaming, allowing you to progressively send data from the server to connected clients in real-time. This is perfect for LLM text streaming, long-running operations, real-time updates, and streaming content like AI responses or terminal output.
-
-**Basic Usage:**
-
-```csharp
-public class StreamingDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var stream = UseStream<string>();
-        var client = UseService<IClientProvider>();
-
-        return Layout.Vertical()
-            | new Button("Start Streaming")
-                .OnClick(async () => await StartStreaming(stream))
-            | Text.Rich().UseStream(stream);
-    }
-
-    private async Task StartStreaming(IWriteStream<string> stream)
-    {
-        var words = "The quick brown fox jumps over the lazy dog".Split(' ');
-
-        foreach (var word in words)
-        {
-            await Task.Delay(500);  // Simulate delay
-            stream.Write(word + " ");
-        }
-    }
-}
-```
-
-**Streaming with RichTextBlock:**
-
-Perfect for streaming AI/LLM responses with styled text:
-
-```csharp
-var stream = UseStream<TextRun>();
-
-var streamingText = Text.Rich()
-    .Bold("🤖 AI: ")
-    .UseStream(stream);
-
-// Stream individual words or tokens
-foreach (var token in aiResponse)
-{
-    stream.Write(new TextRun(token) { Word = true });
-    await Task.Delay(50);
-}
-```
-
-**Terminal Output Streaming:**
-
-```csharp
-var stream = UseStream<string>();
-
-var terminal = new Terminal()
-    .UseStream(stream);
-
-// Stream command output line by line
-await foreach (var line in ExecuteCommandAsync())
-{
-    stream.Write(line + "\n");
-}
-```
-
-**Buffering Behavior:**
-
-By default (`buffer = true`), if you start writing to the stream before the frontend component has fully rendered and subscribed via WebSockets, the data will be buffered in memory on the server. Once the client establishes the subscription, all buffered data will be flushed immediately. This ensures no data is lost even if you start streaming before the widget is ready.
-
-If you don't care about missing early data or want to avoid memory overhead for large streams that might not be listened to, you can disable buffering:
-
-```csharp
-var stream = UseStream<byte[]>(buffer: false);
-```
-
-**How It Works:**
-
-- Data is buffered on the server until a client subscribes (when `buffer = true`)
-- Multiple clients can subscribe to the same stream
-- Streams are automatically cleaned up when components unmount
-- Type-safe streaming with full serialization support
-
-**IWriteStream Interface:**
-
-```csharp
-public interface IWriteStream<T>
-{
-    void Write(T data);              // Write single item
-    Task WriteAsync(T data);         // Async write
-    void Complete();                 // Signal stream completion
-}
-```
-
-**Supported Widgets with Streaming:**
-
-- `RichTextBlock` via `.UseStream(stream)`
-- `Terminal` via `.UseStream(stream)`
-- Any custom widget that implements stream subscription
-
-This feature works seamlessly with the serialization system, ensuring that complex objects (like `TextRun` with styling) are correctly formatted when received by clients.
 
 ---
 
@@ -1308,35 +835,7 @@ public class AdminApp : AppBase { }
 public class ApiUsersV1 : AppBase { }
 ```
 
-**Enhanced App ID Validation:**
 
-The framework now provides comprehensive validation for app IDs with clear error messages:
-
-- **Empty IDs**: "App ID is empty. Please provide a valid App ID."
-- **Leading slash**: "App ID 'X' is invalid. App IDs should not start with '/'."
-- **Unsafe characters**: "App ID 'X' is invalid. App IDs must be URL-friendly (alphanumeric, dashes, underscores, etc.)."
-- **Reserved paths**: "App ID 'X' collides with a reserved path '/X'. Please choose a different App ID."
-- **Static file extensions**: "App ID 'X' collides with a static file extension. Please choose a different App ID."
-
-**What's Still Not Allowed:**
-
-```csharp
-// ❌ Static file extensions conflict
-[App(Id = "app.js")]      // Conflicts with JavaScript files
-[App(Id = "config.json")] // Conflicts with JSON files
-[App(Id = "styles.css")]  // Conflicts with CSS files
-
-// ❌ Unsafe characters
-[App(Id = "app?query")]   // Contains query parameter syntax
-[App(Id = "app:protocol")] // Contains protocol separator
-[App(Id = "app#fragment")] // Contains URL fragment
-
-// ❌ Reserved paths
-[App(Id = "ivy")]         // Conflicts with /ivy system path
-[App(Id = "api")]         // Conflicts with /api system path
-```
-
-Apps with invalid IDs will not be loaded, and clear error messages will be displayed during startup. This validation ensures your app routing remains predictable and conflict-free.
 
 ---
 
@@ -1358,20 +857,6 @@ new Table(tasks)
     .Builder(t => t.Progress, f => f.Progress());
 ```
 
-**Auto-Color Based on Thresholds:**
-
-The progress bar automatically changes color based on completion percentage when using `.AutoColor()`:
-
-- **Green** (Success): ≥75%
-- **Yellow** (Warning): ≥50%
-- **Orange**: ≥25%
-- **Red** (Destructive): <25%
-
-```csharp
-new Table(tasks)
-    .Builder(t => t.Progress, f => f.Progress().AutoColor());
-```
-
 **Custom Range and Format String:**
 
 Configure custom min/max ranges and display the value alongside the progress bar:
@@ -1389,19 +874,6 @@ new Table(downloads)
         .Format("%d bytes"));
 ```
 
-**Explicit Colors:**
-
-Set a specific color for all progress bars:
-
-```csharp
-new Table(tasks)
-    .Builder(t => t.Progress, f => f.Progress()
-        .Color(Colors.Blue)
-        .Format("%d%"));
-```
-
-The Progress builder uses a fluent API, allowing you to chain configuration methods in any order. The percentage calculation automatically clamps values between 0-100%, ensuring consistent visual display even for out-of-range values.
-
 ---
 
 ### Text Alignment for Separator Labels
@@ -1409,19 +881,6 @@ The Progress builder uses a fluent API, allowing you to chain configuration meth
 The `Separator` widget now supports text alignment control, allowing you to position labels at the left, center, or right of the separator line.
 
 **Usage:**
-
-```csharp
-// Left-aligned label
-new Separator("Left Aligned").TextAlign(TextAlignment.Left);
-
-// Center-aligned label (default)
-new Separator("Center Aligned").TextAlign(TextAlignment.Center);
-
-// Right-aligned label
-new Separator("Right Aligned").TextAlign(TextAlignment.Right);
-```
-
-**Example:**
 
 ```csharp
 public override object? Build()
@@ -1457,39 +916,7 @@ var exitCode = new DesktopWindow(server)
 return exitCode;
 ```
 
-**Configuration Options:**
 
-The `DesktopWindow` builder supports fluent configuration for window properties:
-
-```csharp
-new DesktopWindow(server)
-    .Title("My Application")
-    .Size(1280, 800)
-    .Resizable(true)
-    .Center(true)
-    .DpiScaling(true)  // Automatically adjusts for high-DPI displays
-    .TopMost(false)
-    .DevToolsEnabled(true)  // Enable for debugging
-    .Run();
-```
-
-**Custom Window Icon:**
-
-Set a custom icon from an embedded resource in your project:
-
-```csharp
-new DesktopWindow(server)
-    .Title("My App")
-    .Size(1280, 800)
-    .Icon(typeof(Program), "MyApp.Resources.icon.ico")
-    .Run();
-```
-
-**Cross-Platform DPI Support:**
-
-The library includes automatic DPI detection and scaling for high-resolution displays on all platforms. The `DpiScaling(true)` option (enabled by default) automatically adjusts window dimensions for retina displays and high-DPI Windows monitors, ensuring your app looks sharp everywhere.
-
-The native library files are automatically copied to your output directory via MSBuild targets, so no manual setup is required. Just add the package and start building native desktop apps with Ivy!
 
 ---
 
@@ -1813,14 +1240,7 @@ new StackLayout([
 ], wrap: true, gap: 4);
 ```
 
-**Benefits:**
 
-- Single layout system with consistent API
-- Access to all `StackLayout` features (alignment, scroll, etc.)
-- Support for both horizontal and vertical wrapping
-- Independent row and column gap control
-
-**Migration:** Replace `new WrapLayout(...)` with `Layout.Horizontal().Wrap()` or `new StackLayout(..., wrap: true)`. The `gap` parameter maps directly, and all other layout properties are now available.
 
 ---
 
@@ -1842,9 +1262,7 @@ var description = UseState("");
 return description.ToTextareaInput(placeholder: "Enter description...");
 ```
 
-**Migration:** Search your codebase for `.ToTextAreaInput(` and replace with `.ToTextareaInput(`. Run `dotnet build` to find any remaining instances.
 
-Alternatively, you can use the variant directly: `state.ToTextInput(variant: TextInputVariants.Textarea)`
 
 ---
 
@@ -1897,7 +1315,7 @@ myTextInput.Multiline(true);   // Enable multiline
 myTextInput.Multiline(false);  // Disable multiline
 ```
 
-**Migration:** Search for `.MultiLine(` and replace with `.Multiline(`. Also replace constructor parameter `multiLine:` with `multiline:`. Run `dotnet build` to verify.
+
 
 ---
 
@@ -1925,9 +1343,7 @@ return Layout.Horizontal().Gap(4)
     | new Button("Right Button");
 ```
 
-**Impact:** This change simplifies the common pattern of using spacers to push elements to opposite sides. Existing code with explicit `.Width(Size.Grow())` continues to work but is now redundant. If you were relying on `Spacer` taking minimal space by default (rare), you'll need to explicitly set `.Width(Size.Units(0))` or another fixed size.
 
-**Migration:** Review your spacer usage. Most code will benefit from removing the now-redundant `.Width(Size.Grow())` calls, but verify that any spacers intended to take minimal space have explicit sizing.
 
 ---
 
@@ -1957,7 +1373,7 @@ new Button("Hover").Icon(Icons.Info).WithTooltip("This is a tooltip")
 new Button().Icon(Icons.Settings).WithTooltip("Open settings")
 ```
 
-**Migration:** Search your codebase for `new Button(` with `icon:` parameter and convert to use `.Icon()` method. Icon-only buttons should use `new Button()` without a text parameter, then call `.Icon()`.
+
 
 ---
 
@@ -1965,105 +1381,14 @@ new Button().Icon(Icons.Settings).WithTooltip("Open settings")
 
 Several event handler methods have been renamed for consistency across the framework, moving from `Handle*` to `On*` naming pattern to better match .NET conventions.
 
-**HandleRowAction → OnRowAction** (DataTable):
-
 ```csharp
-// Before (v1.2.14 and earlier)
-dataTable.HandleRowAction("edit", e => EditItem(e.Value))
-    .HandleRowAction("delete", async e => await DeleteItem(e.Value))
-
-// After (v1.2.15+)
 dataTable.OnRowAction("edit", e => EditItem(e.Value))
-    .OnRowAction("delete", async e => await DeleteItem(e.Value))
-```
-
-**HandleClick → OnClick** (Card):
-
-```csharp
-// Before (v1.2.14 and earlier)
-new Card("Content").HandleClick(() => DoSomething())
-
-// After (v1.2.15+)
 new Card("Content").OnClick(() => DoSomething())
-```
-
-**HandleSelect → OnSelect** (Tree, MenuItem):
-
-```csharp
-// Before (v1.2.17 and earlier)
-new Tree(items).HandleSelect(e => ProcessSelection(e))
-
-MenuItem.Default("Edit").HandleSelect(() => EditItem())
-MenuItem.Default("Delete").HandleSelect(item => DeleteItem(item))
-
-// After (v1.2.18+)
 new Tree(items).OnSelect(e => ProcessSelection(e))
-
-MenuItem.Default("Edit").OnSelect(() => EditItem())
-MenuItem.Default("Delete").OnSelect(item => DeleteItem(item))
+searchQuery.ToSearchInput().OnSubmit(() => PerformSearch())
+tasks.ToKanban().OnMove(moveData => { /* ... */ })
+records.ToTable().OnCellAction(e => e.Name, value => OpenDetails(value))
 ```
-
-**HandleSubmit → OnSubmit** (TextInput):
-
-```csharp
-// Before (v1.2.17 and earlier)
-searchQuery.ToSearchInput()
-    .Placeholder("Search...")
-    .HandleSubmit(() => PerformSearch())
-
-tag.ToTextInput()
-    .Placeholder("Add a tag...")
-    .HandleSubmit(() => AddTag(tag.Value))
-
-// After (v1.2.18+)
-searchQuery.ToSearchInput()
-    .Placeholder("Search...")
-    .OnSubmit(() => PerformSearch())
-
-tag.ToTextInput()
-    .Placeholder("Add a tag...")
-    .OnSubmit(() => AddTag(tag.Value))
-```
-
-**HandleMove → OnMove** (Kanban):
-
-```csharp
-// Before (v1.2.17 and earlier)
-tasks.ToKanban(
-    columnSelector: t => t.Status,
-    orderSelector: t => t.Priority)
-    .CardBuilder(task => new Card(task.Title, task.Description))
-    .HandleMove(moveData => {
-        UpdateTaskStatus(moveData.CardId, moveData.ToColumn);
-    })
-
-// After (v1.2.18+)
-tasks.ToKanban(
-    columnSelector: t => t.Status,
-    orderSelector: t => t.Priority)
-    .CardBuilder(task => new Card(task.Title, task.Description))
-    .OnMove(moveData => {
-        UpdateTaskStatus(moveData.CardId, moveData.ToColumn);
-    })
-```
-
-**HandleCellAction → OnCellAction** (DataTable):
-
-```csharp
-// Before (v1.2.17 and earlier)
-records.ToTable()
-    .Column(e => e.Id)
-    .Column(e => e.Name)
-    .HandleCellAction(e => e.Name, value => OpenDetails(value))
-
-// After (v1.2.18+)
-records.ToTable()
-    .Column(e => e.Id)
-    .Column(e => e.Name)
-    .OnCellAction(e => e.Name, value => OpenDetails(value))
-```
-
-**Migration:** Search for `.HandleRowAction(`, `.HandleClick(`, `.HandleSelect(`, `.HandleSubmit(`, `.HandleMove(`, and `.HandleCellAction(` and replace with `.OnRowAction(`, `.OnClick(`, `.OnSelect(`, `.OnSubmit(`, `.OnMove(`, and `.OnCellAction(` respectively. Run `dotnet build` to find any remaining instances.
 
 ---
 
@@ -2081,19 +1406,7 @@ The OAuth authentication callback URL has changed from `/ivy/webhook` to `/ivy/a
 - Local development: `http://localhost:5010/ivy/auth/callback`
 - Production: `https://your-app.com/ivy/auth/callback`
 
-**Migration:**
 
-1. Update your OAuth provider settings (GitHub, Google, etc.) to use the new callback URL
-2. For GitHub OAuth Apps: Navigate to Settings → Developer settings → OAuth Apps → Your App → Update "Authorization callback URL"
-3. No code changes required - the framework handles this automatically
-4. Both old and new URLs may work temporarily during migration, but update to the new URL to ensure future compatibility
-
-**Affected authentication providers:**
-
-- GitHub OAuth
-- Google OAuth
-- Microsoft OAuth
-- Any custom OAuth providers
 
 ---
 
@@ -2136,7 +1449,7 @@ new DesktopWindow(server)
     .Run();
 ```
 
-**Migration:** Search your codebase for `.DpiScaling(` and replace with `.UseDpiScaling(`. Search for `.DevToolsEnabled(` and replace with `.UseDevTools(`. Run `dotnet build` to verify.
+
 
 ---
 
@@ -2182,35 +1495,7 @@ var xml = """
 var chart = builder.Build(xml);
 ```
 
-**Type Preservation Benefits:**
 
-The new JSON format preserves exact types, which is especially important for:
-
-```csharp
-// Strings: Leading zeros preserved
-<Data><![CDATA[
-    [{"Id": "007", "Code": "00123"}]
-]]></Data>
-
-// Booleans: True boolean values, not strings
-<Data><![CDATA[
-    [{"Active": true, "Visible": false}]
-]]></Data>
-
-// Numbers: Explicit numeric types
-<Data><![CDATA[
-    [{"Count": 42, "Price": 19.99}]
-]]></Data>
-```
-
-**Migration:**
-
-1. Replace `<ChartType.Data>` wrapper with `<Data>`
-2. Convert `<DataPoint>` elements to JSON array objects inside `<![CDATA[...]]>`
-3. Use JSON syntax: string values in quotes, numbers without quotes, booleans as `true`/`false`
-4. Ensure valid JSON formatting (commas between properties and array items)
-
-**Works with all chart types:** `LineChart`, `BarChart`, `AreaChart`, `PieChart`, and custom chart implementations.
 
 ---
 
@@ -2239,15 +1524,7 @@ mySignal.Send(input);           // Send data through the signal
 mySignal.Receive(callback);     // Register a callback to receive data
 ```
 
-**Why this change:**
-The previous separation between sender and receiver interfaces was unnecessarily complex for most use cases. The unified `ISignal` interface simplifies the API while maintaining full functionality. Components that need to both send and receive no longer need two separate references.
 
-**Migration:**
-
-1. Replace all calls to `context.CreateSignal<...>()` with `context.UseSignal<...>()`
-2. Change variable types from `ISignalSender<TInput, TOutput>` or `ISignalReceiver<TInput, TOutput>` to `ISignal<TInput, TOutput>`
-3. The `.Send()` and `.Receive()` methods work identically, so no changes to usage code are required
-4. Run `dotnet build` to verify all references are updated
 
 ---
 
@@ -2402,15 +1679,7 @@ return result.ToReadOnlyInput()
     .Placeholder("No data available");
 ```
 
-These methods can be chained together:
 
-```csharp
-var token = UseState("");
-
-return token.ToReadOnlyInput()
-    .Placeholder("Token will appear here")
-    .ShowCopyButton();
-```
 
 ---
 
@@ -2451,17 +1720,7 @@ return toggleValue.ToToggleInput(Icons.Bell)
     .Loading(isSaving.Value);
 ```
 
-The loading state can be combined with other input states like descriptions and validation:
 
-```csharp
-var value = UseState(false);
-var isLoading = UseState(true);
-
-return value.ToSwitchInput()
-    .Label("Enable API Access")
-    .Description("Toggle API access for your application")
-    .Loading(isLoading.Value);
-```
 
 ---
 
@@ -2479,62 +1738,7 @@ return searchQuery.ToTextInput()
     .HandleSubmit(() => PerformSearch(searchQuery.Value));
 ```
 
-**Multiple overloads available:**
 
-```csharp
-// Simple Action
-textInput.HandleSubmit(() => DoSomething());
-
-// Action with Event<IAnyInput> parameter
-textInput.HandleSubmit(e => ProcessInput(e));
-
-// Async ValueTask
-textInput.HandleSubmit(async () => await SaveAsync());
-
-// Async with Event<IAnyInput>
-textInput.HandleSubmit(async e => await ProcessAsync(e));
-```
-
-**Practical example - Search input:**
-
-```csharp
-var searchQuery = UseState("");
-var searchResult = UseState("");
-
-return Layout.Horizontal()
-    | searchQuery.ToSearchInput()
-        .Placeholder("Search...")
-        .HandleSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}"))
-    | searchResult;
-```
-
-**Quick-add pattern example:**
-
-```csharp
-var tag = UseState("");
-var tags = UseState<List<string>>(new List<string>());
-
-return Layout.Horizontal()
-    | tag.ToTextInput()
-        .Placeholder("Add a tag...")
-        .HandleSubmit(() => {
-            if (!string.IsNullOrWhiteSpace(tag.Value))
-            {
-                tags.Set(new List<string>(tags.Value) { tag.Value });
-                tag.Set("");  // Clear input after adding
-            }
-        })
-    | Layout.Horizontal().Gap(2) | tags.Value.Select(t => new Badge(t));
-```
-
-**Important notes:**
-
-- Only fires for single-line text inputs (not Textarea variant)
-- In Textarea, Enter inserts a newline as expected
-- Works with all TextInput variants: Default, Password, and Search
-- The input automatically blurs after the event fires
-
----
 
 ### NumberInput - Prefix and Suffix Support
 
@@ -2801,34 +2005,7 @@ new Box("Static Box")
     .Hover(CardHoverVariant.None);
 ```
 
-**Practical Example - Interactive Selection**
 
-```csharp
-var selected = UseState("Option A");
-var client = UseService<IClientProvider>();
-
-return Layout.Horizontal().Gap(4)
-    | CreateOption("Option A", selected, client)
-    | CreateOption("Option B", selected, client)
-    | CreateOption("Option C", selected, client);
-
-Box CreateOption(string label, IState<string> selected, IClientProvider client)
-{
-    var isSelected = selected.Value == label;
-    return new Box(label)
-        .Color(isSelected ? Colors.Primary : Colors.Muted)
-        .BorderThickness(isSelected ? 2 : 1)
-        .Hover(CardHoverVariant.Pointer)
-        .OnClick(() => {
-            selected.Set(label);
-            client.Toast($"Selected: {label}");
-        })
-        .Padding(8)
-        .Width(Size.Fraction(1/3f));
-}
-```
-
-**Note:** When using `OnClick()` without specifying a hover variant, the Box automatically applies `CardHoverVariant.PointerAndTranslate` to provide visual feedback.
 
 **Grow Extension Method**
 
@@ -2840,15 +2017,7 @@ new Box("Content").Width(Size.Grow());
 
 // After: using the convenient Grow() method
 new Box("Content").Grow();
-
-// Practical example - flexible layout
-Layout.Horizontal().Gap(4)
-    | new Box("Fixed width").Width(Size.Units(50))
-    | new Box("Grows to fill space").Grow()
-    | new Box("Another fixed").Width(Size.Units(50));
 ```
-
-This makes your code more concise and expressive when creating flexible layouts where certain boxes should expand to fill available space.
 
 ---
 
@@ -2870,32 +2039,7 @@ return Layout.Vertical().Gap(6)
     | calloutView;
 ```
 
-**Using with UseState:**
 
-```csharp
-var showUpdateBanner = UseState(true);
-var showTrialBanner = UseState(true);
-
-return Layout.Vertical().Gap(6)
-    | (showUpdateBanner.Value
-        ? Callout.Info("A new version is available. Refresh to update.", "Update Available")
-            .OnClose(() => showUpdateBanner.Set(false))
-        : null)
-    | (showTrialBanner.Value
-        ? Callout.Warning("Your trial expires in 3 days.")
-            .OnClose(() => showTrialBanner.Set(false))
-        : null);
-```
-
-**Use cases:**
-
-- Dismissible notification banners
-- Temporary alerts and warnings
-- User-controlled information messages
-- Feature announcements that can be closed
-- Session-based notices
-
-The `OnClose()` extension method provides a convenient way to handle simple dismissal logic, while the `OnClose` property supports full `EventHandler<Event<Callout>>` handlers for more complex scenarios.
 
 ---
 
@@ -2914,29 +2058,7 @@ new Card("This card cannot be clicked.")
     .Width(Size.Units(100));
 ```
 
-**Control disabled state dynamically:**
 
-```csharp
-var isProcessing = UseState(false);
-
-return new Card("Click to process")
-    .Title("Processing Card")
-    .OnClick(async _ => {
-        isProcessing.Set(true);
-        await ProcessDataAsync();
-        isProcessing.Set(false);
-    })
-    .Disabled(isProcessing.Value);  // Disable while processing
-```
-
-**Use cases:**
-
-- Indicate unavailable options (e.g., locked features, insufficient permissions)
-- Show read-only states in dashboards
-- Prevent interaction during async operations
-- Display inactive or archived items
-
-This follows the same pattern as the existing `Button` and `Expandable` widgets, providing a consistent API across interactive components.
 
 ---
 
@@ -2956,54 +2078,7 @@ return file.ToFileInput(upload)
     .Placeholder("Min 1 KB, Max 10 MB");
 ```
 
-**Using FileSize helpers for clarity:**
 
-```csharp
-var upload = UseUpload(handler)
-    .MinFileSize(FileSize.FromKilobytes(1))   // Minimum 1 KB
-    .MaxFileSize(FileSize.FromMegabytes(5));  // Maximum 5 MB
-```
-
-**Direct widget configuration:**
-
-```csharp
-var file = UseState<FileUpload<byte[]>?>();
-
-return file.ToFileInput()
-    .MinFileSize(1024)  // 1 KB minimum
-    .MaxFileSize(5 * 1024 * 1024)  // 5 MB maximum
-    .Placeholder("Between 1 KB and 5 MB");
-```
-
-**Complete example with file size range:**
-
-```csharp
-public class FileSizeRangeDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var file = UseState<FileUpload<byte[]>?>();
-        var upload = UseUpload(MemoryStreamUploadHandler.Create(file))
-            .MinFileSize(FileSize.FromKilobytes(1))    // Reject files < 1 KB
-            .MaxFileSize(FileSize.FromMegabytes(10));  // Reject files > 10 MB
-
-        return Layout.Vertical()
-            | Text.H2("Upload File (1 KB - 10 MB)")
-            | file.ToFileInput(upload)
-                .Placeholder("Select a file between 1 KB and 10 MB")
-            | (file.Value != null
-                ? Text.P($"Selected: {file.Value.FileName} ({Utils.FormatBytes(file.Value.Length)})")
-                : null);
-    }
-}
-```
-
-**Validation behavior:**
-
-- Client-side validation provides immediate feedback before upload
-- Server-side validation ensures security even if client validation is bypassed
-- Error messages automatically format file sizes (e.g., "File is too small (512 B). Minimum required size is 1.00 KB.")
-- Works with both single and multiple file uploads
 
 ---
 
@@ -3024,30 +2099,7 @@ new CodeBlock(@"    private static int Calculate(int input)
     .Language(Languages.Csharp);
 ```
 
-**Practical example - showing error context:**
 
-```csharp
-// Display code around an error on line 42
-var errorContext = GetCodeLinesAround(errorLine: 42);
-
-return Layout.Vertical()
-    | Text.H3($"Error at line {errorLine}")
-    | new CodeBlock(errorContext)
-        .ShowLineNumbers()
-        .StartingLineNumber(40)  // Show lines 40-44
-        .Language(Languages.Csharp);
-```
-
-**Default behavior:**
-
-```csharp
-// Without StartingLineNumber, numbering starts at 1 (default)
-new CodeBlock(code)
-    .ShowLineNumbers()
-    .Language(Languages.Javascript);
-```
-
-The `StartingLineNumber` property defaults to 1, maintaining backward compatibility with existing code.
 
 ---
 
@@ -3062,35 +2114,7 @@ new Expandable("Settings", "Configure your application preferences here.")
     .Icon(Icons.Settings);
 ```
 
-**Multiple examples:**
 
-```csharp
-Layout.Vertical().Gap(2)
-    | new Expandable("Settings", "Configure your application preferences here.").Icon(Icons.Settings)
-    | new Expandable("User Profile", "View and edit your profile information.").Icon(Icons.User)
-    | new Expandable("Notifications", "Manage your notification preferences.").Icon(Icons.Bell);
-```
-
-**With scale variations:**
-
-```csharp
-// Small expandable with icon
-new Expandable("Small Settings", "Configure preferences.")
-    .Icon(Icons.Settings)
-    .Small();
-
-// Medium expandable with icon (default)
-new Expandable("Medium Settings", "Configure preferences.")
-    .Icon(Icons.Settings)
-    .Medium();
-
-// Large expandable with icon
-new Expandable("Large Settings", "Configure preferences.")
-    .Icon(Icons.Settings)
-    .Large();
-```
-
-The icon appears at the start of the header content and automatically adjusts its size to match the expandable's scale for consistent visual hierarchy.
 
 ---
 
@@ -3107,35 +2131,7 @@ new Progress()
     .Goal("Loading...");
 ```
 
-**Toggle between determinate and indeterminate:**
 
-```csharp
-var isLoading = UseState(true);
-var progress = UseState(0);
-
-return Layout.Vertical()
-    | new Progress(progress.Value)
-        .Indeterminate(isLoading.Value)
-        .Goal(isLoading.Value ? "Syncing..." : $"{progress.Value}% Complete")
-    | Layout.Horizontal(
-        new Button("Toggle Loading", _ => isLoading.Set(!isLoading.Value)),
-        new Button("Set 50%", _ => progress.Set(50))
-    );
-```
-
-**Key features:**
-
-- The indeterminate animation respects `prefers-reduced-motion` for accessibility—users with motion sensitivity see a static appearance instead
-- Works alongside existing progress values (e.g., show indeterminate state while keeping the progress bar at 50%)
-- More explicit than passing `null`, making code intent clearer
-- Backward compatible: passing `null` as the value still works
-
-**Common use cases:**
-
-- File uploads or downloads where progress isn't immediately available
-- API calls with unknown duration
-- Background sync operations
-- Initial loading states before progress can be calculated
 
 ---
 
@@ -3189,54 +2185,7 @@ return frameworks.ToSelectInput(options)
     .MaxSelections(3);  // Can't select more than 3
 ```
 
-**Complete Example**
 
-Combining all features:
-
-```csharp
-public class SelectInputAdvancedDemo : ViewBase
-{
-    private enum Frameworks { React, Angular, Vue, Svelte, Ember, Backbone }
-
-    public override object? Build()
-    {
-        var selected = UseState<Frameworks[]>([Frameworks.React]);
-        var isLoading = UseState(false);
-        var isSearchable = UseState(true);
-
-        var options = typeof(Frameworks).ToOptions();
-
-        return Layout.Vertical()
-            | Text.H3("Framework Selection")
-            | (Layout.Horizontal()
-                | isLoading.ToSwitchInput().Label("Loading State")
-                | isSearchable.ToSwitchInput().Label("Searchable"))
-            | selected.ToSelectInput(options)
-                .Variant(SelectInputVariants.Select)
-                .Searchable(isSearchable.Value)
-                .SearchMode(SearchMode.Fuzzy)
-                .Loading(isLoading.Value)
-                .MinSelections(1)
-                .MaxSelections(3)
-                .EmptyMessage("No frameworks found")
-                .Width(Size.Grow());
-    }
-}
-```
-
-**Search Modes:**
-
-- `SearchMode.CaseInsensitive` (default) - Case-insensitive substring matching
-- `SearchMode.CaseSensitive` - Case-sensitive substring matching
-- `SearchMode.Fuzzy` - Fuzzy matching (finds "rct" in "React")
-
-**Behavior Notes:**
-
-- When max selections is reached, remaining options become disabled
-- When at min selections, selected items cannot be deselected
-- Search works across all variants: Select, List, and Toggle
-- Loading state disables interaction and shows a spinner
-- Empty message displays when search returns no results
 
 ---
 
@@ -3264,36 +2213,7 @@ return fruit.ToSelectInput(fruitOptions)
     .Placeholder("Select a fruit...");
 ```
 
-**Works with all variants:**
 
-```csharp
-var colors = UseState<string[]>([]);
-
-var colorOptions = new IAnyOption[]
-{
-    new Option<string>("Red", "red"),
-    new Option<string>("Green", "green"),
-    new Option<string>("Blue (Premium)", "blue").Disabled(),
-    new Option<string>("Yellow", "yellow"),
-};
-
-// Toggle variant
-return colors.ToSelectInput(colorOptions)
-    .Variant(SelectInputVariants.Toggle);
-
-// List variant with checkboxes
-return colors.ToSelectInput(colorOptions)
-    .Variant(SelectInputVariants.List);
-```
-
-**Common use cases:**
-
-- Indicate temporarily unavailable options (out of stock, coming soon)
-- Show premium or restricted features that require upgrades
-- Display items that don't meet current selection criteria
-- Maintain context by showing all options while preventing selection of invalid ones
-
-Disabled options remain visible to provide context to users about what might be available under different circumstances, while preventing selection when those options aren't currently valid.
 
 ---
 
@@ -3338,47 +2258,7 @@ return alignment.ToSelectInput(alignmentOptions)
     .Variant(SelectInputVariant.Toggle);
 ```
 
-**Works Across All Variants:**
 
-Icons work seamlessly with all SelectInput variants:
-
-```csharp
-var status = UseState("active");
-
-var statusOptions = new IAnyOption[]
-{
-    new Option<string>("Active", "active") { Icon = "check-circle" },
-    new Option<string>("Pending", "pending") { Icon = "clock" },
-    new Option<string>("Inactive", "inactive") { Icon = "x-circle" },
-};
-
-// Dropdown variant
-return status.ToSelectInput(statusOptions)
-    .Variant(SelectInputVariant.Select);
-
-// Radio variant
-return status.ToSelectInput(statusOptions)
-    .Variant(SelectInputVariant.Radio);
-
-// Toggle variant
-return status.ToSelectInput(statusOptions)
-    .Variant(SelectInputVariant.Toggle);
-
-// List variant (checkboxes for multi-select)
-return statusList.ToSelectInput(statusOptions)
-    .Variant(SelectInputVariant.List);
-```
-
-**Common Use Cases:**
-
-- Theme selectors with sun/moon icons
-- Text alignment toolbars with alignment icons
-- Status indicators with visual state icons
-- Language/region pickers with flag icons
-- File type filters with document icons
-- Compact toolbars where space is limited
-
-Icons automatically scale to match the density setting (Small, Medium, Large) of the select input.
 
 ---
 
@@ -3439,38 +2319,7 @@ public override object? Build()
 - Respects nullable types and `[Required]` attributes
 - Works seamlessly with other form scaffolding features
 
-**Complete example with mixed field types:**
 
-```csharp
-public class UserPreferencesModel
-{
-    [Required]
-    [Display(Name = "Full Name")]
-    public string Name { get; set; } = "";
-
-    [AllowedValues("USA", "Canada", "UK", "Germany", "France")]
-    [Display(Name = "Country")]
-    public string Country { get; set; } = "USA";
-
-    [AllowedValues("Light", "Dark", "Auto")]
-    [Display(Name = "Theme Preference")]
-    public string Theme { get; set; } = "Auto";
-
-    [AllowedValues("Technology", "Sports", "Music", "Art", "Travel")]
-    [Display(Name = "Interests", Description = "Select your interests")]
-    public string[] Interests { get; set; } = [];
-}
-
-public override object? Build()
-{
-    var preferences = UseState(() => new UserPreferencesModel());
-
-    // All fields automatically scaffolded with appropriate inputs
-    return preferences.ToForm("Save Preferences");
-}
-```
-
-This feature reduces boilerplate code while maintaining type safety and leveraging C#'s built-in `[AllowedValues]` attribute for compile-time validation.
 
 ---
 
@@ -3518,48 +2367,7 @@ tasks.ToTable()
     .Builder(t => t.Progress, f => f.Progress().Color(Colors.Blue));
 ```
 
-**Complete example with download tracking:**
 
-```csharp
-var downloads = new[]
-{
-    new { File = "report.pdf", Downloaded = 1024, Total = 1024 },
-    new { File = "data.csv", Downloaded = 750, Total = 1000 },
-    new { File = "images.zip", Downloaded = 250, Total = 500 }
-};
-
-return downloads
-    .Select(d => new {
-        d.File,
-        d.Downloaded,
-        d.Total,
-        Percent = (double)d.Downloaded / d.Total * 100
-    })
-    .ToTable()
-    .Builder(e => e.Percent, f => f
-        .Progress()
-        .Min(0)
-        .Max(100)
-        .AutoColor()
-        .Format("%d%"))
-    .Header(e => e.Percent, "Progress");
-```
-
-**Configuration options:**
-
-- **`.Min(double)`** - Minimum value for percentage calculation (default: 0)
-- **`.Max(double)`** - Maximum value for percentage calculation (default: 100)
-- **`.AutoColor()`** - Automatic color based on thresholds
-- **`.Color(Colors)`** - Explicit color for the progress bar
-- **`.Format(string)`** - Display formatted value alongside the bar (`%d` for integer, `%f` for decimal)
-
-**Common use cases:**
-
-- Task completion tracking in project management dashboards
-- Download/upload progress monitoring
-- Score or rating visualization
-- Capacity utilization (storage, memory, CPU)
-- Goal achievement tracking
 
 ---
 
@@ -3583,16 +2391,7 @@ return new Html(htmlWithScript)
     .DangerouslyAllowScripts();
 ```
 
-**Default secure behavior (scripts stripped):**
 
-```csharp
-// Without DangerouslyAllowScripts, script tags are removed during sanitization
-var htmlWithScript = "<script>alert('Hello');</script><p>Content</p>";
-
-return new Html(htmlWithScript);  // Only <p>Content</p> is rendered
-```
-
-**When to use:**
 
 - Embedding trusted third-party widgets (analytics, chat, etc.)
 - Rendering HTML from your own backend templates
@@ -3712,19 +2511,7 @@ return content.ToSheet(isOpen,
     side: SheetSide.Left);
 ```
 
-**Important notes:**
 
-- The `width` parameter controls **height** for top/bottom sheets and **width** for left/right sheets
-- Default side is `SheetSide.Right` for backward compatibility
-- Each direction has smooth slide-in animations
-- Top and bottom sheets default to `Size.Rem(16)` height, while left/right default to `Size.Rem(24)` width
-
-**Common use cases:**
-
-- **Left**: Navigation panels, sidebars, menu drawers
-- **Right**: Settings panels, detail views, property inspectors (default)
-- **Top**: Notifications, announcements, banners
-- **Bottom**: Action menus, mobile-style selection sheets
 
 ---
 
@@ -3745,26 +2532,7 @@ new Separator("Center Aligned").TextAlign(TextAlignment.Center);
 new Separator("Right Aligned").TextAlign(TextAlignment.Right);
 ```
 
-**Practical example - section separators with varied alignment:**
 
-```csharp
-return Layout.Vertical().Gap(4)
-    | new Separator("Section Start").TextAlign(TextAlignment.Left)
-    | Text.P("Content for this section goes here...")
-    | new Separator("Important Note").TextAlign(TextAlignment.Center)
-    | Text.P("This is an important message.")
-    | new Separator("Page End").TextAlign(TextAlignment.Right);
-```
-
-**Default behavior:**
-
-When no alignment is specified, separator labels default to center alignment for backward compatibility with existing code.
-
-**Common use cases:**
-
-- Left alignment for section headers that read like chapter titles
-- Center alignment for emphasized dividers or callouts
-- Right alignment for end-of-section markers or footnotes
 
 ---
 
@@ -3785,35 +2553,7 @@ return new CodeBlock(longCode, Languages.Csharp)
     .WrapLines();
 ```
 
-**Default behavior vs. WrapLines:**
 
-```csharp
-// Without WrapLines (default) - requires horizontal scrolling
-new CodeBlock(longCode, Languages.Csharp);
-
-// With WrapLines - wraps long lines for better readability
-new CodeBlock(longCode, Languages.Csharp)
-    .WrapLines();
-```
-
-**Combining with other options:**
-
-```csharp
-// Works well with line numbers and other CodeBlock features
-new CodeBlock(longCode, Languages.Csharp)
-    .WrapLines()
-    .ShowLineNumbers()
-    .ShowCopyButton();
-```
-
-**When to use:**
-
-- Displaying code in narrow panels or responsive layouts
-- Code with very long lines (URLs, long strings, etc.)
-- When horizontal scrolling would disrupt the user experience
-- Documentation or tutorial content where readability is paramount
-
-By default, `WrapLines` is `false`, preserving the original formatting with horizontal scroll for code that depends on strict line structure.
 
 ---
 
@@ -3841,55 +2581,7 @@ var window = new DesktopWindow(server)
     .Run();
 ```
 
-**Window customization with fluent API:**
 
-```csharp
-var window = new DesktopWindow(server)
-    .Title("My Desktop App")
-    .Size(1280, 800)
-    .Resizable(true)
-    .Center()
-    .DpiScaling(true)  // Automatically adjusts for high-DPI displays
-    .Run();
-```
-
-**Adding a custom icon:**
-
-```csharp
-var window = new DesktopWindow(server)
-    .Title("My Desktop App")
-    .Size(1280, 800)
-    .Icon(typeof(Program), "MyApp.icon.ico")  // Embedded resource
-    .Run();
-```
-
-**Advanced configuration:**
-
-```csharp
-var window = new DesktopWindow(server)
-    .Title("Production Dashboard")
-    .Size(1600, 1000)
-    .Resizable(true)
-    .TopMost(false)
-    .Center()
-    .DpiScaling(true)
-    .DevToolsEnabled(isDevelopment)  // Enable dev tools in development
-    .Run();
-```
-
-**Key features:**
-
-- **Cross-platform**: Works on Windows, macOS, and Linux with automatic native library handling
-- **DPI awareness**: Automatic scaling for Retina and high-DPI displays
-- **Builder pattern**: Clean, fluent API for window configuration
-- **Native integration**: Uses Photino for true native window management
-- **MSBuild integration**: Automatically copies required native libraries during build and publish
-
-The library automatically handles platform-specific details like native library copying via MSBuild targets, so your desktop app "just works" across all supported platforms.
-
-**Default Icon:**
-
-Desktop applications now automatically include the Ivy icon embedded in the executable. If you don't specify a custom icon via `.Icon()`, your exported desktop app will display the Ivy Framework icon in the taskbar, dock, and title bar. You can still override this with your own custom icon using the `.Icon()` method as shown above.
 
 ---
 
@@ -3907,131 +2599,13 @@ server.UseConfiguration(config => {
 });
 ```
 
-**Azure Key Vault integration:**
 
-```csharp
-var server = new Server(args);
-
-server.UseConfiguration(config => {
-    var keyVaultUrl = Environment.GetEnvironmentVariable("KEY_VAULT_URL");
-    if (!string.IsNullOrEmpty(keyVaultUrl))
-    {
-        config.AddAzureKeyVault(
-            new Uri(keyVaultUrl),
-            new DefaultAzureCredential());
-    }
-});
-```
-
-**AWS Secrets Manager:**
-
-```csharp
-var server = new Server(args);
-
-server.UseConfiguration(config => {
-    config.AddSecretsManager(region: RegionEndpoint.USEast1);
-});
-```
-
-**Multiple custom sources:**
-
-```csharp
-var server = new Server(args);
-
-server.UseConfiguration(config => {
-    // Add custom JSON configuration
-    config.AddJsonFile("overrides.json", optional: true);
-
-    // Add cloud-based secrets
-    if (server.IsProduction())
-    {
-        config.AddAzureKeyVault(new Uri(keyVaultUrl), new DefaultAzureCredential());
-    }
-
-    // Add in-memory overrides for testing
-    if (server.IsDevelopment())
-    {
-        config.AddInMemoryCollection(new Dictionary<string, string>
-        {
-            ["FeatureFlags:NewUI"] = "true",
-            ["DebugMode"] = "true"
-        });
-    }
-});
-```
-
-**Key features:**
-
-- External providers are applied **after** built-in sources (environment variables, appsettings.json, user secrets)
-- The configuration action receives an `IConfigurationBuilder` to extend
-- Multiple configuration sources can be chained within the action
-- Preserves all default framework configuration behavior
-- Compatible with any .NET configuration provider
-
-This makes it easy to integrate enterprise configuration systems while maintaining the framework's convention-based defaults.
 
 ---
 
 ## Improvements
 
-### Spacer Now Defaults to Grow Behavior
 
-A bare `new Spacer()` now defaults to grow behavior (`flex-grow: 1`), automatically filling available space in the parent layout's direction. This eliminates the need to explicitly specify `.Width(Size.Grow())` for the common use case of pushing sibling elements apart.
-
-**What changed:**
-
-```csharp
-// Before: Had to explicitly use Size.Grow()
-Layout.Horizontal()
-    | new Button("Left")
-    | new Spacer().Width(Size.Grow())
-    | new Button("Right");
-
-// After: Spacer grows by default
-Layout.Horizontal()
-    | new Button("Left")
-    | new Spacer()  // Automatically grows to fill space
-    | new Button("Right");
-```
-
-**Why this matters:**
-
-This matches the overwhelmingly common use case for `Spacer` - creating flexible space that pushes elements to opposite sides of a layout. The new default makes layouts cleaner and more intuitive, while still allowing explicit sizing when needed via `.Width()` or `.Height()`.
-
-**Note:** If you need a fixed-size spacer, you can still explicitly set dimensions:
-
-```csharp
-new Spacer().Width(Size.Units(20))  // Fixed 20-unit spacer
-```
-
----
-
-### Grow() Method Now Available on All Widgets
-
-The convenient `.Grow()` extension method is now available on all widgets, not just `Box`. Previously, only boxes could use `.Grow()` as a shorthand for `.Width(Size.Grow())`. Now every widget type can use this fluent API.
-
-**What changed:**
-
-```csharp
-// Before: Only worked on Box
-new Box(content).Grow()
-
-// Before: Other widgets required the verbose syntax
-new TextInput("Name").Width(Size.Grow())
-
-// After: All widgets support .Grow()
-new TextInput("Name").Grow()
-new Button("Submit").Grow()
-new Card(content).Grow()
-```
-
-**Why this matters:**
-
-This makes the API more consistent and ergonomic across the framework. The `.Grow()` method is a common pattern for making widgets fill available space, and now it works uniformly regardless of widget type.
-
-**Technical details:**
-
-The method has been promoted from a `Box`-specific extension to a generic `WidgetBase<T>` extension, making it available to all widget types that inherit from `WidgetBase<T>`.
 
 ---
 
@@ -4039,43 +2613,7 @@ The method has been promoted from a `Box`-specific extension to a generic `Widge
 
 GridView now offers granular control over grid spacing with dedicated `RowGap()` and `ColumnGap()` methods. The existing `Gap()` method now sets both row and column gaps simultaneously, while the new methods let you control each axis independently.
 
-**What changed:**
 
-```csharp
-// Before: Gap() only set a single gap value
-new GridView()
-    .Gap(16);
-
-// Now: Gap() sets both row and column gaps
-new GridView()
-    .Gap(16);  // Sets both to 16
-
-// New: Control row and column gaps independently
-new GridView()
-    .RowGap(20)      // Vertical spacing between rows
-    .ColumnGap(12);  // Horizontal spacing between columns
-```
-
-**Why this matters:**
-
-Different spacing for rows vs. columns is a common design pattern, especially in responsive grids. You might want tighter horizontal spacing but more breathing room vertically, or vice versa. Previously, you'd need custom CSS or workarounds to achieve this.
-
-**Use cases:**
-
-```csharp
-// Card grid with more vertical space
-new GridView()
-    .Columns("repeat(auto-fill, minmax(200px, 1fr))")
-    .RowGap(32)
-    .ColumnGap(16)
-    | cards;
-
-// Form layout with compact horizontal, spacious vertical
-new GridView()
-    .Columns("1fr 2fr")
-    .RowGap(24)      // Space between form rows
-    .ColumnGap(12);  // Tight label-to-input spacing
-```
 
 ---
 
@@ -4083,50 +2621,11 @@ new GridView()
 
 The framework now defaults to `system` theme instead of `light` theme, automatically respecting users' system-wide dark/light mode preferences. Apps will now adapt to the operating system's appearance settings by default, providing a better out-of-the-box experience.
 
-**Previous behavior:**
 
-- Apps defaulted to light mode regardless of system preferences
-- Users had to manually switch to dark mode even if their OS was set to dark
-
-**New behavior:**
-
-- Apps automatically match the system's light/dark mode preference
-- Seamlessly switches between light and dark as the user changes their system settings
-- Manual theme selection still available and takes precedence when set
-
-No code changes required in your apps - this improvement applies automatically to all Ivy Framework applications.
 
 ---
 
-### AddConnectionsFromAssembly - Optional Assembly Parameter
 
-The `Server.AddConnectionsFromAssembly()` method now accepts an optional `Assembly` parameter, giving you explicit control over which assembly to scan for `IConnection` types.
-
-**What changed:**
-
-```csharp
-// Before: always scanned the entry assembly
-server.AddConnectionsFromAssembly();
-
-// Now: optionally specify which assembly to scan
-server.AddConnectionsFromAssembly(typeof(MyConnection).Assembly);
-
-// Or use the default behavior (entry assembly)
-server.AddConnectionsFromAssembly();
-```
-
-**Why this matters:**
-This enhancement is particularly useful when your entry assembly differs from the one containing your connection definitions. Common scenarios include:
-
-- Plugin architectures where connections are defined in separate assemblies
-- Class libraries containing reusable connections
-- Testing scenarios where you want to load specific assemblies
-
-**API consistency:**
-This change matches the existing `AddAppsFromAssembly(Assembly? assembly = null)` signature, providing a consistent API surface across the framework.
-
-**Note on recompilation:**
-This is a binary breaking change. If you see a `MissingMethodException` at runtime, run `dotnet clean && dotnet build` to recompile your project against the updated method signature.
 
 ---
 
@@ -4134,42 +2633,7 @@ This is a binary breaking change. If you see a `MissingMethodException` at runti
 
 The `DataTableBuilder` now supports the `.Remove()` method, bringing it in line with other builders like `FormBuilder`, `TableBuilder`, and `DetailsBuilder`. This method allows you to completely exclude columns from your data tables.
 
-**What's the difference?**
 
-- **`.Remove()`** - Fully excludes columns from the data (column is not sent to the client at all)
-- **`.Hidden()`** - Keeps columns in the data but hides them visually (data still exists on the client side)
-
-**Basic usage:**
-
-```csharp
-var users = GetUsers();
-
-return users.ToDataTable()
-    .Remove(u => u.PasswordHash)      // Exclude sensitive data completely
-    .Remove(u => u.InternalNotes);    // Not sent to client
-```
-
-**Why this matters:**
-
-Use `.Remove()` when you want to completely exclude data for security or performance reasons. This is especially important for:
-
-- Sensitive fields like password hashes, API keys, or internal notes
-- Large binary data that's not needed for display
-- Computed or redundant fields that bloat the payload
-
-Use `.Hidden()` when you want to keep the data available for client-side operations (filtering, sorting, exports) but don't want to display it in the visible columns.
-
-**Example with both:**
-
-```csharp
-return users.ToDataTable()
-    .Remove(u => u.PasswordHash)      // Security: never send to client
-    .Remove(u => u.InternalNotes)     // Privacy: internal only
-    .Hidden(u => u.CreatedAt)         // Keep for sorting, but hide column
-    .Hidden(u => u.UserId);           // Keep for row actions, but hide column
-```
-
-This enhancement completes the API surface for `DataTableBuilder`, making it consistent with other builder classes in the framework.
 
 ---
 
@@ -4177,19 +2641,7 @@ This enhancement completes the API surface for `DataTableBuilder`, making it con
 
 The Clerk authentication provider now gracefully handles scenarios where a session already exists during sign-in, making the authentication flow more robust and user-friendly.
 
-**What changed:**
-
-- When signing in with a session already active, the provider now attempts to restore and reuse the existing session
-- If restoration fails, it automatically cleans up stale sessions and retries the sign-in
-- This eliminates sign-in failures that could occur in edge cases like browser back/forward navigation or concurrent sign-in attempts
-
-**Impact:**
-Users will experience more reliable sign-in behavior without encountering "session already exists" errors. The improvement works automatically - no code changes needed in your authentication logic.
-
-**Affected methods:**
-
-- Password-based sign-in (email/password)
-- OAuth sign-in (Google, GitHub, etc.)
+- When signing in with a session already active, the provider now attempts to restore and reuse the existing session. If restoration fails, it automatically cleans up stale sessions and retries the sign-in. This eliminates sign-in failures that could occur in edge cases like browser back/forward navigation or concurrent sign-in attempts.
 
 ---
 
@@ -4197,55 +2649,7 @@ Users will experience more reliable sign-in behavior without encountering "sessi
 
 The `WithConfirm` helper method now supports customizable confirm button labels and destructive styling, making confirmation dialogs more appropriate for delete operations and other critical actions.
 
-**What changed:**
 
-```csharp
-// Before: Always showed "Ok" button with default styling
-new Button("Delete")
-    .Variant(ButtonVariant.Destructive)
-    .WithConfirm("Are you sure you want to delete this item?", "Delete Item");
-
-// After: Customize button label and use destructive styling
-new Button("Delete")
-    .Variant(ButtonVariant.Destructive)
-    .WithConfirm(
-        message: "Are you sure you want to delete this item?",
-        title: "Delete Item",
-        confirmLabel: "Delete",    // Custom label instead of "Ok"
-        destructive: true          // Red destructive button styling
-    );
-```
-
-**New parameters:**
-
-- `confirmLabel` (optional) - Customizes the confirm button text (defaults to "Ok")
-- `destructive` (optional) - Applies destructive styling (`ButtonVariant.Destructive`) to the confirm button for dangerous actions
-
-**Why this matters:**
-
-Confirmation dialogs for destructive actions should clearly communicate the severity of the action. A delete dialog with a "Delete" button styled in red provides much clearer intent than a generic "Ok" button. This enhancement makes your confirmation dialogs more user-friendly and reduces the chance of accidental destructive operations.
-
-**Real-world usage:**
-
-```csharp
-// Delete confirmation with appropriate styling
-deleteButton
-    .WithConfirm(
-        $"Are you sure you want to delete '{category.Name}'?",
-        "Delete Category",
-        confirmLabel: "Delete",
-        destructive: true
-    );
-
-// Standard confirmation keeps default "Ok" button
-saveButton
-    .WithConfirm(
-        "This will overwrite the existing data. Continue?",
-        "Confirm Save"
-    );
-```
-
-The method remains backward compatible - existing code without the new parameters will continue to work with the default "Ok" button and primary styling.
 
 ---
 
@@ -4271,48 +2675,7 @@ App IDs can now contain dots, enabling more flexible naming schemes for versioni
 "grpc.ServiceName"
 ```
 
-**Why this matters:**
 
-Dots in app IDs enable cleaner organization patterns:
-
-- **Versioning:** Run multiple versions side-by-side (`api.v1`, `api.v2`)
-- **Namespacing:** Group related apps (`users.profile`, `users.settings`)
-- **Domain-style naming:** Use reverse domain notation (`com.company.product`)
-- **gRPC compatibility:** Match your gRPC service naming conventions
-
-**Improved validation:**
-
-Along with dot support, app ID validation has been significantly enhanced with clear error messages:
-
-```csharp
-// ❌ Invalid: starts with slash
-"/dashboard"  // Error: "App IDs should not start with '/'"
-
-// ❌ Invalid: unsafe characters
-"app?query"   // Error: "App IDs must be URL-friendly"
-"app%20name"  // Error: "App IDs must be URL-friendly"
-
-// ❌ Invalid: reserved paths
-"api"         // Error: "App ID 'api' collides with reserved path '/api'"
-
-// ❌ Invalid: static file extensions
-"app.js"      // Error: "App ID 'app.js' collides with static file extension"
-"config.json" // Error: "App ID 'config.json' collides with static file extension"
-
-// ✅ Valid: dots without static extensions
-"app.v2"      // Valid - .v2 is not a static file extension
-"my.app"      // Valid - .app is not a static file extension
-```
-
-**Protected static file extensions:**
-
-The framework now prevents app IDs that could conflict with static files: `.js`, `.jsx`, `.css`, `.html`, `.json`, `.png`, `.jpg`, `.ico`, `.svg`, `.woff`, `.woff2`, `.ttf`, `.map`
-
-**Error handling:**
-
-Invalid app IDs are now caught at startup and during hot-reload with clear, actionable error messages. Apps with invalid IDs won't be added to the repository, preventing runtime routing issues.
-
-No migration needed - this is purely an enhancement that expands what's possible with app IDs while maintaining backward compatibility with existing dash and underscore-based naming.
 
 ---
 
@@ -4637,68 +3000,7 @@ No code changes needed - this improvement applies automatically to all SelectInp
 
 The `MetricView` component now intelligently colors its progress bar based on achievement percentage, providing instant visual feedback about goal performance.
 
-**What changed:**
 
-- Progress bars now use color-coded thresholds based on goal achievement
-- Replaces the previous fixed amber color with dynamic colors that reflect performance
-
-**Color thresholds:**
-
-```csharp
-// The colors automatically adjust based on goal achievement:
-// ≥ 75% → Green (Success)    - Excellent progress
-// ≥ 50% → Yellow (Warning)   - Good progress
-// ≥ 25% → Orange             - Needs attention
-// < 25% → Red (Destructive)  - Urgent attention needed
-```
-
-**Impact:**
-Dashboard metrics now provide immediate, intuitive visual feedback. Users can instantly identify which metrics are performing well (green), need attention (yellow/orange), or require urgent focus (red) without reading the exact percentage. This makes scanning multiple metrics significantly faster and more effective.
-
-No code changes needed - this improvement applies automatically to all `MetricView` components in your dashboards.
-
----
-
-### Customizable Confirm Dialogs with Destructive Styling
-
-The `WithConfirm` method now supports customizable button labels and destructive styling, allowing you to create more appropriate confirmation dialogs for delete operations and other destructive actions.
-
-**New parameters:**
-
-```csharp
-// Basic confirmation (default "Ok" button)
-new Button("Delete")
-    .Variant(ButtonVariant.Destructive)
-    .WithConfirm("Are you sure you want to delete this item?");
-
-// Custom label with destructive styling
-new Button("Delete")
-    .Variant(ButtonVariant.Destructive)
-    .WithConfirm(
-        message: "Are you sure you want to delete this category?",
-        title: "Delete Category",
-        confirmLabel: "Delete",
-        destructive: true
-    );
-
-// Custom label without destructive styling
-new Button("Proceed")
-    .WithConfirm(
-        message: "This will update all records. Continue?",
-        title: "Confirm Update",
-        confirmLabel: "Update All"
-    );
-```
-
-**What changed:**
-
-- Added optional `confirmLabel` parameter to customize the confirm button text (defaults to "Ok")
-- Added optional `destructive` parameter to style the confirm button with destructive (red) styling
-- When `destructive: true`, the confirm button uses `ButtonVariant.Destructive` for visual emphasis
-- When `destructive: false` or omitted, the confirm button uses the standard `ButtonVariant.Primary`
-
-**Impact:**
-Confirmation dialogs can now better match their purpose. Delete operations can show a red "Delete" button instead of a generic "Ok" button, making the UI more intuitive and reducing the risk of accidental destructive actions through clearer visual communication.
 
 ---
 
@@ -4706,29 +3008,7 @@ Confirmation dialogs can now better match their purpose. Delete operations can s
 
 The `ListItem` widget now includes vertical padding for better content spacing and visual comfort.
 
-**What changed:**
 
-- Added `py-2` (vertical padding) to the ListItem component's styling
-- Content within list items now has more breathing room
-- The minimum height of 60px is maintained for consistent sizing
-
-**Impact:**
-List items now have improved visual hierarchy and readability. The additional vertical padding creates better separation between the content and the list item boundaries, making lists feel less cramped and more polished. This applies automatically to all `ListItem` widgets without requiring any code changes.
-
----
-
-### DefaultSidebarChrome Auto-Opens When Last Tab is Closed
-
-The `DefaultSidebarChrome` now automatically opens the sidebar when you close the last tab, preventing users from being left without visible content or navigation options.
-
-**What changed:**
-
-- When the last tab is closed, the sidebar automatically expands
-- The sidebar state is now managed dynamically instead of using a fixed initial value
-- Users always have access to navigation after closing all tabs
-
-**Impact:**
-This improvement prevents a confusing state where closing the last tab would leave the application with no visible UI elements. The sidebar automatically opens to provide navigation options, making the user experience more intuitive and consistent. This behavior works automatically in applications using `DefaultSidebarChrome`.
 
 ---
 
@@ -4736,70 +3016,7 @@ This improvement prevents a confusing state where closing the last tab would lea
 
 The `Size.Fraction()` and `Size.FractionGap()` methods now accept `decimal` and `double` values in addition to `float`, eliminating common type mismatch errors when using numeric literals or variables.
 
-**What changed:**
 
-```csharp
-// Before: Required float literals or explicit casting
-new Box()
-    .Width(Size.Fraction(0.5f));  // Had to use 'f' suffix
-
-decimal ratio = 0.75m;
-new Box()
-    .Width(Size.Fraction((float)ratio));  // Had to cast
-
-// After: Works with double and decimal directly
-new Box()
-    .Width(Size.Fraction(0.5));  // Double literal works
-
-decimal ratio = 0.75m;
-new Box()
-    .Width(Size.Fraction(ratio));  // No casting needed
-
-// Same applies to FractionGap
-Layout.Horizontal()
-    .Gap(Size.FractionGap(0.25));  // Double works
-```
-
-**Why this matters:**
-
-This removes a common friction point when working with fractional sizes. Since C# numeric literals default to `double` (not `float`), developers previously had to either add the `f` suffix to every literal or explicitly cast their values. The new overloads handle the conversion automatically, making the API more intuitive and reducing boilerplate code.
-
-**Technical details:**
-
-The overloads internally convert `decimal` and `double` to `float` before creating the `Size` instance, maintaining the existing behavior while accepting more input types.
-
----
-
-### Desktop Windows Now Show Ivy Icon by Default
-
-Desktop applications built with Ivy.Desktop now automatically display the Ivy framework icon in the taskbar and title bar when no custom icon is specified. This gives your desktop apps a professional, polished appearance out of the box.
-
-**What changed:**
-
-The Ivy icon (`ivy.ico`) is now embedded as a resource in Ivy.Desktop and automatically applied when you call `Run()` on a `DesktopWindow`, unless you've explicitly set a custom icon using `.Icon()`.
-
-```csharp
-// Your desktop app now shows the Ivy icon automatically
-new DesktopWindow(server)
-    .Title("My App")
-    .Size(1200, 800)
-    .Run();  // Ivy icon appears in taskbar and title bar
-```
-
-**Custom icons still work:**
-
-If you want to use your own icon, the `.Icon()` method works exactly as before:
-
-```csharp
-new DesktopWindow(server)
-    .Title("My App")
-    .Icon<Program>("MyApp.icon.ico")  // Your custom icon
-    .Run();
-```
-
-**Why this matters:**
-
-Previously, desktop apps would show a generic system icon unless you explicitly embedded and configured a custom icon. Now, your Ivy desktop applications have a branded, professional appearance by default, making the framework immediately recognizable while still allowing full customization when needed.
 
 ---
 
@@ -4809,14 +3026,7 @@ Previously, desktop apps would show a generic system icon unless you explicitly 
 
 Fixed a port conflict issue where CLI-only commands (`--describe`, `--describe-connection`, `--test-connection`) would fail if an Ivy application was already running on the configured port. These commands need dependency injection but never actually start the web host, making port binding unnecessary.
 
-**What was fixed:**
 
-- CLI commands now bind to port 0 (ephemeral port) instead of the configured application port
-- Port-in-use checks are completely skipped for CLI commands
-- No more conflicts when running CLI commands alongside a running instance
-
-**Impact:**
-If you use CLI commands like `--describe` to inspect your database schema, `--describe-connection` to test connection strings, or `--test-connection` to verify database connectivity, these commands will now work seamlessly even when your Ivy application is running. Previously, you would get port conflict errors forcing you to stop your running application before using these diagnostic commands.
 
 ---
 
@@ -4824,14 +3034,7 @@ If you use CLI commands like `--describe` to inspect your database schema, `--de
 
 Fixed a critical bug in `FormBuilder` where changing the form submit strategy at runtime would cause an `InvalidOperationException`. The issue occurred when using `OnBlur` or `OnChange` strategies, as internal hooks were called conditionally, violating hook ordering rules.
 
-**What was fixed:**
 
-- Hook indices no longer shift when the form submit strategy changes
-- Hooks are now called consistently regardless of the submit strategy
-- Forms with dynamic strategy switching now work reliably without crashes
-
-**Impact:**
-If you use `FormBuilder` with `.SubmitStrategy(FormSubmitStrategy.OnBlur)` or `.SubmitStrategy(FormSubmitStrategy.OnChange)`, or if you dynamically switch between strategies, your forms will now work correctly without encountering hook ordering exceptions.
 
 ---
 
@@ -4839,13 +3042,7 @@ If you use `FormBuilder` with `.SubmitStrategy(FormSubmitStrategy.OnBlur)` or `.
 
 Fixed a bug in `RichTextBlock` where streaming text content would fail to display. The frontend component expected the `stream` property to be a plain string, but the backend serializer was producing an object with an `id` property (`{ id: "..." }`), causing stream subscriptions to silently fail.
 
-**What was fixed:**
 
-- The `RichTextBlockWidget` now correctly handles the stream object format from the serializer
-- Stream subscriptions now work reliably for real-time text updates
-
-**Impact:**
-If you're using the `RichTextBlock` streaming feature (documented above), streams will now properly display incoming text chunks in real-time.
 
 ---
 
@@ -4853,29 +3050,7 @@ If you're using the `RichTextBlock` streaming feature (documented above), stream
 
 Fixed a runtime `TypeError` that occurred when using `.FormatStyle(NumberFormatStyle.Currency)` on `NumberInput` without explicitly setting a currency code. The framework now automatically defaults to "USD" when no currency is specified.
 
-**What was fixed:**
 
-- `NumberInput` with `Currency` format style no longer crashes at runtime
-- Currency code automatically defaults to "USD" if not explicitly set
-- Works seamlessly with method chaining after `ToNumberInput()`
-
-**Example:**
-
-```csharp
-// This now works without errors
-var input = new NumberInput()
-    .Value(100.50)
-    .FormatStyle(NumberFormatStyle.Currency); // Automatically uses USD
-
-// You can still override with a specific currency
-var euroInput = new NumberInput()
-    .Value(100.50)
-    .FormatStyle(NumberFormatStyle.Currency)
-    .Currency("EUR");
-```
-
-**Impact:**
-If you were experiencing crashes when using currency formatting on number inputs, this fix resolves the issue. The default USD currency provides sensible behavior while still allowing you to specify other currencies when needed.
 
 ---
 
@@ -4883,16 +3058,7 @@ If you were experiencing crashes when using currency formatting on number inputs
 
 Fixed a bug where streamed data (like `TextRun` objects in `RichText`) was not properly serialized when sent to the client. Stream data was passed as raw objects through SignalR, bypassing the camelCase naming policy and enum converters used by `WidgetSerializer`, causing property names and enum values to be incorrectly formatted on the client side.
 
-**What was fixed:**
 
-- Stream data is now pre-serialized using `WidgetSerializer.SerializerOptions`
-- OnSubscribed buffer flush now uses the same serialization as regular Write() calls
-- Property names are correctly converted to camelCase
-- Enum values are properly formatted for the client
-- Streamed complex objects now have consistent serialization with other widget data
-
-**Impact:**
-If you use streaming features (like `UseStream`) with complex objects, particularly `RichText` with `TextRun` objects, the data will now be correctly formatted when received by the client. This fix is especially important for buffered data - if stream data arrives before your frontend component subscribes (a common scenario during component mounting), it will now be properly serialized when flushed to your handler. This ensures consistent behavior between streamed and non-streamed widget data, and between regular stream writes and buffered data.
 
 ---
 
@@ -4900,15 +3066,7 @@ If you use streaming features (like `UseStream`) with complex objects, particula
 
 Fixed a race condition where `StreamData` messages could be dropped if they arrived before the frontend stream handler was ready. This could happen during React re-render cycles when stream data arrives while the component is still mounting or updating.
 
-**What was fixed:**
 
-- Frontend now buffers stream data that arrives before the handler registers
-- When `useStream` subscribes, any buffered data is immediately flushed to the handler
-- Stream data is no longer lost during component lifecycle events
-- Mirrors the backend buffering behavior for consistent reliability
-
-**Impact:**
-If you're using `UseStream` for real-time data streaming (like chat messages, AI responses, or live updates), you'll no longer experience dropped messages during component re-renders or initial mounting. All stream data is now guaranteed to be delivered to your handlers, even if it arrives slightly before the component is ready to receive it.
 
 ---
 
@@ -4916,29 +3074,7 @@ If you're using `UseStream` for real-time data streaming (like chat messages, AI
 
 Fixed a parsing issue in `HtmlPipeline` where void HTML elements (like `<link>`, `<meta>`, `<br>`, etc.) generated by Vite without self-closing slashes would cause `XDocument.Parse` to fail. While these elements are valid HTML5, XML parsing requires them to be self-closed.
 
-**What was fixed:**
 
-- Added automatic normalization that converts void HTML elements to self-closing form before XML parsing
-- Supports all standard void elements: `link`, `meta`, `br`, `hr`, `img`, `input`, `source`, `track`, `wbr`, `col`, `area`, `base`, `embed`
-- Mixed self-closed and non-self-closed elements are now handled correctly
-
-**Impact:**
-If you're using Vite as your build tool with Ivy, you'll no longer encounter parsing errors when the framework processes your `index.html` file. Vite's default HTML output with non-self-closed `<link rel="modulepreload">` and `<link rel="stylesheet">` tags will now work seamlessly with Ivy's HtmlPipeline.
-
----
-
-### HtmlPipeline XML Parsing with Modern Build Tools
-
-Fixed a bug in `HtmlPipeline` where HTML generated by modern build tools like Vite would cause XML parsing failures. Vite and other tools generate void HTML elements (`<link>`, `<meta>`, `<br>`, `<hr>`, `<img>`, etc.) without self-closing slashes, which is valid HTML5 but incompatible with `XDocument.Parse`.
-
-**What was fixed:**
-
-- The `HtmlPipeline` now automatically normalizes void HTML elements to self-closing form before XML parsing
-- Works with HTML generated by Vite, including `<link rel="modulepreload">` and `<link rel="stylesheet">` tags
-- Handles mixed self-closed and non-self-closed void elements correctly
-
-**Impact:**
-If you're using Vite or other modern build tools that generate HTML5-compliant void elements, the `HtmlPipeline` will now process your HTML without parsing errors. This fix ensures compatibility with standard build tool output without requiring manual HTML modifications.
 
 ---
 
@@ -4946,14 +3082,7 @@ If you're using Vite or other modern build tools that generate HTML5-compliant v
 
 Fixed a race condition that could occur when a client connection is closed while event handlers are still processing. Previously, the `ClientSender` could be torn down before in-flight event handlers finished executing, potentially causing errors or lost messages during disconnection.
 
-**What was fixed:**
 
-- App state is now disposed before the `ClientSender` is torn down, ensuring in-flight event handlers complete first
-- Added a disposal guard in `ClientSender.Send` to prevent attempts to write after disposal
-- Eliminated race conditions during connection cleanup
-
-**Impact:**
-If you experienced errors or warnings in your logs when users disconnect (especially during active event processing), these should now be resolved. The framework now ensures a clean shutdown sequence where all pending work completes before communication channels are closed.
 
 ---
 
@@ -4961,14 +3090,7 @@ If you experienced errors or warnings in your logs when users disconnect (especi
 
 Fixed a visual bug where chart content (area charts, bar charts, and line charts) would overlap with the toolbox controls when the toolbox was enabled. The chart grid now properly adjusts its top spacing to accommodate the toolbox.
 
-**What was fixed:**
 
-- Charts now reserve appropriate space at the top when a toolbox is present
-- Toolbox positioning is more precise to prevent overlap
-- All chart types (AreaChart, BarChart, LineChart) now handle toolbox spacing consistently
-
-**Impact:**
-If you're using charts with toolboxes enabled (for features like data zoom, download, or restore), the chart content will no longer visually overlap with the toolbox controls, providing a cleaner and more professional appearance.
 
 ---
 
@@ -4976,13 +3098,7 @@ If you're using charts with toolboxes enabled (for features like data zoom, down
 
 Fixed a compilation error (CS1061) that occurred when using `server.Services.AddHttpClient()`. The Ivy package now includes `Microsoft.Extensions.Http` as a transitive dependency.
 
-**What was fixed:**
 
-- Added `Microsoft.Extensions.Http` package reference to Ivy
-- `AddHttpClient()` extension method is now accessible without manual package installation
-
-**Impact:**
-If you're using `AddHttpClient()` to register HTTP client services in your Ivy application, you no longer need to manually add the `Microsoft.Extensions.Http` package to your project. This dependency is now automatically included.
 
 ---
 
@@ -4990,13 +3106,7 @@ If you're using `AddHttpClient()` to register HTTP client services in your Ivy a
 
 Fixed incorrect property usage in the XAML Builder sample application where `StackLayout` examples were using a non-existent `Gap` property. The examples now correctly use `RowGap` and `ColumnGap` properties.
 
-**What was fixed:**
 
-- "Buttons" example now uses `RowGap="2" ColumnGap="2"` instead of `Gap="2"`
-- "Nested Layout" example now uses proper `RowGap` and `ColumnGap` properties throughout
-
-**Impact:**
-If you were learning from the XAML Builder sample or copying its code, the examples now demonstrate the correct property names for spacing in `StackLayout`. This aligns with the framework's actual API where row and column gaps are controlled independently.
 
 ---
 
@@ -5004,19 +3114,7 @@ If you were learning from the XAML Builder sample or copying its code, the examp
 
 Fixed a `KeyNotFoundException` that occurred when calling `.Remove()` on `TableBuilder` for properties that cannot be displayed in tables, such as `byte[]` arrays. These properties are never registered as columns in the table, so attempting to remove them would throw an exception.
 
-**What was fixed:**
 
-- `TableBuilder.Remove()` now silently skips properties that aren't registered as columns
-- No longer throws `KeyNotFoundException` for non-displayable property types like `byte[]`
-- Uses `TryGetValue` internally to gracefully handle missing column entries
-
-**Example:**
-
-```csharp
-// This no longer throws an exception
-var table = new DataTableBuilder<User>()
-    .Remove(u => u.ProfilePicture); // byte[] property - silently skipped
-```
 
 ---
 
@@ -5024,18 +3122,7 @@ var table = new DataTableBuilder<User>()
 
 Fixed visual glitches in the `TableOfContents` widget that would cause incorrect highlighting and "junk" to appear when users scroll quickly through content. The component now uses a debounced update mechanism to ensure smooth, accurate highlighting even during rapid scrolling.
 
-**What was fixed:**
 
-- Implemented 120ms debounce delay before updating the active TOC heading
-- TOC now correctly identifies and listens to the actual scroll container instead of assuming `window`
-- Eliminated visual jitter and incorrect highlighting during fast scroll operations
-- Fixed auto-scroll behavior to keep the active TOC item visible
-
-**Impact:**
-If you're using the `TableOfContents` widget in your Ivy applications (commonly used for documentation, articles, or long-form content), users will now experience smooth, accurate highlighting as they scroll through content. Fast scrolling no longer causes the TOC to flicker between multiple active states or show incorrect highlights.
-
-**Impact:**
-If you're using `TableBuilder.Remove()` to exclude certain properties from your tables, you can now safely call it on any property without worrying about whether it's displayable. Properties that weren't going to show up anyway (like byte arrays) are now gracefully ignored instead of throwing exceptions.
 
 ---
 
@@ -5043,25 +3130,7 @@ If you're using `TableBuilder.Remove()` to exclude certain properties from your 
 
 Fixed a compiler ambiguity error that occurred when calling `.Set(null)` on state objects with nullable reference types. Previously, passing `null` to `.Set()` would match both the `Set(T value)` and `Set(Func<T,T> setter)` overloads, causing a compilation error.
 
-**What was fixed:**
 
-- Added `[OverloadResolutionPriority(1)]` attribute to `Set(T value)` overload in `IState<T>`, `State<T>`, `ConvertedState<TFrom,TTo>`, and `MockState<T>`
-- The compiler now correctly prefers `Set(T value)` over `Set(Func<T,T>)` when `null` is passed
-- No more ambiguity errors when setting nullable state values to null
-
-**Example:**
-
-```csharp
-// This now works without compiler errors or explicit casting
-var selectedItem = UseState<InventoryItem?>(null);
-selectedItem.Set(null); // ✅ Compiles cleanly
-
-// Previously required casting to resolve ambiguity
-// selectedItem.Set((InventoryItem?)null);
-```
-
-**Impact:**
-If you're managing nullable state values and need to reset them to `null`, you can now call `.Set(null)` directly without casting or wrapping in a lambda. This makes state management code cleaner and more intuitive.
 
 ---
 
@@ -5069,22 +3138,7 @@ If you're managing nullable state values and need to reset them to `null`, you c
 
 Fixed the default window title for Ivy desktop applications. Instead of showing a generic "Ivy App" title, desktop windows now automatically display the application's assembly name, providing a more professional and context-appropriate default.
 
-**What was fixed:**
 
-- Desktop window title now defaults to the entry assembly name (e.g., "MyApplication" for MyApplication.exe)
-- Falls back to "Ivy App" only if the assembly name cannot be determined
-- No code changes required - existing applications automatically benefit from this improvement
-
-**Impact:**
-If you're building desktop applications with `Ivy.Desktop`, your application windows will now show a meaningful title by default without needing to explicitly call `.Title()`. This provides a better out-of-the-box experience, though you can still customize the title using the `.Title()` method when needed:
-
-```csharp
-// Automatically shows your assembly name as the window title
-new DesktopWindow(server);
-
-// Or customize it explicitly
-new DesktopWindow(server).Title("My Custom App Name");
-```
 
 ---
 
@@ -5092,46 +3146,7 @@ new DesktopWindow(server).Title("My Custom App Name");
 
 Fixed the hook usage analyzer (`IVYHOOK001`) to correctly recognize lambdas passed to `FuncView` and `MemoizedFuncView` constructors as valid locations for hooks. Previously, the analyzer would incorrectly flag these as errors, even though these lambdas function as Build methods.
 
-**What was fixed:**
 
-- `FuncView` and `MemoizedFuncView` lambdas are now treated as valid Build method contexts
-- Hooks can be called inside these lambdas without triggering false analyzer errors
-- All other hook rules (no conditionals, no loops, must be at top) still apply within the lambdas
-
-**Example:**
-
-```csharp
-// ✅ This now works without analyzer errors
-public override object? Build()
-{
-    return new FuncView(context =>
-    {
-        var state = UseHelper(context);  // No longer flagged as IVYHOOK001
-        return new Text($"Value: {state}");
-    });
-}
-
-private static object UseHelper(IViewContext context) => context.UseState(0);
-```
-
-**Impact:**
-If you're using `FuncView` or `MemoizedFuncView` with hooks inside their lambdas, you'll no longer get false positive analyzer errors. This enables cleaner inline widget composition with state management, particularly useful for functional-style widget building where you want to encapsulate state logic within the view factory.
-
----
-
-### Table of Contents - Smooth Scrolling Fix
-
-Fixed a visual bug in the `TableOfContents` widget where the active heading indicator would flicker or show incorrect values during fast scrolling. The TOC now updates smoothly with a debounced approach that prevents jittery behavior.
-
-**What was fixed:**
-
-- Added 120ms debounce to prevent excessive updates during rapid scrolling
-- Improved scroll container detection to listen on the correct scrolling element
-- Fixed auto-scrolling of the TOC itself to keep the active item visible
-- Eliminated visual "junk" or flickering that appeared when quickly scrolling through long articles
-
-**Impact:**
-If you're using the `TableOfContents` widget in your articles or documentation pages, you'll notice much smoother behavior when scrolling through content. The active heading indicator now updates cleanly without flickering, providing a better reading experience for your users.
 
 ---
 
@@ -5139,26 +3154,7 @@ If you're using the `TableOfContents` widget in your articles or documentation p
 
 Fixed improper capitalization in chart legends when using camelCase property names. The `SplitPascalCase` utility now properly title-cases each word, producing professional-looking chart labels.
 
-**What was fixed:**
 
-- `SplitPascalCase` now capitalizes the first letter of each word
-- Chart legends now display "Avg Salary" instead of "avg Salary" for properties like `avgSalary`
-- Removed redundant frontend capitalize hack in `PieChartWidget`
-
-**Example:**
-
-```csharp
-// Property names in your data classes
-public class SalesData
-{
-    public decimal avgSalary { get; set; }     // Now displays as "Avg Salary"
-    public int totalCount { get; set; }        // Now displays as "Total Count"
-    public decimal minValue { get; set; }      // Now displays as "Min Value"
-}
-```
-
-**Impact:**
-If you're using pie charts, bar charts, or any other charts that automatically generate labels from property names, the labels will now be properly title-cased, providing a more polished and professional appearance. This fix ensures consistent capitalization across all chart types without requiring manual label customization.
 
 ---
 
@@ -5166,26 +3162,7 @@ If you're using pie charts, bar charts, or any other charts that automatically g
 
 Fixed incorrect color mapping when using semantic surface colors (like `Colors.Muted`, `Colors.Background`, `Colors.Card`) for text. These colors were previously mapping to their base CSS variables, which are designed for backgrounds, resulting in poor readability and contrast issues.
 
-**What was fixed:**
 
-- Surface theme colors (`Background`, `Card`, `Popover`, `Muted`, `Accent`) now automatically map to their foreground variants when used for text
-- `.Color(Colors.Muted)` now correctly applies `muted-foreground` instead of `muted`
-- Brand/state colors (`Primary`, `Secondary`, `Destructive`) continue to use their base variables as intended
-
-**Example:**
-
-```csharp
-// This now applies the correct foreground color with proper contrast
-Text.P("Muted text")
-    .Color(Colors.Muted);  // Uses muted-foreground, not muted
-
-// Other semantic colors work correctly too
-Text.P("Subtle text")
-    .Color(Colors.Accent);  // Uses accent-foreground
-```
-
-**Impact:**
-If you're using semantic surface colors for text styling, your text will now have proper contrast and readability. The framework automatically selects the appropriate foreground variant to ensure text remains legible against the theme's background.
 
 ---
 
@@ -5193,24 +3170,7 @@ If you're using semantic surface colors for text styling, your text will now hav
 
 Fixed a bug in `SidebarLayoutWidget` where the `.Open(false)` property was being overridden by the media query handler on component mount. When a sidebar was explicitly set to closed, the auto-collapse media query would incorrectly force it open if the viewport was wide enough.
 
-**What was fixed:**
 
-- Media query handler now respects the `open` property when determining sidebar state
-- Sidebar stays closed when `.Open(false)` is set, regardless of viewport width
-- The `openProp` is now included in the useEffect dependency array for correct reactivity
-
-**Example:**
-
-```csharp
-// The sidebar now correctly stays closed, even on wide viewports
-new SidebarLayoutWidget()
-    .Open(false)  // This is now properly respected
-    .Sidebar(new Text("Sidebar content"))
-    .MainContent(new Text("Main content"));
-```
-
-**Impact:**
-If you're using `SidebarLayoutWidget` with `.Open(false)` to start with a closed sidebar, it will now correctly remain closed on mount, regardless of the viewport size. Previously, wide viewports would override this setting and show the sidebar anyway.
 
 ---
 
@@ -5218,30 +3178,8 @@ If you're using `SidebarLayoutWidget` with `.Open(false)` to start with a closed
 
 Fixed a visual bug in the `MarkdownRenderer` where code blocks were missing their borders. The `ScrollArea` component wrapping the syntax highlighter was missing the border styling classes that were present in the fallback block, causing rendered code blocks to appear without visible borders.
 
-**What was fixed:**
 
-- Code blocks in markdown now display with proper borders and rounded corners
-- Consistent styling between scrollable and non-scrollable code blocks
-- Visual appearance matches the intended design
 
-**Impact:**
-If you're using markdown rendering in your application (via `MarkdownRenderer` component), code blocks will now properly display with borders, providing better visual separation from surrounding content and a more polished appearance.
-
----
-
-### Clerk Authentication - Graceful Existing Session Handling
-
-Fixed an issue in the Clerk authentication provider where sign-in attempts would fail if an active session already existed. This commonly occurred when users tried to sign in while already having a valid but undetected session, causing authentication errors instead of seamlessly restoring or replacing the existing session.
-
-**What was fixed:**
-
-- Password sign-in now attempts to restore existing sessions before failing
-- If session restoration fails, all sessions are automatically cleared and sign-in proceeds
-- OAuth sign-in gracefully clears conflicting sessions and retries
-- No more `session_exists` errors blocking user authentication
-
-**Impact:**
-If you're using Clerk authentication (`Ivy.Auth.Clerk`) in your application, users will no longer encounter authentication failures when attempting to sign in with an existing session. The framework now intelligently handles these situations by either restoring the existing session or clearing it to allow fresh sign-in, providing a smoother authentication experience without requiring manual session cleanup.
 
 ---
 
@@ -5859,25 +3797,7 @@ CLI diagnostic commands (`--describe`, `--describe-connection`, `--test-connecti
 **What was the problem:**
 These commands need dependency injection but don't actually start a web server. Previously, they would fail with port-in-use errors if you tried to run them while your app was already running, even though they never needed the port.
 
-**What changed:**
 
-- CLI-only commands now use port 0 internally and skip port-in-use checks entirely
-- You can now run diagnostic commands at any time without stopping your running app
-- The commands initialize the DI container but never bind to the actual port
-
-**Example scenario:**
-
-```bash
-# Your app is running on port 5000
-dotnet run
-
-# In another terminal, you can now run diagnostic commands without conflicts
-dotnet run --test-connection postgres
-dotnet run --describe-connection mysql
-dotnet run --describe
-```
-
-This eliminates the frustration of having to stop your running app just to test a database connection or inspect your app's configuration.
 
 ---
 
@@ -5885,19 +3805,7 @@ This eliminates the frustration of having to stop your running app just to test 
 
 Ivy apps now bind to `localhost` instead of the wildcard address (`*`), eliminating Windows Firewall prompts during development.
 
-**What changed:**
 
-- Server now listens on `http://localhost:{port}` instead of `http://*:{port}`
-- Since Ivy apps are local development tools, they don't need to listen on external network interfaces
-- This change prevents Windows from showing firewall permission dialogs every time you run your app
-
-**Impact:**
-
-- Smoother development experience on Windows - no more clicking through firewall dialogs
-- Your app is still fully accessible on localhost as before
-- No action needed from developers - the change is automatic
-
-This makes the development workflow more seamless, especially for Windows users who were repeatedly prompted to allow firewall access.
 
 ---
 
@@ -5906,13 +3814,7 @@ This makes the development workflow more seamless, especially for Windows users 
 
 The `Ivy.Desktop` package is now published to NuGet, making it easier to add desktop application support to your Ivy projects.
 
-**Installation:**
 
-```bash
-dotnet add package Ivy.Desktop
-```
-
-This streamlines the setup process for building native desktop applications - no need to manually reference project files or build from source.
 
 ---
 
@@ -5920,39 +3822,7 @@ This streamlines the setup process for building native desktop applications - no
 
 A new interactive sample app has been added to demonstrate the `XamlBuilder` API. This sample provides a live XAML editor with instant preview, making it easy to experiment with XAML-based layouts and learn the XamlBuilder syntax.
 
-**Features:**
 
-- Pre-built examples including layouts, buttons, cards, and nested structures
-- Live code editor with syntax highlighting for XAML
-- Real-time preview of rendered components
-- Error feedback for invalid XAML syntax
-
-**Code example from the sample:**
-
-```csharp
-var xml = UseState(DefaultXaml);
-var builder = new XamlBuilder();
-
-try
-{
-    var preview = builder.Build(xml.Value);
-    // Display the rendered component
-}
-catch (Exception ex)
-{
-    // Show error feedback
-    preview = Callout.Error(ex.Message);
-}
-```
-
-This sample is particularly useful for learning how to:
-
-- Parse and render XAML at runtime
-- Build interactive editing interfaces
-- Handle dynamic UI generation with error handling
-- Structure complex layouts with minimal code
-
-You can find this sample in the Advanced section of the sample apps.
 
 ---
 
@@ -5980,14 +3850,7 @@ New PowerShell launcher scripts have been added to make it easier to run the Ivy
 ./IvyDocs.ps1 -BuildFrontend
 ```
 
-When you use the `-BuildFrontend` switch, the scripts automatically:
 
-1. Navigate to the frontend directory
-2. Run `npm install` to ensure dependencies are up to date
-3. Run `npm run build` to compile the frontend
-4. Return and launch the .NET project
-
-This eliminates the need to manually build the frontend in a separate terminal or remember the build steps, making it faster to get started with development or documentation work.
 
 ---
 
@@ -6044,17 +3907,11 @@ The Ivy CLI now includes powerful commands for querying and accessing framework 
 
 **`ivy question` - Semantic Documentation Search**
 
-Query the Ivy Framework documentation using natural language with Local RAG (Retrieval-Augmented Generation). The command uses semantic search to find relevant information from the framework's knowledge base, tailored to your specific Ivy version.
+Query the Ivy Framework documentation using natural language with Local RAG (Retrieval-Augmented Generation).
 
 ```terminal
 >ivy question "How do I implement a new Application Shell in Ivy?"
 ```
-
-```terminal
->ivy question "What is the command to create an auto-incrementing migration in Ivy?"
-```
-
-The query is wrapped in double quotes and can be any natural language question about Ivy's architecture, APIs, or best practices.
 
 **`ivy docs list` - List Available Documentation**
 
@@ -6064,8 +3921,6 @@ List all available documentation paths in the framework:
 >ivy docs list
 ```
 
-This outputs a structured YAML representation of all documentation titles and relative paths, making it easy to discover what documentation is available.
-
 **`ivy docs [path]` - Retrieve Raw Documentation**
 
 Fetch the raw Markdown content of a specific documentation page:
@@ -6073,10 +3928,6 @@ Fetch the raw Markdown content of a specific documentation page:
 ```terminal
 >ivy docs "docs/ApiReference/IvyShared/Colors.md"
 ```
-
-This retrieves the full Markdown source for the specified page, version-matched to your framework installation. Use paths discovered via `ivy docs list`.
-
-These commands make it faster to find answers and reference documentation without leaving your terminal or opening a browser.
 
 ---
 
@@ -6106,34 +3957,7 @@ Both syntaxes work, but the documentation now consistently uses the simpler form
 
 The Ivy documentation site now features an intelligent AI-powered search system that helps you find answers faster and more accurately.
 
-**How It Works:**
 
-When you interact with the search box in the documentation sidebar, the Smart Search dialog opens with:
-
-1. **Instant search suggestions** - As you type, see relevant documentation pages filtered by your query with smart scoring
-2. **AI-powered answers** - Click the "Get an answer from Ivy Agent" button to ask natural language questions and receive contextual answers from the Ivy documentation
-3. **Interactive chat** - Ask follow-up questions to refine your understanding without starting a new search
-4. **Keyboard navigation** - Use `Arrow Up`/`Arrow Down` to navigate results, `Enter` to select or submit your question
-
-**Key Features:**
-
-- **Natural language questions** - Ask "How do I create a new input widget?" instead of searching for keywords
-- **Context-aware answers** - Responses are generated from the official Ivy Framework documentation and tailored to your version
-- **Follow-up conversation** - Continue the dialogue with additional questions to drill deeper into a topic
-- **Seamless integration** - The search dialog opens automatically when you click or focus the sidebar search input
-- **Smart error handling** - Clear error messages with retry options if searches fail
-
-The Smart Search feature is powered by the new `IvyDocsQuestionsClient` service that communicates with the Ivy documentation AI API, providing accurate, up-to-date answers based on the framework's official documentation.
-
-**Example Questions:**
-
-```
-"How do I implement a custom ViewBase component?"
-"What's the difference between UseState and UseMemo?"
-"How do I style a Button widget?"
-```
-
-This makes finding documentation faster and more intuitive, especially for developers new to the framework or looking for specific implementation patterns.
 
 ---
 
@@ -6141,19 +3965,7 @@ This makes finding documentation faster and more intuitive, especially for devel
 
 A new entry has been added to the Hallucinations documentation page to help users avoid a common API mistake with layout spacing.
 
-**Common Mistake:**
-
-```csharp
-Layout.Horizontal().SpaceBetween()  // ❌ Error: 'LayoutView' does not contain a definition for 'SpaceBetween'
-```
-
-**Correct Usage:**
-
-```csharp
-Layout.Horizontal(Align.SpaceBetween)  // ✅ Correct
-```
-
-`SpaceBetween` is an `Align` enum value passed to the layout constructor, not a fluent method. The same applies to `SpaceAround` and `SpaceEvenly`. This documentation helps clarify the correct API usage, especially for users working with AI coding assistants.
+`SpaceBetween` is an `Align` enum value passed to the layout constructor, not a fluent method. The same applies to `SpaceAround` and `SpaceEvenly`.
 
 ---
 
@@ -6161,40 +3973,7 @@ Layout.Horizontal(Align.SpaceBetween)  // ✅ Correct
 
 The hallucinations documentation has been updated to clarify that the `.Label()` mistake applies to **all input types**, not just `NumberInputBase`.
 
-**Common Mistake:**
 
-```csharp
-// Any input type - all fail the same way
-stockAdjustment.ToNumberInput().Label("Adjustment amount")  // ❌ CS0311 error
-dateState.ToDateInput().Label("Birthdate")                   // ❌ CS0311 error
-```
-
-**Error:** `The type 'Ivy.NumberInputBase' cannot be used as type parameter 'T' in the generic type or method 'AxisExtensions.Label<T>(T, string)'` (same error for `DateTimeInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, etc.)
-
-**Correct Usage:**
-
-The **preferred way** is to use `.WithField().Label()`:
-
-```csharp
-stockAdjustment.ToNumberInput().WithField().Label("Adjustment amount")
-dateState.ToDateInput().WithField().Label("Birthdate")
-```
-
-Alternatively, use `Text.Label()` as a separate element:
-
-```csharp
-Layout.Vertical()
-    | Text.Label("Adjustment amount")
-    | stockAdjustment.ToNumberInput()
-```
-
-Or use the form builder's `.Label()` method:
-
-```csharp
-state.ToForm().Label(m => m.Amount, "Adjustment amount")
-```
-
-The issue is that `.Label()` is an `AxisExtensions` method for chart axes, not for inputs. This mistake affects all `InputBase` types, and the documentation now includes examples for multiple input types to make this clear.
 
 ---
 
@@ -6234,29 +4013,7 @@ public class MyApp : ViewBase
 
 A new FAQ entry has been added clarifying that the `[App]` attribute does not have a layout parameter. This addresses a common misconception where developers might try to configure layout through the attribute itself.
 
-**The Question:** Does the `[App]` attribute have a layout parameter?
 
-**The Answer:** No. The `[App]` attribute only supports `title`, `icon`, `group`, and `connection` named parameters. Layout is controlled within the `Build()` method using layout helpers, not as an attribute parameter.
-
-**Example:**
-
-```csharp
-[App(title: "My App", icon: Icons.Layout)]
-public class MyApp : ViewBase
-{
-    public override object? Build()
-    {
-        // Layout is set here, not in the attribute
-        return Layout.TopCenter()
-            | (Layout.Vertical().Width(Size.Full().Max(200))
-                | Text.H1("My App")
-                | ...
-            );
-    }
-}
-```
-
-This clarification helps developers understand that layout configuration is part of the component's render logic, not part of the app metadata defined in the attribute.
 
 ---
 
@@ -6264,49 +4021,7 @@ This clarification helps developers understand that layout configuration is part
 
 The Ivy.Desktop package now has a comprehensive README with quick start instructions, code examples, and visual branding to help developers get started with building native desktop applications.
 
-**What's New:**
 
-The README now includes:
-
-- Logo and NuGet badges showing package version, downloads, and license information
-- Clear description of Ivy.Desktop's purpose: running Ivy apps natively on Windows, macOS, and Linux
-- Benefits explanation: lightweight alternative to Electron using [Photino](https://tryphotino.io) without shipping a heavy Chromium instance
-- Complete Quick Start guide with installation and initialization examples
-
-**Quick Start Example:**
-
-```csharp
-using Ivy;
-using Ivy.Desktop;
-
-public class MyDesktopApp : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Vertical(
-            Text.Title("Hello from Ivy.Desktop!"),
-            Text.Subtitle("Native desktop UI powered by C#")
-        );
-    }
-}
-
-// In your Program.cs
-public class Program
-{
-    public static void Main(string[] args)
-    {
-        var appDescriptor = new AppDescriptor()
-        {
-            RootComponent = typeof(MyDesktopApp),
-            InitialTitle = "My Desktop App",
-        };
-
-        DesktopWindow.Run(appDescriptor, args);
-    }
-}
-```
-
-This improved documentation makes it easier for developers to discover and start building desktop applications with Ivy, with clear instructions and working code examples right in the package README.
 
 ---
 
@@ -6314,85 +4029,7 @@ This improved documentation makes it easier for developers to discover and start
 
 A new documentation file has been added that catalogs common API mistakes made by AI coding assistants when generating Ivy Framework code. This reference helps developers quickly identify and fix build errors that result from AI-generated code.
 
-The documentation covers patterns like:
 
-- Using non-existent fluent methods (e.g., `.Options()`, `.OnEnter()`, `.Color()`)
-- Wrong enum names (e.g., `TextInputVariant` instead of `TextInputVariants`)
-- Incorrect constructor signatures (e.g., `new Table<T>()` instead of `.ToTable()`)
-- Confused property names (e.g., `.Data` instead of `.Value`, `.IsLoading` instead of `.Loading`)
-- Non-existent lifecycle callbacks (e.g., `Server.OnReady()`, `Server.OnStartup()`)
-
-Each entry includes the hallucinated API, the actual error message, and the correct way to use the API. This is particularly useful when working with AI assistants like Claude, GPT-4, or Copilot to build Ivy applications.
-
-**New additions:**
-
-The reference now documents the common hallucination where AI assistants suggest `server.OnReady()` or `server.OnStartup()` lifecycle callbacks for initializing data or seeding databases. The `Server` class doesn't have these methods. Instead, use the connection's context factory pattern to seed data:
-
-```csharp
-// Correct: Use context factory for database seeding
-var connection = server.UseConnection<MyDbContext>(options =>
-    options.ContextFactory = () =>
-    {
-        var ctx = new MyDbContext();
-        ctx.Database.EnsureCreated();
-        SeedData(ctx);
-        return ctx;
-    });
-
-// Or resolve services directly in Program.cs:
-var myService = server.Services.GetRequiredService<IMyService>();
-myService.Initialize();
-```
-
-The reference also now includes the `LayoutView.SpaceBetween()` hallucination, where AI assistants suggest using `.SpaceBetween()` as a fluent method when it's actually an `Align` enum value:
-
-```csharp
-// Hallucinated (incorrect):
-Layout.Horizontal().SpaceBetween()
-
-// Correct:
-Layout.Horizontal(Align.SpaceBetween)
-```
-
-The same applies to `SpaceAround` and `SpaceEvenly` — they are alignment options passed to the layout constructor, not fluent methods.
-
-The documentation now includes an improved workaround for the `UseState<T?>(null)` ambiguity issue. When initializing nullable state with `null`, the simplest approach is to omit the argument entirely:
-
-```csharp
-// Best: omit the null argument — the default is already null
-var selectedItem = UseState<InventoryItem?>();
-
-// Alternative: cast null to the explicit type
-var selectedItem = UseState<InventoryItem?>((InventoryItem?)null);
-
-// Alternative: use a lambda
-var selectedItem = UseState(() => (InventoryItem?)null);
-```
-
-**Technical note:** Unlike `IState<T>.Set(null)` (which was fixed using `[OverloadResolutionPriority]`), `UseState` cannot use the same solution. C# 10+ lambda natural types would cause the `T?` overload to steal all lambda calls when given higher priority, breaking `UseState(() => expr)` patterns throughout the codebase.
-
-The reference now documents the `Fragment.Empty` hallucination, where AI assistants suggest using a non-existent static member to return an empty view:
-
-```csharp
-// Hallucinated (incorrect):
-return Fragment.Empty;
-// Error: 'Fragment' does not contain a definition for 'Empty'
-
-// Correct alternatives:
-return ViewBase.Empty;  // Use ViewBase.Empty
-return new Fragment();  // Or return an empty Fragment
-return null;            // Or just return null
-```
-
-`Fragment` does not have an `Empty` static member. To return nothing from a view, use `ViewBase.Empty`, `new Fragment()`, or `null`.
-
-**Key points:**
-
-- The class must inherit from `ViewBase` and override `Build()`
-- `path` controls navigation grouping (e.g., `["Settings", "Advanced"]` creates nested groups)
-- `icon` uses the `Icons` enum (e.g., `Icons.Settings`, `Icons.Users`, `Icons.Database`)
-- All parameters are optional — `[App]` with no arguments is valid
-- Layout is controlled within the `Build()` method, not as an attribute parameter
 
 ---
 
@@ -6428,44 +4065,7 @@ return Layout.Vertical()
 
 The FAQ documentation now includes a complete example of implementing delete confirmations, demonstrating a common pattern for confirming destructive actions before executing them.
 
-**Example - Delete with confirmation:**
 
-```csharp
-var (alertView, showAlert) = UseAlert();
-var client = UseService<IClientProvider>();
-
-void DeleteItem(int id)
-{
-    showAlert("Are you sure you want to delete this item?", async result =>
-    {
-        if (result == AlertResult.Ok)
-        {
-            await using var db = dbFactory.CreateDbContext();
-            var item = await db.Items.FindAsync(id);
-            if (item != null)
-            {
-                db.Items.Remove(item);
-                await db.SaveChangesAsync();
-                client.Toast("Item deleted");
-                refreshToken.Refresh();
-            }
-        }
-    }, "Confirm Delete", AlertButtonSet.OkCancel);
-}
-
-return Layout.Vertical()
-    | new Button("Delete", _ => DeleteItem(itemId)).Destructive()
-    | alertView; // IMPORTANT: must include alertView in the view tree
-```
-
-**Key patterns demonstrated:**
-
-- Using `UseAlert()` for confirmation dialogs
-- Destructive button styling with `.Destructive()`
-- Async database operations inside the callback
-- Toast notifications for user feedback
-- Refreshing the UI after data changes
-- Proper disposal with `await using`
 
 ---
 
@@ -6473,33 +4073,7 @@ return Layout.Vertical()
 
 The FAQ documentation now includes comprehensive guidance on using `UseQuery` with Entity Framework Core, covering the proper patterns for reactive database queries in Ivy applications.
 
-**Key topics covered:**
 
-- **DbContext Factory Pattern**: Always use `IDbContextFactory<T>` (never inject `DbContext` directly) and create a scoped instance with `CreateDbContextAsync()` inside the query lambda
-- **QueryResult Properties**: The result has `.Value`, `.Loading`, and `.Error` properties (not `.Data` or `.IsLoading`)
-- **Reactive Re-fetching**: Pass a `RefreshToken` as a dependency to automatically re-run queries after data mutations
-- **Query Execution**: Always call `.ToListAsync()` inside the query lambda — never return `IQueryable` directly
-- **Mutation Pattern**: Use separate methods that create their own `DbContext` from the factory, call `SaveChangesAsync()`, then trigger `refreshToken.Refresh()`
-
-**Example:**
-
-```csharp
-var dbFactory = UseService<IDbContextFactory<MyDbContext>>();
-var refreshToken = UseRefreshToken();
-
-var query = UseQuery(async () =>
-{
-    await using var db = await dbFactory.CreateDbContextAsync();
-    return await db.Items.OrderBy(i => i.Name).ToListAsync();
-}, refreshToken);
-
-if (query.Loading) return Text.P("Loading...");
-if (query.Value is not { } items) return Callout.Info("No data.");
-
-return items.ToDataTable();
-```
-
-This pattern ensures proper lifetime management, prevents concurrency issues, and integrates seamlessly with Ivy's reactive system.
 
 ---
 
@@ -6507,34 +4081,7 @@ This pattern ensures proper lifetime management, prevents concurrency issues, an
 
 The FAQ documentation now includes guidance on working with navigation properties in DataTable, explaining a common limitation and the recommended solution.
 
-**The Problem:** `DataTableBuilder` only supports top-level properties of the model type. Attempting to access nested properties like `p.Author.Username` will throw a `KeyNotFoundException` at runtime because only direct properties are scaffolded as columns.
 
-**The Solution:** Project your query into a flat DTO with all needed fields as direct properties:
-
-```csharp
-// ❌ BAD - nested property access will fail at runtime
-var posts = db.Posts.Include(p => p.Author).AsQueryable();
-posts.ToDataTable()
-    .Header(p => p.Author.Username, "Author"); // KeyNotFoundException!
-
-// ✅ GOOD - project into a flat DTO
-record PostListItem(int Id, string Title, string AuthorName, string Status);
-
-var posts = db.Posts
-    .Include(p => p.Author)
-    .Select(p => new PostListItem(p.Id, p.Title, p.Author.Username, p.Status.ToString()))
-    .AsQueryable();
-
-posts.ToDataTable()
-    .Header(p => p.AuthorName, "Author"); // Works!
-```
-
-**Benefits of this approach:**
-
-- Avoids runtime exceptions from nested property access
-- Simplifies DataTable configuration
-- No need to use `.Hidden()` to hide navigation properties or unwanted fields
-- Better performance by only selecting the data you need
 
 ---
 
@@ -6582,36 +4129,7 @@ These examples are available in the XamlBuilder sample app and provide ready-to-
 
 The FAQ documentation now includes comprehensive guidance on creating Tables in Ivy, covering both simple data-driven tables and manual table construction.
 
-**Simple data-driven tables:**
 
-For displaying collections as tables, use `.ToTable()` to automatically scaffold columns from your data:
-
-```csharp
-var data = new[]
-{
-    new { Name = "Alice", Age = 30, City = "NYC" },
-    new { Name = "Bob", Age = 25, City = "LA" },
-};
-return data.ToTable();
-```
-
-**Manual table construction:**
-
-For fine-grained control, construct tables explicitly using `TableRow` and `TableCell`:
-
-```csharp
-new Table(
-    new TableRow(new TableCell("Name"), new TableCell("Age")).IsHeader(),
-    new TableRow(new TableCell("Alice"), new TableCell("30")),
-    new TableRow(new TableCell("Bob"), new TableCell("25"))
-)
-```
-
-**Important API notes:**
-
-- `Table` takes `TableRow[]` as its constructor parameter — **not** `string[]`
-- There is **no** `.Row()` method on Table
-- For data-heavy tables with sorting, filtering, and pagination, use `.ToDataTable()` on `IQueryable<T>` instead of `.ToTable()`
 
 ---
 
@@ -7093,11 +4611,7 @@ new Box(Text.P("A"))
     .BorderRadius(BorderRadius.Full)
 ```
 
-**Key points:**
 
-- `BorderRadius.Full` makes the box fully rounded
-- When width and height are equal, this produces a perfect circle
-- Use `BorderRadius.Rounded` for rounded corners instead of a complete circle
 
 ---
 
@@ -7105,38 +4619,7 @@ new Box(Text.P("A"))
 
 The `UseState` hook documentation and AI agent guidelines have been updated with critical guidance about using immutable types to prevent silent re-render failures.
 
-**The Problem:**
 
-When you mutate an object in place and pass the same reference to `.Set()`, Ivy won't detect the change because the reference hasn't changed, resulting in the UI not re-rendering:
-
-```csharp
-// ❌ WRONG - This won't trigger a re-render
-var userState = UseState(new User { Name = "Alice" });
-var user = userState.Value;
-user.Name = "Bob";           // Mutating in place
-userState.Set(user);          // Same reference - no re-render!
-```
-
-**The Solution:**
-
-Always use immutable types like records with `UseState`. When you need to update the state, create a new instance using the `with` expression:
-
-```csharp
-// ✅ CORRECT - Using a record with 'with' expression
-public record User(string Name, int Age);
-
-var userState = UseState(new User("Alice", 30));
-
-// Create a new instance when updating
-userState.Set(userState.Value with { Name = "Bob" });
-```
-
-**Key points:**
-
-- Use `record` types instead of `class` types for state objects
-- The `with` expression creates a new instance with modified properties
-- Creating a new instance ensures the reference changes, triggering a re-render
-- This guidance has been added to both the UseState documentation and the AGENTS.md file
 
 ---
 
@@ -7144,15 +4627,7 @@ userState.Set(userState.Value with { Name = "Bob" });
 
 The FAQ documentation now includes guidance on how to change the size of icons, addressing a common question about icon sizing.
 
-**How to change icon size:**
 
-```csharp
-new Icon(Icons.Star).Small()   // small icon
-new Icon(Icons.Star)            // default size
-new Icon(Icons.Star).Large()   // large icon
-```
-
-**Important:** There is no `.WithIconSize()` method or `IconSize` enum. Use the simple `.Small()` and `.Large()` fluent modifiers for resizing icons.
 
 ---
 
@@ -7160,18 +4635,7 @@ new Icon(Icons.Star).Large()   // large icon
 
 The FAQ documentation now includes guidance on how to change the font size of text, addressing a common question about text sizing.
 
-**How to change text size:**
 
-```csharp
-Text.P("Large text").Large()
-Text.P("Normal text").Medium()
-Text.P("Small text").Small()
-Text.P("Small muted text").Small().Muted()
-```
-
-These modifiers work with all text factory methods (`Text.P()`, `Text.H1()`, `Text.Block()`, `Text.Label()`, etc.).
-
-**Important:** There is no `.WithFontSize()` method or `FontSize` enum. Use the simple `.Large()`, `.Medium()`, and `.Small()` fluent modifiers for text sizing.
 
 ---
 
@@ -7179,56 +4643,7 @@ These modifiers work with all text factory methods (`Text.P()`, `Text.H1()`, `Te
 
 The `RichTextBlock` streaming documentation has been significantly enhanced with more comprehensive examples and explanations, making it easier to implement real-time text streaming scenarios like LLM responses.
 
-**What's New:**
 
-The documentation now includes a realistic LLM response streaming example that demonstrates word-by-word streaming with delays. This example shows how to use the `Word = true` property to automatically insert spaces between words:
-
-```csharp
-public class RichTextLLMStreamDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var stream = Context.UseStream<TextRun>();
-        var cts = new CancellationTokenSource();
-
-        return Layout.Vertical()
-            | Text.Rich()
-                .Bold("🤖 ")
-                .UseStream(stream)
-            | new Button("Generate response").OnClick(async () =>
-            {
-                await cts.CancelAsync();
-                cts = new CancellationTokenSource();
-                var token = cts.Token;
-
-                var words = "The meaning of life is to build great software.".Split(' ');
-                try
-                {
-                    foreach (var word in words)
-                    {
-                        await Task.Delay(100, token);
-                        stream.Write(new TextRun(word) { Word = true });
-                    }
-                }
-                catch (OperationCanceledException) { }
-            });
-    }
-}
-```
-
-**Buffering Control:**
-
-The documentation now explains that `UseStream<T>()` buffers data by default until the frontend subscribes. This means you can start writing immediately, and any data written before the frontend is ready will be automatically flushed once the connection is established:
-
-```csharp
-// Default: buffering enabled (recommended)
-var stream = Context.UseStream<TextRun>();
-
-// Disable buffering if needed
-var stream = Context.UseStream<TextRun>(buffer: false);
-```
-
-These improvements make it much clearer how to implement streaming text scenarios, particularly useful for AI/LLM integrations, live logs, or any incremental text output.
 
 ---
 
@@ -7236,32 +4651,7 @@ These improvements make it much clearer how to implement streaming text scenario
 
 The documentation now includes a comprehensive guide for all the ways to configure the port when running Ivy applications. Whether you're using the CLI, running with `dotnet run`, or working with file-based apps, you now have clear examples for each scenario.
 
-**Three Ways to Configure the Port:**
 
-**1. CLI Flag (simplest for `ivy run`):**
-
-```terminal
->ivy run --port 5011
-```
-
-**2. Server Configuration in Code:**
-
-```csharp
-var server = new Server(new ServerArgs { Port = 5011 });
-```
-
-This is the recommended approach when running with `dotnet run` or `dotnet watch` directly, since those commands do not support the `--port` flag. It also works for file-based apps.
-
-**3. Environment Variable:**
-
-```terminal
->set PORT=5011
->dotnet run
-```
-
-This works with any launch method (`ivy run`, `dotnet run`, file-based apps).
-
-The documentation now clearly explains when to use each method and includes cross-references between the CLI documentation and the file-based apps guide, making it easier to find the right approach for your workflow.
 
 ---
 
@@ -7269,26 +4659,7 @@ The documentation now clearly explains when to use each method and includes cros
 
 A new sample has been added demonstrating the correct way to build a full-height layout with header, content, and footer using `Layout.Vertical().Height(Size.Full())`.
 
-The `FullHeightLayoutApp` sample shows how to create a layout that fills the entire viewport with three sections: a header with title and search input, scrollable content in the middle, and a footer with action buttons.
 
-**Key Pattern:**
-
-```csharp
-return Layout.Vertical().Height(Size.Full())
-    | header
-    | (Layout.Vertical().Height(Size.Full())
-        | content)
-    | footer;
-```
-
-**Important Details:**
-
-- The outer container uses `.Height(Size.Full())` to fill the available space
-- Only the content row (middle section) should have `.Height(Size.Full())` applied
-- Header and footer rows auto-size to their content
-- The content section becomes scrollable when it exceeds available space
-
-This pattern is essential for building app-like layouts where you need a fixed header and footer with scrollable content in between. The sample can be found in the framework's sample browser under the "Layouts" category with search hints including "full height", "header", "footer", "content", "stretch", and "fill".
 
 ---
 
@@ -7296,33 +4667,7 @@ This pattern is essential for building app-like layouts where you need a fixed h
 
 A new FAQ entry has been added explaining how to apply styling (width, height, color, padding) to Ivy components. This addresses a common question from developers trying to apply custom styles to widgets.
 
-**The Question:** How do I apply styling (width, height, color, padding) to Ivy components?
 
-**The Answer:** Ivy uses a fluent API for styling - there is no `.Style()` method for arbitrary CSS. Instead, use the built-in extension methods:
-
-```csharp
-new Box(content)
-    .Width(Size.Px(200))
-    .Height(Size.Px(100))
-    .Color(Colors.Blue)
-    .Padding(16)
-    .Margin(8)
-    .BorderRadius(BorderRadius.Rounded)
-    .BorderStyle(BorderStyle.Solid)
-```
-
-**For Advanced CSS Effects:**
-
-For CSS transforms, rotations, or complex visual effects that can't be expressed with Ivy's styling API, use the `Html` widget with inline styles:
-
-```csharp
-new Html($"<div style='transform: rotate({degrees}deg); width: 100px; height: 2px; background: #000;'></div>")
-    .DangerouslyAllowScripts()
-```
-
-**Important Note:** The `Html` widget renders in an iframe, so CSS variables like `var(--primary)` do not resolve - use hardcoded color values instead.
-
-This documentation helps clarify the proper way to style components and provides clear examples for both standard styling and advanced CSS use cases.
 
 ---
 
@@ -7330,42 +4675,4 @@ This documentation helps clarify the proper way to style components and provides
 
 A new FAQ entry has been added to the TextInput documentation explaining how to create forms with a dynamic number of fields, such as dictionary-style inputs. This addresses a common challenge developers face when trying to use hooks inside loops.
 
-**The Question:** How to create a form with a dynamic number of fields (e.g. dictionary input)?
 
-**The Problem:** Since hooks cannot be called inside loops (IVYHOOK003), you cannot use `UseState` in a `for`/`foreach`/LINQ loop.
-
-**The Solution:** Use **one state variable** that holds all field values in a dictionary:
-
-```csharp
-public override object Build()
-{
-    var columns = GetColumnNames(); // e.g. ["Name", "Age", "City"]
-    var values = UseState(new Dictionary<string, string>());
-
-    var layout = Layout.Vertical();
-    foreach (var col in columns)
-    {
-        var currentValue = values.Value.GetValueOrDefault(col, "");
-        layout.Add(
-            new TextInput(currentValue, e =>
-            {
-                var updated = new Dictionary<string, string>(values.Value) { [col] = e.Value };
-                values.Set(updated);
-            })
-            .Placeholder(col)
-            .WithField()
-            .Label(col)
-        );
-    }
-    return layout;
-}
-```
-
-**Key Points:**
-
-- Only one `UseState` call at the top level — no hook rule violations
-- The dictionary keys map to column names, values map to user input
-- Create a new dictionary on each update to trigger a re-render
-- This pattern works for any dynamic input scenario (forms, dialogs, etc.)
-
-This pattern is essential for building flexible forms where the number of fields is determined at runtime, such as database column editors, custom property panels, or dynamic configuration screens.
