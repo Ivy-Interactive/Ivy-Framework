@@ -2,1014 +2,6 @@
 
 ## Breaking Changes
 
-### Input Variant Enums Renamed to Singular
-
-To maintain consistency across the Ivy Framework, all input variant enums have been renamed from plural to singular form. This aligns them with other styling enums like `ButtonVariant`, `BadgeVariant`, and `CalloutVariant`.
-
-**What Changed:**
-
-| Old Name (Plural) | New Name (Singular) |
-|---|---|
-| `TextInputVariants` | `TextInputVariant` |
-| `SelectInputVariants` | `SelectInputVariant` |
-| `NumberInputVariants` | `NumberInputVariant` |
-| `FileInputVariants` | `FileInputVariant` |
-| `FeedbackInputVariants` | `FeedbackInputVariant` |
-| `DateTimeInputVariants` | `DateTimeInputVariant` |
-| `ColorInputVariants` | `ColorInputVariant` |
-| `CodeInputVariants` | `CodeInputVariant` |
-| `BoolInputVariants` | `BoolInputVariant` |
-
-### Namespaces Flattened
-
-Several core types such as `ExternalWidgetAttribute` and `TextAlignment` have been moved to the root `Ivy` namespace to simplify using directives and prevent refactoring issues (like the `RemoveInvalidIvyUsings` rule incorrectly stripping them).
-
-### Removal of `.Value()` API from Input Widgets
-
-The fluent `.Value()` extension method has been removed from all input widgets. All input widgets are affected (`TextInput`, `SelectInput`, `AsyncSelectInput`, `NumberInput`, `BoolInput`, `CodeInput`, `ColorInput`, `DateRangeInput`, `DateTimeInput`, `FeedbackInput`, `IconInput`, and `ReadOnlyInput`).
-
-### Scale Renamed to Density
-
-The `Scale` enum and all associated APIs have been renamed to `Density` to avoid ambiguity with chart scales, DPI scaling, and other scale-related concepts.
-
-**What Changed:**
-
-- `Ivy.Scale` enum → `Ivy.Density` enum
-- `.Scale()` fluent method → `.Density()` method
-- Enum values remain unchanged: `Small`, `Medium`, `Large`
-- Shortcut methods `.Small()`, `.Medium()`, `.Large()` are unchanged
-
-### Box.Color() Renamed to Box.Background()
-
-The `Color()` method and property on the `Box` widget have been renamed to `Background()` to more clearly reflect what it controls—the background color of the box, not the foreground/text color.
-
-### Text.InlineCode() Renamed to Text.Monospaced()
-
-The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been renamed to `Text.Monospaced()` and `TextVariant.Monospaced` to better reflect what they actually do—render text in a monospace font.
-
-### Explicit Size API for Width, Height, and Size Methods
-
-The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use `Size.Units()` or `Size.Fraction()` to specify sizing.
-
-### ToTextAreaInput() Renamed to ToTextareaInput()
-
-The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()` (lowercase 'a') to standardize naming across the codebase.
-
-### Chart Data Syntax Changed from DataPoint Elements to JSON CDATA
-
-The chart data format has been completely redesigned to use JSON arrays within CDATA sections instead of XML `<DataPoint>` elements.
-
-### CreateSignal Renamed to UseSignal and ISignal Interface Unified
-
-The signal creation API has been simplified and made more consistent with other Ivy hooks. `CreateSignal` has been renamed to `UseSignal`, and the separate `ISignalSender` and `ISignalReceiver` interfaces have been unified into a single `ISignal` interface.
-
-### ContentPipeline Renamed to HtmlPipeline with XDocument-Based Filters
-
-The HTML processing pipeline has been refactored for better performance and maintainability. The namespace was renamed from `ContentPipeline` to `HtmlPipeline`, and filters now operate on parsed `XDocument` objects instead of raw HTML strings.
-
-You can now fully customize the HTML pipeline, including clearing and replacing all built-in filters:
-
-```csharp
-// Replace the entire pipeline
-server.UseHtmlPipeline(pipeline =>
-{
-    pipeline.Clear();  // Remove all built-in filters
-    pipeline.Use<MyCustomFilter>();
-});
-
-// Or append to the existing pipeline
-server.UseHtmlPipeline(pipeline =>
-{
-    pipeline.Use<OpenGraphFilter>();
-});
-```
-
-## New Features
-
-### Terminal Emulator Widget with Xterm.js
-
-Ivy now includes a powerful terminal emulator widget through the `Ivy.Widgets.Xterm` package, powered by xterm.js. Build interactive terminal UIs, display command output, or create full terminal experiences directly in your Ivy apps.
-
-**Installation:**
-
-```bash
-dotnet add package Ivy.Widgets.Xterm
-```
-
-**Interactive Terminal with PTY:**
-
-For interactive shell sessions, use the `Ivy.Hooks.Pty` package to run real processes with PTY support:
-
-```csharp
-using Ivy.Hooks.Pty;
-
-// Create an interactive bash/PowerShell terminal
-var pty = UsePty("/bin/bash");  // or "powershell.exe" on Windows
-
-return new Terminal()
-    .OnInput(input => pty.Write(input))
-    .OnResize((cols, rows) => pty.Resize(cols, rows))
-    .Source(pty.Output);  // Stream process output to terminal
-```
-
-**Terminal with Process Output:**
-
-Run a command and stream its output to the terminal:
-
-```csharp
-// Run a console app and display its output
-var process = UsePty("dotnet", "run", "--project", "./MyConsoleApp");
-
-return new Terminal()
-    .Source(process.Output)
-    .OnOutput(data => Console.WriteLine($"Terminal output: {data}"));
-```
-
-**Customization:**
-
-```csharp
-// Customize terminal appearance
-new Terminal()
-    .FontSize(14)
-    .FontFamily("'Cascadia Code', 'Courier New', monospace")
-    .Theme(new TerminalTheme
-    {
-        Background = "#1e1e1e",
-        Foreground = "#d4d4d4",
-        Cursor = "#ffffff"
-    })
-    .CursorBlink(true)
-    .ScrollbackLimit(1000);
-```
-
-### Screenshot Feedback Widget
-
-Ivy now includes a screenshot and annotation widget through the `Ivy.Widgets.ScreenshotFeedback` package. Capture screenshots of your Ivy app, annotate them with drawing tools, and upload them - perfect for bug reports, feedback forms, and documentation.
-
-**Installation:**
-
-```bash
-dotnet add package Ivy.Widgets.ScreenshotFeedback
-```
-
-**Basic Usage:**
-
-```csharp
-using Ivy.Widgets.ScreenshotFeedback;
-
-var screenshot = UseState<FileUpload<byte[]>?>();
-var uploadCtx = UseUpload(MemoryStreamUploadHandler.Create(screenshot));
-var isOpen = UseState(false);
-
-return Layout.Vertical().Gap(4)
-    | new Button("Take Screenshot", () => isOpen.Set(true), icon: Icons.Camera)
-    | new ScreenshotFeedback()
-        .UploadUrl(uploadCtx.Value.UploadUrl)
-        .Open(isOpen.Value)
-        .HandleSave(() => isOpen.Set(false))
-        .HandleCancel(() => isOpen.Set(false))
-    | (screenshot.Value?.Status == FileUploadStatus.Finished && screenshot.Value.Content != null
-        ? new Image("data:image/png;base64," + Convert.ToBase64String(screenshot.Value.Content))
-        : Text.Muted("No screenshot captured yet."));
-```
-
-### Server-to-Client Streaming with UseStream Hook
-
-Ivy now supports efficient server-to-client streaming with the new `UseStream` hook. Stream real-time data from your backend to the frontend without triggering full state re-renders for every chunk. This is perfect for LLM text streaming, progress updates, or any scenario where you need to push data continuously to a single widget.
-
-**Example: Streaming Rich Text from an LLM**
-
-Attach the stream to widgets that support streaming (like `Text.Rich()`):
-
-```csharp
-public class StreamingApp : ViewBase
-{
-    protected override object? Build()
-    {
-        // 1. Create a stream for text runs
-        var stream = Context.UseStream<TextRun>();
-
-        return Layout.Vertical(
-            Text.Rich()
-                .Bold("🤖 ")
-                // 2. Attach the stream to the widget
-                .UseStream(stream),
-
-            new Button("Generate").OnClick(async () =>
-            {
-                var words = new[] { "Hello", "world", "from", "the", "stream!" };
-
-                foreach (var word in words)
-                {
-                    await Task.Delay(200);
-                    // 3. Write data to the stream which gets pushed to the frontend in real-time
-                    stream.Write(new TextRun(word) { Word = true });
-                }
-            })
-        );
-    }
-}
-```
-
-### Async Cleanup in UseEffect with IAsyncDisposable
-
-`UseEffect` now supports asynchronous cleanup through `IAsyncDisposable`, making it easier to manage async resources like database connections, streams, and network sockets.
-
-**Basic Usage:**
-
-```csharp
-UseEffect(() =>
-{
-    var subscription = SubscribeToWebSocket();
-
-    // Return an async disposable for cleanup
-    return AsyncDisposable.Create(async () =>
-    {
-        await subscription.UnsubscribeAsync();
-        await subscription.DisposeAsync();
-    });
-}, []);
-```
-
-### DevTools for Visual Widget Inspection (Development Only)
-
-Ivy now includes built-in DevTools for debugging and inspecting your widget tree during development. Enable it during local development to inspect widgets, view callsite information, and make live text edits.
-
-**Enable DevTools:**
-
-```csharp
-var server = new Server()
-    .EnableDevTools()  // Only in development builds
-    .Run();
-```
-
-### Enhanced Layout System with Figma-Style Options
-
-Ivy's layout system now supports advanced Figma-style layout options, including space distribution, independent row/column gaps, wrapping, per-child alignment, and enhanced scroll control.
-
-**New Alignment Options:**
-
-The `Align` enum now includes space distribution options that work with both `StackLayout` and `GridLayout`:
-
-```csharp
-// Space distribution
-Layout.Horizontal()
-    .Align(Align.SpaceBetween)
-    | new Button("Left")
-    | new Button("Middle")
-    | new Button("Right");
-```
-
-**Independent Row and Column Gaps:**
-
-Control row and column spacing independently in both `StackLayout` and `GridLayout`:
-
-```csharp
-// StackLayout with different row/column gaps
-Layout.Horizontal()
-    .Wrap()
-    .Gap(rowGap: 2, columnGap: 8)
-    | new Badge("Tight rows")
-    | new Badge("Wide columns")
-    | new Badge("More tags");
-
-// GridLayout with independent gaps
-new GridLayout(new GridDefinition
-{
-    Columns = 3,
-    RowGap = 4,      // Vertical spacing
-    ColumnGap = 8    // Horizontal spacing
-},
-    child1, child2, child3
-);
-
-// GridView with fluent gap methods
-new Grid()
-    .Columns("1fr 1fr 1fr")
-    .RowGap(4)       // Set only row gap
-    .ColumnGap(8)    // Set only column gap
-    | child1
-    | child2
-    | child3;
-
-// Or set both gaps at once
-new Grid()
-    .Columns("1fr 1fr")
-    .Gap(4)          // Sets both row and column gap to 4
-    | item1
-    | item2;
-```
-
-**Wrapping StackLayouts:**
-
-`StackLayout` now supports wrapping, eliminating the need for a separate `WrapLayout` widget:
-
-```csharp
-// Horizontal layout that wraps to new lines
-Layout.Horizontal()
-    .Wrap()
-    .Gap(2)
-    | new Badge("React")
-    | new Badge("Vue")
-    | new Badge("Angular")
-    | new Badge("Svelte")
-    | new Badge("Next.js");
-
-// Vertical layout that wraps to new columns
-Layout.Vertical()
-    .Wrap(Orientation.Vertical)
-    | Text.Literal("Item 1")
-    | Text.Literal("Item 2")
-    | Text.Literal("Item 3");
-```
-
-**Per-Child Alignment with AlignSelf:**
-
-Override alignment for individual children in `StackLayout` and `GridLayout`:
-
-```csharp
-Layout.Vertical()
-    | new Box("Stretched Item").AlignSelf(Align.Stretch)
-    | new Box("Centered Item").AlignSelf(Align.Center)
-    | new Box("Left-Aligned Item").AlignSelf(Align.Left);
-```
-
-**Enhanced Scroll Options:**
-
-The `Scroll` enum now supports directional scrolling:
-
-```csharp
-// Vertical scrolling only
-Layout.Vertical()
-    .Scroll(Scroll.Vertical)
-    | /* content */;
-
-// Horizontal scrolling only
-Layout.Horizontal()
-    .Scroll(Scroll.Horizontal)
-    | /* content */;
-
-// Both directions
-Layout.Vertical()
-    .Scroll(Scroll.Both)
-    | /* content */;
-```
-
-**Enhanced Overflow Options:**
-
-New `Overflow` values provide more control:
-
-```csharp
-// Allow content to overflow visibly
-new Box("Content").Overflow(Overflow.Visible);
-
-// Force scrollbars
-new Box("Content").Overflow(Overflow.Scroll);
-```
-
-### Border Support for Layouts
-
-LayoutView and StackLayout now support borders with full control over color, thickness, radius, and style.
-
-**Adding Borders:**
-
-```csharp
-Layout.Horizontal()
-    .Border(Colors.Red, new Thickness(top: 2, right: 1, bottom: 2, left: 1))
-    | new Text("Custom border thickness");
-```
-
-**Fine-Grained Border Control:**
-
-```csharp
-// Full control over all border properties
-Layout.Vertical()
-    .BorderColor(Colors.Primary)
-    .BorderThickness(2)
-    .BorderStyle(BorderStyle.Solid)
-    .BorderRadius(BorderRadius.Rounded)
-    | new Text("Fully customized border");
-```
-
-### PWA (Progressive Web App) Manifest Support
-
-Ivy now supports Progressive Web Apps with built-in manifest configuration. Configure your app's PWA settings using the new `UseManifest()` API.
-
-**Basic Usage:**
-
-```csharp
-var server = new Server()
-    .UseManifest(manifest =>
-    {
-        manifest.Name = "My Ivy App";
-        manifest.ShortName = "MyApp";
-        manifest.ThemeColor = "#4A90E2";
-        manifest.BackgroundColor = "#ffffff";
-        manifest.Icons = new List<ManifestIcon>
-        {
-            new() { Src = "/icon-192.png", Sizes = "192x192", Type = "image/png" },
-            new() { Src = "/icon-512.png", Sizes = "512x512", Type = "image/png" }
-        };
-    });
-```
-
-The manifest is automatically served at `/manifest.json` and linked in your app's HTML `<head>`.
-
----
-
-### AppBase - Semantic Base Class for Apps
-
-Ivy now includes an `AppBase` class that provides a semantic foundation for building apps. While functionally equivalent to `ViewBase`, it offers clearer intent when defining app-level components.
-
-**Usage:**
-
-```csharp
-[App(Title = "My Application", Icon = "🚀")]
-public class MyApp : AppBase
-{
-    protected override Widget Build()
-    {
-        return new Page("Welcome")
-        {
-            new Text("Hello from AppBase!")
-        };
-    }
-}
-```
-
-### JavaScript Execution in Html Widget with DangerouslyAllowScripts
-
-The `Html` widget now supports opt-in JavaScript execution through the new `DangerouslyAllowScripts` property. By default, the Html widget sanitizes all JavaScript for security, but you can now bypass this when rendering trusted HTML content that requires script execution.
-
-**⚠️ Security Warning:** Only enable `DangerouslyAllowScripts` for HTML content you completely trust. Rendering untrusted or user-generated content with this flag enabled exposes your application to Cross-Site Scripting (XSS) attacks.
-
-**Usage Example:**
-
-```csharp
-public class ScriptHtmlView : ViewBase
-{
-    public override object? Build()
-    {
-        var htmlWithScript =
-            """
-            <div id="target-div">Loading...</div>
-            <script>
-                document.getElementById('target-div').innerText = 'Script executed successfully!';
-            </script>
-            """;
-
-        // Enable script execution using the fluent method
-        return new Html(htmlWithScript).DangerouslyAllowScripts();
-    }
-}
-```
-
-### HtmlPipeline - XDocument-Based Filters and Full Customization
-
-The HTML pipeline has been refactored to use `XDocument` for safer, more structured HTML manipulation. Filters now work with parsed XML instead of raw strings, and new APIs allow full pipeline customization.
-
-**Creating a Custom Filter:**
-
-```csharp
-using System.Xml.Linq;
-using Ivy.Core.Server.HtmlPipeline;
-
-public class OpenGraphFilter : IHtmlFilter
-{
-    public void Process(HtmlPipelineContext context, XDocument document)
-    {
-        var head = document.Root?.Element("head");
-        if (head == null) return;
-
-        head.Add(new XElement("meta",
-            new XAttribute("property", "og:title"),
-            new XAttribute("content", "My App")));
-
-        head.Add(new XElement("meta",
-            new XAttribute("property", "og:description"),
-            new XAttribute("content", "Built with Ivy")));
-    }
-}
-
-// Register the filter
-var server = new Server()
-    .UseHtmlFilter(new OpenGraphFilter());
-```
-
-**Access Services in Filters:**
-
-```csharp
-public class ServiceBasedFilter : IHtmlFilter
-{
-    public void Process(HtmlPipelineContext context, XDocument document)
-    {
-        var myService = context.Services.GetService<IMyService>();
-        var head = document.Root?.Element("head");
-
-        // Use service data to add elements
-        head?.Add(new XElement("meta",
-            new XAttribute("name", "custom"),
-            new XAttribute("content", myService.GetValue())));
-    }
-}
-```
-
-**Full Pipeline Customization:**
-
-Use `Server.UseHtmlPipeline()` to access the full pipeline, allowing you to clear, reorder, or replace filters entirely:
-
-```csharp
-// Replace the entire pipeline with custom filters
-server.UseHtmlPipeline(pipeline =>
-{
-    pipeline.Clear();
-    pipeline.Use<OpenGraphFilter>();
-    pipeline.Use<CustomAnalyticsFilter>();
-});
-```
-
-The pipeline configurator runs after all built-in and custom filters have been added, so `Clear()` removes everything for complete control.
-
-### XamlBuilder: DataPoint Support for Charts
-
-XamlBuilder now supports defining chart data inline using `<DataPoint>` elements, making it easier to work with charts without needing to create separate data classes.
-
-**Complete Chart Example:**
-
-```csharp
-var xaml = """
-    <LineChart ColorScheme="Default">
-        <LineChart.Data>
-            <DataPoint Month="Jan" Revenue="100" Costs="80" />
-            <DataPoint Month="Feb" Revenue="120" Costs="90" />
-            <DataPoint Month="Mar" Revenue="140" Costs="85" />
-        </LineChart.Data>
-        <LineChart.Lines>
-            <Line DataKey="Revenue" />
-            <Line DataKey="Costs" />
-        </LineChart.Lines>
-        <LineChart.XAxis>
-            <XAxis DataKey="Month" />
-        </LineChart.XAxis>
-    </LineChart>
-    """;
-
-var chart = builder.Build(xaml);
-```
-
-### Field - Horizontal Label Layout with LabelPosition
-
-The `Field` widget now supports horizontal label layouts where labels appear beside inputs instead of above them. This is particularly useful for data-dense admin panels, settings pages, and compact form layouts.
-
-**New API:**
-
-```csharp
-public enum LabelPosition
-{
-    Top,   // Default - label above input
-    Left   // Label beside input (horizontal layout)
-}
-```
-
-**Basic Usage:**
-
-```csharp
-// Default - label on top
-var emailField = new Field(
-    new TextInput("Email"),
-    label: "Email Address"
-);
-
-// Horizontal layout - label on left
-var emailField = new Field(
-    new TextInput("Email"),
-    label: "Email Address"
-).LabelPosition(LabelPosition.Left);
-```
-
-### Form Submit Strategies
-
-Forms now support different submit strategies that control when form state is committed back to your model. This is separate from validation timing and gives you fine-grained control over form behavior.
-
-**Available Strategies:**
-
-- `OnSubmit` (default) — State is committed only when the submit button is clicked
-- `OnBlur` — State is committed when any field loses focus (submit button hidden)
-- `OnChange` — State is committed on every field value change (submit button hidden)
-
-**Auto-Save Settings Example:**
-
-```csharp
-public class SettingsPanel : ViewBase
-{
-    public record Settings(string Name, string Theme, int FontSize);
-
-    public override object? Build()
-    {
-        var settings = UseState(() => new Settings("Default", "Light", 14));
-        var client = UseService<IClientProvider>();
-
-        // React to changes and auto-save
-        UseEffect(() =>
-        {
-            if (!string.IsNullOrEmpty(settings.Value.Name))
-            {
-                client.Toast($"Settings auto-saved: {settings.Value.Name}");
-            }
-        }, settings);
-
-        return Layout.Vertical()
-            | settings.ToForm()
-                .SubmitStrategy(FormSubmitStrategy.OnChange)  // Auto-save on every change
-                .Label(m => m.Name, "Display Name")
-                .Label(m => m.Theme, "Theme")
-                .Label(m => m.FontSize, "Font Size")
-            | Text.Block($"Current: {settings.Value.Name}, {settings.Value.Theme}, {settings.Value.FontSize}px");
-    }
-}
-```
-
-Use `OnChange` for settings panels where changes should apply immediately, and `OnBlur` for forms where you want to commit after the user finishes editing each field.
-
-### NumberInput: Min/Max Parameters
-
-`ToNumberInput()` now accepts optional `min` and `max` parameters, making it easier to set value constraints directly when creating number inputs.
-
-**Basic Usage:**
-
-```csharp
-var price = UseState(0.0);
-
-return price.ToNumberInput()
-    .Min(0)
-    .Max(10000)
-    .Placeholder("Enter price")
-    .WithField()
-    .Label("Product Price");
-```
-
-### Fluent API Enhancements
-
-Several widgets have received new fluent API extensions to make configuration more concise and chainable:
-
-- **Toast API**: `.Success()`, `.Destructive()`, `.Warning()`, `.Info()`
-- **ListItem**: `.Title()`, `.Subtitle()`, `.Icon()`, `.Badge()`, `.Tag()`, `.OnClick()`, `.Content()`, `.Disabled()`
-- **FeedbackInput**: Dedicated fluent methods for each variant type.
-- **Chart Builders**: `.Height()` and `.Width()` (replaces `Polish` callback workaround).
-- **DesktopWindow**: `.UseDpiScaling()`, `.UseDevTools()`, `.Resizable()`, `.Center()`, `.TopMost()` (booleans default to `true`).
-- **Table Progress**: `.Min()`, `.Max()`, `.AutoColor()`, `.Color()`, `.Format()`.
-- **Separator**: `.TextAlign(TextAlignment.Left | Center | Right)`.
-- **Global**: `.Grow()` is now available on all widgets (shorthand for `.Width(Size.Grow())`).
-
-### ColorInput: Alpha Channel Support
-
-The `ColorInput` widget now supports transparency with the new `AllowAlpha()` method. When enabled, an opacity slider appears next to the color picker, and colors are stored in `#RRGGBBAA` format (8-digit hex with alpha channel).
-
-**Basic Usage:**
-
-```csharp
-public class ColorAlphaDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var colorState = UseState("#ff000080"); // Red with 50% opacity
-
-        return Layout.Vertical()
-            | colorState.ToColorInput().AllowAlpha()
-            | Text.P($"Selected: {colorState.Value}");
-    }
-}
-```
-
-### Ghost Styling for Minimal Appearance
-
-Several input widgets (`ColorInput`, `SelectInput`, and `AsyncSelectInput`) now support ghost styling through the `.Ghost()` extension method. Ghost styling removes borders, background fill, and shadows, creating a minimal appearance ideal for embedding inputs seamlessly into cards, toolbars, or colored backgrounds.
-
-**Basic Usage:**
-
-```csharp
-// ColorInput ghost styling
-var themeColor = UseState("#4A90E2");
-return themeColor.ToColorInput().Ghost();
-
-// SelectInput ghost styling
-var colorState = UseState(Colors.Red);
-return colorState.ToSelectInput(typeof(Colors).ToOptions()).Ghost();
-
-// AsyncSelectInput ghost styling
-var categoryState = UseState(default(Guid?));
-return categoryState.ToAsyncSelectInput(QueryCategories, LookupCategory).Ghost();
-```
-
-### Card: Disabled State
-
-The `Card` widget now supports a disabled state to prevent user interaction. When disabled, cards are visually dimmed and click events are suppressed, making it easy to indicate unavailable options or read-only states.
-
-**Basic Usage:**
-
-```csharp
-new Card("This card cannot be clicked.")
-    .Title("Disabled Card")
-    .Description("User interaction is disabled.")
-    .OnClick(_ => client.Toast("This won't fire!"))
-    .Disabled()
-    .Width(Size.Units(100));
-```
-
-**Conditional Disable:**
-
-```csharp
-public class ProductCard : ViewBase
-{
-    public override object? Build()
-    {
-        var isOutOfStock = UseState(true);
-
-        return new Card()
-            .Title("Premium Product")
-            .Content("This product is currently unavailable")
-            .OnClick(_ => AddToCart())
-            .Disabled(isOutOfStock.Value);  // Disabled when out of stock
-    }
-}
-```
-
-**Visual Feedback:**
-
-When disabled, cards automatically:
-
-- Display reduced opacity (50%)
-- Show a `not-allowed` cursor on hover
-- Suppress all `OnClick` events
-- Remove hover effects and animations
-
-This follows the same pattern as `Button` and `ListItem` disabled states, providing a consistent API across interactive widgets.
-
----
-
-### DetailsBuilder: Custom Field Labels
-
-The `DetailsBuilder` now supports customizing field labels with the new `.Label()` method. By default, `ToDetails()` generates labels from property names using PascalCase splitting (e.g., `NetBurn` becomes "Net Burn"), but you can now override these auto-generated labels with custom text.
-
-**Basic Usage:**
-
-```csharp
-public record RunwayData(decimal NetBurn, decimal GrossBurn, int Months, DateTime RunwayDate);
-
-var data = new RunwayData(5000m, 10000m, 12, new DateTime(2027, 3, 1));
-data.ToDetails()
-    .Label(x => x.NetBurn, "Net Monthly Burn")
-    .Label(x => x.RunwayDate, "Projected Runway End")
-    .Build();
-```
-
-This provides more control over how field names are displayed to users, especially useful when property names don't naturally translate to readable labels or when you need specific terminology for your domain.
-
-**Alternative Approach:**
-For simple cases, you can use anonymous types where property names become the labels:
-
-```csharp
-new { NetBurn = "$5,000", GrossBurn = "$10,000" }.ToDetails()
-```
-
-**Note:** Use `.Builder(x => x.Field, b => ...)` to customize how a value is *rendered*, not to change the label text. The `.Label()` method is specifically for changing the displayed label.
-
----
-
-### Dots Now Allowed in App IDs
-
-App IDs can now include dots, enabling better namespacing and versioning patterns. Previously, app IDs like `app.v2` or `users.profile` were not allowed, but this restriction has been removed.
-
-**New Capabilities:**
-
-```csharp
-// Version namespacing
-[App(Id = "dashboard.v2")]
-public class DashboardV2 : AppBase { }
-
-// Feature namespacing
-[App(Id = "users.profile")]
-public class UserProfile : AppBase { }
-
-// Domain-style naming
-[App(Id = "com.mycompany.admin")]
-public class AdminApp : AppBase { }
-
-// Multi-level namespacing
-[App(Id = "api.v1.users")]
-public class ApiUsersV1 : AppBase { }
-```
-
----
-
-### Progress Builder for Table Cells
-
-The Table widget now supports inline progress bars through the new `Progress()` builder, allowing you to render numeric values as visual progress indicators directly within table cells.
-
-**Basic Usage:**
-
-```csharp
-var tasks = new[] {
-    new { Name = "Design Review", Progress = 100 },
-    new { Name = "Implementation", Progress = 75 },
-    new { Name = "Testing", Progress = 45 },
-    new { Name = "Documentation", Progress = 20 }
-};
-
-new Table(tasks)
-    .Builder(t => t.Progress, f => f.Progress());
-```
-
-**Custom Range and Format String:**
-
-Configure custom min/max ranges and display the value alongside the progress bar:
-
-```csharp
-var downloads = new[] {
-    new { File = "report.pdf", Downloaded = 750, Total = 1000 }
-};
-
-new Table(downloads)
-    .Builder(d => d.Downloaded, f => f.Progress()
-        .Min(0)
-        .Max(1000)
-        .AutoColor()
-        .Format("%d bytes"));
-```
-
----
-
-### Native Desktop Applications with Ivy.Desktop
-
-Ivy apps can now run as native desktop applications across Windows, macOS, and Linux using the new `Ivy.Desktop` library. Built on Photino.NET, it provides a simple builder API for wrapping your Ivy web apps in native windows with automatic DPI detection and scaling.
-
-**Getting Started:**
-
-Add the `Ivy.Desktop` package to your project and use the `DesktopWindow` builder to configure and launch your app:
-
-```csharp
-using Ivy.Desktop;
-
-var server = new Server(args);
-var exitCode = new DesktopWindow(server)
-    .Title("My Ivy App")
-    .Size(1280, 800)
-    .Run();
-
-return exitCode;
-```
-
-### Icons in Select Options
-
-Select inputs now support optional icons for each option, making it easier to create visually rich select menus. Additionally, labels are now optional—if omitted, the option value will be displayed instead.
-
-**What's New:**
-
-- Added `icon` property to select options (supports any icon name from your icon library)
-- Made `label` property optional (falls back to displaying the value)
-- Icons are supported across all select variants: Toggle, Radio, Checkbox, and Dropdown
-
-**Usage:**
-
-```csharp
-// Add icons to select options
-var options = new List<SelectOption>
-{
-    new() { Value = "home", Label = "Home", Icon = "home" },
-    new() { Value = "settings", Label = "Settings", Icon = "settings" },
-    new() { Value = "profile", Label = "Profile", Icon = "user" }
-};
-
-var selected = UseState("home");
-return selected.ToSelectInput()
-    .Options(options)
-    .Variant(SelectInputVariant.Dropdown);
-```
-
-**Icon-Only Options:**
-
-You can omit labels entirely to create icon-only selects:
-
-```csharp
-// Icon-only toggle buttons
-var theme = UseState("light");
-return theme.ToSelectInput()
-    .Options(new List<SelectOption>
-    {
-        new() { Value = "light", Icon = "sun" },
-        new() { Value = "dark", Icon = "moon" }
-    })
-    .Variant(SelectInputVariant.Toggle);
-```
-
-Icons automatically scale with the density setting (Small, Medium, Large) and are positioned consistently across all select variants.
-
----
-
-### Automatic Validation for Email, Password, Phone, and URL Inputs
-
-Text inputs for common data types now include automatic validation that triggers on blur. New convenience methods like `ToEmailInput()`, `ToPasswordInput()`, `ToTelInput()`, and `ToUrlInput()` create validated inputs with appropriate input types and automatic validation.
-
-**Basic Usage:**
-
-```csharp
-// Email input with automatic validation on blur
-var email = UseState("");
-return email.ToEmailInput()
-    .Placeholder("e.g. user@example.com");
-
-// Password input with minimum length validation (8 characters)
-var password = UseState("");
-return password.ToPasswordInput()
-    .Placeholder("Min 8 characters");
-
-// Phone number input with format validation
-var phone = UseState("");
-return phone.ToTelInput()
-    .Placeholder("e.g. +1 234 567 8900");
-
-// URL input with protocol validation (http/https)
-var website = UseState("");
-return website.ToUrlInput()
-    .Placeholder("e.g. https://example.com");
-```
-
-**Using with Field Wrapper:**
-
-Combine with `.WithField()` for complete form fields with labels, descriptions, and validation:
-
-```csharp
-var email = UseState("");
-return email.ToEmailInput()
-    .Placeholder("e.g. user@example.com")
-    .WithField()
-    .Label("Email Address")
-    .Description("We'll use this for account recovery")
-    .Required();
-```
-
-**Validation Triggers:**
-
-Validation occurs automatically on blur (after the user has interacted with the field). Error messages are displayed below the input:
-
-- **Email**: Validates proper email format (<username@domain.com> with valid domain)
-- **Password**: Validates minimum length (8 characters by default)
-- **Tel**: Validates phone number format (7-15 digits, allows spaces, dashes, parentheses)
-- **URL**: Validates URL format and requires http:// or https:// protocol
-
-**Using Variant Method:**
-
-You can also apply validation using the `.Variant()` method on any `TextInput`:
-
-```csharp
-var email = UseState("");
-return new TextInput(email)
-    .Variant(TextInputVariant.Email)  // Automatically adds email validation
-    .Placeholder("user@example.com");
-```
-
-**Form Integration:**
-
-Form fields automatically get validation based on their type or naming conventions:
-
-```csharp
-public record UserModel(
-    string Email,           // Automatically validated as email
-    string Password,        // Automatically validated as password (min 8 chars)
-    string? PhoneNumber,    // Automatically validated as phone number
-    string? Website         // Automatically validated as URL
-);
-
-var model = UseState(() => new UserModel("", "", null, null));
-
-var form = model.ToForm("Submit")
-    .Builder(m => m.Email, s => s.ToEmailInput())
-    .Builder(m => m.Password, s => s.ToPasswordInput())
-    .Builder(m => m.PhoneNumber, s => s.ToTelInput())
-    .Builder(m => m.Website, s => s.ToUrlInput());
-
-return new Card(form);
-```
-
-**Validation Messages:**
-
-Built-in validation provides user-friendly error messages:
-
-- Email: "Please enter a valid email address"
-- Password: "Password must be at least 8 characters"
-- Tel: "Please enter a valid phone number"
-- URL: "Please enter a valid URL (http or https)"
-
-**Custom Validators:**
-
-Built-in validation works alongside custom validators you define in forms. The framework runs both the variant-specific validation and any custom validators you provide.
-
-This feature makes it much easier to build forms with proper validation without manually writing validator functions for common input types.
-
----
-
-## Breaking Changes
-
 ### IHtmlFilter Interface - XDocument Instead of String Manipulation
 
 The `IHtmlFilter.Process` method now takes an `XDocument` instead of a raw HTML string, and returns `void` instead of `string`. The namespace has also changed from `Ivy.Core.Server.ContentPipeline` to `Ivy.Core.Server.HtmlPipeline`. This provides safer, more structured HTML manipulation.
@@ -1413,6 +405,858 @@ mySignal.Receive(callback);     // Register a callback to receive data
 ```
 
 ---
+
+### Input Variant Enums Renamed to Singular
+
+To maintain consistency across the Ivy Framework, all input variant enums have been renamed from plural to singular form. This aligns them with other styling enums like `ButtonVariant`, `BadgeVariant`, and `CalloutVariant`.
+
+**What Changed:**
+
+| Old Name (Plural) | New Name (Singular) |
+|---|---|
+| `TextInputVariants` | `TextInputVariant` |
+| `SelectInputVariants` | `SelectInputVariant` |
+| `NumberInputVariants` | `NumberInputVariant` |
+| `FileInputVariants` | `FileInputVariant` |
+| `FeedbackInputVariants` | `FeedbackInputVariant` |
+| `DateTimeInputVariants` | `DateTimeInputVariant` |
+| `ColorInputVariants` | `ColorInputVariant` |
+| `CodeInputVariants` | `CodeInputVariant` |
+| `BoolInputVariants` | `BoolInputVariant` |
+
+### Namespaces Flattened
+
+Several core types such as `ExternalWidgetAttribute` and `TextAlignment` have been moved to the root `Ivy` namespace to simplify using directives and prevent refactoring issues (like the `RemoveInvalidIvyUsings` rule incorrectly stripping them).
+
+### Removal of `.Value()` API from Input Widgets
+
+The fluent `.Value()` extension method has been removed from all input widgets. All input widgets are affected (`TextInput`, `SelectInput`, `AsyncSelectInput`, `NumberInput`, `BoolInput`, `CodeInput`, `ColorInput`, `DateRangeInput`, `DateTimeInput`, `FeedbackInput`, `IconInput`, and `ReadOnlyInput`).
+
+### Scale Renamed to Density
+
+The `Scale` enum and all associated APIs have been renamed to `Density` to avoid ambiguity with chart scales, DPI scaling, and other scale-related concepts.
+
+**What Changed:**
+
+- `Ivy.Scale` enum → `Ivy.Density` enum
+- `.Scale()` fluent method → `.Density()` method
+- Enum values remain unchanged: `Small`, `Medium`, `Large`
+- Shortcut methods `.Small()`, `.Medium()`, `.Large()` are unchanged
+
+### Box.Color() Renamed to Box.Background()
+
+The `Color()` method and property on the `Box` widget have been renamed to `Background()` to more clearly reflect what it controls—the background color of the box, not the foreground/text color.
+
+### Text.InlineCode() Renamed to Text.Monospaced()
+
+The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been renamed to `Text.Monospaced()` and `TextVariant.Monospaced` to better reflect what they actually do—render text in a monospace font.
+
+### Explicit Size API for Width, Height, and Size Methods
+
+The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use `Size.Units()` or `Size.Fraction()` to specify sizing.
+
+### ToTextAreaInput() Renamed to ToTextareaInput()
+
+The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()` (lowercase 'a') to standardize naming across the codebase.
+
+### Chart Data Syntax Changed from DataPoint Elements to JSON CDATA
+
+The chart data format has been completely redesigned to use JSON arrays within CDATA sections instead of XML `<DataPoint>` elements.
+
+### CreateSignal Renamed to UseSignal and ISignal Interface Unified
+
+The signal creation API has been simplified and made more consistent with other Ivy hooks. `CreateSignal` has been renamed to `UseSignal`, and the separate `ISignalSender` and `ISignalReceiver` interfaces have been unified into a single `ISignal` interface.
+
+### ContentPipeline Renamed to HtmlPipeline with XDocument-Based Filters
+
+The HTML processing pipeline has been refactored for better performance and maintainability. The namespace was renamed from `ContentPipeline` to `HtmlPipeline`, and filters now operate on parsed `XDocument` objects instead of raw HTML strings.
+
+You can now fully customize the HTML pipeline, including clearing and replacing all built-in filters:
+
+```csharp
+// Replace the entire pipeline
+server.UseHtmlPipeline(pipeline =>
+{
+    pipeline.Clear();  // Remove all built-in filters
+    pipeline.Use<MyCustomFilter>();
+});
+
+// Or append to the existing pipeline
+server.UseHtmlPipeline(pipeline =>
+{
+    pipeline.Use<OpenGraphFilter>();
+});
+```
+
+## New Features
+
+### Terminal Emulator Widget with Xterm.js
+
+Ivy now includes a powerful terminal emulator widget through the `Ivy.Widgets.Xterm` package, powered by xterm.js. Build interactive terminal UIs, display command output, or create full terminal experiences directly in your Ivy apps.
+
+**Installation:**
+
+```bash
+dotnet add package Ivy.Widgets.Xterm
+```
+
+**Interactive Terminal with PTY:**
+
+For interactive shell sessions, use the `Ivy.Hooks.Pty` package to run real processes with PTY support:
+
+```csharp
+using Ivy.Hooks.Pty;
+
+// Create an interactive bash/PowerShell terminal
+var pty = UsePty("/bin/bash");  // or "powershell.exe" on Windows
+
+return new Terminal()
+    .OnInput(input => pty.Write(input))
+    .OnResize((cols, rows) => pty.Resize(cols, rows))
+    .Source(pty.Output);  // Stream process output to terminal
+```
+
+**Terminal with Process Output:**
+
+Run a command and stream its output to the terminal:
+
+```csharp
+// Run a console app and display its output
+var process = UsePty("dotnet", "run", "--project", "./MyConsoleApp");
+
+return new Terminal()
+    .Source(process.Output)
+    .OnOutput(data => Console.WriteLine($"Terminal output: {data}"));
+```
+
+**Customization:**
+
+```csharp
+// Customize terminal appearance
+new Terminal()
+    .FontSize(14)
+    .FontFamily("'Cascadia Code', 'Courier New', monospace")
+    .Theme(new TerminalTheme
+    {
+        Background = "#1e1e1e",
+        Foreground = "#d4d4d4",
+        Cursor = "#ffffff"
+    })
+    .CursorBlink(true)
+    .ScrollbackLimit(1000);
+```
+
+### Screenshot Feedback Widget
+
+Ivy now includes a screenshot and annotation widget through the `Ivy.Widgets.ScreenshotFeedback` package. Capture screenshots of your Ivy app, annotate them with drawing tools, and upload them - perfect for bug reports, feedback forms, and documentation.
+
+**Installation:**
+
+```bash
+dotnet add package Ivy.Widgets.ScreenshotFeedback
+```
+
+**Basic Usage:**
+
+```csharp
+using Ivy.Widgets.ScreenshotFeedback;
+
+var screenshot = UseState<FileUpload<byte[]>?>();
+var uploadCtx = UseUpload(MemoryStreamUploadHandler.Create(screenshot));
+var isOpen = UseState(false);
+
+return Layout.Vertical().Gap(4)
+    | new Button("Take Screenshot", () => isOpen.Set(true), icon: Icons.Camera)
+    | new ScreenshotFeedback()
+        .UploadUrl(uploadCtx.Value.UploadUrl)
+        .Open(isOpen.Value)
+        .HandleSave(() => isOpen.Set(false))
+        .HandleCancel(() => isOpen.Set(false))
+    | (screenshot.Value?.Status == FileUploadStatus.Finished && screenshot.Value.Content != null
+        ? new Image("data:image/png;base64," + Convert.ToBase64String(screenshot.Value.Content))
+        : Text.Muted("No screenshot captured yet."));
+```
+
+### Server-to-Client Streaming with UseStream Hook
+
+Ivy now supports efficient server-to-client streaming with the new `UseStream` hook. Stream real-time data from your backend to the frontend without triggering full state re-renders for every chunk.
+
+**Example: Streaming Rich Text from an LLM**
+
+Attach the stream to widgets that support streaming (like `Text.Rich()`):
+
+```csharp
+public class StreamingApp : ViewBase
+{
+    protected override object? Build()
+    {
+        // 1. Create a stream for text runs
+        var stream = Context.UseStream<TextRun>();
+
+        return Layout.Vertical(
+            Text.Rich()
+                .Bold("🤖 ")
+                // 2. Attach the stream to the widget
+                .UseStream(stream),
+
+            new Button("Generate").OnClick(async () =>
+            {
+                var words = new[] { "Hello", "world", "from", "the", "stream!" };
+
+                foreach (var word in words)
+                {
+                    await Task.Delay(200);
+                    // 3. Write data to the stream which gets pushed to the frontend in real-time
+                    stream.Write(new TextRun(word) { Word = true });
+                }
+            })
+        );
+    }
+}
+```
+
+### Async Cleanup in UseEffect with IAsyncDisposable
+
+`UseEffect` now supports asynchronous cleanup through `IAsyncDisposable`, making it easier to manage async resources like database connections, streams, and network sockets.
+
+**Basic Usage:**
+
+```csharp
+UseEffect(() =>
+{
+    var subscription = SubscribeToWebSocket();
+
+    // Return an async disposable for cleanup
+    return AsyncDisposable.Create(async () =>
+    {
+        await subscription.UnsubscribeAsync();
+        await subscription.DisposeAsync();
+    });
+}, []);
+```
+
+### DevTools for Visual Widget Inspection (Development Only)
+
+Ivy now includes built-in DevTools for debugging and inspecting your widget tree during development. Enable it during local development to inspect widgets, view callsite information, and make live text edits.
+
+**Enable DevTools:**
+
+```csharp
+var server = new Server()
+    .EnableDevTools()  // Only in development builds
+    .Run();
+```
+
+### Enhanced Layout System with Figma-Style Options
+
+Ivy's layout system now supports advanced Figma-style layout options, including space distribution, independent row/column gaps, wrapping, per-child alignment, and enhanced scroll control.
+
+**New Alignment Options:**
+
+The `Align` enum now includes space distribution options that work with both `StackLayout` and `GridLayout`:
+
+```csharp
+// Space distribution
+Layout.Horizontal()
+    .Align(Align.SpaceBetween)
+    | new Button("Left")
+    | new Button("Middle")
+    | new Button("Right");
+```
+
+**Independent Row and Column Gaps:**
+
+Control row and column spacing independently in both `StackLayout` and `GridLayout`:
+
+```csharp
+// StackLayout with different row/column gaps
+Layout.Horizontal()
+    .Wrap()
+    .Gap(rowGap: 2, columnGap: 8)
+    | new Badge("Tight rows")
+    | new Badge("Wide columns")
+    | new Badge("More tags");
+
+// GridLayout with independent gaps
+new GridLayout(new GridDefinition
+{
+    Columns = 3,
+    RowGap = 4,      // Vertical spacing
+    ColumnGap = 8    // Horizontal spacing
+},
+    child1, child2, child3
+);
+
+// GridView with fluent gap methods
+new Grid()
+    .Columns("1fr 1fr 1fr")
+    .RowGap(4)       // Set only row gap
+    .ColumnGap(8)    // Set only column gap
+    | child1
+    | child2
+    | child3;
+
+// Or set both gaps at once
+new Grid()
+    .Columns("1fr 1fr")
+    .Gap(4)          // Sets both row and column gap to 4
+    | item1
+    | item2;
+```
+
+**Wrapping StackLayouts:**
+
+`StackLayout` now supports wrapping, eliminating the need for a separate `WrapLayout` widget:
+
+```csharp
+// Horizontal layout that wraps to new lines
+Layout.Horizontal()
+    .Wrap()
+    .Gap(2)
+    | new Badge("React")
+    | new Badge("Vue")
+    | new Badge("Angular")
+    | new Badge("Svelte")
+    | new Badge("Next.js");
+
+// Vertical layout that wraps to new columns
+Layout.Vertical()
+    .Wrap(Orientation.Vertical)
+    | Text.Literal("Item 1")
+    | Text.Literal("Item 2")
+    | Text.Literal("Item 3");
+```
+
+**Per-Child Alignment with AlignSelf:**
+
+Override alignment for individual children in `StackLayout` and `GridLayout`:
+
+```csharp
+Layout.Vertical()
+    | new Box("Stretched Item").AlignSelf(Align.Stretch)
+    | new Box("Centered Item").AlignSelf(Align.Center)
+    | new Box("Left-Aligned Item").AlignSelf(Align.Left);
+```
+
+**Enhanced Scroll Options:**
+
+The `Scroll` enum now supports directional scrolling:
+
+```csharp
+// Vertical scrolling only
+Layout.Vertical()
+    .Scroll(Scroll.Vertical)
+    | /* content */;
+
+// Horizontal scrolling only
+Layout.Horizontal()
+    .Scroll(Scroll.Horizontal)
+    | /* content */;
+
+// Both directions
+Layout.Vertical()
+    .Scroll(Scroll.Both)
+    | /* content */;
+```
+
+**Enhanced Overflow Options:**
+
+New `Overflow` values provide more control:
+
+```csharp
+// Allow content to overflow visibly
+new Box("Content").Overflow(Overflow.Visible);
+
+// Force scrollbars
+new Box("Content").Overflow(Overflow.Scroll);
+```
+
+### Border Support for Layouts
+
+LayoutView and StackLayout now support borders with full control over color, thickness, radius, and style.
+
+**Adding Borders:**
+
+```csharp
+Layout.Horizontal()
+    .Border(Colors.Red, new Thickness(top: 2, right: 1, bottom: 2, left: 1))
+    | new Text("Custom border thickness");
+```
+
+**Fine-Grained Border Control:**
+
+```csharp
+// Full control over all border properties
+Layout.Vertical()
+    .BorderColor(Colors.Primary)
+    .BorderThickness(2)
+    .BorderStyle(BorderStyle.Solid)
+    .BorderRadius(BorderRadius.Rounded)
+    | new Text("Fully customized border");
+```
+
+### PWA (Progressive Web App) Manifest Support
+
+Ivy now supports Progressive Web Apps with built-in manifest configuration. Configure your app's PWA settings using the new `UseManifest()` API.
+
+**Basic Usage:**
+
+```csharp
+var server = new Server()
+    .UseManifest(manifest =>
+    {
+        manifest.Name = "My Ivy App";
+        manifest.ShortName = "MyApp";
+        manifest.ThemeColor = "#4A90E2";
+        manifest.BackgroundColor = "#ffffff";
+        manifest.Icons = new List<ManifestIcon>
+        {
+            new() { Src = "/icon-192.png", Sizes = "192x192", Type = "image/png" },
+            new() { Src = "/icon-512.png", Sizes = "512x512", Type = "image/png" }
+        };
+    });
+```
+
+The manifest is automatically served at `/manifest.json` and linked in your app's HTML `<head>`.
+
+### AppBase - Semantic Base Class for Apps
+
+Ivy now includes an `AppBase` class that provides a semantic foundation for building apps. While functionally equivalent to `ViewBase`, it offers clearer intent when defining app-level components.
+
+**Usage:**
+
+```csharp
+[App(Title = "My Application", Icon = "🚀")]
+public class MyApp : AppBase
+{
+    protected override Widget Build()
+    {
+        return new Page("Welcome")
+        {
+            new Text("Hello from AppBase!")
+        };
+    }
+}
+```
+
+### JavaScript Execution in Html Widget with DangerouslyAllowScripts
+
+The `Html` widget now supports opt-in JavaScript execution through the new `DangerouslyAllowScripts` property. By default, the Html widget sanitizes all JavaScript for security, but you can now bypass this when rendering trusted HTML content that requires script execution.
+
+**⚠️ Security Warning:** Only enable `DangerouslyAllowScripts` for HTML content you completely trust. Rendering untrusted or user-generated content with this flag enabled exposes your application to Cross-Site Scripting (XSS) attacks.
+
+**Usage Example:**
+
+```csharp
+public class ScriptHtmlView : ViewBase
+{
+    public override object? Build()
+    {
+        var htmlWithScript =
+            """
+            <div id="target-div">Loading...</div>
+            <script>
+                document.getElementById('target-div').innerText = 'Script executed successfully!';
+            </script>
+            """;
+
+        // Enable script execution using the fluent method
+        return new Html(htmlWithScript).DangerouslyAllowScripts();
+    }
+}
+```
+
+### HtmlPipeline - XDocument-Based Filters and Full Customization
+
+The HTML pipeline has been refactored to use `XDocument` for safer, more structured HTML manipulation. Filters now work with parsed XML instead of raw strings, and new APIs allow full pipeline customization.
+
+**Creating a Custom Filter:**
+
+```csharp
+using System.Xml.Linq;
+using Ivy.Core.Server.HtmlPipeline;
+
+public class OpenGraphFilter : IHtmlFilter
+{
+    public void Process(HtmlPipelineContext context, XDocument document)
+    {
+        var head = document.Root?.Element("head");
+        if (head == null) return;
+
+        head.Add(new XElement("meta",
+            new XAttribute("property", "og:title"),
+            new XAttribute("content", "My App")));
+
+        head.Add(new XElement("meta",
+            new XAttribute("property", "og:description"),
+            new XAttribute("content", "Built with Ivy")));
+    }
+}
+
+// Register the filter
+var server = new Server()
+    .UseHtmlFilter(new OpenGraphFilter());
+```
+
+**Access Services in Filters:**
+
+```csharp
+public class ServiceBasedFilter : IHtmlFilter
+{
+    public void Process(HtmlPipelineContext context, XDocument document)
+    {
+        var myService = context.Services.GetService<IMyService>();
+        var head = document.Root?.Element("head");
+
+        // Use service data to add elements
+        head?.Add(new XElement("meta",
+            new XAttribute("name", "custom"),
+            new XAttribute("content", myService.GetValue())));
+    }
+}
+```
+
+**Full Pipeline Customization:**
+
+Use `Server.UseHtmlPipeline()` to access the full pipeline, allowing you to clear, reorder, or replace filters entirely:
+
+```csharp
+// Replace the entire pipeline with custom filters
+server.UseHtmlPipeline(pipeline =>
+{
+    pipeline.Clear();
+    pipeline.Use<OpenGraphFilter>();
+    pipeline.Use<CustomAnalyticsFilter>();
+});
+```
+
+The pipeline configurator runs after all built-in and custom filters have been added, so `Clear()` removes everything for complete control.
+
+### XamlBuilder: DataPoint Support for Charts
+
+XamlBuilder now supports defining chart data inline using `<DataPoint>` elements, making it easier to work with charts without needing to create separate data classes.
+
+**Complete Chart Example:**
+
+```csharp
+var xaml = """
+    <LineChart ColorScheme="Default">
+        <LineChart.Data>
+            <DataPoint Month="Jan" Revenue="100" Costs="80" />
+            <DataPoint Month="Feb" Revenue="120" Costs="90" />
+            <DataPoint Month="Mar" Revenue="140" Costs="85" />
+        </LineChart.Data>
+        <LineChart.Lines>
+            <Line DataKey="Revenue" />
+            <Line DataKey="Costs" />
+        </LineChart.Lines>
+        <LineChart.XAxis>
+            <XAxis DataKey="Month" />
+        </LineChart.XAxis>
+    </LineChart>
+    """;
+
+var chart = builder.Build(xaml);
+```
+
+### Field - Horizontal Label Layout with LabelPosition
+
+The `Field` widget now supports horizontal label layouts where labels appear beside inputs instead of above them. This is particularly useful for data-dense admin panels, settings pages, and compact form layouts.
+
+**New API:**
+
+```csharp
+public enum LabelPosition
+{
+    Top,   // Default - label above input
+    Left   // Label beside input (horizontal layout)
+}
+```
+
+**Basic Usage:**
+
+```csharp
+// Default - label on top
+var emailField = new Field(
+    new TextInput("Email"),
+    label: "Email Address"
+);
+
+// Horizontal layout - label on left
+var emailField = new Field(
+    new TextInput("Email"),
+    label: "Email Address"
+).LabelPosition(LabelPosition.Left);
+```
+
+### Form Submit Strategies
+
+Forms now support different submit strategies that control when form state is committed back to your model. This is separate from validation timing and gives you fine-grained control over form behavior.
+
+**Available Strategies:**
+
+- `OnSubmit` (default) — State is committed only when the submit button is clicked
+- `OnBlur` — State is committed when any field loses focus (submit button hidden)
+- `OnChange` — State is committed on every field value change (submit button hidden)
+
+**Auto-Save Settings Example:**
+
+```csharp
+public class SettingsPanel : ViewBase
+{
+    public record Settings(string Name, string Theme, int FontSize);
+
+    public override object? Build()
+    {
+        var settings = UseState(() => new Settings("Default", "Light", 14));
+        var client = UseService<IClientProvider>();
+
+        // React to changes and auto-save
+        UseEffect(() =>
+        {
+            if (!string.IsNullOrEmpty(settings.Value.Name))
+            {
+                client.Toast($"Settings auto-saved: {settings.Value.Name}");
+            }
+        }, settings);
+
+        return Layout.Vertical()
+            | settings.ToForm()
+                .SubmitStrategy(FormSubmitStrategy.OnChange)  // Auto-save on every change
+                .Label(m => m.Name, "Display Name")
+                .Label(m => m.Theme, "Theme")
+                .Label(m => m.FontSize, "Font Size")
+            | Text.Block($"Current: {settings.Value.Name}, {settings.Value.Theme}, {settings.Value.FontSize}px");
+    }
+}
+```
+
+Use `OnChange` for settings panels where changes should apply immediately, and `OnBlur` for forms where you want to commit after the user finishes editing each field.
+
+### NumberInput: Min/Max Parameters
+
+`ToNumberInput()` now accepts optional `min` and `max` parameters, making it easier to set value constraints directly when creating number inputs.
+
+**Basic Usage:**
+
+```csharp
+var price = UseState(0.0);
+
+return price.ToNumberInput()
+    .Min(0)
+    .Max(10000)
+    .Placeholder("Enter price")
+    .WithField()
+    .Label("Product Price");
+```
+
+### Fluent API Enhancements
+
+Several widgets have received new fluent API extensions to make configuration more concise and chainable:
+
+- **Toast API**: `.Success()`, `.Destructive()`, `.Warning()`, `.Info()`
+- **ListItem**: `.Title()`, `.Subtitle()`, `.Icon()`, `.Badge()`, `.Tag()`, `.OnClick()`, `.Content()`, `.Disabled()`
+- **FeedbackInput**: Dedicated fluent methods for each variant type.
+- **Chart Builders**: `.Height()` and `.Width()` (replaces `Polish` callback workaround).
+- **DesktopWindow**: `.UseDpiScaling()`, `.UseDevTools()`, `.Resizable()`, `.Center()`, `.TopMost()` (booleans default to `true`).
+- **Table Progress**: `.Min()`, `.Max()`, `.AutoColor()`, `.Color()`, `.Format()`.
+- **Separator**: `.TextAlign(TextAlignment.Left | Center | Right)`.
+- **Global**: `.Grow()` is now available on all widgets (shorthand for `.Width(Size.Grow())`).
+
+### ColorInput: Alpha Channel Support
+
+The `ColorInput` widget now supports transparency with the new `AllowAlpha()` method. When enabled, an opacity slider appears next to the color picker, and colors are stored in `#RRGGBBAA` format (8-digit hex with alpha channel).
+
+**Basic Usage:**
+
+```csharp
+public class ColorAlphaDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var colorState = UseState("#ff000080"); // Red with 50% opacity
+
+        return Layout.Vertical()
+            | colorState.ToColorInput().AllowAlpha()
+            | Text.P($"Selected: {colorState.Value}");
+    }
+}
+```
+
+### Ghost Styling for Minimal Appearance
+
+Several input widgets (`ColorInput`, `SelectInput`, and `AsyncSelectInput`) now support ghost styling through the `.Ghost()` extension method. Ghost styling removes borders, background fill, and shadows, creating a minimal appearance ideal for embedding inputs seamlessly into cards, toolbars, or colored backgrounds.
+
+**Basic Usage:**
+
+```csharp
+// ColorInput ghost styling
+var themeColor = UseState("#4A90E2");
+return themeColor.ToColorInput().Ghost();
+
+// SelectInput ghost styling
+var colorState = UseState(Colors.Red);
+return colorState.ToSelectInput(typeof(Colors).ToOptions()).Ghost();
+
+// AsyncSelectInput ghost styling
+var categoryState = UseState(default(Guid?));
+return categoryState.ToAsyncSelectInput(QueryCategories, LookupCategory).Ghost();
+```
+
+### Card: Disabled State
+
+The `Card` widget now supports a disabled state to prevent user interaction.
+
+**Basic Usage:**
+
+```csharp
+new Card("This card cannot be clicked.")
+    .Title("Disabled Card")
+    .Description("User interaction is disabled.")
+    .OnClick(_ => client.Toast("This won't fire!"))
+    .Disabled()
+    .Width(Size.Units(100));
+```
+
+### DetailsBuilder: Custom Field Labels
+
+The `DetailsBuilder` now supports customizing field labels with the new `.Label()` method. By default, `ToDetails()` generates labels from property names using PascalCase splitting (e.g., `NetBurn` becomes "Net Burn"), but you can now override these auto-generated labels with custom text.
+
+**Basic Usage:**
+
+```csharp
+public record RunwayData(decimal NetBurn, decimal GrossBurn, int Months, DateTime RunwayDate);
+
+var data = new RunwayData(5000m, 10000m, 12, new DateTime(2027, 3, 1));
+data.ToDetails()
+    .Label(x => x.NetBurn, "Net Monthly Burn")
+    .Label(x => x.RunwayDate, "Projected Runway End")
+    .Build();
+```
+
+### Dots Now Allowed in App IDs
+
+App IDs can now include dots, enabling better namespacing and versioning patterns. Previously, app IDs like `app.v2` or `users.profile` were not allowed, but this restriction has been removed.
+
+**New Capabilities:**
+
+```csharp
+// Version namespacing
+[App(Id = "dashboard.v2")]
+public class DashboardV2 : AppBase { }
+
+// Feature namespacing
+[App(Id = "users.profile")]
+public class UserProfile : AppBase { }
+
+// Domain-style naming
+[App(Id = "com.mycompany.admin")]
+public class AdminApp : AppBase { }
+
+// Multi-level namespacing
+[App(Id = "api.v1.users")]
+public class ApiUsersV1 : AppBase { }
+```
+
+### Progress Builder for Table Cells
+
+The Table widget now supports inline progress bars through the new `Progress()` builder, allowing you to render numeric values as visual progress indicators directly within table cells.
+
+**Basic Usage:**
+
+```csharp
+var tasks = new[] {
+    new { Name = "Design Review", Progress = 100 },
+    new { Name = "Implementation", Progress = 75 },
+    new { Name = "Testing", Progress = 45 },
+    new { Name = "Documentation", Progress = 20 }
+};
+
+new Table(tasks)
+    .Builder(t => t.Progress, f => f.Progress());
+```
+
+**Custom Range and Format String:**
+
+Configure custom min/max ranges and display the value alongside the progress bar:
+
+```csharp
+var downloads = new[] {
+    new { File = "report.pdf", Downloaded = 750, Total = 1000 }
+};
+
+new Table(downloads)
+    .Builder(d => d.Downloaded, f => f.Progress()
+        .Min(0)
+        .Max(1000)
+        .AutoColor()
+        .Format("%d bytes"));
+```
+
+### Native Desktop Applications with Ivy.Desktop
+
+Ivy apps can now run as native desktop applications across Windows, macOS, and Linux using the new `Ivy.Desktop` library. Built on Photino.NET, it provides a simple builder API for wrapping your Ivy web apps in native windows with automatic DPI detection and scaling.
+
+**Getting Started:**
+
+Add the `Ivy.Desktop` package to your project and use the `DesktopWindow` builder to configure and launch your app:
+
+```csharp
+using Ivy.Desktop;
+
+var server = new Server(args);
+var exitCode = new DesktopWindow(server)
+    .Title("My Ivy App")
+    .Size(1280, 800)
+    .Run();
+
+return exitCode;
+```
+
+### Icons in Select Options
+
+Select inputs now support optional icons for each option, making it easier to create visually rich select menus. Additionally, labels are now optional—if omitted, the option value will be displayed instead.
+
+**What's New:**
+
+- Added `icon` property to select options (supports any icon name from your icon library)
+- Made `label` property optional (falls back to displaying the value)
+- Icons are supported across all select variants: Toggle, Radio, Checkbox, and Dropdown
+
+**Usage:**
+
+```csharp
+// Add icons to select options
+var options = new List<SelectOption>
+{
+    new() { Value = "home", Label = "Home", Icon = "home" },
+    new() { Value = "settings", Label = "Settings", Icon = "settings" },
+    new() { Value = "profile", Label = "Profile", Icon = "user" }
+};
+
+var selected = UseState("home");
+return selected.ToSelectInput()
+    .Options(options)
+    .Variant(SelectInputVariant.Dropdown);
+```
+
+**Icon-Only Options:**
+
+You can omit labels entirely to create icon-only selects:
+
+```csharp
+// Icon-only toggle buttons
+var theme = UseState("light");
+return theme.ToSelectInput()
+    .Options(new List<SelectOption>
+    {
+        new() { Value = "light", Icon = "sun" },
+        new() { Value = "dark", Icon = "moon" }
+    })
+    .Variant(SelectInputVariant.Toggle);
+```
+
+
 
 ## New Features
 
