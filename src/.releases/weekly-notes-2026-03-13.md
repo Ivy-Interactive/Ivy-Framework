@@ -20,20 +20,6 @@ To maintain consistency across the Ivy Framework, all input variant enums have b
 | `CodeInputVariants` | `CodeInputVariant` |
 | `BoolInputVariants` | `BoolInputVariant` |
 
-**Migration:**
-
-Update your code with a simple find-and-replace:
-
-```csharp
-// Before
-new TextInput("Name")
-    .Variant(TextInputVariants.Outlined);
-
-// After
-new TextInput("Name")
-    .Variant(TextInputVariant.Outlined);
-```
-
 ### Namespaces Flattened
 
 Several core types such as `ExternalWidgetAttribute` and `TextAlignment` have been moved to the root `Ivy` namespace to simplify using directives and prevent refactoring issues (like the `RemoveInvalidIvyUsings` rule incorrectly stripping them).
@@ -54,22 +40,6 @@ The `.Value()` method was previously used to set initial values inline directly 
 
 All input widgets are affected: `TextInput`, `SelectInput`, `AsyncSelectInput`, `NumberInput`, `BoolInput`, `CodeInput`, `ColorInput`, `DateRangeInput`, `DateTimeInput`, `FeedbackInput`, `IconInput`, and `ReadOnlyInput`.
 
-**Migration:**
-
-Initial values should now be managed through `IState<T>` via the `UseState(initialValue)` hook and bound to inputs using the respective `.To[InputType]()` methods.
-
-```csharp
-// Before
-var nameState = UseState("");
-var input = new TextInput().Value("John Doe").OnChange(nameState.Set);
-
-// After
-var nameState = UseState("John Doe");
-var input = nameState.ToTextInput();
-```
-
-This change enforces a cleaner, more consistent state management pattern where the state holds the initial value, making data flow more predictable and easier to reason about.
-
 ### Scale Renamed to Density
 
 The `Scale` enum and all associated APIs have been renamed to `Density` to avoid ambiguity with chart scales, DPI scaling, and other scale-related concepts.
@@ -81,61 +51,9 @@ The `Scale` enum and all associated APIs have been renamed to `Density` to avoid
 - Enum values remain unchanged: `Small`, `Medium`, `Large`
 - Shortcut methods `.Small()`, `.Medium()`, `.Large()` are unchanged
 
-**Migration:**
-
-Update your code with a simple find-and-replace:
-
-```csharp
-// Before
-Text.Literal("Hello").Scale(Scale.Large);
-new Button("Click Me").Scale(Scale.Small);
-
-// After
-Text.Literal("Hello").Density(Density.Large);
-new Button("Click Me").Density(Density.Small);
-
-// Shortcut methods still work the same
-Text.Literal("Hello").Large();  // No change needed
-new Button("Click Me").Small();  // No change needed
-```
-
-For quick migration, run a global find-and-replace in your codebase:
-
-- `.Scale(` → `.Density(`
-- `Scale.` → `Density.`
-
 ### Box.Color() Renamed to Box.Background()
 
 The `Color()` method and property on the `Box` widget have been renamed to `Background()` to more clearly reflect what it controls—the background color of the box, not the foreground/text color.
-
-**What Changed:**
-
-- `Box.Color(Colors)` → `Box.Background(Colors)`
-- `Box.Color(Colors, float)` → `Box.Background(Colors, float)` (with opacity)
-- `.WithCell().Color(...)` → `.WithCell().Background(...)`
-
-**What Remains Unchanged:**
-
-- `Text.Color()` and `Icon.Color()` still control foreground/text color
-- `Box.BorderColor()` is unchanged
-
-**Migration:**
-
-Update your code with a simple find-and-replace for `.Color(` on `Box` widgets:
-
-```csharp
-// Before
-new Box("Content").Color(Colors.Primary);
-new Box("Alert").Color(Colors.Red, 0.8f);  // With opacity
-"Cell".WithCell().Color(Colors.Slate);
-
-// After
-new Box("Content").Background(Colors.Primary);
-new Box("Alert").Background(Colors.Red, 0.8f);  // With opacity
-"Cell".WithCell().Background(Colors.Slate);
-```
-
-This change makes it clearer that `Box.Background()` controls the background color, while `Text.Color()` controls the foreground/text color.
 
 ### Text.InlineCode() Renamed to Text.Monospaced()
 
@@ -146,29 +64,6 @@ The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been
 - `Text.InlineCode()` → `Text.Monospaced()`
 - `TextVariant.InlineCode` → `TextVariant.Monospaced`
 
-**Why This Matters:**
-
-The term "InlineCode" implied the text was specifically for displaying code snippets, but the styling simply applies a monospace font. "Monospaced" more accurately describes the visual rendering and can be used for any content that benefits from fixed-width characters, not just code.
-
-**Migration:**
-
-Update your code with a simple find-and-replace:
-
-```csharp
-// Before
-Text.InlineCode("GET /api/users");
-new Text("Path: ").Variant(TextVariant.InlineCode);
-
-// After
-Text.Monospaced("GET /api/users");
-new Text("Path: ").Variant(TextVariant.Monospaced);
-```
-
-For quick migration, run a global find-and-replace in your codebase:
-
-- `Text.InlineCode(` → `Text.Monospaced(`
-- `TextVariant.InlineCode` → `TextVariant.Monospaced`
-
 ### Explicit Size API for Width, Height, and Size Methods
 
 The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use `Size.Units()` or `Size.Fraction()` to specify sizing.
@@ -177,155 +72,20 @@ The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods h
 
 - Removed `Width(int)`, `Width(float)`, `Height(int)`, `Height(float)`, and `Size(int)` overloads
 - All sizing now requires explicit `Size` struct usage via `Size.Units()` or `Size.Fraction()`
-- Fixed a generic constraint mismatch in `WidgetBaseExtensions` that prevented extension methods from working properly with certain generic widgets
-
-**Why This Matters:**
-
-The previous implicit overloads created ambiguity between unit-based and fraction-based sizing. The new explicit API makes sizing intent clearer and more predictable. Additionally, this change resolves issues where extension methods weren't properly resolved for widgets inheriting from generic forms (e.g., `Card`, `SelectInput<T>`).
-
-**Migration:**
-
-Update your sizing code to use the explicit `Size` API:
-
-```csharp
-// Before - numeric values were ambiguous
-new Box("Content")
-    .Width(100)
-    .Height(50);
-
-new Avatar()
-    .Size(200);
-
-// After - explicit unit-based sizing
-new Box("Content")
-    .Width(Size.Units(100))
-    .Height(Size.Units(50));
-
-new Avatar()
-    .Size(Size.Units(200));
-
-// For percentage-based sizing, use Size.Fraction()
-new Box("Content")
-    .Width(Size.Fraction(1f))      // 100% width
-    .Height(Size.Fraction(0.5f));  // 50% height
-```
-
-**Quick Migration Guide:**
-
-- `.Width(100)` → `.Width(Size.Units(100))`
-- `.Height(50)` → `.Height(Size.Units(50))`
-- `.Size(200)` → `.Size(Size.Units(200))`
-- `.Width("100%")` → `.Width(Size.Fraction(1f))`
-- `.Height(0.5f)` (as percentage) → `.Height(Size.Fraction(0.5f))`
 
 ### ToTextAreaInput() Renamed to ToTextareaInput()
 
 The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()` (lowercase 'a') to standardize naming across the codebase.
 
-**What Changed:**
-
-- `ToTextAreaInput()` → `ToTextareaInput()`
-
-This change aligns with:
-
-- The HTML `<textarea>` element specification
-- The existing C# enum `TextInputVariant.Textarea`
-- UI libraries like shadcn and Radix that use `Textarea`
-
-**Migration:**
-
-Update your code by replacing `ToTextAreaInput` with `ToTextareaInput`:
-
-```csharp
-// Before
-var description = UseState("");
-return description.ToTextAreaInput(placeholder: "Enter description...");
-
-// After
-var description = UseState("");
-return description.ToTextareaInput(placeholder: "Enter description...");
-```
-
-For quick migration, run a global find-and-replace in your codebase:
-
-- `ToTextAreaInput` → `ToTextareaInput`
-
-**Alternative:**
-
-You can also use the `TextInputVariant.Textarea` enum directly:
-
-```csharp
-state.ToTextInput(variant: TextInputVariant.Textarea)
-// Or with the fluent API
-state.ToTextInput().Variant(TextInputVariant.Textarea)
-```
-
 ### Chart Data Syntax Changed from DataPoint Elements to JSON CDATA
 
-The chart data format has been completely redesigned to use JSON arrays within CDATA sections instead of XML `<DataPoint>` elements. This new approach provides native type preservation and eliminates ambiguity in data parsing.
+The chart data format has been completely redesigned to use JSON arrays within CDATA sections instead of XML `<DataPoint>` elements.
 
 **What Changed:**
 
 - Removed: `<DataPoint>` XML elements with attributes
 - Added: JSON arrays using `<Data><![CDATA[...]]></Data>` syntax
 - Type handling now preserves strings, numbers, and booleans exactly as specified in JSON
-
-**Why This Matters:**
-
-The old `<DataPoint>` approach auto-parsed attribute values, which could lead to unexpected type conversions. For example, `"007"` might become `7`, or string booleans might not be recognized consistently. The new JSON format uses native JSON type system, making data types explicit and predictable.
-
-**Migration:**
-
-Update your chart data from XML elements to JSON arrays:
-
-```csharp
-// Before - DataPoint XML elements
-<LineChart>
-    <LineChart.Data>
-        <DataPoint Month="Jan" Revenue="100" Costs="80" />
-        <DataPoint Month="Feb" Revenue="120" Costs="90" />
-    </LineChart.Data>
-    <LineChart.Lines>
-        <Line DataKey="Revenue" />
-        <Line DataKey="Costs" />
-    </LineChart.Lines>
-</LineChart>
-
-// After - JSON CDATA syntax
-<LineChart>
-    <Data><![CDATA[
-        [
-            {"Month": "Jan", "Revenue": 100, "Costs": 80},
-            {"Month": "Feb", "Revenue": 120, "Costs": 90}
-        ]
-    ]]></Data>
-    <LineChart.Lines>
-        <Line DataKey="Revenue" />
-        <Line DataKey="Costs" />
-    </LineChart.Lines>
-</LineChart>
-```
-
-**Type Preservation Examples:**
-
-```csharp
-// Strings remain strings (important for IDs, codes, etc.)
-<Data><![CDATA[
-    [{"Id": "007", "Name": "James Bond"}]
-]]></Data>
-
-// Numbers remain numbers
-<Data><![CDATA[
-    [{"Score": 95.5, "Count": 42}]
-]]></Data>
-
-// Booleans are properly typed
-<Data><![CDATA[
-    [{"Active": true, "Verified": false}]
-]]></Data>
-```
-
-This change applies to all chart widgets: `LineChart`, `BarChart`, and any other widgets that accept data arrays.
 
 ### CreateSignal Renamed to UseSignal and ISignal Interface Unified
 
@@ -338,33 +98,6 @@ The signal creation API has been simplified and made more consistent with other 
 - `ISignalReceiver<TInput, TOutput>` interface removed
 - New unified `ISignal<TInput, TOutput>` interface with both `.Send()` and `.Receive()` methods
 
-**Why This Matters:**
-
-The rename to `UseSignal` aligns with Ivy's naming convention for reactive hooks (`UseState`, `UseEffect`, etc.), making the API more intuitive. The unified `ISignal` interface simplifies the type system—you no longer need to choose between sender and receiver types, as both capabilities are always available on the same interface.
-
-**Migration:**
-
-Update signal creation and type references:
-
-```csharp
-// Before - separate sender and receiver
-ISignalSender<string, bool> sender = context.CreateSignal<MySignal, string, bool>();
-ISignalReceiver<string, bool> receiver = context.UseSignal<MySignal, string, bool>();
-
-// After - unified interface
-ISignal<string, bool> signal = context.UseSignal<MySignal, string, bool>();
-
-// The signal works the same way
-signal.Send("data");
-signal.Receive(result => { /* handle result */ });
-```
-
-For quick migration, run a global find-and-replace in your codebase:
-
-- `CreateSignal<` → `UseSignal<`
-- `ISignalSender<` → `ISignal<`
-- `ISignalReceiver<` → `ISignal<`
-
 ### ContentPipeline Renamed to HtmlPipeline with XDocument-Based Filters
 
 The HTML processing pipeline has been refactored for better performance and maintainability. The namespace was renamed from `ContentPipeline` to `HtmlPipeline`, and filters now operate on parsed `XDocument` objects instead of raw HTML strings.
@@ -375,44 +108,6 @@ The HTML processing pipeline has been refactored for better performance and main
 - **Filter interface updated:** `IHtmlFilter.Process` now returns `void` and takes an `XDocument` parameter instead of returning a modified HTML string
 - **New pipeline customization API:** `Server.UseHtmlPipeline()` allows full control over the filter pipeline
 - **New inspection methods:** `HtmlPipeline.Filters` (read-only list) and `HtmlPipeline.Clear()` for pipeline management
-
-**Why This Matters:**
-
-The pipeline now parses HTML once, applies all filters to the DOM structure, and serializes back to HTML. This is more efficient than multiple string replacements and makes filters more robust and easier to write.
-
-**Migration:**
-
-If you have custom HTML filters, update them to work with `XDocument`:
-
-```csharp
-// Before - string manipulation
-using Ivy.Core.Server.ContentPipeline;
-
-public class MyFilter : IHtmlFilter
-{
-    public string Process(HtmlPipelineContext context, string html)
-    {
-        html = html.Replace("</head>",
-            "  <meta name=\"custom\" content=\"value\" />\n</head>");
-        return html;
-    }
-}
-
-// After - XDocument manipulation
-using System.Xml.Linq;
-using Ivy.Core.Server.HtmlPipeline;
-
-public class MyFilter : IHtmlFilter
-{
-    public void Process(HtmlPipelineContext context, XDocument document)
-    {
-        var head = document.Root?.Element("head");
-        head?.Add(new XElement("meta",
-            new XAttribute("name", "custom"),
-            new XAttribute("content", "value")));
-    }
-}
-```
 
 **New Customization API:**
 
@@ -432,45 +127,6 @@ server.UseHtmlPipeline(pipeline =>
     pipeline.Use<OpenGraphFilter>();
 });
 ```
-
-### Size Methods Now Require Explicit Size Type
-
-The implicit size overloads (`.Width(int)`, `.Width(float)`, `.Height(int)`, `.Height(float)`, and `.Size(int)`) have been removed from `WidgetBase` extensions. You must now explicitly specify whether you're using units or fractions using `Size.Units()` or `Size.Fraction()`.
-
-**What Changed:**
-
-- Removed `Width(int)`, `Width(float)`, `Height(int)`, `Height(float)`, and `Size(int)` extension methods
-- All sizing must now use explicit `Size` factory methods: `Size.Units()` or `Size.Fraction()`
-- This change also fixes generic constraint issues with `WidgetBase<T>` extensions that were preventing some widgets from resolving extension methods
-
-**Migration:**
-
-For fixed unit sizes, wrap values with `Size.Units()`:
-
-```csharp
-// Before
-new Box("Content").Width(100).Height(50);
-Layout.Vertical().Size(200);
-
-// After
-new Box("Content").Width(Size.Units(100)).Height(Size.Units(50));
-Layout.Vertical().Size(Size.Units(200));
-```
-
-For percentage/fractional sizes, use `Size.Fraction()`:
-
-```csharp
-// Before
-new Box("Content").Width(0.5f);  // 50% width
-
-// After
-new Box("Content").Width(Size.Fraction(0.5f));  // 50% width
-new Box("Full").Width(Size.Fraction(1f));  // 100% width
-```
-
-This change makes sizing more explicit and fixes issues where certain generic widgets (like `Card` or `SelectInput<T>`) couldn't properly resolve width/height extension methods.
-
----
 
 ## New Features
 
@@ -541,26 +197,6 @@ new Terminal()
     .ScrollbackLimit(1000);
 ```
 
-**Features:**
-
-- Full terminal emulation with ANSI escape sequences
-- Unicode and emoji support
-- Clipboard integration (copy/paste)
-- Web link detection
-- Resizable to match container
-- PTY process support for interactive shells
-- Streaming output from backend processes
-
-This widget is perfect for:
-
-- SSH clients
-- Terminal-based admin panels
-- Build output viewers
-- Interactive CLI tools
-- Log viewers with ANSI color support
-
----
-
 ### Screenshot Feedback Widget
 
 Ivy now includes a screenshot and annotation widget through the `Ivy.Widgets.ScreenshotFeedback` package. Capture screenshots of your Ivy app, annotate them with drawing tools, and upload them - perfect for bug reports, feedback forms, and documentation.
@@ -599,29 +235,9 @@ return Layout.Vertical().Gap(4)
 - Integrates with Ivy's `UseUpload` infrastructure
 - Modal interface with save/cancel actions
 
-This widget is perfect for building in-app feedback tools, bug reporting systems, and documentation workflows.
-
----
-
 ### Server-to-Client Streaming with UseStream Hook
 
 Ivy now supports efficient server-to-client streaming with the new `UseStream` hook. Stream real-time data from your backend to the frontend without triggering full state re-renders for every chunk. This is perfect for LLM text streaming, progress updates, or any scenario where you need to push data continuously to a single widget.
-
-**API Reference:**
-
-```csharp
-/// <summary>
-/// Creates a server-to-client stream that can push data to the frontend in real time.
-/// Attach the returned stream to a widget property (e.g. `RichTextBlock.Stream`)
-/// and call `Write(T data)` to send data.
-/// </summary>
-/// <param name="buffer">
-/// When `true` (default), data written before the frontend subscribes is buffered
-/// and automatically flushed once the subscription is established.
-/// When `false`, data written before subscription is discarded.
-/// </param>
-public IWriteStream<T> UseStream<T>(bool buffer = true)
-```
 
 **Example: Streaming Rich Text from an LLM**
 
@@ -661,12 +277,6 @@ public class StreamingApp : ViewBase
 
 By default (`buffer = true`), if you start writing to the stream before the frontend component has fully rendered and subscribed via WebSockets, the data will be buffered in memory on the server. Once the client establishes the subscription, all buffered data will be flushed immediately.
 
-If you don't need buffering:
-
-```csharp
-var stream = Context.UseStream<byte[]>(buffer: false);
-```
-
 **Features:**
 
 - No full state re-renders for each data chunk
@@ -674,8 +284,6 @@ var stream = Context.UseStream<byte[]>(buffer: false);
 - Type-safe streaming with generics
 - Works with widgets like `Text.Rich()` and `Terminal`
 - No polling required - true push-based streaming
-
----
 
 ### Async Cleanup in UseEffect with IAsyncDisposable
 
@@ -697,45 +305,6 @@ UseEffect(() =>
 }, []);
 ```
 
-**Working with Streams:**
-
-```csharp
-UseEffect(() =>
-{
-    var stream = new FileStream("data.txt", FileMode.Open);
-    var reader = new StreamReader(stream);
-
-    // Process stream data...
-
-    return AsyncDisposable.Create(async () =>
-    {
-        await reader.DisposeAsync();
-        await stream.DisposeAsync();
-    });
-}, []);
-```
-
-**Database Connections:**
-
-```csharp
-UseEffect(() =>
-{
-    var connection = dbContext.Database.GetDbConnection();
-
-    // Use connection...
-
-    return AsyncDisposable.Create(async () =>
-    {
-        await connection.CloseAsync();
-        await connection.DisposeAsync();
-    });
-}, []);
-```
-
-This enhancement allows for proper async cleanup of resources, preventing potential deadlocks and ensuring resources are released efficiently.
-
----
-
 ### DevTools for Visual Widget Inspection (Development Only)
 
 Ivy now includes built-in DevTools for debugging and inspecting your widget tree during development. Enable it during local development to inspect widgets, view callsite information, and make live text edits.
@@ -756,8 +325,6 @@ var server = new Server()
 - Widget tree visualization
 
 DevTools are designed for development environments only and should not be enabled in production.
-
----
 
 ### Enhanced Layout System with Figma-Style Options
 
@@ -897,8 +464,6 @@ new Box("Content").Overflow(Overflow.Visible);
 new Box("Content").Overflow(Overflow.Scroll);
 ```
 
----
-
 ### Border Support for Layouts
 
 LayoutView and StackLayout now support borders with full control over color, thickness, radius, and style.
@@ -906,18 +471,6 @@ LayoutView and StackLayout now support borders with full control over color, thi
 **Adding Borders:**
 
 ```csharp
-// Simple border with default rounded corners
-Layout.Horizontal()
-    .Border(Colors.Gray, thickness: 1)
-    | new Text("Content with border");
-
-// Custom border thickness
-Layout.Vertical()
-    .Border(Colors.Blue, thickness: 2)
-    | new Button("Button 1")
-    | new Button("Button 2");
-
-// Border with custom thickness on different sides
 Layout.Horizontal()
     .Border(Colors.Red, new Thickness(top: 2, right: 1, bottom: 2, left: 1))
     | new Text("Custom border thickness");
@@ -949,10 +502,6 @@ Layout.Vertical()
     .BorderRadius(BorderRadius.Full)
     | new Badge("Pill-shaped layout");
 ```
-
-This gives you the same border control as you have with other widgets like Box, now available on all your layouts.
-
----
 
 ### PWA (Progressive Web App) Manifest Support
 
@@ -1007,165 +556,6 @@ public class MyApp : AppBase
 - Works seamlessly with the `[App]` attribute for metadata configuration
 - Use `AppBase` for top-level application classes and `ViewBase` for reusable view components
 
-This addition makes the framework more intuitive, especially when distinguishing between app entry points and reusable view components.
-
----
-
-### Natural Language Database Queries with Ivy.Agent.EfQuery
-
-Query your Entity Framework Core databases using natural language with the new `Ivy.Agent.EfQuery` package. This intelligent agent pipeline converts natural language questions into SQL queries and automatically renders results as Ivy XAML widgets.
-
-**How it Works:**
-The agent uses a multi-step pipeline: Planning → SQL Generation & Validation → XAML Widget Generation. Each step uses AI to ensure accurate, safe queries and beautiful visualizations.
-
-**Basic Usage:**
-
-```csharp
-using Ivy.Agent.EfQuery;
-using Microsoft.Extensions.AI;
-
-// Setup your chat client (OpenAI, Azure OpenAI, etc.)
-var chatClient = /* your IChatClient implementation */;
-var contextFactory = /* your IDbContextFactory<YourDbContext> */;
-
-// Create the agent
-var agent = new EfQueryAgent<YourDbContext>(chatClient, contextFactory);
-
-// Query in natural language
-var result = await agent.QueryAsync("Show me all products with price above 50");
-
-// Get the results
-Console.WriteLine($"Plan: {result.Plan}");
-Console.WriteLine($"SQL: {result.Sql}");
-Console.WriteLine($"XAML: {result.Xaml}");
-
-// Render the XAML widget
-var builder = new XamlBuilder();
-var widget = builder.Build(result.Xaml);
-```
-
-**Complete Example with OpenAI:**
-
-```csharp
-using OpenAI;
-using Microsoft.Extensions.AI;
-
-// Configure OpenAI client
-var openAiClient = new OpenAIClient(
-    new System.ClientModel.ApiKeyCredential(apiKey),
-    new OpenAIClientOptions { Endpoint = new Uri(endpoint) });
-
-var chatClient = openAiClient.GetChatClient("gpt-4o").AsIChatClient();
-
-// Create the query agent
-var agent = new EfQueryAgent<ProductDbContext>(chatClient, contextFactory);
-
-// Ask questions in natural language
-var result = await agent.QueryAsync(
-    "What are the top 5 selling products this month by revenue?");
-
-// The agent automatically:
-// 1. Plans the query approach
-// 2. Generates and validates SQL
-// 3. Executes the query safely (read-only)
-// 4. Creates appropriate XAML visualization
-```
-
-**Safety Features:**
-
-- Strict SQL validation (only SELECT statements allowed)
-- No dangerous operations (INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE, EXEC, etc.)
-- Query results limited to 1000 rows
-- Read-only transactions with automatic rollback
-- SQL comments not allowed (prevents injection attacks)
-- Multiple statements blocked (no semicolon chaining)
-
-**Schema Collection:**
-The agent automatically collects your database schema including:
-
-- Table and entity names
-- Column names and types
-- Primary keys
-- Foreign key relationships
-- Navigation properties
-
-**Monitoring:**
-
-```csharp
-var result = await agent.QueryAsync("Show revenue by department");
-
-Console.WriteLine($"Input tokens: {result.InputTokens}");
-Console.WriteLine($"Output tokens: {result.OutputTokens}");
-Console.WriteLine($"AI iterations: {result.Iterations}");
-
-// Check if the query failed
-if (result.FailureReason != null)
-{
-    Console.WriteLine($"Query failed: {result.FailureReason}");
-}
-```
-
-The agent intelligently selects appropriate widgets (tables, charts, cards) based on your query and data structure.
-
-**Controlling Schema Exposure with Attributes:**
-
-Use `[EfQueryIgnore]` to hide sensitive entities or properties from the AI agent, and `[EfQueryDescription]` to provide helpful context:
-
-```csharp
-using Ivy.Agent.EfQuery;
-
-// Hide sensitive entity from AI queries
-[EfQueryIgnore]
-public class AuditLog
-{
-    public Guid Id { get; set; }
-    public string Action { get; set; }
-}
-
-// Add descriptions to help the AI understand your schema
-[EfQueryDescription("Customer records with membership information")]
-public class Customer
-{
-    [Key] public Guid Id { get; set; }
-
-    public string Name { get; set; }
-
-    public MembershipTier Tier { get; set; }
-
-    // Hide sensitive fields
-    [EfQueryIgnore]
-    public string PasswordHash { get; set; }
-
-    // Add context for complex fields
-    [EfQueryDescription("Total annual spending in USD")]
-    public decimal AnnualSpend { get; set; }
-}
-
-public enum MembershipTier
-{
-    Bronze = 0,
-    Silver = 1,
-    Gold = 2,
-    Platinum = 3
-}
-```
-
-**Enhanced Schema Intelligence:**
-
-The schema collector now provides richer context to the AI:
-
-- **Database Dialect Detection** - Automatically detects SQL Server, PostgreSQL, MySQL, SQLite, etc.
-- **Enum Value Mappings** - Shows integer values for enums (e.g., "0 = Bronze, 1 = Silver")
-- **Owned Entity Support** - Includes owned entity properties in schema
-- **TPH Inheritance** - Recognizes Table Per Hierarchy patterns with discriminator columns
-- **Schema Caching** - Improves performance by caching collected schema
-
-**Improved Security:**
-
-SQL validation now strips comments before checking for dangerous keywords, preventing attempts to hide malicious SQL inside comments. The `MERGE` statement has also been added to the list of blocked operations.
-
----
-
 ### JavaScript Execution in Html Widget with DangerouslyAllowScripts
 
 The `Html` widget now supports opt-in JavaScript execution through the new `DangerouslyAllowScripts` property. By default, the Html widget sanitizes all JavaScript for security, but you can now bypass this when rendering trusted HTML content that requires script execution.
@@ -1192,18 +582,6 @@ public class ScriptHtmlView : ViewBase
     }
 }
 ```
-
-**Default Behavior:**
-
-By default, `DangerouslyAllowScripts` is `false`, ensuring secure-by-default behavior. The Html widget continues to sanitize JavaScript, removing:
-
-- `<script>` tags and their content
-- Inline event handlers (onclick, onerror, etc.)
-- `javascript:` URLs in href attributes
-
-Only enable script execution when you're embedding trusted HTML from sources you control, such as analytics snippets, embed codes from known services, or interactive demonstrations.
-
----
 
 ### HtmlPipeline - XDocument-Based Filters and Full Customization
 
@@ -1286,8 +664,6 @@ server.UseHtmlPipeline(pipeline =>
 
 The pipeline configurator runs after all built-in and custom filters have been added, so `Clear()` removes everything for complete control.
 
----
-
 ### XamlBuilder: DataPoint Support for Charts
 
 XamlBuilder now supports defining chart data inline using `<DataPoint>` elements, making it easier to work with charts without needing to create separate data classes.
@@ -1331,10 +707,6 @@ var xaml = """
 var chart = builder.Build(xaml);
 ```
 
-DataPoint attributes are automatically parsed to the correct types (numbers, booleans, or strings), and can be used with any chart type including `LineChart`, `BarChart`, and others.
-
----
-
 ### Field - Horizontal Label Layout with LabelPosition
 
 The `Field` widget now supports horizontal label layouts where labels appear beside inputs instead of above them. This is particularly useful for data-dense admin panels, settings pages, and compact form layouts.
@@ -1364,29 +736,6 @@ var emailField = new Field(
     label: "Email Address"
 ).LabelPosition(LabelPosition.Left);
 ```
-
-**Compact Settings Form Example:**
-
-```csharp
-public class SettingsView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Vertical()
-            .Gap(3)
-            | new Field(new TextInput("Username"), "Username")
-                .LabelPosition(LabelPosition.Left)
-            | new Field(new NumberInput(), "Max Items")
-                .LabelPosition(LabelPosition.Left)
-            | new Field(new BoolInput(), "Enable Notifications")
-                .LabelPosition(LabelPosition.Left);
-    }
-}
-```
-
-This layout style saves vertical space and creates a more traditional form appearance common in desktop applications and admin interfaces.
-
----
 
 ### Form Submit Strategies
 
@@ -1432,225 +781,15 @@ public class SettingsPanel : ViewBase
 
 Use `OnChange` for settings panels where changes should apply immediately, and `OnBlur` for forms where you want to commit after the user finishes editing each field.
 
----
-
 ### Auto-Scaffolding SelectInput from [AllowedValues]
 
 Forms now automatically detect the `[AllowedValues]` attribute on `string` and `string[]` properties and scaffold them as `SelectInput` widgets (single or multi-select). This eliminates the need for manual `.Builder()` calls to configure dropdowns.
-
-**Automatic Single Selection:**
-
-```csharp
-public class UserSettings
-{
-    [AllowedValues("Light", "Dark", "Auto")]
-    public string Theme { get; set; } = "Auto";
-
-    [AllowedValues("USA", "Canada", "UK", "Germany", "France")]
-    public string Country { get; set; } = "USA";
-}
-
-public class SettingsView : ViewBase
-{
-    public override object? Build()
-    {
-        var settings = UseState(() => new UserSettings());
-
-        // SelectInput automatically created from [AllowedValues]
-        return settings.ToForm();
-    }
-}
-```
-
-**Automatic Multi-Selection:**
-
-```csharp
-public class ProfileSettings
-{
-    [AllowedValues("Technology", "Sports", "Music", "Art", "Travel")]
-    public string[] Interests { get; set; } = [];
-}
-
-public class ProfileView : ViewBase
-{
-    public override object? Build()
-    {
-        var profile = UseState(() => new ProfileSettings());
-
-        // Multi-select automatically created for string[] with [AllowedValues]
-        return profile.ToForm();
-    }
-}
-```
-
-**Before and After:**
-
-Previously, you had to manually configure dropdowns:
-
-```csharp
-// Before: Manual configuration required
-var themeOptions = new[] { "Light", "Dark", "Auto" }.ToOptions();
-
-return settings.ToForm()
-    .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions));
-```
-
-Now, just add the attribute:
-
-```csharp
-// After: Automatic scaffolding
-[AllowedValues("Light", "Dark", "Auto")]
-public string Theme { get; set; } = "Auto";
-
-return settings.ToForm();  // SelectInput created automatically
-```
-
-The framework automatically converts the allowed values into select options and creates the appropriate input widget (single-select for `string`, multi-select for `string[]`).
-
----
-
-### Automatic Input Validation for Email, Tel, Url, and Password
-
-TextInput now includes built-in validation for Email, Tel (phone), Url, and Password fields. Validation runs automatically on blur when you use the dedicated input methods or variants, providing immediate feedback to users without requiring manual validator setup.
-
-**Convenience Methods with Validation:**
-
-The easiest way to get validated inputs is using the new convenience methods:
-
-```csharp
-public class ContactForm : ViewBase
-{
-    public override object? Build()
-    {
-        var email = UseState("");
-        var phone = UseState("");
-        var website = UseState("");
-        var password = UseState("");
-
-        return Layout.Vertical()
-            | email.ToEmailInput().Placeholder("user@example.com")
-            | phone.ToTelInput().Placeholder("+1 234 567 8900")
-            | website.ToUrlInput().Placeholder("https://example.com")
-            | password.ToPasswordInput().Placeholder("Min 8 characters");
-    }
-}
-```
-
-Each input automatically validates on blur:
-
-- **Email**: Validates proper email format (requires `@` and a domain with `.`)
-- **Tel**: Validates phone numbers (7-15 digits, allows spaces, dashes, parentheses, and `+`)
-- **Url**: Validates URLs (must be absolute URLs with `http` or `https` scheme)
-- **Password**: Validates minimum length (default 8 characters)
-
-**Variant-Based Validation:**
-
-You can also use `.Variant()` to apply validation. Both approaches work identically:
-
-```csharp
-var email = UseState("");
-var phone = UseState("");
-
-// Using convenience method
-var emailInput1 = email.ToEmailInput();
-
-// Using variant - same validation behavior
-var emailInput2 = new TextInput(email).Variant(TextInputVariant.Email);
-
-// Both validate on blur when built inside a view
-```
-
-**Form Field Integration:**
-
-When using with `.WithField()`, validation errors display below the input with proper styling:
-
-```csharp
-var email = UseState("");
-var phone = UseState("");
-
-return Layout.Vertical()
-    | email.ToEmailInput()
-        .Placeholder("user@domain.com")
-        .WithField()
-        .Label("Email Address")
-        .Description("We'll use this for account recovery")
-        .Required()
-    | phone.ToTelInput()
-        .Placeholder("+1 234 567 8900")
-        .WithField()
-        .Label("Phone Number")
-        .Description("7-15 digits required");
-```
-
-**Automatic Form Validation:**
-
-Forms now automatically detect field types and apply validators. If your model has properties named with common patterns (ending in "Email", "Phone", "Password", "Url") or uses the appropriate variants, validation is applied automatically:
-
-```csharp
-public record ContactInfo(
-    string Email,           // Auto-detected as email field
-    string PhoneNumber,     // Auto-detected as phone field
-    string? Website,        // Auto-detected as URL field
-    string Password         // Auto-detected as password field
-);
-
-public class ContactFormView : ViewBase
-{
-    public override object? Build()
-    {
-        var model = UseState(() => new ContactInfo("", "", null, ""));
-
-        // Form automatically applies email, tel, url, and password validators
-        var form = model.ToForm("Submit")
-            .Builder(m => m.Email, s => s.ToEmailInput())
-            .Builder(m => m.PhoneNumber, s => s.ToTelInput())
-            .Builder(m => m.Website, s => s.ToUrlInput())
-            .Builder(m => m.Password, s => s.ToPasswordInput());
-
-        return new Card(form).Width(Size.Full());
-    }
-}
-```
-
-**Validation Messages:**
-
-Clear, user-friendly error messages are shown when validation fails:
-
-- Email: "Please enter a valid email address"
-- Tel: "Please enter a valid phone number"
-- Url: "Please enter a valid URL (http or https)"
-- Password: "Password must be at least 8 characters"
-
-**Technical Notes:**
-
-- Validation only runs when the input is **not empty** (empty values are valid; use `.Required()` for required fields)
-- Validation triggers on **blur** (when the user leaves the field), not on every keystroke
-- Works seamlessly with existing form validation and custom validators
-- Both `ToEmailInput()` and `.Variant(TextInputVariant.Email)` use the same validation logic
-
----
 
 ### NumberInput: Min/Max Parameters
 
 `ToNumberInput()` now accepts optional `min` and `max` parameters, making it easier to set value constraints directly when creating number inputs.
 
 **Basic Usage:**
-
-```csharp
-var count = UseState(1);
-var quantity = UseState(50);
-
-return Layout.Vertical()
-    | count.ToNumberInput(min: 1, max: 100)
-        .Placeholder("Enter count")
-        .WithField().Label("Item Count")
-    | quantity.ToNumberInput(min: 0, max: 1000)
-        .WithField().Label("Quantity");
-```
-
-**Alternative Fluent API:**
-
-You can also use the `.Min()` and `.Max()` fluent extension methods:
 
 ```csharp
 var price = UseState(0.0);
@@ -1662,10 +801,6 @@ return price.ToNumberInput()
     .WithField()
     .Label("Product Price");
 ```
-
-Both approaches are equivalent—use whichever style fits your preference. The parameters provide native HTML5 validation, preventing users from entering values outside the specified range.
-
----
 
 ### TextInput OnSubmit Event
 
@@ -1689,67 +824,6 @@ public class SearchBox : ViewBase
     }
 }
 ```
-
-**HandleSubmit Extension Methods:**
-
-The `HandleSubmit()` extension method comes in three convenient overloads:
-
-```csharp
-// Simple action (no parameters)
-textInput.HandleSubmit(() => PerformSearch());
-
-// Action with event parameter
-textInput.HandleSubmit(e => ProcessInput(e));
-
-// Async ValueTask with event parameter
-textInput.HandleSubmit(async e => await SaveDataAsync());
-```
-
-**Quick-Add Pattern:**
-
-Perfect for adding items to lists without a submit button:
-
-```csharp
-public class TagInput : ViewBase
-{
-    public override object Build()
-    {
-        var tag = UseState("");
-        var tags = UseState<List<string>>(new List<string>());
-
-        return Layout.Horizontal()
-            | tag.ToTextInput()
-                .Placeholder("Add a tag...")
-                .HandleSubmit(() =>
-                {
-                    if (!string.IsNullOrWhiteSpace(tag.Value))
-                    {
-                        tags.Set(new List<string>(tags.Value) { tag.Value });
-                        tag.Set(""); // Clear input
-                    }
-                })
-            | Layout.Horizontal().Gap(2)
-                | tags.Value.Select(t => new Badge(t));
-    }
-}
-```
-
-**Important Notes:**
-
-- OnSubmit only fires for **single-line text inputs** (Default, Password, and Search variants)
-- The Textarea variant does **not** trigger OnSubmit since Enter inserts a newline in multi-line inputs
-- When Enter is pressed, the input is automatically blurred after the event fires
-- Works with all TextInput variants: `ToTextInput()`, `ToPasswordInput()`, and `ToSearchInput()`
-
-**Use Cases:**
-
-- Search boxes that search on Enter
-- Chat inputs that send messages
-- Quick-add fields (tags, todos, comments)
-- Login forms without explicit submit buttons
-- Command palettes and CLI-style interfaces
-
----
 
 ### Toast API with Variants
 
@@ -1784,25 +858,6 @@ client.Toast("A new update is available for download.", "Info").Info();
 client.Toast("This is a standard toast message.");
 ```
 
-**With Exceptions:**
-
-The fluent API also works with exception-based toasts:
-
-```csharp
-try
-{
-    // ... risky operation
-}
-catch (Exception ex)
-{
-    client.Toast(ex).Destructive();
-}
-```
-
-Each variant is visually distinct with appropriate colors: success (green), warning (amber), info (blue), and destructive (red), making it immediately clear to users what type of notification they're seeing.
-
----
-
 ### ColorInput: Alpha Channel Support
 
 The `ColorInput` widget now supports transparency with the new `AllowAlpha()` method. When enabled, an opacity slider appears next to the color picker, and colors are stored in `#RRGGBBAA` format (8-digit hex with alpha channel).
@@ -1823,17 +878,6 @@ public class ColorAlphaDemo : ViewBase
 }
 ```
 
-**Use Cases:**
-
-- Semi-transparent overlays
-- Backgrounds with opacity
-- Theme colors that need transparency
-- UI elements with partial visibility
-
-The alpha slider provides a visual preview with a checkered background pattern and displays the opacity percentage. When alpha is fully opaque (100%), the color reverts to the standard 6-digit hex format.
-
----
-
 ### ColorInput - Ghost Styling for Minimal Appearance
 
 `ColorInput` now supports ghost styling through the `Ghost()` extension method. Ghost styling removes borders, background fill, and shadows from the text input portion, creating a minimal appearance ideal for embedding color pickers in cards or colored backgrounds.
@@ -1849,48 +893,6 @@ return themeColor.ToColorInput();
 // Ghost color input - minimal styling
 return themeColor.ToColorInput().Ghost();
 ```
-
-**Works with all ColorInput variants:**
-
-```csharp
-// Ghost with Text variant
-return themeColor.ToColorInput()
-    .Variant(ColorInputVariant.Text)
-    .Ghost();
-
-// Ghost with TextAndPicker variant (default)
-return themeColor.ToColorInput()
-    .Variant(ColorInputVariant.TextAndPicker)
-    .Ghost();
-
-// Ghost with alpha channel support
-return themeColor.ToColorInput()
-    .AllowAlpha()
-    .Ghost();
-```
-
-**Practical example - blending into cards:**
-
-```csharp
-return new Card(
-    Layout.Vertical().Gap(2)
-        | Text.Label("Brand Color")
-        | brandColor.ToColorInput().Ghost()
-)
-.Title("Theme Settings")
-.Width(Size.Units(100));
-```
-
-**When to use Ghost styling:**
-
-- Inside cards or colored backgrounds where borders create visual clutter
-- In compact UIs where minimal chrome is preferred
-- For inline color controls that should blend with surrounding content
-- When building theme editors or customization panels
-
-The ghost style maintains full functionality including the color picker, validation states, and hover effects while providing a cleaner visual appearance.
-
----
 
 ### SelectInput and AsyncSelectInput - Ghost Styling for Minimal Appearance
 
@@ -1921,89 +923,9 @@ return categoryState.ToAsyncSelectInput(
 ).Ghost();
 ```
 
-**Works with all SelectInput variants:**
-
-```csharp
-var colors = UseState<Colors[]>([Colors.Red, Colors.Blue]);
-var options = typeof(Colors).ToOptions();
-
-// Ghost with default dropdown variant
-return colors.ToSelectInput(options).Ghost();
-
-// Ghost with List variant
-return colors.ToSelectInput(options)
-    .Variant(SelectInputVariant.List)
-    .Ghost();
-
-// Ghost with Toggle variant
-return colors.ToSelectInput(options)
-    .Variant(SelectInputVariant.Toggle)
-    .Ghost();
-```
-
-**Practical example - blending into toolbars:**
-
-```csharp
-return new Card(
-    Layout.Horizontal().Gap(4).AlignItems(Align.Center)
-        | Text.Label("Filter by:")
-        | filterState.ToSelectInput(filterOptions).Ghost()
-        | Text.Label("Sort by:")
-        | sortState.ToSelectInput(sortOptions).Ghost()
-)
-.Variant(CardVariant.Outlined);
-```
-
-**When to use Ghost styling:**
-
-- In toolbars or filter bars where minimal chrome is preferred
-- Inside cards or colored backgrounds where borders create visual clutter
-- For inline controls that should blend with surrounding content
-- In compact UIs where space and visual weight matter
-
-The ghost style maintains full functionality including dropdown behavior, keyboard navigation, validation states, and all select variants while providing a cleaner visual appearance.
-
----
-
 ### FeedbackInput: Fluent Variant API
 
 `FeedbackInput` now supports a more ergonomic fluent API for setting feedback variants. Instead of using the verbose `.Variant()` method, you can now use dedicated methods for each variant type.
-
-**New Fluent Methods:**
-
-```csharp
-// Stars variant (1-5 star rating)
-var rating = UseState(3);
-return rating.ToFeedbackInput().Stars();
-
-// Thumbs variant (binary thumbs up/down)
-var liked = UseState(true);
-return liked.ToFeedbackInput().Thumbs();
-
-// Emojis variant (sentiment emojis)
-var sentiment = UseState(4);
-return sentiment.ToFeedbackInput().Emojis();
-```
-
-**Before:**
-
-```csharp
-rating.ToFeedbackInput().Variant(FeedbackInputVariant.Stars)
-thumbs.ToFeedbackInput().Variant(FeedbackInputVariant.Thumbs)
-emojis.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis)
-```
-
-**After:**
-
-```csharp
-rating.ToFeedbackInput().Stars()
-thumbs.ToFeedbackInput().Thumbs()
-emojis.ToFeedbackInput().Emojis()
-```
-
-The new methods are chainable with other extensions like `.Small()`, `.Large()`, `.Disabled()`, and `.Invalid()`, providing a cleaner and more discoverable API for configuring feedback inputs.
-
----
 
 ### ListItem: Fluent API and Disabled State
 
