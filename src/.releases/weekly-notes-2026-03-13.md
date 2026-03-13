@@ -4,7 +4,7 @@
 
 ### IHtmlFilter Interface - XDocument Instead of String Manipulation
 
-The `IHtmlFilter.Process` method now takes an `XDocument` instead of a raw HTML string, and returns `void` instead of `string`. The namespace has also changed from `Ivy.Core.Server.ContentPipeline` to `Ivy.Core.Server.HtmlPipeline`. This provides safer, more structured HTML manipulation.
+The `IHtmlFilter.Process` method now takes an `XDocument` instead of a raw HTML string, and returns `void` instead of `string`. The namespace has also changed from `Ivy.Core.Server.ContentPipeline` to `Ivy.Core.Server.HtmlPipeline`.
 
 ```csharp
 using System.Xml.Linq;
@@ -64,7 +64,7 @@ The `MultiLine` property and method have been renamed to `Multiline` (lowercase 
 
 ### Spacer Default Behavior Change
 
-The `Spacer` widget now defaults to grow behavior (`flex-grow: 1`) without requiring explicit `.Width(Size.Grow())`. A bare `new Spacer()` will automatically fill available space in the parent layout's direction, matching the most common use case of pushing sibling elements apart.
+The `Spacer` widget now defaults to grow behavior (`flex-grow: 1`) without requiring explicit `.Width(Size.Grow())`. A bare `new Spacer()` will automatically fill available space in the parent layout's direction.
 
 ### Button Icon API - Constructor Parameter Removed
 
@@ -94,14 +94,14 @@ records.ToTable().OnCellAction(e => e.Name, value => OpenDetails(value))
 
 ### OAuth Callback URL Path Change
 
-The OAuth authentication callback URL has changed from `/ivy/webhook` to `/ivy/auth/callback` to better reflect its purpose and avoid confusion with actual webhook endpoints.
+The OAuth authentication callback URL has changed from `/ivy/webhook` to `/ivy/auth/callback`.
 
 - Local development: `http://localhost:5010/ivy/auth/callback`
 - Production: `https://your-app.com/ivy/auth/callback`
 
 ### DesktopWindow API Improvements
 
-The `DesktopWindow` fluent API has been improved with better naming consistency and simpler default parameters. Two methods have been renamed to follow the `Use*` pattern:
+Two `DesktopWindow` methods have been renamed to follow the `Use*` pattern:
 
 **DpiScaling → UseDpiScaling and DevToolsEnabled → UseDevTools:**
 
@@ -151,7 +151,7 @@ mySignal.Receive(callback);     // Register a callback to receive data
 
 ### Input Variant Enums Renamed to Singular
 
-To maintain consistency across the Ivy Framework, all input variant enums have been renamed from plural to singular form. This aligns them with other styling enums like `ButtonVariant`, `BadgeVariant`, and `CalloutVariant`.
+All input variant enums have been renamed from plural to singular form.
 
 | Old Name (Plural) | New Name (Singular) |
 |---|---|
@@ -167,7 +167,7 @@ To maintain consistency across the Ivy Framework, all input variant enums have b
 
 ### Namespaces Flattened
 
-Several core types such as `ExternalWidgetAttribute` and `TextAlignment` have been moved to the root `Ivy` namespace to simplify using directives and prevent refactoring issues (like the `RemoveInvalidIvyUsings` rule incorrectly stripping them).
+Several core types such as `ExternalWidgetAttribute` and `TextAlignment` have been moved to the root `Ivy` namespace.
 
 ### Removal of `.Value()` API from Input Widgets
 
@@ -175,7 +175,7 @@ The fluent `.Value()` extension method has been removed from all input widgets. 
 
 ### Scale Renamed to Density
 
-The `Scale` enum and all associated APIs have been renamed to `Density` to avoid ambiguity with chart scales, DPI scaling, and other scale-related concepts.
+The `Scale` enum and all associated APIs have been renamed to `Density`.
 
 - `Ivy.Scale` enum → `Ivy.Density` enum
 - `.Scale()` fluent method → `.Density()` method
@@ -184,11 +184,11 @@ The `Scale` enum and all associated APIs have been renamed to `Density` to avoid
 
 ### Box.Color() Renamed to Box.Background()
 
-The `Color()` method and property on the `Box` widget have been renamed to `Background()` to more clearly reflect what it controls—the background color of the box, not the foreground/text color.
+The `Color()` method and property on the `Box` widget have been renamed to `Background()`.
 
 ### Text.InlineCode() Renamed to Text.Monospaced()
 
-The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been renamed to `Text.Monospaced()` and `TextVariant.Monospaced` to better reflect what they actually do—render text in a monospace font.
+The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been renamed to `Text.Monospaced()` and `TextVariant.Monospaced`.
 
 ### Explicit Size API for Width, Height, and Size Methods
 
@@ -198,7 +198,7 @@ The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods h
 
 ### Terminal Emulator Widget with Xterm.js
 
-Ivy now includes a powerful terminal emulator widget through the `Ivy.Widgets.Xterm` package, powered by xterm.js. Build interactive terminal UIs, display command output, or create full terminal experiences directly in your Ivy apps.
+Ivy now includes a terminal emulator widget through the `Ivy.Widgets.Xterm` package, powered by xterm.js.
 
 **Installation:**
 
@@ -254,7 +254,7 @@ new Terminal()
 
 ### Screenshot Feedback Widget
 
-Ivy now includes a screenshot and annotation widget through the `Ivy.Widgets.ScreenshotFeedback` package. Capture screenshots of your Ivy app, annotate them with drawing tools, and upload them - perfect for bug reports, feedback forms, and documentation.
+Ivy now includes a screenshot and annotation widget through the `Ivy.Widgets.ScreenshotFeedback` package.
 
 **Installation:**
 
@@ -285,7 +285,7 @@ return Layout.Vertical().Gap(4)
 
 ### Server-to-Client Streaming with UseStream Hook
 
-Ivy now supports efficient server-to-client streaming with the new `UseStream` hook. Stream real-time data from your backend to the frontend without triggering full state re-renders for every chunk.
+Ivy now supports efficient server-to-client streaming with the new `UseStream` hook.
 
 **Example: Streaming Rich Text from an LLM**
 
@@ -323,7 +323,7 @@ public class StreamingApp : ViewBase
 
 ### Async Cleanup in UseEffect with IAsyncDisposable
 
-`UseEffect` now supports asynchronous cleanup through `IAsyncDisposable`, making it easier to manage async resources like database connections, streams, and network sockets.
+`UseEffect` now supports asynchronous cleanup through `IAsyncDisposable`.
 
 **Basic Usage:**
 
@@ -343,7 +343,7 @@ UseEffect(() =>
 
 ### DevTools for Visual Widget Inspection (Development Only)
 
-Ivy now includes built-in DevTools for debugging and inspecting your widget tree during development. Enable it during local development to inspect widgets, view callsite information, and make live text edits.
+Ivy now includes built-in DevTools for debugging and inspecting your widget tree during development.
 
 **Enable DevTools:**
 
@@ -490,7 +490,7 @@ The manifest is automatically served at `/manifest.json` and linked in your app'
 
 ### AppBase - Semantic Base Class for Apps
 
-Ivy now includes an `AppBase` class that provides a semantic foundation for building apps. While functionally equivalent to `ViewBase`, it offers clearer intent when defining app-level components.
+Ivy now includes an `AppBase` class that provides a base foundation for building apps.
 
 **Usage:**
 
@@ -510,7 +510,7 @@ public class MyApp : AppBase
 
 ### HtmlPipeline - XDocument-Based Filters and Full Customization
 
-The HTML pipeline has been refactored to use `XDocument` for safer, more structured HTML manipulation. Filters now work with parsed XML instead of raw strings, and new APIs allow full pipeline customization.
+The HTML pipeline has been refactored to use `XDocument`. Filters now work with parsed XML instead of raw strings, and new APIs allow full pipeline customization.
 
 **Creating a Custom Filter:**
 
@@ -576,7 +576,7 @@ The pipeline configurator runs after all built-in and custom filters have been a
 
 ### XamlBuilder: DataPoint Support for Charts
 
-XamlBuilder now supports defining chart data inline using `<DataPoint>` elements, making it easier to work with charts without needing to create separate data classes.
+XamlBuilder now supports defining chart data inline using `<DataPoint>` elements.
 
 **Complete Chart Example:**
 
@@ -603,7 +603,7 @@ var chart = builder.Build(xaml);
 
 ### Field - Horizontal Label Layout with LabelPosition
 
-The `Field` widget now supports horizontal label layouts where labels appear beside inputs instead of above them. This is particularly useful for data-dense admin panels, settings pages, and compact form layouts.
+The `Field` widget now supports horizontal label layouts where labels appear beside inputs instead of above them.
 
 **New API:**
 
@@ -633,7 +633,7 @@ var emailField = new Field(
 
 ### Form Submit Strategies
 
-Forms now support different submit strategies that control when form state is committed back to your model. This is separate from validation timing and gives you fine-grained control over form behavior.
+Forms now support different submit strategies that control when form state is committed back to your model.
 
 **Available Strategies:**
 
@@ -673,11 +673,9 @@ public class SettingsPanel : ViewBase
 }
 ```
 
-Use `OnChange` for settings panels where changes should apply immediately, and `OnBlur` for forms where you want to commit after the user finishes editing each field.
-
 ### NumberInput: Min/Max Parameters
 
-`ToNumberInput()` now accepts optional `min` and `max` parameters, making it easier to set value constraints directly when creating number inputs.
+`ToNumberInput()` now accepts optional `min` and `max` parameters.
 
 **Basic Usage:**
 
@@ -694,7 +692,7 @@ return price.ToNumberInput()
 
 ### Fluent API Enhancements
 
-Several widgets have received new fluent API extensions to make configuration more concise and chainable:
+Several widgets have received new fluent API extensions:
 
 - **Toast API**: `.Success()`, `.Destructive()`, `.Warning()`, `.Info()`
 - **ListItem**: `.Title()`, `.Subtitle()`, `.Icon()`, `.Badge()`, `.Tag()`, `.OnClick()`, `.Content()`, `.Disabled()`
@@ -727,7 +725,7 @@ public class ColorAlphaDemo : ViewBase
 
 ### Ghost Styling for Minimal Appearance
 
-Several input widgets (`ColorInput`, `SelectInput`, and `AsyncSelectInput`) now support ghost styling through the `.Ghost()` extension method. Ghost styling removes borders, background fill, and shadows, creating a minimal appearance ideal for embedding inputs seamlessly into cards, toolbars, or colored backgrounds.
+Several input widgets (`ColorInput`, `SelectInput`, and `AsyncSelectInput`) now support ghost styling through the `.Ghost()` extension method. Ghost styling removes borders, background fill, and shadows.
 
 **Basic Usage:**
 
@@ -778,7 +776,7 @@ data.ToDetails()
 
 ### Dots Now Allowed in App IDs
 
-App IDs can now include dots, enabling better namespacing and versioning patterns. Previously, app IDs like `app.v2` or `users.profile` were not allowed, but this restriction has been removed.
+App IDs can now include dots. Previously, app IDs like `app.v2` or `users.profile` were not allowed.
 
 **New Capabilities:**
 
@@ -802,7 +800,7 @@ public class ApiUsersV1 : AppBase { }
 
 ### Progress Builder for Table Cells
 
-The Table widget now supports inline progress bars through the new `Progress()` builder, allowing you to render numeric values as visual progress indicators directly within table cells.
+The Table widget now supports inline progress bars through the new `Progress()` builder.
 
 **Basic Usage:**
 
@@ -837,7 +835,7 @@ new Table(downloads)
 
 ### Icons in Select Options
 
-Select inputs now support optional icons for each option, making it easier to create visually rich select menus. Additionally, labels are now optional—if omitted, the option value will be displayed instead.
+Select inputs now support optional icons for each option. Additionally, labels are now optional—if omitted, the option value will be displayed instead.
 
 **What's New:**
 
@@ -939,7 +937,7 @@ var richText = new RichTextBlock
 ```
 
 **Streaming Support:**
-Stream text runs in real-time for dynamic content, perfect for LLM responses or real-time updates:
+Stream text runs in real-time for dynamic content:
 
 Using `UseStream` with the builder API:
 
@@ -986,7 +984,7 @@ await Stream(streamId, new TextRun { Content = "world!", Word = true });
 
 ### ReadOnlyInput - Copy Button and Placeholder Support
 
-The `ReadOnlyInput` widget now supports two new fluent extension methods for enhanced functionality:
+The `ReadOnlyInput` widget now supports two new fluent extension methods:
 
 **ShowCopyButton()** - Control visibility of the copy button:
 
@@ -1042,7 +1040,7 @@ return searchQuery.ToTextInput()
 
 ### NumberInput - Prefix and Suffix Support
 
-The `NumberInput` widget now supports `Prefix` and `Suffix` properties, allowing you to display contextual visual cues inside the input field such as currency symbols, unit labels, or icons.
+The `NumberInput` widget now supports `Prefix` and `Suffix` properties.
 
 ```csharp
 var price = UseState(99.99m);
@@ -1081,7 +1079,7 @@ return fiscalYear.ToYearInput()
 
 ### Badge - Clickable Badges with OnClick Event
 
-The `Badge` widget now supports click events through the `OnClick` extension methods, enabling interactive badges for common UI patterns like filter chips, tag management, and toggle states.
+The `Badge` widget now supports click events through the `OnClick` extension method.
 
 **Basic usage:**
 
@@ -1092,7 +1090,7 @@ new Badge("Click Me", icon: Icons.MousePointer)
 
 ### Box - Interactive Regions with OnClick and Hover Effects
 
-The `Box` widget now supports click events and hover effects, enabling you to create interactive UI regions without using the heavier `Card` widget. This follows the same pattern as `Card`, making it easier to build consistent interactive experiences.
+The `Box` widget now supports click events and hover effects.
 
 ```csharp
 var client = UseService<IClientProvider>();
@@ -1123,7 +1121,7 @@ new Box("Content").Grow();
 
 ### Callout - Closable Callouts with OnClose Event
 
-The `Callout` widget now supports closable behavior through the `OnClose` event handler. When an `OnClose` handler is set, the callout displays a close (X) button in the top-right corner, enabling users to dismiss notifications, banners, and temporary alerts.
+The `Callout` widget now supports closable behavior through the `OnClose` event handler. When an `OnClose` handler is set, the callout displays a close (X) button in the top-right corner.
 
 **Basic usage with UseTrigger:**
 
@@ -1145,7 +1143,7 @@ The `Card` widget now supports a `Disabled` property and extension method to pre
 
 ### FileInput - Minimum File Size Validation
 
-The `FileInput` widget now supports minimum file size validation through the `MinFileSize` property and extension method, allowing you to reject empty or trivially small files that are likely erroneous. This complements the existing `MaxFileSize` validation.
+The `FileInput` widget now supports minimum file size validation through the `MinFileSize` property and extension method.
 
 **Basic usage with UploadContext:**
 
@@ -1161,7 +1159,7 @@ return file.ToFileInput(upload)
 
 ### CodeBlock - Starting Line Number for Code Excerpts
 
-The `CodeBlock` widget now supports `StartingLineNumber` to offset line numbering when displaying code excerpts. This is useful when you want to show a snippet from a larger file while preserving the original line numbers from the source.
+The `CodeBlock` widget now supports `StartingLineNumber` to offset line numbering when displaying code excerpts.
 
 **Basic usage:**
 
@@ -1189,7 +1187,7 @@ new Expandable("Settings", "Configure your application preferences here.")
 
 ### Progress - Indeterminate State for Unknown Progress
 
-The `Progress` widget now supports an explicit `Indeterminate` property to display an animated progress bar when the completion percentage is unknown. This is more expressive than passing `null` as the value and enables showing indeterminate state while preserving the last known progress value.
+The `Progress` widget now supports an explicit `Indeterminate` property to display an animated progress bar when the completion percentage is unknown.
 
 **Basic usage:**
 
@@ -1202,7 +1200,7 @@ new Progress()
 
 ### SelectInput - Search, Loading, and Selection Limits
 
-The `SelectInput` widget now supports advanced features for all variants (Select, List, and Toggle), including search functionality, loading states, and selection count limits. These features work seamlessly across single and multi-select modes.
+The `SelectInput` widget now supports search functionality, loading states, and selection count limits across all variants (Select, List, and Toggle).
 
 **Search Functionality**
 
@@ -1314,7 +1312,7 @@ new Html(trustedHtml).DangerouslyAllowScripts(false)  // Disable (use default sa
 
 ### SidebarLayout - Resizable Drag-to-Resize Support
 
-The `SidebarLayout` widget now supports drag-to-resize functionality, allowing users to adjust the sidebar width at runtime by dragging the sidebar border. This provides a more flexible and customizable user experience for applications with sidebar navigation.
+The `SidebarLayout` widget now supports drag-to-resize functionality, allowing users to adjust the sidebar width at runtime by dragging the sidebar border.
 
 **Basic usage:**
 
@@ -1349,13 +1347,6 @@ return new SidebarLayout(
 - **Default constraints**: 200px minimum, 600px maximum (customizable)
 - **Smooth animations**: Visual feedback during resize operations
 - **Persistent state**: Width persists during the user's session
-
-**When to use:**
-
-- Applications where users want to customize their workspace layout
-- Dashboards with variable amounts of navigation or filtering content
-- Document editors with collapsible tool panels
-- Admin interfaces with configurable sidebars
 
 ### Sheet - Slide from Any Edge with Side API
 
@@ -1425,7 +1416,7 @@ new Separator("Right Aligned").TextAlign(TextAlignment.Right);
 
 ### CodeBlock - WrapLines Option for Long Lines
 
-The `CodeBlock` widget now supports a `WrapLines` option that allows long lines to wrap within the code block instead of requiring horizontal scrolling. This improves readability when displaying code with long lines in constrained layouts.
+The `CodeBlock` widget now supports a `WrapLines` option that allows long lines to wrap within the code block instead of requiring horizontal scrolling.
 
 **Basic usage:**
 
@@ -1442,7 +1433,7 @@ return new CodeBlock(longCode, Languages.Csharp)
 
 ### Ivy.Desktop - Run Ivy Apps as Native Desktop Applications
 
-The new `Ivy.Desktop` library enables you to wrap your Ivy web applications as native desktop applications using Photino. This provides a seamless desktop experience with native window management, system tray integration, and cross-platform support for Windows, macOS, and Linux.
+The new `Ivy.Desktop` library enables you to wrap your Ivy web applications as native desktop applications using Photino, providing cross-platform support for Windows, macOS, and Linux.
 
 **Installation:**
 
@@ -1486,11 +1477,11 @@ GridView now offers granular control over grid spacing with dedicated `RowGap()`
 
 ### Theme Defaults to System Preference
 
-The framework now defaults to `system` theme instead of `light` theme, automatically respecting users' system-wide dark/light mode preferences. Apps will now adapt to the operating system's appearance settings by default, providing a better out-of-the-box experience.
+The framework now defaults to `system` theme instead of `light` theme, automatically respecting users' system-wide dark/light mode preferences.
 
 ### DataTableBuilder - Remove() Method for API Consistency
 
-The `DataTableBuilder` now supports the `.Remove()` method, bringing it in line with other builders like `FormBuilder`, `TableBuilder`, and `DetailsBuilder`. This method allows you to completely exclude columns from your data tables.
+The `DataTableBuilder` now supports the `.Remove()` method. This method allows you to completely exclude columns from your data tables.
 
 ### Clerk Auth: Graceful Handling of Existing Sessions
 
@@ -1500,11 +1491,11 @@ The Clerk authentication provider now gracefully handles scenarios where a sessi
 
 ### WithConfirm: Customizable Button Labels and Destructive Styling
 
-The `WithConfirm` helper method now supports customizable confirm button labels and destructive styling, making confirmation dialogs more appropriate for delete operations and other critical actions.
+The `WithConfirm` helper method now supports customizable confirm button labels and destructive styling.
 
 ### Desktop Apps: Instant Window Display with Loading Screen
 
-Desktop applications now show the window immediately with a clean loading screen, eliminating the startup delay users previously experienced.
+Desktop applications now show the window immediately with a clean loading screen.
 
 - The window appears instantly when you launch your app with a light, modern design
 - Light theme with clean colors: `#ffffff` (white background), `#00cc92` (primary green spinner), `#dd5860` (error red)
@@ -1522,7 +1513,7 @@ No code changes needed - this enhancement applies automatically to all Ivy deskt
 
 ### Desktop Apps: Default Ivy Icon for Windows
 
-Desktop applications now automatically display the Ivy logo in the taskbar and title bar when no custom icon is explicitly set, giving your apps a polished appearance out of the box.
+Desktop applications now automatically display the Ivy logo in the taskbar and title bar when no custom icon is explicitly set.
 
 - When you create a desktop window without calling `.Icon()`, it now automatically uses the embedded Ivy icon
 - The ivy.ico resource is embedded directly in the `Ivy.Desktop` package
@@ -1593,7 +1584,7 @@ No code changes needed - this fix applies automatically to all Ivy desktop appli
 
 ### Desktop Apps: Automatic Ivy Icon Embedding
 
-Desktop applications now automatically include the Ivy icon in their executable files, giving your apps a professional appearance in taskbars, file explorers, and window title bars without any additional configuration.
+Desktop applications now automatically include the Ivy icon in their executable files.
 
 - The Ivy.Desktop package now includes an `ivy.ico` icon file
 - MSBuild automatically sets the `ApplicationIcon` property during build if you haven't specified a custom icon
@@ -1617,7 +1608,7 @@ No code changes needed - this enhancement applies automatically to all new and e
 
 ### Desktop Apps: Server Readiness Check Prevents Premature Loading
 
-Desktop applications now wait for the server to be fully ready before loading the UI, eliminating race conditions and catching early server failures.
+Desktop applications now wait for the server to be fully ready before loading the UI.
 
 - The port was read before the server had actually bound to it, potentially using the wrong port number
 - The WebView could navigate to the URL before the server was accepting requests, causing connection failures
@@ -1657,7 +1648,7 @@ No code changes needed - this protection applies automatically throughout the fr
 
 ### Badge Hover Effects Only Show for Clickable Badges
 
-Badge widgets now only display hover effects when they're actually clickable, preventing confusing UI feedback on non-interactive badges.
+Badge widgets now only display hover effects when they're actually clickable.
 
 - Badges without an `OnClick` handler no longer show hover effects (color changes on mouse-over)
 - Clickable badges continue to show hover feedback with a subtle opacity change and pointer cursor
@@ -1677,33 +1668,26 @@ No code changes needed - this improvement applies automatically to all Badge wid
 
 ### SelectInput: Auto-Flip Dropdown Near Viewport Edge
 
-The `SelectInput` dropdown now automatically detects when it would extend beyond the bottom of the viewport and intelligently flips to open upward instead. This prevents the dropdown from being cut off when the input is positioned near the bottom of the screen.
+The `SelectInput` dropdown now automatically detects when it would extend beyond the bottom of the viewport and intelligently flips to open upward instead.
 
 - The dropdown calculates available space below the trigger element when opening
 - If insufficient space exists (less than the dropdown height + 8px), it automatically opens upward
 - The dropdown smoothly positions itself above the input with appropriate spacing
 - Works seamlessly across all SelectInput variants (Select, List, Toggle, etc.)
 
-**Example scenarios:**
-
-- SelectInput in a modal dialog near the bottom
-- Form fields at the end of a long page
-- Dropdowns in fixed-position sidebars or toolbars
-- Any SelectInput where the trigger is close to the viewport bottom
-
 No code changes needed - this improvement applies automatically to all SelectInput widgets.
 
 ### Dynamic Metric Progress Colors
 
-The `MetricView` component now intelligently colors its progress bar based on achievement percentage, providing instant visual feedback about goal performance.
+The `MetricView` component now colors its progress bar based on achievement percentage.
 
 ### ListItem Improved Vertical Spacing
 
-The `ListItem` widget now includes vertical padding for better content spacing and visual comfort.
+The `ListItem` widget now includes vertical padding for better content spacing.
 
 ### Size.Fraction and Size.FractionGap Now Accept Decimal and Double
 
-The `Size.Fraction()` and `Size.FractionGap()` methods now accept `decimal` and `double` values in addition to `float`, eliminating common type mismatch errors when using numeric literals or variables.
+The `Size.Fraction()` and `Size.FractionGap()` methods now accept `decimal` and `double` values in addition to `float`.
 
 ### Form Submit Strategy Hook Ordering
 
@@ -1745,13 +1729,13 @@ Fixed a compilation error (CS1061) that occurred when using `server.Services.Add
 
 Fixed visual glitches in the `TableOfContents` widget that would cause incorrect highlighting and "junk" to appear when users scroll quickly through content. The component now uses a debounced update mechanism to ensure smooth, accurate highlighting even during rapid scrolling.
 
-### IState<T>.Set(null) Ambiguity Resolved
+### `IState<T>.Set(null)` Ambiguity Resolved
 
 Fixed a compiler ambiguity error that occurred when calling `.Set(null)` on state objects with nullable reference types. Previously, passing `null` to `.Set()` would match both the `Set(T value)` and `Set(Func<T,T> setter)` overloads, causing a compilation error.
 
 ### Desktop Window Title Default
 
-Fixed the default window title for Ivy desktop applications. Instead of showing a generic "Ivy App" title, desktop windows now automatically display the application's assembly name, providing a more professional and context-appropriate default.
+Fixed the default window title for Ivy desktop applications. Instead of showing a generic "Ivy App" title, desktop windows now automatically display the application's assembly name.
 
 ### Hook Usage Analyzer: FuncView and MemoizedFuncView Lambda Support
 
@@ -1759,11 +1743,11 @@ Fixed the hook usage analyzer (`IVYHOOK001`) to correctly recognize lambdas pass
 
 ### Chart Legend Title-Casing Fix
 
-Fixed improper capitalization in chart legends when using camelCase property names. The `SplitPascalCase` utility now properly title-cases each word, producing professional-looking chart labels.
+Fixed improper capitalization in chart legends when using camelCase property names. The `SplitPascalCase` utility now properly title-cases each word.
 
 ### Semantic Color Mapping for Text
 
-Fixed incorrect color mapping when using semantic surface colors (like `Colors.Muted`, `Colors.Background`, `Colors.Card`) for text. These colors were previously mapping to their base CSS variables, which are designed for backgrounds, resulting in poor readability and contrast issues.
+Fixed incorrect color mapping when using semantic surface colors (like `Colors.Muted`, `Colors.Background`, `Colors.Card`) for text. These colors were previously mapping to their base CSS variables, resulting in readability and contrast issues.
 
 ### SidebarLayout - Respect Open Property on Mount
 
@@ -1793,7 +1777,7 @@ Fixed a critical bug in `Ivy.Desktop` on Windows where desktop applications usin
 
 ### Better Desktop Startup Error Messages
 
-Fixed a bug in `Ivy.Desktop` where server startup failures would display a generic "Unable to connect" error message instead of showing the actual exception that caused the server to fail. This made debugging startup issues difficult, as the root cause was hidden.
+Fixed a bug in `Ivy.Desktop` where server startup failures would display a generic "Unable to connect" error message instead of showing the actual exception that caused the server to fail.
 
 - `CheckIfPortIsListening` now monitors the server task status during port polling
 - If the server task faults during startup, the actual exception is now thrown and displayed
@@ -1848,7 +1832,7 @@ new Box("Content").Background(Colors.Muted);
 
 ### Compile-Time Analyzer for App Constructor Requirements
 
-A new Roslyn analyzer (`IVYAPP001`) now provides compile-time feedback when `[App]`-attributed classes don't have a parameterless constructor, catching this common mistake before runtime.
+A new Roslyn analyzer (`IVYAPP001`) now provides compile-time feedback when `[App]`-attributed classes don't have a parameterless constructor.
 
 **What It Catches:**
 
@@ -1892,11 +1876,9 @@ public class MyApp : AppBase
 - Generic methods `Server.UseChrome<T>()` and `Server.UseErrorNotFound<T>()` now have `new()` constraints for compile-time safety
 - Runtime validation in `AppDescriptor.CreateApp()` provides a clear error message if issues are missed
 
-This change helps you follow Ivy's dependency injection patterns correctly and catch mistakes early in development.
-
 ### Compile-Time Analyzer for Widget Child Misuse
 
-New Roslyn analyzers (`IVYCHILD001`, `IVYCHILD002`, and `IVYCHILD003`) now catch widget child misuse at compile time, preventing runtime `NotSupportedException` errors when adding children to incompatible widgets.
+New Roslyn analyzers (`IVYCHILD001`, `IVYCHILD002`, and `IVYCHILD003`) now catch widget child misuse at compile time.
 
 **IVYCHILD001 - Leaf Widgets Don't Support Children:**
 
@@ -1968,11 +1950,9 @@ var menu = new DropDownMenu() | items;
 
 Widget authors can now use `[ChildType(typeof(T))]` to specify allowed child types. The analyzer checks direct children, arrays, and `IEnumerable<T>` collections, supporting both exact type matches and derived types.
 
-These analyzers work with direct widget instantiation, variables, method returns, and derived widget types, providing comprehensive compile-time safety for widget composition.
-
 ### Compile-Time Analyzer for Hook Results Stored in Class Members
 
-A new Roslyn analyzer (`IVYHOOK006`) now detects when hook results are incorrectly stored in class fields or properties, preventing a subtle but critical bug where the reactive system breaks due to cached state.
+A new Roslyn analyzer (`IVYHOOK006`) now detects when hook results are incorrectly stored in class fields or properties.
 
 **What It Catches:**
 
@@ -2046,11 +2026,9 @@ public class TestView : ViewBase
 }
 ```
 
-This analyzer helps enforce the correct hook usage pattern and catches mistakes that would otherwise cause hard-to-debug reactive system issues.
-
 ### Hook Usage Analyzer - Clearer Error Messages with Sub-Types
 
-The hook usage analyzer now provides more specific error messages by splitting `IVYHOOK001` into sub-types, making it easier to understand and fix hook placement issues.
+The hook usage analyzer now provides more specific error messages by splitting `IVYHOOK001` into sub-types.
 
 - `IVYHOOK001` now only fires for hooks called outside `Build()` entirely (e.g., in helper methods)
 - New `IVYHOOK001B` fires for hooks nested in lambdas, local functions, or anonymous methods within `Build()`
@@ -2118,8 +2096,6 @@ public class TestView : ViewBase
 }
 ```
 
-This improvement helps developers quickly identify the exact nature of the hook placement issue and understand why hooks must execute in the same order on every render.
-
 ### Size.Fraction and Size.FractionGap - Decimal/Double Overloads Removed
 
 The `decimal` and `double` overloads for `Size.Fraction()` and `Size.FractionGap()` have been removed to fix ambiguous call compilation errors (CS0121). You must now use `float` values with the `f` suffix.
@@ -2134,11 +2110,9 @@ decimal ratio = 0.333m;
 .Width(Size.Fraction((float)ratio))
 ```
 
-This change ensures compilation succeeds without ambiguous method call errors.
-
 ### Size.Percent() - Intuitive Percentage-Based Sizing
 
-New `Size.Percent()` overloads make it easier to specify percentage-based sizes without manually converting to fractions or using float literals.
+New `Size.Percent()` overloads allow you to specify percentage-based sizes.
 
 **New overloads:**
 
@@ -2157,11 +2131,9 @@ New `Size.Percent()` overloads make it easier to specify percentage-based sizes 
 .Height(Size.Percent(100)) // Obvious it's a percentage
 ```
 
-This is especially helpful when working with percentage values, making the code more readable and eliminating the need to mentally convert percentages to decimal fractions.
-
 ### Connection Name Error Messages
 
-When using `--test-connection` or `--describe-connection` command-line arguments with a connection name that doesn't exist, the error message now lists all available connections to help you quickly identify and fix typos or discover the correct connection names.
+When using `--test-connection` or `--describe-connection` command-line arguments with a connection name that doesn't exist, the error message now lists all available connections.
 
 ```
 Connection 'mytypo' not found. Available connections: postgres, mysql, redis
@@ -2180,8 +2152,6 @@ dotnet run --describe-connection mysql
 dotnet run --test-connection postgress
 # Output: Connection 'postgress' not found. Available connections: postgres, mysql, redis
 ```
-
-This improvement makes it easier to work with database connections during development and deployment, eliminating the need to search through your code or documentation to find the correct connection names.
 
 ### CLI Commands Work Alongside Running Instances
 
