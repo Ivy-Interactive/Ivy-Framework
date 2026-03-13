@@ -35,6 +35,21 @@ public class BasicJsonExample : ViewBase
 }
 ```
 
+## Object Overload
+
+You can pass any object directly to the Json widget and it will be auto-serialized:
+
+```csharp demo-tabs
+public class ObjectJsonExample : ViewBase
+{
+    public override object? Build()
+    {
+        var dog = new { Breed = "Poodle", Color = "White", Age = 3 };
+        return new Json(dog);
+    }
+}
+```
+
 ## Expansion Control
 
 Control how deeply the JSON tree is initially expanded:

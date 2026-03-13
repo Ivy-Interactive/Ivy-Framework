@@ -25,9 +25,13 @@ public class JsonApp : SampleBase
                 "555-5678"
             }
         };
+        var dog = new { Breed = "Poodle", Color = "White", Age = 3 };
+
         return Layout.Vertical().Gap(4)
-            | new Text("Default (collapsed):")
+            | new Text("From JsonNode:")
             | new Json(json)
+            | new Text("From object (auto-serialized):")
+            | new Json(dog)
             | new Text("Expanded to depth 2:")
             | new Json(json) { Expanded = 2 }
             | new Text("Fully expanded:")

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Core;
 
@@ -10,6 +11,10 @@ namespace Ivy;
 public record Json : WidgetBase<Json>
 {
     public Json(JsonNode json) : this(json.ToString())
+    {
+    }
+
+    public Json(object obj) : this(JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true }))
     {
     }
 
