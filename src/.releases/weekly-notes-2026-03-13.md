@@ -878,8 +878,6 @@ var categoryState = UseState(default(Guid?));
 return categoryState.ToAsyncSelectInput(QueryCategories, LookupCategory).Ghost();
 ```
 
-
-
 ### Card: Disabled State
 
 The `Card` widget now supports a disabled state to prevent user interaction. When disabled, cards are visually dimmed and click events are suppressed, making it easy to indicate unavailable options or read-only states.
@@ -1181,25 +1179,9 @@ new Terminal()
 
 The widget handles all the complexity of terminal emulation, ANSI escape codes, and cursor positioning, providing a native terminal experience in the browser.
 
----
-
 ### UseStream - Server-to-Client Streaming
 
 The new `UseStream<T>` hook enables server-to-client streaming, allowing you to progressively send data from the server to connected clients in real-time. This is perfect for LLM text streaming, long-running operations, real-time updates, and streaming content like AI responses or terminal output.
-
-**API Reference:**
-
-```csharp
-/// <summary>
-/// Creates a server-to-client stream that can push data to the frontend in real time.
-/// </summary>
-/// <param name="buffer">
-/// When true (default), data written before the frontend subscribes is buffered
-/// and automatically flushed once the subscription is established.
-/// When false, data written before subscription is discarded.
-/// </param>
-public IWriteStream<T> UseStream<T>(bool buffer = true)
-```
 
 **Basic Usage:**
 
@@ -1592,8 +1574,6 @@ return theme.ToSelectInput()
 Icons automatically scale with the density setting (Small, Medium, Large) and are positioned consistently across all select variants.
 
 ---
-
-
 
 ### Automatic Validation for Email, Password, Phone, and URL Inputs
 
@@ -3260,8 +3240,6 @@ public class SelectInputAdvancedDemo : ViewBase
 
 ---
 
-
-
 ---
 
 ### SelectInput - Disabled Options
@@ -4681,8 +4659,6 @@ No code changes needed - this improvement applies automatically to all `MetricVi
 
 ---
 
-
-
 ### Customizable Confirm Dialogs with Destructive Styling
 
 The `WithConfirm` method now supports customizable button labels and destructive styling, allowing you to create more appropriate confirmation dialogs for delete operations and other destructive actions.
@@ -5875,37 +5851,6 @@ This improvement makes it easier to work with database connections during develo
 
 ---
 
-### AddConnectionsFromAssembly - Optional Assembly Parameter
-
-The `AddConnectionsFromAssembly()` method now accepts an optional `Assembly` parameter, matching the existing `AddAppsFromAssembly` signature and providing more flexibility when registering connections.
-
-**What Changed:**
-
-You can now specify which assembly to scan for `IConnection` types, which is useful when the entry assembly differs from the one containing your connections.
-
-**Usage:**
-
-```csharp
-// Scan the entry assembly (default behavior)
-server.AddConnectionsFromAssembly();
-
-// Scan a specific assembly
-server.AddConnectionsFromAssembly(typeof(MyConnection).Assembly);
-
-// Scan a loaded assembly
-var assembly = Assembly.Load("MyConnectionLibrary");
-server.AddConnectionsFromAssembly(assembly);
-```
-
-**When is this useful?**
-
-- Your connections are defined in a separate library from your main entry point
-- You're building modular applications with connections split across multiple assemblies
-- You need explicit control over which assembly is scanned for connections
-
-This enhancement makes connection registration more flexible and consistent with how apps are registered using `AddAppsFromAssembly`.
-
----
 
 ### CLI Commands Work Alongside Running Instances
 
@@ -5956,17 +5901,6 @@ This makes the development workflow more seamless, especially for Windows users 
 
 ---
 
-### Better Desktop Startup Error Messages
-
-Desktop applications now show the actual server exception in error dialogs instead of a generic "Unable to connect" message. When your app fails to start due to configuration errors, missing dependencies, or other issues, you'll immediately see the root cause without needing to check log files.
-
-**Example:** Instead of "Unable to connect to the Ivy server", you now see the specific error like:
-
-```
-System.InvalidOperationException: Configuration error: AppSettings:DatabaseConnection is missing
-```
-
----
 
 ### Ivy.Desktop Now Available on NuGet
 
@@ -6681,38 +6615,6 @@ new Table(
 
 ---
 
-### UseState Immutable Type Guidance
-
-The `UseState` documentation now includes important guidance about using immutable types to prevent silent re-render failures. This addresses a common pitfall where UI doesn't update as expected.
-
-**The Problem:** When you mutate an object in-place and pass the same reference to `.Set()`, the UI will not re-render because Ivy's change detection is based on reference equality. If the reference hasn't changed, no re-render occurs.
-
-**The Solution:** Always use immutable types (like records) with `UseState`, and create new instances when updating state:
-
-```csharp
-// ❌ BAD - mutating in place won't trigger re-render
-public record UserSettings(string Theme, bool Notifications);
-var settings = UseState(new UserSettings("light", true));
-
-// This won't work - same reference!
-settings.Value.Theme = "dark";
-settings.Set(settings.Value);
-
-// ✅ GOOD - create a new instance with 'with' expression
-var settings = UseState(new UserSettings("light", true));
-
-// This works - new reference!
-settings.Set(settings.Value with { Theme = "dark" });
-```
-
-**Key takeaways:**
-
-- Use C# records for state objects (they're immutable by default)
-- Use `with` expressions to create modified copies
-- Never mutate properties directly on state objects
-- This applies to complex objects — primitives like `int`, `string`, etc. work fine since they're immutable by nature
-
----
 
 ### NumberInput Format Styles FAQ Entry
 
