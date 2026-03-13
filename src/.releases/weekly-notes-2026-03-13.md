@@ -631,10 +631,6 @@ public class SettingsPanel : ViewBase
 
 Use `OnChange` for settings panels where changes should apply immediately, and `OnBlur` for forms where you want to commit after the user finishes editing each field.
 
-### Auto-Scaffolding SelectInput from [AllowedValues]
-
-Forms now automatically detect the `[AllowedValues]` attribute on `string` and `string[]` properties and scaffold them as `SelectInput` widgets (single or multi-select). This eliminates the need for manual `.Builder()` calls to configure dropdowns.
-
 ### NumberInput: Min/Max Parameters
 
 `ToNumberInput()` now accepts optional `min` and `max` parameters, making it easier to set value constraints directly when creating number inputs.
@@ -650,29 +646,6 @@ return price.ToNumberInput()
     .Placeholder("Enter price")
     .WithField()
     .Label("Product Price");
-```
-
-### TextInput OnSubmit Event
-
-TextInput now includes an `OnSubmit` event that fires when the user presses Enter in a single-line text input. This enables common interaction patterns like search boxes, quick-add fields, and login forms without requiring a Form wrapper.
-
-**Basic Usage:**
-
-```csharp
-public class SearchBox : ViewBase
-{
-    public override object Build()
-    {
-        var searchQuery = UseState("");
-        var searchResult = UseState("");
-
-        return Layout.Horizontal()
-            | searchQuery.ToSearchInput()
-                .Placeholder("Search...")
-                .HandleSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}"))
-            | searchResult;
-    }
-}
 ```
 
 ### Fluent API Enhancements
@@ -866,26 +839,6 @@ new Table(downloads)
 
 ---
 
-### Text Alignment for Separator Labels
-
-The `Separator` widget now supports text alignment control, allowing you to position labels at the left, center, or right of the separator line.
-
-**Usage:**
-
-```csharp
-public override object? Build()
-{
-    return Layout.Vertical().Gap(4)
-        | new Separator("Left Aligned").TextAlign(TextAlignment.Left)
-        | new Separator("Center Aligned").TextAlign(TextAlignment.Center)
-        | new Separator("Right Aligned").TextAlign(TextAlignment.Right);
-}
-```
-
-The alignment property works seamlessly with all separator orientations and styling options, giving you precise control over label positioning in your layouts.
-
----
-
 ### Native Desktop Applications with Ivy.Desktop
 
 Ivy apps can now run as native desktop applications across Windows, macOS, and Linux using the new `Ivy.Desktop` library. Built on Photino.NET, it provides a simple builder API for wrapping your Ivy web apps in native windows with automatic DPI detection and scaling.
@@ -905,41 +858,6 @@ var exitCode = new DesktopWindow(server)
 
 return exitCode;
 ```
-
-### Horizontal Label Layout for Field Widget
-
-The `Field` widget now supports horizontal label positioning, enabling labels to appear beside inputs instead of above them. This is particularly useful for data-dense admin panels, settings pages, and compact form layouts.
-
-**Basic Usage:**
-
-```csharp
-// Default vertical layout (label on top)
-new Field(new TextInput("username"), "Username");
-
-// Horizontal layout (label on left)
-new Field(new TextInput("username"), "Username")
-    .LabelPosition(LabelPosition.Left);
-```
-
-**In a Form:**
-
-```csharp
-new Column(
-    new Field(new TextInput("name"), "Name")
-        .LabelPosition(LabelPosition.Left),
-    new Field(new TextInput("email"), "Email")
-        .LabelPosition(LabelPosition.Left),
-    new Field(new NumberInput("age"), "Age")
-        .LabelPosition(LabelPosition.Left)
-);
-```
-
-The `LabelPosition` enum has two values:
-
-- `LabelPosition.Top` - Label appears above the input (default)
-- `LabelPosition.Left` - Label appears to the left of the input
-
----
 
 ### Icons in Select Options
 
@@ -2567,30 +2485,6 @@ The `WithConfirm` helper method now supports customizable confirm button labels 
 
 ---
 
-### App IDs Now Support Dots for Namespacing and Versioning
-
-App IDs can now contain dots, enabling more flexible naming schemes for versioning, namespacing, and organizing your apps. Previously restricted, dots are now fully supported and encouraged for creating hierarchical app identifiers.
-
-**What changed:**
-
-```csharp
-// Now valid: versioned app IDs
-"dashboard.v2"
-"api.v1"
-"app.v3.beta"
-
-// Now valid: namespaced app IDs
-"users.profile"
-"admin.settings"
-"com.example.app"
-
-// Now valid: gRPC-style service names
-"datatable.DataTableService"
-"grpc.ServiceName"
-```
-
----
-
 ### Desktop Apps: Instant Window Display with Loading Screen
 
 Desktop applications now show the window immediately with a clean loading screen, eliminating the startup delay users previously experienced.
@@ -2824,38 +2718,6 @@ No code changes needed - this protection applies automatically throughout the fr
 
 ---
 
-### NumberInput Min/Max Validation
-
-You can now set minimum and maximum values on `NumberInput` widgets directly through optional parameters or fluent methods, providing built-in validation for numeric inputs.
-
-**Direct parameters:**
-
-```csharp
-var count = UseState(1);
-count.ToNumberInput(min: 1, max: 100).Placeholder("Enter count");
-```
-
-**Fluent methods:**
-
-```csharp
-var count = UseState(1);
-count.ToNumberInput()
-    .Min(1)
-    .Max(100)
-    .Placeholder("Enter count");
-```
-
-**What changed:**
-
-- `ToNumberInput()` now accepts optional `min` and `max` parameters
-- The `.Min()` and `.Max()` fluent extension methods provide an alternative syntax
-- Works with all number input variants (standard, slider, etc.)
-
-**Impact:**
-Setting validation bounds on number inputs is now more convenient and requires less code. The HTML `<input type="number">` element's native min/max attributes will be set automatically, providing client-side validation.
-
----
-
 ### Badge Hover Effects Only Show for Clickable Badges
 
 Badge widgets now only display hover effects when they're actually clickable, preventing confusing UI feedback on non-interactive badges.
@@ -2926,14 +2788,6 @@ The `Size.Fraction()` and `Size.FractionGap()` methods now accept `decimal` and 
 
 ---
 
-## Bug Fixes
-
-### CLI Commands Port Conflict Resolution
-
-Fixed a port conflict issue where CLI-only commands (`--describe`, `--describe-connection`, `--test-connection`) would fail if an Ivy application was already running on the configured port. These commands need dependency injection but never actually start the web host, making port binding unnecessary.
-
----
-
 ### Form Submit Strategy Hook Ordering
 
 Fixed a critical bug in `FormBuilder` where changing the form submit strategy at runtime would cause an `InvalidOperationException`. The issue occurred when using `OnBlur` or `OnChange` strategies, as internal hooks were called conditionally, violating hook ordering rules.
@@ -2991,12 +2845,6 @@ Fixed a compilation error (CS1061) that occurred when using `server.Services.Add
 ### XAML Builder Sample - StackLayout Gap Property
 
 Fixed incorrect property usage in the XAML Builder sample application where `StackLayout` examples were using a non-existent `Gap` property. The examples now correctly use `RowGap` and `ColumnGap` properties.
-
----
-
-### TableBuilder.Remove() - Non-Displayable Property Types
-
-Fixed a `KeyNotFoundException` that occurred when calling `.Remove()` on `TableBuilder` for properties that cannot be displayed in tables, such as `byte[]` arrays. These properties are never registered as columns in the table, so attempting to remove them would throw an exception.
 
 ---
 
@@ -3109,48 +2957,6 @@ Fixed a crash that occurred during application startup when the framework scanne
 
 **Impact:**
 Your Ivy applications are now more resilient to partial deployments where not all referenced assemblies are present. This is particularly useful for modular applications where certain features (and their dependencies) may be optionally deployed. The framework will successfully discover and use all available types while gracefully skipping any that depend on missing assemblies, allowing your application to start and run normally instead of crashing at startup.
-
----
-
-### Desktop Window Server Readiness Check
-
-Fixed race conditions in `Ivy.Desktop` where the desktop window could attempt to navigate to the server before it was ready to accept requests. This could lead to blank windows, connection errors, or missed error messages when the server failed to start properly.
-
-**What was fixed:**
-
-- Desktop window now polls the `/ivy/health` endpoint before navigating, ensuring the server is accepting requests
-- Port is read after `RunAsync()` returns, guaranteeing the actual bound port is used (important when using port 0 for auto-assignment)
-- Early server faults are now detected and surfaced immediately instead of appearing as connection timeouts
-- Server startup failures (missing secrets, configuration errors, etc.) are caught before the window loads
-
-**Impact:**
-If you're building desktop applications with `Ivy.Desktop`, your applications will start more reliably. The desktop window will wait for the server to be fully ready before attempting to load, preventing blank windows or "connection refused" errors during startup. If the server fails to start for any reason, you'll see the actual error immediately rather than waiting for a timeout. This is especially helpful during development when configuration issues or missing secrets might prevent server startup.
-
----
-
-### Badge Hover Effect Only for Clickable Badges
-
-Fixed misleading hover effects on badges by only showing hover feedback when a badge has an `OnClick` handler registered. Previously, all badges displayed hover effects regardless of whether they were interactive, creating a confusing user experience.
-
-**What was fixed:**
-
-- Hover effects (darkening on mouse over) now only appear when `.OnClick()` is registered
-- Non-interactive badges no longer show visual feedback suggesting they're clickable
-- The `onClick` handler is now properly conditional based on whether the badge is clickable
-
-**Example:**
-
-```csharp
-// This badge is interactive and shows hover effect
-new Badge("Click me")
-    .OnClick(() => { /* action */ });  // ✅ Has hover effect
-
-// This badge is static and no hover effect
-new Badge("Status: Active");  // ✅ No hover effect
-```
-
-**Impact:**
-If you're using badges in your application, the visual feedback now accurately reflects whether a badge is interactive or purely informational. This improves user experience by preventing users from attempting to click non-interactive badges that displayed misleading hover states.
 
 ---
 
@@ -4463,32 +4269,4 @@ The FAQ documentation now includes guidance on how to change the size of icons, 
 
 The FAQ documentation now includes guidance on how to change the font size of text, addressing a common question about text sizing.
 
----
 
-### RichTextBlock Streaming Documentation Expanded
-
-The `RichTextBlock` streaming documentation has been significantly enhanced with more comprehensive examples and explanations, making it easier to implement real-time text streaming scenarios like LLM responses.
-
----
-
-### Complete Port Configuration Guide
-
-The documentation now includes a comprehensive guide for all the ways to configure the port when running Ivy applications. Whether you're using the CLI, running with `dotnet run`, or working with file-based apps, you now have clear examples for each scenario.
-
----
-
-### Full-Height Layout Sample
-
-A new sample has been added demonstrating the correct way to build a full-height layout with header, content, and footer using `Layout.Vertical().Height(Size.Full())`.
-
----
-
-### Component Styling Guide - FAQ Entry
-
-A new FAQ entry has been added explaining how to apply styling (width, height, color, padding) to Ivy components. This addresses a common question from developers trying to apply custom styles to widgets.
-
----
-
-### Dynamic Form Fields - FAQ Entry
-
-A new FAQ entry has been added to the TextInput documentation explaining how to create forms with a dynamic number of fields, such as dictionary-style inputs. This addresses a common challenge developers face when trying to use hooks inside loops.
