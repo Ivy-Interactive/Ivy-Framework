@@ -209,6 +209,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _italic;
     private bool _muted;
     private TextAlignment? _textAlignment;
+    private string? _anchor;
 
     private Density? _density;
     private string? _testId = null;
@@ -235,7 +236,8 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
                         content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted, _textAlignment)
                     {
                         Density = _density,
-                        TestId = _testId
+                        TestId = _testId,
+                        Anchor = _anchor
                     };
                     return text;
                 }
@@ -340,6 +342,33 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     {
         _testId = testId;
         return this;
+    }
+
+    /// <summary>
+    /// Sets an explicit anchor ID for URL hash navigation on heading variants.
+    /// </summary>
+    public TextBuilder Anchor(string anchor)
+    {
+        _anchor = anchor;
+        return this;
+    }
+
+    /// <summary>
+    /// Auto-generates an anchor ID by slugifying the heading text (lowercase, hyphens, strip non-alphanumeric).
+    /// </summary>
+    public TextBuilder Anchor()
+    {
+        _anchor = Slugify(content);
+        return this;
+    }
+
+    private static string Slugify(string text)
+    {
+        var slug = text.ToLowerInvariant();
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\s-]", "");
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[\s]+", "-");
+        slug = slug.Trim('-');
+        return slug;
     }
 }
 
