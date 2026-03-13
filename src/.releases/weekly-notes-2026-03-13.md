@@ -825,38 +825,18 @@ public class SearchBox : ViewBase
 }
 ```
 
-### Toast API with Variants
+### Fluent API Enhancements
 
-The Toast API has been enhanced with support for different visual variants, making it easier to communicate the nature of notifications to users. The new fluent API allows you to chain variant methods directly on toast calls.
+Several widgets have received new fluent API extensions to make configuration more concise and chainable:
 
-**Available Variants:**
-
-- `Default` — Standard toast appearance
-- `Destructive` — Red styling for errors
-- `Success` — Green styling for successful operations
-- `Warning` — Amber styling for warnings
-- `Info` — Blue styling for informational messages
-
-**Basic Usage:**
-
-```csharp
-var client = UseService<IClientProvider>();
-
-// Success notification
-client.Toast("Record saved successfully.", "Success").Success();
-
-// Error notification
-client.Toast("An error occurred during the operation.", "Error").Destructive();
-
-// Warning notification
-client.Toast("Your session is about to expire.", "Warning").Warning();
-
-// Info notification
-client.Toast("A new update is available for download.", "Info").Info();
-
-// Default (no variant method needed)
-client.Toast("This is a standard toast message.");
-```
+- **Toast API**: `.Success()`, `.Destructive()`, `.Warning()`, `.Info()`
+- **ListItem**: `.Title()`, `.Subtitle()`, `.Icon()`, `.Badge()`, `.Tag()`, `.OnClick()`, `.Content()`, `.Disabled()`
+- **FeedbackInput**: Dedicated fluent methods for each variant type.
+- **Chart Builders**: `.Height()` and `.Width()` (replaces `Polish` callback workaround).
+- **DesktopWindow**: `.UseDpiScaling()`, `.UseDevTools()`, `.Resizable()`, `.Center()`, `.TopMost()` (booleans default to `true`).
+- **Table Progress**: `.Min()`, `.Max()`, `.AutoColor()`, `.Color()`, `.Format()`.
+- **Separator**: `.TextAlign(TextAlignment.Left | Center | Right)`.
+- **Global**: `.Grow()` is now available on all widgets (shorthand for `.Width(Size.Grow())`).
 
 ### ColorInput: Alpha Channel Support
 
@@ -923,95 +903,7 @@ return categoryState.ToAsyncSelectInput(
 ).Ghost();
 ```
 
-### FeedbackInput: Fluent Variant API
 
-`FeedbackInput` now supports a more ergonomic fluent API for setting feedback variants. Instead of using the verbose `.Variant()` method, you can now use dedicated methods for each variant type.
-
-### ListItem: Fluent API and Disabled State
-
-`ListItem` now supports a fluent configuration API, making list creation more readable and chainable. Additionally, list items can now be marked as disabled to prevent user interaction.
-
-**Fluent API Methods:**
-
-The new fluent API provides dedicated methods for configuring ListItem properties:
-
-```csharp
-// Fluent API style - clean and readable
-new ListItem("Dashboard")
-    .Icon(Icons.House)
-    .Subtitle("Main overview")
-    .OnClick(() => NavigateToDashboard());
-
-// Before: Constructor parameters (still supported)
-new ListItem("Dashboard", subtitle: "Main overview", onClick: () => NavigateToDashboard(), icon: Icons.House);
-```
-
-**Available Fluent Methods:**
-
-```csharp
-new ListItem("Item")
-    .Title("New Title")                    // Set title
-    .Subtitle("Subtitle text")             // Set subtitle
-    .Icon(Icons.Settings)                  // Set icon
-    .Badge("3")                            // Set badge
-    .Tag(userData)                         // Set tag object
-    .OnClick(() => DoSomething())          // Set click handler
-    .Disabled()                            // Make non-interactive
-    .Content(new TextInput("Search..."));  // Set custom content
-```
-
-**Disabled State:**
-
-List items can now be disabled to indicate unavailable actions:
-
-```csharp
-new List(new[]
-{
-    new ListItem("Available action")
-        .OnClick(() => PerformAction())
-        .Icon(Icons.Check),
-
-    new ListItem("Unavailable action")
-        .OnClick(() => PerformAction())
-        .Icon(Icons.Ban)
-        .Disabled()  // Grayed out and non-interactive
-});
-```
-
-**Practical Example:**
-
-```csharp
-public class NavigationMenu : ViewBase
-{
-    public override object? Build()
-    {
-        var hasPermission = UseState(false);
-
-        return new List(new[]
-        {
-            new ListItem("Home")
-                .Icon(Icons.House)
-                .OnClick(() => NavigateTo("/"))
-                .Subtitle("Dashboard overview"),
-
-            new ListItem("Settings")
-                .Icon(Icons.Settings)
-                .OnClick(() => NavigateTo("/settings"))
-                .Subtitle("Configure your app"),
-
-            new ListItem("Admin Panel")
-                .Icon(Icons.Shield)
-                .OnClick(() => NavigateTo("/admin"))
-                .Subtitle("Requires admin access")
-                .Disabled(!hasPermission.Value)  // Disabled based on permissions
-        });
-    }
-}
-```
-
-The fluent API provides better IntelliSense support, more readable code, and allows for easier chaining of configuration methods. All existing constructor-based code continues to work unchanged.
-
----
 
 ### Card: Disabled State
 
@@ -1726,71 +1618,7 @@ Icons automatically scale with the density setting (Small, Medium, Large) and ar
 
 ---
 
-### ListItem Fluent API and Disabled State
 
-`ListItem` now includes a comprehensive fluent API for configuration and support for disabling individual list items.
-
-**Fluent API:**
-
-All `ListItem` properties can now be set using fluent extension methods, making list construction more readable and flexible:
-
-```csharp
-// Before - constructor parameters
-new ListItem(
-    title: "Settings",
-    subtitle: "Configure your app",
-    icon: Icons.Settings,
-    badge: "3",
-    onClick: HandleClick
-);
-
-// After - fluent API
-new ListItem("Settings")
-    .Subtitle("Configure your app")
-    .Icon(Icons.Settings)
-    .Badge("3")
-    .OnClick(HandleClick);
-```
-
-**Available Fluent Methods:**
-
-- `.Title(string)` - Set the list item title
-- `.Subtitle(string)` - Set the subtitle text
-- `.Icon(Icons)` - Add an icon
-- `.Badge(string)` - Add a badge indicator
-- `.Tag(object)` - Attach metadata (not rendered)
-- `.OnClick(...)` - Set click handler (supports Action, Action<Event>, or async handlers)
-- `.Content(object)` - Add custom content below the title/subtitle
-- `.Disabled(bool)` - Disable the list item
-
-**Disabled State:**
-
-Individual list items can now be disabled, making them non-interactive with visual feedback:
-
-```csharp
-var items = new[]
-{
-    new ListItem("Available Action")
-        .OnClick(HandleClick)
-        .Icon(Icons.Check),
-
-    new ListItem("Coming Soon")
-        .OnClick(HandleClick)
-        .Icon(Icons.Lock)
-        .Disabled(),  // This item cannot be clicked
-
-    new ListItem("Premium Feature")
-        .OnClick(HandleClick)
-        .Icon(Icons.Star)
-        .Disabled(isPremiumUser == false)  // Conditionally disabled
-};
-
-return new List(items);
-```
-
-When disabled, list items appear with reduced opacity and cannot be clicked. This is useful for showing unavailable actions, premium features, or items that require certain conditions to be met.
-
----
 
 ### Automatic Validation for Email, Password, Phone, and URL Inputs
 
@@ -4944,42 +4772,7 @@ No code changes needed - this improvement applies automatically to all `MetricVi
 
 ---
 
-### Chart Builders: Height and Width Fluent Methods
 
-Chart builders now support `.Height()` and `.Width()` fluent methods, allowing you to set chart dimensions directly in the builder API without needing to use the polish callback workaround.
-
-**New fluent methods:**
-
-```csharp
-// Set chart dimensions with fluent API
-var chart = new LineChart(data)
-    .Lines(...)
-    .Height(Size.Pixels(400))
-    .Width(Size.Percent(100));
-
-// Works with all chart types
-var barChart = new BarChart(data)
-    .Dimension(...)
-    .Height(Size.Pixels(300))
-    .Width(Size.Pixels(600));
-
-var areaChart = new AreaChart(salesData)
-    .Dimension("Month", x => x.Month)
-    .Measure("Revenue", x => x.Revenue)
-    .Height(Size.Pixels(350))
-    .Width(Size.Fraction(1));
-```
-
-**What changed:**
-
-- Added `.Height(Size)` and `.Width()` methods to `LineChartBuilder`, `BarChartBuilder`, `AreaChartBuilder`, and `PieChartBuilder`
-- Previously, setting chart dimensions required using the polish callback: `.Polish(chart => chart with { Height = Size.Pixels(400) })`
-- Chart builders extend `ViewBase` (not `WidgetBase`), so the standard `WidgetBaseExtensions.Height/Width` methods don't apply
-
-**Impact:**
-Setting chart dimensions is now more intuitive and consistent with the rest of the fluent API. You can chain `.Height()` and `.Width()` calls directly on chart builders alongside other configuration methods, making chart setup code cleaner and more discoverable.
-
----
 
 ### Customizable Confirm Dialogs with Destructive Styling
 
