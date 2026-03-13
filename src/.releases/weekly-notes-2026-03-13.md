@@ -153,8 +153,6 @@ mySignal.Receive(callback);     // Register a callback to receive data
 
 To maintain consistency across the Ivy Framework, all input variant enums have been renamed from plural to singular form. This aligns them with other styling enums like `ButtonVariant`, `BadgeVariant`, and `CalloutVariant`.
 
-**What Changed:**
-
 | Old Name (Plural) | New Name (Singular) |
 |---|---|
 | `TextInputVariants` | `TextInputVariant` |
@@ -178,8 +176,6 @@ The fluent `.Value()` extension method has been removed from all input widgets. 
 ### Scale Renamed to Density
 
 The `Scale` enum and all associated APIs have been renamed to `Density` to avoid ambiguity with chart scales, DPI scaling, and other scale-related concepts.
-
-**What Changed:**
 
 - `Ivy.Scale` enum → `Ivy.Density` enum
 - `.Scale()` fluent method → `.Density()` method
@@ -1510,8 +1506,6 @@ The `WithConfirm` helper method now supports customizable confirm button labels 
 
 Desktop applications now show the window immediately with a clean loading screen, eliminating the startup delay users previously experienced.
 
-**What changed:**
-
 - The window appears instantly when you launch your app with a light, modern design
 - Light theme with clean colors: `#ffffff` (white background), `#00cc92` (primary green spinner), `#dd5860` (error red)
 - Uses the modern **Geist font** from Vercel for a polished, contemporary look
@@ -1529,8 +1523,6 @@ No code changes needed - this enhancement applies automatically to all Ivy deskt
 ### Desktop Apps: Default Ivy Icon for Windows
 
 Desktop applications now automatically display the Ivy logo in the taskbar and title bar when no custom icon is explicitly set, giving your apps a polished appearance out of the box.
-
-**What changed:**
 
 - When you create a desktop window without calling `.Icon()`, it now automatically uses the embedded Ivy icon
 - The ivy.ico resource is embedded directly in the `Ivy.Desktop` package
@@ -1568,8 +1560,6 @@ new DesktopWindow(server)
 
 The `DefaultSidebarChrome` now automatically opens the sidebar when you close the last tab, preventing an empty state where both the sidebar and all tabs are closed.
 
-**What changed:**
-
 - When closing the final tab (which redirects to the home page), the sidebar automatically opens
 - This ensures users always have navigation options visible
 - The sidebar state is now dynamically managed to respond to tab closure events
@@ -1577,8 +1567,6 @@ The `DefaultSidebarChrome` now automatically opens the sidebar when you close th
 ### Nested App Streaming Support
 
 The `UseStream` hook now works seamlessly in nested apps hosted via `AppHostWidget`. Previously, streaming functionality might not have worked correctly when using `UseStream` within an app that's hosted inside another app.
-
-**What changed:**
 
 - `AppHostWidget` now provides the necessary streaming infrastructure to child apps
 - Stream subscriptions are properly propagated through nested app boundaries
@@ -1589,8 +1577,6 @@ No code changes needed - this improvement applies automatically to applications 
 ### Desktop Apps: Error Dialog for Unhandled Exceptions
 
 Desktop applications now show a proper error dialog when unhandled exceptions occur, instead of silently failing or writing to an invisible console.
-
-**What changed:**
 
 - The `DesktopWindow.Run()` method now wraps execution in error handling
 - Unhandled exceptions trigger a native error dialog window with the error message and full stack trace
@@ -1610,11 +1596,6 @@ No code changes needed - this protection applies automatically to all Ivy deskto
 
 Desktop applications now automatically handle threading requirements for WebView2 on Windows, fixing an issue where windows would open but display blank content.
 
-**What was the problem:**
-WebView2 requires STA (Single-Threaded Apartment) threading for its COM message pump. If your app started on the wrong thread type, Photino windows would open but show blank white content instead of your UI.
-
-**What changed:**
-
 - `DesktopWindow.Run()` automatically detects the thread apartment state on Windows
 - If not on an STA thread, it creates and switches to an STA thread automatically
 - Works seamlessly without any code changes or performance impact
@@ -1624,8 +1605,6 @@ No code changes needed - this fix applies automatically to all Ivy desktop appli
 ### Desktop Apps: Automatic Ivy Icon Embedding
 
 Desktop applications now automatically include the Ivy icon in their executable files, giving your apps a professional appearance in taskbars, file explorers, and window title bars without any additional configuration.
-
-**What changed:**
 
 - The Ivy.Desktop package now includes an `ivy.ico` icon file
 - MSBuild automatically sets the `ApplicationIcon` property during build if you haven't specified a custom icon
@@ -1651,13 +1630,8 @@ No code changes needed - this enhancement applies automatically to all new and e
 
 Desktop applications now wait for the server to be fully ready before loading the UI, eliminating race conditions and catching early server failures.
 
-**What was the problem:**
-Previously, the desktop window would immediately try to load the app URL as soon as `server.RunAsync()` was called. This created two issues:
-
 - The port was read before the server had actually bound to it, potentially using the wrong port number
 - The WebView could navigate to the URL before the server was accepting requests, causing connection failures
-
-**What changed:**
 
 - The actual bound port is now read after `RunAsync()` returns, ensuring the correct port is used
 - A new `WaitForServerReady()` method polls the server's `/ivy/health` endpoint before the window loads
@@ -1679,8 +1653,6 @@ No code changes needed - this reliability improvement applies automatically to a
 
 The framework now gracefully handles situations where your application references assemblies that aren't deployed, preventing crashes during assembly scanning operations.
 
-**What changed:**
-
 - Assembly scanning operations (for apps, widgets, connections, and extensions) now use a new `GetLoadableTypes()` extension method
 - When an assembly references other assemblies that aren't available (e.g., optional packages like `Ivy.Filters`), the framework loads only the types that are available
 - Previously, these situations would throw a `ReflectionTypeLoadException` and crash your application
@@ -1697,8 +1669,6 @@ No code changes needed - this protection applies automatically throughout the fr
 ### Badge Hover Effects Only Show for Clickable Badges
 
 Badge widgets now only display hover effects when they're actually clickable, preventing confusing UI feedback on non-interactive badges.
-
-**What changed:**
 
 - Badges without an `OnClick` handler no longer show hover effects (color changes on mouse-over)
 - Clickable badges continue to show hover feedback with a subtle opacity change and pointer cursor
@@ -1719,8 +1689,6 @@ No code changes needed - this improvement applies automatically to all Badge wid
 ### SelectInput: Auto-Flip Dropdown Near Viewport Edge
 
 The `SelectInput` dropdown now automatically detects when it would extend beyond the bottom of the viewport and intelligently flips to open upward instead. This prevents the dropdown from being cut off when the input is positioned near the bottom of the screen.
-
-**What changed:**
 
 - The dropdown calculates available space below the trigger element when opening
 - If insufficient space exists (less than the dropdown height + 8px), it automatically opens upward
@@ -1820,8 +1788,6 @@ Fixed a visual bug in the `MarkdownRenderer` where code blocks were missing thei
 
 Fixed a bug in `Ivy.Desktop` where application error dialogs would display as blank white windows instead of showing the formatted error message and stack trace. The issue was caused by using `LoadRawString()` to load the error HTML, which doesn't render properly in Photino.
 
-**What was fixed:**
-
 - Error dialogs now write HTML to a temporary file and load it via `Load(Uri)` instead of `LoadRawString()`
 - This matches the approach used for the main application window, ensuring consistent rendering
 - Temporary error HTML files are automatically cleaned up after the error dialog closes
@@ -1830,8 +1796,6 @@ Fixed a bug in `Ivy.Desktop` where application error dialogs would display as bl
 ### Desktop WebView2 Blank Window Fix
 
 Fixed a critical bug in `Ivy.Desktop` on Windows where desktop applications using WebView2 would open but display completely blank content. The issue was caused by WebView2's COM message pump requiring Single-Threaded Apartment (STA) threading, which wasn't guaranteed when `DesktopWindow.Run()` was called.
-
-**What was fixed:**
 
 - `DesktopWindow.Run()` now automatically checks the current thread's apartment state on Windows
 - If not already on an STA thread, the window automatically starts on a new STA thread
@@ -1842,8 +1806,6 @@ Fixed a critical bug in `Ivy.Desktop` on Windows where desktop applications usin
 
 Fixed a bug in `Ivy.Desktop` where server startup failures would display a generic "Unable to connect" error message instead of showing the actual exception that caused the server to fail. This made debugging startup issues difficult, as the root cause was hidden.
 
-**What was fixed:**
-
 - `CheckIfPortIsListening` now monitors the server task status during port polling
 - If the server task faults during startup, the actual exception is now thrown and displayed
 - Error dialogs now show the real cause of server failures (e.g., port already in use, configuration errors)
@@ -1853,8 +1815,6 @@ Fixed a bug in `Ivy.Desktop` where server startup failures would display a gener
 
 Fixed a crash that occurred during application startup when the framework scanned assemblies that referenced optional dependencies that weren't deployed. Previously, calling `Assembly.GetTypes()` on assemblies with missing references would throw a `ReflectionTypeLoadException`, causing the entire application to crash.
 
-**What was fixed:**
-
 - Added `GetLoadableTypes()` extension method that gracefully handles missing assembly references
 - Framework now loads only the types that are available, skipping types with unresolved dependencies
 - Applied to all assembly scanning operations: app discovery, external widgets, connections, secret providers, and extension methods
@@ -1863,8 +1823,6 @@ Fixed a crash that occurred during application startup when the framework scanne
 ### Outline Button Missing Background
 
 Fixed a visual bug where outline variant buttons were missing their background color, causing transparency issues and inconsistent appearance depending on the content behind them.
-
-**What was fixed:**
 
 - Outline buttons now have an explicit `bg-background` color applied
 - Buttons maintain proper opacity and visual consistency across all contexts
@@ -1881,8 +1839,6 @@ new Button("Submit")
 ### Semantic Color Text Readability Fix
 
 Fixed a bug where using semantic surface colors (like `Colors.Muted`, `Colors.Background`, `Colors.Card`) as text colors would result in poor readability. These colors are designed as background layers, but when applied to text, they should automatically map to their foreground variants.
-
-**What was fixed:**
 
 - Text colored with `Colors.Muted` now properly uses `--muted-foreground` instead of `--muted`
 - Similarly, `Colors.Background`, `Colors.Card`, `Colors.Popover`, and `Colors.Accent` all map to their foreground variants when used as text color
@@ -2107,8 +2063,6 @@ This analyzer helps enforce the correct hook usage pattern and catches mistakes 
 
 The hook usage analyzer now provides more specific error messages by splitting `IVYHOOK001` into sub-types, making it easier to understand and fix hook placement issues.
 
-**What Changed:**
-
 - `IVYHOOK001` now only fires for hooks called outside `Build()` entirely (e.g., in helper methods)
 - New `IVYHOOK001B` fires for hooks nested in lambdas, local functions, or anonymous methods within `Build()`
 - Error messages now explain the "same order on every render" constraint
@@ -2270,9 +2224,6 @@ This improvement makes it easier to work with database connections during develo
 ### CLI Commands Work Alongside Running Instances
 
 CLI diagnostic commands (`--describe`, `--describe-connection`, `--test-connection`) now run successfully even when an Ivy app instance is already running on the configured port.
-
-**What was the problem:**
-These commands need dependency injection but don't actually start a web server. Previously, they would fail with port-in-use errors if you tried to run them while your app was already running, even though they never needed the port.
 
 ### Server Binds to Localhost - No More Windows Firewall Prompts
 
