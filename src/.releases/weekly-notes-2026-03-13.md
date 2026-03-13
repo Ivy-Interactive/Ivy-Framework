@@ -1528,17 +1528,6 @@ Desktop applications now automatically display the Ivy logo in the taskbar and t
 - The ivy.ico resource is embedded directly in the `Ivy.Desktop` package
 - Your app's window will show the Ivy logo in the taskbar and window title bar by default
 
-**Before:**
-
-```csharp
-// No icon set = blank/default system icon in taskbar
-new DesktopWindow(server)
-    .Title("My App")
-    .Run();
-```
-
-**After:**
-
 ```csharp
 // No icon set = Ivy logo appears in taskbar automatically
 new DesktopWindow(server)
@@ -2135,16 +2124,6 @@ This improvement helps developers quickly identify the exact nature of the hook 
 
 The `decimal` and `double` overloads for `Size.Fraction()` and `Size.FractionGap()` have been removed to fix ambiguous call compilation errors (CS0121). You must now use `float` values with the `f` suffix.
 
-**Before (caused ambiguous call errors):**
-
-```csharp
-// These overloads caused compiler ambiguity issues
-.Width(Size.Fraction(0.5))
-.Height(Size.FractionGap(0.25))
-```
-
-**After:**
-
 ```csharp
 // Use explicit float literals with 'f' suffix
 .Width(Size.Fraction(0.5f))
@@ -2173,15 +2152,6 @@ New `Size.Percent()` overloads make it easier to specify percentage-based sizes 
 .Height(Size.Percent("33%")) // 33% height
 ```
 
-**Before (still works):**
-
-```csharp
-.Width(Size.Fraction(0.5f))   // 50% width
-.Height(Size.Fraction(1.0f))  // 100% height
-```
-
-**After (more intuitive):**
-
 ```csharp
 .Width(Size.Percent(50))   // Much clearer intent
 .Height(Size.Percent(100)) // Obvious it's a percentage
@@ -2192,14 +2162,6 @@ This is especially helpful when working with percentage values, making the code 
 ### Connection Name Error Messages
 
 When using `--test-connection` or `--describe-connection` command-line arguments with a connection name that doesn't exist, the error message now lists all available connections to help you quickly identify and fix typos or discover the correct connection names.
-
-**Before:**
-
-```
-Connection 'mytypo' not found.
-```
-
-**After:**
 
 ```
 Connection 'mytypo' not found. Available connections: postgres, mysql, redis
