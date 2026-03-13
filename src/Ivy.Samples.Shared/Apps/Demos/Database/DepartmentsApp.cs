@@ -170,7 +170,7 @@ public class DepartmentDetailsBlade(Guid departmentId) : ViewBase
             .Variant(ButtonVariant.Destructive)
             .Icon(Icons.Trash)
             .Width(Size.Grow())
-            .WithConfirm($"Are you sure you want to delete department '{department.Name}'?", "Delete Department");
+            .WithConfirm($"Are you sure you want to delete department '{department.Name}'?", "Delete Department", confirmLabel: "Delete", destructive: true);
 
         var editBtn = new Button("Edit")
             .Variant(ButtonVariant.Outline)

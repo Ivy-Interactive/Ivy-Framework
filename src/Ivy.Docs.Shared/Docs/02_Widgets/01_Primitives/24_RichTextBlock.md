@@ -214,7 +214,7 @@ Entry point: `Text.Rich()` returns a `RichTextBuilder`.
 |---|---|
 | `NoWrap()` | Prevent text wrapping |
 | `Overflow(overflow)` | Set overflow behavior |
-| `Scale(scale)` / `Small()` / `Medium()` / `Large()` | Set text scale |
+| `Density(density)` / `Small()` / `Medium()` / `Large()` | Set text scale |
 | `Align(alignment)` / `Left()` / `Center()` / `Right()` | Set text alignment |
 | `UseStream(stream)` | Attach a stream for dynamic run appending |
 | `OnLinkClick(handler)` | Set a callback for link clicks (accepts `Action<string>`, `Action<Event<...>>`, or `Func<Event<...>, ValueTask>`) |

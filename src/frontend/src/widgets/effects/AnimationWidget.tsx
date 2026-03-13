@@ -1,5 +1,12 @@
 import React from 'react';
-import { motion, AnimatePresence, Variants, Transition } from 'framer-motion';
+import {
+  m,
+  LazyMotion,
+  domAnimation,
+  AnimatePresence,
+  Variants,
+  Transition,
+} from 'framer-motion';
 
 interface AnimationWidgetProps {
   children?: React.ReactNode;
@@ -114,7 +121,7 @@ const getDirectionOffset = (direction?: string, distance: number = 100) => {
   }
 };
 
-const getAnimationVariants = (props: AnimationWidgetProps): Variants => {
+const getAnimationVariant = (props: AnimationWidgetProps): Variants => {
   const {
     type,
     duration = 0.5,
@@ -329,7 +336,7 @@ const AnimationWidget: React.FC<AnimationWidgetProps> = props => {
   const { children, visible, trigger } = merged;
 
   const [isAnimating, setIsAnimating] = React.useState(trigger === 'Auto');
-  const variants = getAnimationVariants(merged);
+  const variants = getAnimationVariant(merged);
 
   const handleClick = () => {
     if (trigger === 'Click') {
@@ -358,23 +365,25 @@ const AnimationWidget: React.FC<AnimationWidgetProps> = props => {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          initial="initial"
-          animate={isAnimating ? 'animate' : 'initial'}
-          exit="exit"
-          variants={variants}
-          onClick={handleClick}
-          onHoverStart={handleHoverStart}
-          onHoverEnd={handleHoverEnd}
-          onAnimationComplete={handleAnimationComplete}
-          style={{
-            cursor: trigger === 'Click' ? 'pointer' : 'default',
-            display: 'inline-block',
-            transformOrigin: 'center center',
-          }}
-        >
-          {children}
-        </motion.div>
+        <LazyMotion features={domAnimation}>
+          <m.div
+            initial="initial"
+            animate={isAnimating ? 'animate' : 'initial'}
+            exit="exit"
+            variants={variants}
+            onClick={handleClick}
+            onHoverStart={handleHoverStart}
+            onHoverEnd={handleHoverEnd}
+            onAnimationComplete={handleAnimationComplete}
+            style={{
+              cursor: trigger === 'Click' ? 'pointer' : 'default',
+              display: 'inline-block',
+              transformOrigin: 'center center',
+            }}
+          >
+            {children}
+          </m.div>
+        </LazyMotion>
       )}
     </AnimatePresence>
   );

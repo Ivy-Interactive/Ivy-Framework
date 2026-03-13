@@ -11,7 +11,7 @@ public class CodeBlockApp : SampleBase
                | Layout.Tabs(
                    new Tab("Variants", CreateLanguageVariants()),
                    new Tab("Options", CreateOptionsVariants()),
-                   new Tab("Scale API", CreateScaleVariants())
+                   new Tab("Density API", CreateDensityVariants())
                ).Variant(TabsVariant.Content);
     }
 
@@ -224,22 +224,22 @@ public class CodeBlockApp : SampleBase
         var optionBlocks = new object[]
         {
             Layout.Vertical()
-                | Text.InlineCode("Default")
+                | Text.Monospaced("Default")
                 | new CodeBlock(sampleCode, Languages.Csharp),
             Layout.Vertical()
-                | Text.InlineCode("With Line Numbers")
+                | Text.Monospaced("With Line Numbers")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowLineNumbers(true),
             Layout.Vertical()
-                | Text.InlineCode("Starting Line Number")
+                | Text.Monospaced("Starting Line Number")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowLineNumbers(true).StartingLineNumber(42),
             Layout.Vertical()
-                | Text.InlineCode("No Copy Button")
+                | Text.Monospaced("No Copy Button")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowCopyButton(false),
             Layout.Vertical()
-                | Text.InlineCode("No Border")
+                | Text.Monospaced("No Border")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowBorder(false),
             Layout.Vertical()
-                | Text.InlineCode("Wrap Lines")
+                | Text.Monospaced("Wrap Lines")
                 | new CodeBlock("public class VeryLongClassName { public void VeryLongMethodName(string veryLongParameterName, int anotherVeryLongParameterName, bool yetAnotherParameter) { Console.WriteLine(\"This is a very long line that should wrap when WrapLines is enabled.\"); } }", Languages.Csharp).WrapLines().ShowLineNumbers()
         };
 
@@ -247,27 +247,27 @@ public class CodeBlockApp : SampleBase
         return variants;
     }
 
-    private object CreateScaleVariants()
+    private object CreateDensityVariants()
     {
         var sampleCode = """
-            public class ScaleDemo
+            public class DensityDemo
             {
                 public void Hello()
                 {
-                    Console.WriteLine("Testing Scale API");
+                    Console.WriteLine("Testing Density API");
                 }
             }
             """;
 
         return Layout.Vertical().Gap(6)
             | Layout.Vertical().Gap(2)
-                | Text.H3("Small Scale")
+                | Text.H3("Small Density")
                 | new CodeBlock(sampleCode, Languages.Csharp).Small()
             | Layout.Vertical().Gap(2)
-                | Text.H3("Medium Scale (Default)")
+                | Text.H3("Medium Density (Default)")
                 | new CodeBlock(sampleCode, Languages.Csharp)
             | Layout.Vertical().Gap(2)
-                | Text.H3("Large Scale")
+                | Text.H3("Large Density")
                 | new CodeBlock(sampleCode, Languages.Csharp).Large();
     }
 }

@@ -96,7 +96,7 @@ public record FileUpload<T> : FileUpload
     public DetailsBuilder<FileUpload<T>> ToDetails()
     {
         return new DetailsBuilder<FileUpload<T>>(this)
-            .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+            .Builder(e => e.Length, e => e.Func((long x) => StringHelper.FormatBytes(x)))
             .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
             .Remove(e => e.Id);
     }

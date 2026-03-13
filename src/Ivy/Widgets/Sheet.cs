@@ -128,9 +128,9 @@ public static class SheetExtensions
                 Layout.Horizontal().Gap(2)
                 | FormBuilder<TModel>.DefaultSubmitBuilder(submitTitle ?? "Save")(isLoading)
                     .OnClick(_ => HandleSubmitAndClose())
-                    .Scale(formBuilder._scale)
+                    .Density(formBuilder._density)
                 | new Button("Cancel").Variant(ButtonVariant.Outline).OnClick(_ => isOpen.Set(false))
-                    .Scale(formBuilder._scale)
+                    .Density(formBuilder._density)
                 | validationView,
                 formView
             );

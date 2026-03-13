@@ -27,14 +27,20 @@ public abstract partial class ViewBase
     protected IState<T> UseState<T>(T? initialValue = default(T?), bool buildOnChange = true) =>
         this.Context.UseState(initialValue!, buildOnChange);
 
-    protected IState<T> UseState<T>(Func<T> buildInitialValue, bool buildOnChange = true) =>
-        this.Context.UseState(buildInitialValue, buildOnChange);
+    [OverloadResolutionPriority(1)]
+    protected IState<T> UseState<T>(Func<T>? buildInitialValue, bool buildOnChange = true) =>
+        buildInitialValue is null
+            ? this.Context.UseState<T>(initialValue: default, buildOnChange)
+            : this.Context.UseState(buildInitialValue, buildOnChange);
 
-    protected IState<T> UseRef<T>(T? initialValue = default) =>
+    protected IRef<T> UseRef<T>(T? initialValue = default) =>
         this.Context.UseRef(initialValue);
 
-    protected IState<T> UseRef<T>(Func<T> buildInitialValue) =>
-        this.Context.UseRef(buildInitialValue);
+    [OverloadResolutionPriority(1)]
+    protected IRef<T> UseRef<T>(Func<T>? buildInitialValue) =>
+        buildInitialValue is null
+            ? this.Context.UseRef<T>(initialValue: default)
+            : this.Context.UseRef(buildInitialValue);
 
     [OverloadResolutionPriority(1)]
     protected void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers) =>
@@ -173,6 +179,9 @@ public abstract partial class ViewBase
     protected DataTableConnection? UseDataTable(IQueryable queryable, Func<object, object?>? idSelector, RefreshToken? refreshToken = null) =>
         this.Context.UseDataTable(queryable, idSelector, refreshToken);
 
+    protected DataTableConnection? UseDataTable(IQueryable queryable, Func<object, object?>? idSelector, DataTableColumn[]? columns, RefreshToken? refreshToken = null) =>
+        this.Context.UseDataTable(queryable, idSelector, columns, refreshToken);
+
     protected IView UseBlades(Func<IView> rootBlade, string? title = null, Size? width = null) =>
         this.Context.UseBlades(rootBlade, title, width);
 
@@ -187,6 +196,9 @@ public abstract partial class ViewBase
 
     protected IWriteStream<T> UseStream<T>() =>
         this.Context.UseStream<T>();
+
+    protected void UseInterval(Action callback, TimeSpan? interval) =>
+        this.Context.UseInterval(callback, interval);
 
     protected static EffectTrigger OnMount() =>
         EffectTrigger.OnMount();

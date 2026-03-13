@@ -44,6 +44,24 @@ public static class QueryableExtensions
             }
         }
 
+        // If no exact match, try the primary constructor and fill removed params with defaults
+        if (bestConstructor == null)
+        {
+            var primaryCtor = constructors
+                .OrderByDescending(c => c.GetParameters().Length)
+                .FirstOrDefault(c =>
+                {
+                    var ctorParams = c.GetParameters();
+                    var propNames = availableProperties.Select(p => p.Name.ToLowerInvariant()).ToHashSet();
+                    return ctorParams.Length > 0 && ctorParams.All(p => propNames.Contains(p.Name?.ToLowerInvariant() ?? "") || fields.Contains(p.Name!, StringComparer.OrdinalIgnoreCase));
+                });
+
+            if (primaryCtor != null)
+            {
+                bestConstructor = primaryCtor;
+            }
+        }
+
         Expression newExpression;
 
         if (bestConstructor != null)
@@ -55,7 +73,9 @@ public static class QueryableExtensions
                 var prop = availableProperties.FirstOrDefault(
                     ap => ap.Name.Equals(p.Name, StringComparison.OrdinalIgnoreCase)
                 );
-                return Expression.MakeMemberAccess(parameter, prop!);
+                return prop != null
+                    ? (Expression)Expression.MakeMemberAccess(parameter, prop)
+                    : Expression.Default(p.ParameterType);
             }).ToArray();
 
             newExpression = Expression.New(bestConstructor, ctorArgs);

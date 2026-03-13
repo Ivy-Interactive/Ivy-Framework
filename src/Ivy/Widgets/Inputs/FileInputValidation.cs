@@ -62,8 +62,8 @@ public static class FileInputValidation
 
         if (file.Length > maxFileSize.Value)
         {
-            var maxSizeFormatted = Utils.FormatBytes(maxFileSize.Value);
-            var fileSizeFormatted = Utils.FormatBytes(file.Length);
+            var maxSizeFormatted = StringHelper.FormatBytes(maxFileSize.Value);
+            var fileSizeFormatted = StringHelper.FormatBytes(file.Length);
             return ValidationResult.Error($"File '{file.FileName}' is too large ({fileSizeFormatted}). Maximum allowed size is {maxSizeFormatted}.");
         }
 
@@ -76,8 +76,8 @@ public static class FileInputValidation
 
         if (file.Length < minFileSize.Value)
         {
-            var minSizeFormatted = Utils.FormatBytes(minFileSize.Value);
-            var fileSizeFormatted = Utils.FormatBytes(file.Length);
+            var minSizeFormatted = StringHelper.FormatBytes(minFileSize.Value);
+            var fileSizeFormatted = StringHelper.FormatBytes(file.Length);
             return ValidationResult.Error($"File '{file.FileName}' is too small ({fileSizeFormatted}). Minimum required size is {minSizeFormatted}.");
         }
 

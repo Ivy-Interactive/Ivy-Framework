@@ -51,15 +51,12 @@ public class ProgressApp : SampleBase
             | new Progress(50).Indeterminate().Goal("Syncing (50% before pause)...")
 
             | Text.H2("Toggle Indeterminate Mode")
-            | BuildIndeterminateToggle()
+            | BuildIndeterminateToggle(UseState(true), UseState(25))
         ;
     }
 
-    private object BuildIndeterminateToggle()
+    private static object BuildIndeterminateToggle(IState<bool> isLoading, IState<int> progress)
     {
-        var isLoading = UseState(true);
-        var progress = UseState(25);
-
         return Layout.Vertical()
             | new Progress(progress.Value)
                 .Indeterminate(isLoading.Value)

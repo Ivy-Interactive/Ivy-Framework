@@ -1,40 +1,4 @@
-﻿# Faq
-
-## How do I copy text to the clipboard in Ivy?
-
-Use the `CopyToClipboard` extension method on `IClientProvider`:
-
-```csharp
-var client = UseService<IClientProvider>();
-client.CopyToClipboard(content);
-client.Toast("Copied to clipboard!");
-```
-
-**Note:** There is no `UseClipboard` hook. Clipboard access is provided through `IClientProvider`, not through a dedicated hook. Access it via `UseService<IClientProvider>()`.
-
-
-## How do I create a multiline textarea TextInput in Ivy?
-
-Use the `TextInputVariants.Textarea` variant or the dedicated `ToTextareaInput` extension:
-
-```csharp
-state.ToTextareaInput(placeholder: "Enter text...")
-```
-
-## How do I set min/max values on a NumberInput?
-
-You can pass `min` and `max` directly as optional parameters to `ToNumberInput()`:
-
-```csharp
-var count = UseState(1);
-count.ToNumberInput(min: 1, max: 100).Placeholder("Enter count")
-```
-
-Alternatively, use the `.Min()` and `.Max()` fluent extension methods:
-
-```csharp
-count.ToNumberInput().Min(1).Max(100)
-```
+# Faq
 
 ## How do I read CSV data or load external data in Ivy?
 
@@ -69,71 +33,6 @@ var csvText = await http.GetStringAsync("https://example.com/data.csv");
 
 For small datasets, embedding data directly as C# collections is simplest. For larger datasets, use CsvHelper or similar libraries.
 
-## How do I create a horizontal layout with items spaced between (like CSS justify-content: space-between)?
-
-Instead, use a `Spacer` with `Size.Grow()` to push items apart:
-
-```csharp
-Layout.Horizontal().Align(Align.Center)
-    | Text.H1("Title")
-    | new Spacer().Width(Size.Grow())
-    | new Button("Action", handler)
-```
-
-The `Spacer` takes up all remaining space, pushing elements before it to the left and elements after it to the right. You can also use `.Right()` on the layout to align all children to the right:
-
-```csharp
-Layout.Horizontal().Right()
-    | new Button("Right-aligned", handler)
-```
-
-## How do I use UseMutation for async operations in Ivy?
-
-`UseMutation` runs an async function on demand (e.g., when a button is clicked) and tracks loading/error state:
-
-```csharp
-var mutation = UseMutation(async () =>
-{
-    var result = await myService.CallApiAsync(input.Value);
-    output.Set(result);
-});
-
-return Layout.Vertical()
-    | input.ToTextInput().Placeholder("Enter input")
-    | new Button("Submit", mutation.Trigger).Loading(mutation.IsLoading)
-    | (mutation.Error != null ? Callout.Error(mutation.Error.Message) : null)
-    | Text.P(output.Value);
-```
-
-`mutation.Trigger` is the action to invoke. `mutation.IsLoading` indicates if the operation is in progress. `mutation.Error` contains any exception that was thrown.
-
-## How do I use UseQuery to fetch data from a database with Entity Framework in Ivy?
-
-Use `UseQuery` with a `IDbContextFactory<T>` (resolved via `UseService`) to fetch data reactively. Never inject `DbContext` directly — always use a factory. The query re-runs when dependencies change:
-
-```csharp
-var dbFactory = UseService<IDbContextFactory<MyDbContext>>();
-var refreshToken = UseRefreshToken();
-
-var query = UseQuery(async () =>
-{
-    await using var db = await dbFactory.CreateDbContextAsync();
-    return await db.Items.OrderBy(i => i.Name).ToListAsync();
-}, refreshToken);
-
-if (query.Loading) return Text.P("Loading...");
-if (query.Value is not { } items) return Callout.Info("No data.");
-
-return items.ToDataTable();
-```
-
-**Key points:**
-- Always use `IDbContextFactory<T>` — never inject `DbContext` directly. Create a scoped instance with `CreateDbContextAsync()` inside the query lambda and dispose it with `await using`.
-- `UseQuery` returns a `QueryResult<T>` with `.Value`, `.Loading`, `.Error` properties (NOT `.Data` or `.IsLoading`)
-- Pass a `RefreshToken` as a dependency to re-fetch data after mutations
-- Always call `.ToListAsync()` inside the query lambda — do NOT return `IQueryable` directly
-- For mutations (add/edit/delete), use a separate method that creates its own `DbContext` from the factory, calls `db.SaveChangesAsync()`, then `refreshToken.Refresh()`
-
 ## How do I configure an Ivy project to use local source for the Ivy framework?
 
 To use a local copy of the Ivy framework source code instead of the NuGet package:
@@ -145,30 +44,6 @@ To use a local copy of the Ivy framework source code instead of the NuGet packag
 The project file will use a `<ProjectReference>` pointing to the local Ivy.csproj instead of a `<PackageReference>`. This is useful for developing and debugging the Ivy framework itself.
 
 **Important:** Do NOT use direct DLL references (`<Reference Include="Ivy"><HintPath>...</HintPath></Reference>`) — this will fail because transitive NuGet dependencies (Microsoft.Extensions, System.Reactive, etc.) won't be resolved.
-
-## How do I create a Callout or info/warning/error message box in Ivy?
-
-Use the static factory methods on `Callout`:
-
-```csharp
-Callout.Info("No items found.")
-Callout.Warning("This action cannot be undone.")
-Callout.Error("Something went wrong.")
-Callout.Success("Operation completed!")
-```
-
-## How do I handle enter key press on a TextInput?
-
-Single-line TextInputs automatically blur when the user presses Enter, so use `HandleBlur` to react to the Enter key:
-
-```csharp
-var input = UseState("");
-input.ToTextInput()
-    .Placeholder("Type and press Enter")
-    .HandleBlur(() => DoSomething(input.Value))
-```
-
-`HandleBlur` takes an `Action` that is invoked when the input loses focus — which happens automatically on Enter for single-line text inputs.
 
 ## How do I show streaming text from an API (e.g., OpenAI) in Ivy?
 
@@ -206,266 +81,41 @@ return Layout.Vertical()
 
 Each `state.Set()` call triggers a re-render, so the UI updates incrementally as chunks arrive. Use `UseMutation` if you want built-in loading/error tracking for non-streaming async operations instead.
 
-## How do I handle row actions on a DataTable?
+## How do I use HttpClient in an Ivy app?
 
-Use `.RowActions()` to define actions and `.OnRowAction()` to handle clicks:
+For simple HTTP requests, create an `HttpClient` instance directly:
 
 ```csharp
-items.ToDataTable()
-    .RowActions(
-        new RowAction("edit", "Edit", Icons.Pencil),
-        new RowAction("delete", "Delete", Icons.Trash2))
-    .OnRowAction("edit", e => EditItem(e.Value))
-    .OnRowAction("delete", async e => await DeleteItem(e.Value))
+var client = new HttpClient();
+var response = await client.GetAsync(url);
 ```
 
-## What namespace are Ivy types in? (MetricView, charts, DataTable, ViewBase, IState, etc.)
-
-All Ivy types are in the root `Ivy` namespace. There are no sub-namespaces. You only need:
+For apps that need a shared HttpClient with DI, register it through the server in Program.cs:
 
 ```csharp
-using Ivy;
+server.Services.AddHttpClient<MyService>();
 ```
 
-This single using statement gives you access to everything: `ViewBase`, `IState<T>`, `MetricView`, `MetricRecord`, chart views (`LineChartView`, `PieChartView`, `BarChartView`, `AreaChartView`), `DataTable`, `DataTableBuilder<T>`, layout helpers (`Layout.Vertical()`, `Layout.Horizontal()`), `Button`, `TextInput`, all input types, `Card`, `Dialog`, `Sheet`, `Tab`, `Icons`, `RefreshToken`, `IClientProvider`, `IBladeService`, `IConnection`, `IHaveSecrets`, and all other framework types.
+Then access it via `UseService<MyService>()` in your app. Do NOT use `services.AddHttpClient()` directly — use `server.Services`.
 
-**Do NOT use sub-namespaces** like `Ivy.Views.Dashboards`, `Ivy.Widgets.DataTables`, `Ivy.Client`, `Ivy.Hooks`, `Ivy.Services`, or `Ivy.Apps`. These do not exist — the framework source code organizes files in subdirectories but all types use `namespace Ivy;`.
+## How do I get a display name or description from an enum value?
 
-Ivy projects include `<ImplicitUsings>enable</ImplicitUsings>` plus a global using for the project's own namespace, so typically the only explicit using you need is `using Ivy;` and `using Microsoft.EntityFrameworkCore;` (for database connections).
+**For dropdowns and selects:** Ivy handles this automatically. When you pass an enum type to a `Select` or `RadioGroup`, `ToOptions()` reads `[Description]` attributes and falls back to splitting PascalCase names. No extra code needed.
 
-## What are the available ButtonVariant values in Ivy?
-
-`ButtonVariant` has these values: `Primary`, `Destructive`, `Outline`, `Secondary`, `Success`, `Warning`, `Info`, `Ghost`, `Link`, `Inline`, `Ai`.
-
-Set via the `.Variant()` method or shortcut methods:
+**For displaying enum values as text:** Use the built-in `GetDescription()` extension method:
 
 ```csharp
-new Button("Save", handler).Variant(ButtonVariant.Primary)
-// or use shortcut:
-new Button("Save", handler).Primary()
+using System.ComponentModel;
 
-// Other shortcuts: .Secondary(), .Outline(), .Destructive(), .Ghost(), .Link(), .Inline(), .Ai()
-```
-
-**Important:** There is no `ButtonVariant.Default`. Use `ButtonVariant.Primary` instead.
-
-## How do I create an Ivy App with the [App] attribute?
-
-The `[App]` attribute marks a class as an Ivy application. Key parameters:
-
-```csharp
-[App(
-    title: "My App",           // Display name (optional, defaults to class name)
-    icon: Icons.Layout,        // Icon from the Icons enum (optional)
-    path: ["Category"],        // Navigation path/group (optional, array of strings)
-    description: "My app desc" // Description text (optional)
-)]
-public class MyApp : ViewBase
+public enum Status
 {
-    public override object? Build()
-    {
-        return Text.H1("Hello World");
-    }
-}
-```
-
-**Key points:**
-- The class must inherit from `ViewBase` and override `Build()`
-- `path` controls navigation grouping (e.g., `["Settings", "Advanced"]` creates nested groups)
-- `icon` uses the `Icons` enum (e.g., `Icons.Settings`, `Icons.Users`, `Icons.Database`)
-- All parameters are optional — `[App]` with no arguments is valid
-- Other parameters: `id`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`
-
-## How do I show an alert dialog to the user?
-
-Use the `UseAlert` hook, which returns a tuple of `(alertView, showAlert)`:
-
-```csharp
-var (alertView, showAlert) = UseAlert();
-
-return Layout.Vertical()
-    | new Button("Show Alert", _ =>
-        showAlert("Are you sure?", result =>
-        {
-            // result is the AlertResult (Ok, Cancel, Yes, No)
-        }, "Confirmation", AlertButtonSet.OkCancel))
-    | alertView; // IMPORTANT: alertView must be included in the view tree
-```
-
-**Key points:**
-- `UseAlert()` returns a **tuple**, not an object — always destructure it
-- `showAlert` is a delegate: `showAlert(message, callback, title?, buttonSet?)`
-- `alertView` must be rendered somewhere in your view tree for the dialog to appear
-- Available button sets: `AlertButtonSet.Ok`, `AlertButtonSet.OkCancel`, `AlertButtonSet.YesNo`, `AlertButtonSet.YesNoCancel`
-- For simple toast notifications, use `client.Toast("message")` or `client.Error("message")` via `IClientProvider`
-
-## How do I show navigation properties in a DataTable?
-
-`DataTableBuilder` only supports top-level properties of the model type. Nested property access like `p.Author.Username` will throw a `KeyNotFoundException` at runtime because only direct properties are scaffolded as columns.
-
-**Solution:** Project your query into a flat DTO with all needed fields as direct properties:
-
-```csharp
-// BAD - nested property access will fail at runtime
-var posts = db.Posts.Include(p => p.Author).AsQueryable();
-posts.ToDataTable()
-    .Header(p => p.Author.Username, "Author"); // KeyNotFoundException!
-
-// GOOD - project into a flat DTO
-record PostListItem(int Id, string Title, string AuthorName, string Status);
-
-var posts = db.Posts
-    .Include(p => p.Author)
-    .Select(p => new PostListItem(p.Id, p.Title, p.Author.Username, p.Status.ToString()))
-    .AsQueryable();
-
-posts.ToDataTable()
-    .Header(p => p.AuthorName, "Author"); // Works!
-```
-
-This also simplifies the DataTable configuration since you don't need to `.Hidden()` navigation properties or other fields you don't want displayed.
-
-## What are the available BadgeVariant values in Ivy?
-
-The `BadgeVariant` enum has these values: `Primary`, `Destructive`, `Outline`, `Secondary`, `Success`, `Warning`, `Info`.
-
-Usage:
-```csharp
-// Via constructor:
-new Badge("Status", BadgeVariant.Success)
-
-// Via fluent Variant() method:
-new Badge("Status").Variant(BadgeVariant.Warning)
-
-// Via shortcut extension methods:
-new Badge("Status").Success()
-new Badge("Status").Destructive()
-new Badge("Status").Info()
-```
-
-There is no `BadgeVariant.Default`. Use `BadgeVariant.Primary` or omit the variant for the default appearance.
-
-## How do I show a delete confirmation before deleting an entity?
-
-Use `UseAlert()` for confirmation dialogs:
-
-```csharp
-var (alertView, showAlert) = UseAlert();
-var client = UseService<IClientProvider>();
-
-void DeleteItem(int id)
-{
-    showAlert("Are you sure you want to delete this item?", async result =>
-    {
-        if (result == AlertResult.Ok)
-        {
-            await using var db = dbFactory.CreateDbContext();
-            var item = await db.Items.FindAsync(id);
-            if (item != null)
-            {
-                db.Items.Remove(item);
-                await db.SaveChangesAsync();
-                client.Toast("Item deleted");
-                refreshToken.Refresh();
-            }
-        }
-    }, "Confirm Delete", AlertButtonSet.OkCancel);
+    [Description("Not Started")] NotStarted,
+    [Description("In Progress")] InProgress,
+    [Description("At Risk")] AtRisk,
 }
 
-return Layout.Vertical()
-    | new Button("Delete", _ => DeleteItem(itemId)).Destructive()
-    | alertView; // IMPORTANT: must include alertView in the view tree
+// Usage:
+Text.P(status.GetDescription()) // "Not Started"
 ```
 
-## How do I create a simple Table with headers and rows in Ivy?
-
-For simple tabular display, use `.ToTable()` on a collection of records:
-
-```csharp
-var data = new[]
-{
-    new { Name = "Alice", Age = 30, City = "NYC" },
-    new { Name = "Bob", Age = 25, City = "LA" },
-};
-return data.ToTable();
-```
-
-For manual Table construction with `TableRow` and `TableCell`:
-
-```csharp
-new Table(
-    new TableRow(new TableCell("Name"), new TableCell("Age")).IsHeader(),
-    new TableRow(new TableCell("Alice"), new TableCell("30")),
-    new TableRow(new TableCell("Bob"), new TableCell("25"))
-)
-```
-
-**Important:** `Table` takes `TableRow[]`, NOT `string[]`. There is no `.Row()` method. For data-heavy tables with sorting, filtering, and pagination, use `.ToDataTable()` on `IQueryable<T>` instead.
-
-## How do I create a circular shape or circle in Ivy?
-
-There is no dedicated Shape or Circle widget. Use a `Box` with `BorderRadius.Full` and equal width and height to create a circle:
-
-```csharp
-// A colored circle
-new Box()
-    .Color(Colors.Primary)
-    .Width(Size.Px(36))
-    .Height(Size.Px(36))
-    .BorderRadius(BorderRadius.Full)
-
-// A circle with content centered inside
-new Box(Text.P("A"))
-    .Color(Colors.Slate)
-    .Width(Size.Px(48))
-    .Height(Size.Px(48))
-    .ContentAlign(Align.Center)
-    .BorderRadius(BorderRadius.Full)
-```
-
-`BorderRadius.Full` makes the box fully rounded. When width and height are equal, this produces a perfect circle. Use `BorderRadius.Rounded` for rounded corners instead.
-
-## How do I change the size of an Icon?
-
-Use the `.Small()` or `.Large()` extension methods:
-
-```csharp
-new Icon(Icons.Star).Small()   // small icon
-new Icon(Icons.Star)            // default size
-new Icon(Icons.Star).Large()   // large icon
-```
-
-**Important:** There is no `.WithIconSize()` method or `IconSize` enum. Use the simple `.Small()` and `.Large()` fluent modifiers.
-
-## How do I change the font size of text?
-
-Use the `.Large()`, `.Medium()`, or `.Small()` modifiers on any `TextBuilder`:
-
-```csharp
-Text.P("Large text").Large()
-Text.P("Normal text").Medium()
-Text.P("Small text").Small()
-Text.P("Small muted text").Small().Muted()
-```
-
-These modifiers work with all text factory methods (`Text.P()`, `Text.H1()`, `Text.Block()`, `Text.Label()`, etc.). **Important:** There is no `.WithFontSize()` method or `FontSize` enum.
-
-## How do I format a NumberInput as currency, percent, or decimal?
-
-Use the `.FormatStyle()` fluent method with the `NumberFormatStyle` enum:
-
-```csharp
-var price = UseState(99.99m);
-var taxRate = UseState(0.08);
-
-// Currency formatting
-price.ToNumberInput().FormatStyle(NumberFormatStyle.Currency).Currency("USD")
-
-// Percent formatting
-taxRate.ToNumberInput().FormatStyle(NumberFormatStyle.Percent)
-
-// Decimal formatting (default)
-price.ToNumberInput().FormatStyle(NumberFormatStyle.Decimal)
-```
-
-Available `NumberFormatStyle` values: `Decimal` (default), `Currency`, `Percent`. For currency inputs, the recommended state type is `decimal`. Use `.Currency("USD")` to specify the currency code.
+`GetDescription()` reads the `[Description]` attribute if present, otherwise splits PascalCase automatically (e.g., `NotStarted` → `"Not Started"`).

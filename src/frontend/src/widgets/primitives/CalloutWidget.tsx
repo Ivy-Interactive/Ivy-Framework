@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 import React from 'react';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface CalloutWidgetProps {
   id: string;
   title?: string;
@@ -16,7 +18,7 @@ interface CalloutWidgetProps {
   events?: string[];
 }
 
-const calloutVariants = {
+const calloutVariant = {
   Info: {
     container:
       'border-cyan/20 bg-cyan/5 text-foreground dark:border-cyan/30 dark:bg-cyan/10',
@@ -54,7 +56,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   icon,
   width,
   height,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
   const showCloseButton = events.includes('OnClose');
@@ -69,7 +71,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   }
 
   const variantKey = variant || 'Info';
-  const variantStyles = calloutVariants[variantKey];
+  const variantStyles = calloutVariant[variantKey];
 
   return (
     <div

@@ -16,6 +16,7 @@ import {
   TooltipWidget,
   PaginationWidget,
 } from '@/widgets';
+import { BreadcrumbsWidget } from '@/widgets/breadcrumbs';
 import { BladeContainerWidget, BladeWidget } from '@/widgets/blades';
 import { DetailsWidget, DetailWidget } from '@/widgets/details';
 import {
@@ -82,6 +83,7 @@ import {
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
 import React from 'react';
+import { SmartSearch } from '@/docs-internal/SmartSearch';
 
 export const widgetMap = {
   $loading: LoadingScreen,
@@ -132,6 +134,7 @@ export const widgetMap = {
   'Ivy.Card': CardWidget,
   'Ivy.Sheet': SheetWidget,
   'Ivy.Badge': BadgeWidget,
+  'Ivy.Breadcrumbs': BreadcrumbsWidget,
   'Ivy.Expandable': ExpandableWidget,
   'Ivy.Chat': ChatWidget,
   'Ivy.ChatMessage': ChatMessageWidget,
@@ -229,7 +232,7 @@ export const widgetMap = {
   ),
 
   // Internal
-
+  'Ivy.Docs.Shared.Internal.SmartSearch': SmartSearch,
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')
   ),

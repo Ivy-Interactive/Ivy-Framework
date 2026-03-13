@@ -7,11 +7,13 @@ import React, { useMemo, useState } from 'react';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import {
-  colorInputVariants,
-  colorInputPickerVariants,
-} from '@/components/ui/input/color-input-variants';
-import { Scales } from '@/types/scale';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
+  colorInputVariant,
+  colorInputPickerVariant,
+} from '@/components/ui/input/color-input-variant';
+import { Densities } from '@/types/density';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
+
+const EMPTY_ARRAY: never[] = [];
 
 interface ColorInputWidgetProps {
   id: string;
@@ -23,8 +25,9 @@ interface ColorInputWidgetProps {
   nullable?: boolean;
   events?: string[];
   variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch';
-  scale?: Scales;
+  density?: Densities;
   foreground?: boolean;
+  ghost?: boolean;
   allowAlpha?: boolean;
 }
 
@@ -146,7 +149,7 @@ interface AlphaSliderProps {
   alpha: number;
   onChange: (alpha: number) => void;
   disabled?: boolean;
-  scale?: Scales;
+  density?: Densities;
 }
 
 const AlphaSlider: React.FC<AlphaSliderProps> = ({
@@ -154,14 +157,15 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
   alpha,
   onChange,
   disabled = false,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const [localAlpha, setLocalAlpha] = useState<number | null>(null);
   if (localAlpha !== null && alpha === localAlpha) {
     setLocalAlpha(null);
   }
   const displayAlpha = localAlpha ?? alpha;
-  const height = scale === Scales.Small ? 24 : scale === Scales.Large ? 36 : 30;
+  const height =
+    density === Densities.Small ? 24 : density === Densities.Large ? 36 : 30;
   const percentage = Math.round((displayAlpha / 255) * 100);
 
   const gradientStyle: React.CSSProperties = useMemo(
@@ -224,6 +228,54 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
   );
 };
 
+interface CustomColorPickerProps {
+  density: Densities;
+  disabled: boolean;
+  invalid?: string;
+  displayColor: string;
+  actualColor: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const CustomColorPicker: React.FC<CustomColorPickerProps> = ({
+  density,
+  disabled,
+  invalid,
+  displayColor,
+  actualColor,
+  onChange,
+}) => (
+  <div
+    className={cn(
+      colorInputPickerVariant({ density }),
+      'relative shrink-0 rounded-md overflow-hidden bg-transparent border',
+      disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+      invalid ? inputStyles.invalidInput : 'border-input shadow-sm'
+    )}
+  >
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        backgroundImage:
+          'repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)',
+        backgroundSize: '12px 12px',
+      }}
+    />
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{ backgroundColor: actualColor || 'transparent' }}
+    />
+    <input
+      type="color"
+      value={displayColor}
+      onChange={onChange}
+      disabled={disabled}
+      title="Choose color"
+      className="absolute w-[200%] h-[200%] top-[-50%] left-[-50%] opacity-0 cursor-pointer disabled:cursor-not-allowed"
+    />
+  </div>
+);
+
 export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   id,
   value,
@@ -231,9 +283,10 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   invalid,
   placeholder,
   nullable = false,
-  events = [],
+  events = EMPTY_ARRAY,
   variant = 'TextAndPicker',
-  scale = Scales.Medium,
+  density = Densities.Medium,
+  ghost = false,
   allowAlpha = false,
 }) => {
   const eventHandler = useEventHandler();
@@ -394,8 +447,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             }
             disabled={disabled}
             className={cn(
-              colorInputVariants({ scale }),
-              'border-none shadow-none focus-visible:ring-0',
+              colorInputVariant({ density }),
+              ghost &&
+                'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
               invalid && inputStyles.invalidInput,
               (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
             )}
@@ -430,7 +484,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             alpha={currentAlpha}
             onChange={handleAlphaChange}
             disabled={disabled}
-            scale={scale}
+            density={density}
           />
         )}
       </div>
@@ -457,27 +511,21 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   if (variant === 'Picker') {
     return (
       <div className="flex items-center space-x-2">
-        <div className="relative">
-          <input
-            type="color"
-            value={getDisplayColor()}
-            onChange={handleColorChange}
-            disabled={disabled}
-            className={cn(
-              colorInputPickerVariants({ scale }),
-              'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
-              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-              invalid && inputStyles.invalidInput
-            )}
-          />
-        </div>
+        <CustomColorPicker
+          density={density}
+          disabled={disabled}
+          invalid={invalid}
+          displayColor={getDisplayColor()}
+          actualColor={convertToHex(displayValue)}
+          onChange={handleColorChange}
+        />
         {allowAlpha && (
           <AlphaSlider
             color={getDisplayColor()}
             alpha={currentAlpha}
             onChange={handleAlphaChange}
             disabled={disabled}
-            scale={scale}
+            density={density}
           />
         )}
       </div>
@@ -487,20 +535,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   // Default: TextAndPicker
   return (
     <div className="flex items-center space-x-2">
-      <div className="relative">
-        <input
-          type="color"
-          value={getDisplayColor()}
-          onChange={handleColorChange}
-          disabled={disabled}
-          className={cn(
-            colorInputPickerVariants({ scale }),
-            'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
-            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-            invalid && inputStyles.invalidInput
-          )}
-        />
-      </div>
+      <CustomColorPicker
+        density={density}
+        disabled={disabled}
+        invalid={invalid}
+        displayColor={getDisplayColor()}
+        actualColor={convertToHex(displayValue)}
+        onChange={handleColorChange}
+      />
       <div className="relative">
         <Input
           type="text"
@@ -514,8 +556,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           }
           disabled={disabled}
           className={cn(
-            colorInputVariants({ scale }),
-            'border-none shadow-none focus-visible:ring-0',
+            colorInputVariant({ density }),
+            ghost &&
+              'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
             invalid && inputStyles.invalidInput,
             (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
           )}
@@ -537,7 +580,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                 onClick={handleClear}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ density })} />
               </button>
             )}
           </div>
@@ -549,7 +592,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           alpha={currentAlpha}
           onChange={handleAlphaChange}
           disabled={disabled}
-          scale={scale}
+          density={density}
         />
       )}
     </div>

@@ -141,13 +141,5 @@ public static class ReadOnlyInputExtensions
         return widget.OnBlur<T>(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
-    public static IAnyReadOnlyInput Value<T>(this IAnyReadOnlyInput widget, T value)
-    {
-        if (widget is ReadOnlyInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not ReadOnlyInput<{typeof(T).Name}>");
-    }
 
 }

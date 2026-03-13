@@ -18,20 +18,22 @@ import {
 import { getChartThemeColors } from './styles';
 import { LineChartWidgetProps, ChartType } from './chartTypes';
 
+const EMPTY_ARRAY: never[] = [];
+
 const LineChartWidget: React.FC<LineChartWidgetProps> = ({
-  data = [],
+  data = EMPTY_ARRAY,
   width = 'Full',
   height = 'Full',
-  lines = [],
+  lines = EMPTY_ARRAY,
   cartesianGrid,
-  xAxis = [],
-  yAxis = [],
+  xAxis = EMPTY_ARRAY,
+  yAxis = EMPTY_ARRAY,
   tooltip,
   legend,
   toolbox,
-  referenceLines = [],
-  referenceAreas = [],
-  referenceDots = [],
+  referenceLines = EMPTY_ARRAY,
+  referenceAreas = EMPTY_ARRAY,
+  referenceDots = EMPTY_ARRAY,
   colorScheme = 'Default',
 }) => {
   // Use enhanced theme hook with automatic monitoring

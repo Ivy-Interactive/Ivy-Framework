@@ -53,7 +53,7 @@ public class FieldApp : SampleBase
 
                 // Checkbox wrapped with .WithField()
                 | acceptedTerms.ToSelectInput(options.ToOptions())
-                                .Variant(SelectInputVariants.List)
+                                .Variant(SelectInputVariant.List)
                     .WithField()
                     .Label("Accept Terms & Conditions")
                     .Description("You must accept to continue")
@@ -78,6 +78,24 @@ public class FieldApp : SampleBase
                     .Invalid("Must be numeric")
                     .WithField()
                     .Label("Invalid Example")
+
+                | new Spacer().Height(Size.Units(6))
+                | Text.H3("Horizontal Labels")
+
+                // Horizontal label using .LabelPosition
+                | emailState.ToTextInput()
+                    .Variant(TextInputVariant.Email)
+                    .WithField()
+                    .Label("Work Email")
+                    .LabelPosition(LabelPosition.Left)
+                    .Description("We'll send updates here")
+                    .Required()
+
+                // Horizontal password field
+                | passwordState.ToPasswordInput()
+                    .WithField()
+                    .Label("App Password")
+                    .LabelPosition(LabelPosition.Left)
             )
             .Width(Size.Units(120).Max(500))
 

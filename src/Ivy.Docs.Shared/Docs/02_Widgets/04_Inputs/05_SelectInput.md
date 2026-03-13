@@ -28,7 +28,7 @@ public class SelectVariantDemo : ViewBase
     {
         var favLang = UseState("C#");
         return favLang.ToSelectInput(["C#", "Java", "Go", "JavaScript", "F#", "Kotlin", "VB.NET", "Rust"])
-                         .Variant(SelectInputVariants.Select)
+                         .Variant(SelectInputVariant.Select)
                          .WithField()
                          .Label("Select your favourite programming language")
                          .Width(Size.Full());
@@ -66,18 +66,18 @@ public class MultiSelectDemo : ViewBase
         var intOptions = new[] { 1, 2, 3, 4, 5 }.ToOptions();
         
         return Layout.Vertical()
-            | Text.InlineCode("Select Variant (Enum)")
+            | Text.Monospaced("Select Variant (Enum)")
             | languagesSelect.ToSelectInput(languageOptions)
-                .Variant(SelectInputVariants.Select)
+                .Variant(SelectInputVariant.Select)
                 .Placeholder("Choose languages...")
             
-            | Text.InlineCode("List Variant (String Array)")
+            | Text.Monospaced("List Variant (String Array)")
             | stringArray.ToSelectInput(stringOptions.ToOptions())
-                .Variant(SelectInputVariants.List)
+                .Variant(SelectInputVariant.List)
             
-            | Text.InlineCode("Toggle Variant (Integer Array)")
+            | Text.Monospaced("Toggle Variant (Integer Array)")
             | intArray.ToSelectInput(intOptions)
-                .Variant(SelectInputVariants.Toggle);
+                .Variant(SelectInputVariant.Toggle);
     }
 }
 ```
@@ -224,7 +224,7 @@ public class SelectionLimitsDemo : ViewBase
         var colors = UseState<string[]>([]);
         var options = new[] { "Red", "Green", "Blue", "Yellow", "Purple" }.ToOptions();
         return colors.ToSelectInput(options)
-            .Variant(SelectInputVariants.Toggle)
+            .Variant(SelectInputVariant.Toggle)
             .MinSelections(1)
             .MaxSelections(3)
             .Placeholder("Pick 1 to 3 colors")
@@ -265,17 +265,17 @@ public class DisabledOptionsDemo : ViewBase
         };
 
         return Layout.Vertical()
-            | Text.InlineCode("Select Variant")
+            | Text.Monospaced("Select Variant")
             | fruit.ToSelectInput(fruitOptions)
                 .Placeholder("Select a fruit...")
 
-            | Text.InlineCode("Toggle Variant")
+            | Text.Monospaced("Toggle Variant")
             | colors.ToSelectInput(colorOptions)
-                .Variant(SelectInputVariants.Toggle)
+                .Variant(SelectInputVariant.Toggle)
 
-            | Text.InlineCode("List Variant")
+            | Text.Monospaced("List Variant")
             | colors.ToSelectInput(colorOptions)
-                .Variant(SelectInputVariants.List);
+                .Variant(SelectInputVariant.List);
     }
 }
 ```
@@ -338,11 +338,11 @@ public class CoffeeShopDemo: ViewBase
         }
         
         var coffeeSizeMenu = coffeeSize.ToSelectInput(coffeeSizes)
-                                       .Variant(SelectInputVariants.List);
+                                       .Variant(SelectInputVariant.List);
         var availableCondiments = CoffeeAccompaniments[coffee.Value];
         
         var condimentMenu = selectedCondiments.ToSelectInput(availableCondiments.ToOptions())
-            .Variant(SelectInputVariants.Toggle);
+            .Variant(SelectInputVariant.Toggle);
         
         var orderSummary = BuildOrderSummary(coffee.Value, coffeeSize.Value, selectedCondiments.Value);
         

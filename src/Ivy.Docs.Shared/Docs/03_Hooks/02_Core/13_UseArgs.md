@@ -11,12 +11,12 @@ searchHints:
 # UseArgs
 
 <Ingress>
-The `UseArgs` [hook](../01_RulesOfHooks.md) provides access to arguments passed to a [component](../../../01_Onboarding/02_Concepts/02_Views.md), such as route parameters or navigation arguments.
+The `UseArgs` [hook](../02_RulesOfHooks.md) provides access to arguments passed to a [component](../../../01_Onboarding/02_Concepts/02_Views.md), such as route parameters or navigation arguments.
 </Ingress>
 
 ## Overview
 
-The `UseArgs` [hook](../01_RulesOfHooks.md) allows you to access component arguments:
+The `UseArgs` [hook](../02_RulesOfHooks.md) allows you to access component arguments:
 
 - **Navigation Arguments** - Retrieve arguments passed during [navigation](../../../01_Onboarding/02_Concepts/09_Navigation.md)
 - **Type Safety** - Strongly typed argument access with compile-time checking

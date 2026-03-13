@@ -24,48 +24,48 @@ Here's a simple example of a `FeedbackInput` with the default `Stars` variant:
 
 ```csharp demo-below
 public class BasicFeedbackDemo : ViewBase
-{    
+{
     public override object? Build()
-    {    
+    {
         var rating = UseState(3);
         return new FeedbackInput<int>(rating);
     }
-}    
+}
 ```
 
 ## Variants
 
 `FeedbackInput`s come in several variants to suit different use cases:
- For star style feedback ( 1 star to 5 stars) the variant `FeedbackInputVariants.Stars` should be used.
- For binary style feedback ( yes, no, liked/disliked, recommended/not-recommended) type feedback
- the variant `FeedbackInputVariants.Thumbs` should be used. `FeedbackInputVariants.Emojis` should be used
- for collecting sentiment analysis feedbacks about anything.
+For star style feedback ( 1 star to 5 stars) the variant `FeedbackInputVariant.Stars` should be used.
+For binary style feedback ( yes, no, liked/disliked, recommended/not-recommended) type feedback
+the variant `FeedbackInputVariant.Thumbs` should be used. `FeedbackInputVariant.Emojis` should be used
+for collecting sentiment analysis feedbacks about anything.
 
 ```csharp demo-below
 public class FeedbackDemo : ViewBase
 {
     public override object? Build()
-    {    
-        // Initial guess feedbacks 
+    {
+        // Initial guess feedbacks
         var starFeedback = UseState(3);
         var thumbsFeedback = UseState(true);
         var emojiFeedback = UseState(4);
         return Layout.Vertical()
                 | H3 ("Simple movie review")
                 | new FeedbackInput<bool>(thumbsFeedback)
-                      .Variant(FeedbackInputVariants.Thumbs)
+                      .Variant(FeedbackInputVariant.Thumbs)
                       .WithField()
                       .Label("Did you like the movie ?")
                 | new FeedbackInput<int>(starFeedback)
-                      .Variant(FeedbackInputVariants.Stars)
+                      .Variant(FeedbackInputVariant.Stars)
                       .WithField()
                       .Label("How would you like to rate the movie ?")
                 | new FeedbackInput<int>(emojiFeedback)
-                      .Variant(FeedbackInputVariants.Emojis)
+                      .Variant(FeedbackInputVariant.Emojis)
                       .WithField()
                       .Label("How do you feel after seeing the movie ?");
-    }  
-}    
+    }
+}
 ```
 
 ## Event Handling
@@ -74,9 +74,9 @@ The following example shows how change events can be handled for `FeedbackInput`
 
 ```csharp demo-below
 public class FeedbackHandling: ViewBase
-{    
+{
     public override object? Build()
-    {    
+    {
         var feedbackState = UseState(1);
         var exclamation = UseState("");
         exclamation.Set(feedbackState.Value switch
@@ -89,10 +89,10 @@ public class FeedbackHandling: ViewBase
             5 => "WOW! Would you recommend it?",
             _ => "Invalid rating"
         });
-        return Layout.Vertical() 
+        return Layout.Vertical()
                 | new FeedbackInput<int>(feedbackState)
                 | Text.Block(exclamation);
-    }    
+    }
 }
 ```
 
@@ -104,7 +104,7 @@ public class FeedbackHandling: ViewBase
 public class StyledFeedbackDemo : ViewBase
 {
     public override object? Build()
-    {    
+    {
         var state = UseState(3);
         return Layout.Vertical()
                 | new FeedbackInput<int>(state)
@@ -114,7 +114,7 @@ public class StyledFeedbackDemo : ViewBase
                       .Invalid("Validation error")
                       .WithField().Label("Invalid");
     }
-}        
+}
 ```
 
 <WidgetDocs Type="Ivy.FeedbackInput" ExtensionTypes="Ivy.FeedbackInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/FeedbackInput.cs"/>

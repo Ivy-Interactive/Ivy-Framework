@@ -289,31 +289,31 @@ public class BoxesTest : ViewBase
                 new Card(
                     content: Layout.Vertical()
                         | Text.Label("Box with no explicit width (default)")
-                        | new Box(Text.P(BoxTestContent.LongText)).Color(Colors.Primary)
+                        | new Box(Text.P(BoxTestContent.LongText)).Background(Colors.Primary)
                 ).Title("Card: Box with No Width"),
 
                 new Card(
                     content: Layout.Vertical()
                         | Text.Label("Box with Width(Size.Full())")
-                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Full()).Color(Colors.Primary)
+                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Full()).Background(Colors.Primary)
                 ).Title("Card: Box with Full Width"),
 
                 new Card(
                     content: Layout.Vertical()
                         | Text.Label("Box with Width(Size.Units(80))")
-                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Units(80)).Color(Colors.Primary)
+                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Units(80)).Background(Colors.Primary)
                 ).Title("Card: Box with Units(80)"),
 
                 new Card(
                     content: Layout.Vertical()
                         | Text.Label("Box with Width(Size.Px(400))")
-                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Px(400)).Color(Colors.Primary)
+                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Px(400)).Background(Colors.Primary)
                 ).Title("Card: Box with Px(400)"),
 
                 new Card(
                     content: Layout.Vertical()
                         | Text.Label("Box with Width(Size.Fit())")
-                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Fit()).Color(Colors.Primary)
+                        | new Box(Text.P(BoxTestContent.LongText)).Width(Size.Fit()).Background(Colors.Primary)
                 ).Title("Card: Box with Fit")
             ).Gap(4);
     }

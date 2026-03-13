@@ -28,7 +28,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public IBuilder<TModel> Builder { get; set; } = builder;
         public Type? Type => FieldInfo?.FieldType ?? PropertyInfo?.PropertyType;
         public int Order { get; set; } = order;
-        public string Header { get; set; } = Utils.LabelFor(name, fieldInfo?.FieldType ?? propertyInfo?.PropertyType);
+        public string Header { get; set; } = StringHelper.LabelFor(name, fieldInfo?.FieldType ?? propertyInfo?.PropertyType);
         public string? Description { get; set; }
         public bool Removed { get; set; } = removed;
         private readonly IBuilder<TModel> _initialBuilder = initialBuilder;
@@ -72,7 +72,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 
     private Size? _width;
-    private Scale _scale = Scale.Medium;
+    private Density _density = Density.Medium;
     private readonly IEnumerable<TModel> _records;
     private readonly Dictionary<string, TableBuilderColumn> _columns;
     private readonly BuilderFactory<TModel> _builderFactory;
@@ -99,6 +99,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             .Union(
                 type
                     .GetProperties()
+                    .Where(p => p.GetIndexParameters().Length == 0)
                     .Where(p => p.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
                     .Select(e => new { e.Name, Type = e.PropertyType, FieldInfo = (FieldInfo)null!, PropertyInfo = e })
             )
@@ -163,19 +164,19 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
     public TableBuilder<TModel> Large()
     {
-        _scale = Scale.Large;
+        _density = Density.Large;
         return this;
     }
 
     public TableBuilder<TModel> Small()
     {
-        _scale = Scale.Small;
+        _density = Density.Small;
         return this;
     }
 
     public TableBuilder<TModel> Medium()
     {
-        _scale = Scale.Medium;
+        _density = Density.Medium;
         return this;
     }
 
@@ -188,7 +189,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
     private TableBuilderColumn GetField(Expression<Func<TModel, object>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _columns[name];
     }
 
@@ -245,7 +246,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     {
         foreach (var field in fields)
         {
-            var hint = GetField(field);
+            var name = TypeHelper.GetNameFromMemberExpression(field.Body);
+            if (!_columns.TryGetValue(name, out var hint)) continue;
             hint.Removed = true;
         }
         return this;
@@ -331,7 +333,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         Table RenderTable(TableRow[] tableRows)
         {
             var tableWidth = _width ?? Size.Full();
-            var table = new Table(tableRows).Width(tableWidth).Scale(_scale);
+            var table = new Table(tableRows).Width(tableWidth).Density(_density);
             return table;
         }
 
@@ -354,7 +356,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
             if (!isHeader && isEmptyColumn[index])
             {
-                if (!Utils.IsEmptyContent(content))
+                if (!ValidationHelper.IsEmptyContent(content))
                 {
                     isEmptyColumn[index] = false;
                 }
@@ -425,7 +427,7 @@ public static class TableBuilderFactory
         if (enumerableType != null)
         {
             Type itemType = enumerableType.GetGenericArguments()[0];
-            if (Utils.IsSimpleType(itemType))
+            if (TypeHelper.IsSimpleType(itemType))
             {
                 var items = enumerable.Cast<object>().ToArray();
                 var rows = items.Select(item => new TableRow(new TableCell(item))).ToArray();

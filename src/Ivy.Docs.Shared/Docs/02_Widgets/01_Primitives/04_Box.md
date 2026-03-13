@@ -174,7 +174,7 @@ public class InteractiveBoxView : ViewBase
     {
         var isSelected = selected.Value == label;
         return new Box(label)
-            .Color(isSelected ? Colors.Primary : Colors.Muted)
+            .Background(isSelected ? Colors.Primary : Colors.Muted)
             .BorderThickness(isSelected ? 2 : 1)
             .Hover(CardHoverVariant.Pointer)
             .OnClick(_ => {
@@ -197,16 +197,14 @@ public class ColorExamplesView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(4)
-            | new Box("Primary Color").Color(Colors.Primary).Padding(8);
+            | new Box("Primary Color").Background(Colors.Primary).Padding(8);
     }
 }
 ```
 
 For more colors, see the [Colors](../../04_ApiReference/Ivy/Colors.md) reference.
 
-<WidgetDocs Type="Ivy.Box" ExtensionTypes="Ivy.BoxExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Box.cs"/>
-
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -222,19 +220,19 @@ public class StatusDashboardView : ViewBase
     {
         return Layout.Horizontal().Gap(4)
             | new Box("System Online")
-                .Color(Colors.Green)
+                .Background(Colors.Green)
                 .BorderRadius(BorderRadius.Rounded)
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
             | new Box("Warning: High CPU Usage")
-                .Color(Colors.Yellow)
+                .Background(Colors.Yellow)
                 .BorderStyle(BorderStyle.Dashed)
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
             | new Box("Database Error")
-                .Color(Colors.Red)
+                .Background(Colors.Red)
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f));
@@ -259,7 +257,7 @@ public class CardLayoutView : ViewBase
     {
         return Layout.Grid().Columns(2).Gap(8)
             | new Box()
-                .Color(Colors.White)
+                .Background(Colors.White)
                 .BorderRadius(BorderRadius.Rounded)
                 .BorderThickness(1)
                 .Padding(12)
@@ -274,7 +272,7 @@ public class CardLayoutView : ViewBase
     {
         var isSelected = selected.Value == label;
         return new Box(label)
-            .Color(isSelected ? Colors.Primary : Colors.Muted)
+            .Background(isSelected ? Colors.Primary : Colors.Muted)
             .BorderThickness(isSelected ? 2 : 1)
             .Hover(CardHoverVariant.Pointer)
             .OnClick(_ => {
@@ -286,6 +284,67 @@ public class CardLayoutView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I create a circular shape or circle in Ivy?
+</Summary>
+<Body>
+
+There is no dedicated Shape or Circle widget. Use a `Box` with `BorderRadius.Full` and equal width and height to create a circle:
+
+```csharp
+// A colored circle
+new Box()
+    .Background(Colors.Primary)
+    .Width(Size.Px(36))
+    .Height(Size.Px(36))
+    .BorderRadius(BorderRadius.Full)
+
+// A circle with content centered inside
+new Box(Text.P("A"))
+    .Color(Colors.Slate)
+    .Width(Size.Px(48))
+    .Height(Size.Px(48))
+    .ContentAlign(Align.Center)
+    .BorderRadius(BorderRadius.Full)
+```
+
+`BorderRadius.Full` makes the box fully rounded. When width and height are equal, this produces a perfect circle. Use `BorderRadius.Rounded` for rounded corners instead.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I apply styling (width, height, color, padding) to Ivy components?
+</Summary>
+<Body>
+
+Ivy uses a fluent API for styling — there is no `.Style()` method for arbitrary CSS. Use the built-in extension methods:
+
+```csharp
+new Box(content)
+    .Width(Size.Px(200))
+    .Height(Size.Px(100))
+    .Background(Colors.Blue)
+    .Padding(16)
+    .Margin(8)
+    .BorderRadius(BorderRadius.Rounded)
+    .BorderStyle(BorderStyle.Solid)
+```
+
+For CSS transforms, rotations, or complex visual effects that can't be expressed with Ivy's styling API, use the `Html` widget with inline styles:
+
+```csharp
+new Html($"<div style='transform: rotate({degrees}deg); width: 100px; height: 2px; background: #000;'></div>")
+    .DangerouslyAllowScripts()
+```
+
+Note: The `Html` widget renders in an iframe. CSS variables like `var(--primary)` do not resolve — use hardcoded color values.
 
 </Body>
 </Details>
