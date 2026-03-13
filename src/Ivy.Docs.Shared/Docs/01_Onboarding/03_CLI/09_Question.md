@@ -2,9 +2,12 @@
 searchHints:
   - mcp
   - question
+  - ask
 ---
 
 # ivy question
+
+> **Alias:** `ivy ask`
 
 <Ingress>
 Query the local context dynamically using integrated Local RAG features specifically tailored to your semantic `ivyVersion`.
@@ -13,6 +16,12 @@ Query the local context dynamically using integrated Local RAG features specific
 The `ivy question` command executes semantic queries across the comprehensive framework knowledge base. When asked "how" to do something or for code examples regarding Ivy internals, the underlying engine cross-references the latest indexed state of `Ivy.Docs.Shared`.
 
 ## Usage
+
+```terminal
+>ivy ask <QUESTION>
+```
+
+Or equivalently:
 
 ```terminal
 >ivy question <QUESTION>
