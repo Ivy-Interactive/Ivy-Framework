@@ -41,6 +41,8 @@ public record StackLayout : WidgetBase<StackLayout>
 
     [Prop] public bool Wrap { get; set; }
 
+    [Prop] public Scroll Scroll { get; set; } = Scroll.None;
+
     [Prop(attached: nameof(StackLayoutExtensions.AlignSelf))] public Align?[] ChildAlignSelf { get; set; } = null!;
 }
 

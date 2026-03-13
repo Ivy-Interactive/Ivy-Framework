@@ -12,7 +12,6 @@ import {
   getMargin,
   getAlignSelf,
 } from '@/lib/styles';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface StackLayoutWidgetProps {
   children: React.ReactNode;
@@ -95,16 +94,6 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     }
     return child;
   });
-
-  if (scroll === 'Auto' || scroll === 'Vertical') {
-    return (
-      <div style={styles}>
-        <ScrollArea className="h-full w-full">
-          <div className="p-4">{wrappedChildren}</div>
-        </ScrollArea>
-      </div>
-    );
-  }
 
   return (
     <div
