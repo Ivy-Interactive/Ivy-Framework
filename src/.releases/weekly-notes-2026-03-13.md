@@ -412,39 +412,13 @@ Layout.Horizontal()
 Control row and column spacing independently in both `StackLayout` and `GridLayout`:
 
 ```csharp
-// StackLayout with different row/column gaps
-Layout.Horizontal()
-    .Wrap()
-    .Gap(rowGap: 2, columnGap: 8)
-    | new Badge("Tight rows")
-    | new Badge("Wide columns")
-    | new Badge("More tags");
-
-// GridLayout with independent gaps
-new GridLayout(new GridDefinition
-{
-    Columns = 3,
-    RowGap = 4,      // Vertical spacing
-    ColumnGap = 8    // Horizontal spacing
-},
-    child1, child2, child3
-);
-
-// GridView with fluent gap methods
 new Grid()
     .Columns("1fr 1fr 1fr")
-    .RowGap(4)       // Set only row gap
-    .ColumnGap(8)    // Set only column gap
+    .RowGap(4)
+    .ColumnGap(8)
     | child1
     | child2
     | child3;
-
-// Or set both gaps at once
-new Grid()
-    .Columns("1fr 1fr")
-    .Gap(4)          // Sets both row and column gap to 4
-    | item1
-    | item2;
 ```
 
 **Wrapping StackLayouts:**
@@ -452,17 +426,6 @@ new Grid()
 `StackLayout` now supports wrapping, eliminating the need for a separate `WrapLayout` widget:
 
 ```csharp
-// Horizontal layout that wraps to new lines
-Layout.Horizontal()
-    .Wrap()
-    .Gap(2)
-    | new Badge("React")
-    | new Badge("Vue")
-    | new Badge("Angular")
-    | new Badge("Svelte")
-    | new Badge("Next.js");
-
-// Vertical layout that wraps to new columns
 Layout.Vertical()
     .Wrap(Orientation.Vertical)
     | Text.Literal("Item 1")
@@ -983,22 +946,6 @@ return selected.ToSelectInput()
     .Variant(SelectInputVariant.Dropdown);
 ```
 
-**Icon-Only Options:**
-
-You can omit labels entirely to create icon-only selects:
-
-```csharp
-// Icon-only toggle buttons
-var theme = UseState("light");
-return theme.ToSelectInput()
-    .Options(new List<SelectOption>
-    {
-        new() { Value = "light", Icon = "sun" },
-        new() { Value = "dark", Icon = "moon" }
-    })
-    .Variant(SelectInputVariant.Toggle);
-```
-
 ## New Features
 
 ### RichTextBlock - Styled Text with Links and Streaming
@@ -1167,33 +1114,9 @@ return isEnabled.ToSwitchInput()
     .Loading(isLoading.Value);
 ```
 
-**Works with all variants:**
-
-```csharp
-// Checkbox variant
-var checkboxValue = UseState(false);
-return checkboxValue.ToBoolInput()
-    .Label("Accept Terms")
-    .Loading(isProcessing.Value);
-
-// Switch variant
-var switchValue = UseState(true);
-return switchValue.ToSwitchInput()
-    .Label("Notifications")
-    .Loading(isUpdating.Value);
-
-// Toggle variant
-var toggleValue = UseState(false);
-return toggleValue.ToToggleInput(Icons.Bell)
-    .Label("Alerts")
-    .Loading(isSaving.Value);
-```
-
----
-
 ### TextInput - OnSubmit Event for Enter Key Handling
 
-The `TextInput` widget now supports an `OnSubmit` event that fires when the user presses Enter in a single-line text input. This enables common interaction patterns like search boxes, quick-add fields, and login forms without requiring a Form wrapper.
+The `TextInput` widget now supports an `OnSubmit` event that fires when the user presses Enter in a single-line text input.
 
 **Basic usage:**
 
@@ -1207,9 +1130,7 @@ return searchQuery.ToTextInput()
 
 ### NumberInput - Prefix and Suffix Support
 
-The `NumberInput` widget now supports `Prefix` and `Suffix` properties, allowing you to display contextual visual cues inside the input field such as currency symbols, unit labels, or icons. This matches the existing pattern on `TextInput` and makes it easier to build forms with clear input context.
-
-**Basic usage with text affixes:**
+The `NumberInput` widget now supports `Prefix` and `Suffix` properties, allowing you to display contextual visual cues inside the input field such as currency symbols, unit labels, or icons.
 
 ```csharp
 var price = UseState(99.99m);
@@ -1219,87 +1140,9 @@ return price.ToNumberInput()
     .Precision(2);
 ```
 
-**Using icons and units:**
-
-```csharp
-var weight = UseState(5.5);
-var temperature = UseState(22);
-
-return Layout.Vertical()
-    | weight.ToNumberInput()
-        .Suffix("kg")
-        .Precision(1)
-        .WithField()
-        .Label("Weight")
-    | temperature.ToNumberInput()
-        .Prefix(Icons.Thermometer)
-        .Suffix("°C")
-        .WithField()
-        .Label("Temperature");
-```
-
-**Complete example:**
-
-```csharp
-public class NumberPrefixSuffixDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var price = UseState(99.99m);
-        var weight = UseState(5.5);
-        var temperature = UseState(22);
-
-        return Layout.Vertical()
-            | price.ToNumberInput()
-                .Prefix("$")
-                .Precision(2)
-                .WithField()
-                .Label("Price")
-            | weight.ToNumberInput()
-                .Suffix("kg")
-                .Precision(1)
-                .WithField()
-                .Label("Weight")
-            | temperature.ToNumberInput()
-                .Prefix(Icons.Thermometer)
-                .Suffix("°C")
-                .WithField()
-                .Label("Temperature");
-    }
-}
-```
-
-**Extension methods:**
-
-Both `Prefix()` and `Suffix()` accept either a `string` or an `Icons` value:
-
-```csharp
-// String prefix/suffix
-numberInput.Prefix("$")
-numberInput.Suffix("kg")
-
-// Icon prefix/suffix
-numberInput.Prefix(Icons.Thermometer)
-numberInput.Suffix(Icons.Calendar)
-```
-
-**Visual styling:**
-
-Prefix and suffix elements appear with a muted background and border separator, clearly distinguishing them from the editable input area while maintaining visual cohesion with the input field.
-
----
-
 ### DateTimeInput - Month, Week, and Year Pickers
 
-The `DateTimeInput` widget now supports three additional variants for selecting time periods: Month, Week, and Year. These variants are perfect for reporting periods, fiscal years, project planning, and any scenario where you need to select a specific time granularity beyond dates and times.
-
-**New Variants:**
-
-- **Month** - Month picker with year navigation; selects the 1st of the chosen month
-- **Week** - Calendar with week numbers; selects the Monday of the chosen week
-- **Year** - Year picker with decade navigation; selects January 1st of the chosen year
-
-**Convenient Extension Methods:**
+The `DateTimeInput` widget now supports three additional variants for selecting time periods: Month, Week, and Year.
 
 ```csharp
 // Month input
@@ -1324,55 +1167,6 @@ return fiscalYear.ToYearInput()
     .Label("Fiscal Year");
 ```
 
-**All Variants Together:**
-
-```csharp
-public class DateTimeVariantsDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var dateState = UseState(DateTime.Today.Date);
-        var timeState = UseState(DateTime.Now);
-        var dateTimeState = UseState(DateTime.Today);
-        var monthState = UseState(DateTime.Today);
-        var weekState = UseState(DateTime.Today);
-        var yearState = UseState(DateTime.Today);
-
-        return Layout.Vertical()
-            | dateState.ToDateInput()
-                .WithField()
-                .Label("Date")
-            | dateTimeState.ToDateTimeInput()
-                .WithField()
-                .Label("DateTime")
-            | timeState.ToTimeInput()
-                .WithField()
-                .Label("Time")
-            | monthState.ToMonthInput()
-                .WithField()
-                .Label("Month")
-            | weekState.ToWeekInput()
-                .WithField()
-                .Label("Week")
-            | yearState.ToYearInput()
-                .WithField()
-                .Label("Year");
-    }
-}
-```
-
-**Use Cases:**
-
-- Monthly billing periods and subscriptions
-- Weekly sprint planning and project timelines
-- Fiscal year selection for financial reports
-- Annual performance reviews and planning cycles
-- Historical data filtering by time period
-
-All variants support the same features as the existing DateTimeInput: nullable values, validation, disabled state, placeholder text, and all standard sizing options (Small, Medium, Large).
-
----
-
 ### Badge - Clickable Badges with OnClick Event
 
 The `Badge` widget now supports click events through the `OnClick` extension methods, enabling interactive badges for common UI patterns like filter chips, tag management, and toggle states.
@@ -1384,51 +1178,9 @@ new Badge("Click Me", icon: Icons.MousePointer)
     .OnClick(_ => client.Toast("Badge clicked!"));
 ```
 
-**Multiple overloads available:**
-
-```csharp
-// Action with Event<Badge> parameter
-new Badge("Filter")
-    .OnClick(e => client.Toast("Badge clicked!"));
-
-// Simple Action
-new Badge("Remove", variant: BadgeVariant.Destructive)
-    .OnClick(() => RemoveItem());
-
-// Async ValueTask
-new Badge("Save")
-    .OnClick(async () => await SaveAsync());
-
-// Async with Event<Badge>
-new Badge("Process")
-    .OnClick(async e => await ProcessAsync());
-```
-
-**Practical example - Filter badges:**
-
-```csharp
-var activeFilters = UseState<List<string>>(new());
-
-return activeFilters.Value
-    .Select(filter =>
-        new Badge(filter, icon: Icons.X, variant: BadgeVariant.Secondary)
-            .OnClick(() => {
-                var updated = activeFilters.Value.Where(f => f != filter).ToList();
-                activeFilters.Set(updated);
-            })
-    )
-    .ToArray();
-```
-
----
-
 ### Box - Interactive Regions with OnClick and Hover Effects
 
 The `Box` widget now supports click events and hover effects, enabling you to create interactive UI regions without using the heavier `Card` widget. This follows the same pattern as `Card`, making it easier to build consistent interactive experiences.
-
-**OnClick Event Handler**
-
-Add click functionality to any Box with multiple overload options:
 
 ```csharp
 var client = UseService<IClientProvider>();
@@ -1436,18 +1188,6 @@ var client = UseService<IClientProvider>();
 // Simple Action
 new Box("Click Me")
     .OnClick(() => client.Toast("Box clicked!"));
-
-// Action with Event<Box> parameter
-new Box("Clickable Region")
-    .OnClick(e => client.Toast("Box clicked!"));
-
-// Async ValueTask
-new Box("Save")
-    .OnClick(async () => await SaveAsync());
-
-// Async with Event<Box>
-new Box("Process")
-    .OnClick(async e => await ProcessAsync());
 ```
 
 **Hover Effects**
@@ -1459,15 +1199,6 @@ Control hover behavior using the `Hover()` extension method with `CardHoverVaria
 new Box("Hover Me")
     .Hover(CardHoverVariant.Pointer)
     .OnClick(() => DoSomething());
-
-// Pointer + translate animation
-new Box("Interactive Card")
-    .Hover(CardHoverVariant.PointerAndTranslate)
-    .OnClick(() => DoSomething());
-
-// No hover effect (default)
-new Box("Static Box")
-    .Hover(CardHoverVariant.None);
 ```
 
 **Grow Extension Method**
@@ -1475,14 +1206,8 @@ new Box("Static Box")
 The `Box` widget now includes a convenient `Grow()` extension method for making boxes expand to fill available width. This is a shorthand for `.Width(Size.Grow())`.
 
 ```csharp
-// Before: using Size.Grow() explicitly
-new Box("Content").Width(Size.Grow());
-
-// After: using the convenient Grow() method
 new Box("Content").Grow();
 ```
-
----
 
 ### Callout - Closable Callouts with OnClose Event
 
@@ -1502,24 +1227,9 @@ return Layout.Vertical().Gap(6)
     | calloutView;
 ```
 
----
-
 ### Card - Disabled State for Preventing Interaction
 
 The `Card` widget now supports a `Disabled` property and extension method to prevent user interaction. When disabled, the card will not trigger `OnClick` events and displays visual feedback (reduced opacity, no hover effects) to indicate its unavailable state.
-
-**Basic usage:**
-
-```csharp
-new Card("This card cannot be clicked.")
-    .Title("Disabled Card")
-    .Description("User interaction is disabled.")
-    .OnClick(_ => client.Toast("This won't fire!"))
-    .Disabled()
-    .Width(Size.Units(100));
-```
-
----
 
 ### FileInput - Minimum File Size Validation
 
@@ -1536,8 +1246,6 @@ var upload = UseUpload(MemoryStreamUploadHandler.Create(file))
 return file.ToFileInput(upload)
     .Placeholder("Min 1 KB, Max 10 MB");
 ```
-
----
 
 ### CodeBlock - Starting Line Number for Code Excerpts
 
@@ -1556,8 +1264,6 @@ new CodeBlock(@"    private static int Calculate(int input)
     .Language(Languages.Csharp);
 ```
 
----
-
 ### Expandable - Icon Support
 
 The `Expandable` widget now supports icons in the header, following the same pattern as `Button` and `Badge` widgets. Icons automatically scale based on the expandable's size (Small/Medium/Large).
@@ -1568,8 +1274,6 @@ The `Expandable` widget now supports icons in the header, following the same pat
 new Expandable("Settings", "Configure your application preferences here.")
     .Icon(Icons.Settings);
 ```
-
----
 
 ### Progress - Indeterminate State for Unknown Progress
 
@@ -1583,8 +1287,6 @@ new Progress()
     .Indeterminate()
     .Goal("Loading...");
 ```
-
----
 
 ### SelectInput - Search, Loading, and Selection Limits
 
@@ -1604,25 +1306,6 @@ return framework.ToSelectInput(options)
     .EmptyMessage("No frameworks found");
 ```
 
-**Loading State**
-
-Show a loading indicator while fetching data:
-
-```csharp
-var isLoading = UseState(true);
-var data = UseState<string[]>([]);
-
-// Fetch data asynchronously
-UseEffect(async () => {
-    data.Set(await FetchDataAsync());
-    isLoading.Set(false);
-});
-
-return data.ToSelectInput()
-    .Loading(isLoading.Value)
-    .Searchable();
-```
-
 **Selection Limits**
 
 Enforce minimum and maximum selection counts for multi-select:
@@ -1636,15 +1319,9 @@ return frameworks.ToSelectInput(options)
     .MaxSelections(3);  // Can't select more than 3
 ```
 
----
-
----
-
 ### SelectInput - Disabled Options
 
-Individual options within a SelectInput can now be disabled using the fluent `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list. This works across all SelectInput variants: Select (dropdown), List (checkboxes), Toggle, Radio, and MultiSelect.
-
-**Basic usage:**
+Individual options within a SelectInput can now be disabled using the fluent `.Disabled()` method on `Option<T>`.
 
 ```csharp
 var fruit = UseState("apple");
@@ -1662,15 +1339,9 @@ return fruit.ToSelectInput(fruitOptions)
     .Placeholder("Select a fruit...");
 ```
 
----
-
 ### SelectInput - Optional Icons and Labels
 
-Select options now support optional icons and labels, making it easier to create visually rich select inputs with icons and allowing icon-only options for compact interfaces.
-
-**Adding Icons to Options:**
-
-You can now add icons to any select option by specifying the `icon` property when creating options manually:
+Select options now support optional icons and labels
 
 ```csharp
 var theme = UseState("light");
@@ -1686,32 +1357,9 @@ return theme.ToSelectInput(themeOptions)
     .Placeholder("Select theme...");
 ```
 
-**Icon-Only Options:**
-
-Labels are now optional - when omitted, the option's value is used as the display text. This is perfect for icon-only interfaces:
-
-```csharp
-var alignment = UseState("left");
-
-var alignmentOptions = new IAnyOption[]
-{
-    new Option<string>(null, "left") { Icon = "align-left" },
-    new Option<string>(null, "center") { Icon = "align-center" },
-    new Option<string>(null, "right") { Icon = "align-right" },
-    new Option<string>(null, "justify") { Icon = "align-justify" },
-};
-
-return alignment.ToSelectInput(alignmentOptions)
-    .Variant(SelectInputVariant.Toggle);
-```
-
----
-
 ### Forms - Auto-Scaffold [AllowedValues] as SelectInput
 
-String and string array properties with the `[AllowedValues]` attribute are now automatically scaffolded as `SelectInput` widgets (single or multi-select) when using `.ToForm()`. This eliminates the need for manual `.Builder()` calls and makes forms more declarative.
-
-**Before (manual Builder required):**
+String and string array properties with the `[AllowedValues]` attribute are now automatically scaffolded as `SelectInput` widgets (single or multi-select) when using `.ToForm()`.
 
 ```csharp
 public class SettingsModel
@@ -1726,51 +1374,13 @@ public class SettingsModel
 public override object? Build()
 {
     var settings = UseState(() => new SettingsModel());
-
-    var themeOptions = new[] { "Light", "Dark", "Auto" }.ToOptions();
-    var interestOptions = new[] { "Technology", "Sports", "Music", "Art", "Travel" }.ToOptions();
-
-    return settings.ToForm()
-        .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions))
-        .Builder(m => m.Interests, s => s.ToSelectInput(interestOptions).List());
-}
-```
-
-**After (automatic scaffolding):**
-
-```csharp
-public class SettingsModel
-{
-    [AllowedValues("Light", "Dark", "Auto")]
-    public string Theme { get; set; } = "Auto";
-
-    [AllowedValues("Technology", "Sports", "Music", "Art", "Travel")]
-    public string[] Interests { get; set; } = [];
-}
-
-public override object? Build()
-{
-    var settings = UseState(() => new SettingsModel());
-
-    // No Builder calls needed - automatically creates SelectInput!
     return settings.ToForm();
 }
 ```
 
-**How it works:**
-
-- `string` properties with `[AllowedValues]` → Single-select dropdown
-- `string[]` properties with `[AllowedValues]` → Multi-select dropdown
-- Respects nullable types and `[Required]` attributes
-- Works seamlessly with other form scaffolding features
-
----
-
 ### Table - Progress Builder for Inline Progress Bars
 
-The `Table` widget now supports rendering numeric values as inline progress bars through the new `Progress()` builder. This enables visual representation of completion percentages, download progress, scores, and other numeric data directly within table cells.
-
-**Basic usage:**
+The `Table` widget now supports rendering numeric values as inline progress bars through the new `Progress()` builder.
 
 ```csharp
 var tasks = new[]
@@ -1784,33 +1394,6 @@ var tasks = new[]
 return tasks.ToTable()
     .Builder(t => t.Progress, f => f.Progress());
 ```
-
-**Fluent API for customization:**
-
-```csharp
-// Auto-color based on percentage thresholds
-tasks.ToTable()
-    .Builder(t => t.Progress, f => f.Progress().AutoColor());
-// Green (≥75%), Yellow (≥50%), Orange (≥25%), Red (<25%)
-
-// Custom range for non-percentage values
-downloads.ToTable()
-    .Builder(d => d.BytesDownloaded, f => f
-        .Progress()
-        .Min(0)
-        .Max(1000000)
-        .AutoColor());
-
-// Format string to show value alongside progress bar
-tasks.ToTable()
-    .Builder(t => t.Progress, f => f.Progress().Format("%d%"));
-
-// Explicit color for all progress bars
-tasks.ToTable()
-    .Builder(t => t.Progress, f => f.Progress().Color(Colors.Blue));
-```
-
----
 
 ### Html - JavaScript Execution with DangerouslyAllowScripts
 
