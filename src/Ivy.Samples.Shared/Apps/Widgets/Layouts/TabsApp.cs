@@ -45,10 +45,10 @@ public class TabsApp : SampleBase
             | Text.H3("Tabs variant")
             | new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
                 tabs.Value.ToArray()
-            ).Variant(TabsVariant.Tabs).Width(width.Value).AddButton("+", OnAddButtonClick)
+            ).Variant(TabsVariant.Tabs).Width(Size.Fraction((float)width.Value)).AddButton("+", OnAddButtonClick)
             | Text.H3("Content variant")
             | new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
                 tabs.Value.ToArray()
-            ).Variant(TabsVariant.Content).Width(width.Value).AddButton("+", OnAddButtonClick);
+            ).Variant(TabsVariant.Content).Width(Size.Fraction((float)width.Value)).AddButton("+", OnAddButtonClick);
     }
 }

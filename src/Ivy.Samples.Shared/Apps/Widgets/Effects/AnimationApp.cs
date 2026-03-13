@@ -23,7 +23,7 @@ public class AnimationApp : SampleBase
     {
         object Create(AnimationType a)
         {
-            return (Layout.Vertical().Width(50)
+            return (Layout.Vertical().Width(Size.Units(50))
                     | Text.InlineCode($"AnimationType.{a.ToString()}")
                     | Icons.Star.ToIcon().Color(Colors.Primary).Large().WithAnimation(a).Duration(5));
         }

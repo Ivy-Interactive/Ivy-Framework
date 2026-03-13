@@ -138,7 +138,7 @@ public class SidebarMenuExample : ViewBase
                 | Text.Lead("My App")
                 | new TextInput(placeholder: "Search...", variant: TextInputVariant.Search),
             sidebarFooter: Layout.Horizontal().Gap(2)
-                | new Avatar("JD").Size(20)
+                | new Avatar("JD").Size(Size.Units(20))
                 | (Layout.Vertical()
                     | Text.P("John Doe").Small()
                     | Text.P("john@example.com").Small().Color(Colors.Gray))

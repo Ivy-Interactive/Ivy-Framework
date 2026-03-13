@@ -29,7 +29,7 @@ public class AllColorsView : ViewBase
             colors.Select(color =>
                 new Box(color.ToString())
                     .Width(Size.Auto())
-                    .Height(10)
+                    .Height(Size.Units(10))
                     .Background(color).BorderRadius(BorderRadius.Rounded)
                     .Padding(3)
                     .ContentAlign(Align.Center)
@@ -52,7 +52,7 @@ public class NeutralColorsView : ViewBase
             neutralColors.Select(color =>
                 new Box(color.ToString())
                     .Width(Size.Auto())
-                    .Height(10)
+                    .Height(Size.Units(10))
                     .Background(color).BorderRadius(BorderRadius.Rounded)
                     .Padding(3)
                     .ContentAlign(Align.Center)
@@ -79,7 +79,7 @@ public class ChromaticColorsView : ViewBase
             chromaticColors.Select(color =>
                 new Box(color.ToString())
                     .Width(Size.Auto())
-                    .Height(10)
+                    .Height(Size.Units(10))
                     .Background(color).BorderRadius(BorderRadius.Rounded)
                     .Padding(3)
                     .ContentAlign(Align.Center)
@@ -102,7 +102,7 @@ public class SemanticColorsView : ViewBase
             semanticColors.Select(color =>
                 new Box(color.ToString())
                     .Width(Size.Auto())
-                    .Height(10)
+                    .Height(Size.Units(10))
                     .Background(color).BorderRadius(BorderRadius.Rounded)
                     .Padding(3)
                     .ContentAlign(Align.Center)
@@ -131,7 +131,7 @@ public class ColorsOnBackgroundsView : ViewBase
                 colors.Select(color =>
                     new Box(color.ToString())
                         .Width(Size.Auto())
-                        .Height(10)
+                        .Height(Size.Units(10))
                         .Background(color).BorderRadius(BorderRadius.Rounded)
                         .Padding(3)
                         .ContentAlign(Align.Center)

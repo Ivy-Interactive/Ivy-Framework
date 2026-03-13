@@ -44,7 +44,7 @@ class HelloApp : ViewBase
         return Layout.Center(
             new Card(
                 Text.P("Hello")
-            ).Width(60)
+            ).Width(Size.Units(60))
         );
     }
 }

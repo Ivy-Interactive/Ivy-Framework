@@ -88,9 +88,9 @@ Control layout dimensions:
 
 ```csharp demo-tabs
 Layout.Horizontal().Gap(4)
-    | (Layout.Vertical().Width(50).Height(20).Background(Colors.Muted).Center()
+    | (Layout.Vertical().Width(Size.Units(50)).Height(Size.Units(20)).Background(Colors.Muted).Center()
         | Text.Label("50 units wide"))
-    | (Layout.Vertical().Width(30).Height(20).Background(Colors.Muted).Center()
+    | (Layout.Vertical().Width(Size.Units(30)).Height(Size.Units(20)).Background(Colors.Muted).Center()
         | Text.Label("30 units"))
 ```
 

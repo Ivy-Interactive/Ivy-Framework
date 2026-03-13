@@ -15,13 +15,13 @@ public class BoxApp : SampleBase
             colors.Select(color =>
                 new Box(color.ToString())
                     .Width(Size.Auto())
-                    .Height(10)
+                    .Height(Size.Units(10))
                     .Background(color).BorderRadius(BorderRadius.Rounded)
                     .Padding(3)
             )
         );
 
-        var box = new Box().Height(10).Width(Size.Fit()).Padding(2);
+        var box = new Box().Height(Size.Units(10)).Width(Size.Fit()).Padding(2);
 
         return Layout.Vertical()
                | Text.H1("Box Widget")
@@ -30,8 +30,8 @@ public class BoxApp : SampleBase
 
                | Text.H2("Width and Height")
                | new DemoView(_ => new Box()
-                   .Height(20)
-                   .Width(20))
+                   .Height(Size.Units(20))
+                   .Width(Size.Units(20)))
 
                | Text.H2("Border Style")
                | new DemoView(_ => box.BorderStyle(BorderStyle.Dotted).Content("BorderStyle.Dotted"))

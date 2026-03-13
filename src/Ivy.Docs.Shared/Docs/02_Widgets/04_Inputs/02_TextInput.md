@@ -81,8 +81,8 @@ public class CaptureAddressDemo: ViewBase
         return new TextInput(address)
                                .Placeholder("Åkervägen 9, \n132 39 Saltsjö-Boo, \nSweden")
                                .Variant(TextInputVariant.Textarea)
-                               .Height(30)
-                               .Width(100)
+                               .Height(Size.Units(30))
+                               .Width(Size.Units(100))
                                .WithField()
                                .Label("Address");         
     }
@@ -332,8 +332,8 @@ public class DataCaptureUsingExtensionDemo: ViewBase
                      .Label("Mobile")
                 | address.ToTextareaInput()
                          .Placeholder("Address Line1\nAddress Line2\nAddress Line 3")
-                         .Height(40)
-                         .Width(100)
+                         .Height(Size.Units(40))
+                         .Width(Size.Units(100))
                          .WithField()
                          .Label("Address")
                 | website.ToUrlInput()

@@ -494,7 +494,7 @@ public class FileInputValidationExample : ViewBase
                | Text.P("Configure and test file upload validation rules including file size limits, file count limits, and accepted file types.")
                | (Layout.Horizontal()
                    | new FileUploadValidationUploader(settings.Value).Key(settings)
-                   | settings.ToForm(submitTitle: "Update").WithLayout().Width(120));
+                   | settings.ToForm(submitTitle: "Update").WithLayout().Width(Size.Units(120)));
     }
 }
 

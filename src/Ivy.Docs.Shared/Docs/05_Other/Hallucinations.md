@@ -452,9 +452,9 @@ new Spacer(4)
 
 **Correct API:**
 ```csharp
-new Spacer().Height(6)
+new Spacer().Height(Size.Units(6))
 // or
-new Spacer().Width(6)
+new Spacer().Width(Size.Units(6))
 ```
 
 Spacer has only a parameterless constructor. Use fluent `.Height()` or `.Width()` to set size.

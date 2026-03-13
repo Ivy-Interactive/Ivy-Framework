@@ -41,9 +41,9 @@ public class StackLayoutExample : ViewBase
 {
     public override object? Build()
     {
-        var box1 = new Box().Background(Colors.Primary).Width(2).Height(2);
-        var box2 = new Box().Background(Colors.Primary).Width(2).Height(2);
-        var box3 = new Box().Background(Colors.Primary).Width(2).Height(2);
+        var box1 = new Box().Background(Colors.Primary).Width(Size.Units(2)).Height(Size.Units(2));
+        var box2 = new Box().Background(Colors.Primary).Width(Size.Units(2)).Height(Size.Units(2));
+        var box3 = new Box().Background(Colors.Primary).Width(Size.Units(2)).Height(Size.Units(2));
         
         return new StackLayout([
             Text.H2("StackLayout Features"),
@@ -65,7 +65,7 @@ public class AdvancedStackLayoutExample : ViewBase
 {
     public override object? Build()
     {
-        var box = new Box().Background(Colors.Primary).Width(2).Height(2);
+        var box = new Box().Background(Colors.Primary).Width(Size.Units(2)).Height(Size.Units(2));
         
         return new StackLayout([
             Text.H2("Advanced StackLayout Features"),

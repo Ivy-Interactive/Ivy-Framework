@@ -106,7 +106,7 @@ public class TextInputApp : SampleBase
                )
                | Text.H3("OnSubmit (press Enter)")
                | new TextInputSubmitDemo()
-               | new Spacer().Height(15)
+               | new Spacer().Height(Size.Units(15))
             ;
     }
 

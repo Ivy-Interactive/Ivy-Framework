@@ -69,7 +69,7 @@ public class MonthlyRevenueTrendView : ViewBase
             new { Month = "Jun", Desktop = 214, Mobile = 45 },
         };
 
-        return new Card().Title("Monthly Revenue Trend").Height("100%")
+        return new Card().Title("Monthly Revenue Trend").Height(Size.Fraction(1))
                 | data.ToLineChart(style: LineChartStyles.Dashboard)
                     .Dimension("Month", e => e.Month)
                     .Measure("Total", e => e.Sum(f => f.Desktop + f.Mobile))
@@ -92,7 +92,7 @@ public class MonthlyRevenueDistributionView : ViewBase
             new { Month = "Jun", Desktop = 214, Mobile = 45 },
         };
 
-        return new Card().Title("Monthly Revenue Distribution").Height("100%")
+        return new Card().Title("Monthly Revenue Distribution").Height(Size.Fraction(1))
                | data.ToAreaChart(style: AreaChartStyles.Dashboard)
                    .Dimension("Month", e => e.Month)
                    .Measure("Desktop", e => e.Sum(f => f.Desktop))
@@ -123,7 +123,7 @@ public class BrowsersView : ViewBase
             new { Name = "Others", Value = 15 }
         };
 
-        return new Card().Title("Browser Composition").Height("100%") | data.ToPieChart(e => e.Name, e => e.Sum(f => f.Value), PieChartStyles.Dashboard);
+        return new Card().Title("Browser Composition").Height(Size.Fraction(1)) | data.ToPieChart(e => e.Name, e => e.Sum(f => f.Value), PieChartStyles.Dashboard);
     }
 }
 
@@ -149,7 +149,7 @@ public class DonutChartWithCustomLabelsView : ViewBase
 
         var totalValue = data.Sum(d => d.Measure);
 
-        return new Card().Title("Donut Chart with Custom Labels").Height("100%")
+        return new Card().Title("Donut Chart with Custom Labels").Height(Size.Fraction(1))
             | new PieChart(data)
                 .Pie(new Pie(nameof(PieChartData.Measure), nameof(PieChartData.Dimension))
                     .InnerRadius("40%")
