@@ -3287,8 +3287,6 @@ public class TestView : ViewBase
 
 This improvement helps developers quickly identify the exact nature of the hook placement issue and understand why hooks must execute in the same order on every render.
 
-
-
 ### Size.Fraction and Size.FractionGap - Decimal/Double Overloads Removed
 
 The `decimal` and `double` overloads for `Size.Fraction()` and `Size.FractionGap()` have been removed to fix ambiguous call compilation errors (CS0121). You must now use `float` values with the `f` suffix.
@@ -3403,6 +3401,3 @@ Ivy apps now bind to `localhost` instead of the wildcard address (`*`), eliminat
 ### Ivy.Desktop Now Available on NuGet
 
 The `Ivy.Desktop` package is now published to NuGet, making it easier to add desktop application support to your Ivy projects.
-
-
-
