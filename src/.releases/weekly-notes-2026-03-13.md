@@ -2842,12 +2842,6 @@ Fixed a compilation error (CS1061) that occurred when using `server.Services.Add
 
 ---
 
-### XAML Builder Sample - StackLayout Gap Property
-
-Fixed incorrect property usage in the XAML Builder sample application where `StackLayout` examples were using a non-existent `Gap` property. The examples now correctly use `RowGap` and `ColumnGap` properties.
-
----
-
 ### Table of Contents - Smooth Scrolling Without Visual Glitches
 
 Fixed visual glitches in the `TableOfContents` widget that would cause incorrect highlighting and "junk" to appear when users scroll quickly through content. The component now uses a debounced update mechanism to ensure smooth, accurate highlighting even during rapid scrolling.
@@ -3409,12 +3403,6 @@ Ivy apps now bind to `localhost` instead of the wildcard address (`*`), eliminat
 ### Ivy.Desktop Now Available on NuGet
 
 The `Ivy.Desktop` package is now published to NuGet, making it easier to add desktop application support to your Ivy projects.
-
----
-
-### XamlBuilder Live Preview Sample
-
-A new interactive sample app has been added to demonstrate the `XamlBuilder` API. This sample provides a live XAML editor with instant preview, making it easy to experiment with XAML-based layouts and learn the XamlBuilder syntax.
 
 
 
