@@ -54,18 +54,6 @@ Layout.Horizontal()
     | new Badge("Angular");
 ```
 
-### TextArea → Textarea API Standardization
-
-The `ToTextAreaInput()` extension method has been renamed to `ToTextareaInput()` to align with HTML standards and framework conventions.
-
-### MultiLine → Multiline Property and Method Rename
-
-The `MultiLine` property and method have been renamed to `Multiline` (lowercase 'l') across `Detail`, `TableCell`, `DetailsBuilder`, and `TableBuilder` for consistency with .NET naming conventions.
-
-### Spacer Default Behavior Change
-
-The `Spacer` widget now defaults to grow behavior (`flex-grow: 1`) without requiring explicit `.Width(Size.Grow())`. A bare `new Spacer()` will automatically fill available space in the parent layout's direction.
-
 ### Button Icon API - Constructor Parameter Removed
 
 The `Button` widget no longer accepts an `icon` constructor parameter. Use the fluent `.Icon()` method instead to add icons to buttons.
@@ -73,23 +61,6 @@ The `Button` widget no longer accepts an `icon` constructor parameter. Use the f
 ```csharp
 // Icon via fluent method
 new Button("Save").Icon(Icons.Save)
-new Button("Hover").Icon(Icons.Info).WithTooltip("This is a tooltip")
-
-// Icon-only button
-new Button().Icon(Icons.Settings).WithTooltip("Open settings")
-```
-
-### Event Handler Naming Standardization
-
-Several event handler methods have been renamed for consistency across the framework, moving from `Handle*` to `On*` naming pattern to better match .NET conventions.
-
-```csharp
-dataTable.OnRowAction("edit", e => EditItem(e.Value))
-new Card("Content").OnClick(() => DoSomething())
-new Tree(items).OnSelect(e => ProcessSelection(e))
-searchQuery.ToSearchInput().OnSubmit(() => PerformSearch())
-tasks.ToKanban().OnMove(moveData => { /* ... */ })
-records.ToTable().OnCellAction(e => e.Name, value => OpenDetails(value))
 ```
 
 ### OAuth Callback URL Path Change
@@ -164,10 +135,6 @@ All input variant enums have been renamed from plural to singular form.
 | `ColorInputVariants` | `ColorInputVariant` |
 | `CodeInputVariants` | `CodeInputVariant` |
 | `BoolInputVariants` | `BoolInputVariant` |
-
-### Namespaces Flattened
-
-Several core types such as `ExternalWidgetAttribute` and `TextAlignment` have been moved to the root `Ivy` namespace.
 
 ### Removal of `.Value()` API from Input Widgets
 
@@ -324,8 +291,6 @@ public class StreamingApp : ViewBase
 ### Async Cleanup in UseEffect with IAsyncDisposable
 
 `UseEffect` now supports asynchronous cleanup through `IAsyncDisposable`.
-
-**Basic Usage:**
 
 ```csharp
 UseEffect(() =>
@@ -574,56 +539,11 @@ server.UseHtmlPipeline(pipeline =>
 
 The pipeline configurator runs after all built-in and custom filters have been added, so `Clear()` removes everything for complete control.
 
-### XamlBuilder: DataPoint Support for Charts
-
-XamlBuilder now supports defining chart data inline using `<DataPoint>` elements.
-
-**Complete Chart Example:**
-
-```csharp
-var xaml = """
-    <LineChart ColorScheme="Default">
-        <LineChart.Data>
-            <DataPoint Month="Jan" Revenue="100" Costs="80" />
-            <DataPoint Month="Feb" Revenue="120" Costs="90" />
-            <DataPoint Month="Mar" Revenue="140" Costs="85" />
-        </LineChart.Data>
-        <LineChart.Lines>
-            <Line DataKey="Revenue" />
-            <Line DataKey="Costs" />
-        </LineChart.Lines>
-        <LineChart.XAxis>
-            <XAxis DataKey="Month" />
-        </LineChart.XAxis>
-    </LineChart>
-    """;
-
-var chart = builder.Build(xaml);
-```
-
 ### Field - Horizontal Label Layout with LabelPosition
 
 The `Field` widget now supports horizontal label layouts where labels appear beside inputs instead of above them.
 
-**New API:**
-
 ```csharp
-public enum LabelPosition
-{
-    Top,   // Default - label above input
-    Left   // Label beside input (horizontal layout)
-}
-```
-
-**Basic Usage:**
-
-```csharp
-// Default - label on top
-var emailField = new Field(
-    new TextInput("Email"),
-    label: "Email Address"
-);
-
 // Horizontal layout - label on left
 var emailField = new Field(
     new TextInput("Email"),
@@ -640,8 +560,6 @@ Forms now support different submit strategies that control when form state is co
 - `OnSubmit` (default) — State is committed only when the submit button is clicked
 - `OnBlur` — State is committed when any field loses focus (submit button hidden)
 - `OnChange` — State is committed on every field value change (submit button hidden)
-
-**Auto-Save Settings Example:**
 
 ```csharp
 public class SettingsPanel : ViewBase
@@ -673,23 +591,6 @@ public class SettingsPanel : ViewBase
 }
 ```
 
-### NumberInput: Min/Max Parameters
-
-`ToNumberInput()` now accepts optional `min` and `max` parameters.
-
-**Basic Usage:**
-
-```csharp
-var price = UseState(0.0);
-
-return price.ToNumberInput()
-    .Min(0)
-    .Max(10000)
-    .Placeholder("Enter price")
-    .WithField()
-    .Label("Product Price");
-```
-
 ### Fluent API Enhancements
 
 Several widgets have received new fluent API extensions:
@@ -707,8 +608,6 @@ Several widgets have received new fluent API extensions:
 
 The `ColorInput` widget now supports transparency with the new `AllowAlpha()` method. When enabled, an opacity slider appears next to the color picker, and colors are stored in `#RRGGBBAA` format (8-digit hex with alpha channel).
 
-**Basic Usage:**
-
 ```csharp
 public class ColorAlphaDemo : ViewBase
 {
@@ -723,46 +622,9 @@ public class ColorAlphaDemo : ViewBase
 }
 ```
 
-### Ghost Styling for Minimal Appearance
-
-Several input widgets (`ColorInput`, `SelectInput`, and `AsyncSelectInput`) now support ghost styling through the `.Ghost()` extension method. Ghost styling removes borders, background fill, and shadows.
-
-**Basic Usage:**
-
-```csharp
-// ColorInput ghost styling
-var themeColor = UseState("#4A90E2");
-return themeColor.ToColorInput().Ghost();
-
-// SelectInput ghost styling
-var colorState = UseState(Colors.Red);
-return colorState.ToSelectInput(typeof(Colors).ToOptions()).Ghost();
-
-// AsyncSelectInput ghost styling
-var categoryState = UseState(default(Guid?));
-return categoryState.ToAsyncSelectInput(QueryCategories, LookupCategory).Ghost();
-```
-
-### Card: Disabled State
-
-The `Card` widget now supports a disabled state to prevent user interaction.
-
-**Basic Usage:**
-
-```csharp
-new Card("This card cannot be clicked.")
-    .Title("Disabled Card")
-    .Description("User interaction is disabled.")
-    .OnClick(_ => client.Toast("This won't fire!"))
-    .Disabled()
-    .Width(Size.Units(100));
-```
-
 ### DetailsBuilder: Custom Field Labels
 
 The `DetailsBuilder` now supports customizing field labels with the new `.Label()` method. By default, `ToDetails()` generates labels from property names using PascalCase splitting (e.g., `NetBurn` becomes "Net Burn"), but you can now override these auto-generated labels with custom text.
-
-**Basic Usage:**
 
 ```csharp
 public record RunwayData(decimal NetBurn, decimal GrossBurn, int Months, DateTime RunwayDate);
@@ -784,53 +646,6 @@ App IDs can now include dots. Previously, app IDs like `app.v2` or `users.profil
 // Version namespacing
 [App(Id = "dashboard.v2")]
 public class DashboardV2 : AppBase { }
-
-// Feature namespacing
-[App(Id = "users.profile")]
-public class UserProfile : AppBase { }
-
-// Domain-style naming
-[App(Id = "com.mycompany.admin")]
-public class AdminApp : AppBase { }
-
-// Multi-level namespacing
-[App(Id = "api.v1.users")]
-public class ApiUsersV1 : AppBase { }
-```
-
-### Progress Builder for Table Cells
-
-The Table widget now supports inline progress bars through the new `Progress()` builder.
-
-**Basic Usage:**
-
-```csharp
-var tasks = new[] {
-    new { Name = "Design Review", Progress = 100 },
-    new { Name = "Implementation", Progress = 75 },
-    new { Name = "Testing", Progress = 45 },
-    new { Name = "Documentation", Progress = 20 }
-};
-
-new Table(tasks)
-    .Builder(t => t.Progress, f => f.Progress());
-```
-
-**Custom Range and Format String:**
-
-Configure custom min/max ranges and display the value alongside the progress bar:
-
-```csharp
-var downloads = new[] {
-    new { File = "report.pdf", Downloaded = 750, Total = 1000 }
-};
-
-new Table(downloads)
-    .Builder(d => d.Downloaded, f => f.Progress()
-        .Min(0)
-        .Max(1000)
-        .AutoColor()
-        .Format("%d bytes"));
 ```
 
 ### Icons in Select Options
@@ -859,8 +674,6 @@ return selected.ToSelectInput()
     .Options(options)
     .Variant(SelectInputVariant.Dropdown);
 ```
-
-## New Features
 
 ### RichTextBlock - Styled Text with Links and Streaming
 
@@ -980,7 +793,7 @@ await Stream(streamId, new TextRun { Content = "world!", Word = true });
 - `TextAlignment` - Control text alignment (Left, Center, Right, Justify)
 - `NoWrap` - Prevent text wrapping
 - `Overflow` - Control overflow behavior
-- `Scale` - Set text size (Small, Large)
+- `Density` - Set text size (Small, Large)
 
 ### ReadOnlyInput - Copy Button and Placeholder Support
 
@@ -1028,26 +841,12 @@ return isEnabled.ToSwitchInput()
 
 The `TextInput` widget now supports an `OnSubmit` event that fires when the user presses Enter in a single-line text input.
 
-**Basic usage:**
-
 ```csharp
 var searchQuery = UseState("");
 
 return searchQuery.ToTextInput()
     .Placeholder("Search...")
-    .HandleSubmit(() => PerformSearch(searchQuery.Value));
-```
-
-### NumberInput - Prefix and Suffix Support
-
-The `NumberInput` widget now supports `Prefix` and `Suffix` properties.
-
-```csharp
-var price = UseState(99.99m);
-
-return price.ToNumberInput()
-    .Prefix("$")
-    .Precision(2);
+    .OnSubmit(() => PerformSearch(searchQuery.Value));
 ```
 
 ### DateTimeInput - Month, Week, and Year Pickers
@@ -1077,41 +876,7 @@ return fiscalYear.ToYearInput()
     .Label("Fiscal Year");
 ```
 
-### Badge - Clickable Badges with OnClick Event
-
-The `Badge` widget now supports click events through the `OnClick` extension method.
-
-**Basic usage:**
-
-```csharp
-new Badge("Click Me", icon: Icons.MousePointer)
-    .OnClick(_ => client.Toast("Badge clicked!"));
-```
-
-### Box - Interactive Regions with OnClick and Hover Effects
-
-The `Box` widget now supports click events and hover effects.
-
-```csharp
-var client = UseService<IClientProvider>();
-
-// Simple Action
-new Box("Click Me")
-    .OnClick(() => client.Toast("Box clicked!"));
-```
-
-**Hover Effects**
-
-Control hover behavior using the `Hover()` extension method with `CardHoverVariant`:
-
-```csharp
-// Pointer cursor only
-new Box("Hover Me")
-    .Hover(CardHoverVariant.Pointer)
-    .OnClick(() => DoSomething());
-```
-
-**Grow Extension Method**
+### Box Grow Extension Method
 
 The `Box` widget now includes a convenient `Grow()` extension method for making boxes expand to fill available width. This is a shorthand for `.Width(Size.Grow())`.
 
@@ -1123,8 +888,6 @@ new Box("Content").Grow();
 
 The `Callout` widget now supports closable behavior through the `OnClose` event handler. When an `OnClose` handler is set, the callout displays a close (X) button in the top-right corner.
 
-**Basic usage with UseTrigger:**
-
 ```csharp
 var (calloutView, showCallout) = UseTrigger((IState<bool> isOpen) =>
     isOpen.Value
@@ -1135,118 +898,6 @@ var (calloutView, showCallout) = UseTrigger((IState<bool> isOpen) =>
 return Layout.Vertical().Gap(6)
     | new Button("Show callout", onClick: _ => showCallout())
     | calloutView;
-```
-
-### Card - Disabled State for Preventing Interaction
-
-The `Card` widget now supports a `Disabled` property and extension method to prevent user interaction. When disabled, the card will not trigger `OnClick` events and displays visual feedback (reduced opacity, no hover effects) to indicate its unavailable state.
-
-### FileInput - Minimum File Size Validation
-
-The `FileInput` widget now supports minimum file size validation through the `MinFileSize` property and extension method.
-
-**Basic usage with UploadContext:**
-
-```csharp
-var file = UseState<FileUpload<byte[]>?>();
-var upload = UseUpload(MemoryStreamUploadHandler.Create(file))
-    .MinFileSize(1024)  // Minimum 1 KB
-    .MaxFileSize(FileSize.FromMegabytes(10));
-
-return file.ToFileInput(upload)
-    .Placeholder("Min 1 KB, Max 10 MB");
-```
-
-### CodeBlock - Starting Line Number for Code Excerpts
-
-The `CodeBlock` widget now supports `StartingLineNumber` to offset line numbering when displaying code excerpts.
-
-**Basic usage:**
-
-```csharp
-new CodeBlock(@"    private static int Calculate(int input)
-    {
-        return input * 2 + 1;
-    }
-}")
-    .ShowLineNumbers()
-    .StartingLineNumber(18)  // Line numbering starts at 18
-    .Language(Languages.Csharp);
-```
-
-### Expandable - Icon Support
-
-The `Expandable` widget now supports icons in the header, following the same pattern as `Button` and `Badge` widgets. Icons automatically scale based on the expandable's size (Small/Medium/Large).
-
-**Basic usage:**
-
-```csharp
-new Expandable("Settings", "Configure your application preferences here.")
-    .Icon(Icons.Settings);
-```
-
-### Progress - Indeterminate State for Unknown Progress
-
-The `Progress` widget now supports an explicit `Indeterminate` property to display an animated progress bar when the completion percentage is unknown.
-
-**Basic usage:**
-
-```csharp
-// Basic indeterminate progress
-new Progress()
-    .Indeterminate()
-    .Goal("Loading...");
-```
-
-### SelectInput - Search, Loading, and Selection Limits
-
-The `SelectInput` widget now supports search functionality, loading states, and selection count limits across all variants (Select, List, and Toggle).
-
-**Search Functionality**
-
-Enable search with customizable search modes:
-
-```csharp
-var framework = UseState<Frameworks?>(null);
-
-return framework.ToSelectInput(options)
-    .Variant(SelectInputVariants.Select)
-    .Searchable()
-    .SearchMode(SearchMode.Fuzzy)  // CaseInsensitive, CaseSensitive, or Fuzzy
-    .EmptyMessage("No frameworks found");
-```
-
-**Selection Limits**
-
-Enforce minimum and maximum selection counts for multi-select:
-
-```csharp
-var frameworks = UseState<Frameworks[]>([Frameworks.React]);
-
-return frameworks.ToSelectInput(options)
-    .Variant(SelectInputVariants.Select)
-    .MinSelections(1)   // Must have at least 1 selected
-    .MaxSelections(3);  // Can't select more than 3
-```
-
-### SelectInput - Disabled Options
-
-Individual options within a SelectInput can now be disabled using the fluent `.Disabled()` method on `Option<T>`.
-
-```csharp
-var fruit = UseState("apple");
-
-var fruitOptions = new IAnyOption[]
-{
-    new Option<string>("Apple", "apple"),
-    new Option<string>("Orange", "orange"),
-    new Option<string>("Grape (Out of Stock)", "grape").Disabled(),
-    new Option<string>("Banana", "banana"),
-    new Option<string>("Mango (Coming Soon)", "mango").Disabled(),
-};
-
-return fruit.ToSelectInput(fruitOptions)
-    .Placeholder("Select a fruit...");
 ```
 
 ### Forms - Auto-Scaffold [AllowedValues] as SelectInput
@@ -1268,167 +919,6 @@ public override object? Build()
     var settings = UseState(() => new SettingsModel());
     return settings.ToForm();
 }
-```
-
-### Html - JavaScript Execution with DangerouslyAllowScripts
-
-The `Html` widget now supports executing JavaScript through the `DangerouslyAllowScripts` extension method. By default, the Html widget sanitizes all content and strips script tags for security. This new option allows you to bypass sanitization when you have complete trust in the HTML source.
-
-**⚠️ Security Warning:** Only use this feature with completely trusted HTML sources. Enabling script execution with untrusted content exposes your application to Cross-Site Scripting (XSS) attacks. **Never use this with user-generated content.**
-
-**Basic usage:**
-
-```csharp
-var htmlWithScript = """
-    <div id="target-div">Loading...</div>
-    <script>
-        document.getElementById('target-div').innerText = 'Script executed successfully!';
-    </script>
-    """;
-
-return new Html(htmlWithScript)
-    .DangerouslyAllowScripts();
-```
-
-- Embedding trusted third-party widgets (analytics, chat, etc.)
-- Rendering HTML from your own backend templates
-- Displaying documentation with interactive code examples
-- Loading content from trusted CMS systems you control
-
-**When NOT to use:**
-
-- User-generated content (comments, forum posts, user profiles)
-- HTML from external APIs you don't control
-- Any content that could be modified by users
-- Dynamic HTML where you're unsure of the source
-
-The method signature supports both explicit and implicit enabling:
-
-```csharp
-new Html(trustedHtml).DangerouslyAllowScripts()       // Enable
-new Html(trustedHtml).DangerouslyAllowScripts(true)   // Enable explicitly
-new Html(trustedHtml).DangerouslyAllowScripts(false)  // Disable (use default sanitization)
-```
-
-### SidebarLayout - Resizable Drag-to-Resize Support
-
-The `SidebarLayout` widget now supports drag-to-resize functionality, allowing users to adjust the sidebar width at runtime by dragging the sidebar border.
-
-**Basic usage:**
-
-```csharp
-return new SidebarLayout(
-    mainContent: new Card("Your main content here").Title("Main Content"),
-    sidebarContent: Layout.Vertical().Gap(2)
-        | Text.P("Sidebar Content")
-        | Text.P("Drag the right edge to resize this sidebar.").Small()
-).Resizable();
-```
-
-**Custom width constraints:**
-
-By default, the sidebar can be resized between 200px and 600px. You can customize these constraints using the `Size` API with `.Min()` and `.Max()`:
-
-```csharp
-return new SidebarLayout(
-    mainContent: new Card("Main content").Title("Content"),
-    sidebarContent: Layout.Vertical().Gap(2)
-        | Text.P("Custom Width Sidebar")
-)
-.Width(Size.Px(250).Min(Size.Px(150)).Max(Size.Px(400)))
-.Resizable();
-```
-
-**Key features:**
-
-- **Mouse drag**: Click and drag the sidebar border to resize
-- **Touch gestures**: Full touch support for mobile and tablet devices
-- **Keyboard navigation**: Use arrow keys on the resize handle for accessibility
-- **Default constraints**: 200px minimum, 600px maximum (customizable)
-- **Smooth animations**: Visual feedback during resize operations
-- **Persistent state**: Width persists during the user's session
-
-### Sheet - Slide from Any Edge with Side API
-
-The `Sheet` widget now supports sliding in from any edge of the screen through the new `Side` API. Previously, sheets could only slide in from the right side—now you can choose from left, right, top, or bottom using the `SheetSide` enum.
-
-**Basic usage:**
-
-```csharp
-// Slide from left
-new Button("Left Menu").WithSheet(
-    () => new Card("Navigation menu").Title("Menu"),
-    title: "Navigation",
-    side: SheetSide.Left
-);
-
-// Slide from right (default)
-new Button("Right Panel").WithSheet(
-    () => new Card("Settings panel").Title("Settings"),
-    title: "Settings",
-    side: SheetSide.Right
-);
-
-// Slide from top
-new Button("Top Notification").WithSheet(
-    () => new Card("Important message").Title("Alert"),
-    title: "Notification",
-    width: Size.Rem(16),  // Controls height for top/bottom
-    side: SheetSide.Top
-);
-
-// Slide from bottom
-new Button("Bottom Menu").WithSheet(
-    () => new Card("Action menu").Title("Actions"),
-    title: "Actions",
-    width: Size.Rem(16),  // Controls height for top/bottom
-    side: SheetSide.Bottom
-);
-```
-
-**Using fluent extension method:**
-
-```csharp
-var isOpen = UseState(false);
-
-return content.ToSheet(isOpen,
-    title: "My Sheet",
-    width: Size.Rem(24),
-    side: SheetSide.Left);
-```
-
-### Separator - Text Alignment Control
-
-The `Separator` widget now supports text alignment for separator labels through the new `TextAlign` property and fluent API. You can position label text at the left, center, or right along the separator line.
-
-**Basic usage:**
-
-```csharp
-// Left aligned label
-new Separator("Left Aligned").TextAlign(TextAlignment.Left);
-
-// Center aligned label (default)
-new Separator("Center Aligned").TextAlign(TextAlignment.Center);
-
-// Right aligned label
-new Separator("Right Aligned").TextAlign(TextAlignment.Right);
-```
-
-### CodeBlock - WrapLines Option for Long Lines
-
-The `CodeBlock` widget now supports a `WrapLines` option that allows long lines to wrap within the code block instead of requiring horizontal scrolling.
-
-**Basic usage:**
-
-```csharp
-var longCode = @"public class VeryLongClassName {
-    public void VeryLongMethodName(string veryLongParameterName, int anotherVeryLongParameterName) {
-        Console.WriteLine(""This is a very long line that will wrap when WrapLines is enabled."");
-    }
-}";
-
-return new CodeBlock(longCode, Languages.Csharp)
-    .WrapLines();
 ```
 
 ### Ivy.Desktop - Run Ivy Apps as Native Desktop Applications
@@ -1459,8 +949,6 @@ var window = new DesktopWindow(server)
 
 The `Server` class now supports extending the default configuration pipeline with external configuration sources through the `UseConfiguration` method. This enables you to add custom configuration providers like Azure Key Vault, AWS Secrets Manager, or any other configuration source while preserving the built-in defaults (environment variables, appsettings.json, user secrets).
 
-**Basic usage:**
-
 ```csharp
 var server = new Server(args);
 
@@ -1470,14 +958,6 @@ server.UseConfiguration(config => {
 ```
 
 ## Improvements
-
-### GridView: Separate RowGap and ColumnGap Methods
-
-GridView now offers granular control over grid spacing with dedicated `RowGap()` and `ColumnGap()` methods. The existing `Gap()` method now sets both row and column gaps simultaneously, while the new methods let you control each axis independently.
-
-### Theme Defaults to System Preference
-
-The framework now defaults to `system` theme instead of `light` theme, automatically respecting users' system-wide dark/light mode preferences.
 
 ### DataTableBuilder - Remove() Method for API Consistency
 
@@ -1492,24 +972,6 @@ The Clerk authentication provider now gracefully handles scenarios where a sessi
 ### WithConfirm: Customizable Button Labels and Destructive Styling
 
 The `WithConfirm` helper method now supports customizable confirm button labels and destructive styling.
-
-### Desktop Apps: Instant Window Display with Loading Screen
-
-Desktop applications now show the window immediately with a clean loading screen.
-
-- The window appears instantly when you launch your app with a light, modern design
-- Light theme with clean colors: `#ffffff` (white background), `#00cc92` (primary green spinner), `#dd5860` (error red)
-- Uses the modern **Geist font** from Vercel for a polished, contemporary look
-- **Smart loading spinner** that only appears after 4 seconds to avoid flickering on fast startups
-- Animated spinner with "Connecting to server..." message once it appears
-- Client-side JavaScript polling checks when the server is ready and automatically navigates to your app
-- 30-second timeout with clear error messaging if the server fails to start
-- Error dialogs also updated to use the light theme and Geist font for a consistent look
-
-**Technical details:**
-The loading page polls the server every 500ms using `fetch()` with `mode: 'no-cors'`. The loading spinner is initially hidden and only becomes visible after 4 seconds of elapsed time to prevent flashing on quick startups. Once the server responds, it automatically redirects to your app URL. If the server doesn't respond within 30 seconds, users see a clear error message.
-
-No code changes needed - this enhancement applies automatically to all Ivy desktop applications.
 
 ### Desktop Apps: Default Ivy Icon for Windows
 
@@ -1646,26 +1108,6 @@ This is particularly useful for:
 
 No code changes needed - this protection applies automatically throughout the framework.
 
-### Badge Hover Effects Only Show for Clickable Badges
-
-Badge widgets now only display hover effects when they're actually clickable.
-
-- Badges without an `OnClick` handler no longer show hover effects (color changes on mouse-over)
-- Clickable badges continue to show hover feedback with a subtle opacity change and pointer cursor
-- The behavior is automatically determined based on whether you've registered a click handler
-
-**Example:**
-
-```csharp
-// Non-clickable badge - no hover effect
-Badge("Status: Active").Variant(BadgeVariant.Success);
-
-// Clickable badge - shows hover effect
-Badge("Click me").OnClick(() => DoSomething());
-```
-
-No code changes needed - this improvement applies automatically to all Badge widgets.
-
 ### SelectInput: Auto-Flip Dropdown Near Viewport Edge
 
 The `SelectInput` dropdown now automatically detects when it would extend beyond the bottom of the viewport and intelligently flips to open upward instead.
@@ -1681,152 +1123,33 @@ No code changes needed - this improvement applies automatically to all SelectInp
 
 The `MetricView` component now colors its progress bar based on achievement percentage.
 
-### ListItem Improved Vertical Spacing
-
-The `ListItem` widget now includes vertical padding for better content spacing.
-
 ### Size.Fraction and Size.FractionGap Now Accept Decimal and Double
 
 The `Size.Fraction()` and `Size.FractionGap()` methods now accept `decimal` and `double` values in addition to `float`.
 
-### Form Submit Strategy Hook Ordering
-
-Fixed a critical bug in `FormBuilder` where changing the form submit strategy at runtime would cause an `InvalidOperationException`. The issue occurred when using `OnBlur` or `OnChange` strategies, as internal hooks were called conditionally, violating hook ordering rules.
-
-### RichTextBlock Stream Subscription Fix
-
-Fixed a bug in `RichTextBlock` where streaming text content would fail to display. The frontend component expected the `stream` property to be a plain string, but the backend serializer was producing an object with an `id` property (`{ id: "..." }`), causing stream subscriptions to silently fail.
-
-### NumberInput Currency Format Default
-
-Fixed a runtime `TypeError` that occurred when using `.FormatStyle(NumberFormatStyle.Currency)` on `NumberInput` without explicitly setting a currency code. The framework now automatically defaults to "USD" when no currency is specified.
-
-### Stream Data Serialization Fix
-
-Fixed a bug where streamed data (like `TextRun` objects in `RichText`) was not properly serialized when sent to the client. Stream data was passed as raw objects through SignalR, bypassing the camelCase naming policy and enum converters used by `WidgetSerializer`, causing property names and enum values to be incorrectly formatted on the client side.
-
-### Stream Data Buffering - Preventing Dropped Messages
-
-Fixed a race condition where `StreamData` messages could be dropped if they arrived before the frontend stream handler was ready. This could happen during React re-render cycles when stream data arrives while the component is still mounting or updating.
-
-### HtmlPipeline XML Parsing Fix for Vite-Generated HTML
-
-Fixed a parsing issue in `HtmlPipeline` where void HTML elements (like `<link>`, `<meta>`, `<br>`, etc.) generated by Vite without self-closing slashes would cause `XDocument.Parse` to fail. While these elements are valid HTML5, XML parsing requires them to be self-closed.
-
-### ClientSender Disposal Race Condition
-
-Fixed a race condition that could occur when a client connection is closed while event handlers are still processing. Previously, the `ClientSender` could be torn down before in-flight event handlers finished executing, potentially causing errors or lost messages during disconnection.
-
-### Chart Toolbox Overlap Fix
-
-Fixed a visual bug where chart content (area charts, bar charts, and line charts) would overlap with the toolbox controls when the toolbox was enabled. The chart grid now properly adjusts its top spacing to accommodate the toolbox.
-
-### Missing HttpClient Dependency Fix
-
-Fixed a compilation error (CS1061) that occurred when using `server.Services.AddHttpClient()`. The Ivy package now includes `Microsoft.Extensions.Http` as a transitive dependency.
-
-### Table of Contents - Smooth Scrolling Without Visual Glitches
-
-Fixed visual glitches in the `TableOfContents` widget that would cause incorrect highlighting and "junk" to appear when users scroll quickly through content. The component now uses a debounced update mechanism to ensure smooth, accurate highlighting even during rapid scrolling.
-
-### `IState<T>.Set(null)` Ambiguity Resolved
-
-Fixed a compiler ambiguity error that occurred when calling `.Set(null)` on state objects with nullable reference types. Previously, passing `null` to `.Set()` would match both the `Set(T value)` and `Set(Func<T,T> setter)` overloads, causing a compilation error.
-
-### Desktop Window Title Default
-
-Fixed the default window title for Ivy desktop applications. Instead of showing a generic "Ivy App" title, desktop windows now automatically display the application's assembly name.
-
-### Hook Usage Analyzer: FuncView and MemoizedFuncView Lambda Support
-
-Fixed the hook usage analyzer (`IVYHOOK001`) to correctly recognize lambdas passed to `FuncView` and `MemoizedFuncView` constructors as valid locations for hooks. Previously, the analyzer would incorrectly flag these as errors, even though these lambdas function as Build methods.
-
-### Chart Legend Title-Casing Fix
-
-Fixed improper capitalization in chart legends when using camelCase property names. The `SplitPascalCase` utility now properly title-cases each word.
-
-### Semantic Color Mapping for Text
-
-Fixed incorrect color mapping when using semantic surface colors (like `Colors.Muted`, `Colors.Background`, `Colors.Card`) for text. These colors were previously mapping to their base CSS variables, resulting in readability and contrast issues.
-
-### SidebarLayout - Respect Open Property on Mount
-
-Fixed a bug in `SidebarLayoutWidget` where the `.Open(false)` property was being overridden by the media query handler on component mount. When a sidebar was explicitly set to closed, the auto-collapse media query would incorrectly force it open if the viewport was wide enough.
-
-### MarkdownRenderer Code Block Borders
-
-Fixed a visual bug in the `MarkdownRenderer` where code blocks were missing their borders. The `ScrollArea` component wrapping the syntax highlighter was missing the border styling classes that were present in the fallback block, causing rendered code blocks to appear without visible borders.
-
-### Desktop Error Dialog Display Fix
-
-Fixed a bug in `Ivy.Desktop` where application error dialogs would display as blank white windows instead of showing the formatted error message and stack trace. The issue was caused by using `LoadRawString()` to load the error HTML, which doesn't render properly in Photino.
-
-- Error dialogs now write HTML to a temporary file and load it via `Load(Uri)` instead of `LoadRawString()`
-- This matches the approach used for the main application window, ensuring consistent rendering
-- Temporary error HTML files are automatically cleaned up after the error dialog closes
-- Error dialogs now correctly display the formatted error message and stack trace
-
-### Desktop WebView2 Blank Window Fix
-
-Fixed a critical bug in `Ivy.Desktop` on Windows where desktop applications using WebView2 would open but display completely blank content. The issue was caused by WebView2's COM message pump requiring Single-Threaded Apartment (STA) threading, which wasn't guaranteed when `DesktopWindow.Run()` was called.
-
-- `DesktopWindow.Run()` now automatically checks the current thread's apartment state on Windows
-- If not already on an STA thread, the window automatically starts on a new STA thread
-- WebView2 now receives the proper threading context it needs for rendering
-- Desktop applications now display content correctly instead of blank windows
-
-### Better Desktop Startup Error Messages
-
-Fixed a bug in `Ivy.Desktop` where server startup failures would display a generic "Unable to connect" error message instead of showing the actual exception that caused the server to fail.
-
-- `CheckIfPortIsListening` now monitors the server task status during port polling
-- If the server task faults during startup, the actual exception is now thrown and displayed
-- Error dialogs now show the real cause of server failures (e.g., port already in use, configuration errors)
-- Unwraps `AggregateException` to expose the underlying startup exception
-
-### Assembly Scanning - Missing Reference Resilience
-
-Fixed a crash that occurred during application startup when the framework scanned assemblies that referenced optional dependencies that weren't deployed. Previously, calling `Assembly.GetTypes()` on assemblies with missing references would throw a `ReflectionTypeLoadException`, causing the entire application to crash.
-
-- Added `GetLoadableTypes()` extension method that gracefully handles missing assembly references
-- Framework now loads only the types that are available, skipping types with unresolved dependencies
-- Applied to all assembly scanning operations: app discovery, external widgets, connections, secret providers, and extension methods
-- Applications no longer crash when optional assemblies like `Ivy.Filters` aren't deployed
-
-### Outline Button Missing Background
-
-Fixed a visual bug where outline variant buttons were missing their background color, causing transparency issues and inconsistent appearance depending on the content behind them.
-
-- Outline buttons now have an explicit `bg-background` color applied
-- Buttons maintain proper opacity and visual consistency across all contexts
-- No more unintended transparency showing through outline buttons
-
-**Example:**
-
-```csharp
-// Outline buttons now have proper background styling
-new Button("Submit")
-    .Variant(ButtonVariant.Outline);
-```
-
-### Semantic Color Text Readability Fix
-
-Fixed a bug where using semantic surface colors (like `Colors.Muted`, `Colors.Background`, `Colors.Card`) as text colors would result in poor readability. These colors are designed as background layers, but when applied to text, they should automatically map to their foreground variants.
-
-- Text colored with `Colors.Muted` now properly uses `--muted-foreground` instead of `--muted`
-- Similarly, `Colors.Background`, `Colors.Card`, `Colors.Popover`, and `Colors.Accent` all map to their foreground variants when used as text color
-- Brand and state colors (`Colors.Primary`, `Colors.Secondary`, `Colors.Destructive`) remain unchanged as their base variables are already intended for text
-- Ensures consistent readability across all semantic color usage
-
-**Example:**
-
-```csharp
-// Now properly maps to readable foreground color
-Text.P("Muted text").Color(Colors.Muted);
-
-// Background colors remain unchanged
-new Box("Content").Background(Colors.Muted);
-```
+- Form Submit Strategy Hook Ordering
+- RichTextBlock Stream Subscription Fix
+- NumberInput Currency Format Default
+- Stream Data Serialization Fix
+- Stream Data Buffering - Preventing Dropped Messages
+- HtmlPipeline XML Parsing Fix for Vite-Generated HTML
+- ClientSender Disposal Race Condition
+- Chart Toolbox Overlap Fix
+- Missing HttpClient Dependency Fix
+- Table of Contents - Smooth Scrolling Without Visual Glitches
+- `IState<T>.Set(null)` Ambiguity Resolved
+- Desktop Window Title Default
+- Hook Usage Analyzer: FuncView and MemoizedFuncView Lambda Support
+- Chart Legend Title-Casing Fix
+- Semantic Color Mapping for Text
+- SidebarLayout - Respect Open Property on Mount
+- MarkdownRenderer Code Block Borders
+- Desktop Error Dialog Display Fix
+- Desktop WebView2 Blank Window Fix
+- Better Desktop Startup Error Messages
+- Assembly Scanning - Missing Reference Resilience
+- Outline Button Missing Background
+- Semantic Color Text Readability Fix
 
 ## Developer Experience Improvements
 
@@ -2120,15 +1443,6 @@ New `Size.Percent()` overloads allow you to specify percentage-based sizes.
 // Integer percentage
 .Width(Size.Percent(50))    // 50% width
 .Height(Size.Percent(100))  // 100% height
-
-// String percentage (useful when parsing from config/user input)
-.Width(Size.Percent("75%"))  // 75% width
-.Height(Size.Percent("33%")) // 33% height
-```
-
-```csharp
-.Width(Size.Percent(50))   // Much clearer intent
-.Height(Size.Percent(100)) // Obvious it's a percentage
 ```
 
 ### Connection Name Error Messages
@@ -2160,4 +1474,3 @@ CLI diagnostic commands (`--describe`, `--describe-connection`, `--test-connecti
 ### Server Binds to Localhost - No More Windows Firewall Prompts
 
 Ivy apps now bind to `localhost` instead of the wildcard address (`*`), eliminating Windows Firewall prompts during development.
-
