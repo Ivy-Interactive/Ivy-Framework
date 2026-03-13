@@ -676,7 +676,7 @@ public class Server
             var localUrl = $"http://localhost:{port}";
             if (!_args.Silent)
             {
-                Console.WriteLine($@"Ivy is running on {localUrl} [{Process.GetCurrentProcess().Id}]. Press Ctrl+C to stop.");
+                Console.WriteLine($@"Ivy is running on {url} [{Process.GetCurrentProcess().Id}]. Press Ctrl+C to stop.");
             }
             if (_args.Browse)
             {
