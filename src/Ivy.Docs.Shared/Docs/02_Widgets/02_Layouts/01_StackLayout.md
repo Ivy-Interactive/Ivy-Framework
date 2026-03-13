@@ -163,22 +163,6 @@ public class AdvancedStackLayoutExample : ViewBase
 }
 ```
 
-## Properties Reference
-
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| Orientation | Orientation | Vertical | Direction of the stack |
-| RowGap | int | 4 | Vertical spacing between elements |
-| ColumnGap | int | 4 | Horizontal spacing between elements |
-| Padding | Thickness? | null | Internal spacing |
-| Margin | Thickness? | null | External spacing |
-| Background | Colors? | null | Background color |
-| Align | Align? | null | Content alignment |
-| Wrap | bool | false | Whether items wrap to next line |
-| Scroll | Scroll | None | Scrollable behavior (Auto, Vertical, Horizontal, Both) |
-| RemoveParentPadding | bool | false | Removes padding from parent layout |
-| .AlignSelf(Align) | Align | — | Child extension: override alignment for a specific child |
-
 <Callout type="info">
 StackLayout is the foundation for most other layout widgets. Understanding its properties will help you master more complex layout systems.
 </Callout>
