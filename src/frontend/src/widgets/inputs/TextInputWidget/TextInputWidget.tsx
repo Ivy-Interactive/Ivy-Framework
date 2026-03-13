@@ -29,6 +29,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   suffix,
   maxLength,
   minLength,
+  pattern,
   rows,
   'data-testid': dataTestId,
 }) => {
@@ -127,6 +128,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       suffix,
       maxLength,
       minLength,
+      pattern,
       rows,
       'data-testid': dataTestId,
     }),
@@ -146,6 +148,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       suffix,
       maxLength,
       minLength,
+      pattern,
       rows,
       dataTestId,
     ]

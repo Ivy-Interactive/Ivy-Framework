@@ -65,6 +65,8 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public int? MinLength { get; set; }
 
+    [Prop] public string? Pattern { get; set; }
+
     [Prop] public int? Rows { get; set; }
 
     [Prop] public bool Nullable { get; set; }
@@ -271,6 +273,8 @@ public static class TextInputExtensions
     public static TextInputBase MaxLength(this TextInputBase widget, int maxLength) => widget with { MaxLength = maxLength };
 
     public static TextInputBase MinLength(this TextInputBase widget, int minLength) => widget with { MinLength = minLength };
+
+    public static TextInputBase Pattern(this TextInputBase widget, string pattern) => widget with { Pattern = pattern };
 
     public static TextInputBase Rows(this TextInputBase widget, int rows) => widget with { Rows = rows };
 
