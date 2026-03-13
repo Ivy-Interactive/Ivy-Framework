@@ -194,8 +194,6 @@ The `Color()` method and property on the `Box` widget have been renamed to `Back
 
 The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been renamed to `Text.Monospaced()` and `TextVariant.Monospaced` to better reflect what they actually do—render text in a monospace font.
 
-
-
 ### Explicit Size API for Width, Height, and Size Methods
 
 The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use `Size.Units()` or `Size.Fraction()` to specify sizing.
@@ -513,8 +511,6 @@ public class MyApp : AppBase
     }
 }
 ```
-
-
 
 ### HtmlPipeline - XDocument-Based Filters and Full Customization
 
@@ -843,8 +839,6 @@ new Table(downloads)
         .Format("%d bytes"));
 ```
 
-
-
 ### Icons in Select Options
 
 Select inputs now support optional icons for each option, making it easier to create visually rich select menus. Additionally, labels are now optional—if omitted, the option value will be displayed instead.
@@ -994,8 +988,6 @@ await Stream(streamId, new TextRun { Content = "world!", Word = true });
 - `Overflow` - Control overflow behavior
 - `Scale` - Set text size (Small, Large)
 
----
-
 ### ReadOnlyInput - Copy Button and Placeholder Support
 
 The `ReadOnlyInput` widget now supports two new fluent extension methods for enhanced functionality:
@@ -1022,8 +1014,6 @@ var result = UseState("");
 return result.ToReadOnlyInput()
     .Placeholder("No data available");
 ```
-
----
 
 ### BoolInput - Loading State Support
 
@@ -1265,8 +1255,6 @@ return fruit.ToSelectInput(fruitOptions)
     .Placeholder("Select a fruit...");
 ```
 
-
-
 ### Forms - Auto-Scaffold [AllowedValues] as SelectInput
 
 String and string array properties with the `[AllowedValues]` attribute are now automatically scaffolded as `SelectInput` widgets (single or multi-select) when using `.ToForm()`.
@@ -1287,8 +1275,6 @@ public override object? Build()
     return settings.ToForm();
 }
 ```
-
-
 
 ### Html - JavaScript Execution with DangerouslyAllowScripts
 
@@ -1329,8 +1315,6 @@ new Html(trustedHtml).DangerouslyAllowScripts()       // Enable
 new Html(trustedHtml).DangerouslyAllowScripts(true)   // Enable explicitly
 new Html(trustedHtml).DangerouslyAllowScripts(false)  // Disable (use default sanitization)
 ```
-
----
 
 ### SidebarLayout - Resizable Drag-to-Resize Support
 
@@ -1376,8 +1360,6 @@ return new SidebarLayout(
 - Dashboards with variable amounts of navigation or filtering content
 - Document editors with collapsible tool panels
 - Admin interfaces with configurable sidebars
-
----
 
 ### Sheet - Slide from Any Edge with Side API
 
@@ -1428,8 +1410,6 @@ return content.ToSheet(isOpen,
     side: SheetSide.Left);
 ```
 
----
-
 ### Separator - Text Alignment Control
 
 The `Separator` widget now supports text alignment for separator labels through the new `TextAlign` property and fluent API. You can position label text at the left, center, or right along the separator line.
@@ -1447,8 +1427,6 @@ new Separator("Center Aligned").TextAlign(TextAlignment.Center);
 new Separator("Right Aligned").TextAlign(TextAlignment.Right);
 ```
 
----
-
 ### CodeBlock - WrapLines Option for Long Lines
 
 The `CodeBlock` widget now supports a `WrapLines` option that allows long lines to wrap within the code block instead of requiring horizontal scrolling. This improves readability when displaying code with long lines in constrained layouts.
@@ -1465,8 +1443,6 @@ var longCode = @"public class VeryLongClassName {
 return new CodeBlock(longCode, Languages.Csharp)
     .WrapLines();
 ```
-
----
 
 ### Ivy.Desktop - Run Ivy Apps as Native Desktop Applications
 
@@ -1492,8 +1468,6 @@ var window = new DesktopWindow(server)
     .Run();
 ```
 
----
-
 ### Server Configuration - External Configuration Providers
 
 The `Server` class now supports extending the default configuration pipeline with external configuration sources through the `UseConfiguration` method. This enables you to add custom configuration providers like Azure Key Vault, AWS Secrets Manager, or any other configuration source while preserving the built-in defaults (environment variables, appsettings.json, user secrets).
@@ -1508,31 +1482,19 @@ server.UseConfiguration(config => {
 });
 ```
 
----
-
 ## Improvements
-
----
 
 ### GridView: Separate RowGap and ColumnGap Methods
 
 GridView now offers granular control over grid spacing with dedicated `RowGap()` and `ColumnGap()` methods. The existing `Gap()` method now sets both row and column gaps simultaneously, while the new methods let you control each axis independently.
 
----
-
 ### Theme Defaults to System Preference
 
 The framework now defaults to `system` theme instead of `light` theme, automatically respecting users' system-wide dark/light mode preferences. Apps will now adapt to the operating system's appearance settings by default, providing a better out-of-the-box experience.
 
----
-
----
-
 ### DataTableBuilder - Remove() Method for API Consistency
 
 The `DataTableBuilder` now supports the `.Remove()` method, bringing it in line with other builders like `FormBuilder`, `TableBuilder`, and `DetailsBuilder`. This method allows you to completely exclude columns from your data tables.
-
----
 
 ### Clerk Auth: Graceful Handling of Existing Sessions
 
@@ -1540,13 +1502,9 @@ The Clerk authentication provider now gracefully handles scenarios where a sessi
 
 - When signing in with a session already active, the provider now attempts to restore and reuse the existing session. If restoration fails, it automatically cleans up stale sessions and retries the sign-in. This eliminates sign-in failures that could occur in edge cases like browser back/forward navigation or concurrent sign-in attempts.
 
----
-
 ### WithConfirm: Customizable Button Labels and Destructive Styling
 
 The `WithConfirm` helper method now supports customizable confirm button labels and destructive styling, making confirmation dialogs more appropriate for delete operations and other critical actions.
-
----
 
 ### Desktop Apps: Instant Window Display with Loading Screen
 
@@ -1563,15 +1521,10 @@ Desktop applications now show the window immediately with a clean loading screen
 - 30-second timeout with clear error messaging if the server fails to start
 - Error dialogs also updated to use the light theme and Geist font for a consistent look
 
-**Impact:**
-Your desktop apps feel significantly more responsive and polished with immediate window display and a professional loading experience. Fast-loading apps won't show unnecessary loading indicators, while slower startups still provide clear feedback to users.
-
 **Technical details:**
 The loading page polls the server every 500ms using `fetch()` with `mode: 'no-cors'`. The loading spinner is initially hidden and only becomes visible after 4 seconds of elapsed time to prevent flashing on quick startups. Once the server responds, it automatically redirects to your app URL. If the server doesn't respond within 30 seconds, users see a clear error message.
 
 No code changes needed - this enhancement applies automatically to all Ivy desktop applications.
-
----
 
 ### Desktop Apps: Default Ivy Icon for Windows
 
@@ -1611,11 +1564,6 @@ new DesktopWindow(server)
     .Run();
 ```
 
-**Impact:**
-Your desktop applications now have a professional appearance by default without needing to configure an icon. This is especially useful during development and prototyping when you haven't yet created a custom icon. When you're ready to brand your app, simply call `.Icon()` to override the default.
-
----
-
 ### DefaultSidebarChrome: Auto-Open Sidebar When Last Tab Closes
 
 The `DefaultSidebarChrome` now automatically opens the sidebar when you close the last tab, preventing an empty state where both the sidebar and all tabs are closed.
@@ -1625,11 +1573,6 @@ The `DefaultSidebarChrome` now automatically opens the sidebar when you close th
 - When closing the final tab (which redirects to the home page), the sidebar automatically opens
 - This ensures users always have navigation options visible
 - The sidebar state is now dynamically managed to respond to tab closure events
-
-**Impact:**
-Users experience better navigation flow - closing all tabs no longer leaves them without visible navigation options. The sidebar intelligently opens to provide immediate access to navigation, improving the overall user experience in multi-tab applications.
-
----
 
 ### Nested App Streaming Support
 
@@ -1641,12 +1584,7 @@ The `UseStream` hook now works seamlessly in nested apps hosted via `AppHostWidg
 - Stream subscriptions are properly propagated through nested app boundaries
 - Both `RichTextBlock.UseStream()` and `Terminal.UseStream()` work correctly in nested contexts
 
-**Impact:**
-If you're building applications that host other apps (e.g., a dashboard that embeds multiple sub-apps, or a plugin system), streaming features like real-time updates, AI response streaming, and terminal output now work correctly in all nested apps without any code changes needed.
-
 No code changes needed - this improvement applies automatically to applications using `DefaultSidebarChrome`.
-
----
 
 ### Desktop Apps: Error Dialog for Unhandled Exceptions
 
@@ -1660,9 +1598,6 @@ Desktop applications now show a proper error dialog when unhandled exceptions oc
 - Light background with a subtle bordered code block for stack traces
 - This replaces the previous `Console.WriteLine` approach which was invisible in Windows GUI apps
 
-**Impact:**
-When your desktop app encounters an error (e.g., server startup failure, unhandled exception), users and developers will see a clear, professionally styled error dialog instead of the app silently crashing or appearing to hang. This significantly improves debugging and troubleshooting desktop applications.
-
 **Example error scenarios now handled:**
 
 - Server fails to start on the expected port
@@ -1670,8 +1605,6 @@ When your desktop app encounters an error (e.g., server startup failure, unhandl
 - Any unhandled exceptions during the window lifecycle
 
 No code changes needed - this protection applies automatically to all Ivy desktop applications.
-
----
 
 ### Desktop Apps: WebView2 Threading Fix for Windows
 
@@ -1686,12 +1619,7 @@ WebView2 requires STA (Single-Threaded Apartment) threading for its COM message 
 - If not on an STA thread, it creates and switches to an STA thread automatically
 - Works seamlessly without any code changes or performance impact
 
-**Impact:**
-Your desktop apps now work reliably regardless of how the application thread is initialized. This particularly helps when launching from different contexts (console apps, test runners, or other host applications).
-
 No code changes needed - this fix applies automatically to all Ivy desktop applications.
-
----
 
 ### Desktop Apps: Automatic Ivy Icon Embedding
 
@@ -1702,9 +1630,6 @@ Desktop applications now automatically include the Ivy icon in their executable 
 - The Ivy.Desktop package now includes an `ivy.ico` icon file
 - MSBuild automatically sets the `ApplicationIcon` property during build if you haven't specified a custom icon
 - The icon is embedded in your compiled `.exe` file on all platforms
-
-**Impact:**
-Your desktop applications now have a polished, branded appearance by default. The Ivy leaf icon will appear:
 
 - In the Windows taskbar when your app is running
 - In the file explorer alongside your `.exe` file
@@ -1721,8 +1646,6 @@ If you want to use your own icon instead, simply set the `ApplicationIcon` prope
 ```
 
 No code changes needed - this enhancement applies automatically to all new and existing Ivy desktop applications.
-
----
 
 ### Desktop Apps: Server Readiness Check Prevents Premature Loading
 
@@ -1741,9 +1664,6 @@ Previously, the desktop window would immediately try to load the app URL as soon
 - Detects if the server task faults or exits early (e.g., missing secrets, port conflicts)
 - 30-second timeout with clear error message if the server doesn't become ready
 
-**Impact:**
-Desktop apps now start more reliably, especially in scenarios where:
-
 - The server takes a moment to initialize and bind to a port
 - The server fails early due to configuration issues (missing secrets, invalid configuration)
 - Port conflicts or other startup issues occur
@@ -1754,8 +1674,6 @@ The window will only display your app once the server is confirmed to be accepti
 The health check polls `/ivy/health` every 250ms with a 2-second request timeout. The check runs on the main thread before the WebView is navigated, ensuring synchronous startup flow with proper error handling.
 
 No code changes needed - this reliability improvement applies automatically to all Ivy desktop applications.
-
----
 
 ### Graceful Handling of Missing Assembly References
 
@@ -1768,9 +1686,6 @@ The framework now gracefully handles situations where your application reference
 - Previously, these situations would throw a `ReflectionTypeLoadException` and crash your application
 - This affects automatic discovery of: app classes, external widgets, database connections, and extension methods
 
-**Impact:**
-You can now deploy applications without including every referenced assembly. For example, if your project references `Ivy.Filters` during development but doesn't deploy it to production, the app will start successfully instead of crashing on startup.
-
 This is particularly useful for:
 
 - Deploying minimal production builds without optional dependencies
@@ -1778,8 +1693,6 @@ This is particularly useful for:
 - Modular applications where certain features are conditionally deployed
 
 No code changes needed - this protection applies automatically throughout the framework.
-
----
 
 ### Badge Hover Effects Only Show for Clickable Badges
 
@@ -1790,9 +1703,6 @@ Badge widgets now only display hover effects when they're actually clickable, pr
 - Badges without an `OnClick` handler no longer show hover effects (color changes on mouse-over)
 - Clickable badges continue to show hover feedback with a subtle opacity change and pointer cursor
 - The behavior is automatically determined based on whether you've registered a click handler
-
-**Impact:**
-Your badge UI will now be more consistent and intuitive - users won't see visual feedback suggesting interactivity on badges that don't respond to clicks. This is a visual polish improvement that makes the UI feel more professional and predictable.
 
 **Example:**
 
@@ -1806,8 +1716,6 @@ Badge("Click me").OnClick(() => DoSomething());
 
 No code changes needed - this improvement applies automatically to all Badge widgets.
 
----
-
 ### SelectInput: Auto-Flip Dropdown Near Viewport Edge
 
 The `SelectInput` dropdown now automatically detects when it would extend beyond the bottom of the viewport and intelligently flips to open upward instead. This prevents the dropdown from being cut off when the input is positioned near the bottom of the screen.
@@ -1819,9 +1727,6 @@ The `SelectInput` dropdown now automatically detects when it would extend beyond
 - The dropdown smoothly positions itself above the input with appropriate spacing
 - Works seamlessly across all SelectInput variants (Select, List, Toggle, etc.)
 
-**Impact:**
-Users can now reliably interact with SelectInput dropdowns regardless of where they're positioned on the page. Previously, dropdowns near the bottom of the viewport would extend off-screen, forcing users to scroll to see all options. The dropdown now intelligently adapts to available space, ensuring all options remain visible and accessible.
-
 **Example scenarios:**
 
 - SelectInput in a modal dialog near the bottom
@@ -1831,127 +1736,85 @@ Users can now reliably interact with SelectInput dropdowns regardless of where t
 
 No code changes needed - this improvement applies automatically to all SelectInput widgets.
 
----
-
 ### Dynamic Metric Progress Colors
 
 The `MetricView` component now intelligently colors its progress bar based on achievement percentage, providing instant visual feedback about goal performance.
-
----
 
 ### ListItem Improved Vertical Spacing
 
 The `ListItem` widget now includes vertical padding for better content spacing and visual comfort.
 
----
-
 ### Size.Fraction and Size.FractionGap Now Accept Decimal and Double
 
 The `Size.Fraction()` and `Size.FractionGap()` methods now accept `decimal` and `double` values in addition to `float`, eliminating common type mismatch errors when using numeric literals or variables.
-
----
 
 ### Form Submit Strategy Hook Ordering
 
 Fixed a critical bug in `FormBuilder` where changing the form submit strategy at runtime would cause an `InvalidOperationException`. The issue occurred when using `OnBlur` or `OnChange` strategies, as internal hooks were called conditionally, violating hook ordering rules.
 
----
-
 ### RichTextBlock Stream Subscription Fix
 
 Fixed a bug in `RichTextBlock` where streaming text content would fail to display. The frontend component expected the `stream` property to be a plain string, but the backend serializer was producing an object with an `id` property (`{ id: "..." }`), causing stream subscriptions to silently fail.
-
----
 
 ### NumberInput Currency Format Default
 
 Fixed a runtime `TypeError` that occurred when using `.FormatStyle(NumberFormatStyle.Currency)` on `NumberInput` without explicitly setting a currency code. The framework now automatically defaults to "USD" when no currency is specified.
 
----
-
 ### Stream Data Serialization Fix
 
 Fixed a bug where streamed data (like `TextRun` objects in `RichText`) was not properly serialized when sent to the client. Stream data was passed as raw objects through SignalR, bypassing the camelCase naming policy and enum converters used by `WidgetSerializer`, causing property names and enum values to be incorrectly formatted on the client side.
-
----
 
 ### Stream Data Buffering - Preventing Dropped Messages
 
 Fixed a race condition where `StreamData` messages could be dropped if they arrived before the frontend stream handler was ready. This could happen during React re-render cycles when stream data arrives while the component is still mounting or updating.
 
----
-
 ### HtmlPipeline XML Parsing Fix for Vite-Generated HTML
 
 Fixed a parsing issue in `HtmlPipeline` where void HTML elements (like `<link>`, `<meta>`, `<br>`, etc.) generated by Vite without self-closing slashes would cause `XDocument.Parse` to fail. While these elements are valid HTML5, XML parsing requires them to be self-closed.
-
----
 
 ### ClientSender Disposal Race Condition
 
 Fixed a race condition that could occur when a client connection is closed while event handlers are still processing. Previously, the `ClientSender` could be torn down before in-flight event handlers finished executing, potentially causing errors or lost messages during disconnection.
 
----
-
 ### Chart Toolbox Overlap Fix
 
 Fixed a visual bug where chart content (area charts, bar charts, and line charts) would overlap with the toolbox controls when the toolbox was enabled. The chart grid now properly adjusts its top spacing to accommodate the toolbox.
-
----
 
 ### Missing HttpClient Dependency Fix
 
 Fixed a compilation error (CS1061) that occurred when using `server.Services.AddHttpClient()`. The Ivy package now includes `Microsoft.Extensions.Http` as a transitive dependency.
 
----
-
 ### Table of Contents - Smooth Scrolling Without Visual Glitches
 
 Fixed visual glitches in the `TableOfContents` widget that would cause incorrect highlighting and "junk" to appear when users scroll quickly through content. The component now uses a debounced update mechanism to ensure smooth, accurate highlighting even during rapid scrolling.
-
----
 
 ### IState<T>.Set(null) Ambiguity Resolved
 
 Fixed a compiler ambiguity error that occurred when calling `.Set(null)` on state objects with nullable reference types. Previously, passing `null` to `.Set()` would match both the `Set(T value)` and `Set(Func<T,T> setter)` overloads, causing a compilation error.
 
----
-
 ### Desktop Window Title Default
 
 Fixed the default window title for Ivy desktop applications. Instead of showing a generic "Ivy App" title, desktop windows now automatically display the application's assembly name, providing a more professional and context-appropriate default.
-
----
 
 ### Hook Usage Analyzer: FuncView and MemoizedFuncView Lambda Support
 
 Fixed the hook usage analyzer (`IVYHOOK001`) to correctly recognize lambdas passed to `FuncView` and `MemoizedFuncView` constructors as valid locations for hooks. Previously, the analyzer would incorrectly flag these as errors, even though these lambdas function as Build methods.
 
----
-
 ### Chart Legend Title-Casing Fix
 
 Fixed improper capitalization in chart legends when using camelCase property names. The `SplitPascalCase` utility now properly title-cases each word, producing professional-looking chart labels.
-
----
 
 ### Semantic Color Mapping for Text
 
 Fixed incorrect color mapping when using semantic surface colors (like `Colors.Muted`, `Colors.Background`, `Colors.Card`) for text. These colors were previously mapping to their base CSS variables, which are designed for backgrounds, resulting in poor readability and contrast issues.
 
----
-
 ### SidebarLayout - Respect Open Property on Mount
 
 Fixed a bug in `SidebarLayoutWidget` where the `.Open(false)` property was being overridden by the media query handler on component mount. When a sidebar was explicitly set to closed, the auto-collapse media query would incorrectly force it open if the viewport was wide enough.
 
----
-
 ### MarkdownRenderer Code Block Borders
 
 Fixed a visual bug in the `MarkdownRenderer` where code blocks were missing their borders. The `ScrollArea` component wrapping the syntax highlighter was missing the border styling classes that were present in the fallback block, causing rendered code blocks to appear without visible borders.
-
----
 
 ### Desktop Error Dialog Display Fix
 
@@ -1964,11 +1827,6 @@ Fixed a bug in `Ivy.Desktop` where application error dialogs would display as bl
 - Temporary error HTML files are automatically cleaned up after the error dialog closes
 - Error dialogs now correctly display the formatted error message and stack trace
 
-**Impact:**
-If you're building desktop applications with `Ivy.Desktop`, unhandled exceptions will now display properly formatted error dialogs with readable error messages and stack traces, instead of showing blank white windows. This makes debugging and error reporting significantly easier during development and for end users.
-
----
-
 ### Desktop WebView2 Blank Window Fix
 
 Fixed a critical bug in `Ivy.Desktop` on Windows where desktop applications using WebView2 would open but display completely blank content. The issue was caused by WebView2's COM message pump requiring Single-Threaded Apartment (STA) threading, which wasn't guaranteed when `DesktopWindow.Run()` was called.
@@ -1979,11 +1837,6 @@ Fixed a critical bug in `Ivy.Desktop` on Windows where desktop applications usin
 - If not already on an STA thread, the window automatically starts on a new STA thread
 - WebView2 now receives the proper threading context it needs for rendering
 - Desktop applications now display content correctly instead of blank windows
-
-**Impact:**
-If you're building Windows desktop applications with `Ivy.Desktop`, your applications will now render properly instead of showing blank white windows. This fix is automatic and requires no code changes - simply update to this version and your existing desktop apps will work correctly on Windows.
-
----
 
 ### Better Desktop Startup Error Messages
 
@@ -1996,11 +1849,6 @@ Fixed a bug in `Ivy.Desktop` where server startup failures would display a gener
 - Error dialogs now show the real cause of server failures (e.g., port already in use, configuration errors)
 - Unwraps `AggregateException` to expose the underlying startup exception
 
-**Impact:**
-If you're building desktop applications with `Ivy.Desktop`, you'll now see clear, actionable error messages when the server fails to start, rather than a vague "Unable to connect" message. This makes debugging server configuration issues, port conflicts, and other startup problems much easier during development.
-
----
-
 ### Assembly Scanning - Missing Reference Resilience
 
 Fixed a crash that occurred during application startup when the framework scanned assemblies that referenced optional dependencies that weren't deployed. Previously, calling `Assembly.GetTypes()` on assemblies with missing references would throw a `ReflectionTypeLoadException`, causing the entire application to crash.
@@ -2011,11 +1859,6 @@ Fixed a crash that occurred during application startup when the framework scanne
 - Framework now loads only the types that are available, skipping types with unresolved dependencies
 - Applied to all assembly scanning operations: app discovery, external widgets, connections, secret providers, and extension methods
 - Applications no longer crash when optional assemblies like `Ivy.Filters` aren't deployed
-
-**Impact:**
-Your Ivy applications are now more resilient to partial deployments where not all referenced assemblies are present. This is particularly useful for modular applications where certain features (and their dependencies) may be optionally deployed. The framework will successfully discover and use all available types while gracefully skipping any that depend on missing assemblies, allowing your application to start and run normally instead of crashing at startup.
-
----
 
 ### Outline Button Missing Background
 
@@ -2034,11 +1877,6 @@ Fixed a visual bug where outline variant buttons were missing their background c
 new Button("Submit")
     .Variant(ButtonVariant.Outline);
 ```
-
-**Impact:**
-If you're using outline variant buttons in your application, they will now display with the correct background color, ensuring they remain visible and properly styled regardless of the content positioned behind them. This provides more consistent and reliable button styling across your UI.
-
----
 
 ### Semantic Color Text Readability Fix
 
@@ -2060,11 +1898,6 @@ Text.P("Muted text").Color(Colors.Muted);
 // Background colors remain unchanged
 new Box("Content").Background(Colors.Muted);
 ```
-
-**Impact:**
-If you're using semantic surface colors like `Colors.Muted` on text elements, they will now display with proper contrast and readability. The framework automatically selects the appropriate foreground variant, ensuring your text is visible against its background without requiring manual color adjustments.
-
----
 
 ## Developer Experience Improvements
 
@@ -2115,8 +1948,6 @@ public class MyApp : AppBase
 - Runtime validation in `AppDescriptor.CreateApp()` provides a clear error message if issues are missed
 
 This change helps you follow Ivy's dependency injection patterns correctly and catch mistakes early in development.
-
----
 
 ### Compile-Time Analyzer for Widget Child Misuse
 
@@ -2193,8 +2024,6 @@ var menu = new DropDownMenu() | items;
 Widget authors can now use `[ChildType(typeof(T))]` to specify allowed child types. The analyzer checks direct children, arrays, and `IEnumerable<T>` collections, supporting both exact type matches and derived types.
 
 These analyzers work with direct widget instantiation, variables, method returns, and derived widget types, providing comprehensive compile-time safety for widget composition.
-
----
 
 ### Compile-Time Analyzer for Hook Results Stored in Class Members
 
@@ -2273,8 +2102,6 @@ public class TestView : ViewBase
 ```
 
 This analyzer helps enforce the correct hook usage pattern and catches mistakes that would otherwise cause hard-to-debug reactive system issues.
-
----
 
 ### Hook Usage Analyzer - Clearer Error Messages with Sub-Types
 
@@ -2376,8 +2203,6 @@ decimal ratio = 0.333m;
 
 This change ensures compilation succeeds without ambiguous method call errors.
 
----
-
 ### Size.Percent() - Intuitive Percentage-Based Sizing
 
 New `Size.Percent()` overloads make it easier to specify percentage-based sizes without manually converting to fractions or using float literals.
@@ -2409,8 +2234,6 @@ New `Size.Percent()` overloads make it easier to specify percentage-based sizes 
 ```
 
 This is especially helpful when working with percentage values, making the code more readable and eliminating the need to mentally convert percentages to decimal fractions.
-
----
 
 ### Connection Name Error Messages
 
@@ -2444,8 +2267,6 @@ dotnet run --test-connection postgress
 
 This improvement makes it easier to work with database connections during development and deployment, eliminating the need to search through your code or documentation to find the correct connection names.
 
----
-
 ### CLI Commands Work Alongside Running Instances
 
 CLI diagnostic commands (`--describe`, `--describe-connection`, `--test-connection`) now run successfully even when an Ivy app instance is already running on the configured port.
@@ -2453,11 +2274,7 @@ CLI diagnostic commands (`--describe`, `--describe-connection`, `--test-connecti
 **What was the problem:**
 These commands need dependency injection but don't actually start a web server. Previously, they would fail with port-in-use errors if you tried to run them while your app was already running, even though they never needed the port.
 
----
-
 ### Server Binds to Localhost - No More Windows Firewall Prompts
 
 Ivy apps now bind to `localhost` instead of the wildcard address (`*`), eliminating Windows Firewall prompts during development.
-
----
 
