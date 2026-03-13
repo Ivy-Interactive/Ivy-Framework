@@ -858,49 +858,24 @@ public class ColorAlphaDemo : ViewBase
 }
 ```
 
-### ColorInput - Ghost Styling for Minimal Appearance
+### Ghost Styling for Minimal Appearance
 
-`ColorInput` now supports ghost styling through the `Ghost()` extension method. Ghost styling removes borders, background fill, and shadows from the text input portion, creating a minimal appearance ideal for embedding color pickers in cards or colored backgrounds.
+Several input widgets (`ColorInput`, `SelectInput`, and `AsyncSelectInput`) now support ghost styling through the `.Ghost()` extension method. Ghost styling removes borders, background fill, and shadows, creating a minimal appearance ideal for embedding inputs seamlessly into cards, toolbars, or colored backgrounds.
 
 **Basic Usage:**
 
 ```csharp
+// ColorInput ghost styling
 var themeColor = UseState("#4A90E2");
-
-// Normal color input with borders
-return themeColor.ToColorInput();
-
-// Ghost color input - minimal styling
 return themeColor.ToColorInput().Ghost();
-```
 
-### SelectInput and AsyncSelectInput - Ghost Styling for Minimal Appearance
-
-Both `SelectInput` and `AsyncSelectInput` now support ghost styling through the `Ghost()` extension method. Ghost styling removes borders, background fill, and shadows, creating a minimal appearance ideal for embedding select inputs in cards, toolbars, or colored backgrounds.
-
-**Basic Usage:**
-
-```csharp
-// SelectInput with ghost styling
+// SelectInput ghost styling
 var colorState = UseState(Colors.Red);
-var colorOptions = typeof(Colors).ToOptions();
+return colorState.ToSelectInput(typeof(Colors).ToOptions()).Ghost();
 
-return Layout.Vertical()
-    | Text.Label("Theme Color")
-    | colorState.ToSelectInput(colorOptions).Ghost();
-```
-
-**AsyncSelectInput with ghost styling:**
-
-```csharp
-// AsyncSelectInput with ghost styling
+// AsyncSelectInput ghost styling
 var categoryState = UseState(default(Guid?));
-
-return categoryState.ToAsyncSelectInput(
-    QueryCategories,
-    LookupCategory,
-    placeholder: "Select Category"
-).Ghost();
+return categoryState.ToAsyncSelectInput(QueryCategories, LookupCategory).Ghost();
 ```
 
 
@@ -3285,73 +3260,7 @@ public class SelectInputAdvancedDemo : ViewBase
 
 ---
 
-### SelectInput - Ghost Styling for Minimal Appearance
 
-All select input variants now support ghost styling through the `Ghost()` extension method. Ghost styling removes borders, background fill, and shadows, creating a minimal appearance that blends seamlessly into its surroundings while maintaining full functionality.
-
-**Basic usage with SelectInput:**
-
-```csharp
-var color = UseState(Colors.Red);
-var colorOptions = typeof(Colors).ToOptions();
-
-// Normal select
-return color.ToSelectInput(colorOptions);
-
-// Ghost select - minimal styling
-return color.ToSelectInput(colorOptions).Ghost();
-```
-
-**Works with all select variants:**
-
-```csharp
-var frameworks = UseState<Frameworks[]>([Frameworks.React]);
-var options = typeof(Frameworks).ToOptions();
-
-// Ghost with List variant
-return frameworks.ToSelectInput(options)
-    .Variant(SelectInputVariants.List)
-    .Ghost();
-
-// Ghost with Toggle variant
-return frameworks.ToSelectInput(options)
-    .Variant(SelectInputVariants.Toggle)
-    .Ghost();
-```
-
-**AsyncSelectInput also supports Ghost:**
-
-```csharp
-var category = UseState<Guid?>(null);
-
-return category.ToAsyncSelectInput(
-        QueryCategories,
-        LookupCategory,
-        placeholder: "Select Category"
-    )
-    .Ghost();
-```
-
-**Practical example - blending into card backgrounds:**
-
-```csharp
-return new Card(
-    Layout.Vertical().Gap(2)
-        | Text.Label("Select Framework")
-        | framework.ToSelectInput(options).Ghost()
-)
-.Title("Settings")
-.Width(Size.Units(100));
-```
-
-**When to use Ghost styling:**
-
-- Inside cards or colored backgrounds where borders would create visual clutter
-- In compact UIs where minimal chrome is preferred
-- For inline selection controls that should feel lightweight
-- When you want the select to blend with surrounding content
-
-The ghost style maintains hover effects for interactivity feedback while removing the default border and background treatment.
 
 ---
 
