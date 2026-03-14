@@ -871,6 +871,10 @@ server.UseConfiguration(config => {
 
 The framework now defaults to the system light/dark preference instead of light theme.
 
+### AddConnectionsFromAssembly - Optional Assembly Parameter
+
+`Server.AddConnectionsFromAssembly()` now accepts an optional `Assembly?` parameter so you can specify which assembly to scan for `IConnection` types (e.g. plugin or class-library scenarios). Omitting it still scans the entry assembly.
+
 ### DataTableBuilder - Remove() Method for API Consistency
 
 The [DataTable](https://docs.ivy.app/widgets/advanced/data-table) builder now supports the `.Remove()` method. This method allows you to completely exclude columns from your data tables.
