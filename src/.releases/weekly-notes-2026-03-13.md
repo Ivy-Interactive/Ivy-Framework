@@ -1,5 +1,8 @@
 # Ivy Framework Weekly Notes - Week of 2026-03-13
 
+> [!NOTE]
+> We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
+
 ## Breaking Changes
 
 ### IHtmlFilter Interface - XDocument Instead of String Manipulation
@@ -43,7 +46,7 @@ public class MyConnection : IConnection
 
 ### WrapLayout Removed - Use StackLayout with Wrap Instead
 
-The `WrapLayout` widget has been removed. Use `StackLayout` with the new `.Wrap()` method instead.
+The `WrapLayout` widget has been removed. Use [StackLayout](https://docs.ivy.app/onboarding/concepts/layout) with the new `.Wrap()` method instead.
 
 ```csharp
 Layout.Horizontal()
@@ -56,7 +59,7 @@ Layout.Horizontal()
 
 ### Button Icon API - Constructor Parameter Removed
 
-The `Button` widget no longer accepts an `icon` constructor parameter. Use the fluent `.Icon()` method instead to add icons to buttons.
+The [Button](https://docs.ivy.app/widgets/common/button) widget no longer accepts an `icon` constructor parameter. Use the fluent `.Icon()` method instead to add icons to buttons.
 
 ```csharp
 // Icon via fluent method
@@ -109,7 +112,7 @@ var chart = builder.Build(xml);
 
 ### CreateSignal Renamed to UseSignal and ISignal Unified
 
-The `CreateSignal<T, TInput, TOutput>()` method has been removed and replaced by `UseSignal<T, TInput, TOutput>()`. Additionally, the separate `ISignalSender` and `ISignalReceiver` interfaces have been unified into a single `ISignal` interface that provides both sending and receiving capabilities.
+The `CreateSignal<T, TInput, TOutput>()` method has been removed and replaced by [UseSignal](https://docs.ivy.app/hooks/core/use-signal)`<T, TInput, TOutput>()`. Additionally, the separate `ISignalSender` and `ISignalReceiver` interfaces have been unified into a single `ISignal` interface that provides both sending and receiving capabilities.
 
 ```csharp
 // Both sending and receiving are now handled by ISignal
@@ -138,7 +141,7 @@ All input variant enums have been renamed from plural to singular form.
 
 ### Removal of `.Value()` API from Input Widgets
 
-The fluent `.Value()` extension method has been removed from all input widgets. All input widgets are affected (`TextInput`, `SelectInput`, `AsyncSelectInput`, `NumberInput`, `BoolInput`, `CodeInput`, `ColorInput`, `DateRangeInput`, `DateTimeInput`, `FeedbackInput`, `IconInput`, and `ReadOnlyInput`).
+The fluent `.Value()` extension method has been removed from all input widgets. All input widgets are affected ([TextInput](https://docs.ivy.app/widgets/inputs/text-input), [SelectInput](https://docs.ivy.app/widgets/inputs/select-input), [AsyncSelectInput](https://docs.ivy.app/widgets/inputs/async-select-input), [NumberInput](https://docs.ivy.app/widgets/inputs/number-input), [BoolInput](https://docs.ivy.app/widgets/inputs/bool-input), [CodeInput](https://docs.ivy.app/widgets/inputs/code-input), [ColorInput](https://docs.ivy.app/widgets/inputs/color-input), [DateRangeInput](https://docs.ivy.app/widgets/inputs/date-range-input), [DateTimeInput](https://docs.ivy.app/widgets/inputs/date-time-input), [FeedbackInput](https://docs.ivy.app/widgets/inputs/feedback-input), IconInput, and ReadOnlyInput).
 
 ### Scale Renamed to Density
 
@@ -151,15 +154,15 @@ The `Scale` enum and all associated APIs have been renamed to `Density`.
 
 ### Box.Color() Renamed to Box.Background()
 
-The `Color()` method and property on the `Box` widget have been renamed to `Background()`.
+The `Color()` method and property on the [Box](https://docs.ivy.app/widgets/primitives/box) widget have been renamed to `Background()`.
 
 ### Text.InlineCode() Renamed to Text.Monospaced()
 
-The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value have been renamed to `Text.Monospaced()` and `TextVariant.Monospaced`.
+The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value on the [Text](https://docs.ivy.app/widgets/primitives/text-block) helper have been renamed to `Text.Monospaced()` and `TextVariant.Monospaced`.
 
 ### Explicit Size API for Width, Height, and Size Methods
 
-The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use `Size.Units()` or `Size.Fraction()` to specify sizing.
+The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use [Size.Units()](https://docs.ivy.app/api-reference/ivy-shared/size) or `Size.Fraction()` to specify sizing.
 
 ### Size.Fraction and Size.FractionGap - Decimal/Double Overloads Removed
 
@@ -177,7 +180,7 @@ decimal ratio = 0.333m;
 
 ### Size.Percent() - Intuitive Percentage-Based Sizing
 
-New `Size.Percent()` overloads allow you to specify percentage-based sizes.
+New [Size.Percent()](https://docs.ivy.app/api-reference/ivy-shared/size) overloads allow you to specify percentage-based sizes.
 
 **New overloads:**
 
@@ -278,7 +281,7 @@ return Layout.Vertical().Gap(4)
 
 ### Async Cleanup in UseEffect with IAsyncDisposable
 
-`UseEffect` now supports asynchronous cleanup through `IAsyncDisposable`.
+[UseEffect](https://docs.ivy.app/hooks/core/use-effect) now supports asynchronous cleanup through `IAsyncDisposable`.
 
 ```csharp
 UseEffect(() =>
@@ -308,7 +311,7 @@ var server = new Server()
 
 ### Enhanced Layout System with Figma-Style Options
 
-Ivy's layout system now supports advanced Figma-style layout options, including space distribution, independent row/column gaps, wrapping, per-child alignment, and enhanced scroll control.
+Ivy's [layout](https://docs.ivy.app/onboarding/concepts/layout) system now supports advanced Figma-style layout options, including space distribution, independent row/column gaps, wrapping, per-child alignment, and enhanced scroll control.
 
 **New Alignment Options:**
 
@@ -395,7 +398,7 @@ new Box("Content").Overflow(Overflow.Scroll);
 
 ### Border Support for Layouts
 
-LayoutView and StackLayout support borders: `.Border(color, thickness)` or fine-grained `.BorderColor()`, `.BorderThickness()`, `.BorderStyle()`, `.BorderRadius()`.
+[LayoutView](https://docs.ivy.app/onboarding/concepts/layout) and StackLayout support borders: `.Border(color, thickness)` or fine-grained `.BorderColor()`, `.BorderThickness()`, `.BorderStyle()`, `.BorderRadius()`.
 
 ```csharp
 Layout.Vertical()
@@ -515,7 +518,7 @@ The pipeline configurator runs after all built-in and custom filters have been a
 
 ### Field - Horizontal Label Layout with LabelPosition
 
-The `Field` widget now supports horizontal label layouts where labels appear beside inputs instead of above them.
+The [Field](https://docs.ivy.app/widgets/inputs/field) widget now supports horizontal label layouts where labels appear beside inputs instead of above them.
 
 ```csharp
 // Horizontal layout - label on left
@@ -527,7 +530,7 @@ var emailField = new Field(
 
 ### Form Submit Strategies
 
-Forms now support different submit strategies that control when form state is committed back to your model.
+[Forms](https://docs.ivy.app/onboarding/concepts/forms) now support different submit strategies that control when form state is committed back to your model.
 
 **Available Strategies:**
 
@@ -570,17 +573,17 @@ public class SettingsPanel : ViewBase
 Several widgets have received new fluent API extensions:
 
 - **Toast API**: `.Success()`, `.Destructive()`, `.Warning()`, `.Info()`
-- **ListItem**: `.Title()`, `.Subtitle()`, `.Icon()`, `.Badge()`, `.Tag()`, `.OnClick()`, `.Content()`, `.Disabled()`
-- **FeedbackInput**: Dedicated fluent methods for each variant type.
+- **[ListItem](https://docs.ivy.app/widgets/common/list)**: `.Title()`, `.Subtitle()`, `.Icon()`, `.Badge()`, `.Tag()`, `.OnClick()`, `.Content()`, `.Disabled()`
+- **[FeedbackInput](https://docs.ivy.app/widgets/inputs/feedback-input)**: Dedicated fluent methods for each variant type.
 - **Chart Builders**: `.Height()` and `.Width()` (replaces `Polish` callback workaround).
 - **DesktopWindow**: `.UseDpiScaling()`, `.UseDevTools()`, `.Resizable()`, `.Center()`, `.TopMost()` (booleans default to `true`).
-- **Table Progress**: `.Min()`, `.Max()`, `.AutoColor()`, `.Color()`, `.Format()`.
-- **Separator**: `.TextAlign(TextAlignment.Left | Center | Right)`.
-- **Global**: `.Grow()` is now available on all widgets (shorthand for `.Width(Size.Grow())`).
+- **[Table](https://docs.ivy.app/widgets/common/table) Progress**: `.Min()`, `.Max()`, `.AutoColor()`, `.Color()`, `.Format()`.
+- **[Separator](https://docs.ivy.app/widgets/primitives/separator)**: `.TextAlign(TextAlignment.Left | Center | Right)`.
+- **Global**: `.Grow()` is now available on all widgets (shorthand for [`.Width(Size.Grow())`](https://docs.ivy.app/api-reference/ivy-shared/size)).
 
 ### ColorInput: Alpha Channel Support
 
-The `ColorInput` widget now supports transparency with the new `AllowAlpha()` method. When enabled, an opacity slider appears next to the color picker, and colors are stored in `#RRGGBBAA` format (8-digit hex with alpha channel).
+The [ColorInput](https://docs.ivy.app/widgets/inputs/color-input) widget now supports transparency with the new `AllowAlpha()` method. When enabled, an opacity slider appears next to the color picker, and colors are stored in `#RRGGBBAA` format (8-digit hex with alpha channel).
 
 ```csharp
 public class ColorAlphaDemo : ViewBase
@@ -598,7 +601,7 @@ public class ColorAlphaDemo : ViewBase
 
 ### DetailsBuilder: Custom Field Labels
 
-The `DetailsBuilder` now supports customizing field labels with the new `.Label()` method. By default, `ToDetails()` generates labels from property names using PascalCase splitting (e.g., `NetBurn` becomes "Net Burn"), but you can now override these auto-generated labels with custom text.
+The DetailsBuilder (see [Details](https://docs.ivy.app/widgets/common/details)) now supports customizing field labels with the new `.Label()` method. By default, `ToDetails()` generates labels from property names using PascalCase splitting (e.g., `NetBurn` becomes "Net Burn"), but you can now override these auto-generated labels with custom text.
 
 ```csharp
 public record RunwayData(decimal NetBurn, decimal GrossBurn, int Months, DateTime RunwayDate);
@@ -622,7 +625,7 @@ public class DashboardV2 : AppBase { }
 
 ### Icons in Select Options
 
-Select inputs now support optional icons for each option. Additionally, labels are now optional—if omitted, the option value will be displayed instead.
+[SelectInput](https://docs.ivy.app/widgets/inputs/select-input) now supports optional icons for each option. Additionally, labels are now optional—if omitted, the option value will be displayed instead.
 
 ```csharp
 // Add icons to select options
@@ -641,7 +644,7 @@ return selected.ToSelectInput()
 
 ### RichTextBlock - Styled Text with Links and Streaming
 
-The `RichTextBlock` widget supports styled runs (bold, italic, strikethrough, color, highlight, word spacing), hyperlinks (with `LinkTarget.Blank`), programmatic `OnLinkClick`, and streaming via `Text.Rich().UseStream(stream)` or the `Stream` property with `Stream(streamId, run)`. Also: `TextAlignment`, `NoWrap`, `Overflow`, `Density`.
+The [RichTextBlock](https://docs.ivy.app/widgets/primitives/richtextblock) widget supports styled runs (bold, italic, strikethrough, color, highlight, word spacing), hyperlinks (with `LinkTarget.Blank`), programmatic `OnLinkClick`, and streaming via `Text.Rich().UseStream(stream)` or the `Stream` property with `Stream(streamId, run)`. Also: `TextAlignment`, `NoWrap`, `Overflow`, `Density`.
 
 ```csharp
 // Styling, links, OnLinkClick
@@ -670,7 +673,7 @@ var streamingBlock = new RichTextBlock { Stream = "chat", Runs = [new() { Conten
 
 ### ReadOnlyInput - Copy Button and Placeholder Support
 
-`ReadOnlyInput` supports `.ShowCopyButton(bool)` (default true) and `.Placeholder(text)` for empty values:
+[ReadOnlyInput](https://docs.ivy.app/widgets/inputs/read-only-input) supports `.ShowCopyButton(bool)` (default true) and `.Placeholder(text)` for empty values:
 
 ```csharp
 var apiKey = UseState("sk-1234567890abcdef");
@@ -684,7 +687,7 @@ return Layout.Vertical()
 
 ### BoolInput - Loading State Support
 
-The `BoolInput` widget now supports a loading state across all variants (Checkbox, Switch, and Toggle). When in loading state, the widget displays a spinner overlay and is automatically disabled to prevent user interaction during async operations.
+The [BoolInput](https://docs.ivy.app/widgets/inputs/bool-input) widget now supports a loading state across all variants (Checkbox, Switch, and Toggle). When in loading state, the widget displays a spinner overlay and is automatically disabled to prevent user interaction during async operations.
 
 ```csharp
 var isEnabled = UseState(true);
@@ -697,7 +700,7 @@ return isEnabled.ToSwitchInput()
 
 ### DateTimeInput - Month, Week, and Year Pickers
 
-The `DateTimeInput` widget now supports three additional variants for selecting time periods: Month, Week, and Year.
+The [DateTimeInput](https://docs.ivy.app/widgets/inputs/date-time-input) widget now supports three additional variants for selecting time periods: Month, Week, and Year.
 
 ```csharp
 // Month input
@@ -724,7 +727,7 @@ return fiscalYear.ToYearInput()
 
 ### Box Grow Extension Method
 
-The `Box` widget now includes a convenient `Grow()` extension method for making boxes expand to fill available width. This is a shorthand for `.Width(Size.Grow())`.
+The [Box](https://docs.ivy.app/widgets/primitives/box) widget now includes a convenient `Grow()` extension method for making boxes expand to fill available width. This is a shorthand for `.Width(Size.Grow())`.
 
 ```csharp
 new Box("Content").Grow();
@@ -732,7 +735,7 @@ new Box("Content").Grow();
 
 ### Callout - Closable Callouts with OnClose Event
 
-The `Callout` widget now supports closable behavior through the `OnClose` event handler. When an `OnClose` handler is set, the callout displays a close (X) button in the top-right corner.
+The [Callout](https://docs.ivy.app/widgets/primitives/callout) widget now supports closable behavior through the `OnClose` event handler. When an `OnClose` handler is set, the callout displays a close (X) button in the top-right corner.
 
 ```csharp
 var (calloutView, showCallout) = UseTrigger((IState<bool> isOpen) =>
@@ -748,7 +751,7 @@ return Layout.Vertical().Gap(6)
 
 ### Forms - Auto-Scaffold [AllowedValues] as SelectInput
 
-String and string array properties with the `[AllowedValues]` attribute are now automatically scaffolded as `SelectInput` widgets (single or multi-select) when using `.ToForm()`.
+String and string array properties with the `[AllowedValues]` attribute are now automatically scaffolded as [SelectInput](https://docs.ivy.app/widgets/inputs/select-input) widgets (single or multi-select) when using [.ToForm()](https://docs.ivy.app/onboarding/concepts/forms).
 
 ```csharp
 public class SettingsModel
@@ -807,7 +810,7 @@ server.UseConfiguration(config => {
 
 ### DataTableBuilder - Remove() Method for API Consistency
 
-The `DataTableBuilder` now supports the `.Remove()` method. This method allows you to completely exclude columns from your data tables.
+The [DataTable](https://docs.ivy.app/widgets/advanced/data-table) builder now supports the `.Remove()` method. This method allows you to completely exclude columns from your data tables.
 
 ### Clerk Auth: Graceful Handling of Existing Sessions
 
@@ -837,7 +840,7 @@ Unhandled exceptions now show a native error dialog (message + stack trace) inst
 
 ### SelectInput: Auto-Flip Dropdown Near Viewport Edge
 
-SelectInput dropdown opens upward when there isn’t enough space below; works for all variants.
+[SelectInput](https://docs.ivy.app/widgets/inputs/select-input) dropdown opens upward when there isn’t enough space below; works for all variants.
 
 ### Dynamic Metric Progress Colors
 
