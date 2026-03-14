@@ -642,6 +642,42 @@ return selected.ToSelectInput()
     .Variant(SelectInputVariant.Dropdown);
 ```
 
+### Server-to-Client Streaming with UseStream Hook
+
+Ivy now supports efficient server-to-client streaming with the new UseStream hook.
+
+Attach the stream to widgets that support streaming (like Text.Rich()):
+
+```csharp
+public class StreamingApp : ViewBase
+{
+    protected override object? Build()
+    {
+        // 1. Create a stream for text runs
+        var stream = Context.UseStream<TextRun>();
+
+        return Layout.Vertical(
+            Text.Rich()
+                .Bold("🤖 ")
+                // 2. Attach the stream to the widget
+                .UseStream(stream),
+
+            new Button("Generate").OnClick(async () =>
+            {
+                var words = new[] { "Hello", "world", "from", "the", "stream!" };
+
+                foreach (var word in words)
+                {
+                    await Task.Delay(200);
+                    // 3. Write data to the stream which gets pushed to the frontend in real-time
+                    stream.Write(new TextRun(word) { Word = true });
+                }
+            })
+        );
+    }
+}
+```
+
 ### RichTextBlock - Styled Text with Links and Streaming
 
 The [RichTextBlock](https://docs.ivy.app/widgets/primitives/richtextblock) widget supports styled runs (bold, italic, strikethrough, color, highlight, word spacing), hyperlinks (with `LinkTarget.Blank`), programmatic `OnLinkClick`, and streaming via `Text.Rich().UseStream(stream)` or the `Stream` property with `Stream(streamId, run)`. Also: `TextAlignment`, `NoWrap`, `Overflow`, `Density`.
