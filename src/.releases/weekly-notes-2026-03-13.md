@@ -863,6 +863,14 @@ server.UseConfiguration(config => {
 
 ## Improvements
 
+### GridView: Separate RowGap and ColumnGap Methods
+
+[GridView](https://docs.ivy.app/onboarding/concepts/layout) now has `RowGap()` and `ColumnGap()` for per-axis spacing; `Gap()` still sets both.
+
+### Theme Defaults to System Preference
+
+The framework now defaults to the system light/dark preference instead of light theme.
+
 ### DataTableBuilder - Remove() Method for API Consistency
 
 The [DataTable](https://docs.ivy.app/widgets/advanced/data-table) builder now supports the `.Remove()` method. This method allows you to completely exclude columns from your data tables.
@@ -877,9 +885,9 @@ The Clerk authentication provider now gracefully handles scenarios where a sessi
 
 The `WithConfirm` helper method now supports customizable confirm button labels and destructive styling.
 
-### Desktop Apps: Default Ivy Icon for Windows
+### Desktop Apps: Default Ivy Icon and Embedding
 
-Desktop windows without a custom `.Icon()` now show the Ivy logo in the taskbar and title bar. Set `ApplicationIcon` in `.csproj` to use your own icon.
+Desktop windows without a custom `.Icon()` show the Ivy logo in the taskbar and title bar. The Ivy.Desktop package embeds `ivy.ico` in the built .exe by default (skip by setting `ApplicationIcon` in `.csproj`).
 
 ### DefaultSidebarChrome: Auto-Open Sidebar When Last Tab Closes
 
@@ -893,6 +901,10 @@ Closing the last tab now auto-opens the sidebar so navigation stays visible.
 
 Unhandled exceptions now show a native error dialog (message + stack trace) instead of failing silently or using `Console.WriteLine`.
 
+### Desktop Apps: Startup and Reliability
+
+The window shows a loading screen and waits for the server to be ready (health check) before loading the UI, avoiding "connection refused." On Windows, `DesktopWindow.Run()` ensures an STA thread for WebView2 so the window no longer opens blank.
+
 ### SelectInput: Auto-Flip Dropdown Near Viewport Edge
 
 [SelectInput](https://docs.ivy.app/widgets/inputs/select-input) dropdown opens upward when there isn’t enough space below; works for all variants.
@@ -900,6 +912,10 @@ Unhandled exceptions now show a native error dialog (message + stack trace) inst
 ### Dynamic Metric Progress Colors
 
 The `MetricView` component now colors its progress bar based on achievement percentage.
+
+### Graceful Handling of Missing Assembly References
+
+Assembly scanning (apps, widgets, connections, extensions) now uses `GetLoadableTypes()` so missing optional references (e.g. Ivy.Filters not deployed) no longer cause `ReflectionTypeLoadException` and crashes.
 
 ### Bug Fixes
 
