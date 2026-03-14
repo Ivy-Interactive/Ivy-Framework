@@ -154,6 +154,8 @@ The handler can access both properties: `args.Id` to identify the row and `args.
 ```csharp demo-tabs
 public class RowActionsDemo : ViewBase
 {
+    private enum RowAction { Edit, Delete, More, Archive, Export, Share }
+
     public record Employee(int Id, string Name, string Email, int Salary);
 
     public override object? Build()
@@ -168,13 +170,13 @@ public class RowActionsDemo : ViewBase
             .Header(e => e.Email, "Email")
             .Header(e => e.Salary, "Salary")
             .RowActions(
-                MenuItem.Default(Icons.Pencil, "edit"),
-                MenuItem.Default(Icons.Trash2, "delete"),
-                MenuItem.Default(Icons.EllipsisVertical, "more")
+                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
+                MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete),
+                MenuItem.Default(Icons.EllipsisVertical).Tag(RowAction.More)
                     .Children([
-                        MenuItem.Default(Icons.Archive, "archive").Label("Archive"),
-                        MenuItem.Default(Icons.Download, "export").Label("Export"),
-                        MenuItem.Default(Icons.Share2, "share").Label("Share")
+                        MenuItem.Default(Icons.Archive).Tag(RowAction.Archive).Label("Archive"),
+                        MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export"),
+                        MenuItem.Default(Icons.Share2).Tag(RowAction.Share).Label("Share")
                     ])
             )
             .OnRowAction(async e =>
@@ -389,15 +391,25 @@ How do I handle row actions on a DataTable?
 </Summary>
 <Body>
 
-Use `.RowActions()` to define actions and `.OnRowAction()` to handle clicks:
+Use the **fluent API** with **enum tags**: `MenuItem.Default(Icons.X).Tag(YourEnum.Value)` and a single `.OnRowAction()`. Parse the tag with <c>Enum.TryParse&lt;YourEnum&gt;(args.Tag?.ToString(), ignoreCase: true, out var action)</c>:
 
 ```csharp
-items.ToDataTable()
+private enum RowAction { Edit, Delete }
+
+items.ToDataTable(idSelector: e => e.Id)
     .RowActions(
-        new RowAction("edit", "Edit", Icons.Pencil),
-        new RowAction("delete", "Delete", Icons.Trash2))
-    .OnRowAction("edit", e => EditItem(e.Value))
-    .OnRowAction("delete", async e => await DeleteItem(e.Value))
+        MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
+        MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete))
+    .OnRowAction(e =>
+    {
+        var args = e.Value;
+        if (!Enum.TryParse<RowAction>(args.Tag?.ToString(), ignoreCase: true, out var action)) return ValueTask.CompletedTask;
+        var rowId = ResolveId(args.Id);
+        if (rowId < 0) return ValueTask.CompletedTask;
+        if (action == RowAction.Edit) EditItem(rowId);
+        else if (action == RowAction.Delete) DeleteItem(rowId);
+        return ValueTask.CompletedTask;
+    })
 ```
 
 </Body>
@@ -480,26 +492,24 @@ items.ToDataTable()
     })
 ```
 
-For row-level action buttons (edit, delete), use `RowActions()` + `OnRowAction()`:
+For row-level action buttons (edit, delete), use the **fluent API** with **enum tags** and <c>Enum.TryParse</c>:
 
 ```csharp
-items.ToDataTable()
+private enum RowAction { Edit, Delete }
+
+items.ToDataTable(idSelector: e => e.Id)
     .RowActions(
-        MenuItem.Default(Icons.Pencil, "edit"),
-        MenuItem.Default(Icons.Trash2, "delete")
-    )
-    .OnRowAction(async e =>
+        MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
+        MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete))
+    .OnRowAction(e =>
     {
         var args = e.Value;
-        var tag = args.Tag?.ToString();
-        if (tag == "edit")
-        {
-            // Handle edit
-        }
-        else if (tag == "delete")
-        {
-            // Handle delete
-        }
+        if (!Enum.TryParse<RowAction>(args.Tag?.ToString(), ignoreCase: true, out var action)) return ValueTask.CompletedTask;
+        var rowId = ResolveId(args.Id);
+        if (rowId < 0) return ValueTask.CompletedTask;
+        if (action == RowAction.Edit) { /* open edit dialog */ }
+        else if (action == RowAction.Delete) { /* remove row */ }
+        return ValueTask.CompletedTask;
     })
 ```
 
