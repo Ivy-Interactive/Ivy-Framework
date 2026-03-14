@@ -395,25 +395,15 @@ new Box("Content").Overflow(Overflow.Scroll);
 
 ### Border Support for Layouts
 
-LayoutView and StackLayout now support borders with full control over color, thickness, radius, and style.
-
-**Adding Borders:**
+LayoutView and StackLayout support borders: `.Border(color, thickness)` or fine-grained `.BorderColor()`, `.BorderThickness()`, `.BorderStyle()`, `.BorderRadius()`.
 
 ```csharp
-Layout.Horizontal()
-    .Border(Colors.Red, new Thickness(top: 2, right: 1, bottom: 2, left: 1))
-    | new Text("Custom border thickness");
-```
-
-**Fine-Grained Border Control:**
-
-```csharp
-// Full control over all border properties
 Layout.Vertical()
-    .BorderColor(Colors.Primary)
-    .BorderThickness(2)
-    .BorderStyle(BorderStyle.Solid)
-    .BorderRadius(BorderRadius.Rounded)
+    .Border(Colors.Red, new Thickness(top: 2, right: 1, bottom: 2, left: 1))
+    | new Text("Custom border");
+
+Layout.Vertical()
+    .BorderColor(Colors.Primary).BorderThickness(2).BorderStyle(BorderStyle.Solid).BorderRadius(BorderRadius.Rounded)
     | new Text("Fully customized border");
 ```
 
@@ -695,8 +685,6 @@ return Layout.Vertical()
 ### BoolInput - Loading State Support
 
 The `BoolInput` widget now supports a loading state across all variants (Checkbox, Switch, and Toggle). When in loading state, the widget displays a spinner overlay and is automatically disabled to prevent user interaction during async operations.
-
-**Basic usage:**
 
 ```csharp
 var isEnabled = UseState(true);
