@@ -642,6 +642,25 @@ return selected.ToSelectInput()
     .Variant(SelectInputVariant.Dropdown);
 ```
 
+### Progress Builder for Table Cells
+
+Custom Range and Format String:
+
+Configure custom min/max ranges and display the value alongside the progress bar:
+
+```csharp
+var downloads = new[] {
+    new { File = "report.pdf", Downloaded = 750, Total = 1000 }
+};
+
+new Table(downloads)
+    .Builder(d => d.Downloaded, f => f.Progress()
+        .Min(0)
+        .Max(1000)
+        .AutoColor()
+        .Format("%d bytes"));
+```
+
 ### Server-to-Client Streaming with UseStream Hook
 
 Ivy now supports efficient server-to-client streaming with the new UseStream hook.
