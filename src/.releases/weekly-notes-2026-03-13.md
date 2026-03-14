@@ -680,29 +680,16 @@ var streamingBlock = new RichTextBlock { Stream = "chat", Runs = [new() { Conten
 
 ### ReadOnlyInput - Copy Button and Placeholder Support
 
-The `ReadOnlyInput` widget now supports two new fluent extension methods:
-
-**ShowCopyButton()** - Control visibility of the copy button:
+`ReadOnlyInput` supports `.ShowCopyButton(bool)` (default true) and `.Placeholder(text)` for empty values:
 
 ```csharp
 var apiKey = UseState("sk-1234567890abcdef");
-
-// Show copy button (default)
-return apiKey.ToReadOnlyInput()
-    .ShowCopyButton();
-
-// Hide copy button
-return apiKey.ToReadOnlyInput()
-    .ShowCopyButton(false);
-```
-
-**Placeholder()** - Set placeholder text for empty read-only inputs:
-
-```csharp
 var result = UseState("");
 
-return result.ToReadOnlyInput()
-    .Placeholder("No data available");
+return Layout.Vertical()
+    | apiKey.ToReadOnlyInput().ShowCopyButton()           // copy visible (default)
+    | apiKey.ToReadOnlyInput().ShowCopyButton(false)     // copy hidden
+    | result.ToReadOnlyInput().Placeholder("No data available");
 ```
 
 ### BoolInput - Loading State Support
