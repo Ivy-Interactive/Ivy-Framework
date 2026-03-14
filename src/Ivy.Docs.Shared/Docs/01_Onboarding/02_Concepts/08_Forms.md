@@ -724,14 +724,6 @@ public class OnChangeStrategyExample : ViewBase
         var settings = UseState(() => new SettingsModel("Default", "Light", 14));
         var client = UseService<IClientProvider>();
 
-        UseEffect(() =>
-        {
-            if (!string.IsNullOrEmpty(settings.Value.Name))
-            {
-                client.Toast($"Settings auto-saved: {settings.Value.Name}");
-            }
-        }, settings);
-
         return Layout.Vertical()
             | settings.ToForm()
                 .SubmitStrategy(FormSubmitStrategy.OnChange)
