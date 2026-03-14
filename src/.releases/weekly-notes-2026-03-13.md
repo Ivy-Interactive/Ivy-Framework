@@ -651,123 +651,32 @@ return selected.ToSelectInput()
 
 ### RichTextBlock - Styled Text with Links and Streaming
 
-A new `RichTextBlock` widget enables rich text formatting with support for text styling, hyperlinks, and real-time streaming content.
-
-**Text Styling Options:**
-
-- **Bold**, *italic*, and ~~strikethrough~~ text
-- Custom text and highlight colors
-- Word-by-word spacing control
-
-**Hyperlinks:**
+The `RichTextBlock` widget supports styled runs (bold, italic, strikethrough, color, highlight, word spacing), hyperlinks (with `LinkTarget.Blank`), programmatic `OnLinkClick`, and streaming via `Text.Rich().UseStream(stream)` or the `Stream` property with `Stream(streamId, run)`. Also: `TextAlignment`, `NoWrap`, `Overflow`, `Density`.
 
 ```csharp
-// Create a RichTextBlock with styled text and links
+// Styling, links, OnLinkClick
 var richText = new RichTextBlock
 {
     Runs = new List<TextRun>
     {
-        new() { Content = "Visit our ", Word = true },
-        new()
-        {
-            Content = "documentation",
-            Link = "https://docs.example.com",
-            LinkTarget = LinkTarget.Blank,  // Opens in new tab
-            Word = true
-        },
-        new() { Content = " for more info.", Word = true }
-    }
-};
-```
-
-**Text Styling:**
-
-```csharp
-var richText = new RichTextBlock
-{
-    Runs = new List<TextRun>
-    {
-        new() { Content = "Bold text", Bold = true, Word = true },
-        new() { Content = "Italic text", Italic = true, Word = true },
-        new() { Content = "Colored text", Color = "Red", Word = true },
-        new()
-        {
-            Content = "Highlighted text",
-            HighlightColor = "Yellow",
-            Word = true
-        }
-    }
-};
-```
-
-**Link Click Events:**
-Handle link clicks programmatically instead of navigating:
-
-```csharp
-var richText = new RichTextBlock
-{
-    Runs = new List<TextRun>
-    {
-        new()
-        {
-            Content = "Click me",
-            Link = "/action",
-            Word = true
-        }
+        new() { Content = "Bold ", Bold = true, Word = true },
+        new() { Content = "italic ", Italic = true, Word = true },
+        new() { Content = "strikethrough ", StrikeThrough = true, Word = true },
+        new() { Content = "colored ", Color = "Red", Word = true },
+        new() { Content = "highlighted ", HighlightColor = "Yellow", Word = true },
+        new() { Content = "Visit ", Word = true },
+        new() { Content = "docs", Link = "https://docs.example.com", LinkTarget = LinkTarget.Blank, Word = true },
+        new() { Content = " or ", Word = true },
+        new() { Content = "action", Link = "/action", Word = true }
     },
-    OnLinkClick = (url) =>
-    {
-        // Handle the link click
-        Console.WriteLine($"User clicked: {url}");
-    }
+    OnLinkClick = (url) => Console.WriteLine($"Clicked: {url}")
 };
-```
 
-**Streaming Support:**
-Stream text runs in real-time for dynamic content:
-
-Using `UseStream` with the builder API:
-
-```csharp
+// Streaming: builder API or by stream ID
 var stream = Context.UseStream<TextRun>();
-
-var streamingText = Text.Rich()
-    .Bold("🤖 AI: ")
-    .UseStream(stream);
-
-// In an async handler (e.g., button click)
-var words = "The meaning of life is 42.".Split(' ');
-foreach (var word in words)
-{
-    await Task.Delay(100);  // Simulate LLM token delay
-    stream.Write(new TextRun(word) { Word = true });
-}
+var streamingText = Text.Rich().Bold("🤖 ").UseStream(stream);  // stream.Write(new TextRun(word) { Word = true });
+var streamingBlock = new RichTextBlock { Stream = "chat", Runs = [new() { Content = "AI: ", Bold = true }] };  // Stream("chat", new TextRun { Content = "Hi!", Word = true });
 ```
-
-Using `Stream` property with stream ID:
-
-```csharp
-var streamId = "chat-response";
-var richText = new RichTextBlock
-{
-    Stream = streamId,
-    Runs = new List<TextRun>
-    {
-        new() { Content = "AI Response: ", Bold = true }
-    }
-};
-
-// Stream additional runs as they become available
-await Stream(streamId, new TextRun { Content = "Hello ", Word = true });
-await Stream(streamId, new TextRun { Content = "world!", Word = true });
-```
-
-**Additional Properties:**
-
-- `TextAlignment` - Control text alignment (Left, Center, Right, Justify)
-- `NoWrap` - Prevent text wrapping
-- `Overflow` - Control overflow behavior
-- `Density` - Set text size (Small, Large)
 
 ### ReadOnlyInput - Copy Button and Placeholder Support
 
