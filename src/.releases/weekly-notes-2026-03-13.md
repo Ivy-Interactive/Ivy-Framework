@@ -921,7 +921,49 @@ The `MetricView` component now colors its progress bar based on achievement perc
 
 Assembly scanning (apps, widgets, connections, extensions) now uses `GetLoadableTypes()` so missing optional references (e.g. Ivy.Filters not deployed) no longer cause `ReflectionTypeLoadException` and crashes.
 
-### Bug Fixes
+## Developer Experience Improvements
+
+### Compile-Time Analyzer for App Constructor Requirements
+
+Roslyn analyzer **IVYAPP001** flags `[App]` classes that use constructor injection (Ivy instantiates apps via `Activator.CreateInstance`). Use `UseService<T>()` inside `Build()` instead. `Server.UseChrome<T>()` and `Server.UseErrorNotFound<T>()` now have `new()` constraints; runtime validation in `AppDescriptor.CreateApp()` gives a clear error if issues are missed.
+
+### Compile-Time Analyzers for Widget Child Misuse
+
+- **IVYCHILD001**: Flags adding children to leaf widgets (Button, Badge, inputs, charts, DataTable, etc.).
+- **IVYCHILD002**: Warns when multiple children are added to single-child widgets (Card, Sheet, FloatingPanel, etc.); wrap in a layout instead.
+- **IVYCHILD003**: Enforces `[ChildType]` so only allowed child types (e.g. MenuItem for DropDownMenu) are accepted. Widget authors can use `[ChildType(typeof(T))]`; the analyzer checks direct children, arrays, and `IEnumerable<T>`.
+
+### Compile-Time Analyzer for Hook Results in Class Members
+
+**IVYHOOK006** flags when `Use*` hook results are assigned to class fields or properties instead of local variables. Storing hook results in class members breaks Ivy's hook indexing and leads to wrong indices across renders. Store in local variables or discard.
+
+### Hook Usage Analyzer - Clearer Error Messages
+
+- **IVYHOOK001** now only fires for hooks called outside `Build()` (e.g. in helper methods).
+- **IVYHOOK001B** fires for hooks inside lambdas, local functions, or anonymous methods within `Build()`.
+- Error messages explain the "same order on every render" constraint and name the closure type when relevant.
+
+### Size.Fraction and Size.FractionGap - Decimal/Double Overloads Removed
+
+The `decimal` and `double` overloads have been removed to fix ambiguous call errors (CS0121). Use `float` with the `f` suffix or cast: `Size.Fraction(0.5f)`, `Size.FractionGap((float)ratio)`.
+
+### Size.Percent() - Intuitive Percentage-Based Sizing
+
+New overloads: `Size.Percent(50)` (integer) and `Size.Percent("75%")` (string) for percentage-based width/height.
+
+### Connection Name Error Messages
+
+When using `--test-connection` or `--describe-connection` with a non-existent connection name, the error message now lists all available connections.
+
+### CLI Commands Work Alongside Running Instances
+
+CLI diagnostic commands (`--describe`, `--describe-connection`, `--test-connection`) run successfully even when an Ivy app is already running on the configured port.
+
+### Server Binds to Localhost
+
+Ivy apps now bind to `localhost` instead of the wildcard address, eliminating Windows Firewall prompts during development.
+
+## Bug Fixes
 
 - Form Submit Strategy Hook Ordering
 - RichTextBlock Stream Subscription Fix
