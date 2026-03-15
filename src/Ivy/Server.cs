@@ -48,6 +48,8 @@ public record ServerArgs
 
     public bool BindAll { get; set; } = false;
 
+    public string? PathBase { get; set; } = null;
+
     /// <summary>
     /// True when the process is running a CLI-only command (--describe, --describe-connection, --test-connection)
     /// that needs DI but should not bind a real port.
@@ -631,6 +633,9 @@ public class Server
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
 
+        if (!string.IsNullOrEmpty(_args.PathBase))
+            app.UsePathBase(_args.PathBase);
+
         app.UseRouting(); // First routing pass - match explicit routes (gRPC, controllers)
         app.UsePathToAppId(); // Rewrite path to appId if no endpoint matched
         app.UseRouting(); // Second routing pass - route the rewritten path
@@ -914,6 +919,7 @@ public static class WebApplicationExtensions
                 var html = await reader.ReadToEndAsync();
 
                 var pipeline = new HtmlPipeline()
+                    .Use<PathBaseFilter>()
                     .Use<LicenseFilter>()
                     .Use<DevToolsFilter>()
                     .Use<MetaDescriptionFilter>()

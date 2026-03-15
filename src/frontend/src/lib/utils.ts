@@ -205,6 +205,12 @@ function isAllowedIvyHost(origin: string): boolean {
   }
 }
 
+export function getIvyPathBase(): string {
+  return (
+    document.querySelector('meta[name="ivy-path-base"]')?.getAttribute('content') ?? ''
+  );
+}
+
 export function getIvyHost(): string {
   // Never trust user-supplied ivyHost from URL parameters.
   // Only use meta tag or real origin.
@@ -229,7 +235,7 @@ export function getIvyHost(): string {
       if (url.protocol === 'https:' || url.protocol === 'http:') {
         const metaOrigin = url.origin;
         if (isAllowedIvyHost(metaOrigin)) {
-          return metaOrigin;
+          return metaOrigin + getIvyPathBase();
         }
       }
     } catch {
@@ -237,7 +243,7 @@ export function getIvyHost(): string {
     }
   }
 
-  return window.location.origin;
+  return window.location.origin + getIvyPathBase();
 }
 
 export function camelCase(titleCase: unknown): unknown {

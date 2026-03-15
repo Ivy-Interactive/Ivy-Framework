@@ -610,50 +610,78 @@ public static class Utils
 
     public static void KillProcessUsingPort(int port)
     {
-        if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-            throw new NotSupportedException("This method is only supported on Windows.");
-
-        var netstat = new Process
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            StartInfo = new ProcessStartInfo
+            var netstat = new Process
             {
-                FileName = "netstat",
-                Arguments = "-ano",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "netstat",
+                    Arguments = "-ano",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            netstat.Start();
+            string output = netstat.StandardOutput.ReadToEnd();
+            netstat.WaitForExit();
+
+            var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+            var regex = new Regex(@"\s+");
+
+            foreach (var line in lines)
+            {
+                if (!line.Trim().StartsWith("TCP"))
+                    continue;
+                var parts = regex.Split(line.Trim());
+                if (parts.Length < 5)
+                    continue;
+                string localAddress = parts[1];
+                string pidStr = parts[4];
+                int colonIndex = localAddress.LastIndexOf(':');
+                if (colonIndex == -1)
+                    continue;
+                if (!int.TryParse(localAddress[(colonIndex + 1)..], out int linePort) || linePort != port) continue;
+                if (!int.TryParse(pidStr, out int pid)) continue;
+                if (pid == 0) continue;
+                try
+                {
+                    Process.GetProcessById(pid).Kill();
+                }
+                catch (Exception)
+                {
+                    //ignore
+                }
             }
-        };
-        netstat.Start();
-        string output = netstat.StandardOutput.ReadToEnd();
-        netstat.WaitForExit();
-
-        var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        var regex = new Regex(@"\s+");
-
-        foreach (var line in lines)
+        }
+        else
         {
-            if (!line.Trim().StartsWith("TCP"))
-                continue;
-            var parts = regex.Split(line.Trim());
-            if (parts.Length < 5)
-                continue;
-            string localAddress = parts[1];
-            string pidStr = parts[4];
-            int colonIndex = localAddress.LastIndexOf(':');
-            if (colonIndex == -1)
-                continue;
-            if (!int.TryParse(localAddress[(colonIndex + 1)..], out int linePort) || linePort != port) continue;
-            if (!int.TryParse(pidStr, out int pid)) continue;
-            if (pid == 0) continue;
-            try
+            var lsof = new Process
             {
-                Process.GetProcessById(pid).Kill();
-                //Console.WriteLine($"Killed process {pid} using port {port}");
-            }
-            catch (Exception)
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "lsof",
+                    Arguments = $"-ti tcp:{port}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                }
+            };
+            lsof.Start();
+            var pids = lsof.StandardOutput.ReadToEnd().Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            lsof.WaitForExit();
+
+            foreach (var pidStr in pids)
             {
-                //ignore
+                if (!int.TryParse(pidStr.Trim(), out var pid)) continue;
+                try
+                {
+                    Process.GetProcessById(pid).Kill();
+                }
+                catch (Exception)
+                {
+                    //ignore
+                }
             }
         }
     }

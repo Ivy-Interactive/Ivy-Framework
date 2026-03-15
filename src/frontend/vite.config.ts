@@ -68,6 +68,9 @@ const injectMeta = (mode: string): Plugin => {
 };
 
 export default defineConfig(({ mode }) => ({
+  // Relative base so assets work under any path prefix (e.g. /{customerId}/studio).
+  // index.html hrefs are rewritten by PathBaseFilter at runtime.
+  base: './',
   plugins: [react(), tailwindcss(), injectMeta(mode)] as Plugin[],
   server: {
     proxy: {
