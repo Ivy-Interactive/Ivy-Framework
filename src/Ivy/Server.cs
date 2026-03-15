@@ -45,6 +45,7 @@ public record ServerArgs
 #else
     public bool FindAvailablePort { get; set; } = false;
 #endif
+    public string? Host { get; set; } = null;
 
     /// <summary>
     /// True when the process is running a CLI-only command (--describe, --describe-connection, --test-connection)
@@ -87,6 +88,11 @@ public class Server
         if (bool.TryParse(Environment.GetEnvironmentVariable("VERBOSE"), out bool parsedVerbose))
         {
             _args = _args with { Verbose = parsedVerbose };
+        }
+
+        if (Environment.GetEnvironmentVariable("HOST") is { } host)
+        {
+            _args = _args with { Host = host };
         }
 
         _args = _args with
@@ -519,8 +525,10 @@ public class Server
         // so use port 0 to avoid conflicts with a running instance.
         // Bind to localhost for local dev (avoids Windows Firewall prompt),
         // but use wildcard in containers so health probes can reach the app.
+        // On Sliplane or other hosted environments, we usually have PORT set and need to listen on 0.0.0.0.
         var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
-        var host = isContainer ? "*" : "localhost";
+        var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
+        var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
         var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://{host}:{_args.Port}";
         builder.WebHost.UseUrls(bindUrl);
 
