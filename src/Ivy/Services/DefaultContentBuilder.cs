@@ -82,7 +82,7 @@ public class DefaultContentBuilder : IContentBuilder
             return TaskViewFactory.FromTask(task);
         }
 
-        if (Utils.IsObservable(content))
+        if (TypeHelper.IsObservable(content))
         {
             return ObservableViewFactory.FromObservable(content);
         }

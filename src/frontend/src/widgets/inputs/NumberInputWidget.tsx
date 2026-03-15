@@ -76,6 +76,7 @@ interface NumberInputBaseProps {
   density?: Densities;
   prefix?: Affix;
   suffix?: Affix;
+  noGrouping?: boolean;
 }
 
 interface NumberInputWidgetProps
@@ -231,6 +232,7 @@ const NumberVariant = memo(
     density = Densities.Medium,
     prefix,
     suffix,
+    noGrouping,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
     const formatConfig = useMemo(
@@ -238,11 +240,11 @@ const NumberVariant = memo(
         style: formatStyleMap[formatStyle],
         minimumFractionDigits: 0,
         maximumFractionDigits: precision,
-        useGrouping: true,
+        useGrouping: !(noGrouping ?? false),
         notation: 'standard' as const,
         currency: currency || undefined,
       }),
-      [currency, formatStyle, precision]
+      [currency, formatStyle, precision, noGrouping]
     );
 
     const handleNumberChange = useCallback(

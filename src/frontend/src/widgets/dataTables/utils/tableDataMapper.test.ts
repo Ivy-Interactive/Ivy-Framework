@@ -5,9 +5,7 @@ import { ColType } from '../types/types';
 
 describe('tableDataMapper', () => {
   describe('convertArrowTableToData', () => {
-    // TODO: Fix this test
-    // This did not work
-    it.skip('should convert Arrow table with basic data types', () => {
+    it('should convert Arrow table with basic data types', () => {
       const mockField1 = { name: 'id', type: { toString: () => 'int64' } };
       const mockField2 = { name: 'name', type: { toString: () => 'utf8' } };
       const mockField3 = { name: 'active', type: { toString: () => 'bool' } };
@@ -153,9 +151,7 @@ describe('tableDataMapper', () => {
       expect(result.rows).toEqual([{ values: [] }]);
     });
 
-    // TODO: Fix this test
-    // This did not work
-    it.skip('should handle various data types correctly', () => {
+    it('should handle various data types correctly', () => {
       const mockFields = [
         { name: 'int_col', type: { toString: () => 'int32' }, metadata: null },
         {
@@ -225,6 +221,75 @@ describe('tableDataMapper', () => {
           width: expect.any(Number),
         },
       ]);
+    });
+
+    it('should convert Arrow Decimal128 objects to JS numbers', () => {
+      // Simulate real Arrow DecimalBigNum objects — valueOf(scale) returns the correct number
+      const decimalValues = [
+        {
+          valueOf: (scale?: number) =>
+            scale === 28 ? 150000 : 15000000000000000000000000000000n,
+          toString: () => '15000000000000000000000000000000',
+        },
+        {
+          valueOf: (scale?: number) =>
+            scale === 28 ? 99.95 : 9995000000000000000000000000000n,
+          toString: () => '9995000000000000000000000000000',
+        },
+      ];
+
+      const mockField = {
+        name: 'price',
+        type: {
+          toString: () => 'Decimal128(38, 28)',
+          scale: 28,
+          precision: 38,
+        },
+        metadata: null,
+      };
+      const mockSchema = { fields: [mockField] };
+      // get() is called during width calculation (2 samples) AND row extraction (2 rows)
+      const mockColumn = {
+        get: vi.fn((i: number) => decimalValues[i]),
+        length: 2,
+      };
+
+      const mockTable = {
+        schema: mockSchema,
+        numRows: 2,
+        numCols: 1,
+        getChildAt: vi.fn().mockReturnValue(mockColumn),
+      } as unknown as arrow.Table;
+
+      const result = convertArrowTableToData(mockTable, 5);
+
+      expect(result.columns[0].type).toBe(ColType.Number);
+      expect(result.rows[0].values[0]).toBe(150000);
+      expect(result.rows[1].values[0]).toBe(99.95);
+      // Verify they are actual numbers, not objects
+      expect(typeof result.rows[0].values[0]).toBe('number');
+    });
+
+    it('should handle null decimal values without conversion', () => {
+      const mockField = {
+        name: 'amount',
+        type: { toString: () => 'Decimal128(18, 2)' },
+        metadata: null,
+      };
+      const mockSchema = { fields: [mockField] };
+      const mockColumn = { get: vi.fn() };
+      mockColumn.get.mockReturnValueOnce(null);
+
+      const mockTable = {
+        schema: mockSchema,
+        numRows: 1,
+        numCols: 1,
+        getChildAt: vi.fn().mockReturnValue(mockColumn),
+      } as unknown as arrow.Table;
+
+      const result = convertArrowTableToData(mockTable, 5);
+
+      expect(result.rows[0].values[0]).toBeNull();
     });
 
     it('should handle type inference from Arrow types', () => {

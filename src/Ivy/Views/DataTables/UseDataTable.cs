@@ -10,10 +10,15 @@ public static class UseDataTableExtensions
 {
     public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, RefreshToken? refreshToken = null)
     {
-        return UseDataTable(context, queryable, null, refreshToken);
+        return UseDataTable(context, queryable, null, null, refreshToken);
     }
 
     public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, Func<object, object?>? idSelector, RefreshToken? refreshToken = null)
+    {
+        return UseDataTable(context, queryable, idSelector, null, refreshToken);
+    }
+
+    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, Func<object, object?>? idSelector, DataTableColumn[]? columns, RefreshToken? refreshToken = null)
     {
         var connection = context.UseState<DataTableConnection?>(buildOnChange: false);
         var lastQueryable = context.UseState<object?>(buildOnChange: false);
@@ -36,7 +41,8 @@ public static class UseDataTableExtensions
         {
             cleanup.Value?.Dispose();
 
-            var (newCleanup, newConnection) = dataTableService.AddQueryable(queryable, idSelector);
+            var columnNames = columns?.Select(c => c.Name).ToArray();
+            var (newCleanup, newConnection) = dataTableService.AddQueryable(queryable, idSelector, columnNames);
             resultConnection = newConnection with { VersionToken = versionToken };
 
             connection.Set(resultConnection);

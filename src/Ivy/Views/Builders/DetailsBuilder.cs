@@ -68,6 +68,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
             .Union(
                 type
                     .GetProperties()
+                    .Where(p => p.GetIndexParameters().Length == 0)
                     .Where(p => p.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
                     .Select(e => new { e.Name, Type = e.PropertyType, FieldInfo = (FieldInfo)null!, PropertyInfo = e })
             )
@@ -75,7 +76,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
         foreach (var field in fields)
         {
-            var label = Utils.LabelFor(field.Name, field.Type);
+            var label = StringHelper.LabelFor(field.Name, field.Type);
             _items[field.Name] =
                 new Item(
                     label,
@@ -178,7 +179,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
     private Item GetField<TU>(Expression<Func<TModel, TU>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _items[name];
     }
 
@@ -188,7 +189,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
         if (_removeEmpty)
         {
-            items = items.Where(e => !Utils.IsEmptyContent(e.GetValue(_model))).ToArray();
+            items = items.Where(e => !ValidationHelper.IsEmptyContent(e.GetValue(_model))).ToArray();
         }
 
         var details = new Details(items.Select(BuildDetail).ToArray()).Density(_density);

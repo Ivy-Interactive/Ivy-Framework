@@ -24,7 +24,7 @@ public class DataTableBuilder<TModel>(
     private RefreshToken? _refreshToken;
 
     private readonly string? _idColumnName =
-        idSelector != null ? Utils.GetNameFromMemberExpression(idSelector.Body) : null;
+        idSelector != null ? TypeHelper.GetNameFromMemberExpression(idSelector.Body) : null;
 
     private readonly Func<TModel, object?>? _idSelectorFunc = idSelector?.Compile();
 
@@ -86,7 +86,7 @@ public class DataTableBuilder<TModel>(
                 Column = new DataTableColumn()
                 {
                     Name = field.Name,
-                    Header = Utils.LabelFor(field.Name, field.Type),
+                    Header = StringHelper.LabelFor(field.Name, field.Type),
                     ColType = DataTableBuilderHelpers.GetDataTypeHint(field.Type),
                     Align = align,
                     Order = order++
@@ -117,7 +117,7 @@ public class DataTableBuilder<TModel>(
 
     private InternalColumn GetColumn(Expression<Func<TModel, object>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _columns[name];
     }
 
@@ -209,7 +209,7 @@ public class DataTableBuilder<TModel>(
     {
         foreach (var field in fields)
         {
-            var name = Utils.GetNameFromMemberExpression(field.Body);
+            var name = TypeHelper.GetNameFromMemberExpression(field.Body);
             if (!_columns.TryGetValue(name, out var hint)) continue;
             hint.Removed = true;
         }
@@ -271,7 +271,7 @@ public class DataTableBuilder<TModel>(
 
     public DataTableBuilder<TModel> OnCellAction(Expression<Func<TModel, object>> field, EventHandler<object> action)
     {
-        var columnName = Utils.GetNameFromMemberExpression(field.Body);
+        var columnName = TypeHelper.GetNameFromMemberExpression(field.Body);
         _cellActions[columnName] = action;
         return this;
     }

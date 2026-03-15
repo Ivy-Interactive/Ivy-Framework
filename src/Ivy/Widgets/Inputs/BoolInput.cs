@@ -271,7 +271,7 @@ public static class BoolInputExtensions
     {
         if (string.IsNullOrEmpty(input.Label))
         {
-            input.Label = Utils.SplitPascalCase(name) ?? name;
+            input.Label = StringHelper.SplitPascalCase(name) ?? name;
         }
 
         return input;
