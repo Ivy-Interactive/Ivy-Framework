@@ -40,6 +40,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   const [minLengthError, setMinLengthError] = useState<string | undefined>(
     undefined
   );
+  const [patternError, setPatternError] = useState<string | undefined>(
+    undefined
+  );
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
   // Wrapper to normalize null/undefined to empty string for useSyncServerValue
@@ -67,9 +70,21 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       if (minLength !== undefined && newValue.length >= minLength) {
         setMinLengthError(undefined);
       }
+      // Clear the pattern error as soon as the value matches the pattern
+      if (pattern && newValue.length > 0) {
+        try {
+          if (new RegExp(pattern).test(newValue)) {
+            setPatternError(undefined);
+          }
+        } catch {
+          // Invalid regex — ignore
+        }
+      } else if (pattern && newValue.length === 0) {
+        setPatternError(undefined);
+      }
       if (events.includes('OnChange')) eventHandler('OnChange', id, [newValue]);
     },
-    [eventHandler, id, events, minLength]
+    [eventHandler, id, events, minLength, pattern]
   );
 
   const handleBlur = useCallback(() => {
@@ -82,8 +97,18 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     ) {
       setMinLengthError(`Minimum ${minLength} characters required`);
     }
+    // Show validation error if value is non-empty but doesn't match the pattern
+    if (pattern && localValue.length > 0) {
+      try {
+        if (!new RegExp(pattern).test(localValue)) {
+          setPatternError('Please match the requested format');
+        }
+      } catch {
+        // Invalid regex — ignore
+      }
+    }
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
-  }, [eventHandler, id, events, minLength, localValue]);
+  }, [eventHandler, id, events, minLength, pattern, localValue]);
 
   const handleSubmit = useCallback(() => {
     if (events.includes('OnSubmit')) eventHandler('OnSubmit', id, []);
@@ -108,8 +133,8 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     [eventHandler, id, events, disabled, nullable]
   );
 
-  // Server-provided `invalid` takes precedence; fall back to the local minLength error
-  const effectiveInvalid = invalid ?? minLengthError;
+  // Server-provided `invalid` takes precedence; fall back to local validation errors
+  const effectiveInvalid = invalid ?? minLengthError ?? patternError;
 
   const commonProps = useMemo(
     () => ({
