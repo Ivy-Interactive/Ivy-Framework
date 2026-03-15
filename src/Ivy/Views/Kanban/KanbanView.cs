@@ -1,8 +1,8 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views.Kanban;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class KanbanView<TModel, TGroupKey>(IEnumerable<TModel> model) : ViewBase, IStateless
     where TGroupKey : notnull

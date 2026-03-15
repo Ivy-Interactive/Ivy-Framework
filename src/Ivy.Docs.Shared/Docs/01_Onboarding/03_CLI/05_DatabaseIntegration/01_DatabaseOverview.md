@@ -64,34 +64,6 @@ Available providers: `SqlServer`, `Postgres`, `MySql`, `MariaDb`, `Sqlite`, `Sup
 >ivy db add --verbose
 ```
 
-## Generating A Database Schema
-
-This command opens a GUI to guide you through the process of designing a database schema using generative AI:
-
-```terminal
->ivy db generate
-```
-
-First, you will be prompted for a choice of database provider, a format for table and field names, and a description of your database schema. Currently, database schema generation supports the providers SQLite, SQL Server, PostgreSQL, and MySQL, and the casing schemes `PascalCase`, `camelCase` and `snake_case`. The defaults are SQLite and `snake_case`.
-
-![Ivy Database Generator UI, start page](/ivy/assets/db_generator_1.webp "Ivy Database Generator UI")
-
-If you're having trouble coming up with a schema description, Ivy includes a variety of examples to serve as a starting point:
-
-![Ivy Database Generator UI, samples dropdown](/ivy/assets/db_generator_2.webp "Ivy Database Generator UI")
-
-On the next page, you can preview Ivy's generated schema on the left, with a graph of relationships on the right:
-
-![Ivy Database Generator UI, preview page](/ivy/assets/db_generator_3.webp "Ivy Database Generator UI")
-
-Finally, you can choose which apps to generate, make a final selection of database provider, tweak the connection string, and choose whether or not to generate seed data:
-
-![Ivy Database Generator UI, app selection page](/ivy/assets/db_generator_4.webp "Ivy Database Generator UI")
-
-Ivy will then generate your database schema and associated apps:
-
-![Ivy Database Generator UI, generation page](/ivy/assets/db_generator_5.webp "Ivy Database Generator UI")
-
 ## Supported Database Providers
 
 Ivy supports the following database providers. Click on any provider for detailed setup instructions:

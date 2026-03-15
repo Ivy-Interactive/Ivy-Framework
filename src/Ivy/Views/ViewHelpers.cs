@@ -1,7 +1,7 @@
-using Ivy.Client;
 using Ivy.Core;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class ViewHelpers
 {
@@ -25,7 +25,7 @@ public static class ViewHelpers
             catch (Exception ex)
             {
 #if DEBUG
-                Utils.PrintDetailedException(ex);
+                ExceptionHelper.PrintDetailedException(ex);
 #endif
                 client.Toast(ex);
             }
@@ -45,7 +45,7 @@ public static class ViewHelpers
             catch (Exception ex)
             {
 #if DEBUG
-                Utils.PrintDetailedException(ex);
+                ExceptionHelper.PrintDetailedException(ex);
 #endif
                 client.Toast(ex);
             }
@@ -65,7 +65,7 @@ public static class ViewHelpers
             catch (Exception ex)
             {
 #if DEBUG
-                Utils.PrintDetailedException(ex);
+                ExceptionHelper.PrintDetailedException(ex);
 #endif
                 client.Toast(ex);
             }
@@ -85,7 +85,7 @@ public static class ViewHelpers
             catch (Exception ex)
             {
 #if DEBUG
-                Utils.PrintDetailedException(ex);
+                ExceptionHelper.PrintDetailedException(ex);
 #endif
                 client.Toast(ex);
             }

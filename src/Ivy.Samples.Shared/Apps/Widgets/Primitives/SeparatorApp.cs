@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.Minus, path: ["Widgets", "Primitives"], searchHints: ["divider", "line", "horizontal", "vertical", "separator", "hr"])]
@@ -16,7 +14,10 @@ public class SeparatorApp : SampleBase
                     new Button(icon: Icons.Save, variant: ButtonVariant.Outline),
                     new Button(icon: Icons.Trash, variant: ButtonVariant.Outline)
                 ),
-                new Separator()
+                new Separator(),
+                new Separator("Left Aligned").TextAlign(TextAlignment.Left),
+                new Separator("Center Aligned").TextAlign(TextAlignment.Center),
+                new Separator("Right Aligned").TextAlign(TextAlignment.Right)
             );
     }
 }

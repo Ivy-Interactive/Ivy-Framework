@@ -1,5 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -17,13 +16,15 @@ public record Box : WidgetBase<Box>
     {
     }
 
-    [Prop] public Colors? Color { get; set; } = null;
+    [Prop] public Colors? Background { get; set; } = null;
 
-    [Prop] public Thickness BorderThickness { get; set; } = new(1);
+    [Prop] public Colors? BorderColor { get; set; } = null;
 
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
     [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.Solid;
+
+    [Prop] public Thickness BorderThickness { get; set; } = new(1);
 
     [Prop] public Thickness Padding { get; set; } = new(2);
 
@@ -32,13 +33,23 @@ public record Box : WidgetBase<Box>
     [Prop] public Align? ContentAlign { get; set; } = Align.TopLeft;
 
     [Prop] public float? Opacity { get; set; }
+
+    [Prop] public float? BorderOpacity { get; set; }
+
+    [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
+
+    [Event] public EventHandler<Event<Box>>? OnClick { get; set; }
 }
 
 public static class BoxExtensions
 {
-    public static Box Color(this Box box, Colors color) => box with { Color = color };
+    public static Box Background(this Box box, Colors color) => box with { Background = color };
 
-    public static Box Color(this Box box, Colors color, float opacity) => box with { Color = color, Opacity = (1.0f - opacity) * 100 };
+    public static Box Background(this Box box, Colors color, float opacity) => box with { Background = color, Opacity = (1.0f - opacity) * 100 };
+
+    public static Box BorderColor(this Box box, Colors color) => box with { BorderColor = color };
+
+    public static Box BorderColor(this Box box, Colors color, float opacity) => box with { BorderColor = color, BorderOpacity = (1.0f - opacity) * 100 };
 
     public static Box BorderThickness(this Box box, int thickness) => box with { BorderThickness = new(thickness) };
 
@@ -69,12 +80,54 @@ public static class BoxExtensions
     {
         return new Box(anything)
         {
-            BorderRadius = Shared.BorderRadius.None,
-            BorderStyle = Shared.BorderStyle.None,
+            BorderRadius = Ivy.BorderRadius.None,
+            BorderStyle = Ivy.BorderStyle.None,
             BorderThickness = new(0),
             Padding = new(0),
-            Color = null,
+            Background = null,
             ContentAlign = Align.Left
         }.Width(Size.Full()).Height(Size.Full());
+    }
+
+    public static Box Grow(this Box box) => box.Width(Size.Grow());
+
+    public static Box Hover(this Box box, CardHoverVariant variant) => box with { HoverVariant = variant };
+
+    private static CardHoverVariant HoverVariantWithClick(this Box box) => box.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : box.HoverVariant;
+
+    public static Box OnClick(this Box box, Func<Event<Box>, ValueTask> onClick)
+    {
+        return box with
+        {
+            HoverVariant = box.HoverVariantWithClick(),
+            OnClick = new(onClick)
+        };
+    }
+
+    public static Box OnClick(this Box box, Action<Event<Box>> onClick)
+    {
+        return box with
+        {
+            HoverVariant = box.HoverVariantWithClick(),
+            OnClick = new(onClick.ToValueTask())
+        };
+    }
+
+    public static Box OnClick(this Box box, Action onClick)
+    {
+        return box with
+        {
+            HoverVariant = box.HoverVariantWithClick(),
+            OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; })
+        };
+    }
+
+    public static Box OnClick(this Box box, Func<ValueTask> onClick)
+    {
+        return box with
+        {
+            HoverVariant = box.HoverVariantWithClick(),
+            OnClick = new(_ => onClick())
+        };
     }
 }

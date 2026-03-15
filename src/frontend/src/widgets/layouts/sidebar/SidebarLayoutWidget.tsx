@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useMemo,
   useRef,
+  useReducer,
 } from 'react';
 
 import Icon from '@/components/Icon';
@@ -33,8 +34,34 @@ interface SidebarLayoutWidgetProps {
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
   mainContentPadding?: number; // Padding for main content area (default: 2)
-  width?: string; // Width of the sidebar (default: 256px)
+  width?: string; // Width of the sidebar (Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue")
+  open?: boolean; // Whether the sidebar starts open (default: true)
+  resizable?: boolean; // Enable drag-to-resize on sidebar border
 }
+
+// Helper to parse a Size string to pixels
+const parseSizeToPixels = (
+  sizeStr: string | undefined,
+  defaultPx: number
+): number => {
+  if (!sizeStr) return defaultPx;
+  const [sizeType, value] = sizeStr.split(':');
+  const numValue = parseFloat(value);
+  if (isNaN(numValue)) return defaultPx;
+
+  switch (sizeType.toLowerCase()) {
+    case 'px':
+      return numValue;
+    case 'rem':
+      // Assume 16px base font size
+      return numValue * 16;
+    case 'units':
+      // Units are 0.25rem = 4px
+      return numValue * 4;
+    default:
+      return defaultPx;
+  }
+};
 
 // Helper function to check if a slot has meaningful content
 // Checks both props.children (legacy) and props.node (MemoizedWidget)
@@ -72,12 +99,24 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   mainAppSidebar = false,
   mainContentPadding,
   width,
+  open: openProp = true,
+  resizable = false,
 }) => {
+  // Parse Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue"
+  const [wantedWidth, minWidthStr, maxWidthStr] = (width ?? '').split(',');
+
   // Get sidebar width from the width prop (default set in backend)
   const sidebarWidth = getWidth(width).width as string;
+  const initialWidthPx = parseSizeToPixels(wantedWidth, 256);
+
+  // Parse min/max constraints from Size API (defaults match Streamlit: 200-600px)
+  const minWidthPx = parseSizeToPixels(minWidthStr, 200);
+  const maxWidthPx = parseSizeToPixels(maxWidthStr, 600);
+
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
     if (!mainAppSidebar) return true;
+    if (!openProp) return false;
 
     // Check if we're in a browser environment
     if (typeof window !== 'undefined') {
@@ -87,15 +126,103 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     return true; // Default to open if we can't determine width
   };
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(getInitialSidebarState);
-  const [isManuallyToggled, setIsManuallyToggled] = useState(false);
+  const [sidebarState, dispatchSidebar] = useReducer(
+    (
+      state: {
+        isSidebarOpen: boolean;
+        isManuallyToggled: boolean;
+        currentWidth: number;
+        isResizing: boolean;
+        prevInitialWidthPx: number;
+      },
+      action:
+        | Partial<typeof state>
+        | ((prev: typeof state) => Partial<typeof state>)
+    ) => {
+      const updates = typeof action === 'function' ? action(state) : action;
+      return { ...state, ...updates };
+    },
+    {
+      isSidebarOpen: getInitialSidebarState(),
+      isManuallyToggled: false,
+      currentWidth: initialWidthPx,
+      isResizing: false,
+      prevInitialWidthPx: initialWidthPx,
+    }
+  );
+  const {
+    isSidebarOpen,
+    isManuallyToggled,
+    currentWidth,
+    isResizing,
+    prevInitialWidthPx,
+  } = sidebarState;
+
   const containerRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  if (initialWidthPx !== prevInitialWidthPx) {
+    dispatchSidebar({ prevInitialWidthPx: initialWidthPx });
+    if (!isResizing) {
+      dispatchSidebar({ currentWidth: initialWidthPx });
+    }
+  }
+
+  // Handle resize drag
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      if (!resizable || !isSidebarOpen) return;
+
+      e.preventDefault();
+      dispatchSidebar({ isResizing: true });
+
+      const startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const startWidth = currentWidth;
+
+      const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
+        const clientX =
+          'touches' in moveEvent
+            ? moveEvent.touches[0].clientX
+            : moveEvent.clientX;
+        const delta = clientX - startX;
+        const newWidth = Math.min(
+          maxWidthPx,
+          Math.max(minWidthPx, startWidth + delta)
+        );
+        dispatchSidebar({ currentWidth: newWidth });
+      };
+
+      const handleEnd = () => {
+        dispatchSidebar({ isResizing: false });
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('mouseup', handleEnd);
+        document.removeEventListener('touchmove', handleMove);
+        document.removeEventListener('touchend', handleEnd);
+      };
+
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchmove', handleMove, { passive: true });
+      document.addEventListener('touchend', handleEnd, { passive: true });
+    },
+    [
+      resizable,
+      isSidebarOpen,
+      currentWidth,
+      minWidthPx,
+      maxWidthPx,
+      dispatchSidebar,
+    ]
+  );
+
+  // Get the effective sidebar width (use currentWidth when resizable)
+  const effectiveSidebarWidth = resizable ? `${currentWidth}px` : sidebarWidth;
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
-    setIsSidebarOpen(prev => !prev);
-    setIsManuallyToggled(true);
-  }, []);
+    dispatchSidebar(prev => ({ isSidebarOpen: !prev.isSidebarOpen }));
+    dispatchSidebar({ isManuallyToggled: true });
+  }, [dispatchSidebar]);
 
   // Auto-collapse/expand based on width (only for main app sidebar)
   useEffect(() => {
@@ -105,7 +232,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
       if (!isManuallyToggled) {
-        setIsSidebarOpen(e.matches);
+        dispatchSidebar({ isSidebarOpen: openProp && e.matches });
       }
     };
 
@@ -113,23 +240,34 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     mql.addEventListener('change', handleMediaChange);
     return () => mql.removeEventListener('change', handleMediaChange);
-  }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar]);
+  }, [
+    autoCollapseThreshold,
+    isManuallyToggled,
+    mainAppSidebar,
+    openProp,
+    dispatchSidebar,
+  ]);
 
   return (
     <div
       ref={containerRef}
       className="grid h-full w-full remove-parent-padding"
       style={{
-        gridTemplateColumns: isSidebarOpen ? `${sidebarWidth} 1fr` : '0 1fr',
-        transition: 'grid-template-columns 300ms ease-in-out',
+        gridTemplateColumns: isSidebarOpen
+          ? `${effectiveSidebarWidth} 1fr`
+          : '0 1fr',
+        transition: isResizing
+          ? 'none'
+          : 'grid-template-columns 300ms ease-in-out',
       }}
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-        style={{ width: sidebarWidth }}
+        ref={sidebarRef}
+        className={`flex h-full flex-col bg-background text-foreground border-r border-border relative overflow-hidden ${
+          isResizing ? '' : 'transition-transform duration-300 ease-in-out'
+        } ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ width: effectiveSidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
           <div className="flex flex-col shrink-0 p-2 space-y-4">
@@ -148,6 +286,39 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             <div className="flex flex-col p-2 gap-4 min-h-0">
               {slots?.SidebarFooter}
             </div>
+          </div>
+        )}
+        {/* Resize Handle */}
+        {resizable && isSidebarOpen && (
+          <div
+            className={cn(
+              'absolute top-0 right-0 w-1 h-full cursor-ew-resize group'
+            )}
+            onMouseDown={handleResizeStart}
+            onTouchStart={handleResizeStart}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize sidebar"
+            tabIndex={0}
+            onKeyDown={e => {
+              if (e.key === 'ArrowLeft') {
+                dispatchSidebar(prev => ({
+                  currentWidth: Math.max(minWidthPx, prev.currentWidth - 10),
+                }));
+              } else if (e.key === 'ArrowRight') {
+                dispatchSidebar(prev => ({
+                  currentWidth: Math.min(maxWidthPx, prev.currentWidth + 10),
+                }));
+              }
+            }}
+          >
+            <div
+              className={cn(
+                'absolute top-1/2 -translate-y-1/2 right-0 w-1 h-8 rounded-full bg-border',
+                'opacity-0 group-hover:opacity-100 transition-opacity',
+                isResizing && 'opacity-100'
+              )}
+            />
           </div>
         )}
       </div>
@@ -185,6 +356,8 @@ interface SidebarMenuWidgetProps {
   items: MenuItem[];
   searchActive?: boolean;
 }
+
+const EMPTY_ITEMS: MenuItem[] = [];
 
 const getFlatItemsInSearchRenderOrder = (items: MenuItem[]): MenuItem[] => {
   const result: MenuItem[] = [];
@@ -237,13 +410,14 @@ const CollapsibleMenuItem: React.FC<{
   const shouldBeOpen =
     expandedSections.has(item.label) || (item.expanded ?? false);
   const [isOpen, setIsOpen] = useState(shouldBeOpen);
+  const [prevShouldBeOpen, setPrevShouldBeOpen] = useState(shouldBeOpen);
   const itemRef = useRef<HTMLLIElement>(null);
 
-  // Sync local state with derived state when expandedSections changes
-  // Using useEffect to avoid setState during render
-  useEffect(() => {
+  // Sync local state with derived state
+  if (shouldBeOpen !== prevShouldBeOpen) {
+    setPrevShouldBeOpen(shouldBeOpen);
     setIsOpen(shouldBeOpen);
-  }, [shouldBeOpen]);
+  }
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -433,7 +607,7 @@ const renderMenuItems = (
 
 export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   id,
-  items = [],
+  items = EMPTY_ITEMS,
   searchActive = false,
 }) => {
   const eventHandler = useEventHandler();
@@ -720,6 +894,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         ).current = el;
         containerRef.current = el;
       }}
+      role="menu"
       tabIndex={0}
       onFocus={() => {
         if (searchActive && flatItems.length > 0) setSelectedIndex(0);

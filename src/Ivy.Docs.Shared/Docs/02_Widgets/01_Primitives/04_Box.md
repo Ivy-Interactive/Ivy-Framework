@@ -54,7 +54,7 @@ public class BorderStyleExamplesView : ViewBase
 
 ### Border Thickness
 
-Control the width of borders using the `BorderThickness` property. You can specify a single value for uniform thickness or use the [Thickness](../../04_ApiReference/IvyShared/Thickness.md) class for more precise control.
+Control the width of borders using the `BorderThickness` property. You can specify a single value for uniform thickness or use the [Thickness](../../04_ApiReference/Ivy/Thickness.md) class for more precise control.
 
 ```csharp demo-tabs
 public class BorderThicknessExamplesView : ViewBase
@@ -122,29 +122,67 @@ public class SpacingExamplesView : ViewBase
 }
 ```
 
-### Advanced Spacing
+### Advanced Features & Interactions
 
-Use the [Thickness](../../04_ApiReference/IvyShared/Thickness.md) class for more precise control over padding on different sides. This allows you to specify different spacing values for left, top, right, and bottom edges.
+Use the [Thickness](../../04_ApiReference/Ivy/Thickness.md) class for more precise control over padding on different sides. This allows you to specify different spacing values for left, top, right, and bottom edges.
+
+Boxes also support a wide range of [Colors](../../04_ApiReference/Ivy/Colors.md), and interactive states using `OnClick` and `Hover()`.
+
+The following example demonstrates combining these features to create status indicators, interactive selections, and professional card layouts.
 
 ```csharp demo-tabs
-public class AdvancedSpacingView : ViewBase
+public class BoxFeaturesView : ViewBase
 {
     public override object? Build()
     {
+        var client = UseService<IClientProvider>();
+        var selected = UseState("Option A");
+
         return Layout.Vertical().Gap(8)
-            | Layout.Horizontal().Gap(4)
-                | new Box("No Padding")
-                    .Width(Size.Fraction(1/2f))
-                | new Box("Uniform Padding (8)")
-                    .Padding(new Thickness(8))
-                    .Width(Size.Fraction(1/2f))
-            | Layout.Horizontal().Gap(4)
-                | new Box("Horizontal/Vertical (16,8)")
-                    .Padding(new Thickness(16, 8))
-                    .Width(Size.Fraction(1/2f))
-                | new Box("Asymmetric (24,12,6,18)")
+            | Layout.Grid().Columns(2).Gap(8)
+                // Advanced Spacing & Colors
+                | new Box("Asymmetric Padding & Primary Color")
                     .Padding(new Thickness(24, 12, 6, 18))
                     .Width(Size.Fraction(1/2f));
+    }
+}
+```
+
+### Interactive States
+
+Boxes support hover effects and click events.
+
+```csharp demo-tabs
+public class InteractiveBoxView : ViewBase
+{
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        var selected = UseState("Option A");
+
+        return Layout.Vertical().Gap(8)
+            | new Box("Pointer + Translate Hover")
+                .Hover(CardHoverVariant.PointerAndTranslate)
+                .OnClick(_ => client.Toast("Box clicked!"))
+                .Padding(8)
+            | Layout.Horizontal().Gap(4)
+                | CreateOption("Option A", selected, client)
+                | CreateOption("Option B", selected, client);
+    }
+
+    private Box CreateOption(string label, IState<string> selected, IClientProvider client)
+    {
+        var isSelected = selected.Value == label;
+        return new Box(label)
+            .Background(isSelected ? Colors.Primary : Colors.Muted)
+            .BorderThickness(isSelected ? 2 : 1)
+            .Hover(CardHoverVariant.Pointer)
+            .OnClick(_ => {
+                selected.Set(label);
+                client.Toast($"Selected: {label}");
+            })
+            .Padding(8)
+            .Width(Size.Fraction(1/2f));
     }
 }
 ```
@@ -159,16 +197,14 @@ public class ColorExamplesView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(4)
-            | new Box("Primary Color").Color(Colors.Primary).Padding(8);
+            | new Box("Primary Color").Background(Colors.Primary).Padding(8);
     }
 }
 ```
 
-For more colors, see the [Colors](../../04_ApiReference/IvyShared/Colors.md) reference.
+For more colors, see the [Colors](../../04_ApiReference/Ivy/Colors.md) reference.
 
-<WidgetDocs Type="Ivy.Box" ExtensionTypes="Ivy.BoxExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Box.cs"/>
-
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -184,19 +220,19 @@ public class StatusDashboardView : ViewBase
     {
         return Layout.Horizontal().Gap(4)
             | new Box("System Online")
-                .Color(Colors.Green)
+                .Background(Colors.Green)
                 .BorderRadius(BorderRadius.Rounded)
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
             | new Box("Warning: High CPU Usage")
-                .Color(Colors.Yellow)
+                .Background(Colors.Yellow)
                 .BorderStyle(BorderStyle.Dashed)
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
             | new Box("Database Error")
-                .Color(Colors.Red)
+                .Background(Colors.Red)
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f));
@@ -221,7 +257,7 @@ public class CardLayoutView : ViewBase
     {
         return Layout.Grid().Columns(2).Gap(8)
             | new Box()
-                .Color(Colors.White)
+                .Background(Colors.White)
                 .BorderRadius(BorderRadius.Rounded)
                 .BorderThickness(1)
                 .Padding(12)
@@ -229,20 +265,88 @@ public class CardLayoutView : ViewBase
                     Text.Label("User Profile"),
                     Text.P("John Doe"),
                     Text.P("Software Developer")
-                )
-            | new Box()
-                .Color(Colors.White)
-                .BorderRadius(BorderRadius.Rounded)
-                .BorderThickness(1)
-                .Padding(12)
-                .Content(
-                    Text.Label("Statistics"),
-                    Text.P("Projects: 15"),
-                    Text.P("Experience: 5 years")
                 );
+    }
+
+    private Box CreateOption(string label, IState<string> selected, IClientProvider client)
+    {
+        var isSelected = selected.Value == label;
+        return new Box(label)
+            .Background(isSelected ? Colors.Primary : Colors.Muted)
+            .BorderThickness(isSelected ? 2 : 1)
+            .Hover(CardHoverVariant.Pointer)
+            .OnClick(_ => {
+                selected.Set(label);
+                client.Toast($"Selected: {label}");
+            })
+            .Padding(8)
+            .Width(Size.Fraction(1/2f));
     }
 }
 ```
 
 </Body>
 </Details>
+
+<Details>
+<Summary>
+How do I create a circular shape or circle in Ivy?
+</Summary>
+<Body>
+
+There is no dedicated Shape or Circle widget. Use a `Box` with `BorderRadius.Full` and equal width and height to create a circle:
+
+```csharp
+// A colored circle
+new Box()
+    .Background(Colors.Primary)
+    .Width(Size.Px(36))
+    .Height(Size.Px(36))
+    .BorderRadius(BorderRadius.Full)
+
+// A circle with content centered inside
+new Box(Text.P("A"))
+    .Color(Colors.Slate)
+    .Width(Size.Px(48))
+    .Height(Size.Px(48))
+    .ContentAlign(Align.Center)
+    .BorderRadius(BorderRadius.Full)
+```
+
+`BorderRadius.Full` makes the box fully rounded. When width and height are equal, this produces a perfect circle. Use `BorderRadius.Rounded` for rounded corners instead.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I apply styling (width, height, color, padding) to Ivy components?
+</Summary>
+<Body>
+
+Ivy uses a fluent API for styling — there is no `.Style()` method for arbitrary CSS. Use the built-in extension methods:
+
+```csharp
+new Box(content)
+    .Width(Size.Px(200))
+    .Height(Size.Px(100))
+    .Background(Colors.Blue)
+    .Padding(16)
+    .Margin(8)
+    .BorderRadius(BorderRadius.Rounded)
+    .BorderStyle(BorderStyle.Solid)
+```
+
+For CSS transforms, rotations, or complex visual effects that can't be expressed with Ivy's styling API, use the `Html` widget with inline styles:
+
+```csharp
+new Html($"<div style='transform: rotate({degrees}deg); width: 100px; height: 2px; background: #000;'></div>")
+    .DangerouslyAllowScripts()
+```
+
+Note: The `Html` widget renders in an iframe. CSS variables like `var(--primary)` do not resolve — use hardcoded color values.
+
+</Body>
+</Details>
+
+<WidgetDocs Type="Ivy.Box" ExtensionTypes="Ivy.BoxExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Box.cs"/>

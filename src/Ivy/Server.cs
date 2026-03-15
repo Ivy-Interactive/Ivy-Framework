@@ -1,19 +1,15 @@
 using System.Diagnostics;
-using Ivy.Shared;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
-using Ivy.Apps;
-using Ivy.Auth;
-using Ivy.Chrome;
-using Ivy.Connections;
 using Ivy.Core;
+using Ivy.Core.Apps;
+using Ivy.Core.Auth;
 using Ivy.Core.ExternalWidgets;
-using Ivy.Hooks;
+using Ivy.Core.Server;
+using Ivy.Core.Server.HtmlPipeline;
+using Ivy.Core.Server.HtmlPipeline.Filters;
+using Ivy.Core.Server.Middleware;
 using Ivy.Themes;
-using Ivy.Middleware;
-using Ivy.Views;
-using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
@@ -38,15 +34,28 @@ public record ServerArgs
     public string? DefaultAppId { get; set; } = null;
     public bool Silent { get; set; } = false;
     public bool Describe { get; set; } = false;
+    public string? DescribeConnection { get; set; } = null;
+    public string? TestConnection { get; set; } = null;
     public string? MetaTitle { get; set; } = null;
     public string? MetaDescription { get; set; } = null;
     public Assembly? AssetAssembly { get; set; } = null;
+    public bool EnableDevTools { get; set; } = false;
+#if DEBUG
+    public bool FindAvailablePort { get; set; } = true;
+#else
     public bool FindAvailablePort { get; set; } = false;
+#endif
+
+    /// <summary>
+    /// True when the process is running a CLI-only command (--describe, --describe-connection, --test-connection)
+    /// that needs DI but should not bind a real port.
+    /// </summary>
+    public bool IsCliCommand => Describe || DescribeConnection != null || TestConnection != null;
 }
 
 public class Server
 {
-    public IReadOnlyList<string> ReservedPaths => _reservedPaths;
+    public IReadOnlySet<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
     public IServiceCollection Services { get; } = new ServiceCollection();
@@ -60,7 +69,11 @@ public class Server
     internal IServiceProvider? ServiceProvider;
     private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
     private readonly List<Action<WebApplication>> _appMods = new();
-    private List<string> _reservedPaths = new();
+    private HashSet<string> _reservedPaths = new(StringComparer.OrdinalIgnoreCase);
+    private HashSet<string> _fluentApiReservedPaths = new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<IHtmlFilter> _customHtmlFilters = new();
+    private Action<HtmlPipeline>? _pipelineConfigurator;
+    private ManifestOptions? _manifestOptions;
     private ServerArgs _args;
 
     public Server(ServerArgs? args = null)
@@ -127,17 +140,17 @@ public class Server
         AppRepository.AddFactory(() => AppHelpers.GetApps(assembly));
     }
 
-    public void AddConnectionsFromAssembly()
+    public void AddConnectionsFromAssembly(Assembly? assembly = null)
     {
-        var assembly = Assembly.GetEntryAssembly();
+        assembly ??= Assembly.GetEntryAssembly();
 
-        var connections = assembly!.GetTypes()
+        var connections = assembly!.GetLoadableTypes()
             .Where(t => t.IsClass && typeof(IConnection).IsAssignableFrom(t));
 
         foreach (var type in connections)
         {
             var connection = (IConnection)Activator.CreateInstance(type)!;
-            connection.RegisterServices(this.Services);
+            connection.RegisterServices(this);
         }
     }
 
@@ -164,9 +177,23 @@ public class Server
         return this;
     }
 
+    public Server UseCulture(string cultureName)
+    {
+        var culture = new System.Globalization.CultureInfo(cultureName);
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+        return this;
+    }
+
     public Server UseConfiguration(IConfiguration configuration)
     {
         Configuration = configuration;
+        return this;
+    }
+
+    public Server UseConfiguration(Action<IConfigurationBuilder> configure)
+    {
+        Configuration = ServerUtils.GetConfiguration(configure);
         return this;
     }
 
@@ -175,7 +202,7 @@ public class Server
         return UseChrome(() => new DefaultSidebarChrome(settings));
     }
 
-    public Server UseChrome<T>() where T : ViewBase
+    public Server UseChrome<T>() where T : ViewBase, new()
     {
         return UseChrome((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
     }
@@ -222,7 +249,7 @@ public class Server
         return this;
     }
 
-    public Server UseErrorNotFound<T>() where T : ViewBase
+    public Server UseErrorNotFound<T>() where T : ViewBase, new()
     {
         return UseErrorNotFound((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
     }
@@ -254,7 +281,19 @@ public class Server
 
     public Server ReservePaths(params string[] paths)
     {
-        _reservedPaths.AddRange(paths);
+        if (paths != null)
+        {
+            foreach (var path in paths)
+            {
+                if (string.IsNullOrEmpty(path))
+                {
+                    continue;
+                }
+                var normalizedPath = path.StartsWith('/') ? path : "/" + path;
+                _fluentApiReservedPaths.Add(normalizedPath);
+                _reservedPaths.Add(normalizedPath);
+            }
+        }
         return this;
     }
 
@@ -274,6 +313,24 @@ public class Server
     {
         var themeService = new ThemeService();
         themeService.SetTheme(theme);
+
+        var themeType = theme.GetType();
+        if (themeType != typeof(Theme))
+        {
+            themeService.SetThemeFactory(() => (Theme)Activator.CreateInstance(themeType)!);
+        }
+
+        Services.AddSingleton<IThemeService>(themeService);
+        return this;
+    }
+
+    public Server UseTheme(Func<Theme> themeFactory)
+    {
+        var theme = themeFactory();
+        var themeService = new ThemeService();
+        themeService.SetTheme(theme);
+        themeService.SetThemeFactory(themeFactory);
+
         Services.AddSingleton<IThemeService>(themeService);
         return this;
     }
@@ -284,9 +341,44 @@ public class Server
         configureTheme(theme);
         var themeService = new ThemeService();
         themeService.SetTheme(theme);
+
+        themeService.SetThemeFactory(() =>
+        {
+            var t = new Theme();
+            configureTheme(t);
+            return t;
+        });
+
         Services.AddSingleton<IThemeService>(themeService);
         return this;
     }
+
+    public Server UseManifest(Action<ManifestOptions>? configure = null)
+    {
+        _manifestOptions = new ManifestOptions();
+        configure?.Invoke(_manifestOptions);
+        Services.AddSingleton(_manifestOptions);
+        return this;
+    }
+
+    public Server UseHtmlFilter(IHtmlFilter filter)
+    {
+        _customHtmlFilters.Add(filter);
+        return this;
+    }
+
+    public Server UseHtmlPipeline(Action<HtmlPipeline> configure)
+    {
+        _pipelineConfigurator = configure;
+        return this;
+    }
+
+    internal IReadOnlyList<IHtmlFilter> GetCustomFilters() => _customHtmlFilters;
+
+    internal Action<HtmlPipeline>? GetPipelineConfigurator() => _pipelineConfigurator;
+
+
+    internal ManifestOptions? GetManifestOptions() => _manifestOptions;
 
     public async Task RunAsync(CancellationTokenSource? cts = null)
     {
@@ -323,23 +415,44 @@ public class Server
         // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
         _ = Task.Factory.StartNew(() =>
         {
-            while (!cts.Token.IsCancellationRequested)
+            try
             {
-                var key = Console.ReadKey(intercept: true);
-                if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
+                while (!cts.Token.IsCancellationRequested)
                 {
-                    sessionStore.Dump();
+                    if (Console.IsInputRedirected)
+                    {
+                        // Cannot read keys if input is redirected
+                        Thread.Sleep(1000); // Check again later or just exit? Exit is safer.
+                        break;
+                    }
+
+                    var key = Console.ReadKey(intercept: true);
+                    if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
+                    {
+                        sessionStore.Dump();
+                    }
                 }
+            }
+            catch (IOException ex)
+            {
+                // Console not available or detached
+                Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Console not available
+                Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
             }
         }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 #endif
 
-
-        if (Utils.IsPortInUse(_args.Port))
+        // CLI-only commands (--describe, --describe-connection, --test-connection) never start
+        // the web host, so skip port checks entirely. Port 0 will be used below.
+        if (!_args.IsCliCommand && ProcessHelper.IsPortInUse(_args.Port))
         {
             if (_args.IKillForThisPort)
             {
-                Utils.KillProcessUsingPort(_args.Port);
+                ProcessHelper.KillProcessUsingPort(_args.Port);
             }
             else if (_args.FindAvailablePort)
             {
@@ -347,7 +460,7 @@ public class Server
                 var maxAttempts = 100;
                 var attemptCount = 0;
 
-                while (Utils.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
+                while (ProcessHelper.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
                 {
                     _args = _args with { Port = _args.Port + 1 };
                     attemptCount++;
@@ -366,7 +479,7 @@ public class Server
             }
             else
             {
-                Console.WriteLine($@"[31mPort {_args.Port} is already in use on this machine.[0m");
+                Console.WriteLine($@"Port {_args.Port} is already in use on this machine.");
 
                 Console.WriteLine(
                     "Specify a different port using '--port <number>', '--find-available-port', or '--i-kill-for-this-port' to just take it.");
@@ -379,8 +492,6 @@ public class Server
         {
             DefaultAppId = _args.DefaultAppId;
         }
-
-        AppRepository.Reload();
 
         // Initialize external widget registry by scanning loaded assemblies
         ExternalWidgetRegistry.Instance.Initialize();
@@ -404,7 +515,14 @@ public class Server
             mod(builder);
         }
 
-        builder.WebHost.UseUrls($"http://*:{_args.Port}");
+        // CLI-only commands need DI but never call app.StartAsync(),
+        // so use port 0 to avoid conflicts with a running instance.
+        // Bind to localhost for local dev (avoids Windows Firewall prompt),
+        // but use wildcard in containers so health probes can reach the app.
+        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+        var host = isContainer ? "*" : "localhost";
+        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://{host}:{_args.Port}";
+        builder.WebHost.UseUrls(bindUrl);
 
         builder.Services.AddSignalR(options =>
         {
@@ -472,6 +590,16 @@ public class Server
         var app = builder.Build();
         ServiceProvider = app.Services;
 
+        // Update reserved paths with discovered controller routes before reloading apps
+        UpdateReservedPaths(app);
+        AppRepository.ClearInvalidAppIds();
+        AppRepository.Reload(_reservedPaths);
+        if (AppRepository.InvalidAppIds.Count > 0)
+        {
+            Console.WriteLine($@"[CRITICAL] Failed to start Ivy server due to {AppRepository.InvalidAppIds.Count} invalid app ID(s).");
+            return;
+        }
+
         app.UseExceptionHandler(error =>
         {
             error.Run(async context =>
@@ -504,9 +632,9 @@ public class Server
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
 
-        app.UsePathToAppId();
-
-        app.UseRouting();
+        app.UseRouting(); // First routing pass - match explicit routes (gRPC, controllers)
+        app.UsePathToAppId(); // Rewrite path to appId if no endpoint matched
+        app.UseRouting(); // Second routing pass - route the rewritten path
         app.UseCors();
         app.UseGrpcWeb();
 
@@ -524,9 +652,18 @@ public class Server
         {
             HotReloadService.UpdateApplicationEvent += (types) =>
             {
-                AppRepository.Reload();
+                UpdateReservedPaths(app);
+                AppRepository.Reload(_reservedPaths);
                 var hubContext = app.Services.GetService<IHubContext<AppHub>>()!;
                 hubContext.Clients.All.SendAsync("HotReload", cancellationToken: cts.Token);
+
+                var themeService = app.Services.GetService<IThemeService>();
+                if (themeService?.ThemeFactory != null)
+                {
+                    themeService.ReloadTheme();
+                    var newCss = themeService.GenerateThemeCss();
+                    hubContext.Clients.All.SendAsync("ApplyTheme", newCss, cancellationToken: cts.Token);
+                }
             };
         }
 
@@ -544,7 +681,7 @@ public class Server
             }
             if (_args.Browse)
             {
-                Utils.OpenBrowser(localUrl);
+                ProcessHelper.OpenBrowser(localUrl);
             }
         });
 
@@ -555,9 +692,93 @@ public class Server
             return;
         }
 
+        if (_args.DescribeConnection != null)
+        {
+            var connection = ServerDescription.FindConnection(this, app.Services, _args.DescribeConnection);
+            if (connection == null)
+            {
+                var available = ServerDescription.GetConnectionNames(this, app.Services);
+                var availableList = available.Count > 0
+                    ? string.Join(", ", available)
+                    : "(none)";
+                Console.Error.WriteLine($"Connection '{_args.DescribeConnection}' not found. Available connections: {availableList}");
+                return;
+            }
+
+            var serializer = new YamlDotNet.Serialization.SerializerBuilder()
+                .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.CamelCaseNamingConvention.Instance)
+                .ConfigureDefaultValuesHandling(YamlDotNet.Serialization.DefaultValuesHandling.OmitNull)
+                .Build();
+
+            var connectionPath = Path.Combine(Directory.GetCurrentDirectory(), "Connections", connection.GetName());
+            string? context = null;
+            try { context = connection.GetContext(connectionPath); } catch { }
+
+            var secrets = (connection is Ivy.IHaveSecrets hasSecrets)
+                ? hasSecrets.GetSecrets().Select(s => s.Key).ToList()
+                : new List<string>();
+
+            var connectionDescription = new
+            {
+                name = connection.GetName(),
+                type = connection.GetConnectionType(),
+                @namespace = connection.GetNamespace(),
+                context = string.IsNullOrEmpty(context) ? null : context,
+                secrets,
+                entities = connection.GetEntities().Select(e => e.Plural).ToList()
+            };
+
+            Console.WriteLine(serializer.Serialize(connectionDescription));
+            return;
+        }
+
+        if (_args.TestConnection != null)
+        {
+            var connection = ServerDescription.FindConnection(this, app.Services, _args.TestConnection);
+            if (connection == null)
+            {
+                var available = ServerDescription.GetConnectionNames(this, app.Services);
+                var availableList = available.Count > 0
+                    ? string.Join(", ", available)
+                    : "(none)";
+                Console.Error.WriteLine($"Connection '{_args.TestConnection}' not found. Available connections: {availableList}");
+                return;
+            }
+
+            if (connection is Ivy.IHaveSecrets hasSecrets)
+            {
+                var config = app.Services.GetRequiredService<IConfiguration>();
+                var missing = hasSecrets.GetSecrets()
+                    .Where(s => s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
+                    .Select(s => s.Key)
+                    .ToList();
+
+                if (missing.Count > 0)
+                {
+                    Console.Error.WriteLine($"Missing secrets: {string.Join(", ", missing)}");
+                    return;
+                }
+            }
+
+            var configuration = app.Services.GetRequiredService<IConfiguration>();
+            var (ok, message) = await connection.TestConnection(configuration);
+
+            if (ok)
+            {
+                Console.WriteLine($"OK: {message ?? "Connection successful."}");
+            }
+            else
+            {
+                Console.Error.WriteLine($"FAILED: {message ?? "Connection test failed."}");
+            }
+            return;
+        }
+
+        if (!CheckForMissingSecrets(app.Services))
+            return;
+
         try
         {
-            CheckForAppIdCollisions(app);
             await app.StartAsync(cts.Token);
             await app.WaitForShutdownAsync(cts.Token);
         }
@@ -567,7 +788,68 @@ public class Server
         }
     }
 
-    private void CheckForAppIdCollisions(WebApplication app)
+    private bool CheckForMissingSecrets(IServiceProvider serviceProvider)
+    {
+        var config = serviceProvider.GetRequiredService<IConfiguration>();
+        var missingByProvider = new Dictionary<string, List<string>>();
+
+        // Gather from DI
+        var providers = serviceProvider.GetServices<IHaveSecrets>();
+        foreach (var provider in providers)
+            CheckProvider(provider, config, missingByProvider);
+
+        // Gather from assembly (fallback, skip already-found types)
+        var assembly = Assembly.GetEntryAssembly();
+        if (assembly != null)
+        {
+            var knownTypes = providers.Select(p => p.GetType()).ToHashSet();
+            var types = assembly.GetLoadableTypes()
+                .Where(t => t is { IsClass: true, IsAbstract: false }
+                            && typeof(IHaveSecrets).IsAssignableFrom(t)
+                            && !knownTypes.Contains(t));
+
+            foreach (var type in types)
+            {
+                try
+                {
+                    if (Activator.CreateInstance(type) is IHaveSecrets provider)
+                        CheckProvider(provider, config, missingByProvider);
+                }
+                catch
+                {
+                    // Skip types that can't be instantiated
+                }
+            }
+        }
+
+        if (missingByProvider.Count == 0)
+            return true;
+
+        Console.Error.WriteLine("Missing secrets detected. The Ivy server cannot start.");
+        Console.Error.WriteLine();
+        foreach (var (providerName, keys) in missingByProvider)
+        {
+            Console.Error.WriteLine($"  {providerName}:");
+            foreach (var key in keys)
+                Console.Error.WriteLine($"    - {key}");
+            Console.Error.WriteLine();
+        }
+        return false;
+    }
+
+    private static void CheckProvider(IHaveSecrets provider, IConfiguration config,
+        Dictionary<string, List<string>> missingByProvider)
+    {
+        var missing = provider.GetSecrets()
+            .Where(s => s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
+            .Select(s => s.Key)
+            .ToList();
+
+        if (missing.Count > 0)
+            missingByProvider[provider.GetType().Name] = missing;
+    }
+
+    private void UpdateReservedPaths(WebApplication app)
     {
         var actionDescriptorCollectionProvider = app.Services.GetRequiredService<Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider>();
 
@@ -575,10 +857,7 @@ public class Server
         var reservedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // 1. Add existing reserved paths (from fluent API)
-        foreach (var path in _reservedPaths)
-        {
-            reservedPaths.Add(path);
-        }
+        reservedPaths.UnionWith(_fluentApiReservedPaths);
 
         // 2. Add auto-discovered controller routes
         foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)
@@ -597,24 +876,13 @@ public class Server
         }
 
         // 3. Add system excluded paths
-        foreach (var path in PathToAppIdMiddleware.ExcludedPaths)
+        foreach (var path in AppRoutingHelpers.ExcludedPaths)
         {
-            reservedPaths.Add(path.StartsWith("/") ? path : "/" + path);
+            reservedPaths.Add(path.StartsWith('/') ? path : "/" + path);
         }
 
-        // Atomically update the shared list (thread safety for startup)
-        _reservedPaths = reservedPaths.ToList();
-
-        // 4. Check for collisions
-        foreach (var appDescriptor in AppRepository.All())
-        {
-            var appIdPath = "/" + appDescriptor.Id;
-
-            if (reservedPaths.Contains(appIdPath))
-            {
-                throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
-            }
-        }
+        // Atomically update the shared set (thread safety for startup)
+        _reservedPaths = reservedPaths;
     }
 }
 
@@ -646,45 +914,27 @@ public static class WebApplicationExtensions
                 using var reader = new StreamReader(stream);
                 var html = await reader.ReadToEndAsync();
 
-                //Inject Ivy license:
-                var configuration = app.Services.GetRequiredService<IConfiguration>();
-                var ivyLicense = configuration["Ivy:License"] ?? "";
-                if (!string.IsNullOrEmpty(ivyLicense))
-                {
-                    var ivyLicenseTag = $"<meta name=\"ivy-license\" content=\"{ivyLicense}\" />";
-                    html = html.Replace("</head>", $"  {ivyLicenseTag}\n</head>");
-                }
-#if DEBUG
-                var ivyLicensePublicKey = configuration["Ivy:LicensePublicKey"] ?? "";
-                if (!string.IsNullOrEmpty(ivyLicensePublicKey))
-                {
-                    var ivyLicensePublicKeyTag =
-                        $"<meta name=\"ivy-license-public-key\" content=\"{ivyLicensePublicKey}\" />";
-                    html = html.Replace("</head>", $"  {ivyLicensePublicKeyTag}\n</head>");
-                }
-#endif
+                var pipeline = new HtmlPipeline()
+                    .Use<LicenseFilter>()
+                    .Use<DevToolsFilter>()
+                    .Use<MetaDescriptionFilter>()
+                    .Use<TitleFilter>()
+                    .Use<ThemeFilter>()
+                    .Use<ManifestFilter>();
 
-                //Inject Meta Title and Description
-                if (!string.IsNullOrEmpty(serverArgs.MetaDescription))
-                {
-                    var metaDescriptionTag = $"<meta name=\"description\" content=\"{serverArgs.MetaDescription}\" />";
-                    html = html.Replace("</head>", $"  {metaDescriptionTag}\n</head>");
-                }
+                foreach (var filter in server.GetCustomFilters())
+                    pipeline.Use(filter);
 
-                if (!string.IsNullOrEmpty(serverArgs.MetaTitle))
-                {
-                    var metaTitleTag = $"<title>{serverArgs.MetaTitle}</title>";
-                    html = Regex.Replace(html, "<title>.*?</title>", metaTitleTag, RegexOptions.Singleline);
-                }
+                server.GetPipelineConfigurator()?.Invoke(pipeline);
 
-                // Inject theme configuration
-                var themeService = app.Services.GetService<IThemeService>();
-                if (themeService != null)
+                var pipelineContext = new HtmlPipelineContext
                 {
-                    var themeCss = themeService.GenerateThemeCss();
-                    var themeMetaTag = themeService.GenerateThemeMetaTag();
-                    html = html.Replace("</head>", $"  {themeMetaTag}\n  {themeCss}\n</head>");
-                }
+                    Services = app.Services,
+                    ServerArgs = serverArgs
+                };
+
+
+                html = pipeline.Process(pipelineContext, html);
 
                 context.Response.ContentType = "text/html";
                 context.Response.StatusCode = httpStatusCode;
@@ -697,6 +947,13 @@ public static class WebApplicationExtensions
                 context.Response.ContentType = "text/plain";
                 await context.Response.WriteAsync($"Error: {resourceName} not found.");
             }
+        });
+
+        app.MapGet("/manifest.json", () =>
+        {
+            var manifest = app.Services.GetService<ManifestOptions>();
+            if (manifest == null) return Results.NotFound();
+            return Results.Json(manifest.ToManifest());
         });
 
         app.UseStaticFiles(GetStaticFileOptions("", embeddedProvider, assembly));

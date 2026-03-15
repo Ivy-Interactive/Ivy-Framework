@@ -10,8 +10,10 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using ArrowField = Apache.Arrow.Field;
 using SystemType = System.Type;
+using ProtoSortOrder = Ivy.Protos.DataTable.SortOrder;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class QueryResult
 {
@@ -142,7 +144,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         }
     }
 
-    private IQueryable ApplySort(IQueryable query, IEnumerable<SortOrder> sortOrders)
+    private IQueryable ApplySort(IQueryable query, IEnumerable<ProtoSortOrder> sortOrders)
     {
         var sortOrdersList = sortOrders.ToList();
         if (!sortOrdersList.Any())

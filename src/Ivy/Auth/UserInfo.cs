@@ -1,4 +1,5 @@
-namespace Ivy.Auth;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public record UserInfo(string Id, string Email, string? FullName, string? AvatarUrl)
 {

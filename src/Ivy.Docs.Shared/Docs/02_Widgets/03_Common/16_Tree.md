@@ -39,7 +39,7 @@ new Tree(
 
 ## Click Events
 
-Use `HandleSelect` on the Tree and `Tag` on each MenuItem to handle clicks. The `DefaultSelectHandler` routes events to individual `MenuItem.OnSelect` handlers.
+Use `OnSelect` on the Tree and `Tag` on each MenuItem to handle clicks. The `DefaultSelectHandler` routes events to individual `MenuItem.OnSelect` handlers.
 
 ```csharp demo-tabs
 public class TreeClickDemo : ViewBase
@@ -58,7 +58,56 @@ public class TreeClickDemo : ViewBase
                         new MenuItem("App.tsx").Icon(Icons.Code).Tag("App.tsx"),
                         new MenuItem("index.ts").Icon(Icons.Code).Tag("index.ts")
                     )
-            ).HandleSelect(e => selected.Set(e.Value?.ToString() ?? ""));
+            ).OnSelect(e => selected.Set(e.Value?.ToString() ?? ""));
+    }
+}
+```
+
+## Row Actions
+
+**Row actions** can be defined as a set of actions (buttons or menu items) displayed for each tree row. Configure them via `.RowActions()` with one or more `MenuItem`s, and subscribe to clicks with `.OnRowAction()`.
+
+```csharp demo-tabs
+public class TreeRowActionsDemo : ViewBase
+{
+    private enum RowAction { Edit, More, Duplicate, Delete }
+
+    public override object? Build()
+    {
+        var lastAction = UseState<string>("None");
+
+        return Layout.Vertical()
+            | Text.Block($"  Last Action: {lastAction.Value}")
+            | new Tree(
+                new MenuItem("src")
+                    .Icon(Icons.Folder)
+                    .Expanded()
+                    .Children(
+                        new MenuItem("components")
+                            .Icon(Icons.Folder)
+                            .Expanded()
+                            .Children(
+                                new MenuItem("Button.tsx").Icon(Icons.Code).Tag("Button.tsx"),
+                                new MenuItem("Card.tsx").Icon(Icons.Code).Tag("Card.tsx")
+                            ),
+                        new MenuItem("App.tsx").Icon(Icons.Code).Tag("App.tsx")
+                    ),
+                new MenuItem("package.json").Icon(Icons.Braces).Tag("package.json")
+            )
+            .RowActions(
+                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit).Label("Edit"),
+                MenuItem.Default(Icons.Ellipsis).Tag(RowAction.More).Label("More").Children(
+                    MenuItem.Default(Icons.Copy).Tag(RowAction.Duplicate).Label("Duplicate"),
+                    MenuItem.Default(Icons.Trash).Tag(RowAction.Delete).Label("Delete")
+                )
+            )
+            .OnRowAction(e => {
+                var tagStr = e.Value.ActionTag?.ToString();
+                if (Enum.TryParse<RowAction>(tagStr, ignoreCase: true, out var action))
+                    lastAction.Set($"{action} on {e.Value.ItemValue}");
+                else if (tagStr != null)
+                    lastAction.Set($"{tagStr} on {e.Value.ItemValue}");
+            });
     }
 }
 ```

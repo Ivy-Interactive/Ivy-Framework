@@ -20,3 +20,4 @@ export { AppHostWidget } from './AppHostWidget';
 export { AudioPlayerWidget } from './AudioPlayerWidget';
 export { VideoPlayerWidget } from './video';
 export { StepperWidget } from './StepperWidget';
+export { RichTextBlockWidget } from './RichTextBlockWidget';

@@ -57,7 +57,8 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
       )}
       <div className="ml-2 items-center flex gap-0">
         {isActive && showRefresh && (
-          <a
+          <button
+            type="button"
             onClick={e => {
               e.stopPropagation();
               isUserInitiatedChangeRef.current = true;
@@ -66,10 +67,11 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
             className="opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
           >
             <RotateCw className="w-3 h-3" />
-          </a>
+          </button>
         )}
         {showClose && (
-          <a
+          <button
+            type="button"
             onClick={e => {
               e.stopPropagation();
               isUserInitiatedChangeRef.current = true;
@@ -81,7 +83,7 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
             )}
           >
             <X className="w-3 h-3" />
-          </a>
+          </button>
         )}
       </div>
     </>

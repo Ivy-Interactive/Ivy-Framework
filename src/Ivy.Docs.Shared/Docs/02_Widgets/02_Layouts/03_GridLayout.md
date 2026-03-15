@@ -257,8 +257,8 @@ Layout.Vertical()
 | Gap | int | 4 | Space between grid items |
 | Padding | int | 0 | Padding around the grid |
 | AutoFlow | AutoFlow? | null | How items are automatically placed |
-| Width | [Size](../../04_ApiReference/IvyShared/Size.md)? | null | Grid container width |
-| Height | [Size](../../04_ApiReference/IvyShared/Size.md)? | null | Grid container height |
+| Width | [Size](../../04_ApiReference/Ivy/Size.md)? | null | Grid container width |
+| Height | [Size](../../04_ApiReference/Ivy/Size.md)? | null | Grid container height |
 
 ### Child Positioning Extensions
 

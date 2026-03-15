@@ -1,4 +1,3 @@
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Workshops;
 
@@ -239,7 +238,7 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - Position: Between TOC and main content (desktop), hidden on mobile
                 - Design: Horizontal list of contributor avatars with hover cards
                 - Information: Avatar, name, contribution count, last contribution date
-                - Interaction: Click avatar → open GitHub profile in new tab
+                - Interaction: Click avatar -> open GitHub profile in new tab
 
                 ### LLM Copy Button  
                 - Position: Top-right corner of markdown content blocks
@@ -251,7 +250,7 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - Position: Article footer, before prev/next navigation
                 - Design: Card-based layout with discussion previews
                 - Content: Title, author, date, excerpt
-                - Interaction: Click → open GitHub discussion in new tab
+                - Interaction: Click â†’ open GitHub discussion in new tab
                 - State: Loading skeleton, empty state, error handling
                 """"
             )

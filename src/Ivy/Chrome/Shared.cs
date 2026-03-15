@@ -1,13 +1,12 @@
 using System.Text.Json;
-using Ivy.Apps;
-using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Apps;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
+using Ivy.Core.Server;
 
-namespace Ivy.Chrome;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum ChromeNavigation
 {
@@ -24,6 +23,7 @@ public record ChromeSettings
     public bool PreventTabDuplicates { get; init; }
     public ChromeNavigation Navigation { get; init; }
     public Size? Width { get; init; }
+    public bool SidebarOpen { get; init; } = true;
     public Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> FooterMenuItemsTransformer { get; init; } = (items, _) => items;
 
     public static ChromeSettings Default() => new()
@@ -56,6 +56,7 @@ public static class ChromeSettingsExtensions
     public static ChromeSettings UsePages(this ChromeSettings settings) => settings with { Navigation = ChromeNavigation.Pages };
     public static ChromeSettings UseFooterMenuItemsTransformer(this ChromeSettings settings, Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => settings with { FooterMenuItemsTransformer = transformer };
     public static ChromeSettings Width(this ChromeSettings settings, Size width) => settings with { Width = width };
+    public static ChromeSettings SidebarOpen(this ChromeSettings settings, bool open) => settings with { SidebarOpen = open };
 }
 
 [Signal(BroadcastType.Chrome)]
@@ -82,7 +83,7 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
     public string GetUrl(string? parentId = null)
     {
         // Validate AppId to prevent injection attacks
-        if (!Utils.IsSafeAppId(this.AppId))
+        if (!ValidationHelper.IsSafeAppId(this.AppId))
         {
             throw new InvalidOperationException($"Cannot get URL: Invalid AppId '{this.AppId}'. AppId contains unsafe characters.");
         }
@@ -123,13 +124,13 @@ public static class NavigateSignalExtensions
 {
     public static INavigator UseNavigation(this IViewContext context)
     {
-        var signal = context.CreateSignal<NavigateSignal, NavigateArgs, Unit>();
+        var signal = context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
         var repository = context.UseService<IAppRepository>();
         var client = context.UseService<IClientProvider>();
         return new Navigator(signal, repository, client);
     }
 
-    private class Navigator(ISignalSender<NavigateArgs, Unit> signal, IAppRepository repository, IClientProvider client) : INavigator
+    private class Navigator(ISignal<NavigateArgs, Unit> signal, IAppRepository repository, IClientProvider client) : INavigator
     {
         public void Navigate(Type type, object? appArgs = null)
         {
@@ -143,7 +144,7 @@ public static class NavigateSignalExtensions
             if (uri.StartsWith("http://") || uri.StartsWith("https://"))
             {
                 // Validate external URL to prevent open redirect vulnerabilities
-                var validatedUrl = Utils.ValidateLinkUrl(uri);
+                var validatedUrl = ValidationHelper.ValidateLinkUrl(uri);
                 if (validatedUrl == null)
                 {
                     throw new ArgumentException($"Invalid external URL: {uri}", nameof(uri));
@@ -154,7 +155,7 @@ public static class NavigateSignalExtensions
             {
                 var appId = uri[6..];
                 // Validate AppId to prevent injection attacks
-                if (!Utils.IsSafeAppId(appId))
+                if (!ValidationHelper.IsSafeAppId(appId))
                 {
                     throw new ArgumentException($"Invalid AppId: {appId}", nameof(uri));
                 }

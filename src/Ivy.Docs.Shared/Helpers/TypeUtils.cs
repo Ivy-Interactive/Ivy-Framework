@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Ivy.Core.Docs;
-using Ivy.Docs.Shared.Apps.ApiReference.IvyShared;
+using Ivy.Docs.Shared.Apps.ApiReference.Ivy;
 
 namespace Ivy.Docs.Shared.Helpers;
 
@@ -235,7 +235,7 @@ public static class TypeUtils
         foreach (var method in methods)
         {
             var parameters = method.GetParameters().Skip(1);
-            var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.Shared.") : "")}");
+            var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.") : "")}");
             sb.AppendLine($"{method.Name}({string.Join(", ", paramSignatures)})");
         }
 
@@ -244,10 +244,12 @@ public static class TypeUtils
 
     private static bool IsWidgetBaseType(this Type type)
     {
-        Type? currentType = type.BaseType;
+        Type? currentType = type;
 
         while (currentType != null && currentType != typeof(object))
         {
+            if (currentType == typeof(Ivy.WidgetBase)) return true;
+
             // Check if the current type is a generic type
             if (currentType.IsGenericType)
             {
@@ -289,14 +291,14 @@ public static class TypeUtils
         }
 
         var parameters = constructor.GetParameters();
-        var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.Shared.") : "")}");
+        var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.") : "")}");
         return $"new {typeName}({string.Join(", ", paramSignatures)})";
     }
 
     private static string GetCSharpSignature(MethodInfo method)
     {
         var parameters = method.GetParameters();
-        var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.Shared.") : "")}");
+        var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.") : "")}");
         return $"{method.Name}({string.Join(", ", paramSignatures)})";
     }
 

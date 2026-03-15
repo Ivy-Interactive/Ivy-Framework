@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
-using Ivy.Core;
-using Ivy.Helpers;
-using Ivy.Shared;
+using Ivy.Core.Helpers;
 using Microsoft.Extensions.AI;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class DataTableBuilder<TModel>(
     IQueryable<TModel> queryable,
@@ -21,10 +20,11 @@ public class DataTableBuilder<TModel>(
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
     private MenuItem[]? _menuItemRowActions;
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
-    private readonly Dictionary<string, Action<object>> _cellActions = [];
+    private readonly Dictionary<string, EventHandler<object>> _cellActions = [];
+    private RefreshToken? _refreshToken;
 
     private readonly string? _idColumnName =
-        idSelector != null ? Utils.GetNameFromMemberExpression(idSelector.Body) : null;
+        idSelector != null ? TypeHelper.GetNameFromMemberExpression(idSelector.Body) : null;
 
     private readonly Func<TModel, object?>? _idSelectorFunc = idSelector?.Compile();
 
@@ -66,16 +66,16 @@ public class DataTableBuilder<TModel>(
         var order = fields.Count;
         foreach (var field in fields)
         {
-            var align = Shared.Align.Left;
+            var align = Ivy.Align.Left;
 
             if (field.Type.IsNumeric())
             {
-                align = Shared.Align.Right;
+                align = Ivy.Align.Right;
             }
 
             if (field.Type == typeof(bool))
             {
-                align = Shared.Align.Center;
+                align = Ivy.Align.Center;
             }
 
             var removed = field.Name.StartsWith($"_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]) ||
@@ -86,7 +86,7 @@ public class DataTableBuilder<TModel>(
                 Column = new DataTableColumn()
                 {
                     Name = field.Name,
-                    Header = Utils.LabelFor(field.Name, field.Type),
+                    Header = StringHelper.LabelFor(field.Name, field.Type),
                     ColType = DataTableBuilderHelpers.GetDataTypeHint(field.Type),
                     Align = align,
                     Order = order++
@@ -117,7 +117,7 @@ public class DataTableBuilder<TModel>(
 
     private InternalColumn GetColumn(Expression<Func<TModel, object>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _columns[name];
     }
 
@@ -205,6 +205,17 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+    public DataTableBuilder<TModel> Remove(params IEnumerable<Expression<Func<TModel, object>>> fields)
+    {
+        foreach (var field in fields)
+        {
+            var name = TypeHelper.GetNameFromMemberExpression(field.Body);
+            if (!_columns.TryGetValue(name, out var hint)) continue;
+            hint.Removed = true;
+        }
+        return this;
+    }
+
     public DataTableBuilder<TModel> Hidden(params IEnumerable<Expression<Func<TModel, object>>> fields)
     {
         foreach (var field in fields)
@@ -252,16 +263,22 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
-    public DataTableBuilder<TModel> HandleRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
+    public DataTableBuilder<TModel> OnRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
     {
         _onRowAction = handler;
         return this;
     }
 
-    public DataTableBuilder<TModel> HandleCellAction(Expression<Func<TModel, object>> field, Action<object> action)
+    public DataTableBuilder<TModel> OnCellAction(Expression<Func<TModel, object>> field, EventHandler<object> action)
     {
-        var columnName = Utils.GetNameFromMemberExpression(field.Body);
+        var columnName = TypeHelper.GetNameFromMemberExpression(field.Body);
         _cellActions[columnName] = action;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> RefreshToken(RefreshToken token)
+    {
+        _refreshToken = token;
         return this;
     }
 
@@ -305,7 +322,7 @@ public class DataTableBuilder<TModel>(
                 var args = e.Value;
                 if (_cellActions.TryGetValue(args.ColumnName, out var action))
                 {
-                    action(args.CellValue!);
+                    await action.Invoke(args.CellValue!);
                 }
 
                 // Call original handler if it exists
@@ -324,12 +341,12 @@ public class DataTableBuilder<TModel>(
         }
 
         return new DataTableView(queryable1, width, _height, columns, configuration, onCellClick, _onCellActivated,
-            _menuItemRowActions, _onRowAction, idSelectorForView);
+            _menuItemRowActions, _onRowAction, idSelectorForView, _refreshToken);
     }
 
     public object[] GetMemoValues()
     {
         // Memoize based on configuration - if config hasn't changed, don't rebuild
-        return [_width!, _height!, _configuration];
+        return [_width!, _height!, _configuration, _refreshToken?.Token!];
     }
 }

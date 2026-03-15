@@ -65,6 +65,22 @@ const getCommitsUrl = (githubUrl: string): string => {
   return githubUrl.replace('/blob/', '/commits/');
 };
 
+const fetchGitHubCommits = async (apiUrl: string) => {
+  const response = await fetch(apiUrl);
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error(
+        'GitHub API rate limit exceeded. Please try again later.'
+      );
+    } else if (response.status === 404) {
+      throw new Error('Repository or file not found.');
+    } else {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+  }
+  return response.json();
+};
+
 export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
   documentSource,
   onLoadingChange,
@@ -109,23 +125,9 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
 
     onLoadingChange?.(true);
 
-    fetch(apiUrl)
-      .then(response => {
-        setError(null);
-        if (!response.ok) {
-          if (response.status === 403) {
-            throw new Error(
-              'GitHub API rate limit exceeded. Please try again later.'
-            );
-          } else if (response.status === 404) {
-            throw new Error('Repository or file not found.');
-          } else {
-            throw new Error(`GitHub API error: ${response.status}`);
-          }
-        }
-        return response.json();
-      })
+    fetchGitHubCommits(apiUrl)
       .then((commits: GitHubCommit[]) => {
+        setError(null);
         const contributorMap = new Map<string, Contributor>();
 
         commits.forEach(commit => {

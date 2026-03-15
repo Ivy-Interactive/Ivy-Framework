@@ -50,7 +50,7 @@ var tabsLayout = new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedInd
 ).Variant(TabsVariant.Content).Width(0.8); // 80% width
 
 // For responsive behavior, you can bind to a state
-var width = this.UseState(1.0);
+var width = UseState(1.0);
 var responsiveTabsLayout = new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
     tabs.Value.ToArray()
 ).Variant(TabsVariant.Tabs).Width(width.Value);

@@ -1,9 +1,4 @@
 using Ivy;
-using Ivy.Apps;
-using Ivy.Auth;
-using Ivy.Views;
-using Ivy.Widgets;
-using Ivy.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClerkExample;
@@ -35,7 +30,7 @@ public class MainApp : ViewBase
 
             // Profile info
             Layout.Horizontal(
-                 new Image(user.AvatarUrl ?? "").Size(64),
+                 new Image(user.AvatarUrl ?? "").Size(Size.Units(64)),
                  Layout.Vertical(
                      Text.H3(user.FullName ?? "User"),
                      Text.Muted(user.Email)

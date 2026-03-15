@@ -6,6 +6,9 @@ searchHints:
   - picker
   - datetime
   - timestamp
+  - month
+  - week
+  - year
 ---
 
 # DateTimeInput
@@ -14,7 +17,7 @@ searchHints:
 Capture dates and times with intuitive picker [interfaces](../../01_Onboarding/02_Concepts/02_Views.md) supporting calendar selection, time input, and combined date-time entry.
 </Ingress>
 
-The `DateTimeInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a comprehensive date and time picker interface with support for different variants. It allows users to select dates from a calendar, times from a time selector, or both date and time together, making it ideal for scheduling, event creation, and [form](../../01_Onboarding/02_Concepts/08_Forms.md) inputs.
+The `DateTimeInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a comprehensive date and time picker interface with support for different variants. It allows users to select dates, months, weeks, years from a calendar, times from a time selector, or both date and time together, making it ideal for scheduling, event creation, reporting periods, and [form](../../01_Onboarding/02_Concepts/08_Forms.md) inputs.
 
 ## Basic Usage
 
@@ -38,13 +41,16 @@ public class BasicDateUsageDemo : ViewBase
 
 ## Variants
 
-`DateTimeInput` supports three variants: Date, DateTime, and Time. The following extension methods are available for each:
+`DateTimeInput` supports six variants: Date, DateTime, Time, Month, Week, and Year. The following extension methods are available:
 
 - `ToDateInput()`: Calendar picker for dates only.
 - `ToDateTimeInput()`: Calendar picker with time input.
 - `ToTimeInput()`: Time picker only.
+- `ToMonthInput()`: Month picker with year navigation; selects the 1st of the chosen month.
+- `ToWeekInput()`: Calendar with week numbers; selects the Monday of the chosen week.
+- `ToYearInput()`: Year picker with decade navigation; selects January 1st of the chosen year.
 
-The following demo shows all of these in action:
+The following demo shows the core variants in action:
 
 ```csharp demo-below
 public class DateTimeVariantsDemo : ViewBase
@@ -54,6 +60,9 @@ public class DateTimeVariantsDemo : ViewBase
         var dateState = UseState(DateTime.Today.Date);
         var timeState = UseState(DateTime.Now);
         var dateTimeState = UseState(DateTime.Today);
+        var monthState = UseState(DateTime.Today);
+        var weekState = UseState(DateTime.Today);
+        var yearState = UseState(DateTime.Today);
         
         return Layout.Vertical()
                 | dateState.ToDateInput()
@@ -66,7 +75,16 @@ public class DateTimeVariantsDemo : ViewBase
                        .Label("DateTime")
                 | timeState.ToTimeInput()
                        .WithField()
-                       .Label("Time");
+                       .Label("Time")
+                | monthState.ToMonthInput()
+                       .WithField()
+                       .Label("Month")
+                | weekState.ToWeekInput()
+                       .WithField()
+                       .Label("Week")
+                | yearState.ToYearInput()
+                       .WithField()
+                       .Label("Year");
     }    
 }                
 ```

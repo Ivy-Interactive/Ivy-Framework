@@ -4,7 +4,8 @@ using Apache.Arrow.Types;
 using Ivy.Core.Helpers;
 using SystemType = System.Type;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class QueryHelpers
 {

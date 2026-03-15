@@ -1,13 +1,11 @@
 using Ivy;
 using Ivy.Auth.MicrosoftEntra;
-using Ivy.Chrome;
 
 var server = new Server();
 
 server.UseHotReload();
 
-server.UseAuth<MicrosoftEntraAuthProvider>();
-
+server.AddConnectionsFromAssembly();
 server.AddAppsFromAssembly();
 
 var settings = new ChromeSettings()

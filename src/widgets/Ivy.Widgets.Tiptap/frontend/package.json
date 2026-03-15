@@ -30,6 +30,7 @@
     "vite": "^6.0.5"
   },
   "overrides": {
-    "markdown-it": ">=14.1.1"
+    "markdown-it": ">=14.1.1",
+    "rollup": ">=4.59.0"
   }
 }

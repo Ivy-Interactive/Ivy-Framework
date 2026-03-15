@@ -11,6 +11,7 @@
   ],
   "staticFileExtensions": [
     ".js",
+    ".jsx",
     ".css",
     ".html",
     ".json",

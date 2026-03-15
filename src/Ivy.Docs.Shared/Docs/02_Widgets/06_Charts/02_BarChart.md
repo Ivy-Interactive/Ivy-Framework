@@ -47,7 +47,7 @@ the `BarChart` type, the recommended way to easily draw Bar Charts is using `ToB
 
 ## Filling with custom colors
 
-Here instead of using a preset `ColorScheme`, a particular bar can also be filled using a custom [Colors](../../04_ApiReference/IvyShared/Colors.md) value.
+Here instead of using a preset `ColorScheme`, a particular bar can also be filled using a custom [Colors](../../04_ApiReference/Ivy/Colors.md) value.
 
 ```csharp demo-below
 
@@ -83,7 +83,7 @@ public class RainbowBarChartBasic : ViewBase
 ```
 
 There are several functions used in this example. `Fill` is used to fill a bar chart
-with a specific [Colors](../../04_ApiReference/IvyShared/Colors.md) value. The `LegendType` function is used to configure the legend
+with a specific [Colors](../../04_ApiReference/Ivy/Colors.md) value. The `LegendType` function is used to configure the legend
 to use squares. Using the `Name` function, the name of a bar can be renamed. Like
 here is done for the `Blueberry` column.
 

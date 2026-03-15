@@ -2,7 +2,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Ivy.Shared;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum SizeType
 {
@@ -126,6 +127,17 @@ public record Size
     public static Size Third()
     {
         return Fraction(0.333f);
+    }
+
+    public static Size Percent(int value)
+    {
+        return Fraction(value / 100f);
+    }
+
+    public static Size Percent(string value)
+    {
+        var cleaned = value.Replace("%", "").Trim();
+        return Fraction(int.Parse(cleaned) / 100f);
     }
 
     public static Size FractionGap(float value)

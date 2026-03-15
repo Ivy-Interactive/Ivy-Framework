@@ -25,7 +25,7 @@ public class BasicDateRangeDemo : ViewBase
 {
     public override object? Build()
     {    
-        var dateRangeState = this.UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
+        var dateRangeState = UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
         var start = dateRangeState.Value.Item1;
         var end = dateRangeState.Value.Item2;
         var span = $"That's {(end-start).Days} days";
@@ -55,10 +55,10 @@ public class DateRangeVariantsDemo : ViewBase
 {
     public override object? Build()
     {
-        var dateRange = this.UseState(() => 
+        var dateRange = UseState(() => 
             (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
         
-        var nullableRange = this.UseState<(DateOnly?, DateOnly?)>(() => 
+        var nullableRange = UseState<(DateOnly?, DateOnly?)>(() => 
             (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), 
              DateOnly.FromDateTime(DateTime.Today)));
 
@@ -82,7 +82,7 @@ public class FormatDateRangeDemo : ViewBase
 {
     public override object? Build()
     {   
-         var dateRangeState = this.UseState(() => 
+         var dateRangeState = UseState(() => 
             (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
          return Layout.Vertical()
                  | dateRangeState.ToDateRangeInput()
@@ -110,7 +110,7 @@ public class HotelBookingDemo : ViewBase
     
     public override object? Build()
     {
-        var bookingRange = this.UseState<(DateOnly?, DateOnly?)>(() => (null, null));
+        var bookingRange = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
         
         var from = bookingRange.Value.Item1;
         var to = bookingRange.Value.Item2;

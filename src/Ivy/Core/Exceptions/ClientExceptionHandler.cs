@@ -1,4 +1,4 @@
-﻿using Ivy.Client;
+﻿using Ivy.Core.Server;
 
 namespace Ivy.Core.Exceptions;
 

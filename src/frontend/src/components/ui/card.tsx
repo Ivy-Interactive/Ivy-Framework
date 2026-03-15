@@ -4,12 +4,17 @@ import { cn } from '@/lib/utils';
 
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & {
+    disabled?: boolean;
+  }
+>(({ className, disabled, ...props }, ref) => (
   <div
     ref={ref}
+    data-disabled={disabled ? '' : undefined}
+    aria-disabled={disabled}
     className={cn(
       'rounded-box border bg-card text-card-foreground shadow',
+      disabled && 'opacity-50 cursor-not-allowed',
       className
     )}
     {...props}

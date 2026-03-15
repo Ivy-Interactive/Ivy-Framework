@@ -23,7 +23,7 @@ Create stacked [navigation](../../01_Onboarding/02_Concepts/09_Navigation.md) ex
 
 ## Usage
 
-Create a blade container with a root view and use `IBladeService` to push and pop blades. Use [Size](../../04_ApiReference/IvyShared/Size.md) for blade `width` (e.g. `Size.Units(100)`).
+Create a blade container with a root view and use `IBladeService` to push and pop blades. Use [Size](../../04_ApiReference/Ivy/Size.md) for blade `width` (e.g. `Size.Units(100)`).
 
 ```csharp demo-tabs
 public class BladeNavigationDemo : ViewBase
@@ -227,4 +227,4 @@ In most cases, you'll use `UseBlades()` directly in your views. The hook manages
 </Callout>
 
 
-<WidgetDocs Type="Ivy.Blade" ExtensionTypes="Ivy.Views.Blades.UseBladesExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Views/Blades/UseBlades.cs"/>
+<WidgetDocs Type="Ivy.Blade" ExtensionTypes="Ivy.UseBladesExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Views/Blades/UseBlades.cs"/>

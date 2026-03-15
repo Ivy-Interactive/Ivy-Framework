@@ -7,8 +7,8 @@ const SyntaxHighlighter = lazy(() =>
 import { createPrismTheme } from '@/lib/prismTheme';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Scales } from '@/types/scale';
-import { codeCopyButtonVariants } from '@/components/ui/code-variants';
+import { Densities } from '@/types/density';
+import { codeCopyButtonVariant } from '@/components/ui/code-variant';
 
 interface CodeWidgetProps {
   id: string;
@@ -16,10 +16,12 @@ interface CodeWidgetProps {
   language: string;
   showCopyButton?: boolean;
   showLineNumbers?: boolean;
+  startingLineNumber?: number;
   showBorder?: boolean;
+  wrapLines?: boolean;
   width?: string;
   height?: string;
-  scale?: Scales;
+  density?: Densities;
 }
 
 const languageMap: Record<string, string> = {
@@ -35,6 +37,7 @@ const languageMap: Record<string, string> = {
   Text: 'text',
   Xml: 'xml',
   Yaml: 'yaml',
+  Csv: 'text',
 };
 
 const mapLanguageToPrism = (language: string): string | undefined => {
@@ -48,9 +51,9 @@ const mapLanguageToPrism = (language: string): string | undefined => {
 };
 
 const MemoizedCopyButton = memo(
-  ({ textToCopy, scale }: { textToCopy: string; scale: Scales }) => (
-    <div className={codeCopyButtonVariants({ scale })}>
-      <CopyToClipboardButton textToCopy={textToCopy} scale={scale} />
+  ({ textToCopy, density }: { textToCopy: string; density: Densities }) => (
+    <div className={codeCopyButtonVariant({ density })}>
+      <CopyToClipboardButton textToCopy={textToCopy} density={density} />
     </div>
   )
 );
@@ -62,36 +65,50 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     language = 'Csharp',
     showCopyButton = true,
     showLineNumbers = false,
+    startingLineNumber = 1,
     showBorder = true,
+    wrapLines = false,
     width = 'Full',
     height = 'MaxContent,,Px:800',
-    scale = Scales.Medium,
+    density = Densities.Medium,
   }) => {
     const scaleStyles: Record<
-      Scales,
-      { fontSize: string; padding: string; lineHeight: string }
+      Densities,
+      {
+        fontSize: string;
+        padding: string;
+        lineHeight: string;
+        lineNumberMinWidth: string;
+        lineNumberPaddingRight: string;
+      }
     > = useMemo(
       () => ({
-        [Scales.Small]: {
+        [Densities.Small]: {
           fontSize: '0.75rem',
           padding: '0.5rem',
           lineHeight: '1.4',
+          lineNumberMinWidth: '1.5rem',
+          lineNumberPaddingRight: '0.5rem',
         },
-        [Scales.Medium]: {
+        [Densities.Medium]: {
           fontSize: '0.875rem',
           padding: '0.75rem',
           lineHeight: '1.5',
+          lineNumberMinWidth: '2.25rem',
+          lineNumberPaddingRight: '0.75rem',
         },
-        [Scales.Large]: {
+        [Densities.Large]: {
           fontSize: '1rem',
           padding: '1rem',
           lineHeight: '1.6',
+          lineNumberMinWidth: '2.5rem',
+          lineNumberPaddingRight: '1rem',
         },
       }),
       []
     );
 
-    const currentScale = scaleStyles[scale];
+    const currentScale = scaleStyles[density];
 
     /** Pre (container): padding, dimensions, typography. Padding here applies to all lines. */
     const preStyle = useMemo<CSSProperties>(() => {
@@ -113,22 +130,21 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       return style;
     }, [width, height, showBorder, currentScale]);
 
-    /** Code (inner): typography and line layout only. No padding so all lines align. */
     const codeTagStyle = useMemo<CSSProperties>(
       () => ({
         margin: 0,
-        wordBreak: 'normal',
-        overflowWrap: 'break-word',
+        wordBreak: wrapLines ? 'break-word' : 'normal',
+        whiteSpace: wrapLines ? 'pre-wrap' : 'pre',
         fontSize: currentScale.fontSize,
         lineHeight: currentScale.lineHeight,
       }),
-      [currentScale]
+      [currentScale, wrapLines]
     );
 
     const highlighterKey = useMemo(
       () =>
-        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}`,
-      [id, language, showLineNumbers, showBorder]
+        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}-${wrapLines}`,
+      [id, language, showLineNumbers, showBorder, startingLineNumber, wrapLines]
     );
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
@@ -143,12 +159,10 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         }
       : { ...getWidth(width) };
 
-    const shouldWrap = true;
-
     return (
       <div className="relative" style={containerStyles}>
         {showCopyButton && (
-          <MemoizedCopyButton textToCopy={content} scale={scale} />
+          <MemoizedCopyButton textToCopy={content} density={density} />
         )}
         <ScrollArea
           className={cn(
@@ -172,10 +186,29 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
               customStyle={isFull ? { ...preStyle, height: 'auto' } : preStyle}
               style={dynamicTheme}
               showLineNumbers={showLineNumbers}
+              startingLineNumber={startingLineNumber}
               wrapLines={true}
-              wrapLongLines={shouldWrap}
+              wrapLongLines={wrapLines}
               key={highlighterKey}
               codeTagProps={{ style: codeTagStyle }}
+              lineProps={
+                showLineNumbers
+                  ? { style: { display: 'table-row' } }
+                  : undefined
+              }
+              lineNumberStyle={
+                showLineNumbers
+                  ? {
+                      display: 'table-cell',
+                      paddingRight: currentScale.lineNumberPaddingRight,
+                      minWidth: currentScale.lineNumberMinWidth,
+                      textAlign: 'right',
+                      userSelect: 'none',
+                      color: 'var(--muted-foreground)',
+                      opacity: 0.5,
+                    }
+                  : undefined
+              }
             >
               {content}
             </SyntaxHighlighter>

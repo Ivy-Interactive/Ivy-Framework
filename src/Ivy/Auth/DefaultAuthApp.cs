@@ -1,16 +1,12 @@
 using System.Reflection;
-using Ivy.Apps;
-using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Auth;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views;
-using Ivy.Views.Forms;
 using Microsoft.AspNetCore.Mvc;
-using AppContext = Ivy.Apps.AppContext;
+using AppContext = Ivy.AppContext;
 
-namespace Ivy.Auth;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 [App()]
 public class DefaultAuthApp : ViewBase
@@ -129,10 +125,10 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         return Layout.Vertical().Gap(12)
                | formView
                | new Button("Login")
-                   .HandleClick(HandleSubmit)
+                   .OnClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
-                   .Scale(formBuilder._scale)
+                   .Density(formBuilder._density)
                    .Width(Size.Full());
     }
 }
@@ -148,7 +144,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
 
         var state = this.UseState(() => registry.RegisterPending(args.ConnectionId, option.Id ?? ""));
 
-        var oauthUriBuilder = new UriBuilder($"{args.Scheme}://{args.Host}/ivy/auth/oauth-login")
+        var oauthUriBuilder = new UriBuilder($"{args.BaseUrl}/ivy/auth/oauth-login")
         {
             Query = $"optionId={Uri.EscapeDataString(option.Id ?? "")}&callbackId={Uri.EscapeDataString(state.Value)}&connectionId={Uri.EscapeDataString(args.ConnectionId)}"
         };

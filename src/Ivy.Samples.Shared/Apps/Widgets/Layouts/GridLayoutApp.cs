@@ -1,4 +1,3 @@
-﻿using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
@@ -17,25 +16,25 @@ public class GridLayoutApp : SampleBase
                | Text.Block("Disabled")
                | Text.Block("Invalid")
 
-               | Text.InlineCode("TextVariant.Text")
+               | Text.Monospaced("TextVariant.Text")
                | withoutValue.ToTextInput().Placeholder("Placeholder")
                | withValue.ToTextInput()
                | withValue.ToTextInput().Disabled()
                | withValue.ToTextInput().Invalid("Error")
 
-               | Text.InlineCode("TextVariant.Password")
+               | Text.Monospaced("TextVariant.Password")
                | withoutValue.ToPasswordInput().Placeholder("Placeholder")
                | withValue.ToPasswordInput()
                | withValue.ToPasswordInput().Disabled()
                | withValue.ToPasswordInput().Invalid("Error")
 
-               | Text.InlineCode("TextVariant.TextArea")
-               | withoutValue.ToTextAreaInput().Placeholder("Placeholder")
-               | withValue.ToTextAreaInput()
-               | withValue.ToTextAreaInput().Disabled()
-               | withValue.ToTextAreaInput().Invalid("Error")
+               | Text.Monospaced("TextVariant.TextArea")
+               | withoutValue.ToTextareaInput().Placeholder("Placeholder")
+               | withValue.ToTextareaInput()
+               | withValue.ToTextareaInput().Disabled()
+               | withValue.ToTextareaInput().Invalid("Error")
 
-               | Text.InlineCode("TextVariant.Search")
+               | Text.Monospaced("TextVariant.Search")
                | withoutValue.ToSearchInput().Placeholder("Placeholder")
                | withValue.ToSearchInput()
                | withValue.ToSearchInput().Disabled()

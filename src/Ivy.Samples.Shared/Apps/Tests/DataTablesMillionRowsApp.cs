@@ -1,7 +1,3 @@
-using Ivy.Samples.Shared.Apps;
-using Ivy.Shared;
-using Ivy.Views.DataTables;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 public record MillionRowData(

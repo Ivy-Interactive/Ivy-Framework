@@ -1,6 +1,4 @@
-using Ivy.Charts;
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -32,7 +30,7 @@ public record BarChart : WidgetBase<BarChart>
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public ChartTooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
@@ -64,7 +62,7 @@ public record BarChart : WidgetBase<BarChart>
     }
 }
 
-public static class BarChartExtensions
+public static partial class BarChartExtensions
 {
     public static BarChart Layout(this BarChart chart, Layouts layout) => chart with { Layout = layout };
 
@@ -76,7 +74,7 @@ public static class BarChartExtensions
 
     public static BarChart Bar(this BarChart chart, params IEnumerable<Bar> bars) => chart with { Bars = [.. chart.Bars, .. bars] };
 
-    public static BarChart Bar(this BarChart chart, string dataKey, object? stackId = null, string? name = null) => chart with { Bars = [.. chart.Bars, new Bar(dataKey, stackId?.ToString(), name ?? Utils.SplitPascalCase(dataKey))] };
+    public static BarChart Bar(this BarChart chart, string dataKey, object? stackId = null, string? name = null) => chart with { Bars = [.. chart.Bars, new Bar(dataKey, stackId?.ToString(), name ?? StringHelper.SplitPascalCase(dataKey))] };
 
     public static BarChart CartesianGrid(this BarChart chart, CartesianGrid cartesianGrid) => chart with { CartesianGrid = cartesianGrid };
 
@@ -92,9 +90,9 @@ public static class BarChartExtensions
 
     public static BarChart YAxis(this BarChart chart) => chart with { YAxis = [.. chart.YAxis, new YAxis()] };
 
-    public static BarChart Tooltip(this BarChart chart, Charts.Tooltip? tooltip) => chart with { Tooltip = tooltip };
+    public static BarChart Tooltip(this BarChart chart, ChartTooltip? tooltip) => chart with { Tooltip = tooltip };
 
-    public static BarChart Tooltip(this BarChart chart) => chart with { Tooltip = new Charts.Tooltip() };
+    public static BarChart Tooltip(this BarChart chart) => chart with { Tooltip = new ChartTooltip() };
 
     public static BarChart Legend(this BarChart chart, Legend legend) => chart with { Legend = legend };
 

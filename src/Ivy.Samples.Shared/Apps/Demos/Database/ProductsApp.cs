@@ -1,9 +1,6 @@
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Alerts;
-using Ivy.Views.Blades;
-using Ivy.Views.Builders;
-using Ivy.Views.Forms;
+using System.Reactive.Linq;
+using System.ComponentModel.DataAnnotations;
+using Ivy.Samples.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Shared.Apps.Demos.Database;
@@ -175,7 +172,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
             .Variant(ButtonVariant.Destructive)
             .Icon(Icons.Trash)
             .Width(Size.Grow())
-            .WithConfirm($"Are you sure you want to delete product '{product.Name}'?", "Delete Product");
+            .WithConfirm($"Are you sure you want to delete product '{product.Name}'?", "Delete Product", confirmLabel: "Delete", destructive: true);
 
         var editBtn = new Button("Edit")
             .Variant(ButtonVariant.Outline)
@@ -243,7 +240,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
             .ToForm()
             .Builder(e => e.DepartmentId, e => e.ToSelectInput(departmentsQuery.Value!, placeholder: "Select Department"))
             .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.UseCategoryOptions, ProductHelpers.UseCategoryOption, placeholder: "Select Category"))
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToDialog(isOpen, title: "Create Product", submitTitle: "Create");
 
         async Task OnSubmit(ProductCreateRequest request)
@@ -299,14 +296,14 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id) : ViewBase
         return productQuery.Value!
             .ToForm()
             .Builder(e => e.Rating, e => e.ToFeedbackInput())
-            .Builder(e => e.Description, e => e.ToTextAreaInput())
+            .Builder(e => e.Description, e => e.ToTextareaInput())
             .Place(e => e.Name, e => e.DepartmentId) // Place will specify the order of the fields
             .PlaceHorizontal(e => e.Width, e => e.Height) // This will place the fields side by side - useful for related fields
             .Group("Details", open: true, e => e.Description, e => e.Meta) // This will group the fields in a collapsible group that is open by default - useful for related fields that are less common
             .Remove(e => e.Id, e => e.CreatedAt, e => e.UpdatedAt, e => e.Department, e => e.Category) // We remove these fields from the form as users should not be able to edit them
             .Builder(e => e.DepartmentId, e => e.ToSelectInput(departmentsQuery.Value!, placeholder: "Select Department"))
             .Builder(e => e.CategoryId, e => e.ToAsyncSelectInput(ProductHelpers.UseCategoryOptions, ProductHelpers.UseCategoryOption, placeholder: "Select Category"))
-            .HandleSubmit(OnSubmit)
+            .OnSubmit(OnSubmit)
             .ToSheet(isOpen, "Edit Product");
 
         async Task OnSubmit(Product? request)

@@ -96,7 +96,7 @@ public class MultipleElementsView : ViewBase
         
         return new Fragment(
             Text.P("Application"),
-            new Spacer().Height(4),
+            new Spacer().Height(Size.Units(4)),
             // Tab navigation
             Layout.Horizontal().Gap(2)
                 | tabs.Select((tab, index) => 
@@ -106,14 +106,14 @@ public class MultipleElementsView : ViewBase
                       })
                         .Variant(selectedTab.Value == index ? ButtonVariant.Primary : ButtonVariant.Secondary)
                 ),
-            new Spacer().Height(4),
+            new Spacer().Height(Size.Units(4)),
             // Content area
             new Card(
                 selectedTab.Value == 0 ? Text.P("Overview content here...") :
                 selectedTab.Value == 1 ? Text.P("Details content here...") :
                 Text.P("Settings content here...")
             ).Title("Content"),
-            new Spacer().Height(4),
+            new Spacer().Height(Size.Units(4)),
             // Header section
             Layout.Horizontal().Gap(4)
                 | new Button("Save", _ => client.Toast("Changes saved successfully!"))

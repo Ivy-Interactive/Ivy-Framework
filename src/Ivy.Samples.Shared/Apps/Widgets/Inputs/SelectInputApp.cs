@@ -1,7 +1,6 @@
 #pragma warning disable IVYHOOK001
 
 using System.ComponentModel;
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -14,7 +13,10 @@ public class SelectInputApp : SampleBase
             new Tab("Basic", new SelectInputBasicExample()),
             new Tab("Sizes", new SelectInputSizesExample()),
             new Tab("Variants", new SelectInputVariantsExample()),
-            new Tab("Nullable & Edge Cases", new SelectInputAdvancedExample())
+            new Tab("Disabled Options", new SelectInputDisabledOptionsExample()),
+            new Tab("Nullable & Edge Cases", new SelectInputAdvancedExample()),
+            new Tab("Advanced Props", new SelectInputAdvancedPropsExample()),
+            new Tab("Ghost", new SelectInputGhostExample())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -32,7 +34,7 @@ public class SelectInputBasicExample : ViewBase
                 | defaultBehavior.ToSelectInput(["Refused", "Allowed", "Ignored"])
                 | notificationTypes
                     .ToSelectInput().Options(["Email", "SMS", "Push", "In-App"])
-                    .Variant(SelectInputs.List)
+                    .Variant(SelectInputVariant.List)
                     .Placeholder("Select notification types...")
                     .WithField()
                     .Label("Notification types");
@@ -53,35 +55,35 @@ public class SelectInputSizesExample : ViewBase
         var colorOptions = typeof(Colors).ToOptions();
 
         var sizesGrid = Layout.Grid().Columns(4)
-            | Text.InlineCode("Description")
-            | Text.InlineCode("Small")
-            | Text.InlineCode("Medium")
-            | Text.InlineCode("Large")
+            | Text.Monospaced("Description")
+            | Text.Monospaced("Small")
+            | Text.Monospaced("Medium")
+            | Text.Monospaced("Large")
 
-            | Text.InlineCode("SelectInputs")
+            | Text.Monospaced("SelectInputVariant")
             | colorState.ToSelectInput(colorOptions).Small()
             | colorState.ToSelectInput(colorOptions)
             | colorState.ToSelectInput(colorOptions).Large()
 
-            | Text.InlineCode("SelectInputs.List")
-            | colorStateSelectList.ToSelectInput(colorOptions).Variant(SelectInputs.List).Small()
-            | colorStateSelectList.ToSelectInput(colorOptions).Variant(SelectInputs.List)
-            | colorStateSelectList.ToSelectInput(colorOptions).Variant(SelectInputs.List).Large()
+            | Text.Monospaced("SelectInputVariant.List")
+            | colorStateSelectList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Small()
+            | colorStateSelectList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List)
+            | colorStateSelectList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Large()
 
-            | Text.InlineCode("SelectInputs.Select")
-            | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputs.Select).Small()
-            | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputs.Select)
-            | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputs.Select).Large()
+            | Text.Monospaced("SelectInputVariant.Select")
+            | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputVariant.Select).Small()
+            | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputVariant.Select)
+            | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputVariant.Select).Large()
 
-            | Text.InlineCode("SelectInputs.List (multi)")
-            | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputs.List).Small()
-            | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputs.List)
-            | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputs.List).Large()
+            | Text.Monospaced("SelectInputVariant.List (multi)")
+            | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Small()
+            | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List)
+            | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Large()
 
-            | Text.InlineCode("SelectInputs.Toggle")
-            | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Small()
-            | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle)
-            | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Large();
+            | Text.Monospaced("SelectInputVariant.Toggle")
+            | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Small()
+            | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle)
+            | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Large();
 
         return Layout.Vertical()
             | Text.H3("SelectInput Sizes")
@@ -105,16 +107,16 @@ public class SelectInputVariantsExample : ViewBase
         var colorState = UseState(Colors.Red);
         var colorArrayState = UseState(Array.Empty<Colors>());
         var nullableColorArrayState = UseState<Colors[]?>(() => null);
-        var colorOptions = typeof(Colors).ToOptions();
         var iconsState = UseState<string>("bold");
         var nullableIconsState = UseState<string?>();
+        var colorOptions = typeof(Colors).ToOptions();
 
         return Layout.Vertical()
             | Text.H3("Variants")
             | Text.P("Different visual states: default, disabled, invalid, with placeholder, nullable.")
             | Layout.Vertical().Gap(6)
                 | (Layout.Horizontal().Gap(6)
-                    | Text.InlineCode("SelectInputs.Select")
+                    | Text.Monospaced("SelectInputVariant.Select")
                     | colorState.ToSelectInput(colorOptions)
                     | colorState.ToSelectInput(colorOptions).Disabled()
                     | colorState.ToSelectInput(colorOptions).Invalid("Invalid")
@@ -122,29 +124,29 @@ public class SelectInputVariantsExample : ViewBase
                     | nullableColorArrayState.ToSelectInput(colorOptions)
                     | nullableColorArrayState.ToSelectInput(colorOptions).Invalid("Invalid"))
                 | (Layout.Horizontal().Gap(6)
-                    | Text.InlineCode("SelectInputs.List")
-                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.List)
-                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.List).Disabled()
-                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.List).Invalid("Invalid")
-                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.List).Placeholder("Select colors")
-                    | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.List)
-                    | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.List).Invalid("Invalid"))
+                    | Text.Monospaced("SelectInputVariant.List")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List)
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Disabled()
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Invalid("Invalid")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Placeholder("Select colors")
+                    | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List)
+                    | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Invalid("Invalid"))
                 | (Layout.Horizontal().Gap(6)
-                    | Text.InlineCode("SelectInputs.Toggle")
-                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle)
-                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Disabled()
-                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Invalid("Invalid")
-                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Placeholder("Select a color")
-                    | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle)
-                    | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Invalid("Invalid"))
+                    | Text.Monospaced("SelectInputVariant.Toggle")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle)
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Disabled()
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Invalid("Invalid")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Placeholder("Select a color")
+                    | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle)
+                    | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Invalid("Invalid"))
                 | (Layout.Horizontal().Gap(6)
-                    | Text.InlineCode("Toggle with Icons")
-                    | iconsState.ToSelectInput(IconOptions).Variant(SelectInputs.Toggle)
-                    | iconsState.ToSelectInput(IconOptions).Variant(SelectInputs.Toggle).Disabled()
-                    | iconsState.ToSelectInput(IconOptions).Variant(SelectInputs.Toggle).Invalid("Invalid")
-                    | iconsState.ToSelectInput(IconOptions).Variant(SelectInputs.Toggle).Placeholder("Select a color")
-                    | nullableIconsState.ToSelectInput(IconOptions).Variant(SelectInputs.Toggle)
-                    | nullableIconsState.ToSelectInput(IconOptions).Variant(SelectInputs.Toggle).Invalid("Invalid"))
+                    | Text.Monospaced("Toggle with Icons")
+                    | iconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle)
+                    | iconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle).Disabled()
+                    | iconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle).Invalid("Invalid")
+                    | iconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle).Placeholder("Select a color")
+                    | nullableIconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle)
+                    | nullableIconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle).Invalid("Invalid"))
             | Text.H3("Multi-Select Variants")
             | CreateMultiSelectVariants();
     }
@@ -158,26 +160,70 @@ public class SelectInputVariantsExample : ViewBase
 
         return Layout.Vertical().Gap(6)
             | (Layout.Horizontal().Gap(6)
-                | Text.InlineCode("SelectInputs.Select")
-                | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputs.Select)
-                | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputs.Select).Disabled()
-                | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputs.Select).Invalid("Invalid")
-                | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputs.Select).Placeholder("Select colors")
-                | Text.InlineCode($"[{string.Join(", ", colorStateSelect.Value)}]"))
+                | Text.Monospaced("SelectInputVariant.Select")
+                | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputVariant.Select)
+                | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputVariant.Select).Disabled()
+                | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputVariant.Select).Invalid("Invalid")
+                | colorStateSelect.ToSelectInput(colorOptions).Variant(SelectInputVariant.Select).Placeholder("Select colors")
+                | Text.Monospaced($"[{string.Join(", ", colorStateSelect.Value)}]"))
             | (Layout.Horizontal().Gap(6)
-                | Text.InlineCode("SelectInputs.List")
-                | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputs.List)
-                | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputs.List).Disabled()
-                | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputs.List).Invalid("Invalid")
-                | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputs.List).Placeholder("Select colors")
-                | Text.InlineCode($"[{string.Join(", ", colorStateList.Value)}]"))
+                | Text.Monospaced("SelectInputVariant.List")
+                | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List)
+                | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Disabled()
+                | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Invalid("Invalid")
+                | colorStateList.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Placeholder("Select colors")
+                | Text.Monospaced($"[{string.Join(", ", colorStateList.Value)}]"))
             | (Layout.Horizontal().Gap(6)
-                | Text.InlineCode("SelectInputs.Toggle")
-                | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle)
-                | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Disabled()
-                | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Invalid("Invalid")
-                | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Placeholder("Select colors")
-                | Text.InlineCode($"[{string.Join(", ", colorStateToggle.Value)}]"));
+                | Text.Monospaced("SelectInputVariant.Toggle")
+                | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle)
+                | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Disabled()
+                | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Invalid("Invalid")
+                | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Placeholder("Select colors")
+                | Text.Monospaced($"[{string.Join(", ", colorStateToggle.Value)}]"));
+    }
+}
+
+public class SelectInputDisabledOptionsExample : ViewBase
+{
+    public override object? Build()
+    {
+        var fruitState = UseState("apple");
+        var colorState = UseState<string[]>([]);
+
+        var fruitOptions = new IAnyOption[]
+        {
+            new Option<string>("Apple", "apple"),
+            new Option<string>("Orange", "orange"),
+            new Option<string>("Grape (Out of Stock)", "grape").Disabled(),
+            new Option<string>("Banana", "banana"),
+            new Option<string>("Mango (Coming Soon)", "mango").Disabled(),
+        };
+
+        var colorOptions = new IAnyOption[]
+        {
+            new Option<string>("Red", "red"),
+            new Option<string>("Green", "green"),
+            new Option<string>("Blue (Premium)", "blue").Disabled(),
+            new Option<string>("Yellow", "yellow"),
+            new Option<string>("Purple (Unavailable)", "purple").Disabled(),
+        };
+
+        return Layout.Vertical()
+            | Text.H3("Disabled Options")
+            | Text.P("Individual options can be disabled using the fluent .Disabled() method. Disabled options appear greyed out and cannot be selected.")
+            | Layout.Grid().Columns(3).Gap(6)
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Select Variant")
+                    | fruitState.ToSelectInput(fruitOptions)
+                        .Placeholder("Select a fruit..."))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("List Variant")
+                    | colorState.ToSelectInput(colorOptions)
+                        .Variant(SelectInputVariant.List))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Toggle Variant")
+                    | colorState.ToSelectInput(colorOptions)
+                        .Variant(SelectInputVariant.Toggle));
     }
 }
 
@@ -199,20 +245,20 @@ public class SelectInputAdvancedExample : ViewBase
         var colorOptions = typeof(Colors).ToOptions();
 
         var nullableGrid = Layout.Grid().Columns(4)
-            | Text.InlineCode("Type")
-            | Text.InlineCode("Select")
-            | Text.InlineCode("List")
-            | Text.InlineCode("Toggle")
+            | Text.Monospaced("Type")
+            | Text.Monospaced("Select")
+            | Text.Monospaced("List")
+            | Text.Monospaced("Toggle")
 
-            | Text.InlineCode("Nullable")
+            | Text.Monospaced("Nullable")
             | nullableColorState.ToSelectInput(colorOptions).Nullable()
-            | nullableColorState.ToSelectInput(colorOptions).Variant(SelectInputs.List).Nullable()
-            | nullableColorState.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle).Nullable()
+            | nullableColorState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Nullable()
+            | nullableColorState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Nullable()
 
-            | Text.InlineCode("Non-Nullable")
+            | Text.Monospaced("Non-Nullable")
             | nonNullableColorState.ToSelectInput(colorOptions)
-            | nonNullableColorState.ToSelectInput(colorOptions).Variant(SelectInputs.List)
-            | nonNullableColorState.ToSelectInput(colorOptions).Variant(SelectInputs.Toggle);
+            | nonNullableColorState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List)
+            | nonNullableColorState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle);
 
         return Layout.Vertical()
             | Text.H3("Nullable vs Non-Nullable")
@@ -226,20 +272,20 @@ public class SelectInputAdvancedExample : ViewBase
         var multiSelectState = UseState<DatabaseNamingConvention[]>([DatabaseNamingConvention.PascalCase, DatabaseNamingConvention.SnakeCase]);
 
         var edgeCasesGrid = Layout.Grid().Columns(4)
-            | Text.InlineCode("Type")
-            | Text.InlineCode("Select")
-            | Text.InlineCode("List")
-            | Text.InlineCode("Toggle")
+            | Text.Monospaced("Type")
+            | Text.Monospaced("Select")
+            | Text.Monospaced("List")
+            | Text.Monospaced("Toggle")
 
-            | Text.InlineCode("Single Select")
+            | Text.Monospaced("Single Select")
             | singleSelectState.ToSelectInput(namingConventionOptions)
-            | singleSelectState.ToSelectInput(namingConventionOptions).Variant(SelectInputs.List)
-            | singleSelectState.ToSelectInput(namingConventionOptions).Variant(SelectInputs.Toggle)
+            | singleSelectState.ToSelectInput(namingConventionOptions).Variant(SelectInputVariant.List)
+            | singleSelectState.ToSelectInput(namingConventionOptions).Variant(SelectInputVariant.Toggle)
 
-            | Text.InlineCode("Multi Select")
+            | Text.Monospaced("Multi Select")
             | multiSelectState.ToSelectInput(namingConventionOptions)
-            | multiSelectState.ToSelectInput(namingConventionOptions).Variant(SelectInputs.List)
-            | multiSelectState.ToSelectInput(namingConventionOptions).Variant(SelectInputs.Toggle);
+            | multiSelectState.ToSelectInput(namingConventionOptions).Variant(SelectInputVariant.List)
+            | multiSelectState.ToSelectInput(namingConventionOptions).Variant(SelectInputVariant.Toggle);
 
         return Layout.Vertical()
             | Text.H3("Label/Value Edge Cases")
@@ -252,6 +298,98 @@ public class SelectInputAdvancedExample : ViewBase
         return Layout.Vertical()
             | CreateNullableTestSection()
             | CreateLabelValueEdgeCasesSection();
+    }
+}
+
+public class SelectInputAdvancedPropsExample : ViewBase
+{
+    private enum Frameworks { React, Angular, Vue, Svelte, Ember, Backbone, Preact, Lit, Solid, Alpine }
+
+    public override object? Build()
+    {
+        var fwSingle = UseState(Frameworks.React);
+        var fwMultiList = UseState<Frameworks[]>([Frameworks.React, Frameworks.Vue]);
+        var fwMultiToggle = UseState<Frameworks[]>([Frameworks.React, Frameworks.Vue]);
+        var fwMultiSelect = UseState<Frameworks[]>([Frameworks.React, Frameworks.Vue]);
+
+        var fwNullableSingle = UseState((Frameworks?)null);
+        var fwNullableMultiList = UseState<Frameworks[]?>(() => null);
+        var fwNullableMultiToggle = UseState<Frameworks[]?>(() => null);
+        var fwNullableMultiSelect = UseState<Frameworks[]?>(() => null);
+        var isLoading = UseState(false);
+        var isSearchable = UseState(true);
+
+        var options = typeof(Frameworks).ToOptions();
+
+        return Layout.Vertical()
+            | Text.H3("Advanced properties")
+            | (Layout.Horizontal()
+                | isLoading.ToSwitchInput().Label("Loading State")
+                | isSearchable.ToSwitchInput().Label("Searchable"))
+            | Layout.Grid().Columns(2)
+                | (Layout.Vertical()
+                    | Text.H4("Select (Single)")
+                    | (Layout.Horizontal()
+                        | fwSingle.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).EmptyMessage("No frameworks found").SearchMode(SearchMode.Fuzzy).Width(Size.Grow())
+                        | fwNullableSingle.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).EmptyMessage("No frameworks found").SearchMode(SearchMode.Fuzzy).Width(Size.Grow()).Nullable(true)))
+                | (Layout.Vertical()
+                    | Text.H4("Select (Multi, Min=1, Max=3)")
+                    | (Layout.Horizontal()
+                        | fwMultiSelect.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow())
+                        | fwNullableMultiSelect.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow()).Nullable(true)))
+                | (Layout.Vertical()
+                    | Text.H4("List (Multi, Min=1, Max=3)")
+                    | (Layout.Horizontal()
+                        | fwMultiList.ToSelectInput(options).Variant(SelectInputVariant.List)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow())
+                        | fwNullableMultiList.ToSelectInput(options).Variant(SelectInputVariant.List)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow()).Nullable(true)))
+                | (Layout.Vertical()
+                    | Text.H4("Toggle (Multi, Min=1, Max=3)")
+                    | (Layout.Horizontal()
+                        | fwMultiToggle.ToSelectInput(options).Variant(SelectInputVariant.Toggle)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow())
+                        | fwNullableMultiToggle.ToSelectInput(options).Variant(SelectInputVariant.Toggle)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow()).Nullable(true)));
+    }
+}
+
+public class SelectInputGhostExample : ViewBase
+{
+    private enum Colors { Red, Green, Blue, Yellow }
+
+    public override object? Build()
+    {
+        var colorState = UseState(Colors.Red);
+        var colorArrayState = UseState<Colors[]>([Colors.Red, Colors.Blue]);
+        var colorOptions = typeof(Colors).ToOptions();
+
+        return Layout.Vertical()
+            | Text.H3("Ghost Styling")
+            | Text.P("Ghost styling removes borders and background fill, making the select blend into its surroundings.")
+            | Layout.Grid().Columns(2).Gap(6)
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Normal")
+                    | colorState.ToSelectInput(colorOptions))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Ghost")
+                    | colorState.ToSelectInput(colorOptions).Ghost())
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Normal (List)")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Ghost (List)")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.List).Ghost())
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Normal (Toggle)")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Ghost (Toggle)")
+                    | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Ghost());
     }
 }
 

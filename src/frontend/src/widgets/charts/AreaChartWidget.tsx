@@ -35,6 +35,8 @@ import {
   applyDefaults,
 } from './chartDefaults';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface AreaChartWidgetProps {
   id: string;
   data: ChartData[];
@@ -54,19 +56,19 @@ interface AreaChartWidgetProps {
 }
 
 const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
-  data = [],
+  data = EMPTY_ARRAY,
   width = 'Full',
   height = 'Full',
-  areas = [],
+  areas = EMPTY_ARRAY,
   cartesianGrid,
-  xAxis = [],
-  yAxis = [],
+  xAxis = EMPTY_ARRAY,
+  yAxis = EMPTY_ARRAY,
   tooltip,
   toolbox,
   legend,
-  referenceLines = [],
-  referenceAreas = [],
-  referenceDots = [],
+  referenceLines = EMPTY_ARRAY,
+  referenceAreas = EMPTY_ARRAY,
+  referenceDots = EMPTY_ARRAY,
   colorScheme = 'Default',
 }) => {
   // Use enhanced theme hook with automatic monitoring
@@ -205,7 +207,10 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   // Memoize complete option configuration
   const option = useMemo(
     () => ({
-      grid: generateEChartGrid(cartesianGrid),
+      grid: generateEChartGrid(
+        cartesianGrid,
+        !!toolbox && toolbox.enabled !== false
+      ),
       color: chartColors,
       tooltip: generateTooltip(tooltip, 'cross', {
         foreground: themeColors.foreground,

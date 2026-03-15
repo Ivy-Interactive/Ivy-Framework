@@ -2,16 +2,16 @@ import * as React from 'react';
 import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
-import { badgeVariants } from './variants';
+import { badgeVariant } from './variant';
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+    VariantProps<typeof badgeVariant> {}
 
-function Badge({ className, variant, scale, ...props }: BadgeProps) {
+function Badge({ className, variant, density, ...props }: BadgeProps) {
   return (
     <div
-      className={cn(badgeVariants({ variant, scale }), className)}
+      className={cn(badgeVariant({ variant, density }), className)}
       {...props}
     />
   );

@@ -1,4 +1,4 @@
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 interface CardSizeClasses {
   header: string;
@@ -38,9 +38,9 @@ export const cardStyles = {
   },
 } as const;
 
-export const getSizeClasses = (scale?: Scales): CardSizeClasses => {
-  switch (scale) {
-    case Scales.Small:
+export const getSizeClasses = (density?: Densities): CardSizeClasses => {
+  switch (density) {
+    case Densities.Small:
       return {
         header: `px-3 pt-1 pb-0 ${baseHeaderClasses} [&_:is(h1,h2,h3,h4,h5,h6)]:!text-sm`,
         content: `p-3 pt-0 [&_*]:!text-sm ${baseContentClasses}`,
@@ -49,7 +49,7 @@ export const getSizeClasses = (scale?: Scales): CardSizeClasses => {
         description: 'text-xs mt-1',
         icon: 'h-4 w-4',
       };
-    case Scales.Large:
+    case Densities.Large:
       return {
         header: `px-8 pt-5 pb-4 ${baseHeaderClasses} [&_:is(h1,h2,h3,h4,h5,h6)]:!text-lg`,
         content: `p-8 pt-0 ${baseContentClasses}`,

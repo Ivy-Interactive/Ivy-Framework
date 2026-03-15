@@ -1,7 +1,7 @@
 using Ivy.Core;
 using Ivy.Core.Docs;
-using Ivy.Shared;
 
+// ReSharper disable once CheckNamespace
 namespace Ivy;
 
 public enum BadgeVariant
@@ -36,6 +36,8 @@ public record Badge : WidgetBase<Badge>
     [Prop] public Icons? Icon { get; set; }
 
     [Prop] public Align IconPosition { get; set; } = Align.Left;
+
+    [Event] public EventHandler<Event<Badge>>? OnClick { get; set; }
 
     public static Badge operator |(Badge badge, object child)
     {
@@ -96,4 +98,12 @@ public static class BadgeExtensions
     {
         return badge with { Variant = BadgeVariant.Info };
     }
+
+    public static Badge OnClick(this Badge badge, Func<Event<Badge>, ValueTask> onClick) => badge with { OnClick = new(onClick) };
+
+    public static Badge OnClick(this Badge badge, Action<Event<Badge>> onClick) => badge with { OnClick = new(onClick.ToValueTask()) };
+
+    public static Badge OnClick(this Badge badge, Action onClick) => badge with { OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; }) };
+
+    public static Badge OnClick(this Badge badge, Func<ValueTask> onClick) => badge with { OnClick = new(_ => onClick()) };
 }

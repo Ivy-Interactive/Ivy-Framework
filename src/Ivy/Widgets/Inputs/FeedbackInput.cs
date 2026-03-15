@@ -4,13 +4,11 @@ using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Widgets.Inputs;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum FeedbackInputs
+public enum FeedbackInputVariant
 {
     Stars,
     Thumbs,
@@ -19,7 +17,7 @@ public enum FeedbackInputs
 
 public interface IAnyFeedbackInput : IAnyInput
 {
-    public FeedbackInputs Variant { get; set; }
+    public FeedbackInputVariant Variant { get; set; }
 }
 
 public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFeedbackInput
@@ -32,9 +30,9 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     [Prop] public bool Nullable { get; set; }
 
-    [Prop] public FeedbackInputs Variant { get; set; } = FeedbackInputs.Stars;
+    [Prop] public FeedbackInputVariant Variant { get; set; } = FeedbackInputVariant.Stars;
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [
         typeof(bool), typeof(bool?),
@@ -48,30 +46,30 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 {
     [OverloadResolutionPriority(1)]
-    public FeedbackInput(IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputs variant = FeedbackInputs.Stars)
+    public FeedbackInput(IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TNumber>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
-    public FeedbackInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, FeedbackInputs variant = FeedbackInputs.Stars)
+    public FeedbackInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange;
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public FeedbackInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, FeedbackInputs variant = FeedbackInputs.Stars)
+    public FeedbackInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
         : this(placeholder, disabled, variant)
     {
-        OnChange = e => { state(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { state(e.Value); return ValueTask.CompletedTask; });
         Value = value;
     }
 
-    public FeedbackInput(string? placeholder = null, bool disabled = false, FeedbackInputs variant = FeedbackInputs.Stars)
+    public FeedbackInput(string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
     {
         Placeholder = placeholder;
         Disabled = disabled;
@@ -80,20 +78,20 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 
     internal FeedbackInput() { }
 
-    [Prop] public TNumber Value { get; } = default!;
+    [Prop] public TNumber Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
-    [Event] public Func<Event<IInput<TNumber>, TNumber>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TNumber>, TNumber>>? OnChange { get; }
 }
 
 public static class FeedbackInputExtensions
 {
-    public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputs? variant = null)
+    public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant? variant = null)
     {
         var type = state.GetStateType();
 
-        variant ??= type == typeof(bool) || type == typeof(bool?) ? FeedbackInputs.Thumbs : FeedbackInputs.Stars;
+        variant ??= type == typeof(bool) || type == typeof(bool?) ? FeedbackInputVariant.Thumbs : FeedbackInputVariant.Stars;
 
         Type genericType = typeof(FeedbackInput<>).MakeGenericType(type);
         FeedbackInputBase input = (FeedbackInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
@@ -104,24 +102,30 @@ public static class FeedbackInputExtensions
 
     public static FeedbackInputBase Disabled(this FeedbackInputBase widget, bool enabled = true) => widget with { Disabled = enabled };
 
-    public static FeedbackInputBase Variant(this FeedbackInputBase widget, FeedbackInputs variant) => widget with { Variant = variant };
+    public static FeedbackInputBase Variant(this FeedbackInputBase widget, FeedbackInputVariant variant) => widget with { Variant = variant };
 
     public static FeedbackInputBase Invalid(this FeedbackInputBase widget, string invalid) => widget with { Invalid = invalid };
     public static FeedbackInputBase Nullable(this FeedbackInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]
-    public static FeedbackInputBase HandleBlur(this FeedbackInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static FeedbackInputBase OnBlur(this FeedbackInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static FeedbackInputBase HandleBlur(this FeedbackInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static FeedbackInputBase OnBlur(this FeedbackInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static FeedbackInputBase HandleBlur(this FeedbackInputBase widget, Action onBlur)
+    public static FeedbackInputBase OnBlur(this FeedbackInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    public static FeedbackInputBase Stars(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Stars };
+    public static FeedbackInputBase Thumbs(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Thumbs };
+    public static FeedbackInputBase Emojis(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Emojis };
+
+
 }

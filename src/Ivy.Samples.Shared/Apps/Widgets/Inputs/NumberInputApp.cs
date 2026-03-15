@@ -1,4 +1,3 @@
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -9,25 +8,23 @@ public class NumberInputApp : SampleBase
     {
         var nullIntValue = UseState<int?>();
         var intValue = UseState(12345);
-
         var onChangedState = UseState(0);
         var onChangeLabel = UseState("");
         var onBlurState = UseState(0);
         var onBlurLabel = UseState("");
-
-        // Moved from CreateCurrencyExamples
         var usdValue = UseState(1234.56m);
         var eurValue = UseState(987.65m);
         var gbpValue = UseState(567.89m);
         var jpyValue = UseState(12345m);
         var nullCurrencyValue = UseState<decimal?>(() => null);
-
         var nullIntInvalid = UseState<int?>();
-
-        // Create a currency value for size examples
         var sizeExampleCurrency = UseState(1234.56m);
+        var priceValue = UseState(99.99m);
+        var weightValue = UseState(5.5);
+        var temperatureValue = UseState(22);
+        var percentValue = UseState(0.75);
 
-        // Moved from CreateNumericTypeTests
+        // Numeric type test states
         var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
             // Signed integer types
@@ -45,7 +42,6 @@ public class NumberInputApp : SampleBase
         };
 
         var dataBinding = CreateNumericTypeTests(numericTypes);
-
         var currencyExamples = CreateCurrencyExamples((IState<decimal>)usdValue, (IState<decimal>)eurValue, (IState<decimal>)gbpValue, (IState<decimal>)jpyValue, (IState<decimal?>)nullCurrencyValue);
 
 
@@ -60,13 +56,13 @@ public class NumberInputApp : SampleBase
                | (Layout.Grid().Columns(6)
 
                   | null!
-                  | Text.InlineCode("Null")
-                  | Text.InlineCode("With Value")
-                  | Text.InlineCode("Disabled")
-                  | Text.InlineCode("Invalid")
-                  | Text.InlineCode("Invalid Nullable")
+                  | Text.Monospaced("Null")
+                  | Text.Monospaced("With Value")
+                  | Text.Monospaced("Disabled")
+                  | Text.Monospaced("Invalid")
+                  | Text.Monospaced("Invalid Nullable")
 
-                  | Text.InlineCode("ToNumberInput()")
+                  | Text.Monospaced("ToNumberInput()")
                   | nullIntValue
                     .ToNumberInput()
                     .Placeholder("Placeholder")
@@ -87,7 +83,7 @@ public class NumberInputApp : SampleBase
                     .Invalid(loremIpsumString)
                     .TestId("number-input-nullable-invalid-main")
 
-                  | Text.InlineCode("ToSliderInput()")
+                  | Text.Monospaced("ToSliderInput()")
                   | nullIntValue
                     .ToSliderInput()
                     .Placeholder("Placeholder")
@@ -113,6 +109,46 @@ public class NumberInputApp : SampleBase
                | Text.H2("Data Binding")
                | dataBinding
 
+               // Prefix and Suffix Examples:
+               | Text.H2("Prefix and Suffix")
+               | (Layout.Grid().Columns(3)
+                  | Text.Monospaced("Description")
+                  | Text.Monospaced("Number Input")
+                  | Text.Monospaced("State")
+
+                  | Text.Block("Text Prefix ($)")
+                  | priceValue
+                    .ToNumberInput()
+                    .Prefix("$")
+                    .Precision(2)
+                    .TestId("number-input-prefix-text")
+                  | Text.Monospaced(priceValue.Value.ToString("F2"))
+
+                  | Text.Block("Text Suffix (kg)")
+                  | weightValue
+                    .ToNumberInput()
+                    .Suffix("kg")
+                    .Precision(1)
+                    .TestId("number-input-suffix-text")
+                  | Text.Monospaced(weightValue.Value.ToString("F1"))
+
+                  | Text.Block("Icon Prefix + Text Suffix")
+                  | temperatureValue
+                    .ToNumberInput()
+                    .Prefix(Icons.Thermometer)
+                    .Suffix("°C")
+                    .TestId("number-input-prefix-suffix-mixed")
+                  | Text.Monospaced(temperatureValue.Value.ToString())
+
+                  | Text.Block("Text Suffix (%)")
+                  | percentValue
+                    .ToNumberInput()
+                    .Suffix("%")
+                    .Precision(2)
+                    .TestId("number-input-suffix-percent")
+                  | Text.Monospaced(percentValue.Value.ToString("F2"))
+               )
+
                // Currency Examples:
                | Text.H2("Currency Examples")
                | currencyExamples
@@ -120,12 +156,12 @@ public class NumberInputApp : SampleBase
                // Sizes:
                | Text.H2("Sizes")
                | (Layout.Grid().Columns(4)
-                  | Text.InlineCode("Description")
-                  | Text.InlineCode("Small")
-                  | Text.InlineCode("Medium")
-                  | Text.InlineCode("Large")
+                  | Text.Monospaced("Description")
+                  | Text.Monospaced("Small")
+                  | Text.Monospaced("Medium")
+                  | Text.Monospaced("Large")
 
-                  | Text.InlineCode("ToNumberInput()")
+                  | Text.Monospaced("ToNumberInput()")
                   | intValue
                     .ToNumberInput()
                     .Small()
@@ -135,7 +171,7 @@ public class NumberInputApp : SampleBase
                     .ToNumberInput()
                     .Large()
 
-                  | Text.InlineCode("ToSliderInput")
+                  | Text.Monospaced("ToSliderInput")
                   | intValue
                     .ToSliderInput()
                     .Small()
@@ -161,7 +197,7 @@ public class NumberInputApp : SampleBase
                | Layout.Horizontal(
                    onBlurState
                     .ToNumberInput()
-                    .HandleBlur(e => onBlurLabel.Set("Blur")),
+                    .OnBlur(e => onBlurLabel.Set("Blur")),
                    onBlurLabel
                )
             ;
@@ -178,9 +214,9 @@ public class NumberInputApp : SampleBase
         return Layout.Vertical()
                | Text.H3("Different Currencies")
                | (Layout.Grid().Columns(3)
-                  | Text.InlineCode("Currency")
-                  | Text.InlineCode("Number Input")
-                  | Text.InlineCode("Slider Input")
+                  | Text.Monospaced("Currency")
+                  | Text.Monospaced("Number Input")
+                  | Text.Monospaced("Slider Input")
 
                   | Text.Block("USD (Default)")
                   | usdValue
@@ -188,7 +224,7 @@ public class NumberInputApp : SampleBase
                     .Currency("USD")
                   | usdValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariant.Slider)
                     .Currency("USD")
 
                   | Text.Block("EUR")
@@ -197,7 +233,7 @@ public class NumberInputApp : SampleBase
                     .Currency("EUR")
                   | eurValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariant.Slider)
                     .Currency("EUR")
 
                   | Text.Block("GBP")
@@ -206,7 +242,7 @@ public class NumberInputApp : SampleBase
                     .Currency("GBP")
                   | gbpValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariant.Slider)
                     .Currency("GBP")
 
                   | Text.Block("JPY")
@@ -215,7 +251,7 @@ public class NumberInputApp : SampleBase
                     .Currency("JPY")
                   | jpyValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariant.Slider)
                     .Currency("JPY")
 
                   | Text.Block("Null Value")
@@ -224,16 +260,16 @@ public class NumberInputApp : SampleBase
                     .Currency("USD")
                   | nullCurrencyValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariant.Slider)
                     .Currency("USD")
                )
 
                | Text.H3("Format Styles")
                | (Layout.Grid().Columns(4)
-                  | Text.InlineCode("Style")
-                  | Text.InlineCode("Example")
-                  | Text.InlineCode("Number Input")
-                  | Text.InlineCode("Slider Input")
+                  | Text.Monospaced("Style")
+                  | Text.Monospaced("Example")
+                  | Text.Monospaced("Number Input")
+                  | Text.Monospaced("Slider Input")
 
                   | Text.Block("Decimal")
                   | Text.Block("1234.56")
@@ -267,9 +303,9 @@ public class NumberInputApp : SampleBase
 
                | Text.H3("Currency with Constraints")
                | (Layout.Grid().Columns(3)
-                  | Text.InlineCode("Description")
-                  | Text.InlineCode("Number Input")
-                  | Text.InlineCode("Slider Input")
+                  | Text.Monospaced("Description")
+                  | Text.Monospaced("Number Input")
+                  | Text.Monospaced("Slider Input")
 
                   | Text.Block("USD with Min/Max")
                   | usdValue
@@ -279,7 +315,7 @@ public class NumberInputApp : SampleBase
                     .Max(10000)
                   | usdValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariant.Slider)
                     .Currency("USD")
                     .Min(0)
                     .Max(10000)
@@ -291,7 +327,7 @@ public class NumberInputApp : SampleBase
                     .Step(0.01)
                   | eurValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariant.Slider)
                     .Currency("EUR")
                     .Step(0.01)
 
@@ -302,7 +338,7 @@ public class NumberInputApp : SampleBase
                     .Precision(2)
                   | gbpValue
                     .ToMoneyInput("Enter amount")
-                    .Variant(NumberInputs.Slider)
+                    .Variant(NumberInputVariant.Slider)
                     .Currency("GBP")
                     .Precision(2)
                );
@@ -313,12 +349,12 @@ public class NumberInputApp : SampleBase
 
         var gridItems = new List<object>
         {
-            Text.InlineCode("Type"),
-            Text.InlineCode("Non-Nullable"),
-            Text.InlineCode("State"),
-            Text.InlineCode("Type"),
-            Text.InlineCode("Nullable"),
-            Text.InlineCode("State")
+            Text.Monospaced("Type"),
+            Text.Monospaced("Non-Nullable"),
+            Text.Monospaced("State"),
+            Text.Monospaced("Type"),
+            Text.Monospaced("Nullable"),
+            Text.Monospaced("State")
         };
 
         var numericTypeNames = new[] { "double", "decimal", "float", "short", "int", "long", "byte" };
@@ -326,7 +362,7 @@ public class NumberInputApp : SampleBase
         foreach (var (typeName, nonNullableState, nullableState) in numericTypes)
         {
             // Non-nullable columns (first 3)
-            gridItems.Add(Text.InlineCode(typeName));
+            gridItems.Add(Text.Monospaced(typeName));
             gridItems.Add(CreateNumberInputVariants(nonNullableState));
 
             var nonNullableAnyState = nonNullableState as IAnyState;
@@ -340,7 +376,7 @@ public class NumberInputApp : SampleBase
             gridItems.Add(FormatStateValue(typeName, nonNullableValue, false));
 
             // Nullable columns (next 3)
-            gridItems.Add(Text.InlineCode($"{typeName}?"));
+            gridItems.Add(Text.Monospaced($"{typeName}?"));
             gridItems.Add(CreateNumberInputVariants(nullableState));
 
             var anyState = nullableState as IAnyState;
@@ -362,9 +398,9 @@ public class NumberInputApp : SampleBase
         {
             return value switch
             {
-                null => isNullable ? Text.InlineCode("Null") : Text.InlineCode("0"),
-                _ when numericTypeNames.Contains(typeName) => Text.InlineCode(value.ToString()!),
-                _ => Text.InlineCode(value?.ToString() ?? "null")
+                null => isNullable ? Text.Monospaced("Null") : Text.Monospaced("0"),
+                _ when numericTypeNames.Contains(typeName) => Text.Monospaced(value.ToString()!),
+                _ => Text.Monospaced(value?.ToString() ?? "null")
             };
         }
     }

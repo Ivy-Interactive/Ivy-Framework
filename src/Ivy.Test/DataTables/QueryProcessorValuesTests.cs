@@ -1,7 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Ivy.Protos.DataTable;
 using Ivy.Test.DataTables.TestHelpers;
-using Ivy.Views.DataTables;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
