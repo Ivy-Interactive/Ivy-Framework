@@ -13,7 +13,7 @@ import {
 
 const EMPTY_ARRAY: never[] = [];
 
-interface GridLayoutWidgetProps {
+export interface GridLayoutWidgetProps {
   columns?: number;
   rows?: number;
   rowGap?: number;
