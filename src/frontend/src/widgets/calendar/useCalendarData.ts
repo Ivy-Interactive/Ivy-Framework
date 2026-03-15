@@ -1,9 +1,6 @@
 import React from 'react';
 import { parseISO } from 'date-fns';
-import type {
-  CalendarEvent,
-  WidgetNodeChild,
-} from './types';
+import type { CalendarEvent, WidgetNodeChild } from './types';
 
 export function useCalendarData(
   slots: { default?: React.ReactNode[] } | undefined,
@@ -18,8 +15,7 @@ export function useCalendarData(
 
     widgetNodeChildren.forEach((widgetNode, index) => {
       if (widgetNode.type === 'Ivy.CalendarEvent') {
-        const eventId =
-          (widgetNode.props.eventId as string) || widgetNode.id;
+        const eventId = (widgetNode.props.eventId as string) || widgetNode.id;
         const title = (widgetNode.props.title as string) || '';
         const startStr = widgetNode.props.start as string | undefined;
         const endStr = widgetNode.props.end as string | undefined;
@@ -34,7 +30,9 @@ export function useCalendarData(
 
         try {
           start = parseISO(startStr);
-          end = endStr ? parseISO(endStr) : new Date(start.getTime() + 60 * 60 * 1000);
+          end = endStr
+            ? parseISO(endStr)
+            : new Date(start.getTime() + 60 * 60 * 1000);
         } catch {
           return;
         }

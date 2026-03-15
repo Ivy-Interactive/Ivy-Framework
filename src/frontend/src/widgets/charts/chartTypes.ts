@@ -315,7 +315,14 @@ export interface PieLegendProps {
   verticalAlign?: string;
 }
 
-export type ScatterShape = 'Circle' | 'Square' | 'Cross' | 'Diamond' | 'Star' | 'Triangle' | 'Wye';
+export type ScatterShape =
+  | 'Circle'
+  | 'Square'
+  | 'Cross'
+  | 'Diamond'
+  | 'Star'
+  | 'Triangle'
+  | 'Wye';
 
 export type ScatterLineType = 'Joint' | 'Fitting';
 

@@ -107,7 +107,8 @@ const RadialBarChartWidget: React.FC<RadialBarChartWidgetProps> = ({
           coordinateSystem: 'polar',
           data: data.map(d => d[key]),
           animation: barConfig.animated ?? RADIAL_BAR_DEFAULTS.animated,
-          showBackground: barConfig.background ?? RADIAL_BAR_DEFAULTS.background,
+          showBackground:
+            barConfig.background ?? RADIAL_BAR_DEFAULTS.background,
           backgroundStyle: {
             color: 'rgba(180, 180, 180, 0.2)',
           },
@@ -145,13 +146,17 @@ const RadialBarChartWidget: React.FC<RadialBarChartWidgetProps> = ({
         startAngle: startAngle,
         endAngle: endAngle,
         axisLine: {
-          show: polarAngleAxisConfig?.axisLine ?? POLAR_ANGLE_AXIS_DEFAULTS.axisLine,
+          show:
+            polarAngleAxisConfig?.axisLine ??
+            POLAR_ANGLE_AXIS_DEFAULTS.axisLine,
           lineStyle: {
             color: polarAngleAxisConfig?.stroke ?? themeColors.mutedForeground,
           },
         },
         axisTick: {
-          show: polarAngleAxisConfig?.tickLine ?? POLAR_ANGLE_AXIS_DEFAULTS.tickLine,
+          show:
+            polarAngleAxisConfig?.tickLine ??
+            POLAR_ANGLE_AXIS_DEFAULTS.tickLine,
         },
         axisLabel: {
           color: themeColors.foreground,

@@ -233,102 +233,116 @@ const generateScatterSeries = (
         }
       : undefined;
 
-  return scatters.map((scatter, index) => {
-    const shape = scatter.shape || 'Circle';
-    const symbol = mapScatterShape(shape);
-    const customPath = getCustomSymbol(shape);
+  return scatters
+    .map((scatter, index) => {
+      const shape = scatter.shape || 'Circle';
+      const symbol = mapScatterShape(shape);
+      const customPath = getCustomSymbol(shape);
 
-    // Prepare data in [x, y, size] format for scatter
-    const scatterData = data.map(d => {
-      const xVal = resolveValue(d, xAxisDataKey);
-      const x = typeof xVal === 'number' ? xVal : parseFloat(String(xVal || 0));
-      const yVal = resolveValue(d, yAxisDataKey);
-      const y = typeof yVal === 'number' ? yVal : parseFloat(String(yVal || 0));
-      const zVal = zAxisDataKey ? resolveValue(d, zAxisDataKey) : undefined;
-      const z = zVal !== undefined
-        ? typeof zVal === 'number' ? zVal : parseFloat(String(zVal || 0))
-        : undefined;
+      // Prepare data in [x, y, size] format for scatter
+      const scatterData = data.map(d => {
+        const xVal = resolveValue(d, xAxisDataKey);
+        const x =
+          typeof xVal === 'number' ? xVal : parseFloat(String(xVal || 0));
+        const yVal = resolveValue(d, yAxisDataKey);
+        const y =
+          typeof yVal === 'number' ? yVal : parseFloat(String(yVal || 0));
+        const zVal = zAxisDataKey ? resolveValue(d, zAxisDataKey) : undefined;
+        const z =
+          zVal !== undefined
+            ? typeof zVal === 'number'
+              ? zVal
+              : parseFloat(String(zVal || 0))
+            : undefined;
 
-      return z !== undefined ? [x, y, z] : [x, y];
-    });
+        return z !== undefined ? [x, y, z] : [x, y];
+      });
 
-    // Calculate symbol size
-    let symbolSize: number | ((data: number[]) => number) = 8;
-    if (zAxisDataKey && zAxisConfig) {
-      const rangeMin = zAxisConfig.rangeMin || 60;
-      const rangeMax = zAxisConfig.rangeMax || 400;
+      // Calculate symbol size
+      let symbolSize: number | ((data: number[]) => number) = 8;
+      if (zAxisDataKey && zAxisConfig) {
+        const rangeMin = zAxisConfig.rangeMin || 60;
+        const rangeMax = zAxisConfig.rangeMax || 400;
 
-      // Extract all z values to find min/max
-      const zValues = data
-        .map(d => {
-          const v = zAxisDataKey ? resolveValue(d, zAxisDataKey) : undefined;
-          return v !== undefined ? (typeof v === 'number' ? v : parseFloat(String(v || 0))) : 0;
-        })
-        .filter(z => z > 0);
+        // Extract all z values to find min/max
+        const zValues = data
+          .map(d => {
+            const v = zAxisDataKey ? resolveValue(d, zAxisDataKey) : undefined;
+            return v !== undefined
+              ? typeof v === 'number'
+                ? v
+                : parseFloat(String(v || 0))
+              : 0;
+          })
+          .filter(z => z > 0);
 
-      const minZ = Math.min(...zValues);
-      const maxZ = Math.max(...zValues);
+        const minZ = Math.min(...zValues);
+        const maxZ = Math.max(...zValues);
 
-      // Create a function to map z values to symbol sizes
-      symbolSize = (dataItem: number[]) => {
-        const z = dataItem[2];
-        if (z === undefined || minZ === maxZ) return (rangeMin + rangeMax) / 2;
+        // Create a function to map z values to symbol sizes
+        symbolSize = (dataItem: number[]) => {
+          const z = dataItem[2];
+          if (z === undefined || minZ === maxZ)
+            return (rangeMin + rangeMax) / 2;
 
-        // Linear interpolation between rangeMin and rangeMax
-        return rangeMin + ((z - minZ) / (maxZ - minZ)) * (rangeMax - rangeMin);
-      };
-    }
+          // Linear interpolation between rangeMin and rangeMax
+          return (
+            rangeMin + ((z - minZ) / (maxZ - minZ)) * (rangeMax - rangeMin)
+          );
+        };
+      }
 
-    const baseSeries = {
-      name: scatter.name || scatter.dataKey,
-      type: ChartType.Scatter as 'scatter',
-      data: scatterData,
-      symbol: customPath || symbol,
-      symbolSize,
-      itemStyle: {
-        color: scatter.fill || undefined,
-        opacity: scatter.fillOpacity !== null ? scatter.fillOpacity : 0.8,
-        borderColor: scatter.stroke || undefined,
-        borderWidth: scatter.strokeWidth || 1,
-      },
-      emphasis: {
-        focus: 'series',
+      const baseSeries = {
+        name: scatter.name || scatter.dataKey,
+        type: ChartType.Scatter as 'scatter',
+        data: scatterData,
+        symbol: customPath || symbol,
+        symbolSize,
         itemStyle: {
-          borderWidth: 2,
-          shadowBlur: 10,
-          shadowColor: 'rgba(0, 0, 0, 0.3)',
+          color: scatter.fill || undefined,
+          opacity: scatter.fillOpacity !== null ? scatter.fillOpacity : 0.8,
+          borderColor: scatter.stroke || undefined,
+          borderWidth: scatter.strokeWidth || 1,
         },
-      },
-      animation: scatter.animated !== false,
-      animationDuration: 800,
-      markPoint: index === 0 ? markPoint : undefined,
-      markLine: index === 0 ? markLine : undefined,
-      markArea: index === 0 ? markArea : undefined,
-    };
-
-    // If line is enabled, add a line series overlay
-    if (scatter.line) {
-      return [
-        baseSeries,
-        {
-          name: `${scatter.name || scatter.dataKey} Line`,
-          type: 'line' as const,
-          data: scatterData.map(d => [d[0], d[1]]),
-          showSymbol: false,
-          smooth: scatter.lineType === 'Fitting',
-          lineStyle: {
-            width: 1,
-            opacity: 0.5,
-            color: scatter.stroke || undefined,
-            type: scatter.strokeDashArray ? 'dashed' : 'solid',
+        emphasis: {
+          focus: 'series',
+          itemStyle: {
+            borderWidth: 2,
+            shadowBlur: 10,
+            shadowColor: 'rgba(0, 0, 0, 0.3)',
           },
-          animation: false,
         },
-      ];
-    }
+        animation: scatter.animated !== false,
+        animationDuration: 800,
+        markPoint: index === 0 ? markPoint : undefined,
+        markLine: index === 0 ? markLine : undefined,
+        markArea: index === 0 ? markArea : undefined,
+      };
 
-    return baseSeries;
-  }).flat();
+      // If line is enabled, add a line series overlay
+      if (scatter.line) {
+        return [
+          baseSeries,
+          {
+            name: `${scatter.name || scatter.dataKey} Line`,
+            type: 'line' as const,
+            data: scatterData.map(d => [d[0], d[1]]),
+            showSymbol: false,
+            smooth: scatter.lineType === 'Fitting',
+            lineStyle: {
+              width: 1,
+              opacity: 0.5,
+              color: scatter.stroke || undefined,
+              type: scatter.strokeDashArray ? 'dashed' : 'solid',
+            },
+            animation: false,
+          },
+        ];
+      }
+
+      return baseSeries;
+    })
+    .flat();
 };
 
 const ScatterChartWidget: React.FC<ScatterChartWidgetProps> = ({

@@ -120,19 +120,28 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
   // OnClick takes precedence over Link
   const linkProps = !hasOnClick && link ? getLinkProps(link) : null;
 
-  const altText = alt ?? caption ?? "";
+  const altText = alt ?? caption ?? '';
 
   const clickProps = hasOnClick
     ? { onClick: handleClick, style: { cursor: 'pointer' as const } }
     : {};
 
-  const imgStyles: React.CSSProperties = objectFit ? {
-    width: '100%',
-    height: '100%',
-    objectFit: objectFitMap[objectFit],
-  } : {};
+  const imgStyles: React.CSSProperties = objectFit
+    ? {
+        width: '100%',
+        height: '100%',
+        objectFit: objectFitMap[objectFit],
+      }
+    : {};
 
-  const imgElement = <img src={validatedImageSrc} alt={altText} style={imgStyles} {...clickProps} />;
+  const imgElement = (
+    <img
+      src={validatedImageSrc}
+      alt={altText}
+      style={imgStyles}
+      {...clickProps}
+    />
+  );
 
   const wrappedImg = linkProps ? (
     <a {...linkProps} style={{ cursor: 'pointer' }}>
@@ -161,5 +170,13 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
     );
   }
 
-  return <img src={validatedImageSrc} key={id} style={{ ...styles, ...(hasOnClick ? { cursor: 'pointer' } : {}) }} alt={altText} onClick={hasOnClick ? handleClick : undefined} />;
+  return (
+    <img
+      src={validatedImageSrc}
+      key={id}
+      style={{ ...styles, ...(hasOnClick ? { cursor: 'pointer' } : {}) }}
+      alt={altText}
+      onClick={hasOnClick ? handleClick : undefined}
+    />
+  );
 };

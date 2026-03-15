@@ -226,13 +226,25 @@ describe('tableDataMapper', () => {
     it('should convert Arrow Decimal128 objects to JS numbers', () => {
       // Simulate real Arrow DecimalBigNum objects — valueOf(scale) returns the correct number
       const decimalValues = [
-        { valueOf: (scale?: number) => scale === 28 ? 150000 : 15000000000000000000000000000000n, toString: () => '15000000000000000000000000000000' },
-        { valueOf: (scale?: number) => scale === 28 ? 99.95 : 9995000000000000000000000000000n, toString: () => '9995000000000000000000000000000' },
+        {
+          valueOf: (scale?: number) =>
+            scale === 28 ? 150000 : 15000000000000000000000000000000n,
+          toString: () => '15000000000000000000000000000000',
+        },
+        {
+          valueOf: (scale?: number) =>
+            scale === 28 ? 99.95 : 9995000000000000000000000000000n,
+          toString: () => '9995000000000000000000000000000',
+        },
       ];
 
       const mockField = {
         name: 'price',
-        type: { toString: () => 'Decimal128(38, 28)', scale: 28, precision: 38 },
+        type: {
+          toString: () => 'Decimal128(38, 28)',
+          scale: 28,
+          precision: 38,
+        },
         metadata: null,
       };
       const mockSchema = { fields: [mockField] };
