@@ -1423,7 +1423,7 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
   options = EMPTY_ARRAY,
   eventHandler,
   selectMany = false,
-  nullable = false,
+  nullable: _nullable = false,
   ghost = false,
   density = Densities.Medium,
   'data-testid': dataTestId,
@@ -1468,7 +1468,7 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
     return (
       <div
         className={cn('flex items-center justify-center text-muted-foreground', sliderLabelVariant[String(density)])}
-        style={width ? { width: getWidth(width) } : undefined}
+        style={width ? getWidth(width) : undefined}
         data-testid={dataTestId}
       >
         No options available
@@ -1488,7 +1488,7 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
         'relative w-full flex-1 flex flex-col gap-1 pt-6 pb-2 my-auto justify-center',
         ghost && 'border-transparent shadow-none'
       )}
-      style={width ? { width: getWidth(width) } : undefined}
+      style={width ? getWidth(width) : undefined}
       data-testid={dataTestId}
     >
       <div className="relative">
@@ -1499,6 +1499,7 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
           value={[sliderValue]}
           disabled={disabled}
           density={density}
+          tooltipValue={currentLabel}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
           className={cn(invalid && inputStyles.invalidInput)}
@@ -1509,7 +1510,8 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
               <div
                 key={i}
                 className={cn(
-                  'rounded-full bg-muted-foreground/40',
+                  'rounded-full',
+                  i === sliderValue ? 'bg-transparent' : 'bg-muted-foreground/40',
                   density === Densities.Small ? 'w-1 h-1' : density === Densities.Large ? 'w-1.5 h-1.5' : 'w-1 h-1'
                 )}
               />
@@ -1519,7 +1521,6 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
       </div>
       <div className={cn('flex w-full items-center justify-between gap-1', textSize)} aria-hidden="true">
         <span className="text-muted-foreground">{firstLabel}</span>
-        <span className="font-medium">{currentLabel}</span>
         <span className="text-muted-foreground">{lastLabel}</span>
       </div>
       {invalid && (
