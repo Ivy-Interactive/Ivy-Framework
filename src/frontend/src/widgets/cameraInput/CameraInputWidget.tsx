@@ -92,9 +92,6 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
         video: { facingMode },
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
       setCameraState('active');
       setCapturedImage(null);
     } catch (err) {
@@ -156,6 +153,12 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
     setCapturedImage(null);
     startCamera();
   }, [startCamera]);
+
+  useEffect(() => {
+    if (cameraState === 'active' && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [cameraState]);
 
   useEffect(() => {
     return () => {
