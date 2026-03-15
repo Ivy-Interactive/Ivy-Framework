@@ -15,7 +15,7 @@ public class FormBuilder<TModel> : ViewBase
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
-    internal Scale _scale = Ivy.Scale.Medium;
+    internal Density _density = Ivy.Density.Medium;
     internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
     internal FormSubmitStrategy _submitStrategy;
@@ -113,7 +113,7 @@ public class FormBuilder<TModel> : ViewBase
         fieldInfo.InputFactory = ScaffoldWrapper(factory);
         return this;
 
-        bool HasCustomLabel(string label, string name) => label != Utils.SplitPascalCase(name);
+        bool HasCustomLabel(string label, string name) => label != StringHelper.SplitPascalCase(name);
     }
 
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IAnyInput> input)
@@ -299,24 +299,24 @@ public class FormBuilder<TModel> : ViewBase
         {
             var hint = GetField(expr);
             hint.Required = true;
-            hint.Validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
+            hint.Validators.Add(e => (ValidationHelper.IsValidRequired(e), "Required field"));
         }
         return this;
     }
 
-    public FormBuilder<TModel> Scale(Scale scale)
+    public FormBuilder<TModel> Density(Density density)
     {
-        _scale = scale;
+        _density = density;
         return this;
     }
 
-    public FormBuilder<TModel> Small() => Scale(Ivy.Scale.Small);
-    public FormBuilder<TModel> Medium() => Scale(Ivy.Scale.Medium);
-    public FormBuilder<TModel> Large() => Scale(Ivy.Scale.Large);
+    public FormBuilder<TModel> Small() => Density(Ivy.Density.Small);
+    public FormBuilder<TModel> Medium() => Density(Ivy.Density.Medium);
+    public FormBuilder<TModel> Large() => Density(Ivy.Density.Large);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _fields[name];
     }
 
@@ -332,10 +332,11 @@ public class FormBuilder<TModel> : ViewBase
     {
         var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange: false);
 
-        var validationSignal = context.UseSignal<FormValidateSignal, Unit, bool>();
+        // Per-form signal instances (stable across builds via UseRef) so Submit validates only this form's fields.
+        var validationSignal = context.UseRef(() => new FormValidateSignal()).Value;
+        var submitSignal = context.UseRef(() => new FormSubmitSignal()).Value;
         var updateSignal = context.UseSignal<FormUpdateSignal, Unit, Unit>();
         var invalidFields = context.UseState(0);
-
         var fields = _fields
             .Values
             .Where(e => e is { Removed: false, InputFactory: not null })
@@ -346,13 +347,15 @@ public class FormBuilder<TModel> : ViewBase
                     e.InputFactory!,
                     () => e.Visible(currentModel.Value),
                     updateSignal,
+                    validationSignal,
+                    submitSignal,
                     e.Label,
                     e.Description,
                     e.Required,
                     new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                     e.Validators.ToArray(),
                     _validationStrategy,
-                    _scale,
+                    _density,
                     e.Help,
                     e.Placeholder,
                     _submitStrategy
@@ -363,8 +366,9 @@ public class FormBuilder<TModel> : ViewBase
 
         async Task<bool> OnSubmit()
         {
-            var results = await validationSignal.Send(new Unit());
-            if (results.All(e => e))
+            var results = await validationSignal.Send(default);
+            var allValid = results.Length == fields.Length && results.All(e => e);
+            if (allValid)
             {
                 if (_onSubmit != null)
                 {
@@ -374,7 +378,10 @@ public class FormBuilder<TModel> : ViewBase
                 invalidFields.Set(0);
                 return true;
             }
-            invalidFields.Set(results.Count(e => !e));
+            var invalidCount = results.Length == fields.Length
+                ? results.Count(e => !e)
+                : fields.Length;
+            invalidFields.Set(invalidCount);
             return false;
         }
 
@@ -388,9 +395,9 @@ public class FormBuilder<TModel> : ViewBase
         {
             if (_submitStrategy is FormSubmitStrategy.OnBlur or FormSubmitStrategy.OnChange)
             {
-                return submitReceiver.Receive(unit =>
+                return submitSignal.ReceiveWithId(Guid.NewGuid(), _ =>
                 {
-                    _ = OnSubmit();
+                    var t = OnSubmit();
                     return default;
                 });
             }
@@ -405,7 +412,7 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            _scale,
+            _density,
             _groupOpenStates
         );
 
@@ -426,10 +433,10 @@ public class FormBuilder<TModel> : ViewBase
 
         var (handleSubmit, isUploading) = Context.UseUploadAwareSubmit(_model, onSubmit);
 
-        var buttonGap = _scale switch
+        var buttonGap = _density switch
         {
-            Ivy.Scale.Small => 4,
-            Ivy.Scale.Large => 8,
+            Ivy.Density.Small => 4,
+            Ivy.Density.Large => 8,
             _ => 6
         };
 
@@ -443,7 +450,7 @@ public class FormBuilder<TModel> : ViewBase
         return Layout.Vertical().Gap(buttonGap)
                | formView
                | Layout.Horizontal(
-                   _submitBuilder(submitting || isUploading).OnClick(_ => handleSubmit()).Scale(_scale),
+                   _submitBuilder(submitting || isUploading).OnClick(_ => handleSubmit()).Density(_density),
                    validationView
                 );
     }

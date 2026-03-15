@@ -20,7 +20,7 @@ public class TextInputApp : SampleBase
 
         var dataBinding = Layout.Grid().Columns(3)
 
-                          | Text.InlineCode("string")
+                          | Text.Monospaced("string")
                           | (Layout.Vertical()
                              | stringState.ToTextInput()
                              | stringState.ToTextareaInput()
@@ -29,7 +29,7 @@ public class TextInputApp : SampleBase
                           )
                           | stringState
 
-                          | Text.InlineCode("string?")
+                          | Text.Monospaced("string?")
                           | (Layout.Vertical()
                              | nullStringState.ToTextInput()
                              | nullStringState.ToTextareaInput()
@@ -46,30 +46,30 @@ public class TextInputApp : SampleBase
                | Text.H2("Variants")
                | (Layout.Grid().Columns(5)
                   | null!
-                  | Text.InlineCode("Empty")
-                  | Text.InlineCode("With Value")
-                  | Text.InlineCode("Disabled")
-                  | Text.InlineCode("Invalid")
+                  | Text.Monospaced("Empty")
+                  | Text.Monospaced("With Value")
+                  | Text.Monospaced("Disabled")
+                  | Text.Monospaced("Invalid")
 
-                  | Text.InlineCode("TextInputVariants.Text")
+                  | Text.Monospaced("TextInputVariant.Text")
                   | withoutValue.ToTextInput().Placeholder("Placeholder")
                   | withValue.ToTextInput()
                   | withValue.ToTextInput().Disabled()
                   | withValue.ToTextInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
-                  | Text.InlineCode("TextInputVariants.Password")
+                  | Text.Monospaced("TextInputVariant.Password")
                   | withoutValue.ToPasswordInput().Placeholder("Placeholder")
                   | withValue.ToPasswordInput()
                   | withValue.ToPasswordInput().Disabled()
                   | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
-                  | Text.InlineCode("TextInputVariants.Textarea")
+                  | Text.Monospaced("TextInputVariant.Textarea")
                   | withoutValue.ToTextareaInput().Placeholder("Placeholder")
                   | withValue.ToTextareaInput()
                   | withValue.ToTextareaInput().Disabled()
                   | withValue.ToTextareaInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
-                  | Text.InlineCode("TextInputVariants.Search")
+                  | Text.Monospaced("TextInputVariant.Search")
                   | withoutValue.ToSearchInput().Placeholder("Placeholder").ShortcutKey("Ctrl+K")
                   | withValue.ToSearchInput()
                   | withValue.ToSearchInput().Disabled()
@@ -106,7 +106,7 @@ public class TextInputApp : SampleBase
                )
                | Text.H3("OnSubmit (press Enter)")
                | new TextInputSubmitDemo()
-               | new Spacer().Height(15)
+               | new Spacer().Height(Size.Units(15))
             ;
     }
 
@@ -122,9 +122,9 @@ public class TextInputLengthConstraints : ViewBase
         var bothLengthState = UseState("");
 
         return Layout.Grid().Columns(3)
-               | Text.InlineCode("MinLength(3)")
-               | Text.InlineCode("MaxLength(10)")
-               | Text.InlineCode("MinLength(5) + MaxLength(10)")
+               | Text.Monospaced("MinLength(3)")
+               | Text.Monospaced("MaxLength(10)")
+               | Text.Monospaced("MinLength(5) + MaxLength(10)")
                | minLengthState.ToTextInput().Placeholder("At least 3 characters").MinLength(3)
                | maxLengthState.ToTextInput().Placeholder("Up to 10 characters").MaxLength(10)
                | bothLengthState.ToTextInput().Placeholder("Between 5 and 10 characters").MinLength(5).MaxLength(10);
@@ -141,27 +141,27 @@ public class TextInputSizes : ViewBase
         var searchState = UseState("Hello");
 
         return Layout.Grid().Columns(4)
-               | Text.InlineCode("Description")
-               | Text.InlineCode("Small")
-               | Text.InlineCode("Medium")
-               | Text.InlineCode("Large")
+               | Text.Monospaced("Description")
+               | Text.Monospaced("Small")
+               | Text.Monospaced("Medium")
+               | Text.Monospaced("Large")
 
-               | Text.InlineCode("TextInputVariants.Text")
+               | Text.Monospaced("TextInputVariant.Text")
                | textState.ToTextInput().Small()
                | textState.ToTextInput()
                | textState.ToTextInput().Large()
 
-               | Text.InlineCode("TextInputVariants.Password")
+               | Text.Monospaced("TextInputVariant.Password")
                | passwordState.ToPasswordInput().Small()
                | passwordState.ToPasswordInput()
                | passwordState.ToPasswordInput().Large()
 
-               | Text.InlineCode("TextInputVariants.Textarea")
+               | Text.Monospaced("TextInputVariant.Textarea")
                | textareaState.ToTextareaInput().Small()
                | textareaState.ToTextareaInput()
                | textareaState.ToTextareaInput().Large()
 
-               | Text.InlineCode("TextInputVariants.Search")
+               | Text.Monospaced("TextInputVariant.Search")
                | searchState.ToSearchInput().Small()
                | searchState.ToSearchInput()
                | searchState.ToSearchInput().Large();
@@ -177,26 +177,26 @@ public class TextInputAffixes : ViewBase
 
         return Layout.Grid().Columns(4)
                | null!
-               | Text.InlineCode("Prefix only")
-               | Text.InlineCode("Suffix only")
-               | Text.InlineCode("Both")
+               | Text.Monospaced("Prefix only")
+               | Text.Monospaced("Suffix only")
+               | Text.Monospaced("Both")
 
-               | Text.InlineCode("Text prefix/suffix")
+               | Text.Monospaced("Text prefix/suffix")
                | textState.ToTextInput().Prefix("https://")
                | textState.ToTextInput().Suffix(".com")
                | textState.ToTextInput().Prefix("https://").Suffix(".com")
 
-               | Text.InlineCode("Icon prefix/suffix")
+               | Text.Monospaced("Icon prefix/suffix")
                | textState.ToTextInput().Prefix(Icons.Mail)
                | textState.ToTextInput().Suffix(Icons.Mail)
                | textState.ToTextInput().Prefix(Icons.Mail).Suffix(Icons.Mail)
 
-               | Text.InlineCode("Nullable with prefix/suffix")
+               | Text.Monospaced("Nullable with prefix/suffix")
                | nullableState.ToTextInput().Prefix("$").Placeholder("Amount")
                | nullableState.ToTextInput().Suffix("%").Placeholder("Percentage")
                | nullableState.ToTextInput().Prefix("https://").Suffix(".com").Placeholder("domain")
 
-               | Text.InlineCode("Nullable + Invalid + ShortcutKey")
+               | Text.Monospaced("Nullable + Invalid + ShortcutKey")
                | nullableState.ToTextInput().Prefix("@").Invalid("Required field").ShortcutKey("Ctrl+U")
                | nullableState.ToTextInput().Suffix(Icons.Search).Invalid("Invalid input").ShortcutKey("Ctrl+F")
                | nullableState.ToTextInput().Prefix(Icons.Mail).Suffix(".com").Invalid("Error").ShortcutKey("Ctrl+E");

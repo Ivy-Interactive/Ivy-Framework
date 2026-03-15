@@ -236,7 +236,7 @@ public class FormCalloutView : ViewBase
 
 <WidgetDocs Type="Ivy.Callout" ExtensionTypes="Ivy.CalloutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Callout.cs"/>
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -285,6 +285,24 @@ public class CustomIconCalloutView : ViewBase
             | Callout.Success("Integration connected successfully!", "Connection Status").Icon(Icons.Link);
     }
 }
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I create a Callout or info/warning/error message box in Ivy?
+</Summary>
+<Body>
+
+Use the static factory methods on `Callout`:
+
+```csharp
+Callout.Info("No items found.")
+Callout.Warning("This action cannot be undone.")
+Callout.Error("Something went wrong.")
+Callout.Success("Operation completed!")
 ```
 
 </Body>

@@ -18,22 +18,22 @@ public class DateRangeInputApp : SampleBase
 
         // Size examples
         var sizeExamplesGrid = Layout.Grid().Columns(4)
-            | Text.InlineCode("Size")
-            | Text.InlineCode("Normal")
-            | Text.InlineCode("Nullable")
-            | Text.InlineCode("Disabled")
+            | Text.Monospaced("Size")
+            | Text.Monospaced("Normal")
+            | Text.Monospaced("Nullable")
+            | Text.Monospaced("Disabled")
 
-            | Text.InlineCode("Small")
+            | Text.Monospaced("Small")
             | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Small().TestId("daterange-input-dateonly-small")
             | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Small().TestId("daterange-input-dateonly-small-nullable")
             | disabledNullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Small().Disabled().TestId("daterange-input-dateonly-small-disabled")
 
-            | Text.InlineCode("Medium")
-            | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Scale(Scale.Medium).TestId("daterange-input-dateonly-medium")
-            | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Scale(Scale.Medium).TestId("daterange-input-dateonly-medium-nullable")
-            | disabledNullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Scale(Scale.Medium).Disabled().TestId("daterange-input-dateonly-medium-disabled")
+            | Text.Monospaced("Medium")
+            | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Density(Density.Medium).TestId("daterange-input-dateonly-medium")
+            | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Density(Density.Medium).TestId("daterange-input-dateonly-medium-nullable")
+            | disabledNullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Density(Density.Medium).Disabled().TestId("daterange-input-dateonly-medium-disabled")
 
-            | Text.InlineCode("Large")
+            | Text.Monospaced("Large")
             | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Large().TestId("daterange-input-dateonly-large")
             | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Large().TestId("daterange-input-dateonly-large-nullable")
             | disabledNullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Large().Disabled().TestId("daterange-input-dateonly-large-disabled");
@@ -41,7 +41,7 @@ public class DateRangeInputApp : SampleBase
         // Variants grid
         var variantsGrid = Layout.Grid().Columns(5)
             // Header row (update last col)
-            | Text.InlineCode("Normal") | Text.InlineCode("Disabled") | Text.InlineCode("Required") | Text.InlineCode("Nullable") | Text.InlineCode("Nullable Invalid")
+            | Text.Monospaced("Normal") | Text.Monospaced("Disabled") | Text.Monospaced("Required") | Text.Monospaced("Nullable") | Text.Monospaced("Nullable Invalid")
             // Example row (update last widget)
             | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").TestId("daterange-input-dateonly-nullable-main")
             | disabledNullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Disabled().TestId("daterange-input-dateonly-nullable-disabled-main")
@@ -51,21 +51,21 @@ public class DateRangeInputApp : SampleBase
 
         // Data binding grid
         var dataBindingGrid = Layout.Grid().Columns(3)
-            | Text.InlineCode("Type")
-            | Text.InlineCode("Input")
-            | Text.InlineCode("Current Value")
+            | Text.Monospaced("Type")
+            | Text.Monospaced("Input")
+            | Text.Monospaced("Current Value")
 
-            | Text.InlineCode("(DateOnly, DateOnly)")
+            | Text.Monospaced("(DateOnly, DateOnly)")
             | dateOnlyRangeState
                 .ToDateRangeInput()
                 .TestId("daterange-input-dateonly-binding")
-            | Text.InlineCode($"({dateOnlyRangeState.Value.Item1:yyyy-MM-dd}, {dateOnlyRangeState.Value.Item2:yyyy-MM-dd})")
+            | Text.Monospaced($"({dateOnlyRangeState.Value.Item1:yyyy-MM-dd}, {dateOnlyRangeState.Value.Item2:yyyy-MM-dd})")
 
-            | Text.InlineCode("(DateOnly?, DateOnly?)")
+            | Text.Monospaced("(DateOnly?, DateOnly?)")
             | nullableDateOnlyRangeState
                 .ToDateRangeInput()
                 .TestId("daterange-input-dateonly-nullable-binding")
-            | Text.InlineCode($"({nullableDateOnlyRangeState.Value.Item1?.ToString("yyyy-MM-dd") ?? "null"}, {nullableDateOnlyRangeState.Value.Item2?.ToString("yyyy-MM-dd") ?? "null"})");
+            | Text.Monospaced($"({nullableDateOnlyRangeState.Value.Item1?.ToString("yyyy-MM-dd") ?? "null"}, {nullableDateOnlyRangeState.Value.Item2?.ToString("yyyy-MM-dd") ?? "null"})");
 
         // Current values section
         var currentValues = Layout.Vertical()

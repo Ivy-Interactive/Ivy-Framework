@@ -1,4 +1,7 @@
 using Ivy.Docs.Shared.Middleware;
+using Ivy.Docs.Shared.Services;
+using Ivy.Docs.Shared.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Docs.Shared;
 
@@ -17,6 +20,9 @@ public static class DocsServer
             app.UseSsrMarkdown();
             app.UseMarkdownFiles();
         });
+
+        server.Services.AddHttpClient<IvyDocsQuestionsClient>();
+        server.Services.AddScoped<IIvyDocsQuestionsClient>(sp => sp.GetRequiredService<IvyDocsQuestionsClient>());
 
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
         server.SetMetaTitle($"Ivy Docs {version}");

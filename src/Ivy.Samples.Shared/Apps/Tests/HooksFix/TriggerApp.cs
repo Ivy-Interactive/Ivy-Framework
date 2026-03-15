@@ -1,4 +1,4 @@
-﻿namespace Ivy.Samples.Shared.Apps.Tests.HooksFix;
+namespace Ivy.Samples.Shared.Apps.Tests.HooksFix;
 
 [App(isVisible: false)]
 public class TriggerApp : ViewBase

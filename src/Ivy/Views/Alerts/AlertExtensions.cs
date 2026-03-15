@@ -6,9 +6,9 @@ namespace Ivy;
 
 public static class AlertExtensions
 {
-    public static IView WithConfirm(this Button button, string message, string? title = null)
+    public static IView WithConfirm(this Button button, string message, string? title = null, string? confirmLabel = null, bool destructive = false)
     {
-        return new WithConfirmView(button, message, title);
+        return new WithConfirmView(button, message, title, confirmLabel, destructive);
     }
 
     public static IView WithPrompt<T>(this Button button, Action<T> handleResult, T? defaultValue = default(T), string? title = null, string? message = null)
@@ -25,7 +25,7 @@ public class WithPromptView<T>(Button button, Action<T> handleResult, T? default
     {
         if (
             typeof(T) != typeof(FileUpload)
-            && !Utils.IsSimpleType(typeof(T)))
+            && !TypeHelper.IsSimpleType(typeof(T)))
         {
             throw new NotSupportedException();
         }
@@ -46,7 +46,7 @@ public class WithPromptView<T>(Button button, Action<T> handleResult, T? default
     }
 }
 
-public class WithConfirmView(Button button, string message, string? title = null) : ViewBase
+public class WithConfirmView(Button button, string message, string? title = null, string? confirmLabel = null, bool destructive = false) : ViewBase
 {
     public override object? Build()
     {
@@ -69,11 +69,11 @@ public class WithConfirmView(Button button, string message, string? title = null
                 new DialogBody(message),
                 new DialogFooter(
                     new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline),
-                    new Button("Ok", @event =>
+                    new Button(confirmLabel ?? "Ok", async @event =>
                     {
                         isOpen.Set(false);
-                        button.OnClick?.Invoke(@event);
-                    })
+                        if (button.OnClick != null) await button.OnClick.Invoke(@event);
+                    }, variant: destructive ? ButtonVariant.Destructive : ButtonVariant.Primary)
                 )
             ) : null
         );

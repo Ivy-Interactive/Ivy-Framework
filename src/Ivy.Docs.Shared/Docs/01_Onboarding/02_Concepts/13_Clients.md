@@ -128,7 +128,7 @@ if (formSubmitted.Value)
 }
 ```
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -276,6 +276,25 @@ public class ClientNavigationApp : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I copy text to the clipboard in Ivy?
+</Summary>
+<Body>
+
+Use the `CopyToClipboard` extension method on `IClientProvider`:
+
+```csharp
+var client = UseService<IClientProvider>();
+client.CopyToClipboard(content);
+client.Toast("Copied to clipboard!");
+```
+
+**Note:** There is no `UseClipboard` hook. Clipboard access is provided through `IClientProvider`, not through a dedicated hook. Access it via `UseService<IClientProvider>()`.
 
 </Body>
 </Details>

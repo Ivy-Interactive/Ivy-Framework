@@ -65,10 +65,6 @@ public class TypeUtilsTests
             typeof(XYZ), typeof(WidgetBaseExtensions), typeof(XYZ).GetProperty("Width")!,
             """
             Width(Size width)
-            Width(int units)
-            Width(float units)
-            Width(double units)
-            Width(string percent)
             """
         );
 

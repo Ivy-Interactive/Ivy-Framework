@@ -1,4 +1,4 @@
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 export type VariantType =
   | 'Date'
@@ -17,7 +17,7 @@ export interface DateTimeInputWidgetProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
-  scale?: Scales;
+  density?: Densities;
   'data-testid'?: string;
 }
 
@@ -29,7 +29,7 @@ export interface BaseVariantProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
-  scale?: Scales;
+  density?: Densities;
   'data-testid'?: string;
 }
 

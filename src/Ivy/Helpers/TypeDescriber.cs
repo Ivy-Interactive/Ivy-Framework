@@ -62,7 +62,7 @@ public static class TypeDescriber
 
         if (IsCollectionNavigation(propType))
         {
-            var elementType = Utils.GetCollectionTypeParameter(propType);
+            var elementType = TypeHelper.GetCollectionTypeParameter(propType);
             var typeName = elementType != null ? $"Collection<{elementType.Name}>" : "Collection";
             return $"{prop.Name}: {typeName}";
         }
@@ -131,13 +131,13 @@ public static class TypeDescriber
     {
         var type = prop.PropertyType;
         if (IsCollectionNavigation(type)) return true;
-        return !Utils.IsSimpleType(type) && type != typeof(string) && type.IsClass;
+        return !TypeHelper.IsSimpleType(type) && type != typeof(string) && type.IsClass;
     }
 
     private static bool IsCollectionNavigation(Type type)
     {
         if (type == typeof(string)) return false;
-        return Utils.IsCollectionType(type);
+        return TypeHelper.IsCollectionType(type);
     }
 
     private static string GetFriendlyTypeName(Type type)

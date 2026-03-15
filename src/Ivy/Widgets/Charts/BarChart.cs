@@ -74,7 +74,7 @@ public static partial class BarChartExtensions
 
     public static BarChart Bar(this BarChart chart, params IEnumerable<Bar> bars) => chart with { Bars = [.. chart.Bars, .. bars] };
 
-    public static BarChart Bar(this BarChart chart, string dataKey, object? stackId = null, string? name = null) => chart with { Bars = [.. chart.Bars, new Bar(dataKey, stackId?.ToString(), name ?? Utils.SplitPascalCase(dataKey))] };
+    public static BarChart Bar(this BarChart chart, string dataKey, object? stackId = null, string? name = null) => chart with { Bars = [.. chart.Bars, new Bar(dataKey, stackId?.ToString(), name ?? StringHelper.SplitPascalCase(dataKey))] };
 
     public static BarChart CartesianGrid(this BarChart chart, CartesianGrid cartesianGrid) => chart with { CartesianGrid = cartesianGrid };
 

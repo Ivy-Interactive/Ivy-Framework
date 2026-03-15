@@ -10,6 +10,6 @@ public class ChatBox(string? title = null, object? content = null) : ViewBase
             Layout.Vertical().Gap(5)
             | (title != null ? Layout.Horizontal().Align(Align.TopLeft) | Text.Label(title) : null)
             | content
-        ).Padding(4).BorderThickness(1).Color(Colors.Secondary).BorderColor(Colors.Neutral, 0.6f);
+        ).Padding(4).BorderThickness(1).Background(Colors.Secondary).BorderColor(Colors.Neutral, 0.6f);
     }
 }

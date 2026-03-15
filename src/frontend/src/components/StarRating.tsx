@@ -5,13 +5,13 @@ import { Star } from 'lucide-react';
 import { m, LazyMotion, domAnimation } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 interface StarRatingProps {
   totalStars?: number;
   value: number;
   onRate?: (rating: number) => void;
-  scale?: Scales;
+  density?: Densities;
   className?: string;
   disabled?: boolean;
   invalid?: string;
@@ -21,7 +21,7 @@ export function StarRating({
   totalStars = 5,
   value = 0,
   onRate,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   className,
   disabled = false,
   invalid,
@@ -83,7 +83,7 @@ export function StarRating({
                 >
                   <Star
                     className={cn(
-                      starSizes[scale],
+                      starSizes[density],
                       'fill-current stroke-[1.5px]'
                     )}
                   />

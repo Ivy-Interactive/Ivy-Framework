@@ -34,7 +34,7 @@ public class BasicAudioInputDemo : ViewBase
         return Layout.Vertical()
                | new AudioInput(upload.Value, "Start recording", "Recording audio...")
                | (audioFile.Value != null
-                   ? Text.P($"Recorded: {audioFile.Value.FileName} ({Utils.FormatBytes(audioFile.Value.Length)})")
+                   ? Text.P($"Recorded: {audioFile.Value.FileName} ({StringHelper.FormatBytes(audioFile.Value.Length)})")
                    : null);
    }
 }
@@ -65,7 +65,7 @@ public class ChunkedUploadDemo : ViewBase
                    .ChunkInterval(2000)
                | Text.P($"Chunks received: {chunkCount.Value}").Small()
                | (audioFile.Value != null
-                   ? Text.P($"Total accumulated: {Utils.FormatBytes(audioFile.Value.Length)}").Small()
+                   ? Text.P($"Total accumulated: {StringHelper.FormatBytes(audioFile.Value.Length)}").Small()
                    : null);
     }
 }
@@ -96,7 +96,7 @@ public class AudioFormatDemo : ViewBase
                | new AudioInput(upload.Value, "Record WebM", "Recording WebM...")
                    .MimeType("audio/webm")
                | (audioFile.Value != null
-                   ? Text.P($"Format: {audioFile.Value.ContentType}, Size: {Utils.FormatBytes(audioFile.Value.Length)}").Small()
+                   ? Text.P($"Format: {audioFile.Value.ContentType}, Size: {StringHelper.FormatBytes(audioFile.Value.Length)}").Small()
                    : null);
     }
 }

@@ -25,7 +25,7 @@ import {
   SIDEBAR_KEYBOARD_SHORTCUT,
 } from './constants';
 import { SidebarContext, useSidebar } from './context';
-import { sidebarMenuButtonVariants } from './variants';
+import { sidebarMenuButtonVariant } from './variant';
 
 const SidebarProvider = React.forwardRef<
   HTMLDivElement,
@@ -311,7 +311,21 @@ SidebarInset.displayName = 'SidebarInset';
 const SidebarInput = React.forwardRef<
   React.ElementRef<typeof Input>,
   React.ComponentProps<typeof Input>
->(({ className, ...props }, ref) => {
+>(({ className, onFocus, onClick, ...props }, ref) => {
+  const openSmartSearch = () => {
+    window.dispatchEvent(new Event('ivy-docs-open-smart-search'));
+  };
+
+  const handleFocus: React.FocusEventHandler<HTMLInputElement> = event => {
+    onFocus?.(event);
+    openSmartSearch();
+  };
+
+  const handleClick: React.MouseEventHandler<HTMLInputElement> = event => {
+    onClick?.(event);
+    openSmartSearch();
+  };
+
   return (
     <Input
       ref={ref}
@@ -320,6 +334,8 @@ const SidebarInput = React.forwardRef<
         'h-8 w-full bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring',
         className
       )}
+      onFocus={handleFocus}
+      onClick={handleClick}
       {...props}
     />
   );
@@ -493,7 +509,7 @@ const SidebarMenuButton = React.forwardRef<
     asChild?: boolean;
     isActive?: boolean;
     tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-  } & VariantProps<typeof sidebarMenuButtonVariants>
+  } & VariantProps<typeof sidebarMenuButtonVariant>
 >(
   (
     {
@@ -516,7 +532,7 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        className={cn(sidebarMenuButtonVariant({ variant, size }), className)}
         {...props}
       />
     );

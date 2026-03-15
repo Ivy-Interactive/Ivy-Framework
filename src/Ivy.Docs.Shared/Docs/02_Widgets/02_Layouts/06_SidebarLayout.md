@@ -79,52 +79,57 @@ The `SidebarMenu` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is des
 ```csharp demo-tabs
 public class SidebarMenuExample : ViewBase
 {
+    private enum NavPage { Home, Analytics, Profile, Account, Preferences, Help }
+
     public override object? Build()
     {
-        var selectedPage = UseState("home");
+        var selectedPage = UseState<NavPage?>(NavPage.Home);
         var client = UseService<IClientProvider>();
         
         MenuItem[] menuItems = new[]
         {
             MenuItem.Default("Dashboard")
-                .Icon(Icons.LayoutDashboard).Tag("home"),
+                .Icon(Icons.LayoutDashboard).Tag(NavPage.Home),
             MenuItem.Default("Analytics")
-                .Icon(Icons.TrendingUp).Tag("analytics"),
+                .Icon(Icons.TrendingUp).Tag(NavPage.Analytics),
             MenuItem.Default("Settings")
                 .Icon(Icons.Settings).Children(
                 MenuItem.Default("Profile")
-                    .Icon(Icons.User).Tag("profile"),
+                    .Icon(Icons.User).Tag(NavPage.Profile),
                 MenuItem.Default("Account")
-                    .Icon(Icons.UserCog).Tag("account"),
+                    .Icon(Icons.UserCog).Tag(NavPage.Account),
                 MenuItem.Default("Preferences")
-                    .Icon(Icons.Settings).Tag("preferences")
+                    .Icon(Icons.Settings).Tag(NavPage.Preferences)
             ),
-            MenuItem.Default("Help").Icon(Icons.CircleQuestionMark).Tag("help")
+            MenuItem.Default("Help").Icon(Icons.CircleQuestionMark).Tag(NavPage.Help)
         };
 
         var sidebarMenu = new SidebarMenu(
             onSelect: evt => {
-                selectedPage.Value = evt.Value.ToString()!;
-                client.Toast($"Navigated to {evt.Value}");
+                if (Enum.TryParse<NavPage>(evt.Value?.ToString(), ignoreCase: true, out var page))
+                {
+                    selectedPage.Set(page);
+                    client.Toast($"Navigated to {page}");
+                }
             },
             items: menuItems
         );
 
         object RenderContent()
         {
-            return selectedPage.Value switch
+            return (selectedPage.Value ?? NavPage.Home) switch
             {
-                "home" => new Card("Welcome to the Dashboard!")
+                NavPage.Home => new Card("Welcome to the Dashboard!")
                     .Title("Dashboard"),
-                "analytics" => new Card("Analytics and reports go here.")
+                NavPage.Analytics => new Card("Analytics and reports go here.")
                     .Title("Analytics"),
-                "profile" => new Card("User profile settings.")
+                NavPage.Profile => new Card("User profile settings.")
                     .Title("Profile"),
-                "account" => new Card("Account management.")
+                NavPage.Account => new Card("Account management.")
                     .Title("Account"),
-                "preferences" => new Card("User preferences.")
+                NavPage.Preferences => new Card("User preferences.")
                     .Title("Preferences"),
-                "help" => new Card("Help and documentation.")
+                NavPage.Help => new Card("Help and documentation.")
                     .Title("Help & Support"),
                 _ => new Card("Page not found.")
                     .Title("404")
@@ -136,9 +141,9 @@ public class SidebarMenuExample : ViewBase
             sidebarContent: sidebarMenu,
             sidebarHeader: Layout.Vertical().Gap(2)
                 | Text.Lead("My App")
-                | new TextInput(placeholder: "Search...", variant: TextInputVariants.Search),
+                | new TextInput(placeholder: "Search...", variant: TextInputVariant.Search),
             sidebarFooter: Layout.Horizontal().Gap(2)
-                | new Avatar("JD").Size(20)
+                | new Avatar("JD").Size(Size.Units(20))
                 | (Layout.Vertical()
                     | Text.P("John Doe").Small()
                     | Text.P("john@example.com").Small().Color(Colors.Gray))
@@ -149,10 +154,14 @@ public class SidebarMenuExample : ViewBase
 
 ### Main App Sidebar
 
-When used as the main application sidebar, the layout includes a toggle button and responsive behavior:
+When used as the main application sidebar, you can enable toggle mechanics and responsive behavior using the `.MainAppSidebar()` and `.Open()` APIs.
+- `.MainAppSidebar(bool isMainApp = true)`: Configures the layout as the primary application menu. This automatically adds a collapse/expand toggle button for the user and enables responsive behavior on smaller screens.
+- `.Open(bool open = true)`: Controls whether the layout starts in an expanded or collapsed state. By default, this is set to `true`.
+
+When utilizing `ChromeSettings` to define the main application chrome, you can also inject the initialization state through `ChromeSettings.SidebarOpen(false)`.
 
 <Callout Type="tip">
-"You can also create a toggle sidebar layout by defining the sidebar as .MainAppSidebar()">
+"You can combine `.MainAppSidebar(true)` and `.Open(false)` to construct a toggleable sidebar that specifically starts fully collapsed."
 </Callout>
 
 ```csharp demo-tabs
@@ -180,8 +189,8 @@ public class MainAppSidebarExample : ViewBase
                 | new Button("Calendar").Variant(ButtonVariant.Ghost).OnClick(_ => client.Toast("Calendar")),
             sidebarHeader: Layout.Vertical().Gap(2)
                 | Text.Lead("Workspace")
-                | new TextInput(placeholder: "Search...", variant: TextInputVariants.Search)
-        );
+                | new TextInput(placeholder: "Search...", variant: TextInputVariant.Search)
+        ).Open(false).MainAppSidebar(true);
     }
 }
 ```
@@ -247,49 +256,54 @@ The `SidebarMenu` widget is specifically designed for sidebar navigation and pro
 ```csharp demo-tabs
 public class SidebarMenuAdvancedExample : ViewBase
 {
+    private enum DocSection { Install, Quickstart, Examples, Buttons, Forms, Charts, Tables, Hooks, State, Performance }
+
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        var selectedItem = UseState("");
+        var selectedItem = UseState<DocSection?>(null);
         
         MenuItem[] menuItems = new[]
         {
             MenuItem.Default("Getting Started")
                 .Icon(Icons.Play).Children(
                 MenuItem.Default("Installation")
-                    .Icon(Icons.Download).Tag("install"),
+                    .Icon(Icons.Download).Tag(DocSection.Install),
                 MenuItem.Default("Quick Start")
-                    .Icon(Icons.Zap).Tag("quickstart"),
+                    .Icon(Icons.Zap).Tag(DocSection.Quickstart),
                 MenuItem.Default("Examples")
-                    .Icon(Icons.Code).Tag("examples")
+                    .Icon(Icons.Code).Tag(DocSection.Examples)
             ),
             MenuItem.Default("Components")
                 .Icon(Icons.Package).Children(
                 MenuItem.Default("Buttons")
-                    .Icon(Icons.MousePointer).Tag("buttons"),
+                    .Icon(Icons.MousePointer).Tag(DocSection.Buttons),
                 MenuItem.Default("Forms")
-                    .Icon(Icons.FileText).Tag("forms"),
+                    .Icon(Icons.FileText).Tag(DocSection.Forms),
                 MenuItem.Default("Charts")
-                    .Icon(Icons.ChartBar).Tag("charts"),
+                    .Icon(Icons.ChartBar).Tag(DocSection.Charts),
                 MenuItem.Default("Tables")
-                    .Icon(Icons.Table).Tag("tables")
+                    .Icon(Icons.Table).Tag(DocSection.Tables)
             ),
             MenuItem.Default("Advanced")
                 .Icon(Icons.Cpu).Children(
                 MenuItem.Default("Hooks")
-                .Icon(Icons.Link).Tag("hooks"),
+                    .Icon(Icons.Link).Tag(DocSection.Hooks),
                 MenuItem.Default("State Management")
-                .Icon(Icons.Database).Tag("state"),
+                    .Icon(Icons.Database).Tag(DocSection.State),
                 MenuItem.Default("Performance")
-                .Icon(Icons.Gauge).Tag("performance")
+                    .Icon(Icons.Gauge).Tag(DocSection.Performance)
             )
         };
 
         var menu = new SidebarMenu(
             onSelect: evt =>
             {
-                selectedItem.Value = evt.Value?.ToString() ?? "";
-                client.Toast($"Selected: {evt.Value}");
+                if (Enum.TryParse<DocSection>(evt.Value?.ToString(), ignoreCase: true, out var section))
+                {
+                    selectedItem.Set(section);
+                    client.Toast($"Selected: {section}");
+                }
             },
             items: menuItems
         );
@@ -298,7 +312,7 @@ public class SidebarMenuAdvancedExample : ViewBase
             mainContent: new Card(
                 Layout.Vertical().Gap(2)
                     | Text.P("Documentation").Large()
-                    | Text.P($"Currently viewing: {(string.IsNullOrEmpty(selectedItem.Value) ? "None" : selectedItem.Value)}")
+                    | Text.P($"Currently viewing: {(selectedItem.Value?.ToString() ?? "None")}")
             ).Title("Content Area"),
             sidebarContent: menu,
             sidebarHeader: Text.Lead("Documentation Menu")

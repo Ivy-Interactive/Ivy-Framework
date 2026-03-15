@@ -76,6 +76,14 @@ public class AppDescriptor : IAppRepositoryNode
             throw new InvalidOperationException("App Type is not set.");
         }
 
+        if (!Type.GetConstructors().Any(c => c.GetParameters().All(p => p.HasDefaultValue)))
+        {
+            throw new InvalidOperationException(
+                $"App '{Type.FullName}' must have a parameterless constructor. " +
+                $"Use UseService<T>() inside Build() instead of constructor injection. " +
+                $"Example: var client = UseService<IClientProvider>();");
+        }
+
         return (ViewBase)Activator.CreateInstance(Type)!; // Type has DynamicallyAccessedMembers for PublicParameterlessConstructor
     }
 

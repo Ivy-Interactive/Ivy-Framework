@@ -30,16 +30,16 @@ public class IconInputVariantTests : ViewBase
                | Text.P("Demonstrate different visual states of icon inputs: default, invalid, nullable, and disabled.")
                | Layout.Vertical().Gap(6)
                   | (Layout.Horizontal().Gap(6)
-                     | Text.InlineCode("Default")
+                     | Text.Monospaced("Default")
                      | defaultState.ToIconInput())
                   | (Layout.Horizontal().Gap(6)
-                     | Text.InlineCode("Invalid")
+                     | Text.Monospaced("Invalid")
                      | invalidState.ToIconInput().Invalid("Please select an icon"))
                   | (Layout.Horizontal().Gap(6)
-                     | Text.InlineCode("Nullable")
+                     | Text.Monospaced("Nullable")
                      | nullableState.ToIconInput().Nullable())
                   | (Layout.Horizontal().Gap(6)
-                     | Text.InlineCode("Disabled")
+                     | Text.Monospaced("Disabled")
                      | disabledState.ToIconInput().Disabled());
     }
 }
@@ -57,16 +57,16 @@ public class IconInputSizeVariants : ViewBase
                | Text.P("Icon inputs support different sizes: Small, Medium (default), and Large.")
                | Layout.Vertical().Gap(6)
                   | (Layout.Horizontal().Gap(6)
-                     | Text.InlineCode("Small")
-                     | smallState.ToIconInput().Scale(Scale.Small)
+                     | Text.Monospaced("Small")
+                     | smallState.ToIconInput().Density(Density.Small)
                      | new Icon(smallState.Value).Small())
                   | (Layout.Horizontal().Gap(6)
-                     | Text.InlineCode("Medium")
-                     | mediumState.ToIconInput().Scale(Scale.Medium)
+                     | Text.Monospaced("Medium")
+                     | mediumState.ToIconInput().Density(Density.Medium)
                      | new Icon(mediumState.Value).Medium())
                   | (Layout.Horizontal().Gap(6)
-                     | Text.InlineCode("Large")
-                     | largeState.ToIconInput().Scale(Scale.Large)
+                     | Text.Monospaced("Large")
+                     | largeState.ToIconInput().Density(Density.Large)
                      | new Icon(largeState.Value).Large());
     }
 }
@@ -82,17 +82,17 @@ public class IconInputDataBindings : ViewBase
                | Text.H2("Data Binding")
                | Text.P("Icon inputs support Icons (non-nullable) and Icons? (nullable) state types. The selected value updates in real time.")
                | Layout.Grid().Columns(3).Gap(6)
-                  | Text.InlineCode("Icons")
+                  | Text.Monospaced("Icons")
                   | iconsState.ToIconInput().Placeholder("Pick an icon")
                   | (Layout.Horizontal().Gap(2)
                      | new Icon(iconsState.Value)
                      | Text.Block(iconsState.Value.ToString()))
-                  | Text.InlineCode("Icons?")
+                  | Text.Monospaced("Icons?")
                   | nullableIconsState.ToIconInput().Placeholder("Pick an icon (nullable)")
                   | (nullableIconsState.Value.HasValue
                      ? Layout.Horizontal().Gap(2)
                         | new Icon(nullableIconsState.Value!.Value)
                         | Text.Block(nullableIconsState.Value.ToString()!)
-                     : Text.InlineCode("null"));
+                     : Text.Monospaced("null"));
     }
 }

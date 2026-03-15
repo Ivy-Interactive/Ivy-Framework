@@ -44,7 +44,7 @@ class HelloApp : ViewBase
         return Layout.Center(
             new Card(
                 Text.P("Hello")
-            ).Width(60)
+            ).Width(Size.Units(60))
         );
     }
 }
@@ -100,4 +100,17 @@ From the directory that contains your `.cs` file:
 > dotnet run HelloApp.cs
 ```
 
-If you need a specific port or other server settings, configure the `Server` in code (for example via `ServerArgs` as in [Program](./01_Program.md)) or use environment variables (e.g. `PORT`) if your setup supports them.
+If you need a specific port, set it via `ServerArgs`:
+
+```csharp
+var server = new Server(new ServerArgs { Port = 5011 });
+```
+
+Or use the `PORT` environment variable before running:
+
+```terminal
+>set PORT=5011
+>dotnet run HelloApp.cs
+```
+
+See [Program](./01_Program.md) for all available `ServerArgs` properties and [Ivy Run](../03_CLI/03_Run.md) for the full list of CLI options.

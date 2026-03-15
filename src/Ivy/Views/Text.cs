@@ -1,7 +1,5 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Size = Ivy.Size;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -82,12 +80,12 @@ public static class Text
 
     public static TextBuilder Blockquote(IAnyState state) => Blockquote(state.ToString() ?? "");
 
-    public static TextBuilder InlineCode(string content)
+    public static TextBuilder Monospaced(string content)
     {
-        return new TextBuilder(content, TextVariant.InlineCode);
+        return new TextBuilder(content, TextVariant.Monospaced);
     }
 
-    public static TextBuilder InlineCode(IAnyState state) => InlineCode(state.ToString() ?? "");
+    public static TextBuilder Monospaced(IAnyState state) => Monospaced(state.ToString() ?? "");
 
     public static TextBuilder Lead(string content)
     {
@@ -212,7 +210,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _muted;
     private TextAlignment? _textAlignment;
 
-    private Scale? _scale;
+    private Density? _density;
 
     public override object? Build()
     {
@@ -235,7 +233,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
                     var text = new TextBlock(
                         content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted, _textAlignment)
                     {
-                        Scale = _scale
+                        Density = _density
                     };
                     return text;
                 }
@@ -310,17 +308,17 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    public TextBuilder Scale(Scale scale)
+    public TextBuilder Density(Density density)
     {
-        _scale = scale;
+        _density = density;
         return this;
     }
 
-    public TextBuilder Small() => Scale(Ivy.Scale.Small);
+    public TextBuilder Small() => Density(Ivy.Density.Small);
 
-    public TextBuilder Medium() => Scale(Ivy.Scale.Medium);
+    public TextBuilder Medium() => Density(Ivy.Density.Medium);
 
-    public TextBuilder Large() => Scale(Ivy.Scale.Large);
+    public TextBuilder Large() => Density(Ivy.Density.Large);
 
     public TextBuilder Align(TextAlignment alignment)
     {

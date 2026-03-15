@@ -1,14 +1,8 @@
-using Ivy.Core;
-using Ivy.Shared;
-using Ivy.Views.Builders;
-
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
 [App(icon: Icons.Pill, path: ["Widgets"], searchHints: ["tag", "label", "chip", "status", "indicator", "pill"])]
 public class BadgeApp : SampleBase
 {
-    private IClientProvider _client => UseService<IClientProvider>();
-
     private static readonly BadgeVariant[] Variants = [
         BadgeVariant.Primary,
         BadgeVariant.Destructive,

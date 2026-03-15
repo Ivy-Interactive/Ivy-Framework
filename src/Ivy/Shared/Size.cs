@@ -129,6 +129,17 @@ public record Size
         return Fraction(0.333f);
     }
 
+    public static Size Percent(int value)
+    {
+        return Fraction(value / 100f);
+    }
+
+    public static Size Percent(string value)
+    {
+        var cleaned = value.Replace("%", "").Trim();
+        return Fraction(int.Parse(cleaned) / 100f);
+    }
+
     public static Size FractionGap(float value)
     {
         return new Size(SizeType.FractionGap, value);

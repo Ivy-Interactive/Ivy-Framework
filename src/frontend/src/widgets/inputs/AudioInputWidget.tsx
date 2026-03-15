@@ -10,13 +10,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { logger } from '@/lib/logger';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
-  audioInputVariants,
-  textSizeVariants,
-  timerSizeVariants,
-  iconSizeVariants,
-} from '@/components/ui/input/audio-input-variants';
+  audioInputVariant,
+  textSizeVariant,
+  timerSizeVariant,
+  iconSizeVariant,
+} from '@/components/ui/input/audio-input-variant';
 
 interface AudioInputWidgetProps {
   label?: string;
@@ -27,7 +27,7 @@ interface AudioInputWidgetProps {
   width?: string;
   uploadUrl: string;
   chunkInterval: number;
-  scale?: Scales;
+  density?: Densities;
 }
 
 const supportedMimeTypes = [
@@ -48,7 +48,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
   width,
   uploadUrl,
   chunkInterval = 1000,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const normalizedMimeTypes = useMemo(() => {
     const candidates: string[] = [];
@@ -227,7 +227,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
     <div className="relative" style={{ ...getWidth(width) }}>
       <div
         className={cn(
-          audioInputVariants({ scale }),
+          audioInputVariant({ density }),
           disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         )}
         onClick={
@@ -275,21 +275,21 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
           className={'mt-2 h-6 w-fit z-10 mx-auto block'}
         >
           {recording ? (
-            <Square className={iconSizeVariants({ scale })} />
+            <Square className={iconSizeVariant({ density })} />
           ) : (
-            <Mic className={iconSizeVariants({ scale })} />
+            <Mic className={iconSizeVariant({ density })} />
           )}
         </Button>
         <SecondsCounter
           start={recordingStartedAt}
           stopped={recordingStoppedAt}
-          scale={scale}
+          density={density}
         />
         {(label || recordingLabel) && (
           <p
             className={cn(
               'text-center mt-1 text-muted-foreground',
-              textSizeVariants({ scale })
+              textSizeVariant({ density })
             )}
           >
             {recording ? recordingLabel : label}
@@ -299,7 +299,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
           <p
             className={cn(
               'text-muted-foreground text-center',
-              textSizeVariants({ scale })
+              textSizeVariant({ density })
             )}
           >
             {mimeSupportError
@@ -315,7 +315,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
 function SecondsCounter(props: {
   start: number | null;
   stopped: number | null;
-  scale?: Scales;
+  density?: Densities;
 }) {
   const [seconds, setSeconds] = useState(0);
   useEffect(() => {
@@ -340,7 +340,12 @@ function SecondsCounter(props: {
     };
   }, [props.start, props.stopped]);
   return (
-    <p className={cn('text-center', timerSizeVariants({ scale: props.scale }))}>
+    <p
+      className={cn(
+        'text-center',
+        timerSizeVariant({ density: props.density })
+      )}
+    >
       {Math.floor(seconds / 60)
         .toString()
         .padStart(2, '0')}

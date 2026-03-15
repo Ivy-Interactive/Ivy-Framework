@@ -29,7 +29,7 @@ public class MyView : ViewBase
   }
 }
 
-The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**: The attribute uses **named parameters**:
+The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**: 
 
 [App(title: "Customers", icon: Icons.Rocket)]
 public class CustomersApp : ViewBase
@@ -122,15 +122,6 @@ Align values: TopLeft, TopCenter, TopRight, Left, Center, Right, BottomLeft, Bot
 
 [Layouts](https://docs.ivy.app/onboarding/concepts/layout.md)
 
-### Centered Max-Width Layout
-
-For simpler tools and apps, it's quite nice to give the app a max width and position it in the center:
-
-return Layout.TopCenter()
-    | (Layout.Vertical().Width(Size.Full().Max(200)).TopMargin(10)
-        | ...
-        );
-
 ## Text
 
 The Text helper utility is used to create various semantic text elements.
@@ -161,12 +152,12 @@ Ivy.Colors enum has the following values:
 
 Black, White, Slate, Gray, Zinc, Neutral, Stone, Red, Orange, Amber, Yellow, Lime, Green, Emerald, Teal, Cyan, Sky, Blue, Indigo, Violet, Purple, Fuchsia, Pink, Rose, Primary, Secondary, Destructive, Success, Warning, Info, Muted
 
-## Scale
+## Density
 
-All widgets support `.Scale(Scale.Small)`, `.Scale(Scale.Medium)`, `.Scale(Scale.Large)`.
+All widgets support `.Density(Density.Small)`, `.Density(Density.Medium)`, `.Density(Density.Large)`.
 Convenience methods: `.Small()`, `.Medium()`, `.Large()`.
-Scale adjusts the overall visual size of a widget (text, padding, etc.).
-There is no `ButtonSize` enum — use `Scale` for all widgets.
+Density adjusts the overall visual size of a widget (text, padding, etc.).
+There is no `ButtonSize` enum — use `Density` for all widgets.
 
 ## Size
 
@@ -182,7 +173,7 @@ Common Size values:
 - Size.Px(n) — exact pixels
 - Size.Fraction(0.5f) — percentage, Size.Half(), Size.Third()
 
-Size is NOT the same as Scale. Size controls dimensions; Scale controls visual density.
+Size is NOT the same as Density. Size controls dimensions; Density controls visual density.
 
 ## Event Handling
 

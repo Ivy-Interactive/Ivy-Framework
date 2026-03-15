@@ -35,8 +35,17 @@
   <ItemGroup>
     <None Include="build/Ivy.Desktop.targets" Pack="true" PackagePath="build/Ivy.Desktop.targets" />
     <None Include="build/Ivy.Desktop.targets" Pack="true" PackagePath="buildTransitive/Ivy.Desktop.targets" />
+    <None Include="../assets/ivy.ico" Pack="true" PackagePath="build/ivy.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="../assets/ivy.ico" LogicalName="Ivy.Desktop.ivy.ico" />
   </ItemGroup>
 
   <Import Project="build/Ivy.Desktop.targets" />
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

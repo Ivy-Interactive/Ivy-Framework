@@ -76,7 +76,7 @@ public static partial class AreaChartExtensions
 
     public static AreaChart Area(this AreaChart chart, string dataKey, object? stackId = null, string? name = null)
     {
-        return chart with { Areas = [.. chart.Areas, new Area(dataKey, stackId?.ToString(), name ?? Utils.SplitPascalCase(dataKey))] };
+        return chart with { Areas = [.. chart.Areas, new Area(dataKey, stackId?.ToString(), name ?? StringHelper.SplitPascalCase(dataKey))] };
     }
 
     public static AreaChart CartesianGrid(this AreaChart chart, CartesianGrid cartesianGrid)

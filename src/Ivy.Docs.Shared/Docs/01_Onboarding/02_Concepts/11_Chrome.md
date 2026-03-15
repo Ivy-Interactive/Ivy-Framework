@@ -36,7 +36,8 @@ var chromeSettings = new ChromeSettings()
         | Text.P("Enterprise Application Framework").Small()
     )
     .DefaultApp<MyApp>()
-    .UseTabs(preventDuplicates: true);
+    .UseTabs(preventDuplicates: true)
+    .SidebarOpen(false); // Start with sidebar collapsed
 
 server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 ```
@@ -54,6 +55,8 @@ server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 - **UseFooterMenuItemsTransformer(`Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>` transformer)** - Provides a way to dynamically transform the footer menu items. Useful for adding, removing, or re-ordering links based on runtime context such as user roles or navigation state.
 
 - **WallpaperAppId(string? appId)** / **WallpaperApp<T>()** - Sets a dedicated *wallpaper* app that is shown whenever the tab list is empty. Handy for welcome screens or branded backgrounds.
+
+- **SidebarOpen(bool open)** - Controls whether the sidebar is initially expanded or collapsed. Defaults to `true`.
 
 <Callout Type="tip">
 Use `server.UseDefaultApp(typeof(AppName))` instead of `UseChrome()` for single-purpose applications, embedded views, or minimal interfaces where sidebar navigation isn't needed.

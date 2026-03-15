@@ -1,4 +1,4 @@
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 export enum TextInputVariant {
   Text = 'Text',
@@ -27,7 +27,7 @@ export interface TextInputWidgetProps {
   width?: string;
   height?: string;
   shortcutKey?: string;
-  scale?: Scales;
+  density?: Densities;
   prefix?: Affix;
   suffix?: Affix;
   maxLength?: number;

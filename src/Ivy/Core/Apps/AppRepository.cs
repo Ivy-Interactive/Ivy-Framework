@@ -63,7 +63,11 @@ public class AppRepository : IAppRepository
 
     private Dictionary<string, AppDescriptor> Apps { get; } = new();
 
-    public void Reload()
+    public IReadOnlySet<string> InvalidAppIds => _invalidAppIds;
+
+    private HashSet<string> _invalidAppIds { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public void Reload(IReadOnlySet<string> reservedPaths)
     {
         Root = new AppRepositoryGroup("Root");
         Apps.Clear();
@@ -72,6 +76,13 @@ public class AppRepository : IAppRepository
         var indexFixups = new List<(IAppRepositoryGroup, AppDescriptor)>();
         foreach (var appDescriptor in _factories.SelectMany(factory => factory()))
         {
+            if (!ValidateAppId(appDescriptor.Id, reservedPaths))
+            {
+                _invalidAppIds.Add(appDescriptor.Id);
+                // Do not add invalid apps to repository
+                continue;
+            }
+
             Apps[appDescriptor.Id] = appDescriptor;
 
             if (appDescriptor.IsVisible || appDescriptor.IsIndex)
@@ -216,5 +227,44 @@ public class AppRepository : IAppRepository
     public IEnumerable<AppDescriptor> All()
     {
         return Apps.Values;
+    }
+
+    private bool ValidateAppId(string appId, IReadOnlySet<string> reservedPaths)
+    {
+        if (_invalidAppIds.Contains(appId))
+        {
+            return false;
+        }
+
+        switch (AppRoutingHelpers.ValidateAppId(appId, reservedPaths))
+        {
+            case AppIdValidationResult.Valid:
+                return true;
+            case AppIdValidationResult.Empty:
+                Console.WriteLine($"[ERROR] App ID is empty. Please provide a valid App ID.");
+                break;
+            case AppIdValidationResult.StartsWithSlash:
+                Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs should not start with '/'.");
+                break;
+            case AppIdValidationResult.UnsafeCharacters:
+                Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. App IDs must be URL-friendly (alphanumeric, dashes, underscores, etc.).");
+                break;
+            case AppIdValidationResult.ReservedPathConflict:
+                Console.WriteLine($"[ERROR] App ID '{appId}' collides with a reserved path '/{appId}'. Please choose a different App ID.");
+                break;
+            case AppIdValidationResult.StaticFileExtensionConflict:
+                Console.WriteLine($"[ERROR] App ID '{appId}' collides with a static file extension. Please choose a different App ID.");
+                break;
+            default:
+                Console.WriteLine($"[ERROR] App ID '{appId}' is invalid. Please choose a different App ID.");
+                break;
+        }
+
+        return false;
+    }
+
+    public void ClearInvalidAppIds()
+    {
+        _invalidAppIds.Clear();
     }
 }

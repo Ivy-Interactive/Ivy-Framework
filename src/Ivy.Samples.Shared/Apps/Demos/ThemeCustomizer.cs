@@ -11,17 +11,13 @@ public class ThemeCustomizer : SampleBase
         var currentTheme = UseState(Theme.Default);
         var isExportOpen = UseState(false);
         var client = UseService<IClientProvider>();
-        var themeService = new ThemeService();
         var selectedMode = UseState("light"); // "light" or "dark"
-
-        // Individual color states for live editing
         var editingTheme = UseState(CloneTheme(Theme.Default));
-
-        // UseQuery handles theme application reactively with built-in state management
         var themeQuery = UseQuery(
             key: editingTheme.Value,
             fetcher: async ct =>
             {
+                var themeService = new ThemeService();
                 themeService.SetTheme(editingTheme.Value);
                 var css = themeService.GenerateThemeCss();
                 client.ApplyTheme(css);
@@ -185,11 +181,10 @@ public class ThemeCustomizer : SampleBase
         public override object Build()
         {
             var client = UseService<IClientProvider>();
+            var selectedPreset = UseState(editingTheme.Value.Name);
             var currentColors = selectedMode.Value == "light"
                 ? editingTheme.Value.Colors.Light
                 : editingTheme.Value.Colors.Dark;
-
-            var selectedPreset = UseState(editingTheme.Value.Name);
 
             void UpdateColor(Action<ThemeColors> updater)
             {
@@ -348,7 +343,7 @@ public class ThemeCustomizer : SampleBase
                         colorState.Set(e.Value);
                         onChange(e.Value);
                     },
-                    variant: ColorInputVariants.TextAndPicker
+                    variant: ColorInputVariant.TextAndPicker
                 );
         }
     }
@@ -528,8 +523,6 @@ public class ThemeCustomizer : SampleBase
             var uxSatisfaction = UseState((int?)null);
 
             var paginationPage = UseState(1);
-            const int totalPages = 5;
-
             var passwordText = UseState("");
             var notesText = UseState("");
             var searchText = UseState("");
@@ -543,14 +536,24 @@ public class ThemeCustomizer : SampleBase
             var dateTimeState = UseState(DateTime.Now);
             var dateRangeState = UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
 
-            var themeIcon = GetThemeIcon(_theme.Name);
-            var statusVariant = GetStatusVariant(_theme.Name);
-
             // --- Chat state ----------------------------------------------------
             var chatMessages = UseState(ImmutableArray.Create<ChatMessage>(
                 new ChatMessage(ChatSender.Assistant,
                     $"You're previewing the '{_theme.Name}' theme. Type a message to see how chat looks in this theme.")
             ));
+
+            UseEffect(() =>
+            {
+                if (!string.IsNullOrWhiteSpace(payment.Value.NameOnCard) &&
+                    !string.IsNullOrWhiteSpace(payment.Value.CardNumber))
+                {
+                    client.Toast($"Payment form submitted for {payment.Value.NameOnCard}", "Form");
+                }
+            }, payment);
+
+            const int totalPages = 5;
+            var themeIcon = GetThemeIcon(_theme.Name);
+            var statusVariant = GetStatusVariant(_theme.Name);
 
             // --- Helpers -------------------------------------------------------
             ValueTask OnChatSend(Event<Chat, string> e)
@@ -597,15 +600,6 @@ public class ThemeCustomizer : SampleBase
                 .Builder(m => m.BillingAddress, s => s.ToTextInput().Disabled(disableInputs.Value))
                 .Builder(m => m.SameAsShipping, s => s.ToBoolInput().Disabled(disableInputs.Value))
                 .Required(m => m.NameOnCard, m => m.CardNumber, m => m.Cvv);
-
-            UseEffect(() =>
-            {
-                if (!string.IsNullOrWhiteSpace(payment.Value.NameOnCard) &&
-                    !string.IsNullOrWhiteSpace(payment.Value.CardNumber))
-                {
-                    client.Toast($"Payment form submitted for {payment.Value.NameOnCard}", "Form");
-                }
-            }, payment);
 
             QueryResult<Option<string>[]> QueryCategories(IViewContext context, string query)
             {
@@ -686,7 +680,7 @@ public class ThemeCustomizer : SampleBase
                                 new Option<string>("Success", "Success"),
                                 new Option<string>("Warning", "Warning"),
                                 new Option<string>("Info", "Info")
-                            }).Variant(SelectInputVariants.Toggle).Disabled(disableInputs.Value)
+                            }).Variant(SelectInputVariant.Toggle).Disabled(disableInputs.Value)
                             | Text.Block("Selected badges:").Small()
                             | (Layout.Horizontal().Align(Align.Center)
                                 | badgeVariant.Value.Select(variant => variant switch
@@ -718,9 +712,9 @@ public class ThemeCustomizer : SampleBase
                             | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
                         | (Layout.Horizontal().Width(Size.Full())
                             | (Layout.Vertical().Align(Align.Left)
-                                | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).Disabled(disableInputs.Value))
+                                | themeSatisfaction.ToFeedbackInput().Stars().Disabled(disableInputs.Value))
                             | (Layout.Vertical().Align(Align.Right)
-                                | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputVariants.Thumbs).Disabled(disableInputs.Value)))
+                                | uxSatisfaction.ToFeedbackInput().Thumbs().Disabled(disableInputs.Value)))
                         | new Box((Layout.Horizontal().Height(Size.Fit())
                             | agreeTerms.ToBoolInput().Disabled(disableInputs.Value)
                             | Text.Block("I agree to the terms and conditions")))
@@ -756,7 +750,7 @@ public class ThemeCustomizer : SampleBase
                         | email.ToTextInput()
                             .Placeholder("Email (Ctrl+E)")
                             .ShortcutKey("Ctrl+E")
-                            .Variant(TextInputVariants.Email)
+                            .Variant(TextInputVariant.Email)
                             .Disabled(disableInputs.Value)
                         | Text.Block("Price range").Bold()
                         | Text.P($"Estimated monthly budget: ${price.Value}").Small()
@@ -835,14 +829,14 @@ public class ThemeCustomizer : SampleBase
                     new Box("Preview")
                         .Width(Size.Px(100))
                         .Height(Size.Px(60))
-                        .Color(previewColor)
+                        .Background(previewColor)
                         .BorderRadius(BorderRadius.Rounded)
                         .ContentAlign(Align.Center),
                     Layout.Vertical()
                         | Text.P("Background:").Small()
-                        | bgState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Disabled()
+                        | bgState.ToColorInput().Variant(ColorInputVariant.TextAndPicker).Disabled()
                         | Text.P("Foreground:").Small()
-                        | fgState.ToColorInput().Variant(ColorInputVariants.TextAndPicker).Disabled()
+                        | fgState.ToColorInput().Variant(ColorInputVariant.TextAndPicker).Disabled()
                 );
         }
     }

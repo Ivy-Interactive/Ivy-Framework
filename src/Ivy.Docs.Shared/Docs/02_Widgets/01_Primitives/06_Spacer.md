@@ -71,7 +71,7 @@ public class HeaderSpacerView : ViewBase
                 | new Button("Home").Variant(ButtonVariant.Ghost)
                 | new Button("About").Variant(ButtonVariant.Ghost)
                 | new Button("Contact").Variant(ButtonVariant.Ghost)
-                | new Spacer().Width(60)
+                | new Spacer().Width(Size.Units(60))
                 | new Button("Login").Variant(ButtonVariant.Outline)
                 | new Button("Sign Up").Variant(ButtonVariant.Primary)
         );
@@ -99,9 +99,9 @@ public class HeightSpacerView : ViewBase
     {
         return Layout.Vertical().Gap(2)
             | new Card("Top Section")
-            | new Spacer().Height(2)
+            | new Spacer().Height(Size.Units(2))
             | new Card("Middle Section")
-            | new Spacer().Height(10)
+            | new Spacer().Height(Size.Units(10))
             | new Card("Bottom Section");
     }
 }
@@ -131,13 +131,13 @@ public class FormSpacerView : ViewBase
                     | new Separator()
                     | Text.Label("Name:")
                     | name.ToTextInput().Placeholder("Enter your name")
-                    | new Spacer().Height(4)
+                    | new Spacer().Height(Size.Units(4))
                     | Text.Label("Email:")
                     | email.ToTextInput().Placeholder("Enter your email")
-                    | new Spacer().Height(4)
+                    | new Spacer().Height(Size.Units(4))
                     | Text.Label("Message:")
                     | message.ToTextareaInput().Placeholder("Enter your message")
-                    | new Spacer().Height(10)
+                    | new Spacer().Height(Size.Units(10))
                     | (Layout.Horizontal().Gap(3)
                         | new Button("Cancel").Variant(ButtonVariant.Outline)
                         | new Button("Submit").Variant(ButtonVariant.Primary))
@@ -148,7 +148,7 @@ public class FormSpacerView : ViewBase
 
 <WidgetDocs Type="Ivy.Spacer" ExtensionTypes="Ivy.SpacerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Spacer.cs"/>
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -191,11 +191,36 @@ public class DashboardSpacerView : ViewBase
             
         return Layout.Vertical().Gap(4)
             | statsRow
-            | new Spacer().Height(2)
+            | new Spacer().Height(Size.Units(2))
             | actionBar
             | new Card("Main Content Area").Height(Size.Units(50));
     }
 }
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I create a horizontal layout with items spaced between?
+</Summary>
+<Body>
+
+Instead, use a `Spacer` with `Size.Grow()` to push items apart:
+
+```csharp
+Layout.Horizontal().Align(Align.Center)
+    | Text.H1("Title")
+    | new Spacer().Width(Size.Grow())
+    | new Button("Action", handler)
+```
+
+The `Spacer` takes up all remaining space, pushing elements before it to the left and elements after it to the right. You can also use `.Right()` on the layout to align all children to the right:
+
+```csharp
+Layout.Horizontal().Right()
+    | new Button("Right-aligned", handler)
 ```
 
 </Body>

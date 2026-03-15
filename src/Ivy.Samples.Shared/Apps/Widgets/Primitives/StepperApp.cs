@@ -19,9 +19,9 @@ public class StepperApp : SampleBase
         var items = GetItems(selectedIndex.Value);
 
         return Layout.Vertical()
-               | new Stepper(OnSelect, selectedIndex.Value, items).Width(200)
+               | new Stepper(OnSelect, selectedIndex.Value, items).Width(Size.Units(200))
                | Text.H3("With AllowSelectForward")
-               | new Stepper(OnSelect, selectedIndex.Value, items).Width(200).AllowSelectForward()
+               | new Stepper(OnSelect, selectedIndex.Value, items).Width(Size.Units(200)).AllowSelectForward()
                | (Layout.Horizontal().Gap(0)
                   | new Button("Previous").Link().OnClick(() =>
                   {

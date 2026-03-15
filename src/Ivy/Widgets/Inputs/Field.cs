@@ -3,9 +3,15 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public enum LabelPosition
+{
+    Top,
+    Left
+}
+
 public record Field : WidgetBase<Field>
 {
-    public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Ivy.Scale.Medium) : base([input])
+    public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null, Density density = Ivy.Density.Medium) : base([input])
     {
         var labelProp = input.GetType().GetProperty("Label");
         if (labelProp != null && labelProp.PropertyType == typeof(string))
@@ -27,7 +33,7 @@ public record Field : WidgetBase<Field>
         Description = description;
         Required = required;
         Help = help;
-        Scale = scale;
+        Density = density;
     }
 
     internal Field() { }
@@ -39,6 +45,8 @@ public record Field : WidgetBase<Field>
     [Prop] public bool Required { get; set; }
 
     [Prop] public string? Help { get; set; }
+
+    [Prop] public LabelPosition LabelPosition { get; set; } = LabelPosition.Top;
 
     public static Field operator |(Field widget, object child)
     {
@@ -55,6 +63,8 @@ public static class FieldExtensions
     public static Field Help(this Field field, string help) => field with { Help = help };
 
     public static Field Required(this Field field) => field with { Required = true };
+
+    public static Field LabelPosition(this Field field, LabelPosition position) => field with { LabelPosition = position };
 
     public static Field WithField(this IAnyInput input) => new Field(input);
 }

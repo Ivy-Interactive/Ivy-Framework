@@ -93,4 +93,29 @@ Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
 ```
 
+## Faq
+
+<Details>
+<Summary>
+What are the available ButtonVariant values in Ivy?
+</Summary>
+<Body>
+
+`ButtonVariant` has these values: `Primary`, `Destructive`, `Outline`, `Secondary`, `Success`, `Warning`, `Info`, `Ghost`, `Link`, `Inline`, `Ai`.
+
+Set via the `.Variant()` method or shortcut methods:
+
+```csharp
+new Button("Save", handler).Variant(ButtonVariant.Primary)
+// or use shortcut:
+new Button("Save", handler).Primary()
+
+// Other shortcuts: .Secondary(), .Outline(), .Destructive(), .Ghost(), .Link(), .Inline(), .Ai()
+```
+
+**Important:** There is no `ButtonVariant.Default`. Use `ButtonVariant.Primary` instead.
+
+</Body>
+</Details>
+
 <WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Button.cs"/>

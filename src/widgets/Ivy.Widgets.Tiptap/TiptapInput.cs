@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Ivy;
 using Ivy.Core;
-using Ivy.Core.ExternalWidgets;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 

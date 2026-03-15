@@ -5,6 +5,8 @@ namespace Ivy.Samples.Shared.Apps.Widgets;
 [App(icon: Icons.DatabaseZap)]
 public class DataTableApp : SampleBase
 {
+    private enum RowAction { Edit, Delete, View, Menu, Archive, Export, Share }
+
     protected override object? BuildSample()
     {
         var client = UseService<IClientProvider>();
@@ -132,49 +134,44 @@ public class DataTableApp : SampleBase
                 config.LoadAllRows = false; // Use pagination
                 config.ShowSearch = true;
             })
-            // Configure row action buttons
+            // Row actions: fluent API + enum (compile-time safe); .Tag() overwrites default tag
             .RowActions(
-                MenuItem.Default(Icons.Pencil, "edit"),
-                MenuItem.Default(Icons.Trash2, "delete"),
-                MenuItem.Default(Icons.Eye, "view"),
-                MenuItem.Default(Icons.EllipsisVertical, "menu")
+                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
+                MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete),
+                MenuItem.Default(Icons.Eye).Tag(RowAction.View),
+                MenuItem.Default(Icons.EllipsisVertical).Tag(RowAction.Menu)
                     .Children([
-                        MenuItem.Default(Icons.Archive, "archive").Label("Archive"),
-                        MenuItem.Default(Icons.Download, "export").Label("Export"),
-                        MenuItem.Default(Icons.Share2, "share").Label("Share")
+                        MenuItem.Default(Icons.Archive).Tag(RowAction.Archive).Label("Archive"),
+                        MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export"),
+                        MenuItem.Default(Icons.Share2).Tag(RowAction.Share).Label("Share")
                     ])
             )
-            .OnRowAction(async e =>
+            .OnRowAction(e =>
             {
                 var args = e.Value;
-                if (int.TryParse(args.Id?.ToString() ?? "", out int employeeId))
+                if (!Enum.TryParse<RowAction>(args.Tag?.ToString(), ignoreCase: true, out var action)) return ValueTask.CompletedTask;
+                if (!int.TryParse(args.Id?.ToString() ?? "", out int employeeId)) return ValueTask.CompletedTask;
+
+                switch (action)
                 {
-                    var tag = args.Tag?.ToString();
-                    if (tag == "edit")
-                    {
-                        var employee = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == employeeId);
-                        if (employee != null)
+                    case RowAction.Edit:
+                        var toEdit = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == employeeId);
+                        if (toEdit != null) { editingEmployee.Set(toEdit); editModalOpen.Set(true); }
+                        break;
+                    case RowAction.Delete:
+                        var toDelete = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == employeeId);
+                        if (toDelete != null)
                         {
-                            editingEmployee.Set(employee);
-                            editModalOpen.Set(true);
-                        }
-                    }
-                    else if (tag == "delete")
-                    {
-                        var employee = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == employeeId);
-                        if (employee != null)
-                        {
-                            mockService.DeleteEmployee(employee.Id);
+                            mockService.DeleteEmployee(toDelete.Id);
                             refreshToken.Refresh();
-                            client.Toast($"Employee {employee.Name} deleted");
+                            client.Toast($"Employee {toDelete.Name} deleted");
                         }
-                    }
-                    else
-                    {
-                        client.Toast($"Row action: ID: {args.Id}, Tag: {args.Tag}");
-                    }
+                        break;
+                    default:
+                        client.Toast($"Row action: {action} on row ID: {args.Id}");
+                        break;
                 }
-                await ValueTask.CompletedTask;
+                return ValueTask.CompletedTask;
             });
 
         return new Fragment([dataTable, new EmployeeEditDialog(editModalOpen, editingEmployee, refreshToken, updated =>

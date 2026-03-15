@@ -3,7 +3,7 @@ import { X, RotateCw } from 'lucide-react';
 import { useEventHandler } from '@/components/event-handler';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getWidth } from '@/lib/styles';
-import { buttonVariants } from '@/components/ui/button/variants';
+import { buttonVariant } from '@/components/ui/button/variant';
 
 interface BladeWidgetProps {
   id: string;
@@ -59,14 +59,14 @@ export function BladeWidget({
         <div className="flex items-center h-[70px]">
           <button
             onClick={() => eventHandler('OnRefresh', id, [])}
-            className={buttonVariants({ variant: 'ghost', size: 'icon' })}
+            className={buttonVariant({ variant: 'ghost', size: 'icon' })}
           >
             <RotateCw className="h-4 w-4" />
           </button>
           {index > 0 && (
             <button
               onClick={() => eventHandler('OnClose', id, [])}
-              className={buttonVariants({ variant: 'ghost', size: 'icon' })}
+              className={buttonVariant({ variant: 'ghost', size: 'icon' })}
             >
               <X className="h-4 w-4" />
             </button>

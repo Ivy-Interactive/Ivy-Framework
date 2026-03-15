@@ -45,7 +45,7 @@ The following blocks shows how to use these.
 
 ### Password
 
-For capturing passwords, `TextInputVariants.Password` variant needs to be used. The following code shows how to capture
+For capturing passwords, `TextInputVariant.Password` variant needs to be used. The following code shows how to capture
 a new password.
 
 See it in action here.
@@ -58,7 +58,7 @@ public class PasswordCaptureDemo: ViewBase
         var password = UseState("");
         return new TextInput(password)
                      .Placeholder("Password")
-                     .Variant(TextInputVariants.Password)
+                     .Variant(TextInputVariant.Password)
                      .WithField()
                      .Label("Enter Password");         
     }
@@ -67,7 +67,7 @@ public class PasswordCaptureDemo: ViewBase
 
 ### Textarea
 
-When a multiline text is needed, `TextInputVariants.Textarea` variant should be used. A common use-case is for capturing address
+When a multiline text is needed, `TextInputVariant.Textarea` variant should be used. A common use-case is for capturing address
 that typically spans over multiple lines. The following demo shows how to use it.
 
 See it in action here.
@@ -80,9 +80,9 @@ public class CaptureAddressDemo: ViewBase
         var address = UseState("");
         return new TextInput(address)
                                .Placeholder("Åkervägen 9, \n132 39 Saltsjö-Boo, \nSweden")
-                               .Variant(TextInputVariants.Textarea)
-                               .Height(30)
-                               .Width(100)
+                               .Variant(TextInputVariant.Textarea)
+                               .Height(Size.Units(30))
+                               .Width(Size.Units(100))
                                .WithField()
                                .Label("Address");         
     }
@@ -98,7 +98,7 @@ A `.Multiline()` extension method on `TextInputBase` lets you turn any TextInput
 ### Search
 
 When it is necessary to find an element from a collection of items, it is better to give users a visual clue.  
-Using the `TextInputVariants.Search` variant, this visual clue (with a looking glass icon) becomes obvious.
+Using the `TextInputVariant.Search` variant, this visual clue (with a looking glass icon) becomes obvious.
 The following demo shows how to add such an text input.
 
 See it in action here.
@@ -111,7 +111,7 @@ public class SearchBarDemo: ViewBase
         var searchThis = UseState("");
         return new TextInput(searchThis)
                                .Placeholder("search for?")
-                               .Variant(TextInputVariants.Search)
+                               .Variant(TextInputVariant.Search)
                                .WithField()
                                .Label("Search");
     }
@@ -120,7 +120,7 @@ public class SearchBarDemo: ViewBase
 
 ### Email
 
-To capture the emails `TextInputVariants.Email` variant should be used.  
+To capture the emails `TextInputVariant.Email` variant should be used.  
 
 See it in action here.
 
@@ -132,7 +132,7 @@ public class EmailEnterDemo: ViewBase
         var email = UseState("");
         return new TextInput(email)
                        .Placeholder("user@domain.com")
-                       .Variant(TextInputVariants.Email)
+                       .Variant(TextInputVariant.Email)
                        .WithField()
                        .Label("Email");
     }
@@ -141,7 +141,7 @@ public class EmailEnterDemo: ViewBase
 
 ### Telephone
 
-To capture the phone numbers `TextInputVariants.Tel` variant needs to be used.  
+To capture the phone numbers `TextInputVariant.Tel` variant needs to be used.  
 
 see it in action here.
 
@@ -153,7 +153,7 @@ public class PhoneEnterDemo: ViewBase
         var tel = UseState("");
         return new TextInput(tel)
                       .Placeholder("+1-123-3456")
-                      .Variant(TextInputVariants.Tel)
+                      .Variant(TextInputVariant.Tel)
                       .WithField()
                       .Label("Phone");
     }
@@ -162,7 +162,7 @@ public class PhoneEnterDemo: ViewBase
 
 ### URL
 
-To capture the URLs/Links  `TextInputVariants.Url` variant needs to be used.
+To capture the URLs/Links  `TextInputVariant.Url` variant needs to be used.
 
 see it in action here.
 
@@ -174,7 +174,7 @@ public class URLEnterDemo: ViewBase
         var url = UseState("");
         return new TextInput(url)
                       .Placeholder("https://ivy.app/")
-                      .Variant(TextInputVariants.Url)
+                      .Variant(TextInputVariant.Url)
                       .WithField()
                       .Label("Website");
     }
@@ -287,11 +287,11 @@ public class ShortCutDemo : ViewBase
                 | new TextInput(email)
                       .Placeholder("Email (Ctrl+E)")
                       .ShortcutKey("Ctrl+E")
-                      .Variant(TextInputVariants.Email)    
+                      .Variant(TextInputVariant.Email)    
                 | new TextInput(message)
                       .Placeholder("Message (Ctrl+M)")
                       .ShortcutKey("Ctrl+M")
-                      .Variant(TextInputVariants.Textarea);
+                      .Variant(TextInputVariant.Textarea);
     }
 }
 ```
@@ -332,8 +332,8 @@ public class DataCaptureUsingExtensionDemo: ViewBase
                      .Label("Mobile")
                 | address.ToTextareaInput()
                          .Placeholder("Address Line1\nAddress Line2\nAddress Line 3")
-                         .Height(40)
-                         .Width(100)
+                         .Height(Size.Units(40))
+                         .Width(Size.Units(100))
                          .WithField()
                          .Label("Address")
                 | website.ToUrlInput()
@@ -377,7 +377,7 @@ public class BasicFilter : ViewBase
 
 <WidgetDocs Type="Ivy.TextInput" ExtensionTypes="Ivy.TextInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/TextInput.cs"/>
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -461,10 +461,87 @@ public class LoginForm : ViewBase
                     .Label("Password")
                 | new Button("Login")
                     .Disabled(string.IsNullOrWhiteSpace(usernameState.Value) || 
-                        string.IsNullOrWhiteSpace(passwordState.Value));                             
-    }     
+                        string.IsNullOrWhiteSpace(passwordState.Value));
+    }
 }
 ```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I create a multiline textarea TextInput in Ivy?
+</Summary>
+<Body>
+
+Use the `TextInputVariant.Textarea` variant or the dedicated `ToTextareaInput` extension:
+
+```csharp
+state.ToTextareaInput(placeholder: "Enter text...")
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I handle enter key press on a TextInput?
+</Summary>
+<Body>
+
+Single-line TextInputs automatically blur when the user presses Enter, so use `OnBlur` to react to the Enter key:
+
+```csharp
+var input = UseState("");
+input.ToTextInput()
+    .Placeholder("Type and press Enter")
+    .OnBlur(() => DoSomething(input.Value))
+```
+
+`OnBlur` takes an `Action` that is invoked when the input loses focus — which happens automatically on Enter for single-line text inputs.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How to create a form with a dynamic number of fields (e.g. dictionary input)?
+</Summary>
+<Body>
+
+Since hooks cannot be called inside loops (IVYHOOK003), you cannot use `UseState` in a `for`/`foreach`/LINQ loop. Instead, use **one state variable** that holds all field values:
+
+```csharp
+public override object Build()
+{
+    var columns = GetColumnNames(); // e.g. ["Name", "Age", "City"]
+    var values = UseState(new Dictionary<string, string>());
+
+    var layout = Layout.Vertical();
+    foreach (var col in columns)
+    {
+        var currentValue = values.Value.GetValueOrDefault(col, "");
+        layout.Add(
+            new TextInput(currentValue, e =>
+            {
+                var updated = new Dictionary<string, string>(values.Value) { [col] = e.Value };
+                values.Set(updated);
+            })
+            .Placeholder(col)
+            .WithField()
+            .Label(col)
+        );
+    }
+    return layout;
+}
+```
+
+Key points:
+- Only one `UseState` call at the top level — no hook rule violations
+- The dictionary keys map to column names, values map to user input
+- Create a new dictionary on each update to trigger a re-render
+- This pattern works for any dynamic input scenario (forms, dialogs, etc.)
 
 </Body>
 </Details>

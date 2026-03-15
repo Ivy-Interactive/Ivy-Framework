@@ -15,7 +15,7 @@ import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
 import { BorderRadius, getColor, getWidth } from '@/lib/styles';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 const ButtonWithTooltip = withTooltip(Button);
 
@@ -24,7 +24,7 @@ interface ButtonWidgetProps {
   title: string;
   icon?: string;
   iconPosition?: 'Left' | 'Right';
-  scale?: Scales;
+  density?: Densities;
   variant?:
     | 'Primary'
     | 'Inline'
@@ -98,12 +98,12 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   width,
   children,
   borderRadius = 'Rounded',
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
 
-  // For 'Rounded' (default), rely on the 'rounded-field' class from buttonVariants.
+  // For 'Rounded' (default), rely on the 'rounded-field' class from buttonVariant.
   // Only add inline style to override the class for 'None'/'Full'.
   const borderRadiusStyle: React.CSSProperties =
     borderRadius === 'Full'
@@ -126,12 +126,12 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     buttonSize = 'icon';
   }
 
-  if (scale == Scales.Small) {
+  if (density == Densities.Small) {
     buttonSize = 'sm';
     iconSize = 3;
   }
 
-  if (scale == Scales.Large) {
+  if (density == Densities.Large) {
     buttonSize = 'lg';
     iconSize = 5;
   }
