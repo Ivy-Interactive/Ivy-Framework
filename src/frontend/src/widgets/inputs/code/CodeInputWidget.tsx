@@ -62,6 +62,7 @@ const languageExtensions = {
   Markdown: markdown,
   Text: undefined,
   Yaml: yaml,
+  Csv: undefined,
 };
 
 export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({

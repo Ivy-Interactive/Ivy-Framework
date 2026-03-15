@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Ivy.Core.Hooks;
 
-public class State<T> : IState<T>
+public class State<T> : IState<T>, IRef<T>
 {
     private T _value;
     private readonly Subject<T> _subject = new();

@@ -1,5 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -17,7 +16,7 @@ public enum TextVariant
     P,
     Inline,
     Blockquote,
-    InlineCode,
+    Monospaced,
     Lead,
     Muted,
     Danger,

@@ -408,4 +408,20 @@ public class UserContentView : ViewBase
 - You need JavaScript functionality
 - Simple text formatting would suffice (use [Text widget](01_TextBlock.md))
 
+## Faq
+
+### How to apply background styling with CSS gradients?
+
+The `Html` widget in safe mode strips inline `style` attributes. To render custom CSS (including gradients, box-shadows, or positioned elements), you must chain `.DangerouslyAllowScripts()`:
+
+```csharp
+return new Html("""
+    <div style="position: fixed; inset: 0; z-index: -1; background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);"></div>
+""").DangerouslyAllowScripts()
+| Layout.Center()
+    | myContent;
+```
+
+Alternatively, use native Ivy styling with `Layout.Background(Colors.X)` — but this only supports solid `Colors` enum values, not CSS gradients.
+
 <WidgetDocs Type="Ivy.Html" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Html.cs"/>

@@ -1,4 +1,4 @@
-﻿---
+---
 groupExpanded: true
 icon: Rocket
 ---

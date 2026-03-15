@@ -44,6 +44,8 @@ public class FormFieldView(
     Func<IAnyState, IViewContext, IAnyInput> inputFactory,
     Func<bool> visible,
     ISignal<Unit, Unit> updateSender,
+    FormValidateSignal formValidationSignal,
+    FormSubmitSignal formSubmitSignal,
     string? label = null,
     string? description = null,
     string? help = null,
@@ -95,9 +97,7 @@ public class FormFieldView(
         IAnyState inputState = Context.UseClonedAnyState(bindingState);
         var invalidState = UseState((string?)null!);
         var blurOnceState = UseState(false);
-        var validationReceiver = UseSignal<FormValidateSignal, Unit, bool>();
         var updateReceiver = UseSignal<FormUpdateSignal, Unit, Unit>();
-        var submitSender = UseSignal<FormSubmitSignal, Unit, Unit>();
         var visibleState = UseState(visible);
 
         var inputRef = UseRef<IAnyInput?>(() => default);
@@ -110,7 +110,7 @@ public class FormFieldView(
                     visibleState.Set(visible());
                     return default;
                 }),
-                validationReceiver.Receive(_ =>
+                formValidationSignal.ReceiveWithId(Guid.NewGuid(), _ =>
                 {
                     var value = inputState.As<object>().Value;
                     return Validate(value, invalidState, inputRef.Value);
@@ -129,7 +129,7 @@ public class FormFieldView(
             updateSender.Send(new Unit());
             if (submitStrategy == FormSubmitStrategy.OnChange)
             {
-                submitSender.Send(new Unit());
+                var __ = formSubmitSignal.Send(default);
             }
         }, [inputState, blurOnceState]);
 
@@ -138,7 +138,7 @@ public class FormFieldView(
             blurOnceState.Set(true);
             if (submitStrategy == FormSubmitStrategy.OnBlur)
             {
-                submitSender.Send(new Unit());
+                var __ = formSubmitSignal.Send(default);
             }
         }
 
@@ -172,6 +172,8 @@ public class FormFieldBinding<TModel>(
     Func<IAnyState, IViewContext, IAnyInput> factory,
     Func<bool> visible,
     ISignal<Unit, Unit> updateSignal,
+    FormValidateSignal formValidationSignal,
+    FormSubmitSignal formSubmitSignal,
     string? label = null,
     string? description = null,
     bool required = false,
@@ -187,7 +189,7 @@ public class FormFieldBinding<TModel>(
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, density, submitStrategy);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, formValidationSignal, formSubmitSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, density, submitStrategy);
         return (fieldView, disposable);
     }
 }

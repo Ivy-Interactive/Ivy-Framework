@@ -133,6 +133,11 @@ const _getMaxWidth = (width?: string): React.CSSProperties => {
   }
 };
 
+export const getAspectRatio = (aspectRatio?: number): React.CSSProperties => {
+  if (aspectRatio === undefined || aspectRatio === null) return {};
+  return { aspectRatio: aspectRatio };
+};
+
 export const getHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 
@@ -613,8 +618,26 @@ export const getColor = (
   percentage: number | undefined = undefined
 ) => {
   if (!color) return {};
-  const varName =
-    color.toLowerCase() + (role === 'background' ? '' : '-foreground');
+
+  const lowerColor = color.toLowerCase();
+
+  // When a surface color is used as a text color (like Muted, Background, Card),
+  // it should map to its foreground variant (muted-foreground) to ensure readability,
+  // because the base variable (var(--muted)) is designed as a background layer.
+  // We DO NOT include brand/state colors like primary, secondary, destructive since their base variable IS the intended text color.
+  const surfaceThemeColors = [
+    'background',
+    'card',
+    'popover',
+    'muted',
+    'accent',
+  ];
+
+  if (cssProperty === 'color' && surfaceThemeColors.includes(lowerColor)) {
+    role = 'foreground';
+  }
+
+  const varName = lowerColor + (role === 'background' ? '' : '-foreground');
   if (percentage && percentage > -100 && percentage < 100) {
     return {
       [cssProperty]: `color-mix(in srgb, var(--${varName}), var(--background) ${Math.abs(percentage)}%)`,

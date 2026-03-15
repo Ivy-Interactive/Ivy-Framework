@@ -37,7 +37,7 @@ public class TextVariantsDemo : ViewBase
             | Text.P("Paragraph text")
             | Text.Block("Block text")
             | Text.Blockquote("Blockquote text")
-            | Text.InlineCode("InlineCode")
+            | Text.Monospaced("Monospaced")
             | Text.Lead("Lead text for prominent display")
             | Text.P("Large text").Large()
             | Text.P("Small text").Small()
@@ -135,9 +135,9 @@ public class ArticleDemo : ViewBase
             | Text.Block("• Basic knowledge of C#")
             | Text.H2("Installation")
             | Text.P("Install Ivy using the .NET CLI:")
-            | Text.InlineCode("dotnet tool install -g Ivy.Console")
+            | Text.Monospaced("dotnet tool install -g Ivy.Console")
             | Text.P("Create a new project:")
-            | Text.InlineCode("ivy init --namespace MyFirstProject");
+            | Text.Monospaced("ivy init --namespace MyFirstProject");
     }
 }
 ```
@@ -243,3 +243,25 @@ The TextBuilder class provides several modifiers for customizing text appearance
 - **[CodeBlock](10_CodeBlock.md)** - For syntax-highlighted code blocks
 - **[Json](17_Json.md)** - For JSON data display
 - **[Html](15_Html.md)** - For HTML content rendering
+
+## Faq
+
+<Details>
+<Summary>
+How do I change the font size of text?
+</Summary>
+<Body>
+
+Use the `.Large()`, `.Medium()`, or `.Small()` modifiers on any `TextBuilder`:
+
+```csharp
+Text.P("Large text").Large()
+Text.P("Normal text").Medium()
+Text.P("Small text").Small()
+Text.P("Small muted text").Small().Muted()
+```
+
+These modifiers work with all text factory methods (`Text.P()`, `Text.H1()`, `Text.Block()`, `Text.Label()`, etc.). **Important:** There is no `.WithFontSize()` method or `FontSize` enum. **There is no `.Style()` method for arbitrary CSS styling.**
+
+</Body>
+</Details>

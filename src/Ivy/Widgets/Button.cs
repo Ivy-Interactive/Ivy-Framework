@@ -60,6 +60,14 @@ public record Button : WidgetBase<Button>
         OnClick = onClick == null ? null : new(_ => { onClick(); return ValueTask.CompletedTask; });
     }
 
+    public Button(string? title = null, Func<ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
+    {
+        Title = title;
+        Variant = variant;
+        Icon = icon;
+        OnClick = onClick == null ? null : new(_ => onClick());
+    }
+
     [Prop] public string? Title { get; set; }
 
     [Prop] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
@@ -105,6 +113,11 @@ public static class ButtonExtensions
         return new Button(null, onClick, icon: icon, variant: variant);
     }
 
+    public static Button ToButton(this Icons icon, Func<ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
+    {
+        return new Button(null, onClick, icon: icon, variant: variant);
+    }
+
     public static IView ToTrigger(this Button trigger, Func<IState<bool>, object> action)
     {
         return new FuncView((context) =>
@@ -137,7 +150,7 @@ public static class ButtonExtensions
     public static Button Url(this Button button, string url)
     {
         // Validate URL to prevent open redirect vulnerabilities
-        var validatedUrl = Utils.ValidateLinkUrl(url);
+        var validatedUrl = ValidationHelper.ValidateLinkUrl(url);
         if (validatedUrl == null)
         {
             throw new ArgumentException($"Invalid URL: {url}. Only safe URLs (http/https, relative paths, app://, anchors) are allowed.", nameof(url));

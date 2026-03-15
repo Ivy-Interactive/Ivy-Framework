@@ -17,7 +17,7 @@ namespace Ivy.Analyser.Analyzers
         private static readonly DiagnosticDescriptor LeafRule = new DiagnosticDescriptor(
             LeafDiagnosticId,
             "Adding Children to Leaf Widget",
-            "'{0}' does not support children",
+            "'{0}' does not support children. See: https://docs.ivy.app/other/ivy-analyser/ivychild001.",
             "Usage",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
@@ -27,7 +27,7 @@ namespace Ivy.Analyser.Analyzers
         private static readonly DiagnosticDescriptor SingleChildRule = new DiagnosticDescriptor(
             SingleChildDiagnosticId,
             "Adding Multiple Children to Single-Child Widget",
-            "'{0}' only supports a single child",
+            "'{0}' only supports a single child. See: https://docs.ivy.app/other/ivy-analyser/ivychild002.",
             "Usage",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
@@ -37,15 +37,15 @@ namespace Ivy.Analyser.Analyzers
         private static readonly DiagnosticDescriptor WrongChildTypeRule = new DiagnosticDescriptor(
             WrongChildTypeDiagnosticId,
             "Wrong Child Type for Widget",
-            "'{0}' only accepts children of type '{1}'. Got '{2}'.",
+            "'{0}' only accepts children of type '{1}'. Got '{2}'. See: https://docs.ivy.app/other/ivy-analyser/ivychild003.",
             "Usage",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description:
             "This widget only accepts children of a specific type. Passing a different type via the | operator will throw NotSupportedException at runtime.");
 
-        private static readonly HashSet<string> LeafWidgetTypes = new HashSet<string>
-        {
+        private static readonly HashSet<string> LeafWidgetTypes =
+        [
             "Ivy.Button",
             "Ivy.Badge",
             "Ivy.Progress",
@@ -62,15 +62,15 @@ namespace Ivy.Analyser.Analyzers
             "Ivy.PieChart",
             "Ivy.BarChart",
             "Ivy.AreaChart",
-            "Ivy.Tooltip",
-        };
+            "Ivy.Tooltip"
+        ];
 
-        private static readonly HashSet<string> LeafInterfaceTypes = new HashSet<string>
+        private static readonly HashSet<string> LeafInterfaceTypes = new()
         {
             "Ivy.IInput",
         };
 
-        private static readonly HashSet<string> SingleChildWidgetTypes = new HashSet<string>
+        private static readonly HashSet<string> SingleChildWidgetTypes = new()
         {
             "Ivy.Card",
             "Ivy.Sheet",
@@ -187,12 +187,12 @@ namespace Ivy.Analyser.Analyzers
             {
                 foreach (var attr in current.GetAttributes())
                 {
-                    if (attr.AttributeClass != null
-                        && attr.AttributeClass.Name == "ChildTypeAttribute"
-                        && attr.ConstructorArguments.Length == 1
-                        && attr.ConstructorArguments[0].Value is ITypeSymbol allowedType)
+                    if (attr.AttributeClass is { Name: "ChildTypeAttribute" })
                     {
-                        return allowedType;
+                        if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol allowedType)
+                        {
+                            return allowedType;
+                        }
                     }
                 }
 

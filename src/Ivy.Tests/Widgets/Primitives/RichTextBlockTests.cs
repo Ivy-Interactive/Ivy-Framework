@@ -113,7 +113,7 @@ public class RichTextBlockTests
         var builder = Text.Rich().Center().NoWrap().Run("text");
         var widget = (RichTextBlock)builder.Build()!;
 
-        Assert.Equal(Ivy.Shared.TextAlignment.Center, widget.TextAlignment);
+        Assert.Equal(TextAlignment.Center, widget.TextAlignment);
         Assert.True(widget.NoWrap);
     }
 }

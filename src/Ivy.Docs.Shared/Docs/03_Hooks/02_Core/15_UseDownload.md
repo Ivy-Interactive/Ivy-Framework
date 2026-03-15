@@ -118,6 +118,52 @@ public class DownloadMultiFormatDemo : ViewBase
 }
 ```
 
+## Faq
+
+### How do I create multiple downloads for items in a collection?
+
+You cannot call `UseDownload` inside a loop or lambda — hooks must be called at the top level of `Build()`. The idiomatic solution (same as React) is to **extract a child component** for each item. Each child component instance has its own isolated hook state:
+
+```csharp
+// ❌ WRONG — hook inside Select lambda (triggers IVYHOOK001B)
+items.Select(item => UseDownload(() => item.Bytes, "image/png", "file.png"));
+
+// ❌ VERBOSE — pre-creating a fixed number of downloads at top level
+var download1 = UseDownload(() => GetBytes(0), "image/png", "item-1.png");
+var download2 = UseDownload(() => GetBytes(1), "image/png", "item-2.png");
+// ... repeating for each item
+
+// ✅ IDIOMATIC — extract a child component per item
+public override object? Build()
+{
+    var items = UseState(GetItems());
+    return Layout.Vertical(
+        items.Value.Select((item, i) => new DownloadItemView(item).Key($"dl-{i}"))
+    );
+}
+
+// Each child component manages its own UseDownload hook
+public class DownloadItemView(ItemData item) : ViewBase
+{
+    public override object? Build()
+    {
+        var downloadUrl = UseDownload(
+            factory: () => item.GenerateBytes(),
+            mimeType: "image/png",
+            fileName: item.FileName
+        );
+
+        return Layout.Horizontal()
+            | Text.Block(item.Name)
+            | (downloadUrl.Value != null
+                ? new Button("Download").Url(downloadUrl.Value)
+                : Text.Block("Preparing..."));
+    }
+}
+```
+
+For a **fixed, small** number of format exports (e.g., CSV + JSON of the same data), multiple `UseDownload` calls at the top level of a single component is fine — see the [Multiple Format Export](#multiple-format-export) example above.
+
 ## See Also
 
 - [State](./03_UseState.md) - Component state management

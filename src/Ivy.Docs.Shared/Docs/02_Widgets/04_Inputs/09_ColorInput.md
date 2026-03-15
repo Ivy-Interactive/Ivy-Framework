@@ -26,10 +26,10 @@ Here's a simple example of a `ColorInput` that updates a [state](../../03_Hooks/
 public class ColorDemo : ViewBase
 {
     public override object? Build()
-    {    
+    {
         var colorState = UseState("#ff0000");
         return colorState.ToColorInput();
-    }   
+    }
 }
 ```
 
@@ -56,12 +56,12 @@ var colorInputFull = new ColorInput(
 
 `ColorInput` has four variants:
 
-| Variant | Description |
-|---------|-------------|
-| `ColorInputVariant.Text` | Text input for entering hex codes manually |
-| `ColorInputVariant.Picker` | Color picker only |
-| `ColorInputVariant.TextAndPicker` | Text input with color picker (default) |
-| `ColorInputVariant.Swatch` | Grid of predefined colors from `Colors` enum |
+| Variant                           | Description                                  |
+| --------------------------------- | -------------------------------------------- |
+| `ColorInputVariant.Text`          | Text input for entering hex codes manually   |
+| `ColorInputVariant.Picker`        | Color picker only                            |
+| `ColorInputVariant.TextAndPicker` | Text input with color picker (default)       |
+| `ColorInputVariant.Swatch`        | Grid of predefined colors from `Colors` enum |
 
 The following code shows all variants in action:
 
@@ -69,14 +69,14 @@ The following code shows all variants in action:
 public class ColorVariantsDemo : ViewBase
 {
     public override object? Build()
-    {    
+    {
         var colorState = UseState("red");
         return Layout.Grid().Columns(2).ColumnWidths(Size.Units(30), null)
             | Text.P("Just Text").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Text)
             | Text.P("Just Picker").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Picker)
             | Text.P("Text and Picker").Small() | colorState.ToColorInput().Variant(ColorInputVariant.TextAndPicker)
             | Text.P("Swatch").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Swatch);
-    }   
+    }
 }
 ```
 
@@ -88,12 +88,12 @@ The `Swatch` variant displays a grid of predefined colors from the `Colors` enum
 public class ColorSwatchDemo : ViewBase
 {
     public override object? Build()
-    {    
+    {
         var colorState = UseState(Colors.Blue);
         return Layout.Vertical()
             | colorState.ToColorInput().Variant(ColorInputVariant.Swatch)
             | Text.P($"Selected: {colorState.Value}");
-    }   
+    }
 }
 ```
 
@@ -108,7 +108,7 @@ public class ColorChangedDemo : ViewBase
 {
 
     public override object? Build()
-    {    
+    {
         var colorState = UseState("#ff0000");
         var colorName = UseState(colorState.Value);
         var onChangeHandler = (Event<IInput<string>, string> e) =>
@@ -116,17 +116,17 @@ public class ColorChangedDemo : ViewBase
             colorName.Set(e.Value);
             colorState.Set(e.Value);
         };
-        return Layout.Vertical() 
+        return Layout.Vertical()
                 | H3("Hex Color Picker")
                 | (Layout.Horizontal()
                 | new ColorInput<string>
                        (colorState.Value, onChangeHandler)
-                      .Variant(ColorInputVariant.Picker) 
+                      .Variant(ColorInputVariant.Picker)
                 | new CodeBlock(colorName.Value)
                     .ShowCopyButton()
                     .ShowBorder());
-    }    
-}    
+    }
+}
 ```
 
 ## Styling
@@ -154,12 +154,12 @@ When building apps that require semi-transparent colors (e.g., overlays, backgro
 public class ColorAlphaDemo : ViewBase
 {
     public override object? Build()
-    {    
+    {
         var colorState = UseState("#ff000080");
         return Layout.Vertical()
             | colorState.ToColorInput().AllowAlpha()
             | Text.P($"Selected: {colorState.Value}");
-    }   
+    }
 }
 ```
 
@@ -195,18 +195,18 @@ public class CSSColorDemo : ViewBase
         return Layout.Vertical()
                 | H3("CSS Block Generator")
                 | (Layout.Horizontal()
-                   | Text.InlineCode("color")
-                         .Width(35)
+                   | Text.Monospaced("color")
+                         .Width(Size.Units(35))
                    | color.ToColorInput()
                           .Variant(ColorInputVariant.Picker))
                 | (Layout.Horizontal()
-                   | Text.InlineCode("background-color")
-                         .Width(35)
+                   | Text.Monospaced("background-color")
+                         .Width(Size.Units(35))
                    | bgColor.ToColorInput()
                           .Variant(ColorInputVariant.Picker))
                 | (Layout.Horizontal()
-                   | Text.InlineCode("border")
-                         .Width(35)
+                   | Text.Monospaced("border")
+                         .Width(Size.Units(35))
                    | border.ToColorInput()
                           .Variant(ColorInputVariant.Picker))
                    | new CodeBlock(genCode.Value)

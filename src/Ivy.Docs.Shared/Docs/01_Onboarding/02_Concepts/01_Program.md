@@ -318,3 +318,26 @@ server.AddConnectionsFromAssembly();
 ```
 
 This automatically discovers and registers SignalR connection classes for real-time communication.
+
+## Faq
+
+<Details>
+<Summary>
+What namespace are Ivy types in?
+</Summary>
+<Body>
+
+All Ivy types are in the root `Ivy` namespace. There are no sub-namespaces. You only need:
+
+```csharp
+using Ivy;
+```
+
+This single using statement gives you access to everything: `ViewBase`, `IState<T>`, `MetricView`, `MetricRecord`, chart views (`LineChartView`, `PieChartView`, `BarChartView`, `AreaChartView`), `DataTable`, `DataTableBuilder<T>`, layout helpers (`Layout.Vertical()`, `Layout.Horizontal()`), `Button`, `TextInput`, all input types, `Card`, `Dialog`, `Sheet`, `Tab`, `Icons`, `RefreshToken`, `IClientProvider`, `IBladeService`, `IConnection`, `IHaveSecrets`, and all other framework types.
+
+**Do NOT use sub-namespaces** like `Ivy.Views.Dashboards`, `Ivy.Widgets.DataTables`, `Ivy.Client`, `Ivy.Hooks`, `Ivy.Services`, or `Ivy.Apps`. These do not exist — the framework source code organizes files in subdirectories but all types use `namespace Ivy;`.
+
+Ivy projects include `<ImplicitUsings>enable</ImplicitUsings>` plus a global using for the project's own namespace, so typically the only explicit using you need is `using Ivy;` and `using Microsoft.EntityFrameworkCore;` (for database connections).
+
+</Body>
+</Details>
