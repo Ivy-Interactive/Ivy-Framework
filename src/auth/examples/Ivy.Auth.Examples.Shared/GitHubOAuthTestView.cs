@@ -129,7 +129,7 @@ public class GitHubOAuthTestView : ViewBase
             userInfo.Value != null
                 ? Layout.Horizontal(
                     userInfo.Value.AvatarUrl != null
-                        ? new Image(userInfo.Value.AvatarUrl).Size(80)
+                        ? new Image(userInfo.Value.AvatarUrl).Size(Size.Units(80))
                         : null,
                     Layout.Vertical(
                         Text.H5(userInfo.Value.Name ?? userInfo.Value.Login),
