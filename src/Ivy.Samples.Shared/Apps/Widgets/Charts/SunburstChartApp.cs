@@ -1,3 +1,4 @@
+using Ivy;
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
 [App(icon: Icons.ChartPie, searchHints: ["visualization", "graph", "analytics", "data", "sunburst", "statistics", "hierarchical"])]
