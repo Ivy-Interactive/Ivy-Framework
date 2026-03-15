@@ -46,13 +46,26 @@ interface DateRangeInputWidgetProps {
   format?: string;
   invalid?: string;
   nullable?: boolean;
-  firstDayOfWeek?: number;
+  firstDayOfWeek?: WeekDay | string;
   density?: Densities;
   events: string[];
   'data-testid'?: string;
 }
 
+type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
 const EMPTY_EVENTS: string[] = [];
+
+const dayOfWeekMap: Record<string, WeekDay> = {
+  Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3,
+  Thursday: 4, Friday: 5, Saturday: 6,
+};
+
+function resolveDayOfWeek(value?: WeekDay | string): WeekDay | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'number') return value as WeekDay;
+  return dayOfWeekMap[value];
+}
 
 export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   id,
@@ -64,11 +77,12 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   format: formatProp,
   invalid,
   nullable = false,
-  firstDayOfWeek,
+  firstDayOfWeek: firstDayOfWeekRaw,
   density = Densities.Medium,
   events = EMPTY_EVENTS,
   'data-testid': dataTestId,
 }) => {
+  const firstDayOfWeek = resolveDayOfWeek(firstDayOfWeekRaw);
   const eventHandler = useEventHandler();
 
   const handleChange = useCallback(
@@ -245,7 +259,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <div className="rounded-box border border-border">
+          <div className="rounded-box">
             <div className="flex max-sm:flex-col">
               <div className="relative border-border py-4 max-sm:order-1 max-sm:border-t sm:w-32">
                 <div className="h-full border-border sm:border-e">
