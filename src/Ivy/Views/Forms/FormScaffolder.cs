@@ -16,7 +16,7 @@ internal static class FormScaffolder
         {
             var displayInfo = field.GetDisplayInfo();
 
-            var label = displayInfo.Name ?? Utils.LabelFor(field.Name, field.Type);
+            var label = displayInfo.Name ?? StringHelper.LabelFor(field.Name, field.Type);
 
             if (ShouldTrimIdSuffix(displayInfo.Name, label))
             {
@@ -291,7 +291,7 @@ internal static class FormScaffolder
 
         if (field.Required)
         {
-            validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
+            validators.Add(e => (ValidationHelper.IsValidRequired(e), "Required field"));
         }
 
         if (field.PropertyInfo != null)

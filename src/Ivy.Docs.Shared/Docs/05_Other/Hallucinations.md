@@ -2,6 +2,10 @@
 
 Known cases where the agent hallucinated Ivy Framework APIs. Use this as a reference when debugging build errors in agent sessions.
 
+## IRef\<T\> — now supported
+
+`IRef<T>` was previously a hallucinated interface. It has since been added to the framework as `IRef<T> : IState<T>`. Both `UseRef<T>()` return types are now `IRef<T>`, while `UseState<T>()` continues to return `IState<T>`. The two interfaces are interchangeable — `IRef<T>` is a marker subtype used for clarity.
+
 ## SelectInputBase.Options() — chained options method
 
 **Hallucinated API:**
@@ -680,6 +684,31 @@ new Box(content).BorderRadius(BorderRadius.Rounded)
 
 **Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
+
+## BorderRadius.Medium — non-existent enum value
+
+**Hallucinated API:**
+```csharp
+BorderRadius.Medium
+BorderRadius.Large
+BorderRadius.Small
+```
+
+**Error:** `'BorderRadius' does not contain a definition for 'Medium'`
+
+**Correct API:**
+```csharp
+BorderRadius.None     // no rounding
+BorderRadius.Rounded  // standard rounded corners
+BorderRadius.Full     // fully rounded (pill shape)
+```
+
+Valid `BorderRadius` values: `None`, `Rounded`, `Full`. The agent hallucinates Tailwind-style size variants (`Small`, `Medium`, `Large`, `Xl`) that don't exist.
+
+**Found In:**
+050136ca-9275-4e1d-9740-e393b544c1b5
+8a776329-6dc7-474f-aa4d-c8b4da753a25 (BorderRadius.Large)
+4e59e443-3579-4df9-af4b-765b7b7d61c8 (BorderRadius.Small — via IvyMcp hallucination)
 
 ## GridView.Background() — non-existent method
 

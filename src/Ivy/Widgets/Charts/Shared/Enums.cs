@@ -103,3 +103,20 @@ public enum SortOrder
     Ascending,
     Descending
 }
+
+public enum ScatterShape
+{
+    Circle,
+    Square,
+    Cross,
+    Diamond,
+    Star,
+    Triangle,
+    Wye
+}
+
+public enum ScatterLineType
+{
+    Joint,
+    Fitting
+}

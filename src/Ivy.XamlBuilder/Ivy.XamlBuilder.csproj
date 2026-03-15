@@ -9,7 +9,11 @@
     <RootNamespace>Ivy</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(IvyPackageVersion)' != ''">
+    <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="../Ivy/Ivy.csproj" />
   </ItemGroup>
 

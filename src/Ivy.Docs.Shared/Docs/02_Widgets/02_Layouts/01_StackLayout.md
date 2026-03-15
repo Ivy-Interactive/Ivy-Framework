@@ -56,6 +56,91 @@ public class StackLayoutExample : ViewBase
 }
 ```
 
+## Space Distribution
+
+Use `SpaceBetween`, `SpaceAround`, or `SpaceEvenly` to distribute space between elements:
+
+```csharp demo-tabs
+new StackLayout([
+    Text.Label("SpaceBetween:"),
+    new StackLayout([new Badge("A"), new Badge("B"), new Badge("C")], Orientation.Horizontal, align: Align.SpaceBetween),
+    Text.Label("SpaceAround:"),
+    new StackLayout([new Badge("A"), new Badge("B"), new Badge("C")], Orientation.Horizontal, align: Align.SpaceAround),
+    Text.Label("SpaceEvenly:"),
+    new StackLayout([new Badge("A"), new Badge("B"), new Badge("C")], Orientation.Horizontal, align: Align.SpaceEvenly)
+], gap: 4).Width(Size.Full())
+```
+
+## Row Gap & Column Gap
+
+Control vertical and horizontal spacing independently using `RowGap` and `ColumnGap` properties:
+
+```csharp demo-tabs
+new StackLayout([
+    Text.Label("RowGap=8, ColumnGap=2:"),
+    new StackLayout([
+        new Badge("A"), new Badge("B"), new Badge("C"),
+        new Badge("D"), new Badge("E"), new Badge("F"),
+        new Badge("G"), new Badge("H"), new Badge("I"),
+        new Badge("J"), new Badge("K"), new Badge("L"),
+        new Badge("M"), new Badge("N")
+    ], Orientation.Horizontal, wrap: true) { RowGap = 8, ColumnGap = 2 }
+        .Width(Size.Units(60)),
+    Text.Label("RowGap=2, ColumnGap=8:"),
+    new StackLayout([
+        new Badge("A"), new Badge("B"), new Badge("C"),
+        new Badge("D"), new Badge("E"), new Badge("F"),
+        new Badge("G"), new Badge("H")
+    ], Orientation.Horizontal, wrap: true) { RowGap = 2, ColumnGap = 8 }
+        .Width(Size.Units(60))
+], gap: 4)
+```
+
+## Wrap
+
+Use the `wrap` parameter to allow items to flow to the next line when they run out of space. Try resizing the window to see the wrapping behavior:
+
+```csharp demo-tabs
+new StackLayout([
+    new Badge("Tag 1").Primary(),
+    new Badge("Tag 2").Secondary(),
+    new Badge("Tag 3"),
+    new Badge("Tag 4").Primary(),
+    new Badge("Tag 5").Secondary(),
+    new Badge("Tag 6"),
+    new Badge("Tag 7").Primary(),
+    new Badge("Tag 8").Secondary(),
+    new Badge("Tag 9"),
+    new Badge("Tag 10").Primary(),
+    new Badge("Tag 11").Secondary()
+], Orientation.Horizontal, gap: 2, wrap: true)
+```
+
+## AlignSelf
+
+Override alignment for individual children using `.AlignSelf()`:
+
+```csharp demo-tabs
+new StackLayout([
+    new Badge("Top").Primary().AlignSelf(Align.TopLeft),
+    new Badge("Center").Primary().AlignSelf(Align.Center),
+    new Badge("Bottom").Primary().AlignSelf(Align.BottomRight)
+], gap: 4).Width(Size.Full())
+```
+
+## Scroll
+
+Add scrollable behavior using the `Scroll` property on a height-constrained layout:
+
+```csharp demo-tabs
+new StackLayout([
+    new Badge("Item 1"), new Badge("Item 2"), new Badge("Item 3"),
+    new Badge("Item 4"), new Badge("Item 5"), new Badge("Item 6"),
+    new Badge("Item 7"), new Badge("Item 8"), new Badge("Item 9"),
+    new Badge("Item 10"), new Badge("Item 11"), new Badge("Item 12")
+], gap: 2) { Scroll = Scroll.Vertical }.Height(Size.Units(30)).Width(Size.Full())
+```
+
 ## Advanced Features
 
 Complete example showing padding, margins, background colors, and parent padding control. Use [Thickness](../../04_ApiReference/Ivy/Thickness.md) for padding and margin, and [Colors](../../04_ApiReference/Ivy/Colors.md) for background. Alignment options are in [Align](../../04_ApiReference/Ivy/Align.md):

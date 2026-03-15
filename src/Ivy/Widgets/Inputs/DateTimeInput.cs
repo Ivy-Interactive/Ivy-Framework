@@ -227,7 +227,7 @@ public static class DateTimeInputExtensions
         if (string.IsNullOrEmpty(input.Placeholder)
             && !string.IsNullOrEmpty(name))
         {
-            input.Placeholder = Utils.LabelFor(name, type);
+            input.Placeholder = StringHelper.LabelFor(name, type);
         }
 
         return input;

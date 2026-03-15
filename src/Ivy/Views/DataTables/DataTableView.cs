@@ -19,7 +19,7 @@ public class DataTableView(
 {
     public override object? Build()
     {
-        var connection = UseDataTable(queryable, idSelector, refreshToken);
+        var connection = UseDataTable(queryable, idSelector, columns, refreshToken);
         if (connection == null)
         {
             return null;

@@ -68,7 +68,7 @@ public static class ClientExtensions
     public static void OpenUrl(this IClientProvider client, string url)
     {
         // Validate URL to prevent open redirect vulnerabilities
-        var validatedUrl = Utils.ValidateLinkUrl(url);
+        var validatedUrl = ValidationHelper.ValidateLinkUrl(url);
         if (validatedUrl == null)
         {
             throw new ArgumentException($"Invalid URL: {url}", nameof(url));
@@ -78,7 +78,7 @@ public static class ClientExtensions
     public static void OpenUrl(this IClientProvider client, Uri uri)
     {
         // Validate URL to prevent open redirect vulnerabilities
-        var validatedUrl = Utils.ValidateLinkUrl(uri.ToString());
+        var validatedUrl = ValidationHelper.ValidateLinkUrl(uri.ToString());
         if (validatedUrl == null)
         {
             throw new ArgumentException($"Invalid URL: {uri}", nameof(uri));
@@ -90,7 +90,7 @@ public static class ClientExtensions
     {
         // Validate URL to prevent open redirect vulnerabilities
         // For redirects, only allow relative paths or same-origin URLs (frontend will enforce same-origin)
-        var validatedUrl = Utils.ValidateRedirectUrl(url, allowExternal: false);
+        var validatedUrl = ValidationHelper.ValidateRedirectUrl(url, allowExternal: false);
         if (validatedUrl == null)
         {
             throw new ArgumentException($"Invalid redirect URL: {url}. Only relative paths or same-origin URLs are allowed.", nameof(url));
@@ -165,7 +165,7 @@ public static class ClientExtensions
 
     public static ToasterMessage Toast(this IClientProvider client, Exception ex, ToastVariant variant = ToastVariant.Default)
     {
-        var innerException = Utils.GetInnerMostException(ex);
+        var innerException = ExceptionHelper.GetInnerMostException(ex);
         var message = new ToasterMessage { Description = innerException.Message, Title = "Failed", Variant = variant };
         client.Sender.Send("Toast", message);
         return message;
@@ -173,7 +173,7 @@ public static class ClientExtensions
 
     public static void Error(this IClientProvider client, Exception ex)
     {
-        var innerException = Utils.GetInnerMostException(ex);
+        var innerException = ExceptionHelper.GetInnerMostException(ex);
         var notification = new ErrorMessage
         {
             Description = innerException.Message,

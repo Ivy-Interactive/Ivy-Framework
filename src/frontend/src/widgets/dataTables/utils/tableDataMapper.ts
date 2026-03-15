@@ -81,13 +81,30 @@ export function convertArrowTableToData(
       };
     });
 
+  // Precompute decimal column scales for proper Decimal128 → JS number conversion.
+  // Arrow's DecimalBigNum.valueOf(scale) needs the scale to divide the unscaled integer.
+  const decimalScales = new Map<number, number>();
+  for (let j = 0; j < table.schema.fields.length; j++) {
+    const field = table.schema.fields[j];
+    if (field.type.toString().toLowerCase().includes('decimal')) {
+      const scale = (field.type as arrow.Decimal).scale;
+      decimalScales.set(j, scale);
+    }
+  }
+
   const rows: DataRow[] = [];
   for (let i = 0; i < table.numRows; i++) {
     const values: (string | number | boolean | null)[] = [];
     for (let j = 0; j < table.numCols; j++) {
       const column = table.getChildAt(j);
       if (column) {
-        const value = column.get(i);
+        let value = column.get(i);
+        // Arrow Decimal128 values are DecimalBigNum objects containing unscaled integers.
+        // We must pass the column's scale to valueOf() so it divides correctly.
+        const scale = decimalScales.get(j);
+        if (scale !== undefined && value != null && typeof value === 'object') {
+          value = value.valueOf(scale);
+        }
         values.push(value);
       }
     }

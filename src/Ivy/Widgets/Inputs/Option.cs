@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
@@ -77,10 +75,7 @@ public static class OptionExtensions
 
         IAnyOption MakeOption(object e)
         {
-            var label = enumType.GetField(e.ToString()!)?
-                .GetCustomAttributes(typeof(DescriptionAttribute), false)
-                .Cast<DescriptionAttribute>()
-                .FirstOrDefault()?.Description ?? Utils.SplitPascalCase(e.ToString());
+            var label = ((Enum)e).GetDescription();
 
             var value = Convert.ChangeType(e, enumType);
 

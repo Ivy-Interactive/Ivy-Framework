@@ -21,6 +21,13 @@ public class AppContext
 
     public string Host { get; set; }
 
+    /// <summary>
+    /// Gets the base URL of the application (scheme + host).
+    /// Useful for constructing absolute URLs for shareable links, webhooks, OAuth callbacks, etc.
+    /// Example: "https://example.com"
+    /// </summary>
+    public string BaseUrl => $"{Scheme}://{Host}";
+
     public string AppId { get; set; }
 
     public string? NavigationAppId { get; set; }

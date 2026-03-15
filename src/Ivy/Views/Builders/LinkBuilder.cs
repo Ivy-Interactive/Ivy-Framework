@@ -15,7 +15,7 @@ public class LinkBuilder<TModel>(string? url = null, string? label = null) : IBu
         var actualUrl = url ?? value.ToString() ?? string.Empty;
 
         // Validate URL to prevent open redirect vulnerabilities
-        var validatedUrl = Utils.ValidateLinkUrl(actualUrl);
+        var validatedUrl = ValidationHelper.ValidateLinkUrl(actualUrl);
         if (validatedUrl == null)
         {
             // Invalid URL, return button with disabled state

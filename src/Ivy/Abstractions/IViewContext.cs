@@ -15,9 +15,9 @@ public interface IViewContext : IAsyncDisposable
 
     IState<T> UseState<T>(Func<T> buildInitialValue, bool buildOnChange = true);
 
-    IState<T> UseRef<T>(T? initialValue = default) => UseState<T>(initialValue, buildOnChange: false);
+    IRef<T> UseRef<T>(T? initialValue = default) => (IRef<T>)UseState<T>(initialValue, buildOnChange: false);
 
-    IState<T> UseRef<T>(Func<T> buildInitialValue) => UseState<T>(buildInitialValue, buildOnChange: false);
+    IRef<T> UseRef<T>(Func<T> buildInitialValue) => (IRef<T>)UseState<T>(buildInitialValue, buildOnChange: false);
 
     void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers);
 
