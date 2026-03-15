@@ -12,7 +12,8 @@ import { useTableScale } from './table/useTableSize';
 import { Densities } from '@/types/density';
 
 export interface TableProps
-  extends Omit<React.HTMLAttributes<HTMLTableElement>, 'size'>,
+  extends
+    Omit<React.HTMLAttributes<HTMLTableElement>, 'size'>,
     VariantProps<typeof tableSizeVariant> {}
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
@@ -87,7 +88,8 @@ const TableRow = React.forwardRef<
 TableRow.displayName = 'TableRow';
 
 export interface TableHeadProps
-  extends Omit<React.ThHTMLAttributes<HTMLTableCellElement>, 'size'>,
+  extends
+    Omit<React.ThHTMLAttributes<HTMLTableCellElement>, 'size'>,
     VariantProps<typeof tableHeadSizeVariant> {}
 
 const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
@@ -111,7 +113,8 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
 TableHead.displayName = 'TableHead';
 
 export interface TableCellProps
-  extends Omit<React.TdHTMLAttributes<HTMLTableCellElement>, 'size'>,
+  extends
+    Omit<React.TdHTMLAttributes<HTMLTableCellElement>, 'size'>,
     VariantProps<typeof tableCellSizeVariant> {}
 
 const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(

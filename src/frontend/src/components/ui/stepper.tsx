@@ -158,8 +158,7 @@ const StepperItem = React.forwardRef<HTMLDivElement, StepperItemProps>(
 StepperItem.displayName = 'StepperItem';
 
 // StepperTrigger
-interface StepperTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface StepperTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
 }
 

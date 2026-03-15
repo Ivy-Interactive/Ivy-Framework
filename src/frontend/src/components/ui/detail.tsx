@@ -13,7 +13,8 @@ import { useDetailScale } from './detail/useDetailScale';
 import { Densities } from '@/types/density';
 
 export interface DetailsProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'size'>,
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'size'>,
     VariantProps<typeof detailsSizeVariant> {}
 
 const Details = React.forwardRef<HTMLDivElement, DetailsProps>(
@@ -36,8 +37,10 @@ const Details = React.forwardRef<HTMLDivElement, DetailsProps>(
 );
 Details.displayName = 'Details';
 
-export interface DetailItemProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'size'> {
+export interface DetailItemProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'size'
+> {
   label: string;
   multiline?: boolean;
   density?: Densities;

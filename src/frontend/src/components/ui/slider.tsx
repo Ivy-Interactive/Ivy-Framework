@@ -3,8 +3,9 @@ import * as SliderPrimitive from '@radix-ui/react-slider';
 import { cn } from '@/lib/utils';
 import { Densities } from '@/types/density';
 
-interface SliderWithCurrencyProps
-  extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
+interface SliderWithCurrencyProps extends React.ComponentPropsWithoutRef<
+  typeof SliderPrimitive.Root
+> {
   currency?: string;
   density?: Densities;
 }

@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 import { inputVariant } from './input/variant';
 
 export interface InputProps
-  extends Omit<React.ComponentProps<'input'>, 'size'>,
+  extends
+    Omit<React.ComponentProps<'input'>, 'size'>,
     VariantProps<typeof inputVariant> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
