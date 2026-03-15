@@ -90,7 +90,7 @@ public class Server
             _args = _args with { Verbose = parsedVerbose };
         }
 
-        if (Environment.GetEnvironmentVariable("HOST") is { } host)
+        if (_args.Host == null && Environment.GetEnvironmentVariable("HOST") is { } host)
         {
             _args = _args with { Host = host };
         }
