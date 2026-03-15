@@ -236,8 +236,12 @@ export const widgetMap = {
   'Ivy.PieChart': React.lazy(() => import('@/widgets/charts/PieChartWidget')),
   'Ivy.AreaChart': React.lazy(() => import('@/widgets/charts/AreaChartWidget')),
   'Ivy.BarChart': React.lazy(() => import('@/widgets/charts/BarChartWidget')),
-  'Ivy.ScatterChart': React.lazy(() => import('@/widgets/charts/ScatterChartWidget')),
-  'Ivy.RadialBarChart': React.lazy(() => import('@/widgets/charts/RadialBarChartWidget')),
+  'Ivy.ScatterChart': React.lazy(
+    () => import('@/widgets/charts/ScatterChartWidget')
+  ),
+  'Ivy.RadialBarChart': React.lazy(
+    () => import('@/widgets/charts/RadialBarChartWidget')
+  ),
 
   // Effects
   'Ivy.Confetti': React.lazy(() => import('@/widgets/effects/ConfettiWidget')),

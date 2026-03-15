@@ -362,8 +362,24 @@ export const NumberRangeInputWidget = memo(
           >
             {min !== undefined && max !== undefined && (
               <>
-                <span>{formatNumber(min, formatStyle, precision, currency, noGrouping)}</span>
-                <span>{formatNumber(max, formatStyle, precision, currency, noGrouping)}</span>
+                <span>
+                  {formatNumber(
+                    min,
+                    formatStyle,
+                    precision,
+                    currency,
+                    noGrouping
+                  )}
+                </span>
+                <span>
+                  {formatNumber(
+                    max,
+                    formatStyle,
+                    precision,
+                    currency,
+                    noGrouping
+                  )}
+                </span>
               </>
             )}
           </span>

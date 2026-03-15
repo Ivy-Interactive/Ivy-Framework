@@ -46,6 +46,8 @@ public record StackLayout : WidgetBase<StackLayout>
     [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.None;
     [Prop] public Thickness BorderThickness { get; set; } = new(0);
 
+    [Prop] public Scroll Scroll { get; set; } = Scroll.None;
+
     [Prop(attached: nameof(StackLayoutExtensions.AlignSelf))] public Align?[] ChildAlignSelf { get; set; } = null!;
 }
 

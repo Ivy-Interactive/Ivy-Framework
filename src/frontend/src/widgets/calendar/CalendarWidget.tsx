@@ -159,7 +159,13 @@ interface EventPillProps {
   onDragStart?: () => void;
 }
 
-const EventPill: React.FC<EventPillProps> = ({ event, onClick, compact, draggable, onDragStart }) => {
+const EventPill: React.FC<EventPillProps> = ({
+  event,
+  onClick,
+  compact,
+  draggable,
+  onDragStart,
+}) => {
   const bgColor = event.color
     ? `var(--${event.color.toLowerCase()}, var(--primary))`
     : 'var(--primary)';
@@ -172,11 +178,15 @@ const EventPill: React.FC<EventPillProps> = ({ event, onClick, compact, draggabl
         onClick?.(event.id);
       }}
       draggable={draggable}
-      onDragStart={draggable ? (e) => {
-        e.dataTransfer.setData('text/plain', event.id);
-        e.dataTransfer.effectAllowed = 'move';
-        onDragStart?.();
-      } : undefined}
+      onDragStart={
+        draggable
+          ? e => {
+              e.dataTransfer.setData('text/plain', event.id);
+              e.dataTransfer.effectAllowed = 'move';
+              onDragStart?.();
+            }
+          : undefined
+      }
       className={cn(
         'w-full text-left rounded px-1.5 truncate cursor-pointer transition-opacity hover:opacity-80',
         compact ? 'text-[11px] py-px leading-snug' : 'text-xs py-0.5',
@@ -193,7 +203,9 @@ const EventPill: React.FC<EventPillProps> = ({ event, onClick, compact, draggabl
       ) : (
         <>
           {!compact && !event.allDay && (
-            <span className="mr-1 opacity-80">{format(event.start, 'HH:mm')}</span>
+            <span className="mr-1 opacity-80">
+              {format(event.start, 'HH:mm')}
+            </span>
           )}
           {event.title}
         </>
@@ -258,7 +270,9 @@ const MonthView: React.FC<MonthViewProps> = ({
 
   const dayNames = useMemo(() => {
     const start = startOfWeek(new Date(), { weekStartsOn: 1 });
-    return Array.from({ length: 7 }, (_, i) => format(addDays(start, i), 'EEE'));
+    return Array.from({ length: 7 }, (_, i) =>
+      format(addDays(start, i), 'EEE')
+    );
   }, []);
 
   return (
@@ -276,9 +290,15 @@ const MonthView: React.FC<MonthViewProps> = ({
       </div>
 
       {/* Weeks */}
-      <div className="grid flex-1" style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}>
+      <div
+        className="grid flex-1"
+        style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}
+      >
         {weeks.map((week, wi) => (
-          <div key={wi} className="grid grid-cols-7 border-b border-border last:border-b-0">
+          <div
+            key={wi}
+            className="grid grid-cols-7 border-b border-border last:border-b-0"
+          >
             {week.map(day => {
               const key = format(day, 'yyyy-MM-dd');
               const dayEvents = eventsByDay.get(key) || [];
@@ -296,26 +316,59 @@ const MonthView: React.FC<MonthViewProps> = ({
                   )}
                   onClick={() => {
                     const dayStart = startOfDay(day);
-                    onSelectSlot(dayStart.toISOString(), endOfDay(day).toISOString());
+                    onSelectSlot(
+                      dayStart.toISOString(),
+                      endOfDay(day).toISOString()
+                    );
                   }}
-                  onDragOver={enableDragDrop ? (e) => { e.preventDefault(); e.currentTarget.classList.add('bg-primary/10'); } : undefined}
-                  onDragLeave={enableDragDrop ? (e) => { e.currentTarget.classList.remove('bg-primary/10'); } : undefined}
-                  onDrop={enableDragDrop ? (e) => {
-                    e.preventDefault();
-                    e.currentTarget.classList.remove('bg-primary/10');
-                    const eventId = e.dataTransfer.getData('text/plain');
-                    if (eventId && onEventMove) {
-                      const droppedEvent = events.find(ev => ev.id === eventId);
-                      if (droppedEvent) {
-                        const duration = droppedEvent.end.getTime() - droppedEvent.start.getTime();
-                        const newStart = new Date(day);
-                        newStart.setHours(droppedEvent.start.getHours(), droppedEvent.start.getMinutes());
-                        const newEnd = new Date(newStart.getTime() + duration);
-                        onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
-                      }
-                    }
-                    setDraggedEventId(null);
-                  } : undefined}
+                  onDragOver={
+                    enableDragDrop
+                      ? e => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add('bg-primary/10');
+                        }
+                      : undefined
+                  }
+                  onDragLeave={
+                    enableDragDrop
+                      ? e => {
+                          e.currentTarget.classList.remove('bg-primary/10');
+                        }
+                      : undefined
+                  }
+                  onDrop={
+                    enableDragDrop
+                      ? e => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove('bg-primary/10');
+                          const eventId = e.dataTransfer.getData('text/plain');
+                          if (eventId && onEventMove) {
+                            const droppedEvent = events.find(
+                              ev => ev.id === eventId
+                            );
+                            if (droppedEvent) {
+                              const duration =
+                                droppedEvent.end.getTime() -
+                                droppedEvent.start.getTime();
+                              const newStart = new Date(day);
+                              newStart.setHours(
+                                droppedEvent.start.getHours(),
+                                droppedEvent.start.getMinutes()
+                              );
+                              const newEnd = new Date(
+                                newStart.getTime() + duration
+                              );
+                              onEventMove(
+                                eventId,
+                                newStart.toISOString(),
+                                newEnd.toISOString()
+                              );
+                            }
+                          }
+                          setDraggedEventId(null);
+                        }
+                      : undefined
+                  }
                 >
                   <div className="flex justify-end mb-0.5">
                     <span
@@ -336,7 +389,11 @@ const MonthView: React.FC<MonthViewProps> = ({
                         onClick={onEventClick}
                         compact
                         draggable={enableDragDrop}
-                        onDragStart={enableDragDrop ? () => setDraggedEventId(event.id) : undefined}
+                        onDragStart={
+                          enableDragDrop
+                            ? () => setDraggedEventId(event.id)
+                            : undefined
+                        }
                       />
                     ))}
                     {dayEvents.length > MAX_VISIBLE && (
@@ -380,10 +437,7 @@ const TimeGrid: React.FC<TimeGridProps> = ({
       const dayStart = startOfDay(day);
       const dayEnd = endOfDay(day);
       return events.filter(
-        e =>
-          !e.allDay &&
-          e.start < dayEnd &&
-          e.end > dayStart
+        e => !e.allDay && e.start < dayEnd && e.end > dayStart
       );
     },
     [events]
@@ -460,7 +514,10 @@ const TimeGrid: React.FC<TimeGridProps> = ({
 
       {/* Time grid body */}
       <div className="flex-1 overflow-y-auto">
-        <div className="flex relative" style={{ height: HOURS.length * HOUR_HEIGHT }}>
+        <div
+          className="flex relative"
+          style={{ height: HOURS.length * HOUR_HEIGHT }}
+        >
           {/* Time labels */}
           <div className="w-16 flex-shrink-0 relative">
             {HOURS.map(hour => (
@@ -503,23 +560,51 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                         slotEnd.toISOString()
                       );
                     }}
-                    onDragOver={enableDragDrop ? (e) => { e.preventDefault(); e.currentTarget.classList.add('bg-primary/10'); } : undefined}
-                    onDragLeave={enableDragDrop ? (e) => { e.currentTarget.classList.remove('bg-primary/10'); } : undefined}
-                    onDrop={enableDragDrop ? (e) => {
-                      e.preventDefault();
-                      e.currentTarget.classList.remove('bg-primary/10');
-                      const eventId = e.dataTransfer.getData('text/plain');
-                      if (eventId && onEventMove) {
-                        const droppedEvent = events.find(ev => ev.id === eventId);
-                        if (droppedEvent) {
-                          const duration = droppedEvent.end.getTime() - droppedEvent.start.getTime();
-                          const newStart = new Date(day);
-                          newStart.setHours(hour, 0, 0, 0);
-                          const newEnd = new Date(newStart.getTime() + duration);
-                          onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
-                        }
-                      }
-                    } : undefined}
+                    onDragOver={
+                      enableDragDrop
+                        ? e => {
+                            e.preventDefault();
+                            e.currentTarget.classList.add('bg-primary/10');
+                          }
+                        : undefined
+                    }
+                    onDragLeave={
+                      enableDragDrop
+                        ? e => {
+                            e.currentTarget.classList.remove('bg-primary/10');
+                          }
+                        : undefined
+                    }
+                    onDrop={
+                      enableDragDrop
+                        ? e => {
+                            e.preventDefault();
+                            e.currentTarget.classList.remove('bg-primary/10');
+                            const eventId =
+                              e.dataTransfer.getData('text/plain');
+                            if (eventId && onEventMove) {
+                              const droppedEvent = events.find(
+                                ev => ev.id === eventId
+                              );
+                              if (droppedEvent) {
+                                const duration =
+                                  droppedEvent.end.getTime() -
+                                  droppedEvent.start.getTime();
+                                const newStart = new Date(day);
+                                newStart.setHours(hour, 0, 0, 0);
+                                const newEnd = new Date(
+                                  newStart.getTime() + duration
+                                );
+                                onEventMove(
+                                  eventId,
+                                  newStart.toISOString(),
+                                  newEnd.toISOString()
+                                );
+                              }
+                            }
+                          }
+                        : undefined
+                    }
                   />
                 ))}
 
@@ -544,13 +629,17 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                     <button
                       key={event.id}
                       draggable={enableDragDrop}
-                      onDragStart={enableDragDrop ? (e) => {
-                        e.dataTransfer.setData('text/plain', event.id);
-                        e.dataTransfer.effectAllowed = 'move';
-                      } : undefined}
+                      onDragStart={
+                        enableDragDrop
+                          ? e => {
+                              e.dataTransfer.setData('text/plain', event.id);
+                              e.dataTransfer.effectAllowed = 'move';
+                            }
+                          : undefined
+                      }
                       className={cn(
-                        "absolute left-0.5 right-1 rounded px-1.5 py-0.5 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity text-left",
-                        enableDragDrop && "cursor-grab active:cursor-grabbing"
+                        'absolute left-0.5 right-1 rounded px-1.5 py-0.5 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity text-left',
+                        enableDragDrop && 'cursor-grab active:cursor-grabbing'
                       )}
                       style={{
                         top: topPx,
@@ -566,7 +655,9 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                       title={event.title}
                     >
                       {event.content ? (
-                        <div className="w-full h-full overflow-hidden">{event.content}</div>
+                        <div className="w-full h-full overflow-hidden">
+                          {event.content}
+                        </div>
                       ) : (
                         <>
                           <div className="font-medium truncate">
@@ -603,7 +694,7 @@ interface WeekViewProps {
   enableDragDrop?: boolean;
 }
 
-const WeekView: React.FC<WeekViewProps> = (props) => {
+const WeekView: React.FC<WeekViewProps> = props => {
   const days = useMemo(() => {
     const weekStart = startOfWeek(props.currentDate, { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -632,7 +723,7 @@ interface DayViewProps {
   enableDragDrop?: boolean;
 }
 
-const DayView: React.FC<DayViewProps> = (props) => {
+const DayView: React.FC<DayViewProps> = props => {
   const days = useMemo(() => [props.currentDate], [props.currentDate]);
 
   return (
@@ -760,7 +851,6 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   defaultDate,
   enableDragDrop = false,
   showToolbar = true,
-  events: _registeredEvents = [],
   width,
   height,
   slots,
@@ -782,7 +872,8 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   );
 
   const calendarEvents = useCalendarData(slots, widgetNodeChildren);
-  const { handleEventClick, handleSelectSlot, handleEventMove } = useCalendarHandlers(id);
+  const { handleEventClick, handleSelectSlot, handleEventMove } =
+    useCalendarHandlers(id);
 
   const onNavigate = useCallback(
     (action: 'prev' | 'next' | 'today') => {
