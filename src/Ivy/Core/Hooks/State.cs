@@ -1,28 +1,9 @@
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 
 namespace Ivy.Core.Hooks;
 
-public interface IAnyState : IDisposable, IEffectTriggerConvertible
-{
-    public IDisposable SubscribeAny(Action action);
-
-    public IDisposable SubscribeAny(Action<object?> action);
-
-    public Type GetStateType();
-}
-
-public interface IState<T> : IObservable<T>, IAnyState
-{
-    public T Value { get; set; }
-
-    public T Set(T value);
-
-    public T Set(Func<T, T> setter);
-
-    public T Reset();
-}
-
-public class State<T> : IState<T>
+public class State<T> : IState<T>, IRef<T>
 {
     private T _value;
     private readonly Subject<T> _subject = new();
@@ -62,6 +43,7 @@ public class State<T> : IState<T>
         }
     }
 
+    [OverloadResolutionPriority(1)]
     public T Set(T value)
     {
         Value = value;

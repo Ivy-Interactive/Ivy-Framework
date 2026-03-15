@@ -1,3 +1,3 @@
 export { Toggle } from './toggle';
-export { toggleVariants } from './toggle-variants';
+export { toggleVariant } from './toggle-variant';
 export { ToggleGroup, ToggleGroupItem } from './toggle-group';

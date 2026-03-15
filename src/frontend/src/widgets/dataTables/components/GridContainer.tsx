@@ -12,7 +12,7 @@ import DataEditor, {
   Theme,
 } from '@glideapps/glide-data-grid';
 import { tableStyles } from '../styles/style';
-import { RowActionButtons } from '../dataTableRowAction/index';
+import { RowActionButtons } from '../dataTableRowAction/rowActionButtons';
 import { MenuItem } from '@/types/widgets';
 
 interface GridContainerProps {

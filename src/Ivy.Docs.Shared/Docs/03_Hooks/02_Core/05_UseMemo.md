@@ -23,7 +23,7 @@ Memoization in Ivy provides several powerful tools to optimize performance:
 - **[`UseCallback`](./06_UseCallback.md)** - Memoizes callback functions to prevent unnecessary re-renders.
 - **`IMemoized`** - Interface for component-level memoization
 
-These [hooks](../01_RulesOfHooks.md) work similarly to their React counterparts (`useMemo`, `useCallback`) but are designed specifically for Ivy's architecture.
+These [hooks](../02_RulesOfHooks.md) work similarly to their React counterparts (`useMemo`, `useCallback`) but are designed specifically for Ivy's architecture.
 
 ## Basic Usage
 

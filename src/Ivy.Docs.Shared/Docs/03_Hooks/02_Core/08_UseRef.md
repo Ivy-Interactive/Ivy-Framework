@@ -41,7 +41,7 @@ public class BasicRefDemo : ViewBase
     
     public override object? Build()
     {
-        var renderCount = this.UseRef(() => new Counter());
+        var renderCount = UseRef(() => new Counter());
         var forceUpdate = UseState(0);
         
         // Increment without triggering re-render
@@ -143,8 +143,8 @@ public class PreviousValueDemo : ViewBase
     public override object? Build()
     {
         var count = UseState(0);
-        var previousValue = this.UseRef(() => new PreviousValue());
-        var renderCount = this.UseRef(() => new Counter());
+        var previousValue = UseRef(() => new PreviousValue());
+        var renderCount = UseRef(() => new Counter());
         
         renderCount.Value.Value++;
         
@@ -192,7 +192,7 @@ public class MutableReferenceDemo : ViewBase
     public override object? Build()
     {
         var count = UseState(0);
-        var tracker = this.UseRef(() => new RenderTracker());
+        var tracker = UseRef(() => new RenderTracker());
         
         // Mutate ref value without triggering re-render
         tracker.Value.Count++;

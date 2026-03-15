@@ -43,16 +43,7 @@
     <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
   </ItemGroup>
 
-  <!-- Embed the built frontend assets as resources -->
-  <ItemGroup>
-    <EmbeddedResource Include="frontend\dist\**\*" />
-  </ItemGroup>
-  
-  <!-- Build frontend before packing -->
-  <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend\package.json')">
-    <Exec Command="npm install" WorkingDirectory="frontend" />
-    <Exec Command="npm run build" WorkingDirectory="frontend" />
-  </Target>
+  <Import Project="..\..\Ivy\Build\Ivy.ExternalWidget.targets" />
 
   <ItemGroup>
     <Compile Remove=".samples\**\*.cs" />

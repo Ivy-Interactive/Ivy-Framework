@@ -14,7 +14,7 @@ searchHints:
 Add precise spacing between layout elements for fine-tuned control over alignment and visual balance in your [interfaces](../../01_Onboarding/02_Concepts/02_Views.md).
 </Ingress>
 
-The `Spacer` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates empty space between elements in your layout. It's useful for fine-tuning spacing and alignment.
+The `Spacer` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) creates empty space between elements in your layout. By default, it grows to fill available space in the parent layout's direction, making it easy to push elements apart. It's useful for fine-tuning spacing and alignment.
 
 ## Basic Usage
 
@@ -36,7 +36,7 @@ public class BasicSpacerView : ViewBase
 
 ### Flexible Spacing
 
-Use `Spacer` with `Size.Grow()` to push elements to opposite sides:
+A bare `Spacer` grows to fill available space by default, automatically pushing elements apart:
 
 ```csharp demo-tabs
 public class FlexibleSpacerView : ViewBase
@@ -45,15 +45,14 @@ public class FlexibleSpacerView : ViewBase
     {
         return Layout.Horizontal().Gap(4)
             | new Button("Left Button").Variant(ButtonVariant.Outline)
-            | new Spacer().Width(Size.Grow())
+            | new Spacer()
             | new Button("Right Button").Variant(ButtonVariant.Primary);
     }
 }
 ```
 
 <Callout Type="tip">
-The `Spacer().Width(Size.Grow())` pattern is essential for creating responsive layouts. It makes the spacer take up all available horizontal space, effectively pushing elements to opposite sides. See [Size](../../04_ApiReference/IvyShared/Size.md) for `Size.Grow()` and other sizing options.
-Without `Size.Grow()`, the spacer would only take up minimal space, and elements wouldn't be pushed to the edges.
+The `Spacer` defaults to grow behavior (`flex-grow: 1`), making it take up all available space in the parent layout's direction. This effectively pushes sibling elements to opposite sides. See [Size](../../04_ApiReference/Ivy/Size.md) for other sizing options like explicit widths or heights.
 </Callout>
 
 ### Header Layout with Spacing
@@ -72,7 +71,7 @@ public class HeaderSpacerView : ViewBase
                 | new Button("Home").Variant(ButtonVariant.Ghost)
                 | new Button("About").Variant(ButtonVariant.Ghost)
                 | new Button("Contact").Variant(ButtonVariant.Ghost)
-                | new Spacer().Width(60)
+                | new Spacer().Width(Size.Units(60))
                 | new Button("Login").Variant(ButtonVariant.Outline)
                 | new Button("Sign Up").Variant(ButtonVariant.Primary)
         );
@@ -100,9 +99,9 @@ public class HeightSpacerView : ViewBase
     {
         return Layout.Vertical().Gap(2)
             | new Card("Top Section")
-            | new Spacer().Height(2)
+            | new Spacer().Height(Size.Units(2))
             | new Card("Middle Section")
-            | new Spacer().Height(10)
+            | new Spacer().Height(Size.Units(10))
             | new Card("Bottom Section");
     }
 }
@@ -132,13 +131,13 @@ public class FormSpacerView : ViewBase
                     | new Separator()
                     | Text.Label("Name:")
                     | name.ToTextInput().Placeholder("Enter your name")
-                    | new Spacer().Height(4)
+                    | new Spacer().Height(Size.Units(4))
                     | Text.Label("Email:")
                     | email.ToTextInput().Placeholder("Enter your email")
-                    | new Spacer().Height(4)
+                    | new Spacer().Height(Size.Units(4))
                     | Text.Label("Message:")
-                    | message.ToTextAreaInput().Placeholder("Enter your message")
-                    | new Spacer().Height(10)
+                    | message.ToTextareaInput().Placeholder("Enter your message")
+                    | new Spacer().Height(Size.Units(10))
                     | (Layout.Horizontal().Gap(3)
                         | new Button("Cancel").Variant(ButtonVariant.Outline)
                         | new Button("Submit").Variant(ButtonVariant.Primary))
@@ -149,7 +148,7 @@ public class FormSpacerView : ViewBase
 
 <WidgetDocs Type="Ivy.Spacer" ExtensionTypes="Ivy.SpacerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Spacer.cs"/>
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -171,13 +170,13 @@ public class DashboardSpacerView : ViewBase
                     | Text.P("Total Users").Small()
                     | Text.Label("12.3K").Color(Colors.Primary)
             )
-            | new Spacer().Width(Size.Grow())
+            | new Spacer()
             | new Card(
                 Layout.Vertical().Gap(2)
                     | Text.P("Revenue").Small()
                     | Text.Label("$54K").Color(Colors.Green)
             )
-            | new Spacer().Width(Size.Grow())
+            | new Spacer()
             | new Card(
                 Layout.Vertical().Gap(2)
                     | Text.P("Growth").Small()
@@ -186,17 +185,42 @@ public class DashboardSpacerView : ViewBase
             
         var actionBar = Layout.Horizontal().Gap(3)
             | new Button("Export Data").Icon(Icons.Download).Variant(ButtonVariant.Outline)
-            | new Spacer().Width(Size.Grow())
+            | new Spacer()
             | new Button("Refresh").Icon(Icons.RefreshCw).Variant(ButtonVariant.Ghost)
             | new Button("Settings").Icon(Icons.Settings).Variant(ButtonVariant.Ghost);
             
         return Layout.Vertical().Gap(4)
             | statsRow
-            | new Spacer().Height(2)
+            | new Spacer().Height(Size.Units(2))
             | actionBar
             | new Card("Main Content Area").Height(Size.Units(50));
     }
 }
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I create a horizontal layout with items spaced between?
+</Summary>
+<Body>
+
+Instead, use a `Spacer` with `Size.Grow()` to push items apart:
+
+```csharp
+Layout.Horizontal().Align(Align.Center)
+    | Text.H1("Title")
+    | new Spacer().Width(Size.Grow())
+    | new Button("Action", handler)
+```
+
+The `Spacer` takes up all remaining space, pushing elements before it to the left and elements after it to the right. You can also use `.Right()` on the layout to align all children to the right:
+
+```csharp
+Layout.Horizontal().Right()
+    | new Button("Right-aligned", handler)
 ```
 
 </Body>

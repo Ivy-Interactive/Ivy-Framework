@@ -1,6 +1,7 @@
-namespace Ivy.Views.Tables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
-public static class TableExtensions
+public static partial class TableExtensions
 {
     public static TableBuilder<TModel> ToTable<TModel>(this IEnumerable<TModel> records)
     {

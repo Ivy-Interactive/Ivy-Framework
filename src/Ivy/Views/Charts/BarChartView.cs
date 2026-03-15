@@ -3,13 +3,12 @@ using System.Collections.Immutable;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using Ivy.Charts;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views.Charts;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public enum BarChartStyles
 {
@@ -44,7 +43,7 @@ public class DefaultBarChartStyle<TSource> : IBarChartStyle<TSource>
             .YAxis(new YAxis())
             .XAxis(new XAxis(dimension.Name).TickLine(false).AxisLine(false).MinTickGap(10))
             .CartesianGrid(new CartesianGrid().Horizontal())
-            .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+            .Tooltip(new ChartTooltip().Animated(true))
             .Legend(new Legend()
                 .Layout(Legend.Layouts.Horizontal)
                 .Align(Legend.Alignments.Center)
@@ -69,7 +68,7 @@ public class DashboardBarChartStyle<TSource> : IBarChartStyle<TSource>
                 .XAxis(new XAxis().Type(AxisTypes.Number).Hide())
                 .YAxis(new YAxis(dimension.Name).Type(AxisTypes.Category).Hide())
                 .CartesianGrid(new CartesianGrid().Vertical())
-                .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+                .Tooltip(new ChartTooltip().Animated(true))
         ;
     }
 }
@@ -87,6 +86,8 @@ public class BarChartBuilder<TSource>(
     private Func<Toolbox, Toolbox>? _toolboxFactory;
     private Expression<Func<TSource, object>>? _sortSelector;
     private SortOrder _sortOrder = SortOrder.None;
+    private Size? _height;
+    private Size? _width;
 
     public override object? Build()
     {
@@ -152,7 +153,26 @@ public class BarChartBuilder<TSource>(
             configuredChart = configuredChart.Toolbox(_toolboxFactory(baseToolbox));
         }
 
-        return polish?.Invoke(configuredChart) ?? configuredChart;
+        var result = polish?.Invoke(configuredChart) ?? configuredChart;
+
+        if (_height is not null)
+            result = result with { Height = _height };
+        if (_width is not null)
+            result = result with { Width = _width };
+
+        return result;
+    }
+
+    public BarChartBuilder<TSource> Height(Size size)
+    {
+        _height = size;
+        return this;
+    }
+
+    public BarChartBuilder<TSource> Width(Size size)
+    {
+        _width = size;
+        return this;
     }
 
     public BarChartBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
@@ -203,7 +223,7 @@ public class BarChartBuilder<TSource>(
     }
 }
 
-public static class BarChartExtensions
+public static partial class BarChartExtensions
 {
     public static BarChartBuilder<TSource> ToBarChart<TSource>(
     this IEnumerable<TSource> data,

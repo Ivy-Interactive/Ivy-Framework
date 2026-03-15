@@ -1,7 +1,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Ivy.Protos.DataTable;
 using Ivy.Test.DataTables.TestHelpers;
-using Ivy.Views.DataTables;
+using ProtoSortOrder = Ivy.Protos.DataTable.SortOrder;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
@@ -168,7 +168,7 @@ public class QueryProcessorTests
             Limit = 100,
             Sort =
             {
-                new SortOrder
+                new ProtoSortOrder
                 {
                     Column = "Price",
                     Direction = Ivy.Protos.DataTable.SortDirection.Desc
@@ -210,12 +210,12 @@ public class QueryProcessorTests
             Limit = 100,
             Sort =
             {
-                new SortOrder
+                new ProtoSortOrder
                 {
                     Column = "Department",
                     Direction = Ivy.Protos.DataTable.SortDirection.Asc
                 },
-                new SortOrder
+                new ProtoSortOrder
                 {
                     Column = "Age",
                     Direction = Ivy.Protos.DataTable.SortDirection.Desc

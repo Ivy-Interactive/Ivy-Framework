@@ -3,15 +3,17 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
 import { X, Check } from 'lucide-react';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import {
-  colorInputVariants,
-  colorInputPickerVariants,
-} from '@/components/ui/input/color-input-variants';
-import { Scales } from '@/types/scale';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
+  colorInputVariant,
+  colorInputPickerVariant,
+} from '@/components/ui/input/color-input-variant';
+import { Densities } from '@/types/density';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
+
+const EMPTY_ARRAY: never[] = [];
 
 interface ColorInputWidgetProps {
   id: string;
@@ -23,8 +25,10 @@ interface ColorInputWidgetProps {
   nullable?: boolean;
   events?: string[];
   variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch';
-  scale?: Scales;
+  density?: Densities;
   foreground?: boolean;
+  ghost?: boolean;
+  allowAlpha?: boolean;
 }
 
 // Hoisted color map for backend Colors enum
@@ -119,6 +123,159 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
   );
 };
 
+function parseHexAlpha(hex: string): { rgb: string; alpha: number } {
+  if (!hex || !hex.startsWith('#'))
+    return { rgb: hex || '#000000', alpha: 255 };
+  const clean = hex.slice(1);
+  if (clean.length === 8) {
+    return {
+      rgb: '#' + clean.slice(0, 6),
+      alpha: parseInt(clean.slice(6, 8), 16),
+    };
+  }
+  return { rgb: hex.length === 7 ? hex : '#000000', alpha: 255 };
+}
+
+function combineHexAlpha(rgb: string, alpha: number): string {
+  const base = rgb.startsWith('#') ? rgb : '#' + rgb;
+  const hex6 = base.length === 7 ? base : '#000000';
+  if (alpha >= 255) return hex6; // fully opaque → keep 6-char hex
+  const aa = Math.max(0, Math.min(255, alpha)).toString(16).padStart(2, '0');
+  return hex6 + aa;
+}
+
+interface AlphaSliderProps {
+  color: string;
+  alpha: number;
+  onChange: (alpha: number) => void;
+  disabled?: boolean;
+  density?: Densities;
+}
+
+const AlphaSlider: React.FC<AlphaSliderProps> = ({
+  color,
+  alpha,
+  onChange,
+  disabled = false,
+  density = Densities.Medium,
+}) => {
+  const [localAlpha, setLocalAlpha] = useState<number | null>(null);
+  if (localAlpha !== null && alpha === localAlpha) {
+    setLocalAlpha(null);
+  }
+  const displayAlpha = localAlpha ?? alpha;
+  const height =
+    density === Densities.Small ? 24 : density === Densities.Large ? 36 : 30;
+  const percentage = Math.round((displayAlpha / 255) * 100);
+
+  const gradientStyle: React.CSSProperties = useMemo(
+    () => ({
+      background: `linear-gradient(to right, transparent, ${color})`,
+    }),
+    [color]
+  );
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalAlpha(Number(e.target.value));
+  };
+
+  const handleCommit = () => {
+    if (localAlpha !== null) {
+      onChange(localAlpha);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <div
+        className={cn(
+          'relative rounded-md overflow-hidden border border-input',
+          disabled && 'opacity-50 cursor-not-allowed'
+        )}
+        style={{ width: 100, height }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              'repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)',
+            backgroundSize: '12px 12px',
+          }}
+        />
+        <div className="absolute inset-0" style={gradientStyle} />
+        <input
+          type="range"
+          min={0}
+          max={255}
+          value={displayAlpha}
+          disabled={disabled}
+          onChange={handleInput}
+          onPointerUp={handleCommit}
+          onKeyUp={handleCommit}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+          aria-label={`Opacity: ${percentage}%`}
+          title={`${percentage}%`}
+        />
+        <div
+          className="absolute top-0 bottom-0 w-1 bg-white border border-foreground/40 rounded-sm pointer-events-none"
+          style={{ left: `calc(${(displayAlpha / 255) * 100}% - 2px)` }}
+        />
+      </div>
+      <span className="text-xs text-muted-foreground w-8 text-right tabular-nums">
+        {percentage}%
+      </span>
+    </div>
+  );
+};
+
+interface CustomColorPickerProps {
+  density: Densities;
+  disabled: boolean;
+  invalid?: string;
+  displayColor: string;
+  actualColor: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const CustomColorPicker: React.FC<CustomColorPickerProps> = ({
+  density,
+  disabled,
+  invalid,
+  displayColor,
+  actualColor,
+  onChange,
+}) => (
+  <div
+    className={cn(
+      colorInputPickerVariant({ density }),
+      'relative shrink-0 rounded-md overflow-hidden bg-transparent border',
+      disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+      invalid ? inputStyles.invalidInput : 'border-input shadow-sm'
+    )}
+  >
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        backgroundImage:
+          'repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)',
+        backgroundSize: '12px 12px',
+      }}
+    />
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{ backgroundColor: actualColor || 'transparent' }}
+    />
+    <input
+      type="color"
+      value={displayColor}
+      onChange={onChange}
+      disabled={disabled}
+      title="Choose color"
+      className="absolute w-[200%] h-[200%] top-[-50%] left-[-50%] opacity-0 cursor-pointer disabled:cursor-not-allowed"
+    />
+  </div>
+);
+
 export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   id,
   value,
@@ -126,9 +283,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   invalid,
   placeholder,
   nullable = false,
-  events = [],
+  events = EMPTY_ARRAY,
   variant = 'TextAndPicker',
-  scale = Scales.Medium,
+  density = Densities.Medium,
+  ghost = false,
+  allowAlpha = false,
 }) => {
   const eventHandler = useEventHandler();
   // Use derived state for display and input values
@@ -146,13 +305,25 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
 
   /**
    * Converts various color formats to hex.
-   * Supported formats: hex (#rrggbb), rgb(), named colors
+   * Supported formats: hex (#rrggbb / #rrggbbaa), rgb(), rgba(), named colors
    * Unsupported formats: oklch() - returns fallback color (#000000)
    */
   const convertToHex = (colorValue: string): string => {
     if (!colorValue) return '';
     if (colorValue.startsWith('#')) {
       return colorValue;
+    }
+    const rgbaMatch = colorValue.match(
+      /rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/
+    );
+    if (rgbaMatch) {
+      const r = parseInt(rgbaMatch[1]);
+      const g = parseInt(rgbaMatch[2]);
+      const b = parseInt(rgbaMatch[3]);
+      const a = Math.round(parseFloat(rgbaMatch[4]) * 255);
+      const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      if (a < 255) return hex + a.toString(16).padStart(2, '0');
+      return hex;
     }
     const rgbMatch = colorValue.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
     if (rgbMatch) {
@@ -214,12 +385,28 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     if (!displayValue) return '#000000';
     const hexValue = convertToHex(displayValue);
     if (hexValue.startsWith('var(')) return '#000000';
+    if (hexValue.startsWith('#') && hexValue.length === 9) {
+      return hexValue.slice(0, 7);
+    }
     return hexValue.startsWith('#') ? hexValue : '#000000';
   };
 
+  const currentAlpha = displayValue
+    ? parseHexAlpha(convertToHex(displayValue)).alpha
+    : 255;
+
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    eventHandler('OnChange', id, [newValue]);
+    const newRGB = e.target.value;
+    if (allowAlpha) {
+      eventHandler('OnChange', id, [combineHexAlpha(newRGB, currentAlpha)]);
+    } else {
+      eventHandler('OnChange', id, [newRGB]);
+    }
+  };
+
+  const handleAlphaChange = (newAlpha: number) => {
+    const baseColor = getDisplayColor();
+    eventHandler('OnChange', id, [combineHexAlpha(baseColor, newAlpha)]);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -254,11 +441,15 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
-            placeholder={placeholder || 'Enter color'}
+            placeholder={
+              placeholder ||
+              (allowAlpha ? 'Enter color (e.g. #FF0000CC)' : 'Enter color')
+            }
             disabled={disabled}
             className={cn(
-              colorInputVariants({ scale }),
-              'border-none shadow-none focus-visible:ring-0',
+              colorInputVariant({ density }),
+              ghost &&
+                'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
               invalid && inputStyles.invalidInput,
               (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
             )}
@@ -287,6 +478,15 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             </div>
           )}
         </div>
+        {allowAlpha && (
+          <AlphaSlider
+            color={getDisplayColor()}
+            alpha={currentAlpha}
+            onChange={handleAlphaChange}
+            disabled={disabled}
+            density={density}
+          />
+        )}
       </div>
     );
   }
@@ -311,20 +511,23 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   if (variant === 'Picker') {
     return (
       <div className="flex items-center space-x-2">
-        <div className="relative">
-          <input
-            type="color"
-            value={getDisplayColor()}
-            onChange={handleColorChange}
+        <CustomColorPicker
+          density={density}
+          disabled={disabled}
+          invalid={invalid}
+          displayColor={getDisplayColor()}
+          actualColor={convertToHex(displayValue)}
+          onChange={handleColorChange}
+        />
+        {allowAlpha && (
+          <AlphaSlider
+            color={getDisplayColor()}
+            alpha={currentAlpha}
+            onChange={handleAlphaChange}
             disabled={disabled}
-            className={cn(
-              colorInputPickerVariants({ scale }),
-              'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
-              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-              invalid && inputStyles.invalidInput
-            )}
+            density={density}
           />
-        </div>
+        )}
       </div>
     );
   }
@@ -332,20 +535,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   // Default: TextAndPicker
   return (
     <div className="flex items-center space-x-2">
-      <div className="relative">
-        <input
-          type="color"
-          value={getDisplayColor()}
-          onChange={handleColorChange}
-          disabled={disabled}
-          className={cn(
-            colorInputPickerVariants({ scale }),
-            'p-0 rounded-md bg-transparent border-none shadow-none focus:outline-none',
-            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-            invalid && inputStyles.invalidInput
-          )}
-        />
-      </div>
+      <CustomColorPicker
+        density={density}
+        disabled={disabled}
+        invalid={invalid}
+        displayColor={getDisplayColor()}
+        actualColor={convertToHex(displayValue)}
+        onChange={handleColorChange}
+      />
       <div className="relative">
         <Input
           type="text"
@@ -353,11 +550,15 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
-          placeholder={placeholder || 'Enter color'}
+          placeholder={
+            placeholder ||
+            (allowAlpha ? 'Enter color (e.g. #FF0000CC)' : 'Enter color')
+          }
           disabled={disabled}
           className={cn(
-            colorInputVariants({ scale }),
-            'border-none shadow-none focus-visible:ring-0',
+            colorInputVariant({ density }),
+            ghost &&
+              'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
             invalid && inputStyles.invalidInput,
             (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
           )}
@@ -379,12 +580,21 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                 onClick={handleClear}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className={xIconVariants({ scale })} />
+                <X className={xIconVariant({ density })} />
               </button>
             )}
           </div>
         )}
       </div>
+      {allowAlpha && (
+        <AlphaSlider
+          color={getDisplayColor()}
+          alpha={currentAlpha}
+          onChange={handleAlphaChange}
+          disabled={disabled}
+          density={density}
+        />
+      )}
     </div>
   );
 };

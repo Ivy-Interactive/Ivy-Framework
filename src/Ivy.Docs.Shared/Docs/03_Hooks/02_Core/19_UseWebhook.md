@@ -6,6 +6,8 @@ searchHints:
   - api-endpoint
   - external-callback
   - http-handler
+  - base-url
+  - server-url
 imports:
   - Ivy.Core.Hooks
 ---
@@ -13,12 +15,12 @@ imports:
 # UseWebhook
 
 <Ingress>
-The `UseWebhook` [hook](../01_RulesOfHooks.md) creates HTTP endpoints that can be called from external systems, enabling integration with third-party services, webhooks, and external callbacks.
+The `UseWebhook` [hook](../02_RulesOfHooks.md) creates HTTP endpoints that can be called from external systems, enabling integration with third-party services, webhooks, and external callbacks.
 </Ingress>
 
 ## Overview
 
-`UseWebhook` allows your components to define and handle HTTP endpoints dynamically. It is essential for:
+`UseWebhook` allows your components to define and handle HTTP endpoints dynamically. All standard HTTP methods are supported (GET, POST, PUT, DELETE, PATCH). It is essential for:
 
 - **Third-Party Integrations**: Receiving webhooks from Stripe, Slack, GitHub, etc.
 - **Asynchronous Workflows**: Triggering background jobs or state updates from external events.
@@ -73,7 +75,7 @@ sequenceDiagram
     
     Note over Component,Endpoint: Component renders with webhook URL
     
-    External->>Endpoint: HTTP POST /ivy/webhook/{id}
+    External->>Endpoint: HTTP Request /ivy/webhook/{id}
     Endpoint->>Registry: Lookup handler by ID
     Registry->>Handler: Execute handler(request)
     Handler->>State: Update state (e.g., counter.Set())
@@ -105,6 +107,37 @@ sequenceDiagram
 - **Update state safely** - State updates from handlers are automatically thread-safe
 - **Keep handlers fast** - Complete quickly and queue heavy work for background processing
 - **Cleanup is automatic** - Webhooks are automatically unregistered when components unmount
+
+## Faq
+
+### How do I get the current base URL or server URL in Ivy?
+
+**Recommended:** Use `AppContext.BaseUrl` via `UseService`:
+
+```csharp
+var appContext = UseService<AppContext>();
+var baseUrl = appContext.BaseUrl; // e.g., "https://localhost:5001"
+```
+
+This works in all rendering contexts including WebSocket rendering where `IHttpContextAccessor` is not available.
+
+**Alternative:** If you already have a webhook, `WebhookEndpoint` also exposes `BaseUrl`:
+
+```csharp
+var webhook = UseWebhook("my-hook", async ctx => { });
+var baseUrl = webhook.BaseUrl; // e.g., "https://localhost:5001"
+var fullUrl = webhook.GetUri(); // Full endpoint URL
+```
+
+Note: `IClientProvider` does NOT have a `BaseUrl` property. Do not attempt to use it for URL construction.
+
+### Can I call my webhook URL from server-side code (HttpClient)?
+
+No. Webhook URLs include a `state` query parameter that Ivy uses internally for session correlation. Making a server-side `HttpClient` request to a webhook URL will fail with a 400 error because the `state` parameter won't be present or valid.
+
+Webhooks are designed to be called by **external clients** (browsers, third-party services, cURL). The `state` parameter is automatically included in the URL returned by `WebhookEndpoint.GetUri()`.
+
+If you need to test a webhook from within your app, use `client.OpenUrl(webhook.GetUri().ToString())` to open the webhook URL in the user's browser (which will include the `state` parameter), or display the full URL so the user can test it externally with cURL or Postman.
 
 ## See Also
 

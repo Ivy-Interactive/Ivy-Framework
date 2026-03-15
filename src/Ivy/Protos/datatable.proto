@@ -21,6 +21,7 @@ message DataTableQuery {
   repeated Aggregation aggregations = 6; 
   string connectionId = 7; 
   string sourceId = 8;
+  string version_token = 9;
 }
 
 message SortOrder {

@@ -1,15 +1,11 @@
 using Ivy;
 using Ivy.Auth.Supabase;
-using Ivy.Chrome;
 
 var server = new Server();
 
 server.UseHotReload();
 
-server.UseAuth<SupabaseAuthProvider>(auth => auth
-    .UseEmailPassword()
-    .UseGoogle());
-
+server.AddConnectionsFromAssembly();
 server.AddAppsFromAssembly();
 
 var settings = new ChromeSettings()

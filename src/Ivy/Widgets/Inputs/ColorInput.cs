@@ -4,13 +4,11 @@ using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum ColorInputs
+public enum ColorInputVariant
 {
     Text,
     Picker,
@@ -20,7 +18,7 @@ public enum ColorInputs
 
 public interface IAnyColorInput : IAnyInput
 {
-    public ColorInputs Variant { get; set; }
+    public ColorInputVariant Variant { get; set; }
 }
 
 public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInput
@@ -35,9 +33,12 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     [Prop] public bool? Foreground { get; set; }
 
-    [Prop] public ColorInputs Variant { get; set; } = ColorInputs.TextAndPicker;
+    [Prop] public bool Ghost { get; set; }
+    [Prop] public bool AllowAlpha { get; set; }
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Prop] public ColorInputVariant Variant { get; set; } = ColorInputVariant.TextAndPicker;
+
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [
         typeof(string),
@@ -48,30 +49,30 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
 {
     [OverloadResolutionPriority(1)]
-    public ColorInput(IAnyState state, string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
+    public ColorInput(IAnyState state, string? placeholder = null, bool disabled = false, ColorInputVariant variant = ColorInputVariant.TextAndPicker)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TColor>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
-    public ColorInput(TColor value, Func<Event<IInput<TColor>, TColor>, ValueTask> onChange, string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
+    public ColorInput(TColor value, Func<Event<IInput<TColor>, TColor>, ValueTask> onChange, string? placeholder = null, bool disabled = false, ColorInputVariant variant = ColorInputVariant.TextAndPicker)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange;
+        OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public ColorInput(TColor value, Action<Event<IInput<TColor>, TColor>> onChange, string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
+    public ColorInput(TColor value, Action<Event<IInput<TColor>, TColor>> onChange, string? placeholder = null, bool disabled = false, ColorInputVariant variant = ColorInputVariant.TextAndPicker)
         : this(placeholder, disabled, variant)
     {
-        OnChange = e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
     }
 
-    public ColorInput(string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
+    public ColorInput(string? placeholder = null, bool disabled = false, ColorInputVariant variant = ColorInputVariant.TextAndPicker)
     {
         Disabled = disabled;
         Placeholder = placeholder;
@@ -80,9 +81,9 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
 
     internal ColorInput() { }
 
-    [Prop] public TColor Value { get; } = default!;
+    [Prop] public TColor Value { get; init; } = default!;
 
-    [Event] public Func<Event<IInput<TColor>, TColor>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TColor>, TColor>>? OnChange { get; }
 }
 
 /// <summary>
@@ -91,23 +92,23 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
 public record ColorInput : ColorInput<string>
 {
     [OverloadResolutionPriority(1)]
-    public ColorInput(IAnyState state, string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
+    public ColorInput(IAnyState state, string? placeholder = null, bool disabled = false, ColorInputVariant variant = ColorInputVariant.TextAndPicker)
         : base(state, placeholder, disabled, variant)
     {
     }
 
     [OverloadResolutionPriority(1)]
-    public ColorInput(string value, Func<Event<IInput<string>, string>, ValueTask> onChange, string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
+    public ColorInput(string value, Func<Event<IInput<string>, string>, ValueTask> onChange, string? placeholder = null, bool disabled = false, ColorInputVariant variant = ColorInputVariant.TextAndPicker)
         : base(value, onChange, placeholder, disabled, variant)
     {
     }
 
-    public ColorInput(string value, Action<Event<IInput<string>, string>> onChange, string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
+    public ColorInput(string value, Action<Event<IInput<string>, string>> onChange, string? placeholder = null, bool disabled = false, ColorInputVariant variant = ColorInputVariant.TextAndPicker)
         : base(value, onChange, placeholder, disabled, variant)
     {
     }
 
-    public ColorInput(string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
+    public ColorInput(string? placeholder = null, bool disabled = false, ColorInputVariant variant = ColorInputVariant.TextAndPicker)
         : base(placeholder, disabled, variant)
     {
     }
@@ -133,11 +134,11 @@ public static class ColorInputExtensions
         return "Invalid color format";
     }
 
-    public static ColorInputBase ToColorInput(this IAnyState state, string? placeholder = null, bool disabled = false, ColorInputs? variant = null)
+    public static ColorInputBase ToColorInput(this IAnyState state, string? placeholder = null, bool disabled = false, ColorInputVariant? variant = null)
     {
         var type = state.GetStateType();
         var underlyingType = System.Nullable.GetUnderlyingType(type) ?? type;
-        var effectiveVariant = variant ?? (underlyingType == typeof(Colors) ? ColorInputs.Swatch : ColorInputs.TextAndPicker);
+        var effectiveVariant = variant ?? (underlyingType == typeof(Colors) ? ColorInputVariant.Swatch : ColorInputVariant.TextAndPicker);
 
         Type genericType = typeof(ColorInput<>).MakeGenericType(type);
         ColorInputBase input = (ColorInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, effectiveVariant)!;
@@ -173,7 +174,7 @@ public static class ColorInputExtensions
         return widget with { Nullable = nullable ?? true };
     }
 
-    public static ColorInputBase Variant(this ColorInputBase widget, ColorInputs variant)
+    public static ColorInputBase Variant(this ColorInputBase widget, ColorInputVariant variant)
     {
         return widget with { Variant = variant };
     }
@@ -183,19 +184,31 @@ public static class ColorInputExtensions
         return widget with { Foreground = foreground };
     }
 
+    public static ColorInputBase Ghost(this ColorInputBase widget, bool ghost = true)
+    {
+        return widget with { Ghost = ghost };
+    }
+
+    public static ColorInputBase AllowAlpha(this ColorInputBase widget, bool allowAlpha = true)
+    {
+        return widget with { AllowAlpha = allowAlpha };
+    }
+
     [OverloadResolutionPriority(1)]
-    public static ColorInputBase HandleBlur(this ColorInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static ColorInputBase OnBlur(this ColorInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static ColorInputBase HandleBlur(this ColorInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static ColorInputBase OnBlur(this ColorInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static ColorInputBase HandleBlur(this ColorInputBase widget, Action onBlur)
+    public static ColorInputBase OnBlur(this ColorInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+
 }

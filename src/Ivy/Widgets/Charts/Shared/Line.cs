@@ -1,14 +1,13 @@
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
-namespace Ivy.Charts;
+namespace Ivy;
 
 public record Line
 {
     public Line(string dataKey, string? name = null)
     {
         DataKey = dataKey;
-        Name = name ?? Utils.SplitPascalCase(dataKey);
+        Name = name ?? StringHelper.SplitPascalCase(dataKey);
     }
 
     internal Line()

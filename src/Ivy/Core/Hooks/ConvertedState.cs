@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Ivy.Core.Hooks;
 
 public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom, TTo> forward, Func<TTo, TFrom> backward) : IState<TTo>
@@ -30,6 +32,7 @@ public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom,
         set => originalState.Value = backward(value);
     }
 
+    [OverloadResolutionPriority(1)]
     public TTo Set(TTo value)
     {
         originalState.Set(backward(value));

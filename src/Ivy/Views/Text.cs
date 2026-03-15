@@ -1,9 +1,8 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Size = Ivy.Shared.Size;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class Text
 {
@@ -81,12 +80,12 @@ public static class Text
 
     public static TextBuilder Blockquote(IAnyState state) => Blockquote(state.ToString() ?? "");
 
-    public static TextBuilder InlineCode(string content)
+    public static TextBuilder Monospaced(string content)
     {
-        return new TextBuilder(content, TextVariant.InlineCode);
+        return new TextBuilder(content, TextVariant.Monospaced);
     }
 
-    public static TextBuilder InlineCode(IAnyState state) => InlineCode(state.ToString() ?? "");
+    public static TextBuilder Monospaced(IAnyState state) => Monospaced(state.ToString() ?? "");
 
     public static TextBuilder Lead(string content)
     {
@@ -192,6 +191,11 @@ public static class Text
     }
 
     public static TextBuilder Display(IAnyState state) => Display(state.ToString() ?? "");
+
+    /// <summary>
+    /// Create a <see cref="RichTextBuilder"/> for composing inline text with mixed formatting.
+    /// </summary>
+    public static RichTextBuilder Rich() => new();
 }
 
 public class TextBuilder(string content, TextVariant variant, Languages codeLanguage = Languages.Csharp) : ViewBase, IStateless
@@ -204,8 +208,9 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _bold;
     private bool _italic;
     private bool _muted;
+    private TextAlignment? _textAlignment;
 
-    private Scale? _scale;
+    private Density? _density;
 
     public override object? Build()
     {
@@ -226,9 +231,9 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
             default:
                 {
                     var text = new TextBlock(
-                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted)
+                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted, _textAlignment)
                     {
-                        Scale = _scale
+                        Density = _density
                     };
                     return text;
                 }
@@ -303,17 +308,31 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    public TextBuilder Scale(Scale scale)
+    public TextBuilder Density(Density density)
     {
-        _scale = scale;
+        _density = density;
         return this;
     }
 
-    public TextBuilder Small() => Scale(Ivy.Shared.Scale.Small);
+    public TextBuilder Small() => Density(Ivy.Density.Small);
 
-    public TextBuilder Medium() => Scale(Ivy.Shared.Scale.Medium);
+    public TextBuilder Medium() => Density(Ivy.Density.Medium);
 
-    public TextBuilder Large() => Scale(Ivy.Shared.Scale.Large);
+    public TextBuilder Large() => Density(Ivy.Density.Large);
+
+    public TextBuilder Align(TextAlignment alignment)
+    {
+        _textAlignment = alignment;
+        return this;
+    }
+
+    public TextBuilder Left() => Align(TextAlignment.Left);
+
+    public TextBuilder Center() => Align(TextAlignment.Center);
+
+    public TextBuilder Right() => Align(TextAlignment.Right);
+
+    public TextBuilder Justify() => Align(TextAlignment.Justify);
 }
 
 

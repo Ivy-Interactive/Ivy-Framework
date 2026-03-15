@@ -1,97 +1,21 @@
-import React, { Suspense, memo } from 'react';
-import { WidgetNode } from '@/types/widgets';
+/* eslint-disable react-refresh/only-export-components */
+import React, { Suspense } from 'react';
+import { WidgetNode, CallSite } from '@/types/widgets';
 import { widgetMap } from '@/widgets/widgetMap';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
   isExternalWidget,
   createLazyExternalWidget,
   getCachedExternalWidget,
 } from '@/widgets/externalWidgetLoader';
-import {
-  wrapExternalWidget,
-  ExternalWidgetWrapper,
-} from '@/widgets/ExternalWidgetWrapper';
-
-// Cache for wrapped external widget components
-const wrappedExternalWidgetCache = new Map<
-  string,
-  React.ComponentType<Record<string, unknown>>
->();
-
-/**
- * Gets or creates a wrapped component for an external widget.
- * The wrapper provides the event handler as a prop.
- * Note: This function caches components, so subsequent calls return the same component instance.
- */
-const getExternalWidgetComponent = (
-  typeName: string
-): React.ComponentType<Record<string, unknown>> => {
-  // Check if we have a wrapped component cached
-  const cached = wrappedExternalWidgetCache.get(typeName);
-  if (cached) {
-    return cached;
-  }
-
-  // Check if the component is already loaded (not lazy)
-  const loadedComponent = getCachedExternalWidget(typeName);
-  if (loadedComponent) {
-    // Already loaded, wrap it with ExternalWidgetWrapper
-    const Wrapped: React.FC<Record<string, unknown>> = props => (
-      <ExternalWidgetWrapper Component={loadedComponent} props={props}>
-        {props.children as React.ReactNode}
-      </ExternalWidgetWrapper>
-    );
-    wrappedExternalWidgetCache.set(typeName, Wrapped);
-    return Wrapped;
-  }
-
-  // Create lazy component and wrap it
-  const lazyComponent = createLazyExternalWidget(typeName);
-  const wrapped = wrapExternalWidget(lazyComponent);
-  wrappedExternalWidgetCache.set(typeName, wrapped);
-
-  return wrapped;
-};
-
-const isLazyComponent = (
-  component:
-    | React.ComponentType<Record<string, unknown>>
-    | React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>>
-): boolean => {
-  return (
-    component &&
-    (component as { $$typeof?: symbol }).$$typeof === Symbol.for('react.lazy')
-  );
-};
-
-const isChartComponent = (nodeType: string): boolean => {
-  return nodeType.startsWith('Ivy.') && nodeType.includes('Chart');
-};
-
-const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
-  return children.flatMap(child => {
-    if (child.type === 'Ivy.Fragment') {
-      return flattenChildren(child.children || []);
-    }
-    return [child];
-  });
-};
-
-interface MemoizedWidgetProps {
+import { ExternalWidgetWrapper } from '@/widgets/ExternalWidgetWrapper';
+export interface MemoizedWidgetProps {
   node: WidgetNode;
-  inheritedScale?: Scales;
+  inheritedScale?: Densities;
 }
 
-/**
- * Memoized widget component that only re-renders when the node reference changes.
- * Works with structural sharing in use-backend.tsx - unchanged subtrees keep
- * their reference identity, allowing React to skip re-rendering them.
- * Note: This component only handles built-in widgets. External widgets are
- * rendered directly by renderWidgetTree to avoid component creation during render.
- */
-const MemoizedWidget = memo(
+export const MemoizedWidget = React.memo(
   function MemoizedWidget({ node, inheritedScale }: MemoizedWidgetProps) {
-    // Only handle built-in widgets - external widgets are handled by renderWidgetTree
     const Component = widgetMap[
       node.type as keyof typeof widgetMap
     ] as React.ComponentType<Record<string, unknown>>;
@@ -107,7 +31,7 @@ const MemoizedWidget = memo(
     };
 
     if (inheritedScale) {
-      props.scale = inheritedScale;
+      props.density = inheritedScale;
     }
 
     if ('testId' in props && props.testId) {
@@ -116,16 +40,13 @@ const MemoizedWidget = memo(
     }
 
     const children = flattenChildren(node.children || []);
+    const scaleForChildren = (props.density as Densities) || inheritedScale;
 
-    const scaleForChildren = (props.scale as Scales) || inheritedScale;
-
-    // Process children, grouping by Slot widgets
-    // Use renderWidgetTree for children to properly handle external widgets
-    const slots = children.reduce(
-      (acc, child) => {
+    const slots = children.reduce<Record<string, React.ReactNode[]>>(
+      (acc, child: WidgetNode) => {
         if (child.type === 'Ivy.Slot') {
           const slotName = child.props.name as string;
-          acc[slotName] = (child.children || []).map(slotChild =>
+          acc[slotName] = (child.children || []).map((slotChild: WidgetNode) =>
             renderWidgetTree(slotChild, scaleForChildren)
           );
         } else {
@@ -134,23 +55,39 @@ const MemoizedWidget = memo(
         }
         return acc;
       },
-      {} as Record<string, React.ReactNode[]>
+      {}
     );
 
-    // For Kanban widget, pass widget node children for structured data extraction
     if (node.type === 'Ivy.Kanban') {
       props.widgetNodeChildren = children.filter(
-        child => child.type === 'Ivy.KanbanCard'
+        (child: WidgetNode) => child.type === 'Ivy.KanbanCard'
       );
     }
 
+    if (node.type === 'Ivy.Calendar') {
+      props.widgetNodeChildren = children.filter(
+        (child: WidgetNode) => child.type === 'Ivy.CalendarEvent'
+      );
+    }
+
+    if (node.callSite) {
+      widgetCallSiteRegistry.set(node.id, node.callSite);
+    }
+
+    // Store raw content for text-editable widgets
+    const isTextEditable = TEXT_EDITABLE_TYPES.includes(node.type);
+    const rawContent = isTextEditable
+      ? (node.props.content as string) || (node.props.text as string) || ''
+      : undefined;
+
     const content = (
-      <Component {...props} slots={slots}>
-        {slots.default}
-      </Component>
+      <ivy-widget id={node.id} type={node.type} data-content={rawContent}>
+        <Component {...props} slots={slots}>
+          {slots.default}
+        </Component>
+      </ivy-widget>
     );
 
-    // For chart components, provide a specific fallback
     if (isLazyComponent(Component) && isChartComponent(node.type)) {
       return (
         <Suspense
@@ -166,15 +103,12 @@ const MemoizedWidget = memo(
       );
     }
 
-    // For other lazy components, use original behavior
     return isLazyComponent(Component) ? (
       <Suspense>{content}</Suspense>
     ) : (
       content
     );
   },
-  // Custom comparison: only re-render if the node reference changed
-  // Structural sharing ensures unchanged nodes keep their reference
   (prevProps, nextProps) => {
     return (
       prevProps.node === nextProps.node &&
@@ -183,16 +117,81 @@ const MemoizedWidget = memo(
   }
 );
 
+// Registry for widget callsite information, keyed by widget id
+export const widgetCallSiteRegistry = new Map<string, CallSite>();
+
+// Registry for widget content overrides (used by DevTools text editing)
+export const widgetContentOverrides = new Map<string, string>();
+const contentListeners = new Map<string, Set<() => void>>();
+
+export const setWidgetContentOverride = (widgetId: string, content: string) => {
+  widgetContentOverrides.set(widgetId, content);
+  // Notify listeners
+  const listeners = contentListeners.get(widgetId);
+  if (listeners) {
+    listeners.forEach(listener => listener());
+  }
+};
+
+export const clearWidgetContentOverride = (widgetId: string) => {
+  widgetContentOverrides.delete(widgetId);
+  const listeners = contentListeners.get(widgetId);
+  if (listeners) {
+    listeners.forEach(listener => listener());
+  }
+};
+
+export const subscribeToContentOverride = (
+  widgetId: string,
+  listener: () => void
+) => {
+  if (!contentListeners.has(widgetId)) {
+    contentListeners.set(widgetId, new Set());
+  }
+  contentListeners.get(widgetId)!.add(listener);
+  return () => {
+    contentListeners.get(widgetId)?.delete(listener);
+  };
+};
+
+// Types that support text editing
+export const TEXT_EDITABLE_TYPES = ['Ivy.TextBlock', 'Ivy.Markdown'];
+
+export const isLazyComponent = (
+  component:
+    | React.ComponentType<Record<string, unknown>>
+    | React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>>
+): boolean => {
+  return (
+    component &&
+    (component as { $$typeof?: symbol }).$$typeof === Symbol.for('react.lazy')
+  );
+};
+
+export const isChartComponent = (nodeType: string): boolean => {
+  return nodeType.startsWith('Ivy.') && nodeType.includes('Chart');
+};
+
+export const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
+  return children.flatMap(child => {
+    if (child.type === 'Ivy.Fragment') {
+      return flattenChildren(child.children || []);
+    }
+    return [child];
+  });
+};
+
 /**
  * Renders an external widget node directly without memoization.
- * This avoids the react-hooks/static-components rule violation that occurs
- * when getExternalWidgetComponent is called inside a memoized component.
  */
 const renderExternalWidget = (
   node: WidgetNode,
-  inheritedScale?: Scales
+  inheritedScale?: Densities
 ): React.ReactNode => {
-  const Component = getExternalWidgetComponent(node.type);
+  let Component = getCachedExternalWidget(node.type);
+  if (!Component) {
+    Component = createLazyExternalWidget(node.type);
+  }
 
   const props: Record<string, unknown> = {
     ...node.props,
@@ -201,7 +200,7 @@ const renderExternalWidget = (
   };
 
   if (inheritedScale) {
-    props.scale = inheritedScale;
+    props.density = inheritedScale;
   }
 
   if ('testId' in props && props.testId) {
@@ -210,14 +209,14 @@ const renderExternalWidget = (
   }
 
   const children = flattenChildren(node.children || []);
-  const scaleForChildren = (props.scale as Scales) || inheritedScale;
+  const scaleForChildren = (props.density as Densities) || inheritedScale;
 
   // Process children, grouping by Slot widgets
-  const slots = children.reduce(
-    (acc, child) => {
+  const slots = children.reduce<Record<string, React.ReactNode[]>>(
+    (acc, child: WidgetNode) => {
       if (child.type === 'Ivy.Slot') {
         const slotName = child.props.name as string;
-        acc[slotName] = (child.children || []).map(slotChild =>
+        acc[slotName] = (child.children || []).map((slotChild: WidgetNode) =>
           renderWidgetTree(slotChild, scaleForChildren)
         );
       } else {
@@ -226,23 +225,34 @@ const renderExternalWidget = (
       }
       return acc;
     },
-    {} as Record<string, React.ReactNode[]>
+    {}
   );
 
   // For Kanban widget, pass widget node children for structured data extraction
   if (node.type === 'Ivy.Kanban') {
     props.widgetNodeChildren = children.filter(
-      child => child.type === 'Ivy.KanbanCard'
+      (child: WidgetNode) => child.type === 'Ivy.KanbanCard'
     );
   }
 
+  if (node.type === 'Ivy.Calendar') {
+    props.widgetNodeChildren = children.filter(
+      (child: WidgetNode) => child.type === 'Ivy.CalendarEvent'
+    );
+  }
+
+  if (node.callSite) {
+    widgetCallSiteRegistry.set(node.id, node.callSite);
+  }
+
   const content = (
-    <Component {...props} slots={slots} key={node.id}>
-      {slots.default}
-    </Component>
+    <ivy-widget key={node.id} id={node.id} type={node.type}>
+      <ExternalWidgetWrapper Component={Component} props={props}>
+        {slots.default}
+      </ExternalWidgetWrapper>
+    </ivy-widget>
   );
 
-  // For lazy components (external widgets are typically lazy), wrap in Suspense
   return isLazyComponent(Component) ? (
     <Suspense key={node.id}>{content}</Suspense>
   ) : (
@@ -256,7 +266,7 @@ const renderExternalWidget = (
  */
 export const renderWidgetTree = (
   node: WidgetNode,
-  inheritedScale?: Scales
+  inheritedScale?: Densities
 ): React.ReactNode => {
   // Check if it's a built-in widget first
   const isBuiltIn = node.type in widgetMap;

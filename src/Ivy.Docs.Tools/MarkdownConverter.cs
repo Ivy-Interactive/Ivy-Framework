@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis.CSharp;
@@ -95,14 +95,8 @@ public static partial class MarkdownConverter
 
         codeBuilder.AppendLine("using System;");
         codeBuilder.AppendLine("using Ivy;");
-        codeBuilder.AppendLine("using Ivy.Apps;");
-        codeBuilder.AppendLine("using Ivy.Shared;");
-        codeBuilder.AppendLine("using Ivy.Core;");
-        codeBuilder.AppendLine("using Ivy.Views.Tables;");
-        codeBuilder.AppendLine("using Ivy.Views.Kanban;");
-        codeBuilder.AppendLine("using static Ivy.Views.Layout;");
-        codeBuilder.AppendLine("using static Ivy.Views.Text;");
-        codeBuilder.AppendLine("using Ivy.Views;");
+        codeBuilder.AppendLine("using static Ivy.Layout;");
+        codeBuilder.AppendLine("using static Ivy.Text;");
         if (appMeta.Imports != null)
         {
             foreach (var import in appMeta.Imports)
@@ -158,8 +152,9 @@ public static partial class MarkdownConverter
             }
             headingsCode.Append("}");
 
-            codeBuilder.AppendTab(2).Append("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).HandleLinkClick(onLinkClick)");
+            codeBuilder.AppendTab(2).Append("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).OnLinkClick(onLinkClick)");
             codeBuilder.AppendLine($".Headings({headingsCode})");
+            codeBuilder.AppendTab(3).AppendLine("| new global::Ivy.Docs.Shared.Internal.SmartSearchView()");
             codeBuilder.Append(contentBuilder);
 
             codeBuilder.AppendTab(3).AppendLine(";");
@@ -204,7 +199,7 @@ public static partial class MarkdownConverter
                 referencedApps.UnionWith(types);
                 AppendAsMultiLineStringIfNecessary(baseIndentLevel, convertedMarkdown, codeBuilder,
                     isNestedContent ? ", new Markdown(" : "| new Markdown(",
-                    ").HandleLinkClick(onLinkClick)");
+                    ").OnLinkClick(onLinkClick)");
                 sectionBuilder.Clear();
             }
         }
@@ -503,7 +498,7 @@ public static partial class MarkdownConverter
         var (types, convertedContent) = linkConverter.Convert(content);
         referencedApps.UnionWith(types);
 
-        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).HandleLinkClick(onLinkClick)");
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).OnLinkClick(onLinkClick)");
     }
 
     private static void HandleEmbedBlock(StringBuilder codeBuilder, XElement xml)
@@ -578,7 +573,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
             string mermaidBlock = $"```mermaid\n{codeContent}\n```";
             AppendAsMultiLineStringIfNecessary(baseIndentLevel, mermaidBlock, codeBuilder,
                 isNestedContent ? ", new Markdown(" : "| new Markdown(",
-                ").HandleLinkClick(onLinkClick)");
+                ").OnLinkClick(onLinkClick)");
         }
         else
         {

@@ -1,5 +1,4 @@
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -23,7 +22,7 @@ public record TableCell : WidgetBase<TableCell>
 
     [Prop] public Align Align { get; set; } = Align.Left;
 
-    [Prop] public bool MultiLine { get; set; }
+    [Prop] public bool Multiline { get; set; }
 }
 
 public static class TableCellExtensions
@@ -43,8 +42,8 @@ public static class TableCellExtensions
         return cell with { Align = align };
     }
 
-    public static TableCell MultiLine(this TableCell cell, bool multiLine = true)
+    public static TableCell Multiline(this TableCell cell, bool multiline = true)
     {
-        return cell with { MultiLine = multiLine };
+        return cell with { Multiline = multiline };
     }
 }

@@ -34,7 +34,7 @@
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(IvyPackageVersion)' != ''">
     <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
   </ItemGroup>
@@ -42,19 +42,12 @@
   <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <EmbeddedResource Include="frontend\dist\**\*" />
-  </ItemGroup>
-  
+
   <ItemGroup>
     <Compile Remove=".samples\**\*.cs" />
     <None Include=".samples\**\*" CopyToOutputDirectory="Never" />
   </ItemGroup>
-  
-  <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend/package.json')">
-    <Exec Command="npm install" WorkingDirectory="frontend" />
-    <Exec Command="npm run build" WorkingDirectory="frontend" />
-  </Target>
+
+  <Import Project="..\..\Ivy\Build\Ivy.ExternalWidget.targets" />
 
 </Project>

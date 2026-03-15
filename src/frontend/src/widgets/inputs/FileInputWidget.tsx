@@ -5,14 +5,17 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { useEventHandler } from '@/components/event-handler';
 import { toast } from '@/hooks/use-toast';
 import {
-  fileInputVariants,
-  uploadIconVariants,
-  textVariants,
-} from '@/components/ui/input/file-input-variants';
+  fileInputVariant,
+  uploadIconVariant,
+  textVariant,
+} from '@/components/ui/input/file-input-variant';
+import { validateSingleFile, validateFileCount } from './file-input-validation';
+
+const EMPTY_ARRAY: never[] = [];
 
 enum FileInputStatus {
   Pending = 'Pending',
@@ -40,11 +43,12 @@ interface FileInputWidgetProps {
   width?: string;
   accept?: string;
   maxFileSize?: number;
+  minFileSize?: number;
   multiple?: boolean;
   maxFiles?: number;
   placeholder?: string;
   uploadUrl?: string;
-  scale?: Scales;
+  density?: Densities;
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -52,15 +56,16 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  events = [],
+  events = EMPTY_ARRAY,
   width,
   accept,
   maxFileSize,
+  minFileSize,
   multiple = false,
   maxFiles,
   placeholder,
   uploadUrl,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
@@ -73,30 +78,26 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
   const hasBlurHandler = Array.isArray(events) && events.includes('OnBlur');
 
-  const formatBytes = (bytes: number): string => {
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes === 0) return '0 B';
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const size = bytes / Math.pow(1024, i);
-    return `${size.toFixed(size >= 10 ? 0 : 2)} ${sizes[i]}`;
-  };
-
   const validateFile = useCallback(
     (file: File): boolean => {
-      // Validate file size
-      if (maxFileSize && file.size > maxFileSize) {
-        const maxSizeFormatted = formatBytes(maxFileSize);
-        const fileSizeFormatted = formatBytes(file.size);
+      const result = validateSingleFile({
+        file,
+        accept,
+        maxFileSize,
+        minFileSize,
+      });
+
+      if (!result.valid) {
         toast({
-          title: 'File too large',
-          description: `File '${file.name}' is ${fileSizeFormatted}. Maximum allowed size is ${maxSizeFormatted}.`,
+          title: result.title || 'Validation Error',
+          description: result.error,
           variant: 'destructive',
         });
         return false;
       }
       return true;
     },
-    [maxFileSize]
+    [accept, maxFileSize, minFileSize]
   );
 
   const uploadFile = useCallback(
@@ -163,14 +164,16 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         : value
           ? 1
           : 0;
-      if (maxFiles && currentFileCount + files.length > maxFiles) {
-        const remaining = maxFiles - currentFileCount;
+
+      const countValidation = validateFileCount(
+        currentFileCount,
+        files.length,
+        maxFiles
+      );
+      if (!countValidation.valid) {
         toast({
-          title: 'Too many files',
-          description:
-            remaining > 0
-              ? `You can only upload ${remaining} more file${remaining !== 1 ? 's' : ''}. Maximum is ${maxFiles} files total.`
-              : `Maximum of ${maxFiles} file${maxFiles !== 1 ? 's' : ''} already reached.`,
+          title: countValidation.title || 'Too many files',
+          description: countValidation.error,
           variant: 'destructive',
         });
         e.target.value = '';
@@ -280,14 +283,16 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         : value
           ? 1
           : 0;
-      if (maxFiles && currentFileCount + files.length > maxFiles) {
-        const remaining = maxFiles - currentFileCount;
+
+      const countValidation = validateFileCount(
+        currentFileCount,
+        files.length,
+        maxFiles
+      );
+      if (!countValidation.valid) {
         toast({
-          title: 'Too many files',
-          description:
-            remaining > 0
-              ? `You can only upload ${remaining} more file${remaining !== 1 ? 's' : ''}. Maximum is ${maxFiles} files total.`
-              : `Maximum of ${maxFiles} file${maxFiles !== 1 ? 's' : ''} already reached.`,
+          title: countValidation.title || 'Too many files',
+          description: countValidation.error,
           variant: 'destructive',
         });
         return;
@@ -386,7 +391,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       )}
       <div
         className={cn(
-          fileInputVariants({ scale }),
+          fileInputVariant({ density }),
           isDragging && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
@@ -395,6 +400,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           'p-4'
         )}
         onClick={handleClick}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e as unknown as React.MouseEvent);
+          }
+        }}
       >
         <Input
           ref={inputRef}
@@ -409,9 +422,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
         {/* Always show upload icon */}
         <div className="flex flex-col items-center justify-center text-center w-full">
-          <Upload className={uploadIconVariants({ scale })} />
+          <Upload className={uploadIconVariant({ density })} />
           {!hasFiles && (
-            <p className={textVariants({ scale })}>
+            <p className={textVariant({ density })}>
               {placeholder ||
                 `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
             </p>

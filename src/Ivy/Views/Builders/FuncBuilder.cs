@@ -1,4 +1,5 @@
-﻿namespace Ivy.Views.Builders;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class FuncBuilder<TModel, TIn>(Func<TIn, object?> func) : IBuilder<TModel>
 {

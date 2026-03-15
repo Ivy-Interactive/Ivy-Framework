@@ -19,7 +19,6 @@ Create a new `.cs` file with a record that inherits from `WidgetBase<T>`:
 ```csharp
 using Ivy;
 using Ivy.Core;
-using Ivy.Core.ExternalWidgets;
 
 namespace Ivy.Widgets.Leaflet;
 
@@ -59,7 +58,7 @@ Create a corresponding `.tsx` file in `frontend/src/`:
 
 ```tsx
 import React from 'react';
-import { IvyEventHandler } from './types';
+import { EventHandler } from './types';
 import { getWidth, getHeight } from './styles';
 
 interface MyWidgetProps {
@@ -67,7 +66,7 @@ interface MyWidgetProps {
   id: string;
   width?: string;
   height?: string;
-  onIvyEvent: IvyEventHandler;
+  eventHandler: EventHandler;
 
   // Your custom props (match the C# [Prop] attributes)
   title?: string;
@@ -79,18 +78,18 @@ export const MyWidget: React.FC<MyWidgetProps> = ({
   id,
   width,
   height,
-  onIvyEvent,
+  eventHandler,
   title,
   count,
   disabled,
 }) => {
   // Call back to C# via the event handler
   const handleClick = () => {
-    onIvyEvent('onClick', id, []);
+    eventHandler('onClick', id, []);
   };
 
   const handleChange = (value: string) => {
-    onIvyEvent('onChange', id, [value]);
+    eventHandler('onChange', id, [value]);
   };
 
   const style: React.CSSProperties = {
@@ -129,15 +128,12 @@ if (typeof window !== 'undefined') {
 export { Map, MyWidget };
 ```
 
-### 4. Create a Sample File
+### 4. Create a Sample Project
 
-Create a `.samples/{WidgetName}.cs` file to demonstrate the widget:
+The `.samples/` folder contains a full Ivy project that demonstrates the widget. Update `.samples/Program.cs` to add a view for the new widget:
 
 ```csharp
-#:project ..\Ivy.Widgets.Leaflet.csproj
-
 using Ivy;
-using Ivy.Shared;
 using Ivy.Widgets.Leaflet;
 
 var server = new Server();
@@ -152,7 +148,23 @@ class MyWidgetView : ViewBase
 }
 ```
 
-Run the sample with: `dotnet run MyWidget.cs`
+The `.samples/Program.csproj` references the widget project:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ivy.Widgets.Leaflet.csproj" />
+  </ItemGroup>
+</Project>
+```
+
+Run the sample with: `cd .samples && dotnet run`
 
 ## Key Concepts
 
@@ -172,7 +184,7 @@ Run the sample with: `dotnet run MyWidget.cs`
 
 ### Event Handler Signature
 
-In React, call `onIvyEvent(eventName, widgetId, args)`:
+In React, call `eventHandler(eventName, widgetId, args)`:
 - `eventName`: The event name without 'On' prefix, in camelCase (e.g., 'onClick' for `OnClick`)
 - `widgetId`: Always pass `id`
 - `args`: Array of arguments to pass to the C# handler
@@ -214,7 +226,7 @@ public class MyApp : AppBase
     {
         new Map()
             .Label("Hello World")
-            .HandleClick(() => Console.WriteLine("Clicked!"));
+            .OnClick(() => Console.WriteLine("Clicked!"));
     }
 }
 ```

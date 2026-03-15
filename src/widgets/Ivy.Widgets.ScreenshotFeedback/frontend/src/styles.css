@@ -1,0 +1,130 @@
+.screenshot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.screenshot-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #333;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.screenshot-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.screenshot-toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background: #444;
+  margin: 0 4px;
+}
+
+.screenshot-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #2a2a3e;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 13px;
+  min-width: 32px;
+  height: 32px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.screenshot-toolbar button:hover {
+  background: #3a3a5e;
+  border-color: #666;
+}
+
+.screenshot-toolbar button.active {
+  background: #4a6cf7;
+  border-color: #4a6cf7;
+  color: #fff;
+}
+
+.screenshot-toolbar button.save-btn {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+  font-weight: 600;
+  padding: 6px 16px;
+}
+
+.screenshot-toolbar button.save-btn:hover {
+  background: #16a34a;
+}
+
+.screenshot-toolbar button.cancel-btn {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+  font-weight: 600;
+  padding: 6px 16px;
+}
+
+.screenshot-toolbar button.cancel-btn:hover {
+  background: #dc2626;
+}
+
+.screenshot-toolbar input[type="color"] {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #2a2a3e;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.screenshot-toolbar select {
+  height: 32px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #2a2a3e;
+  color: #e0e0e0;
+  cursor: pointer;
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.screenshot-canvas-container {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.screenshot-canvas-wrapper {
+  position: relative;
+  cursor: crosshair;
+}
+
+.screenshot-text-input {
+  position: absolute;
+  background: transparent;
+  border: 1px dashed #4a6cf7;
+  color: inherit;
+  font-family: sans-serif;
+  outline: none;
+  padding: 2px 4px;
+  min-width: 100px;
+  z-index: 10;
+}

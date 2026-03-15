@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -26,8 +25,8 @@ public record Chat : WidgetBase<Chat>
     {
         Width = Size.Full();
         Height = Size.Full();
-        OnSend = onSend;
-        OnCancel = onCancel;
+        OnSend = new(onSend);
+        OnCancel = onCancel.ToEventHandler();
     }
 
     internal Chat()
@@ -36,16 +35,16 @@ public record Chat : WidgetBase<Chat>
         Height = Size.Full();
     }
 
-    [Event] public Func<Event<Chat, string>, ValueTask>? OnSend { get; set; }
+    [Event] public EventHandler<Event<Chat, string>>? OnSend { get; set; }
 
-    [Event] public Func<Event<Chat>, ValueTask>? OnCancel { get; set; }
+    [Event] public EventHandler<Event<Chat>>? OnCancel { get; set; }
 
     [Prop] public string Placeholder { get; set; } = "Type a message...";
 
     [Prop] public bool Streaming { get; set; }
 
     public Chat(ChatMessage[] messages, Action<Event<Chat, string>> onSend)
-    : this(messages, e => { onSend(e); return ValueTask.CompletedTask; }, null)
+    : this(messages, onSend.ToValueTask(), null)
     {
     }
 
@@ -55,9 +54,8 @@ public record Chat : WidgetBase<Chat>
         Action<Event<Chat>>? onCancel
     ) : this(
         messages,
-        e => { onSend(e); return ValueTask.CompletedTask; },
-        onCancel != null ? e => { onCancel(e); return ValueTask.CompletedTask; }
-    : null
+        onSend.ToValueTask(),
+        onCancel?.ToValueTask()
     )
     {
     }
@@ -71,7 +69,7 @@ public static class ChatExtensions
         return chat;
     }
 
-    internal static Chat Streaming(this Chat chat, bool streaming)
+    public static Chat Streaming(this Chat chat, bool streaming)
     {
         chat.Streaming = streaming;
         return chat;

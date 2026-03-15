@@ -12,7 +12,7 @@ searchHints:
 # CodeInput
 
 <Ingress>
-Edit code with syntax highlighting, line numbers, and formatting support for multiple programming languages in a specialized input [field](01_Field.md). Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width()` and `.Height()` to control dimensions.
+Edit code with syntax highlighting, line numbers, and formatting support for multiple programming languages in a specialized input [field](01_Field.md). Use [Size](../../04_ApiReference/Ivy/Size.md) for `.Width()` and `.Height()` to control dimensions.
 </Ingress>
 
 The `CodeInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a specialized text input field for entering and editing code with syntax highlighting.

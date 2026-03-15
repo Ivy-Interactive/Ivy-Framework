@@ -1,8 +1,8 @@
-﻿using Ivy.Apps;
 using Ivy.Core.Hooks;
-using AppContext = Ivy.Apps.AppContext;
+using AppContext = Ivy.AppContext;
 
-namespace Ivy.Hooks;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class UseArgsExtensions
 {

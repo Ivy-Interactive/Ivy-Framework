@@ -1,9 +1,8 @@
 using System.Reactive.Linq;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Blades;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class FilteredListView<T>(
     Func<string, Task<T[]>> fetchRecords,

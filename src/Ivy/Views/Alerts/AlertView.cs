@@ -1,8 +1,8 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
 
-namespace Ivy.Views.Alerts;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class AlertView(IState<AlertResult> alertResult, IState<bool> isOpen, AlertOptions options) : ViewBase
 {

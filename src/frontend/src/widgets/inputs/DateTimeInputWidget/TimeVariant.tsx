@@ -5,11 +5,11 @@ import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
-  dateTimeInputIconVariants,
-  dateTimeInputTextVariants,
-} from '@/components/ui/input/date-time-input-variants';
+  dateTimeInputIconVariant,
+  dateTimeInputTextVariant,
+} from '@/components/ui/input/date-time-input-variant';
 import { TimeVariantProps } from './types';
 import { ClearAndInvalidIcons } from './shared';
 
@@ -20,7 +20,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   nullable,
   invalid,
   onTimeChange,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   // Use local state for the input value to make it uncontrolled
@@ -113,14 +113,14 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
         <Clock
           className={cn(
             'ml-3 shrink-0',
-            dateTimeInputIconVariants({ scale }),
+            dateTimeInputIconVariant({ density }),
             disabled && 'opacity-50'
           )}
         />
         <Input
           type="time"
           step="1"
-          scale={scale}
+          density={density}
           value={localTimeValue}
           onChange={handleTimeChange}
           onBlur={handleTimeBlur}
@@ -129,7 +129,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
           placeholder={placeholder || 'Select time'}
           className={cn(
             'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0',
-            dateTimeInputTextVariants({ scale }),
+            dateTimeInputTextVariant({ density }),
             invalid && inputStyles.invalidInput,
             disabled && 'cursor-not-allowed',
             showClear && invalid ? 'pr-16' : showClear || invalid ? 'pr-8' : ''
@@ -139,7 +139,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
       <ClearAndInvalidIcons
         showClear={showClear}
         invalid={invalid}
-        scale={scale}
+        density={density}
         onClear={handleClear}
       />
     </div>

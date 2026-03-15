@@ -1,18 +1,24 @@
 import Icon from '@/components/Icon';
+import { useEventHandler } from '@/components/event-handler';
 import { getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 import React from 'react';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface CalloutWidgetProps {
+  id: string;
   title?: string;
   children?: React.ReactNode;
   variant?: 'Info' | 'Success' | 'Warning' | 'Error';
   width?: string;
   height?: string;
   icon?: string;
+  events?: string[];
 }
 
-const calloutVariants = {
+const calloutVariant = {
   Info: {
     container:
       'border-cyan/20 bg-cyan/5 text-foreground dark:border-cyan/30 dark:bg-cyan/10',
@@ -43,13 +49,18 @@ const defaultIcons = {
 };
 
 export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
+  id,
   title,
   children,
   variant = 'Info',
   icon,
   width,
   height,
+  events = EMPTY_ARRAY,
 }) => {
+  const eventHandler = useEventHandler();
+  const showCloseButton = events.includes('OnClose');
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
@@ -60,13 +71,13 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   }
 
   const variantKey = variant || 'Info';
-  const variantStyles = calloutVariants[variantKey];
+  const variantStyles = calloutVariant[variantKey];
 
   return (
     <div
       style={styles}
       className={cn(
-        'flex items-center px-4 text-large-body rounded-box border transition-colors',
+        'flex items-center px-4 text-large-body rounded-box border transition-colors relative',
         variantStyles.container
       )}
       role="alert"
@@ -87,6 +98,16 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
           </div>
         )}
       </div>
+      {showCloseButton && (
+        <button
+          type="button"
+          onClick={() => eventHandler('OnClose', id, [])}
+          className="absolute top-3 right-3 p-1 rounded-md opacity-70 hover:opacity-100"
+          aria-label="Dismiss"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 };

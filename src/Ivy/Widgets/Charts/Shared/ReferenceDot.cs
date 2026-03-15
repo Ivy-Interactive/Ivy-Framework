@@ -1,7 +1,7 @@
 ﻿
 
 // ReSharper disable once CheckNamespace
-namespace Ivy.Charts;
+namespace Ivy;
 
 public record ReferenceDot
 {

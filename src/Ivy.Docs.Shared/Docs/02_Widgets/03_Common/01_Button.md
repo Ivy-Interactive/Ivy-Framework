@@ -44,7 +44,7 @@ Layout.Horizontal()
 
 ## Styling & Configuration
 
-Buttons offer extensive styling options including standard variants, states, border radius, and icon integration. Use [Align](../../04_ApiReference/IvyShared/Align.md) for icon position (e.g. `Align.Right`).
+Buttons offer extensive styling options including standard variants, states, border radius, and icon integration. Use [Align](../../04_ApiReference/Ivy/Align.md) for icon position (e.g. `Align.Right`).
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
@@ -92,5 +92,30 @@ Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/
         | new Button("Link Style").Link()
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
 ```
+
+## Faq
+
+<Details>
+<Summary>
+What are the available ButtonVariant values in Ivy?
+</Summary>
+<Body>
+
+`ButtonVariant` has these values: `Primary`, `Destructive`, `Outline`, `Secondary`, `Success`, `Warning`, `Info`, `Ghost`, `Link`, `Inline`, `Ai`.
+
+Set via the `.Variant()` method or shortcut methods:
+
+```csharp
+new Button("Save", handler).Variant(ButtonVariant.Primary)
+// or use shortcut:
+new Button("Save", handler).Primary()
+
+// Other shortcuts: .Secondary(), .Outline(), .Destructive(), .Ghost(), .Link(), .Inline(), .Ai()
+```
+
+**Important:** There is no `ButtonVariant.Default`. Use `ButtonVariant.Primary` instead.
+
+</Body>
+</Details>
 
 <WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Button.cs"/>

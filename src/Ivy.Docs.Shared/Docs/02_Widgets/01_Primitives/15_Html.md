@@ -213,6 +213,33 @@ Only these HTML tags are permitted:
 - **JavaScript URL blocking:** `javascript:` URLs in href attributes are removed
 - **Tag whitelisting:** Only approved HTML tags are allowed
 
+### By-passing Security (DangerouslyAllowScripts)
+
+<Callout Type="Warning">
+**Security Risk:** Enabling `DangerouslyAllowScripts` bypasses the built-in HTML sanitization and executes any JavaScript contained within the HTML string. Only use this feature if you absolutely trust the source of the HTML content. Rendering user-generated content with this flag enabled exposes your application to Cross-Site Scripting (XSS) attacks.
+</Callout>
+
+If you need to render raw HTML that includes `<script>` tags and you trust the source completely, you can bypass the sanitization by setting `DangerouslyAllowScripts(true)`.
+
+```csharp demo-tabs
+public class ScriptHtmlView : ViewBase
+{
+    public override object? Build()
+    {
+        var htmlWithScript = 
+            """
+            <div id="target-div">Loading...</div>
+            <script>
+                document.getElementById('target-div').innerText = 'Script executed successfully!';
+            </script>
+            """;
+        
+        // Use the fluent method to enable scripts execution
+        return new Html(htmlWithScript).DangerouslyAllowScripts();
+    }
+}
+```
+
 ### Example of Security in Action
 
 ```csharp demo-tabs
@@ -380,5 +407,21 @@ public class UserContentView : ViewBase
 - You want to embed external content (use [Iframe widget](20_Iframe.md))
 - You need JavaScript functionality
 - Simple text formatting would suffice (use [Text widget](01_TextBlock.md))
+
+## Faq
+
+### How to apply background styling with CSS gradients?
+
+The `Html` widget in safe mode strips inline `style` attributes. To render custom CSS (including gradients, box-shadows, or positioned elements), you must chain `.DangerouslyAllowScripts()`:
+
+```csharp
+return new Html("""
+    <div style="position: fixed; inset: 0; z-index: -1; background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);"></div>
+""").DangerouslyAllowScripts()
+| Layout.Center()
+    | myContent;
+```
+
+Alternatively, use native Ivy styling with `Layout.Background(Colors.X)` — but this only supports solid `Colors` enum values, not CSS gradients.
 
 <WidgetDocs Type="Ivy.Html" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Html.cs"/>

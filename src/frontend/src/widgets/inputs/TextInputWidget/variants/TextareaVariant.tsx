@@ -3,11 +3,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { getWidth, getHeight, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
-  textAreaSizeVariants,
-  xIconVariants,
-} from '@/components/ui/input/text-input-variants';
+  textareaSizeVariant,
+  xIconVariant,
+} from '@/components/ui/input/text-input-variant';
 import { TextInputWidgetProps } from '../types';
 import {
   useCursorPosition,
@@ -26,7 +26,7 @@ interface TextareaVariantProps {
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
   nullable?: boolean;
-  scale?: Scales;
+  density?: Densities;
 }
 
 export const TextareaVariant: React.FC<TextareaVariantProps> = ({
@@ -37,7 +37,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   onClear,
   inputRef,
   isFocused,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
 
@@ -76,13 +76,14 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           value={props.value}
           disabled={props.disabled}
           maxLength={props.maxLength}
+          minLength={props.minLength}
           rows={props.rows}
           onChange={handleChange}
           onBlur={onBlur}
           onFocus={onFocus}
           onPaste={handlePaste}
           className={cn(
-            textAreaSizeVariants({ scale }),
+            textareaSizeVariant({ density }),
             'border-0 shadow-none dark:bg-transparent h-full',
             props.invalid && inputStyles.invalidInput,
             (props.invalid || showClear) && 'pr-8',
@@ -108,7 +109,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
             className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center"
             style={{ pointerEvents: 'auto' }}
           >
-            <X className={xIconVariants({ scale })} />
+            <X className={xIconVariant({ density })} />
           </button>
         )}
         {props.shortcutKey && !isFocused && !hasValue && (

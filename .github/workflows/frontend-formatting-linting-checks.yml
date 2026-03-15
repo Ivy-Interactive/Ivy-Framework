@@ -10,6 +10,7 @@ on:
     branches: [main, master]
     paths:
       - "src/frontend/**"
+  workflow_dispatch:
 
 jobs:
   frontend-checks:

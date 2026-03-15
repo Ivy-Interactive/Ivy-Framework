@@ -11,12 +11,12 @@ import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
-  dateTimeInputVariants,
-  dateTimeInputIconVariants,
-  dateTimeInputTextVariants,
-} from '@/components/ui/input/date-time-input-variants';
+  dateTimeInputVariant,
+  dateTimeInputIconVariant,
+  dateTimeInputTextVariant,
+} from '@/components/ui/input/date-time-input-variant';
 import { DateVariantProps } from './types';
 import { ClearAndInvalidIcons } from './shared';
 
@@ -28,7 +28,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
   invalid,
   onDateChange,
   format: formatProp,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -58,7 +58,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
             variant="outline"
             data-slot="calendar"
             className={cn(
-              dateTimeInputVariants({ scale }),
+              dateTimeInputVariant({ density }),
               'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
@@ -74,13 +74,13 @@ export const DateVariant: React.FC<DateVariantProps> = ({
             <CalendarIcon
               className={cn(
                 'mr-2 shrink-0',
-                dateTimeInputIconVariants({ scale })
+                dateTimeInputIconVariant({ density })
               )}
             />
             <span
               className={cn(
                 'truncate',
-                dateTimeInputTextVariants({ scale }),
+                dateTimeInputTextVariant({ density }),
                 !date && 'text-muted-foreground'
               )}
             >
@@ -96,14 +96,14 @@ export const DateVariant: React.FC<DateVariantProps> = ({
             selected={date}
             onSelect={handleSelect}
             initialFocus
-            scale={scale}
+            density={density}
           />
         </PopoverContent>
       </Popover>
       <ClearAndInvalidIcons
         showClear={showClear}
         invalid={invalid}
-        scale={scale}
+        density={density}
         onClear={handleClear}
       />
     </div>

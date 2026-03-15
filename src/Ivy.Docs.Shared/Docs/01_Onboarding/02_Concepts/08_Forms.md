@@ -58,6 +58,8 @@ The FormBuilder automatically maps C# types to appropriate [input widgets](./03_
 | `DateTime`, `DateOnly` | [DateTimeInput](../../02_Widgets/04_Inputs/07_DateTimeInput.md) | Date/time picker |
 | `Enum` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) | Dropdown with enum values |
 | `List<Enum>` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) with multiple selection | Multi-select dropdown |
+| `string` with `[AllowedValues]` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) | Auto-generates dropdown from allowed values |
+| `string[]` with `[AllowedValues]` | [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md) with multiple selection | Auto-generates multi-select from allowed values |
 | Properties ending in "Id" | [ReadOnlyInput](../../02_Widgets/04_Inputs/14_ReadOnlyInput.md) | Typically for system-generated IDs |
 | Properties ending in "Email" | [TextInput](../../02_Widgets/04_Inputs/02_TextInput.md) with email validation | Email-specific input |
 | Properties ending in "Password" | PasswordInput | Hidden text input |
@@ -123,7 +125,7 @@ public class CustomInputsExample : ViewBase
         var tagOptions = new[] { "Electronics", "Clothing", "Books", "Home", "Sports", "Food" }.ToOptions();
         
         return product.ToForm()
-            .Builder(m => m.Description, s => s.ToTextAreaInput())
+            .Builder(m => m.Description, s => s.ToTextareaInput())
             .Builder(m => m.JsonConfig, s => s.ToCodeInput().Language(Languages.Json))
             .Builder(m => m.Tags, s => s.ToSelectInput(tagOptions))
             .Builder(m => m.ReleaseDate, s => s.ToDateTimeInput())
@@ -359,10 +361,7 @@ public class ValidationExample : ViewBase
             }
         }, user);
         
-        var countryOptions = new[] { "USA", "Canada", "UK" }.ToOptions();
-        
         return user.ToForm("Create Account")
-            .Builder(m => m.Country, s => s.ToSelectInput(countryOptions))
             // Custom validation: birth date cannot be in the future
             .Validate<DateTime>(m => m.BirthDate, birthDate => 
                 (birthDate <= DateTime.Now, "Birth date cannot be in the future"))
@@ -432,10 +431,7 @@ public class DisplayAttributeExample : ViewBase
             }
         }, user);
 
-        var themeOptions = new[] { "Light", "Dark", "Auto" }.ToOptions();
-        
         return user.ToForm("Create Account")
-            .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions))
             .Builder(m => m.Password, s => s.ToPasswordInput())
             .Builder(m => m.ConfirmPassword, s => s.ToPasswordInput())
             .Validate<string>(m => m.ConfirmPassword, confirmPassword =>
@@ -516,11 +512,9 @@ public class CollectionValidationExample : ViewBase
     public override object? Build()
     {
         var survey = UseState(() => new SurveyModel());
-        var interestOptions = new[] { "Technology", "Sports", "Music", "Art", "Travel" }.ToOptions();
         var tagOptions = new[] { "New", "Popular", "Featured", "Sale", "Limited" }.ToOptions();
-        
+
         return survey.ToForm()
-            .Builder(m => m.Interests, s => s.ToSelectInput(interestOptions).List())
             .Builder(m => m.Tags, s => s.ToSelectInput(tagOptions).List());
     }
 }
@@ -676,6 +670,75 @@ public class SimpleFormWithResetExample : ViewBase
 This example works because it uses the form's internal state management. The form maintains its own copy of the data until submission, so programmatic updates using `.Set()` will be reflected in the form fields.
 </Callout>
 
+### Form submit strategies
+
+Control when form state is committed back to your model by calling `.SubmitStrategy(FormSubmitStrategy.X)` on the form builder. This determines when validation runs and when the bounded state is updated.
+
+| Strategy | When state is committed | Submit button |
+|----------|-------------------------|---------------|
+| `OnSubmit` (default) | Only when the user clicks the submit button or presses Enter | Shown |
+| `OnBlur` | When any field loses focus (tab away or click outside) | Hidden |
+| `OnChange` | On every field value change (keystroke or selection) | Hidden |
+
+**OnSubmit (default)** — Use for traditional forms where the user fills fields and explicitly saves. The examples in [Basic Form Submission](#basic-form-submission) and [Form Submission with State Updates](#form-submission-with-state-updates) use this strategy.
+
+**OnBlur** — Use when you want to commit after the user finishes editing each field, without a submit button:
+
+```csharp demo-tabs
+public class OnBlurStrategyExample : ViewBase
+{
+    public record ProfileModel(string DisplayName, string Bio);
+
+    public override object? Build()
+    {
+        var profile = UseState(() => new ProfileModel("", ""));
+        var client = UseService<IClientProvider>();
+
+        UseEffect(() =>
+        {
+            if (!string.IsNullOrEmpty(profile.Value.DisplayName))
+            {
+                client.Toast($"Profile updated: {profile.Value.DisplayName}");
+            }
+        }, profile);
+
+        return Layout.Vertical()
+            | profile.ToForm()
+                .SubmitStrategy(FormSubmitStrategy.OnBlur)
+                .Label(m => m.DisplayName, "Display Name")
+                .Label(m => m.Bio, "Bio")
+            | Text.Block($"Submitted: {profile.Value.DisplayName} — {profile.Value.Bio}");
+    }
+}
+```
+
+**OnChange (auto-save)** — Use for settings or preferences where changes should apply immediately:
+
+```csharp demo-tabs
+public class OnChangeStrategyExample : ViewBase
+{
+    public record SettingsModel(string Name, string Theme, int FontSize);
+
+    public override object? Build()
+    {
+        var settings = UseState(() => new SettingsModel("Default", "Light", 14));
+        var client = UseService<IClientProvider>();
+
+        return Layout.Vertical()
+            | settings.ToForm()
+                .SubmitStrategy(FormSubmitStrategy.OnChange)
+                .Label(m => m.Name, "Display Name")
+                .Label(m => m.Theme, "Theme")
+                .Label(m => m.FontSize, "Font Size")
+            | Text.Block($"Current: {settings.Value.Name}, {settings.Value.Theme}, {settings.Value.FontSize}px");
+    }
+}
+```
+
+<Callout Type="tip">
+Use `OnChange` for settings panels where changes should apply immediately. Use `OnBlur` when you want to commit after the user finishes editing each field without a submit button.
+</Callout>
+
 ## Advanced Features
 
 ### Conditional Fields
@@ -745,8 +808,8 @@ public class DynamicConfigurationExample : ViewBase
         
         return Layout.Vertical()
             | (Layout.Horizontal()
-                | new Button("New User").HandleClick(_ => isEditMode.Set(false))
-                | new Button("Edit User").HandleClick(_ => isEditMode.Set(true)))
+                | new Button("New User").OnClick(_ => isEditMode.Set(false))
+                | new Button("Edit User").OnClick(_ => isEditMode.Set(true)))
             | form
             | (Layout.Horizontal()
                 | new Button(isEditMode.Value ? "Update User" : "Create User")
@@ -777,7 +840,7 @@ public class SheetFormExample : ViewBase
         var isSheetOpen = UseState(false);
         
         return Layout.Vertical()
-            | new Button("Add New Product").HandleClick(_ => isSheetOpen.Set(true))
+            | new Button("Add New Product").OnClick(_ => isSheetOpen.Set(true))
             | product.ToForm()
                 .Required(m => m.Name, m => m.Price, m => m.Category)
                 .ToSheet(isSheetOpen, "New Product", "Fill in the product details below");
@@ -805,7 +868,7 @@ public class DialogFormExample : ViewBase
         var isDialogOpen = UseState(false);
         
         return Layout.Vertical()
-            | new Button("Create User").HandleClick(_ => isDialogOpen.Set(true))
+            | new Button("Create User").OnClick(_ => isDialogOpen.Set(true))
             | user.ToForm()
                 .Required(m => m.FirstName, m => m.LastName, m => m.Email)
                 .ToDialog(isDialogOpen, "Create New User", "Please provide user information", 
@@ -881,14 +944,14 @@ public class UseFormHookExample : ViewBase
         return Layout.Vertical()
             | formView
             | Layout.Horizontal()
-                | new Button("Save").HandleClick(_ => HandleSubmit())
+                | new Button("Save").OnClick(_ => HandleSubmit())
                     .Loading(loading).Disabled(loading)
                 | validationView;
     }
 }
 ```
 
-<WidgetDocs Type="Ivy.Form" ExtensionTypes="Ivy.Views.Forms.FormsExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Forms/Form.cs"/>
+<WidgetDocs Type="Ivy.Form" ExtensionTypes="Ivy.FormExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Forms/Form.cs"/>
 
 ## Examples
 
@@ -1069,12 +1132,12 @@ public class RealTimeFormExample : ViewBase
                     .Label(m => m.Number1, "First Number")
                     .Label(m => m.Number2, "Second Number")
                     .Label(m => m.Operation, "Operation")
-            ).Title("Calculator").Width(1/2f)
+            ).Title("Calculator").Width(Size.Fraction(1 / 2f))
             | new Card(
                 Layout.Vertical()
                     | Text.H3("Result")
                     | Text.Block($"{calculator.Value.Number1} {calculator.Value.Operation} {calculator.Value.Number2} = {CalculateResult()}")
-            ).Title("Result").Width(1/2f);
+            ).Title("Result").Width(Size.Fraction(1 / 2f));
     }
 }
 ```

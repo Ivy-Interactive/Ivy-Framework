@@ -2,12 +2,12 @@ import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { ThumbsEnum } from './types';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 
 interface ThumbsRatingProps {
   value?: number;
   onRate?: (rating: number) => void;
-  scale?: Scales;
+  density?: Densities;
   className?: string;
   disabled?: boolean;
   invalid?: string;
@@ -16,7 +16,7 @@ interface ThumbsRatingProps {
 const ThumbsRating = ({
   value = ThumbsEnum.None,
   onRate,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   className,
   disabled = false,
   invalid,
@@ -57,7 +57,7 @@ const ThumbsRating = ({
           )}
         >
           <ThumbsDown
-            size={iconScales[scale]}
+            size={iconScales[density]}
             className={cn(
               'transition-colors',
               value === ThumbsEnum.Down
@@ -85,7 +85,7 @@ const ThumbsRating = ({
           )}
         >
           <ThumbsUp
-            size={iconScales[scale]}
+            size={iconScales[density]}
             className={cn(
               'transition-colors',
               value === ThumbsEnum.Up

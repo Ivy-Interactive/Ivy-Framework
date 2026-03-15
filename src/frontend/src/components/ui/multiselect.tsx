@@ -5,38 +5,38 @@ import { Command, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Command as CommandPrimitive } from 'cmdk';
 import { cn } from '@/lib/utils';
 import { cva } from 'class-variance-authority';
-import { Scales } from '@/types/scale';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
-import { selectTriggerVariants } from '@/components/ui/select/variants';
+import { Densities } from '@/types/density';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
+import { selectTriggerVariant } from '@/components/ui/select/variant';
 
-// Variants for MultipleSelector - matches selectTriggerVariants exactly
-const multipleSelectorVariants = selectTriggerVariants;
+// Variants for MultipleSelector - matches selectTriggerVariant exactly
+const multipleSelectorVariant = selectTriggerVariant;
 
 // Variants for menu items
-const menuItemVariants = cva('cursor-pointer', {
+const menuItemVariant = cva('cursor-pointer', {
   variants: {
-    scale: {
+    density: {
       Small: 'px-2 py-1 text-xs',
       Medium: 'px-3 py-2 text-sm',
       Large: 'px-4 py-3 text-base',
     },
   },
   defaultVariants: {
-    scale: 'Medium',
+    density: 'Medium',
   },
 });
 
 // Variants for Badge components
-const badgeVariants = cva('hover:bg-secondary', {
+const badgeVariant = cva('hover:bg-secondary', {
   variants: {
-    scale: {
+    density: {
       Small: 'text-xs',
       Medium: 'text-sm',
       Large: 'text-base',
     },
   },
   defaultVariants: {
-    scale: 'Medium',
+    density: 'Medium',
   },
 });
 
@@ -59,8 +59,9 @@ interface MultipleSelectorProps {
   hidePlaceholderWhenSelected?: boolean;
   emptyIndicator?: React.ReactNode;
   invalid?: boolean;
-  scale?: Scales;
+  density?: Densities;
   maxVisibleBadges?: number;
+  ghost?: boolean;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -79,19 +80,37 @@ const MultipleSelector = React.forwardRef<
       hidePlaceholderWhenSelected = false,
       emptyIndicator,
       invalid = false,
-      scale = Scales.Medium,
+      density = Densities.Medium,
       maxVisibleBadges,
+      ghost = false,
     },
     ref
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     const containerRef = React.useRef<HTMLSpanElement>(null);
+    const triggerWrapperRef = React.useRef<HTMLDivElement>(null);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
     const [open, setOpen] = React.useState(false);
+    const [openUpward, setOpenUpward] = React.useState(false);
     const [inputValue, setInputValue] = React.useState('');
     const measureRef = React.useRef<HTMLDivElement>(null);
     const [visibleCount, setVisibleCount] = React.useState(
       maxVisibleBadges ?? 1
     );
+
+    React.useEffect(() => {
+      if (open && triggerWrapperRef.current) {
+        requestAnimationFrame(() => {
+          if (!triggerWrapperRef.current) return;
+          const rect = triggerWrapperRef.current.getBoundingClientRect();
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const dropdownHeight = dropdownRef.current?.offsetHeight ?? 0;
+          setOpenUpward(spaceBelow < dropdownHeight + 8);
+        });
+      } else {
+        setOpenUpward(false);
+      }
+    }, [open]);
 
     React.useEffect(() => {
       if (maxVisibleBadges !== undefined) {
@@ -161,7 +180,7 @@ const MultipleSelector = React.forwardRef<
       observer.observe(container);
 
       return () => observer.disconnect();
-    }, [value, maxVisibleBadges, scale]);
+    }, [value, maxVisibleBadges, density]);
 
     const handleUnselect = React.useCallback(
       (option: Option) => {
@@ -214,7 +233,7 @@ const MultipleSelector = React.forwardRef<
         )}
         {...commandProps}
       >
-        <div className="relative w-full">
+        <div ref={triggerWrapperRef} className="relative w-full">
           {maxVisibleBadges === undefined && value.length > 0 && (
             <div
               ref={measureRef}
@@ -233,21 +252,21 @@ const MultipleSelector = React.forwardRef<
                 <Badge
                   key={`measure-${option.value}`}
                   variant="secondary"
-                  className={cn(badgeVariants({ scale }), 'shrink-0')}
+                  className={cn(badgeVariant({ density }), 'shrink-0')}
                 >
                   {option.label}
                   <span
                     className="ml-1 p-1 h-3"
                     style={{ display: 'inline-flex' }}
                   >
-                    <X className={xIconVariants({ scale })} />
+                    <X className={xIconVariant({ density })} />
                   </span>
                 </Badge>
               ))}
               <Badge
                 variant="outline"
                 className={cn(
-                  badgeVariants({ scale }),
+                  badgeVariant({ density }),
                   'bg-muted text-muted-foreground shrink-0'
                 )}
               >
@@ -257,12 +276,14 @@ const MultipleSelector = React.forwardRef<
           )}
           <div
             className={cn(
-              multipleSelectorVariants({ scale }),
+              multipleSelectorVariant({ density }),
               disabled && 'cursor-not-allowed opacity-50',
               (!value || value.length === 0) && 'text-muted-foreground',
               invalid
                 ? 'border-destructive text-destructive-foreground focus-within:ring-destructive focus-within:border-destructive'
-                : undefined
+                : undefined,
+              ghost &&
+                'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground'
             )}
           >
             <span
@@ -274,7 +295,7 @@ const MultipleSelector = React.forwardRef<
                   key={option.value}
                   variant="secondary"
                   className={cn(
-                    badgeVariants({ scale }),
+                    badgeVariant({ density }),
                     'shrink-0',
                     invalid &&
                       'bg-destructive/10 border-destructive text-destructive'
@@ -285,7 +306,7 @@ const MultipleSelector = React.forwardRef<
                     type="button"
                     tabIndex={-1}
                     aria-label="Remove"
-                    className="ml-1 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center justify-center h-3 self-center leading-none"
+                    className="ml-1 p-0.5 rounded-sm hover:bg-black/10 dark:hover:bg-white/10 focus:outline-none cursor-pointer flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity"
                     onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -298,7 +319,7 @@ const MultipleSelector = React.forwardRef<
                     }}
                     onClick={() => handleUnselect(option)}
                   >
-                    <X className={xIconVariants({ scale })} />
+                    <X className={xIconVariant({ density })} />
                   </button>
                 </Badge>
               ))}
@@ -306,7 +327,7 @@ const MultipleSelector = React.forwardRef<
                 <Badge
                   variant="outline"
                   className={cn(
-                    badgeVariants({ scale }),
+                    badgeVariant({ density }),
                     'bg-muted text-muted-foreground shrink-0'
                   )}
                 >
@@ -371,7 +392,13 @@ const MultipleSelector = React.forwardRef<
             />
           </div>
           {open && defaultOptions.length > 0 && (
-            <div className="absolute w-full z-50 top-full mt-1 rounded-box border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+            <div
+              ref={dropdownRef}
+              className={cn(
+                'absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none animate-in',
+                openUpward ? 'bottom-full mb-1' : 'top-full mt-1'
+              )}
+            >
               <CommandGroup className="h-full overflow-auto max-h-[300px]">
                 {defaultOptions.map(option => {
                   const selected = isSelected(option);
@@ -387,7 +414,7 @@ const MultipleSelector = React.forwardRef<
                         toggleOption(option);
                       }}
                       className={cn(
-                        menuItemVariants({ scale }),
+                        menuItemVariant({ density }),
                         'flex items-center justify-between'
                       )}
                       disabled={option.disable}
@@ -396,7 +423,7 @@ const MultipleSelector = React.forwardRef<
                       {selected && (
                         <X
                           className={cn(
-                            xIconVariants({ scale }),
+                            xIconVariant({ density }),
                             'text-muted-foreground hover:text-foreground'
                           )}
                         />
@@ -408,7 +435,12 @@ const MultipleSelector = React.forwardRef<
             </div>
           )}
           {open && defaultOptions.length === 0 && emptyIndicator && (
-            <div className="absolute w-full z-50 top-full mt-1 rounded-box border bg-popover text-popover-foreground shadow-md outline-none p-2">
+            <div
+              className={cn(
+                'absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none p-2',
+                openUpward ? 'bottom-full mb-1' : 'top-full mt-1'
+              )}
+            >
               {emptyIndicator}
             </div>
           )}

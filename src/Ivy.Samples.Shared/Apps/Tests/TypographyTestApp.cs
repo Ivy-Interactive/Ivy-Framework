@@ -1,11 +1,6 @@
-using Ivy.Shared;
-using Ivy.Samples.Shared.Apps;
-using Ivy.Views;
-using Ivy.Widgets;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Airplay, path: ["Tests"], searchHints: ["typography", "text", "markdown", "comparison"])]
+[App(icon: Icons.Airplay, path: ["Tests"], isVisible: false, searchHints: ["typography", "text", "markdown", "comparison"])]
 public class TypographyComparisonApp : SampleBase
 {
     protected override object? BuildSample()
@@ -70,7 +65,7 @@ End of the typography test.
                     | Text.P("and")
                     | Text.Inline("Italic Text").Italic()
                     | Text.P("and")
-                    | Text.InlineCode("Inline Code").Color(Colors.Red)
+                    | Text.Monospaced("Inline Code").Color(Colors.Red)
                   )
                  | new Separator()
                  | Text.P("End of the typography test.")

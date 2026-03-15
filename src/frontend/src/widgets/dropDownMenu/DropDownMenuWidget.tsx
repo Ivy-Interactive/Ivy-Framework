@@ -19,6 +19,8 @@ import { MenuItem } from '@/types/widgets';
 import Icon from '@/components/Icon';
 import { camelCase } from '@/lib/utils';
 
+const EMPTY_ARRAY: never[] = [];
+
 interface DropDownMenuWidgetProps {
   id: string;
   items: MenuItem[];
@@ -31,10 +33,120 @@ interface DropDownMenuWidgetProps {
   };
 }
 
+interface DropDownMenuItemGroupProps {
+  items: MenuItem[];
+  onItemClick: (item: MenuItem) => void;
+}
+
+const DropDownMenuItemGroup = ({
+  items,
+  onItemClick,
+}: DropDownMenuItemGroupProps) => {
+  return items.map((item, i) => {
+    // Handle group variant
+    if (item.variant === 'Group' && item.children) {
+      const groupKey = item.label || `group-${i}`;
+      return (
+        <React.Fragment key={groupKey}>
+          {item.label && <DropdownMenuLabel>{item.label}</DropdownMenuLabel>}
+          <DropdownMenuGroup>
+            <DropDownMenuItemGroup
+              items={item.children}
+              onItemClick={onItemClick}
+            />
+          </DropdownMenuGroup>
+        </React.Fragment>
+      );
+    }
+
+    // Handle separator variant
+    if (item.variant === 'Separator') {
+      const sepKey = `separator-${i}`;
+      return <DropdownMenuSeparator key={sepKey} />;
+    }
+
+    // Handle checkbox variant
+    if (item.variant === 'Checkbox') {
+      return (
+        <DropdownMenuItem
+          key={item.label}
+          onClick={() => onItemClick(item)}
+          disabled={item.disabled}
+          className={item.checked ? 'bg-accent' : ''}
+        >
+          {item.icon && <Icon name={item.icon} size={14} />}
+          {item.label}
+          {item.checked && <span className="ml-auto">✓</span>}
+          {item.shortcut && (
+            <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
+          )}
+        </DropdownMenuItem>
+      );
+    }
+
+    // Handle radio variant
+    if (item.variant === 'Radio') {
+      return (
+        <DropdownMenuItem
+          key={item.label}
+          onClick={() => onItemClick(item)}
+          disabled={item.disabled}
+          className={item.checked ? 'bg-accent' : ''}
+        >
+          {item.icon && <Icon name={item.icon} size={14} />}
+          {item.label}
+          {item.checked && <span className="ml-auto">●</span>}
+          {item.shortcut && (
+            <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
+          )}
+        </DropdownMenuItem>
+      );
+    }
+
+    // Handle submenu with children
+    if (item.children && item.children.length > 0) {
+      return (
+        <DropdownMenuSub key={item.label}>
+          <DropdownMenuSubTrigger disabled={item.disabled}>
+            {item.icon && <Icon name={item.icon} size={14} />}
+            {item.label}
+            {item.shortcut && (
+              <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
+            )}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent className="m-2">
+              <DropDownMenuItemGroup
+                items={item.children}
+                onItemClick={onItemClick}
+              />
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+      );
+    }
+
+    // Default menu item
+    return (
+      <DropdownMenuItem
+        key={item.label}
+        onClick={() => onItemClick(item)}
+        disabled={item.disabled}
+      >
+        {item.icon && <Icon name={item.icon} size={14} />}
+        {item.label}
+        {item.shortcut && (
+          <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
+        )}
+      </DropdownMenuItem>
+    );
+  });
+};
+
 export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   slots,
   id,
-  items = [],
+  items = EMPTY_ARRAY,
   align = 'Start',
   side = 'Bottom',
   alignOffset = 0,
@@ -68,100 +180,6 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
     }
   };
 
-  const renderMenuItems = (items: MenuItem[]) => {
-    return items.map((item, index) => {
-      // Handle group variant
-      if (item.variant === 'Group' && item.children) {
-        return (
-          <React.Fragment key={`group-${index}`}>
-            {item.label && <DropdownMenuLabel>{item.label}</DropdownMenuLabel>}
-            <DropdownMenuGroup>
-              {renderMenuItems(item.children)}
-            </DropdownMenuGroup>
-          </React.Fragment>
-        );
-      }
-
-      // Handle separator variant
-      if (item.variant === 'Separator') {
-        return <DropdownMenuSeparator key={`separator-${index}`} />;
-      }
-
-      // Handle checkbox variant
-      if (item.variant === 'Checkbox') {
-        return (
-          <DropdownMenuItem
-            key={item.label}
-            onClick={() => onItemClick(item)}
-            disabled={item.disabled}
-            className={item.checked ? 'bg-accent' : ''}
-          >
-            {item.icon && <Icon name={item.icon} size={14} />}
-            {item.label}
-            {item.checked && <span className="ml-auto">✓</span>}
-            {item.shortcut && (
-              <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
-            )}
-          </DropdownMenuItem>
-        );
-      }
-
-      // Handle radio variant
-      if (item.variant === 'Radio') {
-        return (
-          <DropdownMenuItem
-            key={item.label}
-            onClick={() => onItemClick(item)}
-            disabled={item.disabled}
-            className={item.checked ? 'bg-accent' : ''}
-          >
-            {item.icon && <Icon name={item.icon} size={14} />}
-            {item.label}
-            {item.checked && <span className="ml-auto">●</span>}
-            {item.shortcut && (
-              <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
-            )}
-          </DropdownMenuItem>
-        );
-      }
-
-      // Handle submenu with children
-      if (item.children && item.children.length > 0) {
-        return (
-          <DropdownMenuSub key={item.label}>
-            <DropdownMenuSubTrigger disabled={item.disabled}>
-              {item.icon && <Icon name={item.icon} size={14} />}
-              {item.label}
-              {item.shortcut && (
-                <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
-              )}
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent className="m-2">
-                {renderMenuItems(item.children)}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        );
-      }
-
-      // Default menu item
-      return (
-        <DropdownMenuItem
-          key={item.label}
-          onClick={() => onItemClick(item)}
-          disabled={item.disabled}
-        >
-          {item.icon && <Icon name={item.icon} size={14} />}
-          {item.label}
-          {item.shortcut && (
-            <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
-          )}
-        </DropdownMenuItem>
-      );
-    });
-  };
-
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger ref={triggerRef} asChild>
@@ -177,7 +195,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
         alignOffset={alignOffset}
       >
         {slots.Header && <DropdownMenuLabel>{slots.Header}</DropdownMenuLabel>}
-        {renderMenuItems(items)}
+        <DropDownMenuItemGroup items={items} onItemClick={onItemClick} />
       </DropdownMenuContent>
     </DropdownMenu>
   );

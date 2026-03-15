@@ -1,12 +1,12 @@
-﻿using System.Collections.Concurrent;
-using Ivy.Apps;
+using System.Collections.Concurrent;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using AppContext = Ivy.Apps.AppContext;
+using AppContext = Ivy.AppContext;
 
-namespace Ivy.Hooks;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class UseWebhookExtensions
 {
@@ -53,7 +53,7 @@ public class WebhookController : Controller, IWebhookRegistry
     private static readonly ConcurrentDictionary<string, Func<HttpRequest, Task<IActionResult>>> Handlers = new();
 
     [Route("ivy/webhook/{id}")]
-    [HttpGet, HttpPost]
+    [HttpGet, HttpPost, HttpPut, HttpDelete, HttpPatch]
     public Task<IActionResult> HandleWebhookWithIdInPath(string id)
     {
         if (Handlers.TryGetValue(id, out var handler))
@@ -64,7 +64,7 @@ public class WebhookController : Controller, IWebhookRegistry
     }
 
     [Route("ivy/webhook")]
-    [HttpGet, HttpPost]
+    [HttpGet, HttpPost, HttpPut, HttpDelete, HttpPatch]
     public Task<IActionResult> HandleWebhookWithIdInStateQueryParameter([FromQuery(Name = "state")] string? id)
     {
         if (string.IsNullOrEmpty(id))

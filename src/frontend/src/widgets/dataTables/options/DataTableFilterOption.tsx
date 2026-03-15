@@ -298,6 +298,14 @@ export const DataTableFilterOption: React.FC<{
     <div
       ref={editorContainerRef}
       onClick={handleContainerClick}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleContainerClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       className={cn(
         'flex items-center w-full h-full justify-between',
         'rounded-tr-md rounded-br-md border transition-colors',
@@ -310,6 +318,8 @@ export const DataTableFilterOption: React.FC<{
         data-query-valid={isQueryValid}
         onKeyDownCapture={handleKeyDownCapture}
         onKeyDown={handleKeyDown}
+        role="searchbox"
+        tabIndex={-1}
       >
         <QueryEditor
           value={query}

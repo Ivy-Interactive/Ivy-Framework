@@ -1,9 +1,4 @@
-using Ivy.Shared;
-using Ivy.Themes;
-using Ivy.Hooks;
-using Ivy.Samples.Shared.Helpers;
-using Ivy.Views.Forms;
-using Ivy;
+using System.Collections.Immutable;
 using Ivy.Widgets.Internal;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
@@ -16,17 +11,13 @@ public class ThemeCustomizer : SampleBase
         var currentTheme = UseState(Theme.Default);
         var isExportOpen = UseState(false);
         var client = UseService<IClientProvider>();
-        var themeService = new ThemeService();
         var selectedMode = UseState("light"); // "light" or "dark"
-
-        // Individual color states for live editing
         var editingTheme = UseState(CloneTheme(Theme.Default));
-
-        // UseQuery handles theme application reactively with built-in state management
         var themeQuery = UseQuery(
             key: editingTheme.Value,
             fetcher: async ct =>
             {
+                var themeService = new ThemeService();
                 themeService.SetTheme(editingTheme.Value);
                 var css = themeService.GenerateThemeCss();
                 client.ApplyTheme(css);
@@ -62,7 +53,7 @@ public class ThemeCustomizer : SampleBase
             | new Button("Copy Configuration")
                 .Primary()
                 .Icon(Icons.Copy)
-                .HandleClick(() => isExportOpen.Set(true))
+                .OnClick(() => isExportOpen.Set(true))
                 .Width(Size.Full());
 
         // Right side - Live Preview
@@ -83,7 +74,7 @@ public class ThemeCustomizer : SampleBase
                                 | new Button("Copy C# Code")
                                     .Primary()
                                     .Icon(Icons.ClipboardCopy, Align.Right)
-                                    .HandleClick(() =>
+                                    .OnClick(() =>
                                     {
                                         client.CopyToClipboard(GenerateCSharpCode(editingTheme.Value));
                                         client.Toast("C# theme configuration copied to clipboard!", "Export");
@@ -100,7 +91,7 @@ public class ThemeCustomizer : SampleBase
                                 | new Button("Copy JSON")
                                     .Primary()
                                     .Icon(Icons.ClipboardCopy, Align.Right)
-                                    .HandleClick(() =>
+                                    .OnClick(() =>
                                     {
                                         var json = System.Text.Json.JsonSerializer.Serialize(
                                             editingTheme.Value,
@@ -190,11 +181,10 @@ public class ThemeCustomizer : SampleBase
         public override object Build()
         {
             var client = UseService<IClientProvider>();
+            var selectedPreset = UseState(editingTheme.Value.Name);
             var currentColors = selectedMode.Value == "light"
                 ? editingTheme.Value.Colors.Light
                 : editingTheme.Value.Colors.Dark;
-
-            var selectedPreset = UseState(editingTheme.Value.Name);
 
             void UpdateColor(Action<ThemeColors> updater)
             {
@@ -235,7 +225,7 @@ public class ThemeCustomizer : SampleBase
                     | new Button("Light")
                         .Variant(selectedMode.Value == "light" ? ButtonVariant.Primary : ButtonVariant.Outline)
                         .Icon(Icons.Sun)
-                        .HandleClick(() =>
+                        .OnClick(() =>
                         {
                             selectedMode.Set("light");
                             client.SetThemeMode(ThemeMode.Light);
@@ -244,7 +234,7 @@ public class ThemeCustomizer : SampleBase
                     | new Button("Dark")
                         .Variant(selectedMode.Value == "dark" ? ButtonVariant.Primary : ButtonVariant.Outline)
                         .Icon(Icons.Moon)
-                        .HandleClick(() =>
+                        .OnClick(() =>
                         {
                             selectedMode.Set("dark");
                             client.SetThemeMode(ThemeMode.Dark);
@@ -258,42 +248,42 @@ public class ThemeCustomizer : SampleBase
                     content: Layout.Vertical()
                         | Text.Block("Main Colors").Small()
                         | (Layout.Grid().Columns(4).Gap(2)
-                            | new ThemeColorPicker(currentColors.Primary ?? "#000000", e => UpdateColor(c => c.Primary = e.Value), placeholder: "Primary").WithField().Medium().Description("Primary").WithTooltip($"Primary: {currentColors.Primary ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.PrimaryForeground ?? "#000000", e => UpdateColor(c => c.PrimaryForeground = e.Value), placeholder: "Primary Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Primary Foreground: {currentColors.PrimaryForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Secondary ?? "#000000", e => UpdateColor(c => c.Secondary = e.Value), placeholder: "Secondary").WithField().Medium().Description("Secondary").WithTooltip($"Secondary: {currentColors.Secondary ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.SecondaryForeground ?? "#000000", e => UpdateColor(c => c.SecondaryForeground = e.Value), placeholder: "Secondary Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Secondary Foreground: {currentColors.SecondaryForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Background ?? "#000000", e => UpdateColor(c => c.Background = e.Value), placeholder: "Background").WithField().Medium().Description("Background").WithTooltip($"Background: {currentColors.Background ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Foreground ?? "#000000", e => UpdateColor(c => c.Foreground = e.Value), placeholder: "Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Foreground: {currentColors.Foreground ?? "#000000"}"))
+                            | new ThemeColorPicker(currentColors.Primary ?? "#000000", e => UpdateColor(c => c.Primary = e.Value), placeholder: "Primary").AllowAlpha().WithField().Medium().Description("Primary").WithTooltip($"Primary: {currentColors.Primary ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.PrimaryForeground ?? "#000000", e => UpdateColor(c => c.PrimaryForeground = e.Value), placeholder: "Primary Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Primary Foreground: {currentColors.PrimaryForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Secondary ?? "#000000", e => UpdateColor(c => c.Secondary = e.Value), placeholder: "Secondary").AllowAlpha().WithField().Medium().Description("Secondary").WithTooltip($"Secondary: {currentColors.Secondary ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.SecondaryForeground ?? "#000000", e => UpdateColor(c => c.SecondaryForeground = e.Value), placeholder: "Secondary Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Secondary Foreground: {currentColors.SecondaryForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Background ?? "#000000", e => UpdateColor(c => c.Background = e.Value), placeholder: "Background").AllowAlpha().WithField().Medium().Description("Background").WithTooltip($"Background: {currentColors.Background ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Foreground ?? "#000000", e => UpdateColor(c => c.Foreground = e.Value), placeholder: "Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Foreground: {currentColors.Foreground ?? "#000000"}"))
 
                         | new Separator()
 
                         | Text.Block("Semantic Colors").Small()
                         | (Layout.Grid().Columns(4).Gap(2)
-                            | new ThemeColorPicker(currentColors.Success ?? "#000000", e => UpdateColor(c => c.Success = e.Value), placeholder: "Success").WithField().Medium().Description("Success").WithTooltip($"Success: {currentColors.Success ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.SuccessForeground ?? "#000000", e => UpdateColor(c => c.SuccessForeground = e.Value), placeholder: "Success Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Success Foreground: {currentColors.SuccessForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Destructive ?? "#000000", e => UpdateColor(c => c.Destructive = e.Value), placeholder: "Destructive").WithField().Medium().Description("Destructive").WithTooltip($"Destructive: {currentColors.Destructive ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.DestructiveForeground ?? "#000000", e => UpdateColor(c => c.DestructiveForeground = e.Value), placeholder: "Destructive Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Destructive Foreground: {currentColors.DestructiveForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Warning ?? "#000000", e => UpdateColor(c => c.Warning = e.Value), placeholder: "Warning").WithField().Medium().Description("Warning").WithTooltip($"Warning: {currentColors.Warning ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.WarningForeground ?? "#000000", e => UpdateColor(c => c.WarningForeground = e.Value), placeholder: "Warning Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Warning Foreground: {currentColors.WarningForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Info ?? "#000000", e => UpdateColor(c => c.Info = e.Value), placeholder: "Info").WithField().Medium().Description("Info").WithTooltip($"Info: {currentColors.Info ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.InfoForeground ?? "#000000", e => UpdateColor(c => c.InfoForeground = e.Value), placeholder: "Info Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Info Foreground: {currentColors.InfoForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Success ?? "#000000", e => UpdateColor(c => c.Success = e.Value), placeholder: "Success").AllowAlpha().WithField().Medium().Description("Success").WithTooltip($"Success: {currentColors.Success ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.SuccessForeground ?? "#000000", e => UpdateColor(c => c.SuccessForeground = e.Value), placeholder: "Success Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Success Foreground: {currentColors.SuccessForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Destructive ?? "#000000", e => UpdateColor(c => c.Destructive = e.Value), placeholder: "Destructive").AllowAlpha().WithField().Medium().Description("Destructive").WithTooltip($"Destructive: {currentColors.Destructive ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.DestructiveForeground ?? "#000000", e => UpdateColor(c => c.DestructiveForeground = e.Value), placeholder: "Destructive Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Destructive Foreground: {currentColors.DestructiveForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Warning ?? "#000000", e => UpdateColor(c => c.Warning = e.Value), placeholder: "Warning").AllowAlpha().WithField().Medium().Description("Warning").WithTooltip($"Warning: {currentColors.Warning ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.WarningForeground ?? "#000000", e => UpdateColor(c => c.WarningForeground = e.Value), placeholder: "Warning Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Warning Foreground: {currentColors.WarningForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Info ?? "#000000", e => UpdateColor(c => c.Info = e.Value), placeholder: "Info").AllowAlpha().WithField().Medium().Description("Info").WithTooltip($"Info: {currentColors.Info ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.InfoForeground ?? "#000000", e => UpdateColor(c => c.InfoForeground = e.Value), placeholder: "Info Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Info Foreground: {currentColors.InfoForeground ?? "#000000"}")
       )
 
                         | new Separator()
 
                         | Text.Block("UI Element Colors").Small()
                         | (Layout.Grid().Columns(4).Gap(2)
-                            | new ThemeColorPicker(currentColors.Muted ?? "#000000", e => UpdateColor(c => c.Muted = e.Value), placeholder: "Muted").WithField().Medium().Description("Muted").WithTooltip($"Muted: {currentColors.Muted ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.MutedForeground ?? "#000000", e => UpdateColor(c => c.MutedForeground = e.Value), placeholder: "Muted Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Muted Foreground: {currentColors.MutedForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Accent ?? "#000000", e => UpdateColor(c => c.Accent = e.Value), placeholder: "Accent").WithField().Medium().Description("Accent").WithTooltip($"Accent: {currentColors.Accent ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.AccentForeground ?? "#000000", e => UpdateColor(c => c.AccentForeground = e.Value), placeholder: "Accent Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Accent Foreground: {currentColors.AccentForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Card ?? "#000000", e => UpdateColor(c => c.Card = e.Value), placeholder: "Card").WithField().Medium().Description("Card").WithTooltip($"Card: {currentColors.Card ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.CardForeground ?? "#000000", e => UpdateColor(c => c.CardForeground = e.Value), placeholder: "Card Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Card Foreground: {currentColors.CardForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Popover ?? "#000000", e => UpdateColor(c => c.Popover = e.Value), placeholder: "Popover").WithField().Medium().Description("Popover").WithTooltip($"Popover: {currentColors.Popover ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.PopoverForeground ?? "#000000", e => UpdateColor(c => c.PopoverForeground = e.Value), placeholder: "Popover Foreground").Foreground(true).WithField().Medium().Description("\u00A0").WithTooltip($"Popover Foreground: {currentColors.PopoverForeground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Border ?? "#000000", e => UpdateColor(c => c.Border = e.Value), placeholder: "Border").WithField().Medium().Description("Border").WithTooltip($"Border: {currentColors.Border ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Input ?? "#000000", e => UpdateColor(c => c.Input = e.Value), placeholder: "Input").WithField().Medium().Description("Input").WithTooltip($"Input: {currentColors.Input ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Ring ?? "#000000", e => UpdateColor(c => c.Ring = e.Value), placeholder: "Ring").WithField().Medium().Description("Ring").WithTooltip($"Ring: {currentColors.Ring ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Muted ?? "#000000", e => UpdateColor(c => c.Muted = e.Value), placeholder: "Muted").AllowAlpha().WithField().Medium().Description("Muted").WithTooltip($"Muted: {currentColors.Muted ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.MutedForeground ?? "#000000", e => UpdateColor(c => c.MutedForeground = e.Value), placeholder: "Muted Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Muted Foreground: {currentColors.MutedForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Accent ?? "#000000", e => UpdateColor(c => c.Accent = e.Value), placeholder: "Accent").AllowAlpha().WithField().Medium().Description("Accent").WithTooltip($"Accent: {currentColors.Accent ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.AccentForeground ?? "#000000", e => UpdateColor(c => c.AccentForeground = e.Value), placeholder: "Accent Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Accent Foreground: {currentColors.AccentForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Card ?? "#000000", e => UpdateColor(c => c.Card = e.Value), placeholder: "Card").AllowAlpha().WithField().Medium().Description("Card").WithTooltip($"Card: {currentColors.Card ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.CardForeground ?? "#000000", e => UpdateColor(c => c.CardForeground = e.Value), placeholder: "Card Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Card Foreground: {currentColors.CardForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Popover ?? "#000000", e => UpdateColor(c => c.Popover = e.Value), placeholder: "Popover").AllowAlpha().WithField().Medium().Description("Popover").WithTooltip($"Popover: {currentColors.Popover ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.PopoverForeground ?? "#000000", e => UpdateColor(c => c.PopoverForeground = e.Value), placeholder: "Popover Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Popover Foreground: {currentColors.PopoverForeground ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Border ?? "#000000", e => UpdateColor(c => c.Border = e.Value), placeholder: "Border").AllowAlpha().WithField().Medium().Description("Border").WithTooltip($"Border: {currentColors.Border ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Input ?? "#000000", e => UpdateColor(c => c.Input = e.Value), placeholder: "Input").AllowAlpha().WithField().Medium().Description("Input").WithTooltip($"Input: {currentColors.Input ?? "#000000"}")
+                            | new ThemeColorPicker(currentColors.Ring ?? "#000000", e => UpdateColor(c => c.Ring = e.Value), placeholder: "Ring").AllowAlpha().WithField().Medium().Description("Ring").WithTooltip($"Ring: {currentColors.Ring ?? "#000000"}")
       )
                 ).Height(Size.Fit()).Open()
 
@@ -353,7 +343,7 @@ public class ThemeCustomizer : SampleBase
                         colorState.Set(e.Value);
                         onChange(e.Value);
                     },
-                    variant: ColorInputs.TextAndPicker
+                    variant: ColorInputVariant.TextAndPicker
                 );
         }
     }
@@ -447,7 +437,7 @@ public class ThemeCustomizer : SampleBase
                 )
                 .Width(Size.Px(CardSize))
                 .Height(Size.Px(CardSize))
-                .HandleClick(() => onUpdate(remValue == "0px" ? null : remValue))
+                .OnClick(() => onUpdate(remValue == "0px" ? null : remValue))
                 .WithTooltip($"{remValue} ({pxRadius}px)");
         }
     }
@@ -529,12 +519,10 @@ public class ThemeCustomizer : SampleBase
 
             // --- Settings / inputs / misc state -------------------------------
             var agreeTerms = UseState(true);
-            var themeSatisfaction = UseState(4); // 1–5 stars
+            var themeSatisfaction = UseState(4);
             var uxSatisfaction = UseState((int?)null);
 
             var paginationPage = UseState(1);
-            const int totalPages = 5;
-
             var passwordText = UseState("");
             var notesText = UseState("");
             var searchText = UseState("");
@@ -548,14 +536,24 @@ public class ThemeCustomizer : SampleBase
             var dateTimeState = UseState(DateTime.Now);
             var dateRangeState = UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
 
-            var themeIcon = GetThemeIcon(_theme.Name);
-            var statusVariant = GetStatusVariant(_theme.Name);
-
             // --- Chat state ----------------------------------------------------
             var chatMessages = UseState(ImmutableArray.Create<ChatMessage>(
                 new ChatMessage(ChatSender.Assistant,
                     $"You're previewing the '{_theme.Name}' theme. Type a message to see how chat looks in this theme.")
             ));
+
+            UseEffect(() =>
+            {
+                if (!string.IsNullOrWhiteSpace(payment.Value.NameOnCard) &&
+                    !string.IsNullOrWhiteSpace(payment.Value.CardNumber))
+                {
+                    client.Toast($"Payment form submitted for {payment.Value.NameOnCard}", "Form");
+                }
+            }, payment);
+
+            const int totalPages = 5;
+            var themeIcon = GetThemeIcon(_theme.Name);
+            var statusVariant = GetStatusVariant(_theme.Name);
 
             // --- Helpers -------------------------------------------------------
             ValueTask OnChatSend(Event<Chat, string> e)
@@ -596,21 +594,12 @@ public class ThemeCustomizer : SampleBase
                 .Builder(m => m.NameOnCard, s => s.ToTextInput().Disabled(disableInputs.Value))
                 .Builder(m => m.CardNumber, s => s.ToTextInput().Disabled(disableInputs.Value))
                 .Builder(m => m.Cvv, s => s.ToPasswordInput().Placeholder("CVV").Disabled(disableInputs.Value))
-                .Builder(m => m.Comments, s => s.ToTextAreaInput().Placeholder("Add any additional comments").Disabled(disableInputs.Value))
+                .Builder(m => m.Comments, s => s.ToTextareaInput().Placeholder("Add any additional comments").Disabled(disableInputs.Value))
                 .Builder(m => m.Month, s => s.ToTextInput().Disabled(disableInputs.Value))
                 .Builder(m => m.Year, s => s.ToTextInput().Disabled(disableInputs.Value))
                 .Builder(m => m.BillingAddress, s => s.ToTextInput().Disabled(disableInputs.Value))
                 .Builder(m => m.SameAsShipping, s => s.ToBoolInput().Disabled(disableInputs.Value))
                 .Required(m => m.NameOnCard, m => m.CardNumber, m => m.Cvv);
-
-            UseEffect(() =>
-            {
-                if (!string.IsNullOrWhiteSpace(payment.Value.NameOnCard) &&
-                    !string.IsNullOrWhiteSpace(payment.Value.CardNumber))
-                {
-                    client.Toast($"Payment form submitted for {payment.Value.NameOnCard}", "Form");
-                }
-            }, payment);
 
             QueryResult<Option<string>[]> QueryCategories(IViewContext context, string query)
             {
@@ -633,11 +622,11 @@ public class ThemeCustomizer : SampleBase
             Button CreateLoadingButton(string name, ButtonVariant variant) =>
                 new Button(name, variant: variant)
                 {
-                    OnClick = _ =>
+                    OnClick = new(_ =>
                     {
                         client.Toast($"{name} button clicked", "Action");
                         return ValueTask.CompletedTask;
-                    }
+                    })
                 }.Width(Size.Full()).Disabled(disableButtons.Value);
 
             static object GetPaginationContent(int page, int total) =>
@@ -650,7 +639,7 @@ public class ThemeCustomizer : SampleBase
                             2 => "Badges, borders and subtle shadows adapt instantly to your theme.",
                             3 => "Form controls, switches and sliders stay readable in every palette.",
                             4 => "Try a different theme and see how this card transforms.",
-                            _ => "You’ve reached the end of the tour — tweak settings and explore freely."
+                            _ => "You've reached the end of the tour - tweak settings and explore freely."
                         }).Small()
                 ).Height(Size.Fit());
 
@@ -691,7 +680,7 @@ public class ThemeCustomizer : SampleBase
                                 new Option<string>("Success", "Success"),
                                 new Option<string>("Warning", "Warning"),
                                 new Option<string>("Info", "Info")
-                            }).Variant(SelectInputs.Toggle).Disabled(disableInputs.Value)
+                            }).Variant(SelectInputVariant.Toggle).Disabled(disableInputs.Value)
                             | Text.Block("Selected badges:").Small()
                             | (Layout.Horizontal().Align(Align.Center)
                                 | badgeVariant.Value.Select(variant => variant switch
@@ -723,9 +712,9 @@ public class ThemeCustomizer : SampleBase
                             | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
                         | (Layout.Horizontal().Width(Size.Full())
                             | (Layout.Vertical().Align(Align.Left)
-                                | themeSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Stars).Disabled(disableInputs.Value))
+                                | themeSatisfaction.ToFeedbackInput().Stars().Disabled(disableInputs.Value))
                             | (Layout.Vertical().Align(Align.Right)
-                                | uxSatisfaction.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Disabled(disableInputs.Value)))
+                                | uxSatisfaction.ToFeedbackInput().Thumbs().Disabled(disableInputs.Value)))
                         | new Box((Layout.Horizontal().Height(Size.Fit())
                             | agreeTerms.ToBoolInput().Disabled(disableInputs.Value)
                             | Text.Block("I agree to the terms and conditions")))
@@ -761,7 +750,7 @@ public class ThemeCustomizer : SampleBase
                         | email.ToTextInput()
                             .Placeholder("Email (Ctrl+E)")
                             .ShortcutKey("Ctrl+E")
-                            .Variant(TextInputs.Email)
+                            .Variant(TextInputVariant.Email)
                             .Disabled(disableInputs.Value)
                         | Text.Block("Price range").Bold()
                         | Text.P($"Estimated monthly budget: ${price.Value}").Small()
@@ -840,14 +829,14 @@ public class ThemeCustomizer : SampleBase
                     new Box("Preview")
                         .Width(Size.Px(100))
                         .Height(Size.Px(60))
-                        .Color(previewColor)
+                        .Background(previewColor)
                         .BorderRadius(BorderRadius.Rounded)
                         .ContentAlign(Align.Center),
                     Layout.Vertical()
                         | Text.P("Background:").Small()
-                        | bgState.ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
+                        | bgState.ToColorInput().Variant(ColorInputVariant.TextAndPicker).Disabled()
                         | Text.P("Foreground:").Small()
-                        | fgState.ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
+                        | fgState.ToColorInput().Variant(ColorInputVariant.TextAndPicker).Disabled()
                 );
         }
     }

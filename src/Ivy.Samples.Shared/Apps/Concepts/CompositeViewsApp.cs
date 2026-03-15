@@ -1,4 +1,3 @@
-using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
@@ -14,7 +13,7 @@ public class LoginForm(IState<LoginData> login) : SampleBase
 
         return Layout.Vertical(
             username.ToTextInput(),
-            password.ToTextInput().Variant(TextInputs.Password),
+            password.ToTextInput().Variant(TextInputVariant.Password),
             new BoolInput<bool>(rememberMe).Label("Remember me"),
             new Button("Login", _ =>
             {

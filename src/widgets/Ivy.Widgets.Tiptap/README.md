@@ -15,7 +15,7 @@ dotnet add package Ivy.Widgets.Tiptap
 ```csharp
 using Ivy.Widgets.Tiptap;
 
-var content = this.UseState("<p>Hello, world!</p>");
+var content = UseState("<p>Hello, world!</p>");
 
 new TiptapInput(content);
 ```
@@ -43,7 +43,7 @@ content.ToTiptapInput()
     .AutoFocus()
     .ShowToolbar()
     .HandleFocus(() => Console.WriteLine("Focused"))
-    .HandleBlur(() => Console.WriteLine("Blurred"));
+    .OnBlur(() => Console.WriteLine("Blurred"));
 ```
 
 ## Features

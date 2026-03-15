@@ -26,7 +26,7 @@ public class SignalExample : ViewBase
 {
     public override object? Build()
     {
-        var signal = CreateSignal<CounterSignal, int, string>();
+        var signal = UseSignal<CounterSignal, int, string>();
         var output = UseState("");
 
         async ValueTask OnClick(Event<Button> _)
@@ -74,12 +74,12 @@ public class OneToManyDemo : ViewBase
 {
     public override object? Build()
     {
-        var signal = CreateSignal<BroadcastSignal, string, Unit>();
+        var signal = UseSignal<BroadcastSignal, string, Unit>();
         var message = UseState("");
         var receiver1Message = UseState("");
         var receiver2Message = UseState("");
         var receiver3Message = UseState("");
-        
+
         async ValueTask BroadcastMessage(Event<Button> _)
         {
             if (!string.IsNullOrWhiteSpace(message.Value))
@@ -88,20 +88,17 @@ public class OneToManyDemo : ViewBase
                 message.Set("");
             }
         }
-        
-        // Set up signal receiver
-        var receiver = UseSignal<BroadcastSignal, string, Unit>();
-        
+
         // Process incoming messages
-        UseEffect(() => receiver.Receive(message =>
+        UseEffect(() => signal.Receive(msg =>
         {
             // Each receiver processes the same message differently
-            receiver1Message.Set($"Logged: {message}");
-            receiver2Message.Set($"Analyzed: {message.Length} characters");
-            receiver3Message.Set($"Stats: {message.Split(' ').Length} words");
+            receiver1Message.Set($"Logged: {msg}");
+            receiver2Message.Set($"Analyzed: {msg.Length} characters");
+            receiver3Message.Set($"Stats: {msg.Split(' ').Length} words");
             return new Unit();
         }));
-        
+
         return Layout.Vertical(
             Layout.Horizontal(
                 message.ToTextInput("Broadcast Message"),
@@ -128,27 +125,27 @@ public class RequestResponseDemo : ViewBase
 {
     public override object? Build()
     {
-        var signal = CreateSignal<DataRequestSignal, string, string[]>();
+        var signal = UseSignal<DataRequestSignal, string, string[]>();
         var query = UseState<string>("");
         var results = UseState<string[]>(() => Array.Empty<string>());
         var isSearching = UseState<bool>(false);
-        
+
         async ValueTask SearchData(Event<Button> _)
         {
             if (!string.IsNullOrWhiteSpace(query.Value))
             {
                 isSearching.Set(true);
-                
+
                 // Send request via signal and get responses from all providers
                 var responses = await signal.Send(query.Value);
                 var allResults = responses.SelectMany(r => r).ToArray();
-                
+
                 results.Set(allResults);
                 query.Set("");
                 isSearching.Set(false);
             }
         }
-        
+
         return Layout.Vertical(
             Text.Block("Try searching for: John, Jane, Laptop, Smartphone, Tablet"),
             Layout.Horizontal(
@@ -169,33 +166,33 @@ public class DataProvider : ViewBase
 {
     private readonly string _providerName;
     private readonly string[] _dataSource;
-    
+
     public DataProvider(string providerName, string[] dataSource)
     {
         _providerName = providerName;
         _dataSource = dataSource;
     }
-    
+
     public override object? Build()
     {
         var signal = UseSignal<DataRequestSignal, string, string[]>();
         var processedQueries = UseState<int>(0);
         var lastQuery = UseState<string>("");
-        
+
         UseEffect(() => signal.Receive(query =>
         {
             processedQueries.Set(processedQueries.Value + 1);
             lastQuery.Set(query);
-            
+
             // Process the query and return results
             var matchingResults = _dataSource
                 .Where(item => item.Contains(query, StringComparison.OrdinalIgnoreCase))
                 .Select(item => $"[{_providerName}] {item}")
                 .ToArray();
-                
+
             return matchingResults;
         }));
-        
+
         return new Card(
             Layout.Vertical(
                 Text.Block(_providerName),
@@ -212,19 +209,25 @@ public class DataProvider : ViewBase
 
 - **`AbstractSignal<TInput, TOutput>`** - Base class for signals
 - **`Unit`** - Void return type for notifications without responses
-- **`CreateSignal<TSignal, TInput, TOutput>()`** - Creates signal sender
-- **`UseSignal<TSignal, TInput, TOutput>()`** - Creates signal receiver
+- **`ISignal<TInput, TOutput>`** - Interface for sending and receiving messages
+- **`UseSignal<TSignal, TInput, TOutput>()`** - Gets the signal for sending and receiving
 
 ### Signal Operations
 
-**Creating a sender** (to broadcast messages):
+**Getting a signal** (for sending or receiving):
 
 ```csharp
-var signal = CreateSignal<CounterSignal, int, string>();
-await signal.Send(42); // Returns TOutput[] from all subscribers
+var signal = UseSignal<CounterSignal, int, string>();
 ```
 
-**Creating a receiver** (to listen to messages):
+**Sending messages**:
+
+```csharp
+var signal = UseSignal<CounterSignal, int, string>();
+var results = await signal.Send(42); // Returns TOutput[] from all subscribers
+```
+
+**Receiving messages**:
 
 ```csharp
 var signal = UseSignal<CounterSignal, int, string>();
@@ -245,15 +248,15 @@ Use `Unit` when no response is needed, otherwise return meaningful data.
 
 ## Broadcast Types
 
-### Contextual vs Broadcast Signals
+### Session vs Broadcast Signals
 
-By default, signals are **contextual** (scoped to component tree). For cross-session communication, add the `[Signal]` attribute:
+By default, signals are **session-scoped** - all components in the same session automatically share the same signal instance by type. For cross-session communication, add the `[Signal]` attribute:
 
 ```csharp
-// Contextual - scoped to parent component tree
+// Session-scoped - all components in the same session share this signal
 public class LocalSignal : AbstractSignal<string, Unit> { }
 
-// Broadcast - scoped by BroadcastType
+// Broadcast - sends to multiple sessions based on BroadcastType
 [Signal(BroadcastType.App)]
 public class AppSignal : AbstractSignal<string, Unit> { }
 ```
@@ -275,11 +278,11 @@ graph TB
     Sender[Signal Sender]
     App[App-Level]
     Server[Server-Level]
-    Machine[Machine-Level]
-    
+    User[User-Level]
+
     Sender --> App
     Sender --> Server
-    Sender --> Machine
+    Sender --> User
 ```
 
 ## See Also

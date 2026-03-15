@@ -2,20 +2,20 @@ import * as React from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { dateTimeInputIconVariants } from '@/components/ui/input/date-time-input-variants';
-import { Scales } from '@/types/scale';
+import { dateTimeInputIconVariant } from '@/components/ui/input/date-time-input-variant';
+import { Densities } from '@/types/density';
 
 interface ClearAndInvalidIconsProps {
   showClear?: boolean;
   invalid?: string;
-  scale?: Scales;
+  density?: Densities;
   onClear: (e?: React.MouseEvent) => void;
 }
 
 export const ClearAndInvalidIcons: React.FC<ClearAndInvalidIconsProps> = ({
   showClear = false,
   invalid,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   onClear,
 }) => {
   if (!showClear && !invalid) {
@@ -34,7 +34,7 @@ export const ClearAndInvalidIcons: React.FC<ClearAndInvalidIconsProps> = ({
         >
           <X
             className={cn(
-              dateTimeInputIconVariants({ scale }),
+              dateTimeInputIconVariant({ density }),
               'text-muted-foreground hover:text-foreground'
             )}
           />

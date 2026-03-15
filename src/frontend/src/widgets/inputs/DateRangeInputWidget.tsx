@@ -26,12 +26,12 @@ import {
 } from 'date-fns';
 import { useEventHandler } from '@/components/event-handler';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
-  dateRangeInputVariants,
-  dateRangeInputIconVariants,
-  dateRangeInputTextVariants,
-} from '@/components/ui/input/date-range-input-variants';
+  dateRangeInputVariant,
+  dateRangeInputIconVariant,
+  dateRangeInputTextVariant,
+} from '@/components/ui/input/date-range-input-variant';
 
 interface DateRangeInputWidgetProps {
   id: string;
@@ -44,10 +44,12 @@ interface DateRangeInputWidgetProps {
   format?: string;
   invalid?: string;
   nullable?: boolean;
-  scale?: Scales;
+  density?: Densities;
   events: string[];
   'data-testid'?: string;
 }
+
+const EMPTY_EVENTS: string[] = [];
 
 export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   id,
@@ -57,8 +59,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   format: formatProp,
   invalid,
   nullable = false,
-  scale = Scales.Medium,
-  events = [],
+  density = Densities.Medium,
+  events = EMPTY_EVENTS,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -136,8 +138,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
     to: parseDate(value?.item2),
   };
 
-  const [leftMonth, setLeftMonth] = useState(today);
-  const [rightMonth, setRightMonth] = useState(addMonths(today, 1));
+  const [leftMonth, setLeftMonth] = useState(() => new Date());
+  const [rightMonth, setRightMonth] = useState(() => addMonths(new Date(), 1));
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLeftMonthChange = (newLeft: Date) => {
@@ -172,7 +174,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             data-testid={dataTestId}
             data-slot="calendar"
             className={cn(
-              dateRangeInputVariants({ scale }),
+              dateRangeInputVariant({ density }),
               'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
               !date && 'text-muted-foreground',
               invalid && 'border-destructive focus-visible:ring-destructive',
@@ -186,7 +188,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             <CalendarIcon
               className={cn(
                 'mr-2 shrink-0',
-                dateRangeInputIconVariants({ scale })
+                dateRangeInputIconVariant({ density })
               )}
             />
             {date?.from ? (
@@ -194,7 +196,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                 <span
                   className={cn(
                     'truncate',
-                    dateRangeInputTextVariants({ scale })
+                    dateRangeInputTextVariant({ density })
                   )}
                 >
                   {format(date.from, displayFormat)} -{' '}
@@ -204,7 +206,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                 <span
                   className={cn(
                     'truncate',
-                    dateRangeInputTextVariants({ scale })
+                    dateRangeInputTextVariant({ density })
                   )}
                 >
                   {format(date.from, displayFormat)}
@@ -214,7 +216,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
               <span
                 className={cn(
                   'truncate',
-                  dateRangeInputTextVariants({ scale }),
+                  dateRangeInputTextVariant({ density }),
                   'text-muted-foreground'
                 )}
               >
@@ -234,7 +236,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ density })
                       )}
                       onClick={() => {
                         handleChange({
@@ -253,7 +255,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ density })
                       )}
                       onClick={() => {
                         handleChange(yesterday);
@@ -269,7 +271,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ density })
                       )}
                       onClick={() => {
                         handleChange(last7Days);
@@ -285,7 +287,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ density })
                       )}
                       onClick={() => {
                         handleChange(last30Days);
@@ -301,7 +303,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ density })
                       )}
                       onClick={() => {
                         handleChange(monthToDate);
@@ -317,7 +319,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ density })
                       )}
                       onClick={() => {
                         handleChange(lastMonth);
@@ -333,7 +335,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ density })
                       )}
                       onClick={() => {
                         handleChange(yearToDate);
@@ -349,7 +351,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                       size="sm"
                       className={cn(
                         'w-full justify-start cursor-pointer',
-                        dateRangeInputTextVariants({ scale })
+                        dateRangeInputTextVariant({ density })
                       )}
                       onClick={() => {
                         handleChange(lastYear);
@@ -372,7 +374,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   onMonthChange={handleLeftMonthChange}
                   className="p-2 bg-background"
                   disabled={[{ after: today }]}
-                  scale={scale}
+                  density={density}
                 />
 
                 <Calendar
@@ -383,7 +385,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   onMonthChange={handleRightMonthChange}
                   className="p-2 bg-background"
                   disabled={[{ after: today }]}
-                  scale={scale}
+                  density={density}
                 />
               </div>
             </div>
@@ -403,7 +405,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             >
               <X
                 className={cn(
-                  dateRangeInputIconVariants({ scale }),
+                  dateRangeInputIconVariant({ density }),
                   'text-muted-foreground hover:text-foreground'
                 )}
               />
