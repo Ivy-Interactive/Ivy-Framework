@@ -86,7 +86,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
         className={cn(
           cardStyles.content.base,
           sizeClasses.content,
-          headerIsEmpty && cardStyles.content.noHeader
+          headerIsEmpty && sizeClasses.contentNoHeader
         )}
       >
         {slots?.Content}
