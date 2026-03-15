@@ -3,6 +3,9 @@ searchHints:
   - items
   - collection
   - listitem
+  - list-item
+  - tag
+  - disabled
   - menu
   - rows
   - scroll
@@ -39,7 +42,14 @@ public class BasicListDemo : ViewBase
 
 ## ListItem Configuration
 
-`ListItem`s are highly customizable, supporting titles, subtitles, [icons](../01_Primitives/02_Icon.md), [badges](02_Badge.md), and custom content via the `.Content()` extension method.
+`ListItem`s are highly customizable, supporting titles, subtitles, [icons](../01_Primitives/02_Icon.md), [badges](02_Badge.md), custom content, and interactive states.
+
+- **Title & Subtitle** - Primary and secondary text labels.
+- **Icon** - Visual indicator using the [Icons](../../04_ApiReference/Ivy/Icons.md) enum.
+- **Badge** - Small status indicator or counter.
+- **Tag** - Hidden object reference (e.g., a database entity) used to identify the item in click handlers.
+- **Disabled** - Disables interactions and applies a muted visual style.
+- **Content** - Custom widget content injected into the item (e.g., a switch, input, or complex layout).
 
 ```csharp demo-tabs
 public class ListConfigDemo : ViewBase
@@ -183,6 +193,7 @@ public class SearchableListDemo : ViewBase
 ```
 
 <WidgetDocs Type="Ivy.List" ExtensionTypes="Ivy.WidgetBaseExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Lists/List.cs"/>
+<WidgetDocs Type="Ivy.ListItem" ExtensionTypes="Ivy.ListItemExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Lists/ListItem.cs"/>
 
 ## Examples
 
