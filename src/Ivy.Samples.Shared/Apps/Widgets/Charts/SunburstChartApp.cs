@@ -1,6 +1,3 @@
-using Ivy.Charts;
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
 [App(icon: Icons.ChartPie, searchHints: ["visualization", "graph", "analytics", "data", "sunburst", "statistics", "hierarchical"])]
@@ -80,7 +77,7 @@ public class SunburstChart0View : ViewBase
             }) { Fill = Colors.Zinc },
         };
 
-        return new Card().Title("School Subjects Breakdown").Height(153)
+        return new Card().Title("School Subjects Breakdown").Height(Size.Units(153))
             | new SunburstChart(data)
                 .InnerRadius(85)
                 .OuterRadius(221)
@@ -123,7 +120,7 @@ public class SunburstChart1View : ViewBase
             }) { Fill = Colors.Indigo },
         };
 
-        return new Card().Title("Monthly Expense Breakdown").Height(153)
+        return new Card().Title("Monthly Expense Breakdown").Height(Size.Units(153))
             | new SunburstChart(data)
                 .InnerRadius(85)
                 .OuterRadius(221)
