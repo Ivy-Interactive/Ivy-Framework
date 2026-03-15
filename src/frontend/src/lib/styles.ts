@@ -133,6 +133,11 @@ const _getMaxWidth = (width?: string): React.CSSProperties => {
   }
 };
 
+export const getAspectRatio = (aspectRatio?: number): React.CSSProperties => {
+  if (aspectRatio === undefined || aspectRatio === null) return {};
+  return { aspectRatio: aspectRatio };
+};
+
 export const getHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 

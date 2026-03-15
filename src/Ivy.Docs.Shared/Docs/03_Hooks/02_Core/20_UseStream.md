@@ -1,68 +1,99 @@
 ---
-title: UseStream
+searchHints:
+  - usestream
+  - stream
+  - real-time
+  - streaming
+  - llm
+  - text run
+  - push
+  - websocket
 ---
 
 # UseStream
 
-The `UseStream<T>` hook allows you to create a server-to-client stream that can push data to a frontend widget in real-time. This is particularly useful for LLM text streaming, progress updates, or any scenario where you want to continuously push fragments of data to a single widget without triggering a full state re-render for every chunk.
+<Ingress>
+Create a server-to-client stream that pushes data to the frontend in real time without triggering a full [view](../../../01_Onboarding/02_Concepts/02_Views.md) re-render for each chunk, using the UseStream [hook](../02_RulesOfHooks.md).
+</Ingress>
 
-## API Reference
+The `UseStream<T>` [hook](../02_RulesOfHooks.md) returns an `IWriteStream<T>` that you attach to a widget property. You then call `Write(T data)` to push chunks to the client over the existing connection. Typical uses include LLM text streaming, progress updates, and live logs.
 
-```csharp
-/// <summary>
-/// Creates a server-to-client stream that can push data to the frontend in real time.
-/// Attach the returned stream to a widget property (e.g. `RichTextBlock.Stream`)
-/// and call `Write(T data)` to send data.
-/// </summary>
-/// <param name="buffer">
-/// When `true` (default), data written before the frontend subscribes is buffered
-/// and automatically flushed once the subscription is established.
-/// When `false`, data written before subscription is discarded.
-/// </param>
-/// <typeparam name="T">The type of data to stream (e.g. `TextRun`).</typeparam>
-public IWriteStream<T> UseStream<T>(bool buffer = true)
-```
+## Overview
 
-## Example: Streaming Rich Text from an LLM
+- **Real-time push** — Data is sent to the client as you call `Write()`; no polling.
+- **No re-render per chunk** — The stream is consumed by the widget on the client; the view tree is not rebuilt for every write.
+- **Typical `T`** — Often `TextRun` for streaming rich text; `byte[]` is also supported (serialized as base64).
 
-You can attach the stream returned by `UseStream` to the special `UseStream` widget property available on components that support streaming (like `Text.Rich()`).
+## Basic Usage
 
-```csharp
+1. Create a stream with `Context.UseStream<T>()`.
+2. Attach it to a widget that supports streaming (e.g. [RichTextBlock](../../../02_Widgets/01_Primitives/24_RichTextBlock.md) via `Text.Rich().UseStream(stream)`).
+3. Call `stream.Write(data)` from event handlers or async code to push data in real time.
+
+```csharp demo-below
 public class StreamingApp : ViewBase
 {
-    protected override object? Build()
+    public override object? Build()
     {
-        // 1. Create a stream for text runs
         var stream = Context.UseStream<TextRun>();
 
-        return Layout.Vertical(
-            Text.Rich()
+        return Layout.Vertical()
+            | Text.Rich()
                 .Bold("🤖 ")
-                // 2. Attach the stream to the widget
-                .UseStream(stream),
-                
-            new Button("Generate").OnClick(async () => 
+                .UseStream(stream)
+            | new Button("Generate").OnClick(async () =>
             {
                 var words = new[] { "Hello", "world", "from", "the", "stream!" };
-                
                 foreach (var word in words)
                 {
                     await Task.Delay(200);
-                    // 3. Write data to the stream which gets pushed to the frontend in real-time
                     stream.Write(new TextRun(word) { Word = true });
                 }
-            })
-        );
+            });
     }
 }
 ```
 
-## Buffering
+## How It Works
 
-By default (`buffer = true`), if you start writing to the stream before the frontend component has fully rendered and subscribed via WebSockets, the data will be buffered in memory on the server. Once the client establishes the subscription, all buffered data will be flushed immediately.
-
-If you don't care about missing early data or want to avoid memory overhead for large streams that might not be listened to, you can set `buffer = false`:
+**Hook:**
 
 ```csharp
-var stream = Context.UseStream<byte[]>(buffer: false);
+IWriteStream<T> UseStream<T>(bool buffer = true)
 ```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `buffer` | `bool` | `true` | When `true`, data written before the client subscribes is buffered and flushed when the subscription is established. When `false`, that data is discarded. |
+
+**Returned interface `IWriteStream<T>`:**
+
+| Member | Description |
+|--------|-------------|
+| `Id` | Unique stream identifier (used internally for client subscription). |
+| `Write(T data)` | Pushes one item to the client. Serialization: JSON for most types, base64 for `byte[]`. |
+
+## Buffering
+
+With the default `buffer: true`, any data you write before the frontend has rendered and subscribed is buffered on the server. When the client subscribes, all buffered data is sent immediately. Use this when you want to guarantee that no chunks are lost (e.g. LLM streaming).
+
+To avoid buffering (e.g. to reduce memory or when early data is irrelevant), pass `buffer: false`:
+
+```csharp
+var stream = Context.UseStream<TextRun>(buffer: false);
+```
+
+## When to Use
+
+| Use UseStream for | Prefer something else when |
+|-------------------|----------------------------|
+| LLM or other token-by-token text output | One-shot text - normal [state](./03_UseState.md) or [UseQuery](./09_UseQuery.md) |
+| Progress or log tail that updates in place | Full list updates - [UseState](./03_UseState.md) or [UseQuery](./09_UseQuery.md) |
+| Pushing binary or structured chunks to a single widget | Cross-component events - [UseSignal](./10_UseSignal.md) |
+
+## See Also
+
+- [RichTextBlock — Streaming](../../../02_Widgets/01_Primitives/24_RichTextBlock.md) — Main use case: streaming `TextRun` with `Text.Rich().UseStream(stream)`
+- [Rules of Hooks](../02_RulesOfHooks.md) — Hook rules and best practices
+- [UseState](./03_UseState.md) — For reactive state that triggers re-renders
+- [UseSignal](./10_UseSignal.md) — For cross-component messaging

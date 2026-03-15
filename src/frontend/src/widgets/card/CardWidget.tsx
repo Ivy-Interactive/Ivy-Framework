@@ -4,7 +4,7 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
-import { getHeight, getWidth } from '@/lib/styles';
+import { getAspectRatio, getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import React, { useCallback } from 'react';
@@ -18,6 +18,7 @@ interface CardWidgetProps {
   events: string[];
   width?: string;
   height?: string;
+  aspectRatio?: number;
   hoverVariant?: 'None' | 'Pointer' | 'PointerAndTranslate';
   density?: Densities;
   disabled?: boolean;
@@ -34,6 +35,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   events = EMPTY_ARRAY,
   width = 'Full',
   height,
+  aspectRatio,
   hoverVariant = 'None',
   density = Densities.Medium,
   disabled,
@@ -46,6 +48,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   const styles = {
     ...getWidth(width),
     ...getHeight(height),
+    ...getAspectRatio(aspectRatio),
   };
 
   const footerIsEmpty = !slots?.Footer || slots.Footer.length === 0;

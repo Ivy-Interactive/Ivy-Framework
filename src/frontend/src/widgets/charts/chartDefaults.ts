@@ -15,6 +15,10 @@ import type {
   ToolboxProps,
   XAxisProps,
   YAxisProps,
+  RadialBarProps,
+  PolarGridProps,
+  PolarAngleAxisProps,
+  PolarRadiusAxisProps,
 } from './chartTypes';
 
 // Line/Area defaults (Line.cs, Area.cs)
@@ -133,6 +137,29 @@ export const Y_AXIS_DEFAULTS: Partial<YAxisProps> = {
 export const REFERENCE_LINE_DEFAULTS = {
   strokeWidth: 1,
 };
+
+// RadialBar defaults (RadialBar.cs)
+export const RADIAL_BAR_DEFAULTS: Partial<RadialBarProps> = {
+  legendType: 'Line',
+  animated: true,
+  background: false,
+  minAngle: 0,
+};
+
+// PolarGrid defaults (PolarGrid.cs)
+export const POLAR_GRID_DEFAULTS: Partial<PolarGridProps> = {
+  gridType: 'Polygon',
+  radialLines: true,
+};
+
+// PolarAngleAxis defaults (PolarAngleAxis.cs)
+export const POLAR_ANGLE_AXIS_DEFAULTS: Partial<PolarAngleAxisProps> = {
+  axisLine: true,
+  tickLine: true,
+};
+
+// PolarRadiusAxis defaults (PolarRadiusAxis.cs)
+export const POLAR_RADIUS_AXIS_DEFAULTS: Partial<PolarRadiusAxisProps> = {};
 
 // Re-export applyDefaults from shared utils
 export { applyDefaults } from '@/lib/utils';

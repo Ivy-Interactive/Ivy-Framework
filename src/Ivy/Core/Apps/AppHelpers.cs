@@ -31,7 +31,7 @@ public static class AppHelpers
             {
                 if (type.Namespace == null)
                 {
-                    return global::Ivy.Utils.TitleCaseToFriendlyUrl(type.Name);
+                    return global::Ivy.StringHelper.TitleCaseToFriendlyUrl(type.Name);
                 }
                 var ns = type.Namespace!.Split(".");
                 if (ns.Contains("Apps"))
@@ -39,7 +39,7 @@ public static class AppHelpers
                     ns = ns[(Array.IndexOf(ns, "Apps") + 1)..];
                 }
                 ns = [.. ns, type.Name];
-                return string.Join("/", ns.Select(global::Ivy.Utils.TitleCaseToFriendlyUrl));
+                return string.Join("/", ns.Select(global::Ivy.StringHelper.TitleCaseToFriendlyUrl));
             }
 
             string GetTitle()
@@ -48,7 +48,7 @@ public static class AppHelpers
                 {
                     return path[^1];
                 }
-                return global::Ivy.Utils.TitleCaseToReadable(type.Name); //DatePickerApp => Date Picker
+                return global::Ivy.StringHelper.TitleCaseToReadable(type.Name); //DatePickerApp => Date Picker
             }
 
             return new AppDescriptor()
@@ -82,6 +82,6 @@ public static class AppHelpers
         if (index == -1 || index == parts.Length - 1)
             return null;
 
-        return parts[(index + 1)..].Select(global::Ivy.Utils.TitleCaseToReadable).ToArray();
+        return parts[(index + 1)..].Select(global::Ivy.StringHelper.TitleCaseToReadable).ToArray();
     }
 }

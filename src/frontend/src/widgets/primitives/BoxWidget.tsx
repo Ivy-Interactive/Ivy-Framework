@@ -3,6 +3,7 @@ import {
   BorderRadius,
   BorderStyle,
   getAlign,
+  getAspectRatio,
   getBoxRadius,
   getBorderStyle,
   getBorderThickness,
@@ -37,6 +38,7 @@ interface BoxWidgetProps {
   borderOpacity?: number;
   className?: string;
   events?: string[];
+  aspectRatio?: number;
   hoverVariant?: BoxHoverVariant;
 }
 
@@ -56,6 +58,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   opacity,
   borderOpacity,
   className,
+  aspectRatio,
   events = EMPTY_ARRAY,
   hoverVariant = 'None',
 }) => {
@@ -77,6 +80,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
     ...getAlign('Vertical', contentAlign),
     ...getWidth(width),
     ...getHeight(height),
+    ...getAspectRatio(aspectRatio),
     ...getBorderStyle(borderStyle),
     ...getBorderThickness(borderThickness),
     ...borderRadiusStyle,

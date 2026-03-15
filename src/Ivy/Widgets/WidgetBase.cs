@@ -15,6 +15,8 @@ public abstract record WidgetBase : AbstractWidget
 
     [Prop] public Size? Height { get; set; }
 
+    [Prop] public float? AspectRatio { get; set; }
+
     [Prop] public Density? Density { get; set; }
 
     [Prop, ScaffoldColumn(false)] public bool Visible { get; set; } = true;
@@ -36,6 +38,8 @@ public static class WidgetBaseExtensions
     public static T Height<T>(this T widget, Size? height) where T : WidgetBase => widget with { Height = height };
 
     public static T Size<T>(this T widget, Size? size) where T : WidgetBase => widget.Width(size).Height(size);
+
+    public static T AspectRatio<T>(this T widget, float ratio) where T : WidgetBase => widget with { AspectRatio = ratio };
 
     public static T Grow<T>(this T widget) where T : WidgetBase => widget.Width(Ivy.Size.Grow());
 

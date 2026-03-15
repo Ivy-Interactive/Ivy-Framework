@@ -13,7 +13,7 @@ public class UrlValidationTests
     [InlineData("/", true)]
     public void ValidateRedirectUrl_ValidRelativePath_ReturnsUrl(string url, bool allowExternal)
     {
-        var result = Utils.ValidateRedirectUrl(url, allowExternal);
+        var result = ValidationHelper.ValidateRedirectUrl(url, allowExternal);
         Assert.Equal(url, result);
     }
 
@@ -26,7 +26,7 @@ public class UrlValidationTests
     [InlineData("https://example.com", true, null)]
     public void ValidateRedirectUrl_ExternalUrl_ValidatesCorrectly(string url, bool allowExternal, string? currentOrigin)
     {
-        var result = Utils.ValidateRedirectUrl(url, allowExternal, currentOrigin);
+        var result = ValidationHelper.ValidateRedirectUrl(url, allowExternal, currentOrigin);
 
         if (allowExternal)
         {
@@ -67,7 +67,7 @@ public class UrlValidationTests
     [InlineData("onclick:alert('xss')")]
     public void ValidateRedirectUrl_DangerousProtocol_ReturnsNull(string url)
     {
-        var result = Utils.ValidateRedirectUrl(url, allowExternal: true);
+        var result = ValidationHelper.ValidateRedirectUrl(url, allowExternal: true);
         Assert.Null(result);
     }
 
@@ -78,7 +78,7 @@ public class UrlValidationTests
     [InlineData("\t")]
     public void ValidateRedirectUrl_NullOrWhitespace_ReturnsNull(string? url)
     {
-        var result = Utils.ValidateRedirectUrl(url);
+        var result = ValidationHelper.ValidateRedirectUrl(url);
         Assert.Null(result);
     }
 
@@ -86,7 +86,7 @@ public class UrlValidationTests
     [InlineData("/path:with:colons")]
     public void ValidateRedirectUrl_RelativePathWithColons_ReturnsNull(string url)
     {
-        var result = Utils.ValidateRedirectUrl(url);
+        var result = ValidationHelper.ValidateRedirectUrl(url);
         Assert.Null(result);
     }
 
@@ -96,7 +96,7 @@ public class UrlValidationTests
     public void ValidateRedirectUrl_RelativePathWithQueryOrFragment_ReturnsUrl(string url)
     {
         // Query strings and fragments are valid in relative paths
-        var result = Utils.ValidateRedirectUrl(url);
+        var result = ValidationHelper.ValidateRedirectUrl(url);
         Assert.Equal(url, result);
     }
 
@@ -106,7 +106,7 @@ public class UrlValidationTests
     [InlineData("://malformed")]
     public void ValidateRedirectUrl_InvalidUrlFormat_ReturnsNull(string url)
     {
-        var result = Utils.ValidateRedirectUrl(url, allowExternal: true);
+        var result = ValidationHelper.ValidateRedirectUrl(url, allowExternal: true);
         Assert.Null(result);
     }
 
@@ -116,7 +116,7 @@ public class UrlValidationTests
         var url = "http://localhost:5001";
         var currentOrigin = "http://localhost:5000";
 
-        var result = Utils.ValidateRedirectUrl(url, allowExternal: false, currentOrigin);
+        var result = ValidationHelper.ValidateRedirectUrl(url, allowExternal: false, currentOrigin);
 
         Assert.Null(result);
     }
@@ -127,7 +127,7 @@ public class UrlValidationTests
         var url = "https://localhost:5000";
         var currentOrigin = "http://localhost:5000";
 
-        var result = Utils.ValidateRedirectUrl(url, allowExternal: false, currentOrigin);
+        var result = ValidationHelper.ValidateRedirectUrl(url, allowExternal: false, currentOrigin);
 
         Assert.Null(result);
     }
@@ -143,7 +143,7 @@ public class UrlValidationTests
     [InlineData("/")]
     public void ValidateLinkUrl_ValidRelativePath_ReturnsUrl(string url)
     {
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Equal(url, result);
     }
 
@@ -156,7 +156,7 @@ public class UrlValidationTests
     [InlineData("https://example.com/path#fragment")]
     public void ValidateLinkUrl_ValidHttpHttpsUrl_ReturnsUrl(string url)
     {
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         // Uri.ToString() may add trailing slash for URLs without paths, so check starts with
         Assert.NotNull(result);
         Assert.StartsWith(url, result!);
@@ -168,7 +168,7 @@ public class UrlValidationTests
     [InlineData("app://my-app")]
     public void ValidateLinkUrl_ValidAppUrl_ReturnsUrl(string url)
     {
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Equal(url, result);
     }
 
@@ -178,7 +178,7 @@ public class UrlValidationTests
     [InlineData("#_anchor")]
     public void ValidateLinkUrl_ValidAnchorLink_ReturnsUrl(string url)
     {
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Equal(url, result);
     }
 
@@ -190,7 +190,7 @@ public class UrlValidationTests
     [InlineData("onclick:alert('xss')")]
     public void ValidateLinkUrl_DangerousProtocol_ReturnsNull(string url)
     {
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Null(result);
     }
 
@@ -201,7 +201,7 @@ public class UrlValidationTests
     [InlineData("\t")]
     public void ValidateLinkUrl_NullOrWhitespace_ReturnsNull(string? url)
     {
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Null(result);
     }
 
@@ -209,7 +209,7 @@ public class UrlValidationTests
     [InlineData("/path:with:colons")]
     public void ValidateLinkUrl_RelativePathWithColons_ReturnsNull(string url)
     {
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Null(result);
     }
 
@@ -219,7 +219,7 @@ public class UrlValidationTests
     public void ValidateLinkUrl_RelativePathWithQueryOrFragment_ReturnsUrl(string url)
     {
         // Query strings and fragments are valid in relative paths
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Equal(url, result);
     }
 
@@ -230,7 +230,7 @@ public class UrlValidationTests
     public void ValidateLinkUrl_AppUrlWithQueryParameters_ReturnsUrl(string url)
     {
         // Query parameters are now allowed in app:// URLs
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Equal(url, result);
     }
 
@@ -240,7 +240,7 @@ public class UrlValidationTests
     public void ValidateLinkUrl_AppUrlWithDangerousCharacters_ReturnsNull(string url)
     {
         // Fragments and protocol injection attempts are still blocked
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Null(result);
     }
 
@@ -250,7 +250,7 @@ public class UrlValidationTests
     public void ValidateLinkUrl_AnchorLinkWithColons_ReturnsUrl(string url)
     {
         // Colons are now allowed in anchor links (HTML5 allows this)
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Equal(url, result);
     }
 
@@ -260,7 +260,7 @@ public class UrlValidationTests
     public void ValidateLinkUrl_AnchorLinkWithDangerousCharacters_ReturnsNull(string url)
     {
         // Query parameters and ampersands are still blocked in anchor links
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Null(result);
     }
 
@@ -269,7 +269,7 @@ public class UrlValidationTests
     [InlineData("path/without/leading/slash")]
     public void ValidateLinkUrl_RelativePathWithoutLeadingSlash_ReturnsWithSlash(string url)
     {
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.NotNull(result);
         Assert.StartsWith("/", result);
     }
@@ -279,7 +279,7 @@ public class UrlValidationTests
     [InlineData("://malformed")]
     public void ValidateLinkUrl_InvalidUrlFormat_ReturnsNull(string url)
     {
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Null(result);
     }
 
@@ -289,7 +289,7 @@ public class UrlValidationTests
     public void ValidateLinkUrl_RelativePathWithoutSlash_ReturnsWithSlash(string url)
     {
         // URLs without colons are treated as relative paths and get a leading slash
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.NotNull(result);
         Assert.StartsWith("/", result!);
     }
@@ -298,7 +298,7 @@ public class UrlValidationTests
     public void ValidateLinkUrl_UrlWithWhitespace_TrimsWhitespace()
     {
         var url = "  /dashboard  ";
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Equal("/dashboard", result);
     }
 
@@ -306,7 +306,7 @@ public class UrlValidationTests
     public void ValidateLinkUrl_HttpUrlWithPort_ReturnsUrl()
     {
         var url = "http://example.com:8080/path";
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         Assert.Equal(url, result);
     }
 
@@ -314,7 +314,7 @@ public class UrlValidationTests
     public void ValidateLinkUrl_HttpsUrlWithPort_ReturnsUrl()
     {
         var url = "https://example.com:443/path";
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
         // Uri normalizes default ports (443 for HTTPS), so port may be removed
         Assert.NotNull(result);
         // Should contain the path at minimum
@@ -334,7 +334,7 @@ public class UrlValidationTests
     [InlineData("app_name")]
     public void IsSafeAppId_ValidAppId_ReturnsTrue(string appId)
     {
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.True(result);
     }
 
@@ -345,7 +345,7 @@ public class UrlValidationTests
     [InlineData("\t")]
     public void IsSafeAppId_NullOrWhitespace_ReturnsFalse(string? appId)
     {
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.False(result);
     }
 
@@ -354,7 +354,7 @@ public class UrlValidationTests
     [InlineData("/users/profile")]
     public void IsSafeAppId_StartsWithSlash_ReturnsFalse(string appId)
     {
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.False(result);
     }
 
@@ -365,7 +365,7 @@ public class UrlValidationTests
     [InlineData("app&evil")]
     public void IsSafeAppId_ContainsDangerousCharacters_ReturnsFalse(string appId)
     {
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.False(result);
     }
 
@@ -373,7 +373,7 @@ public class UrlValidationTests
     public void IsSafeAppId_ContainsControlCharacters_ReturnsFalse()
     {
         var appId = "app\u0000with\u0001control\u0002chars";
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.False(result);
     }
 
@@ -381,7 +381,7 @@ public class UrlValidationTests
     public void IsSafeAppId_ValidAppIdWithNumbers_ReturnsTrue()
     {
         var appId = "app123";
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.True(result);
     }
 
@@ -389,7 +389,7 @@ public class UrlValidationTests
     public void IsSafeAppId_ValidAppIdWithUnderscores_ReturnsTrue()
     {
         var appId = "my_app_name";
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.True(result);
     }
 
@@ -397,7 +397,7 @@ public class UrlValidationTests
     public void IsSafeAppId_ValidAppIdWithHyphens_ReturnsTrue()
     {
         var appId = "my-app-name";
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.True(result);
     }
 
@@ -405,7 +405,7 @@ public class UrlValidationTests
     public void IsSafeAppId_AppIdWithNewline_ReturnsFalse()
     {
         var appId = "app\nwith\nnewlines";
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.False(result);
     }
 
@@ -413,7 +413,7 @@ public class UrlValidationTests
     public void IsSafeAppId_AppIdWithTab_ReturnsFalse()
     {
         var appId = "app\twith\ttabs";
-        var result = Utils.IsSafeAppId(appId);
+        var result = ValidationHelper.IsSafeAppId(appId);
         Assert.False(result);
     }
 
@@ -426,8 +426,8 @@ public class UrlValidationTests
     {
         var url = "https://example.com";
 
-        var redirectResult = Utils.ValidateRedirectUrl(url, allowExternal: true);
-        var linkResult = Utils.ValidateLinkUrl(url);
+        var redirectResult = ValidationHelper.ValidateRedirectUrl(url, allowExternal: true);
+        var linkResult = ValidationHelper.ValidateLinkUrl(url);
 
         Assert.NotNull(redirectResult);
         Assert.NotNull(linkResult);
@@ -438,14 +438,14 @@ public class UrlValidationTests
     public void ValidateLinkUrl_AppUrl_CanBeUsedInNavigation()
     {
         var url = "app://dashboard";
-        var result = Utils.ValidateLinkUrl(url);
+        var result = ValidationHelper.ValidateLinkUrl(url);
 
         Assert.NotNull(result);
         Assert.Equal(url, result);
 
         // Extract AppId from app:// URL
         var appId = url[6..]; // Remove "app://" prefix
-        var isSafe = Utils.IsSafeAppId(appId);
+        var isSafe = ValidationHelper.IsSafeAppId(appId);
 
         Assert.True(isSafe);
     }
@@ -454,14 +454,14 @@ public class UrlValidationTests
     public void ValidateRedirectUrl_RelativePath_WorksWithNavigateArgs()
     {
         var url = "/dashboard";
-        var result = Utils.ValidateRedirectUrl(url);
+        var result = ValidationHelper.ValidateRedirectUrl(url);
 
         Assert.NotNull(result);
         Assert.Equal(url, result);
 
         // Extract AppId from relative path (remove leading slash)
         var appId = url.TrimStart('/');
-        var isSafe = Utils.IsSafeAppId(appId);
+        var isSafe = ValidationHelper.IsSafeAppId(appId);
 
         Assert.True(isSafe);
     }

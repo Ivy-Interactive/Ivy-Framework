@@ -38,7 +38,6 @@ Layout.Tabs(
     new Tab("Orders", "Order management").Icon(Icons.DollarSign).Badge("0"),
     new Tab("Settings", "Configuration").Icon(Icons.Settings).Badge("999")
 )
-.Variant(TabsVariant.Tabs)
 ```
 
 It showcases the fluent API of TabView, which allows chaining multiple configuration methods for a complete tab setup with visual indicators and precise layout control.
@@ -82,9 +81,23 @@ new TabsLayout(
 
 ## Variant usage
 
+The default variant is `Content`, which emphasizes the content area. Use `TabsVariant.Tabs` only when tab navigation is itself a primary UI concern (e.g., a settings page with many sections).
+
+### Content Variant (default)
+
+The Content variant emphasizes the content area with subtle tab indicators. This is ideal for content-heavy apps where the focus should be on the displayed information. Since `Content` is the default, you don't need to specify it explicitly.
+
+```csharp demo-tabs
+new TabsLayout(null, null, null, null, 0,
+    new Tab("Overview", "Overview content here"),
+    new Tab("Details", "Detailed information here"),
+    new Tab("Settings", "Configuration options here")
+)
+```
+
 ### Tabs Variant
 
-The Tabs variant displays tabs as clickable buttons with an underline indicator for the active tab, providing a traditional tab interface.
+The Tabs variant displays tabs as clickable buttons with an underline indicator for the active tab, providing a traditional tab navigation interface.
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
@@ -92,18 +105,6 @@ new TabsLayout(null, null, null, null, 0,
     new Tab("Second", "Second tab content"),
     new Tab("Third", "Third tab content")
 ).Variant(TabsVariant.Tabs)
-```
-
-### Content Variant
-
-The Content variant emphasizes the content area with subtle tab indicators. This is ideal for content-heavy apps where the focus should be on the displayed information.
-
-```csharp demo-tabs
-new TabsLayout(null, null, null, null, 0,
-    new Tab("Overview", "Overview content here"),
-    new Tab("Details", "Detailed information here"),
-    new Tab("Settings", "Configuration options here")
-).Variant(TabsVariant.Content)
 ```
 
 ## Customize
@@ -117,7 +118,7 @@ new TabsLayout(null, null, null, null, 0,
     new Tab("Customers", "Customer list").Icon(Icons.User).Badge("10"),
     new Tab("Orders", "Order management").Icon(Icons.DollarSign).Badge("0"),
     new Tab("Settings", "Configuration").Icon(Icons.Settings).Badge("999")
-).Variant(TabsVariant.Tabs)
+)
 ```
 
 ## Responsive Overflow
