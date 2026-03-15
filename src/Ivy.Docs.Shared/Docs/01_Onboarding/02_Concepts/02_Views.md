@@ -205,6 +205,20 @@ public class TextInputApp : ViewBase
 }
 ```
 
+### Sizing Views
+
+Views (`ViewBase` subclasses) have `.Width()` and `.Height()` extension methods that automatically wrap the view in a layout:
+
+```csharp
+// Apply width directly — wraps in a layout under the hood
+new MyView().Width(Size.Fraction(0.5f))
+
+// You can also use WithLayout() explicitly
+new MyView().WithLayout().Width(Size.Fraction(0.5f))
+```
+
+**Note:** These methods return a `LayoutView`, not the original view type. This means you cannot chain view-specific methods after `.Width()` or `.Height()` — apply sizing as the last step, or use `WithLayout()` explicitly if you need further layout configuration.
+
 ## Advanced Patterns
 
 ### Conditional Rendering

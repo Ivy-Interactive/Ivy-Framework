@@ -415,6 +415,7 @@ public class LayoutView : ViewBase, IStateless
                 _alignment, _removeParentPadding, _wrap)
         {
             ColumnGap = _columnGap,
+            Scroll = _scroll,
             BorderColor = _borderColor,
             BorderRadius = _borderRadius,
             BorderStyle = _borderStyle,

@@ -16,7 +16,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
     private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)
     {
-        public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(Utils.GetShortHash(Id + RefreshToken));
+        public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(StringHelper.GetShortHash(Id + RefreshToken));
     }
 
     public override object? Build()

@@ -24,3 +24,5 @@ public interface IState<T> : IObservable<T>, IAnyState
 
     public T Reset();
 }
+
+public interface IRef<T> : IState<T>;

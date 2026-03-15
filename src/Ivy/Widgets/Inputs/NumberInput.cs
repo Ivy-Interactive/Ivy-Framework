@@ -68,6 +68,8 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public Affix? Prefix { get; set; }
 
+    [Prop] public bool NoGrouping { get; init; }
+
     [Prop] public Affix? Suffix { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
@@ -228,6 +230,9 @@ public static class NumberInputExtensions
     {
         return widget with { Currency = currency };
     }
+
+    public static NumberInputBase NoGrouping(this NumberInputBase widget, bool noGrouping = true)
+        => widget with { NoGrouping = noGrouping };
 
     public static NumberInputBase Invalid(this NumberInputBase widget, string invalid)
     {

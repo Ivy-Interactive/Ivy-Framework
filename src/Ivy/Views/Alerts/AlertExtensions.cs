@@ -25,7 +25,7 @@ public class WithPromptView<T>(Button button, Action<T> handleResult, T? default
     {
         if (
             typeof(T) != typeof(FileUpload)
-            && !Utils.IsSimpleType(typeof(T)))
+            && !TypeHelper.IsSimpleType(typeof(T)))
         {
             throw new NotSupportedException();
         }

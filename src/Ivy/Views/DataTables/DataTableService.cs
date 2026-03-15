@@ -38,7 +38,16 @@ public class DataTableService(
             }
 
             var idSelector = queryableRegistry.GetIdSelector(request.SourceId);
+            var columnNames = queryableRegistry.GetColumnNames(request.SourceId);
+
+            // If column names are stored, use them; otherwise fall back to request's SelectColumns
             DataTableQuery queryToUse = request;
+            if (columnNames != null && columnNames.Length > 0)
+            {
+                queryToUse = new DataTableQuery(request);
+                queryToUse.SelectColumns.Clear();
+                queryToUse.SelectColumns.AddRange(columnNames);
+            }
 
             var queryProcessor = new QueryProcessor(logger: null, cache: cache);
             var queryResult = queryProcessor.ProcessQuery(queryable, queryToUse, idSelector);
