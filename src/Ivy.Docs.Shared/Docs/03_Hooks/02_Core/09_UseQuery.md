@@ -267,7 +267,7 @@ public class UseMutationView : ViewBase
 }
 ```
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -472,6 +472,40 @@ public class ErrorHandlingView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I use UseQuery to fetch data from a database with Entity Framework in Ivy?
+</Summary>
+<Body>
+
+Use `UseQuery` with a `IDbContextFactory<T>` (resolved via `UseService`) to fetch data reactively. Never inject `DbContext` directly — always use a factory. The query re-runs when dependencies change:
+
+```csharp
+var dbFactory = UseService<IDbContextFactory<MyDbContext>>();
+var refreshToken = UseRefreshToken();
+
+var query = UseQuery(async () =>
+{
+    await using var db = await dbFactory.CreateDbContextAsync();
+    return await db.Items.OrderBy(i => i.Name).ToListAsync();
+}, refreshToken);
+
+if (query.Loading) return Text.P("Loading...");
+if (query.Value is not { } items) return Callout.Info("No data.");
+
+return items.ToDataTable();
+```
+
+**Key points:**
+- Always use `IDbContextFactory<T>` — never inject `DbContext` directly. Create a scoped instance with `CreateDbContextAsync()` inside the query lambda and dispose it with `await using`.
+- `UseQuery` returns a `QueryResult<T>` with `.Value`, `.Loading`, `.Error` properties (NOT `.Data` or `.IsLoading`)
+- Pass a `RefreshToken` as a dependency to re-fetch data after mutations
+- Always call `.ToListAsync()` inside the query lambda — do NOT return `IQueryable` directly
+- For mutations (add/edit/delete), use a separate method that creates its own `DbContext` from the factory, calls `db.SaveChangesAsync()`, then `refreshToken.Refresh()`
 
 </Body>
 </Details>

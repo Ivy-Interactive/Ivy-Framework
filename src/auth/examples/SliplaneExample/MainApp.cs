@@ -26,7 +26,7 @@ public class MainApp : ViewBase
         return Layout.Vertical(
             Text.H2("Authentication Successful!").Color(Colors.Success),
             Layout.Horizontal(
-                new Image(user.AvatarUrl ?? "").Size(64),
+                new Image(user.AvatarUrl ?? "").Size(Size.Units(64)),
                 Layout.Vertical(
                     Text.H3(user.FullName ?? "User"),
                     Text.Muted(user.Email)

@@ -51,7 +51,7 @@ public class WebhookController : Controller, IWebhookRegistry
     private static readonly ConcurrentDictionary<string, Func<HttpRequest, Task<IActionResult>>> Handlers = new();
 
     [Route("ivy/webhook/{id}")]
-    [HttpGet, HttpPost]
+    [HttpGet, HttpPost, HttpPut, HttpDelete, HttpPatch]
     public Task<IActionResult> HandleWebhookWithIdInPath(string id)
     {
         if (Handlers.TryGetValue(id, out var handler))
@@ -62,7 +62,7 @@ public class WebhookController : Controller, IWebhookRegistry
     }
 
     [Route("ivy/webhook")]
-    [HttpGet, HttpPost]
+    [HttpGet, HttpPost, HttpPut, HttpDelete, HttpPatch]
     public Task<IActionResult> HandleWebhookWithIdInStateQueryParameter([FromQuery(Name = "state")] string? id)
     {
         if (string.IsNullOrEmpty(id))

@@ -454,11 +454,11 @@ public class FormExample : ViewBase
             new Card(
                     BuildDatabaseForm(settingsForm)
                 )
-                .Width(1 / 2f)
+                .Width(Size.Fraction(1 / 2f))
                 .Title("Database Generator Settings"),
             new Card(
                 settingsForm.ToDetails()
-            ).Width(1 / 2f)
+            ).Width(Size.Fraction(1 / 2f))
         );
 
         FormBuilder<UserModel> BuildForm(IState<UserModel> x) =>
@@ -475,11 +475,11 @@ public class FormExample : ViewBase
             new Card(
                     BuildForm(model)
                 )
-                .Width(1 / 2f)
+                .Width(Size.Fraction(1 / 2f))
                 .Title("User Information"),
             new Card(
                 model.ToDetails()
-            ).Width(1 / 2f)
+            ).Width(Size.Fraction(1 / 2f))
         );
 
         return Layout.Vertical()
@@ -581,7 +581,7 @@ public class FormExample : ViewBase
                         .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Thumbs())
                         .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Emojis())
                 )
-                .Width(1 / 3f)
+                .Width(Size.Fraction(1 / 3f))
                 .Title("Small Density - All Inputs")
                 | new Card(
                     mediumModel.ToForm()
@@ -641,7 +641,7 @@ public class FormExample : ViewBase
                         .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Thumbs())
                         .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Emojis())
                 )
-                .Width(1 / 3f)
+                .Width(Size.Fraction(1 / 3f))
                 .Title("Medium Density - All Inputs")
                 | new Card(
                     largeModel.ToForm()
@@ -701,7 +701,7 @@ public class FormExample : ViewBase
                         .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Thumbs())
                         .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Emojis())
                 )
-                .Width(1 / 3f)
+                .Width(Size.Fraction(1 / 3f))
                 .Title("Large Density - All Inputs");
     }
 }
@@ -781,13 +781,13 @@ public class FormValidationExample : ViewBase
         return Layout.Vertical()
             | (Layout.Horizontal()
                 | new Card(form)
-                    .Width(1 / 2f)
+                    .Width(Size.Fraction(1 / 2f))
                     .Title("Enhanced Form Validation")
                 | new Card(
                     Layout.Vertical()
                         | Text.H4("Current Form Data")
                         | model.ToDetails()
-                ).Width(1 / 2f)
+                ).Width(Size.Fraction(1 / 2f))
                     .Title("Form State"));
     }
 }

@@ -28,7 +28,7 @@ type TextBlockVariant =
   | 'Inline'
   | 'Block'
   | 'Blockquote'
-  | 'InlineCode'
+  | 'Monospaced'
   | 'Lead'
   | 'Muted'
   | 'Danger'
@@ -153,7 +153,7 @@ const variantMap: VariantMap = {
       {children}
     </blockquote>
   ),
-  InlineCode: ({ children, className, style }) => (
+  Monospaced: ({ children, className, style }) => (
     <code className={cn(typography.code, className)} style={style}>
       {children}
     </code>

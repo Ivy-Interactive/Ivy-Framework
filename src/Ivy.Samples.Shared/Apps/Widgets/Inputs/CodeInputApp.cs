@@ -83,31 +83,31 @@ public class CodeInputApp : SampleBase
 
         var firstGrid = Layout.Grid().Columns(4)
                | null!
-               | Text.InlineCode("Default")
-               | Text.InlineCode("Disabled")
-               | Text.InlineCode("Invalid")
+               | Text.Monospaced("Default")
+               | Text.Monospaced("Disabled")
+               | Text.Monospaced("Invalid")
 
-               | Text.InlineCode("C#")
+               | Text.Monospaced("C#")
                | csharpCode.ToCodeInput().Language(Languages.Csharp)
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Disabled()
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Invalid("Invalid code")
 
-               | Text.InlineCode("JSON")
+               | Text.Monospaced("JSON")
                | jsonCode.ToCodeInput().Language(Languages.Json)
                | jsonCode.ToCodeInput().Language(Languages.Json).Disabled()
                | jsonCode.ToCodeInput().Language(Languages.Json).Invalid("Invalid JSON")
 
-               | Text.InlineCode("SQL")
+               | Text.Monospaced("SQL")
                | sqlCode.ToCodeInput().Language(Languages.Sql)
                | sqlCode.ToCodeInput().Language(Languages.Sql).Disabled()
                | sqlCode.ToCodeInput().Language(Languages.Sql).Invalid("Invalid SQL")
 
-               | Text.InlineCode("HTML")
+               | Text.Monospaced("HTML")
                | htmlCode.ToCodeInput().Language(Languages.Html)
                | htmlCode.ToCodeInput().Language(Languages.Html).Disabled()
                | htmlCode.ToCodeInput().Language(Languages.Html).Invalid("Invalid HTML")
 
-               | Text.InlineCode("YAML")
+               | Text.Monospaced("YAML")
                | yamlCode.ToCodeInput().Language(Languages.Yaml)
                | yamlCode.ToCodeInput().Language(Languages.Yaml).Disabled()
                | yamlCode.ToCodeInput().Language(Languages.Yaml).Invalid("Invalid YAML")
@@ -115,31 +115,31 @@ public class CodeInputApp : SampleBase
 
         var secondGrid = Layout.Grid().Columns(4)
                | null!
-               | Text.InlineCode("With Placeholder")
-               | Text.InlineCode("Empty State")
-               | Text.InlineCode("With Copy Button")
+               | Text.Monospaced("With Placeholder")
+               | Text.Monospaced("Empty State")
+               | Text.Monospaced("With Copy Button")
 
-               | Text.InlineCode("C#")
+               | Text.Monospaced("C#")
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
                | emptyCsharpState.ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
                | csharpCode.ToCodeInput().Language(Languages.Csharp).ShowCopyButton()
 
-               | Text.InlineCode("JSON")
+               | Text.Monospaced("JSON")
                | jsonCode.ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
                | emptyJsonState.ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
                | jsonCode.ToCodeInput().Language(Languages.Json).ShowCopyButton()
 
-               | Text.InlineCode("SQL")
+               | Text.Monospaced("SQL")
                | sqlCode.ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
                | emptySqlState.ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
                | sqlCode.ToCodeInput().Language(Languages.Sql).ShowCopyButton()
 
-               | Text.InlineCode("HTML")
+               | Text.Monospaced("HTML")
                | htmlCode.ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
                | emptyHtmlState.ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
                | htmlCode.ToCodeInput().Language(Languages.Html).ShowCopyButton()
 
-               | Text.InlineCode("YAML")
+               | Text.Monospaced("YAML")
                | yamlCode.ToCodeInput().Language(Languages.Yaml).Placeholder("Enter YAML here...")
                | emptyYamlState.ToCodeInput().Language(Languages.Yaml).Placeholder("Enter YAML here...")
                | yamlCode.ToCodeInput().Language(Languages.Yaml).ShowCopyButton()
@@ -147,31 +147,31 @@ public class CodeInputApp : SampleBase
 
         var thirdGrid = Layout.Grid().Columns(4)
                | null!
-               | Text.InlineCode("Invalid + Copy")
+               | Text.Monospaced("Invalid + Copy")
                | null!
                | null!
 
-               | Text.InlineCode("C#")
+               | Text.Monospaced("C#")
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Invalid("Invalid code").ShowCopyButton()
                | null!
                | null!
 
-               | Text.InlineCode("JSON")
+               | Text.Monospaced("JSON")
                | jsonCode.ToCodeInput().Language(Languages.Json).Invalid("Invalid JSON").ShowCopyButton()
                | null!
                | null!
 
-               | Text.InlineCode("SQL")
+               | Text.Monospaced("SQL")
                | sqlCode.ToCodeInput().Language(Languages.Sql).Invalid("Invalid SQL").ShowCopyButton()
                | null!
                | null!
 
-               | Text.InlineCode("HTML")
+               | Text.Monospaced("HTML")
                | htmlCode.ToCodeInput().Language(Languages.Html).Invalid("Invalid HTML").ShowCopyButton()
                | null!
                | null!
 
-               | Text.InlineCode("YAML")
+               | Text.Monospaced("YAML")
                | yamlCode.ToCodeInput().Language(Languages.Yaml).Invalid("Invalid YAML").ShowCopyButton()
                | null!
                | null!
@@ -179,31 +179,31 @@ public class CodeInputApp : SampleBase
 
         var sizeGrid = Layout.Grid().Columns(4)
                | null!
-               | Text.InlineCode("Small")
-               | Text.InlineCode("Medium")
-               | Text.InlineCode("Large")
+               | Text.Monospaced("Small")
+               | Text.Monospaced("Medium")
+               | Text.Monospaced("Large")
 
-               | Text.InlineCode("C#")
+               | Text.Monospaced("C#")
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Small()
                | csharpCode.ToCodeInput().Language(Languages.Csharp)
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Large()
 
-               | Text.InlineCode("JSON")
+               | Text.Monospaced("JSON")
                | jsonCode.ToCodeInput().Language(Languages.Json).Small()
                | jsonCode.ToCodeInput().Language(Languages.Json)
                | jsonCode.ToCodeInput().Language(Languages.Json).Large()
 
-               | Text.InlineCode("SQL")
+               | Text.Monospaced("SQL")
                | sqlCode.ToCodeInput().Language(Languages.Sql).Small()
                | sqlCode.ToCodeInput().Language(Languages.Sql)
                | sqlCode.ToCodeInput().Language(Languages.Sql).Large()
 
-               | Text.InlineCode("HTML")
+               | Text.Monospaced("HTML")
                | htmlCode.ToCodeInput().Language(Languages.Html).Small()
                | htmlCode.ToCodeInput().Language(Languages.Html)
                | htmlCode.ToCodeInput().Language(Languages.Html).Large()
 
-               | Text.InlineCode("YAML")
+               | Text.Monospaced("YAML")
                | yamlCode.ToCodeInput().Language(Languages.Yaml).Small()
                | yamlCode.ToCodeInput().Language(Languages.Yaml)
                | yamlCode.ToCodeInput().Language(Languages.Yaml).Large()
@@ -260,18 +260,18 @@ public class CodeInputDataBindings : ViewBase
 
         var gridItems = new List<object>
         {
-            Text.InlineCode("Type"),
-            Text.InlineCode("Non-Nullable"),
-            Text.InlineCode("State"),
-            Text.InlineCode("Type"),
-            Text.InlineCode("Nullable"),
-            Text.InlineCode("State")
+            Text.Monospaced("Type"),
+            Text.Monospaced("Non-Nullable"),
+            Text.Monospaced("State"),
+            Text.Monospaced("Type"),
+            Text.Monospaced("Nullable"),
+            Text.Monospaced("State")
         };
 
         foreach (var (typeName, nonNullableState, nullableState) in stringTypes)
         {
             // Non-nullable columns (first 3)
-            gridItems.Add(Text.InlineCode(typeName));
+            gridItems.Add(Text.Monospaced(typeName));
             gridItems.Add(CreateCodeInputVariants(nonNullableState));
 
             var nonNullableAnyState = nonNullableState as IAnyState;
@@ -284,7 +284,7 @@ public class CodeInputDataBindings : ViewBase
             gridItems.Add(FormatStateValue(typeName, nonNullableValue, false));
 
             // Nullable columns (next 3)
-            gridItems.Add(Text.InlineCode($"{typeName}?"));
+            gridItems.Add(Text.Monospaced($"{typeName}?"));
             gridItems.Add(CreateCodeInputVariants(nullableState));
 
             var anyState = nullableState as IAnyState;
@@ -325,9 +325,9 @@ public class CodeInputDataBindings : ViewBase
     {
         return value switch
         {
-            null => isNullable ? Text.InlineCode("Null") : Text.InlineCode("Empty"),
-            string s => s.Length == 0 ? Text.InlineCode("Empty") : Text.InlineCode($"\"{s}\""),
-            _ => Text.InlineCode(value?.ToString() ?? "null")
+            null => isNullable ? Text.Monospaced("Null") : Text.Monospaced("Empty"),
+            string s => s.Length == 0 ? Text.Monospaced("Empty") : Text.Monospaced($"\"{s}\""),
+            _ => Text.Monospaced(value?.ToString() ?? "null")
         };
     }
 }

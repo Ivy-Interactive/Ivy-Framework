@@ -20,6 +20,10 @@ Hooks are functions that let you "hook into" Ivy state and lifecycle features fr
 
 - [UseRef](./08_UseRef.md): Store mutable values.
 
+## Streaming Hooks
+
+- [UseStream](./20_UseStream.md): Create a stream to push real-time data to frontend widgets.
+ 
 ## Creating Custom Hooks
 
 You can build your own hooks to reuse stateful logic between components. A custom hook is a function whose name starts with "Use" and that may call other hooks.

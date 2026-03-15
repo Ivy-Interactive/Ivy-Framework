@@ -342,3 +342,143 @@ public class ConditionalEffectView : ViewBase
 - [UseCallback](./06_UseCallback.md) - Memoizing callback functions
 - [Signals](./10_UseSignal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
+
+## Faq
+
+<Details>
+<Summary>
+Why does my System.Timers.Timer keep firing after I dispose it in UseEffect cleanup?
+</Summary>
+<Body>
+
+`System.Timers.Timer.Dispose()` does not cancel callbacks that are already queued on the thread pool. This means 1–2 additional `Elapsed` events can fire *after* disposal, causing state updates on an unmounted or paused component.
+
+**Recommended: Use `UseInterval`** for most timer needs. It handles the lifecycle correctly:
+
+```csharp
+var seconds = UseState(0);
+var isRunning = UseState(false);
+
+// Timer starts when isRunning is true, stops when false
+UseInterval(() =>
+{
+    seconds.Set(seconds.Value + 1);
+}, isRunning.Value ? TimeSpan.FromSeconds(1) : null);
+```
+
+Pass `null` to pause the timer, or a `TimeSpan` to start/resume it. The timer is automatically disposed on component unmount.
+
+**For advanced cases:** If you need a raw `System.Timers.Timer` in UseEffect, use `TimerDisposable` with a `CancellationTokenSource` guard:
+
+```csharp
+using Ivy.Core.Helpers;
+
+UseEffect(() =>
+{
+    var cts = new CancellationTokenSource();
+    var timer = new System.Timers.Timer(1000);
+    timer.Elapsed += (s, e) =>
+    {
+        if (cts.Token.IsCancellationRequested) return;
+        counter.Set(counter.Value + 1);
+    };
+    timer.AutoReset = true;
+    timer.Start();
+    return new TimerDisposable(timer, cts);
+}, isRunning);
+```
+
+`TimerDisposable` ensures `Cancel()` → `Stop()` → `Dispose()` ordering, providing a hard barrier against post-disposal callbacks.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I clean up resources (timers, subscriptions) in UseEffect?
+</Summary>
+<Body>
+
+Return an `IDisposable` from the UseEffect callback. For simple cases, return the resource directly. For custom cleanup logic, use `Disposable.Create()` from `System.Reactive.Disposables`:
+
+```csharp
+// Simple: return the disposable resource directly
+UseEffect(() =>
+{
+    var timer = new System.Threading.Timer(_ =>
+    {
+        counter.Set(counter.Value + 1);
+    }, null, 0, 1000);
+
+    return timer; // Timer implements IDisposable — returned for cleanup
+}, dependencies);
+```
+
+```csharp
+// Custom cleanup: use Disposable.Create() from System.Reactive
+using System.Reactive.Disposables;
+
+UseEffect(() =>
+{
+    var timer = new System.Threading.Timer(_ =>
+    {
+        counter.Set(counter.Value + 1);
+    }, null, 0, 1000);
+
+    return Disposable.Create(() =>
+    {
+        timer?.Dispose();
+        // additional cleanup logic here
+    });
+}, dependencies);
+```
+
+**Important:** `Disposable.Create()` requires `using System.Reactive.Disposables;`. System.Reactive is included as a transitive dependency of Ivy Framework — you do NOT need to add a NuGet package, just the using statement.
+
+For cancellation-based cleanup, use a `CancellationTokenSource`:
+
+```csharp
+UseEffect(() =>
+{
+    var cts = new CancellationTokenSource();
+    StartBackgroundWork(cts.Token);
+    return cts; // CancellationTokenSource implements IDisposable
+}, dependencies);
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Why does my UseEffect fire multiple times?
+</Summary>
+<Body>
+
+`UseEffect` with `AfterChange` triggers (state dependencies) fires once per `Set()` call on the watched state. If the state is updated multiple times in quick succession (e.g., file upload status transitions), the effect runs for each update.
+
+Use a guard pattern to prevent duplicate processing:
+
+```csharp
+var processedFile = UseRef<string?>(null);
+var uploadedFile = UseState<FileUpload?>(null);
+
+UseEffect(() =>
+{
+    var file = uploadedFile.Value;
+    if (file == null) return;
+    if (processedFile.Value == file.FileName) return; // Guard: already processed
+    processedFile.Value = file.FileName;
+
+    // Process file and show toast
+    alert.Toast($"Loaded {file.FileName}");
+}, uploadedFile);
+```
+
+Key points:
+- Use `UseRef` to track processed state without triggering re-renders
+- Always check if the meaningful value actually changed before taking action
+- For file uploads, guard on the file name or a unique identifier
+
+</Body>
+</Details>

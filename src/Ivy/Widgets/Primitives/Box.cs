@@ -16,7 +16,7 @@ public record Box : WidgetBase<Box>
     {
     }
 
-    [Prop] public Colors? Color { get; set; } = null;
+    [Prop] public Colors? Background { get; set; } = null;
 
     [Prop] public Colors? BorderColor { get; set; } = null;
 
@@ -43,9 +43,9 @@ public record Box : WidgetBase<Box>
 
 public static class BoxExtensions
 {
-    public static Box Color(this Box box, Colors color) => box with { Color = color };
+    public static Box Background(this Box box, Colors color) => box with { Background = color };
 
-    public static Box Color(this Box box, Colors color, float opacity) => box with { Color = color, Opacity = (1.0f - opacity) * 100 };
+    public static Box Background(this Box box, Colors color, float opacity) => box with { Background = color, Opacity = (1.0f - opacity) * 100 };
 
     public static Box BorderColor(this Box box, Colors color) => box with { BorderColor = color };
 
@@ -84,10 +84,12 @@ public static class BoxExtensions
             BorderStyle = Ivy.BorderStyle.None,
             BorderThickness = new(0),
             Padding = new(0),
-            Color = null,
+            Background = null,
             ContentAlign = Align.Left
         }.Width(Size.Full()).Height(Size.Full());
     }
+
+    public static Box Grow(this Box box) => box.Width(Size.Grow());
 
     public static Box Hover(this Box box, CardHoverVariant variant) => box with { HoverVariant = variant };
 

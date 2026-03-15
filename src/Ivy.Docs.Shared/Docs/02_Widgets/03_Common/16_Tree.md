@@ -70,9 +70,11 @@ public class TreeClickDemo : ViewBase
 ```csharp demo-tabs
 public class TreeRowActionsDemo : ViewBase
 {
+    private enum RowAction { Edit, More, Duplicate, Delete }
+
     public override object? Build()
     {
-        var lastAction = UseState("None");
+        var lastAction = UseState<string>("None");
 
         return Layout.Vertical()
             | Text.Block($"  Last Action: {lastAction.Value}")
@@ -93,13 +95,19 @@ public class TreeRowActionsDemo : ViewBase
                 new MenuItem("package.json").Icon(Icons.Braces).Tag("package.json")
             )
             .RowActions(
-                new MenuItem("Edit").Icon(Icons.Pencil).Tag("edit"),
-                new MenuItem("More").Icon(Icons.Ellipsis).Children(
-                    new MenuItem("Duplicate").Icon(Icons.Copy).Tag("duplicate"),
-                    new MenuItem("Delete").Icon(Icons.Trash).Tag("delete")
+                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit).Label("Edit"),
+                MenuItem.Default(Icons.Ellipsis).Tag(RowAction.More).Label("More").Children(
+                    MenuItem.Default(Icons.Copy).Tag(RowAction.Duplicate).Label("Duplicate"),
+                    MenuItem.Default(Icons.Trash).Tag(RowAction.Delete).Label("Delete")
                 )
             )
-            .OnRowAction(e => lastAction.Set($"{e.Value.ActionTag} on {e.Value.ItemValue}"));
+            .OnRowAction(e => {
+                var tagStr = e.Value.ActionTag?.ToString();
+                if (Enum.TryParse<RowAction>(tagStr, ignoreCase: true, out var action))
+                    lastAction.Set($"{action} on {e.Value.ItemValue}");
+                else if (tagStr != null)
+                    lastAction.Set($"{tagStr} on {e.Value.ItemValue}");
+            });
     }
 }
 ```

@@ -40,7 +40,7 @@ If you prefer to configure the MCP server manually, use the following configurat
         "<path-to-your-project>"
       ],
       "env": {
-        "Ivy__Mcp__ApiUrl": "https://staging.mcp.ivy.app"
+        "Ivy__Mcp__ApiUrl": "https://mcp.ivy.app"
       }
     }
   }

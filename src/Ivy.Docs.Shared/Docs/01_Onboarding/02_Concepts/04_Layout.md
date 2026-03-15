@@ -9,6 +9,8 @@ searchHints:
   - tabs
   - fluent
   - composition
+  - row
+  - column
 ---
 
 # Layout
@@ -60,7 +62,7 @@ All layout methods return a LayoutView that can be further configured:
 
 ### Gap
 
-Control spacing between elements:
+Control spacing between elements with `.Gap()`:
 
 ```csharp demo-tabs
 Layout.Vertical()
@@ -70,6 +72,26 @@ Layout.Vertical()
     | Text.Label("With Gap:")
     | (Layout.Horizontal().Gap(8)
         | new Badge("A") | new Badge("B") | new Badge("C"))
+```
+
+### Independent Row & Column Gap
+
+Use `.Gap(rowGap, columnGap)` to control vertical and horizontal spacing independently:
+
+```csharp demo-tabs
+Layout.Vertical().Gap(4)
+    | Text.Label("RowGap=8, ColumnGap=2:")
+    | (Layout.Wrap().Gap(8, 2).Width(Size.Units(60))
+        | new Badge("A") | new Badge("B") | new Badge("C")
+        | new Badge("D") | new Badge("E") | new Badge("F")
+        | new Badge("G") | new Badge("H") | new Badge("I")
+        | new Badge("J") | new Badge("K") | new Badge("L")
+        | new Badge("M") | new Badge("N"))
+    | Text.Label("RowGap=2, ColumnGap=8:")
+    | (Layout.Wrap().Gap(2, 8).Width(Size.Units(60))
+        | new Badge("A") | new Badge("B") | new Badge("C")
+        | new Badge("D") | new Badge("E") | new Badge("F")
+        | new Badge("G") | new Badge("H"))
 ```
 
 ### Padding and Margin
@@ -88,9 +110,9 @@ Control layout dimensions:
 
 ```csharp demo-tabs
 Layout.Horizontal().Gap(4)
-    | (Layout.Vertical().Width(50).Height(20).Background(Colors.Muted).Center()
+    | (Layout.Vertical().Width(Size.Units(50)).Height(Size.Units(20)).Background(Colors.Muted).Center()
         | Text.Label("50 units wide"))
-    | (Layout.Vertical().Width(30).Height(20).Background(Colors.Muted).Center()
+    | (Layout.Vertical().Width(Size.Units(30)).Height(Size.Units(20)).Background(Colors.Muted).Center()
         | Text.Label("30 units"))
 ```
 
@@ -106,6 +128,66 @@ Layout.Vertical().Gap(4)
         | new Badge("Center aligned"))
     | (Layout.Horizontal().Right()
         | new Badge("Right aligned"))
+```
+
+### Space Distribution
+
+Distribute space between elements using `SpaceBetween`, `SpaceAround`, or `SpaceEvenly`:
+
+```csharp demo-tabs
+Layout.Vertical().Gap(4)
+    | Text.Label("SpaceBetween — items pushed to edges:")
+    | (Layout.Horizontal().Align(Align.SpaceBetween).Width(Size.Full())
+        | new Badge("A") | new Badge("B") | new Badge("C"))
+    | Text.Label("SpaceAround — equal space around each item:")
+    | (Layout.Horizontal().Align(Align.SpaceAround).Width(Size.Full())
+        | new Badge("A") | new Badge("B") | new Badge("C"))
+    | Text.Label("SpaceEvenly — equal space between all items:")
+    | (Layout.Horizontal().Align(Align.SpaceEvenly).Width(Size.Full())
+        | new Badge("A") | new Badge("B") | new Badge("C"))
+```
+
+### Wrap
+
+Use `Layout.Wrap()` to create a layout where items flow and wrap to the next line when they run out of space. Try resizing the window to see the wrapping behavior:
+
+```csharp demo-tabs
+Layout.Wrap().Gap(2)
+    | new Badge("Tag 1").Primary()
+    | new Badge("Tag 2").Secondary()
+    | new Badge("Tag 3")
+    | new Badge("Tag 4").Primary()
+    | new Badge("Tag 5").Secondary()
+    | new Badge("Tag 6")
+    | new Badge("Tag 7").Primary()
+    | new Badge("Tag 8").Secondary()
+    | new Badge("Tag 9")
+    | new Badge("Tag 10").Primary()
+    | new Badge("Tag 11").Secondary()
+```
+
+### AlignSelf
+
+Override alignment for individual children using `.AlignSelf()`. In a horizontal layout, this controls vertical positioning of each child independently:
+
+```csharp demo-tabs
+Layout.Vertical().Gap(4)
+    | new Badge("Top").Primary().AlignSelf(Align.TopLeft)
+    | new Badge("Center").Primary().AlignSelf(Align.Center)
+    | new Badge("Bottom").Primary().AlignSelf(Align.BottomRight)
+```
+
+
+### Scroll
+
+Add scrollable behavior to layouts with constrained height using `.Scroll()`:
+
+```csharp demo-tabs
+Layout.Vertical().Height(Size.Units(30)).Scroll(Scroll.Vertical).Gap(2)
+    | new Badge("Item 1") | new Badge("Item 2") | new Badge("Item 3")
+    | new Badge("Item 4") | new Badge("Item 5") | new Badge("Item 6")
+    | new Badge("Item 7") | new Badge("Item 8") | new Badge("Item 9")
+    | new Badge("Item 10") | new Badge("Item 11") | new Badge("Item 12")
 ```
 
 ## Combining with Other Layouts
@@ -159,4 +241,18 @@ The Layout class provides the following factory methods:
 | [FooterLayout](../../02_Widgets/02_Layouts/05_FooterLayout.md) | Page layout with a fixed footer section |
 | [FloatingPanel](../../02_Widgets/02_Layouts/09_FloatingPanel.md) | Overlay panels that float above the main content |
 | [ResizablePanelGroup](../../02_Widgets/02_Layouts/08_ResizablePanelGroup.md) | Split panels that users can resize by dragging |
+
+## Faq
+
+### Does Ivy have Row and Column widgets?
+
+No. Ivy uses `Layout.Horizontal()` for horizontal layouts (similar to Row) and `Layout.Vertical()` for vertical layouts (similar to Column). You can also use `new StackLayout([...], Orientation.Horizontal)` for explicit orientation control.
+
+```csharp
+// Horizontal layout (like "Row")
+Layout.Horizontal([widget1, widget2, widget3]);
+
+// Vertical layout (like "Column")
+Layout.Vertical([widget1, widget2, widget3]);
+```
 

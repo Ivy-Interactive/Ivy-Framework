@@ -3,6 +3,7 @@ import {
   BorderRadius,
   BorderStyle,
   getAlign,
+  getAspectRatio,
   getBoxRadius,
   getBorderStyle,
   getBorderThickness,
@@ -23,7 +24,7 @@ export type BoxHoverVariant = 'None' | 'Pointer' | 'PointerAndTranslate';
 interface BoxWidgetProps {
   id: string;
   children?: React.ReactNode;
-  color?: string | undefined;
+  background?: string | undefined;
   borderRadius: BorderRadius;
   borderThickness: string;
   borderStyle: BorderStyle;
@@ -37,6 +38,7 @@ interface BoxWidgetProps {
   borderOpacity?: number;
   className?: string;
   events?: string[];
+  aspectRatio?: number;
   hoverVariant?: BoxHoverVariant;
 }
 
@@ -48,7 +50,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   borderStyle = 'Solid',
   borderRadius = 'Rounded',
   borderThickness = '1',
-  color,
+  background,
   borderColor,
   padding = '2',
   margin = '0',
@@ -56,6 +58,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   opacity,
   borderOpacity,
   className,
+  aspectRatio,
   events = EMPTY_ARRAY,
   hoverVariant = 'None',
 }) => {
@@ -77,11 +80,12 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
     ...getAlign('Vertical', contentAlign),
     ...getWidth(width),
     ...getHeight(height),
+    ...getAspectRatio(aspectRatio),
     ...getBorderStyle(borderStyle),
     ...getBorderThickness(borderThickness),
     ...borderRadiusStyle,
-    ...getColor(color, 'backgroundColor', 'background', opacity),
-    ...getColor(color, 'color', 'foreground'),
+    ...getColor(background, 'backgroundColor', 'background', opacity),
+    ...getColor(background, 'color', 'foreground'),
     ...getColor(borderColor, 'borderColor', 'background', borderOpacity),
   };
 

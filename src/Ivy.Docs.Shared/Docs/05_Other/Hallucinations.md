@@ -2,6 +2,10 @@
 
 Known cases where the agent hallucinated Ivy Framework APIs. Use this as a reference when debugging build errors in agent sessions.
 
+## IRef\<T\> — now supported
+
+`IRef<T>` was previously a hallucinated interface. It has since been added to the framework as `IRef<T> : IState<T>`. Both `UseRef<T>()` return types are now `IRef<T>`, while `UseState<T>()` continues to return `IState<T>`. The two interfaces are interchangeable — `IRef<T>` is a marker subtype used for clarity.
+
 ## SelectInputBase.Options() — chained options method
 
 **Hallucinated API:**
@@ -118,6 +122,29 @@ Callout.Error("Error message")
 **Found In:**
 d9116efb-830e-484a-a258-fc3193769158
 
+## HandleSubmit / Handle* — renamed event handler methods
+
+**Hallucinated API:**
+```csharp
+input.ToTextInput().HandleSubmit(() => Save())
+button.HandleClick(() => DoSomething())
+input.HandleBlur(() => Validate())
+```
+
+**Error:** `does not contain a definition for 'HandleSubmit'` (or `HandleClick`, `HandleBlur`, etc.)
+
+**Correct API:**
+```csharp
+input.ToTextInput().OnSubmit(() => Save())
+button.OnClick(() => DoSomething())
+input.OnBlur(() => Validate())
+```
+
+All `Handle*` event handler extension methods were renamed to `On*` in v1.2.17 (Ivy-Framework#2459, #2510): `HandleClick` → `OnClick`, `HandleSubmit` → `OnSubmit`, `HandleChange` → `OnChange`, `HandleSelect` → `OnSelect`, `HandleClose` → `OnClose`, `HandleBlur` → `OnBlur`, `HandleRowAction` → `OnRowAction`, `HandleCardMove` → `OnCardMove`, `HandleExpand` → `OnExpand`, `HandleCollapse` → `OnCollapse`, `HandlePageChange` → `OnPageChange`, `HandleUpload` → `OnUpload`, `HandleDownload` → `OnDownload`. **Auto-fixed:** The refactoring service automatically rewrites all `Handle*` calls to `On*`.
+
+**Found In:**
+(multiple sessions — agent uses old API names from training data)
+
 ## TextInputBase.OnEnter() — invented fluent method
 
 **Hallucinated API:**
@@ -136,21 +163,21 @@ text.ToTextInput().OnSubmit(() => DoSomething())
 **Found In:**
 bd5f45ac-569d-4be8-8ef8-882451e608a1
 
-## TextInputVariant — non-existent enum (wrong enum name)
+## TextInputVariants — old plural enum name
 
 **Hallucinated API:**
-```csharp
-new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariant.Textarea)
-```
-
-**Error:** `The name 'TextInputVariant' does not exist in the current context`
-
-**Correct API:**
 ```csharp
 new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariants.Textarea)
 ```
 
-The enum is `TextInputVariants` (plural with "s" suffix), not `TextInputVariant` (singular). This breaks the naming convention used by other widgets (e.g., `ButtonVariant`, `BadgeVariant`, `CalloutVariant`), which causes the agent to guess `TextInputVariant` by analogy. Values: `Text`, `Textarea`, `Email`, `Tel`, `Url`, `Password`, `Search`.
+**Error:** `The name 'TextInputVariants' does not exist in the current context`
+
+**Correct API:**
+```csharp
+new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariant.Textarea)
+```
+
+The enum is `TextInputVariant` (singular), not `TextInputVariants` (plural). All input variant enums were renamed from plural to singular in Ivy-Framework#2546 (e.g., `TextInputVariants` → `TextInputVariant`, `ColorInputVariants` → `ColorInputVariant`, etc.). **Auto-fixed:** The refactoring service automatically rewrites `TextInputVariants` → `TextInputVariant`. Values: `Text`, `Textarea`, `Email`, `Tel`, `Url`, `Password`, `Search`.
 
 **Found In:**
 4a94f8f6-865d-4663-8f4c-d4c09913398f
@@ -187,14 +214,17 @@ var selectedItem = UseState<InventoryItem?>(null);
 
 **Correct API:**
 ```csharp
+// Best: omit the null argument — the default is already null:
+var selectedItem = UseState<InventoryItem?>();
+// Or cast null to the explicit type:
 var selectedItem = UseState<InventoryItem?>((InventoryItem?)null);
-// or use a lambda:
+// Or use a lambda:
 var selectedItem = UseState(() => (InventoryItem?)null);
 ```
 
-When `T` is a reference type, `null` matches both `T?` and `Func<T>`, causing overload ambiguity. Either cast null to the explicit type or wrap it in a lambda.
+When `T` is a reference type, `null` matches both `T?` and `Func<T>`, causing overload ambiguity. The simplest fix is to omit the `null` argument entirely — the default parameter is already `null`/`default`. Alternatively, cast null to the explicit type or wrap it in a lambda.
 
-**Note:** The related `IState<T>.Set(null)` ambiguity has been fixed via `[OverloadResolutionPriority(1)]` on the `Set(T value)` overload. `.Set(null)` now resolves correctly without casting.
+**Note:** Unlike `IState<T>.Set(null)` (which was fixed via `[OverloadResolutionPriority(1)]`), `UseState` cannot use the same approach because T is inferred from the argument — C# 10+ lambda natural types cause the `T?` overload to steal ALL lambda calls when given higher priority, breaking `UseState(() => expr)` throughout the codebase.
 
 **Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
@@ -217,19 +247,28 @@ The `Button` constructor signature is `Button(string label, Func<Event<Button>, 
 
 **Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
+7a9aadf3-097e-448d-8d5c-bc86152710a6
 
-## NumberInputBase.Label() — AxisExtensions method used on input
+## InputBase.Label() — AxisExtensions method used on input
 
 **Hallucinated API:**
 ```csharp
+// NumberInputBase
 stockAdjustment.ToNumberInput().Label("Adjustment amount")
+
+// DateTimeInputBase
+dateState.ToDateInput().Label("Birthdate")
 ```
 
-**Error:** `The type 'Ivy.NumberInputBase' cannot be used as type parameter 'T' in the generic type or method 'AxisExtensions.Label<T>(T, string)'`
+**Error:** `The type 'Ivy.NumberInputBase' cannot be used as type parameter 'T' in the generic type or method 'AxisExtensions.Label<T>(T, string)'` (same CS0311 error for `DateTimeInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, etc.)
 
 **Correct API:**
 ```csharp
-// Use Text.Label() as a separate element above the input:
+// Use .WithField().Label() to wrap the input in a labeled field:
+stockAdjustment.ToNumberInput().WithField().Label("Adjustment amount")
+dateState.ToDateInput().WithField().Label("Birthdate")
+
+// Or use Text.Label() as a separate element above the input:
 Layout.Vertical()
     | Text.Label("Adjustment amount")
     | stockAdjustment.ToNumberInput()
@@ -238,10 +277,12 @@ Layout.Vertical()
 state.ToForm().Label(m => m.Amount, "Adjustment amount")
 ```
 
-`.Label()` is an `AxisExtensions` method for chart axes, not for inputs. For labeling inputs, use `Text.Label()` as a separate element or use the form builder's `.Label()` method.
+`.Label()` is an `AxisExtensions` method for chart axes, not for inputs. This applies to ALL input types (`NumberInputBase`, `DateTimeInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, etc.). The preferred way to label an input is `.WithField().Label("...")`, which wraps the input in a `Field` with a label.
 
 **Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
+2e91e9c7-9c03-4b86-a9d2-c0417bcf715f
+7a9aadf3-097e-448d-8d5c-bc86152710a6
 
 ## Tab.Content() — non-existent fluent method
 
@@ -321,10 +362,10 @@ date.ToDateTimeInput().Variant(DateTimeVariant.Date)
 ```csharp
 date.ToDateInput()
 // or:
-date.ToDateTimeInput().Variant(DateTimeInputVariants.Date)
+date.ToDateTimeInput().Variant(DateTimeInputVariant.Date)
 ```
 
-The enum is `DateTimeInputVariants` (plural with "Variants" suffix), not `DateTimeVariant` (singular). Values: `DateTime`, `Date`, `Time`, `Month`, `Week`. This follows the same naming pattern as `TextInputVariants`.
+The enum is `DateTimeInputVariant` (singular), not `DateTimeVariant` (missing "Input") or `DateTimeInputVariants` (old plural name). All input variant enums were renamed from plural to singular in Ivy-Framework#2546. Values: `DateTime`, `Date`, `Time`, `Month`, `Week`. **Auto-fixed:** The refactoring service automatically rewrites both `DateTimeVariant` and `DateTimeInputVariants` to `DateTimeInputVariant`.
 
 **Found In:**
 d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
@@ -415,9 +456,9 @@ new Spacer(4)
 
 **Correct API:**
 ```csharp
-new Spacer().Height(6)
+new Spacer().Height(Size.Units(6))
 // or
-new Spacer().Width(6)
+new Spacer().Width(Size.Units(6))
 ```
 
 Spacer has only a parameterless constructor. Use fluent `.Height()` or `.Width()` to set size.
@@ -620,7 +661,7 @@ Text.P("some text").Muted()
 Text.P("some text").Color(Colors.Secondary)
 ```
 
-`Text.Secondary()` does not exist as a static factory method. The static factories on `Text` are: `H1`, `H2`, `H3`, `H4`, `H5`, `H6`, `P`, `Inline`, `Block`, `Blockquote`, `InlineCode`, `Lead`, `Label`, `Muted`, `Strong`, `Bold`, `Danger`, `Warning`, `Success`, `Code`, `Markdown`, `Json`, `Xml`, `Html`, `Latex`, `Display`, `Literal`, `Rich`. The agent likely confused `Secondary` from `ButtonVariant.Secondary` / `Button.Secondary()` or `BadgeVariant.Secondary` / `Badge.Secondary()` with the `Text` API. `.Secondary()` is a fluent method on `Button` and `Badge`, not on `Text`.
+`Text.Secondary()` does not exist as a static factory method. The static factories on `Text` are: `H1`, `H2`, `H3`, `H4`, `H5`, `H6`, `P`, `Inline`, `Block`, `Blockquote`, `Monospaced`, `Lead`, `Label`, `Muted`, `Strong`, `Bold`, `Danger`, `Warning`, `Success`, `Code`, `Markdown`, `Json`, `Xml`, `Html`, `Latex`, `Display`, `Literal`, `Rich`. The agent likely confused `Secondary` from `ButtonVariant.Secondary` / `Button.Secondary()` or `BadgeVariant.Secondary` / `Badge.Secondary()` with the `Text` API. `.Secondary()` is a fluent method on `Button` and `Badge`, not on `Text`.
 
 **Found In:**
 (session not yet recorded)
@@ -643,6 +684,31 @@ new Box(content).BorderRadius(BorderRadius.Rounded)
 
 **Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
+
+## BorderRadius.Medium — non-existent enum value
+
+**Hallucinated API:**
+```csharp
+BorderRadius.Medium
+BorderRadius.Large
+BorderRadius.Small
+```
+
+**Error:** `'BorderRadius' does not contain a definition for 'Medium'`
+
+**Correct API:**
+```csharp
+BorderRadius.None     // no rounding
+BorderRadius.Rounded  // standard rounded corners
+BorderRadius.Full     // fully rounded (pill shape)
+```
+
+Valid `BorderRadius` values: `None`, `Rounded`, `Full`. The agent hallucinates Tailwind-style size variants (`Small`, `Medium`, `Large`, `Xl`) that don't exist.
+
+**Found In:**
+050136ca-9275-4e1d-9740-e393b544c1b5
+8a776329-6dc7-474f-aa4d-c8b4da753a25 (BorderRadius.Large)
+4e59e443-3579-4df9-af4b-765b7b7d61c8 (BorderRadius.Small — via IvyMcp hallucination)
 
 ## GridView.Background() — non-existent method
 
@@ -912,12 +978,12 @@ Text.P("Rate: $50.00/hour").AlignCenter()
 ```csharp
 // TextBuilder does not have alignment methods.
 // To center text, wrap it in a layout:
-Layout.Vertical().AlignItems(Align.Center)
+Layout.Vertical().Align(Align.Center)
     | Text.H1("$0.00")
     | Text.H3("00:00:00")
 
 // Or use a Box:
-new Box(Text.H1("$0.00")).AlignItems(Align.Center)
+new Box(Text.H1("$0.00")).Align(Align.Center)
 ```
 
 `TextBuilder` has no `.AlignCenter()` method. Text alignment is controlled at the layout/container level, not on individual text elements.
@@ -1018,3 +1084,69 @@ new MetricView("Title", "Value", icon: Icons.Activity)
 
 **Found In:**
 c008af27-1cb1-4ab3-b41a-36aa711c6a41
+
+## Disposable.Create() — missing using statement
+
+**Hallucinated usage (missing using):**
+```csharp
+return Disposable.Create(() => timer?.Dispose());
+```
+
+**Error:** `CS0103: The name 'Disposable' does not exist in the current context`
+
+**Fix:** Add the using statement — the package IS available as a transitive dependency:
+```csharp
+using System.Reactive.Disposables;
+
+return Disposable.Create(() => timer?.Dispose());
+```
+
+`System.Reactive` is a transitive dependency of Ivy Framework. The error occurs because the agent omits the `using System.Reactive.Disposables;` directive, not because the package is missing.
+
+**Found In:**
+fb184b5b-8254-4a1f-b8f2-ab8e8657fdbc
+
+## Fragment.Empty — non-existent static member
+
+**Hallucinated API:**
+```csharp
+return Fragment.Empty;
+```
+
+**Error:** `'Fragment' does not contain a definition for 'Empty'`
+
+**Correct API:**
+```csharp
+// Use ViewBase.Empty:
+return ViewBase.Empty;
+
+// Or return an empty Fragment:
+return new Fragment();
+
+// Or just return null:
+return null;
+```
+
+`Fragment` does not have an `Empty` static member. To return nothing from a view, use `ViewBase.Empty`, `new Fragment()`, or `null`.
+
+**Found In:**
+(session not yet recorded)
+
+## TextInput.Grow() — Box-only extension called on TextInput
+
+**Hallucinated API:**
+```csharp
+new TextInput(query).Grow()
+```
+
+**Error:** `CS1929: 'TextInput' does not contain a definition for 'Grow'`
+
+**Correct API:**
+```csharp
+new TextInput(query).Width(Size.Grow())
+```
+
+`Grow()` was originally defined only as a `Box`-specific extension method in `Box.cs`. It is not available on `TextInput` or other widget types. Use `.Width(Size.Grow())` directly, or note that `Grow()` has since been promoted to a generic `WidgetBase<T>` extension and is now available on all widgets.
+
+**Found In:**
+7a9aadf3

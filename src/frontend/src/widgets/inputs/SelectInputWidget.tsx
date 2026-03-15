@@ -1308,6 +1308,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                     <SelectItem
                       key={option.value}
                       value={option.value.toString()}
+                      textValue={option.label}
                       density={density}
                       disabled={disabled || loading || option.disabled}
                     >
