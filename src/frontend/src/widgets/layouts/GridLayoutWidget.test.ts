@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react';
-import { GridLayoutWidget } from './GridLayoutWidget';
+import { GridLayoutWidget, GridLayoutWidgetProps } from './GridLayoutWidget';
 
-function renderGrid(props: Record<string, unknown>, children: string[]) {
+function renderGrid(props: Partial<GridLayoutWidgetProps>, children: string[]) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -90,7 +90,7 @@ describe('GridLayoutWidget', () => {
 
   it('does not apply stretch override when alignSelf is explicitly set', () => {
     const container = renderGrid(
-      { columns: 2, rows: 3, childRowSpan: [2], childAlignSelf: ['Start'] },
+      { columns: 2, rows: 3, childRowSpan: [2], childAlignSelf: ['TopLeft'] },
       ['A']
     );
 
