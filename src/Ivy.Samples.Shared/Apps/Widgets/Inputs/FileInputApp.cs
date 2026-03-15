@@ -41,20 +41,20 @@ public class FileInputVariantTests : ViewBase
                | Text.P("Demonstrate different visual states of file inputs including empty, with value, disabled, invalid, and with placeholder.")
                | (Layout.Grid().Columns(6)
                   | null!
-                  | Text.InlineCode("Empty")
-                  | Text.InlineCode("With Value")
-                  | Text.InlineCode("Disabled")
-                  | Text.InlineCode("Invalid")
-                  | Text.InlineCode("With Placeholder")
+                  | Text.Monospaced("Empty")
+                  | Text.Monospaced("With Value")
+                  | Text.Monospaced("Disabled")
+                  | Text.Monospaced("Invalid")
+                  | Text.Monospaced("With Placeholder")
 
-                  | Text.InlineCode("Single File")
+                  | Text.Monospaced("Single File")
                   | singleFile.ToFileInput(singleFileUpload)
                   | singleFile.ToFileInput(singleFileUpload).Placeholder("File input with value (upload a file)")
                   | singleFile.ToFileInput(singleFileUpload).Disabled()
                   | singleFile.ToFileInput(singleFileUpload).Invalid("Please select a valid file")
                   | placeholderFile.ToFileInput(placeholderFileUpload).Placeholder("Click to select a file")
 
-                  | Text.InlineCode("Multiple Files")
+                  | Text.Monospaced("Multiple Files")
                   | multipleFiles.ToFileInput(multipleFilesUpload)
                   | multipleFiles.ToFileInput(multipleFilesUpload).Placeholder("Multiple files with value (upload files)")
                   | multipleFiles.ToFileInput(multipleFilesUpload).Disabled()
@@ -79,16 +79,16 @@ public class FileInputSizeVariants : ViewBase
                | Text.P("File inputs support different sizes: Small, Medium (default), and Large for both single and multiple file selection.")
                | (Layout.Grid().Columns(4)
                   | null!
-                  | Text.InlineCode("Small")
-                  | Text.InlineCode("Medium")
-                  | Text.InlineCode("Large")
+                  | Text.Monospaced("Small")
+                  | Text.Monospaced("Medium")
+                  | Text.Monospaced("Large")
 
-                  | Text.InlineCode("Single File")
+                  | Text.Monospaced("Single File")
                   | singleSizeFile.ToFileInput(singleSizeFileUpload).Small().Placeholder("Small file input")
                   | singleSizeFile.ToFileInput(singleSizeFileUpload).Placeholder("Medium file input")
                   | singleSizeFile.ToFileInput(singleSizeFileUpload).Large().Placeholder("Large file input")
 
-                  | Text.InlineCode("Multiple Files")
+                  | Text.Monospaced("Multiple Files")
                   | multipleSizeFiles.ToFileInput(multipleSizeFilesUpload).Small()
                   | multipleSizeFiles.ToFileInput(multipleSizeFilesUpload)
                   | multipleSizeFiles.ToFileInput(multipleSizeFilesUpload).Large()
@@ -110,17 +110,17 @@ public class FileInputDataBinding : ViewBase
         var dataBindingMultipleFilesUpload = UseUpload(MemoryStreamUploadHandler.Create(dataBindingMultipleFiles));
 
         var dataBinding = Layout.Grid().Columns(3)
-                          | Text.InlineCode("FileInput")
+                          | Text.Monospaced("FileInput")
                           | dataBindingFile.ToFileInput(dataBindingFileUpload)
                               .Placeholder("Single file: FileUpload<byte[]>? (nullable single file binding)")
                           | dataBindingFile
 
-                          | Text.InlineCode("FileInput?")
+                          | Text.Monospaced("FileInput?")
                           | dataBindingNullableFile.ToFileInput(dataBindingNullableFileUpload)
                               .Placeholder("Single file: FileUpload<byte[]>? (explicitly nullable binding)")
                           | dataBindingNullableFile
 
-                          | Text.InlineCode("IEnumerable<FileInput>")
+                          | Text.Monospaced("IEnumerable<FileInput>")
                           | dataBindingMultipleFiles.ToFileInput(dataBindingMultipleFilesUpload)
                               .Placeholder("Multiple files: ImmutableArray<FileUpload<byte[]>> (collection binding)")
                           | dataBindingMultipleFiles
@@ -151,24 +151,24 @@ public class FileInputTypeRestrictions : ViewBase
                | Text.H2("File Type Restrictions")
                | Text.P("Restrict file selection to specific types using the Accept property with file extensions or MIME types.")
                | (Layout.Grid().Columns(3)
-                  | Text.InlineCode("File Type")
-                  | Text.InlineCode("Accept Property")
-                  | Text.InlineCode("File Input")
+                  | Text.Monospaced("File Type")
+                  | Text.Monospaced("Accept Property")
+                  | Text.Monospaced("File Input")
 
                   | Text.Block("Text Files")
-                  | Text.InlineCode(".txt,.md,.csv")
+                  | Text.Monospaced(".txt,.md,.csv")
                   | textFiles.ToFileInput(textFilesUpload).Accept(".txt,.md,.csv").Placeholder("Select text files")
 
                   | Text.Block("PDF Files")
-                  | Text.InlineCode(".pdf")
+                  | Text.Monospaced(".pdf")
                   | pdfFiles.ToFileInput(pdfFilesUpload).Accept(".pdf").Placeholder("Select PDF files")
 
                   | Text.Block("Images")
-                  | Text.InlineCode(".jpg,.jpeg,.png,.gif,.webp")
+                  | Text.Monospaced(".jpg,.jpeg,.png,.gif,.webp")
                   | imageFiles.ToFileInput(imageFilesUpload).Accept(".jpg,.jpeg,.png,.gif,.webp").Placeholder("Select image files")
 
                   | Text.Block("All Files")
-                  | Text.InlineCode("(default)")
+                  | Text.Monospaced("(default)")
                   | singleLimitFile.ToFileInput(singleLimitFileUpload).Placeholder("Select any file")
                );
     }
@@ -194,9 +194,9 @@ public class FileInputFileSizeLimits : ViewBase
                | Text.H2("File Size Limits")
                | Text.P("Control minimum and maximum file sizes using MinFileSize and MaxFileSize. Use MinFileSize to reject empty or trivially small files.")
                | (Layout.Grid().Columns(3)
-                  | Text.InlineCode("Size Limit")
-                  | Text.InlineCode("Description")
-                  | Text.InlineCode("File Input")
+                  | Text.Monospaced("Size Limit")
+                  | Text.Monospaced("Description")
+                  | Text.Monospaced("File Input")
 
                   | Text.Block("Min 1 KB")
                   | Text.Block("Reject files smaller than 1 KB (empty or trivial files)")
@@ -229,9 +229,9 @@ public class FileInputCountLimits : ViewBase
                | Text.H2("File Count Limits")
                | Text.P("Control the maximum number of files that can be selected using the MaxFiles property.")
                | (Layout.Grid().Columns(3)
-                  | Text.InlineCode("Max Files")
-                  | Text.InlineCode("Description")
-                  | Text.InlineCode("File Input")
+                  | Text.Monospaced("Max Files")
+                  | Text.Monospaced("Description")
+                  | Text.Monospaced("File Input")
 
                   | Text.Block("No Limit")
                   | Text.Block("Default behavior - no restriction on number of files")
@@ -259,8 +259,8 @@ public class FileInputContentDisplay : ViewBase
                | Text.H2("File Content Display")
                | Text.P("Display file details and metadata after selection, showing information like file name, size, content type, and upload progress.")
                | (Layout.Grid().Columns(2)
-                  | Text.InlineCode("File Input")
-                  | Text.InlineCode("File Details")
+                  | Text.Monospaced("File Input")
+                  | Text.Monospaced("File Details")
 
                   | singleLimitFile.ToFileInput(singleLimitFileUpload).Placeholder("Select a text file to view content")
                   | (singleLimitFile.Value != null ? (object)singleLimitFile.Value.ToDetails() : Text.Block("No file selected"))
@@ -385,7 +385,7 @@ public class ProfilePhotoUpload(IState<FileUpload<byte[]>?> state) : ViewBase
         const long maxSize = 5 * 1024 * 1024;
         return state.ToFileInput(uploadContext)
             .Large()
-            .Placeholder($"Upload profile photo (max {Utils.FormatBytes(maxSize)})");
+            .Placeholder($"Upload profile photo (max {StringHelper.FormatBytes(maxSize)})");
     }
 }
 
@@ -398,7 +398,7 @@ public class DocumentUpload(IState<FileUpload<byte[]>?> state) : ViewBase
             .MaxFileSize(10 * 1024 * 1024); // 10 MB
         const long maxSize = 10 * 1024 * 1024;
         return state.ToFileInput(uploadContext)
-            .Placeholder($"Upload document (max {Utils.FormatBytes(maxSize)})");
+            .Placeholder($"Upload document (max {StringHelper.FormatBytes(maxSize)})");
     }
 }
 
@@ -412,7 +412,7 @@ public class CertificateUpload(IState<FileUpload<byte[]>?> state) : ViewBase
         const long maxSize = 2 * 1024 * 1024;
         return state.ToFileInput(uploadContext)
             .Small()
-            .Placeholder($"Upload certificate (max {Utils.FormatBytes(maxSize)})");
+            .Placeholder($"Upload certificate (max {StringHelper.FormatBytes(maxSize)})");
     }
 
 }
@@ -494,7 +494,7 @@ public class FileInputValidationExample : ViewBase
                | Text.P("Configure and test file upload validation rules including file size limits, file count limits, and accepted file types.")
                | (Layout.Horizontal()
                    | new FileUploadValidationUploader(settings.Value).Key(settings)
-                   | settings.ToForm(submitTitle: "Update").WithLayout().Width(120));
+                   | settings.ToForm(submitTitle: "Update").WithLayout().Width(Size.Units(120)));
     }
 }
 
@@ -523,7 +523,7 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
                     | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder)
                     | selectedFiles.Value.ToTable()
                         .Width(Size.Full())
-                        .Builder(e => e.Length, e => e.Func((long x) => Ivy.Utils.FormatBytes(x)))
+                        .Builder(e => e.Length, e => e.Func((long x) => Ivy.StringHelper.FormatBytes(x)))
                         .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
                         .Remove(e => e.Id);
     }

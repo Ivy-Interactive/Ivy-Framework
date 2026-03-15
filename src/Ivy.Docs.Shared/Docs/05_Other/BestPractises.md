@@ -1,4 +1,4 @@
-﻿# Best Practises
+# Best Practises
 
 ## Use UseQuery for Data Fetching
 

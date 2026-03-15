@@ -110,9 +110,9 @@ public class SmartSearchView : ViewBase
                 resultsContent = Layout.Vertical()
                     | new Loading()
                     | Text.P("Finding an answer...")
-                    | new Skeleton().Height(80)
-                    | new Skeleton().Height(120)
-                    | new Skeleton().Height(60);
+                    | new Skeleton().Height(Size.Units(80))
+                    | new Skeleton().Height(Size.Units(120))
+                    | new Skeleton().Height(Size.Units(60));
             }
             else if (query.Error is { } err)
             {

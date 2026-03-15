@@ -63,5 +63,15 @@
   <ItemGroup>
     <Folder Include="Generated/" />
   </ItemGroup>
-  
+
+  <!-- enable ivy analyzer for docs -->
+  <ItemGroup>
+    <ProjectReference Include="../Ivy.Analyser/Ivy.Analyser.csproj">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
+  </ItemGroup>
+
 </Project>

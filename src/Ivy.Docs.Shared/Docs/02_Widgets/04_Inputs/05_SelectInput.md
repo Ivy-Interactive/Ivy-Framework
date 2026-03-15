@@ -66,16 +66,16 @@ public class MultiSelectDemo : ViewBase
         var intOptions = new[] { 1, 2, 3, 4, 5 }.ToOptions();
         
         return Layout.Vertical()
-            | Text.InlineCode("Select Variant (Enum)")
+            | Text.Monospaced("Select Variant (Enum)")
             | languagesSelect.ToSelectInput(languageOptions)
                 .Variant(SelectInputVariant.Select)
                 .Placeholder("Choose languages...")
             
-            | Text.InlineCode("List Variant (String Array)")
+            | Text.Monospaced("List Variant (String Array)")
             | stringArray.ToSelectInput(stringOptions.ToOptions())
                 .Variant(SelectInputVariant.List)
             
-            | Text.InlineCode("Toggle Variant (Integer Array)")
+            | Text.Monospaced("Toggle Variant (Integer Array)")
             | intArray.ToSelectInput(intOptions)
                 .Variant(SelectInputVariant.Toggle);
     }
@@ -265,15 +265,15 @@ public class DisabledOptionsDemo : ViewBase
         };
 
         return Layout.Vertical()
-            | Text.InlineCode("Select Variant")
+            | Text.Monospaced("Select Variant")
             | fruit.ToSelectInput(fruitOptions)
                 .Placeholder("Select a fruit...")
 
-            | Text.InlineCode("Toggle Variant")
+            | Text.Monospaced("Toggle Variant")
             | colors.ToSelectInput(colorOptions)
                 .Variant(SelectInputVariant.Toggle)
 
-            | Text.InlineCode("List Variant")
+            | Text.Monospaced("List Variant")
             | colors.ToSelectInput(colorOptions)
                 .Variant(SelectInputVariant.List);
     }

@@ -2,6 +2,10 @@
 
 Known cases where the agent hallucinated Ivy Framework APIs. Use this as a reference when debugging build errors in agent sessions.
 
+## IRef\<T\> — now supported
+
+`IRef<T>` was previously a hallucinated interface. It has since been added to the framework as `IRef<T> : IState<T>`. Both `UseRef<T>()` return types are now `IRef<T>`, while `UseState<T>()` continues to return `IState<T>`. The two interfaces are interchangeable — `IRef<T>` is a marker subtype used for clarity.
+
 ## SelectInputBase.Options() — chained options method
 
 **Hallucinated API:**
@@ -243,19 +247,28 @@ The `Button` constructor signature is `Button(string label, Func<Event<Button>, 
 
 **Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
+7a9aadf3-097e-448d-8d5c-bc86152710a6
 
-## NumberInputBase.Label() — AxisExtensions method used on input
+## InputBase.Label() — AxisExtensions method used on input
 
 **Hallucinated API:**
 ```csharp
+// NumberInputBase
 stockAdjustment.ToNumberInput().Label("Adjustment amount")
+
+// DateTimeInputBase
+dateState.ToDateInput().Label("Birthdate")
 ```
 
-**Error:** `The type 'Ivy.NumberInputBase' cannot be used as type parameter 'T' in the generic type or method 'AxisExtensions.Label<T>(T, string)'`
+**Error:** `The type 'Ivy.NumberInputBase' cannot be used as type parameter 'T' in the generic type or method 'AxisExtensions.Label<T>(T, string)'` (same CS0311 error for `DateTimeInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, etc.)
 
 **Correct API:**
 ```csharp
-// Use Text.Label() as a separate element above the input:
+// Use .WithField().Label() to wrap the input in a labeled field:
+stockAdjustment.ToNumberInput().WithField().Label("Adjustment amount")
+dateState.ToDateInput().WithField().Label("Birthdate")
+
+// Or use Text.Label() as a separate element above the input:
 Layout.Vertical()
     | Text.Label("Adjustment amount")
     | stockAdjustment.ToNumberInput()
@@ -264,10 +277,12 @@ Layout.Vertical()
 state.ToForm().Label(m => m.Amount, "Adjustment amount")
 ```
 
-`.Label()` is an `AxisExtensions` method for chart axes, not for inputs. For labeling inputs, use `Text.Label()` as a separate element or use the form builder's `.Label()` method.
+`.Label()` is an `AxisExtensions` method for chart axes, not for inputs. This applies to ALL input types (`NumberInputBase`, `DateTimeInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, etc.). The preferred way to label an input is `.WithField().Label("...")`, which wraps the input in a `Field` with a label.
 
 **Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
+2e91e9c7-9c03-4b86-a9d2-c0417bcf715f
+7a9aadf3-097e-448d-8d5c-bc86152710a6
 
 ## Tab.Content() — non-existent fluent method
 
@@ -441,9 +456,9 @@ new Spacer(4)
 
 **Correct API:**
 ```csharp
-new Spacer().Height(6)
+new Spacer().Height(Size.Units(6))
 // or
-new Spacer().Width(6)
+new Spacer().Width(Size.Units(6))
 ```
 
 Spacer has only a parameterless constructor. Use fluent `.Height()` or `.Width()` to set size.
@@ -646,7 +661,7 @@ Text.P("some text").Muted()
 Text.P("some text").Color(Colors.Secondary)
 ```
 
-`Text.Secondary()` does not exist as a static factory method. The static factories on `Text` are: `H1`, `H2`, `H3`, `H4`, `H5`, `H6`, `P`, `Inline`, `Block`, `Blockquote`, `InlineCode`, `Lead`, `Label`, `Muted`, `Strong`, `Bold`, `Danger`, `Warning`, `Success`, `Code`, `Markdown`, `Json`, `Xml`, `Html`, `Latex`, `Display`, `Literal`, `Rich`. The agent likely confused `Secondary` from `ButtonVariant.Secondary` / `Button.Secondary()` or `BadgeVariant.Secondary` / `Badge.Secondary()` with the `Text` API. `.Secondary()` is a fluent method on `Button` and `Badge`, not on `Text`.
+`Text.Secondary()` does not exist as a static factory method. The static factories on `Text` are: `H1`, `H2`, `H3`, `H4`, `H5`, `H6`, `P`, `Inline`, `Block`, `Blockquote`, `Monospaced`, `Lead`, `Label`, `Muted`, `Strong`, `Bold`, `Danger`, `Warning`, `Success`, `Code`, `Markdown`, `Json`, `Xml`, `Html`, `Latex`, `Display`, `Literal`, `Rich`. The agent likely confused `Secondary` from `ButtonVariant.Secondary` / `Button.Secondary()` or `BadgeVariant.Secondary` / `Badge.Secondary()` with the `Text` API. `.Secondary()` is a fluent method on `Button` and `Badge`, not on `Text`.
 
 **Found In:**
 (session not yet recorded)
@@ -669,6 +684,31 @@ new Box(content).BorderRadius(BorderRadius.Rounded)
 
 **Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
+
+## BorderRadius.Medium — non-existent enum value
+
+**Hallucinated API:**
+```csharp
+BorderRadius.Medium
+BorderRadius.Large
+BorderRadius.Small
+```
+
+**Error:** `'BorderRadius' does not contain a definition for 'Medium'`
+
+**Correct API:**
+```csharp
+BorderRadius.None     // no rounding
+BorderRadius.Rounded  // standard rounded corners
+BorderRadius.Full     // fully rounded (pill shape)
+```
+
+Valid `BorderRadius` values: `None`, `Rounded`, `Full`. The agent hallucinates Tailwind-style size variants (`Small`, `Medium`, `Large`, `Xl`) that don't exist.
+
+**Found In:**
+050136ca-9275-4e1d-9740-e393b544c1b5
+8a776329-6dc7-474f-aa4d-c8b4da753a25 (BorderRadius.Large)
+4e59e443-3579-4df9-af4b-765b7b7d61c8 (BorderRadius.Small — via IvyMcp hallucination)
 
 ## GridView.Background() — non-existent method
 
@@ -938,12 +978,12 @@ Text.P("Rate: $50.00/hour").AlignCenter()
 ```csharp
 // TextBuilder does not have alignment methods.
 // To center text, wrap it in a layout:
-Layout.Vertical().AlignItems(Align.Center)
+Layout.Vertical().Align(Align.Center)
     | Text.H1("$0.00")
     | Text.H3("00:00:00")
 
 // Or use a Box:
-new Box(Text.H1("$0.00")).AlignItems(Align.Center)
+new Box(Text.H1("$0.00")).Align(Align.Center)
 ```
 
 `TextBuilder` has no `.AlignCenter()` method. Text alignment is controlled at the layout/container level, not on individual text elements.
@@ -1091,3 +1131,22 @@ return null;
 
 **Found In:**
 (session not yet recorded)
+
+## TextInput.Grow() — Box-only extension called on TextInput
+
+**Hallucinated API:**
+```csharp
+new TextInput(query).Grow()
+```
+
+**Error:** `CS1929: 'TextInput' does not contain a definition for 'Grow'`
+
+**Correct API:**
+```csharp
+new TextInput(query).Width(Size.Grow())
+```
+
+`Grow()` was originally defined only as a `Box`-specific extension method in `Box.cs`. It is not available on `TextInput` or other widget types. Use `.Width(Size.Grow())` directly, or note that `Grow()` has since been promoted to a generic `WidgetBase<T>` extension and is now available on all widgets.
+
+**Found In:**
+7a9aadf3

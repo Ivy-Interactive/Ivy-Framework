@@ -7,7 +7,7 @@ public record Area
     public Area(string dataKey, object? stackId = null, string? name = null)
     {
         DataKey = dataKey;
-        Name = name ?? Utils.SplitPascalCase(dataKey);
+        Name = name ?? StringHelper.SplitPascalCase(dataKey);
         StackId = stackId?.ToString();
     }
 

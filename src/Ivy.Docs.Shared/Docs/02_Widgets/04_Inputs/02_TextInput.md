@@ -81,8 +81,8 @@ public class CaptureAddressDemo: ViewBase
         return new TextInput(address)
                                .Placeholder("Åkervägen 9, \n132 39 Saltsjö-Boo, \nSweden")
                                .Variant(TextInputVariant.Textarea)
-                               .Height(30)
-                               .Width(100)
+                               .Height(Size.Units(30))
+                               .Width(Size.Units(100))
                                .WithField()
                                .Label("Address");         
     }
@@ -332,8 +332,8 @@ public class DataCaptureUsingExtensionDemo: ViewBase
                      .Label("Mobile")
                 | address.ToTextareaInput()
                          .Placeholder("Address Line1\nAddress Line2\nAddress Line 3")
-                         .Height(40)
-                         .Width(100)
+                         .Height(Size.Units(40))
+                         .Width(Size.Units(100))
                          .WithField()
                          .Label("Address")
                 | website.ToUrlInput()
@@ -500,6 +500,48 @@ input.ToTextInput()
 ```
 
 `OnBlur` takes an `Action` that is invoked when the input loses focus — which happens automatically on Enter for single-line text inputs.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How to create a form with a dynamic number of fields (e.g. dictionary input)?
+</Summary>
+<Body>
+
+Since hooks cannot be called inside loops (IVYHOOK003), you cannot use `UseState` in a `for`/`foreach`/LINQ loop. Instead, use **one state variable** that holds all field values:
+
+```csharp
+public override object Build()
+{
+    var columns = GetColumnNames(); // e.g. ["Name", "Age", "City"]
+    var values = UseState(new Dictionary<string, string>());
+
+    var layout = Layout.Vertical();
+    foreach (var col in columns)
+    {
+        var currentValue = values.Value.GetValueOrDefault(col, "");
+        layout.Add(
+            new TextInput(currentValue, e =>
+            {
+                var updated = new Dictionary<string, string>(values.Value) { [col] = e.Value };
+                values.Set(updated);
+            })
+            .Placeholder(col)
+            .WithField()
+            .Label(col)
+        );
+    }
+    return layout;
+}
+```
+
+Key points:
+- Only one `UseState` call at the top level — no hook rule violations
+- The dictionary keys map to column names, values map to user input
+- Create a new dictionary on each update to trigger a re-render
+- This pattern works for any dynamic input scenario (forms, dialogs, etc.)
 
 </Body>
 </Details>

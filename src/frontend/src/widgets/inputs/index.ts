@@ -2,6 +2,7 @@ export { BoolInputWidget } from './BoolInputWidget';
 export { TextInputWidget } from './TextInputWidget';
 export { DateTimeInputWidget } from './DateTimeInputWidget';
 export { NumberInputWidget } from './NumberInputWidget';
+export { NumberRangeInputWidget } from './NumberRangeInputWidget';
 export { SelectInputWidget } from './SelectInputWidget';
 export { ReadOnlyInputWidget } from './ReadOnlyInputWidget';
 export { ColorInputWidget } from './ColorInputWidget';

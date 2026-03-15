@@ -642,8 +642,6 @@ public class PaginationExample : ViewBase
     public override object? Build()
     {
         var page = UseState(1);
-        var totalPages = (int)Math.Ceiling((double)TotalItems / PageSize);
-
         var itemsQuery = UseQuery(
             key: $"paginated-items?page={page.Value}",
             fetcher: async ct =>
@@ -657,6 +655,8 @@ public class PaginationExample : ViewBase
                     .ToList();
             },
             options: new QueryOptions { KeepPrevious = true });
+
+        var totalPages = (int)Math.Ceiling((double)TotalItems / PageSize);
 
         var itemList = itemsQuery.Value?.Select(item =>
             Layout.Horizontal().Gap(2)

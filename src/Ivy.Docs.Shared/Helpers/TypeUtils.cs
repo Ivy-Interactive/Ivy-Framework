@@ -244,10 +244,12 @@ public static class TypeUtils
 
     private static bool IsWidgetBaseType(this Type type)
     {
-        Type? currentType = type.BaseType;
+        Type? currentType = type;
 
         while (currentType != null && currentType != typeof(object))
         {
+            if (currentType == typeof(Ivy.WidgetBase)) return true;
+
             // Check if the current type is a generic type
             if (currentType.IsGenericType)
             {

@@ -28,15 +28,15 @@ public class DateTimeInputApp : SampleBase
 
         // Size examples
         var sizeExamplesGrid = Layout.Grid().Columns(7)
-            | Text.InlineCode("Size")
-            | Text.InlineCode("Date Input")
-            | Text.InlineCode("DateTime Input")
-            | Text.InlineCode("Time Input")
-            | Text.InlineCode("Month Input")
-            | Text.InlineCode("Week Input")
-            | Text.InlineCode("Year Input")
+            | Text.Monospaced("Size")
+            | Text.Monospaced("Date Input")
+            | Text.Monospaced("DateTime Input")
+            | Text.Monospaced("Time Input")
+            | Text.Monospaced("Month Input")
+            | Text.Monospaced("Week Input")
+            | Text.Monospaced("Year Input")
 
-            | Text.InlineCode("Small")
+            | Text.Monospaced("Small")
             | dateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Date)
@@ -74,7 +74,7 @@ public class DateTimeInputApp : SampleBase
                 .Placeholder("Small year")
                 .TestId("datetime-input-year-small")
 
-            | Text.InlineCode("Medium")
+            | Text.Monospaced("Medium")
             | dateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Date)
@@ -112,7 +112,7 @@ public class DateTimeInputApp : SampleBase
                 .Placeholder("Medium year")
                 .TestId("datetime-input-year-medium")
 
-            | Text.InlineCode("Large")
+            | Text.Monospaced("Large")
             | dateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Date)
@@ -153,13 +153,13 @@ public class DateTimeInputApp : SampleBase
         // Variants grid
         var variantsGrid = Layout.Grid().Columns(6)
             | null!
-            | Text.InlineCode("Normal")
-            | Text.InlineCode("Disabled")
-            | Text.InlineCode("Invalid")
-            | Text.InlineCode("Nullable")
-            | Text.InlineCode("Nullable + Invalid")
+            | Text.Monospaced("Normal")
+            | Text.Monospaced("Disabled")
+            | Text.Monospaced("Invalid")
+            | Text.Monospaced("Nullable")
+            | Text.Monospaced("Nullable + Invalid")
 
-            | Text.InlineCode("Date")
+            | Text.Monospaced("Date")
             | dateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Date)
@@ -191,7 +191,7 @@ public class DateTimeInputApp : SampleBase
                 .Invalid("Nullable invalid date")
                 .TestId("datetime-input-date-nullable-invalid-main")
 
-            | Text.InlineCode("DateTime")
+            | Text.Monospaced("DateTime")
             | dateTimeState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.DateTime)
@@ -219,7 +219,7 @@ public class DateTimeInputApp : SampleBase
                 .Invalid("Nullable invalid datetime")
                 .TestId("datetime-input-datetime-nullable-invalid-main")
 
-            | Text.InlineCode("Time")
+            | Text.Monospaced("Time")
             | timeState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Time)
@@ -249,7 +249,7 @@ public class DateTimeInputApp : SampleBase
                 .Invalid("Nullable invalid time")
                 .TestId("datetime-input-time-nullable-invalid-main")
 
-            | Text.InlineCode("Month")
+            | Text.Monospaced("Month")
             | monthState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Month)
@@ -279,7 +279,7 @@ public class DateTimeInputApp : SampleBase
                 .Invalid("Nullable invalid month")
                 .TestId("datetime-input-month-nullable-invalid-main")
 
-            | Text.InlineCode("Week")
+            | Text.Monospaced("Week")
             | weekState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Week)
@@ -309,7 +309,7 @@ public class DateTimeInputApp : SampleBase
                 .Invalid("Nullable invalid week")
                 .TestId("datetime-input-week-nullable-invalid-main")
 
-            | Text.InlineCode("Year")
+            | Text.Monospaced("Year")
             | yearState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Year)
@@ -341,160 +341,160 @@ public class DateTimeInputApp : SampleBase
 
         // Data binding grid
         var dataBindingGrid = Layout.Grid().Columns(3)
-            | Text.InlineCode("Type")
-            | Text.InlineCode("Input")
-            | Text.InlineCode("Current Value")
+            | Text.Monospaced("Type")
+            | Text.Monospaced("Input")
+            | Text.Monospaced("Current Value")
 
-            | Text.InlineCode("DateTime")
+            | Text.Monospaced("DateTime")
             | dateState.ToDateTimeInput().Variant(DateTimeInputVariant.DateTime).TestId("datetime-input-datetime-binding")
-            | Text.InlineCode($"{dateState.Value:yyyy-MM-dd HH:mm:ss}")
+            | Text.Monospaced($"{dateState.Value:yyyy-MM-dd HH:mm:ss}")
 
-            | Text.InlineCode("DateOnly")
+            | Text.Monospaced("DateOnly")
             | dateOnlyState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Date)
                 .TestId("datetime-input-dateonly-binding")
-            | Text.InlineCode($"{dateOnlyState.Value:yyyy-MM-dd}")
+            | Text.Monospaced($"{dateOnlyState.Value:yyyy-MM-dd}")
 
-            | Text.InlineCode("TimeOnly")
+            | Text.Monospaced("TimeOnly")
             | timeOnlyState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Time)
                 .TestId("datetime-input-timeonly-binding")
-            | Text.InlineCode($"{timeOnlyState.Value:HH:mm:ss}")
+            | Text.Monospaced($"{timeOnlyState.Value:HH:mm:ss}")
 
-            | Text.InlineCode("string (ISO)")
+            | Text.Monospaced("string (ISO)")
             | stringState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.DateTime)
                 .TestId("datetime-input-string-binding")
-            | Text.InlineCode(stringState.Value)
+            | Text.Monospaced(stringState.Value)
 
-            | Text.InlineCode("DateTime?")
+            | Text.Monospaced("DateTime?")
             | nullableDateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.DateTime)
                 .TestId("datetime-input-datetime-nullable-binding")
-            | Text.InlineCode(nullableDateState.Value?.ToString("yyyy-MM-dd HH:mm:ss") ?? "null")
+            | Text.Monospaced(nullableDateState.Value?.ToString("yyyy-MM-dd HH:mm:ss") ?? "null")
 
-            | Text.InlineCode("DateOnly?")
+            | Text.Monospaced("DateOnly?")
             | nullableDateOnlyState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Date)
                 .TestId("datetime-input-dateonly-nullable-binding")
-            | Text.InlineCode(nullableDateOnlyState.Value?.ToString("yyyy-MM-dd") ?? "null")
+            | Text.Monospaced(nullableDateOnlyState.Value?.ToString("yyyy-MM-dd") ?? "null")
 
-            | Text.InlineCode("TimeOnly?")
+            | Text.Monospaced("TimeOnly?")
             | nullableTimeState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Time)
                 .TestId("datetime-input-timeonly-nullable-binding")
-            | Text.InlineCode(nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null")
+            | Text.Monospaced(nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null")
 
-            | Text.InlineCode("DateTimeOffset")
+            | Text.Monospaced("DateTimeOffset")
             | dateTimeOffsetState.ToDateTimeInput().Variant(DateTimeInputVariant.DateTime).TestId("datetime-input-datetimeoffset-binding")
-            | Text.InlineCode($"{dateTimeOffsetState.Value:yyyy-MM-dd HH:mm:ss zzz}")
+            | Text.Monospaced($"{dateTimeOffsetState.Value:yyyy-MM-dd HH:mm:ss zzz}")
 
-            | Text.InlineCode("DateTimeOffset?")
+            | Text.Monospaced("DateTimeOffset?")
             | nullableDateTimeOffsetState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.DateTime)
                 .TestId("datetime-input-datetimeoffset-nullable-binding")
-            | Text.InlineCode(nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null")
+            | Text.Monospaced(nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null")
 
-            | Text.InlineCode("Month")
+            | Text.Monospaced("Month")
             | monthState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Month)
                 .TestId("datetime-input-month-binding")
-            | Text.InlineCode($"{monthState.Value:yyyy-MM}")
+            | Text.Monospaced($"{monthState.Value:yyyy-MM}")
 
-            | Text.InlineCode("Week")
+            | Text.Monospaced("Week")
             | weekState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Week)
                 .TestId("datetime-input-week-binding")
-            | Text.InlineCode($"{weekState.Value:yyyy-'W'ww}")
+            | Text.Monospaced($"{weekState.Value:yyyy-'W'ww}")
 
-            | Text.InlineCode("Year")
+            | Text.Monospaced("Year")
             | yearState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Year)
             .TestId("datetime-input-year-binding")
-            | Text.InlineCode($"{yearState.Value:yyyy}");
+            | Text.Monospaced($"{yearState.Value:yyyy}");
 
         // Placeholder examples
         var placeholderExamplesGrid = Layout.Grid().Columns(3)
-            | Text.InlineCode("Variant")
-            | Text.InlineCode("Placeholder Text")
-            | Text.InlineCode("Input")
+            | Text.Monospaced("Variant")
+            | Text.Monospaced("Placeholder Text")
+            | Text.Monospaced("Input")
 
-            | Text.InlineCode("Date")
-            | Text.InlineCode("Birthday")
+            | Text.Monospaced("Date")
+            | Text.Monospaced("Birthday")
             | nullableDateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Date)
                 .Placeholder("Birthday")
                 .TestId("datetime-input-placeholder-birthday")
 
-            | Text.InlineCode("Date")
-            | Text.InlineCode("When did you start?")
+            | Text.Monospaced("Date")
+            | Text.Monospaced("When did you start?")
             | nullableDateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Date)
                 .Placeholder("When did you start?")
                 .TestId("datetime-input-placeholder-start-date")
 
-            | Text.InlineCode("DateTime")
-            | Text.InlineCode("Meeting time")
+            | Text.Monospaced("DateTime")
+            | Text.Monospaced("Meeting time")
             | nullableDateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.DateTime)
                 .Placeholder("Meeting time")
                 .TestId("datetime-input-placeholder-meeting")
 
-            | Text.InlineCode("DateTime")
-            | Text.InlineCode("Deadline")
+            | Text.Monospaced("DateTime")
+            | Text.Monospaced("Deadline")
             | nullableDateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.DateTime)
                 .Placeholder("Deadline")
                 .TestId("datetime-input-placeholder-deadline")
 
-            | Text.InlineCode("Time")
-            | Text.InlineCode("Start time")
+            | Text.Monospaced("Time")
+            | Text.Monospaced("Start time")
             | nullableTimeState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Time)
                 .Placeholder("Start time")
                 .TestId("datetime-input-placeholder-start-time")
 
-            | Text.InlineCode("Time")
-            | Text.InlineCode("Lunch break")
+            | Text.Monospaced("Time")
+            | Text.Monospaced("Lunch break")
             | nullableTimeState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Time)
                 .Placeholder("Lunch break")
                 .TestId("datetime-input-placeholder-lunch-time")
 
-            | Text.InlineCode("Month")
-            | Text.InlineCode("Billing period")
+            | Text.Monospaced("Month")
+            | Text.Monospaced("Billing period")
             | nullableDateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Month)
                 .Placeholder("Billing period")
                 .TestId("datetime-input-placeholder-month")
 
-            | Text.InlineCode("Week")
-            | Text.InlineCode("Project week")
+            | Text.Monospaced("Week")
+            | Text.Monospaced("Project week")
             | nullableDateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Week)
                 .Placeholder("Project week")
                 .TestId("datetime-input-placeholder-week")
 
-            | Text.InlineCode("Year")
-            | Text.InlineCode("Fiscal year")
+            | Text.Monospaced("Year")
+            | Text.Monospaced("Fiscal year")
             | nullableDateState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Year)

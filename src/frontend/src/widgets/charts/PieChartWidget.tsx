@@ -98,7 +98,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         }
 
         return {
-          name: key.charAt(0).toUpperCase() + key.slice(1),
+          name: key,
           type: ChartType.Pie,
           radius: [
             pieConfig.innerRadius ?? '40%',

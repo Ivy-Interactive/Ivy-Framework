@@ -6,16 +6,16 @@ public class DashboardApp : SampleBase
     protected override object? BuildSample()
     {
         return Layout.Vertical() | (Layout.Grid().Columns(4)
-                                    | new MetricView("Total Sales", null, ctx => UseStaticMetric(ctx, new MetricRecord("$84,250", 0.21, 0.21, "$800,000")))
-                                    | new MetricView("Very Long Revenue Number", null, ctx => UseStaticMetric(ctx, new MetricRecord("$123,456,789.99", 12.345, 0.85, "$100,000,000")))
-                                    | new MetricView("Post Engagement Rate", null, ctx => UseStaticMetric(ctx, new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%")))
-                                    | new MetricView("Total Comments per Author", null, ctx => UseStaticMetric(ctx, new MetricRecord("2.25", 0.381, 0.90, "2.50")))
+                                    | new MetricView("Total Sales", null, ctx => CreateStaticMetric(ctx, new MetricRecord("$84,250", 0.21, 0.21, "$800,000")))
+                                    | new MetricView("Very Long Revenue Number", null, ctx => CreateStaticMetric(ctx, new MetricRecord("$123,456,789.99", 12.345, 0.85, "$100,000,000")))
+                                    | new MetricView("Post Engagement Rate", null, ctx => CreateStaticMetric(ctx, new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%")))
+                                    | new MetricView("Total Comments per Author", null, ctx => CreateStaticMetric(ctx, new MetricRecord("2.25", 0.381, 0.90, "2.50")))
                                     )
                                  | (Layout.Grid().Columns(4)
-                                    | new MetricView("Total Comments per Author in This Period", null, ctx => UseStaticMetric(ctx, new MetricRecord("2.25", 0.381, 0.90, "2.50")))
-                                    | new MetricView("User Engagement", null, ctx => UseStaticMetric(ctx, new MetricRecord("1,247", 0.125, 0.75, "1,500 users")))
-                                    | new MetricView("Task Progress", Icons.Check, ctx => UseStaticMetric(ctx, new MetricRecord("87%", null, 0.87, "100% completion")))
-                                    | new MetricView("System Health", Icons.Activity, ctx => UseStaticMetric(ctx, new MetricRecord("99.9%", null, 0.99, "100% uptime")))
+                                    | new MetricView("Total Comments per Author in This Period", null, ctx => CreateStaticMetric(ctx, new MetricRecord("2.25", 0.381, 0.90, "2.50")))
+                                    | new MetricView("User Engagement", null, ctx => CreateStaticMetric(ctx, new MetricRecord("1,247", 0.125, 0.75, "1,500 users")))
+                                    | new MetricView("Task Progress", Icons.Check, ctx => CreateStaticMetric(ctx, new MetricRecord("87%", null, 0.87, "100% completion")))
+                                    | new MetricView("System Health", Icons.Activity, ctx => CreateStaticMetric(ctx, new MetricRecord("99.9%", null, 0.99, "100% uptime")))
                                     )
 
                                  | (Layout.Grid().Columns(4)
@@ -26,27 +26,27 @@ public class DashboardApp : SampleBase
                                     )
 
                                  | (Layout.Grid().Columns(4)
-                                    | new MetricView("Revenue Growth", null, ctx => UseStaticMetric(ctx, new MetricRecord("$45,230", 0.183, 0.65, "$70,000 target")))
-                                    | new MetricView("Social Engagement", Icons.Star, ctx => UseStaticMetric(ctx, new MetricRecord("2,847", null, null, null)))
-                                    | new MetricView("Progress Variations", Icons.Star, ctx => UseStaticMetric(ctx, new MetricRecord("70%", null, 0.70, "100%")))
-                                    | new MetricView("Layout Testing", Icons.LayoutDashboard, ctx => UseStaticMetric(ctx, new MetricRecord("4.8", null, 0.96, "5.0 rating")))
+                                    | new MetricView("Revenue Growth", null, ctx => CreateStaticMetric(ctx, new MetricRecord("$45,230", 0.183, 0.65, "$70,000 target")))
+                                    | new MetricView("Social Engagement", Icons.Star, ctx => CreateStaticMetric(ctx, new MetricRecord("2,847", null, null, null)))
+                                    | new MetricView("Progress Variations", Icons.Star, ctx => CreateStaticMetric(ctx, new MetricRecord("70%", null, 0.70, "100%")))
+                                    | new MetricView("Layout Testing", Icons.LayoutDashboard, ctx => CreateStaticMetric(ctx, new MetricRecord("4.8", null, 0.96, "5.0 rating")))
                                     )
 
                                  | (Layout.Grid().Columns(2)
-                                    | new MetricView("Download Analytics", null, ctx => UseStaticMetric(ctx, new MetricRecord("2,090", 0.25, 0.78, "2,500 total")))
-                                    | new MetricView("Global Distribution", Icons.Globe, ctx => UseStaticMetric(ctx, new MetricRecord("47", null, 0.85, "50 countries")))
+                                    | new MetricView("Download Analytics", null, ctx => CreateStaticMetric(ctx, new MetricRecord("2,090", 0.25, 0.78, "2,500 total")))
+                                    | new MetricView("Global Distribution", Icons.Globe, ctx => CreateStaticMetric(ctx, new MetricRecord("47", null, 0.85, "50 countries")))
                                     )
 
                                  | (Layout.Grid().Columns(3)
-                                    | new MetricView("Text Spacing Demo", Icons.Type, ctx => UseStaticMetric(ctx, new MetricRecord("Compact", null, 0.60, "Tight spacing")))
-                                    | new MetricView("Zero Spacing", Icons.Zap, ctx => UseStaticMetric(ctx, new MetricRecord("Dense", null, 0.75, "Dense layout")))
-                                    | new MetricView("Spacing Control", Icons.Settings, ctx => UseStaticMetric(ctx, new MetricRecord("Custom", null, 0.90, "Custom control")))
+                                    | new MetricView("Text Spacing Demo", Icons.Type, ctx => CreateStaticMetric(ctx, new MetricRecord("Compact", null, 0.60, "Tight spacing")))
+                                    | new MetricView("Zero Spacing", Icons.Zap, ctx => CreateStaticMetric(ctx, new MetricRecord("Dense", null, 0.75, "Dense layout")))
+                                    | new MetricView("Spacing Control", Icons.Settings, ctx => CreateStaticMetric(ctx, new MetricRecord("Custom", null, 0.90, "Custom control")))
                                     )
 
             ;
     }
 
-    private static QueryResult<MetricRecord> UseStaticMetric(IViewContext context, MetricRecord record)
+    private static QueryResult<MetricRecord> CreateStaticMetric(IViewContext context, MetricRecord record)
     {
         return context.UseQuery(
             key: record,
@@ -69,7 +69,7 @@ public class MonthlyRevenueTrendView : ViewBase
             new { Month = "Jun", Desktop = 214, Mobile = 45 },
         };
 
-        return new Card().Title("Monthly Revenue Trend").Height("100%")
+        return new Card().Title("Monthly Revenue Trend").Height(Size.Fraction(1))
                 | data.ToLineChart(style: LineChartStyles.Dashboard)
                     .Dimension("Month", e => e.Month)
                     .Measure("Total", e => e.Sum(f => f.Desktop + f.Mobile))
@@ -92,7 +92,7 @@ public class MonthlyRevenueDistributionView : ViewBase
             new { Month = "Jun", Desktop = 214, Mobile = 45 },
         };
 
-        return new Card().Title("Monthly Revenue Distribution").Height("100%")
+        return new Card().Title("Monthly Revenue Distribution").Height(Size.Fraction(1))
                | data.ToAreaChart(style: AreaChartStyles.Dashboard)
                    .Dimension("Month", e => e.Month)
                    .Measure("Desktop", e => e.Sum(f => f.Desktop))
@@ -123,7 +123,7 @@ public class BrowsersView : ViewBase
             new { Name = "Others", Value = 15 }
         };
 
-        return new Card().Title("Browser Composition").Height("100%") | data.ToPieChart(e => e.Name, e => e.Sum(f => f.Value), PieChartStyles.Dashboard);
+        return new Card().Title("Browser Composition").Height(Size.Fraction(1)) | data.ToPieChart(e => e.Name, e => e.Sum(f => f.Value), PieChartStyles.Dashboard);
     }
 }
 
@@ -149,7 +149,7 @@ public class DonutChartWithCustomLabelsView : ViewBase
 
         var totalValue = data.Sum(d => d.Measure);
 
-        return new Card().Title("Donut Chart with Custom Labels").Height("100%")
+        return new Card().Title("Donut Chart with Custom Labels").Height(Size.Fraction(1))
             | new PieChart(data)
                 .Pie(new Pie(nameof(PieChartData.Measure), nameof(PieChartData.Dimension))
                     .InnerRadius("40%")

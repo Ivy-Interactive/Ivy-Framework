@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { Suspense } from 'react';
 import { WidgetNode, CallSite } from '@/types/widgets';
 import { widgetMap } from '@/widgets/widgetMap';
@@ -60,6 +61,12 @@ export const MemoizedWidget = React.memo(
     if (node.type === 'Ivy.Kanban') {
       props.widgetNodeChildren = children.filter(
         (child: WidgetNode) => child.type === 'Ivy.KanbanCard'
+      );
+    }
+
+    if (node.type === 'Ivy.Calendar') {
+      props.widgetNodeChildren = children.filter(
+        (child: WidgetNode) => child.type === 'Ivy.CalendarEvent'
       );
     }
 
@@ -225,6 +232,12 @@ const renderExternalWidget = (
   if (node.type === 'Ivy.Kanban') {
     props.widgetNodeChildren = children.filter(
       (child: WidgetNode) => child.type === 'Ivy.KanbanCard'
+    );
+  }
+
+  if (node.type === 'Ivy.Calendar') {
+    props.widgetNodeChildren = children.filter(
+      (child: WidgetNode) => child.type === 'Ivy.CalendarEvent'
     );
   }
 

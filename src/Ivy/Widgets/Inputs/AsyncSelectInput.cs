@@ -182,6 +182,23 @@ public static class AsyncSelectInputViewExtensions
         bool disabled = false
         )
     {
+        var targetValueType = typeof(TValue);
+        var stateType = state.GetStateType();
+
+        // If the state is nullable but TValue is a non-nullable value type
+        if (stateType.IsNullableType() &&
+            targetValueType.IsValueType &&
+            !targetValueType.IsNullableType() &&
+            Nullable.GetUnderlyingType(stateType) == targetValueType)
+        {
+            var method = typeof(AsyncSelectInputViewExtensions).GetMethod(nameof(CreateNullableAsyncSelectInput), BindingFlags.NonPublic | BindingFlags.Static);
+            if (method != null)
+            {
+                var genericMethod = method.MakeGenericMethod(targetValueType);
+                return (IAnyAsyncSelectInputBase)genericMethod.Invoke(null, [state, search, lookup, placeholder, disabled])!;
+            }
+        }
+
         var type = typeof(TValue);
         Type genericType = typeof(AsyncSelectInputView<>).MakeGenericType(type);
 
@@ -247,7 +264,55 @@ public static class AsyncSelectInputViewExtensions
         throw new InvalidOperationException("Unable to set ghost on async select input");
     }
 
+    private static IAnyAsyncSelectInputBase CreateNullableAsyncSelectInput<TValue>(
+        IAnyState state,
+        AsyncSelectSearchDelegate<TValue> search,
+        AsyncSelectLookupDelegate<TValue> lookup,
+        string? placeholder,
+        bool disabled) where TValue : struct
+    {
+        AsyncSelectSearchDelegate<TValue?> nullableSearch = (ctx, query) =>
+        {
+            var res = search(ctx, query);
 
+            var options = res.Value?.Select(opt => new Option<TValue?>(opt.Label, opt.TypedValue, opt.Group, opt.Description, opt.Icon, opt.Disabled)).ToArray();
+
+            var newMutator = new QueryMutator<Option<TValue?>[]>(
+                (_, _) => { },
+                res.Mutator.Revalidate,
+                res.Mutator.Invalidate);
+
+            return new QueryResult<Option<TValue?>[]>(options, res.Loading, res.Validating, res.Previous, newMutator, res.Error);
+        };
+
+        AsyncSelectLookupDelegate<TValue?> nullableLookup = (ctx, id) =>
+        {
+            if (!id.HasValue)
+            {
+                var emptyMutator = new QueryMutator<Option<TValue?>?>(
+                    (_, _) => { }, () => { }, () => { });
+                return new QueryResult<Option<TValue?>?>(null, false, false, false, emptyMutator);
+            }
+
+            var res = lookup(ctx, id.Value);
+
+            Option<TValue?>? mapped = null;
+            if (res.Value != null)
+            {
+                var opt = res.Value;
+                mapped = new Option<TValue?>(opt.Label, opt.TypedValue, opt.Group, opt.Description, opt.Icon, opt.Disabled);
+            }
+
+            var newMutator = new QueryMutator<Option<TValue?>?>(
+                (_, _) => { },
+                res.Mutator.Revalidate,
+                res.Mutator.Invalidate);
+
+            return new QueryResult<Option<TValue?>?>(mapped, res.Loading, res.Validating, res.Previous, newMutator, res.Error);
+        };
+
+        return new AsyncSelectInputView<TValue?>(state, nullableSearch, nullableLookup, placeholder, disabled);
+    }
 }
 
 

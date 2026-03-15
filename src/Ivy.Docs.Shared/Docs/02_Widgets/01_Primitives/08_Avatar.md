@@ -63,7 +63,7 @@ public class IvyTeamDemo : ViewBase
         foreach(var key in team.Keys)
         {
             layout = layout
-                      |new Card(new Avatar(key, team[key]).Height(200).Width(100))
+                      |new Card(new Avatar(key, team[key]).Height(Size.Units(200)).Width(Size.Units(100)))
                             .Title(key);
         }
         return Layout.Vertical()

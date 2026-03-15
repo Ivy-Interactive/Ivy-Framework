@@ -59,7 +59,7 @@ public class TestView : ViewBase
     {
         var handler = (Event<Button> e) =>
         {
-            var s = {|IVYHOOK001:UseState(false)|};
+            var s = {|IVYHOOK001B:UseState(false)|};
         };
         return new Button().OnClick(handler);
     }
@@ -93,7 +93,7 @@ public class TestView : ViewBase
     {
         void LocalFunction()
         {
-            var s = {|IVYHOOK001:UseState(false)|};
+            var s = {|IVYHOOK001B:UseState(false)|};
         }
         
         LocalFunction();
@@ -157,7 +157,7 @@ public class TestView : ViewBase
     {
         Action action = delegate()
         {
-            var s = {|IVYHOOK001:UseState(false)|};
+            var s = {|IVYHOOK001B:UseState(false)|};
         };
         
         return new Button();
@@ -981,10 +981,10 @@ public class TestView : ViewBase
         {
             Action action = () =>
             {
-                var state = {|IVYHOOK001:UseState(0)|};
+                var state = {|IVYHOOK001B:UseState(0)|};
             };
         }
-        
+
         return new Button();
     }
 }
@@ -1346,7 +1346,7 @@ public class TestView : ViewBase
 {
     public override object? Build()
     {
-        Action a = () => { var s = {|IVYHOOK001:UseState("""")|};  };
+        Action a = () => { var s = {|IVYHOOK001B:UseState("""")|};  };
         return null;
     }
 }

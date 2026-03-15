@@ -21,27 +21,27 @@ public class FeedbackInputApp : SampleBase
         var nullableBoolState = UseState((bool?)null);
 
         var variants = Layout.Grid().Columns(5)
-               | Text.InlineCode("var")
-               | Text.InlineCode("rating")
-               | Text.InlineCode("state")
-               | Text.InlineCode("Disabled")
-               | Text.InlineCode("Invalid")
+               | Text.Monospaced("var")
+               | Text.Monospaced("rating")
+               | Text.Monospaced("state")
+               | Text.Monospaced("Disabled")
+               | Text.Monospaced("Invalid")
 
-               | Text.InlineCode("FeedbackInputVariant.Stars")
+               | Text.Monospaced("FeedbackInputVariant.Stars")
                | zeroState.ToFeedbackInput().Stars()
-               | Text.InlineCode(zeroState.Value.ToString())
+               | Text.Monospaced(zeroState.Value.ToString())
                | twoState.ToFeedbackInput().Stars().Disabled()
                | twoState.ToFeedbackInput().Stars().Invalid("Invalid feedback")
 
-               | Text.InlineCode("FeedbackInputVariant.Emojis")
+               | Text.Monospaced("FeedbackInputVariant.Emojis")
                | zeroState.ToFeedbackInput().Emojis()
-               | Text.InlineCode(zeroState.Value.ToString())
+               | Text.Monospaced(zeroState.Value.ToString())
                | twoState.ToFeedbackInput().Emojis().Disabled()
                | twoState.ToFeedbackInput().Emojis().Invalid("Invalid feedback")
 
-               | Text.InlineCode("FeedbackInputVariant.Thumbs")
+               | Text.Monospaced("FeedbackInputVariant.Thumbs")
                | zeroState.ToFeedbackInput().Thumbs()
-               | Text.InlineCode(zeroState.Value.ToString())
+               | Text.Monospaced(zeroState.Value.ToString())
                | twoState.ToFeedbackInput().Thumbs().Disabled()
                | twoState.ToFeedbackInput().Thumbs().Invalid("Invalid feedback")
             ;
@@ -49,22 +49,22 @@ public class FeedbackInputApp : SampleBase
 
 
         var sizeExamples = Layout.Grid().Columns(4)
-                          | Text.InlineCode("Variant")
-                          | Text.InlineCode("Small")
-                          | Text.InlineCode("Default")
-                          | Text.InlineCode("Large")
+                          | Text.Monospaced("Variant")
+                          | Text.Monospaced("Small")
+                          | Text.Monospaced("Default")
+                          | Text.Monospaced("Large")
 
-                          | Text.InlineCode("Stars")
+                          | Text.Monospaced("Stars")
                           | sizeState.ToFeedbackInput().Stars().Small()
                           | sizeState.ToFeedbackInput().Stars()
                           | sizeState.ToFeedbackInput().Stars().Large()
 
-                          | Text.InlineCode("Emojis")
+                          | Text.Monospaced("Emojis")
                           | sizeIntState.ToFeedbackInput().Emojis().Small()
                           | sizeIntState.ToFeedbackInput().Emojis()
                           | sizeIntState.ToFeedbackInput().Emojis().Large()
 
-                          | Text.InlineCode("Thumbs")
+                          | Text.Monospaced("Thumbs")
                           | sizeBoolState.ToFeedbackInput().Thumbs().Small()
                           | sizeBoolState.ToFeedbackInput().Thumbs()
                           | sizeBoolState.ToFeedbackInput().Thumbs().Large()
@@ -72,33 +72,33 @@ public class FeedbackInputApp : SampleBase
 
 
         var dataBinding = Layout.Grid().Columns(3)
-                          | Text.InlineCode("var")
-                          | Text.InlineCode("rating")
-                          | Text.InlineCode("state")
+                          | Text.Monospaced("var")
+                          | Text.Monospaced("rating")
+                          | Text.Monospaced("state")
 
-                          | Text.InlineCode("int")
+                          | Text.Monospaced("int")
                           | intState.ToFeedbackInput()
-                          | Text.InlineCode(intState.Value.ToString())
+                          | Text.Monospaced(intState.Value.ToString())
 
-                          | Text.InlineCode("int?")
+                          | Text.Monospaced("int?")
                           | nullableIntState.ToFeedbackInput()
-                          | (nullableIntState.Value == null ? Text.InlineCode("null") : Text.InlineCode(nullableIntState.Value.ToString() ?? "null"))
+                          | (nullableIntState.Value == null ? Text.Monospaced("null") : Text.Monospaced(nullableIntState.Value.ToString() ?? "null"))
 
-                          | Text.InlineCode("float")
+                          | Text.Monospaced("float")
                           | floatState.ToFeedbackInput()
-                          | Text.InlineCode(floatState.Value.ToString())
+                          | Text.Monospaced(floatState.Value.ToString())
 
-                          | Text.InlineCode("float?")
+                          | Text.Monospaced("float?")
                           | nullableFloatState.ToFeedbackInput()
-                          | (nullableFloatState.Value == null ? Text.InlineCode("null") : Text.InlineCode(nullableFloatState.Value.ToString() ?? "null"))
+                          | (nullableFloatState.Value == null ? Text.Monospaced("null") : Text.Monospaced(nullableFloatState.Value.ToString() ?? "null"))
 
-                          | Text.InlineCode("bool")
+                          | Text.Monospaced("bool")
                           | boolState.ToFeedbackInput()
-                          | (boolState.Value == false ? Text.InlineCode("false") : Text.InlineCode("true"))
+                          | (boolState.Value == false ? Text.Monospaced("false") : Text.Monospaced("true"))
 
-                          | Text.InlineCode("bool?")
+                          | Text.Monospaced("bool?")
                           | nullableBoolState.ToFeedbackInput()
-                          | (nullableBoolState.Value == null ? Text.InlineCode("null") : (nullableBoolState.Value == false ? Text.InlineCode("false") : Text.InlineCode("true")))
+                          | (nullableBoolState.Value == null ? Text.Monospaced("null") : (nullableBoolState.Value == false ? Text.Monospaced("false") : Text.Monospaced("true")))
         ;
 
         return Layout.Vertical()

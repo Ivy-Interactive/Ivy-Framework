@@ -17,7 +17,7 @@ public record LineChart : WidgetBase<LineChart>
     public LineChart(object data, string dataKey, string nameKey) : this()
     {
         Data = data;
-        Lines = [new Line(dataKey, Utils.SplitPascalCase(dataKey))];
+        Lines = [new Line(dataKey, StringHelper.SplitPascalCase(dataKey))];
         XAxis = [new XAxis(nameKey)];
         YAxis = [new YAxis(dataKey)];
         Tooltip = new();
@@ -90,7 +90,7 @@ public static partial class LineChartExtensions
     }
     public static LineChart Line(this LineChart chart, string dataKey, string? name = null)
     {
-        return chart with { Lines = [.. chart.Lines, new Line(dataKey, name ?? Utils.SplitPascalCase(dataKey))] };
+        return chart with { Lines = [.. chart.Lines, new Line(dataKey, name ?? StringHelper.SplitPascalCase(dataKey))] };
     }
 
     public static LineChart CartesianGrid(this LineChart chart, CartesianGrid cartesianGrid)
