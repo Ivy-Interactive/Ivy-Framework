@@ -88,7 +88,7 @@ interface SelectInputWidgetProps {
   id: string;
   placeholder?: string;
   value?: NullableSelectValue;
-  variant?: 'Select' | 'List' | 'Toggle' | 'Slider';
+  variant?: 'Select' | 'List' | 'Toggle' | 'Slider' | 'Radio';
   nullable?: boolean;
   disabled?: boolean;
   invalid?: string;
@@ -1558,6 +1558,8 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
       ) : (
         <RadioVariant {...normalizedProps} eventHandler={eventHandler} />
       );
+    case 'Radio':
+      return <RadioVariant {...normalizedProps} eventHandler={eventHandler} />;
     case 'Toggle':
       return <ToggleVariant {...normalizedProps} eventHandler={eventHandler} />;
     case 'Slider':
