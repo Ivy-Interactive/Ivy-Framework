@@ -2,6 +2,7 @@ import React from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import Icon from '@/components/Icon';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface ListItemWidgetProps {
   id: string;
@@ -9,6 +10,7 @@ interface ListItemWidgetProps {
   subtitle?: string;
   icon?: string;
   badge?: string;
+  disabled?: boolean;
   children?: React.ReactNode;
 }
 
@@ -18,6 +20,7 @@ export const ListItemWidget: React.FC<ListItemWidgetProps> = ({
   subtitle,
   icon,
   badge,
+  disabled,
   children,
 }) => {
   const eventHandler = useEventHandler();
@@ -25,7 +28,14 @@ export const ListItemWidget: React.FC<ListItemWidgetProps> = ({
   return (
     <button
       onClick={() => eventHandler('OnClick', id, [])}
-      className={`pl-4 pr-4 py-2 w-full h-full min-h-[60px] flex-left flex items-center ${children ? 'gap-3' : ''} rounded-none hover:bg-accent focus:bg-accent focus:outline-none cursor-pointer min-w-0`}
+      disabled={disabled}
+      className={cn(
+        'pl-4 pr-4 py-2 w-full h-full min-h-[60px] flex-left flex items-center rounded-none text-left min-w-0 transition-colors',
+        children ? 'gap-3' : '',
+        disabled
+          ? 'opacity-50 cursor-not-allowed'
+          : 'hover:bg-accent focus:bg-accent focus:outline-none cursor-pointer'
+      )}
     >
       <div className="flex flex-col items-start text-body w-full flex-1 min-w-0 text-left">
         <span className="block w-full truncate text-left">{title}</span>

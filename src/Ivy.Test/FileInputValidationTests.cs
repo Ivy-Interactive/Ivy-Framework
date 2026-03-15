@@ -608,4 +608,216 @@ public class FileInputValidationTests
         Assert.True(result.IsValid);
         Assert.Null(result.ErrorMessage);
     }
+
+    // Magic Byte Validation Tests
+
+    [Fact]
+    public void ValidateFileTypeWithMagicBytes_ValidJpegWithMatchingContentType_ReturnsSuccess()
+    {
+        // Arrange
+        var file = CreateTestFile("test.jpg", "image/jpeg");
+        var stream = CreateJpegStream();
+
+        // Act
+        var result = FileInputValidation.ValidateFileTypeWithMagicBytes(file, "image/*", stream);
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void ValidateFileTypeWithMagicBytes_SpoofedContentType_ReturnsError()
+    {
+        // Arrange
+        var file = CreateTestFile("malicious.jpg", "image/jpeg"); // Claims to be JPEG
+        var stream = CreatePdfStream(); // But is actually a PDF
+
+        // Act
+        var result = FileInputValidation.ValidateFileTypeWithMagicBytes(file, "image/*", stream);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Contains("security validation", result.ErrorMessage);
+    }
+
+    [Fact]
+    public void ValidateFileTypeWithMagicBytes_NullStream_FallsBackToContentTypeOnly()
+    {
+        // Arrange
+        var file = CreateTestFile("test.jpg", "image/jpeg");
+
+        // Act
+        var result = FileInputValidation.ValidateFileTypeWithMagicBytes(file, "image/*", null);
+
+        // Assert
+        Assert.True(result.IsValid); // Should pass with ContentType validation only
+    }
+
+    [Fact]
+    public void ValidateFileTypeWithMagicBytes_AlternativeMimeType_ValidatesPng()
+    {
+        // Arrange
+        var file = CreateTestFile("test.png", "image/x-png"); // Alternative MIME type
+        var stream = CreatePngStream();
+
+        // Act
+        var result = FileInputValidation.ValidateFileTypeWithMagicBytes(file, "image/*", stream);
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void ValidateFileTypeWithMagicBytes_OfficeDocument_ValidatesDocx()
+    {
+        // Arrange
+        var file = CreateTestFile("document.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        var stream = CreateZipBasedStream(); // Office formats are ZIP-based
+
+        // Act
+        var result = FileInputValidation.ValidateFileTypeWithMagicBytes(file, ".docx", stream);
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void ValidateFileTypeWithMagicBytes_ValidWebP_ReturnsSuccess()
+    {
+        // Arrange
+        var file = CreateTestFile("test.webp", "image/webp");
+        var stream = CreateWebPStream();
+
+        // Act
+        var result = FileInputValidation.ValidateFileTypeWithMagicBytes(file, "image/*", stream);
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void ValidateFileTypeWithMagicBytes_InvalidContentType_ReturnsError()
+    {
+        // Arrange
+        var file = CreateTestFile("test.jpg", "image/jpeg");
+        var stream = CreateJpegStream();
+
+        // Act - try to validate against wrong accept pattern
+        var result = FileInputValidation.ValidateFileTypeWithMagicBytes(file, ".pdf", stream);
+
+        // Assert
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public void ValidateFileTypeWithMagicBytes_TextFile_SkipsMagicByteCheck()
+    {
+        // Arrange - text files don't have magic bytes, so they should pass
+        var file = CreateTestFile("test.txt", "text/plain");
+        var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("Hello World"));
+        stream.Position = 0;
+
+        // Act
+        var result = FileInputValidation.ValidateFileTypeWithMagicBytes(file, "text/plain", stream);
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void ValidateFileTypesWithMagicBytes_AllValid_ReturnsSuccess()
+    {
+        // Arrange
+        var files = new List<FileUpload>
+        {
+            CreateTestFile("test1.jpg", "image/jpeg"),
+            CreateTestFile("test2.png", "image/png")
+        };
+
+        Stream? StreamProvider(IFileUpload file)
+        {
+            return file.FileName switch
+            {
+                "test1.jpg" => CreateJpegStream(),
+                "test2.png" => CreatePngStream(),
+                _ => null
+            };
+        }
+
+        // Act
+        var result = FileInputValidation.ValidateFileTypesWithMagicBytes(files, "image/*", StreamProvider);
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void ValidateFileTypesWithMagicBytes_OneSpoofed_ReturnsError()
+    {
+        // Arrange
+        var files = new List<FileUpload>
+        {
+            CreateTestFile("test1.jpg", "image/jpeg"),
+            CreateTestFile("malicious.jpg", "image/jpeg") // Spoofed
+        };
+
+        Stream? StreamProvider(IFileUpload file)
+        {
+            return file.FileName switch
+            {
+                "test1.jpg" => CreateJpegStream(),
+                "malicious.jpg" => CreatePdfStream(), // Actually a PDF
+                _ => null
+            };
+        }
+
+        // Act
+        var result = FileInputValidation.ValidateFileTypesWithMagicBytes(files, "image/*", StreamProvider);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Contains("malicious.jpg", result.ErrorMessage);
+    }
+
+    // Helper methods to create test streams
+
+    private static MemoryStream CreateJpegStream()
+    {
+        var stream = new MemoryStream();
+        stream.Write(new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 }, 0, 4);
+        stream.Position = 0;
+        return stream;
+    }
+
+    private static MemoryStream CreatePdfStream()
+    {
+        var stream = new MemoryStream();
+        stream.Write(new byte[] { 0x25, 0x50, 0x44, 0x46 }, 0, 4);
+        stream.Position = 0;
+        return stream;
+    }
+
+    private static MemoryStream CreatePngStream()
+    {
+        var stream = new MemoryStream();
+        stream.Write(new byte[] { 0x89, 0x50, 0x4E, 0x47 }, 0, 4);
+        stream.Position = 0;
+        return stream;
+    }
+
+    private static MemoryStream CreateZipBasedStream()
+    {
+        var stream = new MemoryStream();
+        stream.Write(new byte[] { 0x50, 0x4B, 0x03, 0x04 }, 0, 4);
+        stream.Position = 0;
+        return stream;
+    }
+
+    private static MemoryStream CreateWebPStream()
+    {
+        var stream = new MemoryStream();
+        stream.Write(new byte[] { 0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50 }, 0, 12);
+        stream.Position = 0;
+        return stream;
+    }
 }

@@ -16,6 +16,7 @@ import {
   TooltipWidget,
   PaginationWidget,
 } from '@/widgets';
+import { BreadcrumbsWidget } from '@/widgets/breadcrumbs';
 import { BladeContainerWidget, BladeWidget } from '@/widgets/blades';
 import { DetailsWidget, DetailWidget } from '@/widgets/details';
 import {
@@ -31,6 +32,7 @@ import {
   BoolInputWidget,
   DateTimeInputWidget,
   NumberInputWidget,
+  NumberRangeInputWidget,
   SelectInputWidget,
   ReadOnlyInputWidget,
   ColorInputWidget,
@@ -82,6 +84,7 @@ import {
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
 import React from 'react';
+import { SmartSearch } from '@/docs-internal/SmartSearch';
 
 export const widgetMap = {
   $loading: LoadingScreen,
@@ -132,6 +135,7 @@ export const widgetMap = {
   'Ivy.Card': CardWidget,
   'Ivy.Sheet': SheetWidget,
   'Ivy.Badge': BadgeWidget,
+  'Ivy.Breadcrumbs': BreadcrumbsWidget,
   'Ivy.Expandable': ExpandableWidget,
   'Ivy.Chat': ChatWidget,
   'Ivy.ChatMessage': ChatMessageWidget,
@@ -147,6 +151,16 @@ export const widgetMap = {
   'Ivy.KanbanCard': React.lazy(() =>
     import('@/widgets/kanban/KanbanCardWidget').then(m => ({
       default: m.KanbanCardWidget,
+    }))
+  ),
+  'Ivy.Calendar': React.lazy(() =>
+    import('@/widgets/calendar/CalendarWidget').then(m => ({
+      default: m.CalendarWidget,
+    }))
+  ),
+  'Ivy.CalendarEvent': React.lazy(() =>
+    import('@/widgets/calendar/CalendarEventWidget').then(m => ({
+      default: m.CalendarEventWidget,
     }))
   ),
 
@@ -169,6 +183,7 @@ export const widgetMap = {
   'Ivy.BoolInput': BoolInputWidget,
   'Ivy.DateTimeInput': DateTimeInputWidget,
   'Ivy.NumberInput': NumberInputWidget,
+  'Ivy.NumberRangeInput': NumberRangeInputWidget,
   'Ivy.SelectInput': SelectInputWidget,
   'Ivy.ReadOnlyInput': ReadOnlyInputWidget,
   'Ivy.ColorInput': ColorInputWidget,
@@ -221,6 +236,12 @@ export const widgetMap = {
   'Ivy.PieChart': React.lazy(() => import('@/widgets/charts/PieChartWidget')),
   'Ivy.AreaChart': React.lazy(() => import('@/widgets/charts/AreaChartWidget')),
   'Ivy.BarChart': React.lazy(() => import('@/widgets/charts/BarChartWidget')),
+  'Ivy.ScatterChart': React.lazy(
+    () => import('@/widgets/charts/ScatterChartWidget')
+  ),
+  'Ivy.RadialBarChart': React.lazy(
+    () => import('@/widgets/charts/RadialBarChartWidget')
+  ),
 
   // Effects
   'Ivy.Confetti': React.lazy(() => import('@/widgets/effects/ConfettiWidget')),
@@ -229,7 +250,7 @@ export const widgetMap = {
   ),
 
   // Internal
-
+  'Ivy.Docs.Shared.Internal.SmartSearch': SmartSearch,
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')
   ),

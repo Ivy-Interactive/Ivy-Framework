@@ -48,7 +48,7 @@ The `NumberInput` allows users to enter numeric values directly.
 ### Slider
 
 This variant helps create a slider that changes the value as the slider is pulled to the right.
-This creates the `NumberInputVariants.Slider` variant.
+This creates the `NumberInputVariant.Slider` variant.
 
 The following demo shows how a slider can be used to give a visual clue.
 
@@ -70,7 +70,7 @@ public class NumberSliderInput : ViewBase
                      .Max(500.0)
                      .Precision(2)
                      .Step(0.5)
-                     .Variant(NumberInputVariants.Slider)
+                     .Variant(NumberInputVariant.Slider)
                      .WithField()
                      .Label("Tapes")
                 | Text.Block(cart);
@@ -83,7 +83,7 @@ public class NumberSliderInput : ViewBase
 To enable users to enter money amounts, this variant should be used. The extension function `ToMoneyInput`
 should be used to create this variant. This is the idiomatic way to use Ivy.
 
-The following demo uses `NumberInputVariants.Number` with `NumberFormatStyle.Currency` to create
+The following demo uses `NumberInputVariant.Number` with `NumberFormatStyle.Currency` to create
 `NumberInput`s that can take money inputs. `ToMoneyInput` hides all these complexities.
 
 ```csharp demo-below
@@ -252,7 +252,7 @@ new NumberInput<int>(onChangedState.Value, e =>
 
 <WidgetDocs Type="Ivy.NumberInput" ExtensionTypes="Ivy.NumberInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/NumberInput.cs"/>
 
-## Examples
+## Faq
 
 <Details>
 <Summary>
@@ -275,7 +275,7 @@ public class GroceryAppDemo : ViewBase
                    | eggs.ToNumberInput()
                          .Min(0)
                          .Max(12)
-                         .Width(10)
+                         .Width(Size.Units(10))
                          .WithField()
                          .Label("Egg")
                          .Description("Maximum 12"))
@@ -284,7 +284,7 @@ public class GroceryAppDemo : ViewBase
                    | breads.ToNumberInput()
                               .Min(0)
                               .Max(5)
-                              .Width(10)
+                              .Width(Size.Units(10))
                               .WithField()
                               .Label("Bread")
                               .Description("Maximum 5"))
@@ -294,7 +294,7 @@ public class GroceryAppDemo : ViewBase
                    // Since it is disabled, no need to have an onChange event
                    | new NumberInput<decimal>(eggs.Value * eggCost + breadCost * breads.Value,_ => { })
                                      .Disabled()
-                                     .Variant(NumberInputVariants.Number)
+                                     .Variant(NumberInputVariant.Number)
                                      .Precision(2)
                                      .FormatStyle(NumberFormatStyle.Currency)
                                      .Currency("EUR"));
@@ -303,6 +303,55 @@ public class GroceryAppDemo : ViewBase
 }
 
 ```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I set min/max values on a NumberInput?
+</Summary>
+<Body>
+
+You can pass `min` and `max` directly as optional parameters to `ToNumberInput()`:
+
+```csharp
+var count = UseState(1);
+count.ToNumberInput(min: 1, max: 100).Placeholder("Enter count")
+```
+
+Alternatively, use the `.Min()` and `.Max()` fluent extension methods:
+
+```csharp
+count.ToNumberInput().Min(1).Max(100)
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I format a NumberInput as currency, percent, or decimal?
+</Summary>
+<Body>
+
+Use the `.FormatStyle()` fluent method with the `NumberFormatStyle` enum:
+
+```csharp
+var price = UseState(99.99m);
+var taxRate = UseState(0.08);
+
+// Currency formatting
+price.ToNumberInput().FormatStyle(NumberFormatStyle.Currency).Currency("USD")
+
+// Percent formatting
+taxRate.ToNumberInput().FormatStyle(NumberFormatStyle.Percent)
+
+// Decimal formatting (default)
+price.ToNumberInput().FormatStyle(NumberFormatStyle.Decimal)
+```
+
+Available `NumberFormatStyle` values: `Decimal` (default), `Currency`, `Percent`. For currency inputs, the recommended state type is `decimal`. Use `.Currency("USD")` to specify the currency code.
 
 </Body>
 </Details>

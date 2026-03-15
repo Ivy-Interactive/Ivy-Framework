@@ -214,7 +214,7 @@ public class MemoDemo : ViewBase
             | number.ToNumberInput()
                 .Min(0)
                 .Max(20)
-                .Variant(NumberInputVariants.Slider)
+                .Variant(NumberInputVariant.Slider)
                 .WithField()
                 .Label($"Number: {number.Value}")
             | Text.P($"{number.Value}² = {squared}")
@@ -254,7 +254,7 @@ public class CallbackDemo : ViewBase
             | multiplier.ToNumberInput()
                 .Min(1)
                 .Max(10)
-                .Variant(NumberInputVariants.Slider)
+                .Variant(NumberInputVariant.Slider)
                 .WithField()
                 .Label("Multiplier")
             | (Layout.Horizontal()
@@ -837,7 +837,7 @@ public static IState<string> UseLocalStorage(string key, string defaultValue)
 
 ## See Also
 
-- [Rules of Hooks](./01_RulesOfHooks.md) - Essential rules for using hooks correctly
+- [Rules of Hooks](./02_RulesOfHooks.md) - Essential rules for using hooks correctly
 - [Views](../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views
 - [Forms](../01_Onboarding/02_Concepts/08_Forms.md) - Working with forms in Ivy
 - [Layout](../01_Onboarding/02_Concepts/04_Layout.md) - Structuring UI with layouts

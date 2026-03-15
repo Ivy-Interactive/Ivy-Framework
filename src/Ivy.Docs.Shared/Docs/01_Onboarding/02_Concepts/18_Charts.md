@@ -269,3 +269,16 @@ public class DomainAxisDemo : ViewBase
 }
 ```
 
+## Faq
+
+### How do I pass data to a chart?
+
+Always use the builder pattern extension methods (`.ToLineChart()`, `.ToBarChart()`, `.ToAreaChart()`, `.ToPieChart()`) on your data collection. Do NOT construct charts manually with `List<dynamic>`. Anonymous types work correctly with the builder pattern:
+
+```csharp
+var data = new[] { new { Month = "Jan", Sales = 100 } };
+return data.ToLineChart()
+    .Dimension("Month", e => e.Month)
+    .Measure("Sales", e => e.Sum(f => f.Sales));
+```
+

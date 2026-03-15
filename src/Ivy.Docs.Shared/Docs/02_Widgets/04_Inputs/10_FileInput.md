@@ -168,7 +168,7 @@ public class FileUploadValidation : ViewBase
                     .Placeholder("Choose up to 3 images (max 5 MB each)")
                | selectedFiles.Value.ToTable()
                    .Width(Size.Full())
-                   .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+                   .Builder(e => e.Length, e => e.Func((long x) => StringHelper.FormatBytes(x)))
                    .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
                    .Remove(e => e.Id);
     }
@@ -228,7 +228,7 @@ public class FileSizeLimitDemo : ViewBase
                     .ToFileInput(upload)
                     .Placeholder("Min 2 MB, Max 5 MB")
                 | (file.Value != null
-                    ? Text.P($"Selected: {file.Value.FileName} ({Utils.FormatBytes(file.Value.Length)})")
+                    ? Text.P($"Selected: {file.Value.FileName} ({StringHelper.FormatBytes(file.Value.Length)})")
                     : null);
     }
 }
@@ -312,7 +312,7 @@ public class UploadProgressDemo : ViewBase
                     .Placeholder("Choose files")
                 | files.Value.ToTable()
                     .Width(Size.Full())
-                    .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+                    .Builder(e => e.Length, e => e.Func((long x) => StringHelper.FormatBytes(x)))
                     .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
                     .Remove(e => e.Id);
     }
@@ -622,3 +622,22 @@ public class ConfiguredUploadExample : ViewBase
 | `MaxFiles`   | `int?`         | Maximum number of files (for multiple file uploads)              |
 
 <WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/FileInput.cs"/>
+
+## Faq
+
+### What is the return type of UseUpload?
+
+`UseUpload` returns `IState<UploadContext>`, not `UploadContext` directly. Pass this state object to `ToFileInput()`:
+
+```csharp
+var upload = UseUpload(MemoryStreamUploadHandler.Create(fileState));
+// upload is IState<UploadContext> — pass it directly to ToFileInput
+return fileState.ToFileInput(upload);
+```
+
+Do NOT use `IUploadContext` — this type does not exist. The correct type is `UploadContext` (wrapped in `IState<>`).
+
+To access validation configuration, use extension methods that chain on `IState<UploadContext>`:
+```csharp
+var upload = UseUpload(handler).Accept(".csv").MaxFileSize(FileSize.FromMegabytes(10));
+```

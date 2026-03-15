@@ -17,11 +17,13 @@ import {
   applyDefaults,
 } from './chartDefaults';
 
+const EMPTY_ARRAY: never[] = [];
+
 const PieChartWidget: React.FC<PieChartWidgetProps> = ({
-  data = [],
+  data = EMPTY_ARRAY,
   width = 'Full',
   height = 'Full',
-  pies = [],
+  pies = EMPTY_ARRAY,
   tooltip,
   toolbox,
   legend,
@@ -96,7 +98,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         }
 
         return {
-          name: key.charAt(0).toUpperCase() + key.slice(1),
+          name: key,
           type: ChartType.Pie,
           radius: [
             pieConfig.innerRadius ?? '40%',

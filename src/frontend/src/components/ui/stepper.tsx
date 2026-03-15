@@ -246,7 +246,9 @@ const StepperTitle = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
-  <h3 ref={ref} className={cn('text-sm font-medium', className)} {...props} />
+  <h3 ref={ref} className={cn('text-sm font-medium', className)} {...props}>
+    {props.children}
+  </h3>
 ));
 StepperTitle.displayName = 'StepperTitle';
 

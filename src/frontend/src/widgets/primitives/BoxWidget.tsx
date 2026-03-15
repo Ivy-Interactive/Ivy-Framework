@@ -3,6 +3,7 @@ import {
   BorderRadius,
   BorderStyle,
   getAlign,
+  getAspectRatio,
   getBoxRadius,
   getBorderStyle,
   getBorderThickness,
@@ -16,12 +17,14 @@ import { cn } from '@/lib/utils';
 import React, { useCallback } from 'react';
 import { useEventHandler } from '@/components/event-handler';
 
+const EMPTY_ARRAY: never[] = [];
+
 export type BoxHoverVariant = 'None' | 'Pointer' | 'PointerAndTranslate';
 
 interface BoxWidgetProps {
   id: string;
   children?: React.ReactNode;
-  color?: string | undefined;
+  background?: string | undefined;
   borderRadius: BorderRadius;
   borderThickness: string;
   borderStyle: BorderStyle;
@@ -35,6 +38,7 @@ interface BoxWidgetProps {
   borderOpacity?: number;
   className?: string;
   events?: string[];
+  aspectRatio?: number;
   hoverVariant?: BoxHoverVariant;
 }
 
@@ -46,7 +50,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   borderStyle = 'Solid',
   borderRadius = 'Rounded',
   borderThickness = '1',
-  color,
+  background,
   borderColor,
   padding = '2',
   margin = '0',
@@ -54,7 +58,8 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   opacity,
   borderOpacity,
   className,
-  events = [],
+  aspectRatio,
+  events = EMPTY_ARRAY,
   hoverVariant = 'None',
 }) => {
   const eventHandler = useEventHandler();
@@ -75,11 +80,12 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
     ...getAlign('Vertical', contentAlign),
     ...getWidth(width),
     ...getHeight(height),
+    ...getAspectRatio(aspectRatio),
     ...getBorderStyle(borderStyle),
     ...getBorderThickness(borderThickness),
     ...borderRadiusStyle,
-    ...getColor(color, 'backgroundColor', 'background', opacity),
-    ...getColor(color, 'color', 'foreground'),
+    ...getColor(background, 'backgroundColor', 'background', opacity),
+    ...getColor(background, 'color', 'foreground'),
     ...getColor(borderColor, 'borderColor', 'background', borderOpacity),
   };
 
@@ -101,17 +107,33 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
       : hoverVariant === 'Pointer'
         ? 'cursor-pointer'
         : 'cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition';
-  return (
-    <>
+  if (isClickable) {
+    return (
       <div
         style={styles}
         className={cn(className, hoverClass)}
-        onClick={isClickable ? handleClick : undefined}
-        role={isClickable ? 'button' : undefined}
-        tabIndex={isClickable ? 0 : undefined}
+        onClick={handleClick}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e as unknown as React.MouseEvent);
+          }
+        }}
+        role="button"
+        tabIndex={0}
       >
         {children}
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div
+      style={styles}
+      className={cn(className, hoverClass)}
+      role="presentation"
+    >
+      {children}
+    </div>
   );
 };

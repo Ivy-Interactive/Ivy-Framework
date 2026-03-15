@@ -140,20 +140,19 @@ sampleUsers.ToDataTable()
 
 Add contextual actions to each row using `RowActions()` and handle them via `OnRowAction()`. Actions are rendered as icons or [buttons](../03_Common/01_Button.md) that appear when hovering over a row. Row actions support both simple menu items and nested [dropdown menus](../03_Common/11_DropDownMenu.md).
 
-Use `RowActions()` to define one or more `MenuItem` objects. Each menu item can have an icon, label, tooltip, and tag. For nested menus, use `.Children()` to create a dropdown menu with sub-items. For example, you can create individual action buttons like edit, delete, or view, as well as a menu button with a dropdown containing additional actions like archive, export, or share.
+1. **Define actions with a tag** – Each `MenuItem` must have a **tag** (set via `.Tag(value)`) so the handler can tell which action was clicked. Use the fluent API: `MenuItem.Default(Icons.Pencil).Tag(YourEnum.Edit)` or `.Tag("edit")` for strings. Without a tag, the handler cannot distinguish actions.
 
-When creating the DataTable, specify an ID selector using `.ToDataTable(idSelector: e => e.Id)` where `Id` is the property that uniquely identifies each row. This allows the row action handler to identify which row was clicked.
+2. **Single handler** – There is one `OnRowAction()` handler for all row actions. Inside it you must **identify the action from the tag** and branch (e.g. edit vs delete). If you don't branch on the tag, every click runs the same logic and edit/delete will not behave differently.
 
-Use `OnRowAction()` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
+3. **Tag is `object?`** – The handler receives `RowActionClickEventArgs` with `args.Tag` of type `object?`. You must **convert it to a string** before comparing: use **`args.Tag?.ToString()`**. Comparing `args.Tag` directly to a string (e.g. `args.Tag == "edit"`) can fail and the action may do nothing. Prefer an enum and **`Enum.TryParse<YourEnum>(args.Tag?.ToString(), ignoreCase: true, out var action)`** for compile-time safety.
 
-- **Id** - The ID of the row (extracted using the `idSelector` parameter passed to `ToDataTable()`)
-- **Tag** - The tag of the menu item that was clicked (useful for identifying which action was selected, especially with nested menus)
-
-The handler can access both properties: `args.Id` to identify the row and `args.Tag` to determine which action was selected. This is particularly useful when handling nested menu items, as each child menu item can have its own tag.
+4. **Row ID** – Pass **`idSelector`** to `ToDataTable()` (e.g. `.ToDataTable(idSelector: e => e.Id)`) so `args.Id` identifies the row. Parse or cast `args.Id` to your entity ID type in the handler.
 
 ```csharp demo-tabs
 public class RowActionsDemo : ViewBase
 {
+    private enum RowAction { Edit, Delete, More, Archive, Export, Share }
+
     public record Employee(int Id, string Name, string Email, int Salary);
 
     public override object? Build()
@@ -168,13 +167,13 @@ public class RowActionsDemo : ViewBase
             .Header(e => e.Email, "Email")
             .Header(e => e.Salary, "Salary")
             .RowActions(
-                MenuItem.Default(Icons.Pencil, "edit"),
-                MenuItem.Default(Icons.Trash2, "delete"),
-                MenuItem.Default(Icons.EllipsisVertical, "more")
+                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
+                MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete),
+                MenuItem.Default(Icons.EllipsisVertical).Tag(RowAction.More)
                     .Children([
-                        MenuItem.Default(Icons.Archive, "archive").Label("Archive"),
-                        MenuItem.Default(Icons.Download, "export").Label("Export"),
-                        MenuItem.Default(Icons.Share2, "share").Label("Share")
+                        MenuItem.Default(Icons.Archive).Tag(RowAction.Archive).Label("Archive"),
+                        MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export"),
+                        MenuItem.Default(Icons.Share2).Tag(RowAction.Share).Label("Share")
                     ])
             )
             .OnRowAction(async e =>
@@ -376,6 +375,141 @@ sampleUsers.ToDataTable()
         config.LoadAllRows = false;   // Enable incremental loading
     })
     .Height(Size.Units(100))
+```
+
+</Body>
+</Details>
+
+## Faq
+
+<Details>
+<Summary>
+How do I handle row actions on a DataTable?
+</Summary>
+<Body>
+
+**Requirements:** (1) Give each action a tag via `.Tag(...)`. (2) Use a single `.OnRowAction()` and **branch on the tag** so edit/delete run different logic. (3) **Convert the tag in the handler:** `args.Tag` is `object?` — use **`args.Tag?.ToString()`** (or `Enum.TryParse&lt;T&gt;(args.Tag?.ToString(), ...)`) before comparing. Without this, clicks can appear to do nothing.
+
+Use the **fluent API** with **enum tags**: `MenuItem.Default(Icons.X).Tag(YourEnum.Value)` and parse in the handler with <c>Enum.TryParse&lt;YourEnum&gt;(args.Tag?.ToString(), ignoreCase: true, out var action)</c>:
+
+```csharp
+private enum RowAction { Edit, Delete }
+
+items.ToDataTable(idSelector: e => e.Id)
+    .RowActions(
+        MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
+        MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete))
+    .OnRowAction(e =>
+    {
+        var args = e.Value;
+        if (!Enum.TryParse<RowAction>(args.Tag?.ToString(), ignoreCase: true, out var action)) return ValueTask.CompletedTask;
+        var rowId = ResolveId(args.Id);
+        if (rowId < 0) return ValueTask.CompletedTask;
+        if (action == RowAction.Edit) EditItem(rowId);
+        else if (action == RowAction.Delete) DeleteItem(rowId);
+        return ValueTask.CompletedTask;
+    })
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I show navigation properties in a DataTable?
+</Summary>
+<Body>
+
+`DataTableBuilder` only supports top-level properties of the model type. Nested property access like `p.Author.Username` will throw a `KeyNotFoundException` at runtime because only direct properties are scaffolded as columns.
+
+**Solution:** Project your query into a flat DTO with all needed fields as direct properties:
+
+```csharp
+// BAD - nested property access will fail at runtime
+var posts = db.Posts.Include(p => p.Author).AsQueryable();
+posts.ToDataTable()
+    .Header(p => p.Author.Username, "Author"); // KeyNotFoundException!
+
+// GOOD - project into a flat DTO
+record PostListItem(int Id, string Title, string AuthorName, string Status);
+
+var posts = db.Posts
+    .Include(p => p.Author)
+    .Select(p => new PostListItem(p.Id, p.Title, p.Author.Username, p.Status.ToString()))
+    .AsQueryable();
+
+posts.ToDataTable()
+    .Header(p => p.AuthorName, "Author"); // Works!
+```
+
+This also simplifies the DataTable configuration since you don't need to `.Hidden()` navigation properties or other fields you don't want displayed.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I display dictionary or dynamic data in a DataTable?
+</Summary>
+<Body>
+
+`ToDataTable()` uses reflection to discover columns from the model type's top-level properties. It does not expand `Dictionary<TKey, TValue>` properties into separate columns.
+
+To display dynamic data, project it into a flat record first:
+
+```csharp
+// Instead of this:
+record DataRow(int Id, Dictionary<string, string> Values);
+rows.AsQueryable().ToDataTable(); // Shows "Id" and "Values" columns
+
+// Do this — project into a flat anonymous type or record:
+record FlatRow(string Name, int Age, string City);
+var flat = rows.Select(r => new FlatRow(r.Values["Name"], int.Parse(r.Values["Age"]), r.Values["City"]));
+flat.AsQueryable().ToDataTable(); // Shows Name, Age, City columns
+```
+
+If columns are truly dynamic (unknown at compile time), consider building a `List<Dictionary<string, object>>` and using `.ToTable()` with explicit column definitions instead.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I handle row clicks in DataTable?
+</Summary>
+<Body>
+
+There is no `OnRowClick` method. Use `OnCellClick` to handle individual cell clicks:
+
+```csharp
+items.ToDataTable()
+    .OnCellClick(async e =>
+    {
+        var rowIndex = e.Value.RowIndex;
+        var item = items[rowIndex];
+        selectedItem.Set(item);
+    })
+```
+
+For row-level action buttons (edit, delete), use the **fluent API** with **enum tags** and <c>Enum.TryParse</c>:
+
+```csharp
+private enum RowAction { Edit, Delete }
+
+items.ToDataTable(idSelector: e => e.Id)
+    .RowActions(
+        MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
+        MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete))
+    .OnRowAction(e =>
+    {
+        var args = e.Value;
+        if (!Enum.TryParse<RowAction>(args.Tag?.ToString(), ignoreCase: true, out var action)) return ValueTask.CompletedTask;
+        var rowId = ResolveId(args.Id);
+        if (rowId < 0) return ValueTask.CompletedTask;
+        if (action == RowAction.Edit) { /* open edit dialog */ }
+        else if (action == RowAction.Delete) { /* remove row */ }
+        return ValueTask.CompletedTask;
+    })
 ```
 
 </Body>

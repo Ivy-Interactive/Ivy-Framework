@@ -30,6 +30,10 @@ public class LayoutView : ViewBase, IStateless
     private Scroll _scroll = Ivy.Scroll.None;
     private bool _removeParentPadding = false;
     private bool _visible = true;
+    private Colors? _borderColor = null;
+    private Ivy.BorderRadius _borderRadius = Ivy.BorderRadius.None;
+    private Ivy.BorderStyle _borderStyle = Ivy.BorderStyle.None;
+    private Thickness _borderThickness = new(0);
 
     public LayoutView Gap(bool gap)
     {
@@ -251,6 +255,54 @@ public class LayoutView : ViewBase, IStateless
         return this;
     }
 
+    public LayoutView Border(Colors color, int thickness = 1)
+    {
+        _borderColor = color;
+        _borderThickness = new(thickness);
+        _borderStyle = Ivy.BorderStyle.Solid;
+        _borderRadius = Ivy.BorderRadius.Rounded;
+        return this;
+    }
+
+    public LayoutView Border(Colors color, Thickness thickness)
+    {
+        _borderColor = color;
+        _borderThickness = thickness;
+        _borderStyle = Ivy.BorderStyle.Solid;
+        _borderRadius = Ivy.BorderRadius.Rounded;
+        return this;
+    }
+
+    public LayoutView BorderColor(Colors color)
+    {
+        _borderColor = color;
+        return this;
+    }
+
+    public LayoutView BorderRadius(Ivy.BorderRadius radius)
+    {
+        _borderRadius = radius;
+        return this;
+    }
+
+    public LayoutView BorderStyle(Ivy.BorderStyle style)
+    {
+        _borderStyle = style;
+        return this;
+    }
+
+    public LayoutView BorderThickness(int thickness)
+    {
+        _borderThickness = new(thickness);
+        return this;
+    }
+
+    public LayoutView BorderThickness(Thickness thickness)
+    {
+        _borderThickness = thickness;
+        return this;
+    }
+
     public LayoutView Align(Align align)
     {
         _alignment = align;
@@ -362,7 +414,12 @@ public class LayoutView : ViewBase, IStateless
         var layout = new StackLayout(_elements.Select(e => e.Content).ToArray(), _orientation, _rowGap, _padding, _margin, _background,
                 _alignment, _removeParentPadding, _wrap)
         {
-            ColumnGap = _columnGap
+            ColumnGap = _columnGap,
+            Scroll = _scroll,
+            BorderColor = _borderColor,
+            BorderRadius = _borderRadius,
+            BorderStyle = _borderStyle,
+            BorderThickness = _borderThickness
         }
             .Width(_width)
             .Height(_height)

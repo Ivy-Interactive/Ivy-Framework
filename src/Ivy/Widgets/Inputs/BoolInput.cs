@@ -6,7 +6,7 @@ using Ivy.Core.Hooks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum BoolInputVariants
+public enum BoolInputVariant
 {
     Checkbox,
     Switch,
@@ -19,7 +19,7 @@ public interface IAnyBoolInput : IAnyInput
 
     public string? Description { get; set; }
 
-    public BoolInputVariants Variant { get; set; }
+    public BoolInputVariant Variant { get; set; }
 
     public Icons Icon { get; set; }
 
@@ -36,7 +36,7 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 
     [Prop] public string? Description { get; set; }
 
-    [Prop] public BoolInputVariants Variant { get; set; } = BoolInputVariants.Checkbox;
+    [Prop] public BoolInputVariant Variant { get; set; } = BoolInputVariant.Checkbox;
 
     [Prop] public Icons Icon { get; set; }
 
@@ -68,7 +68,7 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 {
     [OverloadResolutionPriority(1)]
     public BoolInput(IAnyState state, string? label = null, bool disabled = false,
-        BoolInputVariants variant = BoolInputVariants.Checkbox)
+        BoolInputVariant variant = BoolInputVariant.Checkbox)
         : this(label, disabled, variant)
     {
         var typedState = state.As<TBool>();
@@ -78,20 +78,20 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 
     [OverloadResolutionPriority(1)]
     public BoolInput(TBool value, Func<Event<IInput<TBool>, TBool>, ValueTask> onChange, string? label = null,
-        bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox) : this(label, disabled, variant)
+        bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox) : this(label, disabled, variant)
     {
         OnChange = new(onChange);
         Value = value;
     }
 
     public BoolInput(TBool value, Action<Event<IInput<TBool>, TBool>> onChange, string? label = null,
-        bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox) : this(label, disabled, variant)
+        bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox) : this(label, disabled, variant)
     {
         OnChange = new(onChange.ToValueTask());
         Value = value;
     }
 
-    public BoolInput(string? label = null, bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox)
+    public BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
     {
         Label = label;
         Disabled = disabled;
@@ -114,25 +114,25 @@ public record BoolInput : BoolInput<bool>
 {
     [OverloadResolutionPriority(1)]
     public BoolInput(IAnyState state, string? label = null, bool disabled = false,
-        BoolInputVariants variant = BoolInputVariants.Checkbox)
+        BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(state, label, disabled, variant)
     {
     }
 
     [OverloadResolutionPriority(1)]
     public BoolInput(bool value, Func<Event<IInput<bool>, bool>, ValueTask> onChange, string? label = null,
-        bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox)
+        bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(value, onChange, label, disabled, variant)
     {
     }
 
     public BoolInput(bool value, Action<Event<IInput<bool>, bool>> onChange, string? label = null,
-        bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox)
+        bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(value, onChange, label, disabled, variant)
     {
     }
 
-    public BoolInput(string? label = null, bool disabled = false, BoolInputVariants variant = BoolInputVariants.Checkbox)
+    public BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(label, disabled, variant)
     {
     }
@@ -141,7 +141,7 @@ public record BoolInput : BoolInput<bool>
 public static class BoolInputExtensions
 {
     public static BoolInputBase ToBoolInput(this IAnyState state, string? label = null, bool disabled = false,
-    BoolInputVariants variant = BoolInputVariants.Checkbox)
+    BoolInputVariant variant = BoolInputVariant.Checkbox)
     {
         var stateType = state.GetStateType();
         var isNullable = stateType.IsNullableType();
@@ -246,7 +246,7 @@ public static class BoolInputExtensions
     public static BoolInputBase ToSwitchInput(this IAnyState state, Icons? icon = null, string? label = null,
         bool disabled = false)
     {
-        var input = state.ToBoolInput(label, disabled, BoolInputVariants.Switch);
+        var input = state.ToBoolInput(label, disabled, BoolInputVariant.Switch);
         if (icon != null)
         {
             input.Icon = icon.Value;
@@ -258,7 +258,7 @@ public static class BoolInputExtensions
     public static BoolInputBase ToToggleInput(this IAnyState state, Icons? icon = null, string? label = null,
         bool disabled = false)
     {
-        var input = state.ToBoolInput(label, disabled, BoolInputVariants.Toggle);
+        var input = state.ToBoolInput(label, disabled, BoolInputVariant.Toggle);
         if (icon != null)
         {
             input.Icon = icon.Value;
@@ -271,7 +271,7 @@ public static class BoolInputExtensions
     {
         if (string.IsNullOrEmpty(input.Label))
         {
-            input.Label = Utils.SplitPascalCase(name) ?? name;
+            input.Label = StringHelper.SplitPascalCase(name) ?? name;
         }
 
         return input;
@@ -282,7 +282,7 @@ public static class BoolInputExtensions
     public static BoolInputBase Disabled(this BoolInputBase widget, bool disabled = true) =>
         widget with { Disabled = disabled };
 
-    public static BoolInputBase Variant(this BoolInputBase widget, BoolInputVariants variant) =>
+    public static BoolInputBase Variant(this BoolInputBase widget, BoolInputVariant variant) =>
         widget with { Variant = variant };
 
     public static BoolInputBase Icon(this BoolInputBase widget, Icons icon) => widget with { Icon = icon };
@@ -315,13 +315,5 @@ public static class BoolInputExtensions
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
-    public static BoolInputBase Value<T>(this BoolInputBase widget, T value)
-    {
-        if (widget is BoolInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not BoolInput<{typeof(T).Name}>");
-    }
 
 }

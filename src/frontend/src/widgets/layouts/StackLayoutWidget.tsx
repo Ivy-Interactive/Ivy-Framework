@@ -1,6 +1,9 @@
 import React from 'react';
 import {
   Align,
+  BorderRadius,
+  BorderStyle,
+  getAspectRatio,
   getRowGap,
   getColumnGap,
   getHeight,
@@ -11,8 +14,13 @@ import {
   getColor,
   getMargin,
   getAlignSelf,
+  getBorderStyle,
+  getBorderThickness,
+  getBoxRadius,
 } from '@/lib/styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
+const EMPTY_ARRAY: never[] = [];
 
 interface StackLayoutWidgetProps {
   children: React.ReactNode;
@@ -30,6 +38,11 @@ interface StackLayoutWidgetProps {
   visible?: boolean;
   wrap?: boolean;
   childAlignSelf?: (Align | undefined)[];
+  borderColor?: string;
+  borderRadius?: BorderRadius;
+  borderStyle?: BorderStyle;
+  borderThickness?: string;
+  aspectRatio?: number;
 }
 
 export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
@@ -47,7 +60,12 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   removeParentPadding = false,
   visible = true,
   wrap = false,
-  childAlignSelf = [],
+  childAlignSelf = EMPTY_ARRAY,
+  borderColor,
+  borderRadius = 'None',
+  borderStyle = 'None',
+  borderThickness,
+  aspectRatio,
 }) => {
   const baseStyles: React.CSSProperties = {
     ...getPadding(padding),
@@ -57,7 +75,16 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     ...getAlign(orientation, align),
     ...getWidth(width),
     ...getHeight(height),
+    ...getAspectRatio(aspectRatio),
     ...getColor(background, 'backgroundColor', 'background'),
+    ...(borderStyle !== 'None' ? getBorderStyle(borderStyle) : {}),
+    ...(borderThickness ? getBorderThickness(borderThickness) : {}),
+    ...(borderColor ? getColor(borderColor, 'borderColor', 'background') : {}),
+    ...(borderRadius === 'Rounded'
+      ? getBoxRadius()
+      : borderRadius === 'Full'
+        ? { borderRadius: '9999px' }
+        : {}),
   };
 
   // Override flexWrap if wrap is enabled
@@ -69,23 +96,6 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     return null;
   }
 
-  // Handle scroll modes
-  const getScrollStyles = (): React.CSSProperties => {
-    switch (scroll) {
-      case 'Auto':
-      case 'Vertical':
-        return { overflowY: 'auto', overflowX: 'hidden' };
-      case 'Horizontal':
-        return { overflowX: 'auto', overflowY: 'hidden' };
-      case 'Both':
-        return { overflow: 'auto' };
-      default:
-        return {};
-    }
-  };
-
-  const styles = { ...baseStyles, ...getScrollStyles() };
-
   // Wrap children with alignSelf styles if needed
   const wrappedChildren = React.Children.map(children, (child, index) => {
     const alignSelf = childAlignSelf[index];
@@ -96,19 +106,32 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     return child;
   });
 
-  if (scroll === 'Auto' || scroll === 'Vertical') {
+  const hasScroll = scroll && scroll !== 'None';
+
+  if (hasScroll) {
+    const flexStyles = { ...baseStyles };
+    delete flexStyles.width;
+    delete flexStyles.height;
+    const outerStyles: React.CSSProperties = {
+      ...getWidth(width),
+      ...getHeight(height),
+    };
+
     return (
-      <div style={styles}>
-        <ScrollArea className="h-full w-full">
-          <div className="p-4">{wrappedChildren}</div>
-        </ScrollArea>
-      </div>
+      <ScrollArea
+        className={removeParentPadding ? 'remove-parent-padding' : ''}
+        style={outerStyles}
+        type="scroll"
+        scrollHideDelay={600}
+      >
+        <div style={flexStyles}>{wrappedChildren}</div>
+      </ScrollArea>
     );
   }
 
   return (
     <div
-      style={styles}
+      style={baseStyles}
       className={removeParentPadding ? 'remove-parent-padding' : ''}
     >
       {wrappedChildren}

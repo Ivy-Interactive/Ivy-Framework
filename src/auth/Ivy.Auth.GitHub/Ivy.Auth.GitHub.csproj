@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../Ivy/Ivy.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -30,5 +30,9 @@
   <PropertyGroup Condition="'$(CI)' == 'true'">
     <DebugType>none</DebugType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

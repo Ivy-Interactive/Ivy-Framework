@@ -40,8 +40,8 @@ Widget: MyWidget
 Create a record that inherits from `WidgetBase<T>` and mark it with `[ExternalWidget]`. The attribute tells the framework where to find the bundled script and (optionally) CSS, and which export/global name to use. See Widgets and Event handlers for the basics.
 
 ```csharp
+using Ivy;
 using Ivy.Core;
-using Ivy.Core.ExternalWidgets;
 
 namespace MyProject.Widgets;
 

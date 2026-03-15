@@ -24,7 +24,7 @@ public class ServerDescription
         var description = new ServerDescription();
 
         // Gather apps
-        server.AppRepository.Reload();
+        server.AppRepository.Reload(server.ReservedPaths);
         foreach (var app in server.AppRepository.All())
         {
             description.Apps.Add(new AppDescription

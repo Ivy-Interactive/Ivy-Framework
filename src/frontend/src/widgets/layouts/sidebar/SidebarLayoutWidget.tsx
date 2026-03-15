@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useMemo,
   useRef,
+  useReducer,
 } from 'react';
 
 import Icon from '@/components/Icon';
@@ -125,21 +126,45 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     return true; // Default to open if we can't determine width
   };
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(getInitialSidebarState);
-  const [isManuallyToggled, setIsManuallyToggled] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [sidebarState, dispatchSidebar] = useReducer(
+    (
+      state: {
+        isSidebarOpen: boolean;
+        isManuallyToggled: boolean;
+        currentWidth: number;
+        isResizing: boolean;
+        prevInitialWidthPx: number;
+      },
+      action:
+        | Partial<typeof state>
+        | ((prev: typeof state) => Partial<typeof state>)
+    ) => {
+      const updates = typeof action === 'function' ? action(state) : action;
+      return { ...state, ...updates };
+    },
+    {
+      isSidebarOpen: getInitialSidebarState(),
+      isManuallyToggled: false,
+      currentWidth: initialWidthPx,
+      isResizing: false,
+      prevInitialWidthPx: initialWidthPx,
+    }
+  );
+  const {
+    isSidebarOpen,
+    isManuallyToggled,
+    currentWidth,
+    isResizing,
+    prevInitialWidthPx,
+  } = sidebarState;
 
-  // Resizable state
-  const [currentWidth, setCurrentWidth] = useState(initialWidthPx);
-  const [isResizing, setIsResizing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  const [prevInitialWidthPx, setPrevInitialWidthPx] = useState(initialWidthPx);
-
   if (initialWidthPx !== prevInitialWidthPx) {
-    setPrevInitialWidthPx(initialWidthPx);
+    dispatchSidebar({ prevInitialWidthPx: initialWidthPx });
     if (!isResizing) {
-      setCurrentWidth(initialWidthPx);
+      dispatchSidebar({ currentWidth: initialWidthPx });
     }
   }
 
@@ -149,7 +174,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       if (!resizable || !isSidebarOpen) return;
 
       e.preventDefault();
-      setIsResizing(true);
+      dispatchSidebar({ isResizing: true });
 
       const startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const startWidth = currentWidth;
@@ -164,11 +189,11 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           maxWidthPx,
           Math.max(minWidthPx, startWidth + delta)
         );
-        setCurrentWidth(newWidth);
+        dispatchSidebar({ currentWidth: newWidth });
       };
 
       const handleEnd = () => {
-        setIsResizing(false);
+        dispatchSidebar({ isResizing: false });
         document.removeEventListener('mousemove', handleMove);
         document.removeEventListener('mouseup', handleEnd);
         document.removeEventListener('touchmove', handleMove);
@@ -177,10 +202,17 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
       document.addEventListener('mousemove', handleMove);
       document.addEventListener('mouseup', handleEnd);
-      document.addEventListener('touchmove', handleMove);
-      document.addEventListener('touchend', handleEnd);
+      document.addEventListener('touchmove', handleMove, { passive: true });
+      document.addEventListener('touchend', handleEnd, { passive: true });
     },
-    [resizable, isSidebarOpen, currentWidth, minWidthPx, maxWidthPx]
+    [
+      resizable,
+      isSidebarOpen,
+      currentWidth,
+      minWidthPx,
+      maxWidthPx,
+      dispatchSidebar,
+    ]
   );
 
   // Get the effective sidebar width (use currentWidth when resizable)
@@ -188,9 +220,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
-    setIsSidebarOpen(prev => !prev);
-    setIsManuallyToggled(true);
-  }, []);
+    dispatchSidebar(prev => ({ isSidebarOpen: !prev.isSidebarOpen }));
+    dispatchSidebar({ isManuallyToggled: true });
+  }, [dispatchSidebar]);
 
   // Auto-collapse/expand based on width (only for main app sidebar)
   useEffect(() => {
@@ -200,7 +232,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
       if (!isManuallyToggled) {
-        setIsSidebarOpen(openProp && e.matches);
+        dispatchSidebar({ isSidebarOpen: openProp && e.matches });
       }
     };
 
@@ -208,7 +240,13 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     mql.addEventListener('change', handleMediaChange);
     return () => mql.removeEventListener('change', handleMediaChange);
-  }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar, openProp]);
+  }, [
+    autoCollapseThreshold,
+    isManuallyToggled,
+    mainAppSidebar,
+    openProp,
+    dispatchSidebar,
+  ]);
 
   return (
     <div
@@ -264,9 +302,13 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             tabIndex={0}
             onKeyDown={e => {
               if (e.key === 'ArrowLeft') {
-                setCurrentWidth(w => Math.max(minWidthPx, w - 10));
+                dispatchSidebar(prev => ({
+                  currentWidth: Math.max(minWidthPx, prev.currentWidth - 10),
+                }));
               } else if (e.key === 'ArrowRight') {
-                setCurrentWidth(w => Math.min(maxWidthPx, w + 10));
+                dispatchSidebar(prev => ({
+                  currentWidth: Math.min(maxWidthPx, prev.currentWidth + 10),
+                }));
               }
             }}
           >
@@ -314,6 +356,8 @@ interface SidebarMenuWidgetProps {
   items: MenuItem[];
   searchActive?: boolean;
 }
+
+const EMPTY_ITEMS: MenuItem[] = [];
 
 const getFlatItemsInSearchRenderOrder = (items: MenuItem[]): MenuItem[] => {
   const result: MenuItem[] = [];
@@ -366,13 +410,14 @@ const CollapsibleMenuItem: React.FC<{
   const shouldBeOpen =
     expandedSections.has(item.label) || (item.expanded ?? false);
   const [isOpen, setIsOpen] = useState(shouldBeOpen);
+  const [prevShouldBeOpen, setPrevShouldBeOpen] = useState(shouldBeOpen);
   const itemRef = useRef<HTMLLIElement>(null);
 
-  // Sync local state with derived state when expandedSections changes
-  // Using useEffect to avoid setState during render
-  useEffect(() => {
+  // Sync local state with derived state
+  if (shouldBeOpen !== prevShouldBeOpen) {
+    setPrevShouldBeOpen(shouldBeOpen);
     setIsOpen(shouldBeOpen);
-  }, [shouldBeOpen]);
+  }
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -562,7 +607,7 @@ const renderMenuItems = (
 
 export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   id,
-  items = [],
+  items = EMPTY_ITEMS,
   searchActive = false,
 }) => {
   const eventHandler = useEventHandler();
@@ -849,6 +894,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         ).current = el;
         containerRef.current = el;
       }}
+      role="menu"
       tabIndex={0}
       onFocus={() => {
         if (searchActive && flatItems.length > 0) setSelectedIndex(0);

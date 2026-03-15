@@ -13,13 +13,13 @@ public class BoolInputApp : SampleBase
 
         var variants = Layout.Grid().Columns(7)
                        | null!
-                       | Text.InlineCode("True")
-                       | Text.InlineCode("False")
-                       | Text.InlineCode("Disabled")
-                       | Text.InlineCode("Invalid")
-                       | Text.InlineCode("Nullable")
-                       | Text.InlineCode("Loading")
-                       | Text.InlineCode("BoolInputVariants.Checkbox")
+                       | Text.Monospaced("True")
+                       | Text.Monospaced("False")
+                       | Text.Monospaced("Disabled")
+                       | Text.Monospaced("Invalid")
+                       | Text.Monospaced("Nullable")
+                       | Text.Monospaced("Loading")
+                       | Text.Monospaced("BoolInputVariant.Checkbox")
                        | trueState
                            .ToBoolInput()
                            .Label("Label")
@@ -78,7 +78,7 @@ public class BoolInputApp : SampleBase
                            .Label("Label")
                            .Loading(loadingState.Value)
                            .TestId("checkbox-loading-state-width")
-                       | Text.InlineCode("BoolInputVariants.Switch")
+                       | Text.Monospaced("BoolInputVariant.Switch")
                        | trueState
                            .ToSwitchInput()
                            .Label("Label")
@@ -133,7 +133,7 @@ public class BoolInputApp : SampleBase
                            .Label("Label")
                            .Loading(loadingState.Value)
                            .TestId("switch-loading-state-width")
-                       | Text.InlineCode("BoolInputVariants.Toggle")
+                       | Text.Monospaced("BoolInputVariant.Toggle")
                        | trueState
                            .ToToggleInput(Icons.Magnet)
                            .Label("Label")
@@ -224,10 +224,10 @@ public class BoolInputApp : SampleBase
                | anyState.ToBoolInput()
                | anyState
                    .ToBoolInput()
-                   .Variant(BoolInputVariants.Switch)
+                   .Variant(BoolInputVariant.Switch)
                | anyState
                    .ToBoolInput()
-                   .Variant(BoolInputVariants.Toggle)
+                   .Variant(BoolInputVariant.Toggle)
                    .Icon(Icons.Star);
     }
 }
@@ -257,12 +257,12 @@ public class BoolInputDataBinding : ViewBase
 
         var gridItems = new List<object>
         {
-            Text.InlineCode("Type"),
-            Text.InlineCode("Non-Nullable"),
-            Text.InlineCode("State"),
-            Text.InlineCode("Type"),
-            Text.InlineCode("Nullable"),
-            Text.InlineCode("State")
+            Text.Monospaced("Type"),
+            Text.Monospaced("Non-Nullable"),
+            Text.Monospaced("State"),
+            Text.Monospaced("Type"),
+            Text.Monospaced("Nullable"),
+            Text.Monospaced("State")
         };
 
         var numericTypeNames = new[] { "double", "decimal", "float", "short", "int", "long", "byte" };
@@ -270,7 +270,7 @@ public class BoolInputDataBinding : ViewBase
         foreach (var (typeName, nonNullableState, nullableState) in numericTypes)
         {
             // Non-nullable columns (first 3)
-            gridItems.Add(Text.InlineCode(typeName));
+            gridItems.Add(Text.Monospaced(typeName));
             gridItems.Add(CreateBoolInputVariants(nonNullableState));
 
             var nonNullableAnyState = nonNullableState as IAnyState;
@@ -284,7 +284,7 @@ public class BoolInputDataBinding : ViewBase
             gridItems.Add(FormatStateValue(typeName, nonNullableValue, false));
 
             // Nullable columns (next 3)
-            gridItems.Add(Text.InlineCode($"{typeName}?"));
+            gridItems.Add(Text.Monospaced($"{typeName}?"));
             gridItems.Add(CreateBoolInputVariants(nullableState));
 
             var anyState = nullableState as IAnyState;
@@ -305,10 +305,10 @@ public class BoolInputDataBinding : ViewBase
 
             return value switch
             {
-                null => isNullable ? Text.InlineCode("Null") : Text.InlineCode("0"),
-                bool b => Text.InlineCode(b.ToString()),
-                _ when numericTypeNames.Contains(typeName) => Text.InlineCode(value.ToString()!),
-                _ => Text.InlineCode(value?.ToString() ?? "null")
+                null => isNullable ? Text.Monospaced("Null") : Text.Monospaced("0"),
+                bool b => Text.Monospaced(b.ToString()),
+                _ when numericTypeNames.Contains(typeName) => Text.Monospaced(value.ToString()!),
+                _ => Text.Monospaced(value?.ToString() ?? "null")
             };
         }
     }
@@ -332,10 +332,10 @@ public class BoolInputDataBinding : ViewBase
                | anyState.ToBoolInput()
                | anyState
                    .ToBoolInput()
-                   .Variant(BoolInputVariants.Switch)
+                   .Variant(BoolInputVariant.Switch)
                | anyState
                    .ToBoolInput()
-                   .Variant(BoolInputVariants.Toggle)
+                   .Variant(BoolInputVariant.Toggle)
                    .Icon(Icons.Star);
     }
 }
@@ -349,12 +349,12 @@ public class BoolInputSizes : ViewBase
         var nullState = UseState((bool?)null);
 
         return Layout.Grid().Columns(4)
-               | Text.InlineCode("Description")
-               | Text.InlineCode("Small")
-               | Text.InlineCode("Medium")
-               | Text.InlineCode("Large")
+               | Text.Monospaced("Description")
+               | Text.Monospaced("Small")
+               | Text.Monospaced("Medium")
+               | Text.Monospaced("Large")
 
-               | Text.InlineCode("BoolInputVariants.Checkbox")
+               | Text.Monospaced("BoolInputVariant.Checkbox")
                | trueState
                    .ToBoolInput()
                    .Label("Label")
@@ -367,7 +367,7 @@ public class BoolInputSizes : ViewBase
                    .Label("Label")
                    .Large()
 
-               | Text.InlineCode("BoolInputVariants.Switch")
+               | Text.Monospaced("BoolInputVariant.Switch")
                | trueState
                    .ToSwitchInput()
                    .Label("Label")
@@ -380,7 +380,7 @@ public class BoolInputSizes : ViewBase
                    .Label("Label")
                    .Large()
 
-               | Text.InlineCode("BoolInputVariants.Toggle")
+               | Text.Monospaced("BoolInputVariant.Toggle")
                | trueState
                    .ToToggleInput(Icons.Star)
                    .Label("Label")
@@ -404,12 +404,12 @@ public class BoolInputIcons : ViewBase
         var trueState = UseState(true);
 
         return Layout.Grid().Columns(4)
-               | Text.InlineCode("Description")
-               | Text.InlineCode("Sun")
-               | Text.InlineCode("Moon")
-               | Text.InlineCode("Star")
+               | Text.Monospaced("Description")
+               | Text.Monospaced("Sun")
+               | Text.Monospaced("Moon")
+               | Text.Monospaced("Star")
 
-               | Text.InlineCode("BoolInputVariants.Switch")
+               | Text.Monospaced("BoolInputVariant.Switch")
                | trueState
                    .ToSwitchInput(Icons.Sun)
                    .Label("Label")
@@ -420,7 +420,7 @@ public class BoolInputIcons : ViewBase
                    .ToSwitchInput(Icons.Star)
                    .Label("Label")
 
-               | Text.InlineCode("BoolInputVariants.Toggle")
+               | Text.Monospaced("BoolInputVariant.Toggle")
                | trueState
                    .ToToggleInput(Icons.Sun)
                    .Label("Label")

@@ -182,13 +182,13 @@ public class InputWidgetsDemo : ViewBase
             | new Card(
                 Layout.Vertical().Gap(2)
                     | new TextInput(textState).Placeholder("Enter text...")
-                    | new TextInput(textState).Variant(TextInputVariants.Password).Placeholder("Password")
-                    | new TextInput(textState).Variant(TextInputVariants.Email).Placeholder("Email")
-                    | new TextInput(textState).Variant(TextInputVariants.Search).Placeholder("Search...")
+                    | new TextInput(textState).Variant(TextInputVariant.Password).Placeholder("Password")
+                    | new TextInput(textState).Variant(TextInputVariant.Email).Placeholder("Email")
+                    | new TextInput(textState).Variant(TextInputVariant.Search).Placeholder("Search...")
             ).Title("TextInput").Description("Text input variants").Height(Size.Units(80))
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | new NumberInput<double>(numberState).Min(0).Max(100).Variant(NumberInputVariants.Slider)
+                    | new NumberInput<double>(numberState).Min(0).Max(100).Variant(NumberInputVariant.Slider)
                     | new NumberInput<int>(numberState).Placeholder("Enter number")
                     | new NumberInput<decimal>(numberState).FormatStyle(NumberFormatStyle.Currency).Currency("USD").Placeholder("$0.00")
                     | new NumberInput<double>(numberState).FormatStyle(NumberFormatStyle.Percent).Placeholder("0%")
@@ -209,10 +209,10 @@ public class InputWidgetsDemo : ViewBase
                 new DateTimeInput<DateTime>(dateState).Placeholder("Select date")
             ).Title("DateTimeInput").Description("Date and time picker").Height(Size.Units(40))
             | new Card(
-                new FeedbackInput<int>(feedbackState).Variant(FeedbackInputVariants.Stars)
+                new FeedbackInput<int>(feedbackState).Stars()
             ).Title("Feedback").Description("Star rating").Height(Size.Units(40))
             | new Card(
-                colorState.ToColorInput().Variant(ColorInputVariants.Picker)
+                colorState.ToColorInput().Variant(ColorInputVariant.Picker)
             ).Title("Color").Description("Color picker").Height(Size.Units(40))
             | new Card(
                 codeState.ToCodeInput().Language(Languages.Javascript).Height(Size.Units(15))

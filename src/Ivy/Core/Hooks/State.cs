@@ -1,8 +1,9 @@
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 
 namespace Ivy.Core.Hooks;
 
-public class State<T> : IState<T>
+public class State<T> : IState<T>, IRef<T>
 {
     private T _value;
     private readonly Subject<T> _subject = new();
@@ -42,6 +43,7 @@ public class State<T> : IState<T>
         }
     }
 
+    [OverloadResolutionPriority(1)]
     public T Set(T value)
     {
         Value = value;

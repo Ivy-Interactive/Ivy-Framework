@@ -98,7 +98,7 @@ public class RichTextLinkDemo : ViewBase
 
 ## Streaming
 
-Use `UseStream` to dynamically append `TextRun` segments in real time — ideal for LLM responses, live logs, or any incremental text output.
+Use [UseStream](../../../03_Hooks/02_Core/20_UseStream.md) to dynamically append `TextRun` segments in real time — ideal for LLM responses, live logs, or any incremental text output.
 
 Call `Context.UseStream<TextRun>()` to create a stream, attach it to a `RichTextBuilder` with `.UseStream(stream)`, then call `stream.Write(...)` to push runs to the frontend as they arrive. Initial `Runs` are displayed immediately; streamed runs are appended after them.
 
@@ -168,7 +168,6 @@ By default, `UseStream<T>()` buffers data until the frontend subscribes. This me
 var stream = Context.UseStream<TextRun>(buffer: false);
 ```
 
-
 ## TextRun Properties
 
 | Property | Type | Default | Description |
@@ -214,7 +213,7 @@ Entry point: `Text.Rich()` returns a `RichTextBuilder`.
 |---|---|
 | `NoWrap()` | Prevent text wrapping |
 | `Overflow(overflow)` | Set overflow behavior |
-| `Scale(scale)` / `Small()` / `Medium()` / `Large()` | Set text scale |
+| `Density(density)` / `Small()` / `Medium()` / `Large()` | Set text scale |
 | `Align(alignment)` / `Left()` / `Center()` / `Right()` | Set text alignment |
 | `UseStream(stream)` | Attach a stream for dynamic run appending |
 | `OnLinkClick(handler)` | Set a callback for link clicks (accepts `Action<string>`, `Action<Event<...>>`, or `Func<Event<...>, ValueTask>`) |

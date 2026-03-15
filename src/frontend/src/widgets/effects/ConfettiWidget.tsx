@@ -56,6 +56,17 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({
     triggerConfetti(x, y);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (trigger === 'Click' && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      const rect = elementRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const x = (rect.left + rect.width / 2) / window.innerWidth;
+      const y = (rect.top + rect.height / 2) / window.innerHeight;
+      triggerConfetti(x, y);
+    }
+  };
+
   useEffect(() => {
     if (trigger === 'Auto' && elementRef.current) {
       const rect = elementRef.current.getBoundingClientRect();
@@ -68,8 +79,23 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({
     }
   }, [trigger, confettiConfig]);
 
+  if (trigger === 'Click') {
+    return (
+      <div
+        ref={elementRef}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        role="button"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+      >
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <div ref={elementRef} onClick={handleClick} onMouseEnter={handleMouseEnter}>
+    <div ref={elementRef} onMouseEnter={handleMouseEnter} role="presentation">
       {children}
     </div>
   );

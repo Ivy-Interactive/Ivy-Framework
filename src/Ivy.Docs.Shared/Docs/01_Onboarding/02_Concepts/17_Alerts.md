@@ -102,10 +102,13 @@ public class BasicToastDemo : ViewBase
 
         return Layout.Horizontal(
             new Button("Success Toast", _ => 
-                client.Toast("Operation completed successfully!", "Success")
+                client.Toast("Operation completed successfully!", "Success").Success()
+            ),
+            new Button("Error Toast", _ => 
+                client.Toast("Something went wrong!", "Error").Destructive()
             ),
             new Button("Info Toast", _ => 
-                client.Toast("Here's some helpful information", "Info")
+                client.Toast("Here's some helpful information", "Info").Info()
             ),
             new Button("Simple Toast", _ => 
                 client.Toast("Just a simple message")
@@ -140,7 +143,7 @@ public class ToastExceptionDemo : ViewBase
 }
 ```
 
-## Examples
+## Faq
 
 ### Form Submission with Feedback
 
@@ -215,3 +218,72 @@ public class AlertExample : ViewBase
     }
 }
 ```
+
+<Details>
+<Summary>
+How do I show an alert dialog to the user?
+</Summary>
+<Body>
+
+Use the `UseAlert` hook, which returns a tuple of `(alertView, showAlert)`:
+
+```csharp
+var (alertView, showAlert) = UseAlert();
+
+return Layout.Vertical()
+    | new Button("Show Alert", _ =>
+        showAlert("Are you sure?", result =>
+        {
+            // result is the AlertResult (Ok, Cancel, Yes, No)
+        }, "Confirmation", AlertButtonSet.OkCancel))
+    | alertView; // IMPORTANT: alertView must be included in the view tree
+```
+
+**Key points:**
+- `UseAlert()` returns a **tuple**, not an object — always destructure it
+- `showAlert` is a delegate: `showAlert(message, callback, title?, buttonSet?)`
+- `alertView` must be rendered somewhere in your view tree for the dialog to appear
+- Available button sets: `AlertButtonSet.Ok`, `AlertButtonSet.OkCancel`, `AlertButtonSet.YesNo`, `AlertButtonSet.YesNoCancel`
+- For simple toast notifications, use `client.Toast("message")` or `client.Error("message")` via `IClientProvider`
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I show a delete confirmation before deleting an entity?
+</Summary>
+<Body>
+
+Use `UseAlert()` for confirmation dialogs:
+
+```csharp
+var (alertView, showAlert) = UseAlert();
+var client = UseService<IClientProvider>();
+
+void DeleteItem(int id)
+{
+    showAlert("Are you sure you want to delete this item?", async result =>
+    {
+        if (result == AlertResult.Ok)
+        {
+            await using var db = dbFactory.CreateDbContext();
+            var item = await db.Items.FindAsync(id);
+            if (item != null)
+            {
+                db.Items.Remove(item);
+                await db.SaveChangesAsync();
+                client.Toast("Item deleted");
+                refreshToken.Refresh();
+            }
+        }
+    }, "Confirm Delete", AlertButtonSet.OkCancel);
+}
+
+return Layout.Vertical()
+    | new Button("Delete", _ => DeleteItem(itemId)).Destructive()
+    | alertView; // IMPORTANT: must include alertView in the view tree
+```
+
+</Body>
+</Details>

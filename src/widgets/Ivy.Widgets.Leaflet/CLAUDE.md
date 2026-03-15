@@ -19,7 +19,6 @@ Create a new `.cs` file with a record that inherits from `WidgetBase<T>`:
 ```csharp
 using Ivy;
 using Ivy.Core;
-using Ivy.Core.ExternalWidgets;
 
 namespace Ivy.Widgets.Leaflet;
 
@@ -129,13 +128,11 @@ if (typeof window !== 'undefined') {
 export { Map, MyWidget };
 ```
 
-### 4. Create a Sample File
+### 4. Create a Sample Project
 
-Create a `.samples/{WidgetName}.cs` file to demonstrate the widget:
+The `.samples/` folder contains a full Ivy project that demonstrates the widget. Update `.samples/Program.cs` to add a view for the new widget:
 
 ```csharp
-#:project ..\Ivy.Widgets.Leaflet.csproj
-
 using Ivy;
 using Ivy.Widgets.Leaflet;
 
@@ -151,7 +148,23 @@ class MyWidgetView : ViewBase
 }
 ```
 
-Run the sample with: `dotnet run MyWidget.cs`
+The `.samples/Program.csproj` references the widget project:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ivy.Widgets.Leaflet.csproj" />
+  </ItemGroup>
+</Project>
+```
+
+Run the sample with: `cd .samples && dotnet run`
 
 ## Key Concepts
 

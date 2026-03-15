@@ -55,7 +55,7 @@ public record ServerArgs
 
 public class Server
 {
-    public IReadOnlyList<string> ReservedPaths => _reservedPaths;
+    public IReadOnlySet<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
     public IServiceCollection Services { get; } = new ServiceCollection();
@@ -69,7 +69,8 @@ public class Server
     internal IServiceProvider? ServiceProvider;
     private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
     private readonly List<Action<WebApplication>> _appMods = new();
-    private List<string> _reservedPaths = new();
+    private HashSet<string> _reservedPaths = new(StringComparer.OrdinalIgnoreCase);
+    private HashSet<string> _fluentApiReservedPaths = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<IHtmlFilter> _customHtmlFilters = new();
     private Action<HtmlPipeline>? _pipelineConfigurator;
     private ManifestOptions? _manifestOptions;
@@ -201,7 +202,7 @@ public class Server
         return UseChrome(() => new DefaultSidebarChrome(settings));
     }
 
-    public Server UseChrome<T>() where T : ViewBase
+    public Server UseChrome<T>() where T : ViewBase, new()
     {
         return UseChrome((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
     }
@@ -248,7 +249,7 @@ public class Server
         return this;
     }
 
-    public Server UseErrorNotFound<T>() where T : ViewBase
+    public Server UseErrorNotFound<T>() where T : ViewBase, new()
     {
         return UseErrorNotFound((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
     }
@@ -280,7 +281,19 @@ public class Server
 
     public Server ReservePaths(params string[] paths)
     {
-        _reservedPaths.AddRange(paths);
+        if (paths != null)
+        {
+            foreach (var path in paths)
+            {
+                if (string.IsNullOrEmpty(path))
+                {
+                    continue;
+                }
+                var normalizedPath = path.StartsWith('/') ? path : "/" + path;
+                _fluentApiReservedPaths.Add(normalizedPath);
+                _reservedPaths.Add(normalizedPath);
+            }
+        }
         return this;
     }
 
@@ -435,11 +448,11 @@ public class Server
 
         // CLI-only commands (--describe, --describe-connection, --test-connection) never start
         // the web host, so skip port checks entirely. Port 0 will be used below.
-        if (!_args.IsCliCommand && Utils.IsPortInUse(_args.Port))
+        if (!_args.IsCliCommand && ProcessHelper.IsPortInUse(_args.Port))
         {
             if (_args.IKillForThisPort)
             {
-                Utils.KillProcessUsingPort(_args.Port);
+                ProcessHelper.KillProcessUsingPort(_args.Port);
             }
             else if (_args.FindAvailablePort)
             {
@@ -447,7 +460,7 @@ public class Server
                 var maxAttempts = 100;
                 var attemptCount = 0;
 
-                while (Utils.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
+                while (ProcessHelper.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
                 {
                     _args = _args with { Port = _args.Port + 1 };
                     attemptCount++;
@@ -480,8 +493,6 @@ public class Server
             DefaultAppId = _args.DefaultAppId;
         }
 
-        AppRepository.Reload();
-
         // Initialize external widget registry by scanning loaded assemblies
         ExternalWidgetRegistry.Instance.Initialize();
 
@@ -506,7 +517,11 @@ public class Server
 
         // CLI-only commands need DI but never call app.StartAsync(),
         // so use port 0 to avoid conflicts with a running instance.
-        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://*:{_args.Port}";
+        // Bind to localhost for local dev (avoids Windows Firewall prompt),
+        // but use wildcard in containers so health probes can reach the app.
+        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+        var host = isContainer ? "*" : "localhost";
+        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://{host}:{_args.Port}";
         builder.WebHost.UseUrls(bindUrl);
 
         builder.Services.AddSignalR(options =>
@@ -575,6 +590,16 @@ public class Server
         var app = builder.Build();
         ServiceProvider = app.Services;
 
+        // Update reserved paths with discovered controller routes before reloading apps
+        UpdateReservedPaths(app);
+        AppRepository.ClearInvalidAppIds();
+        AppRepository.Reload(_reservedPaths);
+        if (AppRepository.InvalidAppIds.Count > 0)
+        {
+            Console.WriteLine($@"[CRITICAL] Failed to start Ivy server due to {AppRepository.InvalidAppIds.Count} invalid app ID(s).");
+            return;
+        }
+
         app.UseExceptionHandler(error =>
         {
             error.Run(async context =>
@@ -607,9 +632,9 @@ public class Server
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
 
-        app.UsePathToAppId();
-
-        app.UseRouting();
+        app.UseRouting(); // First routing pass - match explicit routes (gRPC, controllers)
+        app.UsePathToAppId(); // Rewrite path to appId if no endpoint matched
+        app.UseRouting(); // Second routing pass - route the rewritten path
         app.UseCors();
         app.UseGrpcWeb();
 
@@ -627,7 +652,8 @@ public class Server
         {
             HotReloadService.UpdateApplicationEvent += (types) =>
             {
-                AppRepository.Reload();
+                UpdateReservedPaths(app);
+                AppRepository.Reload(_reservedPaths);
                 var hubContext = app.Services.GetService<IHubContext<AppHub>>()!;
                 hubContext.Clients.All.SendAsync("HotReload", cancellationToken: cts.Token);
 
@@ -655,7 +681,7 @@ public class Server
             }
             if (_args.Browse)
             {
-                Utils.OpenBrowser(localUrl);
+                ProcessHelper.OpenBrowser(localUrl);
             }
         });
 
@@ -753,7 +779,6 @@ public class Server
 
         try
         {
-            CheckForAppIdCollisions(app);
             await app.StartAsync(cts.Token);
             await app.WaitForShutdownAsync(cts.Token);
         }
@@ -824,7 +849,7 @@ public class Server
             missingByProvider[provider.GetType().Name] = missing;
     }
 
-    private void CheckForAppIdCollisions(WebApplication app)
+    private void UpdateReservedPaths(WebApplication app)
     {
         var actionDescriptorCollectionProvider = app.Services.GetRequiredService<Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider>();
 
@@ -832,10 +857,7 @@ public class Server
         var reservedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // 1. Add existing reserved paths (from fluent API)
-        foreach (var path in _reservedPaths)
-        {
-            reservedPaths.Add(path);
-        }
+        reservedPaths.UnionWith(_fluentApiReservedPaths);
 
         // 2. Add auto-discovered controller routes
         foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)
@@ -854,24 +876,13 @@ public class Server
         }
 
         // 3. Add system excluded paths
-        foreach (var path in PathToAppIdMiddleware.ExcludedPaths)
+        foreach (var path in AppRoutingHelpers.ExcludedPaths)
         {
-            reservedPaths.Add(path.StartsWith("/") ? path : "/" + path);
+            reservedPaths.Add(path.StartsWith('/') ? path : "/" + path);
         }
 
-        // Atomically update the shared list (thread safety for startup)
-        _reservedPaths = reservedPaths.ToList();
-
-        // 4. Check for collisions
-        foreach (var appDescriptor in AppRepository.All())
-        {
-            var appIdPath = "/" + appDescriptor.Id;
-
-            if (reservedPaths.Contains(appIdPath))
-            {
-                throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
-            }
-        }
+        // Atomically update the shared set (thread safety for startup)
+        _reservedPaths = reservedPaths;
     }
 }
 

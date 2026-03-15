@@ -48,7 +48,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
     private bool _removeEmpty;
     private readonly Dictionary<string, Item> _items;
     private readonly TModel _model;
-    private Scale _scale = Scale.Medium;
+    private Density _density = Density.Medium;
 
     public DetailsBuilder(TModel model)
     {
@@ -68,6 +68,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
             .Union(
                 type
                     .GetProperties()
+                    .Where(p => p.GetIndexParameters().Length == 0)
                     .Where(p => p.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
                     .Select(e => new { e.Name, Type = e.PropertyType, FieldInfo = (FieldInfo)null!, PropertyInfo = e })
             )
@@ -75,7 +76,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
         foreach (var field in fields)
         {
-            var label = Utils.LabelFor(field.Name, field.Type);
+            var label = StringHelper.LabelFor(field.Name, field.Type);
             _items[field.Name] =
                 new Item(
                     label,
@@ -95,19 +96,19 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
     public DetailsBuilder<TModel> Large()
     {
-        _scale = Scale.Large;
+        _density = Density.Large;
         return this;
     }
 
     public DetailsBuilder<TModel> Small()
     {
-        _scale = Scale.Small;
+        _density = Density.Small;
         return this;
     }
 
     public DetailsBuilder<TModel> Medium()
     {
-        _scale = Scale.Medium;
+        _density = Density.Medium;
         return this;
     }
 
@@ -128,6 +129,13 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
             var prop = GetField(expr);
             prop.IsMultiline = true;
         }
+        return this;
+    }
+
+    public DetailsBuilder<TModel> Label(Expression<Func<TModel, object>> field, string label)
+    {
+        var item = GetField(field);
+        item.Label = label;
         return this;
     }
 
@@ -171,7 +179,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
     private Item GetField<TU>(Expression<Func<TModel, TU>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _items[name];
     }
 
@@ -181,10 +189,10 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
         if (_removeEmpty)
         {
-            items = items.Where(e => !Utils.IsEmptyContent(e.GetValue(_model))).ToArray();
+            items = items.Where(e => !ValidationHelper.IsEmptyContent(e.GetValue(_model))).ToArray();
         }
 
-        var details = new Details(items.Select(BuildDetail).ToArray()).Scale(_scale);
+        var details = new Details(items.Select(BuildDetail).ToArray()).Density(_density);
 
         return details;
 

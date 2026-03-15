@@ -41,8 +41,8 @@ export function getAppId(): string | null {
   // Remove leading slash and use the rest as appId
   const appId = originalPath.replace(/^\/+/, '');
 
-  // Only convert if the path looks like an app ID (contains at least one segment and no dots)
-  if (appId && !appId.includes('.')) {
+  // Only convert if the path looks like an app ID (contains at least one segment)
+  if (appId) {
     return appId;
   }
 
@@ -165,11 +165,11 @@ function isAllowedIvyHost(origin: string): boolean {
     // SECURITY: We require protocol matching to prevent protocol downgrade attacks
     // (e.g., preventing http://localhost:3000 from being accepted when current origin is https://localhost:5000)
     // Only allow this for localhost/127.0.0.1 to prevent security issues in production
-    const localhostVariants = ['localhost', '127.0.0.1', '[::1]', '::1'];
-    const isCurrentLocalhost = localhostVariants.includes(
+    const localhostVariant = ['localhost', '127.0.0.1', '[::1]', '::1'];
+    const isCurrentLocalhost = localhostVariant.includes(
       currentUrl.hostname.toLowerCase()
     );
-    const isUrlLocalhost = localhostVariants.includes(
+    const isUrlLocalhost = localhostVariant.includes(
       url.hostname.toLowerCase()
     );
 

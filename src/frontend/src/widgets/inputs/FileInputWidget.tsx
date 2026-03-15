@@ -5,15 +5,17 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { useEventHandler } from '@/components/event-handler';
 import { toast } from '@/hooks/use-toast';
 import {
-  fileInputVariants,
-  uploadIconVariants,
-  textVariants,
-} from '@/components/ui/input/file-input-variants';
+  fileInputVariant,
+  uploadIconVariant,
+  textVariant,
+} from '@/components/ui/input/file-input-variant';
 import { validateSingleFile, validateFileCount } from './file-input-validation';
+
+const EMPTY_ARRAY: never[] = [];
 
 enum FileInputStatus {
   Pending = 'Pending',
@@ -46,7 +48,7 @@ interface FileInputWidgetProps {
   maxFiles?: number;
   placeholder?: string;
   uploadUrl?: string;
-  scale?: Scales;
+  density?: Densities;
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -54,7 +56,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  events = [],
+  events = EMPTY_ARRAY,
   width,
   accept,
   maxFileSize,
@@ -63,7 +65,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   maxFiles,
   placeholder,
   uploadUrl,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
@@ -389,7 +391,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       )}
       <div
         className={cn(
-          fileInputVariants({ scale }),
+          fileInputVariant({ density }),
           isDragging && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
@@ -398,6 +400,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           'p-4'
         )}
         onClick={handleClick}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e as unknown as React.MouseEvent);
+          }
+        }}
       >
         <Input
           ref={inputRef}
@@ -412,9 +422,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
         {/* Always show upload icon */}
         <div className="flex flex-col items-center justify-center text-center w-full">
-          <Upload className={uploadIconVariants({ scale })} />
+          <Upload className={uploadIconVariant({ density })} />
           {!hasFiles && (
-            <p className={textVariants({ scale })}>
+            <p className={textVariant({ density })}>
               {placeholder ||
                 `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
             </p>

@@ -18,7 +18,7 @@ public class TitleCaseToFriendlyUrlTests
     [InlineData("XMLHttpRequest", "xml-http-request")] // acronym followed by camel word then another
     public void ConvertsCorrectly(string input, string expected)
     {
-        var result = Utils.TitleCaseToFriendlyUrl(input);
+        var result = StringHelper.TitleCaseToFriendlyUrl(input);
         Assert.Equal(expected, result);
     }
 }

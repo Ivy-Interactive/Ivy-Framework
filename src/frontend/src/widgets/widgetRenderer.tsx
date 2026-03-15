@@ -1,14 +1,121 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { Suspense } from 'react';
 import { WidgetNode, CallSite } from '@/types/widgets';
 import { widgetMap } from '@/widgets/widgetMap';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
   isExternalWidget,
   createLazyExternalWidget,
   getCachedExternalWidget,
 } from '@/widgets/externalWidgetLoader';
 import { ExternalWidgetWrapper } from '@/widgets/ExternalWidgetWrapper';
-import { MemoizedWidget } from '@/widgets/MemoizedWidget';
+export interface MemoizedWidgetProps {
+  node: WidgetNode;
+  inheritedScale?: Densities;
+}
+
+export const MemoizedWidget = React.memo(
+  function MemoizedWidget({ node, inheritedScale }: MemoizedWidgetProps) {
+    const Component = widgetMap[
+      node.type as keyof typeof widgetMap
+    ] as React.ComponentType<Record<string, unknown>>;
+
+    if (!Component) {
+      return <div>{`Unknown component type: ${node.type}`}</div>;
+    }
+
+    const props: Record<string, unknown> = {
+      ...node.props,
+      id: node.id,
+      events: node.events || [],
+    };
+
+    if (inheritedScale) {
+      props.density = inheritedScale;
+    }
+
+    if ('testId' in props && props.testId) {
+      props['data-testid'] = props.testId;
+      delete props.testId;
+    }
+
+    const children = flattenChildren(node.children || []);
+    const scaleForChildren = (props.density as Densities) || inheritedScale;
+
+    const slots = children.reduce<Record<string, React.ReactNode[]>>(
+      (acc, child: WidgetNode) => {
+        if (child.type === 'Ivy.Slot') {
+          const slotName = child.props.name as string;
+          acc[slotName] = (child.children || []).map((slotChild: WidgetNode) =>
+            renderWidgetTree(slotChild, scaleForChildren)
+          );
+        } else {
+          acc.default = acc.default || [];
+          acc.default.push(renderWidgetTree(child, scaleForChildren));
+        }
+        return acc;
+      },
+      {}
+    );
+
+    if (node.type === 'Ivy.Kanban') {
+      props.widgetNodeChildren = children.filter(
+        (child: WidgetNode) => child.type === 'Ivy.KanbanCard'
+      );
+    }
+
+    if (node.type === 'Ivy.Calendar') {
+      props.widgetNodeChildren = children.filter(
+        (child: WidgetNode) => child.type === 'Ivy.CalendarEvent'
+      );
+    }
+
+    if (node.callSite) {
+      widgetCallSiteRegistry.set(node.id, node.callSite);
+    }
+
+    // Store raw content for text-editable widgets
+    const isTextEditable = TEXT_EDITABLE_TYPES.includes(node.type);
+    const rawContent = isTextEditable
+      ? (node.props.content as string) || (node.props.text as string) || ''
+      : undefined;
+
+    const content = (
+      <ivy-widget id={node.id} type={node.type} data-content={rawContent}>
+        <Component {...props} slots={slots}>
+          {slots.default}
+        </Component>
+      </ivy-widget>
+    );
+
+    if (isLazyComponent(Component) && isChartComponent(node.type)) {
+      return (
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center p-8 text-muted-foreground">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span className="ml-2">Loading chart...</span>
+            </div>
+          }
+        >
+          {content}
+        </Suspense>
+      );
+    }
+
+    return isLazyComponent(Component) ? (
+      <Suspense>{content}</Suspense>
+    ) : (
+      content
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.node === nextProps.node &&
+      prevProps.inheritedScale === nextProps.inheritedScale
+    );
+  }
+);
 
 // Registry for widget callsite information, keyed by widget id
 export const widgetCallSiteRegistry = new Map<string, CallSite>();
@@ -79,7 +186,7 @@ export const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
  */
 const renderExternalWidget = (
   node: WidgetNode,
-  inheritedScale?: Scales
+  inheritedScale?: Densities
 ): React.ReactNode => {
   let Component = getCachedExternalWidget(node.type);
   if (!Component) {
@@ -93,7 +200,7 @@ const renderExternalWidget = (
   };
 
   if (inheritedScale) {
-    props.scale = inheritedScale;
+    props.density = inheritedScale;
   }
 
   if ('testId' in props && props.testId) {
@@ -102,7 +209,7 @@ const renderExternalWidget = (
   }
 
   const children = flattenChildren(node.children || []);
-  const scaleForChildren = (props.scale as Scales) || inheritedScale;
+  const scaleForChildren = (props.density as Densities) || inheritedScale;
 
   // Process children, grouping by Slot widgets
   const slots = children.reduce<Record<string, React.ReactNode[]>>(
@@ -125,6 +232,12 @@ const renderExternalWidget = (
   if (node.type === 'Ivy.Kanban') {
     props.widgetNodeChildren = children.filter(
       (child: WidgetNode) => child.type === 'Ivy.KanbanCard'
+    );
+  }
+
+  if (node.type === 'Ivy.Calendar') {
+    props.widgetNodeChildren = children.filter(
+      (child: WidgetNode) => child.type === 'Ivy.CalendarEvent'
     );
   }
 
@@ -153,7 +266,7 @@ const renderExternalWidget = (
  */
 export const renderWidgetTree = (
   node: WidgetNode,
-  inheritedScale?: Scales
+  inheritedScale?: Densities
 ): React.ReactNode => {
   // Check if it's a built-in widget first
   const isBuiltIn = node.type in widgetMap;

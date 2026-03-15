@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-#pragma warning disable IVYHOOK001
+#pragma warning disable IVYHOOK001, IVYHOOK001B
 [App(icon: Icons.Code, isVisible: false, searchHints: ["analyzer", "validation", "error", "debugging", "testing", "hooks"])]
 public class ShouldFailWithAnalyser : ViewBase
 {
@@ -25,4 +25,4 @@ public class ShouldFailWithAnalyser : ViewBase
     }
 
 }
-#pragma warning restore IVYHOOK001
+#pragma warning restore IVYHOOK001, IVYHOOK001B
