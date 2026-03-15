@@ -1,6 +1,4 @@
-using Ivy.Charts;
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -38,7 +36,7 @@ public record SunburstChart : WidgetBase<SunburstChart>
 
     [Prop] public Toolbox? Toolbox { get; init; } = null;
 
-    [Prop] public Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public ChartTooltip? Tooltip { get; init; }
 
     /// <summary>
     /// Inner radius of the sunburst chart, in pixels. Controls the size of the hole.
@@ -98,14 +96,14 @@ public static class SunburstChartExtensions
         return chart with { ColorScheme = colorScheme };
     }
 
-    public static SunburstChart Tooltip(this SunburstChart chart, Charts.Tooltip tooltip)
+    public static SunburstChart Tooltip(this SunburstChart chart, ChartTooltip tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static SunburstChart Tooltip(this SunburstChart chart)
     {
-        return chart with { Tooltip = new Charts.Tooltip() };
+        return chart with { Tooltip = new ChartTooltip() };
     }
 
     public static SunburstChart Legend(this SunburstChart chart, Legend? legend)
