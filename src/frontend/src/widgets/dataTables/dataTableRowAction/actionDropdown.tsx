@@ -15,7 +15,8 @@ interface ActionDropdownProps {
   onActionClick: (action: MenuItem) => void;
 }
 
-interface TriggerButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TriggerButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   action: MenuItem;
   actionId: string;
 }

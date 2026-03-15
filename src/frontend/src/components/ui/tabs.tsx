@@ -83,7 +83,8 @@ const TabsList = React.forwardRef<
 TabsList.displayName = 'TabsList';
 
 // Custom TabsTrigger that works independently
-interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TabsTriggerProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   value: string;
   useRadix?: boolean;
 }

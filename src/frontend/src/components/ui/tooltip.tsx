@@ -42,9 +42,8 @@ const needsBreakAll = (content: React.ReactNode): boolean => {
 
 export type TooltipBreakType = 'auto' | 'normal' | 'all' | 'words';
 
-interface TooltipContentProps extends React.ComponentPropsWithoutRef<
-  typeof TooltipPrimitive.Content
-> {
+interface TooltipContentProps
+  extends React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> {
   breakType?: TooltipBreakType;
 }
 
