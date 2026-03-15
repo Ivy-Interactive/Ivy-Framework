@@ -35,6 +35,8 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
   invalid,
   onDateChange,
   format: formatProp,
+  min,
+  max,
   density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
@@ -45,6 +47,16 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
     () => (date ? startOfISOWeek(date) : undefined),
     [date]
   );
+
+  const minDate = useMemo(() => (min ? new Date(min) : undefined), [min]);
+  const maxDate = useMemo(() => (max ? new Date(max) : undefined), [max]);
+
+  const disabledDays = useMemo(() => {
+    const matchers: Array<{ before: Date } | { after: Date }> = [];
+    if (minDate) matchers.push({ before: minDate });
+    if (maxDate) matchers.push({ after: maxDate });
+    return matchers;
+  }, [minDate, maxDate]);
 
   const showClear = nullable && !disabled && value != null && value !== '';
 
@@ -131,6 +143,7 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
             mode="single"
             selected={selectedMonday}
             onSelect={handleSelect}
+            disabled={disabledDays.length > 0 ? disabledDays : undefined}
             showWeekNumber
             weekStartsOn={1}
             ISOWeek

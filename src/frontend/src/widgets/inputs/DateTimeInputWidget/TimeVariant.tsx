@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
@@ -20,6 +20,9 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   nullable,
   invalid,
   onTimeChange,
+  min,
+  max,
+  step,
   density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
@@ -71,6 +74,36 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     }
   }, [value, nullable]);
 
+  const timeStepSeconds = useMemo(() => {
+    if (!step) return 1;
+    const parts = step.split(':');
+    if (parts.length >= 3) {
+      const h = parseInt(parts[0], 10) || 0;
+      const m = parseInt(parts[1], 10) || 0;
+      const s = parseFloat(parts[2]) || 0;
+      return h * 3600 + m * 60 + s;
+    }
+    return 1;
+  }, [step]);
+
+  const timeMin = useMemo(() => {
+    if (!min) return undefined;
+    try {
+      const d = new Date(min);
+      if (!isNaN(d.getTime())) return format(d, 'HH:mm:ss');
+    } catch { /* ignore */ }
+    return undefined;
+  }, [min]);
+
+  const timeMax = useMemo(() => {
+    if (!max) return undefined;
+    try {
+      const d = new Date(max);
+      if (!isNaN(d.getTime())) return format(d, 'HH:mm:ss');
+    } catch { /* ignore */ }
+    return undefined;
+  }, [max]);
+
   const showClear = nullable && !disabled && value != null && value !== '';
 
   const handleClear = (e?: React.MouseEvent) => {
@@ -119,7 +152,9 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
         />
         <Input
           type="time"
-          step="1"
+          step={timeStepSeconds}
+          min={timeMin}
+          max={timeMax}
           density={density}
           value={localTimeValue}
           onChange={handleTimeChange}

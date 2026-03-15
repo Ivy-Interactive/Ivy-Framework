@@ -39,6 +39,10 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 
     [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }
 
+    [Prop] public DateTime? Min { get; set; }
+    [Prop] public DateTime? Max { get; set; }
+    [Prop] public TimeSpan? Step { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
@@ -240,6 +244,10 @@ public static class DateTimeInputExtensions
     public static DateTimeInputBase Invalid(this DateTimeInputBase widget, string? invalid) => widget with { Invalid = invalid };
     public static DateTimeInputBase FirstDayOfWeek(this DateTimeInputBase widget, DayOfWeek day) => widget with { FirstDayOfWeek = day };
     public static DateTimeInputBase Nullable(this DateTimeInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
+
+    public static DateTimeInputBase Min(this DateTimeInputBase widget, DateTime min) => widget with { Min = min };
+    public static DateTimeInputBase Max(this DateTimeInputBase widget, DateTime max) => widget with { Max = max };
+    public static DateTimeInputBase Step(this DateTimeInputBase widget, TimeSpan step) => widget with { Step = step };
 
     [OverloadResolutionPriority(1)]
     public static DateTimeInputBase OnBlur(this DateTimeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

@@ -26,6 +26,11 @@ public class DateTimeInputApp : SampleBase
         var dateTimeOffsetState = UseState(DateTimeOffset.Now);
         var nullableDateTimeOffsetState = UseState<DateTimeOffset?>(() => null);
 
+        // Min/Max/Step states
+        var constrainedDateState = UseState(DateTime.Now);
+        var appointmentState = UseState(DateTime.Now);
+        var timeSlotState = UseState(TimeOnly.FromDateTime(DateTime.Now));
+
         // FirstDayOfWeek states
         var mondayFirstDate = UseState(DateOnly.FromDateTime(DateTime.Now));
         var mondayFirstRange = UseState<(DateOnly, DateOnly)>((DateOnly.FromDateTime(DateTime.Now.AddDays(-7)), DateOnly.FromDateTime(DateTime.Now)));
@@ -535,6 +540,38 @@ public class DateTimeInputApp : SampleBase
             | Text.Block($"DateTimeOffset: {dateTimeOffsetState.Value:yyyy-MM-dd HH:mm:ss zzz}")
             | Text.Block($"Nullable DateTimeOffset: {nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null"}");
 
+        // Min/Max/Step examples
+        var constraintsGrid = Layout.Grid().Columns(3)
+            | Text.Monospaced("Constraint Type")
+            | Text.Monospaced("Configuration")
+            | Text.Monospaced("Input")
+
+            | Text.Monospaced("Min/Max Date")
+            | Text.Block("Future dates only (today to +90 days)")
+            | constrainedDateState
+                .ToDateInput()
+                .Min(DateTime.Today)
+                .Max(DateTime.Today.AddDays(90))
+                .Placeholder("Select date")
+                .TestId("datetime-input-minmax")
+
+            | Text.Monospaced("Business Hours")
+            | Text.Block("9 AM to 5 PM only")
+            | appointmentState
+                .ToDateTimeInput()
+                .Min(DateTime.Today.AddHours(9))
+                .Max(DateTime.Today.AddHours(17))
+                .Placeholder("Select appointment")
+                .TestId("datetime-input-business-hours")
+
+            | Text.Monospaced("Time Slots")
+            | Text.Block("15-minute intervals")
+            | timeSlotState
+                .ToTimeInput()
+                .Step(TimeSpan.FromMinutes(15))
+                .Placeholder("Select time slot")
+                .TestId("datetime-input-time-slots");
+
         return Layout.Vertical()
             | Text.H1("DateTimeInput")
             | Text.H2("Size Examples")
@@ -547,6 +584,8 @@ public class DateTimeInputApp : SampleBase
             | placeholderExamplesGrid
             | Text.H2("FirstDayOfWeek")
             | firstDayOfWeekGrid
+            | Text.H2("Min/Max/Step Constraints")
+            | constraintsGrid
             | currentValues;
     }
 }

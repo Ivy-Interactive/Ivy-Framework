@@ -31,12 +31,36 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onTimeChange,
   format: formatProp,
   firstDayOfWeek,
+  min,
+  max,
+  step,
   density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
+  const minDate = useMemo(() => (min ? new Date(min) : undefined), [min]);
+  const maxDate = useMemo(() => (max ? new Date(max) : undefined), [max]);
   const showClear = nullable && !disabled && value != null && value !== '';
+
+  const disabledDays = useMemo(() => {
+    const matchers: Array<{ before: Date } | { after: Date }> = [];
+    if (minDate) matchers.push({ before: minDate });
+    if (maxDate) matchers.push({ after: maxDate });
+    return matchers;
+  }, [minDate, maxDate]);
+
+  const timeStepSeconds = useMemo(() => {
+    if (!step) return 1;
+    const parts = step.split(':');
+    if (parts.length >= 3) {
+      const h = parseInt(parts[0], 10) || 0;
+      const m = parseInt(parts[1], 10) || 0;
+      const s = parseFloat(parts[2]) || 0;
+      return h * 3600 + m * 60 + s;
+    }
+    return 1;
+  }, [step]);
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -201,6 +225,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               mode="single"
               selected={date}
               onSelect={handleDateSelect}
+              disabled={disabledDays.length > 0 ? disabledDays : undefined}
               initialFocus
               weekStartsOn={firstDayOfWeek}
               density={density}
@@ -214,7 +239,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               />
               <Input
                 type="time"
-                step="1"
+                step={timeStepSeconds}
                 value={localTimeValue}
                 onChange={handleTimeChange}
                 onFocus={handleTimeFocus}
