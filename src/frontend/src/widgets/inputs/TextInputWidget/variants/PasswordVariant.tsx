@@ -4,12 +4,12 @@ import { EyeIcon, EyeOffIcon, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
-  textInputSizeVariants,
-  eyeIconVariants,
-  xIconVariants,
-} from '@/components/ui/input/text-input-variants';
+  textInputSizeVariant,
+  eyeIconVariant,
+  xIconVariant,
+} from '@/components/ui/input/text-input-variant';
 import { TextInputWidgetProps } from '../types';
 import {
   useCursorPosition,
@@ -24,9 +24,10 @@ interface PasswordVariantProps {
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClear: (e: React.MouseEvent) => void;
+  onSubmit?: () => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
-  scale?: Scales;
+  density?: Densities;
 }
 
 export const PasswordVariant: React.FC<PasswordVariantProps> = ({
@@ -35,8 +36,9 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   onBlur,
   onFocus,
   onClear,
+  onSubmit,
   inputRef,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [hasLastPass, setHasLastPass] = useState(false);
@@ -74,7 +76,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
     onChange(syntheticEvent);
   });
 
-  const handleKeyDown = useEnterKeyBlur();
+  const handleKeyDown = useEnterKeyBlur(onSubmit);
 
   const styles: React.CSSProperties = {
     ...getWidth(props.width),
@@ -106,7 +108,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           className={cn(
-            textInputSizeVariants({ scale }),
+            textInputSizeVariant({ density }),
             'border-0 shadow-none dark:bg-transparent',
             props.invalid && inputStyles.invalidInput,
             props.invalid || showClear ? 'pr-14' : 'pr-8',
@@ -128,13 +130,13 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           <div className="pointer-events-auto flex items-center h-6">
             <button
               type="button"
-              className={eyeIconVariants({ scale })}
+              className={eyeIconVariant({ density })}
               onClick={togglePassword}
             >
               {showPassword ? (
-                <EyeOffIcon className={eyeIconVariants({ scale })} />
+                <EyeOffIcon className={eyeIconVariant({ density })} />
               ) : (
-                <EyeIcon className={eyeIconVariants({ scale })} />
+                <EyeIcon className={eyeIconVariant({ density })} />
               )}
             </button>
           </div>
@@ -146,7 +148,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
               onClick={onClear}
               className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
             >
-              <X className={xIconVariants({ scale })} />
+              <X className={xIconVariant({ density })} />
             </button>
           )}
           {props.shortcutKey && !hasValue && !showClear && !props.invalid && (

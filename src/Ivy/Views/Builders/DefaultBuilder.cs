@@ -1,4 +1,5 @@
-namespace Ivy.Views.Builders;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 //This is a default builder that does nothing, i.e. it lets the DefaultContentBuilder handle the value
 public class DefaultBuilder<TModel> : IBuilder<TModel>

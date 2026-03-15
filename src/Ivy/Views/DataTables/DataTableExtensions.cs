@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 
-namespace Ivy.Views.DataTables;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class DataTableExtensions
 {

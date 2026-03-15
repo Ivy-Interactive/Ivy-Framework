@@ -1,9 +1,8 @@
-﻿using System.Runtime.CompilerServices;
-using Ivy.Apps;
+using System.Runtime.CompilerServices;
 using Ivy.Core;
-using Ivy.Helpers;
 
-namespace Ivy.Views;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class DemoView : ViewBase
 {

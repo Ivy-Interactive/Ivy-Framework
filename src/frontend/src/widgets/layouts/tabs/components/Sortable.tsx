@@ -52,6 +52,9 @@ export function SortableTabTrigger({
       {...listeners}
       {...props}
       role="tab"
+      aria-selected={
+        (props as Record<string, unknown>)['aria-selected'] === true
+      }
     >
       {children}
     </TabsTrigger>
@@ -90,6 +93,14 @@ export function SortableDropdownMenuItem({
       {...attributes}
       {...listeners}
       onClick={onClick}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       className={cn(
         'group w-full flex items-center p-1 text-sm cursor-pointer select-none rounded-sm transition-colors hover:bg-accent',
         isActive && 'bg-accent text-accent-foreground'

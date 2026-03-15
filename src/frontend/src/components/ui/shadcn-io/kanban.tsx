@@ -156,7 +156,10 @@ interface KanbanBoardProps {
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
-      className={cn('flex h-full bg-background flex-row', className)}
+      className={cn(
+        'inline-flex min-w-full h-full bg-background flex-row',
+        className
+      )}
       style={{ minWidth: 'fit-content', maxWidth: '100%' }}
     >
       {children}
@@ -252,12 +255,15 @@ export function KanbanColumn({
   return (
     <div
       className={cn(
-        hasExplicitWidth ? 'bg-background' : 'flex-1 bg-background',
-        'rounded-lg px-0 pt-2 min-h-0 flex flex-col transition-colors min-w-70',
+        'bg-background rounded-lg px-0 pt-2 min-h-0 flex flex-col transition-colors',
+        hasExplicitWidth ? 'flex-none shrink-0' : 'flex-none shrink-0 min-w-70',
         showDragOver && 'bg-accent rounded-lg',
         className
       )}
-      style={widthStyles}
+      style={{
+        ...widthStyles,
+        ...(hasExplicitWidth ? {} : { width: 'max-content' }),
+      }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

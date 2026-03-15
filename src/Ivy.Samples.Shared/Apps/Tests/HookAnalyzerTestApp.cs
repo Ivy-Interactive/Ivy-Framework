@@ -1,8 +1,6 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-#pragma warning disable IVYHOOK001, IVYHOOK002, IVYHOOK003, IVYHOOK004, IVYHOOK005
+#pragma warning disable IVYHOOK001, IVYHOOK001B, IVYHOOK002, IVYHOOK003, IVYHOOK004, IVYHOOK005
 [App(icon: Icons.Bug, searchHints: ["analyzer", "hooks", "rules", "warnings", "test"], isVisible: false)]
 public class HookAnalyzerTestApp : ViewBase
 {
@@ -13,7 +11,7 @@ public class HookAnalyzerTestApp : ViewBase
             Text.P("This app demonstrates various hook usage violations that trigger analyzer warnings."),
             Text.P("Check the Error List or build output to see the warnings."),
             new Separator(),
-            Text.P("⚠️ This file intentionally contains violations for testing purposes.")
+            Text.P("NB! This file intentionally contains violations for testing purposes.")
         );
     }
 }
@@ -72,5 +70,5 @@ public class HookNotAtTopView : ViewBase
 
     private int SomeMethod() => 42;
 }
-#pragma warning restore IVYHOOK001, IVYHOOK002, IVYHOOK003, IVYHOOK004, IVYHOOK005
+#pragma warning restore IVYHOOK001, IVYHOOK001B, IVYHOOK002, IVYHOOK003, IVYHOOK004, IVYHOOK005
 

@@ -13,12 +13,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Scales } from '@/types/scale';
+import { Loader2 } from 'lucide-react';
+import { Densities } from '@/types/density';
 import {
-  labelSizeVariants,
-  descriptionSizeVariants,
-  boolInputRowMinHeightVariants,
-} from '@/components/ui/input/bool-input-variants';
+  labelSizeVariant,
+  descriptionSizeVariant,
+  boolInputRowMinHeightVariant,
+} from '@/components/ui/input/bool-input-variant';
 
 type VariantType = 'Checkbox' | 'Switch' | 'Toggle';
 
@@ -28,11 +29,12 @@ interface BoolInputWidgetProps {
   description?: string;
   value: NullableBoolean;
   disabled?: boolean;
+  loading?: boolean;
   nullable?: boolean;
   invalid?: string;
   variant: VariantType;
   icon?: string;
-  scale?: Scales;
+  density?: Densities;
   'data-testid'?: string;
 }
 
@@ -44,7 +46,8 @@ interface BaseVariantProps {
   nullable?: boolean;
   value: NullableBoolean;
   disabled: boolean;
-  scale?: Scales;
+  loading: boolean;
+  density?: Densities;
   'data-testid'?: string;
 }
 
@@ -67,19 +70,19 @@ const InputLabel: React.FC<{
   id: string;
   label?: string;
   description?: string;
-  scale?: Scales;
-}> = React.memo(({ id, label, description, scale = Scales.Medium }) => {
+  density?: Densities;
+}> = React.memo(({ id, label, description, density = Densities.Medium }) => {
   if (!label && !description) return null;
 
   return (
     <div>
       {label && (
-        <Label htmlFor={id} className={labelSizeVariants({ scale })}>
+        <Label htmlFor={id} className={labelSizeVariant({ density })}>
           {label}
         </Label>
       )}
       {description && (
-        <p className={descriptionSizeVariants({ scale })}>{description}</p>
+        <p className={descriptionSizeVariant({ density })}>{description}</p>
       )}
     </div>
   );
@@ -100,6 +103,28 @@ const withTooltip = (content: React.ReactNode, invalid?: string) => {
   );
 };
 
+const LoadingOverlay: React.FC<{
+  density?: Densities;
+  'data-testid'?: string;
+}> = ({ density = Densities.Medium, 'data-testid': dataTestId }) => {
+  const sizeClass =
+    density === Densities.Small
+      ? 'h-4 w-4'
+      : density === Densities.Large
+        ? 'h-5 w-5'
+        : 'h-4 w-4';
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center rounded-md bg-background/80"
+      data-testid={dataTestId ? `${dataTestId}-loading` : undefined}
+    >
+      <Loader2
+        className={cn(sizeClass, 'animate-spin text-muted-foreground')}
+      />
+    </div>
+  );
+};
+
 const VariantComponents = {
   Checkbox: React.memo(
     ({
@@ -108,43 +133,42 @@ const VariantComponents = {
       description,
       value,
       disabled,
+      loading,
       nullable,
       invalid,
-      scale = Scales.Medium,
+      density = Densities.Medium,
       onCheckedChange,
       'data-testid': dataTestId,
     }: CheckboxVariantProps) => {
       const checkboxElement = (
-        <Checkbox
-          id={id}
-          checked={value}
-          onCheckedChange={onCheckedChange}
-          disabled={disabled}
-          nullable={nullable}
-          className={cn(invalid && inputStyles.invalid)}
-          data-testid={dataTestId}
-          scale={scale}
-        />
+        <div className="relative flex shrink-0">
+          <Checkbox
+            id={id}
+            checked={value}
+            onCheckedChange={onCheckedChange}
+            disabled={disabled || loading}
+            nullable={nullable}
+            className={cn(invalid && inputStyles.invalid)}
+            data-testid={dataTestId}
+          />
+          {loading && <LoadingOverlay data-testid={dataTestId} />}
+        </div>
       );
 
       const content = (
         <div
           className={cn(
             'flex gap-2 items-center',
-            boolInputRowMinHeightVariants({ scale }),
+            boolInputRowMinHeightVariant({ density }),
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
+          role="presentation"
         >
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(checkboxElement, invalid)}
           </div>
-          <InputLabel
-            id={id}
-            label={label}
-            description={description}
-            scale={scale}
-          />
+          <InputLabel id={id} label={label} description={description} />
         </div>
       );
 
@@ -159,43 +183,42 @@ const VariantComponents = {
       description,
       value,
       disabled,
+      loading,
       invalid,
-      scale = Scales.Medium,
+      density = Densities.Medium,
       icon,
       onCheckedChange,
       'data-testid': dataTestId,
     }: SwitchVariantProps) => {
       const switchElement = (
-        <Switch
-          id={id}
-          checked={!!value}
-          onCheckedChange={onCheckedChange}
-          disabled={disabled}
-          scale={scale}
-          icon={icon}
-          className={cn(invalid && inputStyles.invalid)}
-          data-testid={dataTestId}
-        />
+        <div className="relative flex shrink-0">
+          <Switch
+            id={id}
+            checked={!!value}
+            onCheckedChange={onCheckedChange}
+            disabled={disabled || loading}
+            icon={icon}
+            className={cn(invalid && inputStyles.invalid)}
+            data-testid={dataTestId}
+          />
+          {loading && <LoadingOverlay data-testid={dataTestId} />}
+        </div>
       );
 
       const content = (
         <div
           className={cn(
             'flex gap-2 items-center',
-            boolInputRowMinHeightVariants({ scale }),
+            boolInputRowMinHeightVariant({ density }),
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
+          role="presentation"
         >
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(switchElement, invalid)}
           </div>
-          <InputLabel
-            id={id}
-            label={label}
-            description={description}
-            scale={scale}
-          />
+          <InputLabel id={id} label={label} description={description} />
         </div>
       );
 
@@ -210,45 +233,44 @@ const VariantComponents = {
       description,
       value,
       disabled,
+      loading,
       icon,
       invalid,
-      scale = Scales.Medium,
+      density = Densities.Medium,
       onPressedChange,
       'data-testid': dataTestId,
     }: ToggleVariantProps) => {
       const toggleElement = (
-        <Toggle
-          id={id}
-          pressed={!!value}
-          onPressedChange={onPressedChange}
-          disabled={disabled}
-          aria-label={label}
-          className={cn(invalid && inputStyles.invalid)}
-          scale={scale}
-          data-testid={dataTestId}
-        >
-          {icon && <Icon name={icon} />}
-        </Toggle>
+        <div className="relative flex shrink-0">
+          <Toggle
+            id={id}
+            pressed={!!value}
+            onPressedChange={onPressedChange}
+            disabled={disabled || loading}
+            aria-label={label}
+            className={cn(invalid && inputStyles.invalid)}
+            data-testid={dataTestId}
+          >
+            {icon && <Icon name={icon} />}
+          </Toggle>
+          {loading && <LoadingOverlay data-testid={dataTestId} />}
+        </div>
       );
 
       const content = (
         <div
           className={cn(
             'flex space-x-2 items-center',
-            boolInputRowMinHeightVariants({ scale }),
+            boolInputRowMinHeightVariant({ density }),
             description && 'items-start'
           )}
           onClick={e => e.stopPropagation()}
+          role="presentation"
         >
           <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
             {withTooltip(toggleElement, invalid)}
           </div>
-          <InputLabel
-            id={id}
-            label={label}
-            description={description}
-            scale={scale}
-          />
+          <InputLabel id={id} label={label} description={description} />
         </div>
       );
 
@@ -263,11 +285,12 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   description,
   value = null,
   disabled = false,
+  loading = false,
   invalid,
   nullable = false,
   variant = 'Checkbox',
   icon,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -277,10 +300,10 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
 
   const handleChange = useCallback(
     (newValue: boolean | null) => {
-      if (disabled) return;
+      if (disabled || loading) return;
       eventHandler('OnChange', id, [newValue]);
     },
-    [disabled, eventHandler, id]
+    [disabled, loading, eventHandler, id]
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);
@@ -292,10 +315,11 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       description={description}
       value={normalizedValue}
       disabled={disabled}
+      loading={loading}
       nullable={nullable}
       icon={icon}
       invalid={invalid}
-      scale={scale}
+      density={density}
       onCheckedChange={handleChange}
       onPressedChange={handleChange}
       data-testid={dataTestId}

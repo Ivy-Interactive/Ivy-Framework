@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 [App(icon: Icons.Code, path: ["Tests"], isVisible: false, searchHints: ["markdown", "rendering", "spacing", "comparison", "layout", "typography"])]

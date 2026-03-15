@@ -1,13 +1,12 @@
 using System.Linq.Expressions;
+using Force.DeepCloner;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
-using static Ivy.Views.Forms.FormHelpers;
+using static Ivy.FormHelpers;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class FormBuilder<TModel> : ViewBase
 {
@@ -16,20 +15,23 @@ public class FormBuilder<TModel> : ViewBase
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
-    internal Scale _scale = Shared.Scale.Medium;
+    internal Density _density = Ivy.Density.Medium;
     internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
+    internal FormSubmitStrategy _submitStrategy;
     internal Func<TModel, Task>? _onSubmit;
 
     public FormBuilder(
         IState<TModel> model,
         string submitTitle = "Save",
-        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur)
+        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
+        FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit)
     {
         _model = model;
         _fields = FormScaffolder.ScaffoldFields<TModel>(_model.GetStateType());
         SubmitTitle(submitTitle);
         _validationStrategy = validationStrategy;
+        _submitStrategy = submitStrategy;
     }
 
     internal static Func<bool, Button> DefaultSubmitBuilder(string title) => (isLoading) => new Button(title).Loading(isLoading).Disabled(isLoading);
@@ -52,13 +54,19 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
+    public FormBuilder<TModel> SubmitStrategy(FormSubmitStrategy strategy)
+    {
+        _submitStrategy = strategy;
+        return this;
+    }
+
     internal IState<TModel> GetModel() => _model;
 
     /// <summary>
     /// Sets a callback that is invoked after the form passes validation but before the model state is updated.
     /// Use this for async operations like saving to a database.
     /// </summary>
-    public FormBuilder<TModel> HandleSubmit(Func<TModel, Task> onSubmit)
+    public FormBuilder<TModel> OnSubmit(Func<TModel, Task> onSubmit)
     {
         _onSubmit = onSubmit;
         return this;
@@ -105,7 +113,7 @@ public class FormBuilder<TModel> : ViewBase
         fieldInfo.InputFactory = ScaffoldWrapper(factory);
         return this;
 
-        bool HasCustomLabel(string label, string name) => label != Utils.SplitPascalCase(name);
+        bool HasCustomLabel(string label, string name) => label != StringHelper.SplitPascalCase(name);
     }
 
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IAnyInput> input)
@@ -291,24 +299,24 @@ public class FormBuilder<TModel> : ViewBase
         {
             var hint = GetField(expr);
             hint.Required = true;
-            hint.Validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
+            hint.Validators.Add(e => (ValidationHelper.IsValidRequired(e), "Required field"));
         }
         return this;
     }
 
-    public FormBuilder<TModel> Scale(Scale scale)
+    public FormBuilder<TModel> Density(Density density)
     {
-        _scale = scale;
+        _density = density;
         return this;
     }
 
-    public FormBuilder<TModel> Small() => Scale(Shared.Scale.Small);
-    public FormBuilder<TModel> Medium() => Scale(Shared.Scale.Medium);
-    public FormBuilder<TModel> Large() => Scale(Shared.Scale.Large);
+    public FormBuilder<TModel> Small() => Density(Ivy.Density.Small);
+    public FormBuilder<TModel> Medium() => Density(Ivy.Density.Medium);
+    public FormBuilder<TModel> Large() => Density(Ivy.Density.Large);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _fields[name];
     }
 
@@ -324,10 +332,11 @@ public class FormBuilder<TModel> : ViewBase
     {
         var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange: false);
 
-        var validationSignal = context.CreateSignal<FormValidateSignal, Unit, bool>();
-        var updateSignal = context.CreateSignal<FormUpdateSignal, Unit, Unit>();
+        // Per-form signal instances (stable across builds via UseRef) so Submit validates only this form's fields.
+        var validationSignal = context.UseRef(() => new FormValidateSignal()).Value;
+        var submitSignal = context.UseRef(() => new FormSubmitSignal()).Value;
+        var updateSignal = context.UseSignal<FormUpdateSignal, Unit, Unit>();
         var invalidFields = context.UseState(0);
-
         var fields = _fields
             .Values
             .Where(e => e is { Removed: false, InputFactory: not null })
@@ -338,15 +347,18 @@ public class FormBuilder<TModel> : ViewBase
                     e.InputFactory!,
                     () => e.Visible(currentModel.Value),
                     updateSignal,
+                    validationSignal,
+                    submitSignal,
                     e.Label,
                     e.Description,
                     e.Required,
                     new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                     e.Validators.ToArray(),
                     _validationStrategy,
-                    _scale,
+                    _density,
                     e.Help,
-                    e.Placeholder
+                    e.Placeholder,
+                    _submitStrategy
                 );
                 return binding;
             })
@@ -354,8 +366,9 @@ public class FormBuilder<TModel> : ViewBase
 
         async Task<bool> OnSubmit()
         {
-            var results = await validationSignal.Send(new Unit());
-            if (results.All(e => e))
+            var results = await validationSignal.Send(default);
+            var allValid = results.Length == fields.Length && results.All(e => e);
+            if (allValid)
             {
                 if (_onSubmit != null)
                 {
@@ -365,7 +378,10 @@ public class FormBuilder<TModel> : ViewBase
                 invalidFields.Set(0);
                 return true;
             }
-            invalidFields.Set(results.Count(e => !e));
+            var invalidCount = results.Length == fields.Length
+                ? results.Count(e => !e)
+                : fields.Length;
+            invalidFields.Set(invalidCount);
             return false;
         }
 
@@ -373,6 +389,20 @@ public class FormBuilder<TModel> : ViewBase
         context.TrackDisposable(bindings.Select(e => e.disposable));
 
         var fieldViews = bindings.Select(e => e.fieldView).ToArray();
+
+        var submitReceiver = context.UseSignal<FormSubmitSignal, Unit, Unit>();
+        context.UseEffect(() =>
+        {
+            if (_submitStrategy is FormSubmitStrategy.OnBlur or FormSubmitStrategy.OnChange)
+            {
+                return submitSignal.ReceiveWithId(Guid.NewGuid(), _ =>
+                {
+                    var t = OnSubmit();
+                    return default;
+                });
+            }
+            return null;
+        });
 
         async ValueTask HandleSubmitEvent(Event<Form> _)
         {
@@ -382,7 +412,7 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            _scale,
+            _density,
             _groupOpenStates
         );
 
@@ -403,17 +433,24 @@ public class FormBuilder<TModel> : ViewBase
 
         var (handleSubmit, isUploading) = Context.UseUploadAwareSubmit(_model, onSubmit);
 
-        var buttonGap = _scale switch
+        var buttonGap = _density switch
         {
-            Shared.Scale.Small => 4,
-            Shared.Scale.Large => 8,
+            Ivy.Density.Small => 4,
+            Ivy.Density.Large => 8,
             _ => 6
         };
+
+        if (_submitStrategy != FormSubmitStrategy.OnSubmit)
+        {
+            return Layout.Vertical().Gap(buttonGap)
+                   | formView
+                   | validationView;
+        }
 
         return Layout.Vertical().Gap(buttonGap)
                | formView
                | Layout.Horizontal(
-                   _submitBuilder(submitting || isUploading).HandleClick(_ => handleSubmit()).Scale(_scale),
+                   _submitBuilder(submitting || isUploading).OnClick(_ => handleSubmit()).Density(_density),
                    validationView
                 );
     }

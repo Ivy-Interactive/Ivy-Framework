@@ -5,21 +5,39 @@ import { cn } from '@/lib/utils';
 
 const ScrollArea = React.forwardRef<
   React.ComponentRef<typeof ScrollAreaPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
->(({ className, children, scrollHideDelay = 0, ...props }, ref) => (
-  <ScrollAreaPrimitive.Root
-    ref={ref}
-    className={cn('relative overflow-hidden', className)}
-    scrollHideDelay={scrollHideDelay}
-    {...props}
-  >
-    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
-      {children}
-    </ScrollAreaPrimitive.Viewport>
-    <ScrollBar />
-    <ScrollAreaPrimitive.Corner />
-  </ScrollAreaPrimitive.Root>
-));
+  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
+    viewportClassName?: string;
+    viewportStyle?: React.CSSProperties;
+  }
+>(
+  (
+    {
+      className,
+      children,
+      scrollHideDelay = 0,
+      viewportClassName,
+      viewportStyle,
+      ...props
+    },
+    ref
+  ) => (
+    <ScrollAreaPrimitive.Root
+      ref={ref}
+      className={cn('relative overflow-hidden', className)}
+      scrollHideDelay={scrollHideDelay}
+      {...props}
+    >
+      <ScrollAreaPrimitive.Viewport
+        className={cn('h-full w-full rounded-[inherit]', viewportClassName)}
+        style={viewportStyle}
+      >
+        {children}
+      </ScrollAreaPrimitive.Viewport>
+      <ScrollBar />
+      <ScrollAreaPrimitive.Corner />
+    </ScrollAreaPrimitive.Root>
+  )
+);
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
 const ScrollBar = React.forwardRef<

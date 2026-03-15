@@ -3,10 +3,10 @@ using Ivy.Core.Helpers;
 
 namespace Ivy.Core.Hooks;
 
-public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
+public class EffectQueue(IExceptionHandler exceptionHandler) : IAsyncDisposable
 {
     private readonly Lock _syncLock = new();
-    private readonly Disposables _disposables = new();
+    private readonly AsyncDisposables _disposables = new();
     private readonly Queue<(EffectHook Effect, EffectPriority Priority)> _queue = new();
     private bool _isProcessing;
 
@@ -100,12 +100,12 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
         }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         lock (_syncLock)
         {
             _queue.Clear();
         }
-        _disposables.Dispose();
+        await _disposables.DisposeAsync();
     }
 }

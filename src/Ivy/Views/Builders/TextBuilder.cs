@@ -1,4 +1,5 @@
-namespace Ivy.Views.Builders;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class TextBuilder<TModel> : IBuilder<TModel>
 {

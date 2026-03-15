@@ -1,4 +1,3 @@
-﻿using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Effects;
 
@@ -9,7 +8,7 @@ public class ConfettiApp : SampleBase
     {
         var client = UseService<IClientProvider>();
 
-        var onClick = new Button("Click").HandleClick(() =>
+        var onClick = new Button("Click").OnClick(() =>
         {
             client.Toast("Did you see the confetti?");
         }).WithConfetti(AnimationTrigger.Click);

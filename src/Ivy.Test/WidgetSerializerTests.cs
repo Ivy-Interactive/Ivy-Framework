@@ -1,8 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Ivy;
 using Ivy.Core;
-using Ivy.Shared;
-using Ivy.Widgets;
 using Xunit.Abstractions;
 
 namespace Ivy.Test;

@@ -16,6 +16,7 @@ import {
   TooltipWidget,
   PaginationWidget,
 } from '@/widgets';
+import { BreadcrumbsWidget } from '@/widgets/breadcrumbs';
 import { BladeContainerWidget, BladeWidget } from '@/widgets/blades';
 import { DetailsWidget, DetailWidget } from '@/widgets/details';
 import {
@@ -31,6 +32,7 @@ import {
   BoolInputWidget,
   DateTimeInputWidget,
   NumberInputWidget,
+  NumberRangeInputWidget,
   SelectInputWidget,
   ReadOnlyInputWidget,
   ColorInputWidget,
@@ -42,7 +44,6 @@ import {
 } from '@/widgets/inputs';
 import {
   StackLayoutWidget,
-  WrapLayoutWidget,
   GridLayoutWidget,
   HeaderLayoutWidget,
   FooterLayoutWidget,
@@ -78,16 +79,19 @@ import {
   AppHostWidget,
   AudioPlayerWidget,
   VideoPlayerWidget,
+  RichTextBlockWidget,
 } from '@/widgets/primitives';
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
 import React from 'react';
+import { SmartSearch } from '@/docs-internal/SmartSearch';
 
 export const widgetMap = {
   $loading: LoadingScreen,
 
   // Primitives
   'Ivy.TextBlock': TextBlockWidget,
+  'Ivy.RichTextBlock': RichTextBlockWidget,
   'Ivy.Markdown': React.lazy(
     () => import('@/widgets/primitives/MarkdownWidget')
   ),
@@ -131,6 +135,7 @@ export const widgetMap = {
   'Ivy.Card': CardWidget,
   'Ivy.Sheet': SheetWidget,
   'Ivy.Badge': BadgeWidget,
+  'Ivy.Breadcrumbs': BreadcrumbsWidget,
   'Ivy.Expandable': ExpandableWidget,
   'Ivy.Chat': ChatWidget,
   'Ivy.ChatMessage': ChatMessageWidget,
@@ -148,10 +153,19 @@ export const widgetMap = {
       default: m.KanbanCardWidget,
     }))
   ),
+  'Ivy.Calendar': React.lazy(() =>
+    import('@/widgets/calendar/CalendarWidget').then(m => ({
+      default: m.CalendarWidget,
+    }))
+  ),
+  'Ivy.CalendarEvent': React.lazy(() =>
+    import('@/widgets/calendar/CalendarEventWidget').then(m => ({
+      default: m.CalendarEventWidget,
+    }))
+  ),
 
   // Layouts
   'Ivy.StackLayout': StackLayoutWidget,
-  'Ivy.WrapLayout': WrapLayoutWidget,
   'Ivy.GridLayout': GridLayoutWidget,
   'Ivy.HeaderLayout': HeaderLayoutWidget,
   'Ivy.FooterLayout': FooterLayoutWidget,
@@ -169,6 +183,7 @@ export const widgetMap = {
   'Ivy.BoolInput': BoolInputWidget,
   'Ivy.DateTimeInput': DateTimeInputWidget,
   'Ivy.NumberInput': NumberInputWidget,
+  'Ivy.NumberRangeInput': NumberRangeInputWidget,
   'Ivy.SelectInput': SelectInputWidget,
   'Ivy.ReadOnlyInput': ReadOnlyInputWidget,
   'Ivy.ColorInput': ColorInputWidget,
@@ -180,8 +195,8 @@ export const widgetMap = {
   'Ivy.CodeInput': React.lazy(
     () => import('@/widgets/inputs/code/CodeInputWidget')
   ),
-  'Ivy.AudioRecorder': React.lazy(
-    () => import('@/widgets/inputs/AudioRecorderWidget')
+  'Ivy.AudioInput': React.lazy(
+    () => import('@/widgets/inputs/AudioInputWidget')
   ),
 
   // Forms
@@ -224,6 +239,12 @@ export const widgetMap = {
   'Ivy.FunnelChart': React.lazy(
     () => import('@/widgets/charts/FunnelChartWidget')
   ),
+  'Ivy.ScatterChart': React.lazy(
+    () => import('@/widgets/charts/ScatterChartWidget')
+  ),
+  'Ivy.RadialBarChart': React.lazy(
+    () => import('@/widgets/charts/RadialBarChartWidget')
+  ),
 
   // Effects
   'Ivy.Confetti': React.lazy(() => import('@/widgets/effects/ConfettiWidget')),
@@ -232,7 +253,7 @@ export const widgetMap = {
   ),
 
   // Internal
-
+  'Ivy.Docs.Shared.Internal.SmartSearch': SmartSearch,
   'Ivy.Widgets.Internal.SidebarNews': React.lazy(
     () => import('@/widgets/internal/SidebarNewsWidget')
   ),

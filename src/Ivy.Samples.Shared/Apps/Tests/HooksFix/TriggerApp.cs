@@ -1,5 +1,3 @@
-﻿using Ivy.Hooks;
-
 namespace Ivy.Samples.Shared.Apps.Tests.HooksFix;
 
 [App(isVisible: false)]

@@ -1,5 +1,3 @@
-using Ivy.Shared;
-using Ivy.Views.Builders;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
@@ -14,7 +12,7 @@ public class DetailsApp : SampleBase
                    new Tab("Basic", new DetailsBasicExample()),
                    new Tab("Nested", new DetailsNestedExample()),
                    new Tab("Multiline", new DetailsMultilineExample()),
-                   new Tab("Scale", new DetailsScaleExample())
+                   new Tab("Density", new DetailsDensityExample())
                ).Variant(TabsVariant.Content);
     }
 }
@@ -90,7 +88,7 @@ public class DetailsMultilineExample : ViewBase
             ShortSummary = "This item has a long description that is better displayed as multiline text.",
             Description =
                 "This is a long description field that contains multiple sentences and paragraphs of explanatory text. " +
-                "Details.MultiLine() allows this content to wrap across multiple lines instead of being truncated, " +
+                "Details.Multiline() allows this content to wrap across multiple lines instead of being truncated, " +
                 "so users can comfortably read everything without hovering or opening a separate dialog. " +
                 "You can use this pattern for notes, comments, troubleshooting instructions, or domain-specific explanations " +
                 "that would otherwise break the layout if rendered as a single-line value. " +
@@ -103,24 +101,24 @@ public class DetailsMultilineExample : ViewBase
 
         return Layout.Vertical().Gap(2)
                | Text.H2("Multiline Fields")
-               | Text.P("Compare the difference: without MultiLine() text is truncated, with MultiLine() it wraps across multiple lines.")
-               | new Spacer().Height(10)
+               | Text.P("Compare the difference: without Multiline() text is truncated, with Multiline() it wraps across multiple lines.")
+               | new Spacer().Height(Size.Units(10))
                | (Layout.Grid().Columns(2).Gap(4)
                    | (Layout.Vertical().Height(Size.Full())
-                       | Text.Label("With MultiLine()").Bold()
+                       | Text.Label("With Multiline()").Bold()
                        | new Card(
                            record.ToDetails()
-                                 .MultiLine(x => x.Description, x => x.Notes)
+                                 .Multiline(x => x.Description, x => x.Notes)
                        ))
                    | (Layout.Vertical().Height(Size.Full())
-                       | Text.Label("Without MultiLine()").Bold()
+                       | Text.Label("Without Multiline()").Bold()
                        | new Card(record.ToDetails()))
                     )
                ;
     }
 }
 
-public class DetailsScaleExample : ViewBase
+public class DetailsDensityExample : ViewBase
 {
     public override object? Build()
     {
@@ -193,20 +191,20 @@ public class DetailsScaleExample : ViewBase
         };
 
         return Layout.Vertical().Gap(2)
-                | Text.H1("Details Scale")
+                | Text.H1("Details Density")
                 | (Layout.Horizontal().Gap(2)
                     | (Layout.Vertical()
-                        | Text.Label("Small Scale").Bold()
+                        | Text.Label("Small Density").Bold()
                         | new Card(record_small.ToDetails().RemoveEmpty().Small())
-                        | new Card(record.ToDetails().MultiLine(x => x.LastName).RemoveEmpty().Small()))
+                        | new Card(record.ToDetails().Multiline(x => x.LastName).RemoveEmpty().Small()))
                     | (Layout.Vertical()
-                        | Text.Label("Medium Scale").Bold()
+                        | Text.Label("Medium Density").Bold()
                         | new Card(record_medium.ToDetails().RemoveEmpty())
-                        | new Card(record.ToDetails().MultiLine(x => x.LastName).RemoveEmpty()))
+                        | new Card(record.ToDetails().Multiline(x => x.LastName).RemoveEmpty()))
                     | (Layout.Vertical()
-                        | Text.Label("Large Scale").Bold()
+                        | Text.Label("Large Density").Bold()
                         | new Card(record_large.ToDetails().RemoveEmpty().Large())
-                        | new Card(record.ToDetails().MultiLine(x => x.LastName).RemoveEmpty().Large())))
+                        | new Card(record.ToDetails().Multiline(x => x.LastName).RemoveEmpty().Large())))
                 ;
     }
 }

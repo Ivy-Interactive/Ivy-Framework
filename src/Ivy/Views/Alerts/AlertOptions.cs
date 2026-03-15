@@ -1,6 +1,5 @@
-using Ivy.Widgets;
-
-namespace Ivy.Views.Alerts;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class AlertOptions
 {

@@ -11,7 +11,7 @@ searchHints:
 # Animation
 
 <Ingress>
-The Animation [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a comprehensive set of animation effects that can transform any widget with engaging visual feedback. From subtle hover effects to attention-grabbing loading spinners, animations enhance user experience by providing visual cues, feedback, and polish to your [interface](../../01_Onboarding/02_Concepts/02_Views.md). Use [Colors](../../04_ApiReference/IvyShared/Colors.md) and [Icon](../01_Primitives/02_Icon.md) with `.ToIcon().Color()` for styled icons.
+The Animation [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a comprehensive set of animation effects that can transform any widget with engaging visual feedback. From subtle hover effects to attention-grabbing loading spinners, animations enhance user experience by providing visual cues, feedback, and polish to your [interface](../../01_Onboarding/02_Concepts/02_Views.md). Use [Colors](../../04_ApiReference/Ivy/Colors.md) and [Icon](../01_Primitives/02_Icon.md) with `.ToIcon().Color()` for styled icons.
 </Ingress>
 
 The `Animation` widget wraps any child widget and animates it using the specified `AnimationType`. Animations can be triggered automatically, on click, or on hover, with extensive customization options for duration, easing, direction, and more.

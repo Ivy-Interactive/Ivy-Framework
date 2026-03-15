@@ -20,7 +20,7 @@ The `Card` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) is a versatil
 
 ## Basic Usage
 
-Here's a simple example of a card containing text and a button that shows a [toast message](../../01_Onboarding/02_Concepts/13_Clients.md) when clicked. Use [Size](../../04_ApiReference/IvyShared/Size.md) for `.Width()` to control card width.
+Here's a simple example of a card containing text and a button that shows a [toast message](../../01_Onboarding/02_Concepts/13_Clients.md) when clicked. Use [Size](../../04_ApiReference/Ivy/Size.md) for `.Width()` to control card width.
 
 ```csharp demo-below
 new Card(
@@ -46,17 +46,31 @@ new Card()
 
 ## Click Listener
 
-HandleClick attaches an event listener and makes the card clickable.
+OnClick attaches an event listener and makes the card clickable.
 
 ```csharp demo-below
 new Card(
     "This card is clickable."
 ).Title("Clickable Card")
  .Description("Demonstrating click and mouse hover.")
- .HandleClick(_ => client.Toast("Card clicked!"))
+ .OnClick(_ => client.Toast("Card clicked!"))
  .Width(Size.Units(100))
 ```
 
+
+## Disabled State
+
+Use the `Disabled()` extension method to prevent user interaction with a card. This is useful for indicating unavailable options or read-only states.
+
+```csharp demo-below
+new Card(
+    "This card cannot be clicked."
+).Title("Disabled Card")
+ .Description("User interaction is disabled.")
+ .OnClick(_ => client.Toast("This won't fire!"))
+ .Disabled()
+ .Width(Size.Units(100))
+```
 
 ## Dashboard Metrics
 

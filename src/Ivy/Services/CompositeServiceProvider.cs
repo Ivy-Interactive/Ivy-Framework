@@ -1,4 +1,5 @@
-﻿namespace Ivy.Services;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 using System;
 

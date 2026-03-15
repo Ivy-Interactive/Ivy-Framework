@@ -1,7 +1,8 @@
 using System.Text.Json;
 using Ivy.Core.Helpers;
 
-namespace Ivy.Apps;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class AppContext
 {
@@ -19,6 +20,13 @@ public class AppContext
     public string Scheme { get; set; }
 
     public string Host { get; set; }
+
+    /// <summary>
+    /// Gets the base URL of the application (scheme + host).
+    /// Useful for constructing absolute URLs for shareable links, webhooks, OAuth callbacks, etc.
+    /// Example: "https://example.com"
+    /// </summary>
+    public string BaseUrl => $"{Scheme}://{Host}";
 
     public string AppId { get; set; }
 

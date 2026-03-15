@@ -42,10 +42,14 @@ async function getPublicKey(publicKeyPem: string): Promise<CryptoKey> {
 export async function hasLicensedFeature(hasFeature: string): Promise<boolean> {
   try {
     let _publicKeyPem = publicKeyPem;
-    if (publicKeyPem.includes('IVY_LICENSE_PUBLIC_KEY')) {
-      const publicKey = getIvyLicensePublicKey(); //in dev the public key is in a meta tag
-      if (!publicKey) return false;
-      _publicKeyPem = publicKey;
+    if (!_publicKeyPem || _publicKeyPem.includes('IVY_LICENSE_PUBLIC_KEY')) {
+      if (import.meta.env.DEV) {
+        const publicKey = getIvyLicensePublicKey(); // dev only: read from meta tag
+        if (!publicKey) return false;
+        _publicKeyPem = publicKey;
+      } else {
+        return false; // production: no baked-in key = no licensed features
+      }
     }
 
     if (!licensePayload) {

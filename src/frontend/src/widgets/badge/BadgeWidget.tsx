@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useEventHandler } from '@/components/event-handler';
 import Icon from '@/components/Icon';
 import { camelCase } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
+
+const EMPTY_ARRAY: never[] = [];
 
 interface BadgeWidgetProps {
   title: string;
@@ -17,7 +20,9 @@ interface BadgeWidgetProps {
     | 'Success'
     | 'Warning'
     | 'Info';
-  scale?: Scales;
+  density?: Densities;
+  id: string;
+  events?: string[];
 }
 
 export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
@@ -25,15 +30,25 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   icon = undefined,
   iconPosition = 'Left',
   variant = 'Primary',
-  scale = Scales.Medium,
+  density = Densities.Medium,
+  id,
+  events = EMPTY_ARRAY,
 }) => {
+  const eventHandler = useEventHandler();
+  const isClickable = events.includes('OnClick');
+
+  const handleClick = useCallback(() => {
+    if (isClickable) {
+      eventHandler('OnClick', id, []);
+    }
+  }, [id, isClickable, eventHandler]);
   let iconSize: number = 4;
 
-  switch (scale) {
-    case Scales.Small:
+  switch (density) {
+    case Densities.Small:
       iconSize = 3;
       break;
-    case Scales.Large:
+    case Densities.Large:
       iconSize = 5;
       break;
     default:
@@ -79,26 +94,28 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   return (
     <Badge
       variant={getBadgeVariant(variant)}
-      scale={scale.toLowerCase() as 'small' | 'medium' | 'large'}
+      density={density.toLowerCase() as 'small' | 'medium' | 'large'}
       className={cn(
         'w-min whitespace-nowrap gap-1',
         hasIcon &&
           title &&
           iconPosition === 'Left' &&
-          (scale === Scales.Small
+          (density === Densities.Small
             ? 'pl-1'
-            : scale === Scales.Large
+            : density === Densities.Large
               ? 'pl-2'
               : 'pl-1.5'),
         hasIcon &&
           title &&
           iconPosition === 'Right' &&
-          (scale === Scales.Small
+          (density === Densities.Small
             ? 'pr-1'
-            : scale === Scales.Large
+            : density === Densities.Large
               ? 'pr-2'
-              : 'pr-1.5')
+              : 'pr-1.5'),
+        isClickable && 'cursor-pointer hover:opacity-80 transition-opacity'
       )}
+      onClick={isClickable ? handleClick : undefined}
     >
       {iconPosition === 'Left' && icon && icon !== 'None' && (
         <Icon style={iconStyles} name={icon} />

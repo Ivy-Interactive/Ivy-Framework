@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using Ivy.Samples.Shared.Helpers;
 using Ivy.Samples.Shared.Apps.Demos;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
@@ -9,8 +11,8 @@ public static class SamplesServer
 {
     public static async Task RunAsync(ServerArgs? args = null)
     {
-        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
         var server = new Server(args);
+        server.UseCulture("en-US");
         server.UseHotReload();
         server.AddAppsFromAssembly(typeof(SamplesServer).Assembly);
 
@@ -28,6 +30,7 @@ public static class SamplesServer
         server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 
         server.Services.AddSingleton<SampleDbContextFactory>();
+        server.Services.AddSingleton<Apps.Widgets.MockEmployeeService>();
 
         if (server.Configuration.GetValue<string>("OpenAi:ApiKey") is { } openAiApiKey &&
            server.Configuration.GetValue<string>("OpenAi:Endpoint") is { } openAiEndpoint)

@@ -55,7 +55,7 @@ Layout.Horizontal()
 
 ### Icons
 
-`Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../01_Primitives/02_Icon.md) for more details. Use [Align](../../04_ApiReference/IvyShared/Align.md) for icon position (e.g. `Align.Right`).
+`Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../01_Primitives/02_Icon.md) for more details. Use [Align](../../04_ApiReference/Ivy/Align.md) for icon position (e.g. `Align.Right`).
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
@@ -74,9 +74,18 @@ Layout.Vertical().Gap(4)
         | new Badge(null, icon:Icons.X, variant:BadgeVariant.Destructive))
 ```
 
+## Click Listener
+
+Badges can be made clickable using the `OnClick` extension method. This is useful for filter chips, tag management, and toggle states.
+
+```csharp demo-below
+new Badge("Click Me", icon:Icons.MousePointer)
+    .OnClick(_ => client.Toast("Badge clicked!"))
+```
+
 <WidgetDocs Type="Ivy.Badge" ExtensionTypes="Ivy.BadgeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Badge.cs"/>
 
-## Examples
+## Faq
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
@@ -93,3 +102,30 @@ Layout.Vertical().Gap(4)
         | new Badge("Design", icon:Icons.Palette)
         | new Badge("Development", icon:Icons.Code))
 ```
+
+<Details>
+<Summary>
+What are the available BadgeVariant values in Ivy?
+</Summary>
+<Body>
+
+The `BadgeVariant` enum has these values: `Primary`, `Destructive`, `Outline`, `Secondary`, `Success`, `Warning`, `Info`.
+
+Usage:
+```csharp
+// Via constructor:
+new Badge("Status", BadgeVariant.Success)
+
+// Via fluent Variant() method:
+new Badge("Status").Variant(BadgeVariant.Warning)
+
+// Via shortcut extension methods:
+new Badge("Status").Success()
+new Badge("Status").Destructive()
+new Badge("Status").Info()
+```
+
+There is no `BadgeVariant.Default`. Use `BadgeVariant.Primary` or omit the variant for the default appearance.
+
+</Body>
+</Details>

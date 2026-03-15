@@ -45,6 +45,7 @@ export interface DataTableConnection {
   path: string;
   connectionId: string;
   sourceId: string;
+  versionToken?: string;
 }
 
 export interface DataTableConfig {

@@ -1,6 +1,7 @@
 using Ivy.Core.Hooks;
 
-namespace Ivy.Hooks;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class UseMemoExtensions
 {

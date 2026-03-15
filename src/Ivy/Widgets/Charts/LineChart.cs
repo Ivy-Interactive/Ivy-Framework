@@ -1,6 +1,4 @@
-using Ivy.Charts;
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -19,7 +17,7 @@ public record LineChart : WidgetBase<LineChart>
     public LineChart(object data, string dataKey, string nameKey) : this()
     {
         Data = data;
-        Lines = [new Line(dataKey, Utils.SplitPascalCase(dataKey))];
+        Lines = [new Line(dataKey, StringHelper.SplitPascalCase(dataKey))];
         XAxis = [new XAxis(nameKey)];
         YAxis = [new YAxis(dataKey)];
         Tooltip = new();
@@ -41,7 +39,7 @@ public record LineChart : WidgetBase<LineChart>
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public ChartTooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
@@ -63,7 +61,7 @@ public record LineChart : WidgetBase<LineChart>
     }
 }
 
-public static class LineChartExtensions
+public static partial class LineChartExtensions
 {
     public static LineChart Layout(this LineChart chart, Layouts layout)
     {
@@ -92,7 +90,7 @@ public static class LineChartExtensions
     }
     public static LineChart Line(this LineChart chart, string dataKey, string? name = null)
     {
-        return chart with { Lines = [.. chart.Lines, new Line(dataKey, name ?? Utils.SplitPascalCase(dataKey))] };
+        return chart with { Lines = [.. chart.Lines, new Line(dataKey, name ?? StringHelper.SplitPascalCase(dataKey))] };
     }
 
     public static LineChart CartesianGrid(this LineChart chart, CartesianGrid cartesianGrid)
@@ -130,14 +128,14 @@ public static class LineChartExtensions
         return chart with { YAxis = [.. chart.YAxis, new YAxis()] };
     }
 
-    public static LineChart Tooltip(this LineChart chart, Charts.Tooltip? tooltip)
+    public static LineChart Tooltip(this LineChart chart, ChartTooltip? tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static LineChart Tooltip(this LineChart chart)
     {
-        return chart with { Tooltip = new Charts.Tooltip() };
+        return chart with { Tooltip = new ChartTooltip() };
     }
 
     public static LineChart Legend(this LineChart chart, Legend legend)

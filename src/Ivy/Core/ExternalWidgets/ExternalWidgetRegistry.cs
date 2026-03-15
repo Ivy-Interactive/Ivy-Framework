@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using Ivy;
 
 namespace Ivy.Core.ExternalWidgets;
 
@@ -155,6 +156,9 @@ public class ExternalWidgetRegistry
 
         foreach (var assembly in loadedAssemblies)
         {
+            if (!ReferencesIvy(assembly))
+                continue;
+
             ScanAssemblySafe(assembly, scannedAssemblies);
         }
 
@@ -287,16 +291,7 @@ public class ExternalWidgetRegistry
 
     private void ScanAssembly(Assembly assembly)
     {
-        Type[] types;
-        try
-        {
-            types = assembly.GetTypes();
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            // Some types may fail to load, use the ones that succeeded
-            types = ex.Types.Where(t => t != null).ToArray()!;
-        }
+        var types = assembly.GetLoadableTypes();
 
         foreach (var type in types)
         {

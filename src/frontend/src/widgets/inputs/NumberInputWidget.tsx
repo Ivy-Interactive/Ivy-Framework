@@ -7,8 +7,31 @@ import { inputStyles, getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { X } from 'lucide-react';
 import React from 'react';
-import { Scales } from '@/types/scale';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
+import { Densities } from '@/types/density';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
+import Icon from '@/components/Icon';
+
+interface Affix {
+  icon?: string;
+  text?: string;
+}
+
+const renderAffix = (affix?: Affix): React.ReactNode => {
+  if (!affix) return null;
+
+  if (affix.icon) {
+    return React.createElement(Icon, {
+      name: affix.icon,
+      className: 'w-4 h-4',
+    });
+  }
+
+  if (affix.text) {
+    return React.createElement('span', { className: 'text-sm' }, affix.text);
+  }
+
+  return null;
+};
 
 const formatStyleMap = {
   Decimal: 'decimal',
@@ -50,7 +73,10 @@ interface NumberInputBaseProps {
   'data-testid'?: string;
   // Add type information for validation
   targetType?: string;
-  scale?: Scales;
+  density?: Densities;
+  prefix?: Affix;
+  suffix?: Affix;
+  noGrouping?: boolean;
 }
 
 interface NumberInputWidgetProps
@@ -94,7 +120,7 @@ const validateAndCapValue = (
 };
 
 // Size variants for text styling
-const sizeVariants: Record<string, { text: string }> = {
+const sizeVariant: Record<string, { text: string }> = {
   Small: {
     text: 'text-xs',
   },
@@ -115,7 +141,7 @@ const SliderVariant = memo(
     disabled = false,
     invalid,
     currency,
-    scale = Scales.Medium,
+    density = Densities.Medium,
     onValueChange,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
@@ -157,7 +183,7 @@ const SliderVariant = memo(
           value={[sliderValue]}
           disabled={disabled}
           currency={currency}
-          scale={scale}
+          density={density}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
           className={cn(invalid && inputStyles.invalidInput)}
@@ -166,7 +192,7 @@ const SliderVariant = memo(
         <span
           className={cn(
             'flex w-full items-center justify-between gap-1',
-            sizeVariants[String(scale)].text
+            sizeVariant[String(density)].text
           )}
           aria-hidden="true"
         >
@@ -203,7 +229,10 @@ const NumberVariant = memo(
     nullable = false,
     onValueChange,
     currency,
-    scale = Scales.Medium,
+    density = Densities.Medium,
+    prefix,
+    suffix,
+    noGrouping,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
     const formatConfig = useMemo(
@@ -211,11 +240,11 @@ const NumberVariant = memo(
         style: formatStyleMap[formatStyle],
         minimumFractionDigits: 0,
         maximumFractionDigits: precision,
-        useGrouping: true,
+        useGrouping: !(noGrouping ?? false),
         notation: 'standard' as const,
         currency: currency || undefined,
       }),
-      [currency, formatStyle, precision]
+      [currency, formatStyle, precision, noGrouping]
     );
 
     const handleNumberChange = useCallback(
@@ -230,45 +259,74 @@ const NumberVariant = memo(
       [onValueChange, nullable]
     );
 
+    const prefixContent = renderAffix(prefix);
+    const suffixContent = renderAffix(suffix);
+
     return (
-      <div className="relative w-full flex-1 rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
-        <NumberInput
-          min={min}
-          max={max}
-          step={step}
-          format={formatConfig}
-          placeholder={placeholder}
-          value={value ?? (nullable ? null : 0)}
-          disabled={disabled}
-          scale={scale}
-          onChange={handleNumberChange}
-          className={cn(
-            'border-0 shadow-none',
-            invalid && inputStyles.invalidInput,
-            (invalid || (nullable && value !== null && !disabled)) && 'pr-8',
-            nullable && value !== null && !disabled && invalid && 'pr-16'
+      <div
+        className={cn(
+          'relative flex items-stretch w-full flex-1 rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10',
+          disabled && 'cursor-not-allowed opacity-50'
+        )}
+      >
+        {/* Prefix with background and separator */}
+        {prefixContent && (
+          <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+            {prefixContent}
+          </div>
+        )}
+
+        <div className="relative flex-1">
+          <NumberInput
+            min={min}
+            max={max}
+            step={step}
+            format={formatConfig}
+            placeholder={placeholder}
+            value={value ?? (nullable ? null : 0)}
+            disabled={disabled}
+            density={density}
+            onChange={handleNumberChange}
+            className={cn(
+              'border-0 shadow-none',
+              invalid && inputStyles.invalidInput,
+              (invalid || (nullable && value !== null && !disabled)) && 'pr-8',
+              nullable && value !== null && !disabled && invalid && 'pr-16',
+              prefixContent && 'rounded-l-none',
+              suffixContent && 'rounded-r-none'
+            )}
+            data-testid={dataTestId}
+          />
+          {/* Icon container - flex row aligned to right */}
+          {((nullable && value !== null && !disabled) || invalid) && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
+              {/* Clear (X) button - leftmost */}
+              {nullable && value !== null && !disabled && (
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Clear"
+                  onClick={() => onValueChange(null)}
+                  className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+                >
+                  <X className={xIconVariant({ density })} />
+                </button>
+              )}
+              {/* Invalid icon - rightmost */}
+              {invalid && (
+                <InvalidIcon
+                  message={invalid}
+                  className="pointer-events-auto"
+                />
+              )}
+            </div>
           )}
-          data-testid={dataTestId}
-        />
-        {/* Icon container - flex row aligned to right */}
-        {((nullable && value !== null && !disabled) || invalid) && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
-            {/* Clear (X) button - leftmost */}
-            {nullable && value !== null && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={() => onValueChange(null)}
-                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-              >
-                <X className={xIconVariants({ scale })} />
-              </button>
-            )}
-            {/* Invalid icon - rightmost */}
-            {invalid && (
-              <InvalidIcon message={invalid} className="pointer-events-auto" />
-            )}
+        </div>
+
+        {/* Suffix with background and separator */}
+        {suffixContent && (
+          <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+            {suffixContent}
           </div>
         )}
       </div>

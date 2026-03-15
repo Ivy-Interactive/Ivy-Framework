@@ -1,9 +1,5 @@
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
-using Ivy.Hooks;
-using Ivy.Shared;
-using Ivy.Views.Builders;
-using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
@@ -294,7 +290,35 @@ public record FormValidationExamples
     public string? Comments { get; init; }
 }
 
-[App(icon: Icons.Clipboard, path: ["Concepts"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls", "scaffolding", "forms"])]
+public class AllowedValuesFormApp : ViewBase
+{
+    public class SettingsModel
+    {
+        [Display(Name = "Theme")]
+        [AllowedValues("Light", "Dark", "Auto")]
+        public string Theme { get; set; } = "Auto";
+
+        [Display(Name = "Country")]
+        [AllowedValues("USA", "Canada", "UK", "Germany", "France")]
+        public string Country { get; set; } = "USA";
+
+        [Display(Name = "Interests", Description = "Select your interests")]
+        [AllowedValues("Technology", "Sports", "Music", "Art", "Travel")]
+        public string[] Interests { get; set; } = [];
+
+        [Display(Name = "Full Name")]
+        [Required]
+        public string Name { get; set; } = "";
+    }
+
+    public override object? Build()
+    {
+        var settings = UseState(() => new SettingsModel());
+        return settings.ToForm();
+    }
+}
+
+[App(icon: Icons.Clipboard, path: ["Concepts"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls", "scaffolding", "forms", "allowed-values", "select", "dropdown"])]
 public class FormApp : SampleBase
 {
     protected override object? BuildSample()
@@ -302,7 +326,8 @@ public class FormApp : SampleBase
         return Layout.Tabs(
             new Tab("Form", new FormExample()),
             new Tab("Scaffolding", new FormScaffoldingExample()),
-            new Tab("Validation", new FormValidationExample())
+            new Tab("Validation", new FormValidationExample()),
+            new Tab("Allowed Values", new AllowedValuesFormApp())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -429,11 +454,11 @@ public class FormExample : ViewBase
             new Card(
                     BuildDatabaseForm(settingsForm)
                 )
-                .Width(1 / 2f)
+                .Width(Size.Fraction(1 / 2f))
                 .Title("Database Generator Settings"),
             new Card(
                 settingsForm.ToDetails()
-            ).Width(1 / 2f)
+            ).Width(Size.Fraction(1 / 2f))
         );
 
         FormBuilder<UserModel> BuildForm(IState<UserModel> x) =>
@@ -450,11 +475,11 @@ public class FormExample : ViewBase
             new Card(
                     BuildForm(model)
                 )
-                .Width(1 / 2f)
+                .Width(Size.Fraction(1 / 2f))
                 .Title("User Information"),
             new Card(
                 model.ToDetails()
-            ).Width(1 / 2f)
+            ).Width(Size.Fraction(1 / 2f))
         );
 
         return Layout.Vertical()
@@ -538,26 +563,26 @@ public class FormExample : ViewBase
                         .Description(m => m.TelField, "Enter your phone number.")
                         .Builder(m => m.UrlField, s => s.ToUrlInput())
                         .Description(m => m.UrlField, "Enter your website URL.")
-                        .Builder(m => m.TextAreaField, s => s.ToTextAreaInput())
+                        .Builder(m => m.TextAreaField, s => s.ToTextareaInput())
                         .Description(m => m.TextAreaField, "Enter a detailed description.")
-                        .Builder(m => m.CheckboxField, s => s.ToBoolInput().Variant(BoolInputs.Checkbox))
-                        .Builder(m => m.SwitchField, s => s.ToBoolInput().Variant(BoolInputs.Switch))
-                        .Builder(m => m.ToggleField, s => s.ToBoolInput().Variant(BoolInputs.Toggle))
-                        .Builder(m => m.DateField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Date))
-                        .Builder(m => m.DateTimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.DateTime))
-                        .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Time))
+                        .Builder(m => m.CheckboxField, s => s.ToBoolInput().Variant(BoolInputVariant.Checkbox))
+                        .Builder(m => m.SwitchField, s => s.ToBoolInput().Variant(BoolInputVariant.Switch))
+                        .Builder(m => m.ToggleField, s => s.ToBoolInput().Variant(BoolInputVariant.Toggle))
+                        .Builder(m => m.DateField, s => s.ToDateTimeInput().Variant(DateTimeInputVariant.Date))
+                        .Builder(m => m.DateTimeField, s => s.ToDateTimeInput().Variant(DateTimeInputVariant.DateTime))
+                        .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputVariant.Time))
                         .Builder(m => m.SelectField, s => s.ToSelectInput())
                         .Builder(m => m.MultiSelectField, s => s.ToSelectInput().List())
                         .Builder(m => m.AsyncSelectField, s => s.ToAsyncSelectInput(QueryOptions, LookupOption, "Search options..."))
                         .Builder(m => m.ColorField, s => s.ToColorInput())
                         .Description(m => m.ColorField, "Pick a color that suits you.")
                         .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Json))
-                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Stars))
-                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Thumbs))
-                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Emojis))
+                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Stars())
+                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Thumbs())
+                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Emojis())
                 )
-                .Width(1 / 3f)
-                .Title("Small Scale - All Inputs")
+                .Width(Size.Fraction(1 / 3f))
+                .Title("Small Density - All Inputs")
                 | new Card(
                     mediumModel.ToForm()
                         .Medium()
@@ -598,26 +623,26 @@ public class FormExample : ViewBase
                         .Description(m => m.TelField, "Enter your phone number.")
                         .Builder(m => m.UrlField, s => s.ToUrlInput())
                         .Description(m => m.UrlField, "Enter your website URL.")
-                        .Builder(m => m.TextAreaField, s => s.ToTextAreaInput())
+                        .Builder(m => m.TextAreaField, s => s.ToTextareaInput())
                         .Description(m => m.TextAreaField, "Enter a detailed description.")
-                        .Builder(m => m.CheckboxField, s => s.ToBoolInput().Variant(BoolInputs.Checkbox))
-                        .Builder(m => m.SwitchField, s => s.ToBoolInput().Variant(BoolInputs.Switch))
-                        .Builder(m => m.ToggleField, s => s.ToBoolInput().Variant(BoolInputs.Toggle))
-                        .Builder(m => m.DateField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Date))
-                        .Builder(m => m.DateTimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.DateTime))
-                        .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Time))
+                        .Builder(m => m.CheckboxField, s => s.ToBoolInput().Variant(BoolInputVariant.Checkbox))
+                        .Builder(m => m.SwitchField, s => s.ToBoolInput().Variant(BoolInputVariant.Switch))
+                        .Builder(m => m.ToggleField, s => s.ToBoolInput().Variant(BoolInputVariant.Toggle))
+                        .Builder(m => m.DateField, s => s.ToDateTimeInput().Variant(DateTimeInputVariant.Date))
+                        .Builder(m => m.DateTimeField, s => s.ToDateTimeInput().Variant(DateTimeInputVariant.DateTime))
+                        .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputVariant.Time))
                         .Builder(m => m.SelectField, s => s.ToSelectInput())
                         .Builder(m => m.MultiSelectField, s => s.ToSelectInput().List())
                         .Builder(m => m.AsyncSelectField, s => s.ToAsyncSelectInput(QueryOptions, LookupOption, "Search options..."))
                         .Builder(m => m.ColorField, s => s.ToColorInput())
                         .Description(m => m.ColorField, "Pick a color that suits you.")
                         .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Javascript))
-                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Stars))
-                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Thumbs))
-                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Emojis))
+                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Stars())
+                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Thumbs())
+                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Emojis())
                 )
-                .Width(1 / 3f)
-                .Title("Medium Scale - All Inputs")
+                .Width(Size.Fraction(1 / 3f))
+                .Title("Medium Density - All Inputs")
                 | new Card(
                     largeModel.ToForm()
                         .Large()
@@ -658,26 +683,26 @@ public class FormExample : ViewBase
                         .Description(m => m.TelField, "Enter your phone number.")
                         .Builder(m => m.UrlField, s => s.ToUrlInput())
                         .Description(m => m.UrlField, "Enter your website URL.")
-                        .Builder(m => m.TextAreaField, s => s.ToTextAreaInput())
+                        .Builder(m => m.TextAreaField, s => s.ToTextareaInput())
                         .Description(m => m.TextAreaField, "Enter a detailed description.")
-                        .Builder(m => m.CheckboxField, s => s.ToBoolInput().Variant(BoolInputs.Checkbox))
-                        .Builder(m => m.SwitchField, s => s.ToBoolInput().Variant(BoolInputs.Switch))
-                        .Builder(m => m.ToggleField, s => s.ToBoolInput().Variant(BoolInputs.Toggle))
-                        .Builder(m => m.DateField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Date))
-                        .Builder(m => m.DateTimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.DateTime))
-                        .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Time))
+                        .Builder(m => m.CheckboxField, s => s.ToBoolInput().Variant(BoolInputVariant.Checkbox))
+                        .Builder(m => m.SwitchField, s => s.ToBoolInput().Variant(BoolInputVariant.Switch))
+                        .Builder(m => m.ToggleField, s => s.ToBoolInput().Variant(BoolInputVariant.Toggle))
+                        .Builder(m => m.DateField, s => s.ToDateTimeInput().Variant(DateTimeInputVariant.Date))
+                        .Builder(m => m.DateTimeField, s => s.ToDateTimeInput().Variant(DateTimeInputVariant.DateTime))
+                        .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputVariant.Time))
                         .Builder(m => m.SelectField, s => s.ToSelectInput())
                         .Builder(m => m.MultiSelectField, s => s.ToSelectInput().List())
                         .Builder(m => m.AsyncSelectField, s => s.ToAsyncSelectInput(QueryOptions, LookupOption, "Search options..."))
                         .Builder(m => m.ColorField, s => s.ToColorInput())
                         .Description(m => m.ColorField, "Pick a color that suits you.")
                         .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Sql))
-                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Stars))
-                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Thumbs))
-                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Emojis))
+                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Stars())
+                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Thumbs())
+                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Emojis())
                 )
-                .Width(1 / 3f)
-                .Title("Large Scale - All Inputs");
+                .Width(Size.Fraction(1 / 3f))
+                .Title("Large Density - All Inputs");
     }
 }
 
@@ -740,18 +765,9 @@ public class FormValidationExample : ViewBase
             }
         }, model);
 
-        var countryOptions = new[] { "USA", "Canada", "UK", "Germany", "France" }.ToOptions();
-        var interestOptions = new[] { "Technology", "Sports", "Music", "Art", "Travel" }.ToOptions();
-        var themeOptions = new[] { "Light", "Dark", "Auto" }.ToOptions();
-        var imageTypeOptions = new[] { "image/png", "image/jpeg", "image/webp" }.ToOptions();
-
         var form = model.ToForm("Submit Registration")
-            .Builder(m => m.Bio, s => s.ToTextAreaInput())
-            .Builder(m => m.Country, s => s.ToSelectInput(countryOptions))
-            .Builder(m => m.Interests, s => s.ToSelectInput(interestOptions).List())
-            .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions))
-            .Builder(m => m.AcceptedImageTypes, s => s.ToSelectInput(imageTypeOptions))
-            .Builder(m => m.Comments, s => s.ToTextAreaInput())
+            .Builder(m => m.Bio, s => s.ToTextareaInput())
+            .Builder(m => m.Comments, s => s.ToTextareaInput())
             .Builder(m => m.BirthDate, s => s.ToDateTimeInput())
             .Builder(m => m.AppointmentDateTime, s => s.ToDateTimeInput())
             .Builder(m => m.Password, s => s.ToPasswordInput())
@@ -765,13 +781,13 @@ public class FormValidationExample : ViewBase
         return Layout.Vertical()
             | (Layout.Horizontal()
                 | new Card(form)
-                    .Width(1 / 2f)
+                    .Width(Size.Fraction(1 / 2f))
                     .Title("Enhanced Form Validation")
                 | new Card(
                     Layout.Vertical()
                         | Text.H4("Current Form Data")
                         | model.ToDetails()
-                ).Width(1 / 2f)
+                ).Width(Size.Fraction(1 / 2f))
                     .Title("Form State"));
     }
 }

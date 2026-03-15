@@ -1,11 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Ivy.Core.Hooks;
-using Ivy.Services;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
-namespace Ivy.Views.Forms;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 internal static class FormScaffolder
 {
@@ -18,7 +16,7 @@ internal static class FormScaffolder
         {
             var displayInfo = field.GetDisplayInfo();
 
-            var label = displayInfo.Name ?? Utils.LabelFor(field.Name, field.Type);
+            var label = displayInfo.Name ?? StringHelper.LabelFor(field.Name, field.Type);
 
             if (ShouldTrimIdSuffix(displayInfo.Name, label))
             {
@@ -143,6 +141,17 @@ internal static class FormScaffolder
             };
         }
 
+        if (nonNullableType == typeof(string) && field.GetAllowedValues() is { } allowedValues)
+        {
+            return (state) =>
+            {
+                var options = allowedValues.Cast<string>().ToOptions().Cast<IAnyOption>().ToArray();
+                var input = state.ToSelectInput(options);
+                if (field.IsNullable && !field.Required) input.Nullable = true;
+                return input;
+            };
+        }
+
         if (nonNullableType == typeof(string))
         {
             return (state) =>
@@ -151,7 +160,7 @@ internal static class FormScaffolder
 
                 if (field.HasDataTypeAttribute(DataType.MultilineText))
                 {
-                    input = input.Variant(TextInputs.Textarea);
+                    input = input.Variant(TextInputVariant.Textarea);
                 }
 
                 // If Required => don't show X button even for nullable types
@@ -185,6 +194,17 @@ internal static class FormScaffolder
             };
         }
 
+        if (type.IsCollectionType() && type.GetCollectionTypeParameter() == typeof(string) && field.GetAllowedValues() is { } allowedCollectionValues)
+        {
+            return (state) =>
+            {
+                var options = allowedCollectionValues.Cast<string>().ToOptions().Cast<IAnyOption>().ToArray();
+                var input = state.ToSelectInput(options).List();
+                if (field.IsNullable && !field.Required) input.Nullable = true;
+                return input;
+            };
+        }
+
         if (type.IsNumeric())
         {
             return (state) =>
@@ -211,11 +231,11 @@ internal static class FormScaffolder
 
                 if (field.HasDataTypeAttribute(DataType.Date))
                 {
-                    input = input.Variant(DateTimeInputs.Date);
+                    input = input.Variant(DateTimeInputVariant.Date);
                 }
                 else if (field.HasDataTypeAttribute(DataType.Time))
                 {
-                    input = input.Variant(DateTimeInputs.Time);
+                    input = input.Variant(DateTimeInputVariant.Time);
                 }
                 if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
@@ -271,7 +291,7 @@ internal static class FormScaffolder
 
         if (field.Required)
         {
-            validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
+            validators.Add(e => (ValidationHelper.IsValidRequired(e), "Required field"));
         }
 
         if (field.PropertyInfo != null)
@@ -283,11 +303,14 @@ internal static class FormScaffolder
             validators.AddRange(FormHelpers.GetValidators(field.FieldInfo));
         }
 
-        var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
-        if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
-        {
+        if (field.IsEmail())
             validators.Add(Validators.CreateEmailValidator(field.Name));
-        }
+        if (field.IsPhone())
+            validators.Add(Validators.CreateTelValidator(field.Name));
+        if (field.IsUrl())
+            validators.Add(Validators.CreateUrlValidator(field.Name));
+        if (field.IsPassword())
+            validators.Add(Validators.CreatePasswordValidator(field.Name));
 
         return validators;
     }
@@ -320,6 +343,7 @@ internal static class FormScaffolder
         public FormHelpers.DisplayInfo GetDisplayInfo() => PropertyInfo != null ? FormHelpers.GetDisplayInfo(PropertyInfo) : FormHelpers.GetDisplayInfo(FieldInfo!);
         public FormHelpers.RangeInfo GetRangeInfo() => PropertyInfo != null ? FormHelpers.GetRangeInfo(PropertyInfo) : FormHelpers.GetRangeInfo(FieldInfo!);
         public int? GetMaxLength() => PropertyInfo != null ? FormHelpers.GetMaxLength(PropertyInfo) : FormHelpers.GetMaxLength(FieldInfo!);
+        public object[]? GetAllowedValues() => PropertyInfo != null ? FormHelpers.GetAllowedValues(PropertyInfo) : FormHelpers.GetAllowedValues(FieldInfo!);
 
         public bool IsEmail() =>
             NonNullableType == typeof(string) &&

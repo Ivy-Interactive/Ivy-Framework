@@ -6,12 +6,12 @@ import { getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { useFocusable } from '@/hooks/use-focus-management';
 import { sidebarMenuRef } from '@/widgets/layouts/sidebar';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import {
-  textInputSizeVariants,
-  searchIconVariants,
-  xIconVariants,
-} from '@/components/ui/input/text-input-variants';
+  textInputSizeVariant,
+  searchIconVariant,
+  xIconVariant,
+} from '@/components/ui/input/text-input-variant';
 import { TextInputWidgetProps } from '../types';
 import {
   useCursorPosition,
@@ -25,10 +25,11 @@ interface SearchVariantProps {
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClear: (e: React.MouseEvent) => void;
+  onSubmit?: () => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-  scale?: Scales;
+  density?: Densities;
 }
 
 export const SearchVariant: React.FC<SearchVariantProps> = ({
@@ -37,9 +38,10 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   onBlur,
   onFocus,
   onClear,
+  onSubmit,
   inputRef,
   isFocused,
-  scale = Scales.Medium,
+  density = Densities.Medium,
 }) => {
   const { savePosition } = useCursorPosition(props.value, inputRef) as {
     savePosition: () => void;
@@ -62,6 +64,9 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+      if (e.key === 'Enter') {
+        onSubmit?.();
+      }
       shouldFocusMenuRef.current = true;
       e.currentTarget.blur();
       e.preventDefault();
@@ -101,7 +106,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" style={styles}>
-      <Search className={searchIconVariants({ scale })} />
+      <Search className={searchIconVariant({ density })} />
       <div className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
         <Input
           ref={mergedRef}
@@ -119,7 +124,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           onPaste={handlePaste}
           autoComplete="off"
           className={cn(
-            textInputSizeVariants({ scale }),
+            textInputSizeVariant({ density }),
             'pl-8 cursor-pointer border-0 shadow-none dark:bg-transparent',
             props.invalid && inputStyles.invalidInput,
             (props.invalid || showClear) && 'pr-8',
@@ -146,7 +151,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
             style={{ pointerEvents: 'auto' }}
           >
-            <X className={xIconVariants({ scale })} />
+            <X className={xIconVariant({ density })} />
           </button>
         )}
         {props.shortcutKey && !isFocused && !hasValue && (

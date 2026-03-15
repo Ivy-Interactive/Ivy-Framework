@@ -2,11 +2,11 @@ using System;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using Ivy.Charts;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 
-namespace Ivy.Views.Charts;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public record PieChartData(string? Dimension, double Measure);
 
@@ -42,7 +42,7 @@ public class DefaultPieChartStyle<TSource> : IPieChartStyle<TSource>
     {
         return new PieChart(data)
             .Pie(nameof(PieChartData.Measure), nameof(PieChartData.Dimension))
-            .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+            .Tooltip(new ChartTooltip().Animated(true))
             .Legend(new Legend()
                 .Layout(Legend.Layouts.Horizontal)
                 .Align(Legend.Alignments.Center)
@@ -67,7 +67,7 @@ public class DashboardPieChartStyle<TSource> : IPieChartStyle<TSource>
                     .Align(Legend.Alignments.Center)
                     .VerticalAlign(Legend.VerticalAlignments.Bottom)
                 )
-                .Tooltip(new Ivy.Charts.Tooltip().Animated(true));
+                .Tooltip(new ChartTooltip().Animated(true));
     }
 }
 
@@ -82,7 +82,7 @@ public class DonutPieChartStyle<TSource> : IPieChartStyle<TSource>
                     .Animated(true)
                 )
                 .ColorScheme(ColorScheme.Rainbow)
-                .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+                .Tooltip(new ChartTooltip().Animated(true))
                 .Legend(new Legend()
                     .Layout(Legend.Layouts.Horizontal)
                     .Align(Legend.Alignments.Center)
@@ -102,6 +102,8 @@ public class PieChartBuilder<TSource>(
 {
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
+    private Size? _height;
+    private Size? _width;
 
     public override object? Build()
     {
@@ -158,7 +160,26 @@ public class PieChartBuilder<TSource>(
             configuredChart = configuredChart.Toolbox(_toolboxFactory(baseToolbox));
         }
 
-        return polish?.Invoke(configuredChart) ?? configuredChart;
+        var result = polish?.Invoke(configuredChart) ?? configuredChart;
+
+        if (_height is not null)
+            result = result with { Height = _height };
+        if (_width is not null)
+            result = result with { Width = _width };
+
+        return result;
+    }
+
+    public PieChartBuilder<TSource> Height(Size size)
+    {
+        _height = size;
+        return this;
+    }
+
+    public PieChartBuilder<TSource> Width(Size size)
+    {
+        _width = size;
+        return this;
     }
 
     public PieChartBuilder<TSource> Toolbox(Toolbox toolbox)
@@ -184,7 +205,7 @@ public class PieChartBuilder<TSource>(
 }
 
 
-public static class PieChartExtensions
+public static partial class PieChartExtensions
 {
     public static PieChartBuilder<TSource> ToPieChart<TSource>(
     this IEnumerable<TSource> data,

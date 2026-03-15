@@ -13,15 +13,18 @@ import {
 import { parse } from 'date-fns';
 
 import { cn } from '@/lib/utils';
-import { Button, buttonVariants } from '@/components/ui/button';
 import {
-  calendarVariants,
-  calendarButtonVariants,
-  calendarCaptionVariants,
-  calendarWeekdayVariants,
-  calendarDayVariants,
-} from './calendar-variants';
-import { Scales } from '@/types/scale';
+  Button,
+  buttonVariant as buttonVariantStyles,
+} from '@/components/ui/button';
+import {
+  calendarVariant,
+  calendarButtonVariant,
+  calendarCaptionVariant,
+  calendarWeekdayVariant,
+  calendarDayVariant,
+} from './calendar-variant';
+import { Densities } from '@/types/density';
 
 export function Calendar({
   className,
@@ -31,11 +34,11 @@ export function Calendar({
   buttonVariant = 'ghost',
   formatters,
   components,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant'];
-  scale?: Scales;
+  density?: Densities;
 }) {
   const defaultClassNames = getDefaultClassNames();
 
@@ -43,7 +46,7 @@ export function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        calendarVariants({ scale }),
+        calendarVariant({ density }),
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -66,19 +69,19 @@ export function Calendar({
           defaultClassNames.nav
         ),
         button_previous: cn(
-          buttonVariants({ variant: buttonVariant }),
-          calendarButtonVariants({ scale }),
+          buttonVariantStyles({ variant: buttonVariant }),
+          calendarButtonVariant({ density }),
           'pointer-events-auto',
           defaultClassNames.button_previous
         ),
         button_next: cn(
-          buttonVariants({ variant: buttonVariant }),
-          calendarButtonVariants({ scale }),
+          buttonVariantStyles({ variant: buttonVariant }),
+          calendarButtonVariant({ density }),
           'pointer-events-auto',
           defaultClassNames.button_next
         ),
         month_caption: cn(
-          calendarCaptionVariants({ scale }),
+          calendarCaptionVariant({ density }),
           defaultClassNames.month_caption
         ),
         dropdowns: cn(
@@ -100,7 +103,7 @@ export function Calendar({
         table: 'w-full border-collapse',
         weekdays: cn('flex', defaultClassNames.weekdays),
         weekday: cn(
-          calendarWeekdayVariants({ scale }),
+          calendarWeekdayVariant({ density }),
           defaultClassNames.weekday
         ),
         week: cn('flex w-full mt-2', defaultClassNames.week),
@@ -168,7 +171,7 @@ export function Calendar({
             <ChevronDownIcon className={cn('size-4', className)} {...props} />
           );
         },
-        DayButton: props => <CalendarDayButton {...props} scale={scale} />,
+        DayButton: props => <CalendarDayButton {...props} density={density} />,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -242,6 +245,7 @@ function MonthYearInput({
       className="flex items-center border border-input rounded-field px-1 py-0.5 gap-0.5 bg-background pointer-events-auto mx-auto w-fit"
       onMouseDown={e => e.stopPropagation()}
       onClick={e => e.stopPropagation()}
+      role="presentation"
     >
       <input
         value={monthStr}
@@ -272,10 +276,10 @@ function CalendarDayButton({
   className,
   day,
   modifiers,
-  scale = Scales.Medium,
+  density = Densities.Medium,
   ...props
 }: React.ComponentProps<typeof DayButton> & {
-  scale?: Scales;
+  density?: Densities;
 }) {
   const defaultClassNames = getDefaultClassNames();
 
@@ -300,7 +304,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        calendarDayVariants({ scale }),
+        calendarDayVariant({ density }),
         defaultClassNames.day,
         className
       )}

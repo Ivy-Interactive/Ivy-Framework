@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json.Nodes;
@@ -8,11 +9,25 @@ namespace Ivy.Core;
 public abstract record AbstractWidget : IWidget
 {
     private string? _id;
-    private readonly Dictionary<(Type, string), object?> _attachedProps = new();
+    private readonly ConcurrentDictionary<(Type, string), object?> _attachedProps = new();
+
+#if DEBUG
+    /// <summary>
+    /// Tracks the current view's callsite during Build() execution.
+    /// Widgets created during Build() will use this as a fallback if they don't have their own user-code callsite.
+    /// </summary>
+    internal static readonly AsyncLocal<CallSite?> CurrentViewCallSite = new();
+#endif
 
     protected AbstractWidget(params object[] children)
     {
         Children = children;
+#if DEBUG
+        // Try to capture the widget's own callsite from the stack trace first
+        // This gives us the exact line where the widget was instantiated
+        CallSite = CallSite.From(new System.Diagnostics.StackTrace(fNeedFileInfo: true))
+                   ?? CurrentViewCallSite.Value;
+#endif
     }
 
     public void SetAttachedValue(Type parentType, string name, object? value)
@@ -42,6 +57,10 @@ public abstract record AbstractWidget : IWidget
     [ScaffoldColumn(false)]
     public string? Key { get; set; }
 
+    public string? Path { get; set; }
+
+    public CallSite? CallSite { get; set; }
+
     [ScaffoldColumn(false)]
     public object[] Children { get; set; }
 
@@ -59,6 +78,14 @@ public abstract record AbstractWidget : IWidget
 
         if (eventDelegate == null)
             return false;
+
+        // Unwrap EventHandler<T> wrapper to get the underlying Func delegate
+        var eventDelegateType = eventDelegate.GetType();
+        if (eventDelegateType.IsGenericType && eventDelegateType.GetGenericTypeDefinition() == typeof(EventHandler<>))
+        {
+            eventDelegate = eventDelegateType.GetProperty("Handler")!.GetValue(eventDelegate);
+            if (eventDelegate == null) return false;
+        }
 
         if (IsFunc(eventDelegate, out Type? eventType, out Type? returnType) && returnType == typeof(ValueTask))
         {

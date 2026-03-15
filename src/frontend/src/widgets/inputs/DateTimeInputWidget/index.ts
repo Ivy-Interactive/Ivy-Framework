@@ -6,4 +6,7 @@ export type {
   DateVariantProps,
   DateTimeVariantProps,
   TimeVariantProps,
+  MonthVariantProps,
+  WeekVariantProps,
+  YearVariantProps,
 } from './types';

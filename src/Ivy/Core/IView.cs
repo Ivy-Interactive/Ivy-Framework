@@ -1,3 +1,4 @@
+using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 
 namespace Ivy.Core;
@@ -9,6 +10,8 @@ public interface IView : IDisposable
     public string? Id { get; set; }
 
     public string? Key { get; set; }
+
+    public CallSite? CallSite { get; set; }
 
     public object? Build();
 

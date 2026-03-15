@@ -28,10 +28,9 @@ This attribute provides essential metadata that the framework uses to:
 
 ## The `[App]` Attribute
 
-The `[App]` attribute is found in the `Ivy.Apps` namespace.
+The `[App]` attribute is found in the `Ivy` namespace.
 
 ```csharp
-using Ivy.Apps;
 
 [App(
     title: "Product Catalog", 
@@ -50,7 +49,7 @@ public class ProductsApp : ViewBase
 | :--- | :--- | :--- | :--- |
 | **`id`** | `string?` | `null` | A unique identifier for the app. If omitted, it is generated from the class name and namespace (see Route Generation below). |
 | **`title`** | `string?` | `null` | The human-readable title of the app. Used in window titles and navigation menus. Defaults to a readable version of the class name. |
-| **`icon`** | `Icons` | `Icons.None` | The [icon](../../02_Widgets/01_Primitives/02_Icon.md) representing the app in the navigation bar and search results. Uses the `Ivy.Shared.Icons` enum. |
+| **`icon`** | `Icons` | `Icons.None` | The [icon](../../02_Widgets/01_Primitives/02_Icon.md) representing the app in the navigation bar and search results. Uses the `Icons` enum. |
 | **`description`** | `string?` | `null` | A brief description of the app's purpose. May be shown in tooltips or app listings. |
 | **`path`** | `string[]?` | `null` | Explicitly defines the navigation path. Overrides automatic generation from the namespace. |
 | **`isVisible`** | `bool` | `true` | Controls whether the app appears in automatically generated navigation menus. Set to `false` for hidden apps or internal tools. |
@@ -99,3 +98,63 @@ If no title is specified, the framework generates one from the class name (e.g.,
 * **Suffix with `App`**: It's common convention to name your app classes ending with `App` (e.g., `ProductsApp`), though the framework will automatically make the title readable (e.g., "Products").
 * **Use `searchHints`**: Add synonyms for your app's functionality to make it easier for users to find via the [Command Palette](./09_Navigation.md) (Cmd/Ctrl+K).
 * **Organize with Namespaces**: Use namespaces to group related apps. This automatically creates a structured hierarchy in your navigation menu.
+
+## Faq
+
+<Details>
+<Summary>
+How do I create an Ivy App with the [App] attribute?
+</Summary>
+<Body>
+
+The `[App]` attribute marks a class as an Ivy application. Key parameters:
+
+```csharp
+[App(
+    title: "My App",           // Display name (optional, defaults to class name)
+    icon: Icons.Layout,        // Icon from the Icons enum (optional)
+    path: ["Category"],        // Navigation path/group (optional, array of strings)
+    description: "My app desc" // Description text (optional)
+)]
+public class MyApp : ViewBase
+{
+    public override object? Build()
+    {
+        return Text.H1("Hello World");
+    }
+}
+```
+
+**Key points:**
+- The class must inherit from `ViewBase` and override `Build()`
+- `path` controls navigation grouping (e.g., `["Settings", "Advanced"]` creates nested groups)
+- `icon` uses the `Icons` enum (e.g., `Icons.Settings`, `Icons.Users`, `Icons.Database`)
+- All parameters are optional — `[App]` with no arguments is valid
+- Other parameters: `id`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+What is the base class for Ivy apps?
+</Summary>
+<Body>
+
+All Ivy apps inherit from `ViewBase` and override `Build()`. Mark them with the `[App]` attribute. Both `ViewBase` and `[App]` are in the `Ivy` namespace (`using Ivy;`). There is no `AppBase` or `IClient` class — use `ViewBase` and `IClientProvider`.
+
+```csharp
+using Ivy;
+
+[App]
+public class MyApp : ViewBase
+{
+    public override ViewSpec Build()
+    {
+        return Text.H1("Hello");
+    }
+}
+```
+
+</Body>
+</Details>

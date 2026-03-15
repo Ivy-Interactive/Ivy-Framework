@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 [App(icon: Icons.Grid2x2, searchHints: ["toolbar", "sticky", "fixed", "navigation", "header", "scroll"])]
@@ -42,19 +40,19 @@ public class HeaderLayoutView : ViewBase
             Layout.Horizontal().Gap(4)
                 | searchText.ToTextInput()
                     .Placeholder("Search items...")
-                    .Variant(TextInputs.Search)
+                    .Variant(TextInputVariant.Search)
                 | new Button("Add Item")
                     .Icon(Icons.Plus)
                     .Variant(ButtonVariant.Primary)
-                    .HandleClick(OnAddItem)
+                    .OnClick(OnAddItem)
                 | new Button("Clear All")
                     .Icon(Icons.Trash)
                     .Variant(ButtonVariant.Outline)
-                    .HandleClick(OnClearItems)
+                    .OnClick(OnClearItems)
                 | new Button("Export")
                     .Icon(Icons.Download)
                     .Variant(ButtonVariant.Ghost)
-                    .HandleClick(OnExport)
+                    .OnClick(OnExport)
         );
 
         // Create scrollable content with many items

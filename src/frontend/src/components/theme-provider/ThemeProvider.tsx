@@ -6,7 +6,7 @@ import { ThemeProviderContext } from './context';
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'light',
+  defaultTheme = 'system',
   storageKey = 'ivy-ui-theme',
   ...props
 }: ThemeProviderProps) {

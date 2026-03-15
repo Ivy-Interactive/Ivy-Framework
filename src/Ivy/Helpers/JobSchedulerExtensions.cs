@@ -1,8 +1,7 @@
-﻿using Ivy.Core;
-using Ivy.Shared;
-using Ivy.Views;
+using Ivy.Core;
 
-namespace Ivy.Helpers;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public static class JobSchedulerExtensions
 {
@@ -60,7 +59,7 @@ public static class JobSchedulerExtensions
                | GetError()
                | (job.Children.Any()
                    ? Layout.Horizontal().Gap(2).Visible(job.State != JobState.Finished)
-                     | new Separator().Orientation(Orientation.Vertical).Width(4)
+                     | new Separator().Orientation(Orientation.Vertical).Width(Size.Units(4))
                      | (Layout.Vertical() | job.Children.Select(child => child.ToView()))
                    : null);
     }

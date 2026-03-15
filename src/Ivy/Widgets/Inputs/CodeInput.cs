@@ -1,23 +1,20 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Shared;
-using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum CodeInputs
+public enum CodeInputVariant
 {
     Default
 }
 
 public interface IAnyCodeInput : IAnyInput
 {
-    public CodeInputs Variant { get; set; }
+    public CodeInputVariant Variant { get; set; }
 }
 
 public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
@@ -30,13 +27,13 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public bool Nullable { get; set; }
 
-    [Prop] public CodeInputs Variant { get; set; } = CodeInputs.Default;
+    [Prop] public CodeInputVariant Variant { get; set; } = CodeInputVariant.Default;
 
     [Prop] public Languages? Language { get; set; } = null;
 
     [Prop] public bool ShowCopyButton { get; set; } = false;
 
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(string)];
 }
@@ -47,30 +44,30 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 public record CodeInput<TString> : CodeInputBase, IInput<TString>
 {
     [OverloadResolutionPriority(1)]
-    public CodeInput(IAnyState state, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
+    public CodeInput(IAnyState state, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TString>();
         Value = typedState.Value;
-        OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
-    public CodeInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
+    public CodeInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange;
+        OnChange = onChange?.ToEventHandler();
         Value = value;
     }
 
-    public CodeInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
+    public CodeInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange == null ? null : e => { onChange(e); return ValueTask.CompletedTask; };
+        OnChange = onChange == null ? null : new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
     }
 
-    public CodeInput(string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default) : this()
+    public CodeInput(string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default) : this()
     {
         Placeholder = placeholder;
         Variant = variant;
@@ -87,12 +84,12 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
-    [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TString>, TString>>? OnChange { get; }
 }
 
 public static class CodeInputExtensions
 {
-    public static CodeInputBase ToCodeInput(this IAnyState state, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default, Languages language = Languages.Json)
+    public static CodeInputBase ToCodeInput(this IAnyState state, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default, Languages language = Languages.Json)
     {
         var type = state.GetStateType();
         Type genericType = typeof(CodeInput<>).MakeGenericType(type);
@@ -122,7 +119,7 @@ public static class CodeInputExtensions
         return widget with { Disabled = disabled };
     }
 
-    public static CodeInputBase Variant(this CodeInputBase widget, CodeInputs variant)
+    public static CodeInputBase Variant(this CodeInputBase widget, CodeInputVariant variant)
     {
         return widget with { Variant = variant };
     }
@@ -143,28 +140,20 @@ public static class CodeInputExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static CodeInputBase HandleBlur(this CodeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static CodeInputBase OnBlur(this CodeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        return widget with { OnBlur = onBlur };
+        return widget with { OnBlur = new(onBlur) };
     }
 
-    public static CodeInputBase HandleBlur(this CodeInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static CodeInputBase OnBlur(this CodeInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
-        return widget.HandleBlur(onBlur.ToValueTask());
+        return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static CodeInputBase HandleBlur(this CodeInputBase widget, Action onBlur)
+    public static CodeInputBase OnBlur(this CodeInputBase widget, Action onBlur)
     {
-        return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
-    public static CodeInputBase Value<T>(this CodeInputBase widget, T value)
-    {
-        if (widget is CodeInput<T> typedWidget)
-        {
-            return typedWidget with { Value = value };
-        }
-        throw new InvalidOperationException($"Cannot set Value: widget is not CodeInput<{typeof(T).Name}>");
-    }
 
 }

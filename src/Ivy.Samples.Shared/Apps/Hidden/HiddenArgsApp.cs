@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Hidden;
 
 public record HiddenArgsAppArgs(string Name, int Value);
@@ -18,7 +16,7 @@ public class HiddenArgsApp : SampleBase
                 Text.H2("Hidden App with Arguments"),
                 Text.P($"Name: {args.Name}"),
                 Text.P($"Value: {args.Value}"),
-                new Button("Back to Links").HandleClick(() =>
+                new Button("Back to Links").OnClick(() =>
                 {
                     navigator.Navigate("app://concepts/links");
                 })

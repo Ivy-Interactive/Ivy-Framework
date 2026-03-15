@@ -1,5 +1,3 @@
-using Ivy.Shared;
-
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
 [App(icon: Icons.Pill, path: ["Widgets"], searchHints: ["tag", "label", "chip", "status", "indicator", "pill"])]
@@ -94,6 +92,38 @@ public class BadgeApp : SampleBase
                    new Badge("10", variant: BadgeVariant.Secondary),
                    new Badge("99+", variant: BadgeVariant.Success)
                )
+
+               | Text.H2("Clickable Badges")
+               | new ClickableBadgesExample()
             ;
+    }
+}
+
+public class ClickableBadgesExample : ViewBase
+{
+    public override object? Build()
+    {
+        var isOpen = UseState(false);
+        var popupMessage = UseState("");
+
+        return Layout.Vertical()
+            | Layout.Horizontal(
+                new Badge("Click Me", icon: Icons.MousePointer)
+                    .OnClick(_ => { popupMessage.Set("Badge clicked!"); isOpen.Set(true); }),
+                new Badge("Filter", icon: Icons.ListFilterPlus, variant: BadgeVariant.Secondary)
+                    .OnClick(_ => { popupMessage.Set("Filter applied!"); isOpen.Set(true); }),
+                new Badge("Remove", icon: Icons.X, variant: BadgeVariant.Destructive)
+                    .OnClick(_ => { popupMessage.Set("Item removed!"); isOpen.Set(true); })
+            )
+            | (isOpen.Value
+                ? new Dialog(
+                    _ => isOpen.Set(false),
+                    new DialogHeader("Badge Action"),
+                    new DialogBody(Text.P(popupMessage.Value)),
+                    new DialogFooter(
+                        new Button("Close", _ => isOpen.Set(false))
+                    )
+                )
+                : null);
     }
 }

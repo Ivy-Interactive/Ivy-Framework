@@ -6,6 +6,12 @@ searchHints:
   - information
   - key-value
   - details
+  - detail
+  - expandable
+  - label-value
+  - display data
+  - ToDetails
+  - copy to clipboard
 ---
 
 # Details
@@ -58,7 +64,7 @@ Mark specific fields as multi-line for better text display. This is perfect for 
 ```csharp demo-tabs
 new { Name = "Widget", Description = "Long description text" }
     .ToDetails()
-    .MultiLine(x => x.Description)
+    .Multiline(x => x.Description)
 ```
 
 ## Custom Builders
@@ -105,4 +111,33 @@ UseState(() => new { Name = "John Doe", Age = 30 })
     .ToDetails()
 ```
 
-<WidgetDocs Type="Ivy.Details" ExtensionTypes="Ivy.Views.Builders.DetailsBuilderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Views/Builders/DetailsBuilder.cs"/>
+## Faq
+
+<Details>
+<Summary>
+How do I customize field labels in Details.ToDetails()?
+</Summary>
+<Body>
+
+By default, `ToDetails()` generates labels from property names using PascalCase splitting (e.g., `NetBurn` becomes "Net Burn"). To override a label, use the `.Label()` method:
+
+```csharp
+var data = new RunwayData(5000m, 10000m, 12, new DateTime(2027, 3, 1));
+data.ToDetails()
+    .Label(x => x.NetBurn, "Net Monthly Burn")
+    .Label(x => x.RunwayDate, "Projected Runway End")
+    .Build();
+```
+
+Alternatively, for simple cases you can use anonymous types where property names become the labels:
+
+```csharp
+new { NetBurn = "$5,000", GrossBurn = "$10,000" }.ToDetails()
+```
+
+Use `.Builder(x => x.Field, b => ...)` to customize how a value is *rendered*, not to change the label text.
+
+</Body>
+</Details>
+
+<WidgetDocs Type="Ivy.Details" ExtensionTypes="Ivy.DetailsBuilderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Views/Builders/DetailsBuilder.cs"/>

@@ -1,7 +1,8 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 using Ivy.Core.Hooks;
 
-namespace Ivy.Hooks;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public class RefreshToken(IState<(Guid, object?, bool)> state) : IEffectTriggerConvertible
 {

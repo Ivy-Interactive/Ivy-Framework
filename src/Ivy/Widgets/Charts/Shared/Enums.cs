@@ -1,6 +1,6 @@
 
 // ReSharper disable once CheckNamespace
-namespace Ivy.Charts;
+namespace Ivy;
 
 public enum ColorScheme
 {
@@ -102,4 +102,21 @@ public enum SortOrder
     None,
     Ascending,
     Descending
+}
+
+public enum ScatterShape
+{
+    Circle,
+    Square,
+    Cross,
+    Diamond,
+    Star,
+    Triangle,
+    Wye
+}
+
+public enum ScatterLineType
+{
+    Joint,
+    Fitting
 }

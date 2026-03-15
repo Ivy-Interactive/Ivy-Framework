@@ -144,7 +144,7 @@ public class InteractiveXmlEditor : ViewBase
         
         return Layout.Vertical().Gap(4)
             | Text.Label("XML Editor")
-            | xmlContent.ToTextAreaInput(placeholder: "Enter XML content here...")
+            | xmlContent.ToTextareaInput(placeholder: "Enter XML content here...")
                 .Height(Size.Units(50))
             | (isValid.Value 
                 ? new Xml(xmlContent.Value)

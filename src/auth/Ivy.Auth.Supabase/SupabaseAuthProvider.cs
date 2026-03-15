@@ -1,12 +1,11 @@
-﻿using System.Reflection;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text;
 using Ivy.Core;
-using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Supabase;
 using Supabase.Gotrue;
+using GotrueConstants = global::Supabase.Gotrue.Constants;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
@@ -76,36 +75,36 @@ public class SupabaseAuthProvider : IAuthProvider
     {
         var provider = option.Id switch
         {
-            "google" => Constants.Provider.Google,
-            "apple" => Constants.Provider.Apple,
-            "discord" => Constants.Provider.Discord,
-            "twitch" => Constants.Provider.Twitch,
-            "figma" => Constants.Provider.Figma,
-            "notion" => Constants.Provider.Notion,
-            "azure" => Constants.Provider.Azure,
-            "workos" => Constants.Provider.WorkOS,
-            "github" => Constants.Provider.Github,
-            "gitlab" => Constants.Provider.Gitlab,
-            "bitbucket" => Constants.Provider.Bitbucket,
+            "google" => GotrueConstants.Provider.Google,
+            "apple" => GotrueConstants.Provider.Apple,
+            "discord" => GotrueConstants.Provider.Discord,
+            "twitch" => GotrueConstants.Provider.Twitch,
+            "figma" => GotrueConstants.Provider.Figma,
+            "notion" => GotrueConstants.Provider.Notion,
+            "azure" => GotrueConstants.Provider.Azure,
+            "workos" => GotrueConstants.Provider.WorkOS,
+            "github" => GotrueConstants.Provider.Github,
+            "gitlab" => GotrueConstants.Provider.Gitlab,
+            "bitbucket" => GotrueConstants.Provider.Bitbucket,
             _ => throw new ArgumentException($"Unknown OAuth provider: {option.Id}"),
         };
 
         var signInOptions = new SignInOptions
         {
             RedirectTo = callback.GetUri().ToString(),
-            FlowType = Constants.OAuthFlowType.PKCE,
+            FlowType = GotrueConstants.OAuthFlowType.PKCE,
         };
 
         // Set scopes. These are necessary for Discord, but some providers return errors if they're provided.
-        if (provider != Constants.Provider.Gitlab
-            && provider != Constants.Provider.Figma
-            && provider != Constants.Provider.Twitch
-            && provider != Constants.Provider.WorkOS)
+        if (provider != GotrueConstants.Provider.Gitlab
+            && provider != GotrueConstants.Provider.Figma
+            && provider != GotrueConstants.Provider.Twitch
+            && provider != GotrueConstants.Provider.WorkOS)
         {
             signInOptions.Scopes = "email openid";
         }
 
-        if (provider == Constants.Provider.WorkOS)
+        if (provider == GotrueConstants.Provider.WorkOS)
         {
             if (option.Tag is not string connectionId || string.IsNullOrEmpty(connectionId))
             {
@@ -258,67 +257,67 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public SupabaseAuthProvider UseGoogle()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Google", nameof(Constants.Provider.Google).ToLower(), Icons.Google));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Google", nameof(GotrueConstants.Provider.Google).ToLower(), Icons.Google));
         return this;
     }
 
     public SupabaseAuthProvider UseApple()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Apple));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(GotrueConstants.Provider.Apple).ToLower(), Icons.Apple));
         return this;
     }
 
     public SupabaseAuthProvider UseDiscord()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Discord", nameof(Constants.Provider.Discord).ToLower(), Icons.Discord));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Discord", nameof(GotrueConstants.Provider.Discord).ToLower(), Icons.Discord));
         return this;
     }
 
     public SupabaseAuthProvider UseTwitch()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Twitch", nameof(Constants.Provider.Twitch).ToLower(), Icons.Twitch));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Twitch", nameof(GotrueConstants.Provider.Twitch).ToLower(), Icons.Twitch));
         return this;
     }
 
     public SupabaseAuthProvider UseFigma()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Figma", nameof(Constants.Provider.Figma).ToLower(), Icons.Figma));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Figma", nameof(GotrueConstants.Provider.Figma).ToLower(), Icons.Figma));
         return this;
     }
 
     public SupabaseAuthProvider UseNotion()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Notion", nameof(Constants.Provider.Notion).ToLower(), Icons.Notion));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Notion", nameof(GotrueConstants.Provider.Notion).ToLower(), Icons.Notion));
         return this;
     }
 
     public SupabaseAuthProvider UseAzure()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Azure", nameof(Constants.Provider.Azure).ToLower(), Icons.Azure));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Azure", nameof(GotrueConstants.Provider.Azure).ToLower(), Icons.Azure));
         return this;
     }
 
     public SupabaseAuthProvider UseWorkOS(string connectionId)
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "WorkOS", nameof(Constants.Provider.WorkOS).ToLower(), Icons.None, connectionId));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "WorkOS", nameof(GotrueConstants.Provider.WorkOS).ToLower(), Icons.None, connectionId));
         return this;
     }
 
     public SupabaseAuthProvider UseGithub()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitHub", nameof(Constants.Provider.Github).ToLower(), Icons.Github));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitHub", nameof(GotrueConstants.Provider.Github).ToLower(), Icons.Github));
         return this;
     }
 
     public SupabaseAuthProvider UseGitlab()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitLab", nameof(Constants.Provider.Gitlab).ToLower(), Icons.Gitlab));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitLab", nameof(GotrueConstants.Provider.Gitlab).ToLower(), Icons.Gitlab));
         return this;
     }
 
     public SupabaseAuthProvider UseBitbucket()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Bitbucket", nameof(Constants.Provider.Bitbucket).ToLower(), Icons.Bitbucket));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Bitbucket", nameof(GotrueConstants.Provider.Bitbucket).ToLower(), Icons.Bitbucket));
         return this;
     }
 

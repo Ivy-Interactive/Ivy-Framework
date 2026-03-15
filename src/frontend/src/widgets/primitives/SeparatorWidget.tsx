@@ -7,6 +7,7 @@ interface SeparatorWidgetProps {
   id: string;
   orientation: 'Vertical' | 'Horizontal';
   text?: string;
+  textAlign?: 'Left' | 'Center' | 'Right' | 'Justify';
   height?: string;
   width?: string;
 }
@@ -14,6 +15,7 @@ interface SeparatorWidgetProps {
 export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({
   orientation = 'Horizontal',
   text,
+  textAlign = 'Center',
   width,
   height,
 }) => {
@@ -28,10 +30,22 @@ export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({
   );
 
   if (text) {
+    const textAlignClass = {
+      Left: 'left-4',
+      Center: 'left-1/2 -translate-x-1/2',
+      Right: 'right-4',
+      Justify: 'left-1/2 -translate-x-1/2',
+    }[textAlign];
+
     return (
-      <div className={cn('relative flex items-center justify-center')}>
+      <div className={cn('relative flex items-center')}>
         {separator}
-        <span className="absolute px-2 text-small-label text-muted-foreground bg-background">
+        <span
+          className={cn(
+            'absolute px-2 text-small-label text-muted-foreground bg-background',
+            textAlignClass
+          )}
+        >
           {text}
         </span>
       </div>

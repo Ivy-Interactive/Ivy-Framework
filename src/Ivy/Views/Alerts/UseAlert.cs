@@ -1,9 +1,8 @@
-using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Views.Alerts;
 
-namespace Ivy.Views.Alerts;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public delegate void ShowAlertDelegate(string message, Action<AlertResult> callback, string? title = null, AlertButtonSet buttonSet = AlertButtonSet.OkCancel);
 

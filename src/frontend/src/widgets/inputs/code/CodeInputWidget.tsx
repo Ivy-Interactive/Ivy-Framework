@@ -21,9 +21,9 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
-import { Scales } from '@/types/scale';
+import { Densities } from '@/types/density';
 import { X, Copy } from 'lucide-react';
-import { xIconVariants } from '@/components/ui/input/text-input-variants';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
 import {
   keymap,
   EditorView,
@@ -31,6 +31,8 @@ import {
   highlightActiveLine,
 } from '@codemirror/view';
 import { history } from '@codemirror/commands';
+
+const EMPTY_ARRAY: never[] = [];
 
 interface CodeInputWidgetProps {
   id: string;
@@ -43,7 +45,7 @@ interface CodeInputWidgetProps {
   events: string[];
   width?: string;
   height?: string;
-  scale?: Scales;
+  density?: Densities;
 }
 
 const languageExtensions = {
@@ -60,6 +62,7 @@ const languageExtensions = {
   Markdown: markdown,
   Text: undefined,
   Yaml: yaml,
+  Csv: undefined,
 };
 
 export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
@@ -72,8 +75,8 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   nullable = false,
   width,
   height,
-  scale = Scales.Medium,
-  events = [],
+  density = Densities.Medium,
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
   const [localValue, setLocalValue] = useState(value || '');
@@ -134,7 +137,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   };
 
   // Create theme extension once and reuse it
-  const themeExtension = useMemo(() => createIvyCodeTheme(scale), [scale]);
+  const themeExtension = useMemo(() => createIvyCodeTheme(density), [density]);
 
   // Minimal setup without search features
   const minimalSetup = useMemo(() => {
@@ -171,7 +174,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
               aria-label="Copy to clipboard"
               className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
             >
-              <Copy className={xIconVariants({ scale })} />
+              <Copy className={xIconVariant({ density })} />
             </button>
           )}
           {showClear && (
@@ -182,7 +185,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
               onClick={handleClear}
               className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
             >
-              <X className={xIconVariants({ scale })} />
+              <X className={xIconVariant({ density })} />
             </button>
           )}
           {/* Invalid icon - rightmost */}
