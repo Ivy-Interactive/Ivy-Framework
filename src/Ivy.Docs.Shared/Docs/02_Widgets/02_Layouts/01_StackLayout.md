@@ -44,15 +44,13 @@ public class StackLayoutExample : ViewBase
         var box1 = new Box().Background(Colors.Primary).Width(Size.Units(2)).Height(Size.Units(2));
         var box2 = new Box().Background(Colors.Primary).Width(Size.Units(2)).Height(Size.Units(2));
         var box3 = new Box().Background(Colors.Primary).Width(Size.Units(2)).Height(Size.Units(2));
-        
+
         return Layout.Vertical().Gap(4)
             | Text.H2("StackLayout Features")
-            | Text.Label("Orientation.Horizontal, gap(2), padding(1)")
-            | (Layout.Horizontal().Gap(2).Padding(1)
-                | box1 | box2 | box3)
-            | Text.Label("Orientation.Vertical, gap(1), Align.Center, padding(2)")
-            | (Layout.Vertical().Gap(1).Align(Align.Center).Padding(2)
-                | box1 | box2 | box3);
+            | Text.Label("Horizontal, Gap(2), Padding(1)")
+            | (Layout.Horizontal().Gap(2).Padding(1) | box1 | box2 | box3)
+            | Text.Label("Vertical, Gap(1), Align(Center), Padding(2)")
+            | (Layout.Vertical().Gap(1).Align(Align.Center).Padding(2) | box1 | box2 | box3);
     }
 }
 ```
@@ -152,15 +150,13 @@ public class AdvancedStackLayoutExample : ViewBase
     public override object? Build()
     {
         var box = new Box().Background(Colors.Primary).Width(Size.Units(2)).Height(Size.Units(2));
-        
+
         return Layout.Vertical().Gap(2).Padding(8)
             | Text.H2("Advanced StackLayout Features")
             | Text.Label("With Margin (external spacing)")
-            | (Layout.Horizontal().Margin(4)
-                | box | box)
+            | (Layout.Horizontal().Margin(4) | box | box)
             | Text.Label("Remove Parent Padding, Background color")
-            | (Layout.Horizontal().RemoveParentPadding().Background(Colors.Gray)
-                | box | box);
+            | (Layout.Horizontal().RemoveParentPadding().Background(Colors.Gray) | box | box);
     }
 }
 ```
@@ -186,16 +182,19 @@ public class NavigationExample : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        
+
         return Layout.Vertical().Gap(16).Padding(12).Align(Align.Center)
+            // Navigation buttons
             | (Layout.Horizontal().Gap(8).Align(Align.Center)
                 | new Button("Home", _ => client.Toast("Home"))
                 | new Button("About", _ => client.Toast("About"))
                 | new Button("Contact", _ => client.Toast("Contact"))
                 | new Button("Settings", _ => client.Toast("Settings")))
+            // App title and user info
             | (Layout.Vertical().Align(Align.Left)
                 | Text.H3("MyApp")
                 | Text.P("Welcome back!").Small())
+            // User actions
             | (Layout.Horizontal().Gap(4).Align(Align.Right)
                 | new Button("Profile", _ => client.Toast("Profile"))
                 | new Button("Logout", _ => client.Toast("Logout")));
