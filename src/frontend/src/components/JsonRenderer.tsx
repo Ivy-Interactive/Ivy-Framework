@@ -61,7 +61,7 @@ const JsonNode = ({
       </div>
 
       {isExpanded && (
-        <div className="ml-4 border-l border-border">
+        <div className="ml-3 border-l border-border">
           {value &&
             typeof value === 'object' &&
             Object.entries(value).map(([key, val]) => (

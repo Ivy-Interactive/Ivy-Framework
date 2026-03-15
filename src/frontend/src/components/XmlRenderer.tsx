@@ -84,7 +84,7 @@ const XmlNodeComponent = ({
         </div>
 
         {isExpanded && (
-          <div className="ml-4 border-l border-border">
+          <div className="ml-3 border-l border-border">
             {node.children?.map((child, i) => {
               const childKey = `xml-node-${i}`;
               return (
