@@ -4,7 +4,7 @@ searchHints:
   - optimization
   - caching
   - usememo
-  - usecallback
+  - callback
   - rendering
   - memo
 ---
@@ -19,11 +19,10 @@ Memoization helps Ivy [applications](../../../01_Onboarding/02_Concepts/10_Apps.
 
 Memoization in Ivy provides several powerful tools to optimize performance:
 
-- **[`UseMemo`](#usememo-hook)** - Caches the result of expensive computations
-- **[`UseCallback`](./06_UseCallback.md)** - Memoizes callback functions to prevent unnecessary re-renders.
+- **[`UseMemo`](#usememo-hook)** - Caches the result of expensive computations (including callback functions)
 - **`IMemoized`** - Interface for component-level memoization
 
-These [hooks](../02_RulesOfHooks.md) work similarly to their React counterparts (`useMemo`, `useCallback`) but are designed specifically for Ivy's architecture.
+These [hooks](../02_RulesOfHooks.md) work similarly to React's `useMemo` but are designed specifically for Ivy's architecture.
 
 ## Basic Usage
 
@@ -54,15 +53,12 @@ flowchart TD
     A["Need to optimize performance?"] --> B{What are you optimizing?}
     
     B --> C["Expensive computation<br/>or data transformation"]
-    B --> D["Callback function<br/>passed to child components"]
     B --> E["Entire component<br/>with expensive rendering"]
-    
+
     C --> F["Use UseMemo"]
-    D --> G["Use UseCallback"]
     E --> H["Implement IMemoized"]
-    
-    F --> I["Cache computed values<br/>• Data filtering<br/>• Complex calculations<br/>• Derived state"]
-    G --> J["Prevent child re-renders<br/>• Event handlers<br/>• Stable function references<br/>• Effect dependencies"]
+
+    F --> I["Cache computed values<br/>• Data filtering<br/>• Complex calculations<br/>• Derived state<br/>• Callback functions"]
     H --> K["Component-level optimization<br/>• List items<br/>• Heavy UI components<br/>• Custom widgets"]
 ```
 
@@ -252,24 +248,21 @@ var options = UseRef(new[] { "option1", "option2" });
 var result = UseMemo(() => ProcessData(data.Value), data.Value, options);
 ```
 
-### Callback Dependencies Issues
+### Callback Memoization
 
-**Problem**: [UseCallback](./06_UseCallback.md) callbacks that capture too many state variables
+You can use `UseMemo` to memoize callback functions when you need a stable delegate reference:
 
 ```csharp
-// Bad: Callback recreated whenever any state changes
-var handleClick = UseCallback(() => 
-{
-    DoSomething(data.Value, filter.Value, sortOrder.Value);
-}, data, filter, sortOrder); // Too many dependencies
+// Memoize a callback using UseMemo
+var onSubmit = UseMemo(() => (Action<string>)(value => Save(value)), dependency);
 ```
 
-**Solution**: Split into smaller, focused callbacks using [UseCallback](./06_UseCallback.md)
+When memoizing callbacks, keep the dependency list minimal and split into smaller, focused callbacks:
 
 ```csharp
 // Good: Separate callbacks with minimal dependencies
-var handleDataAction = UseCallback(() => DoSomethingWithData(data.Value), data);
-var handleFilterAction = UseCallback(() => ApplyFilter(filter.Value), filter);
+var handleDataAction = UseMemo(() => (Action)(() => DoSomethingWithData(data.Value)), data);
+var handleFilterAction = UseMemo(() => (Action)(() => ApplyFilter(filter.Value)), filter);
 ```
 
 ## Best Practices
@@ -282,7 +275,6 @@ var handleFilterAction = UseCallback(() => ApplyFilter(filter.Value), filter);
 ## See Also
 
 - [State Management](./03_UseState.md) - Managing component state
-- [UseCallback](./06_UseCallback.md) - Memoizing callback functions
 - [Effects](./04_UseEffect.md) - Performing side effects with dependencies
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [UseRef](./08_UseRef.md) - Storing stable references

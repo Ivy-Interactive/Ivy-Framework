@@ -41,7 +41,7 @@ Ivy ships with a comprehensive set of hooks organized by purpose:
 | Category                     | Hooks                                                                                                                                     |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | **Core**                     | [UseState](./02_Core/03_UseState.md), [UseEffect](./02_Core/04_UseEffect.md), [UseReducer](./02_Core/07_UseReducer.md)                            |
-| **Performance**              | [UseMemo](./02_Core/05_UseMemo.md), [UseCallback](./02_Core/06_UseCallback.md)                                                                 |
+| **Performance**              | [UseMemo](./02_Core/05_UseMemo.md)                                                                                                             |
 | **References & Context**     | [UseRef](./02_Core/08_UseRef.md), [UseContext](./02_Core/12_UseContext.md), [UseArgs](./02_Core/13_UseArgs.md)                                     |
 | **Data Fetching**            | [UseQuery](./02_Core/09_UseQuery.md), [UseMutation](./02_Core/14_UseMutation.md), [UseSignal](./02_Core/10_UseSignal.md)                           |
 | **Services & Dependencies**  | [UseService](./02_Core/11_UseService.md), [UseRefreshToken](./02_Core/16_UseRefreshToken.md), [UseWebhook](./02_Core/19_UseWebhook.md)            |
@@ -183,7 +183,6 @@ flowchart TB
     A[Performance Hooks] --> B[Memoization]
     
     B --> B1[UseMemo]
-    B --> B2[UseCallback]
 ```
 
 ### UseMemo
@@ -224,47 +223,6 @@ public class MemoDemo : ViewBase
 ```
 
 See [UseMemo](./02_Core/05_UseMemo.md) for detailed documentation.
-
-### UseCallback
-
-Stable function references prevent unnecessary child component re-renders. Dependency-based memoization optimizes component composition and ensures callbacks have stable references when dependencies haven't changed.
-
-```csharp demo-tabs
-public class CallbackDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var count = UseState(0);
-        var multiplier = UseState(2);
-        
-        // Memoized callback - only recreates when count changes
-        var handleIncrement = UseMemo(() => (Action)(() => 
-        {
-            count.Set(count.Value + 1);
-        }), count);
-        
-        // Stable callback with no dependencies - never changes
-        var handleReset = UseMemo(() => (Action)(() => 
-        {
-            count.Set(0);
-        }));
-        
-        return Layout.Vertical()
-            | Text.P($"Count: {count.Value} × {multiplier.Value} = {count.Value * multiplier.Value}")
-            | multiplier.ToNumberInput()
-                .Min(1)
-                .Max(10)
-                .Variant(NumberInputVariant.Slider)
-                .WithField()
-                .Label("Multiplier")
-            | (Layout.Horizontal()
-                | new Button("Increment", _ => handleIncrement())
-                | new Button("Reset", _ => handleReset()));
-    }
-}
-```
-
-See [UseCallback](./02_Core/06_UseCallback.md) for detailed documentation.
 
 ## References & Context
 
