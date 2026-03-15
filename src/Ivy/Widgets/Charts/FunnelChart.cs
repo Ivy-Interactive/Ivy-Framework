@@ -1,6 +1,4 @@
-using Ivy.Charts;
 using Ivy.Core;
-using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy
@@ -32,7 +30,7 @@ namespace Ivy
 
         [Prop] public Funnel[] Funnels { get; init; } = [];
 
-        [Prop] public Charts.Tooltip? Tooltip { get; init; }
+        [Prop] public ChartTooltip? Tooltip { get; init; }
 
         public static FunnelChart operator |(FunnelChart widget, object child)
         {
@@ -77,14 +75,14 @@ namespace Ivy
             return chart with { Toolbox = new Toolbox() };
         }
 
-        public static FunnelChart Tooltip(this FunnelChart chart, Charts.Tooltip tooltip)
+        public static FunnelChart Tooltip(this FunnelChart chart, ChartTooltip tooltip)
         {
             return chart with { Tooltip = tooltip };
         }
 
         public static FunnelChart Tooltip(this FunnelChart chart)
         {
-            return chart with { Tooltip = new Charts.Tooltip() };
+            return chart with { Tooltip = new ChartTooltip() };
         }
     }
 
@@ -195,7 +193,6 @@ namespace Ivy.Views.Charts
     using System.Collections.Immutable;
     using System.Linq.Expressions;
     using System.Runtime.CompilerServices;
-    using Ivy.Charts;
     using Ivy.Core;
     using Ivy.Core.Hooks;
 
@@ -229,7 +226,7 @@ namespace Ivy.Views.Charts
         {
             return new FunnelChart(data)
                 .Funnel(nameof(FunnelChartData.Measure), nameof(FunnelChartData.Dimension))
-                .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+                .Tooltip(new ChartTooltip().Animated(true))
                 .Legend(new Legend()
                     .Layout(Legend.Layouts.Horizontal)
                     .Align(Legend.Alignments.Center)

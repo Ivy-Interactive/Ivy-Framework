@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Ivy.Charts;
 using Ivy.Core;
-using Ivy.Shared;
 using Ivy.Views.Charts;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
@@ -35,8 +33,8 @@ public class FunnelChartApp : SampleBase
                     dimension: x => x.Stage,
                     measure: q => q.Sum(x => x.Value),
                     polish: chart => chart
-                        .ColorScheme(Ivy.Charts.ColorScheme.Rainbow)
-                        .Legend(new Ivy.Charts.Legend())
+                        .ColorScheme(ColorScheme.Rainbow)
+                        .Legend(new Legend())
                 ).Toolbox()).GridColumnSpan(2))
             | (new Card().Title("Vertical Funnel").Description("Shows stages in a conversion pipeline using vertical orientation.")
                 | data.ToFunnelChart(
@@ -50,7 +48,7 @@ public class FunnelChartApp : SampleBase
                     measure: q => q.Sum(x => x.Value),
                     polish: chart => chart with
                     {
-                        ColorScheme = Ivy.Charts.ColorScheme.Rainbow,
+                        ColorScheme = ColorScheme.Rainbow,
                         Funnels = [chart.Funnels[0].Orient(FunnelOrientations.Vertical)]
                     }
                 ).Toolbox());
