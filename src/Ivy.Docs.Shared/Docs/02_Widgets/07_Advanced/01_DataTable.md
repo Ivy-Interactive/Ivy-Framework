@@ -140,6 +140,7 @@ sampleUsers.ToDataTable()
 
 Add contextual actions to each row using `RowActions()` and handle them via `OnRowAction()`. Actions are rendered as icons or [buttons](../03_Common/01_Button.md) that appear when hovering over a row. Row actions support both simple menu items and nested [dropdown menus](../03_Common/11_DropDownMenu.md).
 
+
 1. **Define actions with a tag** – Each `MenuItem` must have a **tag** (set via `.Tag(value)`) so the handler can tell which action was clicked. Use the fluent API: `MenuItem.Default(Icons.Pencil).Tag(YourEnum.Edit)` or `.Tag("edit")` for strings. Without a tag, the handler cannot distinguish actions.
 
 2. **Single handler** – There is one `OnRowAction()` handler for all row actions. Inside it you must **identify the action from the tag** and branch (e.g. edit vs delete). If you don't branch on the tag, every click runs the same logic and edit/delete will not behave differently.

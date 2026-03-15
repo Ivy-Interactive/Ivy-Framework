@@ -269,6 +269,7 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+
     public DataTableBuilder<TModel> OnCellAction(Expression<Func<TModel, object>> field, EventHandler<object> action)
     {
         var columnName = TypeHelper.GetNameFromMemberExpression(field.Body);
