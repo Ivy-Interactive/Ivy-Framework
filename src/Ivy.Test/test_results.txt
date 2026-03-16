@@ -1,0 +1,12 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Ivy.Agent.Filter -> D:\git\ivy-bot4\Ivy-Framework\src\Ivy.Agent.Filter\bin\Debug\net10.0\Ivy.Agent.Filter.dll
+  Ivy -> D:\git\ivy-bot4\Ivy-Framework\src\Ivy\bin\Debug\net10.0\Ivy.dll
+  Ivy.Test -> D:\git\ivy-bot4\Ivy-Framework\src\Ivy.Test\bin\Debug\net10.0\Ivy.Test.dll
+Test run for D:\git\ivy-bot4\Ivy-Framework\src\Ivy.Test\bin\Debug\net10.0\Ivy.Test.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   731, Skipped:     0, Total:   731, Duration: 206 ms - Ivy.Test.dll (net10.0)

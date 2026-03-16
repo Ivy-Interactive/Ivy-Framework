@@ -129,7 +129,7 @@ public static class NumberRangeInputExtensions
 
         Type genericType = typeof(NumberRangeInput<>).MakeGenericType(type.GetGenericArguments()[0]);
         NumberRangeInputBase input = (NumberRangeInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, disabled, formatStyle }, null)!;
-        
+
         input.ScaffoldDefaults(null, type.GetGenericArguments()[0]);
         if (min is not null) input = input with { Min = min };
         if (max is not null) input = input with { Max = max };

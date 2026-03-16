@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Ivy.Core;
 using Ivy.Core.Helpers;
@@ -146,20 +147,14 @@ public static class BoolInputExtensions
         var stateType = state.GetStateType();
         var isNullable = stateType.IsNullableType();
 
-        if (isNullable)
-        {
-            var boolValue = ConvertToBoolValue<bool?>(state);
-            var input = new BoolInput<bool?>(boolValue, e => SetStateValue(state, e.Value), label, disabled, variant);
-            input.ScaffoldDefaults(null!, stateType);
-            return input;
-        }
-        else
-        {
-            var boolValue = ConvertToBoolValue<bool>(state);
-            var input = new BoolInput<bool>(boolValue, e => SetStateValue(state, e.Value), label, disabled, variant);
-            input.ScaffoldDefaults(null!, stateType);
-            return input;
-        }
+        Type genericType = typeof(BoolInput<>).MakeGenericType(stateType);
+
+        BoolInputBase input = (BoolInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, label, disabled, variant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, isNullable);
+
+        input.ScaffoldDefaults(null!, stateType);
+        return input;
     }
 
     private static T ConvertToBoolValue<T>(IAnyState state)

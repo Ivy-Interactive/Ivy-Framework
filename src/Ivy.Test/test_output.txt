@@ -1,0 +1,1059 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Ivy.Agent.Filter -> D:\git\ivy-bot4\Ivy-Framework\src\Ivy.Agent.Filter\bin\Debug\net10.0\Ivy.Agent.Filter.dll
+  Ivy -> D:\git\ivy-bot4\Ivy-Framework\src\Ivy\bin\Debug\net10.0\Ivy.dll
+  Ivy.Test -> D:\git\ivy-bot4\Ivy-Framework\src\Ivy.Test\bin\Debug\net10.0\Ivy.Test.dll
+Test run for D:\git\ivy-bot4\Ivy-Framework\src\Ivy.Test\bin\Debug\net10.0\Ivy.Test.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+D:\git\ivy-bot4\Ivy-Framework\src\Ivy.Test\bin\Debug\net10.0\Ivy.Test.dll
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.3)
+[xUnit.net 00:00:00.06]   Discovering: Ivy.Test
+[xUnit.net 00:00:00.14]   Discovered:  Ivy.Test
+[xUnit.net 00:00:00.21]   Starting:    Ivy.Test
+48-65-6C-6C-6F
+  Passed Ivy.Test.BestGuessConvertTests.StringToInt [15 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToEnum [20 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_InvalidValues_ReturnsFalse(value: null, expected: False) [12 ms]
+  Passed Ivy.Test.ExpressionNameHelper.Test4_AggregationMemberAccess [11 ms]
+  Passed Ivy.Test.SplitPascalCaseTests.SplitPascalCase_TitleCasesEachWord(input: "avgSalary", expected: "Avg Salary") [22 ms]
+  Passed Ivy.Test.WidgetTreeTests.CalculateMemoizedHashCodeTest [17 ms]
+  Passed Ivy.Test.Helpers.CollectionHelperTests.ToExpando_Dictionary_CreatesExpandoObject [15 ms]
+  Passed Ivy.Test.Helpers.ProcessHelperTests.IsPortInUse_UnusedPort_ReturnsFalse [12 ms]
+  Passed Ivy.Test.QueryResultTests.ToTrigger_WithState_ReturnsAfterChangeTrigger [21 ms]
+  Passed Ivy.Test.AllowedValuesTest.GetAllowedValues_ShouldReturnNull_WhenNoAttribute [11 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToReadable_ConvertsCorrectly(input: "UseRefreshTokenApp", expected: "UseRefreshToken") [11 ms]
+  Passed Ivy.Test.PivotTableTests.Test1 [16 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_SingleType_ShowsForeignKey [26 ms]
+  Passed Ivy.Test.SplitPascalCaseTests.SplitPascalCase_TitleCasesEachWord(input: null, expected: null) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_InvalidValues_ReturnsFalse(value: "", expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_InvalidValues_ReturnsFalse(value: "   ", expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_InvalidValues_ReturnsFalse(value: 0, expected: False) [< 1 ms]
+  Passed Ivy.Test.SplitPascalCaseTests.SplitPascalCase_TitleCasesEachWord(input: "minValue", expected: "Min Value") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_InvalidValues_ReturnsFalse(value: 0, expected: False) [< 1 ms]
+  Passed Ivy.Test.SplitPascalCaseTests.SplitPascalCase_TitleCasesEachWord(input: "TotalSalary", expected: "Total Salary") [< 1 ms]
+  Passed Ivy.Test.SplitPascalCaseTests.SplitPascalCase_TitleCasesEachWord(input: "totalCount", expected: "Total Count") [< 1 ms]
+  Passed Ivy.Test.SplitPascalCaseTests.SplitPascalCase_TitleCasesEachWord(input: "count", expected: "Count") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToReadable_ConvertsCorrectly(input: "", expected: "") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToReadable_ConvertsCorrectly(input: "FooBar", expected: "Foo Bar") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToReadable_ConvertsCorrectly(input: "UseStateApp", expected: "UseState") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToReadable_ConvertsCorrectly(input: "DatePickerApp", expected: "Date Picker") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToReadable_ConvertsCorrectly(input: "UseContextApp", expected: "UseContext") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToReadable_ConvertsCorrectly(input: "   ", expected: "") [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "_CLI", expected: "_cli") [28 ms]
+  Passed Ivy.Test.ExpressionNameHelper.Test1 [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "FOOBar", expected: "foo-bar") [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "CLI", expected: "cli") [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "XMLHttpRequest", expected: "xml-http-request") [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "_FooBarApp", expected: "_foo-bar") [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "HTMLParser", expected: "html-parser") [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "_CLIApp", expected: "_cli") [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "FooBar", expected: "foo-bar") [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "FooBarApp", expected: "foo-bar") [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.BoolToIntFalse [< 1 ms]
+  Passed Ivy.Test.TitleCaseToFriendlyUrlTests.ConvertsCorrectly(input: "CLIApp", expected: "cli") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToFriendlyUrl_ConvertsCorrectly(input: "FooBarApp", expected: "foo-bar") [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.StringToNullEnum [< 1 ms]
+  Passed Ivy.Test.ExpressionNameHelper.Test2 [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToTimeOnly [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToFriendlyUrl_ConvertsCorrectly(input: "CLI", expected: "cli") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToFriendlyUrl_ConvertsCorrectly(input: "HTMLParser", expected: "html-parser") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToFriendlyUrl_ConvertsCorrectly(input: "_FooBarApp", expected: "_foo-bar") [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.DoubleToNullInt [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToFriendlyUrl_ConvertsCorrectly(input: "CLIApp", expected: "cli") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToFriendlyUrl_ConvertsCorrectly(input: "FooBar", expected: "foo-bar") [< 1 ms]
+  Passed Ivy.Test.ExpressionNameHelper.Test3 [1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToNullableTimeOnly [< 1 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_SingleType_ShowsNullable [2 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_SingleType_ShowsCollection [< 1 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_SingleType_ShowsRequired [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_NonZeroInt_ReturnsTrue [3 ms]
+  Passed Ivy.Test.Helpers.ProcessHelperTests.IsProduction_WhenSetToProduction_ReturnsTrue [3 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_SingleType_ShowsMaxLength [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.DoubleToBool2 [2 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.EatLeft_Char_EatsCorrectly(input: "", food: '/', expected: "") [2 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsEmptyContent_TrueBool_ReturnsFalse [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.EatLeft_Char_EatsCorrectly(input: "hello", food: '/', expected: "hello") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.EatLeft_Char_EatsCorrectly(input: "///hello", food: '/', expected: "hello") [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToNullableDateTimeOffset [2 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_MultipleTypes_ContainsAllTypes [1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.IntToInt [1 ms]
+  Passed Ivy.Test.Helpers.ProcessHelperTests.IsDevelopment_WhenSetToProduction_ReturnsFalse [1 ms]
+  Passed Ivy.Test.Helpers.ProcessHelperTests.IsDevelopment_WhenNotSet_ReturnsTrue [< 1 ms]
+  Passed Ivy.Test.Helpers.ProcessHelperTests.IsProduction_WhenNotSet_ReturnsFalse [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_InvalidUrls_ReturnsNull(url: "data:text/html,test") [1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_InvalidUrls_ReturnsNull(url: "") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_InvalidUrls_ReturnsNull(url: "javascript:alert('xss')") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_InvalidUrls_ReturnsNull(url: null) [< 1 ms]
+  Passed Ivy.Test.QueryableExtensionsTests.RemoveFields_EmptyFieldsArray_NoFieldsRemoved [34 ms]
+  Passed Ivy.Test.Helpers.ProcessHelperTests.IsDevelopment_WhenSetToDevelopment_ReturnsTrue [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.EatLeft_String_EatsCorrectly [2 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_ValidRelativePath_ReturnsUrl(url: "/users/profile") [1 ms]
+  Passed Ivy.Test.QueryResultTests.ToTrigger_WithoutState_ThrowsInvalidOperationException [7 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToNullableDouble [3 ms]
+  Passed Ivy.Test.InputWidgetTests.IconInput_ToIconInput_ShouldNotThrow [37 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_ValidRelativePath_ReturnsUrl(url: "/dashboard") [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.IntToNullInt [3 ms]
+  Passed Ivy.Test.BestGuessConvertTests.IntToBoolFalse [< 1 ms]
+  Passed Ivy.Test.Helpers.ProcessHelperTests.OpenBrowser_NullUrl_ThrowsArgumentNullException [2 ms]
+  Passed Ivy.Test.Helpers.ProcessHelperTests.OpenBrowser_EmptyUrl_ThrowsArgumentNullException [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrl_SetsUrl(url: "https://example.com/page") [39 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsSafeAppId_ReturnsExpected(appId: null, expected: False) [1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsSafeAppId_ReturnsExpected(appId: "app:id", expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsSafeAppId_ReturnsExpected(appId: "", expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsSafeAppId_ReturnsExpected(appId: "/dashboard", expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsSafeAppId_ReturnsExpected(appId: "dashboard", expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsSafeAppId_ReturnsExpected(appId: "app123", expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsSafeAppId_ReturnsExpected(appId: "my-app", expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsSafeAppId_ReturnsExpected(appId: "app?q", expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.NullIfEmpty_ReturnsExpected(input: "hello", expected: "hello") [3 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrl_SetsUrl(url: "app://dashboard") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrl_SetsUrl(url: "/users/profile") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrl_SetsUrl(url: "http://example.com/page") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrl_SetsUrl(url: "#section1") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_SameOrigin_ReturnsUrl [1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrl_SetsUrl(url: "/dashboard") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsEmptyContent_EmptyValues_ReturnsTrue(value: "", expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.NullIfEmpty_ReturnsExpected(input: null, expected: null) [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.NullIfEmpty_ReturnsExpected(input: "", expected: null) [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.NullIfEmpty_ReturnsExpected(input: "   ", expected: null) [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_WithLinkVariant_DangerousUrl_ThrowsException [< 1 ms]
+  Passed Ivy.Test.FormScaffolderTest.ScaffoldFields_ShouldTrimIdSuffix_FromAutoGeneratedLabels [42 ms]
+  Passed Ivy.Test.FormScaffolderTest.ScaffoldFields_ShouldNotTrimIdSuffix_FromGovIdOrPlainId [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToNullableInt [5 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsEmptyContent_EmptyValues_ReturnsTrue(value: "   ", expected: True) [1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsEmptyContent_EmptyValues_ReturnsTrue(value: null, expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsEmptyContent_EmptyValues_ReturnsTrue(value: False, expected: True) [< 1 ms]
+  Passed Ivy.Test.FormScaffolderTest.ScaffoldFields_ShouldNotTruncateDisplayAttributeName_WhenFieldNameEndsWithId [1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_ValidUrls_ReturnsNonNull(url: "/dashboard") [1 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_WithHeader_IncludesHeader [9 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_ValidUrls_ReturnsNonNull(url: "app://dashboard") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_ValidUrls_ReturnsNonNull(url: "#section1") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_ValidUrls_ReturnsNonNull(url: "https://example.com") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.FormatNumber_FormatsCorrectly(number: 1500000000, expected: "1.5B") [2 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_DangerousProtocol_ReturnsNull(url: "javascript:alert('xss')") [< 1 ms]
+  Passed Ivy.Test.AppHelperTests.Test2 [43 ms]
+  Passed Ivy.Test.FormHelpersTest.IsRequired_ShouldReturnTrue_WhenPropertyIsNonNullableStringWithoutRequiredAttribute [1 ms]
+  Passed Ivy.Test.StateHelpersTest.BoolToObject [2 ms]
+  Passed Ivy.Test.FormHelpersTest.IsRequired_ShouldReturnTrue_WhenRequiredAttributeIsPresentOnProperty [< 1 ms]
+  Passed Ivy.Test.FormHelpersTest.IsRequired_ShouldReturnFalse_WhenPropertyIsNotString [< 1 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_SingleType_ShowsPrimaryKey [1 ms]
+  Passed Ivy.Test.FormHelpersTest.IsRequired_ShouldReturnFalse_WhenPropertyIsNullableString [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_DangerousProtocol_ReturnsNull(url: "data:text/html,<script>alert('xss')</script>") [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.FormatNumber_FormatsCorrectly(number: 500, expected: "500") [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.FormatNumber_FormatsCorrectly(number: 1500000, expected: "1.5M") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.FormatNumber_FormatsCorrectly(number: 1500, expected: "1.5K") [< 1 ms]
+  Passed Ivy.Test.AppHelperTests.Test1 [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_InvalidUrlFormat_ReturnsNull(url: "://malformed") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsEmptyContent_NonEmptyString_ReturnsFalse [< 1 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_SingleType_ContainsTypeName [1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToNullableGuid [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_InvalidUrlFormat_ReturnsNull(url: "invalid://url") [1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_InvalidUrl_ThrowsArgumentException(invalidUrl: "https://") [5 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_InvalidUrl_ThrowsArgumentException(invalidUrl: "invalid://protocol") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_InvalidUrl_ThrowsArgumentException(invalidUrl: "://malformed") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_InvalidUrl_ThrowsArgumentException(invalidUrl: "") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_InvalidUrl_ThrowsArgumentException(invalidUrl: "   ") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_InvalidUrl_ThrowsArgumentException(invalidUrl: "http://") [< 1 ms]
+  Passed Ivy.Test.Helpers.ExceptionHelperTests.GetInnerMostException_NestedExceptions_ReturnsInnerMost [4 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_DangerousProtocol_ReturnsNull(url: "onclick:alert('xss')") [1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_DifferentOrigin_ReturnsNull [2 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.EatRight_Char_EatsCorrectly(input: "hello", food: '/', expected: "hello") [3 ms]
+  Passed Ivy.Test.TypeDescriberTests.Describe_SingleType_ContainsTableAnnotation [2 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_DangerousProtocol_ReturnsNull(url: "file:///etc/passwd") [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_DangerousProtocol_ReturnsNull(url: "vbscript:msgbox('xss')") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_DangerousProtocol_ReturnsNull(url: "data:text/html,<script>alert('xss')</script>") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_DangerousProtocol_ReturnsNull(url: "javascript:alert('xss')") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_ValidGuid_ReturnsTrue [1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.SuggestMin_Int32_ReturnsMinValue [2 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.EatRight_Char_EatsCorrectly(input: "hello///", food: '/', expected: "hello") [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.EatRight_Char_EatsCorrectly(input: "", food: '/', expected: "") [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.GetCollectionTypeParameter_ListOfInt_ReturnsInt [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.GetCollectionTypeParameter_Array_ReturnsElementType [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsCollectionType_ReturnsExpected(type: typeof(string), expected: False) [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.NullableDateTimeToObject [3 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_DangerousUrl_ThrowsArgumentException(dangerousUrl: "vbscript:msgbox(\"xss\")") [2 ms]
+  Passed Ivy.Test.Helpers.ExceptionHelperTests.PrintDetailedException_NullException_DoesNotThrow [2 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidAnchorLink_ReturnsUrl(url: "#heading-2") [1 ms]
+  Passed Ivy.Test.ButtonConstructorOverloadTests.Button_Constructor_FuncValueTask_NullOnClick_SetsOnClickToNull [7 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_NullOrWhitespace_ReturnsNull(url: null) [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.CamelCaseToTitleCase_ReturnsExpected(input: "fooBar", expected: "FooBar") [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidAnchorLink_ReturnsUrl(url: "#_anchor") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidAnchorLink_ReturnsUrl(url: "#section1") [< 1 ms]
+  Passed Ivy.Test.ButtonConstructorOverloadTests.Button_Constructor_ParameterlessAsyncFunc_ResolvesCorrectly [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_DangerousUrl_CreatesDisabledButton(dangerousUrl: "vbscript:msgbox(\"xss\")") [8 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_DangerousUrl_ThrowsArgumentException(dangerousUrl: "javascript:alert(\"xss\")") [1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_DangerousUrl_CreatesDisabledButton(dangerousUrl: "data:text/html,<script>alert(\"xss\")</script>") [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsCollectionType_ReturnsExpected(type: typeof(System.Collections.Generic.List<int>), expected: True) [1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsCollectionType_ReturnsExpected(type: typeof(int[]), expected: True) [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_DangerousUrl_ThrowsArgumentException(dangerousUrl: "file:///etc/passwd") [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsCollectionType_ReturnsExpected(type: typeof(int), expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsCollectionType_ReturnsExpected(type: null, expected: False) [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_DangerousUrl_CreatesDisabledButton(dangerousUrl: "javascript:alert(\"xss\")") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_DangerousUrl_ThrowsArgumentException(dangerousUrl: "data:text/html,<script>alert(\"xss\")</script>") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_DangerousUrl_CreatesDisabledButton(dangerousUrl: "file:///etc/passwd") [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.NullableDoubleToObject [1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidUrlFromValue_NoLabel_UsesUrlAsLabel [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_NullOrWhitespace_ReturnsNull(url: "") [1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_NullOrWhitespace_ReturnsNull(url: "   ") [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNumeric_ReturnsExpected(type: typeof(double), expected: True) [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidUrlWithQueryOrFragment_HandlesCorrectly(url: "/dashboard?tab=settings") [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNumeric_ReturnsExpected(type: typeof(int?), expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNumeric_ReturnsExpected(type: typeof(decimal), expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNumeric_ReturnsExpected(type: typeof(int), expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNumeric_ReturnsExpected(type: typeof(string), expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.CamelCaseToTitleCase_ReturnsExpected(input: "a", expected: "A") [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.CamelCaseToTitleCase_ReturnsExpected(input: "   ", expected: "") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_RelativePathWithQueryOrFragment_ReturnsUrl(url: "/path?query=value") [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.CamelCaseToTitleCase_ReturnsExpected(input: "", expected: "") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_RelativePathWithQueryOrFragment_ReturnsUrl(url: "/path#fragment") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidatesBeforeSetting [1 ms]
+  Passed Ivy.Test.FormSubmitStrategyTests.FormBuilder_SubmitStrategy_OnChange_SetsStrategy [52 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_DangerousProtocol_ReturnsNull(url: "file:///etc/passwd") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidUrlWithQueryOrFragment_HandlesCorrectly(url: "https://example.com/page#section") [1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToBool [2 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidUrlWithQueryOrFragment_HandlesCorrectly(url: "https://example.com/page?param=value") [< 1 ms]
+  Passed Ivy.Test.Helpers.ExceptionHelperTests.UnwrapAggregate_MultipleInnerExceptions_ReturnsAggregate [3 ms]
+  Passed Ivy.Test.ValidationTest.GetValidators_ShouldFail_WhenCollectionContainsDisallowedValue [11 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidUrlWithQueryOrFragment_HandlesCorrectly(url: "/page#section") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_UrlTakesPrecedenceOverValue [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_NullValue_ReturnsNull [< 1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.UseHtmlPipeline_CanReplaceEntirePipeline [54 ms]
+  Passed Ivy.Test.FormSubmitStrategyTests.FormBuilder_SubmitStrategy_SetsStrategy [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_DangerousProtocol_ReturnsNull(url: "onclick:alert('xss')") [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_DangerousProtocol_ReturnsNull(url: "javascript:alert('xss')") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_DangerousProtocol_ReturnsNull(url: "vbscript:msgbox('xss')") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_DangerousProtocol_ReturnsNull(url: "data:text/html,<script>alert('xss')</script>") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsSafeAppId_ControlCharacters_ReturnsFalse [2 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidAbsoluteUrl_CreatesEnabledButton(url: "https://example.com/page") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ValidAppId_ReturnsTrue(appId: "_index") [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_SubpathOfReserved_ReturnsReservedPathConflict(appId: "ivy.messages", reserved: ["/ivy"]) [55 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Autoplay_Extension_UpdatesAutoplayState(autoplayValue: True) [13 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidAbsoluteUrl_CreatesEnabledButton(url: "http://example.com/page") [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_SubpathOfReserved_ReturnsReservedPathConflict(appId: "api.v1", reserved: ["/api"]) [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TrimEnd_TrimsCorrectly(source: "hello", value: "xyz", expected: "hello") [4 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Autoplay_Extension_UpdatesAutoplayState(autoplayValue: False) [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_StartsWithSlash_ReturnsStartsWithSlash(appId: "/app") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_ExternalAllowed_ReturnsUrl [1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ValidAppId_ReturnsTrue(appId: "my-app") [1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ValidAppId_ReturnsTrue(appId: "dashboard") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ValidAppId_ReturnsTrue(appId: "users-profile") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ValidAppId_ReturnsTrue(appId: "app_name") [< 1 ms]
+  Passed Ivy.Test.ButtonConstructorOverloadTests.Button_Constructor_EventParameterAction_ResolvesCorrectly [5 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ValidAppId_ReturnsTrue(appId: "app123") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_InvalidUrlFormat_ReturnsNull(url: "://malformed") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidUrlFromValue_UsesValueAsUrl [1 ms]
+  Passed Ivy.Test.Helpers.ExceptionHelperTests.UnwrapAggregate_SingleInnerException_ReturnsInner [3 ms]
+  Passed Ivy.Test.ValidationTest.GetValidators_ShouldPass_WhenCollectionContainsAllowedValues [3 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_StartsWithSlash_ReturnsStartsWithSlash(appId: "/users/profile") [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_StartsWithSlash_ReturnsStartsWithSlash(appId: "/dashboard") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_CssExtension_ReturnsStaticFileExtensionConflict(appId: "style.css") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TrimEnd_TrimsCorrectly(source: "hello world", value: " world", expected: "hello") [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_CssExtension_ReturnsStaticFileExtensionConflict(appId: "theme.css") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidRelativeOrSpecialUrl_CreatesEnabledButton(url: "/dashboard") [1 ms]
+  Passed Ivy.Test.Helpers.ExceptionHelperTests.UnwrapAggregate_NonAggregateException_ReturnsSame [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.NullableBoolToObject [4 ms]
+  Passed Ivy.Test.Helpers.ExceptionHelperTests.GetInnerMostException_SingleException_ReturnsSame [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidRelativeOrSpecialUrl_CreatesEnabledButton(url: "#section1") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_NonStaticExtensions_ReturnsValid(appId: "my.app") [1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidRelativeOrSpecialUrl_CreatesEnabledButton(url: "app://dashboard") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidRelativeOrSpecialUrl_CreatesEnabledButton(url: "/users/profile") [< 1 ms]
+  Passed Ivy.Test.InputWidgetTests.FeedbackInput_ToFeedbackInput_ShouldNotThrow [22 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_NullUrl_WithNullValue_ReturnsNull [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_AppUrlWithFragment_ReturnsNull [3 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.GetShortHash_ReturnsDeterministicHash [2 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_InvalidUrlFormat_ReturnsNull(url: "not-a-url") [3 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_InvalidUrlFormat_ReturnsNull(url: "invalid://url") [< 1 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Controls_Extension_UpdatesControlsState(controlsValue: True) [4 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_NullOrWhitespace_ReturnsNull(url: "\t") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_CanBeChained [9 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ButtonVariant_IsAlwaysInline [2 ms]
+  Passed Ivy.Test.Helpers.ExceptionHelperTests.PrintDetailedException_DoesNotThrow [3 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Controls_Extension_UpdatesControlsState(controlsValue: False) [1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrlWithQueryOrFragment_SetsUrl(url: "/dashboard?tab=settings") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_MailtoUrl_ReturnsUrl [2 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.SplitPascalCase_SplitsCorrectly(input: "TotalSalary", expected: "Total Salary") [1 ms]
+  Passed Ivy.Test.JsonEnumConverterTests.Read_ShouldAcceptEnumName [63 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_NullOrWhitespace_ReturnsNull(url: "   ") [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_NullOrWhitespace_ReturnsNull(url: null) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_NullOrWhitespace_ReturnsNull(url: "") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_RelativePathWithoutLeadingSlash_ReturnsWithSlash(url: "path/without/leading/slash") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrlWithQueryOrFragment_SetsUrl(url: "https://example.com/page?param=value") [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsEmptyContent_Object_ReturnsFalse [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrlWithQueryOrFragment_SetsUrl(url: "/page#section") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_ValidUrlWithQueryOrFragment_SetsUrl(url: "https://example.com/page#section") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_NonStaticExtensions_ReturnsValid(appId: "app.v2") [4 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_NonStaticExtensions_ReturnsValid(appId: "api.v1") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.SplitPascalCase_SplitsCorrectly(input: null, expected: null) [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.SplitPascalCase_SplitsCorrectly(input: "avgSalary", expected: "Avg Salary") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.SplitPascalCase_SplitsCorrectly(input: "count", expected: "Count") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_SimpleValidIds_ReturnsValid(appId: "my-app") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_RelativePathWithoutLeadingSlash_ReturnsWithSlash(url: "relative-path") [1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ValidAppIdWithHyphens_ReturnsTrue [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateMinFileSize_WithFileEqualToMin_ReturnsSuccess [16 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Muted_Extension_UpdatesMutedState(mutedValue: True) [2 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_ValidString_ReturnsTrue [1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateRedirectUrl_ExternalNotAllowed_NoOrigin_ReturnsNull [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_SimpleValidIds_ReturnsValid(appId: "dashboard") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_SimpleValidIds_ReturnsValid(appId: "app123") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_SimpleValidIds_ReturnsValid(appId: "MyApp") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_SimpleValidIds_ReturnsValid(appId: "app_name") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_MultipleValidUrls_AllWork [1 ms]
+  Passed Ivy.Test.JsonEnumConverterTests.Read_ShouldAcceptDescription_ForBackwardCompatibility [2 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_WhitespaceCharacters_ReturnsUnsafeCharacters(appId: "app\nwith\nnewlines") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_SameOriginDifferentScheme_ReturnsNull [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_SameOriginDifferentPort_ReturnsNull [< 1 ms]
+  Passed Ivy.Test.JsonEnumConverterTests.Read_ShouldAcceptBothDescriptionAndName [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidUrlWithCustomLabel_UsesCustomLabel(url: "app://my-app", label: "Open App") [3 ms]
+  Passed Ivy.Test.StateHelpersTest.DateOnlyToObject [6 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Muted_Extension_UpdatesMutedState(mutedValue: False) [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidHttpHttpsUrl_ReturnsUrl(url: "http://example.com") [< 1 ms]
+  Passed Ivy.Test.ButtonConstructorOverloadTests.Button_Constructor_FuncValueTask_InvokesHandler [8 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidHttpHttpsUrl_ReturnsUrl(url: "https://example.com") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidHttpHttpsUrl_ReturnsUrl(url: "https://example.com/path") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidHttpHttpsUrl_ReturnsUrl(url: "http://subdomain.example.com") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidHttpHttpsUrl_ReturnsUrl(url: "https://example.com/path?query=value") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidHttpHttpsUrl_ReturnsUrl(url: "https://example.com/path#fragment") [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_WithLinkVariant_ValidatesUrl [1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.ValidateLinkUrl_AppUrlWithQuery_ReturnsUrl [1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_MinDateTime_ReturnsFalse [< 1 ms]
+  Passed Ivy.Test.Helpers.ValidationHelperTests.IsValidRequired_EmptyGuid_ReturnsFalse [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.FormatBytes_FormatsCorrectly(bytes: 0, expected: "0 B") [2 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.FormatBytes_FormatsCorrectly(bytes: 1048576, expected: "1 MB") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.FormatBytes_FormatsCorrectly(bytes: 1073741824, expected: "1 GB") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.FormatBytes_FormatsCorrectly(bytes: 1024, expected: "1 KB") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidUrlWithCustomLabel_UsesCustomLabel(url: "https://example.com/page", label: "Custom Label") [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.LabelFor_ReturnsExpected(name: "FirstName", typeName: null, expected: "First Name") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_ValidUrlWithCustomLabel_UsesCustomLabel(url: "/dashboard", label: "Go to Dashboard") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_WhitespaceCharacters_ReturnsUnsafeCharacters(appId: "app\rwith\rreturns") [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_WhitespaceCharacters_ReturnsUnsafeCharacters(appId: "app\twith\ttabs") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.LabelFor_ReturnsExpected(name: "createdAt", typeName: "DateTime", expected: "Created") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ExternalUrl_ValidatesCorrectly(url: "http://example.com", allowExternal: True, currentOrigin: null) [1 ms]
+  Passed Ivy.Test.QueryableExtensionsTests.RemoveFields_PositionalRecord_RemoveMultipleFields [32 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_DottedAppIds_ReturnsValid(appId: "api.v1.users") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ExternalUrl_ValidatesCorrectly(url: "http://example.com", allowExternal: False, currentOrigin: null) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ExternalUrl_ValidatesCorrectly(url: "https://example.com", allowExternal: False, currentOrigin: null) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ExternalUrl_ValidatesCorrectly(url: "https://example.com", allowExternal: True, currentOrigin: null) [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToNullableGuid [2 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ExternalUrl_ValidatesCorrectly(url: "http://localhost:5000", allowExternal: False, currentOrigin: "http://localhost:5000") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ExternalUrl_ValidatesCorrectly(url: "https://localhost:5000", allowExternal: False, currentOrigin: "https://localhost:5000") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_RelativePathWithoutSlash_ReturnsWithSlash(url: "not-a-url") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_DottedAppIds_ReturnsValid(appId: "users.profile") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_DottedAppIds_ReturnsValid(appId: "app.v2") [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.DateRangeConversion [30 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_DottedAppIds_ReturnsValid(appId: "my.app") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_DottedAppIds_ReturnsValid(appId: "com.example.app") [< 1 ms]
+  Passed Ivy.Test.ButtonConstructorOverloadTests.Button_Constructor_ParameterlessAction_ResolvesCorrectly [2 ms]
+  Passed Ivy.Test.BestGuessConvertTests.StringToNullInt [< 1 ms]
+  Passed Ivy.Test.FormSubmitStrategyTests.FormBuilder_SubmitStrategy_FluentChaining [14 ms]
+  Passed Ivy.Test.BestGuessConvertTests.StringToGuid [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_InvalidUrl_CreatesDisabledButton(invalidUrl: "") [2 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_RelativePathWithoutSlash_ReturnsWithSlash(url: "path/without/leading/slash") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ValidRelativePath_ReturnsUrl(url: "/users/profile", allowExternal: True) [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.StringToDateTime [< 1 ms]
+  Passed Ivy.Test.FormSubmitStrategyTests.FormSubmitStrategy_HasExpectedValues [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.GetShortHash_DifferentInputsProduceDifferentHashes [2 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ValidRelativePath_ReturnsUrl(url: "/app/settings", allowExternal: True) [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ValidRelativePath_ReturnsUrl(url: "/", allowExternal: True) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ValidRelativePath_ReturnsUrl(url: "/dashboard", allowExternal: True) [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.BoolToIntTrue [< 1 ms]
+  Passed Ivy.Test.FormSubmitStrategyTests.FormBuilder_DefaultSubmitStrategy_IsOnSubmit [1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_InvalidUrl_CreatesDisabledButton(invalidUrl: "   ") [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_GrpcStyleNames_ValidWithoutReservedConflict(appId: "proto.MyService") [2 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToDouble [3 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_DangerousUrlFromValue_CreatesDisabledButton [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidAppUrl_ReturnsUrl(url: "app://dashboard") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_MalformedUrl_CreatesDisabledButton(malformedUrl: "http://") [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.DoubleToInt [< 1 ms]
+  Passed Ivy.Test.QueryableExtensionsTests.RemoveFields_AllFieldsRemoved_AllPropertiesDefault [3 ms]
+  Passed Ivy.Test.BestGuessConvertTests.DoubleToBool1 [< 1 ms]
+  Passed Ivy.Test.ButtonUrlValidationTests.Button_Url_NullUrl_ThrowsArgumentException [5 ms]
+  Passed Ivy.Test.ButtonConstructorOverloadTests.Button_Constructor_EventParameterAsyncFunc_ResolvesCorrectly [3 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.EatRight_String_EatsCorrectly [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidAppUrl_ReturnsUrl(url: "app://users/profile") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_MalformedUrl_CreatesDisabledButton(malformedUrl: "://malformed") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidAppUrl_ReturnsUrl(url: "app://my-app") [< 1 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Loop_Extension_UpdatesLoopState(loopValue: True) [6 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ContainsDangerousCharacters_ReturnsFalse(appId: "app#fragment") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_MalformedUrl_CreatesDisabledButton(malformedUrl: "invalid://protocol") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ContainsDangerousCharacters_ReturnsFalse(appId: "app?query") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ContainsDangerousCharacters_ReturnsFalse(appId: "app:protocol") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ContainsDangerousCharacters_ReturnsFalse(appId: "app&evil") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_MalformedUrl_CreatesDisabledButton(malformedUrl: "https://") [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.DoubleToBool0 [< 1 ms]
+  Passed Ivy.Test.JsonEnumConverterTests.DatabaseNamingConvention_SimulateRealScenario [6 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_GrpcStyleNames_ValidWithoutReservedConflict(appId: "datatable.DataTableService") [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_GrpcStyleNames_ValidWithoutReservedConflict(appId: "grpc.ServiceName") [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.DateTimeOffsetToObject [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileType_WithExtensionWithoutDot_ReturnsError [8 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Loop_Extension_UpdatesLoopState(loopValue: False) [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidRelativePath_ReturnsUrl(url: "/") [< 1 ms]
+  Passed Ivy.Test.BestGuessConvertTests.StringToEnum [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_MultipleViolations_ReturnsFirstViolation [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateMinFileSize_WithFileSmallerThanMin_ReturnsError [1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToCamelCase_ReturnsExpected(input: "FooBar", expected: "fooBar") [2 ms]
+  Passed Ivy.Test.AllowedValuesTest.GetAllowedValues_ShouldReturnValues_WhenAttributeIsPresent [45 ms]
+  Passed Ivy.Test.BestGuessConvertTests.IntToBoolTrue [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidRelativePath_ReturnsUrl(url: "/users/profile") [1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToGuid [2 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidRelativePath_ReturnsUrl(url: "/app/settings") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_ValidRelativePath_ReturnsUrl(url: "/dashboard") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_RelativePath_WorksWithNavigateArgs [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_MixedValidAndInvalidUrls_HandlesCorrectly [2 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_NotInReservedPaths_ReturnsValid(appId: "dashboard", reserved: ["/ivy", "/api"]) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsObservable_WithObservable_ReturnsTrue [23 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToCamelCase_ReturnsExpected(input: "", expected: "") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToCamelCase_ReturnsExpected(input: "   ", expected: "") [< 1 ms]
+  Passed Ivy.Test.Helpers.StringHelperTests.TitleCaseToCamelCase_ReturnsExpected(input: "A", expected: "a") [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypes_WithExactMimeType_ReturnsSuccess [1 ms]
+  Passed Ivy.Test.AllowedValuesTest.ScaffoldFields_ShouldCreateSelectFactory_WhenStringHasAllowedValues [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AppUrlWithDangerousCharacters_ReturnsNull(url: "app://path#fragment") [< 1 ms]
+  Passed Ivy.Test.AllowedValuesTest.ScaffoldFields_ShouldCreateSelectFactory_WhenStringArrayHasAllowedValues [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AppUrlWithDangerousCharacters_ReturnsNull(url: "app://path:extra:colons") [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.SuggestPrecision_ReturnsExpected(type: typeof(decimal), expected: 4) [1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_InvalidButSafeUrl_NoLabel_UsesSafeDefault [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_NotInReservedPaths_ReturnsValid(appId: "users", reserved: ["/ivy", "/api", "/assets"]) [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_RelativePathWithQueryOrFragment_ReturnsUrl(url: "/path#fragment") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_UnsafeCharacters_ReturnsUnsafeCharacters(appId: "app?query") [< 1 ms]
+  Passed Ivy.Test.LinkBuilderTests.LinkBuilder_InvalidUrl_NoLabel_UsesSafeDefault [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_RelativePathWithQueryOrFragment_ReturnsUrl(url: "/path?query=value") [< 1 ms]
+  Passed Ivy.Test.JsonEnumConverterTests.Read_InvalidValue_ShouldThrowJsonException [5 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToNullableDateOnly [3 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_UnsafeCharacters_ReturnsUnsafeCharacters(appId: "app&evil") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_UnsafeCharacters_ReturnsUnsafeCharacters(appId: "app#fragment") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_UnsafeCharacters_ReturnsUnsafeCharacters(appId: "app\\backslash") [< 1 ms]
+  Passed Ivy.Test.ButtonConstructorOverloadTests.ToButton_FuncValueTask_ResolvesCorrectly [6 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_UnsafeCharacters_ReturnsUnsafeCharacters(appId: "app%encoded") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_UnsafeCharacters_ReturnsUnsafeCharacters(appId: "app:protocol") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_JsonExtension_ReturnsStaticFileExtensionConflict(appId: "data.json") [< 1 ms]
+  Passed Ivy.Test.ButtonConstructorOverloadTests.ToButton_FuncValueTask_WithVariant_SetsVariant [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_ChainedExtensionMethods_WorkCorrectly [78 ms]
+  Passed Ivy.Test.JsonEnumConverterTests.Write_ShouldSerializeEnumAsName_NotDescription [< 1 ms]
+  Passed Ivy.Test.JsonEnumConverterTests.ProveTheBugWasFixed_DescriptionVsEnumName [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.SuggestPrecision_ReturnsExpected(type: typeof(int), expected: 0) [2 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.SuggestPrecision_ReturnsExpected(type: typeof(double), expected: 4) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.SuggestPrecision_ReturnsExpected(type: typeof(double?), expected: 4) [< 1 ms]
+  Passed Ivy.Test.JsonEnumConverterTests.RoundTrip_EnumValue_ShouldMaintainCorrectValue [< 1 ms]
+  Passed Ivy.Test.QueryableExtensionsTests.RemoveFields_RemoveSingleField_FieldIsRemoved [7 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsDate_ReturnsExpected(type: typeof(System.DateTimeOffset), expected: True) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_StartsWithSlash_ReturnsFalse(appId: "/dashboard") [2 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsDate_ReturnsExpected(type: typeof(System.DateTime), expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsDate_ReturnsExpected(type: typeof(int), expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsDate_ReturnsExpected(type: typeof(System.DateOnly), expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsDate_ReturnsExpected(type: typeof(DateTime?), expected: True) [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.NullableEnumToObject [2 ms]
+  Passed Ivy.Test.JsonEnumConverterTests.Write_AllEnumValues_ShouldSerializeAsNames [1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_StartsWithSlash_ReturnsFalse(appId: "/users/profile") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_NullOrWhitespace_ReturnsNull(url: "") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_JsonExtension_ReturnsStaticFileExtensionConflict(appId: "manifest.json") [2 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_NullOrWhitespace_ReturnsNull(url: null) [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_JsonExtension_ReturnsStaticFileExtensionConflict(appId: "config.json") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_NullOrWhitespace_ReturnsNull(url: "\t") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_NullOrWhitespace_ReturnsNull(url: "   ") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_CaseInsensitiveReservedPaths_ReturnsReservedPathConflict [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AppUrlWithQueryParameters_ReturnsUrl(url: "app://path?query=value") [< 1 ms]
+  Passed Ivy.Test.QueryableExtensionsTests.RemoveFields_RemoveNonExistentField_NoError [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AppUrlWithQueryParameters_ReturnsUrl(url: "app://path?param1=value1&param2=value2") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AppUrlWithQueryParameters_ReturnsUrl(url: "app://MyApp?param=value") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_ReservedPath_ReturnsReservedPathConflict(appId: "api", reserved: ["/api"]) [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_ReservedPath_ReturnsReservedPathConflict(appId: "ivy", reserved: ["/ivy"]) [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_ReservedPath_ReturnsReservedPathConflict(appId: "assets", reserved: ["/assets"]) [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToTimeOnly [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_FontExtension_ReturnsStaticFileExtensionConflict(appId: "typeface.woff2") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_NullOrWhitespace_ReturnsFalse(appId: "") [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNullableType_ReturnsExpected(type: typeof(int?), expected: True) [2 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_NullOrWhitespace_ReturnsFalse(appId: null) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_NullOrWhitespace_ReturnsFalse(appId: "\t") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_NullOrWhitespace_ReturnsFalse(appId: "   ") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_FontExtension_ReturnsStaticFileExtensionConflict(appId: "font.ttf") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_FontExtension_ReturnsStaticFileExtensionConflict(appId: "font.woff") [< 1 ms]
+  Passed Ivy.Test.ValueTupleConverterTests.Serialize_Tuple_HasExpectedPropertyNames [84 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_WhitespaceOnly_ReturnsUnsafeCharacters(appId: "  \t  ") [< 1 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Preload_Extension_UpdatesPreloadStrategy [10 ms]
+  Passed Ivy.Test.QueryableExtensionsTests.RemoveFields_RemoveMultipleFields_FieldsAreRemoved [2 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_UrlWithWhitespace_TrimsWhitespace [1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNullableType_ReturnsExpected(type: typeof(int), expected: False) [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_WhitespaceOnly_ReturnsUnsafeCharacters(appId: "   ") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_WhitespaceOnly_ReturnsUnsafeCharacters(appId: "\t") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_TypicalStaticFiles_AllBlocked [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_ImageExtension_ReturnsStaticFileExtensionConflict(appId: "graphic.svg") [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_AppIdWithTab_ReturnsFalse [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNullable_ReturnsExpected(type: typeof(int), expected: False) [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_OnBlurEvent_WorksCorrectly [6 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNullable_ReturnsExpected(type: typeof(string), expected: False) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsNullable_ReturnsExpected(type: typeof(int?), expected: True) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AnchorLinkWithDangerousCharacters_ReturnsNull(url: "#anchor&evil") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_ImageExtension_ReturnsStaticFileExtensionConflict(appId: "icon.ico") [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithNoAcceptOrMaxFiles_ReturnsSuccess [9 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_ImageExtension_ReturnsStaticFileExtensionConflict(appId: "image.png") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_ImageExtension_ReturnsStaticFileExtensionConflict(appId: "photo.jpg") [< 1 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_FluentAPI_ConfiguresProperties [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_ManyReservedPaths_ValidatesCorrectly [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToNullableDouble [3 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AnchorLinkWithDangerousCharacters_ReturnsNull(url: "#anchor?query=value") [< 1 ms]
+  Passed Ivy.Test.QueryableExtensionsTests.RemoveFields_PositionalRecord_RemovedFieldGetsDefault [2 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_JavaScriptExtension_ReturnsStaticFileExtensionConflict(appId: "script.js") [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_WithEmptyString_WorksCorrectly [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AnchorLinkWithColons_ReturnsUrl(url: "#section:value") [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_GenericVersion_WorksForStringType [< 1 ms]
+  Passed Ivy.Test.InputWidgetTests.NumberRangeInput_ToNumberRangeInput_ShouldNotThrow [27 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.GetNameFromMemberExpression_UnaryExpression_ReturnsMemberName [2 ms]
+  Passed Ivy.Test.TableBuilderTests.ProgressBuilder_ShouldReturnLayoutWithFormatString [42 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToDateTime [1 ms]
+  Passed Ivy.Test.TableBuilderTests.ProgressBuilder_ShouldReturnProgressWidget [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_JavaScriptExtension_ReturnsStaticFileExtensionConflict(appId: "component.jsx") [1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_AllVariants_WorkCorrectly(variant: Password) [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_JavaScriptExtension_ReturnsStaticFileExtensionConflict(appId: "bundle.js") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_JavaScriptExtension_ReturnsStaticFileExtensionConflict(appId: "app.js") [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.SuggestStep_ReturnsExpected(type: typeof(decimal), expected: 0.01) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AnchorLinkWithColons_ReturnsUrl(url: "#anchor:colons") [1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_RelativePathWithColons_ReturnsNull(url: "/path:with:colons") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_SourceMapExtension_ReturnsStaticFileExtensionConflict(appId: "source.map") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_HtmlExtension_ReturnsStaticFileExtensionConflict(appId: "index.html") [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_HtmlExtension_ReturnsStaticFileExtensionConflict(appId: "page.html") [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_AllVariants_WorkCorrectly(variant: Search) [1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_AllVariants_WorkCorrectly(variant: Tel) [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_AllVariants_WorkCorrectly(variant: Email) [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_AllVariants_WorkCorrectly(variant: Text) [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_AllVariants_WorkCorrectly(variant: Textarea) [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_AllVariants_WorkCorrectly(variant: Url) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.SuggestStep_ReturnsExpected(type: typeof(double), expected: 0.01) [1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.SuggestStep_ReturnsExpected(type: typeof(int), expected: 1) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateRedirectUrl_ThenValidateLinkUrl_ConsistentResults [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_ControlCharacters_ReturnsUnsafeCharacters [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_Disabled_WorksCorrectly [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ValidAppIdWithUnderscores_ReturnsTrue [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.NullableDateOnlyToObject [2 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsSimpleType_ReturnsExpected(type: typeof(System.DateTime), expected: True) [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypeWithMagicBytes_SpoofedContentType_ReturnsError [4 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_Empty_ReturnsEmpty(appId: "") [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileType_WithValidExtension_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_TypicalReservedPaths_AllBlocked [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_WithShortcutKey_WorksCorrectly [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsSimpleType_ReturnsExpected(type: typeof(System.Guid), expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsSimpleType_ReturnsExpected(type: typeof(string), expected: True) [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsSimpleType_ReturnsExpected(type: typeof(System.Collections.Generic.List<int>), expected: False) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_HttpUrlWithPort_ReturnsUrl [1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsSimpleType_ReturnsExpected(type: typeof(int), expected: True) [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_AppIdWithNewline_ReturnsFalse [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.SuggestMax_Int32_ReturnsMaxValue [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToObject [1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_TypicalAppIds_AllValid [1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ContainsControlCharacters_ReturnsFalse [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.GetCollectionTypeParameter_Dictionary_ReturnsKeyValuePair [< 1 ms]
+  Passed Ivy.Test.AppRoutingHelpersTests.ValidateAppId_EmptyReservedPaths_ValidatesCorrectly [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_RelativePathWithColons_ReturnsNull(url: "/path:with:colons") [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.StringToDateTime [48 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.GetNameFromMemberExpression_ReturnsMemberName [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.StringToEnum [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.StringToNullEnum [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_HttpsUrlWithPort_ReturnsUrl [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.IsSafeAppId_ValidAppIdWithNumbers_ReturnsTrue [< 1 ms]
+  Passed Ivy.Test.UrlValidationTests.ValidateLinkUrl_AppUrl_CanBeUsedInNavigation [< 1 ms]
+  Passed Ivy.Test.Helpers.TypeHelperTests.IsObservable_WithNonObservable_ReturnsFalse [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.DoubleToBool0 [1 ms]
+  Passed Ivy.Test.StateHelpersTest.GuidToObject [2 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithInvalidFileTypes_ReturnsError [4 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileCount_WithExactCount_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToByteArray [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithInvalidSingleFile_ReturnsError [< 1 ms]
+  Passed Ivy.Test.TableBuilderTests.ProgressBuilder_ShouldCalculatePercentageCorrectly [9 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_WithValueAndOnChange_WorksCorrectly [6 ms]
+  Passed Ivy.Test.TableBuilderTests.ProgressBuilder_ShouldReturnNullForNullValue [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithMultipleFilesOneFileTooSmall_ReturnsError [1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToNullableDateTime [1 ms]
+  Passed Ivy.Test.TableBuilderTests.ProgressBuilder_ShouldClampPercentageToZeroToHundred [1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_WithNullValue_WorksCorrectly [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypeWithMagicBytes_InvalidContentType_ReturnsError [1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.DateRangeConversion [4 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypes_WithInvalidMimeType_ReturnsError [1 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Constructor_SetsDefaultProperties [15 ms]
+  Passed Ivy.Test.AudioPlayerWidgetTests.Audio_Src_Extension_UpdatesSource [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithMultipleFilesAndMinFileSize_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToInt [3 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypes_WithValidExtensions_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileCount_WithTooManyFiles_ReturnsError [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_ExtensionMethods_WithDisabled_WorkCorrectly [3 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypes_WithInvalidExtension_ReturnsError [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileType_WithFileWithoutExtension_ReturnsError [< 1 ms]
+  Passed Ivy.Test.Helpers.CollectionHelperTests.ToArrayAsync_AsyncEnumerable_ReturnsArray [42 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_WithState_BindsCorrectly [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateMinFileSize_WithNullMinFileSize_ReturnsSuccess [1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToByteArray [2 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileCount_WithValidCount_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithValidSingleFile_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypeWithMagicBytes_ValidWebP_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_ExtensionMethods_WithPlaceholder_WorkCorrectly [2 ms]
+  Passed Ivy.Test.StateHelpersTest.IntToObject [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithBothMinAndMaxFileSize_ReturnsSuccess [1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_WithDifferentGenericTypes_WorksCorrectly [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.NullableTimeOnlyToObject [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypeWithMagicBytes_AlternativeMimeType_ValidatesPng [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileType_WithInvalidExtension_ReturnsError [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypes_WithNullAccept_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToGuid [2 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_SupportedStateTypes_ReturnsEmptyArray [3 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypesWithMagicBytes_OneSpoofed_ReturnsError [2 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToNullableEnum [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypeWithMagicBytes_OfficeDocument_ValidatesDocx [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToNullableDateTimeOffset [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileType_WithExtensionWithoutDot_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypeWithMagicBytes_NullStream_FallsBackToContentTypeOnly [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypes_WithMimeTypeWildcard_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.ManifestFilter_AddsLink_WhenManifestRegistered [58 ms]
+[xUnit.net 00:00:00.49]       Assert.IsType() Failure: Value is not the exact type
+[xUnit.net 00:00:00.49]       Expected: typeof(Ivy.TextInput<string>)
+[xUnit.net 00:00:00.49]       Actual:   typeof(Ivy.TextInput<object>)
+[xUnit.net 00:00:00.49]       Stack Trace:
+[xUnit.net 00:00:00.49]         D:\git\ivy-bot4\Ivy-Framework\src\Ivy.Test\InputWidgetTests.cs(50,0): at Ivy.Test.InputWidgetTests.TextInput_ToTextInput_ShouldNotThrow()
+[xUnit.net 00:00:00.49]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.49]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+  Passed Ivy.Test.TextInputTests.TextInput_WithState_UpdatesStateOnChange [3 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_WithInvalid_WorksCorrectly [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileCount_WithNullMaxFiles_ReturnsSuccess [< 1 ms]
+  Failed Ivy.Test.InputWidgetTests.TextInput_ToTextInput_ShouldNotThrow [10 ms]
+  Error Message:
+   Assert.IsType() Failure: Value is not the exact type
+Expected: typeof(Ivy.TextInput<string>)
+Actual:   typeof(Ivy.TextInput<object>)
+  Stack Trace:
+     at Ivy.Test.InputWidgetTests.TextInput_ToTextInput_ShouldNotThrow() in D:\git\ivy-bot4\Ivy-Framework\src\Ivy.Test\InputWidgetTests.cs:line 50
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+  Passed Ivy.Test.Helpers.CollectionHelperTests.ToExpando_NestedDictionary_CreatesNestedExpando [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToEnum [2 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_WithPlaceholderAndVariant_WorksCorrectly [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileCount_WithSingleFileLimit_ReturnsError [1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToString [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateMinFileSize_WithEmptyFile_ReturnsError [< 1 ms]
+  Passed Ivy.Test.ValueTupleConverterTests.SerializeDeserialize_Tuple_WithMultipleTypes [31 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithFileTooSmall_ReturnsError [< 1 ms]
+  Passed Ivy.Test.TextInputTests.TextInput_ExtensionMethods_WorkCorrectly [2 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithNullValue_ReturnsSuccess [1 ms]
+  Passed Ivy.Test.InputWidgetTests.ReadOnlyInput_ToReadOnlyInput_ShouldNotThrow [3 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypes_WithValidExtension_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.Helpers.CollectionHelperTests.After_ExecutesAfterAction [4 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypesWithMagicBytes_AllValid_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypes_WithEmptyAccept_ReturnsSuccess [20 ms]
+  Passed Ivy.Test.HtmlPipelineTests.LicenseFilter_AddsLicenseMeta_WhenConfigured [26 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypeWithMagicBytes_ValidJpegWithMatchingContentType_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.Helpers.CollectionHelperTests.ToExpando_EnumerableOfDictionaries_CreatesArray [21 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateFileTypeWithMagicBytes_TextFile_SkipsMagicByteCheck [1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.Clear_RemovesAllFilters [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithMimeTypeWildcard_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithValidMinFileSize_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.InputWidgetTests.CodeInput_ToCodeInput_ShouldNotThrow [24 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithTooManyFiles_ReturnsError [< 1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.DevToolsFilter_AddsMetaTag_WhenEnabled [1 ms]
+  Passed Ivy.Test.FileInputValidationTests.ValidateMinFileSize_WithFileLargerThanMin_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.TableBuilderTests.Reset_ShouldRestoreInitialState [44 ms]
+  Passed Ivy.Test.FileInputValidationTests.FileInput_ValidateValue_WithValidMultipleFiles_ReturnsSuccess [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.Test1 [28 ms]
+  Passed Ivy.Test.TableBuilderTests.ProgressBuilder_ShouldReturnNullForNonNumericValue [< 1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.TitleFilter_NoOp_WhenMetaTitleIsNull [< 1 ms]
+  Passed Ivy.Test.Helpers.CollectionHelperTests.Before_ExecutesBeforeAction [3 ms]
+  Passed Ivy.Test.HtmlPipelineTests.BareAttributes_AreNormalized [1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToNullableDateTime [1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.DevToolsFilter_NoOp_WhenDisabled [< 1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.EmptyPipeline_PreservesHtmlStructure [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToNullableEnum [1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.MetaDescriptionFilter_AddsMetaTag [1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToDateOnly [1 ms]
+  Passed Ivy.Test.TableBuilderTests.ProgressBuilder_ShouldApplyExplicitColor [6 ms]
+  Passed Ivy.Test.WidgetSerializerTests.Serialize_NonDefaultValues_AreSerialized [149 ms]
+  Standard Output Messages:
+ {
+   "id": "4f30d6e6-8991-4b50-9305-8550eb88cbfc",
+   "type": "Ivy.Button",
+   "children": [],
+   "props": {
+     "title": "Delete",
+     "variant": "Destructive",
+     "disabled": true,
+     "loading": true
+   },
+   "events": [],
+   "callSite": {
+     "filePath": "D:\\git\\ivy-bot4\\Ivy-Framework\\src\\Ivy.Test\\WidgetSerializerTests.cs",
+     "lineNumber": 55,
+     "memberName": "Serialize_NonDefaultValues_AreSerialized",
+     "declaringType": "Ivy.Test.WidgetSerializerTests"
+   }
+ }
+
+
+  Passed Ivy.Test.StateHelpersTest.ObjectToInt [2 ms]
+  Passed Ivy.Test.HtmlPipelineTests.ManifestFilter_NoOp_WhenNoManifest [3 ms]
+  Passed Ivy.Test.TableBuilderTests.ProgressBuilder_ShouldApplyAutoColor [1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.DistIndexHtml_WithModulepreloadLinks_ParsesSuccessfully [< 1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.MixedSelfClosedAndNonSelfClosed_VoidElements_Survive [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToNullableInt [1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.CustomFilter_CanBeAdded [< 1 ms]
+  Passed Ivy.Test.InputWidgetTests.Option_ToOptions_ShouldNotThrow [10 ms]
+  Passed Ivy.Test.HtmlPipelineTests.NonSelfClosedLinkTags_ParseSuccessfully [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.DateTimeToObject [1 ms]
+  Passed Ivy.Test.HtmlPipelineTests.TitleFilter_ReplacesExistingTitle [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.DoubleToObject [1 ms]
+  Passed Ivy.Test.StateHelpersTest.NullableGuidToObject [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.ConvertFileInput [57 ms]
+  Passed Ivy.Test.StateHelpersTest.TimeOnlyToObject [1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.TestEnumArray [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.DoubleToBool2 [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.IntToBoolTrue [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToDouble [1 ms]
+  Passed Ivy.Test.InputWidgetTests.NumberInput_ToNumberInput_ShouldNotThrow [5 ms]
+  Passed Ivy.Test.StateHelpersTest.ByteArrayToObject [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToDateTimeOffset [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.Foo [2 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.DoubleToBool1 [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.EnumToObject [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.BoolToIntFalse [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToNullableDateOnly [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.NullableIntToObject [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.IntToInt [1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.StringToNullInt [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToBool [1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.DoubleToInt [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToDateTimeOffset [1 ms]
+  Passed Ivy.Test.StateHelpersTest.ObjectToNullableBool [< 1 ms]
+  Passed Ivy.Test.WidgetSerializerTests.Serialize_TextBlock_NonDefaultVariantIsSerialized [14 ms]
+  Standard Output Messages:
+ {
+   "id": "9b9f0e39-c1c0-4631-99d0-15983504c50a",
+   "type": "Ivy.TextBlock",
+   "children": [],
+   "props": {
+     "content": "Title",
+     "variant": "H1",
+     "bold": true
+   },
+   "callSite": {
+     "filePath": "D:\\git\\ivy-bot4\\Ivy-Framework\\src\\Ivy.Test\\WidgetSerializerTests.cs",
+     "lineNumber": 105,
+     "memberName": "Serialize_TextBlock_NonDefaultVariantIsSerialized",
+     "declaringType": "Ivy.Test.WidgetSerializerTests"
+   }
+ }
+
+
+  Passed Ivy.Test.WidgetSerializerTests.Serialize_TextBlock_DefaultVariantNotSerialized [< 1 ms]
+  Standard Output Messages:
+ {
+   "id": "57af3ef2-adb1-4bfb-a11d-1413720aba98",
+   "type": "Ivy.TextBlock",
+   "children": [],
+   "props": {
+     "content": "Hello"
+   },
+   "callSite": {
+     "filePath": "D:\\git\\ivy-bot4\\Ivy-Framework\\src\\Ivy.Test\\WidgetSerializerTests.cs",
+     "lineNumber": 82,
+     "memberName": "Serialize_TextBlock_DefaultVariantNotSerialized",
+     "declaringType": "Ivy.Test.WidgetSerializerTests"
+   }
+ }
+
+
+  Passed Ivy.Test.StateHelpersTest.StringToDateTime [1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.TestEnumList [2 ms]
+  Passed Ivy.Test.WidgetSerializerTests.Serialize_SimpleWidget_ReturnsValidJson [< 1 ms]
+  Standard Output Messages:
+ {
+   "id": "e53befe7-447f-4d5a-8c52-e9dbf214d6f2",
+   "type": "Ivy.TextBlock",
+   "children": [],
+   "props": {
+     "content": "Hello, World!"
+   },
+   "callSite": {
+     "filePath": "D:\\git\\ivy-bot4\\Ivy-Framework\\src\\Ivy.Test\\WidgetSerializerTests.cs",
+     "lineNumber": 14,
+     "memberName": "Serialize_SimpleWidget_ReturnsValidJson",
+     "declaringType": "Ivy.Test.WidgetSerializerTests"
+   }
+ }
+
+
+  Passed Ivy.Test.ConvertJsonNodeTests.StringToInt [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.NullableDateTimeOffsetToObject [< 1 ms]
+  Passed Ivy.Test.InputWidgetTests.ColorInput_ToColorInput_ShouldNotThrow [8 ms]
+  Passed Ivy.Test.WidgetSerializerTests.Serialize_DefaultValues_AreNotSerialized [< 1 ms]
+  Standard Output Messages:
+ {
+   "id": "9ef8b44b-cdef-481f-93fb-61b09c06f2a9",
+   "type": "Ivy.Button",
+   "children": [],
+   "props": {
+     "title": "Click me"
+   },
+   "events": [],
+   "callSite": {
+     "filePath": "D:\\git\\ivy-bot4\\Ivy-Framework\\src\\Ivy.Test\\WidgetSerializerTests.cs",
+     "lineNumber": 31,
+     "memberName": "Serialize_DefaultValues_AreNotSerialized",
+     "declaringType": "Ivy.Test.WidgetSerializerTests"
+   }
+ }
+
+
+  Passed Ivy.Test.ConvertJsonNodeTests.StringToGuid [1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.DoubleToNullInt [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.IntToBoolFalse [< 1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToNullableBool [1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.IntToNullInt [< 1 ms]
+  Passed Ivy.Test.ConvertJsonNodeTests.BoolToIntTrue [< 1 ms]
+  Passed Ivy.Test.WidgetSerializerTests.Serialize_NestedProps_DefaultValuesNotSerialized [2 ms]
+  Standard Output Messages:
+ {
+   "id": "7ca3716c-6ea3-49c4-8e3e-08545a64cb1b",
+   "type": "Ivy.Button",
+   "children": [],
+   "props": {
+     "title": "Sized",
+     "width": "Units:100"
+   },
+   "events": [],
+   "callSite": {
+     "filePath": "D:\\git\\ivy-bot4\\Ivy-Framework\\src\\Ivy.Test\\WidgetSerializerTests.cs",
+     "lineNumber": 124,
+     "memberName": "Serialize_NestedProps_DefaultValuesNotSerialized",
+     "declaringType": "Ivy.Test.WidgetSerializerTests"
+   }
+ }
+
+
+  Passed Ivy.Test.StateHelpersTest.StringToNullableTimeOnly [1 ms]
+  Passed Ivy.Test.StateHelpersTest.StringToDateOnly [< 1 ms]
+  Passed Ivy.Test.InputWidgetTests.DateRangeInput_ToDateRangeInput_ShouldNotThrow [3 ms]
+  Passed Ivy.Test.AppRepositoryTests.Test1 [172 ms]
+  Standard Output Messages:
+ [
+   {
+     "Label": "Foo",
+     "Children": [
+       {
+         "Label": "Bar",
+         "Children": [
+           {
+             "Label": "X1",
+             "Children": null,
+             "Icon": null,
+             "Tag": "foo/bar/x1",
+             "Variant": 0,
+             "Checked": false,
+             "Disabled": false,
+             "Shortcut": null,
+             "Expanded": false,
+             "Tooltip": null,
+             "SearchHints": null,
+             "Path": null
+           }
+         ],
+         "Icon": 612,
+         "Tag": null,
+         "Variant": 0,
+         "Checked": false,
+         "Disabled": false,
+         "Shortcut": null,
+         "Expanded": true,
+         "Tooltip": null,
+         "SearchHints": null,
+         "Path": null
+       }
+     ],
+     "Icon": 626,
+     "Tag": null,
+     "Variant": 0,
+     "Checked": false,
+     "Disabled": false,
+     "Shortcut": null,
+     "Expanded": false,
+     "Tooltip": null,
+     "SearchHints": null,
+     "Path": null
+   }
+ ]
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_DifferentQueries_UsesDifferentCacheKeys [173 ms]
+  Standard Output Messages:
+ Different cache keys: Query1 returned 7 values, Query2 returned 1 values
+
+
+  Passed Ivy.Test.InputWidgetTests.SelectInput_ToSelectInput_ShouldNotThrow [3 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_WithNullValues_ExcludesNulls [2 ms]
+  Standard Output Messages:
+ Found 20 non-null descriptions out of 30 products
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_NumericColumn_ConvertsToString [3 ms]
+  Standard Output Messages:
+ Numeric values as strings: 1, 9, 14, 17, 24, 26, 30, 38, 46, 58, 60, 82, 91
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_EmptyColumn_ThrowsException [< 1 ms]
+  Standard Output Messages:
+ Expected error: Column name is required for values query
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_WithCaching_UsesCachedResult [2 ms]
+  Standard Output Messages:
+ Cache test: Second call returned cached result
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_CacheFailure_ContinuesWithoutCaching [1 ms]
+  Standard Output Messages:
+ Cache failure handled gracefully, query executed successfully
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_DateTimeColumn_FormatsCorrectly [7 ms]
+  Standard Output Messages:
+ DateTime values: 1/1/2024 12:00:00 AM, 1/2/2024 12:00:00 AM, 1/3/2024 12:00:00 AM
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_EmptyQueryable_ReturnsEmptyResult [1 ms]
+  Standard Output Messages:
+ Empty queryable returns empty values result
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_BasicQuery_ReturnsDistinctValues [1 ms]
+  Standard Output Messages:
+ Found 7 distinct categories: Books, Clothing, Electronics, Food, Home, Sports, Toys
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_BooleanColumn_ConvertsToString [6 ms]
+  Standard Output Messages:
+ Boolean values: False, True
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_DecimalColumn_FormatsCorrectly [7 ms]
+  Standard Output Messages:
+ Decimal values: 49.00, 99.99, 199.50
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithMultipleSorts_AppliesInOrder [210 ms]
+  Standard Output Messages:
+ Multi-sort verified: Department ASC, then Age DESC
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_ComplexData_HandlesAllDataTypes [3 ms]
+  Standard Output Messages:
+ Departments: Finance, HR, IT, Marketing, Operations, Sales
+ Ages: 20, 21, 26, 28, 29, 31, 32, 36, 37, 40...
+ Emails (non-null): 23 distinct values
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_SearchOnNumericColumn_WorksCorrectly [3 ms]
+  Standard Output Messages:
+ Stock quantities containing '5': 58, 59
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_InvalidColumn_ThrowsException [< 1 ms]
+  Standard Output Messages:
+ Expected error: Column 'NonExistentColumn' not found in type Product
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_WithLimit_ReturnsLimitedValues [1 ms]
+  Standard Output Messages:
+ Retrieved 5 of 50 total values
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_ComplexCombination_WithAndOrNot_WorksCorrectly [218 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorTests.SimpleQuery_NoFiltersOrSorting_ReturnsAllData [8 ms]
+  Standard Output Messages:
+ Total Arrow data size: 3624 bytes
+ Schema fields: Id:Apache.Arrow.Types.Int32Type, Name:Apache.Arrow.Types.StringType, Description:Apache.Arrow.Types.StringType, Price:Apache.Arrow.Types.Decimal128Type, StockQuantity:Apache.Arrow.Types.Int32Type, Category:Apache.Arrow.Types.StringType, IsAvailable:Apache.Arrow.Types.BooleanType, CreatedDate:Apache.Arrow.Types.TimestampType, LastModifiedDate:Apache.Arrow.Types.TimestampType, Rating:Apache.Arrow.Types.DoubleType, ImageData:Apache.Arrow.Types.BinaryType, SupplierId:Apache.Arrow.Types.StringType
+ 
+First 3 rows:
+ Id=1, Name=Product 1, Description=Description for product 1, Price=668.106465911542, StockQuantity=14, Category=Electronics, IsAvailable=True, CreatedDate=1/14/2026 7:36:33 PM, LastModifiedDate=3/9/2026 7:36:33 PM, Rating=3.6220418236321033, ImageData=null, SupplierId=3882efef-adeb-48e8-bfc9-0680223ab041
+ Id=2, Name=Product 2, Description=Description for product 2, Price=512.922791537327, StockQuantity=17, Category=Sports, IsAvailable=False, CreatedDate=12/13/2025 7:36:33 PM, LastModifiedDate=3/1/2026 7:36:33 PM, Rating=1.6011659366084106, ImageData=null, SupplierId=d3f993ac-582b-491a-8a3f-cda3021eb4be
+ Id=3, Name=Product 3, Description=null, Price=380.969613502254, StockQuantity=26, Category=Books, IsAvailable=False, CreatedDate=5/23/2025 6:36:33 PM, LastModifiedDate=2/27/2026 7:36:33 PM, Rating=1.9873525700473005, ImageData=null, SupplierId=37ac5583-cc1a-47c8-bb15-ebc12c079059
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorValuesTests.ProcessValues_WithSearch_FiltersValues [2 ms]
+  Standard Output Messages:
+ Found 12 names containing '1': Product 1, Product 10, Product 11, Product 12, Product 13, Product 14, Product 15, Product 16, Product 17, Product 18, Product 19, Product 21
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_Before_ReturnsEarlierDates [4 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithNullValueFiltering_HandlesCorrectly [4 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_NotBlank_ReturnsNonNullValues [2 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_NotContains_ExcludesMatchingRows [2 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_InRange_WithInsufficientArgs_ReturnsNull [< 1 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithEdgeCases_HandlesCorrectly [4 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithInvalidFilterFunction_ThrowsException [< 1 ms]
+  Standard Output Messages:
+ Expected error for invalid function: Filter function 'invalidFunction' is not supported
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_InRange_ForNumbers_ReturnsValuesInRange [4 ms]
+  Standard Output Messages:
+ Original prices:
+ Product 1: 668.106465911542
+ Product 2: 512.922791537327
+ Product 3: 380.969613502254
+ Product 4: 152.193080239088
+ Product 5: 711.154589760655
+ Product 6: 41.5099663853226
+ Product 7: 748.3589270843
+ Product 8: 115.176371352364
+ Product 9: 44.4983570112373
+ Product 10: 218.445537247902
+ Total rows returned: 2
+ Row count: 2
+ Prices returned: 41.5099663853226, 44.4983570112373
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithNestedFilterGroups_AppliesCorrectLogic [3 ms]
+  Standard Output Messages:
+ Found 8 products matching nested filter groups
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithInvalidColumnName_ThrowsException [< 1 ms]
+  Standard Output Messages:
+ Expected error for invalid column: Column 'NonExistentColumn' not found in type Product
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_NotBlankOnNullableField_HandlesCorrectly [2 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithComplexFilters_CombinesLogically [2 ms]
+  Standard Output Messages:
+ Found 11 products with price > 500 AND stock < 50
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_Blank_OnStringField_DetectsEmptyStrings [2 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithSorting_ReturnsSortedData [3 ms]
+  Standard Output Messages:
+ Price range: $907.26 to $8.95
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_Blank_ReturnsNullOrEmptyValues [1 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithSimpleFilter_ReturnsFilteredData [2 ms]
+  Standard Output Messages:
+ Filtered to 4 Electronics products out of 20 total
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_InRange_ForDates_ReturnsValuesInRange [2 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_BlankOnNonNullableValueType_ReturnsFalse [1 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_WithNegation_InvertsCondition [2 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorFormulaTests.Filter_After_ReturnsLaterDates [2 ms]
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithStringFilterFunctions_AppliesCorrectly [7 ms]
+  Standard Output Messages:
+ Found 2 products with '5' in name
+ Found 11 products starting with 'Product 1'
+ Found 2 products ending with '0'
+
+
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithPagination_ReturnsCorrectPage [1 ms]
+[xUnit.net 00:00:00.52]   Finished:    Ivy.Test
+  Passed Ivy.Test.DataTables.QueryProcessorTests.Query_WithBooleanFiltering_HandlesCorrectly [5 ms]
+  Standard Output Messages:
+ Found 6 active and 14 inactive products
+
+
+
+Total tests: 731
+     Passed: 730
+     Failed: 1
+ Total time: 0.8557 Seconds

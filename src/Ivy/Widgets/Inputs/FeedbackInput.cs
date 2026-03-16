@@ -92,7 +92,7 @@ public static class FeedbackInputExtensions
     {
         var type = state.GetStateType();
         variant ??= type == typeof(bool) || type == typeof(bool?) ? FeedbackInputVariant.Thumbs : FeedbackInputVariant.Stars;
-        
+
         Type genericType = typeof(FeedbackInput<>).MakeGenericType(type);
         FeedbackInputBase input = (FeedbackInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant.Value }, null)!;
         return input;
