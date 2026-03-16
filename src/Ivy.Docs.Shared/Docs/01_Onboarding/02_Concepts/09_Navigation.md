@@ -206,6 +206,90 @@ public class Program
 - **Pages Mode**: Navigation replaces the current view
 - **Prevent Duplicates**: Avoid opening multiple tabs for the same app
 
+## Navigation Beacons
+
+Navigation Beacons enable apps to advertise their ability to handle specific entity types, allowing dynamic discovery and type-safe contextual navigation without hard-coding app IDs.
+
+### Registering a Beacon
+
+Apps register beacons using the `[NavigationBeacon]` attribute and a static factory method:
+
+```csharp
+public class Product { public int Id { get; set; } }
+
+[App(icon: Icons.Package)]
+[NavigationBeacon(typeof(Product), nameof(GetProductBeacon))]
+public class ProductDetailsApp : ViewBase
+{
+    public static NavigationBeacon<Product> GetProductBeacon() => new(
+        AppId: "product-details",
+        ArgsBuilder: product => new { ProductId = product.Id }
+    );
+
+    public override object? Build()
+    {
+        var args = UseArgs<dynamic>();
+        return Text.Heading($"Product #{args?.ProductId}");
+    }
+}
+```
+
+### Using Beacons for Navigation
+
+Other apps can discover and navigate using beacons without knowing the target app's ID:
+
+```csharp
+public class ProductListApp : ViewBase
+{
+    public override object? Build()
+    {
+        var navigator = UseNavigation();
+        var productBeacon = UseNavigationBeacon<Product>();
+
+        var products = new[] {
+            new Product { Id = 1 },
+            new Product { Id = 2 }
+        };
+
+        return Layout.Vertical(
+            products.Select(product =>
+                new Button($"View Product {product.Id}")
+                    .OnClick(() => {
+                        if (productBeacon != null)
+                            navigator.Navigate(productBeacon, product);
+                    })
+            )
+        );
+    }
+}
+```
+
+### Checking Beacon Availability
+
+Use `UseNavigationBeacon<T>()` to check if a handler exists:
+
+```csharp
+var productBeacon = UseNavigationBeacon<Product>();
+
+if (productBeacon != null)
+{
+    // Product detail app is available
+    navigator.Navigate(productBeacon, product);
+}
+else
+{
+    // No app handles Product entities
+    UseToast().Show("Product details not available", ToastType.Warning);
+}
+```
+
+### Beacon Best Practices
+
+- **One beacon per entity type**: Only one app can register a beacon for each entity type
+- **Use meaningful entity types**: Define dedicated entity classes rather than reusing primitives
+- **Handle missing beacons gracefully**: Always check if beacon exists before navigating
+- **Keep ArgsBuilder simple**: Return anonymous objects with the minimum data needed for navigation
+
 ## Best Practices and Common Patterns
 
 ### Type-Safe Navigation

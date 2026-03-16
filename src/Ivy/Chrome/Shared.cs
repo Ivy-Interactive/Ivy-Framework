@@ -174,3 +174,12 @@ public interface INavigator
         Navigate(typeof(T), appArgs);
     }
 }
+
+public static class NavigatorBeaconExtensions
+{
+    public static void Navigate<T>(this INavigator navigator, NavigationBeacon<T> beacon, T entity)
+    {
+        var args = beacon.ArgsBuilder(entity);
+        navigator.Navigate(beacon.AppId, args);
+    }
+}

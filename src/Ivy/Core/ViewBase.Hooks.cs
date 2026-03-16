@@ -191,6 +191,9 @@ public abstract partial class ViewBase
     protected INavigator UseNavigation() =>
         this.Context.UseNavigation();
 
+    protected NavigationBeacon<T>? UseNavigationBeacon<T>() =>
+        this.Context.UseNavigationBeacon<T>();
+
     protected (IView? alertView, ShowAlertDelegate showAlert) UseAlert() =>
         this.Context.UseAlert();
 
