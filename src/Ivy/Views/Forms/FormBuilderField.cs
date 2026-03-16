@@ -23,7 +23,7 @@ public class FormBuilderField<TModel>(
 
     public Type Type => (FieldInfo?.FieldType ?? PropertyInfo?.PropertyType)!;
 
-    public bool Disabled { get; set; } = true;
+    public bool Disabled { get; set; } = false;
 
     public int Order { get; set; } = order;
 
