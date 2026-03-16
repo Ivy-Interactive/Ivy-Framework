@@ -41,6 +41,8 @@ interface DateRangeInputWidgetProps {
   invalid?: string;
   nullable?: boolean;
   firstDayOfWeek?: WeekDay | string;
+  min?: string | null;
+  max?: string | null;
   density?: Densities;
   events: string[];
   'data-testid'?: string;
@@ -79,6 +81,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   invalid,
   nullable = false,
   firstDayOfWeek: firstDayOfWeekRaw,
+  min,
+  max,
   density = Densities.Medium,
   events = EMPTY_EVENTS,
   'data-testid': dataTestId,
@@ -123,6 +127,14 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
     from: parseDate(value?.item1),
     to: parseDate(value?.item2),
   };
+
+  const minDate = parseDate(min);
+  const maxDate = parseDate(max);
+
+  const disabledMatchers = [
+    ...(minDate ? [{ before: minDate }] : []),
+    ...(maxDate ? [{ after: maxDate }] : []),
+  ];
 
   const [leftMonth, setLeftMonth] = useState(() => new Date());
   const [rightMonth, setRightMonth] = useState(() => addMonths(new Date(), 1));
@@ -252,7 +264,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   month={leftMonth}
                   onMonthChange={handleLeftMonthChange}
                   className="p-2 bg-background"
-                  disabled={[{ after: today }]}
+                  disabled={disabledMatchers}
                   weekStartsOn={firstDayOfWeek}
                   density={density}
                 />
@@ -264,7 +276,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   month={rightMonth}
                   onMonthChange={handleRightMonthChange}
                   className="p-2 bg-background"
-                  disabled={[{ after: today }]}
+                  disabled={disabledMatchers}
                   weekStartsOn={firstDayOfWeek}
                   density={density}
                 />
