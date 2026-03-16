@@ -30,9 +30,9 @@ public interface IAuthProvider : IAuthTokenHandler
 
     Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default);
 
-    Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(OAuthSessionsResult.Failure(canRetry: false));
+        return Task.FromResult(BrokeredSessionsResult.Failure(canRetry: false));
     }
 
     bool OpenOAuthLoginInNewTab => false;

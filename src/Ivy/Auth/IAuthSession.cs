@@ -6,59 +6,59 @@ namespace Ivy;
 
 public interface IAuthSession : IAuthTokenHandlerSession
 {
-    public IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthSessions { get; }
+    public IReadOnlyDictionary<string, IAuthTokenHandlerSession> BrokeredSessions { get; }
 
-    public void AddOAuthSession(string provider, IAuthTokenHandlerSession session);
-    public void RemoveOAuthSession(string provider);
-    public void ClearOAuthSessions();
+    public void AddBrokeredSession(string provider, IAuthTokenHandlerSession session);
+    public void RemoveBrokeredSession(string provider);
+    public void ClearBrokeredSessions();
 
-    public event Action<string>? OAuthSessionAdded;
-    public event Action<string>? OAuthSessionRemoved;
+    public event Action<string>? BrokeredSessionAdded;
+    public event Action<string>? BrokeredSessionRemoved;
 }
 
 public class AuthSession(
     AuthToken? authToken = null,
     string? authSessionData = null,
     TunneledHttpMessageHandler? httpMessageHandler = null,
-    Dictionary<string, IAuthTokenHandlerSession>? oauthSessions = null) : AuthTokenHandlerSession(authToken, authSessionData, httpMessageHandler), IAuthSession
+    Dictionary<string, IAuthTokenHandlerSession>? brokeredSessions = null) : AuthTokenHandlerSession(authToken, authSessionData, httpMessageHandler), IAuthSession
 {
-    private readonly Dictionary<string, IAuthTokenHandlerSession> _oauthSessions = oauthSessions ?? [];
+    private readonly Dictionary<string, IAuthTokenHandlerSession> _brokeredSessions = brokeredSessions ?? [];
 
     [ActivatorUtilitiesConstructor]
     public AuthSession(TunneledHttpMessageHandler? httpMessageHandler = null) : this(null, null, httpMessageHandler)
     {
     }
 
-    public IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthSessions => _oauthSessions;
+    public IReadOnlyDictionary<string, IAuthTokenHandlerSession> BrokeredSessions => _brokeredSessions;
 
-    public event Action<string>? OAuthSessionAdded;
-    public event Action<string>? OAuthSessionRemoved;
+    public event Action<string>? BrokeredSessionAdded;
+    public event Action<string>? BrokeredSessionRemoved;
 
-    public void AddOAuthSession(string provider, IAuthTokenHandlerSession session)
+    public void AddBrokeredSession(string provider, IAuthTokenHandlerSession session)
     {
-        var isNew = !_oauthSessions.ContainsKey(provider);
-        _oauthSessions[provider] = session;
+        var isNew = !_brokeredSessions.ContainsKey(provider);
+        _brokeredSessions[provider] = session;
         if (isNew)
         {
-            OAuthSessionAdded?.Invoke(provider);
+            BrokeredSessionAdded?.Invoke(provider);
         }
     }
 
-    public void RemoveOAuthSession(string provider)
+    public void RemoveBrokeredSession(string provider)
     {
-        if (_oauthSessions.Remove(provider))
+        if (_brokeredSessions.Remove(provider))
         {
-            OAuthSessionRemoved?.Invoke(provider);
+            BrokeredSessionRemoved?.Invoke(provider);
         }
     }
 
-    public void ClearOAuthSessions()
+    public void ClearBrokeredSessions()
     {
-        var providers = _oauthSessions.Keys.ToList();
-        _oauthSessions.Clear();
+        var providers = _brokeredSessions.Keys.ToList();
+        _brokeredSessions.Clear();
         foreach (var provider in providers)
         {
-            OAuthSessionRemoved?.Invoke(provider);
+            BrokeredSessionRemoved?.Invoke(provider);
         }
     }
 }
@@ -66,6 +66,6 @@ public class AuthSession(
 public readonly struct AuthSessionSnapshot
 {
     public readonly AuthToken? AuthToken { get; init; }
-    public readonly IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthSessions { get; init; }
+    public readonly IReadOnlyDictionary<string, IAuthTokenHandlerSession> BrokeredSessions { get; init; }
     public readonly string? AuthSessionData { get; init; }
 }

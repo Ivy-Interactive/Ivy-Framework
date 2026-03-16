@@ -42,7 +42,7 @@ public class OAuthProviderTestView : ViewBase
     {
         return Layout.Vertical(
             Text.H4($"{providerName} OAuth"),
-            Text.P($"OAuth provider session available for {providerName}, but no test view has been implemented yet."),
+            Text.P($"Brokered auth session available for {providerName}, but no test view has been implemented yet."),
             Text.Muted($"Access Token: {_session.AuthToken?.AccessToken?[..Math.Min(20, _session.AuthToken?.AccessToken?.Length ?? 0)]}...")
         ).Gap(10);
     }

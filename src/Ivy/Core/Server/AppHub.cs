@@ -24,10 +24,10 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    private readonly ConcurrentDictionary<string, Action<string>> _oauthTokenAddedHandlers = new();
-    private readonly ConcurrentDictionary<string, Action<string>> _oauthTokenRemovedHandlers = new();
-    private readonly ConcurrentDictionary<string, HashSet<string>> _activeOAuthRefreshLoops = new();
-    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>> _oauthRefreshCancellations = new();
+    private readonly ConcurrentDictionary<string, Action<string>> _brokeredTokenAddedHandlers = new();
+    private readonly ConcurrentDictionary<string, Action<string>> _brokeredTokenRemovedHandlers = new();
+    private readonly ConcurrentDictionary<string, HashSet<string>> _activeBrokeredRefreshLoops = new();
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>> _brokeredRefreshCancellations = new();
 
     private AppContext GetAppArgs(string connectionId, string machineId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
     {
@@ -255,16 +255,16 @@ public class AppHub(
             {
                 _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted), connectionAborted);
 
-                // Start a refresh loop for each OAuth provider session
+                // Start a refresh loop for each brokered auth session
                 var authService = appState.AppServices.GetService<IAuthService>();
                 if (authService != null)
                 {
                     var authSession = authService.GetAuthSession();
-                    var oauthProviders = authSession.OAuthSessions.Keys.ToList();
+                    var brokeredSessions = authSession.BrokeredSessions.Keys.ToList();
 
-                    // Track active OAuth refresh loops and their cancellation tokens for this connection
-                    var activeProviders = _activeOAuthRefreshLoops.GetOrAdd(connectionId, _ => new HashSet<string>());
-                    var cancellations = _oauthRefreshCancellations.GetOrAdd(connectionId, _ => new ConcurrentDictionary<string, CancellationTokenSource>());
+                    // Track active brokered refresh loops and their cancellation tokens for this connection
+                    var activeProviders = _activeBrokeredRefreshLoops.GetOrAdd(connectionId, _ => new HashSet<string>());
+                    var cancellations = _brokeredRefreshCancellations.GetOrAdd(connectionId, _ => new ConcurrentDictionary<string, CancellationTokenSource>());
 
                     void AddProvider(string provider)
                     {
@@ -274,17 +274,17 @@ public class AppHub(
                             {
                                 var cts = CancellationTokenSource.CreateLinkedTokenSource(connectionAborted);
                                 cancellations[provider] = cts;
-                                _ = Task.Run(() => OAuthTokenRefreshLoopAsync(connectionId, provider, cts.Token), connectionAborted);
+                                _ = Task.Run(() => BrokeredTokenRefreshLoopAsync(connectionId, provider, cts.Token), connectionAborted);
                             }
                         }
                     }
 
-                    foreach (var provider in oauthProviders)
+                    foreach (var brokeredSession in brokeredSessions)
                     {
-                        AddProvider(provider);
+                        AddProvider(brokeredSession);
                     }
 
-                    // Subscribe to new OAuth provider sessions being added
+                    // Subscribe to new brokered auth sessions being added
                     Action<string> addedHandler = provider =>
                     {
                         // Check if connection is still active
@@ -296,10 +296,10 @@ public class AppHub(
                         AddProvider(provider);
                     };
 
-                    // Subscribe to OAuth provider sessions being removed
+                    // Subscribe to brokered auth sessions being removed
                     Action<string> removedHandler = provider =>
                     {
-                        logger.LogInformation("Cancelling OAuth token refresh loop for removed provider {Provider} on connection {ConnectionId}", provider, connectionId);
+                        logger.LogInformation("Cancelling brokered token refresh loop for removed provider {Provider} on connection {ConnectionId}", provider, connectionId);
 
                         if (cancellations.TryRemove(provider, out var cts))
                         {
@@ -313,10 +313,10 @@ public class AppHub(
                         }
                     };
 
-                    _oauthTokenAddedHandlers[connectionId] = addedHandler;
-                    _oauthTokenRemovedHandlers[connectionId] = removedHandler;
-                    authSession.OAuthSessionAdded += addedHandler;
-                    authSession.OAuthSessionRemoved += removedHandler;
+                    _brokeredTokenAddedHandlers[connectionId] = addedHandler;
+                    _brokeredTokenRemovedHandlers[connectionId] = removedHandler;
+                    authSession.BrokeredSessionAdded += addedHandler;
+                    authSession.BrokeredSessionRemoved += removedHandler;
                 }
             }
         }
@@ -360,8 +360,8 @@ public class AppHub(
             // Cancel all pending HTTP tunnel requests for this connection
             HttpTunnelingController.CancelRequestsForConnection(Context.ConnectionId, "SignalR connection closed");
 
-            // Clean up OAuth session event subscriptions
-            if (_oauthTokenAddedHandlers.TryRemove(Context.ConnectionId, out var addedHandler))
+            // Clean up brokered session event subscriptions
+            if (_brokeredTokenAddedHandlers.TryRemove(Context.ConnectionId, out var addedHandler))
             {
                 // Get the auth session and unsubscribe
                 if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var tempAppState))
@@ -370,12 +370,12 @@ public class AppHub(
                     if (authService != null)
                     {
                         var authSession = authService.GetAuthSession();
-                        authSession.OAuthSessionAdded -= addedHandler;
+                        authSession.BrokeredSessionAdded -= addedHandler;
                     }
                 }
             }
 
-            if (_oauthTokenRemovedHandlers.TryRemove(Context.ConnectionId, out var removedHandler))
+            if (_brokeredTokenRemovedHandlers.TryRemove(Context.ConnectionId, out var removedHandler))
             {
                 // Get the auth session and unsubscribe
                 if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var tempAppState))
@@ -384,13 +384,13 @@ public class AppHub(
                     if (authService != null)
                     {
                         var authSession = authService.GetAuthSession();
-                        authSession.OAuthSessionRemoved -= removedHandler;
+                        authSession.BrokeredSessionRemoved -= removedHandler;
                     }
                 }
             }
 
-            // Cancel and dispose all OAuth refresh loop cancellation tokens
-            if (_oauthRefreshCancellations.TryRemove(Context.ConnectionId, out var cancellations))
+            // Cancel and dispose all brokered token refresh loop cancellation tokens
+            if (_brokeredRefreshCancellations.TryRemove(Context.ConnectionId, out var cancellations))
             {
                 foreach (var kvp in cancellations)
                 {
@@ -401,13 +401,13 @@ public class AppHub(
                     }
                     catch (Exception ex)
                     {
-                        logger.LogWarning(ex, "Error cancelling OAuth refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, Context.ConnectionId);
+                        logger.LogWarning(ex, "Error cancelling brokered token refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, Context.ConnectionId);
                     }
                 }
             }
 
-            // Clean up active OAuth refresh loop tracking
-            _activeOAuthRefreshLoops.TryRemove(Context.ConnectionId, out _);
+            // Clean up active brokered token refresh loop tracking
+            _activeBrokeredRefreshLoops.TryRemove(Context.ConnectionId, out _);
 
             if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
             {
@@ -608,7 +608,7 @@ public class AppHub(
         await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
     }
 
-    private async Task OAuthTokenRefreshLoopAsync(string connectionId, string provider, CancellationToken cancellationToken)
+    private async Task BrokeredTokenRefreshLoopAsync(string connectionId, string provider, CancellationToken cancellationToken)
     {
         try
         {
@@ -616,7 +616,7 @@ public class AppHub(
             var handler = server.ServiceProvider!.GetKeyedService<IAuthTokenHandler>(provider);
             if (handler == null)
             {
-                logger.LogError("OAuthTokenRefreshLoop[{Provider}]: No handler registered for {ConnectionId}, exiting loop.", provider, connectionId);
+                logger.LogError("BrokeredTokenRefreshLoop[{Provider}]: No handler registered for {ConnectionId}, exiting loop.", provider, connectionId);
                 return;
             }
 
@@ -628,9 +628,9 @@ public class AppHub(
             var authSession = authService.GetAuthSession();
 
             // Get the provider's session
-            if (!authSession.OAuthSessions.TryGetValue(provider, out var providerSession))
+            if (!authSession.BrokeredSessions.TryGetValue(provider, out var providerSession))
             {
-                logger.LogError("OAuthTokenRefreshLoop[{Provider}]: No session found for {ConnectionId}, exiting loop.", provider, connectionId);
+                logger.LogError("BrokeredTokenRefreshLoop[{Provider}]: No session found for {ConnectionId}, exiting loop.", provider, connectionId);
                 return;
             }
 
@@ -642,7 +642,7 @@ public class AppHub(
             }
 
             var client = session.AppServices.GetRequiredService<IClientProvider>();
-            var oauthLogger = session.AppServices.GetRequiredService<ILoggerFactory>()
+            var brokeredLogger = session.AppServices.GetRequiredService<ILoggerFactory>()
                 .CreateLogger<AuthTokenHandlerService>();
 
             // Create a service instance for this provider
@@ -652,9 +652,9 @@ public class AppHub(
                 client,
                 sessionStore,
                 session.MachineId,
-                oauthLogger);
+                brokeredLogger);
 
-            var strategy = new OAuthTokenRefreshStrategy(
+            var strategy = new BrokeredTokenRefreshStrategy(
                 connectionId,
                 provider,
                 tokenService,
@@ -664,14 +664,14 @@ public class AppHub(
                 authService,
                 sessionStore,
                 contentBuilder,
-                logger);
+                brokeredLogger);
 
             await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
         }
         finally
         {
             // Clean up: remove provider from active set when loop exits
-            if (_activeOAuthRefreshLoops.TryGetValue(connectionId, out var activeProviders))
+            if (_activeBrokeredRefreshLoops.TryGetValue(connectionId, out var activeProviders))
             {
                 lock (activeProviders)
                 {
@@ -680,7 +680,7 @@ public class AppHub(
             }
 
             // Clean up: dispose the cancellation token source
-            if (_oauthRefreshCancellations.TryGetValue(connectionId, out var cancellations))
+            if (_brokeredRefreshCancellations.TryGetValue(connectionId, out var cancellations))
             {
                 if (cancellations.TryRemove(provider, out var cts))
                 {

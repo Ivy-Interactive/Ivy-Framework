@@ -7,7 +7,7 @@ public enum AuthSessionProperty
 {
     AuthToken,
     AuthSessionData,
-    OAuthSessions
+    BrokeredSessions
 }
 
 public enum AuthSessionAccessMode
@@ -34,8 +34,8 @@ public class CheckedAuthTokenHandlerSessionBuilder(IAuthTokenHandlerSession inne
     public CheckedAuthTokenHandlerSessionBuilder WithSessionDataAccess(AuthSessionAccessMode accessMode)
         => WithAccessMode(AuthSessionProperty.AuthSessionData, accessMode);
 
-    public CheckedAuthTokenHandlerSessionBuilder WithOAuthSessionsAccess(AuthSessionAccessMode accessMode)
-        => WithAccessMode(AuthSessionProperty.OAuthSessions, accessMode);
+    public CheckedAuthTokenHandlerSessionBuilder WithBrokeredSessionsAccess(AuthSessionAccessMode accessMode)
+        => WithAccessMode(AuthSessionProperty.BrokeredSessions, accessMode);
 
     public IAuthTokenHandlerSession Build()
     {
@@ -64,8 +64,8 @@ public class CheckedAuthSessionBuilder(IAuthSession innerAuthSession)
     public CheckedAuthSessionBuilder WithSessionDataAccess(AuthSessionAccessMode accessMode)
         => WithAccessMode(AuthSessionProperty.AuthSessionData, accessMode);
 
-    public CheckedAuthSessionBuilder WithOAuthSessionsAccess(AuthSessionAccessMode accessMode)
-        => WithAccessMode(AuthSessionProperty.OAuthSessions, accessMode);
+    public CheckedAuthSessionBuilder WithBrokeredSessionsAccess(AuthSessionAccessMode accessMode)
+        => WithAccessMode(AuthSessionProperty.BrokeredSessions, accessMode);
 
     public IAuthSession Build()
     {
@@ -134,43 +134,43 @@ public class CheckedAuthSession(IAuthSession innerAuthSession, Dictionary<AuthSe
 {
     private readonly IAuthSession _innerAuthSession = innerAuthSession;
 
-    public IReadOnlyDictionary<string, IAuthTokenHandlerSession> OAuthSessions
+    public IReadOnlyDictionary<string, IAuthTokenHandlerSession> BrokeredSessions
     {
         get
         {
-            CheckRead(AuthSessionProperty.OAuthSessions);
-            return _innerAuthSession.OAuthSessions;
+            CheckRead(AuthSessionProperty.BrokeredSessions);
+            return _innerAuthSession.BrokeredSessions;
         }
     }
 
-    public void AddOAuthSession(string provider, IAuthTokenHandlerSession session)
+    public void AddBrokeredSession(string provider, IAuthTokenHandlerSession session)
     {
-        CheckWrite(AuthSessionProperty.OAuthSessions);
-        _innerAuthSession.AddOAuthSession(provider, session);
+        CheckWrite(AuthSessionProperty.BrokeredSessions);
+        _innerAuthSession.AddBrokeredSession(provider, session);
     }
 
-    public void RemoveOAuthSession(string provider)
+    public void RemoveBrokeredSession(string provider)
     {
-        CheckWrite(AuthSessionProperty.OAuthSessions);
-        _innerAuthSession.RemoveOAuthSession(provider);
+        CheckWrite(AuthSessionProperty.BrokeredSessions);
+        _innerAuthSession.RemoveBrokeredSession(provider);
     }
 
-    public void ClearOAuthSessions()
+    public void ClearBrokeredSessions()
     {
-        CheckWrite(AuthSessionProperty.OAuthSessions);
-        _innerAuthSession.ClearOAuthSessions();
+        CheckWrite(AuthSessionProperty.BrokeredSessions);
+        _innerAuthSession.ClearBrokeredSessions();
     }
 
-    public event Action<string>? OAuthSessionAdded
+    public event Action<string>? BrokeredSessionAdded
     {
-        add => _innerAuthSession.OAuthSessionAdded += value;
-        remove => _innerAuthSession.OAuthSessionAdded -= value;
+        add => _innerAuthSession.BrokeredSessionAdded += value;
+        remove => _innerAuthSession.BrokeredSessionAdded -= value;
     }
 
-    public event Action<string>? OAuthSessionRemoved
+    public event Action<string>? BrokeredSessionRemoved
     {
-        add => _innerAuthSession.OAuthSessionRemoved += value;
-        remove => _innerAuthSession.OAuthSessionRemoved -= value;
+        add => _innerAuthSession.BrokeredSessionRemoved += value;
+        remove => _innerAuthSession.BrokeredSessionRemoved -= value;
     }
 }
 #endif

@@ -16,8 +16,8 @@ public class AuthService : AuthTokenHandlerService, IAuthService
     private readonly IAuthSession _authSession;
     private readonly IServiceProvider? _serviceProvider;
 
-    // Hold removed OAuth provider sessions so they can be updated in place and restored later
-    private readonly Dictionary<string, IAuthTokenHandlerSession> _removedOAuthSessions = new();
+    // Hold removed brokered auth sessions so they can be updated in place and restored later
+    private readonly Dictionary<string, IAuthTokenHandlerSession> _removedBrokeredSessions = new();
 
     public AuthService(
         IAuthProvider authProvider,
@@ -89,11 +89,11 @@ public class AuthService : AuthTokenHandlerService, IAuthService
         }
 
         // Capture OAuth providers before clearing so we can delete their cookies
-        var providersToDelete = _authSession.OAuthSessions.Keys.ToList();
+        var providersToDelete = _authSession.BrokeredSessions.Keys.ToList();
 
         _authSession.AuthToken = null;
-        _authSession.ClearOAuthSessions();
-        _removedOAuthSessions.Clear();
+        _authSession.ClearBrokeredSessions();
+        _removedBrokeredSessions.Clear();
 
         // Pass the captured providers to delete their cookies
         var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession, providersToDelete);
@@ -120,10 +120,10 @@ public class AuthService : AuthTokenHandlerService, IAuthService
 
     public IAuthSession GetAuthSession() => _authSession;
 
-    public async Task<OAuthSessionsResult> GetOAuthSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default)
+    public async Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default)
     {
         var result = await TimeoutHelper.WithTimeoutAsync(ct =>
-            _authProvider.GetOAuthSessionsAsync(_authSession, skipCache, ct), cancellationToken);
+            _authProvider.GetBrokeredSessionsAsync(_authSession, skipCache, ct), cancellationToken);
 
         if (result.Sessions == null)
         {
@@ -138,21 +138,21 @@ public class AuthService : AuthTokenHandlerService, IAuthService
         var unhandledSessions = result.Sessions?.Where(kvp => !filteredSessions.ContainsKey(kvp.Key)).Select(s => s.Key).ToList();
         if (unhandledSessions != null && unhandledSessions.Count > 0)
         {
-            _logger.LogWarning("The following OAuth provider sessions are available but have no registered handler and will be ignored: {UnhandledProviders}", string.Join(", ", unhandledSessions));
+            _logger.LogWarning("The following brokered auth sessions are available but have no registered handler and will be ignored: {UnhandledProviders}", string.Join(", ", unhandledSessions));
         }
 
-        // Diff and update _authSession.OAuthSessions
-        var currentProviders = _authSession.OAuthSessions.Keys.ToHashSet();
+        // Diff and update _authSession.BrokeredSessions
+        var currentProviders = _authSession.BrokeredSessions.Keys.ToHashSet();
         var newProviders = filteredSessions.Keys.ToHashSet();
 
-        // Remove providers that are no longer present, but keep them in _removedOAuthSessions
+        // Remove providers that are no longer present, but keep them in _removedBrokeredSessions
         foreach (var provider in currentProviders.Where(p => !newProviders.Contains(p)))
         {
-            if (_authSession.OAuthSessions.TryGetValue(provider, out var sessionToRemove))
+            if (_authSession.BrokeredSessions.TryGetValue(provider, out var sessionToRemove))
             {
-                _removedOAuthSessions[provider] = sessionToRemove;
+                _removedBrokeredSessions[provider] = sessionToRemove;
             }
-            _authSession.RemoveOAuthSession(provider);
+            _authSession.RemoveBrokeredSession(provider);
         }
 
         // Add or update sessions
@@ -160,25 +160,25 @@ public class AuthService : AuthTokenHandlerService, IAuthService
         foreach (var kvp in filteredSessions)
         {
             // Check if session exists in active sessions
-            if (_authSession.OAuthSessions.TryGetValue(kvp.Key, out var existingSession))
+            if (_authSession.BrokeredSessions.TryGetValue(kvp.Key, out var existingSession))
             {
                 // Update existing active session in place to preserve references
                 existingSession.AuthToken = kvp.Value.AuthToken;
                 existingSession.AuthSessionData = kvp.Value.AuthSessionData;
             }
             // Check if session exists in removed sessions
-            else if (_removedOAuthSessions.Remove(kvp.Key, out var removedSession))
+            else if (_removedBrokeredSessions.Remove(kvp.Key, out var removedSession))
             {
                 // Update the removed session in place and restore it to active sessions
                 removedSession.AuthToken = kvp.Value.AuthToken;
                 removedSession.AuthSessionData = kvp.Value.AuthSessionData;
-                _authSession.AddOAuthSession(kvp.Key, removedSession);
+                _authSession.AddBrokeredSession(kvp.Key, removedSession);
                 hasChanges = true;
             }
             else
             {
                 // New session, add it
-                _authSession.AddOAuthSession(kvp.Key, kvp.Value);
+                _authSession.AddBrokeredSession(kvp.Key, kvp.Value);
                 hasChanges = true;
             }
         }
@@ -188,7 +188,7 @@ public class AuthService : AuthTokenHandlerService, IAuthService
             SetAuthCookies(reloadPage: false);
         }
 
-        return OAuthSessionsResult.Success(filteredSessions);
+        return BrokeredSessionsResult.Success(filteredSessions);
     }
 
     public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)

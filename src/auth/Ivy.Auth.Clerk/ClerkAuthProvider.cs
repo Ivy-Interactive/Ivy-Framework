@@ -286,13 +286,13 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
     }
 
 
-    public async Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    public async Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
         // Return stored sessions if available and not skipping cache
-        if (!skipCache && authSession.OAuthSessions.Count > 0)
+        if (!skipCache && authSession.BrokeredSessions.Count > 0)
         {
-            return OAuthSessionsResult.Success(
-                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions));
+            return BrokeredSessionsResult.Success(
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.BrokeredSessions));
         }
 
         try
@@ -300,13 +300,13 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
             // Get user ID from the current session token
             if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) is not var (claims, _))
             {
-                return OAuthSessionsResult.Failure();
+                return BrokeredSessionsResult.Failure();
             }
 
             var userId = claims.FindFirst("sub")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return OAuthSessionsResult.Failure();
+                return BrokeredSessionsResult.Failure();
             }
 
             // Get user details to find their external accounts
@@ -314,12 +314,12 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
             if (user?.ExternalAccounts == null || user.ExternalAccounts.Count == 0)
             {
-                return OAuthSessionsResult.Success([]);
+                return BrokeredSessionsResult.Success([]);
             }
 
             var sessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
-            // Fetch OAuth tokens for each external account
+            // Fetch brokered OAuth tokens for each external account
             foreach (var externalAccount in user.ExternalAccounts)
             {
                 try
@@ -364,11 +364,11 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                 }
             }
 
-            return OAuthSessionsResult.Success(sessions);
+            return BrokeredSessionsResult.Success(sessions);
         }
         catch (Exception)
         {
-            return OAuthSessionsResult.Failure();
+            return BrokeredSessionsResult.Failure();
         }
     }
 }

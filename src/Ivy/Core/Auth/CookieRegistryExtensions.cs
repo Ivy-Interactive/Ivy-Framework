@@ -27,20 +27,20 @@ public static class CookieRegistryExtensions
         cookies.AddCookiesForAuthToken(authSession.AuthToken, providersToDelete);
         cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData);
 
-        // Filter out OAuth providers that have been globally removed (if machineId is provided)
-        IReadOnlyDictionary<string, IAuthTokenHandlerSession> sessionsToWrite = authSession.OAuthSessions;
+        // Filter out brokered session providers that have been globally removed (if machineId is provided)
+        IReadOnlyDictionary<string, IAuthTokenHandlerSession> sessionsToWrite = authSession.BrokeredSessions;
         HashSet<string>? removedProviders = providersToDelete != null
             ? new(providersToDelete)
             : null;
 
         if (removedProviders != null && removedProviders.Count > 0)
         {
-            sessionsToWrite = authSession.OAuthSessions
+            sessionsToWrite = authSession.BrokeredSessions
                 .Where(kvp => !removedProviders.Contains(kvp.Key))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
-        cookies.AddCookiesForOAuthSessions(sessionsToWrite);
+        cookies.AddCookiesForBrokeredSessions(sessionsToWrite);
 
         // Also delete cookies for removed providers
         if (removedProviders != null && removedProviders.Count > 0)
@@ -71,7 +71,7 @@ public static class CookieRegistryExtensions
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken, IEnumerable<string>? providersToDelete = null)
+    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken, IEnumerable<string>? sessionsToDelete = null)
     {
         var authTokenName = "access_token";
         var refreshTokenName = "refresh_token";
@@ -83,13 +83,13 @@ public static class CookieRegistryExtensions
             cookies.Delete(refreshTokenName, CreateAuthCookieOptions());
             cookies.Delete(tagName, CreateAuthCookieOptions());
 
-            // Delete OAuth provider session cookies
-            if (providersToDelete != null)
+            // Delete brokered auth session cookies
+            if (sessionsToDelete != null)
             {
                 var cookieOptions = CreateAuthCookieOptions();
-                foreach (var provider in providersToDelete)
+                foreach (var provider in sessionsToDelete)
                 {
-                    Console.WriteLine($"Deleting cookies for removed OAuth provider: {provider}");
+                    Console.WriteLine($"Deleting cookies for removed brokered session: {provider}");
                     cookies.Delete($"{provider}_access_token", cookieOptions);
                     cookies.Delete($"{provider}_refresh_token", cookieOptions);
                     cookies.Delete($"{provider}_auth_tag", cookieOptions);
@@ -138,18 +138,18 @@ public static class CookieRegistryExtensions
         }
     }
 
-    public static void AddCookiesForOAuthSessions(this CookieJar cookies, IReadOnlyDictionary<string, IAuthTokenHandlerSession> oauthSessions)
+    public static void AddCookiesForBrokeredSessions(this CookieJar cookies, IReadOnlyDictionary<string, IAuthTokenHandlerSession> brokeredSessions)
     {
         var cookieOptions = CreateAuthCookieOptions();
 
         Console.WriteLine("blah:");
 
-        foreach (var (provider, session) in oauthSessions)
+        foreach (var (provider, session) in brokeredSessions)
         {
             var accessTokenName = $"{provider}_access_token";
             var refreshTokenName = $"{provider}_refresh_token";
             var tagName = $"{provider}_auth_tag";
-            Console.WriteLine($"    Adding cookies for OAuth session: provider={provider}, accessToken={(string.IsNullOrEmpty(session.AuthToken?.AccessToken) ? "null/empty" : "present")}");
+            Console.WriteLine($"    Adding cookies for brokered session: provider={provider}, accessToken={(string.IsNullOrEmpty(session.AuthToken?.AccessToken) ? "null/empty" : "present")}");
 
             // Store access token
             if (!string.IsNullOrEmpty(session.AuthToken?.AccessToken))

@@ -14,13 +14,13 @@ namespace Ivy.Core.Auth;
 public static class AuthHelper
 {
     public static AuthSession GetAuthSession(HttpContext context, TunneledHttpMessageHandler? httpMessageHandler)
-    => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var oauthSessions)
-        ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, oauthSessions, httpMessageHandler)
+    => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var brokeredSessions)
+        ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, brokeredSessions, httpMessageHandler)
         : new AuthSession(httpMessageHandler: httpMessageHandler);
 
     public static AuthSession GetAuthSession(ServerCallContext context, TunneledHttpMessageHandler? httpMessageHandler)
-    => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var oauthSessions)
-        ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, oauthSessions, httpMessageHandler)
+    => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var brokeredSessions)
+        ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, brokeredSessions, httpMessageHandler)
         : new AuthSession(httpMessageHandler: httpMessageHandler);
 
     public static async Task ValidateAuthIfRequired(global::Ivy.Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
@@ -140,7 +140,7 @@ public static class AuthHelper
         }
     }
 
-    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<string, IAuthTokenHandlerSession> OAuthSessions) GetAuthCookies(HttpContext context)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<string, IAuthTokenHandlerSession> BrokeredSessions) GetAuthCookies(HttpContext context)
     {
         var cookies = context.Request.Cookies;
         var accessToken = cookies["access_token"].NullIfEmpty();
@@ -148,12 +148,12 @@ public static class AuthHelper
         var tag = cookies["auth_tag"].NullIfEmpty();
         var authSessionDataValue = cookies["auth_session_data"].NullIfEmpty();
 
-        var oauthSessions = ExtractOAuthSessionsFromCookies(cookies);
+        var brokeredSessions = ExtractBrokeredSessionsFromCookies(cookies);
 
-        return (accessToken, refreshToken, tag, authSessionDataValue, oauthSessions);
+        return (accessToken, refreshToken, tag, authSessionDataValue, brokeredSessions);
     }
 
-    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<string, IAuthTokenHandlerSession> OAuthSessions) GetAuthCookies(ServerCallContext context)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<string, IAuthTokenHandlerSession> BrokeredSessions) GetAuthCookies(ServerCallContext context)
     {
         var cookies = context.RequestHeaders.GetValue("cookie") ?? string.Empty;
         if (string.IsNullOrEmpty(cookies))
@@ -177,32 +177,32 @@ public static class AuthHelper
         var tag = GetCookie("auth_tag");
         var authSessionDataValue = GetCookie("auth_session_data");
 
-        var oauthSessions = ExtractOAuthSessionsFromCookieHeader(cookieHeader);
+        var brokeredSessions = ExtractBrokeredSessionsFromCookieHeader(cookieHeader);
 
-        return (accessToken, refreshToken, tag, authSessionDataValue, oauthSessions);
+        return (accessToken, refreshToken, tag, authSessionDataValue, brokeredSessions);
     }
 
-    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tag, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> oauthSessions, TunneledHttpMessageHandler? httpMessageHandler)
+    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tag, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> brokeredSessions, TunneledHttpMessageHandler? httpMessageHandler)
     {
         if (accessToken == null)
         {
-            return new(null, authSessionDataValue, httpMessageHandler, oauthSessions);
+            return new(null, authSessionDataValue, httpMessageHandler, brokeredSessions);
         }
 
         try
         {
             var token = new AuthToken(accessToken, refreshToken, tag);
-            return new(token, authSessionDataValue, httpMessageHandler, oauthSessions);
+            return new(token, authSessionDataValue, httpMessageHandler, brokeredSessions);
         }
         catch (Exception)
         {
-            return new(null, authSessionDataValue, httpMessageHandler, oauthSessions);
+            return new(null, authSessionDataValue, httpMessageHandler, brokeredSessions);
         }
     }
 
-    private static Dictionary<string, IAuthTokenHandlerSession> ExtractOAuthSessionsFromCookies(IRequestCookieCollection cookies)
+    private static Dictionary<string, IAuthTokenHandlerSession> ExtractBrokeredSessionsFromCookies(IRequestCookieCollection cookies)
     {
-        var oauthSessions = new Dictionary<string, IAuthTokenHandlerSession>();
+        var brokeredSessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
         // Discover OAuth provider cookies by scanning for the pattern: {provider}_access_token
         var accessTokenCookies = cookies.Keys
@@ -226,15 +226,15 @@ public static class AuthHelper
 
             var authToken = new AuthToken(accessToken, refreshToken, tag);
             var session = new AuthTokenHandlerSession(authToken: authToken);
-            oauthSessions[provider] = session;
+            brokeredSessions[provider] = session;
         }
 
-        return oauthSessions;
+        return brokeredSessions;
     }
 
-    private static Dictionary<string, IAuthTokenHandlerSession> ExtractOAuthSessionsFromCookieHeader(List<CookieHeaderValue> cookieHeader)
+    private static Dictionary<string, IAuthTokenHandlerSession> ExtractBrokeredSessionsFromCookieHeader(List<CookieHeaderValue> cookieHeader)
     {
-        var oauthSessions = new Dictionary<string, IAuthTokenHandlerSession>();
+        var brokeredSessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
         string? GetCookie(string name)
         {
@@ -268,9 +268,9 @@ public static class AuthHelper
 
             var authToken = new AuthToken(accessToken, refreshToken, tag);
             var session = new AuthTokenHandlerSession(authToken: authToken);
-            oauthSessions[provider] = session;
+            brokeredSessions[provider] = session;
         }
 
-        return oauthSessions;
+        return brokeredSessions;
     }
 }

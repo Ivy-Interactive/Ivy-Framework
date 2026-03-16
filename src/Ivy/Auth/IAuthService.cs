@@ -18,7 +18,7 @@ public interface IAuthService : IAuthTokenHandlerService
 
     IAuthSession GetAuthSession();
 
-    Task<OAuthSessionsResult> GetOAuthSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default);
+    Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default);
 
     internal void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null);
 }

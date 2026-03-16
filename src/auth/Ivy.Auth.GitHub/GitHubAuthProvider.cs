@@ -112,9 +112,9 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     [Obsolete("GitHub OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public GitHubAuthProvider UseGitHub() => this;
 
-    /// <summary>Get OAuth provider sessions - returns live session references that stay up-to-date</summary>
-    public Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
-        => Task.FromResult(OAuthSessionsResult.Success([]));
+    /// <summary>Get brokered auth sessions - returns live session references that stay up-to-date</summary>
+    public Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+        => Task.FromResult(BrokeredSessionsResult.Success([]));
 
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)
     {

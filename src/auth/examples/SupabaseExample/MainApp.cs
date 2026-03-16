@@ -10,16 +10,16 @@ public class MainApp : ViewBase
     {
         var auth = UseService<IAuthService>();
         var userInfo = UseState<UserInfo?>();
-        var oauthSessions = UseState<Dictionary<string, IAuthTokenHandlerSession>?>();
+        var brokeredSessions = UseState<Dictionary<string, IAuthTokenHandlerSession>?>();
 
         UseEffect(async () =>
         {
             var info = await auth.GetUserInfoAsync();
             userInfo.Set(info);
 
-            // Get OAuth provider sessions
-            var result = await auth.GetOAuthSessionsAsync();
-            oauthSessions.Set(result.Sessions);
+            // Get brokered auth sessions
+            var result = await auth.GetBrokeredSessionsAsync();
+            brokeredSessions.Set(result.Sessions);
         });
 
         if (userInfo.Value is null)
@@ -42,17 +42,17 @@ public class MainApp : ViewBase
                  ).Gap(4).Align(Align.Center)
             ).Gap(20).Align(Align.Center),
 
-            // OAuth Provider Sessions Section
-            Text.H3("OAuth Provider Sessions"),
-            oauthSessions.Value == null
-                ? Text.P("OAuth sessions not available")
-                : oauthSessions.Value.Count == 0
-                    ? Text.P("No OAuth providers connected")
+            // Brokered Auth Sessions Section
+            Text.H3("Brokered Auth Sessions"),
+            brokeredSessions.Value == null
+                ? Text.P("Brokered auth sessions not available")
+                : brokeredSessions.Value.Count == 0
+                    ? Text.P("No brokered auth sessions connected")
                     : Layout.Vertical(
-                        Text.P($"Connected providers: {string.Join(", ", oauthSessions.Value.Keys)}"),
+                        Text.P($"Connected providers: {string.Join(", ", brokeredSessions.Value.Keys)}"),
 
                         // Automatically show the appropriate test view for each provider
-                        Layout.Vertical(oauthSessions.Value.Select(kvp => new OAuthProviderTestView(kvp.Key, kvp.Value)).ToArray())
+                        Layout.Vertical(brokeredSessions.Value.Select(kvp => new OAuthProviderTestView(kvp.Key, kvp.Value)).ToArray())
                     ).Gap(10)
 
         ).Gap(40).Padding(50).Align(Align.Center).Height(Size.Full());

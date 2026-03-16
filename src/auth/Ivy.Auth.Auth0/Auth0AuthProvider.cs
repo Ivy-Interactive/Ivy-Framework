@@ -186,25 +186,25 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         return _managementClient;
     }
 
-    public async Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    public async Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
     {
         // Return stored sessions if available and not skipping cache
-        if (!skipCache && authSession.OAuthSessions.Count > 0)
+        if (!skipCache && authSession.BrokeredSessions.Count > 0)
         {
-            return OAuthSessionsResult.Success(
-                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions));
+            return BrokeredSessionsResult.Success(
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.BrokeredSessions));
         }
 
         // Get user ID from the current access token
         if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
         {
-            return OAuthSessionsResult.Failure();
+            return BrokeredSessionsResult.Failure();
         }
 
         var userId = claims.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId))
         {
-            return OAuthSessionsResult.Failure();
+            return BrokeredSessionsResult.Failure();
         }
 
         // Get management API client
@@ -215,7 +215,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
 
         if (user.Identities == null || !user.Identities.Any())
         {
-            return OAuthSessionsResult.Success(new Dictionary<string, IAuthTokenHandlerSession>());
+            return BrokeredSessionsResult.Success(new Dictionary<string, IAuthTokenHandlerSession>());
         }
 
         var sessions = new Dictionary<string, IAuthTokenHandlerSession>();
@@ -249,6 +249,6 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
             sessions[provider] = session;
         }
 
-        return OAuthSessionsResult.Success(sessions);
+        return BrokeredSessionsResult.Success(sessions);
     }
 }

@@ -30,16 +30,16 @@ public static class AuthSessionExtensions
         => new()
         {
             AuthToken = authSession.AuthToken,
-            OAuthSessions = new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions),
+            BrokeredSessions = new Dictionary<string, IAuthTokenHandlerSession>(authSession.BrokeredSessions),
             AuthSessionData = authSession.AuthSessionData,
         };
 
     public static bool HasChangedSince(this IAuthSession authSession, AuthSessionSnapshot snapshot)
         => authSession.AuthToken != snapshot.AuthToken ||
            authSession.AuthSessionData != snapshot.AuthSessionData ||
-           !OAuthSessionsEqual(authSession.OAuthSessions, snapshot.OAuthSessions);
+           !BrokeredSessionsEqual(authSession.BrokeredSessions, snapshot.BrokeredSessions);
 
-    private static bool OAuthSessionsEqual(
+    private static bool BrokeredSessionsEqual(
         IReadOnlyDictionary<string, IAuthTokenHandlerSession> current,
         IReadOnlyDictionary<string, IAuthTokenHandlerSession> snapshot)
     {

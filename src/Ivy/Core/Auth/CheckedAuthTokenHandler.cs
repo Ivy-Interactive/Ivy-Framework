@@ -12,7 +12,7 @@ public class CheckedAuthTokenHandler(IAuthTokenHandler innerAuthTokenHandler) : 
         var checkedSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadWrite)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthSessionsAccess(AuthSessionAccessMode.ReadWrite)
+            .WithBrokeredSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthTokenHandler.InitializeAsync(checkedSession, requestScheme, requestHost, cancellationToken);
     }
@@ -27,7 +27,7 @@ public class CheckedAuthTokenHandler(IAuthTokenHandler innerAuthTokenHandler) : 
         var checkedSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
-            .WithOAuthSessionsAccess(AuthSessionAccessMode.ReadWrite)
+            .WithBrokeredSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthTokenHandler.RefreshAccessTokenAsync(checkedSession, cancellationToken);
     }
@@ -56,7 +56,7 @@ public class CheckedAuthTokenHandler(IAuthTokenHandler innerAuthTokenHandler) : 
         var checkedSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
-            .WithOAuthSessionsAccess(AuthSessionAccessMode.ReadOnly)
+            .WithBrokeredSessionsAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
         return _innerAuthTokenHandler.GetUserInfoAsync(checkedSession, cancellationToken);
     }
@@ -71,7 +71,7 @@ public class CheckedAuthTokenHandler(IAuthTokenHandler innerAuthTokenHandler) : 
         var checkedSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
-            .WithOAuthSessionsAccess(AuthSessionAccessMode.ReadOnly)
+            .WithBrokeredSessionsAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
         return _innerAuthTokenHandler.GetAccessTokenLifetimeAsync(checkedSession, cancellationToken);
     }
