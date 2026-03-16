@@ -53,7 +53,7 @@ public class GridDefinition
 /// <summary>
 /// A layout using the CSS Grid system for complex arrangements.
 /// </summary>
-public record GridLayout : WidgetBase<GridLayout>
+internal record GridLayout : WidgetBase<GridLayout>
 {
     public GridLayout(GridDefinition def, params object[] children) : base(children)
     {
