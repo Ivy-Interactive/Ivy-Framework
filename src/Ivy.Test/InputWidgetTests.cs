@@ -1,6 +1,7 @@
 using System;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Xunit;
@@ -32,63 +33,21 @@ public class InputWidgetTests
         public IEffectTrigger ToTrigger() => EffectTrigger.OnStateChange(this);
     }
 
-    [Fact]
-    public void ColorInput_ToColorInput_ShouldNotThrow()
-    {
-        var state = new MockState<string>("#ffffff");
-        var widget = state.ToColorInput();
-        Assert.NotNull(widget);
-        Assert.IsType<ColorInput<string>>(widget);
-    }
 
 
 
-    [Fact]
-    public void DateRangeInput_ToDateRangeInput_ShouldNotThrow()
-    {
-        var state = new MockState<(DateOnly, DateOnly)>((DateOnly.MinValue, DateOnly.MaxValue));
-        var widget = state.ToDateRangeInput();
-        Assert.NotNull(widget);
-        Assert.IsType<DateRangeInput<(DateOnly, DateOnly)>>(widget);
-    }
-
-    [Fact]
-    public void CodeInput_ToCodeInput_ShouldNotThrow()
-    {
-        var state = new MockState<string>("{}");
-        var widget = state.ToCodeInput();
-        Assert.NotNull(widget);
-        Assert.IsType<CodeInput<string>>(widget);
-    }
-
-    [Fact]
-    public void FeedbackInput_ToFeedbackInput_ShouldNotThrow()
-    {
-        var state = new MockState<int>(5);
-        var widget = state.ToFeedbackInput();
-        Assert.NotNull(widget);
-        Assert.IsType<FeedbackInput<int>>(widget);
-    }
-
-    [Fact]
-    public void IconInput_ToIconInput_ShouldNotThrow()
-    {
-        var state = new MockState<Icons>(Icons.Activity);
-        var widget = state.ToIconInput();
-        Assert.NotNull(widget);
-        Assert.IsType<IconInput<Icons>>(widget);
-    }
 
 
 
-    [Fact]
-    public void NumberRangeInput_ToNumberRangeInput_ShouldNotThrow()
-    {
-        var state = new MockState<(int, int)>((0, 100));
-        var widget = state.ToNumberRangeInput();
-        Assert.NotNull(widget);
-        Assert.IsType<NumberRangeInput<int>>(widget);
-    }
+
+
+
+
+
+
+
+
+
 
     public enum TestEnum { A, B, C }
 
@@ -198,4 +157,96 @@ public class InputWidgetTests
         var expectedWidgetType = typeof(DateTimeInput<>).MakeGenericType(type);
         Assert.IsType(expectedWidgetType, widget);
     }
+
+    [Theory]
+    [InlineData(typeof(string), "#ffffff")]
+    [InlineData(typeof(string), null)]
+    [InlineData(typeof(Colors), Colors.Blue)]
+    [InlineData(typeof(Colors?), null)]
+    public void ColorInput_PreservesType(Type type, object? value)
+    {
+        var mockStateType = typeof(MockState<>).MakeGenericType(type);
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
+        var widget = state.ToColorInput();
+        Assert.NotNull(widget);
+        var expectedWidgetType = typeof(ColorInput<>).MakeGenericType(type);
+        Assert.IsType(expectedWidgetType, widget);
+    }
+
+    [Theory]
+    [MemberData(nameof(DateRangeData))]
+    public void DateRangeInput_PreservesType(Type type, object? value)
+    {
+        var mockStateType = typeof(MockState<>).MakeGenericType(type);
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
+        var widget = state.ToDateRangeInput();
+        Assert.NotNull(widget);
+        var expectedWidgetType = typeof(DateRangeInput<>).MakeGenericType(type);
+        Assert.IsType(expectedWidgetType, widget);
+    }
+    public static IEnumerable<object?[]> DateRangeData() =>
+    [
+        [typeof((DateOnly, DateOnly)), (DateOnly.MinValue, DateOnly.MaxValue)],
+        [typeof((DateOnly?, DateOnly?)), ((DateOnly?)null, (DateOnly?)null)]
+    ];
+
+    [Theory]
+    [InlineData(typeof(string), "{}")]
+    [InlineData(typeof(string), null)]
+    public void CodeInput_PreservesType(Type type, object? value)
+    {
+        var mockStateType = typeof(MockState<>).MakeGenericType(type);
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
+        var widget = state.ToCodeInput();
+        Assert.NotNull(widget);
+        var expectedWidgetType = typeof(CodeInput<>).MakeGenericType(type);
+        Assert.IsType(expectedWidgetType, widget);
+    }
+
+    [Theory]
+    [InlineData(typeof(int), 5)]
+    [InlineData(typeof(int?), null)]
+    [InlineData(typeof(bool), true)]
+    [InlineData(typeof(bool?), null)]
+    public void FeedbackInput_PreservesType(Type type, object? value)
+    {
+        var mockStateType = typeof(MockState<>).MakeGenericType(type);
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
+        var widget = state.ToFeedbackInput();
+        Assert.NotNull(widget);
+        var expectedWidgetType = typeof(FeedbackInput<>).MakeGenericType(type);
+        Assert.IsType(expectedWidgetType, widget);
+    }
+
+    [Theory]
+    [InlineData(typeof(Icons), Icons.Activity)]
+    [InlineData(typeof(Icons?), null)]
+    public void IconInput_PreservesType(Type type, object? value)
+    {
+        var mockStateType = typeof(MockState<>).MakeGenericType(type);
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
+        var widget = state.ToIconInput();
+        Assert.NotNull(widget);
+        var expectedWidgetType = typeof(IconInput<>).MakeGenericType(type);
+        Assert.IsType(expectedWidgetType, widget);
+    }
+
+    [Theory]
+    [MemberData(nameof(NumberRangeData))]
+    public void NumberRangeInput_PreservesType(Type type, object? value)
+    {
+        var mockStateType = typeof(MockState<>).MakeGenericType(type);
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
+        var widget = state.ToNumberRangeInput();
+        Assert.NotNull(widget);
+        var expectedWidgetType = typeof(NumberRangeInput<>).MakeGenericType(type.GetGenericArguments()[0]);
+        Assert.IsType(expectedWidgetType, widget);
+    }
+    public static IEnumerable<object?[]> NumberRangeData() =>
+    [
+        [typeof((int, int)), (0, 100)],
+        [typeof((int?, int?)), ((int?)null, (int?)null)],
+        [typeof((double, double)), (0.0, 100.0)],
+        [typeof((double?, double?)), ((double?)null, (double?)null)]
+    ];
 }
