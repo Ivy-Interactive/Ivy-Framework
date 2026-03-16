@@ -113,8 +113,7 @@ public static class CookieRegistryExtensions
 
             if (authToken.Tag != null)
             {
-                var tagJson = JsonSerializer.Serialize(authToken.Tag, JsonHelper.IgnoreNullOptions);
-                cookies.Append(tagName, tagJson, cookieOptions);
+                cookies.Append(tagName, authToken.Tag, cookieOptions);
             }
             else
             {
@@ -175,8 +174,7 @@ public static class CookieRegistryExtensions
             // Store tag if present
             if (session.AuthToken?.Tag != null)
             {
-                var tagJson = JsonSerializer.Serialize(session.AuthToken.Tag, JsonHelper.IgnoreNullOptions);
-                cookies.Append(tagName, tagJson, cookieOptions);
+                cookies.Append(tagName, session.AuthToken.Tag, cookieOptions);
             }
             else
             {

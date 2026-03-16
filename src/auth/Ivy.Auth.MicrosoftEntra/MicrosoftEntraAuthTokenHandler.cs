@@ -113,10 +113,8 @@ public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
             return null;
         }
 
-        if (app is not IByRefreshToken refresher
-            || token.Tag is not JsonElement tag
-            || tag.GetString() is not string accountId
-            || accountId.Length <= 0)
+        var accountId = token.Tag;
+        if (app is not IByRefreshToken refresher || string.IsNullOrEmpty(accountId))
         {
             return null;
         }

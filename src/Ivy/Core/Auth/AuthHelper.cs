@@ -182,7 +182,7 @@ public static class AuthHelper
         return (accessToken, refreshToken, tag, authSessionDataValue, oauthSessions);
     }
 
-    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tagJson, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> oauthSessions, TunneledHttpMessageHandler? httpMessageHandler)
+    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tag, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> oauthSessions, TunneledHttpMessageHandler? httpMessageHandler)
     {
         if (accessToken == null)
         {
@@ -191,19 +191,6 @@ public static class AuthHelper
 
         try
         {
-            object? tag = null;
-            if (!string.IsNullOrEmpty(tagJson))
-            {
-                try
-                {
-                    tag = JsonSerializer.Deserialize<object>(tagJson, JsonHelper.DefaultOptions);
-                }
-                catch
-                {
-                    // If tag deserialization fails, just leave it null
-                }
-            }
-
             var token = new AuthToken(accessToken, refreshToken, tag);
             return new(token, authSessionDataValue, httpMessageHandler, oauthSessions);
         }
@@ -235,20 +222,7 @@ public static class AuthHelper
             }
 
             var refreshToken = cookies[refreshTokenName].NullIfEmpty();
-            var tagJson = cookies[tagName].NullIfEmpty();
-
-            object? tag = null;
-            if (!string.IsNullOrEmpty(tagJson))
-            {
-                try
-                {
-                    tag = JsonSerializer.Deserialize<object>(tagJson, JsonHelper.DefaultOptions);
-                }
-                catch
-                {
-                    // If tag deserialization fails, just leave it null
-                }
-            }
+            var tag = cookies[tagName].NullIfEmpty();
 
             var authToken = new AuthToken(accessToken, refreshToken, tag);
             var session = new AuthTokenHandlerSession(authToken: authToken);
@@ -290,20 +264,7 @@ public static class AuthHelper
             }
 
             var refreshToken = GetCookie(refreshTokenName);
-            var tagJson = GetCookie(tagName);
-
-            object? tag = null;
-            if (!string.IsNullOrEmpty(tagJson))
-            {
-                try
-                {
-                    tag = JsonSerializer.Deserialize<object>(tagJson, JsonHelper.DefaultOptions);
-                }
-                catch
-                {
-                    // If tag deserialization fails, just leave it null
-                }
-            }
+            var tag = GetCookie(tagName);
 
             var authToken = new AuthToken(accessToken, refreshToken, tag);
             var session = new AuthTokenHandlerSession(authToken: authToken);
