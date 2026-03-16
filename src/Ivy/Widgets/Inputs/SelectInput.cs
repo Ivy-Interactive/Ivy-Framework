@@ -118,9 +118,13 @@ public static class SelectInputExtensions
 {
     public static SelectInputBase ToSelectInput(this IAnyState state, IEnumerable<IAnyOption>? options = null, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select)
     {
-        var type = state.GetStateType();
+        return ToSelectInputDynamic((dynamic)state, options, placeholder, disabled, variant);
+    }
+
+    private static SelectInputBase ToSelectInputDynamic<T>(IState<T> state, IEnumerable<IAnyOption>? options, string? placeholder, bool disabled, SelectInputVariant variant)
+    {
+        var type = typeof(T);
         bool selectMany = type.IsCollectionType();
-        Type genericType = typeof(SelectInput<>).MakeGenericType(type);
 
         if (options == null)
         {
@@ -144,8 +148,10 @@ public static class SelectInputExtensions
             placeholder = "Select options...";
         }
 
-        SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, state, options, placeholder, disabled, variant, selectMany)!;
-        input.Nullable = type.IsNullableType();
+        var input = new SelectInput<T>(state, options, placeholder, disabled, variant, selectMany)
+        {
+            Nullable = type.IsNullableType()
+        };
 
         return input;
     }

@@ -119,15 +119,19 @@ public static class NumberRangeInputExtensions
 {
     public static NumberRangeInputBase ToNumberRangeInput(this IAnyState state, bool disabled = false, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal, double? min = null, double? max = null)
     {
-        var type = state.GetStateType();
+        return ToNumberRangeInputDynamic((dynamic)state, disabled, formatStyle, min, max);
+    }
+
+    private static NumberRangeInputBase ToNumberRangeInputDynamic<T>(IState<(T, T)> state, bool disabled, NumberFormatStyle formatStyle, double? min, double? max)
+    {
+        var type = typeof((T, T));
 
         if (!type.IsGenericType || type.GetGenericArguments().Length != 2)
         {
             throw new Exception("NumberRangeInput can only be used with a tuple of two numeric values");
         }
 
-        Type genericType = typeof(NumberRangeInput<>).MakeGenericType(type.GetGenericArguments()[0]);
-        NumberRangeInputBase input = (NumberRangeInputBase)Activator.CreateInstance(genericType, state, disabled, formatStyle)!;
+        var input = new NumberRangeInput<T>(state, disabled, formatStyle);
         input.ScaffoldDefaults(null, type.GetGenericArguments()[0]);
         if (min is not null) input = input with { Min = min };
         if (max is not null) input = input with { Max = max };

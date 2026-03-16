@@ -71,19 +71,19 @@ public static class OptionExtensions
         if (!enumType.IsEnum)
             throw new ArgumentException("Type must be an enum", nameof(enumType));
 
-        var optionType = typeof(Option<>).MakeGenericType(enumType);
-
         IAnyOption MakeOption(object e)
         {
             var label = ((Enum)e).GetDescription();
-
             var value = Convert.ChangeType(e, enumType);
-
-            // Pass all 6 parameters including optional ones (label, value, group, description, icon, disabled)
-            return (IAnyOption)Activator.CreateInstance(optionType, label, value, null, null, null, false)!;
+            return MakeOptionDynamic(label, (dynamic)value);
         }
 
         return Enum.GetValues(enumType).Cast<object>().Select(MakeOption).ToArray();
+    }
+
+    private static IAnyOption MakeOptionDynamic<TValue>(string label, TValue value)
+    {
+        return new Option<TValue>(label, value, null, null, null, false);
     }
 
     public static MenuItem[] ToMenuItems(this IEnumerable<IAnyOption> options)

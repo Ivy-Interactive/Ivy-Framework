@@ -84,16 +84,19 @@ public static class DateRangeInputExtensions
 {
     public static DateRangeInputBase ToDateRangeInput(this IAnyState state, string? placeholder = null, bool disabled = false)
     {
-        var type = state.GetStateType();
+        return ToDateRangeInputDynamic((dynamic)state, placeholder, disabled);
+    }
+
+    private static DateRangeInputBase ToDateRangeInputDynamic<T>(IState<T> state, string? placeholder, bool disabled)
+    {
+        var type = typeof(T);
 
         if (!type.IsGenericType || type.GetGenericArguments().Length != 2)
         {
             throw new Exception("DateRangeInput can only be used with a tuple of two elements");
         }
 
-        Type genericType = typeof(DateRangeInput<>).MakeGenericType(type);
-        DateRangeInputBase input = (DateRangeInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled)!;
-        return input;
+        return new DateRangeInput<T>(state, placeholder, disabled);
     }
 
     public static DateRangeInputBase Disabled(this DateRangeInputBase widget, bool disabled = true)

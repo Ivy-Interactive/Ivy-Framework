@@ -84,10 +84,12 @@ public static class ReadOnlyInputExtensions
 {
     public static IAnyReadOnlyInput ToReadOnlyInput(this IAnyState state)
     {
-        var type = state.GetStateType();
-        Type genericType = typeof(ReadOnlyInput<>).MakeGenericType(type);
-        IAnyReadOnlyInput input = (IAnyReadOnlyInput)Activator.CreateInstance(genericType, state)!;
-        return input;
+        return ToReadOnlyInputDynamic((dynamic)state);
+    }
+
+    private static IAnyReadOnlyInput ToReadOnlyInputDynamic<T>(IState<T> state)
+    {
+        return new ReadOnlyInput<T>(state);
     }
 
     [OverloadResolutionPriority(1)]

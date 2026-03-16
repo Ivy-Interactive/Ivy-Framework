@@ -136,19 +136,25 @@ public static class ColorInputExtensions
 
     public static ColorInputBase ToColorInput(this IAnyState state, string? placeholder = null, bool disabled = false, ColorInputVariant? variant = null)
     {
-        var type = state.GetStateType();
+        return ToColorInputDynamic((dynamic)state, placeholder, disabled, variant);
+    }
+
+    private static ColorInputBase ToColorInputDynamic<T>(IState<T> state, string? placeholder, bool disabled, ColorInputVariant? variant)
+    {
+        var type = typeof(T);
         var underlyingType = System.Nullable.GetUnderlyingType(type) ?? type;
         var effectiveVariant = variant ?? (underlyingType == typeof(Colors) ? ColorInputVariant.Swatch : ColorInputVariant.TextAndPicker);
 
-        Type genericType = typeof(ColorInput<>).MakeGenericType(type);
-        ColorInputBase input = (ColorInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, effectiveVariant)!;
-        input.Nullable = type.IsNullableType();
+        var input = new ColorInput<T>(state, placeholder, disabled, effectiveVariant)
+        {
+            Nullable = type.IsNullableType()
+        };
 
         var currentValue = state.As<object>().Value?.ToString();
         var validationError = ValidateColorFormat(currentValue);
         if (validationError != null)
         {
-            input = input with { Invalid = validationError };
+            return input with { Invalid = validationError };
         }
 
         return input;

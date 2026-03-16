@@ -77,10 +77,16 @@ public static class IconInputExtensions
 {
     public static IconInputBase ToIconInput(this IAnyState state, string? placeholder = null, bool disabled = false)
     {
-        var type = state.GetStateType();
-        var genericType = typeof(IconInput<>).MakeGenericType(type);
-        var input = (IconInputBase)Activator.CreateInstance(genericType, state, placeholder ?? "Select an icon", disabled)!;
-        input.Nullable = type.IsNullableType();
+        return ToIconInputDynamic((dynamic)state, placeholder, disabled);
+    }
+
+    private static IconInputBase ToIconInputDynamic<T>(IState<T> state, string? placeholder, bool disabled)
+    {
+        var type = typeof(T);
+        var input = new IconInput<T>(state, placeholder ?? "Select an icon", disabled)
+        {
+            Nullable = type.IsNullableType()
+        };
         return input;
     }
 

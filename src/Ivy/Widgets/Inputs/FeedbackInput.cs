@@ -89,13 +89,14 @@ public static class FeedbackInputExtensions
 {
     public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant? variant = null)
     {
-        var type = state.GetStateType();
+        return ToFeedbackInputDynamic((dynamic)state, placeholder, disabled, variant);
+    }
 
+    private static FeedbackInputBase ToFeedbackInputDynamic<T>(IState<T> state, string? placeholder, bool disabled, FeedbackInputVariant? variant)
+    {
+        var type = typeof(T);
         variant ??= type == typeof(bool) || type == typeof(bool?) ? FeedbackInputVariant.Thumbs : FeedbackInputVariant.Stars;
-
-        Type genericType = typeof(FeedbackInput<>).MakeGenericType(type);
-        FeedbackInputBase input = (FeedbackInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
-        return input;
+        return new FeedbackInput<T>(state, placeholder, disabled, variant.Value);
     }
 
     public static FeedbackInputBase Placeholder(this FeedbackInputBase widget, string placeholder) => widget with { Placeholder = placeholder };

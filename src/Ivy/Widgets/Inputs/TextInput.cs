@@ -158,13 +158,12 @@ public static class TextInputExtensions
     private static bool VariantHasBuiltInValidation(TextInputVariant variant) =>
         variant is TextInputVariant.Email or TextInputVariant.Tel or TextInputVariant.Url or TextInputVariant.Password;
 
-    private static TextInputBase CreateTextInputCore(IAnyState state, string? placeholder, bool disabled, TextInputVariant variant)
+    private static TextInputBase ToTextInputDynamic<T>(IState<T> state, string? placeholder, bool disabled, TextInputVariant variant)
     {
-        var type = state.GetStateType();
-        Type genericType = typeof(TextInput<>).MakeGenericType(type);
-        TextInputBase input = (TextInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
-        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        nullableProperty?.SetValue(input, type.IsNullableType());
+        var input = new TextInput<T>(state, placeholder, disabled, variant)
+        {
+            Nullable = typeof(T).IsNullableType()
+        };
         return input;
     }
 
@@ -205,7 +204,7 @@ public static class TextInputExtensions
 
     public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
     {
-        var input = CreateTextInputCore(state, placeholder, disabled, variant);
+        var input = ToTextInputDynamic((dynamic)state, placeholder, disabled, variant);
         // Allow .Variant(Email) later to pick up the same state for validation
         if (TextInputBuildContext.GetCurrent() is { } ctx)
             input.SetAttachedValue(ValidationOwner, AttachedValidationState, state);
