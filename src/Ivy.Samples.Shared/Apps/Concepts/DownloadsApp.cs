@@ -9,11 +9,17 @@ public class DownloadsApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        IState<string?> url = UseDownload(GenerateImage, "image/png", "file.png");
-        if (url.Value is null) return null;
+        IState<string?> imageUrl = UseDownload(GenerateImage, "image/png", "file.png");
+        IState<string?> streamUrl = UseDownload(GenerateStream, "application/octet-stream", "large-file.bin");
+
+        if (imageUrl.Value is null) return null;
+
         return Layout.Vertical()
-            | new Image(url.Value)
-            | new Button("Download Image").Url(url.Value);
+            | new Image(imageUrl.Value)
+            | new Button("Download Image (byte[])").Url(imageUrl.Value)
+            | (streamUrl.Value is not null
+                ? new Button("Download Stream").Url(streamUrl.Value)
+                : null);
     }
 
     private byte[] GenerateImage()
@@ -27,5 +33,10 @@ public class DownloadsApp : SampleBase
         using var ms = new MemoryStream();
         image.SaveAsPng(ms);
         return ms.ToArray();
+    }
+
+    private Stream GenerateStream()
+    {
+        return new MemoryStream(new byte[1024 * 1024]);
     }
 }

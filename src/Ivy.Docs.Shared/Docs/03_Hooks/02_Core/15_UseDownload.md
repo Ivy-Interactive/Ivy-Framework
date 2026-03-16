@@ -118,6 +118,35 @@ public class DownloadMultiFormatDemo : ViewBase
 }
 ```
 
+## Streaming Large Files
+
+For large files (audio, video, PDFs), use the `Stream`-based overload. This avoids loading the entire file into memory and supports HTTP range requests, enabling features like seeking in audio/video players.
+
+```csharp demo-below
+public class DownloadStreamDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var downloadUrl = UseDownload(
+            factory: async () =>
+            {
+                var stream = new MemoryStream(new byte[1024]);
+                return (Stream)stream;
+            },
+            mimeType: "audio/mpeg",
+            fileName: "audio.mp3"
+        );
+
+        return Layout.Vertical()
+            | (downloadUrl.Value != null
+                ? new Button("Download Audio").Url(downloadUrl.Value)
+                : Text.Block("Preparing download..."));
+    }
+}
+```
+
+> Streams are automatically disposed after the download completes. Range headers are supported, so audio/video players can seek within streamed content.
+
 ## Faq
 
 ### How do I create multiple downloads for items in a collection?
