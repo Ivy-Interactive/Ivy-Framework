@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Densities } from '@/types/density';
@@ -8,6 +8,7 @@ import { Densities } from '@/types/density';
 interface EmojiRatingProps {
   value: number;
   onRate?: (rating: number) => void;
+  totalEmojis?: number;
   density?: Densities;
   className?: string;
   disabled?: boolean;
@@ -15,17 +16,36 @@ interface EmojiRatingProps {
   allowHalf?: boolean;
 }
 
-const emojis = ['😢', '😕', '😐', '🙂', '😊'];
+const baseEmojis = ['😢', '😕', '😐', '🙂', '😊'];
+
+function getEmojis(total: number): string[] {
+  if (total <= 0) return [];
+  if (total === baseEmojis.length) return baseEmojis;
+  if (total < baseEmojis.length) {
+    // Pick evenly spaced emojis from the base set
+    const indices = Array.from({ length: total }, (_, i) =>
+      Math.round((i * (baseEmojis.length - 1)) / (total - 1))
+    );
+    return indices.map(i => baseEmojis[i]);
+  }
+  // For larger totals, interpolate by repeating the base pattern
+  return Array.from({ length: total }, (_, i) => {
+    const mapped = Math.round((i * (baseEmojis.length - 1)) / (total - 1));
+    return baseEmojis[mapped];
+  });
+}
 
 export function EmojiRating({
   value = 0,
   onRate,
+  totalEmojis = 5,
   density = Densities.Medium,
   className,
   disabled = false,
   invalid,
   allowHalf = false,
 }: EmojiRatingProps) {
+  const emojis = useMemo(() => getEmojis(totalEmojis), [totalEmojis]);
   const [hover, setHover] = useState(0);
 
   const getHalfValue = useCallback(

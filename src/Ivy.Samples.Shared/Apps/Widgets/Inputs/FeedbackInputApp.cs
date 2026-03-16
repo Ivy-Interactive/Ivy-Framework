@@ -122,12 +122,39 @@ public class FeedbackInputApp : SampleBase
                                 | Text.InlineCode(decimalState.Value.ToString())
         ;
 
+        var maxState3 = UseState(0);
+        var maxState10 = UseState(0);
+
+        var maxExamples = Layout.Grid().Columns(3)
+                          | Text.InlineCode("Max")
+                          | Text.InlineCode("rating")
+                          | Text.InlineCode("state")
+
+                          | Text.InlineCode("Max(3) Stars")
+                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).Max(3)
+                          | Text.InlineCode(maxState3.Value.ToString())
+
+                          | Text.InlineCode("Max(10) Stars")
+                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).Max(10)
+                          | Text.InlineCode(maxState10.Value.ToString())
+
+                          | Text.InlineCode("Max(3) Emojis")
+                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).Max(3)
+                          | Text.InlineCode(maxState3.Value.ToString())
+
+                          | Text.InlineCode("Max(10) Emojis")
+                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).Max(10)
+                          | Text.InlineCode(maxState10.Value.ToString())
+        ;
+
         return Layout.Vertical()
                | Text.H1("Feedback Inputs")
                | Text.H2("Variants")
                | variants
                | Text.H2("Size Examples")
                | sizeExamples
+               | Text.H2("Custom Max")
+               | maxExamples
                | Text.H2("Allow Half")
                | allowHalfExamples
                | Text.H2("Data Binding")
