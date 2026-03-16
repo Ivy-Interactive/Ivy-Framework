@@ -427,24 +427,25 @@ public class FormFileUpload : ViewBase
     {
         var model = UseState(() => new FormFileUploadModel());
 
+        // Extract sub-states for hooks (must be at top level of Build)
+        var (state1, disp1) = Ivy.Core.Helpers.StateHelpers.MemberState(model, m => m.Attachment1);
+        var s1 = Ivy.Core.Helpers.StateHelpers.As<FileUpload<byte[]>?>(state1);
+        Context.TrackDisposable(disp1);
+        var upload1 = UseUpload(MemoryStreamUploadHandler.Create(s1))
+            .Accept("image/jpeg")
+            .MaxFileSize(FileSize.FromMegabytes(1));
+
+        var (state2, disp2) = Ivy.Core.Helpers.StateHelpers.MemberState(model, m => m.Attachment2);
+        var s2 = Ivy.Core.Helpers.StateHelpers.As<FileUpload<byte[]>?>(state2);
+        Context.TrackDisposable(disp2);
+        var upload2 = UseUpload(MemoryStreamUploadHandler.Create(s2))
+            .Accept("application/pdf")
+            .MaxFileSize(FileSize.FromMegabytes(5));
+
         var form = model.ToForm()
-            .Builder(e => e.Attachment1, (state, view) =>
-            {
-                var uploadContext = view.UseUpload(
-                    MemoryStreamUploadHandler.Create(state))
-                    .Accept("image/jpeg")
-                    .MaxFileSize(FileSize.FromMegabytes(1));
-                return state.ToFileInput(uploadContext);
-            })
+            .Builder(e => e.Attachment1, (state, view) => s1.ToFileInput(upload1))
             .Label(x => x.Attachment1, "Attachment1 image/jpeg (Required)")
-            .Builder(e => e.Attachment2, (state, view) =>
-            {
-                var uploadContext = view.UseUpload(
-                    MemoryStreamUploadHandler.Create(state))
-                    .Accept("application/pdf")
-                    .MaxFileSize(FileSize.FromMegabytes(5));
-                return state.ToFileInput(uploadContext);
-            })
+            .Builder(e => e.Attachment2, (state, view) => s2.ToFileInput(upload2))
             .Label(x => x.Attachment2, "Attachment2 application/pdf (Optional)");
 
         return Layout.Vertical()
