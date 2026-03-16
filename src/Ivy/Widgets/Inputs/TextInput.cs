@@ -158,15 +158,6 @@ public static class TextInputExtensions
     private static bool VariantHasBuiltInValidation(TextInputVariant variant) =>
         variant is TextInputVariant.Email or TextInputVariant.Tel or TextInputVariant.Url or TextInputVariant.Password;
 
-    private static TextInputBase ToTextInputDynamic<T>(IState<T> state, string? placeholder, bool disabled, TextInputVariant variant)
-    {
-        var input = new TextInput<T>(state, placeholder, disabled, variant)
-        {
-            Nullable = typeof(T).IsNullableType()
-        };
-        return input;
-    }
-
     /// <summary>Wire blur validation for variant; <paramref name="widget"/> must already be bound to <paramref name="state"/>.</summary>
     private static TextInputBase ApplyVariantValidation(IViewContext context, IAnyState state, TextInputBase widget, TextInputVariant variant)
     {
@@ -204,7 +195,7 @@ public static class TextInputExtensions
 
     public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
     {
-        var input = ToTextInputDynamic((dynamic)state, placeholder, disabled, variant);
+        var input = new TextInput<object>(state, placeholder, disabled, variant);
         // Allow .Variant(Email) later to pick up the same state for validation
         if (TextInputBuildContext.GetCurrent() is { } ctx)
             input.SetAttachedValue(ValidationOwner, AttachedValidationState, state);

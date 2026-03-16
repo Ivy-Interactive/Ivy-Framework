@@ -91,16 +91,11 @@ public static class CodeInputExtensions
 {
     public static CodeInputBase ToCodeInput(this IAnyState state, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default, Languages language = Languages.Json)
     {
-        return ToCodeInputDynamic((dynamic)state, placeholder, disabled, variant);
-    }
-
-    private static CodeInputBase ToCodeInputDynamic<T>(IState<T> state, string? placeholder, bool disabled, CodeInputVariant variant)
-    {
-        var type = typeof(T);
-        var input = new CodeInput<T>(state, placeholder, disabled, variant)
-        {
-            Nullable = type.IsNullableType()
-        };
+        var type = state.GetStateType();
+        Type genericType = typeof(CodeInput<>).MakeGenericType(type);
+        CodeInputBase input = (CodeInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
         return input;
     }
 

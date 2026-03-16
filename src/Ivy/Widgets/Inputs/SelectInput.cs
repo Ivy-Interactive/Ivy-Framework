@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -118,13 +119,9 @@ public static class SelectInputExtensions
 {
     public static SelectInputBase ToSelectInput(this IAnyState state, IEnumerable<IAnyOption>? options = null, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select)
     {
-        return ToSelectInputDynamic((dynamic)state, options, placeholder, disabled, variant);
-    }
-
-    private static SelectInputBase ToSelectInputDynamic<T>(IState<T> state, IEnumerable<IAnyOption>? options, string? placeholder, bool disabled, SelectInputVariant variant)
-    {
-        var type = typeof(T);
+        var type = state.GetStateType();
         bool selectMany = type.IsCollectionType();
+        Type genericType = typeof(SelectInput<>).MakeGenericType(type);
 
         if (options == null)
         {
@@ -148,10 +145,9 @@ public static class SelectInputExtensions
             placeholder = "Select options...";
         }
 
-        var input = new SelectInput<T>(state, options, placeholder, disabled, variant, selectMany)
-        {
-            Nullable = type.IsNullableType()
-        };
+        SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, options, placeholder, disabled, variant, selectMany }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
 
         return input;
     }

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -84,19 +85,16 @@ public static class DateRangeInputExtensions
 {
     public static DateRangeInputBase ToDateRangeInput(this IAnyState state, string? placeholder = null, bool disabled = false)
     {
-        return ToDateRangeInputDynamic((dynamic)state, placeholder, disabled);
-    }
-
-    private static DateRangeInputBase ToDateRangeInputDynamic<T>(IState<T> state, string? placeholder, bool disabled)
-    {
-        var type = typeof(T);
+        var type = state.GetStateType();
 
         if (!type.IsGenericType || type.GetGenericArguments().Length != 2)
         {
             throw new Exception("DateRangeInput can only be used with a tuple of two elements");
         }
 
-        return new DateRangeInput<T>(state, placeholder, disabled);
+        Type genericType = typeof(DateRangeInput<>).MakeGenericType(type);
+        DateRangeInputBase input = (DateRangeInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled }, null)!;
+        return input;
     }
 
     public static DateRangeInputBase Disabled(this DateRangeInputBase widget, bool disabled = true)

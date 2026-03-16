@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -140,13 +141,10 @@ public static class NumberInputExtensions
 
     public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal, double? min = null, double? max = null)
     {
-        return ToNumberInputDynamic((dynamic)state, placeholder, disabled, variant, formatStyle, min, max);
-    }
-
-    private static NumberInputBase ToNumberInputDynamic<T>(IState<T> state, string? placeholder, bool disabled, NumberInputVariant variant, NumberFormatStyle formatStyle, double? min, double? max)
-    {
-        var type = typeof(T);
-        var input = new NumberInput<T>(state, placeholder, disabled, variant, formatStyle);
+        var type = state.GetStateType();
+        Type genericType = typeof(NumberInput<>).MakeGenericType(type);
+        NumberInputBase input = (NumberInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant, formatStyle }, null)!;
+        
         input.ScaffoldDefaults(null, type);
         if (min is not null) input = input with { Min = min };
         if (max is not null) input = input with { Max = max };

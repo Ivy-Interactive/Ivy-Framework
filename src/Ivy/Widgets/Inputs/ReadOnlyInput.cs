@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -84,12 +85,10 @@ public static class ReadOnlyInputExtensions
 {
     public static IAnyReadOnlyInput ToReadOnlyInput(this IAnyState state)
     {
-        return ToReadOnlyInputDynamic((dynamic)state);
-    }
-
-    private static IAnyReadOnlyInput ToReadOnlyInputDynamic<T>(IState<T> state)
-    {
-        return new ReadOnlyInput<T>(state);
+        var type = state.GetStateType();
+        Type genericType = typeof(ReadOnlyInput<>).MakeGenericType(type);
+        IAnyReadOnlyInput input = (IAnyReadOnlyInput)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state }, null)!;
+        return input;
     }
 
     [OverloadResolutionPriority(1)]

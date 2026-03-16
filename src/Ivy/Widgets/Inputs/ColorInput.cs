@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -136,19 +137,14 @@ public static class ColorInputExtensions
 
     public static ColorInputBase ToColorInput(this IAnyState state, string? placeholder = null, bool disabled = false, ColorInputVariant? variant = null)
     {
-        return ToColorInputDynamic((dynamic)state, placeholder, disabled, variant);
-    }
-
-    private static ColorInputBase ToColorInputDynamic<T>(IState<T> state, string? placeholder, bool disabled, ColorInputVariant? variant)
-    {
-        var type = typeof(T);
+        var type = state.GetStateType();
         var underlyingType = System.Nullable.GetUnderlyingType(type) ?? type;
         var effectiveVariant = variant ?? (underlyingType == typeof(Colors) ? ColorInputVariant.Swatch : ColorInputVariant.TextAndPicker);
 
-        var input = new ColorInput<T>(state, placeholder, disabled, effectiveVariant)
-        {
-            Nullable = type.IsNullableType()
-        };
+        Type genericType = typeof(ColorInput<>).MakeGenericType(type);
+        ColorInputBase input = (ColorInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, effectiveVariant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
 
         var currentValue = state.As<object>().Value?.ToString();
         var validationError = ValidateColorFormat(currentValue);

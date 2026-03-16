@@ -1,4 +1,5 @@
 
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -89,14 +90,12 @@ public static class FeedbackInputExtensions
 {
     public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant? variant = null)
     {
-        return ToFeedbackInputDynamic((dynamic)state, placeholder, disabled, variant);
-    }
-
-    private static FeedbackInputBase ToFeedbackInputDynamic<T>(IState<T> state, string? placeholder, bool disabled, FeedbackInputVariant? variant)
-    {
-        var type = typeof(T);
+        var type = state.GetStateType();
         variant ??= type == typeof(bool) || type == typeof(bool?) ? FeedbackInputVariant.Thumbs : FeedbackInputVariant.Stars;
-        return new FeedbackInput<T>(state, placeholder, disabled, variant.Value);
+        
+        Type genericType = typeof(FeedbackInput<>).MakeGenericType(type);
+        FeedbackInputBase input = (FeedbackInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant.Value }, null)!;
+        return input;
     }
 
     public static FeedbackInputBase Placeholder(this FeedbackInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
