@@ -709,7 +709,7 @@ export const typography: Record<string, string> = {
 
   // Size variants
   large: 'text-lg font-semibold',
-  small: 'text-large-body font-medium leading-none',
+  small: 'text-large-body leading-none',
   muted: 'text-base text-muted-foreground',
 
   // Semantic variants
