@@ -31,6 +31,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   minLength,
   pattern,
   rows,
+  autoFocus,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -155,6 +156,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       minLength,
       pattern,
       rows,
+      autoFocus,
       'data-testid': dataTestId,
     }),
     [
@@ -175,6 +177,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       minLength,
       pattern,
       rows,
+      autoFocus,
       dataTestId,
     ]
   );

@@ -30,6 +30,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
   format: formatProp,
   firstDayOfWeek,
   density = Densities.Medium,
+  autoFocus,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -57,6 +58,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
           <Button
             disabled={disabled}
             variant="outline"
+            autoFocus={autoFocus}
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),

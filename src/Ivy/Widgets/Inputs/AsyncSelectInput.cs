@@ -62,6 +62,8 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
+    public bool AutoFocus { get; set; }
+
     public EventHandler<Event<IInput<TValue>, TValue>>? OnChange { get; init; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
@@ -120,7 +122,8 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 OnSelect = HandleSelect,
                 Loading = loading,
                 Density = Density,
-                Ghost = Ghost
+                Ghost = Ghost,
+                AutoFocus = AutoFocus
             },
             open.Value ? new Sheet(
                 OnClose,
@@ -321,6 +324,8 @@ internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
     [Prop] public string? Placeholder { get; init; }
 
     [Prop] public bool Disabled { get; init; }
+
+    [Prop] public bool AutoFocus { get; init; }
 
     [Prop] public string? Invalid { get; init; }
 

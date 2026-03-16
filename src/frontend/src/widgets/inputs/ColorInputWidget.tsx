@@ -29,6 +29,7 @@ interface ColorInputWidgetProps {
   foreground?: boolean;
   ghost?: boolean;
   allowAlpha?: boolean;
+  autoFocus?: boolean;
 }
 
 // Hoisted color map for backend Colors enum
@@ -288,6 +289,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   density = Densities.Medium,
   ghost = false,
   allowAlpha = false,
+  autoFocus,
 }) => {
   const eventHandler = useEventHandler();
   // Use derived state for display and input values
@@ -441,6 +443,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
+            autoFocus={autoFocus}
             placeholder={
               placeholder ||
               (allowAlpha ? 'Enter color (e.g. #FF0000CC)' : 'Enter color')
@@ -550,6 +553,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
+          autoFocus={autoFocus}
           placeholder={
             placeholder ||
             (allowAlpha ? 'Enter color (e.g. #FF0000CC)' : 'Enter color')

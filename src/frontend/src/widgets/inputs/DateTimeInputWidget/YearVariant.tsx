@@ -36,6 +36,7 @@ export const YearVariant: React.FC<YearVariantProps> = ({
   onDateChange,
   format: formatProp,
   density = Densities.Medium,
+  autoFocus,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -83,6 +84,7 @@ export const YearVariant: React.FC<YearVariantProps> = ({
           <Button
             disabled={disabled}
             variant="outline"
+            autoFocus={autoFocus}
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),

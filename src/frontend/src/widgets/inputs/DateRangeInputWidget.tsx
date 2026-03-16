@@ -43,6 +43,7 @@ interface DateRangeInputWidgetProps {
   firstDayOfWeek?: WeekDay | string;
   density?: Densities;
   events: string[];
+  autoFocus?: boolean;
   'data-testid'?: string;
 }
 
@@ -81,6 +82,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   firstDayOfWeek: firstDayOfWeekRaw,
   density = Densities.Medium,
   events = EMPTY_EVENTS,
+  autoFocus,
   'data-testid': dataTestId,
 }) => {
   const firstDayOfWeek = resolveDayOfWeek(firstDayOfWeekRaw);
@@ -157,6 +159,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
           <Button
             variant="outline"
             disabled={disabled}
+            autoFocus={autoFocus}
             data-testid={dataTestId}
             data-slot="calendar"
             className={cn(

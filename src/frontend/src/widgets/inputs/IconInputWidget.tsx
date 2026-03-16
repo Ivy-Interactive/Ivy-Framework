@@ -61,6 +61,7 @@ interface IconInputWidgetProps {
   nullable?: boolean;
   events?: string[];
   density?: Densities;
+  autoFocus?: boolean;
 }
 
 const ICONS_PER_ROW = 8;
@@ -74,6 +75,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   nullable = false,
   events = EMPTY_ARRAY,
   density = Densities.Medium,
+  autoFocus,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
@@ -171,6 +173,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             type="button"
             variant="outline"
             disabled={disabled}
+            autoFocus={autoFocus}
             className={cn(
               iconInputTriggerVariant({ density }),
               !hasValue && 'text-muted-foreground',

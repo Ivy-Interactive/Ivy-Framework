@@ -21,6 +21,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   invalid,
   onTimeChange,
   density = Densities.Medium,
+  autoFocus,
   'data-testid': dataTestId,
 }) => {
   // Use local state for the input value to make it uncontrolled
@@ -126,6 +127,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
           onBlur={handleTimeBlur}
           onKeyDown={handleKeyDown}
           disabled={disabled}
+          autoFocus={autoFocus}
           placeholder={placeholder || 'Select time'}
           className={cn(
             'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0',

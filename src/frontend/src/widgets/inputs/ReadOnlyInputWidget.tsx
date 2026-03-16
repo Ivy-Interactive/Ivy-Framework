@@ -5,6 +5,7 @@ interface ReadOnlyInputWidgetProps {
   id: string;
   value: string | number | boolean | null | undefined;
   showCopyButton?: boolean;
+  autoFocus?: boolean;
 }
 
 export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({

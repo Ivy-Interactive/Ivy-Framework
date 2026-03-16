@@ -21,6 +21,7 @@ export interface DateTimeInputWidgetProps {
   format?: string;
   firstDayOfWeek?: WeekDay | string;
   density?: Densities;
+  autoFocus?: boolean;
   'data-testid'?: string;
 }
 
@@ -34,6 +35,7 @@ export interface BaseVariantProps {
   format?: string;
   firstDayOfWeek?: WeekDay;
   density?: Densities;
+  autoFocus?: boolean;
   'data-testid'?: string;
 }
 

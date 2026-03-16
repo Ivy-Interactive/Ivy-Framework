@@ -34,5 +34,6 @@ export interface TextInputWidgetProps {
   minLength?: number;
   pattern?: string;
   rows?: number;
+  autoFocus?: boolean;
   'data-testid'?: string;
 }

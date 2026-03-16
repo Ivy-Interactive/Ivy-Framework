@@ -12,6 +12,7 @@ public interface IAnyInput
 
     [Prop] public string? Invalid { get; set; }
     [Prop] public bool Nullable { get; set; }
+    [Prop] public bool AutoFocus { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
@@ -40,6 +41,12 @@ public static class AnyInputExtensions
     public static IAnyInput Nullable(this IAnyInput input, bool? nullable = true)
     {
         input.Nullable = nullable ?? true;
+        return input;
+    }
+
+    public static IAnyInput AutoFocus(this IAnyInput input, bool autoFocus = true)
+    {
+        input.AutoFocus = autoFocus;
         return input;
     }
 

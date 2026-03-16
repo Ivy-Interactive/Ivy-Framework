@@ -98,6 +98,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             maxLength={props.maxLength}
             minLength={props.minLength}
             pattern={props.pattern}
+            autoFocus={props.autoFocus}
             onChange={handleChange}
             onBlur={onBlur}
             onFocus={onFocus}

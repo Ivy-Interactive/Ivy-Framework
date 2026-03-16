@@ -47,6 +47,8 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Prop] public int? MaxSelections { get; set; }
 
     [Prop] public int? MinSelections { get; set; }

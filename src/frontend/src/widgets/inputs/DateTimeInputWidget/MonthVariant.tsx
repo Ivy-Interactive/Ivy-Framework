@@ -47,6 +47,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   onDateChange,
   format: formatProp,
   density = Densities.Medium,
+  autoFocus,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -93,6 +94,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
           <Button
             disabled={disabled}
             variant="outline"
+            autoFocus={autoFocus}
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),

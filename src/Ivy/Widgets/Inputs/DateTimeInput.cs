@@ -35,6 +35,8 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
     [Prop] public bool Disabled { get; set; }
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Prop] public string? Invalid { get; set; }
 
     [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }

@@ -56,6 +56,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   format: formatProp,
   firstDayOfWeek: firstDayOfWeekRaw,
   density = Densities.Medium,
+  autoFocus,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -105,6 +106,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       format={formatProp}
       firstDayOfWeek={firstDayOfWeek}
       density={density}
+      autoFocus={autoFocus}
       onDateChange={handleDateChange}
       onTimeChange={handleTimeChange}
       data-testid={dataTestId}

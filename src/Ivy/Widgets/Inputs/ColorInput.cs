@@ -32,6 +32,8 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Prop] public bool? Foreground { get; set; }
 
     [Prop] public bool Ghost { get; set; }

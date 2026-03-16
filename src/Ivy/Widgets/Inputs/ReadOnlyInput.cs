@@ -51,6 +51,8 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput    
     [Prop] public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Event] public EventHandler<Event<IInput<TValue>, TValue>>? OnChange { get; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
