@@ -199,6 +199,19 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+    public DataTableBuilder<TModel> Format(Expression<Func<TModel, object>> field, NumberFormatStyle formatStyle, int? precision = null, string? currency = null)
+    {
+        var column = GetColumn(field);
+        column.Column.FormatStyle = formatStyle;
+        if (precision.HasValue) column.Column.Precision = precision;
+        if (currency != null) column.Column.Currency = currency;
+        if ((formatStyle == NumberFormatStyle.Currency || formatStyle == NumberFormatStyle.Accounting) && string.IsNullOrEmpty(column.Column.Currency))
+        {
+            column.Column.Currency = "USD";
+        }
+        return this;
+    }
+
     public DataTableBuilder<TModel> Group(Expression<Func<TModel, object>> field, string group)
     {
         var column = GetColumn(field);
@@ -218,6 +231,12 @@ public class DataTableBuilder<TModel>(
         var column = GetColumn(field);
         column.Column.Renderer = renderer;
         column.Column.ColType = renderer.ColType;
+        if (renderer is NumberDisplayRenderer numRenderer)
+        {
+            column.Column.FormatStyle = numRenderer.FormatStyle;
+            column.Column.Precision = numRenderer.Precision;
+            column.Column.Currency = numRenderer.Currency;
+        }
         return this;
     }
 
