@@ -13,6 +13,9 @@ public class FeedbackInputApp : SampleBase
         var sizeBoolState = UseState(true);
         var sizeIntState = UseState(2);
 
+        var decimalState = UseState(3.5m);
+        var nullableDecimalState = UseState((decimal?)null);
+
         var intState = UseState(0);
         var nullableIntState = UseState((int?)null);
         var floatState = UseState(0.0f);
@@ -101,12 +104,32 @@ public class FeedbackInputApp : SampleBase
                           | (nullableBoolState.Value == null ? Text.Monospaced("null") : (nullableBoolState.Value == false ? Text.Monospaced("false") : Text.Monospaced("true")))
         ;
 
+        var allowHalfExamples = Layout.Grid().Columns(3)
+                                | Text.InlineCode("Variant")
+                                | Text.InlineCode("rating")
+                                | Text.InlineCode("state")
+
+                                | Text.InlineCode("Stars (decimal)")
+                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).AllowHalf()
+                                | Text.InlineCode(decimalState.Value.ToString())
+
+                                | Text.InlineCode("Stars (decimal?)")
+                                | nullableDecimalState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).AllowHalf()
+                                | (nullableDecimalState.Value == null ? Text.InlineCode("null") : Text.InlineCode(nullableDecimalState.Value.ToString() ?? "null"))
+
+                                | Text.InlineCode("Emojis (decimal)")
+                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).AllowHalf()
+                                | Text.InlineCode(decimalState.Value.ToString())
+        ;
+
         return Layout.Vertical()
                | Text.H1("Feedback Inputs")
                | Text.H2("Variants")
                | variants
                | Text.H2("Size Examples")
                | sizeExamples
+               | Text.H2("Allow Half")
+               | allowHalfExamples
                | Text.H2("Data Binding")
                | dataBinding
 
