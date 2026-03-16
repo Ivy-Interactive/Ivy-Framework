@@ -10,6 +10,7 @@ public abstract record AbstractWidget : IWidget
 {
     private string? _id;
     private readonly ConcurrentDictionary<(Type, string), object?> _attachedProps = new();
+    private static readonly ConcurrentDictionary<(Type, string), PropertyInfo?> _eventPropertyCache = new();
 
 #if DEBUG
     /// <summary>
@@ -69,7 +70,7 @@ public abstract record AbstractWidget : IWidget
     public async Task<bool> InvokeEventAsync(string eventName, JsonArray args)
     {
         var type = GetType();
-        var property = type.GetProperty(eventName);
+        var property = _eventPropertyCache.GetOrAdd((type, eventName), key => key.Item1.GetProperty(key.Item2));
 
         if (property == null)
             return false;
