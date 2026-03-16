@@ -10,7 +10,11 @@ import {
   generateEChartLegend,
   generateDataProps,
 } from './sharedUtils';
-import { RadarChartWidgetProps, RadarProps, RadarIndicatorProps } from './chartTypes';
+import {
+  RadarChartWidgetProps,
+  RadarProps,
+  RadarIndicatorProps,
+} from './chartTypes';
 import { getChartThemeColors } from './styles';
 import { RADAR_DEFAULTS, applyDefaults } from './chartDefaults';
 
@@ -18,7 +22,10 @@ const EMPTY_ARRAY: never[] = [];
 
 // Case-insensitive property lookup to handle CamelCase JSON serialization
 // C# indicator names (e.g. "Sales") may not match camelCase JSON keys (e.g. "sales")
-const getPropertyValue = (obj: Record<string, unknown>, propName: string): unknown => {
+const getPropertyValue = (
+  obj: Record<string, unknown>,
+  propName: string
+): unknown => {
   if (propName in obj) return obj[propName];
   const lowerName = propName.toLowerCase();
   const key = Object.keys(obj).find(k => k.toLowerCase() === lowerName);
@@ -96,7 +103,12 @@ const RadarChartWidget: React.FC<RadarChartWidgetProps> = ({
     if (data.length > 0 && valueKeys.length > 0) {
       return valueKeys.map(key => ({
         name: key,
-        max: Math.max(...data.map((d: Record<string, unknown>) => Number(getPropertyValue(d, key) || 0))) * 1.2,
+        max:
+          Math.max(
+            ...data.map((d: Record<string, unknown>) =>
+              Number(getPropertyValue(d, key) || 0)
+            )
+          ) * 1.2,
       }));
     }
     return [];
@@ -106,20 +118,26 @@ const RadarChartWidget: React.FC<RadarChartWidgetProps> = ({
   const series = useMemo(() => {
     if (radars.length === 0 && data.length > 0 && radarIndicators.length > 0) {
       // Default: each data row becomes a series entry
-      return [{
-        type: 'radar' as const,
-        data: data.map((item: Record<string, unknown>) => ({
-          value: radarIndicators.map(ind => Number(getPropertyValue(item, ind.name) || 0)),
-          name: (item.name || item.Name || 'Data') as string,
-        })),
-      }];
+      return [
+        {
+          type: 'radar' as const,
+          data: data.map((item: Record<string, unknown>) => ({
+            value: radarIndicators.map(ind =>
+              Number(getPropertyValue(item, ind.name) || 0)
+            ),
+            name: (item.name || item.Name || 'Data') as string,
+          })),
+        },
+      ];
     }
 
     // Map each radar config to a series
     return radars.map((rawRadar: RadarProps, i: number) => {
       const radar = applyDefaults(rawRadar, RADAR_DEFAULTS);
       const seriesData = data.map((item: Record<string, unknown>) => ({
-        value: radarIndicators.map(ind => Number(getPropertyValue(item, ind.name) || 0)),
+        value: radarIndicators.map(ind =>
+          Number(getPropertyValue(item, ind.name) || 0)
+        ),
         name: (item.name || item.Name || radar.name || radar.dataKey) as string,
       }));
 

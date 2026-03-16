@@ -72,10 +72,12 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
     // falling back to the standard PieChartData property names
     const firstFunnel = funnels?.[0];
     const valKey = firstFunnel?.dataKey
-      ? firstFunnel.dataKey.charAt(0).toLowerCase() + firstFunnel.dataKey.slice(1)
+      ? firstFunnel.dataKey.charAt(0).toLowerCase() +
+        firstFunnel.dataKey.slice(1)
       : 'measure';
     const nameKey = firstFunnel?.nameKey
-      ? firstFunnel.nameKey.charAt(0).toLowerCase() + firstFunnel.nameKey.slice(1)
+      ? firstFunnel.nameKey.charAt(0).toLowerCase() +
+        firstFunnel.nameKey.slice(1)
       : 'dimension';
 
     return data.map(d => {
@@ -143,7 +145,8 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
             color: funnelConfig.fill ?? undefined,
             opacity: funnelConfig.fillOpacity ?? undefined,
             borderColor: funnelConfig.stroke ?? undefined,
-            borderWidth: funnelConfig.strokeWidth ?? FUNNEL_DEFAULTS.strokeWidth,
+            borderWidth:
+              funnelConfig.strokeWidth ?? FUNNEL_DEFAULTS.strokeWidth,
           },
           emphasis: {
             label: {
@@ -153,7 +156,15 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
           data: funnelData,
         };
       }),
-    [valueKeys, funnels, funnelData, echartsSort, echartsOrient, gap, themeColors]
+    [
+      valueKeys,
+      funnels,
+      funnelData,
+      echartsSort,
+      echartsOrient,
+      gap,
+      themeColors,
+    ]
   );
 
   const option = useMemo(() => {
@@ -201,7 +212,12 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
           mutedForeground: themeColors.mutedForeground,
         }),
         trigger: 'item' as const,
-        formatter: (params: { name: string; value: number; percent: number; marker: string }) => {
+        formatter: (params: {
+          name: string;
+          value: number;
+          percent: number;
+          marker: string;
+        }) => {
           return `${params.marker} ${params.name}<br/><strong>${params.value.toLocaleString()}</strong> (${params.percent}%)`;
         },
       },

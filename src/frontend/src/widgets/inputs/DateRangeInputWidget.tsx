@@ -57,8 +57,13 @@ type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 const EMPTY_EVENTS: string[] = [];
 
 const dayOfWeekMap: Record<string, WeekDay> = {
-  Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3,
-  Thursday: 4, Friday: 5, Saturday: 6,
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
 };
 
 function resolveDayOfWeek(value?: WeekDay | string): WeekDay | undefined {
@@ -231,7 +236,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                 >
                   {format(date.from, displayFormat)}
                   {(endPlaceholder || startPlaceholder) && (
-                    <span className="text-muted-foreground"> - {endPlaceholder || placeholder || 'Pick a date range'}</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      - {endPlaceholder || placeholder || 'Pick a date range'}
+                    </span>
                   )}
                 </span>
               )
@@ -243,7 +251,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   'text-muted-foreground'
                 )}
               >
-                {startPlaceholder || placeholder || 'Start'} - {endPlaceholder || placeholder || 'End'}
+                {startPlaceholder || placeholder || 'Start'} -{' '}
+                {endPlaceholder || placeholder || 'End'}
               </span>
             ) : (
               <span

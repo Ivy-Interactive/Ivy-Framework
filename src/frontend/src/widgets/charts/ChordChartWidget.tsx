@@ -87,10 +87,18 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
     if (sort) {
       graphNodes.sort((a, b) => {
         const aTotal = links
-          .filter(l => nodes[l.source]?.name === a.name || nodes[l.target]?.name === a.name)
+          .filter(
+            l =>
+              nodes[l.source]?.name === a.name ||
+              nodes[l.target]?.name === a.name
+          )
           .reduce((sum, l) => sum + l.value, 0);
         const bTotal = links
-          .filter(l => nodes[l.source]?.name === b.name || nodes[l.target]?.name === b.name)
+          .filter(
+            l =>
+              nodes[l.source]?.name === b.name ||
+              nodes[l.target]?.name === b.name
+          )
           .reduce((sum, l) => sum + l.value, 0);
         return bTotal - aTotal;
       });

@@ -86,7 +86,12 @@ const JsonNode = ({
   );
 };
 
-function collectPaths(value: unknown, path: string, maxDepth: number, currentDepth: number): string[] {
+function collectPaths(
+  value: unknown,
+  path: string,
+  maxDepth: number,
+  currentDepth: number
+): string[] {
   if (currentDepth >= maxDepth) return [];
   if (value === null || typeof value !== 'object') return [];
   if (Array.isArray(value) && value.length === 0) return [];
@@ -94,7 +99,9 @@ function collectPaths(value: unknown, path: string, maxDepth: number, currentDep
 
   const paths = [path];
   for (const [key, val] of Object.entries(value)) {
-    paths.push(...collectPaths(val, `${path}.${key}`, maxDepth, currentDepth + 1));
+    paths.push(
+      ...collectPaths(val, `${path}.${key}`, maxDepth, currentDepth + 1)
+    );
   }
   return paths;
 }
@@ -123,8 +130,10 @@ export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
   }
 
   const getInitialExpanded = () => {
-    if (initialExpanded === null || initialExpanded === undefined) return new Set();
-    if (initialExpanded === -1) return new Set(collectAllPaths(parsedData, 'root'));
+    if (initialExpanded === null || initialExpanded === undefined)
+      return new Set();
+    if (initialExpanded === -1)
+      return new Set(collectAllPaths(parsedData, 'root'));
     if (initialExpanded === 0) return new Set();
     return new Set(collectPaths(parsedData, 'root', initialExpanded, 0));
   };

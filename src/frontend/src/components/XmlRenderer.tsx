@@ -124,14 +124,21 @@ const XmlNodeComponent = ({
   );
 };
 
-function collectXmlPaths(node: XmlNode, path: string, maxDepth: number, currentDepth: number): string[] {
+function collectXmlPaths(
+  node: XmlNode,
+  path: string,
+  maxDepth: number,
+  currentDepth: number
+): string[] {
   if (currentDepth >= maxDepth) return [];
   if (!node.children || node.children.length === 0) return [];
 
   const paths = [path];
   node.children.forEach((child, i) => {
     if (child.type === 'element') {
-      paths.push(...collectXmlPaths(child, `${path}.${i}`, maxDepth, currentDepth + 1));
+      paths.push(
+        ...collectXmlPaths(child, `${path}.${i}`, maxDepth, currentDepth + 1)
+      );
     }
   });
   return paths;
@@ -213,8 +220,10 @@ export const XmlRenderer = ({ data, initialExpanded }: XmlRendererProps) => {
   const parsedXml = parseXml(data);
 
   const getInitialExpanded = () => {
-    if (!parsedXml || initialExpanded === null || initialExpanded === undefined) return new Set<string>();
-    if (initialExpanded === -1) return new Set(collectAllXmlPaths(parsedXml, 'root'));
+    if (!parsedXml || initialExpanded === null || initialExpanded === undefined)
+      return new Set<string>();
+    if (initialExpanded === -1)
+      return new Set(collectAllXmlPaths(parsedXml, 'root'));
     if (initialExpanded === 0) return new Set<string>();
     return new Set(collectXmlPaths(parsedXml, 'root', initialExpanded, 0));
   };

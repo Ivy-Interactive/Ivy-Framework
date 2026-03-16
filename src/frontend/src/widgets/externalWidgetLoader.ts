@@ -240,13 +240,27 @@ export const getCachedExternalWidget = (
 };
 
 /**
+ * Cache for React.lazy wrappers per type name.
+ */
+const lazyComponents = new Map<
+  string,
+  React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>>
+>();
+
+/**
  * Creates a React.lazy component for an external widget.
  * This allows the widget to be rendered with Suspense.
+ * Caches the lazy wrapper to maintain component identity across renders.
  */
 export const createLazyExternalWidget = (
   typeName: string
 ): React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>> => {
-  return React.lazy(() =>
-    loadExternalWidget(typeName).then(Component => ({ default: Component }))
-  );
+  let lazy = lazyComponents.get(typeName);
+  if (!lazy) {
+    lazy = React.lazy(() =>
+      loadExternalWidget(typeName).then(Component => ({ default: Component }))
+    );
+    lazyComponents.set(typeName, lazy);
+  }
+  return lazy;
 };

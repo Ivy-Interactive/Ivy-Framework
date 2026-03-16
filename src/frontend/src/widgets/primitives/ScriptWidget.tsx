@@ -53,7 +53,16 @@ const ScriptWidget: React.FC<ScriptWidgetProps> = ({
         scriptRef.current = null;
       }
     };
-  }, [id, src, inlineCode, isAsync, isDefer, crossOrigin, integrity, referrerPolicy]);
+  }, [
+    id,
+    src,
+    inlineCode,
+    isAsync,
+    isDefer,
+    crossOrigin,
+    integrity,
+    referrerPolicy,
+  ]);
 
   return null;
 };

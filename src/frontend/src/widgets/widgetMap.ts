@@ -240,11 +240,21 @@ export const widgetMap = {
   'Ivy.PieChart': React.lazy(() => import('@/widgets/charts/PieChartWidget')),
   'Ivy.AreaChart': React.lazy(() => import('@/widgets/charts/AreaChartWidget')),
   'Ivy.BarChart': React.lazy(() => import('@/widgets/charts/BarChartWidget')),
-  'Ivy.ScatterChart': React.lazy(() => import('@/widgets/charts/ScatterChartWidget')),
-  'Ivy.RadarChart': React.lazy(() => import('@/widgets/charts/RadarChartWidget')),
-  'Ivy.SankeyChart': React.lazy(() => import('@/widgets/charts/SankeyChartWidget')),
-  'Ivy.ChordChart': React.lazy(() => import('@/widgets/charts/ChordChartWidget')),
-  'Ivy.FunnelChart': React.lazy(() => import('@/widgets/charts/FunnelChartWidget')),
+  'Ivy.ScatterChart': React.lazy(
+    () => import('@/widgets/charts/ScatterChartWidget')
+  ),
+  'Ivy.RadarChart': React.lazy(
+    () => import('@/widgets/charts/RadarChartWidget')
+  ),
+  'Ivy.SankeyChart': React.lazy(
+    () => import('@/widgets/charts/SankeyChartWidget')
+  ),
+  'Ivy.ChordChart': React.lazy(
+    () => import('@/widgets/charts/ChordChartWidget')
+  ),
+  'Ivy.FunnelChart': React.lazy(
+    () => import('@/widgets/charts/FunnelChartWidget')
+  ),
 
   // Effects
   'Ivy.Confetti': React.lazy(() => import('@/widgets/effects/ConfettiWidget')),

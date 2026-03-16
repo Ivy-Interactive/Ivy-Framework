@@ -1415,7 +1415,9 @@ const sliderLabelVariant: Record<string, string> = {
   Large: 'text-base',
 };
 
-const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHandler }> = ({
+const SliderVariant: React.FC<
+  SelectInputWidgetProps & { eventHandler: EventHandler }
+> = ({
   id,
   value,
   disabled = false,
@@ -1430,10 +1432,15 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
   width,
 }) => {
   if (selectMany) {
-    logger.warn('SelectInput Slider variant does not support selectMany. Falling back to single-select.');
+    logger.warn(
+      'SelectInput Slider variant does not support selectMany. Falling back to single-select.'
+    );
   }
 
-  const validOptions = useMemo(() => options.filter(o => !o.disabled), [options]);
+  const validOptions = useMemo(
+    () => options.filter(o => !o.disabled),
+    [options]
+  );
 
   const currentIndex = useMemo(() => {
     if (value == null) return -1;
@@ -1467,7 +1474,10 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
   if (validOptions.length === 0) {
     return (
       <div
-        className={cn('flex items-center justify-center text-muted-foreground', sliderLabelVariant[String(density)])}
+        className={cn(
+          'flex items-center justify-center text-muted-foreground',
+          sliderLabelVariant[String(density)]
+        )}
         style={width ? getWidth(width) : undefined}
         data-testid={dataTestId}
       >
@@ -1505,21 +1515,40 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
           className={cn(invalid && inputStyles.invalidInput)}
         />
         {validOptions.length > 1 && (
-          <div className="absolute w-full flex justify-between px-[2px]" style={{ top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+          <div
+            className="absolute w-full flex justify-between px-[2px]"
+            style={{
+              top: '50%',
+              transform: 'translateY(-50%)',
+              pointerEvents: 'none',
+            }}
+          >
             {validOptions.map((_, i) => (
               <div
                 key={i}
                 className={cn(
                   'rounded-full',
-                  i === sliderValue ? 'bg-transparent' : 'bg-muted-foreground/40',
-                  density === Densities.Small ? 'w-1 h-1' : density === Densities.Large ? 'w-1.5 h-1.5' : 'w-1 h-1'
+                  i === sliderValue
+                    ? 'bg-transparent'
+                    : 'bg-muted-foreground/40',
+                  density === Densities.Small
+                    ? 'w-1 h-1'
+                    : density === Densities.Large
+                      ? 'w-1.5 h-1.5'
+                      : 'w-1 h-1'
                 )}
               />
             ))}
           </div>
         )}
       </div>
-      <div className={cn('flex w-full items-center justify-between gap-1', textSize)} aria-hidden="true">
+      <div
+        className={cn(
+          'flex w-full items-center justify-between gap-1',
+          textSize
+        )}
+        aria-hidden="true"
+      >
         <span className="text-muted-foreground">{firstLabel}</span>
         <span className="text-muted-foreground">{lastLabel}</span>
       </div>
