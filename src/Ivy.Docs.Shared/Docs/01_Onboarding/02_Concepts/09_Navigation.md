@@ -237,24 +237,24 @@ return new Table<Item>(items)
 Navigate based on user permissions or [state](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp
-var handleNavigation = UseCallback(() =>
+var handleNavigation = UseMemo(() => (Action)(() =>
 {
     if (user.HasRole("Admin"))
         navigator.Navigate(typeof(AdminPanelApp));
     else
         navigator.Navigate(typeof(UnauthorizedApp));
-}, user);
+}), user);
 ```
 
 ### Memoized Navigation Callbacks
 
-Use [UseCallback](../../03_Hooks/02_Core/06_UseCallback.md) to prevent unnecessary re-renders:
+Use [UseMemo](../../03_Hooks/02_Core/05_UseMemo.md) to memoize navigation callbacks:
 
 ```csharp
-var navigateToUser = UseCallback((int userId) =>
+var navigateToUser = UseMemo(() => (Action<int>)((int userId) =>
 {
     navigator.Navigate(typeof(UserProfileApp), new UserProfileArgs(userId));
-}, navigator);
+}), navigator);
 ```
 
 ## Troubleshooting
@@ -288,7 +288,7 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 
 ## Performance Considerations
 
-- **Memoize Navigation Callbacks**: Use [UseCallback](../../03_Hooks/02_Core/06_UseCallback.md) for navigation handlers to prevent unnecessary re-renders
+- **Memoize Navigation Callbacks**: Use [UseMemo](../../03_Hooks/02_Core/05_UseMemo.md) to memoize navigation handlers
 - **Lazy App Loading**: Apps are loaded on-demand when navigated to
 - **State Cleanup**: Navigation automatically handles cleanup of previous app [state](../../03_Hooks/02_Core/03_UseState.md)
 - **Memory Management**: The [Chrome](./11_Chrome.md) system manages app lifecycle and memory usage

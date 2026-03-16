@@ -3,6 +3,7 @@ import { ChevronRight, ChevronDown } from 'lucide-react';
 
 interface XmlRendererProps {
   data: string;
+  initialExpanded?: number | null;
 }
 
 interface XmlNode {
@@ -83,7 +84,7 @@ const XmlNodeComponent = ({
         </div>
 
         {isExpanded && (
-          <div className="ml-4 border-l border-border">
+          <div className="ml-3 border-l border-border">
             {node.children?.map((child, i) => {
               const childKey = `xml-node-${i}`;
               return (
@@ -123,9 +124,32 @@ const XmlNodeComponent = ({
   );
 };
 
-export const XmlRenderer = ({ data }: XmlRendererProps) => {
-  const [expanded, setExpanded] = useState(new Set());
+function collectXmlPaths(node: XmlNode, path: string, maxDepth: number, currentDepth: number): string[] {
+  if (currentDepth >= maxDepth) return [];
+  if (!node.children || node.children.length === 0) return [];
 
+  const paths = [path];
+  node.children.forEach((child, i) => {
+    if (child.type === 'element') {
+      paths.push(...collectXmlPaths(child, `${path}.${i}`, maxDepth, currentDepth + 1));
+    }
+  });
+  return paths;
+}
+
+function collectAllXmlPaths(node: XmlNode, path: string): string[] {
+  if (!node.children || node.children.length === 0) return [];
+
+  const paths = [path];
+  node.children.forEach((child, i) => {
+    if (child.type === 'element') {
+      paths.push(...collectAllXmlPaths(child, `${path}.${i}`));
+    }
+  });
+  return paths;
+}
+
+export const XmlRenderer = ({ data, initialExpanded }: XmlRendererProps) => {
   const parseXml = (xmlString: string): XmlNode | null => {
     try {
       const parser = new DOMParser();
@@ -186,6 +210,17 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     }
   };
 
+  const parsedXml = parseXml(data);
+
+  const getInitialExpanded = () => {
+    if (!parsedXml || initialExpanded === null || initialExpanded === undefined) return new Set<string>();
+    if (initialExpanded === -1) return new Set(collectAllXmlPaths(parsedXml, 'root'));
+    if (initialExpanded === 0) return new Set<string>();
+    return new Set(collectXmlPaths(parsedXml, 'root', initialExpanded, 0));
+  };
+
+  const [expanded, setExpanded] = useState(getInitialExpanded);
+
   const toggleNode = (path: string) => {
     const newExpanded = new Set(expanded);
     if (newExpanded.has(path)) {
@@ -195,8 +230,6 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     }
     setExpanded(newExpanded);
   };
-
-  const parsedXml = parseXml(data);
 
   if (!parsedXml) {
     return <div className="text-destructive">Invalid XML string</div>;

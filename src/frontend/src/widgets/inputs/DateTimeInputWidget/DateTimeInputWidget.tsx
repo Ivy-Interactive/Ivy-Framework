@@ -8,6 +8,7 @@ import {
   DateChangeProp,
   TimeChangeProp,
   VariantType,
+  WeekDay,
 } from './types';
 import { DateVariant } from './DateVariant';
 import { DateTimeVariant } from './DateTimeVariant';
@@ -28,6 +29,17 @@ const VariantComponents: Record<
   Year: YearVariant,
 };
 
+const dayOfWeekMap: Record<string, WeekDay> = {
+  Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3,
+  Thursday: 4, Friday: 5, Saturday: 6,
+};
+
+function resolveDayOfWeek(value?: WeekDay | string): WeekDay | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'number') return value as WeekDay;
+  return dayOfWeekMap[value];
+}
+
 export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   id,
   value,
@@ -37,10 +49,12 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   nullable = false,
   invalid,
   format: formatProp,
+  firstDayOfWeek: firstDayOfWeekRaw,
   density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
+  const firstDayOfWeek = resolveDayOfWeek(firstDayOfWeekRaw);
 
   // Normalize undefined to null when nullable
   const normalizedValue = nullable && value === undefined ? undefined : value;
@@ -84,6 +98,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       nullable={nullable}
       invalid={invalid}
       format={formatProp}
+      firstDayOfWeek={firstDayOfWeek}
       density={density}
       onDateChange={handleDateChange}
       onTimeChange={handleTimeChange}

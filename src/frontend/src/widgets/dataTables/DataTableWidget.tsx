@@ -63,6 +63,13 @@ export const DataTable: React.FC<TableProps> = ({
     ...getHeight(height),
   };
 
+  // If height is Full, ensure it can shrink and grow properly within a flex container
+  // to avoid "infinite growth" when no height constraint is provided by the parent.
+  if (height === 'Full') {
+    containerStyle.flexGrow = 1;
+    containerStyle.minHeight = 0;
+  }
+
   return (
     <div style={containerStyle} data-testid={dataTestId}>
       <TableProvider

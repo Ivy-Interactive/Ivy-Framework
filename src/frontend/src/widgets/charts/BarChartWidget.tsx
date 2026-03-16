@@ -180,10 +180,10 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
           : BAR_DEFAULTS;
 
         return {
-          name: key,
+          name: barConfig.name || key,
           type: ChartType.Bar,
           legendHoverLink: true,
-          showBackground: true,
+          showBackground: false,
           data: data.map(d => d[key]),
           stack:
             barConfig.stackId !== undefined

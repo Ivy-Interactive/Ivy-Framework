@@ -21,7 +21,8 @@ public class AudioInputApp() : SampleBase
                | (Layout.Horizontal().Gap(4)
                     | new Card(new AudioInputBasic()).Title("Basic")
                     | new Card(new AudioInputChunkedUpload()).Title("Chunked Upload")
-                    | new Card(new AudioInputDisabledState()).Title("Disabled State"))
+                    | new Card(new AudioInputDisabledState()).Title("Disabled State")
+                    | new Card(new AudioInputSampleRate(24000)).Title("24 kHz (speech)"))
                | Text.H2("Sizes")
                | CreateSizesSection(dummyUpload.Value);
     }
@@ -109,6 +110,39 @@ public class AudioInputChunkedUpload : ViewBase
                | Text.P($"Chunks received: {chunkCount.Value}").Small()
                | (audioFile.Value != null
                    ? Text.P($"Total accumulated: {StringHelper.FormatBytes(audioFile.Value.Length)}").Small()
+                   : null);
+    }
+}
+
+public class AudioInputSampleRate : ViewBase
+{
+    private readonly int? _sampleRate;
+
+    public AudioInputSampleRate(int? sampleRate)
+    {
+        _sampleRate = sampleRate;
+    }
+
+    public override object? Build()
+    {
+        var audioFile = UseState<FileUpload<byte[]>?>();
+        var upload = UseUpload(
+            MemoryStreamUploadHandler.Create(audioFile),
+            defaultContentType: "audio/webm"
+        );
+
+        var label = _sampleRate.HasValue ? $"Record at {_sampleRate} Hz" : "Record (browser default)";
+        var input = new AudioInput(upload.Value, label, "Recording...");
+        if (_sampleRate.HasValue)
+            input = input.SampleRate(_sampleRate.Value);
+
+        return Layout.Vertical().Gap(4)
+               | Text.P(_sampleRate.HasValue
+                   ? $"Records at {_sampleRate} Hz (e.g. for speech or high-fidelity)."
+                   : "Uses the browser's default sample rate (typically 48 kHz).")
+               | input
+               | (audioFile.Value != null
+                   ? Text.P($"Uploaded: {StringHelper.FormatBytes(audioFile.Value.Length)}").Small()
                    : null);
     }
 }

@@ -29,11 +29,11 @@ public class LayoutView : ViewBase, IStateless
     private Align? _alignment = null;
     private Scroll _scroll = Ivy.Scroll.None;
     private bool _removeParentPadding = false;
-    private bool _visible = true;
     private Colors? _borderColor = null;
     private Ivy.BorderRadius _borderRadius = Ivy.BorderRadius.None;
     private Ivy.BorderStyle _borderStyle = Ivy.BorderStyle.None;
     private Thickness _borderThickness = new(0);
+    private string? _testId = null;
 
     public LayoutView Gap(bool gap)
     {
@@ -53,12 +53,6 @@ public class LayoutView : ViewBase, IStateless
     {
         _rowGap = rowGap;
         _columnGap = columnGap;
-        return this;
-    }
-
-    public LayoutView Visible(bool visible)
-    {
-        _visible = visible;
         return this;
     }
 
@@ -409,6 +403,12 @@ public class LayoutView : ViewBase, IStateless
         return this;
     }
 
+    public LayoutView TestId(string testId)
+    {
+        _testId = testId;
+        return this;
+    }
+
     public override object? Build()
     {
         var layout = new StackLayout(_elements.Select(e => e.Content).ToArray(), _orientation, _rowGap, _padding, _margin, _background,
@@ -422,8 +422,9 @@ public class LayoutView : ViewBase, IStateless
             BorderThickness = _borderThickness
         }
             .Width(_width)
-            .Height(_height)
-            .Visible(_visible);
+            .Height(_height);
+
+        if (_testId != null) layout.TestId = _testId;
 
         return layout;
     }

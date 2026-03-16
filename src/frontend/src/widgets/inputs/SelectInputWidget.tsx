@@ -32,6 +32,7 @@ import {
   Option as MultiSelectOption,
 } from '@/components/ui/multiselect';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
+import { Slider } from '@/components/ui/slider';
 import { Densities } from '@/types/density';
 import { cva } from 'class-variance-authority';
 import { xIconVariant } from '@/components/ui/input/text-input-variant';
@@ -77,6 +78,7 @@ export type NullableSelectValue =
 interface Option {
   value: string | number;
   label?: string;
+  description?: string;
   group?: string;
   icon?: string;
   disabled?: boolean;
@@ -86,7 +88,7 @@ interface SelectInputWidgetProps {
   id: string;
   placeholder?: string;
   value?: NullableSelectValue;
-  variant?: 'Select' | 'List' | 'Toggle';
+  variant?: 'Select' | 'List' | 'Toggle' | 'Slider' | 'Radio';
   nullable?: boolean;
   disabled?: boolean;
   invalid?: string;
@@ -278,7 +280,16 @@ const ToggleOptionItem: React.FC<{
           className={cn(iconClasses[density], !option.label && 'mx-auto')}
         />
       )}
-      {option.label}
+      {option.description ? (
+        <div className="flex flex-col items-center">
+          <span>{option.label}</span>
+          <span className="text-xs text-muted-foreground mt-0.5 font-normal">
+            {option.description}
+          </span>
+        </div>
+      ) : (
+        option.label
+      )}
     </ToggleGroupItem>
   );
 
@@ -620,7 +631,16 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                         className="h-4 w-4 flex-shrink-0"
                       />
                     )}
-                    {option.label}
+                    {option.description ? (
+                      <div className="flex flex-col">
+                        <span>{option.label}</span>
+                        <span className="text-xs text-muted-foreground mt-0.5 font-normal">
+                          {option.description}
+                        </span>
+                      </div>
+                    ) : (
+                      option.label
+                    )}
                   </Label>
                 </div>
               );
@@ -898,7 +918,16 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                           className="h-4 w-4 flex-shrink-0"
                         />
                       )}
-                      {option.label}
+                      {option.description ? (
+                        <div className="flex flex-col">
+                          <span>{option.label}</span>
+                          <span className="text-xs text-muted-foreground mt-0.5 font-normal">
+                            {option.description}
+                          </span>
+                        </div>
+                      ) : (
+                        option.label
+                      )}
                     </Label>
                   </div>
                 );
@@ -1380,6 +1409,129 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   );
 };
 
+const sliderLabelVariant: Record<string, string> = {
+  Small: 'text-xs',
+  Medium: 'text-sm',
+  Large: 'text-base',
+};
+
+const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHandler }> = ({
+  id,
+  value,
+  disabled = false,
+  invalid,
+  options = EMPTY_ARRAY,
+  eventHandler,
+  selectMany = false,
+  nullable: _nullable = false,
+  ghost = false,
+  density = Densities.Medium,
+  'data-testid': dataTestId,
+  width,
+}) => {
+  if (selectMany) {
+    logger.warn('SelectInput Slider variant does not support selectMany. Falling back to single-select.');
+  }
+
+  const validOptions = useMemo(() => options.filter(o => !o.disabled), [options]);
+
+  const currentIndex = useMemo(() => {
+    if (value == null) return -1;
+    const strValue = String(value);
+    return validOptions.findIndex(o => String(o.value) === strValue);
+  }, [value, validOptions]);
+
+  const [localIndex, setLocalIndex] = useState(currentIndex);
+
+  useEffect(() => {
+    setLocalIndex(currentIndex);
+  }, [currentIndex]);
+
+  const handleSliderChange = useCallback((values: number[]) => {
+    const newIndex = values[0];
+    if (typeof newIndex === 'number') {
+      setLocalIndex(newIndex);
+    }
+  }, []);
+
+  const handleSliderCommit = useCallback(
+    (values: number[]) => {
+      const newIndex = values[0];
+      if (typeof newIndex === 'number' && validOptions[newIndex]) {
+        eventHandler('OnChange', id, [validOptions[newIndex].value]);
+      }
+    },
+    [eventHandler, id, validOptions]
+  );
+
+  if (validOptions.length === 0) {
+    return (
+      <div
+        className={cn('flex items-center justify-center text-muted-foreground', sliderLabelVariant[String(density)])}
+        style={width ? getWidth(width) : undefined}
+        data-testid={dataTestId}
+      >
+        No options available
+      </div>
+    );
+  }
+
+  const sliderValue = localIndex >= 0 ? localIndex : 0;
+  const currentLabel = validOptions[sliderValue]?.label ?? '';
+  const firstLabel = validOptions[0]?.label ?? '';
+  const lastLabel = validOptions[validOptions.length - 1]?.label ?? '';
+  const textSize = sliderLabelVariant[String(density)];
+
+  return (
+    <div
+      className={cn(
+        'relative w-full flex-1 flex flex-col gap-1 pt-6 pb-2 my-auto justify-center',
+        ghost && 'border-transparent shadow-none'
+      )}
+      style={width ? getWidth(width) : undefined}
+      data-testid={dataTestId}
+    >
+      <div className="relative">
+        <Slider
+          min={0}
+          max={validOptions.length - 1}
+          step={1}
+          value={[sliderValue]}
+          disabled={disabled}
+          density={density}
+          tooltipValue={currentLabel}
+          onValueChange={handleSliderChange}
+          onValueCommit={handleSliderCommit}
+          className={cn(invalid && inputStyles.invalidInput)}
+        />
+        {validOptions.length > 1 && (
+          <div className="absolute w-full flex justify-between px-[2px]" style={{ top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+            {validOptions.map((_, i) => (
+              <div
+                key={i}
+                className={cn(
+                  'rounded-full',
+                  i === sliderValue ? 'bg-transparent' : 'bg-muted-foreground/40',
+                  density === Densities.Small ? 'w-1 h-1' : density === Densities.Large ? 'w-1.5 h-1.5' : 'w-1 h-1'
+                )}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      <div className={cn('flex w-full items-center justify-between gap-1', textSize)} aria-hidden="true">
+        <span className="text-muted-foreground">{firstLabel}</span>
+        <span className="text-muted-foreground">{lastLabel}</span>
+      </div>
+      {invalid && (
+        <div className="absolute right-2.5 translate-y-1/2 -top-1.5">
+          <InvalidIcon message={invalid} />
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
   const eventHandler = useEventHandler();
 
@@ -1407,8 +1559,12 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
       ) : (
         <RadioVariant {...normalizedProps} eventHandler={eventHandler} />
       );
+    case 'Radio':
+      return <RadioVariant {...normalizedProps} eventHandler={eventHandler} />;
     case 'Toggle':
       return <ToggleVariant {...normalizedProps} eventHandler={eventHandler} />;
+    case 'Slider':
+      return <SliderVariant {...normalizedProps} eventHandler={eventHandler} />;
     default:
       return <SelectVariant {...normalizedProps} eventHandler={eventHandler} />;
   }

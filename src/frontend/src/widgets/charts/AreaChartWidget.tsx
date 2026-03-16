@@ -174,7 +174,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
           : LINE_DEFAULTS;
 
         return {
-          name: key,
+          name: areaConfig.name || key,
           type: ChartType.Line,
           smooth: areaConfig.curveType?.toLowerCase() === 'natural',
           lineStyle: {

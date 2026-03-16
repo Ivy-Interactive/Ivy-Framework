@@ -7,11 +7,12 @@ interface SliderWithCurrencyProps
   extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
   currency?: string;
   density?: Densities;
+  tooltipValue?: string | number;
 }
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   SliderWithCurrencyProps
->(({ className, currency, density = Densities.Medium, ...props }, ref) => {
+>(({ className, currency, density = Densities.Medium, tooltipValue, ...props }, ref) => {
   const currentValue = props.value?.[0] ?? props.defaultValue?.[0] ?? 0;
 
   const formattedValue = React.useMemo(() => {
@@ -81,7 +82,7 @@ const Slider = React.forwardRef<
             variant.tooltip
           )}
         >
-          {formattedValue}
+          {tooltipValue != null ? tooltipValue : formattedValue}
         </div>
       </SliderPrimitive.Thumb>
     </SliderPrimitive.Root>

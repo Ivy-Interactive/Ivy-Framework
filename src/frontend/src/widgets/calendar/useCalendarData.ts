@@ -22,6 +22,7 @@ export function useCalendarData(
         const color = widgetNode.props.color as string | undefined;
         const allDay = widgetNode.props.allDay as boolean | undefined;
         const widgetId = widgetNode.id;
+        const hasChildren = widgetNode.children && widgetNode.children.length > 0;
 
         if (!startStr) return;
 
@@ -50,7 +51,7 @@ export function useCalendarData(
           color,
           allDay: allDay ?? false,
           widgetId,
-          content: slots?.default?.[index] || null,
+          content: hasChildren ? (slots?.default?.[index] || null) : null,
         });
       }
     });

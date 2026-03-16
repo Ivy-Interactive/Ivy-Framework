@@ -36,11 +36,30 @@ public class SelectVariantDemo : ViewBase
 }
 ```
 
+## Radio Buttons
+
+The `Radio` variant renders traditional radio buttons for single-select scenarios. Radio buttons are ideal for small sets of mutually exclusive choices where all options should be visible:
+
+```csharp demo-below
+public class RadioVariantDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var frequency = UseState("Daily");
+        return frequency.ToSelectInput(["Immediately", "Daily", "Weekly", "Never"])
+                         .Radio()
+                         .WithField()
+                         .Label("Notification frequency")
+                         .Width(Size.Full());
+    }
+}
+```
+
 ## Multiple Selection
 
 Multiple selection is automatically enabled when you use a collection type (array, List, etc.) as your state. The framework automatically detects this and enables multi-select functionality.
 
-`SelectInput` supports three variants: **Select** (dropdown), **List** (checkboxes), and **Toggle** (button toggles). Multi-select works with all variants and data types. Here's an example demonstrating different combinations:
+`SelectInput` supports five variants: **Select** (dropdown), **List** (checkboxes), **Toggle** (button toggles), **Slider** (range slider for ordered options), and **Radio** (radio buttons for single-select). Multi-select works with all variants except Slider and Radio. Here's an example demonstrating different combinations:
 
 ```csharp demo-tabs
 public class MultiSelectDemo : ViewBase
@@ -183,6 +202,39 @@ public class SelectStylingDemo : ViewBase
 }
 ```
 
+## Slider Variant
+
+The **Slider** variant is ideal for selecting from an ordered list of discrete options, such as T-shirt sizes, quality levels, or priority levels. It renders a range slider that snaps to each option.
+
+```csharp demo-below
+public class SliderVariantDemo : ViewBase
+{
+    private enum Priority { Low, Medium, High, Critical }
+
+    public override object? Build()
+    {
+        var size = UseState("M");
+        var priority = UseState(Priority.Medium);
+
+        return Layout.Vertical()
+            | size.ToSelectInput(new[] { "XS", "S", "M", "L", "XL", "XXL" }.ToOptions())
+                .Slider()
+                .WithField()
+                .Label("T-Shirt Size")
+                .Width(Size.Full())
+            | priority.ToSelectInput()
+                .Slider()
+                .WithField()
+                .Label("Priority")
+                .Width(Size.Full());
+    }
+}
+```
+
+<Callout Type="info">
+The Slider variant only supports single-select. If used with a collection state type, it will fall back to single-select behavior with a console warning.
+</Callout>
+
 ## Advanced Features
 
 SelectInput supports search, selection limits, and loading state. These work across all variants (Select, List, Toggle).
@@ -281,7 +333,7 @@ public class DisabledOptionsDemo : ViewBase
 ```
 
 <Callout Type="tip">
-Use Select for single choice dropdowns, List for multiple selection with checkboxes, and Toggle for visual button-based selection. The List variant is particularly useful for [forms](../../01_Onboarding/02_Concepts/13_Forms.md) where users need to select multiple options.
+Use Select for single choice dropdowns, List for multiple selection with checkboxes, Toggle for visual button-based selection, and Radio for single-select radio buttons in forms. The Radio variant is particularly useful for settings and configuration UIs where all options should be visible.
 </Callout>
 
 <WidgetDocs Type="Ivy.SelectInput" ExtensionTypes="Ivy.SelectInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/SelectInput.cs"/>

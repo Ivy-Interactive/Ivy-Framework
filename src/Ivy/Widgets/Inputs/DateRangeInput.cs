@@ -16,6 +16,10 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 {
     [Prop] public string? Placeholder { get; set; }
 
+    [Prop] public string? StartPlaceholder { get; set; }
+
+    [Prop] public string? EndPlaceholder { get; set; }
+
     [Prop] public string? Format { get; set; }
 
     [Prop] public bool Disabled { get; set; }
@@ -23,6 +27,8 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
     [Prop] public string? Invalid { get; set; }
 
     [Prop] public bool Nullable { get; set; }
+
+    [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
@@ -100,6 +106,16 @@ public static class DateRangeInputExtensions
         return widget with { Placeholder = placeholder };
     }
 
+    public static DateRangeInputBase StartPlaceholder(this DateRangeInputBase widget, string placeholder)
+    {
+        return widget with { StartPlaceholder = placeholder };
+    }
+
+    public static DateRangeInputBase EndPlaceholder(this DateRangeInputBase widget, string placeholder)
+    {
+        return widget with { EndPlaceholder = placeholder };
+    }
+
     public static DateRangeInputBase Format(this DateRangeInputBase widget, string format)
     {
         return widget with { Format = format };
@@ -113,6 +129,11 @@ public static class DateRangeInputExtensions
     public static DateRangeInputBase Nullable(this DateRangeInputBase widget, bool nullable = true)
     {
         return widget with { Nullable = nullable };
+    }
+
+    public static DateRangeInputBase FirstDayOfWeek(this DateRangeInputBase widget, DayOfWeek day)
+    {
+        return widget with { FirstDayOfWeek = day };
     }
 
     [OverloadResolutionPriority(1)]
