@@ -236,23 +236,40 @@ public class BoolInputDataBinding : ViewBase
 {
     public override object Build()
     {
+        var shortState = UseState((short)0);
+        var shortNullState = UseState((short?)null);
+        var intState = UseState(0);
+        var intNullState = UseState((int?)null);
+        var longState = UseState((long)0);
+        var longNullState = UseState((long?)null);
+        var byteState = UseState((byte)0);
+        var byteNullState = UseState((byte?)null);
+        var floatState = UseState(0.0f);
+        var floatNullState = UseState((float?)null);
+        var doubleState = UseState(0.0);
+        var doubleNullState = UseState((double?)null);
+        var decimalState = UseState((decimal)0);
+        var decimalNullState = UseState((decimal?)null);
+        var boolState = UseState(false);
+        var boolNullState = UseState((bool?)null);
+
         var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
             // Signed integer types
-            ("short", UseState((short)0), UseState((short?)null)),
-            ("int", UseState(0), UseState((int?)null)),
-            ("long", UseState((long)0), UseState((long?)null)),
+            ("short", shortState, shortNullState),
+            ("int", intState, intNullState),
+            ("long", longState, longNullState),
 
             // Unsigned integer types
-            ("byte", UseState((byte)0), UseState((byte?)null)),
+            ("byte", byteState, byteNullState),
 
             // Floating-point types
-            ("float", UseState(0.0f), UseState((float?)null)),
-            ("double", UseState(0.0), UseState((double?)null)),
-            ("decimal", UseState((decimal)0), UseState((decimal?)null)),
+            ("float", floatState, floatNullState),
+            ("double", doubleState, doubleNullState),
+            ("decimal", decimalState, decimalNullState),
 
             // Boolean types
-            ("bool", UseState(false), UseState((bool?)null))
+            ("bool", boolState, boolNullState)
         };
 
         var gridItems = new List<object>
