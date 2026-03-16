@@ -110,12 +110,16 @@ public class InputWidgetTests
 
     [Theory]
     [InlineData(typeof(short), (short)1)]
+    [InlineData(typeof(short?), null)]
     [InlineData(typeof(int), 1)]
+    [InlineData(typeof(int?), null)]
+    [InlineData(typeof(int?), 1)]
     [InlineData(typeof(double), 1.0)]
-    public void NumberInput_PreservesType(Type type, object value)
+    [InlineData(typeof(double?), null)]
+    public void NumberInput_PreservesType(Type type, object? value)
     {
         var mockStateType = typeof(MockState<>).MakeGenericType(type);
-        var state = (IAnyState)Activator.CreateInstance(mockStateType, value)!;
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
         var widget = state.ToNumberInput();
         Assert.NotNull(widget);
         var expectedWidgetType = typeof(NumberInput<>).MakeGenericType(type);
@@ -124,11 +128,13 @@ public class InputWidgetTests
 
     [Theory]
     [InlineData(typeof(string), "test")]
+    [InlineData(typeof(string), null)]
     [InlineData(typeof(int), 1)]
-    public void TextInput_PreservesType(Type type, object value)
+    [InlineData(typeof(int?), null)]
+    public void TextInput_PreservesType(Type type, object? value)
     {
         var mockStateType = typeof(MockState<>).MakeGenericType(type);
-        var state = (IAnyState)Activator.CreateInstance(mockStateType, value)!;
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
         var widget = state.ToTextInput();
         Assert.NotNull(widget);
         var expectedWidgetType = typeof(TextInput<>).MakeGenericType(type);
@@ -137,10 +143,11 @@ public class InputWidgetTests
 
     [Theory]
     [InlineData(typeof(string), "test")]
-    public void ReadOnlyInput_PreservesType(Type type, object value)
+    [InlineData(typeof(string), null)]
+    public void ReadOnlyInput_PreservesType(Type type, object? value)
     {
         var mockStateType = typeof(MockState<>).MakeGenericType(type);
-        var state = (IAnyState)Activator.CreateInstance(mockStateType, value)!;
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
         var widget = state.ToReadOnlyInput();
         Assert.NotNull(widget);
         var expectedWidgetType = typeof(ReadOnlyInput<>).MakeGenericType(type);
@@ -149,10 +156,12 @@ public class InputWidgetTests
 
     [Theory]
     [InlineData(typeof(TestEnum), TestEnum.A)]
-    public void SelectInput_PreservesType(Type type, object value)
+    [InlineData(typeof(TestEnum?), null)]
+    [InlineData(typeof(TestEnum?), TestEnum.B)]
+    public void SelectInput_PreservesType(Type type, object? value)
     {
         var mockStateType = typeof(MockState<>).MakeGenericType(type);
-        var state = (IAnyState)Activator.CreateInstance(mockStateType, value)!;
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
         var widget = state.ToSelectInput();
         Assert.NotNull(widget);
         var expectedWidgetType = typeof(SelectInput<>).MakeGenericType(type);
@@ -161,11 +170,14 @@ public class InputWidgetTests
 
     [Theory]
     [InlineData(typeof(bool), true)]
+    [InlineData(typeof(bool?), null)]
+    [InlineData(typeof(bool?), false)]
     [InlineData(typeof(int), 1)]
-    public void BoolInput_PreservesType(Type type, object value)
+    [InlineData(typeof(int?), null)]
+    public void BoolInput_PreservesType(Type type, object? value)
     {
         var mockStateType = typeof(MockState<>).MakeGenericType(type);
-        var state = (IAnyState)Activator.CreateInstance(mockStateType, value)!;
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
         var widget = state.ToBoolInput();
         Assert.NotNull(widget);
         var expectedWidgetType = typeof(BoolInput<>).MakeGenericType(type);
@@ -174,11 +186,13 @@ public class InputWidgetTests
 
     [Theory]
     [InlineData(typeof(DateTime), "2024-01-01T00:00:00")]
-    public void DateTimeInput_PreservesType(Type type, string valueStr)
+    [InlineData(typeof(DateTime?), null)]
+    [InlineData(typeof(DateTime?), "2024-01-01T00:00:00")]
+    public void DateTimeInput_PreservesType(Type type, string? valueStr)
     {
-        var value = DateTime.Parse(valueStr);
+        object? value = valueStr == null ? null : DateTime.Parse(valueStr);
         var mockStateType = typeof(MockState<>).MakeGenericType(type);
-        var state = (IAnyState)Activator.CreateInstance(mockStateType, value)!;
+        var state = (IAnyState)Activator.CreateInstance(mockStateType, new object?[] { value })!;
         var widget = state.ToDateTimeInput();
         Assert.NotNull(widget);
         var expectedWidgetType = typeof(DateTimeInput<>).MakeGenericType(type);
