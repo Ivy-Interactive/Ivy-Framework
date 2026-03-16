@@ -10,6 +10,7 @@ public class NumberInputApp : SampleBase
         var intValue = UseState(12345);
         var onChangedState = UseState(0);
         var onChangeLabel = UseState("");
+        UseEffect(() => { onChangeLabel.Set("Changed"); }, onChangedState);
         var onBlurState = UseState(0);
         var onBlurLabel = UseState("");
         var usdValue = UseState(1234.56m);
@@ -186,11 +187,7 @@ public class NumberInputApp : SampleBase
                | Text.H2("Events")
                | Text.H3("OnChange")
                | Layout.Horizontal(
-                   new NumberInput<int>(onChangedState.Value, e =>
-                   {
-                       onChangedState.Set(e);
-                       onChangeLabel.Set("Changed");
-                   }),
+                   onChangedState.ToNumberInput(),
                    onChangeLabel
                )
                | Text.H3("OnBlur")

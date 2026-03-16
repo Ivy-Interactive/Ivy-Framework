@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas-pro';
-import { DrawingTool, Shape, EventHandler } from './types';
+import { DrawingTool, Shape, AnnotationData, EventHandler } from './types';
 import { DrawingCanvas } from './DrawingCanvas';
 import { Toolbar } from './Toolbar';
 import './styles.css';
@@ -22,7 +22,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
 }) => {
   const [screenshotCanvas, setScreenshotCanvas] = useState<HTMLCanvasElement | null>(null);
   const [shapes, setShapes] = useState<Shape[]>([]);
-  const [activeTool, setActiveTool] = useState<DrawingTool>(DrawingTool.Freehand);
+  const [activeTool, setActiveTool] = useState<DrawingTool>(DrawingTool.Callout);
   const [color, setColor] = useState('#ef4444');
   const [lineWidth, setLineWidth] = useState(4);
   const [capturing, setCapturing] = useState(false);
@@ -73,49 +73,56 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     setShapes((prev) => prev.slice(0, -1));
   }, []);
 
+  const buildAnnotationData = useCallback((): AnnotationData => {
+    return {
+      shapes,
+      screenshotWidth: screenshotCanvas?.width ?? 0,
+      screenshotHeight: screenshotCanvas?.height ?? 0,
+    };
+  }, [shapes, screenshotCanvas]);
+
   const handleSave = useCallback(async () => {
     if (!screenshotCanvas) return;
 
-    // Merge screenshot and annotations into one canvas
-    const mergedCanvas = document.createElement('canvas');
-    mergedCanvas.width = screenshotCanvas.width;
-    mergedCanvas.height = screenshotCanvas.height;
-    const ctx = mergedCanvas.getContext('2d');
-    if (!ctx) return;
-
-    // Draw screenshot
-    ctx.drawImage(screenshotCanvas, 0, 0);
-
-    // Draw annotations from the annotation canvas
-    const annotationCanvas = overlayRef.current?.querySelector(
-      '.screenshot-canvas-wrapper canvas:nth-child(2)'
-    ) as HTMLCanvasElement | null;
-    if (annotationCanvas) {
-      ctx.drawImage(annotationCanvas, 0, 0);
+    // Fire the event first so the UI responds immediately
+    if (events.includes('OnSave')) {
+      eventHandler('OnSave', id, [buildAnnotationData()]);
     }
 
-    // Export as PNG blob
-    const blob = await new Promise<Blob | null>((resolve) => {
-      mergedCanvas.toBlob(resolve, 'image/png');
-    });
+    // Then handle upload in the background
+    try {
+      const mergedCanvas = document.createElement('canvas');
+      mergedCanvas.width = screenshotCanvas.width;
+      mergedCanvas.height = screenshotCanvas.height;
+      const ctx = mergedCanvas.getContext('2d');
+      if (!ctx) return;
 
-    if (!blob) return;
+      ctx.drawImage(screenshotCanvas, 0, 0);
 
-    // Upload if uploadUrl is provided
-    if (uploadUrl) {
-      const getUploadUrl = () => {
-        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-        if (ivyHostMeta) {
-          const host = ivyHostMeta.getAttribute('content');
-          return host + uploadUrl;
-        }
-        return uploadUrl;
-      };
+      const annotationCanvas = overlayRef.current?.querySelector(
+        '.screenshot-canvas-wrapper canvas:nth-child(2)'
+      ) as HTMLCanvasElement | null;
+      if (annotationCanvas) {
+        ctx.drawImage(annotationCanvas, 0, 0);
+      }
 
-      const formData = new FormData();
-      formData.append('file', blob, 'screenshot.png');
+      const blob = await new Promise<Blob | null>((resolve) => {
+        mergedCanvas.toBlob(resolve, 'image/png');
+      });
 
-      try {
+      if (blob && uploadUrl) {
+        const getUploadUrl = () => {
+          const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
+          if (ivyHostMeta) {
+            const host = ivyHostMeta.getAttribute('content');
+            return host + uploadUrl;
+          }
+          return uploadUrl;
+        };
+
+        const formData = new FormData();
+        formData.append('file', blob, 'screenshot.png');
+
         const response = await fetch(getUploadUrl(), {
           method: 'POST',
           body: formData,
@@ -123,15 +130,11 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
         if (!response.ok) {
           console.error('Screenshot upload failed:', response.statusText);
         }
-      } catch (error) {
-        console.error('Screenshot upload error:', error);
       }
+    } catch (error) {
+      console.error('Screenshot save error:', error);
     }
-
-    if (events.includes('OnSave')) {
-      eventHandler('OnSave', id, []);
-    }
-  }, [screenshotCanvas, uploadUrl, events, eventHandler, id]);
+  }, [screenshotCanvas, uploadUrl, events, eventHandler, id, buildAnnotationData]);
 
   const handleCancel = useCallback(() => {
     if (events.includes('OnCancel')) {
@@ -139,21 +142,30 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     }
   }, [events, eventHandler, id]);
 
-  // Handle Escape key
+  // Handle keyboard shortcuts
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        handleCancel();
+      // Ctrl+S to save
+      if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleSave();
+        return;
       }
+      // Ctrl+Z to undo
       if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         handleUndo();
+        return;
+      }
+      // ESC — only cancel if no active tool input (text/callout inputs handle their own ESC via stopPropagation)
+      if (e.key === 'Escape') {
+        handleCancel();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleCancel, handleUndo]);
+  }, [isOpen, handleCancel, handleUndo, handleSave]);
 
   if (!isOpen) return null;
 
@@ -166,8 +178,9 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             flex: 1,
-            color: '#e0e0e0',
+            color: 'hsl(var(--muted-foreground))',
             fontSize: 18,
+            fontFamily: 'var(--font-sans, sans-serif)',
           }}
         >
           Capturing screenshot...

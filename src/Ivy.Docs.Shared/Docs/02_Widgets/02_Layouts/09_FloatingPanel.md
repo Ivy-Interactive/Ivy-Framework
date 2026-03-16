@@ -354,16 +354,17 @@ public class FloatingSearchView : ViewBase
 {
     public override object? Build()
     {
+        var searchQuery = UseState("");
         var (panelView, showSearchBar) = UseTrigger((IState<bool> isOpen) =>
             isOpen.Value ? new FloatingPanel(
                 new Card(
                     Layout.Horizontal().Gap(2)
-                        | new TextInput(placeholder: "Search...")
+                        | searchQuery.ToTextInput().Placeholder("Search...")
                         | new Button("Search").Icon(Icons.Search).Primary()
                         | new Button("Close", onClick: _ => isOpen.Set(false)).Secondary()
                 ),
                 Align.TopCenter)
-                .Offset(new Thickness(0, 10, 0, 0)) : null);
+                .Offset(new Thickness(0, 10, 0, 0)) : (object?)null);
 
         return Layout.Vertical()
             | new Button("Show Search Bar", onClick: _ => showSearchBar())

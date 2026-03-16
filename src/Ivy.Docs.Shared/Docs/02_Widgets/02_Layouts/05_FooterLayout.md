@@ -64,9 +64,9 @@ public class FormWithFooterExample : ViewBase
                         .Variant(ButtonVariant.Primary),
                 content: Layout.Vertical()
                     | new Card(Layout.Vertical()
-                        | new TextInput(firstName, "First Name")
-                        | new TextInput(lastName, "Last Name")
-                        | new TextInput(email, "Email Address")
+                        | firstName.ToTextInput().WithField().Label("First Name")
+                        | lastName.ToTextInput().WithField().Label("Last Name")
+                        | email.ToTextInput().WithField().Label("Email Address")
                     ).Title("Personal Information")
             );
     }
@@ -98,8 +98,8 @@ public class SheetWithFooterExample : ViewBase
                         .Variant(ButtonVariant.Primary),
                 content: Layout.Vertical()
                     | new Card(Layout.Vertical()
-                        | new TextInput(title, "Article Title")
-                        | new TextInput(content, "Article Content").Variant(TextInputVariant.Textarea)
+                        | title.ToTextInput().WithField().Label("Article Title")
+                        | content.ToTextareaInput().WithField().Label("Article Content")
                     ).Title("Article Details")
                     | new Card("Article preview will appear here as you type...")
                         .Title("Preview")
@@ -147,8 +147,8 @@ public class ComplexFooterExample : ViewBase
                         .Variant(ButtonVariant.Primary),
                 content: Layout.Vertical()
                     | new Card(Layout.Vertical()
-                        | new TextInput(docTitle, "Document Title")
-                        | new TextInput(summary, "Executive Summary").Variant(TextInputVariant.Textarea)
+                        | docTitle.ToTextInput().WithField().Label("Document Title")
+                        | summary.ToTextareaInput().WithField().Label("Executive Summary")
                     ).Title("Document Information")
             );
     }

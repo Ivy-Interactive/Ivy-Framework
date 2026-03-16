@@ -339,11 +339,58 @@ public class ConditionalEffectView : ViewBase
 - [State Management](./03_UseState.md) - Managing component state
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Memoization](./05_UseMemo.md) - Optimizing performance with memoization
-- [UseCallback](./06_UseCallback.md) - Memoizing callback functions
 - [Signals](./10_UseSignal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
 
 ## Faq
+
+<Details>
+<Summary>
+Why does my System.Timers.Timer keep firing after I dispose it in UseEffect cleanup?
+</Summary>
+<Body>
+
+`System.Timers.Timer.Dispose()` does not cancel callbacks that are already queued on the thread pool. This means 1–2 additional `Elapsed` events can fire *after* disposal, causing state updates on an unmounted or paused component.
+
+**Recommended: Use `UseInterval`** for most timer needs. It handles the lifecycle correctly:
+
+```csharp
+var seconds = UseState(0);
+var isRunning = UseState(false);
+
+// Timer starts when isRunning is true, stops when false
+UseInterval(() =>
+{
+    seconds.Set(seconds.Value + 1);
+}, isRunning.Value ? TimeSpan.FromSeconds(1) : null);
+```
+
+Pass `null` to pause the timer, or a `TimeSpan` to start/resume it. The timer is automatically disposed on component unmount.
+
+**For advanced cases:** If you need a raw `System.Timers.Timer` in UseEffect, use `TimerDisposable` with a `CancellationTokenSource` guard:
+
+```csharp
+using Ivy.Core.Helpers;
+
+UseEffect(() =>
+{
+    var cts = new CancellationTokenSource();
+    var timer = new System.Timers.Timer(1000);
+    timer.Elapsed += (s, e) =>
+    {
+        if (cts.Token.IsCancellationRequested) return;
+        counter.Set(counter.Value + 1);
+    };
+    timer.AutoReset = true;
+    timer.Start();
+    return new TimerDisposable(timer, cts);
+}, isRunning);
+```
+
+`TimerDisposable` ensures `Cancel()` → `Stop()` → `Dispose()` ordering, providing a hard barrier against post-disposal callbacks.
+
+</Body>
+</Details>
 
 <Details>
 <Summary>

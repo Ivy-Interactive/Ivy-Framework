@@ -8,6 +8,7 @@ import type {
   LinesProps,
   BarProps,
   PieProps,
+  FunnelProps,
   CartesianGridProps,
   LegendProps,
   PieLegendProps,
@@ -15,6 +16,10 @@ import type {
   ToolboxProps,
   XAxisProps,
   YAxisProps,
+  RadarProps,
+  PolarGridProps,
+  PolarAngleAxisProps,
+  PolarRadiusAxisProps,
 } from './chartTypes';
 
 // Line/Area defaults (Line.cs, Area.cs)
@@ -132,6 +137,46 @@ export const Y_AXIS_DEFAULTS: Partial<YAxisProps> = {
 // ReferenceLine defaults (ReferenceLine.cs)
 export const REFERENCE_LINE_DEFAULTS = {
   strokeWidth: 1,
+};
+
+// PolarGrid defaults (PolarGrid.cs)
+export const POLAR_GRID_DEFAULTS: Partial<PolarGridProps> = {
+  gridType: 'Polygon',
+  radialLines: true,
+};
+
+// PolarAngleAxis defaults (PolarAngleAxis.cs)
+export const POLAR_ANGLE_AXIS_DEFAULTS: Partial<PolarAngleAxisProps> = {
+  axisLine: true,
+  tickLine: true,
+};
+
+// PolarRadiusAxis defaults (PolarRadiusAxis.cs)
+export const POLAR_RADIUS_AXIS_DEFAULTS: Partial<PolarRadiusAxisProps> = {};
+
+// Radar defaults (Radar.cs)
+export const RADAR_DEFAULTS: Partial<RadarProps> = {
+  filled: false,
+  strokeWidth: 2,
+  showSymbol: true,
+  legendType: 'Line',
+};
+
+// Funnel defaults (Funnel.cs)
+export const FUNNEL_DEFAULTS: Partial<FunnelProps> = {
+  legendType: 'Line',
+  strokeWidth: 1,
+  animated: false,
+  minSize: '0%',
+  maxSize: '100%',
+};
+
+// Funnel Legend defaults
+export const FUNNEL_LEGEND_DEFAULTS: Partial<PieLegendProps> = {
+  layout: 'Horizontal',
+  align: 'Center',
+  verticalAlign: 'Bottom',
+  iconSize: 14,
 };
 
 // Re-export applyDefaults from shared utils

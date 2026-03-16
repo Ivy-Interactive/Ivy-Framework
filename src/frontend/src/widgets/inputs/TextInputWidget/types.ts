@@ -32,6 +32,7 @@ export interface TextInputWidgetProps {
   suffix?: Affix;
   maxLength?: number;
   minLength?: number;
+  pattern?: string;
   rows?: number;
   'data-testid'?: string;
 }

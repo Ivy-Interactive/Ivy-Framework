@@ -39,7 +39,7 @@ public class ExternalWidgetController : ControllerBase
             return NotFound($"Script resource not found for widget '{decodedTypeName}'");
         }
 
-        if (Ivy.Utils.IsDevelopment())
+        if (Ivy.ProcessHelper.IsDevelopment())
         {
             Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
         }
@@ -75,7 +75,7 @@ public class ExternalWidgetController : ControllerBase
             return NotFound($"Style resource not found for widget '{decodedTypeName}'");
         }
 
-        if (Ivy.Utils.IsDevelopment())
+        if (Ivy.ProcessHelper.IsDevelopment())
         {
             Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
         }

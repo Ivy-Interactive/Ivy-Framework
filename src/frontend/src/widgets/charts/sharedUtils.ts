@@ -80,7 +80,7 @@ export function generateEChartGrid(
     left: '3%',
     right: '4%',
     top: hasToolbox ? 40 : 15,
-    bottom: 30, // Reduced space to remove wasted screen area, still accommodates legend
+    bottom: 50, // Space for legend below axis labels
     containLabel: true,
     borderWidth: 0, // Ensure no border is drawn
   };
@@ -200,7 +200,7 @@ export const generateSeries = (
       : LINE_DEFAULTS;
 
     return {
-      name: key,
+      name: lineConfig.name || key,
       type: ChartType.Line,
       data: data.map(d =>
         transform ? transform(Number(d[key] ?? 0)) : Number(d[key] ?? 0)
@@ -237,7 +237,8 @@ export const generateXAxis = (
   categories: string[],
   xAxis?: XAxisProps[],
   isVertical?: boolean,
-  themeColors?: { mutedForeground: string; fontSans: string }
+  themeColors?: { mutedForeground: string; fontSans: string },
+  cartesianGrid?: CartesianGridProps
 ) => ({
   position: xAxis?.[0]?.orientation?.toLowerCase() === 'top' ? 'top' : 'bottom',
   type: isVertical ? 'value' : 'category',
@@ -272,7 +273,7 @@ export const generateXAxis = (
     show: true,
     lineStyle: {
       type: 'dashed',
-      color: themeColors?.mutedForeground,
+      color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
       opacity: 0.4,
     },
   },
@@ -286,7 +287,8 @@ export const generateYAxis = (
   yAxis?: YAxisProps[],
   isVertical: boolean = false,
   categories?: string[],
-  themeColors?: { mutedForeground: string; fontSans: string }
+  themeColors?: { mutedForeground: string; fontSans: string },
+  cartesianGrid?: CartesianGridProps
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
 
@@ -339,7 +341,7 @@ export const generateYAxis = (
       show: true,
       lineStyle: {
         type: 'dashed',
-        color: themeColors?.mutedForeground,
+        color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
         opacity: 0.4,
       },
     },
@@ -362,10 +364,10 @@ export const generateTooltip = (
     : TOOLTIP_DEFAULTS;
 
   return {
-    trigger: 'axis',
+    trigger: type === 'item' ? 'item' : 'axis',
     appendToBody: true,
     axisPointer: {
-      type: type ?? 'cross',
+      type: type === 'item' ? 'cross' : (type ?? 'cross'),
       animated: tip.animated ?? TOOLTIP_DEFAULTS.animated,
       shadowStyle: { opacity: 0.5 },
       lineStyle: {

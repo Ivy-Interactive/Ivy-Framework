@@ -26,37 +26,25 @@ public class BoolInputDemo : ViewBase
     public override object? Build()
     {
         var state = UseState(false);
-        return new BoolInput(state).Label("Accept Terms");
+        return state.ToBoolInput().Label("Accept Terms");
     }
 }
 ```
 
 ### Creating BoolInput Instances
 
-You can create `BoolInput` instances in several ways:
-
-**Using the non-generic constructor (defaults to `bool` type):**
-
-```csharp
-var input = new BoolInput(); // Creates BoolInput<bool> with default values
-var labeledInput = new BoolInput("My Label"); // With custom label
-```
-
-**Using the generic constructor for specific types:**
-
-```csharp
-var nullableInput = new BoolInput<bool?>(); // For nullable boolean
-var intInput = new BoolInput<int>(); // For integer-based boolean (0/1)
-```
-
-**Using extension methods from [state](../../03_Hooks/02_Core/03_UseState.md):**
+You create `BoolInput` instances using extension methods on [state](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp
 var state = UseState(false);
 var input = state.ToBoolInput(); // Creates BoolInput from state
-```
 
-The non-generic `BoolInput` constructor is the most convenient when you need a simple boolean input without nullable types or other boolean-like representations.
+var nullableState = UseState<bool?>(null);
+var nullableInput = nullableState.ToBoolInput(); // For nullable boolean
+
+var intState = UseState(0);
+var intInput = intState.ToBoolInput(); // For integer-based boolean (0/1)
+```
 
 
 <Callout variant="info" title="Extension Methods">

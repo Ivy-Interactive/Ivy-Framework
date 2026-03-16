@@ -4,6 +4,8 @@ export enum ChartType {
   Bar = 'bar',
   Line = 'line',
   Pie = 'pie',
+  Scatter = 'scatter',
+  Funnel = 'funnel',
 }
 
 export interface ChartData {
@@ -100,6 +102,7 @@ export type CartesianGridProps = {
   fillOpacity: number | null;
   height: number | null;
   horizontal: boolean;
+  stroke: string | null;
   strokeDashArray: string | null;
   vertical: boolean;
   width: number | null;
@@ -313,3 +316,211 @@ export interface PieLegendProps {
   layout?: string;
   verticalAlign?: string;
 }
+
+export type ScatterShape =
+  | 'Circle'
+  | 'Square'
+  | 'Cross'
+  | 'Diamond'
+  | 'Star'
+  | 'Triangle'
+  | 'Wye';
+
+export type ScatterLineType = 'Joint' | 'Fitting';
+
+export interface ZAxisProps {
+  dataKey?: string;
+  rangeMin?: number;
+  rangeMax?: number;
+  unit?: string | null;
+  name?: string | null;
+  scale?: string;
+}
+
+export interface ScatterProps {
+  animated?: boolean;
+  dataKey: string;
+  fill?: string | null;
+  fillOpacity?: number | null;
+  legendType?: ScatterShape | null;
+  line?: boolean;
+  lineType?: ScatterLineType;
+  name: string;
+  shape?: ScatterShape;
+  stroke?: string | null;
+  strokeDashArray?: string | null;
+  strokeWidth?: number;
+  unit?: string | null;
+}
+
+export interface ScatterChartWidgetProps {
+  id: string;
+  data: ChartData[];
+  width?: string;
+  height?: string;
+  scatters?: ScatterProps[];
+  cartesianGrid?: CartesianGridProps;
+  xAxis?: XAxisProps[];
+  yAxis?: YAxisProps[];
+  zAxis?: ZAxisProps | null;
+  tooltip?: ToolTipProps;
+  toolbox?: ToolboxProps;
+  legend?: LegendProps;
+  referenceLines?: MarkLine[];
+  referenceAreas?: MarkArea[];
+  referenceDots?: ReferenceDot[];
+  colorScheme: ColorScheme;
+}
+
+export type PolarGridTypes = 'Polygon' | 'Circle';
+
+export interface PolarGridProps {
+  gridType?: PolarGridTypes;
+  stroke?: string | null;
+  radialLines?: boolean;
+}
+
+export interface PolarAngleAxisProps {
+  dataKey?: string | null;
+  stroke?: string | null;
+  axisLine?: boolean;
+  tickLine?: boolean;
+}
+
+export interface PolarRadiusAxisProps {
+  angle?: number | null;
+  domain?: unknown[] | null;
+  tickCount?: number | null;
+  stroke?: string | null;
+}
+
+export interface RadarProps {
+  dataKey: string;
+  name?: string | null;
+  filled?: boolean;
+  fill?: string | null;
+  stroke?: string | null;
+  strokeWidth?: number;
+  strokeDashArray?: string | null;
+  showSymbol?: boolean;
+  legendType?: string;
+  labelLists?: string[];
+}
+
+export interface RadarIndicatorProps {
+  name: string;
+  max?: number;
+  min?: number;
+}
+
+export interface RadarChartWidgetProps {
+  id: string;
+  data: ChartData[];
+  width?: string;
+  height?: string;
+  radars?: RadarProps[];
+  indicators?: RadarIndicatorProps[];
+  tooltip?: ToolTipProps;
+  legend?: LegendProps;
+  toolbox?: ToolboxProps;
+  colorScheme: ColorScheme;
+  shape?: 'Polygon' | 'Circle';
+  cx?: string | number;
+  cy?: string | number;
+  radius?: string | number;
+  startAngle?: number;
+  splitLine?: boolean;
+  splitArea?: boolean;
+  axisLine?: boolean;
+}
+
+export interface SankeyNode {
+  name: string;
+}
+
+export interface SankeyLink {
+  source: number;
+  target: number;
+  value: number;
+}
+
+export interface SankeyData {
+  nodes: SankeyNode[];
+  links: SankeyLink[];
+}
+
+export type SankeyAlign = 'Justify' | 'Left';
+
+export interface SankeyChartWidgetProps {
+  id: string;
+  data: SankeyData | null;
+  width?: string;
+  height?: string;
+  colorScheme: ColorScheme;
+  nodeWidth?: number;
+  nodeGap?: number;
+  curvature?: number;
+  layoutIterations?: number;
+  nodeAlign?: SankeyAlign;
+  tooltip?: ToolTipProps;
+  legend?: LegendProps;
+  toolbox?: ToolboxProps;
+}
+
+export interface ChordNode {
+  name: string;
+}
+
+export interface ChordLink {
+  source: number;
+  target: number;
+  value: number;
+}
+
+export interface ChordData {
+  nodes: ChordNode[];
+  links: ChordLink[];
+}
+
+export interface ChordChartWidgetProps {
+  id: string;
+  data: ChordData | null;
+  width?: string;
+  height?: string;
+  colorScheme: ColorScheme;
+  sort?: boolean;
+  sortSubGroups?: boolean;
+  padAngle?: number;
+  tooltip?: ToolTipProps;
+  legend?: LegendProps;
+  toolbox?: ToolboxProps;
+}
+
+export interface FunnelChartWidgetProps {
+  id: string;
+  data: ChartData[];
+  width?: string;
+  height?: string;
+  funnels?: FunnelProps[];
+  tooltip?: ToolTipProps;
+  legend?: PieLegendProps;
+  toolbox?: ToolboxProps;
+  colorScheme: ColorScheme;
+  sort?: 'Descending' | 'Ascending' | 'None';
+  orientation?: 'Vertical' | 'Horizontal';
+  gap?: number;
+}
+
+export type FunnelProps = {
+  animated?: boolean;
+  dataKey: string;
+  nameKey: string;
+  fill?: string | null;
+  fillOpacity?: number | null;
+  legendType?: string;
+  minSize?: string;
+  maxSize?: string;
+  stroke?: string | null;
+  strokeWidth?: number;
+  labelLists?: string[];
+};

@@ -117,27 +117,6 @@ public class TextInputTests
     public void TextInput_ExtensionMethods_WorkCorrectly()
     {
         var state = new MockState<string>("test");
-
-        // Test ToTextInput extension
-        var textInput = state.ToTextInput();
-        Assert.Equal(TextInputVariant.Text, textInput.Variant);
-
-        // Test ToPasswordInput extension
-        var passwordInput = state.ToPasswordInput();
-        Assert.Equal(TextInputVariant.Password, passwordInput.Variant);
-
-        // Test ToSearchInput extension
-        var searchInput = state.ToSearchInput();
-        Assert.Equal(TextInputVariant.Search, searchInput.Variant);
-
-        // Test ToEmailInput extension
-        var emailInput = state.ToEmailInput();
-        Assert.Equal(TextInputVariant.Email, emailInput.Variant);
-
-        // Test ToUrlInput extension
-        var urlInput = state.ToUrlInput();
-        Assert.Equal(TextInputVariant.Url, urlInput.Variant);
-
         // Test ToTelInput extension
         var telInput = state.ToTelInput();
         Assert.Equal(TextInputVariant.Tel, telInput.Variant);

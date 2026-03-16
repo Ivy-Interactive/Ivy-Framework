@@ -56,6 +56,13 @@ public class ExpressionNameHelper
                         return $"{left}And{right}";
                     }
                 }
+                // If the lambda body is a simple member access (e.g. q.Sum(x => x.Speed)),
+                // return the member name instead of the aggregation method name.
+                var memberName = GetMemberName(lambdaBody);
+                if (!string.IsNullOrEmpty(memberName))
+                {
+                    return memberName;
+                }
             }
         }
         // Fallback: return the method name itself.

@@ -118,16 +118,23 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     ...borderRadiusStyle,
   };
 
-  let buttonSize: 'icon' | 'default' | 'sm' | 'lg' | null | undefined =
-    'default';
+  let buttonSize:
+    | 'icon'
+    | 'icon-sm'
+    | 'default'
+    | 'sm'
+    | 'lg'
+    | null
+    | undefined = 'default';
   let iconSize: number = 4;
+  const isIconOnly = icon && icon != 'None' && !title;
 
-  if (icon && icon != 'None' && !title) {
+  if (isIconOnly) {
     buttonSize = 'icon';
   }
 
   if (density == Densities.Small) {
-    buttonSize = 'sm';
+    buttonSize = isIconOnly ? 'icon-sm' : 'sm';
     iconSize = 3;
   }
 
@@ -323,7 +330,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       }
       disabled={disabled}
       className={cn(
-        buttonSize !== 'icon' && 'w-min',
+        ['icon', 'icon-sm'].includes(buttonSize) ? '' : 'w-min',
         hasChildren &&
           'p-2 h-auto items-start justify-start text-left inline-block',
         (variant === 'Link' || variant === 'Inline') &&

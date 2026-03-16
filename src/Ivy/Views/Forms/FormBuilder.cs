@@ -113,7 +113,7 @@ public class FormBuilder<TModel> : ViewBase
         fieldInfo.InputFactory = ScaffoldWrapper(factory);
         return this;
 
-        bool HasCustomLabel(string label, string name) => label != Utils.SplitPascalCase(name);
+        bool HasCustomLabel(string label, string name) => label != StringHelper.SplitPascalCase(name);
     }
 
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IAnyInput> input)
@@ -299,7 +299,7 @@ public class FormBuilder<TModel> : ViewBase
         {
             var hint = GetField(expr);
             hint.Required = true;
-            hint.Validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
+            hint.Validators.Add(e => (ValidationHelper.IsValidRequired(e), "Required field"));
         }
         return this;
     }
@@ -316,7 +316,7 @@ public class FormBuilder<TModel> : ViewBase
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _fields[name];
     }
 

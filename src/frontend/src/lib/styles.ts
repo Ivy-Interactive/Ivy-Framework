@@ -133,6 +133,11 @@ const _getMaxWidth = (width?: string): React.CSSProperties => {
   }
 };
 
+export const getAspectRatio = (aspectRatio?: number): React.CSSProperties => {
+  if (aspectRatio === undefined || aspectRatio === null) return {};
+  return { aspectRatio: aspectRatio };
+};
+
 export const getHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 
@@ -704,7 +709,7 @@ export const typography: Record<string, string> = {
 
   // Size variants
   large: 'text-lg font-semibold',
-  small: 'text-large-body font-medium leading-none',
+  small: 'text-large-body leading-none',
   muted: 'text-base text-muted-foreground',
 
   // Semantic variants

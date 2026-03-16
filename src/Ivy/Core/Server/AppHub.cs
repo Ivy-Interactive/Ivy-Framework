@@ -273,7 +273,11 @@ public class AppHub(
     {
         try
         {
-            if (exception != null)
+            if (exception is OperationCanceledException)
+            {
+                logger.LogDebug("Client {ConnectionId} timed out", Context.ConnectionId);
+            }
+            else if (exception != null)
             {
                 logger.LogWarning(exception, "Client {ConnectionId} disconnected with error", Context.ConnectionId);
             }
@@ -516,7 +520,7 @@ public class AppHub(
                 appSession.LastInteraction = DateTime.UtcNow;
                 if (!await appSession.WidgetTree.TriggerEventAsync(widgetId, eventName, args ?? new JsonArray()))
                 {
-                    logger.LogWarning("Event '{EventName}' for Widget '{WidgetId}' not found.", eventName, widgetId);
+                    logger.LogDebug("Event '{EventName}' for Widget '{WidgetId}' not found.", eventName, widgetId);
                 }
             }
             catch (Exception e)

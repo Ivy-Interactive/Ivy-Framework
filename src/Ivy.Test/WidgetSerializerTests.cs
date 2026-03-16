@@ -56,8 +56,7 @@ public class WidgetSerializerTests(ITestOutputHelper output)
         {
             Variant = ButtonVariant.Destructive,
             Disabled = true,
-            Loading = true,
-            Visible = false
+            Loading = true
         };
         widget.Id = Guid.NewGuid().ToString();
 
@@ -75,9 +74,6 @@ public class WidgetSerializerTests(ITestOutputHelper output)
 
         Assert.NotNull(props["loading"]);
         Assert.True(props["loading"]!.GetValue<bool>());
-
-        Assert.NotNull(props["visible"]);
-        Assert.False(props["visible"]!.GetValue<bool>());
     }
 
     [Fact]

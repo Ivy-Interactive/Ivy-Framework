@@ -122,6 +122,23 @@ public class SpacingExamplesView : ViewBase
 }
 ```
 
+### Aspect Ratio
+
+Set a width and an aspect ratio — the height adjusts automatically. Pass the ratio as a float: `16f / 9f` for widescreen, `1f` for square. Works on any widget since it's defined on `WidgetBase`.
+
+```csharp demo-tabs
+public class AspectRatioExamplesView : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Horizontal().Gap(4)
+            | new Box("16:9").Width(Size.Units(80)).AspectRatio(16f / 9f).Background(Colors.Primary)
+            | new Box("4:3").Width(Size.Units(80)).AspectRatio(4f / 3f).Background(Colors.Secondary)
+            | new Box("1:1").Width(Size.Units(40)).AspectRatio(1f).Background(Colors.Warning);
+    }
+}
+```
+
 ### Advanced Features & Interactions
 
 Use the [Thickness](../../04_ApiReference/Ivy/Thickness.md) class for more precise control over padding on different sides. This allows you to specify different spacing values for left, top, right, and bottom edges.

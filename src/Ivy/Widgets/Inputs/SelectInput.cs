@@ -20,7 +20,9 @@ public enum SelectInputVariant
 {
     Select,
     List,
-    Toggle
+    Toggle,
+    Slider,
+    Radio
 }
 
 public interface IAnySelectInput : IAnyInput
@@ -69,7 +71,7 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 public record SelectInput<TValue> : SelectInputBase, IInput<TValue>
 {
     [OverloadResolutionPriority(1)]
-    public SelectInput(IAnyState state, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
+    internal SelectInput(IAnyState state, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
         : this(options, placeholder, disabled, variant, selectMany)
     {
         var typedState = state.As<TValue>();
@@ -78,21 +80,21 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>
     }
 
     [OverloadResolutionPriority(1)]
-    public SelectInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
+    internal SelectInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
     : this(options, placeholder, disabled, variant, selectMany)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public SelectInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
+    internal SelectInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
         : this(options, placeholder, disabled, variant, selectMany)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public SelectInput(IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
+    internal SelectInput(IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
     {
         Placeholder = placeholder;
         Variant = variant;
@@ -185,6 +187,10 @@ public static class SelectInputExtensions
     public static SelectInputBase Ghost(this SelectInputBase widget, bool ghost = true) => widget with { Ghost = ghost };
 
     public static SelectInputBase List(this SelectInputBase widget) => widget with { Variant = SelectInputVariant.List };
+
+    public static SelectInputBase Slider(this SelectInputBase widget) => widget with { Variant = SelectInputVariant.Slider };
+
+    public static SelectInputBase Radio(this SelectInputBase widget) => widget with { Variant = SelectInputVariant.Radio };
 
     [OverloadResolutionPriority(1)]
     public static SelectInputBase OnBlur(this SelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

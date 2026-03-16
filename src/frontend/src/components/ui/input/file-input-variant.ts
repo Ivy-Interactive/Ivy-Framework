@@ -2,17 +2,44 @@ import { cva } from 'class-variance-authority';
 
 // Size variants for FileInput
 export const fileInputVariant = cva(
-  'relative rounded-field border-dashed transition-colors',
+  'relative rounded-field border-dashed transition-colors transition-shadow duration-200',
   {
     variants: {
+      variant: {
+        Default: 'border-transparent bg-transparent p-0 min-h-0',
+        Drop: 'border-2 border-muted-foreground/25 bg-transparent min-h-[100px] max-h-[300px] p-4',
+      },
       density: {
-        Small: 'min-h-[80px] max-h-[200px] p-2 border-2',
-        Medium: 'min-h-[100px] max-h-[300px] p-4 border-2',
-        Large: 'min-h-[120px] max-h-[400px] p-6 border-3',
+        Small: 'gap-2',
+        Medium: 'gap-4',
+        Large: 'gap-6',
+      },
+      isDragging: {
+        true: 'border-primary bg-primary/5 outline-none ring-2 ring-primary ring-offset-2',
+        false: '',
       },
     },
+    compoundVariants: [
+      {
+        variant: 'Drop',
+        density: 'Small',
+        className: 'min-h-[80px] max-h-[200px] p-2',
+      },
+      {
+        variant: 'Drop',
+        density: 'Medium',
+        className: 'min-h-[100px] max-h-[300px] p-4',
+      },
+      {
+        variant: 'Drop',
+        density: 'Large',
+        className: 'min-h-[120px] max-h-[400px] p-6 border-3',
+      },
+    ],
     defaultVariants: {
+      variant: 'Drop',
       density: 'Medium',
+      isDragging: false,
     },
   }
 );

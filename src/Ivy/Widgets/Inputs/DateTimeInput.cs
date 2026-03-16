@@ -36,6 +36,8 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 
     [Prop] public string? Invalid { get; set; }
 
+    [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
@@ -53,7 +55,7 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 {
     [OverloadResolutionPriority(1)]
-    public DateTimeInput(IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
+    internal DateTimeInput(IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TDate>();
         Value = typedState.Value;
@@ -61,19 +63,19 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
     }
 
     [OverloadResolutionPriority(1)]
-    public DateTimeInput(TDate value, Func<Event<IInput<TDate>, TDate>, ValueTask> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
+    internal DateTimeInput(TDate value, Func<Event<IInput<TDate>, TDate>, ValueTask> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public DateTimeInput(TDate value, Action<Event<IInput<TDate>, TDate>> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
+    internal DateTimeInput(TDate value, Action<Event<IInput<TDate>, TDate>> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
     {
         OnChange = new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
     }
 
-    public DateTimeInput(string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date)
+    internal DateTimeInput(string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date)
     {
         Variant = variant;
         Placeholder = placeholder;
@@ -227,7 +229,7 @@ public static class DateTimeInputExtensions
         if (string.IsNullOrEmpty(input.Placeholder)
             && !string.IsNullOrEmpty(name))
         {
-            input.Placeholder = Utils.LabelFor(name, type);
+            input.Placeholder = StringHelper.LabelFor(name, type);
         }
 
         return input;
@@ -242,6 +244,7 @@ public static class DateTimeInputExtensions
     public static DateTimeInputBase Format(this DateTimeInputBase widget, string format) => widget with { Format = format };
 
     public static DateTimeInputBase Invalid(this DateTimeInputBase widget, string? invalid) => widget with { Invalid = invalid };
+    public static DateTimeInputBase FirstDayOfWeek(this DateTimeInputBase widget, DayOfWeek day) => widget with { FirstDayOfWeek = day };
     public static DateTimeInputBase Nullable(this DateTimeInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]

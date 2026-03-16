@@ -60,6 +60,13 @@ public class FileInputVariantTests : ViewBase
                   | multipleFiles.ToFileInput(multipleFilesUpload).Disabled()
                   | multipleFiles.ToFileInput(multipleFilesUpload).Invalid("Please select valid files")
                   | multipleFiles.ToFileInput(multipleFilesUpload).Placeholder("Click to select files")
+
+                  | Text.Monospaced("Default Variant")
+                  | singleFile.ToFileInput(singleFileUpload).Variant(FileInputVariant.Default).Placeholder("Select one file...")
+                  | placeholderFile.ToFileInput(placeholderFileUpload).Variant(FileInputVariant.Default).Placeholder("Click to select a file")
+                  | singleFile.ToFileInput(singleFileUpload).Variant(FileInputVariant.Default).Disabled()
+                  | multipleFiles.ToFileInput(multipleFilesUpload).Variant(FileInputVariant.Default).Placeholder("Select multiple...")
+                  | multipleFiles.ToFileInput(multipleFilesUpload).Variant(FileInputVariant.Default).MaxFiles(3).Placeholder("Max 3 files...")
                );
     }
 }
@@ -385,7 +392,7 @@ public class ProfilePhotoUpload(IState<FileUpload<byte[]>?> state) : ViewBase
         const long maxSize = 5 * 1024 * 1024;
         return state.ToFileInput(uploadContext)
             .Large()
-            .Placeholder($"Upload profile photo (max {Utils.FormatBytes(maxSize)})");
+            .Placeholder($"Upload profile photo (max {StringHelper.FormatBytes(maxSize)})");
     }
 }
 
@@ -398,7 +405,7 @@ public class DocumentUpload(IState<FileUpload<byte[]>?> state) : ViewBase
             .MaxFileSize(10 * 1024 * 1024); // 10 MB
         const long maxSize = 10 * 1024 * 1024;
         return state.ToFileInput(uploadContext)
-            .Placeholder($"Upload document (max {Utils.FormatBytes(maxSize)})");
+            .Placeholder($"Upload document (max {StringHelper.FormatBytes(maxSize)})");
     }
 }
 
@@ -412,7 +419,7 @@ public class CertificateUpload(IState<FileUpload<byte[]>?> state) : ViewBase
         const long maxSize = 2 * 1024 * 1024;
         return state.ToFileInput(uploadContext)
             .Small()
-            .Placeholder($"Upload certificate (max {Utils.FormatBytes(maxSize)})");
+            .Placeholder($"Upload certificate (max {StringHelper.FormatBytes(maxSize)})");
     }
 
 }
@@ -523,7 +530,7 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
                     | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder)
                     | selectedFiles.Value.ToTable()
                         .Width(Size.Full())
-                        .Builder(e => e.Length, e => e.Func((long x) => Ivy.Utils.FormatBytes(x)))
+                        .Builder(e => e.Length, e => e.Func((long x) => Ivy.StringHelper.FormatBytes(x)))
                         .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
                         .Remove(e => e.Id);
     }

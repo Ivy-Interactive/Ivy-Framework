@@ -129,15 +129,33 @@ public class ExternalWidgetRegistry
     /// </summary>
     public IEnumerable<ExternalWidgetRegistryDto> GetRegistryForFrontend()
     {
+        // Find canonical TypeNames for shared script and style resources
+        var canonicalScripts = _widgets.Values
+            .GroupBy(w => new { w.Assembly, w.ScriptPath })
+            .ToDictionary(g => g.Key, g => g.First().TypeName);
+
+        var canonicalStyles = _widgets.Values
+            .Where(w => w.StylePath != null)
+            .GroupBy(w => new { w.Assembly, StylePath = w.StylePath! })
+            .ToDictionary(g => g.Key, g => g.First().TypeName);
+
         return _widgets.Values.Select(w =>
         {
             var version = w.Assembly.GetName().Version?.ToString() ?? "0";
+            var canonicalScriptType = canonicalScripts[new { w.Assembly, w.ScriptPath }];
+
+            string? canonicalStyleType = null;
+            if (w.StylePath != null)
+            {
+                canonicalStyleType = canonicalStyles[new { w.Assembly, StylePath = w.StylePath! }];
+            }
+
             return new ExternalWidgetRegistryDto
             {
                 TypeName = w.TypeName,
-                ScriptUrl = $"/ivy/external-widgets/{Uri.EscapeDataString(w.TypeName)}/script.js?v={version}",
-                StyleUrl = w.StylePath != null
-                    ? $"/ivy/external-widgets/{Uri.EscapeDataString(w.TypeName)}/style.css?v={version}"
+                ScriptUrl = $"/ivy/external-widgets/{Uri.EscapeDataString(canonicalScriptType)}/script.js?v={version}",
+                StyleUrl = canonicalStyleType != null
+                    ? $"/ivy/external-widgets/{Uri.EscapeDataString(canonicalStyleType)}/style.css?v={version}"
                     : null,
                 ExportName = w.ExportName,
                 GlobalName = w.GlobalName

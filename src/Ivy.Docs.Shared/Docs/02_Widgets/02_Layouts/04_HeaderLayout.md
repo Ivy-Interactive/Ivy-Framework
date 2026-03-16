@@ -241,15 +241,15 @@ public class FormHeaderExample : ViewBase
             | new Card(
                 Layout.Vertical().Gap(3)
                     | Text.P("Account Settings").Small()
-                    | new BoolInput<bool>(UseState(true)).Label("Email notifications")
-                    | new BoolInput<bool>(UseState(false)).Label("SMS notifications")
-                    | new BoolInput<bool>(UseState(true)).Label("Marketing emails")
+                    | UseState(true).ToBoolInput().WithField().Label("Email notifications")
+                    | UseState(false).ToBoolInput().WithField().Label("SMS notifications")
+                    | UseState(true).ToBoolInput().WithField().Label("Marketing emails")
             )
             | new Card(
                 Layout.Vertical().Gap(3)
                     | Text.P("Privacy").Small()
-                    | new BoolInput<bool>(UseState(true)).Label("Profile visibility")
-                    | new BoolInput<bool>(UseState(false)).Label("Show online status")
+                    | UseState(true).ToBoolInput().WithField().Label("Profile visibility")
+                    | UseState(false).ToBoolInput().WithField().Label("Show online status")
             );
 
         return new HeaderLayout(formHeader, formContent);

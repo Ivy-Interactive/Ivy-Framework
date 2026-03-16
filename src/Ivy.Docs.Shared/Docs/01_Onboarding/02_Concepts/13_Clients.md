@@ -160,7 +160,7 @@ public class FormSubmissionApp : ViewBase
         }
         
         return Layout.Vertical(
-            new TextInput(nameState.Value, e => nameState.Value = e.Value) { Placeholder = "Your name" },
+            nameState.ToTextInput().Placeholder("Your name"),
             new Button("Submit Form", _ => submitTrigger.Value = true)
         );
     }

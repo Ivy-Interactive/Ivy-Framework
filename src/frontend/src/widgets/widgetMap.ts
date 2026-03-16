@@ -16,6 +16,7 @@ import {
   TooltipWidget,
   PaginationWidget,
 } from '@/widgets';
+import { BreadcrumbsWidget } from '@/widgets/breadcrumbs';
 import { BladeContainerWidget, BladeWidget } from '@/widgets/blades';
 import { DetailsWidget, DetailWidget } from '@/widgets/details';
 import {
@@ -31,6 +32,7 @@ import {
   BoolInputWidget,
   DateTimeInputWidget,
   NumberInputWidget,
+  NumberRangeInputWidget,
   SelectInputWidget,
   ReadOnlyInputWidget,
   ColorInputWidget,
@@ -109,6 +111,7 @@ export const widgetMap = {
   'Ivy.Icon': IconWidget,
   'Ivy.Box': BoxWidget,
   'Ivy.Embed': React.lazy(() => import('@/widgets/primitives/EmbedWidget')),
+  'Ivy.Script': React.lazy(() => import('@/widgets/primitives/ScriptWidget')),
   'Ivy.Callout': CalloutWidget,
   'Ivy.Kbd': KbdWidget,
   'Ivy.Empty': EmptyWidget,
@@ -133,6 +136,7 @@ export const widgetMap = {
   'Ivy.Card': CardWidget,
   'Ivy.Sheet': SheetWidget,
   'Ivy.Badge': BadgeWidget,
+  'Ivy.Breadcrumbs': BreadcrumbsWidget,
   'Ivy.Expandable': ExpandableWidget,
   'Ivy.Chat': ChatWidget,
   'Ivy.ChatMessage': ChatMessageWidget,
@@ -148,6 +152,16 @@ export const widgetMap = {
   'Ivy.KanbanCard': React.lazy(() =>
     import('@/widgets/kanban/KanbanCardWidget').then(m => ({
       default: m.KanbanCardWidget,
+    }))
+  ),
+  'Ivy.Calendar': React.lazy(() =>
+    import('@/widgets/calendar/CalendarWidget').then(m => ({
+      default: m.CalendarWidget,
+    }))
+  ),
+  'Ivy.CalendarEvent': React.lazy(() =>
+    import('@/widgets/calendar/CalendarEventWidget').then(m => ({
+      default: m.CalendarEventWidget,
     }))
   ),
 
@@ -170,6 +184,7 @@ export const widgetMap = {
   'Ivy.BoolInput': BoolInputWidget,
   'Ivy.DateTimeInput': DateTimeInputWidget,
   'Ivy.NumberInput': NumberInputWidget,
+  'Ivy.NumberRangeInput': NumberRangeInputWidget,
   'Ivy.SelectInput': SelectInputWidget,
   'Ivy.ReadOnlyInput': ReadOnlyInputWidget,
   'Ivy.ColorInput': ColorInputWidget,
@@ -183,6 +198,9 @@ export const widgetMap = {
   ),
   'Ivy.AudioInput': React.lazy(
     () => import('@/widgets/inputs/AudioInputWidget')
+  ),
+  'Ivy.CameraInput': React.lazy(
+    () => import('@/widgets/cameraInput/CameraInputWidget')
   ),
 
   // Forms
@@ -222,6 +240,21 @@ export const widgetMap = {
   'Ivy.PieChart': React.lazy(() => import('@/widgets/charts/PieChartWidget')),
   'Ivy.AreaChart': React.lazy(() => import('@/widgets/charts/AreaChartWidget')),
   'Ivy.BarChart': React.lazy(() => import('@/widgets/charts/BarChartWidget')),
+  'Ivy.ScatterChart': React.lazy(
+    () => import('@/widgets/charts/ScatterChartWidget')
+  ),
+  'Ivy.RadarChart': React.lazy(
+    () => import('@/widgets/charts/RadarChartWidget')
+  ),
+  'Ivy.SankeyChart': React.lazy(
+    () => import('@/widgets/charts/SankeyChartWidget')
+  ),
+  'Ivy.ChordChart': React.lazy(
+    () => import('@/widgets/charts/ChordChartWidget')
+  ),
+  'Ivy.FunnelChart': React.lazy(
+    () => import('@/widgets/charts/FunnelChartWidget')
+  ),
 
   // Effects
   'Ivy.Confetti': React.lazy(() => import('@/widgets/effects/ConfettiWidget')),

@@ -92,7 +92,12 @@ export const ResizablePanelGroupWidget: React.FC<
             parseSizeString(defaultSizeProp);
 
           return (
-            <React.Fragment key={index}>
+            <React.Fragment
+              key={
+                (panelWidget as React.ReactElement<{ id?: string }>).props.id ||
+                index
+              }
+            >
               {index > 0 && showHandle && (
                 <ResizableHandle
                   withHandle={showHandle}

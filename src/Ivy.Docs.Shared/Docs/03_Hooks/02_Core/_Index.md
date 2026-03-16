@@ -14,7 +14,6 @@ Hooks are functions that let you "hook into" Ivy state and lifecycle features fr
 ## Performance Hooks
 
 - [UseMemo](./05_UseMemo.md): Memoize expensive calculations.
-- [UseCallback](./06_UseCallback.md): Memoize callback functions.
 
 ## Other Hooks
 

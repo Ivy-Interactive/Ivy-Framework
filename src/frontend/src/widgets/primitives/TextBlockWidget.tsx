@@ -52,6 +52,7 @@ interface TextBlockWidgetProps {
   muted?: boolean;
   density?: Densities;
   textAlignment?: TextAlignment;
+  anchor?: string;
 }
 
 interface VariantMap {
@@ -59,6 +60,7 @@ interface VariantMap {
     children: string;
     className?: string;
     style?: React.CSSProperties;
+    id?: string;
   }>;
 }
 const variantMap: VariantMap = {
@@ -67,33 +69,33 @@ const variantMap: VariantMap = {
       {children}
     </span>
   ),
-  H1: ({ children, className, style }) => (
-    <h1 className={cn(typography.h1, className)} style={style}>
+  H1: ({ children, className, style, id }) => (
+    <h1 id={id} className={cn(typography.h1, className)} style={style}>
       {children}
     </h1>
   ),
-  H2: ({ children, className, style }) => (
-    <h2 className={cn(typography.h2, className)} style={style}>
+  H2: ({ children, className, style, id }) => (
+    <h2 id={id} className={cn(typography.h2, className)} style={style}>
       {children}
     </h2>
   ),
-  H3: ({ children, className, style }) => (
-    <h3 className={cn(typography.h3, className)} style={style}>
+  H3: ({ children, className, style, id }) => (
+    <h3 id={id} className={cn(typography.h3, className)} style={style}>
       {children}
     </h3>
   ),
-  H4: ({ children, className, style }) => (
-    <h4 className={cn(typography.h4, className)} style={style}>
+  H4: ({ children, className, style, id }) => (
+    <h4 id={id} className={cn(typography.h4, className)} style={style}>
       {children}
     </h4>
   ),
-  H5: ({ children, className, style }) => (
-    <h5 className={cn(typography.h5, className)} style={style}>
+  H5: ({ children, className, style, id }) => (
+    <h5 id={id} className={cn(typography.h5, className)} style={style}>
       {children}
     </h5>
   ),
-  H6: ({ children, className, style }) => (
-    <h6 className={cn(typography.h6, className)} style={style}>
+  H6: ({ children, className, style, id }) => (
+    <h6 id={id} className={cn(typography.h6, className)} style={style}>
       {children}
     </h6>
   ),
@@ -214,6 +216,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   muted,
   density,
   textAlignment,
+  anchor,
 }) => {
   const [, forceUpdate] = useState(0);
 
@@ -245,6 +248,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   const Component = variantMap[variant];
   return (
     <Component
+      id={anchor}
       style={styles}
       className={cn(
         strikeThrough && 'line-through',

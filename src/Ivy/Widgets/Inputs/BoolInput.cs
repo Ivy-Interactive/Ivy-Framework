@@ -67,7 +67,7 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 {
     [OverloadResolutionPriority(1)]
-    public BoolInput(IAnyState state, string? label = null, bool disabled = false,
+    internal BoolInput(IAnyState state, string? label = null, bool disabled = false,
         BoolInputVariant variant = BoolInputVariant.Checkbox)
         : this(label, disabled, variant)
     {
@@ -77,21 +77,21 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
     }
 
     [OverloadResolutionPriority(1)]
-    public BoolInput(TBool value, Func<Event<IInput<TBool>, TBool>, ValueTask> onChange, string? label = null,
+    internal BoolInput(TBool value, Func<Event<IInput<TBool>, TBool>, ValueTask> onChange, string? label = null,
         bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox) : this(label, disabled, variant)
     {
         OnChange = new(onChange);
         Value = value;
     }
 
-    public BoolInput(TBool value, Action<Event<IInput<TBool>, TBool>> onChange, string? label = null,
+    internal BoolInput(TBool value, Action<Event<IInput<TBool>, TBool>> onChange, string? label = null,
         bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox) : this(label, disabled, variant)
     {
         OnChange = new(onChange.ToValueTask());
         Value = value;
     }
 
-    public BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
+    internal BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
     {
         Label = label;
         Disabled = disabled;
@@ -113,26 +113,26 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 public record BoolInput : BoolInput<bool>
 {
     [OverloadResolutionPriority(1)]
-    public BoolInput(IAnyState state, string? label = null, bool disabled = false,
+    internal BoolInput(IAnyState state, string? label = null, bool disabled = false,
         BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(state, label, disabled, variant)
     {
     }
 
     [OverloadResolutionPriority(1)]
-    public BoolInput(bool value, Func<Event<IInput<bool>, bool>, ValueTask> onChange, string? label = null,
+    internal BoolInput(bool value, Func<Event<IInput<bool>, bool>, ValueTask> onChange, string? label = null,
         bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(value, onChange, label, disabled, variant)
     {
     }
 
-    public BoolInput(bool value, Action<Event<IInput<bool>, bool>> onChange, string? label = null,
+    internal BoolInput(bool value, Action<Event<IInput<bool>, bool>> onChange, string? label = null,
         bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(value, onChange, label, disabled, variant)
     {
     }
 
-    public BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
+    internal BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(label, disabled, variant)
     {
     }
@@ -271,7 +271,7 @@ public static class BoolInputExtensions
     {
         if (string.IsNullOrEmpty(input.Label))
         {
-            input.Label = Utils.SplitPascalCase(name) ?? name;
+            input.Label = StringHelper.SplitPascalCase(name) ?? name;
         }
 
         return input;

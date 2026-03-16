@@ -13,10 +13,13 @@ public class SelectInputApp : SampleBase
             new Tab("Basic", new SelectInputBasicExample()),
             new Tab("Sizes", new SelectInputSizesExample()),
             new Tab("Variants", new SelectInputVariantsExample()),
+            new Tab("Radio", new SelectInputRadioExample()),
+            new Tab("Slider", new SelectInputSliderExample()),
             new Tab("Disabled Options", new SelectInputDisabledOptionsExample()),
             new Tab("Nullable & Edge Cases", new SelectInputAdvancedExample()),
             new Tab("Advanced Props", new SelectInputAdvancedPropsExample()),
-            new Tab("Ghost", new SelectInputGhostExample())
+            new Tab("Ghost", new SelectInputGhostExample()),
+            new Tab("Descriptions", new SelectInputDescriptionsExample())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -83,7 +86,12 @@ public class SelectInputSizesExample : ViewBase
             | Text.Monospaced("SelectInputVariant.Toggle")
             | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Small()
             | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle)
-            | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Large();
+            | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Large()
+
+            | Text.Monospaced("SelectInputVariant.Radio")
+            | colorState.ToSelectInput(colorOptions).Radio().Small()
+            | colorState.ToSelectInput(colorOptions).Radio()
+            | colorState.ToSelectInput(colorOptions).Radio().Large();
 
         return Layout.Vertical()
             | Text.H3("SelectInput Sizes")
@@ -140,6 +148,14 @@ public class SelectInputVariantsExample : ViewBase
                     | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle)
                     | nullableColorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Invalid("Invalid"))
                 | (Layout.Horizontal().Gap(6)
+                    | Text.Monospaced("SelectInputVariant.Radio")
+                    | colorState.ToSelectInput(colorOptions).Radio()
+                    | colorState.ToSelectInput(colorOptions).Radio().Disabled()
+                    | colorState.ToSelectInput(colorOptions).Radio().Invalid("Invalid")
+                    | colorState.ToSelectInput(colorOptions).Radio().Placeholder("Select a color")
+                    | nullableColorArrayState.ToSelectInput(colorOptions).Radio().Nullable()
+                    | nullableColorArrayState.ToSelectInput(colorOptions).Radio().Invalid("Invalid"))
+                | (Layout.Horizontal().Gap(6)
                     | Text.Monospaced("Toggle with Icons")
                     | iconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle)
                     | iconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle).Disabled()
@@ -180,6 +196,37 @@ public class SelectInputVariantsExample : ViewBase
                 | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Invalid("Invalid")
                 | colorStateToggle.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Placeholder("Select colors")
                 | Text.Monospaced($"[{string.Join(", ", colorStateToggle.Value)}]"));
+    }
+}
+
+public class SelectInputSliderExample : ViewBase
+{
+    private enum Priority { Low, Medium, High, Critical }
+
+    public override object? Build()
+    {
+        var sizeState = UseState("M");
+        var priorityState = UseState(Priority.Medium);
+        var sizeOptions = new[] { "XS", "S", "M", "L", "XL", "XXL" }.ToOptions();
+
+        return Layout.Vertical()
+            | Text.H3("Slider Variant")
+            | Text.P("The Slider variant is ideal for selecting from an ordered list of discrete options.")
+            | Layout.Vertical().Gap(6)
+                | sizeState.ToSelectInput(sizeOptions).Slider()
+                    .WithField().Label("T-Shirt Size")
+                | priorityState.ToSelectInput().Slider()
+                    .WithField().Label("Priority (Enum)")
+                | sizeState.ToSelectInput(sizeOptions).Slider().Disabled()
+                    .WithField().Label("Disabled Slider")
+            | Text.H3("Densities")
+            | Layout.Grid().Columns(3).Gap(6)
+                | sizeState.ToSelectInput(sizeOptions).Slider().Small()
+                    .WithField().Label("Small")
+                | sizeState.ToSelectInput(sizeOptions).Slider().Medium()
+                    .WithField().Label("Medium")
+                | sizeState.ToSelectInput(sizeOptions).Slider().Large()
+                    .WithField().Label("Large");
     }
 }
 
@@ -390,6 +437,91 @@ public class SelectInputGhostExample : ViewBase
                 | (Layout.Vertical().Gap(2)
                     | Text.Monospaced("Ghost (Toggle)")
                     | colorArrayState.ToSelectInput(colorOptions).Variant(SelectInputVariant.Toggle).Ghost());
+    }
+}
+
+public class SelectInputDescriptionsExample : ViewBase
+{
+    public override object? Build()
+    {
+        var genreToggle = UseState("Comedy");
+        var genreRadio = UseState("Comedy");
+        var genreCheckbox = UseState<string[]>([]);
+
+        var genreOptions = new IAnyOption[]
+        {
+            new Option<string>("Comedy", "Comedy") { Description = "Laugh out loud." },
+            new Option<string>("Drama", "Drama") { Description = "Get the popcorn." },
+            new Option<string>("Documentary", "Documentary") { Description = "Never stop learning." },
+            new Option<string>("Action", "Action") { Description = "Edge of your seat thrills." },
+        };
+
+        return Layout.Vertical()
+            | Text.H3("Option Descriptions")
+            | Text.P("Options can include descriptions that appear as caption text below the label in Toggle and Radio/Checkbox (List) variants.")
+            | Layout.Vertical().Gap(6)
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Toggle Variant")
+                    | genreToggle.ToSelectInput(genreOptions)
+                        .Variant(SelectInputVariant.Toggle)
+                        .WithField()
+                        .Label("Favorite genre"))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Radio Variant (List, Single-Select)")
+                    | genreRadio.ToSelectInput(genreOptions)
+                        .Variant(SelectInputVariant.List)
+                        .WithField()
+                        .Label("Favorite genre"))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Checkbox Variant (List, Multi-Select)")
+                    | genreCheckbox.ToSelectInput(genreOptions)
+                        .Variant(SelectInputVariant.List)
+                        .WithField()
+                        .Label("Favorite genres"));
+    }
+}
+
+public class SelectInputRadioExample : ViewBase
+{
+    private enum Genre { Comedy, Drama, Documentary, Horror, SciFi }
+
+    public override object? Build()
+    {
+        var genre = UseState(Genre.Comedy);
+        var nullableGenre = UseState((Genre?)null);
+        var notificationFrequency = UseState("Daily");
+        var genreOptions = typeof(Genre).ToOptions();
+        var frequencyOptions = new[] { "Immediately", "Daily", "Weekly", "Never" }.ToOptions();
+
+        return Layout.Vertical()
+            | Text.H3("Radio Variant")
+            | Text.P("Radio buttons for single-select scenarios. A familiar form element for choosing one option from a small set of mutually exclusive choices.")
+            | Layout.Grid().Columns(3).Gap(6)
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Basic")
+                    | genre.ToSelectInput(genreOptions).Radio()
+                        .WithField().Label("Favorite genre"))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Nullable")
+                    | nullableGenre.ToSelectInput(genreOptions).Radio().Nullable()
+                        .WithField().Label("Favorite genre (optional)"))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Disabled")
+                    | genre.ToSelectInput(genreOptions).Radio().Disabled()
+                        .WithField().Label("Favorite genre"))
+            | Layout.Grid().Columns(3).Gap(6)
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Invalid")
+                    | genre.ToSelectInput(genreOptions).Radio().Invalid("Please select a different genre")
+                        .WithField().Label("Favorite genre"))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Ghost")
+                    | genre.ToSelectInput(genreOptions).Radio().Ghost()
+                        .WithField().Label("Favorite genre"))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("String options")
+                    | notificationFrequency.ToSelectInput(frequencyOptions).Radio()
+                        .WithField().Label("Notification frequency"));
     }
 }
 

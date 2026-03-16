@@ -28,7 +28,7 @@ public abstract record IconInputBase : WidgetBase<IconInputBase>, IAnyInput
 public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
 {
     [OverloadResolutionPriority(1)]
-    public IconInput(IAnyState state, string? placeholder = null, bool disabled = false)
+    internal IconInput(IAnyState state, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
         var typedState = state.As<TIcon>();
@@ -42,14 +42,14 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
     }
 
     [OverloadResolutionPriority(1)]
-    public IconInput(TIcon value, Func<Event<IInput<TIcon>, TIcon>, ValueTask> onChange, string? placeholder = null, bool disabled = false)
+    internal IconInput(TIcon value, Func<Event<IInput<TIcon>, TIcon>, ValueTask> onChange, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public IconInput(TIcon value, Action<Event<IInput<TIcon>, TIcon>> onChange, string? placeholder = null, bool disabled = false)
+    internal IconInput(TIcon value, Action<Event<IInput<TIcon>, TIcon>> onChange, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
         OnChange = new(e =>
@@ -60,7 +60,7 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
         Value = value;
     }
 
-    public IconInput(string? placeholder = null, bool disabled = false)
+    internal IconInput(string? placeholder = null, bool disabled = false)
     {
         Disabled = disabled;
         Placeholder = placeholder ?? "Select an icon";

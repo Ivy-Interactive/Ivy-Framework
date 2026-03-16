@@ -52,7 +52,7 @@ public static class AppRoutingHelpers
         }
 
         // Invalid if app ID contains unsafe characters
-        if (!Ivy.Utils.IsSafeAppId(appId))
+        if (!ValidationHelper.IsSafeAppId(appId))
         {
             return AppIdValidationResult.UnsafeCharacters;
         }

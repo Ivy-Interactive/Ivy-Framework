@@ -28,6 +28,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
   invalid,
   onDateChange,
   format: formatProp,
+  firstDayOfWeek,
   density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
@@ -96,6 +97,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
             selected={date}
             onSelect={handleSelect}
             initialFocus
+            weekStartsOn={firstDayOfWeek}
             density={density}
           />
         </PopoverContent>

@@ -6,6 +6,12 @@ searchHints:
   - information
   - key-value
   - details
+  - detail
+  - expandable
+  - label-value
+  - display data
+  - ToDetails
+  - copy to clipboard
 ---
 
 # Details

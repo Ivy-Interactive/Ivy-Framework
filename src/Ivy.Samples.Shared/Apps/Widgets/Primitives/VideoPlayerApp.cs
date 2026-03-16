@@ -26,6 +26,13 @@ public class VideoPlayerApp : SampleBase
         var withoutControls = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
             .Controls(false);
 
+        // Volume control
+        var halfVolumeVideo = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+            .Volume(0.5f);
+
+        var quietVideo = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+            .Volume(0.2f);
+
         // Custom sizing
         var customSizedVideo = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
             .Width(Size.Fraction(0.5f))
@@ -73,6 +80,17 @@ public class VideoPlayerApp : SampleBase
                     | new Button("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the video programmatically"))
                         .Variant(ButtonVariant.Outline)
                 ).Title("Controls Example"))
+
+                // Volume Control
+                | (new Card(
+                    Layout.Vertical().Gap(4)
+                    | Text.H4("50% Volume")
+                    | Text.P("Video player set to 50% volume.").Small()
+                    | halfVolumeVideo
+                    | Text.H4("20% Volume")
+                    | Text.P("Video player set to 20% volume (quiet background).").Small()
+                    | quietVideo
+                ).Title("Volume Control"))
 
                 // Custom Sizing
                 | (new Card(
