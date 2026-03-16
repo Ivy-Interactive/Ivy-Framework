@@ -94,57 +94,8 @@ public class MicrosoftEntraAuthProvider : MicrosoftEntraAuthTokenHandler, IAuthP
     [Obsolete("Microsoft Entra OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public MicrosoftEntraAuthProvider UseMicrosoftEntra() => this;
 
-    public async Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
-    {
-        // Return stored sessions if available and not skipping cache
-        if (!skipCache && authSession.OAuthSessions.Count > 0)
-        {
-            return OAuthSessionsResult.Success(
-                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions));
-        }
-
-        if (authSession.AuthToken is not { } token)
-        {
-            return OAuthSessionsResult.Failure();
-        }
-
-        try
-        {
-            var app = GetApp();
-
-            if (app is not IByRefreshToken refresher
-                || token.Tag is not JsonElement tag
-                || tag.GetString() is not string accountId
-                || accountId.Length <= 0
-                || token.RefreshToken == null)
-            {
-                return OAuthSessionsResult.Failure();
-            }
-
-            // Use refresh token to get a fresh access token for Microsoft Graph
-            var result = await refresher.AcquireTokenByRefreshToken(Scopes, token.RefreshToken)
-                .ExecuteAsync(cancellationToken);
-
-            if (result?.AccessToken == null)
-            {
-                return OAuthSessionsResult.Failure();
-            }
-
-            // Create the session
-            var session = new AuthTokenHandlerSession(authToken: new AuthToken(result.AccessToken));
-
-            var sessions = new Dictionary<string, IAuthTokenHandlerSession>
-            {
-                [OAuthProviders.Microsoft] = session
-            };
-
-            return OAuthSessionsResult.Success(sessions);
-        }
-        catch (Exception)
-        {
-            return OAuthSessionsResult.Failure();
-        }
-    }
+    public Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+        => Task.FromResult(OAuthSessionsResult.Success([]));
 
     private static string GenerateCodeVerifier()
     {

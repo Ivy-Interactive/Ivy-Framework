@@ -114,31 +114,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
 
     /// <summary>Get OAuth provider sessions - returns live session references that stay up-to-date</summary>
     public Task<OAuthSessionsResult> GetOAuthSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
-    {
-        // Return stored sessions if available and not skipping cache
-        if (!skipCache && authSession.OAuthSessions.Count > 0)
-        {
-            return Task.FromResult(OAuthSessionsResult.Success(
-                new Dictionary<string, IAuthTokenHandlerSession>(authSession.OAuthSessions)));
-        }
-
-        // If no stored sessions, create one from the main auth token (GitHub uses the main token)
-        var token = authSession.AuthToken?.AccessToken;
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            return Task.FromResult(OAuthSessionsResult.Failure());
-        }
-
-        // Create the session
-        var session = new AuthTokenHandlerSession(authToken: new AuthToken(token));
-
-        var sessions = new Dictionary<string, IAuthTokenHandlerSession>
-        {
-            [OAuthProviders.GitHub] = session
-        };
-
-        return Task.FromResult(OAuthSessionsResult.Success(sessions));
-    }
+        => Task.FromResult(OAuthSessionsResult.Success([]));
 
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)
     {

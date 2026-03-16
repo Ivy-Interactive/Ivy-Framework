@@ -314,7 +314,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
             if (user?.ExternalAccounts == null || user.ExternalAccounts.Count == 0)
             {
-                return OAuthSessionsResult.Success(new Dictionary<string, IAuthTokenHandlerSession>());
+                return OAuthSessionsResult.Success([]);
             }
 
             var sessions = new Dictionary<string, IAuthTokenHandlerSession>();
