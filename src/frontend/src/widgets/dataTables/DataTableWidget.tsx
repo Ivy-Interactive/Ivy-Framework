@@ -9,6 +9,7 @@ import { DataTableEditor } from './dataTableEditor';
 import { DataTableHeader } from './DataTableHeader';
 import { DataTableOption } from './DataTableOption';
 import { DataTableFilterOption } from './options/DataTableFilterOption';
+import { AggregateFooter } from './DataTableFooter';
 import { Filter as FilterIcon } from 'lucide-react';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
@@ -57,6 +58,16 @@ export const DataTable: React.FC<TableProps> = ({
 
   const finalColumns = useMemo(() => applyColumnsDefaults(columns), [columns]);
 
+  const hasFooter = useMemo(
+    () => finalColumns.some((col) => col.footer && col.footer.length > 0),
+    [finalColumns]
+  );
+
+  const footerElement = useMemo(
+    () => (hasFooter ? <AggregateFooter columns={finalColumns} /> : undefined),
+    [hasFooter, finalColumns]
+  );
+
   // Create styles object with width and height if provided
   const containerStyle: React.CSSProperties = {
     ...getWidth(width),
@@ -100,6 +111,7 @@ export const DataTable: React.FC<TableProps> = ({
             widgetId={id}
             hasOptions={finalConfig.allowFiltering}
             rowActions={rowActions}
+            footer={footerElement}
           />
         </TableLayout>
       </TableProvider>

@@ -25,6 +25,8 @@ searchHints:
   - filter
   - search
   - dataset
+  - footer
+  - aggregate
 ---
 
 # DataTable
@@ -86,6 +88,38 @@ sampleUsers.ToDataTable()
 - **Hidden** - Hide columns from display
 - **Order** - Control the display order of columns
 - **Group** - Organize columns into logical groups (requires `ShowGroups` config)
+
+## Footer Aggregates
+
+Display aggregate calculations (sum, average, count, etc.) in column footers. The `.Footer()` method accepts a column selector, a label, and an aggregate function:
+
+```csharp demo-tabs
+sampleUsers.ToDataTable()
+    .Header(u => u.Name, "Full Name")
+    .Header(u => u.Salary, "Salary")
+        .Footer(u => u.Salary, "Total", values => values.Sum())
+        .Footer(u => u.Salary, "Avg", values => (int)values.Average())
+    .Height(Size.Units(100))
+```
+
+**Multiple aggregates per column** can be added by calling `.Footer()` multiple times on the same column, or by using the tuple overload:
+
+```csharp
+data.ToDataTable()
+    .Header(x => x.Qty, "Quantity")
+        .Footer(x => x.Qty, new[]
+        {
+            ("Total", values => values.Sum()),
+            ("Avg", values => (int)values.Average())
+        })
+    .Height(Size.Units(80))
+```
+
+**Footer features:**
+- Calculate aggregates across the full dataset (not just visible rows)
+- Common patterns: `.Sum()`, `.Average()`, `.Count()`, `.Min()`, `.Max()`
+- Supports single or multiple aggregates per column
+- Footer row is sticky at the bottom of the table
 
 ## Advanced Configuration
 

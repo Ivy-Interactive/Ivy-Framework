@@ -28,6 +28,7 @@ public class DataTableColumn
     public int Order { get; set; } = 0;
     public string? Icon { get; set; } = null;
     public string? Help { get; set; } = null;
+    public List<string>? Footer { get; set; } = null;
 
     [JsonIgnore]
     public IDataTableColumnRenderer? Renderer { get; set; } = null;

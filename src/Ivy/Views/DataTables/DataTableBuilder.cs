@@ -121,6 +121,12 @@ public class DataTableBuilder<TModel>(
         return _columns[name];
     }
 
+    private InternalColumn GetColumn<TValue>(Expression<Func<TModel, TValue>> field)
+    {
+        var name = Utils.GetNameFromMemberExpression(field.Body);
+        return _columns[name];
+    }
+
     public DataTableBuilder<TModel> Header(Expression<Func<TModel, object>> field, string label)
     {
         var column = GetColumn(field);
@@ -160,6 +166,36 @@ public class DataTableBuilder<TModel>(
     {
         var column = GetColumn(field);
         column.Column.Help = help;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Footer<TValue>(
+        Expression<Func<TModel, TValue>> field,
+        string label,
+        Func<IEnumerable<TValue>, object> aggregateFunc)
+    {
+        var column = GetColumn(field);
+        var selector = field.Compile();
+        var values = queryable.Select(selector).ToList();
+        var result = aggregateFunc(values);
+        var footerText = $"{label}: {result}";
+        column.Column.Footer ??= [];
+        column.Column.Footer.Add(footerText);
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Footer<TValue>(
+        Expression<Func<TModel, TValue>> field,
+        IEnumerable<(string Label, Func<IEnumerable<TValue>, object> AggregateFunc)> aggregates)
+    {
+        var column = GetColumn(field);
+        var selector = field.Compile();
+        var values = queryable.Select(selector).ToList();
+        var footerValues = aggregates
+            .Select(agg => $"{agg.Label}: {agg.AggregateFunc(values)}")
+            .ToList();
+        column.Column.Footer ??= [];
+        column.Column.Footer.AddRange(footerValues);
         return this;
     }
 
