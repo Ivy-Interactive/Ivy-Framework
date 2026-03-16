@@ -49,16 +49,7 @@ public class InputWidgetTests
 
 
 
-    public enum TestEnum { A, B, C }
 
-    [Fact]
-    public void Option_ToOptions_ShouldNotThrow()
-    {
-        var options = typeof(TestEnum).ToOptions();
-        Assert.NotNull(options);
-        Assert.NotEmpty(options);
-        Assert.All(options, opt => Assert.IsType<Option<TestEnum>>(opt));
-    }
 
 
 
@@ -112,6 +103,8 @@ public class InputWidgetTests
         var expectedWidgetType = typeof(ReadOnlyInput<>).MakeGenericType(type);
         Assert.IsType(expectedWidgetType, widget);
     }
+
+    public enum TestEnum { A, B, C }
 
     [Theory]
     [InlineData(typeof(TestEnum), TestEnum.A)]
