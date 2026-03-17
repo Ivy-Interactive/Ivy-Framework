@@ -110,8 +110,7 @@ export interface GrpcTableStreamOptions {
 export class GrpcTableService extends EventEmitter {
   private isConnected = false;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  constructor(_serverUrl?: string) {
+  constructor() {
     super();
   }
 
@@ -865,7 +864,7 @@ let _grpcTableServiceInstance: GrpcTableService | null = null;
 
 export function getGrpcTableService(): GrpcTableService {
   if (!_grpcTableServiceInstance) {
-    _grpcTableServiceInstance = new GrpcTableService('');
+    _grpcTableServiceInstance = new GrpcTableService();
   }
   return _grpcTableServiceInstance;
 }
