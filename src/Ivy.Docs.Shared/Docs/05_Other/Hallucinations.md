@@ -174,7 +174,7 @@ new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariants.Text
 
 **Correct API:**
 ```csharp
-new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariant.Textarea)
+text.ToTextInput().Variant(TextInputVariant.Textarea)
 ```
 
 The enum is `TextInputVariant` (singular), not `TextInputVariants` (plural). All input variant enums were renamed from plural to singular in Ivy-Framework#2546 (e.g., `TextInputVariants` → `TextInputVariant`, `ColorInputVariants` → `ColorInputVariant`, etc.). **Auto-fixed:** The refactoring service automatically rewrites `TextInputVariants` → `TextInputVariant`. Values: `Text`, `Textarea`, `Email`, `Tel`, `Url`, `Password`, `Search`.
@@ -1196,7 +1196,7 @@ new TextInput(query).Grow()
 
 **Correct API:**
 ```csharp
-new TextInput(query).Width(Size.Grow())
+query.ToTextInput().Width(Size.Grow())
 ```
 
 `Grow()` was originally defined only as a `Box`-specific extension method in `Box.cs`. It is not available on `TextInput` or other widget types. Use `.Width(Size.Grow())` directly, or note that `Grow()` has since been promoted to a generic `WidgetBase<T>` extension and is now available on all widgets.
