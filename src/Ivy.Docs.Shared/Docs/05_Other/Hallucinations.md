@@ -1309,3 +1309,70 @@ new Button("=").ColSpan(2)
 
 **Found In:**
 ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## IState\<T\>.ToTextArea() — incorrect textarea method name
+
+**Hallucinated API:**
+```csharp
+var text = UseState("");
+text.ToTextArea()
+```
+
+**Error:** `CS1061: 'IState<string>' does not contain a definition for 'ToTextArea'`
+
+**Correct API:**
+```csharp
+var text = UseState("");
+text.ToTextareaInput()
+// or equivalently:
+text.ToTextInput().Multiline()
+```
+
+The method is `ToTextareaInput()`, not `ToTextArea()`. Alternatively use `ToTextInput().Multiline()`. See `Docs/02_Widgets/04_Inputs/02_TextInput.md` for full textarea documentation.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
+
+## IState\<T\>.ToSelect() — incorrect select method name
+
+**Hallucinated API:**
+```csharp
+var format = UseState("Option1");
+format.ToSelect(options)
+```
+
+**Error:** `CS1061: 'IState<string>' does not contain a definition for 'ToSelect'`
+
+**Correct API:**
+```csharp
+var format = UseState("Option1");
+format.ToSelectInput(new[] { "Option1", "Option2" }.ToOptions())
+```
+
+The method is `ToSelectInput()`, not `ToSelect()`. Options are passed as `IEnumerable<IAnyOption>` — use `.ToOptions()` on a string array to convert.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
+
+## Card.When() — non-existent conditional rendering method
+
+**Hallucinated API:**
+```csharp
+new Card(outputText).When(hasOutput)
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'When'`
+
+**Correct API:**
+```csharp
+// Use standard C# control flow for conditional rendering:
+if (hasOutput)
+{
+    new Card(outputText);
+}
+```
+
+There is no `.When()` method on any widget. Ivy uses standard C# `if` statements for conditional rendering, similar to React's conditional rendering pattern. See also the existing `.Visible()` hallucination entry.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
