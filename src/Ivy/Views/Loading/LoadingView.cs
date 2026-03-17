@@ -3,13 +3,16 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public class LoadingView(LoadingOptions options) : ViewBase
+public class LoadingView(LoadingOptions options, CancellationTokenSource? cts) : ViewBase
 {
     public override object? Build()
     {
-        void OnCancel(Event<Dialog> _)
+        void OnClose(Event<Dialog> _)
         {
-            // Loading dialogs are non-dismissable
+            if (options.Cancellable && !options.IsCancelling)
+            {
+                cts?.Cancel();
+            }
         }
 
         var progressWidget = options.Indeterminate
@@ -17,11 +20,11 @@ public class LoadingView(LoadingOptions options) : ViewBase
             : new Progress(options.Progress ?? 0);
 
         return new Dialog(
-            OnCancel,
-            new DialogHeader(options.Message),
+            OnClose,
+            new DialogHeader(options.Message) { HideCloseButton = !options.Cancellable || options.IsCancelling },
             new DialogBody(
                 Layout.Vertical()
-                | (options.Status != null ? Text.P(options.Status).Muted() : null)!
+                | (!options.IsCancelling && options.Status != null ? Text.P(options.Status).Muted() : null)!
                 | progressWidget
             ),
             new DialogFooter()

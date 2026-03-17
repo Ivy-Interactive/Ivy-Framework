@@ -4,61 +4,113 @@ using Ivy.Core.Hooks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public delegate void ShowLoadingDelegate(string message = "Loading...", int? progress = null);
-public delegate void HideLoadingDelegate();
-public delegate void UpdateLoadingDelegate(string? message = null, int? progress = null, string? status = null);
+public interface ILoadingContext
+{
+    void Message(string message);
+    void Status(string? status);
+    void Progress(int? progress);
+    CancellationToken CancellationToken { get; }
+}
+
+public delegate Task ShowLoadingDelegate(Func<ILoadingContext, Task> work, bool cancellable = false);
 
 public static class UseLoadingExtensions
 {
-    public static (IView? loadingView, ShowLoadingDelegate showLoading, HideLoadingDelegate hideLoading, UpdateLoadingDelegate updateLoading) UseLoading(this IViewContext context)
+    public static (IView? loadingView, ShowLoadingDelegate showLoading) UseLoading(this IViewContext context)
     {
         var open = context.UseRef(false);
         var loadingOptions = context.UseRef<LoadingOptions?>();
+        var cts = context.UseRef<CancellationTokenSource?>();
 
         var view = new FuncView(context2 =>
         {
             var openInternal = context2.UseState(false);
+            var optionsInternal = context2.UseState<LoadingOptions?>((LoadingOptions?)null);
 
             context2.UseEffect(() =>
             {
                 openInternal.Set(open.Value);
             }, open);
 
-            return openInternal.Value && loadingOptions.Value != null
-                ? new LoadingView(loadingOptions.Value)
+            context2.UseEffect(() =>
+            {
+                optionsInternal.Set(loadingOptions.Value);
+            }, loadingOptions);
+
+            return openInternal.Value && optionsInternal.Value != null
+                ? new LoadingView(optionsInternal.Value, cts.Value)
                 : null;
         });
 
-        var showLoading = new ShowLoadingDelegate((message, progress) =>
+        var showLoading = new ShowLoadingDelegate(async (work, cancellable) =>
         {
+            var tokenSource = new CancellationTokenSource();
+            cts.Set(tokenSource);
+
             loadingOptions.Set(new LoadingOptions
             {
-                Message = message,
-                Progress = progress,
-                Indeterminate = progress == null
+                Cancellable = cancellable
             });
             open.Set(true);
-        });
 
-        var hideLoading = new HideLoadingDelegate(() =>
-        {
-            open.Set(false);
-        });
+            var loadingContext = new LoadingContext(loadingOptions, tokenSource.Token);
+            var wasCancelled = false;
 
-        var updateLoading = new UpdateLoadingDelegate((message, progress, status) =>
-        {
-            if (loadingOptions.Value != null)
+            try
             {
-                loadingOptions.Set(loadingOptions.Value with
+                await work(loadingContext);
+            }
+            catch (OperationCanceledException)
+            {
+                wasCancelled = true;
+            }
+            finally
+            {
+                if (wasCancelled)
                 {
-                    Message = message ?? loadingOptions.Value.Message,
-                    Progress = progress ?? loadingOptions.Value.Progress,
-                    Status = status ?? loadingOptions.Value.Status,
-                    Indeterminate = progress == null && loadingOptions.Value.Progress == null
-                });
+                    // Show "Cancelling..." briefly before closing
+                    loadingOptions.Set(new LoadingOptions
+                    {
+                        Message = "Cancelling...",
+                        Indeterminate = true,
+                        Cancellable = false,
+                        IsCancelling = true
+                    });
+                    await Task.Delay(800);
+                }
+
+                open.Set(false);
+                cts.Set((CancellationTokenSource?)null);
             }
         });
 
-        return (view, showLoading, hideLoading, updateLoading);
+        return (view, showLoading);
+    }
+
+    private class LoadingContext(IState<LoadingOptions?> options, CancellationToken cancellationToken) : ILoadingContext
+    {
+        public CancellationToken CancellationToken => cancellationToken;
+
+        public void Message(string message)
+        {
+            if (options.Value != null)
+                options.Set(options.Value with { Message = message });
+        }
+
+        public void Status(string? status)
+        {
+            if (options.Value != null)
+                options.Set(options.Value with { Status = status });
+        }
+
+        public void Progress(int? progress)
+        {
+            if (options.Value != null)
+                options.Set(options.Value with
+                {
+                    Progress = progress,
+                    Indeterminate = progress == null
+                });
+        }
     }
 }
