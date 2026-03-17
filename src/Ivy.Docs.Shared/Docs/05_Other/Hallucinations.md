@@ -1227,3 +1227,85 @@ The `.Visible()` extension method was removed from `WidgetBase` (commit f869df30
 
 **Found In:**
 18763683-ff01-4f76-8dc5-6f0bfe750e4a
+
+## Card.Secondary() — Badge extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Secondary()
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Secondary' and the best extension method overload 'BadgeExtensions.Secondary(Badge)' requires a receiver of type 'Ivy.Badge'`
+
+**Correct API:**
+```csharp
+// Cards don't have variants. To style card content, style the children:
+new Card(new Text("Content").Secondary())
+// Or use a Box with background:
+new Box(content).Background(Colors.Gray100)
+```
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## Card.Children() — MenuItem extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card().Children(child1, child2)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Children' and the best extension method overload 'MenuItemExtensions.Children(MenuItem, params MenuItem[])' requires a receiver of type 'Ivy.MenuItem'`
+
+**Correct API:**
+```csharp
+// Use the constructor or pipe operator:
+new Card(child1 / child2)
+// Or:
+var card = new Card();
+card | (child1 / child2);
+```
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## Card.Background() — Box extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Background(Colors.Gray100)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Background' and the best extension method overload 'BoxExtensions.Background(Box, Colors)' requires a receiver of type 'Ivy.Box'`
+
+**Correct API:**
+```csharp
+// Wrap in a Box for background color:
+new Box(new Card(content)).Background(Colors.Gray100)
+// Or use Card's built-in styling via content:
+new Card(content)
+```
+
+Similar to the GridView.Background() hallucination — `.Background()` is a Box-only extension.
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## Button.ColSpan() — non-existent grid span method
+
+**Hallucinated API:**
+```csharp
+new Button("=").ColSpan(2)
+```
+
+**Error:** `CS1061: 'Button' does not contain a definition for 'ColSpan'`
+
+**Correct API:**
+```csharp
+// Grid column spanning is not set on child widgets.
+// Use GridLayout column definitions to control spans,
+// or use multiple grid cells for the same widget.
+```
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
