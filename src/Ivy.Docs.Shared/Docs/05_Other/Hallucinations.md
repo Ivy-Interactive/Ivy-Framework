@@ -940,6 +940,34 @@ Note: `.Border()` expects a `Colors` enum as the first argument, not a string. T
 | `server.UseNoChrome()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseChrome()` instead |
 | `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
 
+## AppAttribute — PascalCase properties and invented parameters
+
+**Hallucinated API:**
+```csharp
+[App(Icon = Icons.Bot, Group = "Apps", Chrome = UseDefaultAppChrome)]
+[App(Icon = Icons.Waves)]
+```
+
+**Errors:**
+- `CS0655: 'Icon' is not a valid named attribute argument` — PascalCase property used instead of constructor parameter
+- `CS0246: The type or namespace name 'Group' could not be found` — parameter doesn't exist
+- `CS0246: The type or namespace name 'Chrome' could not be found` — parameter doesn't exist
+
+**Correct API:**
+```csharp
+[App(icon: Icons.Bot, path: new[] { "Apps" })]
+```
+
+The `AppAttribute` uses **lowercase named constructor parameters**, not PascalCase named properties. C# attributes with nullable property types cause CS0655 when accessed via `PropertyName = value` syntax. Use `parameterName: value` syntax instead.
+
+Available parameters: `id`, `title`, `icon`, `description`, `path`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`. There is NO `group` or `chrome` parameter — use `path:` for navigation grouping, and configure chrome in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`.
+
+See: Ivy-Framework#2587 (plans to rename `path` to `group`)
+
+**Found In:**
+7c547408-00b3-47e1-976e-59c9357c1e74
+d6a5f377-bc84-404d-acca-71164d3754d4
+
 ## TextBuilder.Style() — non-existent styling method
 
 **Hallucinated API:**
