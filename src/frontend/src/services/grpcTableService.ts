@@ -114,10 +114,6 @@ export class GrpcTableService extends EventEmitter {
   constructor(serverUrl: string) {
     super();
     this.serverUrl = serverUrl;
-    logger.debug(
-      'GrpcTableService constructor - Connecting to:',
-      this.serverUrl
-    );
   }
 
   async parseFilter(
@@ -125,8 +121,6 @@ export class GrpcTableService extends EventEmitter {
     serverUrl: string
   ): Promise<ParseFilterResult> {
     try {
-      logger.debug('parseFilter - Request:', request);
-
       // Create gRPC-Web request headers
       const grpcHeaders = {
         'Content-Type': 'application/grpc-web+proto',
@@ -139,7 +133,6 @@ export class GrpcTableService extends EventEmitter {
       const grpcMessage = this.createGrpcMessage(serializedRequest);
 
       const requestUrl = `${serverUrl}/datatable.DataTableService/ParseFilter`;
-      logger.debug('parseFilter - Request URL:', requestUrl);
 
       // Make the gRPC-Web request
       const response = await fetch(requestUrl, {
@@ -147,8 +140,6 @@ export class GrpcTableService extends EventEmitter {
         headers: grpcHeaders,
         body: grpcMessage as BodyInit,
       });
-
-      logger.debug('parseFilter - Response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -175,10 +166,6 @@ export class GrpcTableService extends EventEmitter {
     try {
       this.isConnected = true;
 
-      // Debug: Log the server URL being used
-      logger.debug('gRPC Table Service - Connecting to:', serverUrl);
-      logger.debug('gRPC Table Service - Query:', query);
-
       // Create gRPC-Web request with proper headers
       const grpcHeaders = {
         'Content-Type': 'application/grpc-web+proto',
@@ -193,7 +180,6 @@ export class GrpcTableService extends EventEmitter {
       const grpcMessage = this.createGrpcMessage(serializedQuery);
 
       const requestUrl = `${serverUrl}/datatable.DataTableService/Query`;
-      logger.debug('gRPC Table Service - Request URL:', requestUrl);
 
       // Make the gRPC-Web request
       const response = await fetch(requestUrl, {
@@ -201,12 +187,6 @@ export class GrpcTableService extends EventEmitter {
         headers: grpcHeaders,
         body: grpcMessage as BodyInit,
       });
-
-      logger.debug('gRPC Table Service - Response status:', response.status);
-      logger.debug(
-        'gRPC Table Service - Response headers:',
-        Object.fromEntries(response.headers.entries())
-      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -273,11 +253,6 @@ export class GrpcTableService extends EventEmitter {
 
   // Serialize ParseFilterRequest to protobuf format
   private serializeParseFilterRequest(request: ParseFilterRequest): Uint8Array {
-    logger.debug(
-      'serializeParseFilterRequest: Starting serialization',
-      request
-    );
-
     const encoder = new TextEncoder();
     const chunks: Uint8Array[] = [];
 
@@ -305,8 +280,6 @@ export class GrpcTableService extends EventEmitter {
 
   // Serialize DataTableQuery to protobuf format
   private serializeDataTableQuery(query: DataTableQuery): Uint8Array {
-    logger.debug('serializeDataTableQuery: Starting serialization', query);
-
     // This is a simplified protobuf serialization
     // In production, you should use the generated protobuf classes
     const encoder = new TextEncoder();
@@ -314,10 +287,6 @@ export class GrpcTableService extends EventEmitter {
 
     // Serialize sort orders (field 1, repeated message)
     if (query.sort && query.sort.length > 0) {
-      logger.debug(
-        'serializeDataTableQuery: Serializing sort orders',
-        query.sort
-      );
       query.sort.forEach(sort => {
         const sortMessage = this.serializeSortOrder(sort);
         chunks.push(this.encodeField(1, 2, sortMessage)); // Field 1, wire type 2 (length-delimited)
@@ -326,13 +295,8 @@ export class GrpcTableService extends EventEmitter {
 
     // Serialize filter (field 2, message)
     if (query.filter) {
-      logger.debug('serializeDataTableQuery: Serializing filter', query.filter);
       try {
         const filterMessage = this.serializeFilter(query.filter);
-        logger.debug(
-          'serializeDataTableQuery: Filter serialized successfully, length:',
-          filterMessage.length
-        );
         chunks.push(this.encodeField(2, 2, filterMessage)); // Field 2, wire type 2
       } catch (error) {
         logger.error(
@@ -465,87 +429,47 @@ export class GrpcTableService extends EventEmitter {
   }
 
   private serializeFilter(filter: Filter): Uint8Array {
-    logger.debug('serializeFilter: Serializing filter', filter);
     const chunks: Uint8Array[] = [];
 
     if (filter.condition) {
-      logger.debug('serializeFilter: Serializing condition', filter.condition);
-      // Field 1: condition (message)
       const conditionMessage = this.serializeCondition(filter.condition);
-      logger.debug(
-        'serializeFilter: Condition serialized, length:',
-        conditionMessage.length
-      );
       chunks.push(this.encodeField(1, 2, conditionMessage));
     }
 
     if (filter.group) {
-      logger.debug('serializeFilter: Serializing group', filter.group);
-      // Field 2: group (message)
       const groupMessage = this.serializeFilterGroup(filter.group);
-      logger.debug(
-        'serializeFilter: Group serialized, length:',
-        groupMessage.length
-      );
       chunks.push(this.encodeField(2, 2, groupMessage));
     }
 
     if (filter.negate !== undefined) {
-      logger.debug('serializeFilter: Serializing negate', filter.negate);
-      // Field 3: negate (bool)
       const negateValue = filter.negate ? 1 : 0;
       chunks.push(this.encodeField(3, 0, this.encodeVarint(negateValue)));
     }
 
-    const result = this.combineChunks(chunks);
-    logger.debug(
-      'serializeFilter: Filter serialization complete, total length:',
-      result.length
-    );
-    return result;
+    return this.combineChunks(chunks);
   }
 
   private serializeCondition(condition: Condition): Uint8Array {
-    logger.debug('serializeCondition: Serializing condition', condition);
     const encoder = new TextEncoder();
     const chunks: Uint8Array[] = [];
 
     // Field 1: column (string)
     const columnData = encoder.encode(condition.column);
-    logger.debug('serializeCondition: Column data length:', columnData.length);
     chunks.push(this.encodeField(1, 2, columnData));
 
     // Field 2: function (string)
     const functionData = encoder.encode(condition.function);
-    logger.debug(
-      'serializeCondition: Function data length:',
-      functionData.length
-    );
     chunks.push(this.encodeField(2, 2, functionData));
 
     // Field 3: args (repeated Any) - need to encode as proper protobuf Any messages
     if (condition.args && condition.args.length > 0) {
-      logger.debug('serializeCondition: Serializing args', condition.args);
-      condition.args.forEach((arg, index) => {
-        const jsonArg = JSON.stringify(arg);
-        logger.debug(`serializeCondition: Arg ${index}: ${jsonArg}`);
-
-        // Create a proper protobuf Any message
+      condition.args.forEach(arg => {
         const anyMessage = this.serializeAnyValue(arg);
-        logger.debug(
-          `serializeCondition: Arg ${index} Any message length:`,
-          anyMessage.length
-        );
         chunks.push(this.encodeField(3, 2, anyMessage));
       });
     }
 
-    const result = this.combineChunks(chunks);
-    logger.debug(
-      'serializeCondition: Condition serialization complete, total length:',
-      result.length
-    );
-    return result;
+    return this.combineChunks(chunks);
   }
 
   private serializeFilterGroup(group: FilterGroup): Uint8Array {
@@ -566,13 +490,6 @@ export class GrpcTableService extends EventEmitter {
 
   // Serialize a value as a protobuf Any message
   private serializeAnyValue(value: unknown): Uint8Array {
-    logger.debug(
-      'serializeAnyValue: Serializing value',
-      value,
-      'type:',
-      typeof value
-    );
-
     const encoder = new TextEncoder();
     const chunks: Uint8Array[] = [];
 
@@ -640,14 +557,7 @@ export class GrpcTableService extends EventEmitter {
     // Field 2: value (bytes)
     chunks.push(this.encodeField(2, 2, valueBytes));
 
-    const result = this.combineChunks(chunks);
-    logger.debug(
-      'serializeAnyValue: Any value serialized as',
-      typeUrl,
-      'length:',
-      result.length
-    );
-    return result;
+    return this.combineChunks(chunks);
   }
 
   private encodeVarint(value: number): Uint8Array {
@@ -666,8 +576,6 @@ export class GrpcTableService extends EventEmitter {
   ): Promise<ParseFilterResult> {
     const buffer = await response.arrayBuffer();
     const uint8Array = new Uint8Array(buffer);
-
-    logger.debug('parseParseFilterResponse - Buffer size:', buffer.byteLength);
 
     // Extract protobuf message from gRPC wrapper
     if (uint8Array.length < 5) {
@@ -693,10 +601,6 @@ export class GrpcTableService extends EventEmitter {
       const fieldNumber = tag >>> 3;
       const wireType = tag & 0x7;
 
-      logger.debug(
-        `parseParseFilterResponse - Field ${fieldNumber}, wire type ${wireType}`
-      );
-
       if (fieldNumber === 1 && wireType === 2) {
         // filterString field (string)
         const length = this.decodeVarint(messageData, offset);
@@ -706,10 +610,6 @@ export class GrpcTableService extends EventEmitter {
           messageData.slice(offset, offset + length)
         );
         offset += length;
-        logger.debug(
-          'parseParseFilterResponse - Got filter string:',
-          filterString
-        );
       } else {
         // Skip other fields
         offset = this.skipField(messageData, offset, wireType);
@@ -728,27 +628,8 @@ export class GrpcTableService extends EventEmitter {
     const buffer = await response.arrayBuffer();
     const uint8Array = new Uint8Array(buffer);
 
-    logger.debug(
-      'gRPC Table Service - Response buffer size:',
-      buffer.byteLength
-    );
-    logger.debug(
-      'gRPC Table Service - Response data (first 100 bytes):',
-      Array.from(uint8Array.slice(0, 100))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join(' ')
-    );
-
     // Parse the full DataTableResult to get all fields (including arrow data)
     const fullResult = this.parseDataTableResult(uint8Array);
-
-    logger.debug('Parsed DataTableResult fields:', {
-      has_arrow_stream: !!fullResult.arrow_ipc_stream,
-      arrow_stream_size: fullResult.arrow_ipc_stream?.length || 0,
-      offset: fullResult.offset,
-      row_count: fullResult.row_count,
-      total_rows: fullResult.total_rows,
-    });
 
     // If we didn't get the arrow stream from fullResult, fall back to the old method
     if (!fullResult.arrow_ipc_stream) {
@@ -757,7 +638,6 @@ export class GrpcTableService extends EventEmitter {
       );
       try {
         const fallbackArrowData = this.parseGrpcMessage(uint8Array);
-        logger.debug('Fallback arrow data size:', fallbackArrowData.length);
         if (fallbackArrowData.length > 0) {
           fullResult.arrow_ipc_stream = fallbackArrowData;
         }
@@ -796,18 +676,12 @@ export class GrpcTableService extends EventEmitter {
       throw new Error('Invalid gRPC message: too short');
     }
 
-    // Read compression flag (1 byte)
-    const compressionFlag = data[0];
-    logger.debug('gRPC Table Service - Compression flag:', compressionFlag);
-
     // Read message length (4 bytes, big-endian)
     const messageLength =
       (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
-    logger.debug('gRPC Table Service - Message length:', messageLength);
 
     // Extract the message data
     const messageData = data.slice(5, 5 + messageLength);
-    logger.debug('gRPC Table Service - Message data size:', messageData.length);
 
     // Parse the protobuf message to extract the Arrow data
     return this.parseTableResultProtobuf(messageData);
@@ -829,16 +703,6 @@ export class GrpcTableService extends EventEmitter {
     let offset = 0;
 
     while (offset < messageData.length) {
-      // Debug: show raw bytes at current offset
-      if (offset < 10) {
-        logger.debug(
-          `Raw bytes at offset ${offset}:`,
-          Array.from(messageData.slice(offset, offset + 8))
-            .map(b => `0x${b.toString(16).padStart(2, '0')}`)
-            .join(' ')
-        );
-      }
-
       // Read field tag
       const tag = this.decodeVarint(messageData, offset);
       offset += this.getVarintLength(tag);
@@ -944,10 +808,6 @@ export class GrpcTableService extends EventEmitter {
       const fieldNumber = tag >> 3;
       const wireType = tag & 0x07;
 
-      logger.debug(
-        `gRPC Table Service - Field ${fieldNumber}, wire type ${wireType}`
-      );
-
       if (fieldNumber === 1 && wireType === 2) {
         // arrow_ipc_stream field
         // Read length-delimited data
@@ -955,12 +815,7 @@ export class GrpcTableService extends EventEmitter {
         offset += this.getVarintLength(length);
 
         // Extract the Arrow data
-        const arrowData = data.slice(offset, offset + length);
-        logger.debug(
-          'gRPC Table Service - Extracted Arrow IPC stream size:',
-          arrowData.length
-        );
-        return arrowData;
+        return data.slice(offset, offset + length);
       } else {
         // Skip other fields
         offset = this.skipField(data, offset, wireType);
