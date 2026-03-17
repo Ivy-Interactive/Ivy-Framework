@@ -63,7 +63,7 @@ public class AppRouter(global::Ivy.Server server)
 
         if (httpContext.Request.Query.TryGetValue("appId", out var appIdParam))
         {
-            var id = appIdParam.ToString();
+            var id = appIdParam.ToString().TrimEnd('/');
             if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
             {
                 id = null;
