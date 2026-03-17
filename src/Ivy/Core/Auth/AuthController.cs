@@ -20,6 +20,7 @@ public class AuthController() : Controller
         [FromQuery] string callbackId,
         [FromQuery] string connectionId,
         [FromServices] AppSessionStore sessionStore,
+        [FromServices] global::Ivy.Server server,
         [FromServices] ILogger<AuthController> logger)
     {
         if (string.IsNullOrWhiteSpace(optionId) || string.IsNullOrWhiteSpace(callbackId) || string.IsNullOrWhiteSpace(connectionId))
@@ -57,7 +58,7 @@ public class AuthController() : Controller
             scheme = forwardedProto.ToString();
         }
         var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
-        var callback = WebhookEndpoint.CreateAuthCallback(callbackId, scheme, host);
+        var callback = WebhookEndpoint.CreateAuthCallback(callbackId, scheme, host, server.Args?.PathBase);
 
         try
         {

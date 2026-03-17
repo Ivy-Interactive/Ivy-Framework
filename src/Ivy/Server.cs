@@ -911,59 +911,14 @@ public static class WebApplicationExtensions
             $"{assembly.GetName().Name}"
         );
         var resourceName = $"{assembly.GetName().Name}.index.html";
+
         app.MapGet("/", async context =>
-        {
-            var version = assembly.GetName().Version?.ToString();
-            if (!string.IsNullOrEmpty(version))
-            {
-                context.Response.Headers["ivy-version"] = version;
-            }
+            await ServeIndexHtml(context, app, serverArgs, assembly, resourceName));
 
-            // Determine HTTP status code based on app routing
-            var server = app.Services.GetRequiredService<Server>();
-            var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
-
-            await using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream != null)
-            {
-                using var reader = new StreamReader(stream);
-                var html = await reader.ReadToEndAsync();
-
-                var pipeline = new HtmlPipeline()
-                    .Use<PathBaseFilter>()
-                    .Use<LicenseFilter>()
-                    .Use<DevToolsFilter>()
-                    .Use<MetaDescriptionFilter>()
-                    .Use<TitleFilter>()
-                    .Use<ThemeFilter>()
-                    .Use<ManifestFilter>();
-
-                foreach (var filter in server.GetCustomFilters())
-                    pipeline.Use(filter);
-
-                server.GetPipelineConfigurator()?.Invoke(pipeline);
-
-                var pipelineContext = new HtmlPipelineContext
-                {
-                    Services = app.Services,
-                    ServerArgs = serverArgs
-                };
-
-
-                html = pipeline.Process(pipelineContext, html);
-
-                context.Response.ContentType = "text/html";
-                context.Response.StatusCode = httpStatusCode;
-                var bytes = Encoding.UTF8.GetBytes(html);
-                await context.Response.Body.WriteAsync(bytes);
-            }
-            else
-            {
-                context.Response.StatusCode = 500;
-                context.Response.ContentType = "text/plain";
-                await context.Response.WriteAsync($"Error: {resourceName} not found.");
-            }
-        });
+        // SPA fallback: serve index.html for any path not matched by other routes
+        // (enables client-side routing for /sign-in, /foo/bar/sign-in, etc.)
+        app.MapFallback(async context =>
+            await ServeIndexHtml(context, app, serverArgs, assembly, resourceName));
 
         app.MapGet("/manifest.json", () =>
         {
@@ -975,6 +930,59 @@ public static class WebApplicationExtensions
         app.UseStaticFiles(GetStaticFileOptions("", embeddedProvider, assembly));
 
         return app;
+    }
+
+    private static async Task ServeIndexHtml(HttpContext context, WebApplication app, ServerArgs serverArgs, Assembly assembly, string resourceName)
+    {
+        var version = assembly.GetName().Version?.ToString();
+        if (!string.IsNullOrEmpty(version))
+        {
+            context.Response.Headers["ivy-version"] = version;
+        }
+
+        // Determine HTTP status code based on app routing
+        var server = app.Services.GetRequiredService<Server>();
+        var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
+
+        await using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream != null)
+        {
+            using var reader = new StreamReader(stream);
+            var html = await reader.ReadToEndAsync();
+
+            var pipeline = new HtmlPipeline()
+                .Use<PathBaseFilter>()
+                .Use<LicenseFilter>()
+                .Use<DevToolsFilter>()
+                .Use<MetaDescriptionFilter>()
+                .Use<TitleFilter>()
+                .Use<ThemeFilter>()
+                .Use<ManifestFilter>();
+
+            foreach (var filter in server.GetCustomFilters())
+                pipeline.Use(filter);
+
+            server.GetPipelineConfigurator()?.Invoke(pipeline);
+
+            var pipelineContext = new HtmlPipelineContext
+            {
+                Services = app.Services,
+                ServerArgs = serverArgs
+            };
+
+            html = pipeline.Process(pipelineContext, html);
+
+            context.Response.ContentType = "text/html";
+            context.Response.StatusCode = httpStatusCode;
+            var bytes = Encoding.UTF8.GetBytes(html);
+            await context.Response.Body.WriteAsync(bytes);
+        }
+        else
+        {
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "text/plain";
+            await context.Response.WriteAsync($"Error: {resourceName} not found.");
+        }
     }
 
     public static WebApplication UseAssets(this WebApplication app, ServerArgs args, ILogger<Server> logger,

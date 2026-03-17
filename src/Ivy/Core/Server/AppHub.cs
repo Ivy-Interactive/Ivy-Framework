@@ -31,7 +31,7 @@ public class AppHub(
             appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
-        return new AppContext(connectionId, machineId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!);
+        return new AppContext(connectionId, machineId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!, server.Args?.PathBase);
     }
 
     public override async Task OnConnectedAsync()
