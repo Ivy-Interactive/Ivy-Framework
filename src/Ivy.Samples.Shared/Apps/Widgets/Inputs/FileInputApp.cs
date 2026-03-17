@@ -60,6 +60,13 @@ public class FileInputVariantTests : ViewBase
                   | multipleFiles.ToFileInput(multipleFilesUpload).Disabled()
                   | multipleFiles.ToFileInput(multipleFilesUpload).Invalid("Please select valid files")
                   | multipleFiles.ToFileInput(multipleFilesUpload).Placeholder("Click to select files")
+
+                  | Text.Monospaced("Default Variant")
+                  | singleFile.ToFileInput(singleFileUpload).Variant(FileInputVariant.Default).Placeholder("Select one file...")
+                  | placeholderFile.ToFileInput(placeholderFileUpload).Variant(FileInputVariant.Default).Placeholder("Click to select a file")
+                  | singleFile.ToFileInput(singleFileUpload).Variant(FileInputVariant.Default).Disabled()
+                  | multipleFiles.ToFileInput(multipleFilesUpload).Variant(FileInputVariant.Default).Placeholder("Select multiple...")
+                  | multipleFiles.ToFileInput(multipleFilesUpload).Variant(FileInputVariant.Default).MaxFiles(3).Placeholder("Max 3 files...")
                );
     }
 }
@@ -182,11 +189,13 @@ public class FileInputFileSizeLimits : ViewBase
         var maxSizeFile = UseState<FileUpload<byte[]>?>(() => null);
         var rangeSizeFile = UseState<FileUpload<byte[]>?>(() => null);
 
-        var minSizeUpload = UseUpload(MemoryStreamUploadHandler.Create(minSizeFile))
-            .MinFileSize(1024); // 1 KB minimum
-        var maxSizeUpload = UseUpload(MemoryStreamUploadHandler.Create(maxSizeFile))
-            .MaxFileSize(5 * 1024 * 1024); // 5 MB maximum
-        var rangeSizeUpload = UseUpload(MemoryStreamUploadHandler.Create(rangeSizeFile))
+        var minSizeUploadCtx = UseUpload(MemoryStreamUploadHandler.Create(minSizeFile));
+        var maxSizeUploadCtx = UseUpload(MemoryStreamUploadHandler.Create(maxSizeFile));
+        var rangeSizeUploadCtx = UseUpload(MemoryStreamUploadHandler.Create(rangeSizeFile));
+
+        var minSizeUpload = minSizeUploadCtx.MinFileSize(1024); // 1 KB minimum
+        var maxSizeUpload = maxSizeUploadCtx.MaxFileSize(5 * 1024 * 1024); // 5 MB maximum
+        var rangeSizeUpload = rangeSizeUploadCtx
             .MinFileSize(1024)           // 1 KB minimum
             .MaxFileSize(10 * 1024 * 1024); // 10 MB maximum
 
@@ -379,7 +388,8 @@ public class ProfilePhotoUpload(IState<FileUpload<byte[]>?> state) : ViewBase
 {
     public override object Build()
     {
-        var uploadContext = UseUpload(MemoryStreamUploadHandler.Create(state))
+        var uploadCtx = UseUpload(MemoryStreamUploadHandler.Create(state));
+        var uploadContext = uploadCtx
             .Accept("image/*")
             .MaxFileSize(5 * 1024 * 1024); // 5 MB
         const long maxSize = 5 * 1024 * 1024;
@@ -393,7 +403,8 @@ public class DocumentUpload(IState<FileUpload<byte[]>?> state) : ViewBase
 {
     public override object Build()
     {
-        var uploadContext = UseUpload(MemoryStreamUploadHandler.Create(state))
+        var uploadCtx = UseUpload(MemoryStreamUploadHandler.Create(state));
+        var uploadContext = uploadCtx
             .Accept(".pdf,.doc,.docx")
             .MaxFileSize(10 * 1024 * 1024); // 10 MB
         const long maxSize = 10 * 1024 * 1024;
@@ -406,7 +417,8 @@ public class CertificateUpload(IState<FileUpload<byte[]>?> state) : ViewBase
 {
     public override object Build()
     {
-        var uploadContext = UseUpload(MemoryStreamUploadHandler.Create(state))
+        var uploadCtx = UseUpload(MemoryStreamUploadHandler.Create(state));
+        var uploadContext = uploadCtx
             .Accept(".pdf")
             .MaxFileSize(2 * 1024 * 1024); // 2 MB
         const long maxSize = 2 * 1024 * 1024;
@@ -428,7 +440,8 @@ public class DialogFileUploadExample : ViewBase
         // Dialog visibility state
         var isOpen = UseState(false);
 
-        var uploadContext = UseUpload(MemoryStreamUploadHandler.Create(dialogFile)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
+        var uploadCtx = UseUpload(MemoryStreamUploadHandler.Create(dialogFile));
+        var uploadContext = uploadCtx.Accept("*/*").MaxFileSize(10 * 1024 * 1024);
 
 
 
@@ -514,7 +527,8 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
     public override object? Build()
     {
         var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var upload = UseUpload(MemoryStreamUploadHandler.Create(selectedFiles))
+        var uploadCtx = UseUpload(MemoryStreamUploadHandler.Create(selectedFiles));
+        var upload = uploadCtx
             .Accept(settings.Accept!)
             .MaxFileSize(settings.MaxFileSize)
             .MaxFiles(settings.MaxFiles);

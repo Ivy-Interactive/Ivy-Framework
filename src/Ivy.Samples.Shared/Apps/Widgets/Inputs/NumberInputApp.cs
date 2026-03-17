@@ -10,6 +10,7 @@ public class NumberInputApp : SampleBase
         var intValue = UseState(12345);
         var onChangedState = UseState(0);
         var onChangeLabel = UseState("");
+        UseEffect(() => { onChangeLabel.Set("Changed"); }, onChangedState);
         var onBlurState = UseState(0);
         var onBlurLabel = UseState("");
         var usdValue = UseState(1234.56m);
@@ -24,21 +25,36 @@ public class NumberInputApp : SampleBase
         var temperatureValue = UseState(22);
         var percentValue = UseState(0.75);
 
+        var shortState = UseState((short)0);
+        var shortNullState = UseState((short?)null);
+        var intVariantState = UseState(0);
+        var intNullVariantState = UseState((int?)null);
+        var longState = UseState((long)0);
+        var longNullState = UseState((long?)null);
+        var byteState = UseState((byte)0);
+        var byteNullState = UseState((byte?)null);
+        var floatState = UseState(0.0f);
+        var floatNullState = UseState((float?)null);
+        var doubleState = UseState(0.0);
+        var doubleNullState = UseState((double?)null);
+        var decimalState = UseState((decimal)0);
+        var decimalNullState = UseState((decimal?)null);
+
         // Numeric type test states
         var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
             // Signed integer types
-            ("short", UseState((short)0), UseState((short?)null)),
-            ("int", UseState(0), UseState((int?)null)),
-            ("long", UseState((long)0), UseState((long?)null)),
+            ("short", shortState, shortNullState),
+            ("int", intVariantState, intNullVariantState),
+            ("long", longState, longNullState),
 
             // Unsigned integer types
-            ("byte", UseState((byte)0), UseState((byte?)null)),
+            ("byte", byteState, byteNullState),
 
             // Floating-point types
-            ("float", UseState(0.0f), UseState((float?)null)),
-            ("double", UseState(0.0), UseState((double?)null)),
-            ("decimal", UseState((decimal)0), UseState((decimal?)null))
+            ("float", floatState, floatNullState),
+            ("double", doubleState, doubleNullState),
+            ("decimal", decimalState, decimalNullState)
         };
 
         var dataBinding = CreateNumericTypeTests(numericTypes);
@@ -186,11 +202,7 @@ public class NumberInputApp : SampleBase
                | Text.H2("Events")
                | Text.H3("OnChange")
                | Layout.Horizontal(
-                   new NumberInput<int>(onChangedState.Value, e =>
-                   {
-                       onChangedState.Set(e);
-                       onChangeLabel.Set("Changed");
-                   }),
+                   onChangedState.ToNumberInput(),
                    onChangeLabel
                )
                | Text.H3("OnBlur")

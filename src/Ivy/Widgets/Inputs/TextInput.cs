@@ -80,7 +80,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
 public record TextInput<TString> : TextInputBase, IInput<TString>
 {
-    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
+    internal TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TString>();
@@ -92,21 +92,21 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
     }
 
     [OverloadResolutionPriority(1)]
-    public TextInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
+    internal TextInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public TextInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
+    internal TextInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public TextInput(string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
+    internal TextInput(string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
     {
         Placeholder = placeholder;
         Variant = variant;
@@ -127,23 +127,23 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
 /// </summary>
 public record TextInput : TextInput<string>
 {
-    public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
+    internal TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : base(state, placeholder, disabled, variant)
     {
     }
 
     [OverloadResolutionPriority(1)]
-    public TextInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
+    internal TextInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : base(value, onChange, placeholder, disabled, variant)
     {
     }
 
-    public TextInput(string value, Action<Event<IInput<string>, string>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
+    internal TextInput(string value, Action<Event<IInput<string>, string>>? onChange = null, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : base(value, onChange?.ToValueTask(), placeholder, disabled, variant)
     {
     }
 
-    public TextInput(string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
+    internal TextInput(string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
         : base(placeholder, disabled, variant)
     {
     }
@@ -157,17 +157,6 @@ public static class TextInputExtensions
 
     private static bool VariantHasBuiltInValidation(TextInputVariant variant) =>
         variant is TextInputVariant.Email or TextInputVariant.Tel or TextInputVariant.Url or TextInputVariant.Password;
-
-    /// <summary>Creates the text input without blur-validation wiring (used to avoid recursion when wrapping).</summary>
-    private static TextInputBase CreateTextInputCore(IAnyState state, string? placeholder, bool disabled, TextInputVariant variant)
-    {
-        var type = state.GetStateType();
-        Type genericType = typeof(TextInput<>).MakeGenericType(type);
-        TextInputBase input = (TextInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
-        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        nullableProperty?.SetValue(input, type.IsNullableType());
-        return input;
-    }
 
     /// <summary>Wire blur validation for variant; <paramref name="widget"/> must already be bound to <paramref name="state"/>.</summary>
     private static TextInputBase ApplyVariantValidation(IViewContext context, IAnyState state, TextInputBase widget, TextInputVariant variant)
@@ -206,7 +195,11 @@ public static class TextInputExtensions
 
     public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
     {
-        var input = CreateTextInputCore(state, placeholder, disabled, variant);
+        var type = state.GetStateType();
+        Type genericType = typeof(TextInput<>).MakeGenericType(type);
+        TextInputBase input = (TextInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
         // Allow .Variant(Email) later to pick up the same state for validation
         if (TextInputBuildContext.GetCurrent() is { } ctx)
             input.SetAttachedValue(ValidationOwner, AttachedValidationState, state);

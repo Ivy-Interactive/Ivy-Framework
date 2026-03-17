@@ -65,11 +65,11 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     prevIsOpenRef.current = isOpen;
   }, [isOpen]);
 
-  const handleShapeAdd = useCallback((shape: Shape) => {
+  const onShapeAdd = useCallback((shape: Shape) => {
     setShapes((prev) => [...prev, shape]);
   }, []);
 
-  const handleUndo = useCallback(() => {
+  const onUndo = useCallback(() => {
     setShapes((prev) => prev.slice(0, -1));
   }, []);
 
@@ -81,7 +81,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     };
   }, [shapes, screenshotCanvas]);
 
-  const handleSave = useCallback(async () => {
+  const onSave = useCallback(async () => {
     if (!screenshotCanvas) return;
 
     // Fire the event first so the UI responds immediately
@@ -136,7 +136,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     }
   }, [screenshotCanvas, uploadUrl, events, eventHandler, id, buildAnnotationData]);
 
-  const handleCancel = useCallback(() => {
+  const onCancel = useCallback(() => {
     if (events.includes('OnCancel')) {
       eventHandler('OnCancel', id, []);
     }
@@ -149,23 +149,23 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
       // Ctrl+S to save
       if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
-        handleSave();
+        onSave();
         return;
       }
       // Ctrl+Z to undo
       if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
-        handleUndo();
+        onUndo();
         return;
       }
       // ESC — only cancel if no active tool input (text/callout inputs handle their own ESC via stopPropagation)
       if (e.key === 'Escape') {
-        handleCancel();
+        onCancel();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleCancel, handleUndo, handleSave]);
+  }, [isOpen, onCancel, onUndo, onSave]);
 
   if (!isOpen) return null;
 
@@ -198,9 +198,9 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
         onToolChange={setActiveTool}
         onColorChange={setColor}
         onLineWidthChange={setLineWidth}
-        onUndo={handleUndo}
-        onSave={handleSave}
-        onCancel={handleCancel}
+        onUndo={onUndo}
+        onSave={onSave}
+        onCancel={onCancel}
         canUndo={shapes.length > 0}
       />
       <div className="screenshot-canvas-container">
@@ -210,7 +210,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
           color={color}
           lineWidth={lineWidth}
           shapes={shapes}
-          onShapeAdd={handleShapeAdd}
+          onShapeAdd={onShapeAdd}
         />
       </div>
     </div>

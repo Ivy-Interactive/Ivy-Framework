@@ -1,15 +1,5 @@
 import React from 'react';
 import { useEventHandler, EventHandler } from '@/components/event-handler';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { selectIconContainerVariant } from '@/components/ui/select/variant';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -25,19 +15,23 @@ import {
 } from '@/components/ui/tooltip';
 import Icon from '@/components/Icon';
 import { X, Search, Loader2 } from 'lucide-react';
-import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { logger } from '@/lib/logger';
-import {
-  MultipleSelector,
-  Option as MultiSelectOption,
-} from '@/components/ui/multiselect';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
 import { Slider } from '@/components/ui/slider';
 import { Densities } from '@/types/density';
 import { cva } from 'class-variance-authority';
 import { xIconVariant } from '@/components/ui/input/text-input-variant';
 
-const EMPTY_ARRAY: never[] = [];
+import { Option, SelectInputWidgetProps } from './select-types';
+import {
+  convertValuesToOriginalType,
+  useSelectValueHandler,
+} from './select-utils';
+import { SelectMultiVariant } from './SelectMultiVariant';
+import { SelectSingleVariant } from './SelectSingleVariant';
+
+import { EMPTY_ARRAY } from '@/lib/constants';
 // variants for SelectInputWidget container
 const selectContainerVariant = cva(
   'relative border border-input bg-transparent rounded-box shadow-sm focus-within:ring-1 focus-within:ring-ring dark:border-white/10',
@@ -65,165 +59,6 @@ const circleSizeVariant = {
   Small: 'h-3 w-3',
   Medium: 'h-4 w-4',
   Large: 'h-5 w-5',
-};
-
-export type NullableSelectValue =
-  | string
-  | number
-  | string[]
-  | number[]
-  | null
-  | undefined;
-
-interface Option {
-  value: string | number;
-  label?: string;
-  description?: string;
-  group?: string;
-  icon?: string;
-  disabled?: boolean;
-}
-
-interface SelectInputWidgetProps {
-  id: string;
-  placeholder?: string;
-  value?: NullableSelectValue;
-  variant?: 'Select' | 'List' | 'Toggle' | 'Slider' | 'Radio';
-  nullable?: boolean;
-  disabled?: boolean;
-  invalid?: string;
-  options: Option[];
-  eventHandler: EventHandler;
-  selectMany: boolean;
-  separator: string;
-  maxSelections?: number;
-  minSelections?: number;
-  searchable?: boolean;
-  searchMode?: 'CaseInsensitive' | 'CaseSensitive' | 'Fuzzy';
-  emptyMessage?: string;
-  loading?: boolean;
-  ghost?: boolean;
-  'data-testid'?: string;
-  density?: Densities;
-  width?: string;
-}
-
-// Helper function to convert string values back to their original types
-const convertValuesToOriginalType = (
-  stringValues: string[],
-  originalValue: NullableSelectValue,
-  options: Option[],
-  selectMany: boolean = false
-): NullableSelectValue => {
-  if (stringValues.length === 0) {
-    // For nullable types, we need to determine the expected array type from options
-    if (originalValue === null || originalValue === undefined) {
-      if (selectMany) {
-        // For nullable collection types, determine the expected array type from options
-        if (options.length > 0) {
-          const firstOption = options[0];
-          if (typeof firstOption.value === 'number') {
-            return [];
-          } else if (typeof firstOption.value === 'string') {
-            return [];
-          }
-        }
-        return [];
-      }
-      return null;
-    }
-    return originalValue instanceof Array ? [] : null;
-  }
-
-  const optionsMap = new Map<string, Option>();
-  for (const option of options) {
-    optionsMap.set(option.value.toString(), option);
-  }
-
-  // If original value is an array, preserve the array type
-  if (originalValue instanceof Array) {
-    // Check if original array contains numbers
-    if (originalValue.length > 0 && typeof originalValue[0] === 'number') {
-      return stringValues.map(v => {
-        const option = optionsMap.get(v);
-        return option ? Number(option.value) : Number(v);
-      });
-    }
-    // Check if original array contains strings
-    else if (originalValue.length > 0 && typeof originalValue[0] === 'string') {
-      return stringValues.map(v => {
-        const option = optionsMap.get(v);
-        return option ? String(option.value) : v;
-      });
-    }
-    // Default to string array
-    return stringValues;
-  }
-
-  // For nullable collection types where originalValue is null, determine type from options
-  if ((originalValue === null || originalValue === undefined) && selectMany) {
-    if (options.length > 0) {
-      const firstOption = options[0];
-      if (typeof firstOption.value === 'number') {
-        return stringValues.map(v => {
-          const option = optionsMap.get(v);
-          return option ? Number(option.value) : Number(v);
-        });
-      } else if (typeof firstOption.value === 'string') {
-        return stringValues.map(v => {
-          const option = optionsMap.get(v);
-          return option ? String(option.value) : v;
-        });
-      }
-    }
-    // Default to string array if we can't determine the type
-    return stringValues;
-  }
-
-  // For single values, return the first value with proper type
-  const firstValue = stringValues[0];
-  const option = optionsMap.get(firstValue);
-  if (option) {
-    return option.value;
-  }
-  return firstValue;
-};
-
-const useSelectValueHandler = (
-  id: string,
-  value: NullableSelectValue,
-  options: Option[],
-  eventHandler: EventHandler,
-  selectMany: boolean = false
-) => {
-  return useCallback(
-    (newValue: string | string[]) => {
-      logger.debug('Select input value change', {
-        id,
-        currentValue: value,
-        newValue,
-        optionsCount: options.length,
-      });
-
-      const stringArray = Array.isArray(newValue) ? newValue : [newValue];
-      const convertedValue = convertValuesToOriginalType(
-        stringArray,
-        value,
-        options,
-        selectMany
-      );
-
-      logger.debug('Select input converted value', {
-        id,
-        originalValue: value,
-        stringArray,
-        convertedValue,
-      });
-
-      eventHandler('OnChange', id, [convertedValue]);
-    },
-    [id, value, options, eventHandler, selectMany]
-  );
 };
 
 // Helper component for ToggleGroupItem with validation
@@ -968,444 +803,13 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   return container;
 };
 
-const SelectVariant: React.FC<SelectInputWidgetProps> = ({
-  id,
-  placeholder = '',
-  value,
-  disabled = false,
-  invalid,
-  options = EMPTY_ARRAY,
-  eventHandler,
-  nullable = false,
-  selectMany = false,
-  maxSelections,
-  minSelections,
-  searchable = false,
-  searchMode = 'CaseInsensitive',
-  emptyMessage,
-  loading = false,
-  ghost = false,
-  density = Densities.Medium,
-  'data-testid': dataTestId,
-  width,
-}) => {
-  const validOptions = options.filter(
-    option => option.value != null && option.value.toString().trim() !== ''
-  );
-
-  const handleValueChange = useSelectValueHandler(
-    id,
-    value,
-    validOptions,
-    eventHandler,
-    selectMany
-  );
-
-  // Convert current value to array format for multiselect
-  const selectedValues = useMemo(() => {
-    let values: (string | number)[] = [];
-    if (selectMany) {
-      if (Array.isArray(value)) {
-        values = value;
-      } else if (value != null && value.toString().trim() !== '') {
-        values = value
-          .toString()
-          .split(',')
-          .map(v => v.trim());
-      }
-    }
-    return values;
-  }, [selectMany, value]);
-
-  // Convert options to MultiSelectOption format
-  const multiSelectOptions: MultiSelectOption[] = useMemo(() => {
-    const isAtMax =
-      maxSelections != null && selectedValues.length >= maxSelections;
-    return validOptions.map(option => ({
-      label: option.label || option.value.toString(),
-      value: option.value.toString(),
-      disable:
-        disabled ||
-        loading ||
-        option.disabled ||
-        (isAtMax && !selectedValues.includes(option.value.toString())),
-    }));
-  }, [validOptions, selectedValues, maxSelections, disabled, loading]);
-
-  // Create lookup map for efficient option finding
-  const optionsLookup = useMemo(() => {
-    const map = new Map<string, Option>();
-    validOptions.forEach(option => {
-      map.set(option.value.toString(), option);
-    });
-    return map;
-  }, [validOptions]);
-
-  // Convert selected values to MultiSelectOption format
-  const selectedMultiSelectOptions: MultiSelectOption[] = useMemo(
-    () =>
-      selectedValues.map(val => {
-        const option = optionsLookup.get(val.toString());
-        return {
-          label: option?.label || val.toString(),
-          value: val.toString(),
-          disable: false,
-        };
-      }),
-    [selectedValues, optionsLookup]
-  );
-
-  const styles: React.CSSProperties = {
-    ...getWidth(width),
-  };
-
-  // Get string value for both single and multi-select
-  const stringValue =
-    value != null && value.toString().trim() !== ''
-      ? value.toString()
-      : undefined;
-
-  // Get the selected option's label for tooltip (only for single select)
-  const selectedOption = useMemo(() => {
-    if (selectMany || !stringValue) return undefined;
-    return validOptions.find(opt => opt.value.toString() === stringValue);
-  }, [stringValue, validOptions, selectMany]);
-
-  const selectedLabel = selectedOption?.label;
-
-  // Create ref for SelectTrigger (needs to be before early returns)
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  // Detect ellipsis on the SelectValue span (needs to be before early returns)
-  const [isEllipsed, setIsEllipsed] = useState(false);
-  // Track if select dropdown is open to disable tooltip (needs to be before early returns)
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    // Skip ellipsis check for multiselect or when no label
-    if (selectMany || !selectedLabel) {
-      requestAnimationFrame(() => setIsEllipsed(false));
-      return;
-    }
-
-    const checkEllipsis = () => {
-      if (!triggerRef?.current) {
-        return;
-      }
-      // SelectValue renders as the first span child of SelectTrigger
-      const firstSpan = triggerRef.current.querySelector(
-        'span:first-child'
-      ) as HTMLSpanElement;
-      if (firstSpan) {
-        setIsEllipsed(firstSpan.scrollWidth > firstSpan.clientWidth);
-      } else {
-        setIsEllipsed(false);
-      }
-    };
-
-    // Check after render
-    requestAnimationFrame(checkEllipsis);
-
-    // Debounced resize handler
-    let resizeTimeout: NodeJS.Timeout;
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(checkEllipsis, 150);
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      clearTimeout(resizeTimeout);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [selectedLabel, stringValue, selectMany]);
-
-  // Shared Search State
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredOptions = useMemo(() => {
-    if (!searchable || !searchTerm) return validOptions;
-
-    return validOptions.filter(option => {
-      if (searchMode === 'Fuzzy') {
-        let i = 0;
-        let j = 0;
-        const searchLower = searchTerm.toLowerCase();
-        const labelLower = (option.label || '').toLowerCase();
-        while (i < searchLower.length && j < labelLower.length) {
-          if (searchLower[i] === labelLower[j]) i++;
-          j++;
-        }
-        return i === searchLower.length;
-      }
-      const term =
-        searchMode === 'CaseInsensitive'
-          ? searchTerm.toLowerCase()
-          : searchTerm;
-      const label =
-        searchMode === 'CaseInsensitive'
-          ? (option.label || '').toLowerCase()
-          : option.label || '';
-      return label.includes(term);
-    });
-  }, [validOptions, searchable, searchTerm, searchMode]);
-
-  // Handle multiselect case
-  if (selectMany) {
-    const handleMultiSelectChange = (
-      newSelectedOptions: MultiSelectOption[]
-    ) => {
-      // Prevent deselection if at or below min
-      if (
-        minSelections != null &&
-        newSelectedOptions.length < minSelections &&
-        newSelectedOptions.length < selectedValues.length
-      ) {
-        return; // ignore the change
-      }
-
-      const newValues = newSelectedOptions.map(opt => opt.value);
-      const convertedValue = convertValuesToOriginalType(
-        newValues,
-        value,
-        validOptions,
-        selectMany
-      );
-      eventHandler('OnChange', id, [convertedValue]);
-    };
-
-    return (
-      <div className="flex items-center gap-2 w-full" style={styles}>
-        <div className="flex-1 relative w-full">
-          <MultipleSelector
-            value={selectedMultiSelectOptions}
-            defaultOptions={multiSelectOptions}
-            onValueChange={handleMultiSelectChange}
-            placeholder={placeholder}
-            disabled={disabled || loading}
-            className={cn('w-full', ghost && 'ghost')}
-            invalid={!!invalid}
-            hidePlaceholderWhenSelected
-            density={density}
-            ghost={ghost}
-            data-testid={dataTestId}
-          />
-          {(nullable && selectedMultiSelectOptions.length > 0 && !disabled) ||
-          invalid ||
-          loading ? (
-            <div
-              className={selectIconContainerVariant({ density })}
-              style={{ zIndex: 2 }}
-            >
-              {/* Loading spinner */}
-              {loading && (
-                <div className="pointer-events-auto flex items-center h-6 p-1">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
-                </div>
-              )}
-              {/* Clear (X) button */}
-              {nullable &&
-                selectedMultiSelectOptions.length > 0 &&
-                !disabled && (
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Clear All"
-                    onClick={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      logger.debug(
-                        'Select input clear button clicked (MultiSelect)',
-                        { id }
-                      );
-                      eventHandler('OnChange', id, [null]);
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        eventHandler('OnChange', id, [null]);
-                      }
-                    }}
-                    className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
-                  >
-                    <X className={xIconVariant({ density })} />
-                  </button>
-                )}
-              {/* Invalid icon - rightmost */}
-              {invalid && (
-                <div className="pointer-events-auto flex items-center h-6 p-1">
-                  <InvalidIcon message={invalid} />
-                </div>
-              )}
-            </div>
-          ) : null}
-        </div>
-      </div>
-    );
-  }
-
-  const groupedOptions = filteredOptions.reduce<Record<string, Option[]>>(
-    (acc, option) => {
-      const key = option.group || 'default';
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-      acc[key].push(option);
-      return acc;
-    },
-    {}
-  );
-
-  const hasValue = stringValue !== undefined;
-
-  const selectTriggerElement = (
-    <SelectTrigger
-      ref={triggerRef}
-      className={cn(
-        'relative',
-        invalid && inputStyles.invalidInput,
-        !hasValue && 'text-muted-foreground',
-        ghost &&
-          'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground'
-      )}
-      density={density}
-    >
-      <SelectValue placeholder={placeholder} />
-    </SelectTrigger>
-  );
-
-  // Wrap trigger with tooltip if ellipsed (tooltip hidden when dropdown is open)
-  const shouldShowTooltip = isEllipsed && selectedLabel;
-  const selectTrigger = shouldShowTooltip ? (
-    <TooltipProvider>
-      <Tooltip delayDuration={300} open={!isOpen ? undefined : false}>
-        <TooltipTrigger asChild>{selectTriggerElement}</TooltipTrigger>
-        <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-          <div className="whitespace-pre-wrap break-words">{selectedLabel}</div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+const SelectVariant: React.FC<
+  SelectInputWidgetProps & { eventHandler: EventHandler }
+> = props => {
+  return props.selectMany ? (
+    <SelectMultiVariant {...props} />
   ) : (
-    selectTriggerElement
-  );
-
-  return (
-    <div className="flex items-center gap-2 w-full" style={styles}>
-      <div className="flex-1 relative w-full">
-        <Select
-          key={`${id}-${stringValue ?? 'null'}`}
-          disabled={disabled}
-          value={stringValue}
-          onValueChange={handleValueChange}
-          open={isOpen}
-          onOpenChange={setIsOpen}
-          data-testid={dataTestId}
-        >
-          {selectTrigger}
-          <SelectContent density={density}>
-            {searchable && (
-              <div className="p-2 border-b">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    onKeyDown={e => e.stopPropagation()}
-                    onClick={e => e.stopPropagation()}
-                    className="pl-9 h-9"
-                    disabled={disabled || loading}
-                  />
-                </div>
-              </div>
-            )}
-            {loading ? (
-              <div className="flex justify-center p-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : filteredOptions.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                {emptyMessage || 'No options available'}
-              </div>
-            ) : (
-              Object.entries(groupedOptions).map(([group, options]) => (
-                <SelectGroup key={group}>
-                  {group !== 'default' && <SelectLabel>{group}</SelectLabel>}
-                  {options.map(option => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value.toString()}
-                      textValue={option.label}
-                      density={density}
-                      disabled={disabled || loading || option.disabled}
-                    >
-                      <div className="flex items-center gap-2">
-                        {option.icon && (
-                          <Icon
-                            name={option.icon}
-                            className="h-4 w-4 flex-shrink-0"
-                          />
-                        )}
-                        {option.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              ))
-            )}
-          </SelectContent>
-        </Select>
-        {/* Right-side icon container */}
-        {(nullable && hasValue && !disabled) || invalid || loading ? (
-          <div
-            className={selectIconContainerVariant({ density })}
-            style={{ zIndex: 2 }}
-          >
-            {/* Loading spinner */}
-            {loading && (
-              <div className="pointer-events-auto flex items-center h-6 p-1">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
-              </div>
-            )}
-            {/* Clear (X) button */}
-            {nullable && hasValue && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  logger.debug(
-                    'Select input clear button clicked (SelectVariant)',
-                    { id }
-                  );
-                  eventHandler('OnChange', id, [null]);
-                }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    eventHandler('OnChange', id, [null]);
-                  }
-                }}
-                className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
-              >
-                <X className={xIconVariant({ density })} />
-              </button>
-            )}
-            {/* Invalid icon - rightmost */}
-            {invalid && (
-              <div className="pointer-events-auto flex items-center h-6 p-1">
-                <InvalidIcon message={invalid} />
-              </div>
-            )}
-          </div>
-        ) : null}
-      </div>
-    </div>
+    <SelectSingleVariant key={props.value?.toString() ?? 'null'} {...props} />
   );
 };
 
@@ -1415,7 +819,9 @@ const sliderLabelVariant: Record<string, string> = {
   Large: 'text-base',
 };
 
-const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHandler }> = ({
+const SliderVariant: React.FC<
+  SelectInputWidgetProps & { eventHandler: EventHandler }
+> = ({
   id,
   value,
   disabled = false,
@@ -1423,17 +829,21 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
   options = EMPTY_ARRAY,
   eventHandler,
   selectMany = false,
-  nullable: _nullable = false,
   ghost = false,
   density = Densities.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
   if (selectMany) {
-    logger.warn('SelectInput Slider variant does not support selectMany. Falling back to single-select.');
+    logger.warn(
+      'SelectInput Slider variant does not support selectMany. Falling back to single-select.'
+    );
   }
 
-  const validOptions = useMemo(() => options.filter(o => !o.disabled), [options]);
+  const validOptions = useMemo(
+    () => options.filter(o => !o.disabled),
+    [options]
+  );
 
   const currentIndex = useMemo(() => {
     if (value == null) return -1;
@@ -1442,10 +852,6 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
   }, [value, validOptions]);
 
   const [localIndex, setLocalIndex] = useState(currentIndex);
-
-  useEffect(() => {
-    setLocalIndex(currentIndex);
-  }, [currentIndex]);
 
   const handleSliderChange = useCallback((values: number[]) => {
     const newIndex = values[0];
@@ -1467,7 +873,10 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
   if (validOptions.length === 0) {
     return (
       <div
-        className={cn('flex items-center justify-center text-muted-foreground', sliderLabelVariant[String(density)])}
+        className={cn(
+          'flex items-center justify-center text-muted-foreground',
+          sliderLabelVariant[String(density)]
+        )}
         style={width ? getWidth(width) : undefined}
         data-testid={dataTestId}
       >
@@ -1505,21 +914,40 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
           className={cn(invalid && inputStyles.invalidInput)}
         />
         {validOptions.length > 1 && (
-          <div className="absolute w-full flex justify-between px-[2px]" style={{ top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-            {validOptions.map((_, i) => (
+          <div
+            className="absolute w-full flex justify-between px-[2px]"
+            style={{
+              top: '50%',
+              transform: 'translateY(-50%)',
+              pointerEvents: 'none',
+            }}
+          >
+            {validOptions.map((option, i) => (
               <div
-                key={i}
+                key={option.value}
                 className={cn(
                   'rounded-full',
-                  i === sliderValue ? 'bg-transparent' : 'bg-muted-foreground/40',
-                  density === Densities.Small ? 'w-1 h-1' : density === Densities.Large ? 'w-1.5 h-1.5' : 'w-1 h-1'
+                  i === sliderValue
+                    ? 'bg-transparent'
+                    : 'bg-muted-foreground/40',
+                  density === Densities.Small
+                    ? 'w-1 h-1'
+                    : density === Densities.Large
+                      ? 'w-1.5 h-1.5'
+                      : 'w-1 h-1'
                 )}
               />
             ))}
           </div>
         )}
       </div>
-      <div className={cn('flex w-full items-center justify-between gap-1', textSize)} aria-hidden="true">
+      <div
+        className={cn(
+          'flex w-full items-center justify-between gap-1',
+          textSize
+        )}
+        aria-hidden="true"
+      >
         <span className="text-muted-foreground">{firstLabel}</span>
         <span className="text-muted-foreground">{lastLabel}</span>
       </div>
@@ -1564,7 +992,13 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
     case 'Toggle':
       return <ToggleVariant {...normalizedProps} eventHandler={eventHandler} />;
     case 'Slider':
-      return <SliderVariant {...normalizedProps} eventHandler={eventHandler} />;
+      return (
+        <SliderVariant
+          key={normalizedProps.value?.toString() ?? 'null'}
+          {...normalizedProps}
+          eventHandler={eventHandler}
+        />
+      );
     default:
       return <SelectVariant {...normalizedProps} eventHandler={eventHandler} />;
   }

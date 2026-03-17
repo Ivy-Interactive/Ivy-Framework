@@ -18,8 +18,6 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
   height = 'Full',
   colorScheme = 'Default',
   sort = false,
-  sortSubGroups = false,
-  padAngle = 2,
   tooltip,
   legend,
   toolbox,
@@ -87,10 +85,18 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
     if (sort) {
       graphNodes.sort((a, b) => {
         const aTotal = links
-          .filter(l => nodes[l.source]?.name === a.name || nodes[l.target]?.name === a.name)
+          .filter(
+            l =>
+              nodes[l.source]?.name === a.name ||
+              nodes[l.target]?.name === a.name
+          )
           .reduce((sum, l) => sum + l.value, 0);
         const bTotal = links
-          .filter(l => nodes[l.source]?.name === b.name || nodes[l.target]?.name === b.name)
+          .filter(
+            l =>
+              nodes[l.source]?.name === b.name ||
+              nodes[l.target]?.name === b.name
+          )
           .reduce((sum, l) => sum + l.value, 0);
         return bTotal - aTotal;
       });
@@ -162,17 +168,7 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
         toolbox && { ...toolbox, magicType: false }
       ),
     };
-  }, [
-    chartColors,
-    data,
-    sort,
-    sortSubGroups,
-    padAngle,
-    legend,
-    themeColors,
-    tooltip,
-    toolbox,
-  ]);
+  }, [chartColors, data, sort, legend, themeColors, tooltip, toolbox]);
 
   return (
     <div style={styles}>

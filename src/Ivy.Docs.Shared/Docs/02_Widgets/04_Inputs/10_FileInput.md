@@ -21,7 +21,7 @@ searchHints:
 Enable file uploads with automatic [state management](../../03_Hooks/02_Core/03_UseState.md), progress tracking, type filtering, size limits, and support for single or multiple file selections.
 </Ingress>
 
-The `FileInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a file upload interface with built-in validation, progress tracking, and drag-and-drop support. It works seamlessly with the upload system to automatically manage file data in [state](../../03_Hooks/02_Core/03_UseState.md).
+The `FileInput` [widget](../../01_Onboarding/02_Concepts/03_Widgets.md) provides a file upload interface with built-in validation, progress tracking, and drag-and-drop support. It supports two variants: `Drop` (a large drag-and-drop zone, default) and `Default` (a more traditional button-based input). It works seamlessly with the upload system to automatically manage file data in [state](../../03_Hooks/02_Core/03_UseState.md).
 
 ## Basic Usage
 
@@ -136,12 +136,44 @@ public class SingleVsMultipleDemo : ViewBase
                 | Text.H2("Multiple Files")
                 | multipleFiles
                     .ToFileInput(multipleUpload)
-                    .Placeholder("Choose multiple files");
+                    .Placeholder("Choose multiple files")
+                | Text.H2("Default Variant")
+                | singleFile
+                    .ToFileInput(singleUpload)
+                    .Variant(FileInputVariant.Default)
+                    .Placeholder("Traditional file picker");
     }
 }
 ```
 
 Multiple file selection is automatically enabled when you use `ImmutableArray&lt;FileUpload&lt;T&gt;&gt;` as your state type. You do **not** need to explicitly set a `.Multiple()` property.
+
+## Variants
+
+Choose a variant that fits your layout:
+
+- `FileInputVariant.Drop` (Default): A large area that invites drag and drop. Best for dedicated upload pages or large cards.
+- `FileInputVariant.Default`: A compact button-based input. Best for forms, sidebars, or dense layouts. Note that even the `Default` variant supports drag and drop directly onto the button.
+
+```csharp demo-below
+public class FileInputVariantsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var file1 = UseState<FileUpload<byte[]>?>();
+        var upload1 = UseUpload(MemoryStreamUploadHandler.Create(file1));
+        
+        var file2 = UseState<FileUpload<byte[]>?>();
+        var upload2 = UseUpload(MemoryStreamUploadHandler.Create(file2));
+
+        return Layout.Vertical()
+                | Text.H3("Drop Variant (Default)")
+                | file1.ToFileInput(upload1)
+                | Text.H3("Default Variant")
+                | file2.ToFileInput(upload2).Variant(FileInputVariant.Default);
+    }
+}
+```
 
 ## File Validation
 

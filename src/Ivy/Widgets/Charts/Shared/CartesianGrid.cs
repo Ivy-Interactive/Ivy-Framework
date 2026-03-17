@@ -20,6 +20,8 @@ public record CartesianGrid
     public double? FillOpacity { get; set; } = null;
 
     public string? StrokeDashArray { get; set; }
+
+    public Colors? Stroke { get; set; } = null;
 }
 
 public static class CartesianGridExtensions
@@ -67,5 +69,10 @@ public static class CartesianGridExtensions
     public static CartesianGrid StrokeDashArray(this CartesianGrid cartesianGrid, string strokeDashArray)
     {
         return cartesianGrid with { StrokeDashArray = strokeDashArray };
+    }
+
+    public static CartesianGrid Stroke(this CartesianGrid cartesianGrid, Colors stroke)
+    {
+        return cartesianGrid with { Stroke = stroke };
     }
 }

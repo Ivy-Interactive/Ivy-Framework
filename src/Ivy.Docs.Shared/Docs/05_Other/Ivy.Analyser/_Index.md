@@ -11,6 +11,7 @@ Reference pages for all Ivy.Analyser diagnostic codes.
 - [IVYHOOK004](IVYHOOK004.md) - Hook Called in Switch Statement
 - [IVYHOOK005](IVYHOOK005.md) - Hook Not at Top of Build Method
 - [IVYHOOK006](IVYHOOK006.md) - Hook Result Stored in Class Member
+- [IVYHOOK007](IVYHOOK007.md) - Hook Called Inline in Expression
 
 ## App Constructor
 

@@ -119,10 +119,13 @@ public class EventHandlingDemo : ViewBase
     {
         var selectedCategory = UseState("Programming");
         var selectedSkill = UseState("");
-        var showInfo = UseState(false);
         
         var categoryOptions = CategoryOptions.Keys.ToOptions();
         var skillOptions = CategoryOptions[selectedCategory.Value].ToOptions();
+        
+        UseEffect(() => {
+            selectedSkill.Set("");
+        }, selectedCategory);
         
         return Layout.Vertical()
             | Layout.Grid().Columns(2)
@@ -131,19 +134,12 @@ public class EventHandlingDemo : ViewBase
                     .WithField()
                     .Label("Category:")
                 
-                | new SelectInput<string>(
-                    value: selectedSkill.Value,
-                    onChange: e =>
-                    {
-                        selectedSkill.Set(e.Value);
-                        showInfo.Set(!string.IsNullOrEmpty(e.Value));
-                    },
-                    skillOptions)
+                | selectedSkill.ToSelectInput(skillOptions)
                     .Placeholder("Select a skill...")
                     .WithField()
                     .Label("Skill:")
             
-            | (showInfo.Value 
+            | (!string.IsNullOrEmpty(selectedSkill.Value) 
                 ? Text.Block($"Selected: {selectedCategory.Value} → {selectedSkill.Value}") 
                 : null);
     }

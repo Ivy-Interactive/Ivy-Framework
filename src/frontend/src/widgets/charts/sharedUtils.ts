@@ -237,7 +237,8 @@ export const generateXAxis = (
   categories: string[],
   xAxis?: XAxisProps[],
   isVertical?: boolean,
-  themeColors?: { mutedForeground: string; fontSans: string }
+  themeColors?: { mutedForeground: string; fontSans: string },
+  cartesianGrid?: CartesianGridProps
 ) => ({
   position: xAxis?.[0]?.orientation?.toLowerCase() === 'top' ? 'top' : 'bottom',
   type: isVertical ? 'value' : 'category',
@@ -272,7 +273,7 @@ export const generateXAxis = (
     show: true,
     lineStyle: {
       type: 'dashed',
-      color: themeColors?.mutedForeground,
+      color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
       opacity: 0.4,
     },
   },
@@ -286,7 +287,8 @@ export const generateYAxis = (
   yAxis?: YAxisProps[],
   isVertical: boolean = false,
   categories?: string[],
-  themeColors?: { mutedForeground: string; fontSans: string }
+  themeColors?: { mutedForeground: string; fontSans: string },
+  cartesianGrid?: CartesianGridProps
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
 
@@ -339,7 +341,7 @@ export const generateYAxis = (
       show: true,
       lineStyle: {
         type: 'dashed',
-        color: themeColors?.mutedForeground,
+        color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
         opacity: 0.4,
       },
     },

@@ -221,7 +221,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
             case TextVariant.Code:
                 return new CodeBlock(content, codeLanguage);
             case TextVariant.Markdown:
-                return new Markdown(content);
+                return new Markdown(content) { Density = _density };
             case TextVariant.Json:
                 return new Json(content);
             case TextVariant.Xml:

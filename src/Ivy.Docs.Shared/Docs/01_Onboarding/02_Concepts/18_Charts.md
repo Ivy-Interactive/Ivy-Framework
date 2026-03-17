@@ -170,6 +170,7 @@ All Cartesian charts (Line, Bar, Area) share these methods:
 | Method | Description |
 |--------|-------------|
 | `.CartesianGrid()` | Add grid lines (`.Horizontal()`, `.Vertical()`) |
+| `.Stroke()` | Set custom grid line color (e.g., `.Stroke(Colors.Slate)`) |
 | `.XAxis()` | Configure X-axis (`.Label<XAxis>("text")`) |
 | `.YAxis()` | Configure Y-axis (`.Label<YAxis>("text")`) |
 | `.Legend()` | Show legend (`.Layout()`, `.VerticalAlign()`) |

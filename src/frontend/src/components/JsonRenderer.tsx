@@ -86,7 +86,12 @@ const JsonNode = ({
   );
 };
 
-function collectPaths(value: unknown, path: string, maxDepth: number, currentDepth: number): string[] {
+function collectPaths(
+  value: unknown,
+  path: string,
+  maxDepth: number,
+  currentDepth: number
+): string[] {
   if (currentDepth >= maxDepth) return [];
   if (value === null || typeof value !== 'object') return [];
   if (Array.isArray(value) && value.length === 0) return [];
@@ -94,7 +99,9 @@ function collectPaths(value: unknown, path: string, maxDepth: number, currentDep
 
   const paths = [path];
   for (const [key, val] of Object.entries(value)) {
-    paths.push(...collectPaths(val, `${path}.${key}`, maxDepth, currentDepth + 1));
+    paths.push(
+      ...collectPaths(val, `${path}.${key}`, maxDepth, currentDepth + 1)
+    );
   }
   return paths;
 }
@@ -113,23 +120,46 @@ function collectAllPaths(value: unknown, path: string): string[] {
 
 export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
   let parsedData = data;
+  let parseError = null;
   if (typeof data === 'string') {
     try {
       parsedData = JSON.parse(data);
     } catch (error) {
       console.error(error);
-      return <div className="text-destructive">Invalid JSON string</div>;
+      parseError = 'Invalid JSON string';
     }
   }
 
-  const getInitialExpanded = () => {
-    if (initialExpanded === null || initialExpanded === undefined) return new Set();
-    if (initialExpanded === -1) return new Set(collectAllPaths(parsedData, 'root'));
-    if (initialExpanded === 0) return new Set();
+  // Use a key-based state reset for expansion
+  // We compute initial state during render if it's the first time or if props changed
+  const [lastProps, setLastProps] = useState({ parsedData, initialExpanded });
+  const [expanded, setExpanded] = useState(() => {
+    if (initialExpanded === null || initialExpanded === undefined)
+      return new Set<string>();
+    if (initialExpanded === -1)
+      return new Set(collectAllPaths(parsedData, 'root'));
+    if (initialExpanded === 0) return new Set<string>();
     return new Set(collectPaths(parsedData, 'root', initialExpanded, 0));
-  };
+  });
 
-  const [expanded, setExpanded] = useState(getInitialExpanded);
+  if (
+    lastProps.parsedData !== parsedData ||
+    lastProps.initialExpanded !== initialExpanded
+  ) {
+    setLastProps({ parsedData, initialExpanded });
+    setExpanded(() => {
+      if (initialExpanded === null || initialExpanded === undefined)
+        return new Set<string>();
+      if (initialExpanded === -1)
+        return new Set(collectAllPaths(parsedData, 'root'));
+      if (initialExpanded === 0) return new Set<string>();
+      return new Set(collectPaths(parsedData, 'root', initialExpanded, 0));
+    });
+  }
+
+  if (parseError) {
+    return <div className="text-destructive">{parseError}</div>;
+  }
 
   const toggleNode = (path: string) => {
     const newExpanded = new Set(expanded);

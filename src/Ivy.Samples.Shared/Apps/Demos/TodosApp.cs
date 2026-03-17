@@ -52,12 +52,18 @@ public class TodoItem(Todo todo, Action deleteTodo, Action toggleTodo) : ViewBas
 {
     public override object? Build()
     {
+        var doneState = UseState(todo.Done);
+        UseEffect((Action)(() =>
+        {
+            if (doneState.Value != todo.Done)
+            {
+                toggleTodo();
+            }
+        }), doneState);
+
         return Layout.Vertical(
             Layout.Horizontal(
-                new BoolInput<bool>(todo.Done, _ =>
-                {
-                    toggleTodo();
-                }),
+                doneState.ToBoolInput(),
                 todo.Done ? Text.Muted(todo.Title).StrikeThrough().Width(Size.Grow()) : Text.Literal(todo.Title).Width(Size.Grow()),
                 new Button(null, _ =>
                 {

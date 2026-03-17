@@ -104,25 +104,25 @@ public class ManualFieldTab : ViewBase
         var tel = UseState("");
         var website = UseState("");
 
-        var emailInput = new TextInput(email)
+        var emailInput = email.ToEmailInput()
             .Placeholder("user@domain.com")
             .Variant(TextInputVariant.Email)
             .WithField()
             .Label("Email");
 
-        var passwordInput = new TextInput(password)
+        var passwordInput = password.ToPasswordInput()
             .Placeholder("Min 8 characters")
             .Variant(TextInputVariant.Password)
             .WithField()
             .Label("Password");
 
-        var telInput = new TextInput(tel)
+        var telInput = tel.ToTelInput()
             .Placeholder("tel")
             .Variant(TextInputVariant.Tel)
             .WithField()
             .Label("Tel");
 
-        var websiteInput = new TextInput(website)
+        var websiteInput = website.ToUrlInput()
             .Placeholder("https://example.com")
             .Variant(TextInputVariant.Url)
             .WithField()
@@ -131,7 +131,7 @@ public class ManualFieldTab : ViewBase
         return new Card(
             Layout.Vertical().Gap(4)
                 | Text.H3("Manual TextInput + Field")
-                | Text.P("new TextInput(state).Variant(...).WithField() — same blur validation as To*Input().")
+                | Text.P("name.ToTextInput().Variant(...).WithField() — same blur validation as To*Input().")
                 | emailInput
                 | passwordInput
                 | telInput

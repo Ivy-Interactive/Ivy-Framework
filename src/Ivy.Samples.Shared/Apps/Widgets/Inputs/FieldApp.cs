@@ -17,6 +17,8 @@ public class FieldApp : SampleBase
         var passwordState = UseState<string>();
         var acceptedTerms = UseState(false);
         var addressState = UseState<string>();
+        var disabledState = UseState("Disabled value");
+        var invalidState = UseState("abc");
         var options = new List<string>() { "I read the terms and conditions and I agree" };
 
         return Layout.Vertical().Center()
@@ -26,7 +28,7 @@ public class FieldApp : SampleBase
 
                 // Explicit Field
                 | new Field(
-                    new TextInput(nameState)
+                    nameState.ToTextInput()
                         .Placeholder("Enter your name")
                 )
                 .Label("Name")
@@ -67,14 +69,14 @@ public class FieldApp : SampleBase
                     .Description("Your mailing address")
 
                 // Disabled TextInput
-                | new TextInput("Disabled value")
+                | disabledState.ToTextInput()
                     .Disabled()
                     .WithField()
                     .Label("Disabled Field")
                     .Description("This field is disabled")
 
                 // Invalid example
-                | new TextInput("abc")
+                | invalidState.ToTextInput()
                     .Invalid("Must be numeric")
                     .WithField()
                     .Label("Invalid Example")

@@ -74,7 +74,11 @@ const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
           mutedForeground: themeColors.mutedForeground,
         }),
         trigger: 'item',
-        formatter: (params: any) => {
+        formatter: (params: {
+          dataType: string;
+          data: { source: string; target: string; value: number };
+          name: string;
+        }) => {
           if (params.dataType === 'edge') {
             const sourceName = params.data.source;
             const targetName = params.data.target;

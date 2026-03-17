@@ -1,4 +1,5 @@
 
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -46,7 +47,7 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 {
     [OverloadResolutionPriority(1)]
-    public FeedbackInput(IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
+    internal FeedbackInput(IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TNumber>();
@@ -55,21 +56,21 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
     }
 
     [OverloadResolutionPriority(1)]
-    public FeedbackInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
+    internal FeedbackInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public FeedbackInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
+    internal FeedbackInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
         : this(placeholder, disabled, variant)
     {
         OnChange = new(e => { state(e.Value); return ValueTask.CompletedTask; });
         Value = value;
     }
 
-    public FeedbackInput(string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
+    internal FeedbackInput(string? placeholder = null, bool disabled = false, FeedbackInputVariant variant = FeedbackInputVariant.Stars)
     {
         Placeholder = placeholder;
         Disabled = disabled;
@@ -90,11 +91,10 @@ public static class FeedbackInputExtensions
     public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputVariant? variant = null)
     {
         var type = state.GetStateType();
-
         variant ??= type == typeof(bool) || type == typeof(bool?) ? FeedbackInputVariant.Thumbs : FeedbackInputVariant.Stars;
 
         Type genericType = typeof(FeedbackInput<>).MakeGenericType(type);
-        FeedbackInputBase input = (FeedbackInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
+        FeedbackInputBase input = (FeedbackInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant.Value }, null)!;
         return input;
     }
 

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -71,7 +72,7 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 public record SelectInput<TValue> : SelectInputBase, IInput<TValue>
 {
     [OverloadResolutionPriority(1)]
-    public SelectInput(IAnyState state, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
+    internal SelectInput(IAnyState state, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
         : this(options, placeholder, disabled, variant, selectMany)
     {
         var typedState = state.As<TValue>();
@@ -80,21 +81,21 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>
     }
 
     [OverloadResolutionPriority(1)]
-    public SelectInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
+    internal SelectInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
     : this(options, placeholder, disabled, variant, selectMany)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public SelectInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
+    internal SelectInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
         : this(options, placeholder, disabled, variant, selectMany)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public SelectInput(IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
+    internal SelectInput(IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputVariant variant = SelectInputVariant.Select, bool selectMany = false)
     {
         Placeholder = placeholder;
         Variant = variant;
@@ -144,8 +145,9 @@ public static class SelectInputExtensions
             placeholder = "Select options...";
         }
 
-        SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, state, options, placeholder, disabled, variant, selectMany)!;
-        input.Nullable = type.IsNullableType();
+        SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, options, placeholder, disabled, variant, selectMany }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
 
         return input;
     }

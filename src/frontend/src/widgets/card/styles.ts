@@ -29,7 +29,7 @@ export const cardStyles = {
   },
 
   content: {
-    base: 'flex-1',
+    base: 'flex-auto',
   },
 
   footer: {

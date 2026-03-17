@@ -193,9 +193,16 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
               }
             }}
           >
-            <Camera className={cn('text-muted-foreground', iconVariant({ density }))} />
+            <Camera
+              className={cn('text-muted-foreground', iconVariant({ density }))}
+            />
             {placeholder && (
-              <p className={cn('text-muted-foreground text-center', textVariant({ density }))}>
+              <p
+                className={cn(
+                  'text-muted-foreground text-center',
+                  textVariant({ density })
+                )}
+              >
                 {placeholder}
               </p>
             )}
@@ -211,12 +218,7 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
               muted
               className="w-full rounded-sm"
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={capture}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={capture}>
               <Camera className={iconVariant({ density })} />
               <span className={textVariant({ density })}>Capture</span>
             </Button>
@@ -230,12 +232,7 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
               alt="Captured photo"
               className="w-full rounded-sm"
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={retake}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={retake}>
               <RotateCcw className={iconVariant({ density })} />
               <span className={textVariant({ density })}>Retake</span>
             </Button>

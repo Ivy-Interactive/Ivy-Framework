@@ -164,14 +164,13 @@ The `Text.InlineCode()` method and `TextVariant.InlineCode` enum value on the [T
 
 The implicit numeric overloads for `Width()`, `Height()`, and `Size()` methods have been removed. You now must explicitly use [Size.Units()](https://docs.ivy.app/api-reference/ivy-shared/size) or `Size.Fraction()` to specify sizing.
 
-### Size.Fraction and Size.FractionGap - Decimal/Double Overloads Removed
+### Size.Fraction - Decimal/Double Overloads Removed
 
-The `decimal` and `double` overloads for `Size.Fraction()` and `Size.FractionGap()` have been removed to fix ambiguous call compilation errors (CS0121). You must now use `float` values with the `f` suffix.
+The `decimal` and `double` overloads for `Size.Fraction()` have been removed to fix ambiguous call compilation errors (CS0121). You must now use `float` values with the `f` suffix.
 
 ```csharp
 // Use explicit float literals with 'f' suffix
 .Width(Size.Fraction(0.5f))
-.Height(Size.FractionGap(0.25f))
 
 // Or cast explicitly if using decimal/double variables
 decimal ratio = 0.333m;
@@ -943,9 +942,9 @@ Roslyn analyzer **IVYAPP001** flags `[App]` classes that use constructor injecti
 - **IVYHOOK001B** fires for hooks inside lambdas, local functions, or anonymous methods within `Build()`.
 - Error messages explain the "same order on every render" constraint and name the closure type when relevant.
 
-### Size.Fraction and Size.FractionGap - Decimal/Double Overloads Removed
+### Size.Fraction - Decimal/Double Overloads Removed
 
-The `decimal` and `double` overloads have been removed to fix ambiguous call errors (CS0121). Use `float` with the `f` suffix or cast: `Size.Fraction(0.5f)`, `Size.FractionGap((float)ratio)`.
+The `decimal` and `double` overloads have been removed to fix ambiguous call errors (CS0121). Use `float` with the `f` suffix or cast: `Size.Fraction(0.5f)`, `Size.Fraction((float)ratio)`.
 
 ### Size.Percent() - Intuitive Percentage-Based Sizing
 

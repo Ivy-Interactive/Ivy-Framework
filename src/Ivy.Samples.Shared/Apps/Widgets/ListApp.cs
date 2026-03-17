@@ -7,7 +7,8 @@ public class ListApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return UseBlades(() => new ListBlade(), "List");
+        var blades = UseBlades(() => new ListBlade(), "List");
+        return blades;
     }
 }
 

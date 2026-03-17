@@ -21,8 +21,8 @@ class ScreenshotFeedbackApp : ViewBase
                | new ScreenshotFeedback()
                    .UploadUrl(uploadCtx.Value.UploadUrl)
                    .Open(isOpen.Value)
-                   .HandleSave(() => isOpen.Set(false))
-                   .HandleCancel(() => isOpen.Set(false))
+                   .OnSave(() => isOpen.Set(false))
+                   .OnCancel(() => isOpen.Set(false))
                | (screenshot.Value?.Status == FileUploadStatus.Finished && screenshot.Value.Content != null
                    ? (object)(Layout.Vertical().Gap(2)
                        | Text.H2("Captured Screenshot")

@@ -49,7 +49,7 @@ export const BreadcrumbsWidget: React.FC<BreadcrumbsWidgetProps> = ({
             item.hasOnClick && !item.disabled && !disabled && !isLast;
 
           return (
-            <React.Fragment key={`${item.label}-${index}`}>
+            <React.Fragment key={item.label}>
               <li className="flex items-center gap-1.5">
                 {isClickable ? (
                   <button

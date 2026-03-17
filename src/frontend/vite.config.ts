@@ -100,31 +100,6 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]',
-        // Fine-grained vendor chunking to keep initial payloads small and improve caching
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') && !id.includes('recharts'))
-              return 'vendor-react';
-            if (
-              id.includes('codemirror') ||
-              id.includes('@uiw/react-codemirror')
-            )
-              return 'vendor-codemirror';
-            if (
-              id.includes('remark') ||
-              id.includes('rehype') ||
-              id.includes('unified') ||
-              id.includes('react-markdown')
-            )
-              return 'vendor-markdown';
-            if (id.includes('mermaid')) return 'vendor-mermaid';
-            if (id.includes('reactflow')) return 'vendor-reactflow';
-            if (id.includes('framer-motion')) return 'vendor-motion';
-            if (id.includes('katex')) return 'vendor-katex';
-            if (id.includes('lodash')) return 'vendor-lodash';
-          }
-          return undefined;
-        },
       },
     },
   },

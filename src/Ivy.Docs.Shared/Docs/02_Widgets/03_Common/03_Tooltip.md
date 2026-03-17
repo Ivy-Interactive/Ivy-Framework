@@ -32,9 +32,9 @@ Tooltips are perfect for displaying validation errors or helpful hints on form i
 
 ```csharp demo-tabs
 Layout.Vertical()
-    | new TextInput(placeholder: "Enter email").WithTooltip("Enter a valid email address")
-    | new TextInput(placeholder: "Enter password").WithTooltip("Password must be at least 8 characters long")
-    | new NumberInput<int>(placeholder: "Enter age").WithTooltip("Must be between 18 and 100")
+    | UseState("").ToTextInput().Placeholder("Enter email").WithTooltip("Enter a valid email address")
+    | UseState("").ToPasswordInput().Placeholder("Enter password").WithTooltip("Password must be at least 8 characters long")
+    | UseState(0).ToNumberInput().Placeholder("Enter age").WithTooltip("Must be between 18 and 100")
 ```
 
 ### With Icons
@@ -120,10 +120,10 @@ Provide contextual help for form fields:
 
 ```csharp demo-below
 Layout.Vertical()
-    | new TextInput(placeholder: "Enter username").WithTooltip("Choose a unique username that will be visible to other users")
-    | new TextInput(placeholder: "Enter email").WithTooltip("We'll use this email for account verification and notifications")
-    | new NumberInput<int>(placeholder: "Enter age").WithTooltip("You must be at least 13 years old to create an account")
-    | new BoolInput("Newsletter").WithTooltip("Receive updates about new features and improvements")
+    | UseState("").ToTextInput().Placeholder("Enter username").WithTooltip("Choose a unique username that will be visible to other users")
+    | UseState("").ToTextInput().Placeholder("Enter email").WithTooltip("We'll use this email for account verification and notifications")
+    | UseState(0).ToNumberInput().Placeholder("Enter age").WithTooltip("You must be at least 13 years old to create an account")
+    | UseState(false).ToBoolInput().Label("Newsletter").WithTooltip("Receive updates about new features and improvements")
 ```
 
 </Body>

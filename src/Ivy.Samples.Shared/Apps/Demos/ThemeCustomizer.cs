@@ -182,6 +182,20 @@ public class ThemeCustomizer : SampleBase
         {
             var client = UseService<IClientProvider>();
             var selectedPreset = UseState(editingTheme.Value.Name);
+            var fontFamilyState = UseState(editingTheme.Value.FontFamily ?? "");
+            var fontSizeState = UseState(editingTheme.Value.FontSize ?? "");
+
+            UseEffect(() =>
+            {
+                if (presets.TryGetValue(selectedPreset.Value, out var preset))
+                {
+                    loadPreset(preset);
+                }
+            }, selectedPreset);
+
+            UseEffect(() => UpdateThemeProperty(t => t.FontFamily = string.IsNullOrWhiteSpace(fontFamilyState.Value) ? null : fontFamilyState.Value), fontFamilyState);
+            UseEffect(() => UpdateThemeProperty(t => t.FontSize = string.IsNullOrWhiteSpace(fontSizeState.Value) ? null : fontSizeState.Value), fontSizeState);
+
             var currentColors = selectedMode.Value == "light"
                 ? editingTheme.Value.Colors.Light
                 : editingTheme.Value.Colors.Dark;
@@ -206,18 +220,7 @@ public class ThemeCustomizer : SampleBase
 
             return Layout.Vertical()
                 | Text.H3("Theme Preset").Small()
-                | new SelectInput<string>(
-                    value: selectedPreset.Value,
-                    onChange: e =>
-                    {
-                        selectedPreset.Set(e.Value);
-                        if (presets.TryGetValue(e.Value, out var preset))
-                        {
-                            loadPreset(preset);
-                        }
-                    },
-                    options: presetOptions
-                )
+                | selectedPreset.ToSelectInput(options: presetOptions)
                 | new Separator()
                 // Mode toggle
                 | Text.H3("Theme Mode").Small()
@@ -291,16 +294,12 @@ public class ThemeCustomizer : SampleBase
                 | new Expandable(
                     "Typography & Layout",
                     Layout.Vertical()
-                        | new TextInput(
-                            value: editingTheme.Value.FontFamily ?? "",
-                            onChange: e => UpdateThemeProperty(t => t.FontFamily = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
-                            placeholder: "e.g., Inter, system-ui, sans-serif"
-                        ).WithField().Label("Font Family")
-                        | new TextInput(
-                            value: editingTheme.Value.FontSize ?? "",
-                            onChange: e => UpdateThemeProperty(t => t.FontSize = string.IsNullOrWhiteSpace(e.Value) ? null : e.Value),
-                            placeholder: "e.g., 16px, 1rem"
-                        ).WithField().Label("Font Size")
+                        | fontFamilyState.ToTextInput()
+                            .Placeholder("e.g., Inter, system-ui, sans-serif")
+                        .WithField().Label("Font Family")
+                        | fontSizeState.ToTextInput()
+                            .Placeholder("e.g., 16px, 1rem")
+                        .WithField().Label("Font Size")
                         | new Separator()
                         | new BorderRadiusSelector(
                             editingTheme,
@@ -334,17 +333,11 @@ public class ThemeCustomizer : SampleBase
                 },
                 options: new QueryOptions { RevalidateOnMount = true });
 
+            UseEffect(() => onChange(colorState.Value), colorState);
+
             return Layout.Horizontal().Align(Align.Center)
                 | Text.P(label).Small().Width(Size.Px(180))
-                | new ColorInput(
-                    value: colorState.Value,
-                    onChange: e =>
-                    {
-                        colorState.Set(e.Value);
-                        onChange(e.Value);
-                    },
-                    variant: ColorInputVariant.TextAndPicker
-                );
+                | colorState.ToColorInput(variant: ColorInputVariant.TextAndPicker);
         }
     }
 

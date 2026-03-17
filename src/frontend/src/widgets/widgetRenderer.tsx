@@ -6,7 +6,6 @@ import { Densities } from '@/types/density';
 import {
   isExternalWidget,
   createLazyExternalWidget,
-  getCachedExternalWidget,
 } from '@/widgets/externalWidgetLoader';
 import { ExternalWidgetWrapper } from '@/widgets/ExternalWidgetWrapper';
 export interface MemoizedWidgetProps {
@@ -188,10 +187,7 @@ const renderExternalWidget = (
   node: WidgetNode,
   inheritedScale?: Densities
 ): React.ReactNode => {
-  let Component = getCachedExternalWidget(node.type);
-  if (!Component) {
-    Component = createLazyExternalWidget(node.type);
-  }
+  const Component = createLazyExternalWidget(node.type);
 
   const props: Record<string, unknown> = {
     ...node.props,

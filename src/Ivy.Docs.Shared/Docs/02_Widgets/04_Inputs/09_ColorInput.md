@@ -33,23 +33,23 @@ public class ColorDemo : ViewBase
 }
 ```
 
-### Using the Non-Generic Constructor
+### Creating ColorInput Instances
 
-For convenience, you can create a `ColorInput` without specifying the generic type, which defaults to `string`:
+For convenience, you create `ColorInput` instances using extension methods on [state](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp
-// Using the non-generic constructor (defaults to string)
-var colorInput = new ColorInput();
+// Creating a ColorInput from a state
+var colorState = UseState("#ff0000");
+var colorInput = colorState.ToColorInput();
 
 // With placeholder
-var colorInputWithPlaceholder = new ColorInput("Choose a color");
+var colorInputWithPlaceholder = colorState.ToColorInput().Placeholder("Choose a color");
 
 // With all options
-var colorInputFull = new ColorInput(
-    placeholder: "Select your favorite color",
-    disabled: false,
-    variant: ColorInputVariant.TextAndPicker
-);
+var colorInputFull = colorState.ToColorInput()
+    .Placeholder("Select your favorite color")
+    .Disabled(false)
+    .Variant(ColorInputVariant.TextAndPicker);
 ```
 
 ## Variants
@@ -99,9 +99,9 @@ public class ColorSwatchDemo : ViewBase
 
 ## Event Handling
 
-ColorInput can handle change events using the `onChange` parameter.
+ColorInput typically handles state automatically through `UseState`. If you need to perform actions when the color changes, use the [UseEffect](../../03_Hooks/02_Core/04_UseEffect.md) hook to watch the state.
 The following demo shows how the `Picker` variant can be used with a code
-block so that
+block.
 
 ```csharp demo-below
 public class ColorChangedDemo : ViewBase
@@ -111,16 +111,15 @@ public class ColorChangedDemo : ViewBase
     {
         var colorState = UseState("#ff0000");
         var colorName = UseState(colorState.Value);
-        var onChangeHandler = (Event<IInput<string>, string> e) =>
-        {
-            colorName.Set(e.Value);
-            colorState.Set(e.Value);
-        };
+        
+        UseEffect(() => {
+            colorName.Set(colorState.Value);
+        }, colorState);
+
         return Layout.Vertical()
                 | H3("Hex Color Picker")
                 | (Layout.Horizontal()
-                | new ColorInput<string>
-                       (colorState.Value, onChangeHandler)
+                | colorState.ToColorInput()
                       .Variant(ColorInputVariant.Picker)
                 | new CodeBlock(colorName.Value)
                     .ShowCopyButton()

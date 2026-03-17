@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -44,7 +45,7 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange>
 {
     [OverloadResolutionPriority(1)]
-    public DateRangeInput(IAnyState state, string? placeholder = null, bool disabled = false) : this(placeholder, disabled)
+    internal DateRangeInput(IAnyState state, string? placeholder = null, bool disabled = false) : this(placeholder, disabled)
     {
         var typedState = state.As<TDateRange>();
         Value = typedState.Value;
@@ -53,21 +54,21 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
     }
 
     [OverloadResolutionPriority(1)]
-    public DateRangeInput(TDateRange value, Func<Event<IInput<TDateRange>, TDateRange>, ValueTask> onChange, string? placeholder = null, bool disabled = false) : this(placeholder, disabled)
+    internal DateRangeInput(TDateRange value, Func<Event<IInput<TDateRange>, TDateRange>, ValueTask> onChange, string? placeholder = null, bool disabled = false) : this(placeholder, disabled)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
         Nullable = typeof(TDateRange) == typeof((DateOnly?, DateOnly?));
     }
 
-    public DateRangeInput(TDateRange value, Action<Event<IInput<TDateRange>, TDateRange>> onChange, string? placeholder = null, bool disabled = false) : this(placeholder, disabled)
+    internal DateRangeInput(TDateRange value, Action<Event<IInput<TDateRange>, TDateRange>> onChange, string? placeholder = null, bool disabled = false) : this(placeholder, disabled)
     {
         OnChange = new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
         Nullable = typeof(TDateRange) == typeof((DateOnly?, DateOnly?));
     }
 
-    public DateRangeInput(string? placeholder = null, bool disabled = false)
+    internal DateRangeInput(string? placeholder = null, bool disabled = false)
     {
         Placeholder = placeholder;
         Disabled = disabled;
@@ -92,7 +93,7 @@ public static class DateRangeInputExtensions
         }
 
         Type genericType = typeof(DateRangeInput<>).MakeGenericType(type);
-        DateRangeInputBase input = (DateRangeInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled)!;
+        DateRangeInputBase input = (DateRangeInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled }, null)!;
         return input;
     }
 

@@ -13,6 +13,7 @@ public class BarChartApp : SampleBase
             | new BarChart3()
             | new BarChart4()
             | new BarChart5()
+            | new BarChart9()
         ;
     }
 }
@@ -162,6 +163,33 @@ public class BarChart5 : ViewBase
                 .Measure("Designers", e => e.Sum(f => f.Designers))
                 .Measure("QA", e => e.Sum(f => f.QA))
                 .Toolbox()
+        ;
+    }
+}
+
+public class BarChart9 : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Month = "Jan", Revenue = 4200, Expenses = 3100 },
+            new { Month = "Feb", Revenue = 4800, Expenses = 3400 },
+            new { Month = "Mar", Revenue = 5100, Expenses = 3600 },
+            new { Month = "Apr", Revenue = 4700, Expenses = 3200 },
+            new { Month = "May", Revenue = 5300, Expenses = 3800 },
+            new { Month = "Jun", Revenue = 5900, Expenses = 4000 },
+        };
+
+        return new Card().Title("Custom Grid Line Color (Stroke)")
+            | new BarChart(data)
+                .ColorScheme(ColorScheme.Default)
+                .Bar(new Bar("Revenue", 1).Radius(8).LegendType(LegendTypes.Square))
+                .Bar(new Bar("Expenses", 2).Radius(8).LegendType(LegendTypes.Square))
+                .CartesianGrid(new CartesianGrid().Horizontal().Stroke(Colors.Red))
+                .Tooltip()
+                .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
+                .Legend()
         ;
     }
 }
