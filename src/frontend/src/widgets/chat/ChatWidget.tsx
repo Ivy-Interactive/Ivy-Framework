@@ -5,7 +5,7 @@ import { useEventHandler } from '@/components/event-handler';
 import { MessageLoading } from '@/components/MessageLoading';
 import { Button } from '@/components/ui/button';
 import { CornerDownLeft, Square } from 'lucide-react';
-import React, { FormEvent, useState, KeyboardEvent, ReactNode } from 'react';
+import React, { useState, KeyboardEvent, ReactNode } from 'react';
 import { User, LucideStars } from 'lucide-react';
 import { TextShimmer } from '@/components/TextShimmer';
 import { getHeight, getWidth } from '@/lib/styles';
@@ -111,8 +111,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 
   const [input, setInput] = useState('');
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (
+    e?: React.FormEvent | React.MouseEvent | React.KeyboardEvent
+  ) => {
+    if (e) e.preventDefault();
     if (!input.trim()) return;
     setInput('');
     eventHandler('OnSend', id, [input.trim()]);
@@ -126,7 +128,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e as unknown as FormEvent);
+      handleSubmit();
     }
   };
 
@@ -142,10 +144,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
       </div>
 
       <div className="m-4">
-        <form
-          onSubmit={handleSubmit}
-          className="relative rounded-field border bg-background focus-within:ring-1 focus-within:ring-ring p-1"
-        >
+        <div className="relative rounded-field border bg-background focus-within:ring-1 focus-within:ring-ring p-1">
           <ChatInput
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -165,13 +164,17 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
                 <Square className="size-3.5 fill-black" />
               </Button>
             ) : (
-              <Button type="submit" className="ml-auto gap-1.5">
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                className="ml-auto gap-1.5"
+              >
                 Send Message
                 <CornerDownLeft className="size-3.5" />
               </Button>
             )}
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
