@@ -58,7 +58,14 @@ public class AuthController() : Controller
             scheme = forwardedProto.ToString();
         }
         var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
-        var callback = WebhookEndpoint.CreateAuthCallback(callbackId, scheme, host, server.Args?.PathBase);
+        if (HttpContext.Request.Headers.TryGetValue("X-Forwarded-Host", out var forwardedHost) && !string.IsNullOrEmpty(forwardedHost.ToString()))
+        {
+            host = forwardedHost.ToString();
+        }
+        var pathPrefix = HttpContext.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var fwdPrefix) && !string.IsNullOrEmpty(fwdPrefix.ToString())
+            ? fwdPrefix.ToString().Trim('/')
+            : server.Args?.PathBase;
+        var callback = WebhookEndpoint.CreateAuthCallback(callbackId, scheme, host, pathPrefix);
 
         try
         {
