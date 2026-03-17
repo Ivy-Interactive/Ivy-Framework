@@ -28,7 +28,7 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
   multiple = false,
   maxFileSize,
   minFileSize,
-  mode,
+  mode = 'Upload',
   uploadUrl,
   events = [],
 }) => {
