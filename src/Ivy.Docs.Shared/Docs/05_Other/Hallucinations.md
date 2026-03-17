@@ -991,6 +991,31 @@ new Box(Text.H1("$0.00")).Align(Align.Center)
 **Found In:**
 713546f7-32fb-4961-ab78-def91e7c010d
 
+## TextBuilder.Padding() — non-existent method
+
+**Hallucinated API:**
+```csharp
+Text.Block(content).Padding(16)
+Text.P(content).Padding(4)
+```
+
+**Error:** `CS1929: 'TextBuilder' does not contain a definition for 'Padding'`
+
+**Correct API:**
+```csharp
+// Wrap text in a Box for padding:
+new Box(Text.Block(content)).Padding(16)
+
+// Or wrap in a layout:
+Layout.Vertical().Padding(16)
+    | Text.Block(content)
+```
+
+`TextBuilder` does not have `.Padding()`. Padding is available on container widgets (`Box`, `LayoutView`, `TabView`, `GridView`). To add padding around text, wrap it in a `Box` or layout. This is a variant of the `TextBuilder.AlignCenter()` and `TextBuilder.Style()` hallucinations — the agent applies container-level styling to text elements.
+
+**Found In:**
+7c547408-00b3-47e1-976e-59c9357c1e74
+
 ## FileUploadStatus.Completed — non-existent enum value
 
 **Hallucinated API:**
