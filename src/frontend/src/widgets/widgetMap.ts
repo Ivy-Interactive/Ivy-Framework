@@ -17,6 +17,11 @@ import {
   PaginationWidget,
 } from '@/widgets';
 import { BreadcrumbsWidget } from '@/widgets/breadcrumbs';
+import {
+  FileDialogWidget,
+  SaveDialogWidget,
+  FolderDialogWidget,
+} from '@/widgets/filePicker';
 import { BladeContainerWidget, BladeWidget } from '@/widgets/blades';
 import { DetailsWidget, DetailWidget } from '@/widgets/details';
 import {
@@ -205,6 +210,11 @@ export const widgetMap = {
 
   // Forms
   'Ivy.Form': FormWidget,
+
+  // File Pickers
+  'Ivy.FileDialog': FileDialogWidget,
+  'Ivy.SaveDialog': SaveDialogWidget,
+  'Ivy.FolderDialog': FolderDialogWidget,
 
   // Dialogs
   'Ivy.Dialog': DialogWidget,
