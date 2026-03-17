@@ -38,6 +38,8 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
         var secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
         var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
 
+        IsProduction = ProcessHelper.IsProduction();
+
         var (secretIsProduction, _) = ParseKey("Clerk:SecretKey", "sk", secretKey);
         var (publishableIsProduction, _) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
 
@@ -46,7 +48,10 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
             throw new Exception("Clerk:SecretKey and Clerk:PublishableKey must both be for the same environment (test or live)");
         }
 
-        IsProduction = secretIsProduction;
+        if (secretIsProduction != IsProduction)
+        {
+            throw new Exception($"Clerk:SecretKey and Clerk:PublishableKey environment ({(secretIsProduction ? "live" : "test")}) does not match IVY_ENVIRONMENT ({(IsProduction ? "Production" : "Development")})");
+        }
 
         var (_, publishableKeyValue) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
         try
