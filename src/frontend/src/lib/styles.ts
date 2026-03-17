@@ -32,13 +32,6 @@ const _getWantedWidth = (width?: string): React.CSSProperties => {
       return {
         width: `${parseFloat(value) * 100}%`,
       };
-    case 'fraction-gap':
-      return {
-        flexBasis: `${parseFloat(value) * 100}%`,
-        flexShrink: 1,
-        flexGrow: 0,
-        minWidth: 0, // Allow shrinking below flex-basis to accommodate gaps
-      };
     case 'full':
       return { width: '100%' };
     case 'fit':
@@ -75,10 +68,6 @@ const _getMinWidth = (width?: string): React.CSSProperties => {
       return {
         minWidth: `${parseFloat(value) * 100}%`,
       };
-    case 'fraction-gap':
-      return {
-        minWidth: 0, // Allow shrinking to accommodate gaps
-      };
     case 'full':
       return { minWidth: '100%' };
     case 'fit':
@@ -108,10 +97,6 @@ const _getMaxWidth = (width?: string): React.CSSProperties => {
     case 'rem':
       return { maxWidth: `${value}rem` };
     case 'fraction':
-      return {
-        maxWidth: `${parseFloat(value) * 100}%`,
-      };
-    case 'fraction-gap':
       return {
         maxWidth: `${parseFloat(value) * 100}%`,
       };

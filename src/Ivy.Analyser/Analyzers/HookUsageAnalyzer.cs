@@ -47,6 +47,11 @@ namespace Ivy.Analyser.Analyzers
         private const string MessageFormatFieldStorage = "Ivy hook '{0}' result must not be stored in a class field or property. Use a local variable instead. See: https://docs.ivy.app/other/ivy-analyser/ivyhook006.";
         private const string DescriptionFieldStorage = "Storing hook results in class fields or properties breaks the reactive system. The state object is captured once and reused across renders, causing hooks to receive wrong indices.";
 
+        public const string DiagnosticIdInlineExpression = "IVYHOOK007";
+        private const string TitleInlineExpression = "Hook Called Inline in Expression";
+        private const string MessageFormatInlineExpression = "'{0}' should be assigned to a local variable at the top of the Build method, not called inline in an expression. Extract to: var myVar = {0}; See: https://docs.ivy.app/other/ivy-analyser/ivyhook007.";
+        private const string DescriptionInlineExpression = "Hooks must be assigned to a top-level local variable or called as a standalone expression statement. Do not call hooks inline within widget construction expressions, pipe chains, constructor arguments, or return statements.";
+
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
             DiagnosticId,
             Title,
@@ -110,6 +115,15 @@ namespace Ivy.Analyser.Analyzers
             isEnabledByDefault: true,
             description: DescriptionFieldStorage);
 
+        private static readonly DiagnosticDescriptor RuleInlineExpression = new DiagnosticDescriptor(
+            DiagnosticIdInlineExpression,
+            TitleInlineExpression,
+            MessageFormatInlineExpression,
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: DescriptionInlineExpression);
+
         private static bool IsHookName(string methodName)
         {
             return methodName.Length > 3
@@ -141,7 +155,8 @@ namespace Ivy.Analyser.Analyzers
             RuleLoop,
             RuleSwitch,
             RuleNotAtTop,
-            RuleFieldStorage);
+            RuleFieldStorage,
+            RuleInlineExpression);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -215,6 +230,14 @@ namespace Ivy.Analyser.Analyzers
             if (isInSwitch)
             {
                 var diagnostic = Diagnostic.Create(RuleSwitch, invocation.GetLocation(), methodName);
+                context.ReportDiagnostic(diagnostic);
+            }
+
+            // Only check for inline expressions when the hook isn't already flagged by
+            // conditional/loop/switch rules (those are more specific diagnostics)
+            if (!isInConditional && !isInLoop && !isInSwitch && IsInlineExpression(invocation))
+            {
+                var diagnostic = Diagnostic.Create(RuleInlineExpression, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
             }
 
@@ -480,12 +503,12 @@ namespace Ivy.Analyser.Analyzers
         {
             if (statement is LocalDeclarationStatementSyntax localDecl)
             {
-                // Use LINQ for cleaner filtering
+                // Use LINQ for cleaner filtering — unwrap null-forgiving operator (!)
                 if (localDecl.Declaration.Variables
-                    .Where(v => v.Initializer?.Value is InvocationExpressionSyntax)
+                    .Where(v => v.Initializer != null && UnwrapSuppression(v.Initializer.Value) is InvocationExpressionSyntax)
                     .Any(v =>
                     {
-                        var invocation = (InvocationExpressionSyntax)v.Initializer!.Value;
+                        var invocation = (InvocationExpressionSyntax)UnwrapSuppression(v.Initializer!.Value);
                         var methodName = GetMethodName(invocation);
                         return methodName != null && IsHookName(methodName);
                     }))
@@ -550,6 +573,75 @@ namespace Ivy.Analyser.Analyzers
                 {
                     return true;
                 }
+            }
+
+            return false;
+        }
+
+        private static ExpressionSyntax UnwrapSuppression(ExpressionSyntax expression)
+        {
+            // Unwrap null-forgiving operator: UseHook()! → UseHook()
+            while (expression is PostfixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.SuppressNullableWarningExpression } postfix)
+            {
+                expression = postfix.Operand;
+            }
+            return expression;
+        }
+
+        private static bool IsInlineExpression(InvocationExpressionSyntax invocation)
+        {
+            // Walk up from the invocation to find the containing statement
+            var current = (SyntaxNode)invocation;
+
+            while (current != null)
+            {
+                if (current.Parent is LocalDeclarationStatementSyntax localDecl)
+                {
+                    // Check if the hook invocation is the direct initializer of the variable
+                    // e.g., var x = UseState(0); → OK
+                    // e.g., var x = UseArgs<T>()!; → OK (null-forgiving wrapper)
+                    // but var x = UseState(0).Value; → inline
+                    foreach (var variable in localDecl.Declaration.Variables)
+                    {
+                        if (variable.Initializer?.Value == invocation)
+                        {
+                            return false; // Direct initializer — allowed
+                        }
+                        // Handle null-forgiving operator: var x = UseHook()!;
+                        if (variable.Initializer != null && UnwrapSuppression(variable.Initializer.Value) == invocation)
+                        {
+                            return false; // Direct initializer with ! — allowed
+                        }
+                    }
+                    return true; // Hook is nested inside the initializer expression
+                }
+
+                if (current.Parent is ExpressionStatementSyntax)
+                {
+                    // Check if the hook invocation is the entire expression
+                    // e.g., UseEffect(() => {}); → OK
+                    if (current == invocation)
+                    {
+                        return false; // Standalone expression — allowed
+                    }
+
+                    // Check if the hook is the direct RHS of an assignment expression
+                    // e.g., _field = UseState(0); → allowed (caught by IVYHOOK006 instead)
+                    if (current is AssignmentExpressionSyntax assignment && assignment.Right == invocation)
+                    {
+                        return false;
+                    }
+
+                    return true; // Hook is nested inside another expression
+                }
+
+                // If we reach a statement without matching the above, the hook is inline
+                if (current.Parent is StatementSyntax)
+                {
+                    return true;
+                }
+
+                current = current.Parent;
             }
 
             return false;

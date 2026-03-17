@@ -158,16 +158,6 @@ public static class TextInputExtensions
     private static bool VariantHasBuiltInValidation(TextInputVariant variant) =>
         variant is TextInputVariant.Email or TextInputVariant.Tel or TextInputVariant.Url or TextInputVariant.Password;
 
-    private static TextInputBase CreateTextInputCore(IAnyState state, string? placeholder, bool disabled, TextInputVariant variant)
-    {
-        var type = state.GetStateType();
-        Type genericType = typeof(TextInput<>).MakeGenericType(type);
-        TextInputBase input = (TextInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
-        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        nullableProperty?.SetValue(input, type.IsNullableType());
-        return input;
-    }
-
     /// <summary>Wire blur validation for variant; <paramref name="widget"/> must already be bound to <paramref name="state"/>.</summary>
     private static TextInputBase ApplyVariantValidation(IViewContext context, IAnyState state, TextInputBase widget, TextInputVariant variant)
     {
@@ -205,7 +195,11 @@ public static class TextInputExtensions
 
     public static TextInputBase ToTextInput(this IAnyState state, string? placeholder = null, bool disabled = false, TextInputVariant variant = TextInputVariant.Text)
     {
-        var input = CreateTextInputCore(state, placeholder, disabled, variant);
+        var type = state.GetStateType();
+        Type genericType = typeof(TextInput<>).MakeGenericType(type);
+        TextInputBase input = (TextInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
         // Allow .Variant(Email) later to pick up the same state for validation
         if (TextInputBuildContext.GetCurrent() is { } ctx)
             input.SetAttachedValue(ValidationOwner, AttachedValidationState, state);

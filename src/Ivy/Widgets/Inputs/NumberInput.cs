@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -142,7 +143,8 @@ public static class NumberInputExtensions
     {
         var type = state.GetStateType();
         Type genericType = typeof(NumberInput<>).MakeGenericType(type);
-        NumberInputBase input = (NumberInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant, formatStyle)!;
+        NumberInputBase input = (NumberInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant, formatStyle }, null)!;
+
         input.ScaffoldDefaults(null, type);
         if (min is not null) input = input with { Min = min };
         if (max is not null) input = input with { Max = max };

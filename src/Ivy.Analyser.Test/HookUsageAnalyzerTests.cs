@@ -1569,5 +1569,219 @@ public class Button { }
 
             await VerifyCS.VerifyAnalyzerAsync(test);
         }
+
+        // IVYHOOK007: Hook Called Inline in Expression
+
+        [Fact]
+        public async Task HookInlineInPipeOperatorShouldWarn()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+            Layout.Vertical()
+                | {|IVYHOOK007:UseState(true)|}.ToBoolInput()
+        );
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected IState<T> UseState<T>(T initialValue) => default!;
+}
+
+public interface IState<T>
+{
+    T Value { get; }
+    IWidget ToBoolInput();
+}
+
+public class Layout
+{
+    public static IWidget Vertical() => default!;
+}
+
+public interface IWidget
+{
+    public static IWidget operator |(IWidget left, IWidget right) => left;
+}
+
+public class Card
+{
+    public Card(IWidget content) { }
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookInlineAsConstructorArgumentShouldWarn()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card({|IVYHOOK007:UseState(0)|}.Value);
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected IState<T> UseState<T>(T initialValue) => default!;
+}
+
+public interface IState<T> { T Value { get; } }
+public class Card
+{
+    public Card(int content) { }
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookInlineInReturnExpressionShouldWarn()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return {|IVYHOOK007:UseState(true)|}.ToBoolInput();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected IState<T> UseState<T>(T initialValue) => default!;
+}
+
+public interface IState<T>
+{
+    T Value { get; }
+    object ToBoolInput();
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookAssignedToVariableShouldNotWarnInline()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        var x = UseState(0);
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookAsExpressionStatementShouldNotWarnInline()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        UseEffect(() => { });
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected void UseEffect(Action effect) { }
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task MultipleInlineHooksInLayoutShouldWarnForEach()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+            Layout.Vertical()
+                | {|IVYHOOK007:UseState(true)|}.ToBoolInput()
+                | {|IVYHOOK007:UseState(false)|}.ToBoolInput()
+                | {|IVYHOOK007:UseState(true)|}.ToBoolInput()
+        );
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected IState<T> UseState<T>(T initialValue) => default!;
+}
+
+public interface IState<T>
+{
+    T Value { get; }
+    IWidget ToBoolInput();
+}
+
+public class Layout
+{
+    public static IWidget Vertical() => default!;
+}
+
+public interface IWidget
+{
+    public static IWidget operator |(IWidget left, IWidget right) => left;
+}
+
+public class Card
+{
+    public Card(IWidget content) { }
+}
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
     }
 }

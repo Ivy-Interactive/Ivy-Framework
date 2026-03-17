@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -78,9 +79,10 @@ public static class IconInputExtensions
     public static IconInputBase ToIconInput(this IAnyState state, string? placeholder = null, bool disabled = false)
     {
         var type = state.GetStateType();
-        var genericType = typeof(IconInput<>).MakeGenericType(type);
-        var input = (IconInputBase)Activator.CreateInstance(genericType, state, placeholder ?? "Select an icon", disabled)!;
-        input.Nullable = type.IsNullableType();
+        Type genericType = typeof(IconInput<>).MakeGenericType(type);
+        IconInputBase input = (IconInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder ?? "Select an icon", disabled }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
         return input;
     }
 
