@@ -1150,3 +1150,27 @@ new TextInput(query).Width(Size.Grow())
 
 **Found In:**
 7a9aadf3
+
+## Button.Visible() / Widget.Visible() — removed conditional rendering method
+
+**Hallucinated API:**
+```csharp
+new Button("Reset").Visible(hasDate)
+```
+
+**Error:** `'Button' does not contain a definition for 'Visible'` (CS1061)
+
+**Correct API:**
+```csharp
+// Use a simple if statement for conditional rendering:
+if (hasDate)
+    yield return new Button("Reset");
+
+// Or use a ternary:
+var resetButton = hasDate ? new Button("Reset") : null;
+```
+
+The `.Visible()` extension method was removed from `WidgetBase` (commit f869df302). `LayoutView.Visible()` was also removed. The only remaining `.Visible()` is `FormBuilder<TModel>.Visible(field, predicate)` which controls form field visibility — not widget rendering. The agent confuses this with the old WidgetBase API or UI frameworks like WPF/WinForms that have a `Visible` property. In Ivy, conditional rendering is done with standard C# control flow (`if`, ternary, etc.) like in React.
+
+**Found In:**
+18763683-ff01-4f76-8dc5-6f0bfe750e4a
