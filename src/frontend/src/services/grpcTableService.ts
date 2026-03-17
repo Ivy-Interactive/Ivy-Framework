@@ -108,12 +108,11 @@ export interface GrpcTableStreamOptions {
 }
 
 export class GrpcTableService extends EventEmitter {
-  private serverUrl: string;
   private isConnected = false;
 
-  constructor(serverUrl: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  constructor(_serverUrl?: string) {
     super();
-    this.serverUrl = serverUrl;
   }
 
   async parseFilter(
