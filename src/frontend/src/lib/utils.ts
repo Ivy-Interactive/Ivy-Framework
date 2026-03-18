@@ -207,7 +207,9 @@ function isAllowedIvyHost(origin: string): boolean {
 
 export function getIvyPathBase(): string {
   return (
-    document.querySelector('meta[name="ivy-path-base"]')?.getAttribute('content') ?? ''
+    document
+      .querySelector('meta[name="ivy-path-base"]')
+      ?.getAttribute('content') ?? ''
   );
 }
 
