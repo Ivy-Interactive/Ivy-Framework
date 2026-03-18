@@ -60,6 +60,48 @@ f20dced8-1689-4289-a2d8-ee67136eb6ce
 2e91e9c7-9c03-4b86-a9d2-c0417bcf715f
 7a9aadf3-097e-448d-8d5c-bc86152710a6
 
+## ToastVariant — non-existent enum
+
+**Hallucinated API:**
+```csharp
+client.Toast("Error!", ToastVariant.Destructive)
+```
+
+**Error:** `The name 'ToastVariant' does not exist in the current context`
+
+**Correct API:**
+```csharp
+client.Toast("Success message");       // neutral toast
+client.Toast("Done!", "Title");        // with title
+client.Error("Something went wrong."); // error toast
+```
+
+`ToastVariant` does not exist. The `IClientProvider.Toast()` method takes `(string message)` or `(string message, string title)`. For error toasts, use `client.Error(message)` instead.
+
+**Found In:**
+d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
+
+## DateTimeVariant — wrong enum name
+
+**Hallucinated API:**
+```csharp
+date.ToDateTimeInput().Variant(DateTimeVariant.Date)
+```
+
+**Error:** `The name 'DateTimeVariant' does not exist in the current context`
+
+**Correct API:**
+```csharp
+date.ToDateInput()
+// or:
+date.ToDateTimeInput().Variant(DateTimeInputVariant.Date)
+```
+
+The enum is `DateTimeInputVariant` (singular), not `DateTimeVariant` (missing "Input") or `DateTimeInputVariants` (old plural name). All input variant enums were renamed from plural to singular in Ivy-Framework#2546. Values: `DateTime`, `Date`, `Time`, `Month`, `Week`. **Auto-fixed:** The refactoring service automatically rewrites both `DateTimeVariant` and `DateTimeInputVariants` to `DateTimeInputVariant`.
+
+**Found In:**
+d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
+
 ## Badge.Color(Colors.X) — non-existent fluent method
 
 **Hallucinated API:**
@@ -161,69 +203,6 @@ See: Ivy-Framework#2587 (plans to rename `path` to `group`)
 7c547408-00b3-47e1-976e-59c9357c1e74
 d6a5f377-bc84-404d-acca-71164d3754d4
 
-## SelectInputBase.Options() — chained options method
-
-**Hallucinated API:**
-```csharp
-defaultBehavior.ToSelectInput().Options(["Refused", "Allowed", "Ignored"])
-```
-
-**Error:** `'SelectInputBase' does not contain a definition for 'Options'`
-
-**Correct API:**
-```csharp
-defaultBehavior.ToSelectInput(new[] { "Refused", "Allowed", "Ignored" }.ToOptions())
-```
-
-Options are passed as `IEnumerable<IAnyOption>` to `ToSelectInput(options)`, not chained via a `.Options()` method. Use the `.ToOptions()` extension method on a string array to convert to the correct type.
-
-**Found In:**
-4eb1799f-39b2-4325-a0bd-37b769a33432``
-
-https://github.com/Ivy-Interactive/Ivy-Framework/issues/2271
-
-## ToastVariant — non-existent enum
-
-**Hallucinated API:**
-```csharp
-client.Toast("Error!", ToastVariant.Destructive)
-```
-
-**Error:** `The name 'ToastVariant' does not exist in the current context`
-
-**Correct API:**
-```csharp
-client.Toast("Success message");       // neutral toast
-client.Toast("Done!", "Title");        // with title
-client.Error("Something went wrong."); // error toast
-```
-
-`ToastVariant` does not exist. The `IClientProvider.Toast()` method takes `(string message)` or `(string message, string title)`. For error toasts, use `client.Error(message)` instead.
-
-**Found In:**
-d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
-
-## DateTimeVariant — wrong enum name
-
-**Hallucinated API:**
-```csharp
-date.ToDateTimeInput().Variant(DateTimeVariant.Date)
-```
-
-**Error:** `The name 'DateTimeVariant' does not exist in the current context`
-
-**Correct API:**
-```csharp
-date.ToDateInput()
-// or:
-date.ToDateTimeInput().Variant(DateTimeInputVariant.Date)
-```
-
-The enum is `DateTimeInputVariant` (singular), not `DateTimeVariant` (missing "Input") or `DateTimeInputVariants` (old plural name). All input variant enums were renamed from plural to singular in Ivy-Framework#2546. Values: `DateTime`, `Date`, `Time`, `Month`, `Week`. **Auto-fixed:** The refactoring service automatically rewrites both `DateTimeVariant` and `DateTimeInputVariants` to `DateTimeInputVariant`.
-
-**Found In:**
-d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
-
 ## TextBuilder.Style() — non-existent styling method
 
 **Hallucinated API:**
@@ -266,6 +245,27 @@ Text.H1("$0.00").Center()
 
 **Found In:**
 713546f7-32fb-4961-ab78-def91e7c010d, 5d2202d2-9d6b-4198-9922-c3763534aca5
+
+## SelectInputBase.Options() — chained options method
+
+**Hallucinated API:**
+```csharp
+defaultBehavior.ToSelectInput().Options(["Refused", "Allowed", "Ignored"])
+```
+
+**Error:** `'SelectInputBase' does not contain a definition for 'Options'`
+
+**Correct API:**
+```csharp
+defaultBehavior.ToSelectInput(new[] { "Refused", "Allowed", "Ignored" }.ToOptions())
+```
+
+Options are passed as `IEnumerable<IAnyOption>` to `ToSelectInput(options)`, not chained via a `.Options()` method. Use the `.ToOptions()` extension method on a string array to convert to the correct type.
+
+**Found In:**
+4eb1799f-39b2-4325-a0bd-37b769a33432``
+
+https://github.com/Ivy-Interactive/Ivy-Framework/issues/2271
 
 ## Table\<T\> — non-generic type used with type arguments
 
@@ -757,6 +757,30 @@ Text.Block(frequencyText).Small().Muted()
 **Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
 
+## Text.Secondary("text") — non-existent static factory
+
+**Hallucinated API:**
+```csharp
+Text.Secondary("some text")
+```
+
+**Error:** `CS1501: No overload for method 'Secondary' takes 1 arguments`
+
+**Correct API:**
+```csharp
+// Use Text.Muted() for secondary/muted appearance:
+Text.Muted("some text")
+// Or use Text.P() with .Muted() chained:
+Text.P("some text").Muted()
+// Or use Text.P() with Colors.Secondary color:
+Text.P("some text").Color(Colors.Secondary)
+```
+
+`Text.Secondary()` does not exist as a static factory method. The static factories on `Text` are: `H1`, `H2`, `H3`, `H4`, `H5`, `H6`, `P`, `Inline`, `Block`, `Blockquote`, `Monospaced`, `Lead`, `Label`, `Muted`, `Strong`, `Bold`, `Danger`, `Warning`, `Success`, `Code`, `Markdown`, `Json`, `Xml`, `Html`, `Latex`, `Display`, `Literal`, `Rich`. The agent likely confused `Secondary` from `ButtonVariant.Secondary` / `Button.Secondary()` or `BadgeVariant.Secondary` / `Badge.Secondary()` with the `Text` API. `.Secondary()` is a fluent method on `Button` and `Badge`, not on `Text`.
+
+**Found In:**
+(session not yet recorded)
+
 ## Box.BorderRadius(int) — wrong argument type
 
 **Hallucinated API:**
@@ -982,6 +1006,28 @@ new Box(content).Padding(20)
 **Found In:**
 84faf65a-c7df-4b5a-888b-4c49255c50ab (trace 004)
 
+## SelectInput<T>.Width() — generic constraint mismatch
+
+**Hallucinated API:**
+```csharp
+language.ToSelectInput(options).Width(Size.Px(200))
+```
+
+**Error:** `CS0311: The type 'Ivy.SelectInput<string>' cannot be used as type parameter 'T' in the generic type or method 'WidgetBaseExtensions.Width<T>(T, Size?)'`
+
+**Correct API:**
+```csharp
+// Cast to SelectInputBase first:
+(SelectInputBase)language.ToSelectInput(options).Width(Size.Px(200))
+// Or wrap in a Box with width:
+new Box(language.ToSelectInput(options)).Width(Size.Px(200))
+```
+
+`SelectInput<T>` inherits from `SelectInputBase : WidgetBase<SelectInputBase>`, not `WidgetBase<SelectInput<T>>`. The `Width<T>()` extension requires `T : WidgetBase<T>`, which `SelectInput<T>` doesn't satisfy.
+
+### Found In
+852f6bec-756c-48f8-93da-ad426af73fab
+
 ## TextBuilder.Padding() — non-existent method
 
 **Hallucinated API:**
@@ -1006,6 +1052,81 @@ Layout.Vertical().Padding(16)
 
 **Found In:**
 7c547408-00b3-47e1-976e-59c9357c1e74
+
+## FileUploadStatus.Completed — non-existent enum value
+
+**Hallucinated API:**
+```csharp
+if (upload.Status == FileUploadStatus.Completed)
+```
+
+**Error:** `'FileUploadStatus' does not contain a definition for 'Completed'`
+
+**Correct API:**
+```csharp
+if (upload.Status == FileUploadStatus.Finished)
+```
+
+`FileUploadStatus` values are: `Pending`, `Aborted`, `Loading`, `Failed`, `Finished`. There is no `Completed` value. **Auto-fixed:** The refactoring service automatically rewrites `FileUploadStatus.Completed` → `FileUploadStatus.Finished`.
+
+**Found In:**
+(session not yet recorded)
+
+## UseDownload — ambiguous overload between sync and async
+
+**Hallucinated API:**
+```csharp
+UseDownload(() => bytes, "file.txt", "text/plain")
+```
+
+**Error:** `CS0121: The call is ambiguous between 'ViewBase.UseDownload(Func<byte[]>, string, string)' and 'ViewBase.UseDownload(Func<Task<byte[]>>, string, string)'`
+
+**Correct API:**
+```csharp
+// For sync: explicitly type the delegate
+UseDownload((Func<byte[]>)(() => bytes), "file.txt", "text/plain")
+
+// Or use a named method:
+byte[] GetBytes() => bytes;
+UseDownload(GetBytes, "file.txt", "text/plain")
+```
+
+When using `UseDownload` with a lambda, you must explicitly cast to `Func<byte[]>` or `Func<Task<byte[]>>` to avoid ambiguity.
+
+**Found In:**
+(session not yet recorded)
+
+## Server.OnReady / Server.OnStartup — non-existent lifecycle callbacks
+
+**Hallucinated API:**
+```csharp
+server.OnReady(() => { /* seed data */ });
+server.OnStartup(() => { /* initialize */ });
+```
+
+**Error:** `CS1061: 'Server' does not contain a definition for 'OnReady'`
+
+**Correct API:**
+```csharp
+// Seed data via the context factory pattern:
+var connection = server.UseConnection<MyDbContext>(options =>
+    options.ContextFactory = () =>
+    {
+        var ctx = new MyDbContext();
+        ctx.Database.EnsureCreated();
+        SeedData(ctx);
+        return ctx;
+    });
+
+// Or resolve services directly in Program.cs:
+var myService = server.Services.GetRequiredService<IMyService>();
+myService.Initialize();
+```
+
+The `Server` class does not have `OnReady`, `OnStartup`, or similar lifecycle callback methods. To run initialization code (e.g., database seeding), use the connection's context factory pattern — seed data in the factory's `CreateContext` method or use `server.Services` to resolve and call services directly in `Program.cs`.
+
+**Found In:**
+(session not yet recorded)
 
 ## MetricCard — non-existent class name
 
@@ -1046,6 +1167,32 @@ return Disposable.Create(() => timer?.Dispose());
 
 **Found In:**
 fb184b5b-8254-4a1f-b8f2-ab8e8657fdbc
+
+## Fragment.Empty — non-existent static member
+
+**Hallucinated API:**
+```csharp
+return Fragment.Empty;
+```
+
+**Error:** `'Fragment' does not contain a definition for 'Empty'`
+
+**Correct API:**
+```csharp
+// Use ViewBase.Empty:
+return ViewBase.Empty;
+
+// Or return an empty Fragment:
+return new Fragment();
+
+// Or just return null:
+return null;
+```
+
+`Fragment` does not have an `Empty` static member. To return nothing from a view, use `ViewBase.Empty`, `new Fragment()`, or `null`.
+
+**Found In:**
+(session not yet recorded)
 
 ## Button.Visible() / Widget.Visible() — removed conditional rendering method
 
@@ -1571,270 +1718,6 @@ query.ToTextInput().Width(Size.Grow())
 **Found In:**
 7a9aadf3
 
-## Progress.Max() — non-existent method
-
-**Hallucinated API:**
-```csharp
-new Progress(value).Max(100)
-```
-
-**Error:** `'Progress' does not contain a definition for 'Max'` (CS1929)
-
-**Correct API:**
-```csharp
-new Progress(value) // value is 0-100 (percentage)
-```
-
-The `Progress` widget always uses percentage values (0-100). There is no `.Max()` or `.Min()` method. If you need a custom range, normalize the value to 0-100 before passing it. Note: `ProgressBuilder<T>` (used in DataTable column builders) does have `.Min()` and `.Max()`, but these are not available on the `Progress` widget itself.
-
-**Found In:**
-ec6b51cb-29aa-4b6c-89dc-24d1e7bba68f
-
-## using Ivy.Icons — enum used as namespace
-
-**Hallucinated API:**
-```csharp
-using Ivy.Icons;
-```
-
-**Error:** `CS0138: A 'using namespace' directive can only be applied to namespaces; 'Icons' is a type not a namespace`
-
-**Correct API:**
-```csharp
-using static Ivy.Icons;
-// Then use: Icons.FileCode
-// Or without the using: Ivy.Icons.FileCode
-```
-
-`Icons` is an enum (`Ivy.Icons`), not a namespace. Use `using static Ivy.Icons;` if you want unqualified access to icon values, or reference them as `Icons.FileCode` / `Ivy.Icons.FileCode`.
-
-**Found In:**
-0a42123e-a489-433a-93e5-87d4de7075eb
-
-## CodeInput.ReadOnly() — non-existent method
-
-**Hallucinated API:**
-```csharp
-codeInput.ReadOnly()
-```
-
-**Error:** `CS1061: 'CodeInputBase' does not contain a definition for 'ReadOnly'`
-
-**Correct API:**
-```csharp
-codeInput.Disabled(true)
-```
-
-`CodeInput` does not have a `.ReadOnly()` method. Use `.Disabled(true)` to make a CodeInput non-editable. The agent draws from HTML `readonly` attribute or other UI frameworks. In Ivy, the `Disabled` extension is the standard way to prevent editing on all input widgets.
-
-**Found In:**
-0a42123e-a489-433a-93e5-87d4de7075eb
-
-## View / IComponent — non-existent base types
-
-**Hallucinated API:**
-```csharp
-public class MyApp : View { }
-public class MyApp : IComponent { }
-```
-
-**Error:** `CS0246: The type or namespace name 'View' could not be found` / `CS0246: The type or namespace name 'IComponent' could not be found`
-
-**Correct API:**
-```csharp
-public class MyApp : ViewBase { }
-```
-
-The base class for all Ivy views/apps is `ViewBase`, not `View` or `IComponent`. The agent confuses Ivy's naming with React (`Component`), Blazor (`ComponentBase`), or generic UI patterns (`View`).
-
-**Found In:**
-0a42123e-a489-433a-93e5-87d4de7075eb
-
-## TableHeader — non-existent class
-
-**Hallucinated API:**
-```csharp
-new TableHeader("Name", "Age", "Email")
-```
-
-**Error:** `The type or namespace name 'TableHeader' could not be found`
-
-**Correct API:**
-There is no `TableHeader` class. Use `TableRow` with `.IsHeader()`:
-```csharp
-new Table(
-    new TableRow(new TableCell("Name"), new TableCell("Age"), new TableCell("Email")).IsHeader(),
-    new TableRow(new TableCell("Alice"), new TableCell("30"), new TableCell("alice@example.com"))
-)
-```
-
-**Found In:**
-1e59a9a1-4d98-4491-84d9-6f6e74bcbdad
-## Table.Header() — non-existent fluent method
-
-**Hallucinated API:**
-```csharp
-new Table().Header(new TableRow(...))
-```
-
-**Error:** `'Table' does not contain a definition for 'Header'`
-
-**Correct API:**
-`Table` has no `.Header()` method. Pass all rows (including the header row) directly to the constructor:
-```csharp
-new Table(headerRow, dataRow1, dataRow2)
-```
-Mark the header row with `.IsHeader()` on the `TableRow`.
-
-**Found In:**
-1e59a9a1-4d98-4491-84d9-6f6e74bcbdad
-## Text.Secondary("text") — non-existent static factory
-
-**Hallucinated API:**
-```csharp
-Text.Secondary("some text")
-```
-
-**Error:** `CS1501: No overload for method 'Secondary' takes 1 arguments`
-
-**Correct API:**
-```csharp
-// Use Text.Muted() for secondary/muted appearance:
-Text.Muted("some text")
-// Or use Text.P() with .Muted() chained:
-Text.P("some text").Muted()
-// Or use Text.P() with Colors.Secondary color:
-Text.P("some text").Color(Colors.Secondary)
-```
-
-`Text.Secondary()` does not exist as a static factory method. The static factories on `Text` are: `H1`, `H2`, `H3`, `H4`, `H5`, `H6`, `P`, `Inline`, `Block`, `Blockquote`, `Monospaced`, `Lead`, `Label`, `Muted`, `Strong`, `Bold`, `Danger`, `Warning`, `Success`, `Code`, `Markdown`, `Json`, `Xml`, `Html`, `Latex`, `Display`, `Literal`, `Rich`. The agent likely confused `Secondary` from `ButtonVariant.Secondary` / `Button.Secondary()` or `BadgeVariant.Secondary` / `Badge.Secondary()` with the `Text` API. `.Secondary()` is a fluent method on `Button` and `Badge`, not on `Text`.
-
-**Found In:**
-(session not yet recorded)
-
-## SelectInput<T>.Width() — generic constraint mismatch
-
-**Hallucinated API:**
-```csharp
-language.ToSelectInput(options).Width(Size.Px(200))
-```
-
-**Error:** `CS0311: The type 'Ivy.SelectInput<string>' cannot be used as type parameter 'T' in the generic type or method 'WidgetBaseExtensions.Width<T>(T, Size?)'`
-
-**Correct API:**
-```csharp
-// Cast to SelectInputBase first:
-(SelectInputBase)language.ToSelectInput(options).Width(Size.Px(200))
-// Or wrap in a Box with width:
-new Box(language.ToSelectInput(options)).Width(Size.Px(200))
-```
-
-`SelectInput<T>` inherits from `SelectInputBase : WidgetBase<SelectInputBase>`, not `WidgetBase<SelectInput<T>>`. The `Width<T>()` extension requires `T : WidgetBase<T>`, which `SelectInput<T>` doesn't satisfy.
-
-### Found In
-852f6bec-756c-48f8-93da-ad426af73fab
-
-## FileUploadStatus.Completed — non-existent enum value
-
-**Hallucinated API:**
-```csharp
-if (upload.Status == FileUploadStatus.Completed)
-```
-
-**Error:** `'FileUploadStatus' does not contain a definition for 'Completed'`
-
-**Correct API:**
-```csharp
-if (upload.Status == FileUploadStatus.Finished)
-```
-
-`FileUploadStatus` values are: `Pending`, `Aborted`, `Loading`, `Failed`, `Finished`. There is no `Completed` value. **Auto-fixed:** The refactoring service automatically rewrites `FileUploadStatus.Completed` → `FileUploadStatus.Finished`.
-
-**Found In:**
-(session not yet recorded)
-
-## UseDownload — ambiguous overload between sync and async
-
-**Hallucinated API:**
-```csharp
-UseDownload(() => bytes, "file.txt", "text/plain")
-```
-
-**Error:** `CS0121: The call is ambiguous between 'ViewBase.UseDownload(Func<byte[]>, string, string)' and 'ViewBase.UseDownload(Func<Task<byte[]>>, string, string)'`
-
-**Correct API:**
-```csharp
-// For sync: explicitly type the delegate
-UseDownload((Func<byte[]>)(() => bytes), "file.txt", "text/plain")
-
-// Or use a named method:
-byte[] GetBytes() => bytes;
-UseDownload(GetBytes, "file.txt", "text/plain")
-```
-
-When using `UseDownload` with a lambda, you must explicitly cast to `Func<byte[]>` or `Func<Task<byte[]>>` to avoid ambiguity.
-
-**Found In:**
-(session not yet recorded)
-
-## Server.OnReady / Server.OnStartup — non-existent lifecycle callbacks
-
-**Hallucinated API:**
-```csharp
-server.OnReady(() => { /* seed data */ });
-server.OnStartup(() => { /* initialize */ });
-```
-
-**Error:** `CS1061: 'Server' does not contain a definition for 'OnReady'`
-
-**Correct API:**
-```csharp
-// Seed data via the context factory pattern:
-var connection = server.UseConnection<MyDbContext>(options =>
-    options.ContextFactory = () =>
-    {
-        var ctx = new MyDbContext();
-        ctx.Database.EnsureCreated();
-        SeedData(ctx);
-        return ctx;
-    });
-
-// Or resolve services directly in Program.cs:
-var myService = server.Services.GetRequiredService<IMyService>();
-myService.Initialize();
-```
-
-The `Server` class does not have `OnReady`, `OnStartup`, or similar lifecycle callback methods. To run initialization code (e.g., database seeding), use the connection's context factory pattern — seed data in the factory's `CreateContext` method or use `server.Services` to resolve and call services directly in `Program.cs`.
-
-**Found In:**
-(session not yet recorded)
-
-## Fragment.Empty — non-existent static member
-
-**Hallucinated API:**
-```csharp
-return Fragment.Empty;
-```
-
-**Error:** `'Fragment' does not contain a definition for 'Empty'`
-
-**Correct API:**
-```csharp
-// Use ViewBase.Empty:
-return ViewBase.Empty;
-
-// Or return an empty Fragment:
-return new Fragment();
-
-// Or just return null:
-return null;
-```
-
-`Fragment` does not have an `Empty` static member. To return nothing from a view, use `ViewBase.Empty`, `new Fragment()`, or `null`.
-
-**Found In:**
-(session not yet recorded)
-
 ## Server Configuration
 
 | Hallucinated API | Correct API |
@@ -1979,4 +1862,83 @@ new LayoutView()
 Individual properties are also available: `.BorderColor()`, `.BorderThickness()`, `.BorderStyle()`, `.BorderRadius()`.
 
 Note: `.Border()` expects a `Colors` enum as the first argument, not a string. Thickness accepts `int` (uniform) or `Thickness` struct — do NOT pass `Ivy.Thickness` where `int` is expected.
+
+## Progress.Max() — non-existent method
+
+**Hallucinated API:**
+```csharp
+new Progress(value).Max(100)
+```
+
+**Error:** `'Progress' does not contain a definition for 'Max'` (CS1929)
+
+**Correct API:**
+```csharp
+new Progress(value) // value is 0-100 (percentage)
+```
+
+The `Progress` widget always uses percentage values (0-100). There is no `.Max()` or `.Min()` method. If you need a custom range, normalize the value to 0-100 before passing it. Note: `ProgressBuilder<T>` (used in DataTable column builders) does have `.Min()` and `.Max()`, but these are not available on the `Progress` widget itself.
+
+**Found In:**
+ec6b51cb-29aa-4b6c-89dc-24d1e7bba68f
+
+## using Ivy.Icons — enum used as namespace
+
+**Hallucinated API:**
+```csharp
+using Ivy.Icons;
+```
+
+**Error:** `CS0138: A 'using namespace' directive can only be applied to namespaces; 'Icons' is a type not a namespace`
+
+**Correct API:**
+```csharp
+using static Ivy.Icons;
+// Then use: Icons.FileCode
+// Or without the using: Ivy.Icons.FileCode
+```
+
+`Icons` is an enum (`Ivy.Icons`), not a namespace. Use `using static Ivy.Icons;` if you want unqualified access to icon values, or reference them as `Icons.FileCode` / `Ivy.Icons.FileCode`.
+
+**Found In:**
+0a42123e-a489-433a-93e5-87d4de7075eb
+
+## CodeInput.ReadOnly() — non-existent method
+
+**Hallucinated API:**
+```csharp
+codeInput.ReadOnly()
+```
+
+**Error:** `CS1061: 'CodeInputBase' does not contain a definition for 'ReadOnly'`
+
+**Correct API:**
+```csharp
+codeInput.Disabled(true)
+```
+
+`CodeInput` does not have a `.ReadOnly()` method. Use `.Disabled(true)` to make a CodeInput non-editable. The agent draws from HTML `readonly` attribute or other UI frameworks. In Ivy, the `Disabled` extension is the standard way to prevent editing on all input widgets.
+
+**Found In:**
+0a42123e-a489-433a-93e5-87d4de7075eb
+
+## View / IComponent — non-existent base types
+
+**Hallucinated API:**
+```csharp
+public class MyApp : View { }
+public class MyApp : IComponent { }
+```
+
+**Error:** `CS0246: The type or namespace name 'View' could not be found` / `CS0246: The type or namespace name 'IComponent' could not be found`
+
+**Correct API:**
+```csharp
+public class MyApp : ViewBase { }
+```
+
+The base class for all Ivy views/apps is `ViewBase`, not `View` or `IComponent`. The agent confuses Ivy's naming with React (`Component`), Blazor (`ComponentBase`), or generic UI patterns (`View`).
+
+**Found In:**
+0a42123e-a489-433a-93e5-87d4de7075eb
 
