@@ -96,11 +96,7 @@ The `MetricView` uses UseQuery hooks for data loading, which automatically handl
 
 ## Faq
 
-<Details>
-<Summary>
-How do I add content to a Card
-</Summary>
-<Body>
+### How do I add content to a Card?
 
 Cards have three approaches:
 
@@ -126,8 +122,5 @@ new Card().Content(
     Layout.Vertical() | item1 | item2 | item3
 )
 ```
-
-</Body>
-</Details>
 
 <WidgetDocs Type="Ivy.Card" ExtensionTypes="Ivy.CardExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Card.cs"/>
