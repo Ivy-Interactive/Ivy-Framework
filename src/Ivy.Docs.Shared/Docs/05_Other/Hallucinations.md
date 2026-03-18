@@ -1861,22 +1861,3 @@ Individual properties are also available: `.BorderColor()`, `.BorderThickness()`
 
 Note: `.Border()` expects a `Colors` enum as the first argument, not a string. Thickness accepts `int` (uniform) or `Thickness` struct — do NOT pass `Ivy.Thickness` where `int` is expected.
 
-## Progress.Max() — non-existent method
-
-**Hallucinated API:**
-```csharp
-new Progress(value).Max(100)
-```
-
-**Error:** `'Progress' does not contain a definition for 'Max'` (CS1929)
-
-**Correct API:**
-```csharp
-new Progress(value) // value is 0-100 (percentage)
-```
-
-The `Progress` widget always uses percentage values (0-100). There is no `.Max()` or `.Min()` method. If you need a custom range, normalize the value to 0-100 before passing it. Note: `ProgressBuilder<T>` (used in DataTable column builders) does have `.Min()` and `.Max()`, but these are not available on the `Progress` widget itself.
-
-**Found In:**
-ec6b51cb-29aa-4b6c-89dc-24d1e7bba68f
-
