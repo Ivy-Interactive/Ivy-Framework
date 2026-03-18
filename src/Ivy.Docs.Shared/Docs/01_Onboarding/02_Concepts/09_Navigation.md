@@ -386,11 +386,7 @@ public class MyApp : ViewBase { }
 
 ## Faq
 
-<Details>
-<Summary>
-How do I create a hyperlink or link component
-</Summary>
-<Body>
+### How do I create a hyperlink or link component?
 
 Ivy does not have a dedicated Link widget. Use `Button` with `UseNavigation()` for internal navigation, or open external URLs:
 
@@ -404,14 +400,7 @@ new Button("Go to Settings").OnClick(() => nav.Navigate(typeof(SettingsApp)));
 new Button("Visit Docs").OnClick(() => nav.Navigate("https://docs.ivy.app"));
 ```
 
-</Body>
-</Details>
-
-<Details>
-<Summary>
-How do I navigate to a different page
-</Summary>
-<Body>
+### How do I navigate to a different page?
 
 Use the `UseNavigation()` hook:
 
@@ -421,9 +410,6 @@ nav.Navigate(typeof(TargetApp));          // type-safe
 nav.Navigate("app://path/to/app");        // URI-based
 nav.Navigate("https://example.com");      // external URL
 ```
-
-</Body>
-</Details>
 
 ## See Also
 
