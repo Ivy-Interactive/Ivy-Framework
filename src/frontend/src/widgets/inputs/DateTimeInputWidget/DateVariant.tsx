@@ -36,14 +36,12 @@ export const DateVariant: React.FC<DateVariantProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const date = value ? new Date(value) : undefined;
-  const minDate = min ? new Date(min) : undefined;
-  const maxDate = max ? new Date(max) : undefined;
   const showClear = nullable && !disabled && value != null && value !== '';
 
   const disabledDays = useMemo(() => {
     const matchers: Array<{ before: Date } | { after: Date }> = [];
-    if (minDate) matchers.push({ before: minDate });
-    if (maxDate) matchers.push({ after: maxDate });
+    if (min) matchers.push({ before: new Date(min) });
+    if (max) matchers.push({ after: new Date(max) });
     return matchers;
   }, [min, max]);
 
