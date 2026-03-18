@@ -2,249 +2,9 @@
 
 Known cases where the agent hallucinated Ivy Framework APIs. Use this as a reference when debugging build errors in agent sessions.
 
-## HandleSubmit / Handle* — renamed event handler methods
+## IRef\<T\> — now supported
 
-**Hallucinated API:**
-```csharp
-input.ToTextInput().HandleSubmit(() => Save())
-button.HandleClick(() => DoSomething())
-input.HandleBlur(() => Validate())
-```
-
-**Error:** `does not contain a definition for 'HandleSubmit'` (or `HandleClick`, `HandleBlur`, etc.)
-
-**Correct API:**
-```csharp
-input.ToTextInput().OnSubmit(() => Save())
-button.OnClick(() => DoSomething())
-input.OnBlur(() => Validate())
-```
-
-All `Handle*` event handler extension methods were renamed to `On*` in v1.2.17 (Ivy-Framework#2459, #2510): `HandleClick` → `OnClick`, `HandleSubmit` → `OnSubmit`, `HandleChange` → `OnChange`, `HandleSelect` → `OnSelect`, `HandleClose` → `OnClose`, `HandleBlur` → `OnBlur`, `HandleRowAction` → `OnRowAction`, `HandleCardMove` → `OnCardMove`, `HandleExpand` → `OnExpand`, `HandleCollapse` → `OnCollapse`, `HandlePageChange` → `OnPageChange`, `HandleUpload` → `OnUpload`, `HandleDownload` → `OnDownload`. **Auto-fixed:** The refactoring service automatically rewrites all `Handle*` calls to `On*`.
-
-**Found In:**
-(multiple sessions — agent uses old API names from training data)
-
-## InputBase.Label() — AxisExtensions method used on input
-
-**Hallucinated API:**
-```csharp
-// NumberInputBase
-stockAdjustment.ToNumberInput().Label("Adjustment amount")
-
-// DateTimeInputBase
-dateState.ToDateInput().Label("Birthdate")
-```
-
-**Error:** `The type 'Ivy.NumberInputBase' cannot be used as type parameter 'T' in the generic type or method 'AxisExtensions.Label<T>(T, string)'` (same CS0311 error for `DateTimeInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, etc.)
-
-**Correct API:**
-```csharp
-// Use .WithField().Label() to wrap the input in a labeled field:
-stockAdjustment.ToNumberInput().WithField().Label("Adjustment amount")
-dateState.ToDateInput().WithField().Label("Birthdate")
-
-// Or use Text.Label() as a separate element above the input:
-Layout.Vertical()
-    | Text.Label("Adjustment amount")
-    | stockAdjustment.ToNumberInput()
-
-// Or use a form with .Label() on the form builder:
-state.ToForm().Label(m => m.Amount, "Adjustment amount")
-```
-
-`.Label()` is an `AxisExtensions` method for chart axes, not for inputs. This applies to ALL input types (`NumberInputBase`, `DateTimeInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, etc.). The preferred way to label an input is `.WithField().Label("...")`, which wraps the input in a `Field` with a label.
-
-**Found In:**
-f20dced8-1689-4289-a2d8-ee67136eb6ce
-2e91e9c7-9c03-4b86-a9d2-c0417bcf715f
-7a9aadf3-097e-448d-8d5c-bc86152710a6
-
-## ToastVariant — non-existent enum
-
-**Hallucinated API:**
-```csharp
-client.Toast("Error!", ToastVariant.Destructive)
-```
-
-**Error:** `The name 'ToastVariant' does not exist in the current context`
-
-**Correct API:**
-```csharp
-client.Toast("Success message");       // neutral toast
-client.Toast("Done!", "Title");        // with title
-client.Error("Something went wrong."); // error toast
-```
-
-`ToastVariant` does not exist. The `IClientProvider.Toast()` method takes `(string message)` or `(string message, string title)`. For error toasts, use `client.Error(message)` instead.
-
-**Found In:**
-d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
-
-## DateTimeVariant — wrong enum name
-
-**Hallucinated API:**
-```csharp
-date.ToDateTimeInput().Variant(DateTimeVariant.Date)
-```
-
-**Error:** `The name 'DateTimeVariant' does not exist in the current context`
-
-**Correct API:**
-```csharp
-date.ToDateInput()
-// or:
-date.ToDateTimeInput().Variant(DateTimeInputVariant.Date)
-```
-
-The enum is `DateTimeInputVariant` (singular), not `DateTimeVariant` (missing "Input") or `DateTimeInputVariants` (old plural name). All input variant enums were renamed from plural to singular in Ivy-Framework#2546. Values: `DateTime`, `Date`, `Time`, `Month`, `Week`. **Auto-fixed:** The refactoring service automatically rewrites both `DateTimeVariant` and `DateTimeInputVariants` to `DateTimeInputVariant`.
-
-**Found In:**
-d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
-
-## Badge.Color(Colors.X) — non-existent fluent method
-
-**Hallucinated API:**
-```csharp
-new Badge(match.Value).Color(Colors.Green)
-new Badge("No match").Color(Colors.Red)
-```
-
-**Correct API:**
-```csharp
-// Via constructor variant parameter:
-new Badge(match.Value, BadgeVariant.Success)
-
-// Via fluent shortcut methods:
-new Badge(match.Value).Success()
-new Badge("No match").Destructive()
-
-// Via explicit Variant() method:
-new Badge(match.Value).Variant(BadgeVariant.Info)
-```
-
-Available `BadgeVariant` values: `Primary`, `Destructive`, `Secondary`, `Outline`, `Success`, `Warning`, `Info`. The agent confused `LabelExtensions.Color(Label, Colors)` (which exists for `Label`) with a Badge method. Badge uses `BadgeVariant`, not `Colors`.
-
-**Found In:**
-3c507fb4-71e1-4136-9d40-8eca6590250d
-ce144de9-0688-490a-bef6-b2766e323154
-642d3167-790d-48c4-a381-bfab78f928cc
-
-## BorderRadius.Medium — non-existent enum value
-
-**Hallucinated API:**
-```csharp
-BorderRadius.Medium
-BorderRadius.Large
-BorderRadius.Small
-```
-
-**Error:** `'BorderRadius' does not contain a definition for 'Medium'`
-
-**Correct API:**
-```csharp
-BorderRadius.None     // no rounding
-BorderRadius.Rounded  // standard rounded corners
-BorderRadius.Full     // fully rounded (pill shape)
-```
-
-Valid `BorderRadius` values: `None`, `Rounded`, `Full`. The agent hallucinates Tailwind-style size variants (`Small`, `Medium`, `Large`, `Xl`) that don't exist.
-
-**Found In:**
-050136ca-9275-4e1d-9740-e393b544c1b5
-8a776329-6dc7-474f-aa4d-c8b4da753a25 (BorderRadius.Large)
-4e59e443-3579-4df9-af4b-765b7b7d61c8 (BorderRadius.Small — via IvyMcp hallucination)
-
-## Button("text", Icons.X) — icon as constructor argument
-
-**Hallucinated API:**
-```csharp
-new Button("Add Item", Icons.Plus)
-```
-
-**Error:** `Argument 2: cannot convert from 'Ivy.Icons' to 'System.Func<Ivy.Event<Ivy.Button>, System.Threading.Tasks.ValueTask>?'`
-
-**Correct API:**
-```csharp
-new Button("Add Item").Icon(Icons.Plus)
-```
-
-The `Button` constructor signature is `Button(string label, Func<Event<Button>, ValueTask>? onClick = null, ...)`. The second parameter is a click handler, not an icon. Use the `.Icon(Icons.X)` fluent method to set an icon on a button.
-
-**Found In:**
-f20dced8-1689-4289-a2d8-ee67136eb6ce
-7a9aadf3-097e-448d-8d5c-bc86152710a6
-
-## AppAttribute — PascalCase properties and invented parameters
-
-**Hallucinated API:**
-```csharp
-[App(Icon = Icons.Bot, Group = "Apps", Chrome = UseDefaultAppChrome)]
-[App(Icon = Icons.Waves)]
-```
-
-**Errors:**
-- `CS0655: 'Icon' is not a valid named attribute argument` — PascalCase property used instead of constructor parameter
-- `CS0246: The type or namespace name 'Group' could not be found` — parameter doesn't exist
-- `CS0246: The type or namespace name 'Chrome' could not be found` — parameter doesn't exist
-
-**Correct API:**
-```csharp
-[App(icon: Icons.Bot, path: new[] { "Apps" })]
-```
-
-The `AppAttribute` uses **lowercase named constructor parameters**, not PascalCase named properties. C# attributes with nullable property types cause CS0655 when accessed via `PropertyName = value` syntax. Use `parameterName: value` syntax instead.
-
-Available parameters: `id`, `title`, `icon`, `description`, `path`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`. There is NO `group` or `chrome` parameter — use `path:` for navigation grouping, and configure chrome in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`.
-
-See: Ivy-Framework#2587 (plans to rename `path` to `group`)
-
-**Found In:**
-7c547408-00b3-47e1-976e-59c9357c1e74
-d6a5f377-bc84-404d-acca-71164d3754d4
-
-## TextBuilder.Style() — non-existent styling method
-
-**Hallucinated API:**
-```csharp
-Text.P("🐶").Style("font-size: 48px")
-```
-
-**Error:** `'TextBuilder' does not contain a definition for 'Style'`
-
-**Correct API:**
-```csharp
-Text.P("🐶").Large()
-Text.P("text").Medium()
-Text.P("text").Small()
-```
-
-`TextBuilder` does not have a `.Style()` method for arbitrary CSS. Use `.Large()`, `.Medium()`, or `.Small()` fluent modifiers. The agent invented a CSS-style `.Style()` method similar to JSX `style` props. Variant of the documented `WithFontSize()` hallucination.
-
-Also hallucinated: `Text.Code(expr).FontSize(24)` — CS1929: `.FontSize()` is an extension on `LabelList`, not `TextBuilder`.
-
-**Found In:**
-88e4f0bb-d358-4b34-9458-bc7eb98845e5, 625c285f-068b-4de3-b01c-ae2f7286a5d8
-
-## TextBuilder.AlignCenter() / .Centered() — use .Center()
-
-**Hallucinated API:**
-```csharp
-Text.H1("$0.00").AlignCenter()
-Text.H1("title").Centered()
-```
-
-**Error:** `CS1061: 'TextBuilder' does not contain a definition for 'AlignCenter'` / `'Centered'`
-
-**Correct API:**
-```csharp
-Text.H1("$0.00").Center()
-```
-
-`TextBuilder` now has a `.Center()` method (returns `Align(TextAlignment.Center)`). The agent sometimes hallucinates `.AlignCenter()` or `.Centered()` instead. The correct method name is `.Center()`.
-
-**Found In:**
-713546f7-32fb-4961-ab78-def91e7c010d, 5d2202d2-9d6b-4198-9922-c3763534aca5
+`IRef<T>` was previously a hallucinated interface. It has since been added to the framework as `IRef<T> : IState<T>`. Both `UseRef<T>()` return types are now `IRef<T>`, while `UseState<T>()` continues to return `IState<T>`. The two interfaces are interchangeable — `IRef<T>` is a marker subtype used for clarity.
 
 ## SelectInputBase.Options() — chained options method
 
@@ -383,6 +143,29 @@ Callout.Error(errorMessage)
 **Found In:**
 600cee71-6d3b-45a3-ac18-86e2a98e79d1
 
+## HandleSubmit / Handle* — renamed event handler methods
+
+**Hallucinated API:**
+```csharp
+input.ToTextInput().HandleSubmit(() => Save())
+button.HandleClick(() => DoSomething())
+input.HandleBlur(() => Validate())
+```
+
+**Error:** `does not contain a definition for 'HandleSubmit'` (or `HandleClick`, `HandleBlur`, etc.)
+
+**Correct API:**
+```csharp
+input.ToTextInput().OnSubmit(() => Save())
+button.OnClick(() => DoSomething())
+input.OnBlur(() => Validate())
+```
+
+All `Handle*` event handler extension methods were renamed to `On*` in v1.2.17 (Ivy-Framework#2459, #2510): `HandleClick` → `OnClick`, `HandleSubmit` → `OnSubmit`, `HandleChange` → `OnChange`, `HandleSelect` → `OnSelect`, `HandleClose` → `OnClose`, `HandleBlur` → `OnBlur`, `HandleRowAction` → `OnRowAction`, `HandleCardMove` → `OnCardMove`, `HandleExpand` → `OnExpand`, `HandleCollapse` → `OnCollapse`, `HandlePageChange` → `OnPageChange`, `HandleUpload` → `OnUpload`, `HandleDownload` → `OnDownload`. **Auto-fixed:** The refactoring service automatically rewrites all `Handle*` calls to `On*`.
+
+**Found In:**
+(multiple sessions — agent uses old API names from training data)
+
 ## TextInputBase.OnEnter() — invented fluent method
 
 **Hallucinated API:**
@@ -467,6 +250,61 @@ When `T` is a reference type, `null` matches both `T?` and `Func<T>`, causing ov
 **Found In:**
 f20dced8-1689-4289-a2d8-ee67136eb6ce
 
+## Button("text", Icons.X) — icon as constructor argument
+
+**Hallucinated API:**
+```csharp
+new Button("Add Item", Icons.Plus)
+```
+
+**Error:** `Argument 2: cannot convert from 'Ivy.Icons' to 'System.Func<Ivy.Event<Ivy.Button>, System.Threading.Tasks.ValueTask>?'`
+
+**Correct API:**
+```csharp
+new Button("Add Item").Icon(Icons.Plus)
+```
+
+The `Button` constructor signature is `Button(string label, Func<Event<Button>, ValueTask>? onClick = null, ...)`. The second parameter is a click handler, not an icon. Use the `.Icon(Icons.X)` fluent method to set an icon on a button.
+
+**Found In:**
+f20dced8-1689-4289-a2d8-ee67136eb6ce
+7a9aadf3-097e-448d-8d5c-bc86152710a6
+
+## InputBase.Label() — AxisExtensions method used on input
+
+**Hallucinated API:**
+```csharp
+// NumberInputBase
+stockAdjustment.ToNumberInput().Label("Adjustment amount")
+
+// DateTimeInputBase
+dateState.ToDateInput().Label("Birthdate")
+```
+
+**Error:** `The type 'Ivy.NumberInputBase' cannot be used as type parameter 'T' in the generic type or method 'AxisExtensions.Label<T>(T, string)'` (same CS0311 error for `DateTimeInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, etc.)
+
+**Correct API:**
+```csharp
+// Use .WithField().Label() to wrap the input in a labeled field:
+stockAdjustment.ToNumberInput().WithField().Label("Adjustment amount")
+dateState.ToDateInput().WithField().Label("Birthdate")
+
+// Or use Text.Label() as a separate element above the input:
+Layout.Vertical()
+    | Text.Label("Adjustment amount")
+    | stockAdjustment.ToNumberInput()
+
+// Or use a form with .Label() on the form builder:
+state.ToForm().Label(m => m.Amount, "Adjustment amount")
+```
+
+`.Label()` is an `AxisExtensions` method for chart axes, not for inputs. This applies to ALL input types (`NumberInputBase`, `DateTimeInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, etc.). The preferred way to label an input is `.WithField().Label("...")`, which wraps the input in a `Field` with a label.
+
+**Found In:**
+f20dced8-1689-4289-a2d8-ee67136eb6ce
+2e91e9c7-9c03-4b86-a9d2-c0417bcf715f
+7a9aadf3-097e-448d-8d5c-bc86152710a6
+
 ## Tab.Content() — non-existent fluent method
 
 **Hallucinated API:**
@@ -511,6 +349,48 @@ The `|` pipe operator works on `LayoutView` (for composing children) but does NO
 **Found In:**
 41ae072b-2845-46f1-bd0b-a4a6370c6807
 
+## ToastVariant — non-existent enum
+
+**Hallucinated API:**
+```csharp
+client.Toast("Error!", ToastVariant.Destructive)
+```
+
+**Error:** `The name 'ToastVariant' does not exist in the current context`
+
+**Correct API:**
+```csharp
+client.Toast("Success message");       // neutral toast
+client.Toast("Done!", "Title");        // with title
+client.Error("Something went wrong."); // error toast
+```
+
+`ToastVariant` does not exist. The `IClientProvider.Toast()` method takes `(string message)` or `(string message, string title)`. For error toasts, use `client.Error(message)` instead.
+
+**Found In:**
+d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
+
+## DateTimeVariant — wrong enum name
+
+**Hallucinated API:**
+```csharp
+date.ToDateTimeInput().Variant(DateTimeVariant.Date)
+```
+
+**Error:** `The name 'DateTimeVariant' does not exist in the current context`
+
+**Correct API:**
+```csharp
+date.ToDateInput()
+// or:
+date.ToDateTimeInput().Variant(DateTimeInputVariant.Date)
+```
+
+The enum is `DateTimeInputVariant` (singular), not `DateTimeVariant` (missing "Input") or `DateTimeInputVariants` (old plural name). All input variant enums were renamed from plural to singular in Ivy-Framework#2546. Values: `DateTime`, `Date`, `Time`, `Month`, `Week`. **Auto-fixed:** The refactoring service automatically rewrites both `DateTimeVariant` and `DateTimeInputVariants` to `DateTimeInputVariant`.
+
+**Found In:**
+d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
+
 ## FormBuilder.Header() — non-existent method
 
 **Hallucinated API:**
@@ -533,6 +413,34 @@ entity.ToForm()
 
 **Found In:**
 d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002, 003)
+
+## Badge.Color(Colors.X) — non-existent fluent method
+
+**Hallucinated API:**
+```csharp
+new Badge(match.Value).Color(Colors.Green)
+new Badge("No match").Color(Colors.Red)
+```
+
+**Correct API:**
+```csharp
+// Via constructor variant parameter:
+new Badge(match.Value, BadgeVariant.Success)
+
+// Via fluent shortcut methods:
+new Badge(match.Value).Success()
+new Badge("No match").Destructive()
+
+// Via explicit Variant() method:
+new Badge(match.Value).Variant(BadgeVariant.Info)
+```
+
+Available `BadgeVariant` values: `Primary`, `Destructive`, `Secondary`, `Outline`, `Success`, `Warning`, `Info`. The agent confused `LabelExtensions.Color(Label, Colors)` (which exists for `Label`) with a Badge method. Badge uses `BadgeVariant`, not `Colors`.
+
+**Found In:**
+3c507fb4-71e1-4136-9d40-8eca6590250d
+ce144de9-0688-490a-bef6-b2766e323154
+642d3167-790d-48c4-a381-bfab78f928cc
 
 ## Callout.Color(Colors.X) — non-existent fluent method
 
@@ -798,6 +706,31 @@ new Box(content).BorderRadius(BorderRadius.Rounded)
 **Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
 
+## BorderRadius.Medium — non-existent enum value
+
+**Hallucinated API:**
+```csharp
+BorderRadius.Medium
+BorderRadius.Large
+BorderRadius.Small
+```
+
+**Error:** `'BorderRadius' does not contain a definition for 'Medium'`
+
+**Correct API:**
+```csharp
+BorderRadius.None     // no rounding
+BorderRadius.Rounded  // standard rounded corners
+BorderRadius.Full     // fully rounded (pill shape)
+```
+
+Valid `BorderRadius` values: `None`, `Rounded`, `Full`. The agent hallucinates Tailwind-style size variants (`Small`, `Medium`, `Large`, `Xl`) that don't exist.
+
+**Found In:**
+050136ca-9275-4e1d-9740-e393b544c1b5
+8a776329-6dc7-474f-aa4d-c8b4da753a25 (BorderRadius.Large)
+4e59e443-3579-4df9-af4b-765b7b7d61c8 (BorderRadius.Small — via IvyMcp hallucination)
+
 ## GridView.Background() — non-existent method
 
 **Hallucinated API:**
@@ -1026,6 +959,125 @@ new Box(language.ToSelectInput(options)).Width(Size.Px(200))
 ### Found In
 852f6bec-756c-48f8-93da-ad426af73fab
 
+## Align.End / Align.Start — CSS-inspired enum values
+
+**Hallucinated API:**
+```csharp
+Align.End
+Align.Start
+Align.FlexEnd
+Align.FlexStart
+```
+
+**Error:** `'Align' does not contain a definition for 'End'` (CS0117)
+
+**Correct API:**
+```csharp
+Align.Right   // instead of Align.End or Align.FlexEnd
+Align.Left    // instead of Align.Start or Align.FlexStart
+```
+
+Valid `Align` values: `TopLeft`, `TopRight`, `TopCenter`, `BottomLeft`, `BottomRight`, `BottomCenter`, `Left`, `Right`, `Center`, `Stretch`, `SpaceBetween`, `SpaceAround`, `SpaceEvenly`.
+
+The agent draws from CSS `justify-content: flex-end` / `align-items: flex-end` terminology. **Auto-fixed:** The refactoring service automatically rewrites `Align.End` → `Align.Right`, `Align.Start` → `Align.Left`, etc.
+
+**Found In:**
+DecisionMatrixApp.cs (two occurrences of `Align.End`)
+
+## LayoutView.Border() — now supported
+
+LayoutView supports `.Border(color, thickness)` for adding borders. Example:
+
+```csharp
+new LayoutView()
+    .Border(Colors.Gray, 1)
+    .Padding(4)
+    .Vertical(content);
+```
+
+Individual properties are also available: `.BorderColor()`, `.BorderThickness()`, `.BorderStyle()`, `.BorderRadius()`.
+
+Note: `.Border()` expects a `Colors` enum as the first argument, not a string. Thickness accepts `int` (uniform) or `Thickness` struct — do NOT pass `Ivy.Thickness` where `int` is expected.
+
+## Server Configuration
+
+| Hallucinated API | Correct API |
+|-----------------|-------------|
+| `server.UseSingleApp()` | `server.UseDefaultApp(typeof(AppType))` |
+| `server.UseNoChrome()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseChrome()` instead |
+| `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
+
+## AppAttribute — PascalCase properties and invented parameters
+
+**Hallucinated API:**
+```csharp
+[App(Icon = Icons.Bot, Group = "Apps", Chrome = UseDefaultAppChrome)]
+[App(Icon = Icons.Waves)]
+```
+
+**Errors:**
+- `CS0655: 'Icon' is not a valid named attribute argument` — PascalCase property used instead of constructor parameter
+- `CS0246: The type or namespace name 'Group' could not be found` — parameter doesn't exist
+- `CS0246: The type or namespace name 'Chrome' could not be found` — parameter doesn't exist
+
+**Correct API:**
+```csharp
+[App(icon: Icons.Bot, path: new[] { "Apps" })]
+```
+
+The `AppAttribute` uses **lowercase named constructor parameters**, not PascalCase named properties. C# attributes with nullable property types cause CS0655 when accessed via `PropertyName = value` syntax. Use `parameterName: value` syntax instead.
+
+Available parameters: `id`, `title`, `icon`, `description`, `path`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`. There is NO `group` or `chrome` parameter — use `path:` for navigation grouping, and configure chrome in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`.
+
+See: Ivy-Framework#2587 (plans to rename `path` to `group`)
+
+**Found In:**
+7c547408-00b3-47e1-976e-59c9357c1e74
+d6a5f377-bc84-404d-acca-71164d3754d4
+
+## TextBuilder.Style() — non-existent styling method
+
+**Hallucinated API:**
+```csharp
+Text.P("🐶").Style("font-size: 48px")
+```
+
+**Error:** `'TextBuilder' does not contain a definition for 'Style'`
+
+**Correct API:**
+```csharp
+Text.P("🐶").Large()
+Text.P("text").Medium()
+Text.P("text").Small()
+```
+
+`TextBuilder` does not have a `.Style()` method for arbitrary CSS. Use `.Large()`, `.Medium()`, or `.Small()` fluent modifiers. The agent invented a CSS-style `.Style()` method similar to JSX `style` props. Variant of the documented `WithFontSize()` hallucination.
+
+Also hallucinated: `Text.Code(expr).FontSize(24)` — CS1929: `.FontSize()` is an extension on `LabelList`, not `TextBuilder`.
+
+**Found In:**
+88e4f0bb-d358-4b34-9458-bc7eb98845e5, 625c285f-068b-4de3-b01c-ae2f7286a5d8
+
+## TextBuilder.AlignCenter() / .Centered() — use .Center()
+
+**Hallucinated API:**
+```csharp
+Text.H1("$0.00").AlignCenter()
+Text.H1("title").Centered()
+```
+
+**Error:** `CS1061: 'TextBuilder' does not contain a definition for 'AlignCenter'` / `'Centered'`
+
+**Correct API:**
+```csharp
+Text.H1("$0.00").Center()
+```
+
+`TextBuilder` now has a `.Center()` method (returns `Align(TextAlignment.Center)`). The agent sometimes hallucinates `.AlignCenter()` or `.Centered()` instead. The correct method name is `.Center()`.
+
+**Found In:**
+713546f7-32fb-4961-ab78-def91e7c010d, 5d2202d2-9d6b-4198-9922-c3763534aca5
+
 ## TextBuilder.Padding() — non-existent method
 
 **Hallucinated API:**
@@ -1191,6 +1243,25 @@ return null;
 
 **Found In:**
 (session not yet recorded)
+
+## TextInput.Grow() — Box-only extension called on TextInput
+
+**Hallucinated API:**
+```csharp
+new TextInput(query).Grow()
+```
+
+**Error:** `CS1929: 'TextInput' does not contain a definition for 'Grow'`
+
+**Correct API:**
+```csharp
+query.ToTextInput().Width(Size.Grow())
+```
+
+`Grow()` was originally defined only as a `Box`-specific extension method in `Box.cs`. It is not available on `TextInput` or other widget types. Use `.Width(Size.Grow())` directly, or note that `Grow()` has since been promoted to a generic `WidgetBase<T>` extension and is now available on all widgets.
+
+**Found In:**
+7a9aadf3
 
 ## Button.Visible() / Widget.Visible() — removed conditional rendering method
 
@@ -1574,6 +1645,83 @@ state.ToForm()
 **Found In:**
 5d2202d2-9d6b-4198-9922-c3763534aca5
 
+## UploadDelegate — wrong parameter count
+
+**Hallucinated API:**
+```csharp
+UseUpload((file) => { ... });
+UseUpload((file, ct) => { ... });
+```
+
+**Error:** `UploadDelegate` signature mismatch — agent assumed 1 or 2 parameters.
+
+**Correct API:**
+```csharp
+UseUpload((FileUpload fileUpload, Stream stream, CancellationToken ct) => { ... });
+```
+
+`UploadDelegate` takes **three** parameters: `(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)`. The `Stream` parameter contains the file data. Use `MemoryStreamUploadHandler.Create(state)` for the common case of reading bytes into state.
+
+## FileUpload.ReadAllBytesAsync — non-existent method
+
+**Hallucinated API:**
+```csharp
+UseUpload((file, stream, ct) => {
+    var bytes = await file.ReadAllBytesAsync();
+});
+```
+
+**Error:** `FileUpload` does not contain a definition for `ReadAllBytesAsync`.
+
+**Correct API:**
+```csharp
+UseUpload(async (file, stream, ct) => {
+    using var ms = new MemoryStream();
+    await stream.CopyToAsync(ms, ct);
+    var bytes = ms.ToArray();
+});
+```
+
+`FileUpload` does not have a `ReadAllBytesAsync` method. Read the file content from the `Stream` parameter of `UploadDelegate`.
+
+## QueryMutator.MutateAsync, .Loading, .Error — non-existent members
+
+**Hallucinated API:**
+```csharp
+var mutation = UseMutation<byte[]>("key", async () => await FetchData());
+mutation.MutateAsync();
+if (mutation.Loading) { ... }
+if (mutation.Error != null) { ... }
+```
+
+**Error:** `QueryMutator<T>` does not contain definitions for `MutateAsync`, `Loading`, or `Error`.
+
+**Correct API:**
+```csharp
+var query = UseQuery("key", async () => await FetchData());
+var mutator = UseMutation<byte[]>("key");
+// Use query.Loading, query.Error for status
+// Use mutator.Revalidate() to trigger refetch
+```
+
+`QueryMutator<T>` only has `Mutate`, `Revalidate`, and `Invalidate` methods. `Loading` and `Error` are on `QueryResult<T>` returned by `UseQuery`.
+
+## Spinner — non-existent component
+
+**Hallucinated API:**
+```csharp
+new Spinner()
+```
+
+**Error:** The type or namespace name `Spinner` could not be found.
+
+**Correct API:**
+```csharp
+new Progress().Indeterminate()
+```
+
+There is no `Spinner` component. Use `Progress` with `.Indeterminate()` for an indeterminate loading indicator.
+
 ## new TextInput() — parameterless constructor
 
 **Hallucinated API:**
@@ -1672,135 +1820,6 @@ No widget in Ivy has a `MinWidth` method. To constrain width, wrap the widget in
 **Found In:**
 7aaec87b-1189-4439-863e-3ee0c219a5d1
 
-## Align.End / Align.Start — CSS-inspired enum values
-
-**Hallucinated API:**
-```csharp
-Align.End
-Align.Start
-Align.FlexEnd
-Align.FlexStart
-```
-
-**Error:** `'Align' does not contain a definition for 'End'` (CS0117)
-
-**Correct API:**
-```csharp
-Align.Right   // instead of Align.End or Align.FlexEnd
-Align.Left    // instead of Align.Start or Align.FlexStart
-```
-
-Valid `Align` values: `TopLeft`, `TopRight`, `TopCenter`, `BottomLeft`, `BottomRight`, `BottomCenter`, `Left`, `Right`, `Center`, `Stretch`, `SpaceBetween`, `SpaceAround`, `SpaceEvenly`.
-
-The agent draws from CSS `justify-content: flex-end` / `align-items: flex-end` terminology. **Auto-fixed:** The refactoring service automatically rewrites `Align.End` → `Align.Right`, `Align.Start` → `Align.Left`, etc.
-
-**Found In:**
-DecisionMatrixApp.cs (two occurrences of `Align.End`)
-
-## TextInput.Grow() — Box-only extension called on TextInput
-
-**Hallucinated API:**
-```csharp
-new TextInput(query).Grow()
-```
-
-**Error:** `CS1929: 'TextInput' does not contain a definition for 'Grow'`
-
-**Correct API:**
-```csharp
-query.ToTextInput().Width(Size.Grow())
-```
-
-`Grow()` was originally defined only as a `Box`-specific extension method in `Box.cs`. It is not available on `TextInput` or other widget types. Use `.Width(Size.Grow())` directly, or note that `Grow()` has since been promoted to a generic `WidgetBase<T>` extension and is now available on all widgets.
-
-**Found In:**
-7a9aadf3
-
-## Server Configuration
-
-| Hallucinated API | Correct API |
-|-----------------|-------------|
-| `server.UseSingleApp()` | `server.UseDefaultApp(typeof(AppType))` |
-| `server.UseNoChrome()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseChrome()` instead |
-| `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
-
-## UploadDelegate — wrong parameter count
-
-**Hallucinated API:**
-```csharp
-UseUpload((file) => { ... });
-UseUpload((file, ct) => { ... });
-```
-
-**Error:** `UploadDelegate` signature mismatch — agent assumed 1 or 2 parameters.
-
-**Correct API:**
-```csharp
-UseUpload((FileUpload fileUpload, Stream stream, CancellationToken ct) => { ... });
-```
-
-`UploadDelegate` takes **three** parameters: `(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)`. The `Stream` parameter contains the file data. Use `MemoryStreamUploadHandler.Create(state)` for the common case of reading bytes into state.
-
-## FileUpload.ReadAllBytesAsync — non-existent method
-
-**Hallucinated API:**
-```csharp
-UseUpload((file, stream, ct) => {
-    var bytes = await file.ReadAllBytesAsync();
-});
-```
-
-**Error:** `FileUpload` does not contain a definition for `ReadAllBytesAsync`.
-
-**Correct API:**
-```csharp
-UseUpload(async (file, stream, ct) => {
-    using var ms = new MemoryStream();
-    await stream.CopyToAsync(ms, ct);
-    var bytes = ms.ToArray();
-});
-```
-
-`FileUpload` does not have a `ReadAllBytesAsync` method. Read the file content from the `Stream` parameter of `UploadDelegate`.
-
-## QueryMutator.MutateAsync, .Loading, .Error — non-existent members
-
-**Hallucinated API:**
-```csharp
-var mutation = UseMutation<byte[]>("key", async () => await FetchData());
-mutation.MutateAsync();
-if (mutation.Loading) { ... }
-if (mutation.Error != null) { ... }
-```
-
-**Error:** `QueryMutator<T>` does not contain definitions for `MutateAsync`, `Loading`, or `Error`.
-
-**Correct API:**
-```csharp
-var query = UseQuery("key", async () => await FetchData());
-var mutator = UseMutation<byte[]>("key");
-// Use query.Loading, query.Error for status
-// Use mutator.Revalidate() to trigger refetch
-```
-
-`QueryMutator<T>` only has `Mutate`, `Revalidate`, and `Invalidate` methods. `Loading` and `Error` are on `QueryResult<T>` returned by `UseQuery`.
-
-## Spinner — non-existent component
-
-**Hallucinated API:**
-```csharp
-new Spinner()
-```
-
-**Error:** The type or namespace name `Spinner` could not be found.
-
-**Correct API:**
-```csharp
-new Progress().Indeterminate()
-```
-
-There is no `Spinner` component. Use `Progress` with `.Indeterminate()` for an indeterminate loading indicator.
-
 ## Color — singular instead of Colors enum
 
 **Hallucinated API:**
@@ -1842,22 +1861,3 @@ List<WidgetBase> cells = new();
 ```
 
 There is no `Widget` type in Ivy. The base class for all widgets is `WidgetBase`. Views (like `GridView`, `StackView`) inherit from `ViewBase`, not `WidgetBase`. When you need a common return type, use `WidgetBase` for widgets or `IView` for views.
-## IRef\<T\> — now supported
-
-`IRef<T>` was previously a hallucinated interface. It has since been added to the framework as `IRef<T> : IState<T>`. Both `UseRef<T>()` return types are now `IRef<T>`, while `UseState<T>()` continues to return `IState<T>`. The two interfaces are interchangeable — `IRef<T>` is a marker subtype used for clarity.
-
-## LayoutView.Border() — now supported
-
-LayoutView supports `.Border(color, thickness)` for adding borders. Example:
-
-```csharp
-new LayoutView()
-    .Border(Colors.Gray, 1)
-    .Padding(4)
-    .Vertical(content);
-```
-
-Individual properties are also available: `.BorderColor()`, `.BorderThickness()`, `.BorderStyle()`, `.BorderRadius()`.
-
-Note: `.Border()` expects a `Colors` enum as the first argument, not a string. Thickness accepts `int` (uniform) or `Thickness` struct — do NOT pass `Ivy.Thickness` where `int` is expected.
-
