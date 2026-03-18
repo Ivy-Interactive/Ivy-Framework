@@ -94,7 +94,10 @@ export function EmojiRating({
       >
         {emojis.map((emoji, index) => {
           const rating = index + 1;
-          const fillRatio = Math.max(0, Math.min(1, displayValue - (rating - 1)));
+          const fillRatio = Math.max(
+            0,
+            Math.min(1, displayValue - (rating - 1))
+          );
           const isActive = fillRatio >= 1;
           const isPartial = fillRatio > 0 && fillRatio < 1;
 
@@ -112,7 +115,9 @@ export function EmojiRating({
               )}
               onClick={e => handleRating(rating, e)}
               onMouseEnter={e => !disabled && handleMouseMove(rating, e)}
-              onMouseMove={e => allowHalf && !disabled && handleMouseMove(rating, e)}
+              onMouseMove={e =>
+                allowHalf && !disabled && handleMouseMove(rating, e)
+              }
               onMouseLeave={() => !disabled && setHover(0)}
               disabled={disabled}
             >

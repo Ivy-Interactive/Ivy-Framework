@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { Star } from 'lucide-react';
 import { m, LazyMotion, domAnimation } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -77,7 +77,10 @@ export function StarRating({
         >
           {Array.from({ length: totalStars }, (_, index) => index + 1).map(
             star => {
-              const fillRatio = Math.max(0, Math.min(1, displayValue - (star - 1)));
+              const fillRatio = Math.max(
+                0,
+                Math.min(1, displayValue - (star - 1))
+              );
               const isFull = fillRatio >= 1;
               const isPartial = fillRatio > 0 && fillRatio < 1;
 
@@ -93,9 +96,13 @@ export function StarRating({
                   )}
                   onClick={e => handleRating(star, e)}
                   onMouseEnter={e => !disabled && handleMouseMove(star, e)}
-                  onMouseMove={e => allowHalf && !disabled && handleMouseMove(star, e)}
+                  onMouseMove={e =>
+                    allowHalf && !disabled && handleMouseMove(star, e)
+                  }
                   onMouseLeave={() => !disabled && setHover(0)}
-                  whileHover={!disabled ? { scale: 1.3, rotate: -10 } : undefined}
+                  whileHover={
+                    !disabled ? { scale: 1.3, rotate: -10 } : undefined
+                  }
                   whileTap={!disabled ? { scale: 0.9, rotate: 15 } : undefined}
                   disabled={disabled}
                 >

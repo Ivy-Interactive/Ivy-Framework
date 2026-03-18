@@ -105,46 +105,46 @@ public class FeedbackInputApp : SampleBase
         ;
 
         var allowHalfExamples = Layout.Grid().Columns(3)
-                                | Text.InlineCode("Variant")
-                                | Text.InlineCode("rating")
-                                | Text.InlineCode("state")
+                                | Text.Monospaced("Variant")
+                                | Text.Monospaced("rating")
+                                | Text.Monospaced("state")
 
-                                | Text.InlineCode("Stars (decimal)")
-                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).AllowHalf()
-                                | Text.InlineCode(decimalState.Value.ToString())
+                                | Text.Monospaced("Stars (decimal)")
+                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).AllowHalf()
+                                | Text.Monospaced(decimalState.Value.ToString())
 
-                                | Text.InlineCode("Stars (decimal?)")
-                                | nullableDecimalState.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).AllowHalf()
-                                | (nullableDecimalState.Value == null ? Text.InlineCode("null") : Text.InlineCode(nullableDecimalState.Value.ToString() ?? "null"))
+                                | Text.Monospaced("Stars (decimal?)")
+                                | nullableDecimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).AllowHalf()
+                                | (nullableDecimalState.Value == null ? Text.Monospaced("null") : Text.Monospaced(nullableDecimalState.Value.ToString() ?? "null"))
 
-                                | Text.InlineCode("Emojis (decimal)")
-                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).AllowHalf()
-                                | Text.InlineCode(decimalState.Value.ToString())
+                                | Text.Monospaced("Emojis (decimal)")
+                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).AllowHalf()
+                                | Text.Monospaced(decimalState.Value.ToString())
         ;
 
         var maxState3 = UseState(0);
         var maxState10 = UseState(0);
 
         var maxExamples = Layout.Grid().Columns(3)
-                          | Text.InlineCode("Max")
-                          | Text.InlineCode("rating")
-                          | Text.InlineCode("state")
+                          | Text.Monospaced("Max")
+                          | Text.Monospaced("rating")
+                          | Text.Monospaced("state")
 
-                          | Text.InlineCode("Max(3) Stars")
-                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).Max(3)
-                          | Text.InlineCode(maxState3.Value.ToString())
+                          | Text.Monospaced("Max(3) Stars")
+                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Max(3)
+                          | Text.Monospaced(maxState3.Value.ToString())
 
-                          | Text.InlineCode("Max(10) Stars")
-                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariants.Stars).Max(10)
-                          | Text.InlineCode(maxState10.Value.ToString())
+                          | Text.Monospaced("Max(10) Stars")
+                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Max(10)
+                          | Text.Monospaced(maxState10.Value.ToString())
 
-                          | Text.InlineCode("Max(3) Emojis")
-                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).Max(3)
-                          | Text.InlineCode(maxState3.Value.ToString())
+                          | Text.Monospaced("Max(3) Emojis")
+                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Max(3)
+                          | Text.Monospaced(maxState3.Value.ToString())
 
-                          | Text.InlineCode("Max(10) Emojis")
-                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariants.Emojis).Max(10)
-                          | Text.InlineCode(maxState10.Value.ToString())
+                          | Text.Monospaced("Max(10) Emojis")
+                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Max(10)
+                          | Text.Monospaced(maxState10.Value.ToString())
         ;
 
         return Layout.Vertical()
