@@ -91,7 +91,9 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     try {
       const d = new Date(min);
       if (!isNaN(d.getTime())) return format(d, 'HH:mm:ss');
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return undefined;
   }, [min]);
 
@@ -100,7 +102,9 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     try {
       const d = new Date(max);
       if (!isNaN(d.getTime())) return format(d, 'HH:mm:ss');
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return undefined;
   }, [max]);
 
