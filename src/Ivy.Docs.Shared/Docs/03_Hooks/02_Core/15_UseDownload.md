@@ -149,7 +149,11 @@ public class DownloadStreamDemo : ViewBase
 
 ## Faq
 
-### How do I create multiple downloads for items in a collection?
+<Details>
+<Summary>
+How do I create multiple downloads for items in a collection
+</Summary>
+<Body>
 
 You cannot call `UseDownload` inside a loop or lambda — hooks must be called at the top level of `Build()`. The idiomatic solution (same as React) is to **extract a child component** for each item. Each child component instance has its own isolated hook state:
 
@@ -192,6 +196,9 @@ public class DownloadItemView(ItemData item) : ViewBase
 ```
 
 For a **fixed, small** number of format exports (e.g., CSV + JSON of the same data), multiple `UseDownload` calls at the top level of a single component is fine — see the [Multiple Format Export](#multiple-format-export) example above.
+
+</Body>
+</Details>
 
 ## See Also
 

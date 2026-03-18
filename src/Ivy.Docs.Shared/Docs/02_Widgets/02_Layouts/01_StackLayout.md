@@ -231,29 +231,3 @@ Alternatively, use `Layout.Grid().Columns(2)` for grid-based layouts.
 
 </Body>
 </Details>
-
-<Details>
-<Summary>
-How do I center content in the middle of the page (horizontally and vertically)?
-</Summary>
-<Body>
-
-Use `Layout.Center()` to center content both horizontally and vertically on the page:
-
-```csharp
-// ❌ Only centers horizontally within vertical stack
-Layout.Vertical().Align(Align.Center)
-    | TextInput().Placeholder("Enter URL")
-    | Button("Scan")
-
-// ✅ Centers the entire UI in middle of page
-Layout.Center()
-    | Layout.Vertical().Gap(2)
-        | TextInput().Placeholder("Enter URL")
-        | Button("Scan")
-```
-
-`Layout.Center()` creates a centered flex container that positions its content in the center of the available space both horizontally and vertically. Use `Layout.Vertical()` or `Layout.Horizontal()` inside it to arrange multiple elements.
-
-</Body>
-</Details>
