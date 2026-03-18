@@ -145,11 +145,7 @@ public class ToastExceptionDemo : ViewBase
 
 ## Faq
 
-<Details>
-<Summary>
-When should I use Toast vs UseAlert dialog
-</Summary>
-<Body>
+### When should I use Toast vs UseAlert dialog?
 
 Use **Toast** (`IClientProvider`) for simple, non-blocking feedback messages — success confirmations, error notifications, validation messages. Toasts auto-dismiss and don't require user interaction.
 
@@ -171,14 +167,7 @@ showAlert("Are you sure?", result => {
 
 **Rule of thumb:** If you don't need a user response, use Toast. If you need a Yes/No/Ok answer, use UseAlert.
 
-</Body>
-</Details>
-
-<Details>
-<Summary>
-Form Submission with Feedback
-</Summary>
-<Body>
+### Form Submission with Feedback
 
 ```csharp demo-below
 public class FormSubmissionDemo : ViewBase
@@ -191,15 +180,15 @@ public class FormSubmissionDemo : ViewBase
 
         return Layout.Vertical(
             new Button(
-                isSubmitting.Value ? "Submitting..." : "Submit Form",
+                isSubmitting.Value ? "Submitting..." : "Submit Form", 
                 _ => {
                     showAlert("Are you ready to submit this form?", async result => {
                         if (result == AlertResult.Ok) {
                             isSubmitting.Set(true);
-
+                            
                             // Simulate API call
                             await Task.Delay(2000);
-
+                            
                             isSubmitting.Set(false);
                             client.Toast("Form submitted successfully!", "Success");
                         }
@@ -211,9 +200,6 @@ public class FormSubmissionDemo : ViewBase
     }
 }
 ```
-
-</Body>
-</Details>
 
 ## UseAlert
 
