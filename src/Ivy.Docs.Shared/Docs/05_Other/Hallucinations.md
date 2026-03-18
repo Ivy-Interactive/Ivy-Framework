@@ -1798,25 +1798,3 @@ No widget in Ivy has a `MinWidth` method. To constrain width, wrap the widget in
 
 **Found In:**
 7aaec87b-1189-4439-863e-3ee0c219a5d1
-
-## Color — singular instead of Colors enum
-
-**Hallucinated API:**
-```csharp
-Ivy.Color.Red
-// or
-using Ivy;
-Color myColor = Color.Red;
-```
-
-**Error:** `CS0234: The type or namespace name 'Color' does not exist in the namespace 'Ivy'`
-
-**Correct API:**
-```csharp
-Ivy.Colors.Red
-// or
-using Ivy;
-Colors myColor = Colors.Red;
-```
-
-The color enum in Ivy is `Colors` (plural), not `Color` (singular). This is a common confusion with `System.Drawing.Color`. All color references should use `Colors.X`.
