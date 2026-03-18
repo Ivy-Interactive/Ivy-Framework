@@ -1980,37 +1980,3 @@ Individual properties are also available: `.BorderColor()`, `.BorderThickness()`
 
 Note: `.Border()` expects a `Colors` enum as the first argument, not a string. Thickness accepts `int` (uniform) or `Thickness` struct — do NOT pass `Ivy.Thickness` where `int` is expected.
 
-## Code — non-existent widget
-
-**Hallucinated API:**
-```csharp
-Code("var x = 1;")
-```
-
-**Error:** `The name 'Code' does not exist in the current context` (CS0246)
-
-**Correct API:**
-```csharp
-CodeBlock("var x = 1;", Languages.Csharp)
-```
-
-`Code` is not a widget. Use `CodeBlock` for displaying code snippets. It takes the code string and a `Languages` enum value.
-
-## Languages.Shell / Languages.Bash — non-existent enum values
-
-**Hallucinated API:**
-```csharp
-CodeBlock("pip install reflexify", Languages.Shell)
-```
-
-**Error:** `'Languages' does not contain a definition for 'Shell'` (CS0117)
-
-**Correct API:**
-```csharp
-CodeBlock("pip install reflexify", Languages.Text)
-```
-
-`Languages.Shell` and `Languages.Bash` do not exist. For shell/terminal commands, use `Languages.Text`.
-
-Available languages: `Csharp, Javascript, Typescript, Python, Sql, Html, Css, Json, Dbml, Markdown, Text, Xml, Yaml, Csv`
-
