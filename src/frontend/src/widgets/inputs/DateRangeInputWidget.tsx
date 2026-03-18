@@ -114,9 +114,6 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
     },
     [id, disabled, events, eventHandler]
   );
-
-  const today = new Date();
-
   const parseDate = (val: string | null | undefined) => {
     if (!val) return undefined;
     const d = new Date(val);
