@@ -1,4 +1,5 @@
 using System.Reactive.Disposables;
+using Ivy.Core.Apps;
 using Ivy.Core.Auth;
 using Ivy.Core.Server;
 using Microsoft.AspNetCore.Mvc;
@@ -14,17 +15,29 @@ public class DownloadController(AppSessionStore sessionStore, Server server) : C
     {
         if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
         {
-            throw new Exception($"Download 'ivy/download/{connectionId}/{downloadId}' not found.");
+            return RedirectToErrorApp(
+                ErrorAppArgs.ForNotFound("Download not found", "This download link has expired or is invalid."));
         }
 
-        if (await this.ValidateAuthIfRequired(server, session.AppServices) is { } errorResult)
+        if (await this.ValidateAuthIfRequired(server, session.AppServices) is { } _)
         {
-            return errorResult;
+            return RedirectToErrorApp(ErrorAppArgs.ForUnauthorized());
         }
 
         var downloadService = session.AppServices.GetRequiredService<IDownloadService>();
-        return await downloadService.Download(downloadId);
+        try
+        {
+            return await downloadService.Download(downloadId);
+        }
+        catch (Exception ex) when (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToErrorApp(
+                ErrorAppArgs.ForNotFound("Download not found", "The requested file is no longer available.") with { Details = ex.Message });
+        }
     }
+
+    private RedirectResult RedirectToErrorApp(ErrorAppArgs args) =>
+        Redirect($"/?appId={Uri.EscapeDataString(AppIds.ErrorNotFound)}&appArgs={Uri.EscapeDataString(ErrorAppArgs.ToArgsJson(args))}");
 }
 
 public class DownloadService(string connectionId) : IDownloadService, IDisposable

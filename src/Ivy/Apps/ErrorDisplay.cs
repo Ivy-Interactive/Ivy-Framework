@@ -30,6 +30,9 @@ public record ErrorAppArgs(string Title, string Message, string? Kind = null, st
     public static ErrorAppArgs ForServerError(string message, string? title = null, string? details = null) =>
         new(title ?? ErrorApp.DefaultTitle, message, KindServerError, details);
 
+    public static ErrorAppArgs ForUnauthorized(string? title = null, string? message = null, string? details = null) =>
+        new(title ?? "Unauthorized", message ?? "Please sign in to continue.", KindUnauthorized, details);
+
     public static ErrorAppArgs Custom(string title, string message, string? kind = null, string? details = null) =>
         new(title, message, kind, details);
 
