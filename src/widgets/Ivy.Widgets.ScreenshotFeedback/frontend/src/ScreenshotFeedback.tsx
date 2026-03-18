@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import html2canvas from 'html2canvas-pro';
-import { DrawingTool, Shape, AnnotationData, EventHandler } from './types';
-import { DrawingCanvas } from './DrawingCanvas';
-import { Toolbar } from './Toolbar';
-import './styles.css';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import html2canvas from "html2canvas-pro";
+import { DrawingTool, Shape, AnnotationData, EventHandler } from "./types";
+import { DrawingCanvas } from "./DrawingCanvas";
+import { Toolbar } from "./Toolbar";
+import "./styles.css";
 
 interface ScreenshotFeedbackProps {
   id: string;
@@ -20,12 +20,16 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
   events = [],
   eventHandler,
 }) => {
-  const [screenshotCanvas, setScreenshotCanvas] = useState<HTMLCanvasElement | null>(null);
+  const [screenshotCanvas, setScreenshotCanvas] =
+    useState<HTMLCanvasElement | null>(null);
   const [shapes, setShapes] = useState<Shape[]>([]);
-  const [activeTool, setActiveTool] = useState<DrawingTool>(DrawingTool.Callout);
-  const [color, setColor] = useState('#ef4444');
+  const [activeTool, setActiveTool] = useState<DrawingTool>(
+    DrawingTool.Callout,
+  );
+  const [color, setColor] = useState("#ef4444");
   const [lineWidth, setLineWidth] = useState(4);
   const [capturing, setCapturing] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
   const prevIsOpenRef = useRef(false);
 
@@ -39,7 +43,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
       const timer = setTimeout(() => {
         html2canvas(document.body, {
           ignoreElements: (el) => {
-            return el.getAttribute('data-screenshot-overlay') === 'true';
+            return el.getAttribute("data-screenshot-overlay") === "true";
           },
           useCORS: true,
           logging: false,
@@ -49,7 +53,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
             setCapturing(false);
           })
           .catch((err) => {
-            console.error('Screenshot capture failed:', err);
+            console.error("Screenshot capture failed:", err);
             setCapturing(false);
           });
       }, 50);
@@ -84,61 +88,74 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
   const onSave = useCallback(async () => {
     if (!screenshotCanvas) return;
 
-    // Fire the event first so the UI responds immediately
-    if (events.includes('OnSave')) {
-      eventHandler('OnSave', id, [buildAnnotationData()]);
-    }
+    setSubmitting(true);
 
-    // Then handle upload in the background
+    // First: merge canvases and upload the screenshot
     try {
-      const mergedCanvas = document.createElement('canvas');
+      const mergedCanvas = document.createElement("canvas");
       mergedCanvas.width = screenshotCanvas.width;
       mergedCanvas.height = screenshotCanvas.height;
-      const ctx = mergedCanvas.getContext('2d');
+      const ctx = mergedCanvas.getContext("2d");
       if (!ctx) return;
 
       ctx.drawImage(screenshotCanvas, 0, 0);
 
       const annotationCanvas = overlayRef.current?.querySelector(
-        '.screenshot-canvas-wrapper canvas:nth-child(2)'
+        ".screenshot-canvas-wrapper canvas:nth-child(2)",
       ) as HTMLCanvasElement | null;
       if (annotationCanvas) {
         ctx.drawImage(annotationCanvas, 0, 0);
       }
 
       const blob = await new Promise<Blob | null>((resolve) => {
-        mergedCanvas.toBlob(resolve, 'image/png');
+        mergedCanvas.toBlob(resolve, "image/png");
       });
 
       if (blob && uploadUrl) {
         const getUploadUrl = () => {
           const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
           if (ivyHostMeta) {
-            const host = ivyHostMeta.getAttribute('content');
+            const host = ivyHostMeta.getAttribute("content");
             return host + uploadUrl;
           }
           return uploadUrl;
         };
 
         const formData = new FormData();
-        formData.append('file', blob, 'screenshot.png');
+        formData.append("file", blob, "screenshot.png");
 
         const response = await fetch(getUploadUrl(), {
-          method: 'POST',
+          method: "POST",
           body: formData,
         });
         if (!response.ok) {
-          console.error('Screenshot upload failed:', response.statusText);
+          console.error("Screenshot upload failed:", response.statusText);
+          return;
         }
       }
     } catch (error) {
-      console.error('Screenshot save error:', error);
+      console.error("Screenshot save error:", error);
+      return;
+    } finally {
+      setSubmitting(false);
     }
-  }, [screenshotCanvas, uploadUrl, events, eventHandler, id, buildAnnotationData]);
+
+    // Then fire the event (upload is now complete, C# handler can read the content)
+    if (events.includes("OnSave")) {
+      eventHandler("OnSave", id, [buildAnnotationData()]);
+    }
+  }, [
+    screenshotCanvas,
+    uploadUrl,
+    events,
+    eventHandler,
+    id,
+    buildAnnotationData,
+  ]);
 
   const onCancel = useCallback(() => {
-    if (events.includes('OnCancel')) {
-      eventHandler('OnCancel', id, []);
+    if (events.includes("OnCancel")) {
+      eventHandler("OnCancel", id, []);
     }
   }, [events, eventHandler, id]);
 
@@ -147,24 +164,24 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl+S to save
-      if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+      if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         onSave();
         return;
       }
       // Ctrl+Z to undo
-      if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+      if (e.key === "z" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         onUndo();
         return;
       }
       // ESC — only cancel if no active tool input (text/callout inputs handle their own ESC via stopPropagation)
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onCancel();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onCancel, onUndo, onSave]);
 
   if (!isOpen) return null;
@@ -174,13 +191,13 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
       <div className="screenshot-overlay" data-screenshot-overlay="true">
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             flex: 1,
-            color: 'hsl(var(--muted-foreground))',
+            color: "hsl(var(--muted-foreground))",
             fontSize: 18,
-            fontFamily: 'var(--font-sans, sans-serif)',
+            fontFamily: "var(--font-sans, sans-serif)",
           }}
         >
           Capturing screenshot...
@@ -190,7 +207,11 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
   }
 
   return (
-    <div className="screenshot-overlay" ref={overlayRef} data-screenshot-overlay="true">
+    <div
+      className="screenshot-overlay"
+      ref={overlayRef}
+      data-screenshot-overlay="true"
+    >
       <Toolbar
         activeTool={activeTool}
         color={color}
@@ -202,6 +223,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
         onSave={onSave}
         onCancel={onCancel}
         canUndo={shapes.length > 0}
+        submitting={submitting}
       />
       <div className="screenshot-canvas-container">
         <DrawingCanvas
