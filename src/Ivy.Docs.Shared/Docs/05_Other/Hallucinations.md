@@ -612,10 +612,8 @@ showAlert("message", result => { }, "title", AlertButtonSet.Ok);
 
 `UseAlert()` returns a tuple `(IView? alertView, ShowAlertDelegate showAlert)`, not an object with methods. Destructure the tuple and call the delegate directly. The `alertView` must be included in the returned view tree.
 
-Also seen as `showAlert.Error("message")` — the agent confuses `ShowAlertDelegate` methods with `IClientProvider` toast methods. For simple error/success notifications, use `IClientProvider.Error()` or `IClientProvider.Toast()` instead of `UseAlert`.
-
 **Found In:**
-276d383f-696e-4d67-bc6e-14502c59734b, 0a42123e-a489-433a-93e5-87d4de7075eb
+276d383f-696e-4d67-bc6e-14502c59734b
 
 ## Size.Flex() — non-existent static method
 
@@ -1881,64 +1879,4 @@ The `Progress` widget always uses percentage values (0-100). There is no `.Max()
 
 **Found In:**
 ec6b51cb-29aa-4b6c-89dc-24d1e7bba68f
-
-## using Ivy.Icons — enum used as namespace
-
-**Hallucinated API:**
-```csharp
-using Ivy.Icons;
-```
-
-**Error:** `CS0138: A 'using namespace' directive can only be applied to namespaces; 'Icons' is a type not a namespace`
-
-**Correct API:**
-```csharp
-using static Ivy.Icons;
-// Then use: Icons.FileCode
-// Or without the using: Ivy.Icons.FileCode
-```
-
-`Icons` is an enum (`Ivy.Icons`), not a namespace. Use `using static Ivy.Icons;` if you want unqualified access to icon values, or reference them as `Icons.FileCode` / `Ivy.Icons.FileCode`.
-
-**Found In:**
-0a42123e-a489-433a-93e5-87d4de7075eb
-
-## CodeInput.ReadOnly() — non-existent method
-
-**Hallucinated API:**
-```csharp
-codeInput.ReadOnly()
-```
-
-**Error:** `CS1061: 'CodeInputBase' does not contain a definition for 'ReadOnly'`
-
-**Correct API:**
-```csharp
-codeInput.Disabled(true)
-```
-
-`CodeInput` does not have a `.ReadOnly()` method. Use `.Disabled(true)` to make a CodeInput non-editable. The agent draws from HTML `readonly` attribute or other UI frameworks. In Ivy, the `Disabled` extension is the standard way to prevent editing on all input widgets.
-
-**Found In:**
-0a42123e-a489-433a-93e5-87d4de7075eb
-
-## View / IComponent — non-existent base types
-
-**Hallucinated API:**
-```csharp
-public class MyApp : View { }
-public class MyApp : IComponent { }
-```
-
-**Error:** `CS0246: The type or namespace name 'View' could not be found` / `CS0246: The type or namespace name 'IComponent' could not be found`
-
-**Correct API:**
-```csharp
-public class MyApp : ViewBase { }
-```
-
-The base class for all Ivy views/apps is `ViewBase`, not `View` or `IComponent`. The agent confuses Ivy's naming with React (`Component`), Blazor (`ComponentBase`), or generic UI patterns (`View`).
-
-**Found In:**
-0a42123e-a489-433a-93e5-87d4de7075eb
 
