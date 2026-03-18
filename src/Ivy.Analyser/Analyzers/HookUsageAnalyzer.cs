@@ -13,43 +13,43 @@ namespace Ivy.Analyser.Analyzers
     {
         public const string DiagnosticId = "IVYHOOK001";
         private const string Title = "Invalid Ivy Hook Usage";
-        private const string MessageFormat = "Ivy hook '{0}' must be called at the top level of the Build() method — not inside lambdas, local functions, or helper methods. Hooks must always execute in the same order on every render. See: https://docs.ivy.app/other/ivy-analyser/ivyhook001.";
+        private const string MessageFormat = "Ivy hook '{0}' must be called at the top level of the Build() method — not inside lambdas, local functions, or helper methods. Hooks must always execute in the same order on every render. See: https://docs.ivy.app/other/ivy/analyser/ivyhook001.";
         private const string Description = "Ivy hooks must be called directly inside the Build() method, not inside lambdas, local functions, or other methods.";
 
         public const string DiagnosticIdNestedClosure = "IVYHOOK001B";
         private const string TitleNestedClosure = "Ivy Hook Used in Nested Closure";
-        private const string MessageFormatNestedClosure = "Ivy hook '{0}' is inside a {1} within Build() — move it to the top level of Build(). Hooks must always execute in the same order on every render. See: https://docs.ivy.app/other/ivy-analyser/ivyhook001b.";
+        private const string MessageFormatNestedClosure = "Ivy hook '{0}' is inside a {1} within Build() — move it to the top level of Build(). Hooks must always execute in the same order on every render. See: https://docs.ivy.app/other/ivy/analyser/ivyhook001b.";
         private const string DescriptionNestedClosure = "Ivy hooks cannot be called inside lambdas, local functions, or anonymous methods even when those are defined within Build(). Move the hook call to the top level of Build().";
         private const string Category = "Usage";
 
         public const string DiagnosticIdConditional = "IVYHOOK002";
         private const string TitleConditional = "Ivy Hook Called Conditionally";
-        private const string MessageFormatConditional = "Ivy hook '{0}' cannot be called conditionally. Hooks must be called in the same order on every render. See: https://docs.ivy.app/other/ivy-analyser/ivyhook002.";
+        private const string MessageFormatConditional = "Ivy hook '{0}' cannot be called conditionally. Hooks must be called in the same order on every render. See: https://docs.ivy.app/other/ivy/analyser/ivyhook002.";
         private const string DescriptionConditional = "Ivy hooks must be called unconditionally at the top level of the Build() method. Do not call hooks inside if statements, ternary operators, or other conditional logic.";
 
         public const string DiagnosticIdLoop = "IVYHOOK003";
         private const string TitleLoop = "Ivy Hook Called in Loop";
-        private const string MessageFormatLoop = "Ivy hook '{0}' cannot be called inside a loop. Hooks must be called in the same order on every render. See: https://docs.ivy.app/other/ivy-analyser/ivyhook003.";
+        private const string MessageFormatLoop = "Ivy hook '{0}' cannot be called inside a loop. Hooks must be called in the same order on every render. See: https://docs.ivy.app/other/ivy/analyser/ivyhook003.";
         private const string DescriptionLoop = "Ivy hooks must be called unconditionally at the top level of the Build() method. Do not call hooks inside for, foreach, while, or do-while loops.";
 
         public const string DiagnosticIdSwitch = "IVYHOOK004";
         private const string TitleSwitch = "Ivy Hook Called in Switch Statement";
-        private const string MessageFormatSwitch = "Ivy hook '{0}' cannot be called inside a switch statement. Hooks must be called in the same order on every render. See: https://docs.ivy.app/other/ivy-analyser/ivyhook004.";
+        private const string MessageFormatSwitch = "Ivy hook '{0}' cannot be called inside a switch statement. Hooks must be called in the same order on every render. See: https://docs.ivy.app/other/ivy/analyser/ivyhook004.";
         private const string DescriptionSwitch = "Ivy hooks must be called unconditionally at the top level of the Build() method. Do not call hooks inside switch statements.";
 
         public const string DiagnosticIdNotAtTop = "IVYHOOK005";
         private const string TitleNotAtTop = "Ivy Hook Not at Top of Build Method";
-        private const string MessageFormatNotAtTop = "Ivy hook '{0}' must be called at the top of the Build() method, before any other statements. See: https://docs.ivy.app/other/ivy-analyser/ivyhook005.";
+        private const string MessageFormatNotAtTop = "Ivy hook '{0}' must be called at the top of the Build() method, before any other statements. See: https://docs.ivy.app/other/ivy/analyser/ivyhook005.";
         private const string DescriptionNotAtTop = "All hooks must be called at the very top of the Build() method, before any other non-hook statements. This ensures hooks are called in a consistent order on every render.";
 
         public const string DiagnosticIdFieldStorage = "IVYHOOK006";
         private const string TitleFieldStorage = "Hook Result Stored in Class Member";
-        private const string MessageFormatFieldStorage = "Ivy hook '{0}' result must not be stored in a class field or property. Use a local variable instead. See: https://docs.ivy.app/other/ivy-analyser/ivyhook006.";
+        private const string MessageFormatFieldStorage = "Ivy hook '{0}' result must not be stored in a class field or property. Use a local variable instead. See: https://docs.ivy.app/other/ivy/analyser/ivyhook006.";
         private const string DescriptionFieldStorage = "Storing hook results in class fields or properties breaks the reactive system. The state object is captured once and reused across renders, causing hooks to receive wrong indices.";
 
         public const string DiagnosticIdInlineExpression = "IVYHOOK007";
         private const string TitleInlineExpression = "Hook Called Inline in Expression";
-        private const string MessageFormatInlineExpression = "'{0}' should be assigned to a local variable at the top of the Build method, not called inline in an expression. Extract to: var myVar = {0}; See: https://docs.ivy.app/other/ivy-analyser/ivyhook007.";
+        private const string MessageFormatInlineExpression = "'{0}' should be assigned to a local variable at the top of the Build method, not called inline in an expression. Extract to: var myVar = {0}; See: https://docs.ivy.app/other/ivy/analyser/ivyhook007.";
         private const string DescriptionInlineExpression = "Hooks must be assigned to a top-level local variable or called as a standalone expression statement. Do not call hooks inline within widget construction expressions, pipe chains, constructor arguments, or return statements.";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
