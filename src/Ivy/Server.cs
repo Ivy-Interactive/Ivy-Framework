@@ -13,6 +13,7 @@ using Ivy.Themes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -658,15 +659,12 @@ public class Server
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
         // Configure ForwardedHeaders middleware to process X-Forwarded-* headers from reverse proxies
-        var forwardedHeadersOptions = new Microsoft.AspNetCore.HttpOverrides.ForwardedHeadersOptions
+        var forwardedHeadersOptions = new ForwardedHeadersOptions
         {
-            ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
-                | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
-                | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedHost
-                | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedPrefix,
-            // Allow proxy headers from any source (configure as needed for security)
-            KnownNetworks = new Microsoft.AspNetCore.HttpOverrides.IPNetwork[0],
-            KnownProxies = new System.Net.IPAddress[0],
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                | ForwardedHeaders.XForwardedProto
+                | ForwardedHeaders.XForwardedHost
+                | ForwardedHeaders.XForwardedPrefix,
         };
         app.UseForwardedHeaders(forwardedHeadersOptions);
 
