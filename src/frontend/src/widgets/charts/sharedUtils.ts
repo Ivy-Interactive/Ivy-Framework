@@ -246,8 +246,15 @@ export const generateXAxis = (
   data: isVertical ? undefined : categories,
   axisLabel: {
     show: true,
-    formatter: (value: string) =>
-      value.length > 10 ? value.match(/.{1,10}/g)?.join('\n') : value,
+    formatter: isVertical
+      ? (value: number) => {
+          if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(0) + 'B';
+          if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(0) + 'M';
+          if (Math.abs(value) >= 1e3) return (value / 1e3).toFixed(0) + 'K';
+          return value;
+        }
+      : (value: string) =>
+          value.length > 10 ? value.match(/.{1,10}/g)?.join('\n') : value,
     interval: 'auto',
     ...generateAxisLabelStyle(
       themeColors?.mutedForeground,
