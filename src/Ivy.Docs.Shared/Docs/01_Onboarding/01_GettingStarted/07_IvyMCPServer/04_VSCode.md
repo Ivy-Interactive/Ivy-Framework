@@ -8,16 +8,16 @@ For more information on configuring MCP servers in VS Code, please refer to thei
 
 To use the Ivy MCP Server, you first need to install Ivy. Refer to the [installation guide](../02_Installation.md) to learn how.
 
-
-
 ## Setup
 
 1. Open your project directory in VS Code.
-2. Initialise the Ivy project: 
+2. Initialise the Ivy project:
+
    ```terminal
    ivy init 
    ```
-3. Generate the MCP configuration: 
+
+3. Generate the MCP configuration:
 
    ```terminal
    ivy mcp config
