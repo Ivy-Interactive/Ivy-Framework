@@ -11,7 +11,7 @@ public class SplitPascalCaseTests
     [InlineData(null, null)]
     public void SplitPascalCase_TitleCasesEachWord(string? input, string? expected)
     {
-        var result = Utils.SplitPascalCase(input);
+        var result = StringHelper.SplitPascalCase(input);
         Assert.Equal(expected, result);
     }
 }

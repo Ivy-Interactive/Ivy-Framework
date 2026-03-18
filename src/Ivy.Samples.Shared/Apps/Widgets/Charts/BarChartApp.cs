@@ -13,6 +13,7 @@ public class BarChartApp : SampleBase
             | new BarChart3()
             | new BarChart4()
             | new BarChart5()
+            | new BarChart9()
         ;
     }
 }
@@ -32,13 +33,10 @@ public class BarChart0 : ViewBase
         };
 
         return new Card().Title("Desktop Usage by Month")
-            | new BarChart(data)
-                .ColorScheme(ColorScheme.Default)
-                .Bar(new Bar("Desktop", 1).Radius(8))
-                .CartesianGrid(new CartesianGrid().Horizontal())
-                .Tooltip()
-                .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
-                .Legend()
+            | data.ToBarChart()
+                .Dimension("Month", e => e.Month)
+                .Measure("Desktop", e => e.Sum(f => f.Desktop))
+                .Toolbox()
         ;
     }
 }
@@ -58,14 +56,11 @@ public class BarChart1 : ViewBase
         };
 
         return new Card().Title("Desktop vs Mobile Usage")
-            | new BarChart(data)
-                .ColorScheme(ColorScheme.Default)
-                .Bar(new Bar("Mobile", 1).Radius(0, 8).LegendType(LegendTypes.Square))
-                .Bar(new Bar("Desktop", 1).Radius(8, 0).LegendType(LegendTypes.Square))
-                .CartesianGrid(new CartesianGrid().Horizontal())
-                .Tooltip()
-                .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
-                .Legend()
+            | data.ToBarChart()
+                .Dimension("Month", e => e.Month)
+                .Measure("Mobile", e => e.Sum(f => f.Mobile))
+                .Measure("Desktop", e => e.Sum(f => f.Desktop))
+                .Toolbox()
         ;
     }
 }
@@ -85,14 +80,11 @@ public class BarChart2 : ViewBase
         };
 
         return new Card().Title("Device Usage Comparison")
-            | new BarChart(data)
-                .ColorScheme(ColorScheme.Default)
-                .Bar(new Bar("Mobile", 1).Radius(8).LegendType(LegendTypes.Square))
-                .Bar(new Bar("Desktop", 2).Radius(8).LegendType(LegendTypes.Square))
-                .CartesianGrid(new CartesianGrid().Horizontal())
-                .Tooltip()
-                .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
-                .Legend()
+            | data.ToBarChart()
+                .Dimension("Month", e => e.Month)
+                .Measure("Mobile", e => e.Sum(f => f.Mobile))
+                .Measure("Desktop", e => e.Sum(f => f.Desktop))
+                .Toolbox()
         ;
     }
 }
@@ -141,15 +133,11 @@ public class BarChart4 : ViewBase
         };
 
         return new Card().Title("Financial Performance by Quarter")
-            | new BarChart(data)
-                .ColorScheme(ColorScheme.Default)
-                .Bar(new Bar("Revenue", 1).Radius(8).LegendType(LegendTypes.Square))
-                .Bar(new Bar("Expenses", 1).Radius(8).LegendType(LegendTypes.Square))
-                .Bar(new Bar("Profit", 1).Radius(8).LegendType(LegendTypes.Square))
-                .CartesianGrid(new CartesianGrid().Horizontal())
-                .Tooltip()
-                .XAxis(new XAxis("Quarter").TickLine(false).AxisLine(false))
-                .Legend()
+            | data.ToBarChart()
+                .Dimension("Quarter", e => e.Quarter)
+                .Measure("Revenue", e => e.Sum(f => f.Revenue))
+                .Measure("Expenses", e => e.Sum(f => f.Expenses))
+                .Measure("Profit", e => e.Sum(f => f.Profit))
                 .Toolbox()
         ;
     }
@@ -169,16 +157,39 @@ public class BarChart5 : ViewBase
         };
 
         return new Card().Title("Team Distribution by Department")
+            | data.ToBarChart()
+                .Dimension("Category", e => e.Category)
+                .Measure("Developers", e => e.Sum(f => f.Developers))
+                .Measure("Designers", e => e.Sum(f => f.Designers))
+                .Measure("QA", e => e.Sum(f => f.QA))
+                .Toolbox()
+        ;
+    }
+}
+
+public class BarChart9 : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Month = "Jan", Revenue = 4200, Expenses = 3100 },
+            new { Month = "Feb", Revenue = 4800, Expenses = 3400 },
+            new { Month = "Mar", Revenue = 5100, Expenses = 3600 },
+            new { Month = "Apr", Revenue = 4700, Expenses = 3200 },
+            new { Month = "May", Revenue = 5300, Expenses = 3800 },
+            new { Month = "Jun", Revenue = 5900, Expenses = 4000 },
+        };
+
+        return new Card().Title("Custom Grid Line Color (Stroke)")
             | new BarChart(data)
                 .ColorScheme(ColorScheme.Default)
-                .Bar(new Bar("Developers", 1).Radius(8).LegendType(LegendTypes.Square))
-                .Bar(new Bar("Designers", 1).Radius(8).LegendType(LegendTypes.Square))
-                .Bar(new Bar("QA", 1).Radius(8).LegendType(LegendTypes.Square))
-                .CartesianGrid(new CartesianGrid().Horizontal())
+                .Bar(new Bar("Revenue", 1).Radius(8).LegendType(LegendTypes.Square))
+                .Bar(new Bar("Expenses", 2).Radius(8).LegendType(LegendTypes.Square))
+                .CartesianGrid(new CartesianGrid().Horizontal().Stroke(Colors.Red))
                 .Tooltip()
-                .XAxis(new XAxis("Category").TickLine(false).AxisLine(false))
+                .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                 .Legend()
-                .Toolbox()
         ;
     }
 }

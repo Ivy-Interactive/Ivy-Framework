@@ -28,7 +28,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public IBuilder<TModel> Builder { get; set; } = builder;
         public Type? Type => FieldInfo?.FieldType ?? PropertyInfo?.PropertyType;
         public int Order { get; set; } = order;
-        public string Header { get; set; } = Utils.LabelFor(name, fieldInfo?.FieldType ?? propertyInfo?.PropertyType);
+        public string Header { get; set; } = StringHelper.LabelFor(name, fieldInfo?.FieldType ?? propertyInfo?.PropertyType);
         public string? Description { get; set; }
         public bool Removed { get; set; } = removed;
         private readonly IBuilder<TModel> _initialBuilder = initialBuilder;
@@ -99,6 +99,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             .Union(
                 type
                     .GetProperties()
+                    .Where(p => p.GetIndexParameters().Length == 0)
                     .Where(p => p.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
                     .Select(e => new { e.Name, Type = e.PropertyType, FieldInfo = (FieldInfo)null!, PropertyInfo = e })
             )
@@ -188,7 +189,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
     private TableBuilderColumn GetField(Expression<Func<TModel, object>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _columns[name];
     }
 
@@ -245,7 +246,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     {
         foreach (var field in fields)
         {
-            var name = Utils.GetNameFromMemberExpression(field.Body);
+            var name = TypeHelper.GetNameFromMemberExpression(field.Body);
             if (!_columns.TryGetValue(name, out var hint)) continue;
             hint.Removed = true;
         }
@@ -355,7 +356,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
             if (!isHeader && isEmptyColumn[index])
             {
-                if (!Utils.IsEmptyContent(content))
+                if (!ValidationHelper.IsEmptyContent(content))
                 {
                     isEmptyColumn[index] = false;
                 }
@@ -426,7 +427,7 @@ public static class TableBuilderFactory
         if (enumerableType != null)
         {
             Type itemType = enumerableType.GetGenericArguments()[0];
-            if (Utils.IsSimpleType(itemType))
+            if (TypeHelper.IsSimpleType(itemType))
             {
                 var items = enumerable.Cast<object>().ToArray();
                 var rows = items.Select(item => new TableRow(new TableCell(item))).ToArray();

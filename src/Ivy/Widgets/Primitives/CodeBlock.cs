@@ -18,6 +18,7 @@ public enum Languages
     Text,
     Xml,
     Yaml,
+    Csv,
 }
 
 /// <summary>

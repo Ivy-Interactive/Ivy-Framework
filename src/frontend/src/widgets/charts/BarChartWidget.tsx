@@ -180,10 +180,10 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
           : BAR_DEFAULTS;
 
         return {
-          name: key,
+          name: barConfig.name || key,
           type: ChartType.Bar,
           legendHoverLink: true,
-          showBackground: true,
+          showBackground: false,
           data: data.map(d => d[key]),
           stack:
             barConfig.stackId !== undefined
@@ -233,10 +233,17 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         themeColors.foreground,
         themeColors.fontSans
       ),
-      xAxis: generateXAxis(ChartType.Bar, categories, xAxis, isVertical, {
-        mutedForeground: themeColors.mutedForeground,
-        fontSans: themeColors.fontSans,
-      }),
+      xAxis: generateXAxis(
+        ChartType.Bar,
+        categories,
+        xAxis,
+        isVertical,
+        {
+          mutedForeground: themeColors.mutedForeground,
+          fontSans: themeColors.fontSans,
+        },
+        cartesianGrid
+      ),
       yAxis: generateYAxis(
         largeSpread,
         transform,
@@ -248,7 +255,8 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         {
           mutedForeground: themeColors.mutedForeground,
           fontSans: themeColors.fontSans,
-        }
+        },
+        cartesianGrid
       ),
       series,
       legend: generateEChartLegend(legend, {

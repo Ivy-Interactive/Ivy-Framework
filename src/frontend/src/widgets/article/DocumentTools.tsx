@@ -66,12 +66,19 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
   const fetchMarkdown = async (): Promise<string> => {
     const path = window.location.pathname;
     const cleanPath = path.endsWith('/') ? path.slice(0, -1) : path;
+
+    if (!cleanPath || cleanPath === '') {
+      throw new Error('No markdown available for the root page');
+    }
+
     const url = `${cleanPath}.md`;
 
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch markdown: ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch markdown: ${response.statusText || response.status}`
+      );
     }
 
     return await response.text();

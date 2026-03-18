@@ -5,6 +5,8 @@ using Ivy.Core.Helpers;
 
 namespace Ivy.Test;
 
+public record PositionalRecord(int Id, string Name, string Department, decimal Salary, DateTime HireDate, bool IsActive);
+
 public class QueryableExtensionsTests
 {
     private class TestModel
@@ -114,5 +116,44 @@ public class QueryableExtensionsTests
             Assert.Equal(0, item.Value);
             Assert.False(item.IsActive);
         }
+    }
+
+    [Fact]
+    public void RemoveFields_PositionalRecord_RemovedFieldGetsDefault()
+    {
+        var data = new List<PositionalRecord>
+        {
+            new(1, "Alice", "Engineering", 90000m, new DateTime(2023, 1, 15), true),
+            new(2, "Bob", "Marketing", 75000m, new DateTime(2024, 6, 1), false),
+        }.AsQueryable();
+
+        var result = data.RemoveFields(["Id"]).Cast<PositionalRecord>().ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal(0, result[0].Id);
+        Assert.Equal("Alice", result[0].Name);
+        Assert.Equal("Engineering", result[0].Department);
+        Assert.Equal(90000m, result[0].Salary);
+        Assert.Equal(0, result[1].Id);
+        Assert.Equal("Bob", result[1].Name);
+    }
+
+    [Fact]
+    public void RemoveFields_PositionalRecord_RemoveMultipleFields()
+    {
+        var data = new List<PositionalRecord>
+        {
+            new(1, "Alice", "Engineering", 90000m, new DateTime(2023, 1, 15), true),
+        }.AsQueryable();
+
+        var result = data.RemoveFields(["Id", "HireDate", "IsActive"]).Cast<PositionalRecord>().ToList();
+
+        Assert.Single(result);
+        Assert.Equal(0, result[0].Id);
+        Assert.Equal("Alice", result[0].Name);
+        Assert.Equal("Engineering", result[0].Department);
+        Assert.Equal(90000m, result[0].Salary);
+        Assert.Equal(default, result[0].HireDate);
+        Assert.False(result[0].IsActive);
     }
 }

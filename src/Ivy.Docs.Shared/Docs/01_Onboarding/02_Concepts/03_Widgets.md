@@ -160,6 +160,10 @@ public class InputWidgetsDemo : ViewBase
         var asyncSelectState = UseState((string?)null);
         
         var selectedCategory = UseState<string?>(default(string?));
+        var sliderState = UseState(0.0);
+        var currencyState = UseState(0m);
+        var percentState = UseState(0.0);
+        var readOnlyState = UseState("Read-only value");
 
         QueryResult<Option<string>[]> QueryCategories(IViewContext context, string query)
         {
@@ -181,22 +185,22 @@ public class InputWidgetsDemo : ViewBase
         return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | new TextInput(textState).Placeholder("Enter text...")
-                    | new TextInput(textState).Variant(TextInputVariant.Password).Placeholder("Password")
-                    | new TextInput(textState).Variant(TextInputVariant.Email).Placeholder("Email")
-                    | new TextInput(textState).Variant(TextInputVariant.Search).Placeholder("Search...")
+                    | textState.ToTextInput().Placeholder("Enter text...")
+                    | textState.ToTextInput().Variant(TextInputVariant.Password).Placeholder("Password")
+                    | textState.ToTextInput().Variant(TextInputVariant.Email).Placeholder("Email")
+                    | textState.ToTextInput().Variant(TextInputVariant.Search).Placeholder("Search...")
             ).Title("TextInput").Description("Text input variants").Height(Size.Units(80))
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | new NumberInput<double>(numberState).Min(0).Max(100).Variant(NumberInputVariant.Slider)
-                    | new NumberInput<int>(numberState).Placeholder("Enter number")
-                    | new NumberInput<decimal>(numberState).FormatStyle(NumberFormatStyle.Currency).Currency("USD").Placeholder("$0.00")
-                    | new NumberInput<double>(numberState).FormatStyle(NumberFormatStyle.Percent).Placeholder("0%")
+                    | sliderState.ToNumberInput().Min(0).Max(100).Variant(NumberInputVariant.Slider)
+                    | numberState.ToNumberInput().Placeholder("Enter number")
+                    | currencyState.ToNumberInput().FormatStyle(NumberFormatStyle.Currency).Currency("USD").Placeholder("$0.00")
+                    | percentState.ToNumberInput().FormatStyle(NumberFormatStyle.Percent).Placeholder("0%")
             ).Title("NumberInput").Description("Number and slider").Height(Size.Units(80))
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | new BoolInput(boolState).Label("Accept terms and conditions")
-                    | boolState.ToSwitchInput().Label("Enable notifications")
+                    | boolState.ToBoolInput().WithField().Label("Accept terms and conditions")
+                    | boolState.ToSwitchInput().WithField().Label("Enable notifications")
             ).Title("BoolInput").Description("Checkbox input").Height(Size.Units(65))
             | new Card(
                 Layout.Vertical().Gap(2)
@@ -206,10 +210,10 @@ public class InputWidgetsDemo : ViewBase
                 dateRangeState.ToDateRangeInput().Placeholder("Select date range")
             ).Title("DateRange").Description("Date range picker").Height(Size.Units(40))
             | new Card(
-                new DateTimeInput<DateTime>(dateState).Placeholder("Select date")
+                dateState.ToDateTimeInput().Placeholder("Select date")
             ).Title("DateTimeInput").Description("Date and time picker").Height(Size.Units(40))
             | new Card(
-                new FeedbackInput<int>(feedbackState).Stars()
+                feedbackState.ToFeedbackInput().Stars()
             ).Title("Feedback").Description("Star rating").Height(Size.Units(40))
             | new Card(
                 colorState.ToColorInput().Variant(ColorInputVariant.Picker)
@@ -221,7 +225,7 @@ public class InputWidgetsDemo : ViewBase
                 selectState.ToSelectInput(new[] { "Option 1", "Option 2", "Option 3" }.ToOptions()).Placeholder("Select option")
             ).Title("Select").Description("Dropdown select").Height(Size.Units(50))
             | new Card(
-                new ReadOnlyInput<string>("Read-only value")
+                readOnlyState.ToReadOnlyInput()
             ).Title("ReadOnly").Description("Read-only display").Height(Size.Units(40))
             | new Card(
                 selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, "Search categories...")

@@ -32,6 +32,8 @@ import {
 } from '@codemirror/view';
 import { history } from '@codemirror/commands';
 
+import { useDebouncedCallback } from 'use-debounce';
+
 const EMPTY_ARRAY: never[] = [];
 
 interface CodeInputWidgetProps {
@@ -62,6 +64,7 @@ const languageExtensions = {
   Markdown: markdown,
   Text: undefined,
   Yaml: yaml,
+  Csv: undefined,
 };
 
 export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
@@ -94,12 +97,18 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     localValueRef.current = localValue;
   }, [localValue]);
 
+  const debouncedOnChange = useDebouncedCallback((value: string) => {
+    if (events.includes('OnChange')) {
+      eventHandler('OnChange', id, [value]);
+    }
+  }, 300);
+
   const handleChange = useCallback(
     (value: string) => {
       setLocalValue(value);
-      if (events.includes('OnChange')) eventHandler('OnChange', id, [value]);
+      debouncedOnChange(value);
     },
-    [eventHandler, id, events]
+    [debouncedOnChange]
   );
 
   const handleBlur = useCallback(() => {

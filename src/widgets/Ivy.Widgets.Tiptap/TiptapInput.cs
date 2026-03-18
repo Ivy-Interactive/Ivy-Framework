@@ -151,22 +151,22 @@ public static class TiptapInputExtensions
     }
 
     [OverloadResolutionPriority(1)]
-    public static TiptapInputBase HandleFocus(this TiptapInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus) =>
+    public static TiptapInputBase OnFocus(this TiptapInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus) =>
         widget with { OnFocus = new(onFocus) };
 
-    public static TiptapInputBase HandleFocus(this TiptapInputBase widget, Action<Event<IAnyInput>> onFocus) =>
-        widget.HandleFocus(onFocus.ToValueTask());
+    public static TiptapInputBase OnFocus(this TiptapInputBase widget, Action<Event<IAnyInput>> onFocus) =>
+        widget.OnFocus(onFocus.ToValueTask());
 
-    public static TiptapInputBase HandleFocus(this TiptapInputBase widget, Action handler) =>
-        widget.HandleFocus(_ => { handler(); return ValueTask.CompletedTask; });
+    public static TiptapInputBase OnFocus(this TiptapInputBase widget, Action handler) =>
+        widget.OnFocus(_ => { handler(); return ValueTask.CompletedTask; });
 
     [OverloadResolutionPriority(1)]
-    public static TiptapInputBase HandleBlur(this TiptapInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur) =>
+    public static TiptapInputBase OnBlur(this TiptapInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur) =>
         widget with { OnBlur = new(onBlur) };
 
-    public static TiptapInputBase HandleBlur(this TiptapInputBase widget, Action<Event<IAnyInput>> onBlur) =>
-        widget.HandleBlur(onBlur.ToValueTask());
+    public static TiptapInputBase OnBlur(this TiptapInputBase widget, Action<Event<IAnyInput>> onBlur) =>
+        widget.OnBlur(onBlur.ToValueTask());
 
-    public static TiptapInputBase HandleBlur(this TiptapInputBase widget, Action handler) =>
-        widget.HandleBlur(_ => { handler(); return ValueTask.CompletedTask; });
+    public static TiptapInputBase OnBlur(this TiptapInputBase widget, Action handler) =>
+        widget.OnBlur(_ => { handler(); return ValueTask.CompletedTask; });
 }

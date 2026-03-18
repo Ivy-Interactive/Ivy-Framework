@@ -115,7 +115,7 @@ public class TodoItem(Todo todo, Action deleteTodo, Action toggleTodo) : ViewBas
     {
         return Layout.Vertical()
            | (Layout.Horizontal().Align(Align.Center).Width(Size.Full())
-              | new BoolInput<bool>(todo.Done, _ =>
+              | todo.Done.ToBoolInput().OnChange(_ =>
               {
                   toggleTodo();
               })

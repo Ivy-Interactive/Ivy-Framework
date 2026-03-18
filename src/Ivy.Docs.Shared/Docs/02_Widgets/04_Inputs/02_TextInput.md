@@ -29,7 +29,7 @@ public class BasicUsageDemo : ViewBase
     public override object? Build()
     { 
         var text = UseState("");
-        return new TextInput(text).Placeholder("Enter text here...");
+        return text.ToTextInput().Placeholder("Enter text here...");
     }
 }
 ```
@@ -56,9 +56,8 @@ public class PasswordCaptureDemo: ViewBase
     public override object? Build()
     {
         var password = UseState("");
-        return new TextInput(password)
+        return password.ToPasswordInput()
                      .Placeholder("Password")
-                     .Variant(TextInputVariant.Password)
                      .WithField()
                      .Label("Enter Password");         
     }
@@ -78,9 +77,8 @@ public class CaptureAddressDemo: ViewBase
     public override object? Build()
     {
         var address = UseState("");
-        return new TextInput(address)
+        return address.ToTextareaInput()
                                .Placeholder("Åkervägen 9, \n132 39 Saltsjö-Boo, \nSweden")
-                               .Variant(TextInputVariant.Textarea)
                                .Height(Size.Units(30))
                                .Width(Size.Units(100))
                                .WithField()
@@ -109,9 +107,8 @@ public class SearchBarDemo: ViewBase
     public override object? Build()
     {
         var searchThis = UseState("");
-        return new TextInput(searchThis)
+        return searchThis.ToSearchInput()
                                .Placeholder("search for?")
-                               .Variant(TextInputVariant.Search)
                                .WithField()
                                .Label("Search");
     }
@@ -130,9 +127,8 @@ public class EmailEnterDemo: ViewBase
     public override object? Build()
     {
         var email = UseState("");
-        return new TextInput(email)
+        return email.ToEmailInput()
                        .Placeholder("user@domain.com")
-                       .Variant(TextInputVariant.Email)
                        .WithField()
                        .Label("Email");
     }
@@ -151,9 +147,8 @@ public class PhoneEnterDemo: ViewBase
     public override object? Build()
     {
         var tel = UseState("");
-        return new TextInput(tel)
+        return tel.ToTelInput()
                       .Placeholder("+1-123-3456")
-                      .Variant(TextInputVariant.Tel)
                       .WithField()
                       .Label("Phone");
     }
@@ -172,9 +167,8 @@ public class URLEnterDemo: ViewBase
     public override object? Build()
     {
         var url = UseState("");
-        return new TextInput(url)
+        return url.ToUrlInput()
                       .Placeholder("https://ivy.app/")
-                      .Variant(TextInputVariant.Url)
                       .WithField()
                       .Label("Website");
     }
@@ -212,7 +206,7 @@ public class EventsDemoApp : ViewBase
     {
         var name = UseState("");
         return Layout.Vertical()
-            | new TextInput(name.Value, e => name.Set(e.Value))
+            | name.ToTextInput()
                   .Placeholder("Enter your name...").WithField().Label("Name")
             | (name.Value.Length > 0 ? $"Hello, {name.Value}!" : "");
     }
@@ -230,8 +224,8 @@ public class TextInputStylingDemo : ViewBase
     {
         var text = UseState("");
         return Layout.Vertical()
-            | new TextInput(text).Placeholder("Invalid input").Invalid("This field has an error")
-            | new TextInput(text).Placeholder("Disabled input").Disabled();
+            | text.ToTextInput().Placeholder("Invalid input").Invalid("This field has an error")
+            | text.ToTextInput().Placeholder("Disabled input").Disabled();
     }
 }
 ```
@@ -262,7 +256,7 @@ The `Prefix` and `Suffix` methods accept either a `string` or an `IWidget`, ther
 We can use associate keyboard shortcuts to text inputs the following way.
 
 ```csharp
- new TextInput(name)
+ name.ToTextInput()
     .Placeholder("Name (Ctrl+S)")
     .ShortcutKey("Ctrl+S")   
 ```
@@ -281,17 +275,15 @@ public class ShortCutDemo : ViewBase
         return Layout.Vertical()
                 | Text.Inline("Keyboard Shortcuts Demo")
                 | Text.Inline("Ctrl+J - Focus Name, Ctrl+E - Focus Email, Ctrl+M - Focus Message")  
-                | new TextInput(name)
+                | name.ToTextInput()
                       .Placeholder("Name (Ctrl+J)")
                       .ShortcutKey("Ctrl+J")    
-                | new TextInput(email)
+                | email.ToEmailInput()
                       .Placeholder("Email (Ctrl+E)")
                       .ShortcutKey("Ctrl+E")
-                      .Variant(TextInputVariant.Email)    
-                | new TextInput(message)
+                | message.ToTextareaInput()
                       .Placeholder("Message (Ctrl+M)")
-                      .ShortcutKey("Ctrl+M")
-                      .Variant(TextInputVariant.Textarea);
+                      .ShortcutKey("Ctrl+M");
     }
 }
 ```
@@ -400,29 +392,13 @@ public class EmailValidationDemo : ViewBase
 
     public override object? Build()
     {         
-        var onChangedState = UseState("");         
-        var invalidState = UseState("");         
+        var email = UseState("");         
+        var isValid = string.IsNullOrWhiteSpace(email.Value) || EmailRegex.IsMatch(email.Value);
         
-        return new TextInput(onChangedState.Value, e =>                    
-              {                        
-                onChangedState.Set(e.Value);
-                if (string.IsNullOrWhiteSpace(e.Value))
-                {
-                    invalidState.Set("");
-                }
-                else if (!EmailRegex.IsMatch(e.Value))                        
-                {                             
-                    invalidState.Set("Invalid email address");
-                }                        
-                else                        
-                {                         
-                    invalidState.Set(""); 
-                }                    
-              })
-              .Invalid(invalidState.Value)
+        return email.ToTextInput()
+              .Invalid(isValid ? "" : "Invalid email address")
               .WithField()
               .Label("Email");
-         
     }     
 }
 ```
@@ -504,44 +480,4 @@ input.ToTextInput()
 </Body>
 </Details>
 
-<Details>
-<Summary>
-How to create a form with a dynamic number of fields (e.g. dictionary input)?
-</Summary>
-<Body>
 
-Since hooks cannot be called inside loops (IVYHOOK003), you cannot use `UseState` in a `for`/`foreach`/LINQ loop. Instead, use **one state variable** that holds all field values:
-
-```csharp
-public override object Build()
-{
-    var columns = GetColumnNames(); // e.g. ["Name", "Age", "City"]
-    var values = UseState(new Dictionary<string, string>());
-
-    var layout = Layout.Vertical();
-    foreach (var col in columns)
-    {
-        var currentValue = values.Value.GetValueOrDefault(col, "");
-        layout.Add(
-            new TextInput(currentValue, e =>
-            {
-                var updated = new Dictionary<string, string>(values.Value) { [col] = e.Value };
-                values.Set(updated);
-            })
-            .Placeholder(col)
-            .WithField()
-            .Label(col)
-        );
-    }
-    return layout;
-}
-```
-
-Key points:
-- Only one `UseState` call at the top level — no hook rule violations
-- The dictionary keys map to column names, values map to user input
-- Create a new dictionary on each update to trigger a re-render
-- This pattern works for any dynamic input scenario (forms, dialogs, etc.)
-
-</Body>
-</Details>

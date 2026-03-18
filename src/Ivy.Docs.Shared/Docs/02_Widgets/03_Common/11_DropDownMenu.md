@@ -33,18 +33,27 @@ new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value),
 Default menu items are the most common type, providing simple clickable options. The second example shows how to add custom tags for more advanced [event handling](../../01_Onboarding/02_Concepts/07_EventHandlers.md).
 
 ```csharp demo-tabs
-Layout.Horizontal().Gap(2).Center()
-    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-        new Button("Default Items"),
-        MenuItem.Default("Copy"),
-        MenuItem.Default("Paste"),
-        MenuItem.Default("Cut"),
-        MenuItem.Default("Delete"))
-    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-        new Button("With Tags"),
-        MenuItem.Default("Save").Tag("save-action"),
-        MenuItem.Default("Export").Tag("export-action"),
-        MenuItem.Default("Import").Tag("import-action"))
+public class DefaultMenuItemsDemo : ViewBase
+{
+    private enum MenuAction { Save, Export, Import }
+
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        return Layout.Horizontal().Gap(2).Center()
+            | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+                new Button("Default Items"),
+                MenuItem.Default("Copy"),
+                MenuItem.Default("Paste"),
+                MenuItem.Default("Cut"),
+                MenuItem.Default("Delete"))
+            | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+                new Button("With Tags"),
+                MenuItem.Default("Save").Tag(MenuAction.Save),
+                MenuItem.Default("Export").Tag(MenuAction.Export),
+                MenuItem.Default("Import").Tag(MenuAction.Import));
+    }
+}
 ```
 
 Default menu items are the most common type, providing simple clickable options. The second example shows how to add custom tags for more advanced event handling.
@@ -177,23 +186,33 @@ Layout.Horizontal().Gap(2).Center()
 Custom event handling allows you to implement complex [business logic](../../03_Hooks/02_Core/11_UseService.md) based on menu selections, making your dropdowns more interactive and useful.
 
 ```csharp demo-tabs
-new DropDownMenu(@evt => {
-        var value = @evt.Value?.ToString();
-        if (value == "delete") {
-            client.Toast("Deleting item...");
-        } else if (value == "export") {
-            client.Toast("Exporting data...");
-        } else {
-            client.Toast($"Selected: {value}");
-        }
-    }, 
-    new Button("Custom Actions"))
-    | MenuItem.Default("View").Tag("view")
-    | MenuItem.Default("Edit").Tag("edit")
-    | MenuItem.Default("Delete").Tag("delete")
-    | MenuItem.Separator()
-    | MenuItem.Default("Export").Tag("export")
-    | MenuItem.Default("Share").Tag("share")
+public class CustomActionsDropDownDemo : ViewBase
+{
+    private enum ItemAction { View, Edit, Delete, Export, Share }
+
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        return new DropDownMenu(@evt => {
+            if (Enum.TryParse<ItemAction>(@evt.Value?.ToString(), ignoreCase: true, out var action))
+            {
+                switch (action)
+                {
+                    case ItemAction.Delete: client.Toast("Deleting item..."); break;
+                    case ItemAction.Export: client.Toast("Exporting data..."); break;
+                    default: client.Toast($"Selected: {action}"); break;
+                }
+            }
+        }, 
+        new Button("Custom Actions"))
+            | MenuItem.Default("View").Tag(ItemAction.View)
+            | MenuItem.Default("Edit").Tag(ItemAction.Edit)
+            | MenuItem.Default("Delete").Tag(ItemAction.Delete)
+            | MenuItem.Separator()
+            | MenuItem.Default("Export").Tag(ItemAction.Export)
+            | MenuItem.Default("Share").Tag(ItemAction.Share);
+    }
+}
 ```
 
 <WidgetDocs Type="Ivy.DropDownMenu" ExtensionTypes="Ivy.DropDownMenuExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/DropDownMenu.cs"/>
@@ -209,44 +228,54 @@ Complex using
 Here's a comprehensive example combining multiple features:
 
 ```csharp demo-tabs
-Layout.Horizontal().Gap(2).Center()
-    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-        new Button("User Menu"),
-        MenuItem.Separator(),
-        MenuItem.Default("View Profile").Tag("profile"),
-        MenuItem.Default("Account Settings").Tag("settings"),
-        MenuItem.Default("Preferences").Tag("preferences"),
-        MenuItem.Separator(),
-        MenuItem.Default("Theme")
-            .Children(
-                MenuItem.Checkbox("Light").Tag("theme-light"),
-                MenuItem.Checkbox("Dark").Checked().Tag("theme-dark"),
-                MenuItem.Checkbox("System").Tag("theme-system")
-            ),
-        MenuItem.Default("Notifications")
-            .Children(
-                MenuItem.Checkbox("Email").Checked().Tag("notify-email"),
-                MenuItem.Checkbox("Push").Checked().Tag("notify-push"),
-                MenuItem.Checkbox("SMS").Tag("notify-sms")
-            ),
-        MenuItem.Separator(),
-        MenuItem.Default("Help & Support").Tag("help"),
-        MenuItem.Default("About").Tag("about"),
-        MenuItem.Separator(),
-        MenuItem.Default("Logout").Tag("logout"))
-        .Header(Text.Muted("Signed in as john.doe@company.com"))
-        .Top()
-        .Align(DropDownMenu.AlignOptions.End)
-    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-        new Button("Settings Menu"),
-        MenuItem.Default("General").Tag("general"),
-        MenuItem.Default("Appearance").Tag("appearance"),
-        MenuItem.Default("Privacy").Tag("privacy"),
-        MenuItem.Default("Security").Tag("security"),
-        MenuItem.Separator(),
-        MenuItem.Default("Updates").Tag("updates"),
-        MenuItem.Default("Support").Tag("support"))
-        .Header(Text.Muted("Application Settings"))
+public class ComplexDropDownDemo : ViewBase
+{
+    private enum UserMenuAction { Profile, Settings, Preferences, ThemeLight, ThemeDark, ThemeSystem, NotifyEmail, NotifyPush, NotifySms, Help, About, Logout }
+    private enum SettingsMenuAction { General, Appearance, Privacy, Security, Updates, Support }
+
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        return Layout.Horizontal().Gap(2).Center()
+            | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+                new Button("User Menu"),
+                MenuItem.Separator(),
+                MenuItem.Default("View Profile").Tag(UserMenuAction.Profile),
+                MenuItem.Default("Account Settings").Tag(UserMenuAction.Settings),
+                MenuItem.Default("Preferences").Tag(UserMenuAction.Preferences),
+                MenuItem.Separator(),
+                MenuItem.Default("Theme")
+                    .Children(
+                        MenuItem.Checkbox("Light").Tag(UserMenuAction.ThemeLight),
+                        MenuItem.Checkbox("Dark").Checked().Tag(UserMenuAction.ThemeDark),
+                        MenuItem.Checkbox("System").Tag(UserMenuAction.ThemeSystem)
+                    ),
+                MenuItem.Default("Notifications")
+                    .Children(
+                        MenuItem.Checkbox("Email").Checked().Tag(UserMenuAction.NotifyEmail),
+                        MenuItem.Checkbox("Push").Checked().Tag(UserMenuAction.NotifyPush),
+                        MenuItem.Checkbox("SMS").Tag(UserMenuAction.NotifySms)
+                    ),
+                MenuItem.Separator(),
+                MenuItem.Default("Help & Support").Tag(UserMenuAction.Help),
+                MenuItem.Default("About").Tag(UserMenuAction.About),
+                MenuItem.Separator(),
+                MenuItem.Default("Logout").Tag(UserMenuAction.Logout))
+                .Header(Text.Muted("Signed in as john.doe@company.com"))
+                .Top()
+                .Align(DropDownMenu.AlignOptions.End)
+            | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+                new Button("Settings Menu"),
+                MenuItem.Default("General").Tag(SettingsMenuAction.General),
+                MenuItem.Default("Appearance").Tag(SettingsMenuAction.Appearance),
+                MenuItem.Default("Privacy").Tag(SettingsMenuAction.Privacy),
+                MenuItem.Default("Security").Tag(SettingsMenuAction.Security),
+                MenuItem.Separator(),
+                MenuItem.Default("Updates").Tag(SettingsMenuAction.Updates),
+                MenuItem.Default("Support").Tag(SettingsMenuAction.Support))
+                .Header(Text.Muted("Application Settings"));
+    }
+}
 ```
 
 </Body>

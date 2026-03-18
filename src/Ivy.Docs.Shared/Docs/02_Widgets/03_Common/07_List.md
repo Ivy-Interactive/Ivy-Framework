@@ -3,6 +3,9 @@ searchHints:
   - items
   - collection
   - listitem
+  - list-item
+  - tag
+  - disabled
   - menu
   - rows
   - scroll
@@ -31,7 +34,7 @@ public class BasicListDemo : ViewBase
             new ListItem("Banana"),
             new ListItem("Cherry")
         };
-        
+
         return new List(items);
     }
 }
@@ -39,7 +42,14 @@ public class BasicListDemo : ViewBase
 
 ## ListItem Configuration
 
-`ListItem`s are highly customizable, supporting titles, subtitles, [icons](../01_Primitives/02_Icon.md), [badges](02_Badge.md), and custom content via the `.Content()` extension method.
+`ListItem`s are highly customizable, supporting titles, subtitles, [icons](../01_Primitives/02_Icon.md), [badges](02_Badge.md), custom content, and interactive states.
+
+- **Title & Subtitle** - Primary and secondary text labels.
+- **Icon** - Visual indicator using the [Icons](../../04_ApiReference/Ivy/Icons.md) enum.
+- **Badge** - Small status indicator or counter.
+- **Tag** - Hidden object reference (e.g., a database entity) used to identify the item in click handlers.
+- **Disabled** - Disables interactions and applies a muted visual style.
+- **Content** - Custom widget content injected into the item (e.g., a switch, input, or complex layout).
 
 ```csharp demo-tabs
 public class ListConfigDemo : ViewBase
@@ -47,7 +57,8 @@ public class ListConfigDemo : ViewBase
     public override object? Build()
     {
         var notifications = UseState(false);
-    
+        var searchPattern = UseState("");
+
         return Layout.Vertical().Gap(4)
             | Text.P("Title and Subtitle").Large()
             | new List(new[]
@@ -71,7 +82,7 @@ public class ListConfigDemo : ViewBase
             | new List(new[]
             {
                 new ListItem("Notifications").Icon(Icons.Bell)
-                    .Content(new BoolInput(notifications, variant: BoolInputVariant.Switch)),
+                    .Content(notifications.ToBoolInput().Variant(BoolInputVariant.Switch)),
                 new ListItem("Status").Icon(Icons.Activity)
                     .Content(
                         Layout.Horizontal().Gap(2)
@@ -79,7 +90,7 @@ public class ListConfigDemo : ViewBase
                             | Text.Muted("Last seen 2 min ago")
                     ),
                 new ListItem("Search").Icon(Icons.Search)
-                    .Content(new TextInput("", placeholder: "Type to search..."))
+                    .Content(searchPattern.ToTextInput().Placeholder("Type to search..."))
             });
     }
 }
@@ -97,13 +108,13 @@ public class InteractiveListDemo : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        
+
         var onItemClick = new Action<Event<ListItem>>(e =>
         {
             var item = e.Sender;
             client.Toast($"Clicked: {item.Title}", "Item Selected");
         });
-        
+
         var items = new[]
         {
             new ListItem("Click me!").OnClick(onItemClick).Icon(Icons.MousePointer),
@@ -126,13 +137,13 @@ public class DynamicListDemo : ViewBase
     public override object? Build()
     {
         var items = UseState(new[] { "Item 1", "Item 2", "Item 3" });
-        
+
         var addItem = new Action<Event<Button>>(e =>
         {
             var newItems = items.Value.Append($"Item {items.Value.Length + 1}").ToArray();
             items.Set(newItems);
         });
-        
+
         var removeItem = new Action<Event<Button>>(e =>
         {
             if (items.Value.Length > 0)
@@ -141,7 +152,7 @@ public class DynamicListDemo : ViewBase
                 items.Set(newItems);
             }
         });
-        
+
         return Layout.Vertical().Gap(2)
             | (Layout.Horizontal().Gap(1)
                 | new Button("Add Item", addItem).Variant(ButtonVariant.Secondary)
@@ -165,16 +176,16 @@ public class SearchableListDemo : ViewBase
         var allItems = new[] { "Apple", "Banana", "Cherry", "Date" };
         var searchTerm = UseState("");
         var filteredItems = UseState(allItems);
-        
+
         UseEffect(() =>
         {
-            var filtered = allItems.Where(item => 
+            var filtered = allItems.Where(item =>
                 item.Contains(searchTerm.Value, StringComparison.OrdinalIgnoreCase)).ToArray();
             filteredItems.Set(filtered);
         }, [searchTerm]);
-        
+
         var listItems = filteredItems.Value.Select(item => new ListItem(item));
-        
+
         return Layout.Vertical().Gap(2)
             | searchTerm.ToSearchInput().Placeholder("Search fruits...")
             | new List(listItems);
@@ -183,6 +194,7 @@ public class SearchableListDemo : ViewBase
 ```
 
 <WidgetDocs Type="Ivy.List" ExtensionTypes="Ivy.WidgetBaseExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Lists/List.cs"/>
+<WidgetDocs Type="Ivy.ListItem" ExtensionTypes="Ivy.ListItemExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Lists/ListItem.cs"/>
 
 ## Examples
 
@@ -197,7 +209,7 @@ public class ExamplesListDemo : ViewBase
             new { Name = "Laptop", Price = 999.99m, Stock = 15 },
             new { Name = "Mouse", Price = 29.99m, Stock = 50 }
         };
-        
+
         var customItems = products.Select(product => new ListItem(product.Name)
             .Subtitle($"${product.Price} - {product.Stock} in stock")
             .Content(

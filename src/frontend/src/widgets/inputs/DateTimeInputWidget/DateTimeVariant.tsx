@@ -30,6 +30,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onDateChange,
   onTimeChange,
   format: formatProp,
+  firstDayOfWeek,
   density = Densities.Medium,
   'data-testid': dataTestId,
 }) => {
@@ -201,6 +202,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               selected={date}
               onSelect={handleDateSelect}
               initialFocus
+              weekStartsOn={firstDayOfWeek}
               density={density}
             />
             <div className="flex items-center gap-2">

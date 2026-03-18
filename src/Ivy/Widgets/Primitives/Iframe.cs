@@ -34,7 +34,7 @@ public record Iframe : WidgetBase<Iframe>
 
 public static class IframeExtensions
 {
-    public static Iframe HandleMessageReceived(
+    public static Iframe OnMessageReceived(
         this Iframe widget,
         Func<Event<Iframe, (string type, JsonNode payload)>, ValueTask> callback)
     {

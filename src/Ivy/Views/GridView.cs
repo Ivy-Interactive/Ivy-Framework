@@ -9,6 +9,7 @@ public class GridView : ViewBase, IStateless
     private readonly GridDefinition _definition;
 
     private readonly List<object> _cells = new();
+    private string? _testId = null;
 
     internal GridView(object[] cells)
     {
@@ -107,6 +108,12 @@ public class GridView : ViewBase, IStateless
         return this;
     }
 
+    public GridView TestId(string testId)
+    {
+        _testId = testId;
+        return this;
+    }
+
     public override object? Build()
     {
         var cells = _cells.ToArray();
@@ -162,7 +169,9 @@ public class GridView : ViewBase, IStateless
             cells = transformedCells.ToArray();
         }
 
-        return new GridLayout(_definition, cells);
+        var grid = new GridLayout(_definition, cells);
+        if (_testId != null) grid.TestId = _testId;
+        return grid;
     }
 
     public static GridView operator |(GridView view, object child)

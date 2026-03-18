@@ -12,17 +12,20 @@ public static class ScreenshotFeedbackExtensions
     public static ScreenshotFeedback Open(this ScreenshotFeedback w, bool isOpen) =>
         w with { IsOpen = isOpen };
 
-    public static ScreenshotFeedback HandleSave(this ScreenshotFeedback w,
-        Func<Event<ScreenshotFeedback>, ValueTask> handler) =>
+    public static ScreenshotFeedback OnSave(this ScreenshotFeedback w,
+        Func<Event<ScreenshotFeedback, AnnotationData>, ValueTask> handler) =>
         w with { OnSave = handler };
 
-    public static ScreenshotFeedback HandleSave(this ScreenshotFeedback w, Action handler) =>
+    public static ScreenshotFeedback OnSave(this ScreenshotFeedback w, Action<AnnotationData> handler) =>
+        w with { OnSave = e => { handler(e.Value); return ValueTask.CompletedTask; } };
+
+    public static ScreenshotFeedback OnSave(this ScreenshotFeedback w, Action handler) =>
         w with { OnSave = _ => { handler(); return ValueTask.CompletedTask; } };
 
-    public static ScreenshotFeedback HandleCancel(this ScreenshotFeedback w,
+    public static ScreenshotFeedback OnCancel(this ScreenshotFeedback w,
         Func<Event<ScreenshotFeedback>, ValueTask> handler) =>
         w with { OnCancel = handler };
 
-    public static ScreenshotFeedback HandleCancel(this ScreenshotFeedback w, Action handler) =>
+    public static ScreenshotFeedback OnCancel(this ScreenshotFeedback w, Action handler) =>
         w with { OnCancel = _ => { handler(); return ValueTask.CompletedTask; } };
 }

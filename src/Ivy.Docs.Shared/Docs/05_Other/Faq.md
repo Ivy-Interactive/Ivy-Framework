@@ -80,3 +80,56 @@ return Layout.Vertical()
 ```
 
 Each `state.Set()` call triggers a re-render, so the UI updates incrementally as chunks arrive. Use `UseMutation` if you want built-in loading/error tracking for non-streaming async operations instead.
+
+## How do I use HttpClient in an Ivy app?
+
+For simple HTTP requests, create an `HttpClient` instance directly:
+
+```csharp
+var client = new HttpClient();
+var response = await client.GetAsync(url);
+```
+
+For apps that need a shared HttpClient with DI, register it through the server in Program.cs:
+
+```csharp
+server.Services.AddHttpClient<MyService>();
+```
+
+Then access it via `UseService<MyService>()` in your app. Do NOT use `services.AddHttpClient()` directly — use `server.Services`.
+
+## When should I use UseDefaultApp vs UseChrome in Program.cs?
+
+**UseDefaultApp** is for single-app projects where you want to skip the sidebar and go directly to the app:
+```csharp
+server.UseDefaultApp(typeof(MyApp));
+```
+
+**UseChrome** is for multi-app projects where users need sidebar navigation between apps:
+```csharp
+server.UseChrome(new ChromeSettings().DefaultApp<MyApp>().UseTabs(preventDuplicates: true));
+```
+
+For new projects with a single app, prefer `UseDefaultApp` for a cleaner experience. If you later add more apps and need a sidebar, switch to `UseChrome`.
+
+## How do I get a display name or description from an enum value?
+
+**For dropdowns and selects:** Ivy handles this automatically. When you pass an enum type to a `Select` or `RadioGroup`, `ToOptions()` reads `[Description]` attributes and falls back to splitting PascalCase names. No extra code needed.
+
+**For displaying enum values as text:** Use the built-in `GetDescription()` extension method:
+
+```csharp
+using System.ComponentModel;
+
+public enum Status
+{
+    [Description("Not Started")] NotStarted,
+    [Description("In Progress")] InProgress,
+    [Description("At Risk")] AtRisk,
+}
+
+// Usage:
+Text.P(status.GetDescription()) // "Not Started"
+```
+
+`GetDescription()` reads the `[Description]` attribute if present, otherwise splits PascalCase automatically (e.g., `NotStarted` → `"Not Started"`).

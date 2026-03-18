@@ -32,13 +32,6 @@ const _getWantedWidth = (width?: string): React.CSSProperties => {
       return {
         width: `${parseFloat(value) * 100}%`,
       };
-    case 'fraction-gap':
-      return {
-        flexBasis: `${parseFloat(value) * 100}%`,
-        flexShrink: 1,
-        flexGrow: 0,
-        minWidth: 0, // Allow shrinking below flex-basis to accommodate gaps
-      };
     case 'full':
       return { width: '100%' };
     case 'fit':
@@ -75,10 +68,6 @@ const _getMinWidth = (width?: string): React.CSSProperties => {
       return {
         minWidth: `${parseFloat(value) * 100}%`,
       };
-    case 'fraction-gap':
-      return {
-        minWidth: 0, // Allow shrinking to accommodate gaps
-      };
     case 'full':
       return { minWidth: '100%' };
     case 'fit':
@@ -111,10 +100,6 @@ const _getMaxWidth = (width?: string): React.CSSProperties => {
       return {
         maxWidth: `${parseFloat(value) * 100}%`,
       };
-    case 'fraction-gap':
-      return {
-        maxWidth: `${parseFloat(value) * 100}%`,
-      };
     case 'full':
       return { maxWidth: '100%' };
     case 'fit':
@@ -131,6 +116,11 @@ const _getMaxWidth = (width?: string): React.CSSProperties => {
       console.warn(`Unknown size type: ${sizeType}`);
       return {};
   }
+};
+
+export const getAspectRatio = (aspectRatio?: number): React.CSSProperties => {
+  if (aspectRatio === undefined || aspectRatio === null) return {};
+  return { aspectRatio: aspectRatio };
 };
 
 export const getHeight = (height?: string): React.CSSProperties => {
@@ -704,7 +694,7 @@ export const typography: Record<string, string> = {
 
   // Size variants
   large: 'text-lg font-semibold',
-  small: 'text-large-body font-medium leading-none',
+  small: 'text-large-body leading-none',
   muted: 'text-base text-muted-foreground',
 
   // Semantic variants

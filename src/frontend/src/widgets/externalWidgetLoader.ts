@@ -81,35 +81,39 @@ export const getExternalWidgetInfo = (
 };
 
 /**
- * Set of scripts that have been loaded.
+ * Cache for scripts that have been loaded or are currently loading.
  */
-const loadedScripts = new Set<string>();
+const scriptPromises = new Map<string, Promise<void>>();
 
 /**
  * Loads a script via script tag and returns a promise that resolves when loaded.
  */
 const loadScript = (url: string): Promise<void> => {
-  if (loadedScripts.has(url)) {
-    return Promise.resolve();
+  const existing = scriptPromises.get(url);
+  if (existing) {
+    return existing;
   }
 
-  return new Promise((resolve, reject) => {
+  const promise = new Promise<void>((resolve, reject) => {
     const script = document.createElement('script');
     script.src = url;
     script.async = true;
 
     script.onload = () => {
-      loadedScripts.add(url);
       //logger.debug('Loaded external widget script', { url });
       resolve();
     };
 
     script.onerror = () => {
+      scriptPromises.delete(url); // allow retrying on failure
       reject(new Error(`Failed to load script: ${url}`));
     };
 
     document.head.appendChild(script);
   });
+
+  scriptPromises.set(url, promise);
+  return promise;
 };
 
 /**
@@ -236,13 +240,27 @@ export const getCachedExternalWidget = (
 };
 
 /**
+ * Cache for React.lazy wrappers per type name.
+ */
+const lazyComponents = new Map<
+  string,
+  React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>>
+>();
+
+/**
  * Creates a React.lazy component for an external widget.
  * This allows the widget to be rendered with Suspense.
+ * Caches the lazy wrapper to maintain component identity across renders.
  */
 export const createLazyExternalWidget = (
   typeName: string
 ): React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>> => {
-  return React.lazy(() =>
-    loadExternalWidget(typeName).then(Component => ({ default: Component }))
-  );
+  let lazy = lazyComponents.get(typeName);
+  if (!lazy) {
+    lazy = React.lazy(() =>
+      loadExternalWidget(typeName).then(Component => ({ default: Component }))
+    );
+    lazyComponents.set(typeName, lazy);
+  }
+  return lazy;
 };

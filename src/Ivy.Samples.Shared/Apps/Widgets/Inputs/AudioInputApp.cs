@@ -21,7 +21,8 @@ public class AudioInputApp() : SampleBase
                | (Layout.Horizontal().Gap(4)
                     | new Card(new AudioInputBasic()).Title("Basic")
                     | new Card(new AudioInputChunkedUpload()).Title("Chunked Upload")
-                    | new Card(new AudioInputDisabledState()).Title("Disabled State"))
+                    | new Card(new AudioInputDisabledState()).Title("Disabled State")
+                    | new Card(new AudioInputSampleRate(24000)).Title("24 kHz (speech)"))
                | Text.H2("Sizes")
                | CreateSizesSection(dummyUpload.Value);
     }
@@ -64,7 +65,7 @@ public class AudioInputBasic : ViewBase
         {
             if (audioFile.Value?.Status == FileUploadStatus.Finished)
             {
-                client.Toast($"Recording uploaded: {Utils.FormatBytes(audioFile.Value.Length)}", "Upload Complete");
+                client.Toast($"Recording uploaded: {StringHelper.FormatBytes(audioFile.Value.Length)}", "Upload Complete");
             }
         }, audioFile);
 
@@ -72,7 +73,7 @@ public class AudioInputBasic : ViewBase
                | Text.P("Basic AudioInput example. Records audio and uploads the complete recording when you stop.")
                | new AudioInput(upload.Value, "Start recording", "Recording audio...")
                | (audioFile.Value != null
-                   ? Text.P($"Last upload: {Utils.FormatBytes(audioFile.Value.Length)}").Small()
+                   ? Text.P($"Last upload: {StringHelper.FormatBytes(audioFile.Value.Length)}").Small()
                    : Text.P("No recordings uploaded yet").Small());
     }
 }
@@ -98,7 +99,7 @@ public class AudioInputChunkedUpload : ViewBase
             {
                 var newCount = chunkCount.Value + 1;
                 chunkCount.Set(newCount);
-                client.Toast($"Chunk {newCount}: Total size {Utils.FormatBytes(audioFile.Value.Length)}", "Audio Chunk Received");
+                client.Toast($"Chunk {newCount}: Total size {StringHelper.FormatBytes(audioFile.Value.Length)}", "Audio Chunk Received");
             }
         }, audioFile);
 
@@ -108,7 +109,40 @@ public class AudioInputChunkedUpload : ViewBase
                    .ChunkInterval(2000)
                | Text.P($"Chunks received: {chunkCount.Value}").Small()
                | (audioFile.Value != null
-                   ? Text.P($"Total accumulated: {Utils.FormatBytes(audioFile.Value.Length)}").Small()
+                   ? Text.P($"Total accumulated: {StringHelper.FormatBytes(audioFile.Value.Length)}").Small()
+                   : null);
+    }
+}
+
+public class AudioInputSampleRate : ViewBase
+{
+    private readonly int? _sampleRate;
+
+    public AudioInputSampleRate(int? sampleRate)
+    {
+        _sampleRate = sampleRate;
+    }
+
+    public override object? Build()
+    {
+        var audioFile = UseState<FileUpload<byte[]>?>();
+        var upload = UseUpload(
+            MemoryStreamUploadHandler.Create(audioFile),
+            defaultContentType: "audio/webm"
+        );
+
+        var label = _sampleRate.HasValue ? $"Record at {_sampleRate} Hz" : "Record (browser default)";
+        var input = new AudioInput(upload.Value, label, "Recording...");
+        if (_sampleRate.HasValue)
+            input = input.SampleRate(_sampleRate.Value);
+
+        return Layout.Vertical().Gap(4)
+               | Text.P(_sampleRate.HasValue
+                   ? $"Records at {_sampleRate} Hz (e.g. for speech or high-fidelity)."
+                   : "Uses the browser's default sample rate (typically 48 kHz).")
+               | input
+               | (audioFile.Value != null
+                   ? Text.P($"Uploaded: {StringHelper.FormatBytes(audioFile.Value.Length)}").Small()
                    : null);
     }
 }

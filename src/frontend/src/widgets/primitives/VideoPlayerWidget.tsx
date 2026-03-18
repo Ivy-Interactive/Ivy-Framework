@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { getIvyHost } from '@/lib/utils';
 import {
@@ -20,6 +20,7 @@ interface VideoPlayerWidgetProps {
   preload?: 'none' | 'metadata' | 'auto';
   controls?: boolean;
   poster?: string; // optional preview image before playback
+  volume?: number; // 0.0 to 1.0
 }
 
 const getVideoUrl = (url: string | undefined | null): string | null => {
@@ -58,8 +59,16 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
   preload = 'metadata',
   controls = true,
   poster,
+  volume,
 }) => {
   const [hasError, setHasError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current && volume != null) {
+      videoRef.current.volume = Math.max(0, Math.min(1, volume));
+    }
+  }, [volume]);
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -130,6 +139,7 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
 
   return (
     <video
+      ref={videoRef}
       id={id}
       src={validatedVideoSrc}
       style={styles}

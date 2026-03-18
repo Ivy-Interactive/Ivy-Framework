@@ -14,7 +14,7 @@ public class LoginForm(IState<LoginData> login) : SampleBase
         return Layout.Vertical(
             username.ToTextInput(),
             password.ToTextInput().Variant(TextInputVariant.Password),
-            new BoolInput<bool>(rememberMe).Label("Remember me"),
+            rememberMe.ToBoolInput().Label("Remember me"),
             new Button("Login", _ =>
             {
                 login.Set(login.Value with { Username = username.Value, Password = password.Value, DidLogin = true, RememberMe = rememberMe.Value });

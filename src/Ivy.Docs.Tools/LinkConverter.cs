@@ -32,11 +32,16 @@ public partial class LinkConverter(string currentFilePath)
             return (null, null); //do nothing
         }
 
-        var path = Utils.GetPathForLink(currentFilePath, link);
+        // Strip fragment identifier (#...) from link before processing
+        var fragmentIndex = link.IndexOf('#');
+        var linkWithoutFragment = fragmentIndex >= 0 ? link[..fragmentIndex] : link;
+        var fragment = fragmentIndex >= 0 ? link[fragmentIndex..] : "";
+
+        var path = Utils.GetPathForLink(currentFilePath, linkWithoutFragment);
         var type = Utils.GetTypeNameFromPath(path);
         var appId = Utils.GetAppIdFromTypeName(type);
 
-        return (type, $"[{text}](app://{appId})");
+        return (type, $"[{text}](app://{appId}{fragment})");
     }
 
     [GeneratedRegex(@"!?\[(.*?)\]\((.*?)\)")]

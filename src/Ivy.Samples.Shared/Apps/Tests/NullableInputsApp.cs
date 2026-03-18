@@ -44,6 +44,7 @@ public class NullableInputsApp : SampleBase
 
         var nonNullableText = UseState("Hello");
         var nonNullableInt = UseState(42);
+        var nonNullableDate = UseState(DateOnly.FromDateTime(DateTime.Today));
 
         // States for scale examples - set initial values so X button appears
         var scaleText = UseState((string?)"Sample text");
@@ -437,7 +438,7 @@ public class NullableInputsApp : SampleBase
                 | nullableInt.ToNumberInput().Placeholder("Can be cleared").Nullable()
 
                 | Text.Block("Date Input")
-                | UseState(DateOnly.FromDateTime(DateTime.Today)).ToDateInput()
+                | nonNullableDate.ToDateInput()
                 | nullableDate.ToDateInput().Placeholder("Can be cleared").Nullable()
              )
           ;

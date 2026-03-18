@@ -8,6 +8,8 @@ export type VariantType =
   | 'Week'
   | 'Year';
 
+export type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
 export interface DateTimeInputWidgetProps {
   id: string;
   value?: string;
@@ -17,6 +19,7 @@ export interface DateTimeInputWidgetProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
+  firstDayOfWeek?: WeekDay | string;
   density?: Densities;
   'data-testid'?: string;
 }
@@ -29,6 +32,7 @@ export interface BaseVariantProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
+  firstDayOfWeek?: WeekDay;
   density?: Densities;
   'data-testid'?: string;
 }

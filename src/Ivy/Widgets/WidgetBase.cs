@@ -15,9 +15,9 @@ public abstract record WidgetBase : AbstractWidget
 
     [Prop] public Size? Height { get; set; }
 
-    [Prop] public Density? Density { get; set; }
+    [Prop] public float? AspectRatio { get; set; }
 
-    [Prop, ScaffoldColumn(false)] public bool Visible { get; set; } = true;
+    [Prop] public Density? Density { get; set; }
 
     [Prop, ScaffoldColumn(false)] public string? TestId { get; set; }
 }
@@ -37,6 +37,8 @@ public static class WidgetBaseExtensions
 
     public static T Size<T>(this T widget, Size? size) where T : WidgetBase => widget.Width(size).Height(size);
 
+    public static T AspectRatio<T>(this T widget, float ratio) where T : WidgetBase => widget with { AspectRatio = ratio };
+
     public static T Grow<T>(this T widget) where T : WidgetBase => widget.Width(Ivy.Size.Grow());
 
     public static T Density<T>(this T widget, Density density) where T : WidgetBase => widget with { Density = density };
@@ -46,12 +48,6 @@ public static class WidgetBaseExtensions
     public static T Medium<T>(this T widget) where T : WidgetBase => widget with { Density = Ivy.Density.Medium };
 
     public static T Large<T>(this T widget) where T : WidgetBase => widget with { Density = Ivy.Density.Large };
-
-    public static T Visible<T>(this T widget, bool visible = true) where T : WidgetBase => widget with { Visible = visible };
-
-    public static T Show<T>(this T widget) where T : WidgetBase => widget with { Visible = true };
-
-    public static T Hide<T>(this T widget) where T : WidgetBase => widget with { Visible = false };
 
     public static T TestId<T>(this T widget, string testId) where T : WidgetBase => widget with { TestId = testId };
 

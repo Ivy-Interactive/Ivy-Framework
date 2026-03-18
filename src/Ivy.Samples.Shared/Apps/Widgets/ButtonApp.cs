@@ -105,6 +105,11 @@ public class ButtonApp() : SampleBase
                    Icons.Heart.ToButton(eventHandler, ButtonVariant.Destructive),
                    Icons.Star.ToButton(eventHandler, ButtonVariant.Outline)
                )
+               | Layout.Horizontal(
+                   Icons.MessageSquareX.ToButton(eventHandler).Small(),
+                   Icons.Heart.ToButton(eventHandler, ButtonVariant.Destructive).Small(),
+                   Icons.Star.ToButton(eventHandler, ButtonVariant.Outline).Small()
+               )
 
                | Text.H2("Buttons with URLs")
                | (Layout.Horizontal().Gap(8)

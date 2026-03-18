@@ -102,6 +102,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           disabled={props.disabled}
           maxLength={props.maxLength}
           minLength={props.minLength}
+          pattern={props.pattern}
           onChange={handleChange}
           onBlur={onBlur}
           onFocus={onFocus}
