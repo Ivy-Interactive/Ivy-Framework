@@ -16,6 +16,7 @@ public class DateRangeInputApp : SampleBase
         var nullableInvalidDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
         var nullableDisabledDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
         var emptyNullableDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
+        var constrainedRangeState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
 
         // Size examples
         var sizeExamplesGrid = Layout.Grid().Columns(4)
@@ -82,7 +83,6 @@ public class DateRangeInputApp : SampleBase
             .TestId("daterange-input-start-end-placeholder");
 
         // Min/Max Constraints Example
-        var constrainedRangeState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
         var minMaxExample = Layout.Vertical().Gap(2)
             | Text.P("Date range constrained to 2026 only").Small()
             | constrainedRangeState.ToDateRangeInput()
