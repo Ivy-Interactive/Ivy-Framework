@@ -174,7 +174,7 @@ new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariants.Text
 
 **Correct API:**
 ```csharp
-new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariant.Textarea)
+text.ToTextInput().Variant(TextInputVariant.Textarea)
 ```
 
 The enum is `TextInputVariant` (singular), not `TextInputVariants` (plural). All input variant enums were renamed from plural to singular in Ivy-Framework#2546 (e.g., `TextInputVariants` → `TextInputVariant`, `ColorInputVariants` → `ColorInputVariant`, etc.). **Auto-fixed:** The refactoring service automatically rewrites `TextInputVariants` → `TextInputVariant`. Values: `Text`, `Textarea`, `Email`, `Tel`, `Url`, `Password`, `Search`.
@@ -731,6 +731,52 @@ new Box(
 **Found In:**
 7e97011f-41b3-42d3-98ea-3b7faad347c2
 
+## GridView.AddChildren() / GridView.Children() — non-existent methods
+
+**Hallucinated API:**
+```csharp
+var grid = new GridView();
+grid.AddChildren(widget1, widget2);
+// or
+grid.Children(widget1, widget2);
+```
+
+**Error:** `CS1061: 'GridView' does not contain a definition for 'AddChildren'/'Children'`
+
+**Correct API:**
+```csharp
+// Use the pipe operator to add children to a GridView:
+var grid = new GridView(columns: 8);
+grid | widget1 | widget2;
+// Or pass children in constructor:
+new GridView(columns: 8, children: new[] { widget1, widget2 });
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## OnClick() on non-clickable widgets — extension method receiver mismatch
+
+**Hallucinated API:**
+```csharp
+myCustomView.OnClick(e => ...)
+new LayoutView().OnClick(e => ...)
+```
+
+**Error:** `CS1929: 'MyView' does not contain a definition for 'OnClick' and the best extension method overload requires a receiver of type 'Card'/'Button'/'Badge'`
+
+**Correct API:**
+```csharp
+// OnClick is only available on specific widgets: Card, Button, Badge, Image, Box
+// For custom click handling, wrap in a Box or use a Button:
+new Box(myCustomView).OnClick(e => ...)
+// Or use a Card:
+new Card(myCustomView).OnClick(e => ...)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
 ## Size.Pixels() — wrong method name
 
 **Hallucinated API:**
@@ -940,6 +986,34 @@ Note: `.Border()` expects a `Colors` enum as the first argument, not a string. T
 | `server.UseNoChrome()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseChrome()` instead |
 | `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
 
+## AppAttribute — PascalCase properties and invented parameters
+
+**Hallucinated API:**
+```csharp
+[App(Icon = Icons.Bot, Group = "Apps", Chrome = UseDefaultAppChrome)]
+[App(Icon = Icons.Waves)]
+```
+
+**Errors:**
+- `CS0655: 'Icon' is not a valid named attribute argument` — PascalCase property used instead of constructor parameter
+- `CS0246: The type or namespace name 'Group' could not be found` — parameter doesn't exist
+- `CS0246: The type or namespace name 'Chrome' could not be found` — parameter doesn't exist
+
+**Correct API:**
+```csharp
+[App(icon: Icons.Bot, path: new[] { "Apps" })]
+```
+
+The `AppAttribute` uses **lowercase named constructor parameters**, not PascalCase named properties. C# attributes with nullable property types cause CS0655 when accessed via `PropertyName = value` syntax. Use `parameterName: value` syntax instead.
+
+Available parameters: `id`, `title`, `icon`, `description`, `path`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`. There is NO `group` or `chrome` parameter — use `path:` for navigation grouping, and configure chrome in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`.
+
+See: Ivy-Framework#2587 (plans to rename `path` to `group`)
+
+**Found In:**
+7c547408-00b3-47e1-976e-59c9357c1e74
+d6a5f377-bc84-404d-acca-71164d3754d4
+
 ## TextBuilder.Style() — non-existent styling method
 
 **Hallucinated API:**
@@ -990,6 +1064,31 @@ new Box(Text.H1("$0.00")).Align(Align.Center)
 
 **Found In:**
 713546f7-32fb-4961-ab78-def91e7c010d
+
+## TextBuilder.Padding() — non-existent method
+
+**Hallucinated API:**
+```csharp
+Text.Block(content).Padding(16)
+Text.P(content).Padding(4)
+```
+
+**Error:** `CS1929: 'TextBuilder' does not contain a definition for 'Padding'`
+
+**Correct API:**
+```csharp
+// Wrap text in a Box for padding:
+new Box(Text.Block(content)).Padding(16)
+
+// Or wrap in a layout:
+Layout.Vertical().Padding(16)
+    | Text.Block(content)
+```
+
+`TextBuilder` does not have `.Padding()`. Padding is available on container widgets (`Box`, `LayoutView`, `TabView`, `GridView`). To add padding around text, wrap it in a `Box` or layout. This is a variant of the `TextBuilder.AlignCenter()` and `TextBuilder.Style()` hallucinations — the agent applies container-level styling to text elements.
+
+**Found In:**
+7c547408-00b3-47e1-976e-59c9357c1e74
 
 ## FileUploadStatus.Completed — non-existent enum value
 
@@ -1143,10 +1242,286 @@ new TextInput(query).Grow()
 
 **Correct API:**
 ```csharp
-new TextInput(query).Width(Size.Grow())
+query.ToTextInput().Width(Size.Grow())
 ```
 
 `Grow()` was originally defined only as a `Box`-specific extension method in `Box.cs`. It is not available on `TextInput` or other widget types. Use `.Width(Size.Grow())` directly, or note that `Grow()` has since been promoted to a generic `WidgetBase<T>` extension and is now available on all widgets.
 
 **Found In:**
 7a9aadf3
+
+## Button.Visible() / Widget.Visible() — removed conditional rendering method
+
+**Hallucinated API:**
+```csharp
+new Button("Reset").Visible(hasDate)
+```
+
+**Error:** `'Button' does not contain a definition for 'Visible'` (CS1061)
+
+**Correct API:**
+```csharp
+// Use a simple if statement for conditional rendering:
+if (hasDate)
+    yield return new Button("Reset");
+
+// Or use a ternary:
+var resetButton = hasDate ? new Button("Reset") : null;
+```
+
+The `.Visible()` extension method was removed from `WidgetBase` (commit f869df302). `LayoutView.Visible()` was also removed. The only remaining `.Visible()` is `FormBuilder<TModel>.Visible(field, predicate)` which controls form field visibility — not widget rendering. The agent confuses this with the old WidgetBase API or UI frameworks like WPF/WinForms that have a `Visible` property. In Ivy, conditional rendering is done with standard C# control flow (`if`, ternary, etc.) like in React.
+
+**Found In:**
+18763683-ff01-4f76-8dc5-6f0bfe750e4a
+
+## Card.Secondary() — Badge extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Secondary()
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Secondary' and the best extension method overload 'BadgeExtensions.Secondary(Badge)' requires a receiver of type 'Ivy.Badge'`
+
+**Correct API:**
+```csharp
+// Cards don't have variants. To style card content, style the children:
+new Card(new Text("Content").Secondary())
+// Or use a Box with background:
+new Box(content).Background(Colors.Gray100)
+```
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## Card.Children() — MenuItem extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card().Children(child1, child2)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Children' and the best extension method overload 'MenuItemExtensions.Children(MenuItem, params MenuItem[])' requires a receiver of type 'Ivy.MenuItem'`
+
+**Correct API:**
+```csharp
+// Use the constructor or pipe operator:
+new Card(child1 / child2)
+// Or:
+var card = new Card();
+card | (child1 / child2);
+```
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## Card.Background() — Box extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Background(Colors.Gray100)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Background' and the best extension method overload 'BoxExtensions.Background(Box, Colors)' requires a receiver of type 'Ivy.Box'`
+
+**Correct API:**
+```csharp
+// Wrap in a Box for background color:
+new Box(new Card(content)).Background(Colors.Gray100)
+// Or use Card's built-in styling via content:
+new Card(content)
+```
+
+Similar to the GridView.Background() hallucination — `.Background()` is a Box-only extension.
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## Button.ColSpan() — non-existent grid span method
+
+**Hallucinated API:**
+```csharp
+new Button("=").ColSpan(2)
+```
+
+**Error:** `CS1061: 'Button' does not contain a definition for 'ColSpan'`
+
+**Correct API:**
+```csharp
+// Grid column spanning is not set on child widgets.
+// Use GridLayout column definitions to control spans,
+// or use multiple grid cells for the same widget.
+```
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## IState\<T\>.ToTextArea() — incorrect textarea method name
+
+**Hallucinated API:**
+```csharp
+var text = UseState("");
+text.ToTextArea()
+```
+
+**Error:** `CS1061: 'IState<string>' does not contain a definition for 'ToTextArea'`
+
+**Correct API:**
+```csharp
+var text = UseState("");
+text.ToTextareaInput()
+// or equivalently:
+text.ToTextInput().Multiline()
+```
+
+The method is `ToTextareaInput()`, not `ToTextArea()`. Alternatively use `ToTextInput().Multiline()`. See `Docs/02_Widgets/04_Inputs/02_TextInput.md` for full textarea documentation.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
+
+## IState\<T\>.ToSelect() — incorrect select method name
+
+**Hallucinated API:**
+```csharp
+var format = UseState("Option1");
+format.ToSelect(options)
+```
+
+**Error:** `CS1061: 'IState<string>' does not contain a definition for 'ToSelect'`
+
+**Correct API:**
+```csharp
+var format = UseState("Option1");
+format.ToSelectInput(new[] { "Option1", "Option2" }.ToOptions())
+```
+
+The method is `ToSelectInput()`, not `ToSelect()`. Options are passed as `IEnumerable<IAnyOption>` — use `.ToOptions()` on a string array to convert.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
+
+## Card.When() — non-existent conditional rendering method
+
+**Hallucinated API:**
+```csharp
+new Card(outputText).When(hasOutput)
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'When'`
+
+**Correct API:**
+```csharp
+// Use standard C# control flow for conditional rendering:
+if (hasOutput)
+{
+    new Card(outputText);
+}
+```
+
+There is no `.When()` method on any widget. Ivy uses standard C# `if` statements for conditional rendering, similar to React's conditional rendering pattern. See also the existing `.Visible()` hallucination entry.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
+
+## Card.Style() / Card.ClassName() / Card.WithStyle() — non-existent CSS methods
+
+**Hallucinated API:**
+```csharp
+new Card(...).Style("background: green")
+new Card(...).ClassName("my-class")
+new Card(...).WithStyle(new { Background = "green" })
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'Style'/'ClassName'/'WithStyle'`
+
+**Correct API:**
+```csharp
+// Cards don't support direct CSS styling. To add a colored background, wrap in a Box:
+new Box(new Card(content)).Background(Colors.Green)
+// Or use a Box directly instead of Card when you need full styling control:
+new Box(content).Background(Colors.Green).Padding(20).Rounded()
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Card.Border() — Box extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Border(1)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Border'`
+
+**Correct API:**
+```csharp
+// Cards have a built-in border. For custom borders, wrap in a Box:
+new Box(new Card(content)).Border(1)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Card.Color() — non-existent method on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Color(Colors.Green)
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'Color'`
+
+**Correct API:**
+```csharp
+// Cards don't have a Color method. Use Box for colored containers:
+new Box(content).Background(Colors.Green)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Card.Align() — non-existent method on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Align(Align.Center)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Align'`
+
+**Correct API:**
+```csharp
+// Use a Layout to control alignment of card content:
+Layout.Vertical(Align.Center) | new Card(content)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Nested Layout | operator without parentheses
+
+**Hallucinated pattern:**
+```csharp
+Layout.Vertical()
+    | Layout.Horizontal().Gap(4)
+        | child1
+        | child2
+    | otherContent;
+```
+
+**Problem:** C# evaluates `|` left-to-right. Without parentheses, `child1` and `child2` are added to the outer `Vertical` layout, not the inner `Horizontal`. The indentation is misleading — C# ignores indentation.
+
+**Correct pattern:**
+```csharp
+Layout.Vertical()
+    | (Layout.Horizontal().Gap(4)
+        | child1
+        | child2)
+    | otherContent;
+```
+
+Always wrap nested layouts in parentheses `(Layout.Horizontal() | child1 | child2)` to ensure children are added to the correct parent layout.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f

@@ -137,6 +137,12 @@ public abstract partial class ViewBase
     protected IState<string?> UseDownload(Func<Task<byte[]>> factory, string mimeType, string fileName) =>
         this.Context.UseDownload(factory, mimeType, fileName);
 
+    protected IState<string?> UseDownload(Func<Stream> factory, string mimeType, string fileName) =>
+        this.Context.UseDownload(() => Task.FromResult(factory()), mimeType, fileName);
+
+    protected IState<string?> UseDownload(Func<Task<Stream>> factory, string mimeType, string fileName) =>
+        this.Context.UseDownload(factory, mimeType, fileName);
+
     protected RefreshToken UseRefreshToken() =>
         this.Context.UseRefreshToken();
 

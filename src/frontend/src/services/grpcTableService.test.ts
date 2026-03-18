@@ -54,7 +54,7 @@ describe('GrpcTableService', () => {
   });
 
   describe('constructor', () => {
-    it('should create service with server URL', () => {
+    it('should create service', () => {
       const testService = new GrpcTableService();
       expect(testService).toBeInstanceOf(GrpcTableService);
     });
