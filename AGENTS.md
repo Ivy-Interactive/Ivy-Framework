@@ -326,6 +326,7 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 - All types are in the `Ivy` namespace
 - `Colors` is a flat enum (e.g. `Colors.Red`, `Colors.Blue`) we have no shade levels
 - `DbContext` must never be injected directly! Always resolve `IDbContextFactory<T>` via `UseService` and create scoped instances with `CreateDbContextAsync()` inside query/mutation lambdas
+- **Nested layouts MUST use parentheses** — `Layout.Vertical() | (Layout.Horizontal() | child1 | child2)` — without parentheses, C# left-to-right `|` evaluation adds children to the outer layout, not the inner one. See the nested layout example in the Layouts section above.
 
 ## Further Reading
 

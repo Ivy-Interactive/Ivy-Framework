@@ -1452,3 +1452,30 @@ Layout.Vertical(Align.Center) | new Card(content)
 
 **Found In:**
 5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Nested Layout | operator without parentheses
+
+**Hallucinated pattern:**
+```csharp
+Layout.Vertical()
+    | Layout.Horizontal().Gap(4)
+        | child1
+        | child2
+    | otherContent;
+```
+
+**Problem:** C# evaluates `|` left-to-right. Without parentheses, `child1` and `child2` are added to the outer `Vertical` layout, not the inner `Horizontal`. The indentation is misleading — C# ignores indentation.
+
+**Correct pattern:**
+```csharp
+Layout.Vertical()
+    | (Layout.Horizontal().Gap(4)
+        | child1
+        | child2)
+    | otherContent;
+```
+
+Always wrap nested layouts in parentheses `(Layout.Horizontal() | child1 | child2)` to ensure children are added to the correct parent layout.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
