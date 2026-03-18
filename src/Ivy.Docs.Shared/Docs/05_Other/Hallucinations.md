@@ -731,6 +731,52 @@ new Box(
 **Found In:**
 7e97011f-41b3-42d3-98ea-3b7faad347c2
 
+## GridView.AddChildren() / GridView.Children() — non-existent methods
+
+**Hallucinated API:**
+```csharp
+var grid = new GridView();
+grid.AddChildren(widget1, widget2);
+// or
+grid.Children(widget1, widget2);
+```
+
+**Error:** `CS1061: 'GridView' does not contain a definition for 'AddChildren'/'Children'`
+
+**Correct API:**
+```csharp
+// Use the pipe operator to add children to a GridView:
+var grid = new GridView(columns: 8);
+grid | widget1 | widget2;
+// Or pass children in constructor:
+new GridView(columns: 8, children: new[] { widget1, widget2 });
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## OnClick() on non-clickable widgets — extension method receiver mismatch
+
+**Hallucinated API:**
+```csharp
+myCustomView.OnClick(e => ...)
+new LayoutView().OnClick(e => ...)
+```
+
+**Error:** `CS1929: 'MyView' does not contain a definition for 'OnClick' and the best extension method overload requires a receiver of type 'Card'/'Button'/'Badge'`
+
+**Correct API:**
+```csharp
+// OnClick is only available on specific widgets: Card, Button, Badge, Image, Box
+// For custom click handling, wrap in a Box or use a Button:
+new Box(myCustomView).OnClick(e => ...)
+// Or use a Card:
+new Card(myCustomView).OnClick(e => ...)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
 ## Size.Pixels() — wrong method name
 
 **Hallucinated API:**
