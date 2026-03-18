@@ -1376,3 +1376,79 @@ There is no `.When()` method on any widget. Ivy uses standard C# `if` statements
 
 **Found In:**
 19ec33cf-3e86-409e-806c-babf0d20730f
+
+## Card.Style() / Card.ClassName() / Card.WithStyle() — non-existent CSS methods
+
+**Hallucinated API:**
+```csharp
+new Card(...).Style("background: green")
+new Card(...).ClassName("my-class")
+new Card(...).WithStyle(new { Background = "green" })
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'Style'/'ClassName'/'WithStyle'`
+
+**Correct API:**
+```csharp
+// Cards don't support direct CSS styling. To add a colored background, wrap in a Box:
+new Box(new Card(content)).Background(Colors.Green)
+// Or use a Box directly instead of Card when you need full styling control:
+new Box(content).Background(Colors.Green).Padding(20).Rounded()
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Card.Border() — Box extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Border(1)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Border'`
+
+**Correct API:**
+```csharp
+// Cards have a built-in border. For custom borders, wrap in a Box:
+new Box(new Card(content)).Border(1)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Card.Color() — non-existent method on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Color(Colors.Green)
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'Color'`
+
+**Correct API:**
+```csharp
+// Cards don't have a Color method. Use Box for colored containers:
+new Box(content).Background(Colors.Green)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Card.Align() — non-existent method on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Align(Align.Center)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Align'`
+
+**Correct API:**
+```csharp
+// Use a Layout to control alignment of card content:
+Layout.Vertical(Align.Center) | new Card(content)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
