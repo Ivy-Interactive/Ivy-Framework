@@ -95,8 +95,7 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
       if (types) {
         options.types = types;
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const handles = await (window as any).showOpenFilePicker(options);
+      const handles = await showOpenFilePicker(options);
       const files: File[] = [];
       for (const handle of handles) {
         const file = await handle.getFile();

@@ -54,8 +54,7 @@ export const SaveDialogWidget: React.FC<SaveDialogWidgetProps> = ({
         options.types = types;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const handle = await (window as any).showSaveFilePicker(options);
+      const handle = await showSaveFilePicker(options);
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();

@@ -46,7 +46,7 @@ describe('GrpcTableService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new GrpcTableService('http://localhost:8080');
+    service = new GrpcTableService();
   });
 
   afterEach(() => {
@@ -55,7 +55,7 @@ describe('GrpcTableService', () => {
 
   describe('constructor', () => {
     it('should create service with server URL', () => {
-      const testService = new GrpcTableService('http://test.com:9000');
+      const testService = new GrpcTableService();
       expect(testService).toBeInstanceOf(GrpcTableService);
     });
   });

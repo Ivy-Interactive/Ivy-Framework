@@ -1,0 +1,16 @@
+src/Ivy.Docs.Shared/Docs/03_Hooks/02_Core/21_UseFileDialog.md
+src/Ivy.Samples.Shared/Apps/Widgets/FileDialogApp.cs
+src/Ivy/Core/ViewBase.Hooks.cs
+src/Ivy/Hooks/UseFileDialog.cs
+src/Ivy/Hooks/UseFolderDialog.cs
+src/Ivy/Hooks/UseSaveDialog.cs
+src/Ivy/Widgets/FileDialog.cs
+src/Ivy/Widgets/FolderDialog.cs
+src/Ivy/Widgets/SaveDialog.cs
+src/frontend/src/widgets/filePicker/FileDialogWidget.tsx
+src/frontend/src/widgets/filePicker/FolderDialogWidget.tsx
+src/frontend/src/widgets/filePicker/SaveDialogWidget.tsx
+src/frontend/src/widgets/filePicker/browserSupport.ts
+src/frontend/src/widgets/filePicker/index.ts
+src/frontend/src/widgets/filePicker/shared.ts
+src/frontend/src/widgets/widgetMap.ts

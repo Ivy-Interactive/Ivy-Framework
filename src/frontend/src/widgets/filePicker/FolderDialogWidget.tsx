@@ -30,8 +30,7 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
 
   const openModernDialog = useCallback(async () => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const dirHandle = await (window as any).showDirectoryPicker();
+      const dirHandle = await showDirectoryPicker();
       const entries: FolderDialogEntry[] = [];
 
       for await (const [name, handle] of dirHandle.entries()) {

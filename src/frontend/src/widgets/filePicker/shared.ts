@@ -57,26 +57,33 @@ export async function uploadFile(uploadUrl: string, file: File): Promise<void> {
  */
 export function acceptToPickerTypes(
   accept?: string
-): { description: string; accept: Record<string, string[]> }[] | undefined {
+): FilePickerAcceptType[] | undefined {
   if (!accept) return undefined;
 
-  const acceptMap: Record<string, string[]> = {};
+  const acceptMap: Record<string, FileExtension[]> = {};
   const parts = accept.split(',').map(s => s.trim());
 
   for (const part of parts) {
     if (part.includes('/')) {
       // MIME type like "image/*" or "application/pdf"
-      acceptMap[part] = [];
+      if (!acceptMap[part]) {
+        acceptMap[part] = [];
+      }
     } else if (part.startsWith('.')) {
       // File extension like ".pdf"
-      // Group under a wildcard MIME type
-      const existing = acceptMap['application/octet-stream'] || [];
-      existing.push(part);
-      acceptMap['application/octet-stream'] = existing;
+      const mimeType = 'application/octet-stream';
+      const existing = acceptMap[mimeType] || [];
+      existing.push(part as FileExtension);
+      acceptMap[mimeType] = existing;
     }
   }
 
   if (Object.keys(acceptMap).length === 0) return undefined;
 
-  return [{ description: 'Accepted files', accept: acceptMap }];
+  return [
+    {
+      description: 'Accepted files',
+      accept: acceptMap as Record<MIMEType, FileExtension[]>,
+    },
+  ];
 }

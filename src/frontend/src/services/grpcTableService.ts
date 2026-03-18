@@ -108,12 +108,10 @@ export interface GrpcTableStreamOptions {
 }
 
 export class GrpcTableService extends EventEmitter {
-  private serverUrl: string;
   private isConnected = false;
 
-  constructor(serverUrl: string) {
+  constructor() {
     super();
-    this.serverUrl = serverUrl;
   }
 
   async parseFilter(
@@ -866,7 +864,7 @@ let _grpcTableServiceInstance: GrpcTableService | null = null;
 
 export function getGrpcTableService(): GrpcTableService {
   if (!_grpcTableServiceInstance) {
-    _grpcTableServiceInstance = new GrpcTableService('');
+    _grpcTableServiceInstance = new GrpcTableService();
   }
   return _grpcTableServiceInstance;
 }
