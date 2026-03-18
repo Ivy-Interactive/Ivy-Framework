@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.PenTool, path: ["Widgets", "Inputs"], searchHints: ["signature", "sign", "drawing", "canvas", "handwriting", "pen"])]
+[App(icon: Icons.PenTool, group: ["Widgets", "Inputs"], searchHints: ["signature", "sign", "drawing", "canvas", "handwriting", "pen"])]
 public class SignatureInputApp : SampleBase
 {
     protected override object? BuildSample()
