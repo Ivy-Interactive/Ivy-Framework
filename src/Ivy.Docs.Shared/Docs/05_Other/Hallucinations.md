@@ -122,27 +122,6 @@ Callout.Error("Error message")
 **Found In:**
 d9116efb-830e-484a-a258-fc3193769158
 
-## Callout.Error() as instance method — static method called on instance
-
-**Hallucinated API:**
-```csharp
-new Callout(errorMessage).Error()
-```
-
-**Error:** `CS0176: Member 'Callout.Error(string?, string?)' cannot be accessed with an instance reference; qualify it with a type name instead`
-
-**Correct API:**
-```csharp
-Callout.Error(errorMessage)
-```
-
-`Callout.Error()`, `.Warning()`, `.Info()`, `.Success()` are **static** factory methods, not instance methods. The agent constructed a Callout instance and then tried to call the static method on it. This is a variant of the documented `CalloutType` and `Callout.Destructive()` hallucinations — all stem from the agent not understanding that Callout uses static factories.
-
-**Auto-fix:** `new Callout({arg}).Error()` → `Callout.Error({arg})`
-
-**Found In:**
-600cee71-6d3b-45a3-ac18-86e2a98e79d1
-
 ## HandleSubmit / Handle* — renamed event handler methods
 
 **Hallucinated API:**
@@ -1841,23 +1820,3 @@ Colors myColor = Colors.Red;
 ```
 
 The color enum in Ivy is `Colors` (plural), not `Color` (singular). This is a common confusion with `System.Drawing.Color`. All color references should use `Colors.X`.
-
-## Widget — non-existent base type
-
-**Hallucinated API:**
-```csharp
-Widget CreateCell() { ... }
-// or
-List<Widget> cells = new();
-```
-
-**Error:** `CS0246: The type or namespace name 'Widget' could not be found`
-
-**Correct API:**
-```csharp
-WidgetBase CreateCell() { ... }
-// or
-List<WidgetBase> cells = new();
-```
-
-There is no `Widget` type in Ivy. The base class for all widgets is `WidgetBase`. Views (like `GridView`, `StackView`) inherit from `ViewBase`, not `WidgetBase`. When you need a common return type, use `WidgetBase` for widgets or `IView` for views.
