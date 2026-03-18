@@ -4,7 +4,7 @@
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  background: #0a1a0f;
+  background: #374151;
 }
 
 .screenshot-toolbar {
@@ -12,7 +12,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #0a1a0f;
+  background: #374151;
   flex-shrink: 0;
   flex-wrap: wrap;
   font-family: var(--font-sans, sans-serif);
@@ -27,7 +27,7 @@
 .screenshot-toolbar-separator {
   width: 1px;
   height: 24px;
-  background: #1a3d25;
+  background: #4b5563;
   margin: 0 4px;
 }
 
@@ -39,24 +39,27 @@
   border: 1px solid transparent;
   border-radius: var(--radius-fields, 6px);
   background: transparent;
-  color: #7aaa8a;
+  color: #9ca3af;
   cursor: pointer;
   font-size: 13px;
   min-width: 32px;
   height: 32px;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
   font-family: var(--font-sans, sans-serif);
 }
 
 .screenshot-toolbar button:hover {
-  background: #1a3d25;
-  color: #d0e8d8;
+  background: #4b5563;
+  color: #e5e7eb;
 }
 
 .screenshot-toolbar button.active {
-  background: #d0e8d8;
-  border-color: #d0e8d8;
-  color: #0a1a0f;
+  background: #e5e7eb;
+  border-color: #e5e7eb;
+  color: #1f2937;
 }
 
 .screenshot-toolbar button:disabled {
@@ -78,15 +81,15 @@
 
 .screenshot-toolbar button.cancel-btn {
   background: transparent;
-  border-color: #2a5e3a;
-  color: #a3c9b0;
+  border-color: #6b7280;
+  color: #d1d5db;
   font-weight: 600;
   padding: 6px 16px;
 }
 
 .screenshot-toolbar button.cancel-btn:hover {
-  background: #1a3d25;
-  color: #d0e8d8;
+  background: #4b5563;
+  color: #e5e7eb;
 }
 
 .screenshot-toolbar input[type="color"] {
@@ -124,15 +127,15 @@
   border: 1px solid transparent !important;
   border-radius: var(--radius-fields, 6px);
   background: transparent !important;
-  color: #7aaa8a !important;
+  color: #9ca3af !important;
   cursor: pointer;
   font-size: 13px;
   font-family: var(--font-sans, sans-serif);
 }
 
 .screenshot-dropdown-trigger:hover {
-  background: #1a3d25 !important;
-  color: #d0e8d8 !important;
+  background: #4b5563 !important;
+  color: #e5e7eb !important;
 }
 
 .screenshot-dropdown-content {
@@ -192,7 +195,8 @@
   position: relative;
   cursor: crosshair;
   border-radius: 12px;
-  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
 }
 
 .screenshot-canvas-wrapper canvas {
@@ -222,8 +226,25 @@
 }
 
 @keyframes tooltip-fade {
-  from { opacity: 0; transform: translateX(-50%) translateY(2px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.screenshot-spinner {
+  animation: screenshot-spin 0.8s linear infinite;
+  margin-right: 4px;
+}
+
+@keyframes screenshot-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .screenshot-text-input {

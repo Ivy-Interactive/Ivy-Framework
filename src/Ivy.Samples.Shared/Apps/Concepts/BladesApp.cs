@@ -5,7 +5,8 @@ public class BladesApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return UseBlades(() => new RootView("A"), "Blade 0");
+        var blades = UseBlades(() => new RootView("A"), "Blade 0");
+        return blades;
     }
 }
 

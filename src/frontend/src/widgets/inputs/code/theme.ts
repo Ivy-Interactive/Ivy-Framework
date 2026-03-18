@@ -54,6 +54,7 @@ export function createIvyCodeTheme(
       boxSizing: 'border-box',
       color: 'var(--foreground)',
       backgroundColor: 'var(--background)',
+      caretColor: 'var(--foreground) !important',
     },
     '.cm-line': {
       whiteSpace: 'pre-wrap',
@@ -63,7 +64,7 @@ export function createIvyCodeTheme(
     },
     '.cm-gutters': {
       height: '100%',
-      backgroundColor: 'var(--muted)',
+      backgroundColor: 'transparent',
       borderRight: '1px solid var(--border)',
       color: 'var(--muted-foreground)',
     },
@@ -89,8 +90,9 @@ export function createIvyCodeTheme(
       backgroundColor: 'color-mix(in srgb, var(--input) 50%, transparent)',
       color: 'var(--input-accent)',
     },
-    '.cm-cursor': {
-      borderLeftColor: 'var(--foreground)',
+    '.cm-cursor, .cm-dropCursor, .cm-cursor-primary': {
+      borderLeftColor: 'var(--foreground) !important',
+      borderLeftWidth: '2px !important',
     },
     // Ensure all editor areas have proper background
     '.cm-editor .cm-content': {

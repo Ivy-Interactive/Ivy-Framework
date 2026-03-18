@@ -396,7 +396,8 @@ const CollapsibleMenuItem: React.FC<{
   level: number;
   activeTag?: string | null;
   expandedSections: Set<string>;
-  onExpandChange: (label: string, expanded: boolean) => void;
+  onExpandChange: (pathKey: string, expanded: boolean) => void;
+  pathKey: string;
 }> = ({
   item,
   eventHandler,
@@ -405,10 +406,11 @@ const CollapsibleMenuItem: React.FC<{
   activeTag,
   expandedSections,
   onExpandChange,
+  pathKey,
 }) => {
   // Derive the open state from expandedSections or item.expanded
   const shouldBeOpen =
-    expandedSections.has(item.label) || (item.expanded ?? false);
+    expandedSections.has(pathKey) || (item.expanded ?? false);
   const [isOpen, setIsOpen] = useState(shouldBeOpen);
   const [prevShouldBeOpen, setPrevShouldBeOpen] = useState(shouldBeOpen);
   const itemRef = useRef<HTMLLIElement>(null);
@@ -421,7 +423,7 @@ const CollapsibleMenuItem: React.FC<{
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    onExpandChange(item.label, open);
+    onExpandChange(pathKey, open);
   };
 
   const onItemClick = (item: MenuItem) => {
@@ -476,7 +478,8 @@ const CollapsibleMenuItem: React.FC<{
                   level + 1,
                   activeTag,
                   expandedSections,
-                  onExpandChange
+                  onExpandChange,
+                  pathKey
                 )}
             </ul>
           </CollapsibleContent>
@@ -513,7 +516,8 @@ const renderMenuItems = (
   level: number,
   activeTag?: string | null,
   expandedSections: Set<string> = new Set(),
-  onExpandChange: (label: string, expanded: boolean) => void = () => {}
+  onExpandChange: (pathKey: string, expanded: boolean) => void = () => {},
+  parentPathKey: string = ''
 ) => {
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
@@ -528,10 +532,13 @@ const renderMenuItems = (
   };
 
   return items.map(item => {
+    const itemPathKey = parentPathKey
+      ? `${parentPathKey}/${item.label}`
+      : item.label;
     if ('children' in item) {
       if (level === 0) {
         return (
-          <div key={item.label} className="space-y-1 mt-6 first:mt-0">
+          <div key={itemPathKey} className="space-y-1 mt-6 first:mt-0">
             <h4 className="sticky top-0 z-10 bg-background px-2 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
@@ -544,7 +551,8 @@ const renderMenuItems = (
                   1,
                   activeTag,
                   expandedSections,
-                  onExpandChange
+                  onExpandChange,
+                  itemPathKey
                 )}
             </ul>
           </div>
@@ -552,7 +560,7 @@ const renderMenuItems = (
       } else {
         return (
           <CollapsibleMenuItem
-            key={item.label}
+            key={itemPathKey}
             item={item}
             eventHandler={eventHandler}
             widgetId={widgetId}
@@ -560,6 +568,7 @@ const renderMenuItems = (
             activeTag={activeTag}
             expandedSections={expandedSections}
             onExpandChange={onExpandChange}
+            pathKey={itemPathKey}
           />
         );
       }
@@ -684,17 +693,23 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     (
       items: MenuItem[],
       targetTag: string,
-      path: string[] = []
+      currentPathKeys: string[] = [],
+      parentPathKey: string = ''
     ): string[] | null => {
       for (const item of items) {
         if (item.tag === targetTag) {
-          return path;
+          return currentPathKeys;
         }
         if (item.children && item.children.length > 0) {
-          const result = findPathToTag(item.children, targetTag, [
-            ...path,
-            item.label,
-          ]);
+          const itemPathKey = parentPathKey
+            ? `${parentPathKey}/${item.label}`
+            : item.label;
+          const result = findPathToTag(
+            item.children,
+            targetTag,
+            [...currentPathKeys, itemPathKey],
+            itemPathKey
+          );
           if (result) {
             return result;
           }
@@ -745,17 +760,20 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     prevActiveTagRef.current = activeTag;
   }, [activeTag, items, searchActive, findPathToTag]);
 
-  const handleExpandChange = useCallback((label: string, expanded: boolean) => {
-    setExpandedSections(prev => {
-      const next = new Set(prev);
-      if (expanded) {
-        next.add(label);
-      } else {
-        next.delete(label);
-      }
-      return next;
-    });
-  }, []);
+  const handleExpandChange = useCallback(
+    (pathKey: string, expanded: boolean) => {
+      setExpandedSections(prev => {
+        const next = new Set(prev);
+        if (expanded) {
+          next.add(pathKey);
+        } else {
+          next.delete(pathKey);
+        }
+        return next;
+      });
+    },
+    []
+  );
 
   const handleMenuKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

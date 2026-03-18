@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Ivy.Core;
 using Ivy.Core.Helpers;
@@ -98,21 +99,14 @@ public static class DateTimeInputExtensions
         var stateType = state.GetStateType();
         var isNullable = stateType.IsNullableType();
 
-        if (isNullable)
-        {
-            var dateValue = ConvertToDateValue<object?>(state);
-            var input = new DateTimeInput<object?>(dateValue, e => SetStateValue(state, e.Value), placeholder, disabled, variant);
-            input.ScaffoldDefaults(null!, stateType);
-            input.Nullable = true;
-            return input;
-        }
-        else
-        {
-            var dateValue = ConvertToDateValue<object>(state);
-            var input = new DateTimeInput<object>(dateValue, e => SetStateValue(state, e.Value), placeholder, disabled, variant);
-            input.ScaffoldDefaults(null!, stateType);
-            return input;
-        }
+        Type genericType = typeof(DateTimeInput<>).MakeGenericType(stateType);
+
+        DateTimeInputBase input = (DateTimeInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, isNullable);
+
+        input.ScaffoldDefaults(null!, stateType);
+        return input;
     }
 
     public static DateTimeInputBase ToDateInput(this IAnyState state, string? placeholder = null, bool disabled = false,

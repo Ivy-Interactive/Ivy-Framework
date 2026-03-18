@@ -123,7 +123,7 @@ Layout.Center()
 
 Ivy uses a fluent API and the pipe operator (`|`) to compose layouts and widgets. This makes it easy to read and build complex hierarchical UIs. Learn more about the [Card widget here](https://docs.ivy.app/widgets/common/card).
 
-3. Run it immediately using the Ivy CLI:
+1. Run it immediately using the Ivy CLI:
 
 ```terminal
 >dotnet run HelloWorldApp.cs

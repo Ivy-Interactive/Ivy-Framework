@@ -214,10 +214,15 @@ public class ColorInputDataBindings : ViewBase
 {
     public override object Build()
     {
+        var stringState = UseState("#ff0000");
+        var stringNullState = UseState((string?)null);
+        var colorsState = UseState(Colors.Red);
+        var colorsNullState = UseState((Colors?)null);
+
         var colorTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
-            ("string", UseState("#ff0000"), UseState((string?)null)),
-            ("Colors", UseState(Colors.Red), UseState((Colors?)null))
+            ("string", stringState, stringNullState),
+            ("Colors", colorsState, colorsNullState)
         };
 
         var gridItems = new List<object>

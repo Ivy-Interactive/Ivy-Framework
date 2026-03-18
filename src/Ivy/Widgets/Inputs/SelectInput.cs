@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -144,8 +145,9 @@ public static class SelectInputExtensions
             placeholder = "Select options...";
         }
 
-        SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, state, options, placeholder, disabled, variant, selectMany)!;
-        input.Nullable = type.IsNullableType();
+        SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, options, placeholder, disabled, variant, selectMany }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
 
         return input;
     }

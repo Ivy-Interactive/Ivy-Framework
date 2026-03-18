@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -141,14 +142,15 @@ public static class ColorInputExtensions
         var effectiveVariant = variant ?? (underlyingType == typeof(Colors) ? ColorInputVariant.Swatch : ColorInputVariant.TextAndPicker);
 
         Type genericType = typeof(ColorInput<>).MakeGenericType(type);
-        ColorInputBase input = (ColorInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, effectiveVariant)!;
-        input.Nullable = type.IsNullableType();
+        ColorInputBase input = (ColorInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, effectiveVariant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
 
         var currentValue = state.As<object>().Value?.ToString();
         var validationError = ValidateColorFormat(currentValue);
         if (validationError != null)
         {
-            input = input with { Invalid = validationError };
+            return input with { Invalid = validationError };
         }
 
         return input;

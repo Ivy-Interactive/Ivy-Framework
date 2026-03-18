@@ -93,8 +93,9 @@ public static class CodeInputExtensions
     {
         var type = state.GetStateType();
         Type genericType = typeof(CodeInput<>).MakeGenericType(type);
-        CodeInputBase input = (CodeInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
-        input.Nullable = type.IsNullableType();
+        CodeInputBase input = (CodeInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
         return input;
     }
 
