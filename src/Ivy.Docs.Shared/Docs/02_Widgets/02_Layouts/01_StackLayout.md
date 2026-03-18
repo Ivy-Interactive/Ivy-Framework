@@ -204,3 +204,56 @@ public class NavigationExample : ViewBase
 
 </Body>
 </Details>
+
+## Faq
+
+<Details>
+<Summary>
+Why do Cards inside Layout.Horizontal() stack vertically instead of appearing side-by-side
+</Summary>
+<Body>
+
+`Card` defaults to `Width = Size.Full()` (100% width). When placed in a horizontal layout, each card tries to take the full width, preventing side-by-side rendering. Set explicit fractional widths:
+
+```csharp
+// ❌ Cards stack vertically — each takes full width
+Layout.Horizontal()
+    | new Card("Left").Content(...)
+    | new Card("Right").Content(...)
+
+// ✅ Cards share space equally
+Layout.Horizontal()
+    | new Card("Left").Content(...).Width(Size.Fraction(1))
+    | new Card("Right").Content(...).Width(Size.Fraction(1))
+```
+
+Alternatively, use `Layout.Grid().Columns(2)` for grid-based layouts.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I center content in the middle of the page (horizontally and vertically)?
+</Summary>
+<Body>
+
+Use `Layout.Center()` to center content both horizontally and vertically on the page:
+
+```csharp
+// ❌ Only centers horizontally within vertical stack
+Layout.Vertical().Align(Align.Center)
+    | TextInput().Placeholder("Enter URL")
+    | Button("Scan")
+
+// ✅ Centers the entire UI in middle of page
+Layout.Center()
+    | Layout.Vertical().Gap(2)
+        | TextInput().Placeholder("Enter URL")
+        | Button("Scan")
+```
+
+`Layout.Center()` creates a centered flex container that positions its content in the center of the available space both horizontally and vertically. Use `Layout.Vertical()` or `Layout.Horizontal()` inside it to arrange multiple elements.
+
+</Body>
+</Details>
