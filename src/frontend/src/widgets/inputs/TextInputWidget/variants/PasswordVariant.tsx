@@ -111,6 +111,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           className={cn(
             textInputSizeVariant({ density }),
             'border-0 shadow-none dark:bg-transparent',
+            '[&::-ms-reveal]:hidden [&::-ms-clear]:hidden',
             props.invalid && inputStyles.invalidInput,
             props.invalid || showClear ? 'pr-14' : 'pr-8',
             hasLastPass && 'pr-3',
@@ -131,13 +132,24 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           <div className="pointer-events-auto flex items-center h-6">
             <button
               type="button"
-              className={eyeIconVariant({ density })}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center"
               onClick={togglePassword}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (
-                <EyeOffIcon className={eyeIconVariant({ density })} />
+                <EyeOffIcon
+                  className={cn(
+                    'text-muted-foreground',
+                    eyeIconVariant({ density })
+                  )}
+                />
               ) : (
-                <EyeIcon className={eyeIconVariant({ density })} />
+                <EyeIcon
+                  className={cn(
+                    'text-muted-foreground',
+                    eyeIconVariant({ density })
+                  )}
+                />
               )}
             </button>
           </div>
