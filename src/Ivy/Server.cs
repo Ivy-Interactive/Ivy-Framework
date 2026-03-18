@@ -47,8 +47,6 @@ public record ServerArgs
 #endif
     public string? Host { get; set; } = null;
 
-    public bool BindAll { get; set; } = false;
-
     public string? PathBase { get; set; } = null;
 
     /// <summary>
@@ -588,8 +586,24 @@ public class Server
             });
         }
 
+        // Capture any ILoggerProvider registrations added via server.Services (e.g. FileLoggerProvider)
+        // before ClearProviders() wipes them from builder.Services.
+        var extraLoggerProviders = builder.Services
+            .Where(s => s.ServiceType == typeof(ILoggerProvider))
+            .ToList();
+
         builder.Logging.ClearProviders();
-        builder.Logging.AddConsole();
+        builder.Logging.AddConsole(options =>
+        {
+            // Write everything to stdout instead of stderr
+            options.LogToStandardErrorThreshold = LogLevel.None;
+        });
+
+        // Re-add any custom ILoggerProvider registrations that were cleared above
+        foreach (var descriptor in extraLoggerProviders)
+        {
+            builder.Services.Add(descriptor);
+        }
 
         builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
 
@@ -643,9 +657,24 @@ public class Server
 
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
+        // Configure ForwardedHeaders middleware to process X-Forwarded-* headers from reverse proxies
+        var forwardedHeadersOptions = new Microsoft.AspNetCore.HttpOverrides.ForwardedHeadersOptions
+        {
+            ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+                | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+                | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedHost
+                | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedPrefix,
+            // Allow proxy headers from any source (configure as needed for security)
+            KnownNetworks = new Microsoft.AspNetCore.HttpOverrides.IPNetwork[0],
+            KnownProxies = new System.Net.IPAddress[0],
+        };
+        app.UseForwardedHeaders(forwardedHeadersOptions);
 
         if (!string.IsNullOrEmpty(_args.PathBase))
+        {
+            Console.WriteLine($"Using base path: {_args.PathBase}");
             app.UsePathBase(_args.PathBase);
+        }
 
         app.UseRouting(); // First routing pass - match explicit routes (gRPC, controllers)
         app.UsePathToAppId(); // Rewrite path to appId if no endpoint matched
