@@ -238,6 +238,44 @@ public class RefreshTokenDemo : ViewBase
 }
 ```
 
+## Empty States
+
+Configure what users see when the table has no data. By default, DataTable shows a generic "No items found" message, but you can customize it to match your application's needs:
+
+```csharp demo-tabs
+public class TenantListDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var db = UseService<TenantDb>();
+        var tenants = db.Tenants.AsQueryable();
+
+        return tenants.ToDataTable(e => e.Id)
+            .Header(t => t.Name, "Name")
+            .Header(t => t.Email, "Email")
+            .Empty((context) => new Stack()
+                .Padding(Spacing.ExtraLarge)
+                .Gap(Spacing.Medium)
+                .AlignItems(Align.Center)
+                | new Text("No tenants yet")
+                    .Size(TextSize.Large)
+                    .Weight(FontWeight.SemiBold)
+                | new Text("Create your first tenant to get started")
+                    .Color(Colors.Muted)
+                | new Button("Create Tenant", variant: ButtonVariant.Primary)
+                    .ToTrigger((isOpen) => new TenantCreateDialog(isOpen))
+            )
+            .Height(Size.Units(100));
+    }
+}
+```
+
+The `Empty` method accepts a `FuncViewBuilder` (which is `Func<IViewContext, object?>`) — you can use the context parameter to access hooks like UseState or UseQuery if needed, or simply ignore it and return a widget tree. Use Stack, Card, or any other layout to design your empty state exactly how you want it.
+
+<Callout Type="tip">
+Empty states are checked server-side by executing a Count() query. The empty state view is only rendered if the count is zero, preventing unnecessary "Loading..." states when data doesn't exist.
+</Callout>
+
 ## AI-Powered Filtering
 
 DataTable supports natural language filtering powered by a Large Language Model (LLM). Instead of writing formal filter expressions, users can type conversational queries and the AI will convert them to the appropriate filter syntax.
