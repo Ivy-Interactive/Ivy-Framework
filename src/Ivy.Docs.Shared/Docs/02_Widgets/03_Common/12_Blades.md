@@ -246,6 +246,28 @@ Blades are optimized for **CRUD applications** and **master-detail workflows** â
 - Building single-page apps with a centered content area
 - The app doesn't need stacked navigation
 
+### Why is my BladeHeader content invisible?
+
+The BladeHeader slot container has no implicit width or flex-grow. Content inside it must manage its own sizing:
+
+**For list blades with search:**
+```csharp
+var header = Layout.Horizontal().Gap(1)
+    | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
+    | Icons.Plus.ToButton(_ => Create()).Ghost();
+return new Fragment() | new BladeHeader(header) | list;
+```
+
+**For detail blades with a title:**
+```csharp
+return new Fragment() | new BladeHeader(Text.Literal(entity.Name)) | details;
+```
+
+Key rules:
+- Always use `.Width(Size.Grow())` on search inputs inside BladeHeader
+- Use `Text.Literal()` for blade titles, not `Text.H3()`
+- Place action buttons inside the `Layout.Horizontal()` with `.Ghost()` styling
+
 ### Why does UseService<IBladeService>() return null?
 
 `IBladeService` is not registered in the DI container. It is a context service provided by `UseBlades()`. Use `UseContext<IBladeService>()` instead. `UseService<T>()` is only for application-registered DI services like database factories or HTTP clients.
