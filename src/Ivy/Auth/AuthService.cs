@@ -82,14 +82,14 @@ public class AuthService : AuthTokenHandlerService, IAuthService
 
     public async Task LogoutAsync(CancellationToken cancellationToken)
     {
+        // Capture OAuth providers before clearing so we can delete their cookies
+        var providersToDelete = _authSession.BrokeredSessions.Keys.ToList();
+
         if (!string.IsNullOrWhiteSpace(_authSession.AuthToken?.AccessToken))
         {
             await TimeoutHelper.WithTimeoutAsync(ct =>
                 _authProvider.LogoutAsync(_authSession, ct), cancellationToken);
         }
-
-        // Capture OAuth providers before clearing so we can delete their cookies
-        var providersToDelete = _authSession.BrokeredSessions.Keys.ToList();
 
         _authSession.AuthToken = null;
         _authSession.ClearBrokeredSessions();
