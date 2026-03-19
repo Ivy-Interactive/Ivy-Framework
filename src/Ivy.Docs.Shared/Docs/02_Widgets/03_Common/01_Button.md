@@ -118,4 +118,33 @@ new Button("Save", handler).Primary()
 </Body>
 </Details>
 
+<Details>
+<Summary>
+How do I run an async operation when a button is clicked?
+</Summary>
+<Body>
+
+Button accepts `Func<ValueTask>` and `Func<Event<Button>, ValueTask>` handlers natively — just use `async`:
+
+```csharp
+var result = UseState<string?>(null);
+var loading = UseState(false);
+
+if (loading.Value) return new Text("Loading...");
+
+new Button("Run", async () => {
+    loading.Value = true;
+    result.Value = await myService.DoWorkAsync();
+    loading.Value = false;
+});
+
+if (result.Value != null)
+    new Callout(result.Value).Success();
+```
+
+There is no `UseAsync` hook. For data fetching with automatic loading/error state, use `UseQuery()` instead. `UseMutation` is for cache invalidation, not general async operations.
+
+</Body>
+</Details>
+
 <WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Button.cs"/>
