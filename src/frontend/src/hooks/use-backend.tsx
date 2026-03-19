@@ -461,7 +461,8 @@ export const useBackend = (
             cookieJarId: message.cookieJarId,
             connectionId: currentConnectionId ?? null,
             triggerMachineReload: message.triggerMachineReload,
-            triggerMachineBrokeredRefresh: message.triggerMachineBrokeredRefresh,
+            triggerMachineBrokeredRefresh:
+              message.triggerMachineBrokeredRefresh,
           }),
           credentials: 'include',
         }
