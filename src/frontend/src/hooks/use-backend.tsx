@@ -939,7 +939,7 @@ export const useBackend = (
 
   const eventHandler: WidgetEventHandlerType = useCallback(
     (eventName, widgetId, args) => {
-      console.log('[Event] Sending:', eventName, widgetId, args);
+      logger.info('[Event] Sending:', eventName, widgetId, args);
       logger.debug(`[${connectionId}] Event: ${eventName}`, { widgetId, args });
       if (!connection) {
         console.warn(
