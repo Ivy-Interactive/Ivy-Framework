@@ -54,7 +54,7 @@ export function BladeWidget({
           {!slots?.BladeHeader && title && (
             <h2 className="text-body">{title}</h2>
           )}
-          <div>{slots?.BladeHeader}</div>
+          <div className="flex-1 min-w-0">{slots?.BladeHeader}</div>
         </div>
         <div className="flex items-center h-[70px]">
           <button
