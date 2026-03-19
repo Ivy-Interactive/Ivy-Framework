@@ -192,8 +192,15 @@ export const generateSeries = (
         }
       : {};
 
-  return valueKeys.map((key, i) => {
-    const rawLineConfig = lines?.[i];
+  // When explicit series are configured, only plot those data keys
+  const configuredKeys = (lines || []).map(l => l.dataKey).filter(Boolean);
+  const keysToPlot =
+    configuredKeys.length > 0
+      ? valueKeys.filter(k => configuredKeys.includes(k))
+      : valueKeys;
+
+  return keysToPlot.map(key => {
+    const rawLineConfig = lines?.find(l => l.dataKey === key);
     // Apply defaults for line config
     const lineConfig = rawLineConfig
       ? applyDefaults(rawLineConfig, LINE_DEFAULTS)

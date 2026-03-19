@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - avatar
   - profile
   - user
   - image

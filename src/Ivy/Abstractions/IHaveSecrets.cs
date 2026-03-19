@@ -6,4 +6,4 @@ public interface IHaveSecrets
     public Secret[] GetSecrets();
 }
 
-public sealed record Secret(string Key, string? Preset = null);
+public sealed record Secret(string Key, string? Preset = null, bool Optional = false);

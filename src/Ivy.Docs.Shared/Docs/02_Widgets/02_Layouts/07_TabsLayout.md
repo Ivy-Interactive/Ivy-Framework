@@ -2,6 +2,7 @@
 prepare: |
   var client = UseService<IClientProvider>();
 searchHints:
+  - tabs
   - navigation
   - panels
   - pages
@@ -41,20 +42,6 @@ Layout.Tabs(
 ```
 
 It showcases the fluent API of TabView, which allows chaining multiple configuration methods for a complete tab setup with visual indicators and precise layout control.
-
-## TabsLayout usage
-
-If you need more flexibility in creating and managing tabs, TabsLayout offers a comprehensive API for enhanced tab configuration.
-
-The first parameter is the selected tab index (0), and the remaining parameters are the Tab objects.
-
-```csharp demo-tabs
-new TabsLayout(null, null, null, null, 0,
-    new Tab("Overview", "This is the overview content"),
-    new Tab("Details", "This is the details content"),
-    new Tab("Settings", "This is the settings content")
-)
-```
 
 ### With Event Handlers
 
