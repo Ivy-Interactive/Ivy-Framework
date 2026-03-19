@@ -86,7 +86,6 @@ public static class CookieRegistryExtensions
                 var cookieOptions = CreateAuthCookieOptions();
                 foreach (var provider in sessionsToDelete)
                 {
-                    Console.WriteLine($"Deleting cookies for removed brokered session: {provider}");
                     cookies.Delete($"{provider}_access_token", cookieOptions);
                     cookies.Delete($"{provider}_refresh_token", cookieOptions);
                     cookies.Delete($"{provider}_auth_tag", cookieOptions);
@@ -139,14 +138,11 @@ public static class CookieRegistryExtensions
     {
         var cookieOptions = CreateAuthCookieOptions();
 
-        Console.WriteLine("blah:");
-
         foreach (var (provider, session) in brokeredSessions)
         {
             var accessTokenName = $"{provider}_access_token";
             var refreshTokenName = $"{provider}_refresh_token";
             var tagName = $"{provider}_auth_tag";
-            Console.WriteLine($"    Adding cookies for brokered session: provider={provider}, accessToken={(string.IsNullOrEmpty(session.AuthToken?.AccessToken) ? "null/empty" : "present")}");
 
             // Store access token
             if (!string.IsNullOrEmpty(session.AuthToken?.AccessToken))
