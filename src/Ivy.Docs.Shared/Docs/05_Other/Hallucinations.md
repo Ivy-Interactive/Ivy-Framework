@@ -1458,6 +1458,29 @@ The method is `ToTextareaInput()`, not `ToTextArea()`. Alternatively use `ToText
 **Found In:**
 19ec33cf-3e86-409e-806c-babf0d20730f
 
+## TextInputBase.Lines() — non-existent multi-line property
+
+**Hallucinated API:**
+```csharp
+var text = UseState("");
+text.ToTextInput().Lines(8)
+```
+
+**Error:** `CS1061: 'TextInputBase' does not contain a definition for 'Lines'`
+
+**Correct API:**
+```csharp
+var text = UseState("");
+text.ToTextareaInput()
+// or equivalently:
+text.ToTextInput().Multiline()
+```
+
+There is no `.Lines()` method. Use `ToTextareaInput()` or `ToTextInput().Multiline()` for multi-line text input. The textarea height can be controlled via `.Height()` on the widget.
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
+
 ## IState\<T\>.ToSelect() — incorrect select method name
 
 **Hallucinated API:**
