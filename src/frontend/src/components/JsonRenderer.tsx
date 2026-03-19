@@ -133,7 +133,7 @@ export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
   }, [data]);
 
   const [expanded, setExpanded] = useState<Set<string>>(() => {
-    if (!parsedData) return new Set<string>();
+    if (parsedData == null) return new Set<string>();
     if (initialExpanded === null || initialExpanded === undefined)
       return new Set<string>();
     if (initialExpanded === -1)
@@ -144,7 +144,7 @@ export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
 
   // Reset expansion state when data or initialExpanded changes
   useEffect(() => {
-    if (!parsedData) {
+    if (parsedData == null) {
       setExpanded(new Set<string>());
       return;
     }
