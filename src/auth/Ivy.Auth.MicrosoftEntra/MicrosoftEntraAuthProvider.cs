@@ -1,14 +1,6 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Identity.Client;
 using Ivy.Core;
-using System.Text.Json.Serialization;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Ivy.Auth.MicrosoftEntra;
 
