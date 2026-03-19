@@ -155,7 +155,9 @@ export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
     } else if (initialExpanded === 0) {
       setExpanded(new Set<string>());
     } else {
-      setExpanded(new Set(collectPaths(parsedData, 'root', initialExpanded, 0)));
+      setExpanded(
+        new Set(collectPaths(parsedData, 'root', initialExpanded, 0))
+      );
     }
   }, [parsedData, initialExpanded]);
 
