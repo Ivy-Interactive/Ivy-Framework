@@ -214,7 +214,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
             fontFamily: "var(--font-sans, sans-serif)",
           }}
         >
-          Capturing screenshot...
+          Capturing Screenshot...
         </div>
       </div>
     );
