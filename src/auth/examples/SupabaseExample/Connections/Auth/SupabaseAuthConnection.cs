@@ -25,8 +25,7 @@ public class SupabaseAuthConnection : IConnection, IHaveSecrets
     public Secret[] GetSecrets() =>
     [
         new("Supabase:Url"),
-        new("Supabase:ApiKey"),
-        new("Supabase:LegacyJwtSecret")
+        new("Supabase:ApiKey")
     ];
 
     public async Task<(bool ok, string? message)> TestConnection(IConfiguration config)
