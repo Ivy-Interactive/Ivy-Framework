@@ -16,9 +16,6 @@ public class AuthService : AuthTokenHandlerService, IAuthService
     private readonly IAuthSession _authSession;
     private readonly IServiceProvider? _serviceProvider;
 
-    // Hold removed brokered auth sessions so they can be updated in place and restored later
-    private readonly Dictionary<string, IAuthTokenHandlerSession> _removedBrokeredSessions = new();
-
     public AuthService(
         IAuthProvider authProvider,
         IAuthSession authSession,
@@ -93,7 +90,6 @@ public class AuthService : AuthTokenHandlerService, IAuthService
 
         _authSession.AuthToken = null;
         _authSession.ClearBrokeredSessions();
-        _removedBrokeredSessions.Clear();
 
         // Pass the captured providers to delete their cookies
         var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession, providersToDelete);
@@ -145,16 +141,6 @@ public class AuthService : AuthTokenHandlerService, IAuthService
         var currentProviders = _authSession.BrokeredSessions.Keys.ToHashSet();
         var newProviders = filteredSessions.Keys.ToHashSet();
 
-        // Remove providers that are no longer present, but keep them in _removedBrokeredSessions
-        foreach (var provider in currentProviders.Where(p => !newProviders.Contains(p)))
-        {
-            if (_authSession.BrokeredSessions.TryGetValue(provider, out var sessionToRemove))
-            {
-                _removedBrokeredSessions[provider] = sessionToRemove;
-            }
-            _authSession.RemoveBrokeredSession(provider);
-        }
-
         // Add or update sessions
         bool hasChanges = false;
         foreach (var kvp in filteredSessions)
@@ -165,15 +151,6 @@ public class AuthService : AuthTokenHandlerService, IAuthService
                 // Update existing active session in place to preserve references
                 existingSession.AuthToken = kvp.Value.AuthToken;
                 existingSession.AuthSessionData = kvp.Value.AuthSessionData;
-            }
-            // Check if session exists in removed sessions
-            else if (_removedBrokeredSessions.Remove(kvp.Key, out var removedSession))
-            {
-                // Update the removed session in place and restore it to active sessions
-                removedSession.AuthToken = kvp.Value.AuthToken;
-                removedSession.AuthSessionData = kvp.Value.AuthSessionData;
-                _authSession.AddBrokeredSession(kvp.Key, removedSession);
-                hasChanges = true;
             }
             else
             {
