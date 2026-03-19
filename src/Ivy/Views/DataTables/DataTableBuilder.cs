@@ -123,7 +123,7 @@ public class DataTableBuilder<TModel>(
 
     private InternalColumn GetColumn<TValue>(Expression<Func<TModel, TValue>> field)
     {
-        var name = Utils.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
         return _columns[name];
     }
 

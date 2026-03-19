@@ -19,7 +19,8 @@ public enum NumberFormatStyle
 {
     Decimal,
     Currency,
-    Percent
+    Percent,
+    Accounting
 }
 
 public interface IAnyNumberInput : IAnyInput
