@@ -124,7 +124,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
             var session = await Client.Auth.ExchangeCodeForSession(_pkceCodeVerifier, code)
                 .WaitAsync(cancellationToken);
 
-            ExtractAndStoreProviderTokens(session, authSession);
+            ExtractAndStoreBrokeredTokens(session, authSession);
 
             return MakeAuthToken(session);
         }
@@ -217,7 +217,7 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
         return this;
     }
 
-    private static void ExtractAndStoreProviderTokens(Session? session, IAuthSession authSession)
+    private static void ExtractAndStoreBrokeredTokens(Session? session, IAuthSession authSession)
     {
         if (session?.User?.AppMetadata == null || string.IsNullOrEmpty(session.ProviderToken))
         {
