@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.Link, path: ["Widgets"], searchHints: ["anchor", "heading", "hash", "navigation", "deep-link"])]
+[App(icon: Icons.Link, group: ["Widgets"], searchHints: ["anchor", "heading", "hash", "navigation", "deep-link"])]
 public class TextBlockAnchorApp : SampleBase
 {
     protected override object? BuildSample() => Layout.Vertical(
@@ -14,3 +14,4 @@ public class TextBlockAnchorApp : SampleBase
         Text.P("Special characters are stripped during slugification: #section-with-special-characters")
     ).Gap(10).Padding(20);
 }
+

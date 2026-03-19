@@ -17,7 +17,7 @@ namespace Ivy.Analyser.Analyzers
         private static readonly DiagnosticDescriptor LeafRule = new DiagnosticDescriptor(
             LeafDiagnosticId,
             "Adding Children to Leaf Widget",
-            "'{0}' does not support children. See: https://docs.ivy.app/other/ivy-analyser/ivychild001.",
+            "'{0}' does not support children. See: https://docs.ivy.app/other/ivy/analyser/ivychild001.",
             "Usage",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
@@ -27,7 +27,7 @@ namespace Ivy.Analyser.Analyzers
         private static readonly DiagnosticDescriptor SingleChildRule = new DiagnosticDescriptor(
             SingleChildDiagnosticId,
             "Adding Multiple Children to Single-Child Widget",
-            "'{0}' only supports a single child. See: https://docs.ivy.app/other/ivy-analyser/ivychild002.",
+            "'{0}' only supports a single child. See: https://docs.ivy.app/other/ivy/analyser/ivychild002.",
             "Usage",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
@@ -37,7 +37,7 @@ namespace Ivy.Analyser.Analyzers
         private static readonly DiagnosticDescriptor WrongChildTypeRule = new DiagnosticDescriptor(
             WrongChildTypeDiagnosticId,
             "Wrong Child Type for Widget",
-            "'{0}' only accepts children of type '{1}'. Got '{2}'. See: https://docs.ivy.app/other/ivy-analyser/ivychild003.",
+            "'{0}' only accepts children of type '{1}'. Got '{2}'. See: https://docs.ivy.app/other/ivy/analyser/ivychild003.",
             "Usage",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,

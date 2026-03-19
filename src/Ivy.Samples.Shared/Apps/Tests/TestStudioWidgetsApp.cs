@@ -30,7 +30,7 @@ public class MultipleAnswerQuestion<T>(string question, IEnumerable<IAnyOption> 
     }
 }
 
-[App(icon: Icons.MessageSquare, path: ["Tests"], isVisible: false)]
+[App(icon: Icons.MessageSquare, group: ["Tests"], isVisible: false)]
 public class TestStudioWidgetsApp : SampleBase
 {
     protected override object? BuildSample()

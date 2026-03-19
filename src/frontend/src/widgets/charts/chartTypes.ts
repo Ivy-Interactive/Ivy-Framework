@@ -524,3 +524,30 @@ export type FunnelProps = {
   strokeWidth?: number;
   labelLists?: string[];
 };
+
+export interface GaugeThresholdProps {
+  value: number;
+  color: string;
+}
+
+export interface GaugePointerProps {
+  style?: 'Line' | 'Arrow' | 'Rounded';
+  width?: number;
+  length?: string;
+}
+
+export interface GaugeChartWidgetProps {
+  id: string;
+  value: number;
+  min?: number;
+  max?: number;
+  label?: string;
+  startAngle?: number;
+  endAngle?: number;
+  thresholds?: GaugeThresholdProps[];
+  pointer?: GaugePointerProps;
+  animated?: boolean;
+  colorScheme?: ColorScheme;
+  width?: string;
+  height?: string;
+}

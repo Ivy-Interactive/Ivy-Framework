@@ -72,6 +72,11 @@ public class AppHub(
                 requestScheme = forwardedProto.ToString();
             }
 
+            // Resolve route before auth so we can avoid reload loop on error page (skip LogoutAsync) and avoid overriding to Auth app
+            var appRouter = new AppRouter(server);
+            var routeResult = appRouter.Resolve(httpContext);
+            var isErrorAppRequest = routeResult.AppId == AppIds.ErrorNotFound || routeResult.NavigationAppId == AppIds.ErrorNotFound;
+
             if (server.AuthProviderType != null)
             {
                 var authProvider = server.ServiceProvider!.GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
@@ -118,17 +123,16 @@ public class AppHub(
                     authSession.AuthToken = null;
                 }
 
-                if (authSession.AuthToken == null && parentId != null)
+                // Don't call LogoutAsync when user is on the error page: nothing to clear and it would send SetAuthCookies(reloadPage: true), causing a reload loop
+                if (authSession.AuthToken == null && parentId != null && !isErrorAppRequest)
                 {
                     await authService.LogoutAsync(Context.ConnectionAborted);
                 }
             }
 
-            var appRouter = new AppRouter(server);
-            var routeResult = appRouter.Resolve(httpContext);
-
-            // Override to Auth app if authentication failed
-            if (server.AuthProviderType != null)
+            // Reuse routeResult and isErrorAppRequest from above
+            // Override to Auth app if authentication failed (unless they requested the error page)
+            if (server.AuthProviderType != null && !isErrorAppRequest)
             {
                 var authService = appServices.BuildServiceProvider().GetService<IAuthService>();
                 if (authService?.GetCurrentToken() == null)
@@ -152,6 +156,10 @@ public class AppHub(
             var machineId = AppRouter.GetMachineId(httpContext);
 
             var appArgs = GetAppArgs(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
+            if (routeResult.ArgsJson != null)
+            {
+                appArgs = new AppContext(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, routeResult.ArgsJson, requestScheme, httpContext.Request.Host.Value!);
+            }
 
             logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
 
@@ -235,7 +243,7 @@ public class AppHub(
             }
             catch (Exception e)
             {
-                var tree = new WidgetTree(new ErrorView(e), contentBuilder, serviceProvider);
+                var tree = new WidgetTree(new ExceptionErrorView(e), contentBuilder, serviceProvider);
                 await tree.BuildAsync();
                 await Clients.Caller.SendAsync("Refresh", new
                 {

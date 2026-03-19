@@ -145,6 +145,28 @@ public class ToastExceptionDemo : ViewBase
 
 ## Faq
 
+### When should I use Toast vs UseAlert dialog?
+
+Use **Toast** (`IClientProvider`) for simple, non-blocking feedback messages — success confirmations, error notifications, validation messages. Toasts auto-dismiss and don't require user interaction.
+
+```csharp
+var client = UseService<IClientProvider>();
+client.Toast("Saved successfully!");  // neutral
+client.Error("Invalid input");        // error styling
+client.Success("Upload complete");    // success styling
+```
+
+Use **UseAlert** (`ShowAlertDelegate`) only when you need a **modal dialog** that blocks and waits for user input — confirmations, yes/no decisions, destructive action warnings.
+
+```csharp
+var (alertView, showAlert) = UseAlert();
+showAlert("Are you sure?", result => {
+    if (result == AlertResult.Yes) Delete();
+}, buttons: AlertButtonSet.YesNo);
+```
+
+**Rule of thumb:** If you don't need a user response, use Toast. If you need a Yes/No/Ok answer, use UseAlert.
+
 ### Form Submission with Feedback
 
 ```csharp demo-below

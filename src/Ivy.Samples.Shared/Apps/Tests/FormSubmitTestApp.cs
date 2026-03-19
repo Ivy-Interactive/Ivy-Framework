@@ -2,7 +2,7 @@ namespace Ivy.Samples.Shared.Apps.Tests;
 
 public record LoginModel(string Username, string Email, string Password);
 
-[App(icon: Icons.LogIn, path: ["Tests"], isVisible: false)]
+[App(icon: Icons.LogIn, group: ["Tests"], isVisible: false)]
 public class FormSubmitTestApp : SampleBase
 {
     protected override object? BuildSample()

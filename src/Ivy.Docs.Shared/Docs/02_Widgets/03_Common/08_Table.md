@@ -473,4 +473,41 @@ new Table(
 </Body>
 </Details>
 
+<Details>
+<Summary>
+When should I use DataTable instead of Table?
+</Summary>
+<Body>
+
+`Table` is for simple, static layouts. For **interactive data grids** with sorting, filtering, search, and large datasets, use [DataTable](../07_Advanced/01_DataTable.md) instead.
+
+**Use DataTable when you need:**
+- Sorting and filtering
+- Search functionality
+- Pagination or incremental loading
+- Row actions (edit, delete)
+- Large datasets (100+ rows)
+- Performance with IQueryable (Apache Arrow backend)
+
+```csharp
+// Use DataTable for interactive data:
+employees.AsQueryable().ToDataTable()
+    .Header(e => e.Name, "Employee")
+    .Config(c => {
+        c.AllowSorting = true;
+        c.ShowSearch = true;
+    })
+
+// Use Table for simple layouts:
+new[] {
+    new { Label = "Status", Value = "Active" },
+    new { Label = "Count", Value = "42" }
+}.ToTable()
+```
+
+See [DataTable](../07_Advanced/01_DataTable.md) for full grid capabilities.
+
+</Body>
+</Details>
+
 <WidgetDocs Type="Ivy.Table" ExtensionTypes="Ivy.TableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Tables/Table.cs"/>

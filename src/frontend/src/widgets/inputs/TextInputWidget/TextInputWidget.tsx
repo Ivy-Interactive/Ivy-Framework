@@ -2,7 +2,8 @@ import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import { Densities } from '@/types/density';
 import { TextInputWidgetProps, TextInputVariant } from './types';
-import { useSyncServerValue, useShortcutKey } from './hooks';
+import { useShortcutKey } from './hooks';
+import { useOptimisticValue } from '../shared/useOptimisticValue';
 import {
   DefaultVariant,
   TextareaVariant,
@@ -34,8 +35,6 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
-  // Normalize null/undefined to empty string for display (HTML inputs can't have null values)
-  const [localValue, setLocalValue] = useState(value ?? '');
   const [isFocused, setIsFocused] = useState(false);
   const [minLengthError, setMinLengthError] = useState<string | undefined>(
     undefined
@@ -45,13 +44,13 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   );
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
-  // Wrapper to normalize null/undefined to empty string for useSyncServerValue
-  const setLocalValueNormalized = useCallback(
-    (val: string | undefined) => setLocalValue(val ?? ''),
-    []
+  // Normalize null/undefined to empty string for display (HTML inputs can't have null values)
+  const serverValue = value ?? '';
+  const [localValue, setLocalValue] = useOptimisticValue(
+    serverValue,
+    isFocused,
+    (a: string, b: string) => a === b
   );
-
-  useSyncServerValue(value, localValue, isFocused, setLocalValueNormalized);
 
   useShortcutKey({
     shortcutKey,
@@ -84,7 +83,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       }
       if (events.includes('OnChange')) eventHandler('OnChange', id, [newValue]);
     },
-    [eventHandler, id, events, minLength, pattern]
+    [eventHandler, id, events, minLength, pattern, setLocalValue]
   );
 
   const handleBlur = useCallback(() => {
@@ -130,7 +129,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       setLocalValue(clearedValue ?? '');
       eventHandler('OnChange', id, [clearedValue]);
     },
-    [eventHandler, id, events, disabled, nullable]
+    [eventHandler, id, events, disabled, nullable, setLocalValue]
   );
 
   // Server-provided `invalid` takes precedence; fall back to local validation errors

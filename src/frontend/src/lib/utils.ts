@@ -37,9 +37,9 @@ export function getAppId(): string | null {
     return null;
   }
 
-  // Convert path to appId
-  // Remove leading slash and use the rest as appId
-  const appId = originalPath.replace(/^\/+/, '');
+  // Convert path to appId: remove leading slash and trim trailing slash so /hooks/core/ === /hooks/core
+  const raw = originalPath.replace(/^\/+/, '');
+  const appId = raw.endsWith('/') ? raw.slice(0, -1) : raw;
 
   // Only convert if the path looks like an app ID (contains at least one segment)
   if (appId) {

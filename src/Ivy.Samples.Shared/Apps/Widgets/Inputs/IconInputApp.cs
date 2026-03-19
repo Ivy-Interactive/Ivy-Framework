@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Sparkles, path: ["Widgets", "Inputs"], searchHints: ["picker", "icon", "lucide", "select"])]
+[App(icon: Icons.Sparkles, group: ["Widgets", "Inputs"], searchHints: ["picker", "icon", "lucide", "select"])]
 public class IconInputApp : SampleBase
 {
     protected override object? BuildSample()

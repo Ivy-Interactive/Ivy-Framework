@@ -4,6 +4,7 @@ import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
 import { X, Check } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
+import { useOptimisticValue } from './shared/useOptimisticValue';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import {
@@ -290,9 +291,12 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   allowAlpha = false,
 }) => {
   const eventHandler = useEventHandler();
+
+  const [localValue, setLocalColorValue] = useOptimisticValue(value, false);
+
   // Use derived state for display and input values
-  const displayValue = value ?? '';
-  const inputValue = value ?? '';
+  const displayValue = localValue ?? '';
+  const inputValue = localValue ?? '';
 
   const getThemeColorHex = (cssVar: string): string | undefined => {
     if (typeof window === 'undefined') return undefined;
@@ -395,28 +399,33 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     ? parseHexAlpha(convertToHex(displayValue)).alpha
     : 255;
 
+  const fireColorChange = (newColor: string | null) => {
+    setLocalColorValue(newColor);
+    eventHandler('OnChange', id, [newColor]);
+  };
+
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newRGB = e.target.value;
     if (allowAlpha) {
-      eventHandler('OnChange', id, [combineHexAlpha(newRGB, currentAlpha)]);
+      fireColorChange(combineHexAlpha(newRGB, currentAlpha));
     } else {
-      eventHandler('OnChange', id, [newRGB]);
+      fireColorChange(newRGB);
     }
   };
 
   const handleAlphaChange = (newAlpha: number) => {
     const baseColor = getDisplayColor();
-    eventHandler('OnChange', id, [combineHexAlpha(baseColor, newAlpha)]);
+    fireColorChange(combineHexAlpha(baseColor, newAlpha));
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    eventHandler('OnChange', id, [newValue]);
+    fireColorChange(newValue);
   };
 
   const handleInputBlur = () => {
     const convertedValue = convertToHex(inputValue);
-    eventHandler('OnChange', id, [convertedValue]);
+    fireColorChange(convertedValue);
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, [convertedValue]);
   };
 
@@ -427,7 +436,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   };
 
   const handleClear = () => {
-    eventHandler('OnChange', id, [null]);
+    fireColorChange(null);
   };
 
   // --- Variant rendering logic ---
@@ -451,10 +460,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
               ghost &&
                 'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
               invalid && inputStyles.invalidInput,
-              (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
+              (invalid || (nullable && localValue !== null && !disabled)) &&
+                'pr-8'
             )}
           />
-          {(invalid || (nullable && value !== null && !disabled)) && (
+          {(invalid || (nullable && localValue !== null && !disabled)) && (
             <div
               className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
               style={{ zIndex: 2 }}
@@ -464,7 +474,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                   <InvalidIcon message={invalid} />
                 </span>
               )}
-              {nullable && value !== null && !disabled && (
+              {nullable && localValue !== null && !disabled && (
                 <button
                   type="button"
                   tabIndex={-1}
@@ -493,13 +503,13 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
 
   if (variant === 'Swatch') {
     const handleSwatchSelect = (colorName: string) => {
-      eventHandler('OnChange', id, [colorName]);
+      fireColorChange(colorName);
     };
 
     return (
       <div className="flex items-center space-x-2">
         <ColorSwatchGrid
-          selectedColor={value}
+          selectedColor={localValue}
           onColorSelect={handleSwatchSelect}
           disabled={disabled}
         />
@@ -560,10 +570,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             ghost &&
               'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
             invalid && inputStyles.invalidInput,
-            (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
+            (invalid || (nullable && localValue !== null && !disabled)) &&
+              'pr-8'
           )}
         />
-        {(invalid || (nullable && value !== null && !disabled)) && (
+        {(invalid || (nullable && localValue !== null && !disabled)) && (
           <div
             className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
             style={{ zIndex: 2 }}
@@ -572,7 +583,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             {invalid && (
               <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
-            {nullable && value !== null && !disabled && (
+            {nullable && localValue !== null && !disabled && (
               <button
                 type="button"
                 tabIndex={-1}

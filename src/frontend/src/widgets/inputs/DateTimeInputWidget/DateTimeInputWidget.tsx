@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useCallback, useMemo } from 'react';
 import { useEventHandler } from '@/components/event-handler';
+import { useOptimisticValue } from '../shared/useOptimisticValue';
 import { Densities } from '@/types/density';
 import {
   DateTimeInputWidgetProps,
@@ -64,13 +65,19 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   // Normalize undefined to null when nullable
   const normalizedValue = nullable && value === undefined ? undefined : value;
 
+  const [localValue, setLocalValue] = useOptimisticValue(
+    normalizedValue,
+    false
+  );
+
   const handleDateChange = useCallback(
     (selectedDate: Date | undefined) => {
       if (disabled) return;
       const isoString = selectedDate?.toISOString();
+      setLocalValue(isoString);
       eventHandler('OnChange', id, [isoString]);
     },
-    [disabled, eventHandler, id]
+    [disabled, eventHandler, id, setLocalValue]
   );
 
   const handleTimeChange = useCallback(
@@ -79,6 +86,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
 
       // For Time variant, send the time string directly
       if (variant === 'Time') {
+        setLocalValue(time);
         eventHandler('OnChange', id, [time]);
       } else {
         // For other variants, create a date with the selected time
@@ -86,10 +94,12 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
         const newDateTime = new Date();
         newDateTime.setHours(hours, minutes, seconds);
 
-        eventHandler('OnChange', id, [newDateTime.toISOString()]);
+        const isoString = newDateTime.toISOString();
+        setLocalValue(isoString);
+        eventHandler('OnChange', id, [isoString]);
       }
     },
-    [disabled, eventHandler, id, variant]
+    [disabled, eventHandler, id, variant, setLocalValue]
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);
@@ -97,7 +107,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   return (
     <VariantComponent
       id={id}
-      value={normalizedValue}
+      value={localValue}
       placeholder={placeholder}
       disabled={disabled}
       nullable={nullable}

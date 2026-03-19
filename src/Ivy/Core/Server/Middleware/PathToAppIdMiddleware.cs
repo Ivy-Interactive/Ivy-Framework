@@ -18,9 +18,8 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
             return;
         }
 
-        // Convert path to appId
-        // Remove leading slash and use the rest as appId
-        var appId = path.TrimStart('/');
+        // Convert path to appId: remove leading slash and trim trailing slash so /hooks/core/ === /hooks/core
+        var appId = path.TrimStart('/').TrimEnd('/');
 
         if (AppRoutingHelpers.ValidateAppId(appId, server.ReservedPaths) != AppIdValidationResult.Valid)
         {

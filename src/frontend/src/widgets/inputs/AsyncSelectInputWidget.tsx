@@ -155,7 +155,8 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         className={cn(
           asyncSelectContainerVariant({ density }),
           invalid && inputStyles.invalidInput,
-          ghost && 'border-transparent shadow-none'
+          ghost &&
+            'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
         )}
       >
         {wrappedDisplayValue}

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Upload, path: ["Widgets", "Inputs"], searchHints: ["upload", "file", "attachment", "drag-drop", "browse", "files"])]
+[App(icon: Icons.Upload, group: ["Widgets", "Inputs"], searchHints: ["upload", "file", "attachment", "drag-drop", "browse", "files"])]
 public class FileInputApp : SampleBase
 {
     protected override object? BuildSample()
