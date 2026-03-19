@@ -590,6 +590,33 @@ queryResult.IsLoading
 **Found In:**
 a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 002, 004)
 
+## QueryMutator.Trigger() / .IsLoading / .Error — non-existent properties
+
+**Hallucinated API:**
+```csharp
+var mutation = UseMutation(key);
+mutation.Trigger();    // doesn't exist
+mutation.IsLoading     // doesn't exist
+mutation.Error         // doesn't exist
+```
+
+**Error:** `CS1061: 'QueryMutator' does not contain a definition for 'Trigger'/'IsLoading'/'Error'`
+
+**Correct API:**
+`QueryMutator` only has `Revalidate` (Action) and `Invalidate` (Action). `QueryMutator<T>` adds `Mutate` (MutateDelegate<T>). For loading state and error, use `QueryResult<T>` from `UseQuery()`, which has `.Loading`, `.Error`, and `.Value`.
+
+For async operations triggered by a button click, use the button's async `OnClick` handler directly:
+```csharp
+new Button("Validate", async () => {
+    result = await service.ValidateAsync(input);
+})
+```
+
+Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
+
 ## ListItem.Description / ListItem.Meta / ListItem.Actions — non-existent members
 
 **Hallucinated API:**
@@ -1677,3 +1704,19 @@ state.ToForm()
 
 **Found In:**
 5d2202d2-9d6b-4198-9922-c3763534aca5
+
+## UseService vs UseContext
+
+LLMs sometimes use `UseService<IBladeService>()` to obtain the blade service. This is incorrect — `IBladeService` is a **context** service provided by `UseBlades()`, not a DI-registered service. Using `UseService` returns `null`, causing `NullReferenceException` at runtime.
+
+**Wrong:**
+```csharp
+var bladeService = UseService<IBladeService>(); // Returns null!
+```
+
+**Correct:**
+```csharp
+var bladeService = UseContext<IBladeService>();
+```
+
+**Rule:** Use `UseContext<T>()` for framework-provided context services (`IBladeService`, etc.). Use `UseService<T>()` only for application-registered DI services (e.g., `DbContextFactory`, `HttpClient`).
