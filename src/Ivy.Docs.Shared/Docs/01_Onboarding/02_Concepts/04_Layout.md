@@ -233,9 +233,7 @@ The Layout class provides the following factory methods:
 
 | Layout | Description |
 |--------|-------------|
-| [StackLayout](../../02_Widgets/02_Layouts/01_StackLayout.md) | Arranges elements vertically or horizontally in a linear sequence (supports wrapping) |
 | [GridLayout](../../02_Widgets/02_Layouts/03_GridLayout.md) | Two-dimensional grid system with precise control over positioning and spanning |
-| [TabsLayout](../../02_Widgets/02_Layouts/07_TabsLayout.md) | Organizes content into tabbed sections for easy navigation |
 | [SidebarLayout](../../02_Widgets/02_Layouts/06_SidebarLayout.md) | Main content area with a collapsible sidebar for navigation |
 | [HeaderLayout](../../02_Widgets/02_Layouts/04_HeaderLayout.md) | Page layout with a fixed header section |
 | [FooterLayout](../../02_Widgets/02_Layouts/05_FooterLayout.md) | Page layout with a fixed footer section |
