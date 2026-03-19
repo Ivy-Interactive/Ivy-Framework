@@ -439,6 +439,7 @@ Available `BadgeVariant` values: `Primary`, `Destructive`, `Secondary`, `Outline
 3c507fb4-71e1-4136-9d40-8eca6590250d
 ce144de9-0688-490a-bef6-b2766e323154
 642d3167-790d-48c4-a381-bfab78f928cc
+857de09c-ab87-49a5-aac4-394f7d0aa207
 
 ## Callout.Color(Colors.X) — non-existent fluent method
 
@@ -1745,3 +1746,29 @@ state.ToForm().OnSubmit(async form => { ... })
 ```
 
 `OnSubmit` is a fluent extension method that chains after `ToForm()`, not a constructor parameter. The same pattern applies to other form event handlers like `OnChange`.
+
+## Details() — empty constructor instead of passing items
+
+**Hallucinated API:**
+```csharp
+new Details()
+    | new Detail("Country Code", result.CountryCode, false)
+    | new Detail("VAT Number", result.VatNumber, false)
+```
+
+**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'items' of 'Details.Details(IEnumerable<Detail>)'`
+
+**Correct API:**
+```csharp
+new Details(new[] {
+    new Detail("Country Code", result.CountryCode, false),
+    new Detail("VAT Number", result.VatNumber, false)
+})
+// or use the builder pattern:
+result.ToDetails()
+```
+
+`Details` requires an `IEnumerable<Detail>` in its constructor. There is no parameterless public constructor, and the pipe operator `|` does not work on `Details` to add children. Use the collection constructor or the `.ToDetails()` builder pattern on a model.
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207

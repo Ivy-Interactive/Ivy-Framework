@@ -513,22 +513,28 @@ public class AppHub(
 
     public Task Event(string eventName, string widgetId, JsonArray? args)
     {
-        logger.LogDebug("Event: {EventName} {WidgetId} {Args}", eventName, widgetId, args);
+        logger.LogWarning("Event RECEIVED: {EventName} {WidgetId} ConnectionId={ConnectionId}", eventName, widgetId, Context.ConnectionId);
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
             logger.LogWarning("Event: {EventName} {WidgetId} [AppSession Not Found]", eventName, widgetId);
             return Task.CompletedTask;
         }
 
+        if (appSession.EventQueue == null)
+        {
+            logger.LogWarning("Event: {EventName} {WidgetId} [EventQueue is null!]", eventName, widgetId);
+            return Task.CompletedTask;
+        }
+
         // Enqueue async event handling to avoid tying up ThreadPool workers
-        appSession.EventQueue?.Enqueue(async () =>
+        appSession.EventQueue.Enqueue(async () =>
         {
             try
             {
                 appSession.LastInteraction = DateTime.UtcNow;
                 if (!await appSession.WidgetTree.TriggerEventAsync(widgetId, eventName, args ?? new JsonArray()))
                 {
-                    logger.LogDebug("Event '{EventName}' for Widget '{WidgetId}' not found.", eventName, widgetId);
+                    logger.LogWarning("Event '{EventName}' for Widget '{WidgetId}' not found.", eventName, widgetId);
                 }
             }
             catch (Exception e)

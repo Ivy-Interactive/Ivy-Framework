@@ -150,13 +150,14 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     }
 
     // Then fire the event (upload is now complete, C# handler can read the content)
-    console.log("[ScreenshotFeedback] Upload complete, firing OnSave event", {
-      hasEvents: events.includes("OnSave"),
-      id,
-      uploadUrl,
-    });
-    if (events.includes("OnSave")) {
+    const hasOnSave = events.includes("OnSave");
+    console.log("[ScreenshotFeedback] Upload complete. events:", JSON.stringify(events), "hasOnSave:", hasOnSave, "id:", id);
+    if (hasOnSave) {
+      console.log("[ScreenshotFeedback] Calling eventHandler now...");
       eventHandler("OnSave", id, [buildAnnotationData()]);
+      console.log("[ScreenshotFeedback] eventHandler called.");
+    } else {
+      console.error("[ScreenshotFeedback] OnSave NOT in events array! Events received:", events);
     }
   }, [
     screenshotCanvas,
