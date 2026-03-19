@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 
 interface JsonRendererProps {
@@ -132,34 +132,33 @@ export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
     return { parsedData: data, parseError: null };
   }, [data]);
 
-  const [expanded, setExpanded] = useState<Set<string>>(() => {
-    if (parsedData == null) return new Set<string>();
-    if (initialExpanded === null || initialExpanded === undefined)
-      return new Set<string>();
-    if (initialExpanded === -1)
-      return new Set(collectAllPaths(parsedData, 'root'));
-    if (initialExpanded === 0) return new Set<string>();
-    return new Set(collectPaths(parsedData, 'root', initialExpanded, 0));
-  });
+  // Compute expanded paths based on parsedData and initialExpanded
+  const computeExpandedPaths = (
+    parsed: unknown,
+    initial: number | null | undefined
+  ): Set<string> => {
+    if (parsed == null) return new Set<string>();
+    if (initial === null || initial === undefined) return new Set<string>();
+    if (initial === -1) return new Set(collectAllPaths(parsed, 'root'));
+    if (initial === 0) return new Set<string>();
+    return new Set(collectPaths(parsed, 'root', initial, 0));
+  };
 
-  // Reset expansion state when data or initialExpanded changes
-  useEffect(() => {
-    if (parsedData == null) {
-      setExpanded(new Set<string>());
-      return;
-    }
-    if (initialExpanded === null || initialExpanded === undefined) {
-      setExpanded(new Set<string>());
-    } else if (initialExpanded === -1) {
-      setExpanded(new Set(collectAllPaths(parsedData, 'root')));
-    } else if (initialExpanded === 0) {
-      setExpanded(new Set<string>());
-    } else {
-      setExpanded(
-        new Set(collectPaths(parsedData, 'root', initialExpanded, 0))
-      );
-    }
-  }, [parsedData, initialExpanded]);
+  const [expanded, setExpanded] = useState<Set<string>>(() =>
+    computeExpandedPaths(parsedData, initialExpanded)
+  );
+
+  // Track previous props to detect changes during render (React-recommended pattern)
+  const [prevData, setPrevData] = useState(data);
+  const [prevInitialExpanded, setPrevInitialExpanded] =
+    useState(initialExpanded);
+
+  // Reset expansion state when data or initialExpanded changes (during render, not in effect)
+  if (data !== prevData || initialExpanded !== prevInitialExpanded) {
+    setPrevData(data);
+    setPrevInitialExpanded(initialExpanded);
+    setExpanded(computeExpandedPaths(parsedData, initialExpanded));
+  }
 
   if (parseError) {
     return <div className="text-destructive">{parseError}</div>;
