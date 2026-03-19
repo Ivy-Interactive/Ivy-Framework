@@ -93,15 +93,14 @@ public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
             return null;
         }
 
-        foreach (var (key, token) in tokenCache.RefreshToken)
+        if (tokenCache.RefreshToken.TryGetValue($"{accountId}-login.windows.net-refreshtoken-{ClientId}--", out var token))
         {
-            if (key.StartsWith(accountId))
-            {
-                return token.Secret;
-            }
+            return token.Secret;
         }
-
-        return null;
+        else
+        {
+            return null;
+        }
     }
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken)
