@@ -97,7 +97,8 @@ public class NavigationBeaconsApp : ViewBase
                     customers.Select(customer =>
                         new Button($"View {customer.Name}")
                             .Disabled(customerBeacon == null)
-                            .OnClick(() => {
+                            .OnClick(() =>
+                            {
                                 if (customerBeacon != null)
                                     navigator.Navigate(customerBeacon, customer);
                             })
@@ -115,7 +116,8 @@ public class NavigationBeaconsApp : ViewBase
                     orders.Select(order =>
                         new Button($"View Order #{order.Id}")
                             .Disabled(orderBeacon == null)
-                            .OnClick(() => {
+                            .OnClick(() =>
+                            {
                                 if (orderBeacon != null)
                                     navigator.Navigate(orderBeacon, order);
                             })
