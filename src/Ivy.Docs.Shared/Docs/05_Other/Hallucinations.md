@@ -1689,7 +1689,7 @@ layout.Margin(0, 4, 0, 0)    // left, top, right, bottom
 **Found In:**
 2e18b175-94ec-459c-94a5-8f28b81ecfdc
 
-## UseService vs UseContext
+## UseService vs UseContext — blade/context services
 
 LLMs sometimes use `UseService<IBladeService>()` to obtain the blade service. This is incorrect — `IBladeService` is a **context** service provided by `UseBlades()`, not a DI-registered service. Using `UseService` returns `null`, causing `NullReferenceException` at runtime.
 
@@ -1728,18 +1728,20 @@ state.ToForm()
 **Found In:**
 5d2202d2-9d6b-4198-9922-c3763534aca5
 
-## UseService vs UseContext
-
-LLMs sometimes use `UseService<IBladeService>()` to obtain the blade service. This is incorrect — `IBladeService` is a **context** service provided by `UseBlades()`, not a DI-registered service. Using `UseService` returns `null`, causing `NullReferenceException` at runtime.
-
-**Wrong:**
-```csharp
-var bladeService = UseService<IBladeService>(); // Returns null!
-```
-
-**Correct:**
-```csharp
-var bladeService = UseContext<IBladeService>();
-```
-
 **Rule:** Use `UseContext<T>()` for framework-provided context services (`IBladeService`, etc.). Use `UseService<T>()` only for application-registered DI services (e.g., `DbContextFactory`, `HttpClient`).
+
+## ToForm(OnSubmit: ...) — OnSubmit is an extension method, not a parameter
+
+**Hallucinated API:**
+```csharp
+state.ToForm(OnSubmit: async form => { ... })
+```
+
+**Error:** `CS1739: The best overload for 'ToForm' does not have a parameter named 'OnSubmit'`
+
+**Correct API:**
+```csharp
+state.ToForm().OnSubmit(async form => { ... })
+```
+
+`OnSubmit` is a fluent extension method that chains after `ToForm()`, not a constructor parameter. The same pattern applies to other form event handlers like `OnChange`.
