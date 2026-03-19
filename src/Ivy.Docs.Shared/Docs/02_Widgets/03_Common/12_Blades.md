@@ -245,3 +245,7 @@ Blades are optimized for **CRUD applications** and **master-detail workflows** â
 - Building dashboards, admin panels, or data-heavy layouts that need full screen width
 - Building single-page apps with a centered content area
 - The app doesn't need stacked navigation
+
+### Why does UseService<IBladeService>() return null?
+
+`IBladeService` is not registered in the DI container. It is a context service provided by `UseBlades()`. Use `UseContext<IBladeService>()` instead. `UseService<T>()` is only for application-registered DI services like database factories or HTTP clients.
