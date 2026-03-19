@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 
 interface JsonRendererProps {
@@ -119,21 +119,21 @@ function collectAllPaths(value: unknown, path: string): string[] {
 }
 
 export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
-  let parsedData = data;
-  let parseError = null;
-  if (typeof data === 'string') {
-    try {
-      parsedData = JSON.parse(data);
-    } catch (error) {
-      console.error(error);
-      parseError = 'Invalid JSON string';
+  // Memoize parsed data to avoid creating new object references on every render
+  const { parsedData, parseError } = useMemo(() => {
+    if (typeof data === 'string') {
+      try {
+        return { parsedData: JSON.parse(data), parseError: null };
+      } catch (error) {
+        console.error(error);
+        return { parsedData: null, parseError: 'Invalid JSON string' };
+      }
     }
-  }
+    return { parsedData: data, parseError: null };
+  }, [data]);
 
-  // Use a key-based state reset for expansion
-  // We compute initial state during render if it's the first time or if props changed
-  const [lastProps, setLastProps] = useState({ parsedData, initialExpanded });
-  const [expanded, setExpanded] = useState(() => {
+  const [expanded, setExpanded] = useState<Set<string>>(() => {
+    if (!parsedData) return new Set<string>();
     if (initialExpanded === null || initialExpanded === undefined)
       return new Set<string>();
     if (initialExpanded === -1)
@@ -142,20 +142,22 @@ export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
     return new Set(collectPaths(parsedData, 'root', initialExpanded, 0));
   });
 
-  if (
-    lastProps.parsedData !== parsedData ||
-    lastProps.initialExpanded !== initialExpanded
-  ) {
-    setLastProps({ parsedData, initialExpanded });
-    setExpanded(() => {
-      if (initialExpanded === null || initialExpanded === undefined)
-        return new Set<string>();
-      if (initialExpanded === -1)
-        return new Set(collectAllPaths(parsedData, 'root'));
-      if (initialExpanded === 0) return new Set<string>();
-      return new Set(collectPaths(parsedData, 'root', initialExpanded, 0));
-    });
-  }
+  // Reset expansion state when data or initialExpanded changes
+  useEffect(() => {
+    if (!parsedData) {
+      setExpanded(new Set<string>());
+      return;
+    }
+    if (initialExpanded === null || initialExpanded === undefined) {
+      setExpanded(new Set<string>());
+    } else if (initialExpanded === -1) {
+      setExpanded(new Set(collectAllPaths(parsedData, 'root')));
+    } else if (initialExpanded === 0) {
+      setExpanded(new Set<string>());
+    } else {
+      setExpanded(new Set(collectPaths(parsedData, 'root', initialExpanded, 0)));
+    }
+  }, [parsedData, initialExpanded]);
 
   if (parseError) {
     return <div className="text-destructive">{parseError}</div>;
