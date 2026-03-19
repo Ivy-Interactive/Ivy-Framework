@@ -939,7 +939,6 @@ export const useBackend = (
 
   const eventHandler: WidgetEventHandlerType = useCallback(
     (eventName, widgetId, args) => {
-      console.debug('[Event] Sending:', eventName, widgetId, args);
       logger.debug(`[${connectionId}] Event: ${eventName}`, { widgetId, args });
       if (!connection) {
         logger.warn('No SignalR connection available for event', {
