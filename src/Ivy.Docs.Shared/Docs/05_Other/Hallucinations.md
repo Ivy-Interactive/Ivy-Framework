@@ -778,21 +778,21 @@ new Box(
 **Found In:**
 7e97011f-41b3-42d3-98ea-3b7faad347c2
 
-## GridView.AddChildren() / GridView.Children() — non-existent methods
+## GridView.AddChildren() — non-existent method
 
 **Hallucinated API:**
 ```csharp
 var grid = new GridView();
 grid.AddChildren(widget1, widget2);
-// or
-grid.Children(widget1, widget2);
 ```
 
-**Error:** `CS1061: 'GridView' does not contain a definition for 'AddChildren'/'Children'`
+**Error:** `CS1061: 'GridView' does not contain a definition for 'AddChildren'`
 
 **Correct API:**
 ```csharp
-// Use the pipe operator to add children to a GridView:
+// Use the .Children() extension to replace children:
+new GridView(columns: 8).Children(widget1, widget2);
+// Or use the pipe operator to append children:
 var grid = new GridView(columns: 8);
 grid | widget1 | widget2;
 // Or pass children in constructor:
@@ -1347,27 +1347,6 @@ new Card(...).Secondary()
 new Card(new Text("Content").Secondary())
 // Or use a Box with background:
 new Box(content).Background(Colors.Gray100)
-```
-
-**Found In:**
-ab38eba1-af47-4003-905b-4fe9cea8ba4f
-
-## Card.Children() — MenuItem extension used on Card
-
-**Hallucinated API:**
-```csharp
-new Card().Children(child1, child2)
-```
-
-**Error:** `CS1929: 'Card' does not contain a definition for 'Children' and the best extension method overload 'MenuItemExtensions.Children(MenuItem, params MenuItem[])' requires a receiver of type 'Ivy.MenuItem'`
-
-**Correct API:**
-```csharp
-// Use the constructor or pipe operator:
-new Card(child1 / child2)
-// Or:
-var card = new Card();
-card | (child1 / child2);
 ```
 
 **Found In:**
