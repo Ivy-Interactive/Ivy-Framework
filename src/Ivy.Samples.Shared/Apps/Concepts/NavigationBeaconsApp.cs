@@ -1,6 +1,6 @@
 using Ivy;
 
-namespace Ivy.Samples;
+namespace Ivy.Samples.Shared.Apps.Concepts;
 
 // Define entity types for this demo
 public class Customer { public int Id { get; set; } public string Name { get; set; } = ""; }
