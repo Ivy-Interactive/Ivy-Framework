@@ -48,6 +48,7 @@ type SetAuthCookiesMessage = {
   cookieJarId: string;
   reloadPage: boolean;
   triggerMachineReload: boolean;
+  triggerMachineBrokeredRefresh: boolean;
 };
 
 type HttpTunnelRequestMessage = {
@@ -460,6 +461,7 @@ export const useBackend = (
             cookieJarId: message.cookieJarId,
             connectionId: currentConnectionId ?? null,
             triggerMachineReload: message.triggerMachineReload,
+            triggerMachineBrokeredRefresh: message.triggerMachineBrokeredRefresh,
           }),
           credentials: 'include',
         }
@@ -841,6 +843,40 @@ export const useBackend = (
           connection.on('ReloadPage', () => {
             logger.debug(`[${connection.connectionId}] ReloadPage`);
             window.location.reload();
+          });
+
+          connection.on('RefreshAuthFromCookies', async () => {
+            logger.debug(`[${connection.connectionId}] RefreshAuthFromCookies`);
+            try {
+              const response = await fetch(
+                `${getIvyHost()}/ivy/auth/refresh-session`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-Connection-Id': connection.connectionId ?? '',
+                    'X-Machine-Id': getMachineId(),
+                  },
+                  credentials: 'include',
+                }
+              );
+              if (!response.ok) {
+                logger.error(
+                  'Failed to refresh auth from cookies, reloading page',
+                  {
+                    status: response.status,
+                    statusText: response.statusText,
+                  }
+                );
+                window.location.reload();
+              }
+            } catch (error) {
+              logger.error(
+                'Error refreshing auth from cookies, reloading page',
+                error
+              );
+              window.location.reload();
+            }
           });
 
           connection.on('HttpRequest', message => {

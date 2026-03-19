@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ivy.Core.Auth;
 
-public record SetAuthCookiesRequest(string CookieJarId, string? ConnectionId, bool TriggerMachineReload);
+public record SetAuthCookiesRequest(string CookieJarId, string? ConnectionId, bool TriggerMachineReload, bool TriggerMachineBrokeredRefresh = false);
 
 public class AuthController() : Controller
 {
@@ -188,6 +188,15 @@ public class AuthController() : Controller
             }
         }
 
+        if (request.TriggerMachineBrokeredRefresh)
+        {
+            if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
+            {
+                var machineId = headerValue.ToString();
+                TriggerMachineAuthRefresh(sessionStore, machineId, request.ConnectionId, logger);
+            }
+        }
+
         return Ok();
     }
 
@@ -256,6 +265,106 @@ public class AuthController() : Controller
         foreach (var session in GetMachineSessions(sessionStore, machineId, excludeConnectionId))
         {
             await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload: true, triggerMachineReload: false, logger, "TriggerMachineLogout");
+        }
+    }
+
+    private static void TriggerMachineAuthRefresh(
+        AppSessionStore sessionStore,
+        string machineId,
+        string? excludeConnectionId,
+        ILogger logger)
+    {
+        // Notify ALL sessions with same machineId except the originator
+        var sessions = sessionStore.Sessions.Values
+            .Where(s => !s.IsDisposed()
+                        && s.MachineId == machineId
+                        && s.ConnectionId != excludeConnectionId);
+
+        foreach (var session in sessions)
+        {
+            logger.LogInformation("Triggering auth refresh from cookies for session {ConnectionId}", session.ConnectionId);
+            var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
+            clientProvider.RefreshAuthFromCookies();
+        }
+    }
+
+    [Route("ivy/auth/refresh-session")]
+    [HttpPost]
+    public IActionResult RefreshSessionFromCookies(
+        [FromHeader(Name = "X-Connection-Id")] string connectionId,
+        [FromHeader(Name = "X-Machine-Id")] string machineId,
+        [FromServices] AppSessionStore sessionStore,
+        [FromServices] ILogger<AuthController> logger)
+    {
+        // Validate session exists
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
+        {
+            logger.LogWarning("RefreshSessionFromCookies: Session not found for {ConnectionId}", connectionId);
+            return NotFound("Session not found");
+        }
+
+        // Verify machine ID matches as a security check
+        if (session.MachineId != machineId)
+        {
+            logger.LogWarning("RefreshSessionFromCookies: Machine ID mismatch for {ConnectionId}. Expected {Expected}, got {Actual}",
+                connectionId, session.MachineId, machineId);
+            return BadRequest("Machine ID mismatch");
+        }
+
+        // Get existing AuthSession
+        var authService = session.AppServices.GetService<IAuthService>();
+        if (authService == null)
+        {
+            logger.LogWarning("RefreshSessionFromCookies: Auth not configured for {ConnectionId}", connectionId);
+            return BadRequest("Auth not configured for this session");
+        }
+
+        // Parse cookies into fresh auth state
+        var httpMessageHandler = session.AppServices.GetService<TunneledHttpMessageHandler>();
+        var freshAuthState = AuthHelper.GetAuthSession(HttpContext, httpMessageHandler);
+        var existingSession = authService.GetAuthSession();
+
+        // Update main auth token in place
+        existingSession.AuthToken = freshAuthState.AuthToken;
+        existingSession.AuthSessionData = freshAuthState.AuthSessionData;
+
+        // Sync brokered sessions (fires Add/Remove events → starts/stops refresh loops)
+        SyncBrokeredSessions(existingSession, freshAuthState.BrokeredSessions, logger);
+
+        logger.LogInformation("Refreshed auth session from cookies for {ConnectionId}", connectionId);
+        return Ok();
+    }
+
+    private static void SyncBrokeredSessions(
+        IAuthSession existing,
+        IReadOnlyDictionary<string, IAuthTokenHandlerSession> newSessions,
+        ILogger logger)
+    {
+        var existingProviders = existing.BrokeredSessions.Keys.ToHashSet();
+        var newProviders = newSessions.Keys.ToHashSet();
+
+        // Remove providers no longer present
+        foreach (var provider in existingProviders.Except(newProviders))
+        {
+            logger.LogInformation("SyncBrokeredSessions: Removing provider {Provider}", provider);
+            existing.RemoveBrokeredSession(provider);
+        }
+
+        // Add or update providers
+        foreach (var (provider, newSession) in newSessions)
+        {
+            if (existing.BrokeredSessions.TryGetValue(provider, out var existingBrokered))
+            {
+                // Update existing in place
+                existingBrokered.AuthToken = newSession.AuthToken;
+                existingBrokered.AuthSessionData = newSession.AuthSessionData;
+            }
+            else
+            {
+                // Add new provider → fires BrokeredSessionAdded → starts refresh loop
+                logger.LogInformation("SyncBrokeredSessions: Adding provider {Provider}", provider);
+                existing.AddBrokeredSession(provider, newSession);
+            }
         }
     }
 }

@@ -162,15 +162,15 @@ public class AuthService : AuthTokenHandlerService, IAuthService
 
         if (hasChanges || currentProviders.Count != newProviders.Count)
         {
-            SetAuthCookies(reloadPage: false);
+            SetAuthCookies(reloadPage: false, triggerMachineBrokeredRefresh: true);
         }
 
         return BrokeredSessionsResult.Success(filteredSessions);
     }
 
-    public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)
+    public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null, bool triggerMachineBrokeredRefresh = false)
     {
         var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession);
-        _client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
+        _client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload, triggerMachineBrokeredRefresh);
     }
 }

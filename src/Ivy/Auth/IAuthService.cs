@@ -20,5 +20,5 @@ public interface IAuthService : IAuthTokenHandlerService
 
     Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default);
 
-    internal void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null);
+    internal void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null, bool triggerMachineBrokeredRefresh = false);
 }
