@@ -2,6 +2,7 @@
 prepare: |
   var client = UseService<IClientProvider>();
 searchHints:
+  - card
   - container
   - panel
   - box
