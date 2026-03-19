@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo } from 'react';
 import { useEventHandler, EventHandler } from '@/components/event-handler';
+import { useOptimisticValue } from './shared/useOptimisticValue';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
@@ -191,14 +192,33 @@ export const NumberRangeInputWidget = memo(
     const normalizedLower = lowerValue ?? min;
     const normalizedUpper = upperValue ?? max;
 
+    type RangeTuple = { lower: number; upper: number };
+    const serverRange: RangeTuple = {
+      lower: normalizedLower,
+      upper: normalizedUpper,
+    };
+
+    const rangeEqual = (a: RangeTuple, b: RangeTuple): boolean =>
+      a.lower === b.lower && a.upper === b.upper;
+
+    const [localRange, setLocalRange] = useOptimisticValue(
+      serverRange,
+      false,
+      rangeEqual
+    );
+
     // Local state for live feedback during drag
-    const [localLower, setLocalLower] = React.useState<number>(normalizedLower);
-    const [localUpper, setLocalUpper] = React.useState<number>(normalizedUpper);
+    const [localLower, setLocalLower] = React.useState<number>(
+      localRange.lower
+    );
+    const [localUpper, setLocalUpper] = React.useState<number>(
+      localRange.upper
+    );
 
     React.useEffect(() => {
-      setLocalLower(normalizedLower);
-      setLocalUpper(normalizedUpper);
-    }, [normalizedLower, normalizedUpper]);
+      setLocalLower(localRange.lower);
+      setLocalUpper(localRange.upper);
+    }, [localRange.lower, localRange.upper]);
 
     // Only update local state on drag
     const handleSliderChange = useCallback((values: number[]) => {
@@ -235,12 +255,19 @@ export const NumberRangeInputWidget = memo(
         const validatedLower = validateAndCapValue(newLower, targetType);
         const validatedUpper = validateAndCapValue(newUpper, targetType);
 
+        // Optimistic update for committed values
+        const newRange = {
+          lower: validatedLower ?? min,
+          upper: validatedUpper ?? max,
+        };
+        setLocalRange(newRange);
+
         // Send as tuple
         eventHandler('OnChange', id, [
           { item1: validatedLower, item2: validatedUpper },
         ]);
       },
-      [eventHandler, id, min, max, targetType, disabled, events]
+      [eventHandler, id, min, max, targetType, disabled, events, setLocalRange]
     );
 
     const handleClear = useCallback(

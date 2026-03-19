@@ -87,6 +87,12 @@ new Badge("Click Me", icon:Icons.MousePointer)
 
 ## Faq
 
+<Details>
+<Summary>
+Badge usage examples
+</Summary>
+<Body>
+
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
     | Text.P("Status").Large()
@@ -102,6 +108,9 @@ Layout.Vertical().Gap(4)
         | new Badge("Design", icon:Icons.Palette)
         | new Badge("Development", icon:Icons.Code))
 ```
+
+</Body>
+</Details>
 
 <Details>
 <Summary>

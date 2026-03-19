@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.TextQuote, path: ["Widgets", "Primitives"], searchHints: ["rich", "text", "run", "inline", "formatting", "streaming", "stream", "llm"])]
+[App(icon: Icons.TextQuote, group: ["Widgets", "Primitives"], searchHints: ["rich", "text", "run", "inline", "formatting", "streaming", "stream", "llm"])]
 public class RichTextApp : SampleBase
 {
     protected override object? BuildSample()

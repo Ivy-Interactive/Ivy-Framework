@@ -6,7 +6,7 @@ public record MillionRowData(
     DateTime CreatedAt
 );
 
-[App(icon: Icons.Database, path: ["Tests"], isVisible: false, searchHints: ["datatable", "million", "performance", "large", "data"])]
+[App(icon: Icons.Database, group: ["Tests"], isVisible: false, searchHints: ["datatable", "million", "performance", "large", "data"])]
 public class DataTablesMillionRowsApp : SampleBase
 {
     protected override object? BuildSample()

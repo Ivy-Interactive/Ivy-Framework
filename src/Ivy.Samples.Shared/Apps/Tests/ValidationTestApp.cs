@@ -2,7 +2,7 @@ namespace Ivy.Samples.Shared.Apps.Tests;
 
 public record ValidationFormModel(string Email, string Password, string? PhoneNumber, string? Website);
 
-[App(icon: Icons.ShieldCheck, path: ["Tests"], searchHints: ["validation", "email", "password", "tel", "url", "form", "field", "textinput"])]
+[App(icon: Icons.ShieldCheck, group: ["Tests"], searchHints: ["validation", "email", "password", "tel", "url", "form", "field", "textinput"])]
 public class ValidationTestApp : SampleBase
 {
     protected override object? BuildSample()

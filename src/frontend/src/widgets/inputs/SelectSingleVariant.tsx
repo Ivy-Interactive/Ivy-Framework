@@ -6,6 +6,7 @@ import {
   SelectGroup,
   SelectItem,
   SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -131,7 +132,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
         invalid && inputStyles.invalidInput,
         !hasValue && 'text-muted-foreground',
         ghost &&
-          'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground'
+          'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground'
       )}
       density={density}
     >
@@ -192,29 +193,32 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
                 {emptyMessage || 'No options available'}
               </div>
             ) : (
-              Object.entries(groupedOptions).map(([group, options]) => (
-                <SelectGroup key={group}>
-                  {group !== 'default' && <SelectLabel>{group}</SelectLabel>}
-                  {options.map(option => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value.toString()}
-                      textValue={option.label}
-                      density={density}
-                      disabled={disabled || loading || option.disabled}
-                    >
-                      <div className="flex items-center gap-2">
-                        {option.icon && (
-                          <Icon
-                            name={option.icon}
-                            className="h-4 w-4 flex-shrink-0"
-                          />
-                        )}
-                        {option.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
+              Object.entries(groupedOptions).map(([group, options], index) => (
+                <React.Fragment key={group}>
+                  {index > 0 && <SelectSeparator />}
+                  <SelectGroup>
+                    {group !== 'default' && <SelectLabel>{group}</SelectLabel>}
+                    {options.map(option => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value.toString()}
+                        textValue={option.label}
+                        density={density}
+                        disabled={disabled || loading || option.disabled}
+                      >
+                        <div className="flex items-center gap-2">
+                          {option.icon && (
+                            <Icon
+                              name={option.icon}
+                              className="h-4 w-4 flex-shrink-0"
+                            />
+                          )}
+                          {option.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </React.Fragment>
               ))
             )}
           </SelectContent>

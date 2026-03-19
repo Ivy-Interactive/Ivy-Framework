@@ -76,6 +76,43 @@ new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .Poster("https://www.w3schools.com/html/pic_trulli.jpg")
 ```
 
+### Time Range Control
+
+Play a specific segment of a video by setting start and end times (in seconds):
+
+```csharp demo-tabs
+Layout.Vertical().Gap(4)
+| Text.P("Start at 5 seconds").Small()
+| new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+    .StartTime(5)
+| Text.P("Play from 2s to 6s").Small()
+| new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+    .StartTime(2)
+    .EndTime(6)
+| Text.P("YouTube segment (30s to 60s)").Small()
+| new VideoPlayer("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+    .StartTime(30)
+    .EndTime(60)
+    .Height(Size.Units(100))
+```
+
+### Playback Rate
+
+Control video playback speed (0.25x to higher speeds, where 1.0 is normal):
+
+```csharp demo-tabs
+Layout.Vertical().Gap(4)
+| Text.P("1.5x speed (faster lectures/tutorials)").Small()
+| new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+    .PlaybackRate(1.5)
+| Text.P("0.5x speed (slow motion review)").Small()
+| new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+    .PlaybackRate(0.5)
+| Text.P("2x speed (quick scrubbing)").Small()
+| new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+    .PlaybackRate(2.0)
+```
+
 ### Large Video Files
 
 The VideoPlayer also supports streaming of large video files.

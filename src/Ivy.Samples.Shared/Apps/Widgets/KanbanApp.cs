@@ -11,7 +11,7 @@ public class KanbanTask
     public required string Assignee { get; set; }
 }
 
-[App(icon: Icons.Kanban, path: ["Widgets"], searchHints: ["board"])]
+[App(icon: Icons.Kanban, group: ["Widgets"], searchHints: ["board"])]
 public class KanbanApp : SampleBase
 {
     protected override object? BuildSample()

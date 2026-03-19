@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
-[App(icon: Icons.PanelLeft, path: ["Widgets", "Layouts"], searchHints: ["navigation", "menu", "drawer", "side-panel", "layout", "aside", "resizable", "drag-to-resize"])]
+[App(icon: Icons.PanelLeft, group: ["Widgets", "Layouts"], searchHints: ["navigation", "menu", "drawer", "side-panel", "layout", "aside", "resizable", "drag-to-resize"])]
 public class SidebarApp : SampleBase
 {
     protected override object? BuildSample()

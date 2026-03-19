@@ -256,15 +256,23 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           borderRadiusClasses.container,
           disabled && 'opacity-50'
         )}
+        style={{
+          boxShadow:
+            '0 0 8px 1px rgba(168, 85, 247, 0.12), 0 0 16px 2px rgba(6, 182, 212, 0.08)',
+        }}
       >
-        {/* Rotating RGB gradient border - scaled up to cover entire button */}
+        {/* Rotating gradient border - starfall comet trail */}
         <LazyMotion features={domAnimation}>
           <m.div
-            className="absolute inset-[-50%] aspect-square"
+            className="absolute inset-[-40%] aspect-square"
             style={{
               background:
-                'conic-gradient(from 0deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)',
-              filter: 'blur(10px)',
+                'conic-gradient(from 0deg, transparent 0%, transparent 10%, #10b981 30%, #06b6d4 50%, #3b82f6 70%, #7c3aed 88%, transparent 100%)',
+              filter: 'blur(8px)',
+              maskImage:
+                'conic-gradient(from 0deg, transparent 0%, transparent 10%, rgba(0,0,0,0.05) 20%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,1) 88%, transparent 100%)',
+              WebkitMaskImage:
+                'conic-gradient(from 0deg, transparent 0%, transparent 10%, rgba(0,0,0,0.05) 20%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,1) 88%, transparent 100%)',
             }}
             animate={{ rotate: 360 }}
             transition={{

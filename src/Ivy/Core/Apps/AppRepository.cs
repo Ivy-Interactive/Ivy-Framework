@@ -88,11 +88,11 @@ public class AppRepository : IAppRepository
             if (appDescriptor.IsVisible || appDescriptor.IsIndex)
             {
                 var current = Root;
-                foreach (var part in appDescriptor.Path)
+                foreach (var part in appDescriptor.Group)
                 {
                     if (current is not IAppRepositoryGroup group)
                     {
-                        throw new InvalidOperationException("Path is not a group.");
+                        throw new InvalidOperationException("Group part is not a group.");
                     }
 
                     var next = group.Children.OfType<AppRepositoryGroup>().FirstOrDefault(e => e.Title == part);
@@ -106,7 +106,7 @@ public class AppRepository : IAppRepository
 
                 if (current is not IAppRepositoryGroup group2)
                 {
-                    throw new InvalidOperationException("Path is not a group.");
+                    throw new InvalidOperationException("Group part is not a group.");
                 }
 
                 if (appDescriptor.IsIndex)
@@ -201,7 +201,9 @@ public class AppRepository : IAppRepository
             ? Apps.GetValueOrDefault(id)
             : null;
 
-        return app ?? Apps.Values.FirstOrDefault(x => !AppIds.ShouldNotBeAutoDefaultApps.Contains(x.Id))
+        return app
+            ?? Apps.Values.FirstOrDefault(x => !AppIds.ShouldNotBeAutoDefaultApps.Contains(x.Id))
+            ?? Apps.GetValueOrDefault(AppIds.ErrorNotFound)
             ?? throw new InvalidOperationException("No serviceable apps are registered on this server.");
     }
 

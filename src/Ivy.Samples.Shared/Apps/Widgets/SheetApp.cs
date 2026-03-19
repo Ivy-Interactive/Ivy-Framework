@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.PanelRight, path: ["Widgets"], searchHints: ["sidebar", "drawer", "panel", "slide-out", "modal", "overlay", "side"])]
+[App(icon: Icons.PanelRight, group: ["Widgets"], searchHints: ["sidebar", "drawer", "panel", "slide-out", "modal", "overlay", "side"])]
 public class SheetApp : SampleBase
 {
     protected override object? BuildSample()

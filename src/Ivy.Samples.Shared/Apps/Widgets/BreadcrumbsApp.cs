@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.ChevronRight, path: ["Widgets"], searchHints: ["breadcrumbs", "navigation", "trail", "hierarchy", "path"])]
+[App(icon: Icons.ChevronRight, group: ["Widgets"], searchHints: ["breadcrumbs", "navigation", "trail", "hierarchy", "path"])]
 public class BreadcrumbsApp : SampleBase
 {
     protected override object? BuildSample()

@@ -173,8 +173,8 @@ public class SearchableListDemo : ViewBase
 {
     public override object? Build()
     {
-        var allItems = new[] { "Apple", "Banana", "Cherry", "Date" };
         var searchTerm = UseState("");
+        var allItems = new[] { "Apple", "Banana", "Cherry", "Date" };
         var filteredItems = UseState(allItems);
 
         UseEffect(() =>
