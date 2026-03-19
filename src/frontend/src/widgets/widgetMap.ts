@@ -17,6 +17,11 @@ import {
   PaginationWidget,
 } from '@/widgets';
 import { BreadcrumbsWidget } from '@/widgets/breadcrumbs';
+import {
+  FileDialogWidget,
+  SaveDialogWidget,
+  FolderDialogWidget,
+} from '@/widgets/filePicker';
 import { BladeContainerWidget, BladeWidget } from '@/widgets/blades';
 import { DetailsWidget, DetailWidget } from '@/widgets/details';
 import {
@@ -41,6 +46,7 @@ import {
   AsyncSelectInputWidget,
   DateRangeInputWidget,
   FileInputWidget,
+  SignatureInputWidget,
 } from '@/widgets/inputs';
 import {
   StackLayoutWidget,
@@ -193,6 +199,7 @@ export const widgetMap = {
   'Ivy.AsyncSelectInput': AsyncSelectInputWidget,
   'Ivy.DateRangeInput': DateRangeInputWidget,
   'Ivy.FileInput': FileInputWidget,
+  'Ivy.SignatureInput': SignatureInputWidget,
   'Ivy.CodeInput': React.lazy(
     () => import('@/widgets/inputs/code/CodeInputWidget')
   ),
@@ -205,6 +212,11 @@ export const widgetMap = {
 
   // Forms
   'Ivy.Form': FormWidget,
+
+  // File Pickers
+  'Ivy.FileDialog': FileDialogWidget,
+  'Ivy.SaveDialog': SaveDialogWidget,
+  'Ivy.FolderDialog': FolderDialogWidget,
 
   // Dialogs
   'Ivy.Dialog': DialogWidget,
@@ -254,6 +266,9 @@ export const widgetMap = {
   ),
   'Ivy.FunnelChart': React.lazy(
     () => import('@/widgets/charts/FunnelChartWidget')
+  ),
+  'Ivy.GaugeChart': React.lazy(
+    () => import('@/widgets/charts/GaugeChartWidget')
   ),
 
   // Effects

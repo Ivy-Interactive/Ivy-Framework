@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useOptimisticValue } from './shared/useOptimisticValue';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -41,6 +42,8 @@ interface DateRangeInputWidgetProps {
   invalid?: string;
   nullable?: boolean;
   firstDayOfWeek?: WeekDay | string;
+  min?: string | null;
+  max?: string | null;
   density?: Densities;
   events: string[];
   autoFocus?: boolean;
@@ -80,6 +83,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   invalid,
   nullable = false,
   firstDayOfWeek: firstDayOfWeekRaw,
+  min,
+  max,
   density = Densities.Medium,
   events = EMPTY_EVENTS,
   autoFocus,
@@ -87,6 +92,21 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
 }) => {
   const firstDayOfWeek = resolveDayOfWeek(firstDayOfWeekRaw);
   const eventHandler = useEventHandler();
+
+  type RangeValue = { item1: string | null; item2: string | null } | null;
+  const serverRange: RangeValue = value ?? null;
+
+  const rangeEqual = (a: RangeValue, b: RangeValue): boolean => {
+    if (a === b) return true;
+    if (a == null || b == null) return a == b;
+    return a.item1 === b.item1 && a.item2 === b.item2;
+  };
+
+  const [localRange, setLocalRange] = useOptimisticValue(
+    serverRange,
+    false,
+    rangeEqual
+  );
 
   const handleChange = useCallback(
     (e: DateRange) => {
@@ -97,9 +117,11 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
         e.from && isValid(e.from) ? formatDate(e.from, 'yyyy-MM-dd') : null;
       const item2 =
         e.to && isValid(e.to) ? formatDate(e.to, 'yyyy-MM-dd') : null;
-      eventHandler('OnChange', id, [{ item1, item2 }]);
+      const newRange = { item1, item2 };
+      setLocalRange(newRange);
+      eventHandler('OnChange', id, [newRange]);
     },
-    [id, disabled, events, eventHandler]
+    [id, disabled, events, eventHandler, setLocalRange]
   );
 
   const handleClear = useCallback(
@@ -108,13 +130,12 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
       e.stopPropagation();
       if (!events.includes('OnChange')) return;
       if (disabled) return;
-      eventHandler('OnChange', id, [{ item1: null, item2: null }]);
+      const cleared = { item1: null, item2: null };
+      setLocalRange(cleared);
+      eventHandler('OnChange', id, [cleared]);
     },
-    [id, disabled, events, eventHandler]
+    [id, disabled, events, eventHandler, setLocalRange]
   );
-
-  const today = new Date();
-
   const parseDate = (val: string | null | undefined) => {
     if (!val) return undefined;
     const d = new Date(val);
@@ -122,9 +143,17 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   };
 
   const date: DateRange = {
-    from: parseDate(value?.item1),
-    to: parseDate(value?.item2),
+    from: parseDate(localRange?.item1),
+    to: parseDate(localRange?.item2),
   };
+
+  const minDate = parseDate(min);
+  const maxDate = parseDate(max);
+
+  const disabledMatchers = [
+    ...(minDate ? [{ before: minDate }] : []),
+    ...(maxDate ? [{ after: maxDate }] : []),
+  ];
 
   const [leftMonth, setLeftMonth] = useState(() => new Date());
   const [rightMonth, setRightMonth] = useState(() => addMonths(new Date(), 1));
@@ -255,7 +284,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   month={leftMonth}
                   onMonthChange={handleLeftMonthChange}
                   className="p-2 bg-background"
-                  disabled={[{ after: today }]}
+                  disabled={disabledMatchers}
                   weekStartsOn={firstDayOfWeek}
                   density={density}
                 />
@@ -267,7 +296,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   month={rightMonth}
                   onMonthChange={handleRightMonthChange}
                   className="p-2 bg-background"
-                  disabled={[{ after: today }]}
+                  disabled={disabledMatchers}
                   weekStartsOn={firstDayOfWeek}
                   density={density}
                 />

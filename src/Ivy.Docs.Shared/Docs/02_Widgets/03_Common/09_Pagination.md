@@ -2,6 +2,7 @@
 prepare: |
   var client = UseService<IClientProvider>();
 searchHints:
+  - pagination
   - paging
   - navigation
   - pages

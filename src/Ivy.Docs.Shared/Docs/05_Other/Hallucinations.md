@@ -142,6 +142,25 @@ input.OnBlur(() => Validate())
 
 All `Handle*` event handler extension methods were renamed to `On*` in v1.2.17 (Ivy-Framework#2459, #2510): `HandleClick` → `OnClick`, `HandleSubmit` → `OnSubmit`, `HandleChange` → `OnChange`, `HandleSelect` → `OnSelect`, `HandleClose` → `OnClose`, `HandleBlur` → `OnBlur`, `HandleRowAction` → `OnRowAction`, `HandleCardMove` → `OnCardMove`, `HandleExpand` → `OnExpand`, `HandleCollapse` → `OnCollapse`, `HandlePageChange` → `OnPageChange`, `HandleUpload` → `OnUpload`, `HandleDownload` → `OnDownload`. **Auto-fixed:** The refactoring service automatically rewrites all `Handle*` calls to `On*`.
 
+## AppAttribute.path — renamed to group
+
+**Hallucinated API:**
+```csharp
+[App(path: ["Tests"])]
+```
+
+**Error:** `'AppAttribute' does not contain a definition for 'path'`
+
+**Correct API:**
+```csharp
+[App(group: ["Tests"])]
+```
+
+The `path` parameter was renamed to `group` in v1.2.18 to better reflect that it defines the organizational group/folder in the sidebar, not a URL path. This applies to both the `[App]` attribute and the `AppDescriptor` class (`Path` property → `Group` property).
+
+**Found In:**
+Ivy-Framework#2612
+
 **Found In:**
 (multiple sessions — agent uses old API names from training data)
 
@@ -174,7 +193,7 @@ new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariants.Text
 
 **Correct API:**
 ```csharp
-new TextInput(text.Value, e => text.Set(e.Value)).Variant(TextInputVariant.Textarea)
+text.ToTextInput().Variant(TextInputVariant.Textarea)
 ```
 
 The enum is `TextInputVariant` (singular), not `TextInputVariants` (plural). All input variant enums were renamed from plural to singular in Ivy-Framework#2546 (e.g., `TextInputVariants` → `TextInputVariant`, `ColorInputVariants` → `ColorInputVariant`, etc.). **Auto-fixed:** The refactoring service automatically rewrites `TextInputVariants` → `TextInputVariant`. Values: `Text`, `Textarea`, `Email`, `Tel`, `Url`, `Password`, `Search`.
@@ -420,6 +439,7 @@ Available `BadgeVariant` values: `Primary`, `Destructive`, `Secondary`, `Outline
 3c507fb4-71e1-4136-9d40-8eca6590250d
 ce144de9-0688-490a-bef6-b2766e323154
 642d3167-790d-48c4-a381-bfab78f928cc
+857de09c-ab87-49a5-aac4-394f7d0aa207
 
 ## Callout.Color(Colors.X) — non-existent fluent method
 
@@ -570,6 +590,33 @@ queryResult.IsLoading
 
 **Found In:**
 a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 002, 004)
+
+## QueryMutator.Trigger() / .IsLoading / .Error — non-existent properties
+
+**Hallucinated API:**
+```csharp
+var mutation = UseMutation(key);
+mutation.Trigger();    // doesn't exist
+mutation.IsLoading     // doesn't exist
+mutation.Error         // doesn't exist
+```
+
+**Error:** `CS1061: 'QueryMutator' does not contain a definition for 'Trigger'/'IsLoading'/'Error'`
+
+**Correct API:**
+`QueryMutator` only has `Revalidate` (Action) and `Invalidate` (Action). `QueryMutator<T>` adds `Mutate` (MutateDelegate<T>). For loading state and error, use `QueryResult<T>` from `UseQuery()`, which has `.Loading`, `.Error`, and `.Value`.
+
+For async operations triggered by a button click, use the button's async `OnClick` handler directly:
+```csharp
+new Button("Validate", async () => {
+    result = await service.ValidateAsync(input);
+})
+```
+
+Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
 
 ## ListItem.Description / ListItem.Meta / ListItem.Actions — non-existent members
 
@@ -730,6 +777,52 @@ new Box(
 
 **Found In:**
 7e97011f-41b3-42d3-98ea-3b7faad347c2
+
+## GridView.AddChildren() — non-existent method
+
+**Hallucinated API:**
+```csharp
+var grid = new GridView();
+grid.AddChildren(widget1, widget2);
+```
+
+**Error:** `CS1061: 'GridView' does not contain a definition for 'AddChildren'`
+
+**Correct API:**
+```csharp
+// Use the .Children() extension to replace children:
+new GridView(columns: 8).Children(widget1, widget2);
+// Or use the pipe operator to append children:
+var grid = new GridView(columns: 8);
+grid | widget1 | widget2;
+// Or pass children in constructor:
+new GridView(columns: 8, children: new[] { widget1, widget2 });
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## OnClick() on non-clickable widgets — extension method receiver mismatch
+
+**Hallucinated API:**
+```csharp
+myCustomView.OnClick(e => ...)
+new LayoutView().OnClick(e => ...)
+```
+
+**Error:** `CS1929: 'MyView' does not contain a definition for 'OnClick' and the best extension method overload requires a receiver of type 'Card'/'Button'/'Badge'`
+
+**Correct API:**
+```csharp
+// OnClick is only available on specific widgets: Card, Button, Badge, Image, Box
+// For custom click handling, wrap in a Box or use a Button:
+new Box(myCustomView).OnClick(e => ...)
+// Or use a Card:
+new Card(myCustomView).OnClick(e => ...)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
 
 ## Size.Pixels() — wrong method name
 
@@ -940,6 +1033,34 @@ Note: `.Border()` expects a `Colors` enum as the first argument, not a string. T
 | `server.UseNoChrome()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseChrome()` instead |
 | `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
 
+## AppAttribute — PascalCase properties and invented parameters
+
+**Hallucinated API:**
+```csharp
+[App(Icon = Icons.Bot, Group = "Apps", Chrome = UseDefaultAppChrome)]
+[App(Icon = Icons.Waves)]
+```
+
+**Errors:**
+- `CS0655: 'Icon' is not a valid named attribute argument` — PascalCase property used instead of constructor parameter
+- `CS0246: The type or namespace name 'Group' could not be found` — parameter doesn't exist
+- `CS0246: The type or namespace name 'Chrome' could not be found` — parameter doesn't exist
+
+**Correct API:**
+```csharp
+[App(icon: Icons.Bot, path: new[] { "Apps" })]
+```
+
+The `AppAttribute` uses **lowercase named constructor parameters**, not PascalCase named properties. C# attributes with nullable property types cause CS0655 when accessed via `PropertyName = value` syntax. Use `parameterName: value` syntax instead.
+
+Available parameters: `id`, `title`, `icon`, `description`, `path`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`. There is NO `group` or `chrome` parameter — use `path:` for navigation grouping, and configure chrome in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`.
+
+See: Ivy-Framework#2587 (plans to rename `path` to `group`)
+
+**Found In:**
+7c547408-00b3-47e1-976e-59c9357c1e74
+d6a5f377-bc84-404d-acca-71164d3754d4
+
 ## TextBuilder.Style() — non-existent styling method
 
 **Hallucinated API:**
@@ -963,33 +1084,50 @@ Also hallucinated: `Text.Code(expr).FontSize(24)` — CS1929: `.FontSize()` is a
 **Found In:**
 88e4f0bb-d358-4b34-9458-bc7eb98845e5, 625c285f-068b-4de3-b01c-ae2f7286a5d8
 
-## TextBuilder.AlignCenter() — non-existent method
+## TextBuilder.AlignCenter() / .Centered() — use .Center()
 
 **Hallucinated API:**
 ```csharp
 Text.H1("$0.00").AlignCenter()
-Text.H3("00:00:00").AlignCenter()
-Text.P("Rate: $50.00/hour").AlignCenter()
+Text.H1("title").Centered()
 ```
 
-**Error:** `CS1061: 'TextBuilder' does not contain a definition for 'AlignCenter'`
+**Error:** `CS1061: 'TextBuilder' does not contain a definition for 'AlignCenter'` / `'Centered'`
 
 **Correct API:**
 ```csharp
-// TextBuilder does not have alignment methods.
-// To center text, wrap it in a layout:
-Layout.Vertical().Align(Align.Center)
-    | Text.H1("$0.00")
-    | Text.H3("00:00:00")
-
-// Or use a Box:
-new Box(Text.H1("$0.00")).Align(Align.Center)
+Text.H1("$0.00").Center()
 ```
 
-`TextBuilder` has no `.AlignCenter()` method. Text alignment is controlled at the layout/container level, not on individual text elements.
+`TextBuilder` now has a `.Center()` method (returns `Align(TextAlignment.Center)`). The agent sometimes hallucinates `.AlignCenter()` or `.Centered()` instead. The correct method name is `.Center()`.
 
 **Found In:**
-713546f7-32fb-4961-ab78-def91e7c010d
+713546f7-32fb-4961-ab78-def91e7c010d, 5d2202d2-9d6b-4198-9922-c3763534aca5
+
+## TextBuilder.Padding() — non-existent method
+
+**Hallucinated API:**
+```csharp
+Text.Block(content).Padding(16)
+Text.P(content).Padding(4)
+```
+
+**Error:** `CS1929: 'TextBuilder' does not contain a definition for 'Padding'`
+
+**Correct API:**
+```csharp
+// Wrap text in a Box for padding:
+new Box(Text.Block(content)).Padding(16)
+
+// Or wrap in a layout:
+Layout.Vertical().Padding(16)
+    | Text.Block(content)
+```
+
+`TextBuilder` does not have `.Padding()`. Padding is available on container widgets (`Box`, `LayoutView`, `TabView`, `GridView`). To add padding around text, wrap it in a `Box` or layout. This is a variant of the `TextBuilder.AlignCenter()` and `TextBuilder.Style()` hallucinations — the agent applies container-level styling to text elements.
+
+**Found In:**
+7c547408-00b3-47e1-976e-59c9357c1e74
 
 ## FileUploadStatus.Completed — non-existent enum value
 
@@ -1143,10 +1281,473 @@ new TextInput(query).Grow()
 
 **Correct API:**
 ```csharp
-new TextInput(query).Width(Size.Grow())
+query.ToTextInput().Width(Size.Grow())
 ```
 
 `Grow()` was originally defined only as a `Box`-specific extension method in `Box.cs`. It is not available on `TextInput` or other widget types. Use `.Width(Size.Grow())` directly, or note that `Grow()` has since been promoted to a generic `WidgetBase<T>` extension and is now available on all widgets.
 
 **Found In:**
 7a9aadf3
+## AppAttribute.path old parameter name
+
+**Hallucinated API:**
+```csharp
+[App("Dashboard", path: ["Dashboards"])]
+```
+
+**Error:** 'AppAttribute' does not contain a constructor that takes... / does not have a parameter named 'path'
+
+**Correct API:**
+```csharp
+[App("Dashboard", group: ["Dashboards"])]
+```
+
+The path: parameter on AppAttribute was renamed to group: (Ivy-Framework#2587) because it is used to specify a group/category name in the sidebar. Agents trained on older data might still use path:. **Auto-fixed:** The refactoring service automatically rewrites path: to group: in [App] attributes.
+
+**Found In:**
+875efaff-8eb2-4604-b3aa-a2b5799df88c
+
+
+## Button.Visible() / Widget.Visible() — removed conditional rendering method
+
+**Hallucinated API:**
+```csharp
+new Button("Reset").Visible(hasDate)
+```
+
+**Error:** `'Button' does not contain a definition for 'Visible'` (CS1061)
+
+**Correct API:**
+```csharp
+// Use a simple if statement for conditional rendering:
+if (hasDate)
+    yield return new Button("Reset");
+
+// Or use a ternary:
+var resetButton = hasDate ? new Button("Reset") : null;
+```
+
+The `.Visible()` extension method was removed from `WidgetBase` (commit f869df302). `LayoutView.Visible()` was also removed. The only remaining `.Visible()` is `FormBuilder<TModel>.Visible(field, predicate)` which controls form field visibility — not widget rendering. The agent confuses this with the old WidgetBase API or UI frameworks like WPF/WinForms that have a `Visible` property. In Ivy, conditional rendering is done with standard C# control flow (`if`, ternary, etc.) like in React.
+
+**Found In:**
+18763683-ff01-4f76-8dc5-6f0bfe750e4a
+
+## Card.Secondary() — Badge extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Secondary()
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Secondary' and the best extension method overload 'BadgeExtensions.Secondary(Badge)' requires a receiver of type 'Ivy.Badge'`
+
+**Correct API:**
+```csharp
+// Cards don't have variants. To style card content, style the children:
+new Card(new Text("Content").Secondary())
+// Or use a Box with background:
+new Box(content).Background(Colors.Gray100)
+```
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## Card.Child — Non-existent property
+
+**Hallucinated API:**
+```csharp
+Card.Child(content)
+// or
+new Card { Child = content }
+```
+
+**Error:** `CS0117: 'Card' does not contain a definition for 'Child'`
+
+**Correct API:**
+```csharp
+// Use the constructor, pipe operator, or .Content():
+new Card(content)
+new Card() | content
+new Card().Content(content)
+```
+
+**Found In:**
+2e18b175-94ec-459c-94a5-8f28b81ecfdc
+
+## Card.Background() — Box extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Background(Colors.Gray100)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Background' and the best extension method overload 'BoxExtensions.Background(Box, Colors)' requires a receiver of type 'Ivy.Box'`
+
+**Correct API:**
+```csharp
+// Wrap in a Box for background color:
+new Box(new Card(content)).Background(Colors.Gray100)
+// Or use Card's built-in styling via content:
+new Card(content)
+```
+
+Similar to the GridView.Background() hallucination — `.Background()` is a Box-only extension.
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## Button.ColSpan() — non-existent grid span method
+
+**Hallucinated API:**
+```csharp
+new Button("=").ColSpan(2)
+```
+
+**Error:** `CS1061: 'Button' does not contain a definition for 'ColSpan'`
+
+**Correct API:**
+```csharp
+// Grid column spanning is not set on child widgets.
+// Use GridLayout column definitions to control spans,
+// or use multiple grid cells for the same widget.
+```
+
+**Found In:**
+ab38eba1-af47-4003-905b-4fe9cea8ba4f
+
+## IState\<T\>.ToTextArea() — incorrect textarea method name
+
+**Hallucinated API:**
+```csharp
+var text = UseState("");
+text.ToTextArea()
+```
+
+**Error:** `CS1061: 'IState<string>' does not contain a definition for 'ToTextArea'`
+
+**Correct API:**
+```csharp
+var text = UseState("");
+text.ToTextareaInput()
+// or equivalently:
+text.ToTextInput().Multiline()
+```
+
+The method is `ToTextareaInput()`, not `ToTextArea()`. Alternatively use `ToTextInput().Multiline()`. See `Docs/02_Widgets/04_Inputs/02_TextInput.md` for full textarea documentation.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
+
+## TextInputBase.Lines() — non-existent multi-line property
+
+**Hallucinated API:**
+```csharp
+var text = UseState("");
+text.ToTextInput().Lines(8)
+```
+
+**Error:** `CS1061: 'TextInputBase' does not contain a definition for 'Lines'`
+
+**Correct API:**
+```csharp
+var text = UseState("");
+text.ToTextareaInput()
+// or equivalently:
+text.ToTextInput().Multiline()
+```
+
+There is no `.Lines()` method. Use `ToTextareaInput()` or `ToTextInput().Multiline()` for multi-line text input. The textarea height can be controlled via `.Height()` on the widget.
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
+
+## IState\<T\>.ToSelect() — incorrect select method name
+
+**Hallucinated API:**
+```csharp
+var format = UseState("Option1");
+format.ToSelect(options)
+```
+
+**Error:** `CS1061: 'IState<string>' does not contain a definition for 'ToSelect'`
+
+**Correct API:**
+```csharp
+var format = UseState("Option1");
+format.ToSelectInput(new[] { "Option1", "Option2" }.ToOptions())
+```
+
+The method is `ToSelectInput()`, not `ToSelect()`. Options are passed as `IEnumerable<IAnyOption>` — use `.ToOptions()` on a string array to convert.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
+
+## Card.When() — non-existent conditional rendering method
+
+**Hallucinated API:**
+```csharp
+new Card(outputText).When(hasOutput)
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'When'`
+
+**Correct API:**
+```csharp
+// Use standard C# control flow for conditional rendering:
+if (hasOutput)
+{
+    new Card(outputText);
+}
+```
+
+There is no `.When()` method on any widget. Ivy uses standard C# `if` statements for conditional rendering, similar to React's conditional rendering pattern. See also the existing `.Visible()` hallucination entry.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
+
+## Card.Style() / Card.ClassName() / Card.WithStyle() — non-existent CSS methods
+
+**Hallucinated API:**
+```csharp
+new Card(...).Style("background: green")
+new Card(...).ClassName("my-class")
+new Card(...).WithStyle(new { Background = "green" })
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'Style'/'ClassName'/'WithStyle'`
+
+**Correct API:**
+```csharp
+// Cards don't support direct CSS styling. To add a colored background, wrap in a Box:
+new Box(new Card(content)).Background(Colors.Green)
+// Or use a Box directly instead of Card when you need full styling control:
+new Box(content).Background(Colors.Green).Padding(20).Rounded()
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Card.Border() — Box extension used on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Border(1)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Border'`
+
+**Correct API:**
+```csharp
+// Cards have a built-in border. For custom borders, wrap in a Box:
+new Box(new Card(content)).Border(1)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Card.Color() — non-existent method on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Color(Colors.Green)
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'Color'`
+
+**Correct API:**
+```csharp
+// Cards don't have a Color method. Use Box for colored containers:
+new Box(content).Background(Colors.Green)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Card.Align() — non-existent method on Card
+
+**Hallucinated API:**
+```csharp
+new Card(...).Align(Align.Center)
+```
+
+**Error:** `CS1929: 'Card' does not contain a definition for 'Align'`
+
+**Correct API:**
+```csharp
+// Use a Layout to control alignment of card content:
+Layout.Vertical(Align.Center) | new Card(content)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+
+## Nested Layout | operator without parentheses
+
+**Hallucinated pattern:**
+```csharp
+Layout.Vertical()
+    | Layout.Horizontal().Gap(4)
+        | child1
+        | child2
+    | otherContent;
+```
+
+**Problem:** C# evaluates `|` left-to-right. Without parentheses, `child1` and `child2` are added to the outer `Vertical` layout, not the inner `Horizontal`. The indentation is misleading — C# ignores indentation.
+
+**Correct pattern:**
+```csharp
+Layout.Vertical()
+    | (Layout.Horizontal().Gap(4)
+        | child1
+        | child2)
+    | otherContent;
+```
+
+Always wrap nested layouts in parentheses `(Layout.Horizontal() | child1 | child2)` to ensure children are added to the correct parent layout.
+
+**Found In:**
+19ec33cf-3e86-409e-806c-babf0d20730f
+
+## Edge — Non-existent margin edge enum
+
+**Hallucinated API:**
+```csharp
+widget.Margin(Edge.Top, 4)
+```
+
+**Error:** `CS0103: The name 'Edge' does not exist in the current context`
+
+**Correct API:**
+```csharp
+// Use WithMargin with positional int parameters (left, top, right, bottom):
+widget.WithMargin(0, 4, 0, 0) // top margin of 4
+
+// Or use Layout.Margin:
+Layout.Vertical().Margin(0, 4, 0, 0) | widget
+```
+
+**Found In:**
+2e18b175-94ec-459c-94a5-8f28b81ecfdc
+
+## WithMargin(top: 4) — Named parameters don't exist
+
+**Hallucinated API:**
+```csharp
+widget.WithMargin(top: 4)
+```
+
+**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'left' of 'LayoutExtensions.WithMargin(object, int, int, int, int)'`
+
+**Correct API:**
+```csharp
+// WithMargin has three overloads, all with positional parameters:
+widget.WithMargin(4)            // uniform margin
+widget.WithMargin(4, 2)         // horizontal, vertical
+widget.WithMargin(0, 4, 0, 0)   // left, top, right, bottom
+```
+
+**Found In:**
+2e18b175-94ec-459c-94a5-8f28b81ecfdc
+
+## Margin(new Thickness(...)) — Margin takes int, not Thickness
+
+**Hallucinated API:**
+```csharp
+layout.Margin(new Thickness(0, 4, 0, 0))
+```
+
+**Error:** `CS1503: Argument 1: cannot convert from 'Ivy.Thickness' to 'int'`
+
+**Correct API:**
+```csharp
+// Margin() takes int parameters directly:
+layout.Margin(4)              // uniform
+layout.Margin(4, 2)           // horizontal, vertical
+layout.Margin(0, 4, 0, 0)    // left, top, right, bottom
+```
+
+**Found In:**
+2e18b175-94ec-459c-94a5-8f28b81ecfdc
+
+## UseService vs UseContext — blade/context services
+
+LLMs sometimes use `UseService<IBladeService>()` to obtain the blade service. This is incorrect — `IBladeService` is a **context** service provided by `UseBlades()`, not a DI-registered service. Using `UseService` returns `null`, causing `NullReferenceException` at runtime.
+
+**Wrong:**
+```csharp
+var bladeService = UseService<IBladeService>(); // Returns null!
+```
+
+**Correct:**
+```csharp
+var bladeService = UseContext<IBladeService>();
+```
+
+**Rule:** Use `UseContext<T>()` for framework-provided context services (`IBladeService`, etc.). Use `UseService<T>()` only for application-registered DI services (e.g., `DbContextFactory`, `HttpClient`).
+
+## Form() — internal constructor
+
+**Hallucinated API:**
+```csharp
+new Form()
+new Form(children)
+```
+
+**Error:** `CS1729: 'Form' does not contain a constructor that takes 0 arguments`
+
+**Correct API:**
+```csharp
+// Forms are created from state objects:
+state.ToForm()
+    .Field(f => f.Name)
+    .Field(f => f.Email)
+```
+
+`Form` constructors are `internal`. Forms must be created using the `.ToForm()` extension method on `IState<T>`. The agent should never use `new Form()` directly.
+
+**Found In:**
+5d2202d2-9d6b-4198-9922-c3763534aca5
+
+**Rule:** Use `UseContext<T>()` for framework-provided context services (`IBladeService`, etc.). Use `UseService<T>()` only for application-registered DI services (e.g., `DbContextFactory`, `HttpClient`).
+
+## ToForm(OnSubmit: ...) — OnSubmit is an extension method, not a parameter
+
+**Hallucinated API:**
+```csharp
+state.ToForm(OnSubmit: async form => { ... })
+```
+
+**Error:** `CS1739: The best overload for 'ToForm' does not have a parameter named 'OnSubmit'`
+
+**Correct API:**
+```csharp
+state.ToForm().OnSubmit(async form => { ... })
+```
+
+`OnSubmit` is a fluent extension method that chains after `ToForm()`, not a constructor parameter. The same pattern applies to other form event handlers like `OnChange`.
+
+## Details() — empty constructor instead of passing items
+
+**Hallucinated API:**
+```csharp
+new Details()
+    | new Detail("Country Code", result.CountryCode, false)
+    | new Detail("VAT Number", result.VatNumber, false)
+```
+
+**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'items' of 'Details.Details(IEnumerable<Detail>)'`
+
+**Correct API:**
+```csharp
+new Details(new[] {
+    new Detail("Country Code", result.CountryCode, false),
+    new Detail("VAT Number", result.VatNumber, false)
+})
+// or use the builder pattern:
+result.ToDetails()
+```
+
+`Details` requires an `IEnumerable<Detail>` in its constructor. There is no parameterless public constructor, and the pipe operator `|` does not work on `Details` to add children. Use the collection constructor or the `.ToDetails()` builder pattern on a model.
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207

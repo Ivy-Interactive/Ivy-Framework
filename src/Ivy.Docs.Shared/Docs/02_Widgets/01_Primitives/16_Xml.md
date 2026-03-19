@@ -48,11 +48,13 @@ public class TextHelperExample : ViewBase
 {
     public override object? Build()
     {
+        var dynamicXml = UseState("<root><item>dynamic</item></root>");
+
         return Layout.Vertical().Gap(4)
             | Text.P("Here's an example XML configuration:")
             | Text.Xml("<config><setting>value</setting></config>")
             | Text.P("You can also use it with state variables:")
-            | Text.Xml(UseState("<root><item>dynamic</item></root>"));
+            | Text.Xml(dynamicXml);
     }
 }
 ```
@@ -153,6 +155,11 @@ public class InteractiveXmlEditor : ViewBase
         
         var isValid = UseState(true);
         var errorMessage = UseState("");
+
+        // Validate on content change
+        UseEffect(() => {
+            ValidateXml();
+        });
         
         void ValidateXml()
         {
@@ -168,11 +175,6 @@ public class InteractiveXmlEditor : ViewBase
                 errorMessage.Value = ex.Message;
             }
         }
-        
-        // Validate on content change
-        UseEffect(() => {
-            ValidateXml();
-        });
         
         return Layout.Vertical().Gap(4)
             | Text.Label("XML Editor")

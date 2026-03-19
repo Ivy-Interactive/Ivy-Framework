@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - line chart
   - visualization
   - graph
   - analytics

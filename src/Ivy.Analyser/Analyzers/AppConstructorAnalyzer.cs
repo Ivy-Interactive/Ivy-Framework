@@ -13,7 +13,7 @@ public class AppConstructorAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
         "App class must have a parameterless constructor",
-        "App '{0}' must have a parameterless constructor, use UseService<T>() inside Build() instead of constructor injection. See: https://docs.ivy.app/other/ivy-analyser/ivyapp001.",
+        "App '{0}' must have a parameterless constructor, use UseService<T>() inside Build() instead of constructor injection. See: https://docs.ivy.app/other/ivy/analyser/ivyapp001.",
         "Ivy.Apps",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,

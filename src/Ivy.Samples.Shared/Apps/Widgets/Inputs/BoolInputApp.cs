@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Check, path: ["Widgets", "Inputs"], searchHints: ["checkbox", "switch", "toggle", "boolean", "true-false", "option"])]
+[App(icon: Icons.Check, group: ["Widgets", "Inputs"], searchHints: ["checkbox", "switch", "toggle", "boolean", "true-false", "option"])]
 public class BoolInputApp : SampleBase
 {
     protected override object? BuildSample()

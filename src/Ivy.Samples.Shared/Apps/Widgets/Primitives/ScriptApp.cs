@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Code, path: ["Widgets", "Primitives"], searchHints: ["script", "javascript", "js", "analytics", "external", "inline"])]
+[App(icon: Icons.Code, group: ["Widgets", "Primitives"], searchHints: ["script", "javascript", "js", "analytics", "external", "inline"])]
 public class ScriptApp : SampleBase
 {
     protected override object? BuildSample()
@@ -17,3 +17,4 @@ public class ScriptApp : SampleBase
                 .CrossOrigin("anonymous");
     }
 }
+

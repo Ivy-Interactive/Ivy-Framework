@@ -265,3 +265,28 @@ These modifiers work with all text factory methods (`Text.P()`, `Text.H1()`, `Te
 
 </Body>
 </Details>
+
+<Details>
+<Summary>
+Why does my text wrap vertically in horizontal layouts?
+</Summary>
+<Body>
+
+When using `Text.H3()` or similar inside a `Layout.Horizontal()`, short text like scores or labels may wrap each character onto a separate line. Use `.NoWrap()` to prevent this:
+
+```csharp
+// Bad: "2 - 2" wraps to separate lines
+Layout.Horizontal()
+    | new Spacer()
+    | Text.H3("2 - 2")
+    | new Spacer()
+
+// Good: stays on one line
+Layout.Horizontal()
+    | new Spacer()
+    | Text.H3("2 - 2").NoWrap()
+    | new Spacer()
+```
+
+</Body>
+</Details>

@@ -118,9 +118,42 @@ public class DownloadMultiFormatDemo : ViewBase
 }
 ```
 
+## Streaming Large Files
+
+For large files (audio, video, PDFs), use the `Stream`-based overload. This avoids loading the entire file into memory and supports HTTP range requests, enabling features like seeking in audio/video players.
+
+```csharp demo-below
+public class DownloadStreamDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var downloadUrl = UseDownload(
+            factory: async () =>
+            {
+                var stream = new MemoryStream(new byte[1024]);
+                return (Stream)stream;
+            },
+            mimeType: "audio/mpeg",
+            fileName: "audio.mp3"
+        );
+
+        return Layout.Vertical()
+            | (downloadUrl.Value != null
+                ? new Button("Download Audio").Url(downloadUrl.Value)
+                : Text.Block("Preparing download..."));
+    }
+}
+```
+
+> Streams are automatically disposed after the download completes. Range headers are supported, so audio/video players can seek within streamed content.
+
 ## Faq
 
-### How do I create multiple downloads for items in a collection?
+<Details>
+<Summary>
+How do I create multiple downloads for items in a collection
+</Summary>
+<Body>
 
 You cannot call `UseDownload` inside a loop or lambda — hooks must be called at the top level of `Build()`. The idiomatic solution (same as React) is to **extract a child component** for each item. Each child component instance has its own isolated hook state:
 
@@ -163,6 +196,9 @@ public class DownloadItemView(ItemData item) : ViewBase
 ```
 
 For a **fixed, small** number of format exports (e.g., CSV + JSON of the same data), multiple `UseDownload` calls at the top level of a single component is fine — see the [Multiple Format Export](#multiple-format-export) example above.
+
+</Body>
+</Details>
 
 ## See Also
 

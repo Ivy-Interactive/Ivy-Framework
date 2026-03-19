@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Key, path: ["Widgets", "Primitives"], searchHints: ["keyboard", "shortcut", "key", "hotkey", "command", "keys"])]
+[App(icon: Icons.Key, group: ["Widgets", "Primitives"], searchHints: ["keyboard", "shortcut", "key", "hotkey", "command", "keys"])]
 public class KbdApp : SampleBase
 {
     protected override object? BuildSample()

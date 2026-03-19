@@ -137,6 +137,12 @@ public abstract partial class ViewBase
     protected IState<string?> UseDownload(Func<Task<byte[]>> factory, string mimeType, string fileName) =>
         this.Context.UseDownload(factory, mimeType, fileName);
 
+    protected IState<string?> UseDownload(Func<Stream> factory, string mimeType, string fileName) =>
+        this.Context.UseDownload(() => Task.FromResult(factory()), mimeType, fileName);
+
+    protected IState<string?> UseDownload(Func<Task<Stream>> factory, string mimeType, string fileName) =>
+        this.Context.UseDownload(factory, mimeType, fileName);
+
     protected RefreshToken UseRefreshToken() =>
         this.Context.UseRefreshToken();
 
@@ -194,11 +200,36 @@ public abstract partial class ViewBase
     protected (IView? alertView, ShowAlertDelegate showAlert) UseAlert() =>
         this.Context.UseAlert();
 
+    protected (object? dialogView, ShowFileDialogDelegate showFileDialog) UseFileDialog(
+        IUploadHandler handler,
+        string? accept = null,
+        bool multiple = false,
+        long? maxFileSize = null,
+        long? minFileSize = null) =>
+        this.Context.UseFileDialog(handler, accept, multiple, maxFileSize, minFileSize);
+
+    protected (object? dialogView, ShowFileDialogDelegate showFileDialog) UseFileDialog(
+        string? accept = null,
+        bool multiple = false) =>
+        this.Context.UseFileDialog(accept, multiple);
+
+    protected (object? dialogView, ShowSaveDialogDelegate showSaveDialog) UseSaveDialog(
+        Func<Task<byte[]>> contentFactory,
+        string mimeType,
+        string suggestedName) =>
+        this.Context.UseSaveDialog(contentFactory, mimeType, suggestedName);
+
+    protected (object? dialogView, ShowFolderDialogDelegate showFolderDialog) UseFolderDialog() =>
+        this.Context.UseFolderDialog();
+
     protected IWriteStream<T> UseStream<T>() =>
         this.Context.UseStream<T>();
 
     protected void UseInterval(Action callback, TimeSpan? interval) =>
         this.Context.UseInterval(callback, interval);
+
+    protected Action<string> UseClipboard() =>
+        this.Context.UseClipboard();
 
     protected static EffectTrigger OnMount() =>
         EffectTrigger.OnMount();
