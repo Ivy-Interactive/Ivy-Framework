@@ -29,24 +29,24 @@ public class AsyncSelectBasicDemo : ViewBase
     {
         var selectedCategory = UseState<string?>(default(string?));
 
-        QueryResult<Option<string>[]> QueryCategories(IViewContext context, string query)
+        QueryResult<Option<string>[]> UseQueryCategories(IViewContext context, string query)
         {
             return context.UseQuery<Option<string>[], (string, string)>(
-                key: (nameof(QueryCategories), query),
+                key: (nameof(UseQueryCategories), query),
                 fetcher: ct => Task.FromResult(Categories
                     .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
                     .Select(c => new Option<string>(c))
                     .ToArray()));
         }
 
-        QueryResult<Option<string>?> LookupCategory(IViewContext context, string? category)
+        QueryResult<Option<string>?> UseLookupCategory(IViewContext context, string? category)
         {
             return context.UseQuery<Option<string>?, (string, string?)>(
-                key: (nameof(LookupCategory), category),
+                key: (nameof(UseLookupCategory), category),
                 fetcher: ct => Task.FromResult(category != null ? new Option<string>(category) : null));
         }
 
-        return selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, "Search categories...")
+        return selectedCategory.ToAsyncSelectInput(UseQueryCategories, UseLookupCategory, "Search categories...")
                 .WithField()
                 .Label("Select a category:")
                 .Width(Size.Full());
@@ -93,20 +93,20 @@ public class DataTypesDemo : ViewBase
         var selectedYear = UseState<int?>(default(int));
         var selectedLanguage = UseState(ProgrammingLanguage.CSharp);
 
-        QueryResult<Option<string>[]> QueryCountries(IViewContext context, string query)
+        QueryResult<Option<string>[]> UseQueryCountries(IViewContext context, string query)
         {
             return context.UseQuery<Option<string>[], (string, string)>(
-                key: (nameof(QueryCountries), query),
+                key: (nameof(UseQueryCountries), query),
                 fetcher: ct => Task.FromResult(CountryRegions.Keys
                     .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
                     .Select(c => new Option<string>(c, c, description: CountryRegions[c]))
                     .ToArray()));
         }
 
-        QueryResult<Option<string>?> LookupCountry(IViewContext context, string? country)
+        QueryResult<Option<string>?> UseLookupCountry(IViewContext context, string? country)
         {
             return context.UseQuery<Option<string>?, (string, string?)>(
-                key: (nameof(LookupCountry), country),
+                key: (nameof(UseLookupCountry), country),
                 fetcher: ct =>
                 {
                     if (string.IsNullOrEmpty(country)) return Task.FromResult<Option<string>?>(null);
@@ -114,10 +114,10 @@ public class DataTypesDemo : ViewBase
                 });
         }
 
-        QueryResult<Option<int>[]> QueryYears(IViewContext context, string query)
+        QueryResult<Option<int>[]> UseQueryYears(IViewContext context, string query)
         {
             return context.UseQuery<Option<int>[], (string, string)>(
-                key: (nameof(QueryYears), query),
+                key: (nameof(UseQueryYears), query),
                 fetcher: ct =>
                 {
                     var currentYear = DateTime.Now.Year;
@@ -143,17 +143,17 @@ public class DataTypesDemo : ViewBase
                 });
         }
 
-        QueryResult<Option<int>?> LookupYear(IViewContext context, int year)
+        QueryResult<Option<int>?> UseLookupYear(IViewContext context, int year)
         {
             return context.UseQuery<Option<int>?, (string, int)>(
-                key: (nameof(LookupYear), year),
+                key: (nameof(UseLookupYear), year),
                 fetcher: ct => Task.FromResult<Option<int>?>(new Option<int>(year.ToString(), year)));
         }
 
-        QueryResult<Option<ProgrammingLanguage>[]> QueryLanguages(IViewContext context, string query)
+        QueryResult<Option<ProgrammingLanguage>[]> UseQueryLanguages(IViewContext context, string query)
         {
             return context.UseQuery<Option<ProgrammingLanguage>[], (string, string)>(
-                key: (nameof(QueryLanguages), query),
+                key: (nameof(UseQueryLanguages), query),
                 fetcher: ct =>
                 {
                     var languages = new[]
@@ -180,28 +180,24 @@ public class DataTypesDemo : ViewBase
                 });
         }
 
-        QueryResult<Option<ProgrammingLanguage>?> LookupLanguage(IViewContext context, ProgrammingLanguage language)
+        QueryResult<Option<ProgrammingLanguage>?> UseLookupLanguage(IViewContext context, ProgrammingLanguage language)
         {
             return context.UseQuery<Option<ProgrammingLanguage>?, (string, ProgrammingLanguage)>(
-                key: (nameof(LookupLanguage), language),
+                key: (nameof(UseLookupLanguage), language),
                 fetcher: ct => Task.FromResult<Option<ProgrammingLanguage>?>(new Option<ProgrammingLanguage>(language.ToString(), language)));
         }
 
         return Layout.Vertical()
-            | selectedCountry.ToAsyncSelectInput(QueryCountries, LookupCountry, placeholder: "Search countries...")
+            | selectedCountry.ToAsyncSelectInput(UseQueryCountries, UseLookupCountry, placeholder: "Search countries...")
                 .WithField()
-                .Label("String-based AsyncSelect:")
-                .Width(Size.Full())
-            
-            | selectedYear.ToAsyncSelectInput(QueryYears, LookupYear, placeholder: "Search years...")
+                .Label("Country")
+            | selectedYear.ToAsyncSelectInput(UseQueryYears, UseLookupYear, placeholder: "Select year...")
                 .WithField()
-                .Label("Integer-based AsyncSelect:")
-                .Width(Size.Full())
-            
-            | selectedLanguage.ToAsyncSelectInput(QueryLanguages, LookupLanguage, placeholder: "Search languages...")
+                .Label("Release Year")
+            | selectedLanguage.ToAsyncSelectInput(UseQueryLanguages, UseLookupLanguage)
                 .WithField()
-                .Label("Enum-based AsyncSelect:")
-                .Width(Size.Full());
+                .Label("Primary Language")
+                .Description($"Selected: {selectedLanguage.Value}");
     }
 }
 ```
@@ -253,10 +249,10 @@ public class AdvancedQueryDemo : ViewBase
             selectedUserInfo.Set(user != null ? $"{user.Name} - {user.Email} ({user.Department})" : "No user selected");
         }, [selectedUser]);
 
-        QueryResult<Option<Guid>[]> QueryUsers(IViewContext context, string query)
+        QueryResult<Option<Guid>[]> UseQueryUsers(IViewContext context, string query)
         {
             return context.UseQuery<Option<Guid>[], (string, string)>(
-                key: (nameof(QueryUsers), query),
+                key: (nameof(UseQueryUsers), query),
                 fetcher: ct =>
                 {
                     if (string.IsNullOrEmpty(query))
@@ -276,10 +272,10 @@ public class AdvancedQueryDemo : ViewBase
                 });
         }
 
-        QueryResult<Option<Guid>?> LookupUser(IViewContext context, Guid id)
+        QueryResult<Option<Guid>?> UseLookupUser(IViewContext context, Guid id)
         {
             return context.UseQuery<Option<Guid>?, (string, Guid)>(
-                key: (nameof(LookupUser), id),
+                key: (nameof(UseLookupUser), id),
                 fetcher: ct =>
                 {
                     var user = Users.FirstOrDefault(u => u.Id == id);
@@ -291,9 +287,9 @@ public class AdvancedQueryDemo : ViewBase
 
         var customAsyncSelect = new AsyncSelectInputView<Guid>(
             selectedUser.Value,
-            e => { selectedUser.Set(e.Value); return ValueTask.CompletedTask; },
-            QueryUsers,
-            LookupUser,
+            onChange: e => selectedUser.Set(e.Value),
+            search: UseQueryUsers,
+            lookup: UseLookupUser,
             placeholder: "Search by name, email, or department..."
         );
 
@@ -322,35 +318,35 @@ public class StylingDemo : ViewBase
         var invalidSelect = UseState<string?>(default(string));
         var disabledSelect = UseState<string?>(default(string));
 
-        QueryResult<Option<string>[]> QueryOptions(IViewContext context, string query)
+        QueryResult<Option<string>[]> UseQueryOptions(IViewContext context, string query)
         {
             var options = new[] { "Option 1", "Option 2", "Option 3" };
             return context.UseQuery<Option<string>[], (string, string)>(
-                key: (nameof(QueryOptions), query),
+                key: (nameof(UseQueryOptions), query),
                 fetcher: ct => Task.FromResult(options
                     .Where(opt => opt.Contains(query, StringComparison.OrdinalIgnoreCase))
                     .Select(opt => new Option<string>(opt))
                     .ToArray()));
         }
 
-        QueryResult<Option<string>?> LookupOption(IViewContext context, string? option)
+        QueryResult<Option<string>?> UseLookupOption(IViewContext context, string? option)
         {
             return context.UseQuery<Option<string>?, (string, string?)>(
-                key: (nameof(LookupOption), option),
+                key: (nameof(UseLookupOption), option),
                 fetcher: ct => Task.FromResult<Option<string>?>(option != null ? new Option<string>(option) : null));
         }
 
         return Layout.Vertical()
-            | normalSelect.ToAsyncSelectInput(QueryOptions, LookupOption, placeholder: "Choose an option...")
+            | normalSelect.ToAsyncSelectInput(UseQueryOptions, UseLookupOption, placeholder: "Choose an option...")
                 .WithField()
                 .Label("Normal AsyncSelectInput:")
             
-            | invalidSelect.ToAsyncSelectInput(QueryOptions, LookupOption, placeholder: "This has an error...")
+            | invalidSelect.ToAsyncSelectInput(UseQueryOptions, UseLookupOption, placeholder: "This has an error...")
                 .Invalid("This field is required")
                 .WithField()
                 .Label("Invalid AsyncSelectInput:")
             
-            | disabledSelect.ToAsyncSelectInput(QueryOptions, LookupOption, placeholder: "This is disabled...")
+            | disabledSelect.ToAsyncSelectInput(UseQueryOptions, UseLookupOption, placeholder: "This is disabled...")
                 .Disabled(true)
                 .WithField()
                 .Label("Disabled AsyncSelectInput:");
