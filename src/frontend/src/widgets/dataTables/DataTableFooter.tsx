@@ -60,7 +60,10 @@ const FooterCell: React.FC<{
 
   // Multiple values — dropdown selector
   return (
-    <div ref={ref} style={{ ...footerStyles.cell, textAlign, position: 'relative' }}>
+    <div
+      ref={ref}
+      style={{ ...footerStyles.cell, textAlign, position: 'relative' }}
+    >
       <div
         style={{
           ...footerStyles.value,
@@ -75,10 +78,10 @@ const FooterCell: React.FC<{
           background: open ? 'var(--accent)' : 'transparent',
         }}
         onClick={() => setOpen(!open)}
-        onMouseEnter={(e) => {
+        onMouseEnter={e => {
           if (!open) e.currentTarget.style.background = 'var(--accent)';
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={e => {
           if (!open) e.currentTarget.style.background = 'transparent';
         }}
       >
@@ -120,14 +123,15 @@ const FooterCell: React.FC<{
                 fontSize: '12px',
                 cursor: 'pointer',
                 fontWeight: i === selectedIndex ? 700 : 400,
-                background: i === selectedIndex ? 'var(--accent)' : 'transparent',
+                background:
+                  i === selectedIndex ? 'var(--accent)' : 'transparent',
                 whiteSpace: 'nowrap',
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 if (i !== selectedIndex)
                   e.currentTarget.style.background = 'var(--accent)';
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 if (i !== selectedIndex)
                   e.currentTarget.style.background = 'transparent';
               }}
@@ -151,15 +155,13 @@ export interface AggregateFooterProps {
 export const AggregateFooter: React.FC<AggregateFooterProps> = ({
   columns,
 }) => {
-  const hasFooter = columns.some(
-    (col) => col.footer && col.footer.length > 0
-  );
+  const hasFooter = columns.some(col => col.footer && col.footer.length > 0);
   if (!hasFooter) return null;
 
   return (
     <DataTableFooter>
       <div style={footerStyles.row}>
-        {columns.map((col) => {
+        {columns.map(col => {
           const footerValues = col.footer;
           if (!footerValues || footerValues.length === 0) {
             return (

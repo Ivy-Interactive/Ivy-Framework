@@ -59,7 +59,7 @@ export const DataTable: React.FC<TableProps> = ({
   const finalColumns = useMemo(() => applyColumnsDefaults(columns), [columns]);
 
   const hasFooter = useMemo(
-    () => finalColumns.some((col) => col.footer && col.footer.length > 0),
+    () => finalColumns.some(col => col.footer && col.footer.length > 0),
     [finalColumns]
   );
 
