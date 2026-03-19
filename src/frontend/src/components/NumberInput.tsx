@@ -22,6 +22,7 @@ interface NumberInputProps {
   onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
   format?: Intl.NumberFormatOptions;
   allowNegative?: boolean;
+  autoFocus?: boolean;
   className?: string;
   density?: Densities;
   'data-testid'?: string;
