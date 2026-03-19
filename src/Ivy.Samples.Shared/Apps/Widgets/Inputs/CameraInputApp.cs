@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Camera, path: ["Widgets", "Inputs"], searchHints: ["camera", "webcam", "photo", "capture", "snapshot", "picture"])]
+[App(icon: Icons.Camera, group: ["Widgets", "Inputs"], searchHints: ["camera", "webcam", "photo", "capture", "snapshot", "picture"])]
 
 public class CameraInputApp() : SampleBase
 {
@@ -86,3 +86,4 @@ public class CameraInputDisabledState : ViewBase
                | new CameraInput(dummyUpload.Value, "Take a photo", disabled: true);
     }
 }
+

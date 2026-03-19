@@ -124,7 +124,10 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
         const formData = new FormData();
         formData.append("file", blob, "screenshot.png");
 
-        const response = await fetch(getUploadUrl(), {
+        const resolvedUrl = getUploadUrl();
+        console.log("[ScreenshotFeedback] Uploading screenshot to:", resolvedUrl);
+
+        const response = await fetch(resolvedUrl, {
           method: "POST",
           body: formData,
         });
@@ -132,6 +135,12 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
           console.error("Screenshot upload failed:", response.statusText);
           return;
         }
+        console.log("[ScreenshotFeedback] Upload successful");
+      } else {
+        console.warn("[ScreenshotFeedback] Skipping upload:", {
+          hasBlob: !!blob,
+          uploadUrl,
+        });
       }
     } catch (error) {
       console.error("Screenshot save error:", error);
@@ -141,6 +150,11 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     }
 
     // Then fire the event (upload is now complete, C# handler can read the content)
+    console.log("[ScreenshotFeedback] Upload complete, firing OnSave event", {
+      hasEvents: events.includes("OnSave"),
+      id,
+      uploadUrl,
+    });
     if (events.includes("OnSave")) {
       eventHandler("OnSave", id, [buildAnnotationData()]);
     }

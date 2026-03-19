@@ -657,7 +657,11 @@ public class ConfiguredUploadExample : ViewBase
 
 ## Faq
 
-### What is the return type of UseUpload?
+<Details>
+<Summary>
+What is the return type of UseUpload
+</Summary>
+<Body>
 
 `UseUpload` returns `IState<UploadContext>`, not `UploadContext` directly. Pass this state object to `ToFileInput()`:
 
@@ -673,3 +677,6 @@ To access validation configuration, use extension methods that chain on `IState<
 ```csharp
 var upload = UseUpload(handler).Accept(".csv").MaxFileSize(FileSize.FromMegabytes(10));
 ```
+
+</Body>
+</Details>

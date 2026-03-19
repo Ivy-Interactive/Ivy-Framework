@@ -29,13 +29,16 @@ public class MyView : ViewBase
   }
 }
 
-The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named parameters**: 
+The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named constructor parameters** (lowercase):
 
-[App(title: "Customers", icon: Icons.Rocket)]
+[App(title: "Customers", icon: Icons.Rocket, path: new[] { "CRM" })]
 public class CustomersApp : ViewBase
 
 - `title` is optional — if omitted, it is derived from the class name (e.g. `CustomersApp` → "Customers").
 - `icon` uses the `Icons` enum — these are Lucide icons in PascalCase (e.g. `Icons.Link`, `Icons.Settings`, `Icons.Rocket`).
+- `path` groups the app in the navigation sidebar (e.g. `path: new[] { "Apps" }`).
+- There is no `group` or `chrome` parameter. Chrome is configured in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`.
+- Use **lowercase** parameter names (`icon:`, `path:`), NOT PascalCase property names (`Icon =`, `Path =`) — PascalCase causes CS0655.
 
 An app is built into a tree of widgets. This is what's rendered to the screen.
 
@@ -323,6 +326,7 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 - All types are in the `Ivy` namespace
 - `Colors` is a flat enum (e.g. `Colors.Red`, `Colors.Blue`) we have no shade levels
 - `DbContext` must never be injected directly! Always resolve `IDbContextFactory<T>` via `UseService` and create scoped instances with `CreateDbContextAsync()` inside query/mutation lambdas
+- **Nested layouts MUST use parentheses** — `Layout.Vertical() | (Layout.Horizontal() | child1 | child2)` — without parentheses, C# left-to-right `|` evaluation adds children to the outer layout, not the inner one. See the nested layout example in the Layouts section above.
 
 ## Further Reading
 

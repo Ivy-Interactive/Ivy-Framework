@@ -94,4 +94,33 @@ new MetricView(
 
 The `MetricView` uses UseQuery hooks for data loading, which automatically handles loading states, error handling, and caching. It also displays trend arrows with color-coded indicators for performance tracking. See the [MetricView documentation](13_MetricView.md) for more details.
 
+## Faq
+
+### How do I add content to a Card?
+
+Cards have three approaches:
+
+```csharp
+// 1. Constructor:
+new Card(content)
+new Card(content, footer, header)
+
+// 2. Pipe operator (single child only):
+new Card() | content
+
+// 3. Fluent API:
+new Card()
+    .Header(Text.H4("Title"))
+    .Content(myContent)
+    .Footer(new Button("Action", handler))
+```
+
+Cards do NOT have `.Child`, `.Children()`, or `.Add()` methods. For multiple items in the content area, wrap them in a Layout:
+
+```csharp
+new Card().Content(
+    Layout.Vertical() | item1 | item2 | item3
+)
+```
+
 <WidgetDocs Type="Ivy.Card" ExtensionTypes="Ivy.CardExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Card.cs"/>

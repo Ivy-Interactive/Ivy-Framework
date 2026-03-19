@@ -184,7 +184,7 @@ The `[App]` attribute supports several properties:
 
 - `icon`: [Icon](../../02_Widgets/01_Primitives/02_Icon.md) to display in [navigation](./09_Navigation.md)
 - `title`: Display name (defaults to class name)
-- `path`: [Navigation](./09_Navigation.md) path array for hierarchical organization
+- `group`: [Navigation](./09_Navigation.md) path array for hierarchical organization
 - `isVisible`: Whether to show in navigation
 - `searchHints`: Alternative keywords for search discoverability
 - `order`: Sort order within group
@@ -194,7 +194,7 @@ For enhanced search discoverability, use `searchHints` to provide alternative ke
 
 ```csharp
 [App(icon: Icons.TextCursorInput, 
-     path: ["Widgets", "Inputs"], 
+     group: ["Widgets", "Inputs"], 
      searchHints: ["password", "textarea", "search", "email"])]
 public class TextInputApp : ViewBase
 {

@@ -3,6 +3,7 @@ import { useEventHandler } from '@/components/event-handler';
 import { StarRating } from '@/components/StarRating';
 import { ThumbsEnum, ThumbsRating } from '@/components/ui/thumbs-rating';
 import React, { useCallback, useMemo } from 'react';
+import { useOptimisticValue } from './shared/useOptimisticValue';
 import { Densities } from '@/types/density';
 
 const EMPTY_ARRAY: never[] = [];
@@ -30,6 +31,13 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
+  type FeedbackValue = number | boolean | null;
+
+  const [localValue, setLocalValue] = useOptimisticValue<FeedbackValue>(
+    value,
+    false
+  );
+
   const isBooleanType = useMemo(() => {
     // If variant is Thumbs and nullable is true, treat as bool?
     if (variant === 'Thumbs' && nullable) return true;
@@ -38,21 +46,21 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
 
   // Convert value to number for rating components
   const numericValue = useMemo(() => {
-    if (value === null || value === undefined) return ThumbsEnum.None;
+    if (localValue === null || localValue === undefined) return ThumbsEnum.None;
     if (isBooleanType) {
       if (variant === 'Thumbs') {
         if (nullable) {
           // For nullable boolean types: null -> None(0), false -> Down(1), true -> Up(2)
-          return value ? ThumbsEnum.Up : ThumbsEnum.Down;
+          return localValue ? ThumbsEnum.Up : ThumbsEnum.Down;
         } else {
           // For non-nullable boolean types: false -> Down(1), true -> Up(2)
-          return value ? ThumbsEnum.Up : ThumbsEnum.Down;
+          return localValue ? ThumbsEnum.Up : ThumbsEnum.Down;
         }
       }
-      return value ? 1 : 0;
+      return localValue ? 1 : 0;
     }
-    return value as number;
-  }, [value, variant, isBooleanType, nullable]);
+    return localValue as number;
+  }, [localValue, variant, isBooleanType, nullable]);
 
   const handleChange = useCallback(
     (e: number) => {
@@ -79,10 +87,10 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
             // For non-nullable boolean types
             if (e === ThumbsEnum.None) {
               // For non-nullable types, toggle to the opposite value
-              convertedValue = !value;
+              convertedValue = !localValue;
             } else if (e === numericValue) {
               // Clicking the same thumb - toggle to the opposite value
-              convertedValue = !value;
+              convertedValue = !localValue;
             } else {
               // Clicking different thumb - set new value
               convertedValue = e === ThumbsEnum.Up;
@@ -99,18 +107,20 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
           convertedValue = e;
         }
       }
+      setLocalValue(convertedValue);
       eventHandler('OnChange', id, [convertedValue]);
     },
     [
       id,
       disabled,
-      value,
+      localValue,
       variant,
       numericValue,
       events,
       eventHandler,
       nullable,
       isBooleanType,
+      setLocalValue,
     ]
   );
 
