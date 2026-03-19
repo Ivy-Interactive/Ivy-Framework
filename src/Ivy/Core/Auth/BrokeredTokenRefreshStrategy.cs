@@ -17,6 +17,10 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
     private readonly IClientProvider _client;
     private readonly ILogger _logger;
 
+    // Track consecutive refresh failures across calls to OnRefreshFailedAsync
+    private int _consecutiveRefreshFailures = 0;
+    private const int MaxConsecutiveRefreshFailures = 3;
+
     public string LoggingName { get; }
 
     public BrokeredTokenRefreshStrategy(
@@ -51,7 +55,13 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
 
     public async Task<bool> ValidateTokenAsync(CancellationToken cancellationToken = default)
     {
-        return await _tokenService.ValidateAccessTokenAsync(cancellationToken);
+        var isValid = await _tokenService.ValidateAccessTokenAsync(cancellationToken);
+        if (isValid)
+        {
+            // Reset failure counter on successful validation
+            _consecutiveRefreshFailures = 0;
+        }
+        return isValid;
     }
 
     public async Task<TokenLifetime?> GetTokenLifetimeAsync(CancellationToken cancellationToken = default)
@@ -61,86 +71,78 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
 
     public async Task<bool> RefreshTokenAsync(CancellationToken cancellationToken = default)
     {
+        // First, try the token handler's native refresh (uses refresh_token if available)
         _logger.LogInformation("Attempting to refresh OAuth token for {Provider}", _provider);
-
         var result = await _tokenService.RefreshAccessTokenAsync(cancellationToken);
 
         if (result != null)
         {
-            _logger.LogInformation("Successfully refreshed OAuth token for {Provider}", _provider);
-
-            // Update parent session cookies to include the refreshed OAuth token
-            var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession);
-            _client.SetAuthCookies(cookieJarId, reloadPage: false, triggerMachineReload: null);
-
-            return true;
+            _logger.LogInformation("Successfully refreshed OAuth token for {Provider} via token handler", _provider);
+            return await OnRefreshSuccessAsync();
         }
-        else
+
+        // Fallback: Try to get a fresh token from the auth provider (e.g., Clerk auto-refreshes tokens)
+        _logger.LogInformation("Token handler refresh failed for {Provider}, trying GetBrokeredSessionsAsync fallback", _provider);
+
+        try
         {
-            _logger.LogWarning("Failed to refresh OAuth token for {Provider}", _provider);
+            var brokeredResult = await _authService.GetBrokeredSessionsAsync(skipCache: true, cancellationToken);
+
+            // Check if provider is still available
+            if (brokeredResult.Sessions == null || !brokeredResult.Sessions.ContainsKey(_provider))
+            {
+                _logger.LogWarning("GetBrokeredSessionsAsync fallback: {Provider} not in sessions", _provider);
+                return false;
+            }
+
+            // Validate the token we got back
+            var isValid = await _tokenService.ValidateAccessTokenAsync(cancellationToken);
+            if (isValid)
+            {
+                _logger.LogInformation("Successfully refreshed OAuth token for {Provider} via GetBrokeredSessionsAsync", _provider);
+                return await OnRefreshSuccessAsync();
+            }
+
+            _logger.LogWarning("GetBrokeredSessionsAsync returned {Provider} but token is invalid", _provider);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "GetBrokeredSessionsAsync fallback failed for {Provider}", _provider);
             return false;
         }
     }
 
+    private async Task<bool> OnRefreshSuccessAsync()
+    {
+        // Reset consecutive failure counter on success
+        _consecutiveRefreshFailures = 0;
+
+        // Update parent session cookies to include the refreshed OAuth token
+        var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_parentSession);
+        _client.SetAuthCookies(cookieJarId, reloadPage: false, triggerMachineReload: null);
+
+        return true;
+    }
+
     public async Task<bool> OnRefreshFailedAsync()
     {
-        _logger.LogWarning("BrokeredTokenRefreshLoop[{Provider}]: Failed to refresh token for {ConnectionId}, attempting recovery", _provider, _connectionId);
+        _consecutiveRefreshFailures++;
+        _logger.LogWarning("BrokeredTokenRefreshLoop[{Provider}]: Refresh failed for {ConnectionId}, attempt {Attempt}/{MaxAttempts}",
+            _provider, _connectionId, _consecutiveRefreshFailures, MaxConsecutiveRefreshFailures);
 
-        const int maxRetries = 3;
-        const int retryDelaySeconds = 5;
-
-        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        // Check if we've exceeded max consecutive failures
+        if (_consecutiveRefreshFailures >= MaxConsecutiveRefreshFailures)
         {
-            try
-            {
-                _logger.LogInformation("BrokeredTokenRefreshLoop[{Provider}]: Recovery attempt {Attempt}/{MaxRetries} for {ConnectionId}",
-                    _provider, attempt, maxRetries, _connectionId);
-
-                // Try to re-fetch brokered auth sessions from the main auth provider (skip cache to force fresh fetch)
-                var result = await _authService.GetBrokeredSessionsAsync(skipCache: true, CancellationToken.None);
-
-                if (result.Sessions != null && result.Sessions.ContainsKey(_provider))
-                {
-                    _logger.LogInformation("BrokeredTokenRefreshLoop[{Provider}]: Successfully recovered token for {ConnectionId}, continuing loop",
-                        _provider, _connectionId);
-                    return true; // Continue the loop with the recovered token
-                }
-
-                // If the provider signals that retrying won't help, exit immediately
-                if (!result.CanRetry)
-                {
-                    _logger.LogError("BrokeredTokenRefreshLoop[{Provider}]: Provider indicates retry will not succeed for {ConnectionId}, abandoning session",
-                        _provider, _connectionId);
-                    await LogoutAsync();
-                    return false; // Exit the loop
-                }
-
-                _logger.LogWarning("BrokeredTokenRefreshLoop[{Provider}]: Recovery attempt {Attempt} failed - provider not in returned sessions for {ConnectionId}",
-                    _provider, attempt, _connectionId);
-
-                if (attempt < maxRetries)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(retryDelaySeconds));
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "BrokeredTokenRefreshLoop[{Provider}]: Recovery attempt {Attempt} threw exception for {ConnectionId}",
-                    _provider, attempt, _connectionId);
-
-                // If we can't even contact the auth provider, the main session is likely invalid
-                _logger.LogError("BrokeredTokenRefreshLoop[{Provider}]: Cannot communicate with auth provider for {ConnectionId}, abandoning session",
-                    _provider, _connectionId);
-                await LogoutAsync();
-                return false; // Exit the loop
-            }
+            _logger.LogError("BrokeredTokenRefreshLoop[{Provider}]: {MaxAttempts} consecutive refresh failures for {ConnectionId}, abandoning session",
+                _provider, MaxConsecutiveRefreshFailures, _connectionId);
+            await LogoutAsync();
+            return false; // Exit the loop
         }
 
-        // All recovery attempts failed - log out the main auth provider
-        _logger.LogError("BrokeredTokenRefreshLoop[{Provider}]: All recovery attempts failed for {ConnectionId}, abandoning session",
-            _provider, _connectionId);
-        await LogoutAsync();
-        return false; // Exit the loop
+        // Add a delay before retrying to avoid tight loop
+        await Task.Delay(TimeSpan.FromSeconds(5));
+        return true; // Continue the loop - will retry RefreshTokenAsync
     }
 
     private async Task LogoutAsync()
