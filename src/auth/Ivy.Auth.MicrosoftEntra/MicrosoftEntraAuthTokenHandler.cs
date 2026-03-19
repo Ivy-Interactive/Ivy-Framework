@@ -11,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Ivy.Auth.MicrosoftEntra;
 
-[OAuthTokenHandler(OAuthProviders.Microsoft)]
 public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
 {
     protected readonly string TenantId;
