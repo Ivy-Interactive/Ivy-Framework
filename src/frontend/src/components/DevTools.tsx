@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useRef, useReducer } from 'react';
-import './devtools.css';
 import { CallSite } from '@/types/widgets';
 import {
   widgetCallSiteRegistry,
   setWidgetContentOverride,
   clearWidgetContentOverride,
 } from '@/widgets/widgetRenderer';
-import { LuTrash2, LuTextCursor, LuSend, LuPlus } from 'react-icons/lu';
-import { FaMagic } from 'react-icons/fa';
+import { Trash2, TextCursor, Send, Plus, Wand2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
 
 type DialogAction = 'modify' | 'delete' | 'text-edit';
 
@@ -48,7 +48,7 @@ function formatWidgetType(type: string): string {
 }
 
 function getDialogPosition(clickPos: { x: number; y: number }) {
-  const dialogWidth = 320;
+  const dialogWidth = 380;
   const dialogHeight = 280;
   return {
     top: Math.min(clickPos.y + 8, window.innerHeight - dialogHeight),
@@ -77,6 +77,16 @@ export function DevTools() {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === 'DEVTOOLS_SET_ENABLED') {
         setEnabled(e.data.token === 'true');
+      }
+      if (e.data?.type === 'APPLY_THEME' && typeof e.data.css === 'string') {
+        const existingStyle = document.getElementById('ivy-custom-theme');
+        if (existingStyle) existingStyle.remove();
+        const styleElement = document.createElement('style');
+        styleElement.id = 'ivy-custom-theme';
+        styleElement.innerHTML = e.data.css
+          .replace('<style id="ivy-custom-theme">', '')
+          .replace('</style>', '');
+        document.head.appendChild(styleElement);
       }
     };
     window.addEventListener('message', handler);
@@ -316,6 +326,8 @@ export function DevTools() {
     [dialogWidget, closeDialog, handleAdd]
   );
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!enabled) return;
 
@@ -327,6 +339,18 @@ export function DevTools() {
         capture: true,
       });
       document.body.style.cursor = 'crosshair';
+    } else {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (
+          dialogRef.current &&
+          !dialogRef.current.contains(e.target as Node)
+        ) {
+          closeDialog();
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
     }
 
     document.addEventListener('keydown', handleKeyDown);
@@ -345,6 +369,7 @@ export function DevTools() {
     handleClick,
     handleKeyDown,
     handleWheel,
+    closeDialog,
   ]);
 
   useEffect(() => {
@@ -354,8 +379,14 @@ export function DevTools() {
     if (bounds.width === 0 && bounds.height === 0) return;
 
     const overlay = document.createElement('div');
-    overlay.className = 'ivy-devtools ivy-devtools-overlay';
+    overlay.className = 'ivy-devtools';
     Object.assign(overlay.style, {
+      position: 'fixed',
+      background: 'color-mix(in srgb, var(--primary) 25%, transparent)',
+      border: '2px solid var(--primary)',
+      pointerEvents: 'none',
+      zIndex: '99999',
+      boxSizing: 'border-box',
       top: `${bounds.top}px`,
       left: `${bounds.left}px`,
       width: `${bounds.width}px`,
@@ -363,8 +394,23 @@ export function DevTools() {
     });
 
     const label = document.createElement('div');
-    label.className = 'ivy-devtools-label';
-    label.innerHTML = `<div class="ivy-devtools-label-type">${formatWidgetType(type)}</div>`;
+    Object.assign(label.style, {
+      position: 'absolute',
+      top: '0',
+      right: '0',
+      backgroundColor: 'var(--popover)',
+      color: 'var(--popover-foreground)',
+      padding: '4px 8px',
+      fontSize: '11px',
+      fontFamily: 'var(--font-sans)',
+      borderRadius: 'var(--radius-selectors)',
+      whiteSpace: 'nowrap',
+      boxShadow: 'var(--shadow-lg)',
+      lineHeight: '1.4',
+      pointerEvents: 'none',
+      fontWeight: '500',
+    });
+    label.textContent = formatWidgetType(type);
     overlay.appendChild(label);
     document.body.appendChild(overlay);
 
@@ -376,59 +422,54 @@ export function DevTools() {
   if (!enabled) return null;
 
   return (
-    <div className="ivy-devtools-container">
+    <div>
       {dialogWidget && (
         <div
-          className="ivy-devtools ivy-devtools-dialog"
+          ref={dialogRef}
+          className="ivy-devtools fixed z-[100001] bg-popover border-2 border-primary rounded-boxes shadow-2xl p-3 font-[family-name:var(--font-sans)] w-fit"
           style={getDialogPosition(clickPosition)}
         >
-          <div className="ivy-devtools-dialog-toggles">
-            <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === 'modify' ? 'ivy-devtools-toggle-active' : ''}`}
-              onClick={() => handleActionChange('modify')}
+          <div className="mb-3">
+            <ToggleGroup
+              type="single"
+              value={dialogAction}
+              onValueChange={val => {
+                if (val) handleActionChange(val as DialogAction);
+              }}
+              density="Small"
             >
-              <FaMagic size={12} />
-              Change
-            </button>
-            <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === 'text-edit' ? 'ivy-devtools-toggle-active' : ''}`}
-              onClick={() => handleActionChange('text-edit')}
-            >
-              <LuTextCursor size={14} />
-              Edit Text
-            </button>
-            <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === 'delete' ? 'ivy-devtools-toggle-active' : ''}`}
-              onClick={() => handleActionChange('delete')}
-            >
-              <LuTrash2 size={14} />
-              Delete
-            </button>
+              <ToggleGroupItem value="modify" className="whitespace-nowrap">
+                <Wand2 />
+                Change
+              </ToggleGroupItem>
+              <ToggleGroupItem value="text-edit" className="whitespace-nowrap">
+                <TextCursor />
+                Edit Text
+              </ToggleGroupItem>
+              <ToggleGroupItem value="delete" className="whitespace-nowrap">
+                <Trash2 />
+                Delete
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
-          <div className="ivy-devtools-textarea-wrapper">
+          <div className="relative">
             <textarea
               ref={textareaRef}
               value={displayValue}
               onChange={e => handleTextChange(e.target.value)}
               placeholder="Write anything..."
-              className="ivy-devtools-textarea"
+              className="w-full h-16 px-3 py-2.5 pr-9 border-none rounded-field text-sm resize-none font-[family-name:var(--font-sans)] bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
           </div>
-          <div className="ivy-devtools-dialog-actions">
-            <button
-              onClick={handleAdd}
-              className="ivy-devtools-btn ivy-devtools-btn-muted"
-            >
-              <LuPlus size={14} />
+          <div className="flex gap-2.5 mt-2 items-center justify-end">
+            <Button variant="ghost" onClick={handleAdd}>
+              <Plus size={14} />
               Add To Prompt
-            </button>
-            <button
-              onClick={handleSend}
-              className="ivy-devtools-btn ivy-devtools-btn-outlined"
-            >
-              <LuSend size={14} />
+            </Button>
+            <Button variant="outline" onClick={handleSend}>
+              <Send size={14} />
               Send direct
-            </button>
+            </Button>
           </div>
         </div>
       )}
