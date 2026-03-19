@@ -228,6 +228,19 @@ public class AppHub(
 
             sessionStore.Sessions[Context.ConnectionId] = appState;
 
+            // Trigger reload for other tabs on this machine after OAuth login
+            if (parentId == null &&
+                httpContext.Request.Query.ContainsKey("oauthLogin") &&
+                serviceProvider.GetService<IAuthService>()?.GetCurrentToken() != null)
+            {
+                var oauthConnectionId = Context.ConnectionId;
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100); // Small delay to ensure cookies are processed
+                    AuthController.TriggerMachineReload(sessionStore, machineId, oauthConnectionId);
+                });
+            }
+
             var connectionId = Context.ConnectionId;
 
             await base.OnConnectedAsync();

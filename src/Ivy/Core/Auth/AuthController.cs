@@ -140,7 +140,7 @@ public class AuthController() : Controller
             cookies.AddCookiesForBrokeredSessions(tempSession.BrokeredSessions);
             cookies.WriteToResponse(Response);
 
-            return Redirect("/");
+            return Redirect("/?oauthLogin=1");
         }
         catch (Exception ex)
         {
@@ -200,7 +200,7 @@ public class AuthController() : Controller
         return Ok();
     }
 
-    private static string FindRootAncestor(AppSessionStore sessionStore, string connectionId)
+    internal static string FindRootAncestor(AppSessionStore sessionStore, string connectionId)
     {
         var current = connectionId;
         while (sessionStore.Sessions.TryGetValue(current, out var session) && session.ParentId != null)
@@ -210,7 +210,7 @@ public class AuthController() : Controller
         return current;
     }
 
-    private static IEnumerable<AppSession> GetMachineSessions(
+    internal static IEnumerable<AppSession> GetMachineSessions(
         AppSessionStore sessionStore,
         string machineId,
         string? excludeConnectionId)
@@ -242,7 +242,7 @@ public class AuthController() : Controller
         }
     }
 
-    private static void TriggerMachineReload(
+    internal static void TriggerMachineReload(
         AppSessionStore sessionStore,
         string machineId,
         string? excludeConnectionId)

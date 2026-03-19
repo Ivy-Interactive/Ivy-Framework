@@ -677,10 +677,24 @@ export const useBackend = (
       });
     }
 
+    // Check if this is an OAuth login redirect
+    const pageParams = new URLSearchParams(window.location.search);
+    const oauthLogin = pageParams.get('oauthLogin');
+
+    // Build SignalR connection URL
+    let signalRUrl = `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${latestChromeRef.current}`;
+    if (oauthLogin) {
+      signalRUrl += `&oauthLogin=${oauthLogin}`;
+      // Clean up the URL by removing the oauthLogin parameter
+      pageParams.delete('oauthLogin');
+      const newUrl = pageParams.toString()
+        ? `${window.location.pathname}?${pageParams.toString()}`
+        : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(
-        `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${latestChromeRef.current}`
-      )
+      .withUrl(signalRUrl)
       .withAutomaticReconnect()
       .build();
 
