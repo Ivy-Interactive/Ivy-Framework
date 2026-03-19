@@ -228,3 +228,20 @@ In most cases, you'll use `UseBlades()` directly in your views. The hook manages
 
 
 <WidgetDocs Type="Ivy.Blade" ExtensionTypes="Ivy.UseBladesExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Views/Blades/UseBlades.cs"/>
+
+## Faq
+
+### When should I use Blades?
+
+Blades are optimized for **CRUD applications** and **master-detail workflows** — interfaces where users navigate from a list to a detail view, then drill deeper into sub-details. Each new view slides in from the right as a blade, creating a stacked navigation experience.
+
+**Use Blades when:**
+- Building CRUD apps (list → detail → edit)
+- Master-detail interfaces with drill-down navigation
+- Wizards or multi-step flows where context from previous steps stays visible
+- Any app where stacked, sliding panels make sense
+
+**Don't use Blades when:**
+- Building dashboards, admin panels, or data-heavy layouts that need full screen width
+- Building single-page apps with a centered content area
+- The app doesn't need stacked navigation
