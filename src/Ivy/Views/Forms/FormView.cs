@@ -55,7 +55,8 @@ public class FormFieldView(
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
     Density density = Density.Medium,
-    FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit)
+    FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit,
+    bool disabled = false)
     : ViewBase, IFormFieldView
 {
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
@@ -156,6 +157,11 @@ public class FormFieldView(
             input.Placeholder = placeholder;
         }
 
+        if (disabled)
+        {
+            input.Disabled(true);
+        }
+
         if (density != Density.Medium)
         {
             WidgetBaseExtensions.SetDensityViaReflection(input, density);
@@ -183,13 +189,14 @@ public class FormFieldBinding<TModel>(
     Density density = Density.Medium,
     string? help = null,
     string? placeholder = null,
-    FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit
+    FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit,
+    bool disabled = false
     ) : IFormFieldBinding<TModel>
 {
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, formValidationSignal, formSubmitSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, density, submitStrategy);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, formValidationSignal, formSubmitSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, density, submitStrategy, disabled);
         return (fieldView, disposable);
     }
 }

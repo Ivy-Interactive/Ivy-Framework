@@ -1,10 +1,5 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useRef,
-} from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { useOptimisticValue } from '../shared/useOptimisticValue';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
@@ -81,21 +76,13 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
-  const [localValue, setLocalValue] = useState(value || '');
   const [isFocused, setIsFocused] = useState(false);
-  const localValueRef = useRef(localValue);
 
-  // Update local value when server value changes and control is not focused
-  useEffect(() => {
-    if (!isFocused && value !== localValueRef.current) {
-      queueMicrotask(() => setLocalValue(value || ''));
-    }
-  }, [value, isFocused]);
-
-  // Keep ref in sync with state
-  useEffect(() => {
-    localValueRef.current = localValue;
-  }, [localValue]);
+  const serverValue = value || '';
+  const [localValue, setLocalValue] = useOptimisticValue(
+    serverValue,
+    isFocused
+  );
 
   const debouncedOnChange = useDebouncedCallback((value: string) => {
     if (events.includes('OnChange')) {
@@ -108,7 +95,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       setLocalValue(value);
       debouncedOnChange(value);
     },
-    [debouncedOnChange]
+    [debouncedOnChange, setLocalValue]
   );
 
   const handleBlur = useCallback(() => {
@@ -131,7 +118,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       setLocalValue(clearedValue ?? '');
       eventHandler('OnChange', id, [clearedValue]);
     },
-    [eventHandler, id, events, disabled, nullable]
+    [eventHandler, id, events, disabled, nullable, setLocalValue]
   );
 
   const hasValue = localValue && localValue.toString().trim() !== '';

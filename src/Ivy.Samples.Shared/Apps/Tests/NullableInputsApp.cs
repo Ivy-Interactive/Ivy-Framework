@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.CircleOff, path: ["Widgets", "Inputs"], isVisible: false, searchHints: ["nullable", "null", "clear", "optional"])]
+[App(icon: Icons.CircleOff, group: ["Widgets", "Inputs"], isVisible: false, searchHints: ["nullable", "null", "clear", "optional"])]
 public class NullableInputsApp : SampleBase
 {
     protected override object? BuildSample()

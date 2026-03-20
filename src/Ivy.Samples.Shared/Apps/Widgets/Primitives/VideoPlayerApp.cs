@@ -1,12 +1,25 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Film, path: ["Widgets"], isVisible: true, searchHints: ["media", "youtube", "playback", "video", "streaming", "embed"])]
+[App(icon: Icons.Film, group: ["Widgets"], isVisible: true, searchHints: ["media", "youtube", "playback", "video", "streaming", "embed"])]
 public class VideoPlayerApp : SampleBase
 {
     protected override object? BuildSample()
     {
         var client = UseService<IClientProvider>();
+
+        // Event callbacks
+        var playCount = UseState(0);
+        var pauseCount = UseState(0);
+        var completedState = UseState(false);
+        var loadedState = UseState(false);
+
+        var eventVideo = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+            .HandlePlay(_ => playCount.Set(playCount.Value + 1))
+            .HandlePause(_ => pauseCount.Set(pauseCount.Value + 1))
+            .HandleEnded(_ => completedState.Set(true))
+            .HandleLoaded(_ => loadedState.Set(true))
+            .Height(Size.Units(50));
 
         // Basic video player
         var basicVideo = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4");
@@ -41,6 +54,19 @@ public class VideoPlayerApp : SampleBase
         // Poster image
         var posterVideo = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
             .Poster("https://www.w3schools.com/html/pic_trulli.jpg");
+
+        // StartTime and EndTime
+        var startTimeVideo = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+            .StartTime(5);
+
+        var segmentVideo = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+            .StartTime(2)
+            .EndTime(6);
+
+        var youtubeSegment = new VideoPlayer("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            .StartTime(30)
+            .EndTime(60)
+            .Height(Size.Units(100));
 
         // YouTube video
         var youtubeVideo = new VideoPlayer("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=100")
@@ -107,6 +133,52 @@ public class VideoPlayerApp : SampleBase
                     | Text.P("Video player with a preview image before playback.").Small()
                     | posterVideo
                 ).Title("Poster Example"))
+
+                // Time Range
+                | (new Card(
+                    Layout.Vertical().Gap(4)
+                    | Text.H4("Start Time")
+                    | Text.P("Video starts at 5 seconds.").Small()
+                    | startTimeVideo
+                    | Text.H4("Segment Playback")
+                    | Text.P("Video plays from 2s to 6s.").Small()
+                    | segmentVideo
+                    | Text.H4("YouTube Segment")
+                    | Text.P("YouTube video plays from 30s to 60s.").Small()
+                    | youtubeSegment
+                ).Title("Time Range Control"))
+
+                // Event Callbacks
+                | (new Card(
+                    Layout.Vertical().Gap(4)
+                    | Text.H4("Event Callbacks")
+                    | Text.P("Track video playback events for analytics, sequential content, or coordinated UI.").Small()
+                    | eventVideo
+                    | (Layout.Horizontal().Gap(4)
+                        | new Badge($"Play: {playCount.Value}").Variant(BadgeVariant.Secondary)
+                        | new Badge($"Pause: {pauseCount.Value}").Variant(BadgeVariant.Secondary)
+                        | new Badge(completedState.Value ? "Completed" : "Not completed")
+                            .Variant(completedState.Value ? BadgeVariant.Success : BadgeVariant.Secondary)
+                        | new Badge(loadedState.Value ? "Loaded" : "Loading")
+                            .Variant(loadedState.Value ? BadgeVariant.Success : BadgeVariant.Secondary))
+                ).Title("Event Callbacks"))
+
+                // Playback Rate
+                | (new Card(
+                    Layout.Vertical().Gap(4)
+                    | Text.H4("1.5x Speed (Fast)")
+                    | Text.P("Play tutorial or lecture at increased speed.").Small()
+                    | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+                        .PlaybackRate(1.5)
+                    | Text.H4("0.5x Speed (Slow)")
+                    | Text.P("Slow motion for detailed review.").Small()
+                    | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+                        .PlaybackRate(0.5)
+                    | Text.H4("2x Speed (Very Fast)")
+                    | Text.P("Quickly scrub through long recordings.").Small()
+                    | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+                        .PlaybackRate(2.0)
+                ).Title("Playback Rate"))
 
                 // YouTube
                 | (new Card(

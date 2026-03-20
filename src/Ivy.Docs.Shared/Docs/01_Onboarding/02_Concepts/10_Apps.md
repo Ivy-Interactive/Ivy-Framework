@@ -51,7 +51,7 @@ public class ProductsApp : ViewBase
 | **`title`** | `string?` | `null` | The human-readable title of the app. Used in window titles and navigation menus. Defaults to a readable version of the class name. |
 | **`icon`** | `Icons` | `Icons.None` | The [icon](../../02_Widgets/01_Primitives/02_Icon.md) representing the app in the navigation bar and search results. Uses the `Icons` enum. |
 | **`description`** | `string?` | `null` | A brief description of the app's purpose. May be shown in tooltips or app listings. |
-| **`path`** | `string[]?` | `null` | Explicitly defines the navigation path. Overrides automatic generation from the namespace. |
+| **`group`** | `string[]?` | `null` | Explicitly defines the navigation path. Overrides automatic generation from the namespace. |
 | **`isVisible`** | `bool` | `true` | Controls whether the app appears in automatically generated navigation menus. Set to `false` for hidden apps or internal tools. |
 | **`order`** | `int` | `0` | Controls the sorting order of the app within its group in the navigation menu. Lower numbers appear first. |
 | **`groupExpanded`** | `bool` | `false` | If `true`, the navigation group containing this app will be expanded by default. |
@@ -78,7 +78,7 @@ The logic works as follows:
 
 ### Customizing Routes
 
-You can override the automatic generation using the `id` or `path` parameters, though sticking to conventions is recommended for consistency.
+You can override the automatic generation using the `id` or `group` parameters, though sticking to conventions is recommended for consistency.
 
 ## Page Title
 
@@ -113,7 +113,7 @@ The `[App]` attribute marks a class as an Ivy application. Key parameters:
 [App(
     title: "My App",           // Display name (optional, defaults to class name)
     icon: Icons.Layout,        // Icon from the Icons enum (optional)
-    path: ["Category"],        // Navigation path/group (optional, array of strings)
+    group: ["Category"],       // Navigation path/group (optional, array of strings)
     description: "My app desc" // Description text (optional)
 )]
 public class MyApp : ViewBase
@@ -127,7 +127,7 @@ public class MyApp : ViewBase
 
 **Key points:**
 - The class must inherit from `ViewBase` and override `Build()`
-- `path` controls navigation grouping (e.g., `["Settings", "Advanced"]` creates nested groups)
+- `group` controls navigation grouping (e.g., `["Settings", "Advanced"]` creates nested groups)
 - `icon` uses the `Icons` enum (e.g., `Icons.Settings`, `Icons.Users`, `Icons.Database`)
 - All parameters are optional — `[App]` with no arguments is valid
 - Other parameters: `id`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`

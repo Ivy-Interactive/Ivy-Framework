@@ -16,6 +16,7 @@ import {
 import Icon from '@/components/Icon';
 import { X, Search, Loader2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { useOptimisticValue } from './shared/useOptimisticValue';
 import { logger } from '@/lib/logger';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
 import { Slider } from '@/components/ui/slider';
@@ -23,7 +24,11 @@ import { Densities } from '@/types/density';
 import { cva } from 'class-variance-authority';
 import { xIconVariant } from '@/components/ui/input/text-input-variant';
 
-import { Option, SelectInputWidgetProps } from './select-types';
+import {
+  NullableSelectValue,
+  Option,
+  SelectInputWidgetProps,
+} from './select-types';
 import {
   convertValuesToOriginalType,
   useSelectValueHandler,
@@ -960,13 +965,47 @@ const SliderVariant: React.FC<
   );
 };
 
+const selectValueEqual = (
+  a: NullableSelectValue,
+  b: NullableSelectValue
+): boolean => {
+  if (a === b) return true;
+  if (a == null || b == null) return a == b;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    return a.every((v, i) => v === b[i]);
+  }
+  return String(a) === String(b);
+};
+
 export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
   const eventHandler = useEventHandler();
 
   // Normalize undefined to null when nullable
+  const serverValue =
+    props.nullable && props.value === undefined ? null : props.value;
+
+  const [localValue, setLocalValue] = useOptimisticValue(
+    serverValue,
+    false,
+    selectValueEqual
+  );
+
+  // Wrap eventHandler to intercept OnChange and apply optimistic update
+  const optimisticEventHandler: EventHandler = useCallback(
+    (event: string, id: string, args: unknown[]) => {
+      if (event === 'OnChange') {
+        const newValue = args[0] as NullableSelectValue;
+        setLocalValue(newValue as NullableSelectValue & undefined);
+      }
+      eventHandler(event, id, args);
+    },
+    [eventHandler, setLocalValue]
+  );
+
   const normalizedProps = {
     ...props,
-    value: props.nullable && props.value === undefined ? null : props.value,
+    value: localValue,
     density: props.density ?? Densities.Medium,
     variant: props.variant ?? 'Select',
     separator: props.separator ?? ';',
@@ -983,24 +1022,45 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
   switch (normalizedProps.variant) {
     case 'List':
       return normalizedProps.selectMany ? (
-        <CheckboxVariant {...normalizedProps} eventHandler={eventHandler} />
+        <CheckboxVariant
+          {...normalizedProps}
+          eventHandler={optimisticEventHandler}
+        />
       ) : (
-        <RadioVariant {...normalizedProps} eventHandler={eventHandler} />
+        <RadioVariant
+          {...normalizedProps}
+          eventHandler={optimisticEventHandler}
+        />
       );
     case 'Radio':
-      return <RadioVariant {...normalizedProps} eventHandler={eventHandler} />;
+      return (
+        <RadioVariant
+          {...normalizedProps}
+          eventHandler={optimisticEventHandler}
+        />
+      );
     case 'Toggle':
-      return <ToggleVariant {...normalizedProps} eventHandler={eventHandler} />;
+      return (
+        <ToggleVariant
+          {...normalizedProps}
+          eventHandler={optimisticEventHandler}
+        />
+      );
     case 'Slider':
       return (
         <SliderVariant
           key={normalizedProps.value?.toString() ?? 'null'}
           {...normalizedProps}
-          eventHandler={eventHandler}
+          eventHandler={optimisticEventHandler}
         />
       );
     default:
-      return <SelectVariant {...normalizedProps} eventHandler={eventHandler} />;
+      return (
+        <SelectVariant
+          {...normalizedProps}
+          eventHandler={optimisticEventHandler}
+        />
+      );
   }
 };
 

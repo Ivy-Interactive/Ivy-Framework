@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.ThumbsUp, path: ["Widgets", "Inputs"], searchHints: ["rating", "stars", "review", "feedback", "score", "evaluation"])]
+[App(icon: Icons.ThumbsUp, group: ["Widgets", "Inputs"], searchHints: ["rating", "stars", "review", "feedback", "score", "evaluation"])]
 public class FeedbackInputApp : SampleBase
 {
     protected override object? BuildSample()
@@ -13,12 +13,18 @@ public class FeedbackInputApp : SampleBase
         var sizeBoolState = UseState(true);
         var sizeIntState = UseState(2);
 
+        var decimalState = UseState(3.5m);
+        var nullableDecimalState = UseState((decimal?)null);
+
         var intState = UseState(0);
         var nullableIntState = UseState((int?)null);
         var floatState = UseState(0.0f);
         var nullableFloatState = UseState((float?)null);
         var boolState = UseState(false);
         var nullableBoolState = UseState((bool?)null);
+
+        var maxState3 = UseState(0);
+        var maxState10 = UseState(0);
 
         var variants = Layout.Grid().Columns(5)
                | Text.Monospaced("var")
@@ -101,12 +107,56 @@ public class FeedbackInputApp : SampleBase
                           | (nullableBoolState.Value == null ? Text.Monospaced("null") : (nullableBoolState.Value == false ? Text.Monospaced("false") : Text.Monospaced("true")))
         ;
 
+        var allowHalfExamples = Layout.Grid().Columns(3)
+                                | Text.Monospaced("Variant")
+                                | Text.Monospaced("rating")
+                                | Text.Monospaced("state")
+
+                                | Text.Monospaced("Stars (decimal)")
+                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).AllowHalf()
+                                | Text.Monospaced(decimalState.Value.ToString())
+
+                                | Text.Monospaced("Stars (decimal?)")
+                                | nullableDecimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).AllowHalf()
+                                | (nullableDecimalState.Value == null ? Text.Monospaced("null") : Text.Monospaced(nullableDecimalState.Value.ToString() ?? "null"))
+
+                                | Text.Monospaced("Emojis (decimal)")
+                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).AllowHalf()
+                                | Text.Monospaced(decimalState.Value.ToString())
+        ;
+
+        var maxExamples = Layout.Grid().Columns(3)
+                          | Text.Monospaced("Max")
+                          | Text.Monospaced("rating")
+                          | Text.Monospaced("state")
+
+                          | Text.Monospaced("Max(3) Stars")
+                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Max(3)
+                          | Text.Monospaced(maxState3.Value.ToString())
+
+                          | Text.Monospaced("Max(10) Stars")
+                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Max(10)
+                          | Text.Monospaced(maxState10.Value.ToString())
+
+                          | Text.Monospaced("Max(3) Emojis")
+                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Max(3)
+                          | Text.Monospaced(maxState3.Value.ToString())
+
+                          | Text.Monospaced("Max(10) Emojis")
+                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Max(10)
+                          | Text.Monospaced(maxState10.Value.ToString())
+        ;
+
         return Layout.Vertical()
                | Text.H1("Feedback Inputs")
                | Text.H2("Variants")
                | variants
                | Text.H2("Size Examples")
                | sizeExamples
+               | Text.H2("Custom Max")
+               | maxExamples
+               | Text.H2("Allow Half")
+               | allowHalfExamples
                | Text.H2("Data Binding")
                | dataBinding
 

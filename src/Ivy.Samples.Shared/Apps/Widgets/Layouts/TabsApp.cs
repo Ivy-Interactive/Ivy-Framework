@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
-[App(icon: Icons.LayoutTemplate, path: ["Widgets", "Layouts"], searchHints: ["navigation", "panels", "pages", "switcher", "tabbed", "sections"])]
+[App(icon: Icons.LayoutTemplate, group: ["Widgets", "Layouts"], searchHints: ["navigation", "panels", "pages", "switcher", "tabbed", "sections"])]
 public class TabsApp : SampleBase
 {
     protected override object? BuildSample()

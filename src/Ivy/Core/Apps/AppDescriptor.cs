@@ -33,7 +33,7 @@ public class AppDescriptor : IAppRepositoryNode
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
     public Type? Type { get; init; }
 
-    public required string[] Path { get; init; }
+    public required string[] Group { get; init; }
 
     public int Order { get; set; }
 

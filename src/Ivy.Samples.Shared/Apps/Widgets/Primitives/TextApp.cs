@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Type, path: ["Widgets", "Primitives"], searchHints: ["typography", "heading", "paragraph", "label", "text", "content"])]
+[App(icon: Icons.Type, group: ["Widgets", "Primitives"], searchHints: ["typography", "heading", "paragraph", "label", "text", "content"])]
 public class TextApp : SampleBase
 {
     protected override object? BuildSample()

@@ -2,7 +2,7 @@ using Ivy.Widgets.Internal;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Terminal, path: ["Widgets", "Primitives"], searchHints: ["terminal", "console", "command", "cli", "shell", "bash"])]
+[App(icon: Icons.Terminal, group: ["Widgets", "Primitives"], searchHints: ["terminal", "console", "command", "cli", "shell", "bash"])]
 public class TerminalApp : SampleBase
 {
     protected override object? BuildSample()

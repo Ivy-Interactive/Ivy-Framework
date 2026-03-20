@@ -192,8 +192,15 @@ export const generateSeries = (
         }
       : {};
 
-  return valueKeys.map((key, i) => {
-    const rawLineConfig = lines?.[i];
+  // When explicit series are configured, only plot those data keys
+  const configuredKeys = (lines || []).map(l => l.dataKey).filter(Boolean);
+  const keysToPlot =
+    configuredKeys.length > 0
+      ? valueKeys.filter(k => configuredKeys.includes(k))
+      : valueKeys;
+
+  return keysToPlot.map(key => {
+    const rawLineConfig = lines?.find(l => l.dataKey === key);
     // Apply defaults for line config
     const lineConfig = rawLineConfig
       ? applyDefaults(rawLineConfig, LINE_DEFAULTS)
@@ -246,8 +253,15 @@ export const generateXAxis = (
   data: isVertical ? undefined : categories,
   axisLabel: {
     show: true,
-    formatter: (value: string) =>
-      value.length > 10 ? value.match(/.{1,10}/g)?.join('\n') : value,
+    formatter: isVertical
+      ? (value: number) => {
+          if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(0) + 'B';
+          if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(0) + 'M';
+          if (Math.abs(value) >= 1e3) return (value / 1e3).toFixed(0) + 'K';
+          return value;
+        }
+      : (value: string) =>
+          value.length > 10 ? value.match(/.{1,10}/g)?.join('\n') : value,
     interval: 'auto',
     ...generateAxisLabelStyle(
       themeColors?.mutedForeground,

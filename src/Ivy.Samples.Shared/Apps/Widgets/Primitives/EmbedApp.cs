@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Video, path: ["Widgets", "Primitives"], searchHints: ["iframe", "external", "integration", "widget", "embed", "content"])]
+[App(icon: Icons.Video, group: ["Widgets", "Primitives"], searchHints: ["iframe", "external", "integration", "widget", "embed", "content"])]
 public class EmbedApp : SampleBase
 {
     protected override object? BuildSample()

@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - image
   - picture
   - photo
   - img

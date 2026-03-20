@@ -127,7 +127,7 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
 
     [Prop] public TNumber Value { get; init; } = default!;
 
-    [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
+    [Prop(AlwaysSerialize = true)] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
     [Event] public EventHandler<Event<IInput<TNumber>, TNumber>>? OnChange { get; }
 }
