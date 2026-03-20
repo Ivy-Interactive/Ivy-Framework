@@ -8,6 +8,11 @@ namespace Ivy;
 
 public class BasicAuthTokenHandler : IAuthTokenHandler
 {
+    private static readonly TimeSpan ClockSkew = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan AccessTokenLifetime = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromHours(24);
+    private static readonly TimeSpan MaxSessionAge = TimeSpan.FromDays(365);
+
     protected readonly string Issuer;
     protected readonly string Audience;
     protected readonly SymmetricSecurityKey SigningKey;
@@ -116,7 +121,7 @@ public class BasicAuthTokenHandler : IAuthTokenHandler
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = SigningKey,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(2),
+                ClockSkew = ClockSkew,
             }, out var validatedToken);
             if (claims.FindFirst(TokenUseClaim)?.Value != tokenUse)
             {
@@ -132,7 +137,7 @@ public class BasicAuthTokenHandler : IAuthTokenHandler
 
     protected AuthToken CreateToken(string user, DateTimeOffset now, long authTime)
     {
-        var expiresAt = now.AddMinutes(15);
+        var expiresAt = now.Add(AccessTokenLifetime);
         var claims = new[] {
             new Claim(JwtRegisteredClaimNames.Sub, user),
             new Claim(TokenUseClaim, "access"),
@@ -146,8 +151,8 @@ public class BasicAuthTokenHandler : IAuthTokenHandler
             signingCredentials: creds);
         var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-        var rtExpiresAt = now.AddHours(24);
-        var maxAgeSeconds = (long)TimeSpan.FromDays(365).TotalSeconds;
+        var rtExpiresAt = now.Add(RefreshTokenLifetime);
+        var maxAgeSeconds = (long)MaxSessionAge.TotalSeconds;
 
         var rtClaims = new[]
         {
