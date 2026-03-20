@@ -169,8 +169,10 @@ Supabase does not provide a way to refetch provider tokens after the initial log
 For an OAuth provider to appear in brokered sessions, you must have a registered token handler:
 
 **Built-in handlers** - Add the NuGet package to your project:
-- `Ivy.Auth.Google` - For Google OAuth tokens
+- `Ivy.Auth.Google` - For Google OAuth tokens (requires `Google:ClientId` and `Google:ClientSecret` configuration)
 - `Ivy.Auth.GitHub` - For GitHub OAuth tokens
+
+> **Note:** The Google token handler requires your Google OAuth credentials (`Google:ClientId` and `Google:ClientSecret`) to refresh tokens. These are the same credentials you configured in Supabase for Google social login.
 
 **Custom handlers** - For other providers, implement a custom `IAuthTokenHandler` and register it in `Program.cs`:
 

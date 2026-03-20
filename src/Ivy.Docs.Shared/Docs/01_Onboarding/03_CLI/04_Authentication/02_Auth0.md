@@ -222,8 +222,10 @@ When users authenticate via OAuth providers like Google or GitHub, Auth0 manages
 In addition to enabling Management API access, you must have a registered token handler for each OAuth provider you want to use. Without a registered handler, the provider won't appear in brokered sessions.
 
 **Built-in handlers** - Add the NuGet package to your project:
-- `Ivy.Auth.Google` - For Google OAuth tokens
+- `Ivy.Auth.Google` - For Google OAuth tokens (requires `Google:ClientId` and `Google:ClientSecret` configuration)
 - `Ivy.Auth.GitHub` - For GitHub OAuth tokens
+
+> **Note:** The Google token handler requires your Google OAuth credentials (`Google:ClientId` and `Google:ClientSecret`) to refresh tokens. These are the same credentials you configured in Auth0 for Google social login.
 
 **Custom handlers** - For other providers (Microsoft, Apple, Twitter), implement a custom `IAuthTokenHandler` and register it in `Program.cs`:
 

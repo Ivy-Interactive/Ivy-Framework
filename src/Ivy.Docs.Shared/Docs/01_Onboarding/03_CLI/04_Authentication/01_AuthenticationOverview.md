@@ -194,6 +194,15 @@ Ivy provides pre-built token handlers for Google and GitHub. Simply add the NuGe
 - `Ivy.Auth.Google` - Provides `GoogleAuthTokenHandler`
 - `Ivy.Auth.GitHub` - Provides `GitHubAuthTokenHandler`
 
+**Configuration for Google Token Handler**
+
+The Google token handler requires your Google OAuth credentials to refresh tokens. Add these to your configuration (via [user secrets](../../02_Concepts/14_Secrets.md) or environment variables):
+
+- **Google:ClientId**: Required. Your Google OAuth client ID.
+- **Google:ClientSecret**: Required. Your Google OAuth client secret.
+
+These are the same credentials you configured when setting up Google as a social login provider in your identity provider (Auth0, Clerk, Supabase, etc.).
+
 **Custom Handlers**
 
 For other OAuth providers, implement your own `IAuthTokenHandler` and register it:

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace Ivy.Auth.Google;
 
@@ -7,10 +8,14 @@ namespace Ivy.Auth.Google;
 public class GoogleAuthTokenHandler : IAuthTokenHandler
 {
     private readonly HttpClient _httpClient;
+    private readonly string _clientId;
+    private readonly string _clientSecret;
 
     /// <summary>Initialize Google auth token handler</summary>
-    public GoogleAuthTokenHandler()
+    public GoogleAuthTokenHandler(IConfiguration configuration)
     {
+        _clientId = configuration.GetValue<string>("Google:ClientId") ?? throw new Exception("Google:ClientId is required");
+        _clientSecret = configuration.GetValue<string>("Google:ClientSecret") ?? throw new Exception("Google:ClientSecret is required");
         _httpClient = new HttpClient();
     }
 
@@ -25,6 +30,8 @@ public class GoogleAuthTokenHandler : IAuthTokenHandler
         {
             var content = new FormUrlEncodedContent(new[]
             {
+                new KeyValuePair<string, string>("client_id", _clientId),
+                new KeyValuePair<string, string>("client_secret", _clientSecret),
                 new KeyValuePair<string, string>("refresh_token", refreshToken),
                 new KeyValuePair<string, string>("grant_type", "refresh_token")
             });
