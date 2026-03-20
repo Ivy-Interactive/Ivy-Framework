@@ -251,6 +251,12 @@ public class Server
         return this;
     }
 
+    public Server RegisterAuthTokenHandler<T>(string provider) where T : class, IAuthTokenHandler
+    {
+        Services.AddKeyedSingleton<IAuthTokenHandler, T>(provider);
+        return this;
+    }
+
     private void DiscoverAndRegisterOAuthTokenHandlers()
     {
         try
