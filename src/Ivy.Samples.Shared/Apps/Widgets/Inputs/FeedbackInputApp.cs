@@ -23,6 +23,9 @@ public class FeedbackInputApp : SampleBase
         var boolState = UseState(false);
         var nullableBoolState = UseState((bool?)null);
 
+        var maxState3 = UseState(0);
+        var maxState10 = UseState(0);
+
         var variants = Layout.Grid().Columns(5)
                | Text.Monospaced("var")
                | Text.Monospaced("rating")
@@ -121,9 +124,6 @@ public class FeedbackInputApp : SampleBase
                                 | decimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).AllowHalf()
                                 | Text.Monospaced(decimalState.Value.ToString())
         ;
-
-        var maxState3 = UseState(0);
-        var maxState10 = UseState(0);
 
         var maxExamples = Layout.Grid().Columns(3)
                           | Text.Monospaced("Max")
