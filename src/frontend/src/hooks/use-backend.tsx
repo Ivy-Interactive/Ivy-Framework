@@ -939,15 +939,10 @@ export const useBackend = (
 
   const eventHandler: WidgetEventHandlerType = useCallback(
     (eventName, widgetId, args) => {
-      console.log('[Event] Sending:', eventName, widgetId, args);
+      logger.info('[Event] Sending:', { eventName, widgetId, args });
       logger.debug(`[${connectionId}] Event: ${eventName}`, { widgetId, args });
       if (!connection) {
-        console.warn(
-          '[Event] No SignalR connection available for event:',
-          eventName,
-          widgetId
-        );
-        logger.warn('No SignalR connection available for event', {
+        logger.warn('[Event] No SignalR connection available for event:', {
           eventName,
           widgetId,
         });
@@ -956,11 +951,14 @@ export const useBackend = (
       connection
         .invoke('Event', eventName, widgetId, args)
         .then(() => {
-          console.debug('[Event] Invoke succeeded:', eventName, widgetId);
+          logger.debug('[Event] Invoke succeeded:', { eventName, widgetId });
         })
         .catch(err => {
-          console.error('[Event] Invoke failed:', eventName, widgetId, err);
-          logger.error('SignalR Error when sending event:', err);
+          logger.error('[Event] Invoke failed:', {
+            eventName,
+            widgetId,
+            error: err,
+          });
         });
     },
     [connection, connectionId]
