@@ -481,6 +481,7 @@ public class AppHub(
     {
         var state = TokenRefreshState.Initial;
         var consecutiveErrors = 0;
+        DateTimeOffset? lastRefreshTime = null;
 
         while (true)
         {
@@ -529,9 +530,12 @@ public class AppHub(
                             {
                                 var lifetime = await strategy.GetTokenLifetimeAsync(cancellationToken);
 
+                                // Use NotBefore from token, or fall back to lastRefreshTime if we recently refreshed
+                                var effectiveNotBefore = lifetime?.NotBefore ?? lastRefreshTime;
+
                                 TimeSpan renewalMargin;
-                                if (lifetime != null && lifetime.NotBefore != null && lifetime.Expires != null &&
-                                    lifetime.Expires - lifetime.NotBefore is { } duration &&
+                                if (lifetime?.Expires != null && effectiveNotBefore != null &&
+                                    lifetime.Expires - effectiveNotBefore is { } duration &&
                                     duration < TimeSpan.FromMinutes(3))
                                 {
                                     renewalMargin = duration / 6;
@@ -574,6 +578,7 @@ public class AppHub(
                             {
                                 logger.LogInformation("{StrategyName}RefreshLoop: Token refreshed successfully for {ConnectionId}.", strategy.LoggingName, connectionId);
                                 state = TokenRefreshState.HasToken;
+                                lastRefreshTime = DateTimeOffset.UtcNow;
                             }
                             else
                             {
