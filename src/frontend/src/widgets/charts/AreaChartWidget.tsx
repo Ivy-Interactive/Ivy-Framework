@@ -163,11 +163,22 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
     [referenceAreas]
   );
 
+  // When explicit series are configured, only plot those data keys
+  const configuredAreaKeys = (areas || []).map(a => a.dataKey).filter(Boolean);
+  const areaKeysToPlot =
+    configuredAreaKeys.length > 0
+      ? valueKeys.filter(k =>
+          configuredAreaKeys.some(ck => ck.toLowerCase() === k.toLowerCase())
+        )
+      : valueKeys;
+
   // Memoize series configuration
   const series = useMemo(
     () =>
-      valueKeys.map((key, i) => {
-        const rawAreaConfig = areas?.find(a => a.dataKey.toLowerCase() === key);
+      areaKeysToPlot.map((key, i) => {
+        const rawAreaConfig = areas?.find(
+          a => a.dataKey.toLowerCase() === key.toLowerCase()
+        );
         // Apply C# defaults for area config
         const areaConfig = rawAreaConfig
           ? applyDefaults(rawAreaConfig, LINE_DEFAULTS)
@@ -193,7 +204,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
         };
       }),
     [
-      valueKeys,
+      areaKeysToPlot,
       areas,
       chartColors,
       gradientColors,

@@ -124,7 +124,10 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
         const formData = new FormData();
         formData.append("file", blob, "screenshot.png");
 
-        const response = await fetch(getUploadUrl(), {
+        const resolvedUrl = getUploadUrl();
+        console.log("[ScreenshotFeedback] Uploading screenshot to:", resolvedUrl);
+
+        const response = await fetch(resolvedUrl, {
           method: "POST",
           body: formData,
         });
@@ -132,6 +135,12 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
           console.error("Screenshot upload failed:", response.statusText);
           return;
         }
+        console.log("[ScreenshotFeedback] Upload successful");
+      } else {
+        console.warn("[ScreenshotFeedback] Skipping upload:", {
+          hasBlob: !!blob,
+          uploadUrl,
+        });
       }
     } catch (error) {
       console.error("Screenshot save error:", error);
@@ -141,8 +150,14 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     }
 
     // Then fire the event (upload is now complete, C# handler can read the content)
-    if (events.includes("OnSave")) {
+    const hasOnSave = events.includes("OnSave");
+    console.log("[ScreenshotFeedback] Upload complete. events:", JSON.stringify(events), "hasOnSave:", hasOnSave, "id:", id);
+    if (hasOnSave) {
+      console.log("[ScreenshotFeedback] Calling eventHandler now...");
       eventHandler("OnSave", id, [buildAnnotationData()]);
+      console.log("[ScreenshotFeedback] eventHandler called.");
+    } else {
+      console.error("[ScreenshotFeedback] OnSave NOT in events array! Events received:", events);
     }
   }, [
     screenshotCanvas,
@@ -200,7 +215,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
             fontFamily: "var(--font-sans, sans-serif)",
           }}
         >
-          Capturing screenshot...
+          Capturing Screenshot...
         </div>
       </div>
     );

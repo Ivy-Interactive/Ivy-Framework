@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.SquareChevronRight, path: ["Widgets"], searchHints: ["paging", "navigation", "pages", "next", "previous", "numbers"])]
+[App(icon: Icons.SquareChevronRight, group: ["Widgets"], searchHints: ["paging", "navigation", "pages", "next", "previous", "numbers"])]
 public class PaginationApp() : SampleBase
 {
     protected override object? BuildSample()

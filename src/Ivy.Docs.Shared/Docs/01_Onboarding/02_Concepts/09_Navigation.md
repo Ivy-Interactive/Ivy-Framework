@@ -10,6 +10,9 @@ searchHints:
   - chrome
   - navigation-args
   - route
+  - hyperlink
+  - link
+  - anchor
 ---
 
 # Navigation
@@ -380,6 +383,33 @@ public class MyApp : ViewBase { }
 - **Use records for arguments** - Pass data with strongly-typed argument objects
 - **Include protocol for external URLs** - Always use `https://` or `mailto:` for external links
 - **Ensure apps have [App](./10_Apps.md) attribute** - Target apps must be decorated with `[App]`
+
+## Faq
+
+### How do I create a hyperlink or link component?
+
+Ivy does not have a dedicated Link widget. Use `Button` with `UseNavigation()` for internal navigation, or open external URLs:
+
+```csharp
+var nav = UseNavigation();
+
+// Internal link
+new Button("Go to Settings").OnClick(() => nav.Navigate(typeof(SettingsApp)));
+
+// External link
+new Button("Visit Docs").OnClick(() => nav.Navigate("https://docs.ivy.app"));
+```
+
+### How do I navigate to a different page?
+
+Use the `UseNavigation()` hook:
+
+```csharp
+var nav = UseNavigation();
+nav.Navigate(typeof(TargetApp));          // type-safe
+nav.Navigate("app://path/to/app");        // URI-based
+nav.Navigate("https://example.com");      // external URL
+```
 
 ## See Also
 

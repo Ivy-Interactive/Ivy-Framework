@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.Pill, path: ["Widgets"], searchHints: ["tag", "label", "chip", "status", "indicator", "pill"])]
+[App(icon: Icons.Pill, group: ["Widgets"], searchHints: ["tag", "label", "chip", "status", "indicator", "pill"])]
 public class BadgeApp : SampleBase
 {
     private static readonly BadgeVariant[] Variants = [

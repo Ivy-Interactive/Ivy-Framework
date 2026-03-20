@@ -1,5 +1,8 @@
 ---
 searchHints:
+  - pie chart
+  - chart
+  - pie
   - visualization
   - graph
   - analytics

@@ -22,6 +22,18 @@ export const ExternalWidgetWrapper: React.FC<ExternalWidgetWrapperProps> = ({
   const eventHandler = useEventHandler();
   const subscribeToStream = useStreamSubscriber();
 
+  // Debug: log when external widget gets events prop
+  React.useEffect(() => {
+    if (props.events && (props.events as string[]).length > 0) {
+      console.log(
+        '[ExternalWidgetWrapper] Rendering with events:',
+        props.events,
+        'eventHandler present:',
+        !!eventHandler
+      );
+    }
+  }, [props.events, eventHandler]);
+
   // Pass the event handler and stream subscriber as props so external widgets can use them
   const enhancedProps = {
     ...props,
