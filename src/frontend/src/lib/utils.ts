@@ -15,8 +15,15 @@ export function getAppId(): string | null {
   }
 
   // If no appId parameter, try to parse from path
-  const path = window.location.pathname.toLowerCase();
-  const originalPath = window.location.pathname;
+  // Strip the path base prefix so /foo/bar/my-app with base /foo/bar → /my-app
+  const pathBase = getIvyPathBase(); // e.g. "/foo/bar"
+  let pathname = window.location.pathname;
+  if (pathBase && pathname.startsWith(pathBase)) {
+    pathname = pathname.slice(pathBase.length) || '/';
+  }
+
+  const path = pathname.toLowerCase();
+  const originalPath = pathname;
 
   // Skip if path is empty or just "/"
   if (!path || path === '/') {
@@ -97,8 +104,9 @@ export function convertAppUrlToPath(appUrl: string): string {
   const appId = extractAppProtocolContent(appUrl);
   const [appPath, existingQueryString] = appId.split('?');
 
-  // Build the path
-  let path = `/${appPath}`;
+  // Build the path, prepending the path base if set
+  const pathBase = getIvyPathBase(); // e.g. "/foo/bar"
+  let path = pathBase ? `${pathBase}/${appPath}` : `/${appPath}`;
 
   // Preserve chrome=false if we're currently in chrome=false mode
   const isChromeFalse = !getChromeParam();
