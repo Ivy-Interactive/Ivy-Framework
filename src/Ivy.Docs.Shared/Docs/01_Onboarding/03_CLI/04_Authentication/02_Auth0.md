@@ -197,7 +197,7 @@ The user information email, name and picture will now be added to the JWT and co
 
 ### Step 7: Enable Management API Access (Optional)
 
-If you need to access OAuth provider tokens (e.g., to call Google APIs directly using the Google OAuth token), you must authorize your application to access the Auth0 Management API.
+If you need to access brokered tokens (e.g., to call Google APIs directly using the Google OAuth token), you must authorize your application to access the Auth0 Management API.
 
 #### Why You Need This
 
@@ -210,13 +210,14 @@ When users authenticate via OAuth providers like Google or GitHub, Auth0 manages
 3. **Select the "Application Access" tab**
 4. **Find your application** in the list of applications
 5. **Click "Edit"**
-6. **Toggle the switch to "Authorized"**
-7. **Grant the following scopes**:
+6. **Select the "Client Access" tab if it isn't already selected**
+7. **Toggle the switch to "Authorized"**
+8. **Grant the following scopes**:
    - `read:users` - Required to fetch user information
    - `read:user_idp_tokens` - Required to access OAuth provider tokens
-8. **Click "Update"**
+9. **Click "Update"**
 
-#### Using OAuth Provider Tokens
+#### Using Brokered OAuth Tokens
 
 Once configured, you can access OAuth provider tokens in your Ivy application:
 
