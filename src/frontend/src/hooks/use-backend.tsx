@@ -303,6 +303,32 @@ function applyUpdateMessage(
   return newTree;
 }
 
+async function refreshAuthFromCookies(
+  connectionId: string | null
+): Promise<void> {
+  try {
+    const response = await fetch(`${getIvyHost()}/ivy/auth/refresh-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Connection-Id': connectionId ?? '',
+        'X-Machine-Id': getMachineId(),
+      },
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      logger.error('Failed to refresh auth from cookies, reloading page', {
+        status: response.status,
+        statusText: response.statusText,
+      });
+      window.location.reload();
+    }
+  } catch (error) {
+    logger.error('Error refreshing auth from cookies, reloading page', error);
+    window.location.reload();
+  }
+}
+
 export const useBackend = (
   appId: string | null,
   appArgs: string | null,
@@ -860,38 +886,9 @@ export const useBackend = (
             window.location.reload();
           });
 
-          connection.on('RefreshAuthFromCookies', async () => {
+          connection.on('RefreshAuthFromCookies', () => {
             logger.debug(`[${connection.connectionId}] RefreshAuthFromCookies`);
-            try {
-              const response = await fetch(
-                `${getIvyHost()}/ivy/auth/refresh-session`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'X-Connection-Id': connection.connectionId ?? '',
-                    'X-Machine-Id': getMachineId(),
-                  },
-                  credentials: 'include',
-                }
-              );
-              if (!response.ok) {
-                logger.error(
-                  'Failed to refresh auth from cookies, reloading page',
-                  {
-                    status: response.status,
-                    statusText: response.statusText,
-                  }
-                );
-                window.location.reload();
-              }
-            } catch (error) {
-              logger.error(
-                'Error refreshing auth from cookies, reloading page',
-                error
-              );
-              window.location.reload();
-            }
+            refreshAuthFromCookies(connection.connectionId);
           });
 
           connection.on('HttpRequest', message => {
@@ -990,7 +987,7 @@ export const useBackend = (
 
   const eventHandler: WidgetEventHandlerType = useCallback(
     (eventName, widgetId, args) => {
-      console.log('[Event] Sending:', eventName, widgetId, args);
+      logger.debug('[Event] Sending:', eventName, widgetId, args);
       logger.debug(`[${connectionId}] Event: ${eventName}`, { widgetId, args });
       if (!connection) {
         console.warn(
