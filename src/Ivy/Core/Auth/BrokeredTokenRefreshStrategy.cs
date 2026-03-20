@@ -4,14 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Ivy.Core.Auth;
 
-public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
+public class BrokeredTokenRefreshStrategy : RefreshStrategy
 {
     private readonly string _connectionId;
     private readonly string _provider;
-    private readonly IAuthTokenHandlerService _tokenService;
     private readonly IAuthSession _parentSession;
-    private readonly string _machineId;
-    private readonly IAuthService _authService;
+    private readonly IAuthService _parentAuthService;
     private readonly AppSessionStore _sessionStore;
     private readonly IContentBuilder _contentBuilder;
     private readonly IClientProvider _client;
@@ -21,41 +19,33 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
     private int _consecutiveRefreshFailures = 0;
     private const int MaxConsecutiveRefreshFailures = 3;
 
-    public string LoggingName { get; }
+    public override string LoggingName { get; }
 
     public BrokeredTokenRefreshStrategy(
         string connectionId,
         string provider,
-        IAuthTokenHandlerService tokenService,
+        IAuthTokenHandlerService authService,
         IAuthSession parentSession,
-        string machineId,
         IClientProvider client,
-        IAuthService authService,
+        IAuthService parentAuthService,
         AppSessionStore sessionStore,
         IContentBuilder contentBuilder,
-        ILogger logger)
+        ILogger logger) : base(authService)
     {
         _connectionId = connectionId;
         _provider = provider;
-        _tokenService = tokenService;
         _parentSession = parentSession;
-        _machineId = machineId;
         _client = client;
-        _authService = authService;
+        _parentAuthService = parentAuthService;
         _sessionStore = sessionStore;
         _contentBuilder = contentBuilder;
         _logger = logger;
         LoggingName = $"OAuth[{provider}]";
     }
 
-    public bool HasToken()
+    public override async Task<bool> ValidateTokenAsync(CancellationToken cancellationToken = default)
     {
-        return _tokenService.GetCurrentToken() != null;
-    }
-
-    public async Task<bool> ValidateTokenAsync(CancellationToken cancellationToken = default)
-    {
-        var isValid = await _tokenService.ValidateAccessTokenAsync(cancellationToken);
+        var isValid = await base.ValidateTokenAsync(cancellationToken);
         if (isValid)
         {
             // Reset failure counter on successful validation
@@ -64,16 +54,11 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
         return isValid;
     }
 
-    public async Task<TokenLifetime?> GetTokenLifetimeAsync(CancellationToken cancellationToken = default)
-    {
-        return await _tokenService.GetAccessTokenLifetimeAsync(cancellationToken);
-    }
-
-    public async Task<bool> RefreshTokenAsync(CancellationToken cancellationToken = default)
+    public override async Task<bool> RefreshTokenAsync(CancellationToken cancellationToken = default)
     {
         // First, try the token handler's native refresh (uses refresh_token if available)
         _logger.LogInformation("Attempting to refresh OAuth token for {Provider}", _provider);
-        var result = await _tokenService.RefreshAccessTokenAsync(cancellationToken);
+        var result = await _authService.RefreshAccessTokenAsync(cancellationToken);
 
         if (result != null)
         {
@@ -86,7 +71,7 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
 
         try
         {
-            var brokeredResult = await _authService.GetBrokeredSessionsAsync(skipCache: true, cancellationToken);
+            var brokeredResult = await _parentAuthService.GetBrokeredSessionsAsync(skipCache: true, cancellationToken);
 
             // Check if provider is still available
             if (brokeredResult.Sessions == null || !brokeredResult.Sessions.ContainsKey(_provider))
@@ -96,7 +81,7 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
             }
 
             // Validate the token we got back
-            var isValid = await _tokenService.ValidateAccessTokenAsync(cancellationToken);
+            var isValid = await _authService.ValidateAccessTokenAsync(cancellationToken);
             if (isValid)
             {
                 _logger.LogInformation("Successfully refreshed OAuth token for {Provider} via GetBrokeredSessionsAsync", _provider);
@@ -125,7 +110,7 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
         return true;
     }
 
-    public async Task<bool> OnRefreshFailedAsync()
+    public override async Task<bool> OnRefreshFailedAsync()
     {
         _consecutiveRefreshFailures++;
         _logger.LogWarning("BrokeredTokenRefreshLoop[{Provider}]: Refresh failed for {ConnectionId}, attempt {Attempt}/{MaxAttempts}",
@@ -145,12 +130,18 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
         return true; // Continue the loop - will retry RefreshTokenAsync
     }
 
+    public override Task<bool> OnTokenLostAsync()
+    {
+        _logger.LogInformation("BrokeredTokenRefreshLoop[{Provider}]: Token lost for {ConnectionId}, exiting loop", _provider, _connectionId);
+        return Task.FromResult(false); // Exit the loop
+    }
+
     private async Task LogoutAsync()
     {
         try
         {
             // First, properly log out from the auth provider
-            await _authService.LogoutAsync(CancellationToken.None);
+            await _parentAuthService.LogoutAsync(CancellationToken.None);
         }
         catch (Exception ex)
         {
@@ -167,11 +158,5 @@ public class BrokeredTokenRefreshStrategy : ITokenRefreshStrategy
             triggerMachineReload: true,
             _logger,
             $"BrokeredTokenRefreshLoop[{_provider}]");
-    }
-
-    public Task<bool> OnTokenLostAsync()
-    {
-        _logger.LogInformation("BrokeredTokenRefreshLoop[{Provider}]: Token lost for {ConnectionId}, exiting loop", _provider, _connectionId);
-        return Task.FromResult(false); // Exit the loop
     }
 }

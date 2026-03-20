@@ -4,53 +4,29 @@ using Microsoft.Extensions.Logging;
 
 namespace Ivy.Core.Auth;
 
-public class MainAuthTokenRefreshStrategy : ITokenRefreshStrategy
+public class MainAuthTokenRefreshStrategy : RefreshStrategy
 {
-    private readonly IAuthProvider _authProvider;
-    private readonly IAuthTokenHandlerService _authService;
     private readonly IAuthSession _authSession;
     private readonly AppSession _appSession;
     private readonly IContentBuilder _contentBuilder;
     private readonly ILogger _logger;
 
-    public string LoggingName => "MainAuth";
+    public override string LoggingName => "MainAuth";
 
     public MainAuthTokenRefreshStrategy(
-        IAuthProvider authProvider,
         IAuthTokenHandlerService authService,
         IAuthSession authSession,
         AppSession appSession,
         IContentBuilder contentBuilder,
-        ILogger logger)
+        ILogger logger) : base(authService)
     {
-        _authProvider = authProvider;
-        _authService = authService;
         _authSession = authSession;
         _appSession = appSession;
         _contentBuilder = contentBuilder;
         _logger = logger;
     }
 
-    public bool HasToken()
-    {
-        return _authSession.AuthToken != null;
-    }
-
-    public async Task<bool> ValidateTokenAsync(CancellationToken cancellationToken = default)
-    {
-        return await TimeoutHelper.WithTimeoutAsync(
-            ct => _authProvider.ValidateAccessTokenAsync(_authSession, ct),
-            cancellationToken);
-    }
-
-    public async Task<TokenLifetime?> GetTokenLifetimeAsync(CancellationToken cancellationToken = default)
-    {
-        return await TimeoutHelper.WithTimeoutAsync(
-            ct => _authProvider.GetAccessTokenLifetimeAsync(_authSession, ct),
-            cancellationToken);
-    }
-
-    public async Task<bool> RefreshTokenAsync(CancellationToken cancellationToken = default)
+    public override async Task<bool> RefreshTokenAsync(CancellationToken cancellationToken = default)
     {
         var oldSession = _authSession.TakeSnapshot();
         await _authService.RefreshAccessTokenAsync(cancellationToken);
@@ -66,14 +42,14 @@ public class MainAuthTokenRefreshStrategy : ITokenRefreshStrategy
         return _authSession.AuthToken != null;
     }
 
-    public async Task<bool> OnRefreshFailedAsync()
+    public override async Task<bool> OnRefreshFailedAsync()
     {
         _logger.LogError("AuthRefreshLoop: Failed to refresh token for {ConnectionId}, abandoning connection", _appSession.ConnectionId);
         await AbandonConnection(resetTokenAndReload: true);
         return false; // Exit the loop
     }
 
-    public async Task<bool> OnTokenLostAsync()
+    public override async Task<bool> OnTokenLostAsync()
     {
         _logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}, abandoning connection", _appSession.ConnectionId);
         await AbandonConnection(resetTokenAndReload: true);

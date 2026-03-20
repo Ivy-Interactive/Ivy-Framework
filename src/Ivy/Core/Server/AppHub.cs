@@ -615,11 +615,9 @@ public class AppHub(
     {
         var session = sessionStore.Sessions[connectionId];
         var authService = session.AppServices.GetRequiredService<IAuthService>();
-        var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
         var authSession = authService.GetAuthSession();
 
         var strategy = new MainAuthTokenRefreshStrategy(
-            authProvider,
             authService,
             authSession,
             session,
@@ -680,7 +678,6 @@ public class AppHub(
                 provider,
                 tokenService,
                 authSession,
-                session.MachineId,
                 client,
                 authService,
                 sessionStore,
