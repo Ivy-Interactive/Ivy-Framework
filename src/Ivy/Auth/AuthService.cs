@@ -141,8 +141,15 @@ public class AuthService : AuthTokenHandlerService, IAuthService
         var currentProviders = _authSession.BrokeredSessions.Keys.ToHashSet();
         var newProviders = filteredSessions.Keys.ToHashSet();
 
+        // Remove providers that no longer exist
+        var removedProviders = currentProviders.Except(newProviders).ToList();
+        foreach (var provider in removedProviders)
+        {
+            _authSession.RemoveBrokeredSession(provider);
+        }
+
         // Add or update sessions
-        bool hasChanges = false;
+        bool hasChanges = removedProviders.Count > 0;
         foreach (var kvp in filteredSessions)
         {
             // Check if session exists in active sessions
@@ -160,9 +167,11 @@ public class AuthService : AuthTokenHandlerService, IAuthService
             }
         }
 
-        if (hasChanges || currentProviders.Count != newProviders.Count)
+        if (hasChanges)
         {
-            SetAuthCookies(reloadPage: false, triggerMachineBrokeredRefresh: true);
+            // Pass removed providers so their cookies get deleted
+            var cookieJarId = _sessionStore.RegisterAuthSessionCookies(_authSession, removedProviders);
+            _client.SetAuthCookies(cookieJarId, reloadPage: false, triggerMachineReload: null, triggerMachineBrokeredRefresh: true);
         }
 
         return BrokeredSessionsResult.Success(filteredSessions);
