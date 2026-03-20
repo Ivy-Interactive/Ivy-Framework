@@ -67,10 +67,15 @@ public class AuthController() : Controller
             : server.Args?.PathBase;
         var callback = WebhookEndpoint.CreateAuthCallback(callbackId, scheme, host, pathPrefix);
 
+        // DEBUG: Log the constructed callback details
+        logger.LogInformation("OAuth callback construction - Scheme={Scheme}, Host={Host}, PathPrefix={PathPrefix}, FinalUrl={CallbackUrl}",
+            scheme, host, pathPrefix ?? "(null)", callback.GetUri());
+
         try
         {
             // Get the OAuth URI and redirect to it
             var uri = await authService.GetOAuthUriAsync(option, callback, HttpContext.RequestAborted);
+            logger.LogInformation("OAuth redirect URI: {RedirectUri}", uri);
             return Redirect(uri.ToString());
         }
         catch (Exception ex)

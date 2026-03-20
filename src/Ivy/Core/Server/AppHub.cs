@@ -31,7 +31,18 @@ public class AppHub(
             appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
-        return new AppContext(connectionId, machineId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!, server.Args?.PathBase);
+        // Get path base from X-Forwarded-Prefix header (for reverse proxy), or fall back to server.Args
+        var pathBase = server.Args?.PathBase;
+        if (httpContext.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var forwardedPrefix) && !string.IsNullOrEmpty(forwardedPrefix.ToString()))
+        {
+            pathBase = forwardedPrefix.ToString().Trim('/');
+        }
+
+        var requestHost = httpContext.Request.Host.Value!;
+        if (httpContext.Request.Headers.TryGetValue("X-Forwarded-Host", out var forwardedHost) && !string.IsNullOrEmpty(forwardedHost.ToString()))
+            requestHost = forwardedHost.ToString();
+
+        return new AppContext(connectionId, machineId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, requestHost, pathBase);
     }
 
     public override async Task OnConnectedAsync()

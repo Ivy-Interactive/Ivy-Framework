@@ -606,7 +606,7 @@ public class Server
             builder.Services.Add(descriptor);
         }
 
-        builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
+        builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Information);
 
         // Suppress hosting startup errors when not verbose (we handle IOException with a friendly message)
         if (!_args.Verbose)
@@ -666,6 +666,8 @@ public class Server
                 | ForwardedHeaders.XForwardedHost
                 | ForwardedHeaders.XForwardedPrefix,
         };
+        forwardedHeadersOptions.KnownNetworks.Clear();
+        forwardedHeadersOptions.KnownProxies.Clear();
         app.UseForwardedHeaders(forwardedHeadersOptions);
 
         if (!string.IsNullOrEmpty(_args.PathBase))
@@ -944,8 +946,14 @@ public static class WebApplicationExtensions
 
         // SPA fallback: serve index.html for any path not matched by other routes
         // (enables client-side routing for /sign-in, /foo/bar/sign-in, etc.)
-        app.MapFallback(async context =>
-            await ServeIndexHtml(context, app, serverArgs, assembly, resourceName));
+        // Only active when a path base is configured (reverse proxy scenario). Without a path
+        // base, PathToAppIdMiddleware rewrites all app paths to /?appId=... so this is not needed
+        // and would interfere with path rewriting by being selected in the first UseRouting() pass.
+        if (!string.IsNullOrEmpty(serverArgs.PathBase))
+        {
+            app.MapFallback(async context =>
+                await ServeIndexHtml(context, app, serverArgs, assembly, resourceName));
+        }
 
         app.MapGet("/manifest.json", () =>
         {
