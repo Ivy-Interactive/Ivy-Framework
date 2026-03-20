@@ -197,7 +197,7 @@ The user information email, name and picture will now be added to the JWT and co
 
 ### Step 7: Enable Management API Access (Optional)
 
-If you need to access brokered tokens (e.g., to call Google APIs directly using the Google OAuth token), you must authorize your application to access the Auth0 Management API.
+If you need to access brokered sessions (e.g., to call Google APIs directly using the Google OAuth token), you must authorize your application to access the Auth0 Management API. For more information about brokered sessions, see [Authentication Overview](01_AuthenticationOverview.md#brokered-sessions).
 
 #### Why You Need This
 
@@ -217,14 +217,30 @@ When users authenticate via OAuth providers like Google or GitHub, Auth0 manages
    - `read:user_idp_tokens` - Required to access OAuth provider tokens
 9. **Click "Update"**
 
-#### Using Brokered OAuth Tokens
+#### Register Token Handlers
+
+In addition to enabling Management API access, you must have a registered token handler for each OAuth provider you want to use. Without a registered handler, the provider won't appear in brokered sessions.
+
+**Built-in handlers** - Add the NuGet package to your project:
+- `Ivy.Auth.Google` - For Google OAuth tokens
+- `Ivy.Auth.GitHub` - For GitHub OAuth tokens
+
+**Custom handlers** - For other providers (Microsoft, Apple, Twitter), implement a custom `IAuthTokenHandler` and register it in `Program.cs`:
+
+```csharp
+server.RegisterAuthTokenHandler<MyTwitterTokenHandler>(OAuthProviders.Twitter);
+```
+
+See [Authentication Overview](01_AuthenticationOverview.md#registering-token-handlers) for details on implementing custom token handlers.
+
+#### Using Brokered Sessions
 
 Once configured, you can access OAuth provider tokens in your Ivy application:
 
 ```csharp
 var authService = UseService<IAuthService>();
 
-// Get all brokered auth sessions
+// Get all brokered sessions
 var result = await authService.GetBrokeredSessionsAsync();
 
 if (result.Sessions?.TryGetValue(OAuthProviders.Google, out var googleSession) == true)

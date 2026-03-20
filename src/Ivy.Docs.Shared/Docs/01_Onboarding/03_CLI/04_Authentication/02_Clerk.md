@@ -235,6 +235,58 @@ Key features of the Clerk provider:
 - **Customizable UI**: Pre-built authentication components that can be customized to match your brand
 - **Development Mode**: Separate test environment with built-in OAuth credentials for easy local development
 
+## Brokered Sessions
+
+Brokered sessions allow you to access OAuth provider tokens (Google, GitHub, etc.) to call external APIs directly. For more information, see [Authentication Overview](01_AuthenticationOverview.md#brokered-sessions).
+
+### How It Works
+
+Clerk fetches provider tokens via its Backend API using your Secret Key. No additional Clerk configuration is needed beyond having social connections enabled.
+
+### Register Token Handlers
+
+For an OAuth provider to appear in brokered sessions, you must have a registered token handler. Without a registered handler, the provider won't appear in brokered sessions even though Clerk has the tokens.
+
+**Built-in handlers** - Add the NuGet package to your project:
+- `Ivy.Auth.Google` - For Google OAuth tokens
+- `Ivy.Auth.GitHub` - For GitHub OAuth tokens
+
+**Custom handlers** - For other providers (Microsoft, Apple, Twitter), implement a custom `IAuthTokenHandler` and register it in `Program.cs`:
+
+```csharp
+server.RegisterAuthTokenHandler<MyTwitterTokenHandler>(OAuthProviders.Twitter);
+```
+
+See [Authentication Overview](01_AuthenticationOverview.md#registering-token-handlers) for details on implementing custom token handlers.
+
+### Usage Example
+
+```csharp
+var authService = UseService<IAuthService>();
+var result = await authService.GetBrokeredSessionsAsync();
+
+if (result.Sessions?.TryGetValue(OAuthProviders.Google, out var googleSession) == true)
+{
+    using var httpClient = new HttpClient();
+    httpClient.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", googleSession.AuthToken?.AccessToken);
+
+    var response = await httpClient.GetAsync("https://www.googleapis.com/drive/v3/files");
+    // Process response...
+}
+```
+
+### Troubleshooting
+
+**Provider not appearing in brokered sessions**
+- Verify the OAuth provider is enabled in Clerk Dashboard under SSO connections
+- Ensure you have added the appropriate token handler package (`Ivy.Auth.Google`, `Ivy.Auth.GitHub`) or registered a custom handler
+- Check that the user actually authenticated via that OAuth provider
+
+**Token retrieval fails**
+- Verify your Secret Key is correct and has not been rotated
+- Ensure the OAuth provider is properly configured in Clerk Dashboard
+
 ## Security Best Practices
 
 - **Always use HTTPS** in production environments
