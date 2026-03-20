@@ -6,19 +6,21 @@ namespace Ivy.Samples.Shared.Apps.Concepts;
 public class Customer { public int Id { get; set; } public string Name { get; set; } = ""; }
 public class Order { public int Id { get; set; } public int CustomerId { get; set; } }
 
+public record CustomerDetailsArgs(int CustomerId);
+
 // App that registers a beacon for Customer entities
 [App(icon: Icons.Users)]
 [NavigationBeacon(typeof(Customer), nameof(GetCustomerBeacon))]
 public class CustomerDetailsApp : ViewBase
 {
     public static NavigationBeacon<Customer> GetCustomerBeacon() => new(
-        AppId: "customer-details",
-        ArgsBuilder: customer => new { CustomerId = customer.Id }
+        AppId: "concepts/customer-details",
+        ArgsBuilder: customer => new CustomerDetailsArgs(customer.Id)
     );
 
     public override object? Build()
     {
-        var args = UseArgs<dynamic>();
+        var args = UseArgs<CustomerDetailsArgs>();
         var customerId = args?.CustomerId ?? 0;
 
         return Layout.Vertical(
@@ -29,24 +31,26 @@ public class CustomerDetailsApp : ViewBase
     }
 }
 
+public record OrderDetailsArgs(int OrderId, int CustomerId);
+
 // App that registers a beacon for Order entities
 [App(icon: Icons.ShoppingCart)]
 [NavigationBeacon(typeof(Order), nameof(GetOrderBeacon))]
 public class OrderDetailsApp : ViewBase
 {
     public static NavigationBeacon<Order> GetOrderBeacon() => new(
-        AppId: "order-details",
-        ArgsBuilder: order => new { OrderId = order.Id, CustomerId = order.CustomerId }
+        AppId: "concepts/order-details",
+        ArgsBuilder: order => new OrderDetailsArgs(order.Id, order.CustomerId)
     );
 
     public override object? Build()
     {
-        var args = UseArgs<dynamic>();
-        var orderId = args?.OrderId ?? 0;
-        var customerId = args?.CustomerId ?? 0;
-
+        var args = UseArgs<OrderDetailsArgs>();
         var navigator = UseNavigation();
         var customerBeacon = UseNavigationBeacon<Customer>();
+
+        var orderId = args?.OrderId ?? 0;
+        var customerId = args?.CustomerId ?? 0;
 
         return Layout.Vertical(
             Text.H1($"Order Details: #{orderId}"),

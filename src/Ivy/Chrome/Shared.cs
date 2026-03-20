@@ -180,6 +180,6 @@ public static class NavigatorBeaconExtensions
     public static void Navigate<T>(this INavigator navigator, NavigationBeacon<T> beacon, T entity)
     {
         var args = beacon.ArgsBuilder(entity);
-        navigator.Navigate(beacon.AppId, args);
+        navigator.Navigate("app://" + beacon.AppId, args);
     }
 }
