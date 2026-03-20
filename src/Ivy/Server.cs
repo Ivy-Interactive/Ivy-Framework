@@ -109,7 +109,7 @@ public class Server
 
     private void AddDefaultApps()
     {
-        UseErrorNotFound<NotFoundApp>();
+        UseErrorNotFound<ErrorApp>();
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
@@ -119,7 +119,7 @@ public class Server
             Id = AppIds.Default,
             Title = "Default",
             ViewFunc = viewFactory,
-            Path = ["Apps"],
+            Group = ["Apps"],
             IsVisible = true
         });
         DefaultAppId = AppIds.Default;
@@ -221,7 +221,7 @@ public class Server
             Id = AppIds.Chrome,
             Title = "Chrome",
             ViewFactory = viewFactory ?? (() => new DefaultSidebarChrome(ChromeSettings.Default())),
-            Path = [],
+            Group = [],
             IsVisible = false
         });
         DefaultAppId = AppIds.Chrome;
@@ -243,7 +243,7 @@ public class Server
             Id = AppIds.Auth,
             Title = "Auth",
             ViewFactory = viewFactory ?? (() => new DefaultAuthApp()),
-            Path = [],
+            Group = [],
             IsVisible = false
         });
         AuthProviderType = typeof(T);
@@ -268,7 +268,7 @@ public class Server
             Id = AppIds.ErrorNotFound,
             Title = "App Not Found",
             ViewFactory = viewFactory,
-            Path = [],
+            Group = [],
             IsVisible = false
         });
         return this;
@@ -776,7 +776,7 @@ public class Server
             {
                 var config = app.Services.GetRequiredService<IConfiguration>();
                 var missing = hasSecrets.GetSecrets()
-                    .Where(s => s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
+                    .Where(s => !s.Optional && s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
                     .Select(s => s.Key)
                     .ToList();
 
@@ -868,7 +868,7 @@ public class Server
         Dictionary<string, List<string>> missingByProvider)
     {
         var missing = provider.GetSecrets()
-            .Where(s => s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
+            .Where(s => !s.Optional && s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
             .Select(s => s.Key)
             .ToList();
 

@@ -238,6 +238,45 @@ public class RefreshTokenDemo : ViewBase
 }
 ```
 
+## Empty States
+
+Configure what users see when the table has no data. By default, DataTable shows a generic "No items found" message, but you can customize it to match your application's needs:
+
+```csharp demo-tabs
+public class EmptyDataTableDemo : ViewBase
+{
+    public record Person(int Id, string Name, string Email);
+
+    public override object? Build()
+    {
+        // Empty list to demonstrate empty state
+        var emptyList = new List<Person>().AsQueryable();
+
+        return emptyList.ToDataTable(e => e.Id)
+            .Header(e => e.Name, "Name")
+            .Header(e => e.Email, "Email")
+            .Empty((context) => Layout.Vertical()
+                .Padding(16)
+                .Gap(8)
+                .Align(Align.Center)
+                | Text.Block("No people found")
+                    .Large()
+                    .Bold()
+                | Text.Block("Add people to get started")
+                    .Color(Colors.Muted)
+                | new Button("Add Person", variant: ButtonVariant.Primary)
+            )
+            .Height(Size.Units(100));
+    }
+}
+```
+
+The `Empty` method accepts a `FuncViewBuilder` (which is `Func<IViewContext, object?>`) — you can use the context parameter to access hooks like UseState or UseQuery if needed, or simply ignore it and return a widget tree. Use Layout.Vertical(), Card, or any other layout to design your empty state exactly how you want it.
+
+<Callout Type="tip">
+Empty states are checked server-side by executing a Count() query. The empty state view is only rendered if the count is zero, preventing unnecessary "Loading..." states when data doesn't exist.
+</Callout>
+
 ## AI-Powered Filtering
 
 DataTable supports natural language filtering powered by a Large Language Model (LLM). Instead of writing formal filter expressions, users can type conversational queries and the AI will convert them to the appropriate filter syntax.
@@ -512,6 +551,134 @@ items.ToDataTable(idSelector: e => e.Id)
         return ValueTask.CompletedTask;
     })
 ```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+When should I use DataTable instead of Table?
+</Summary>
+<Body>
+
+**Use DataTable when:**
+- ✅ You have a data collection to display (IQueryable, IEnumerable)
+- ✅ You need sorting, filtering, or search functionality
+- ✅ You're working with large datasets (100+ rows)
+- ✅ You want pagination or incremental loading
+- ✅ You need row actions (edit, delete buttons per row)
+- ✅ You're converting from data grid libraries (AG Grid, React Table, Handsontable)
+
+**Use Table when:**
+- ✅ You need a simple layout table without interactivity
+- ✅ You're displaying a small amount of static data (<20 rows)
+- ✅ You need manual control over individual cells (TableCell, TableRow)
+- ✅ You're rendering a report or summary (not raw data browsing)
+
+**Example scenarios:**
+
+```csharp
+// DataTable — interactive stock data grid
+stocks.AsQueryable().ToDataTable()
+    .Header(s => s.Symbol, "Ticker")
+    .Header(s => s.Price, "Price")
+    .Config(c => c.AllowSorting = true)
+    .Height(Size.Units(100))
+
+// Table — static summary report
+new[] {
+    new { Metric = "Total Sales", Value = "$1.2M" },
+    new { Metric = "Orders", Value = "342" }
+}.ToTable().Width(Size.Full())
+```
+
+See [Table](../../03_Common/08_Table.md) documentation for simple table layouts.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+What properties are available on CellClickEventArgs?
+</Summary>
+<Body>
+
+The `CellClickEventArgs` type provides these properties:
+
+- `RowIndex` — zero-based index of the clicked row
+- `ColumnIndex` — zero-based index of the clicked column
+- `ColumnName` — name of the clicked column
+- `CellValue` — value of the clicked cell
+
+**Note**: There is NO `Row` or `Rows` property directly on the event args. To access the clicked row data, retrieve it from your original data source using `RowIndex`:
+
+```csharp
+var table = db.Tenants.ToList();
+table.AsQueryable().ToDataTable((builder) => builder
+    .OnCellClick((e) => {
+        var tenant = table[e.Value.RowIndex]; // Access via index
+        blades.Open(new TenantDetailsBlade(tenant.Id));
+    })
+);
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+How do I define columns in a DataTable?
+</Summary>
+<Body>
+
+Use the `Header()` method to define columns:
+
+```csharp
+.ToDataTable((table) => table
+    .Header(t => t.Name, "Name")
+    .Header(t => t.Email, "Email")
+)
+```
+
+**Note**: There is NO `Table.Column` or `DataTableBuilder.AddColumn` method. Use `Header()` to define column headers and specify which properties to display.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+What's the difference between generic and non-generic UseMutation?
+</Summary>
+<Body>
+
+Use the **non-generic** `UseMutation`:
+
+```csharp
+var mutation = this.UseMutation(async () => {
+    await db.SaveChangesAsync();
+});
+```
+
+**Note**: There is NO generic `UseMutation<TInput, TOutput>` or `MutationOptions<,>`. The method signature is:
+```csharp
+UseMutation(Func<Task> mutation, QueryOptions? options = null)
+```
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+What options are available for QueryOptions?
+</Summary>
+<Body>
+
+The `QueryOptions` type has these properties:
+- `RefreshInterval` — polling frequency
+- `LifetimeType` — controls when query is disposed
+- `Tags` — for invalidation
+
+**Note**: There is NO `OnSuccess` callback property on `QueryOptions`. Handle success in your mutation function directly.
 
 </Body>
 </Details>

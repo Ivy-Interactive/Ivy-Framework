@@ -54,7 +54,7 @@ public class DefaultContentBuilder : IContentBuilder
 
         if (content is Exception e)
         {
-            return new ErrorView(e);
+            return new ExceptionErrorView(e);
         }
 
         if (content is IWidget widget)

@@ -72,6 +72,11 @@ public class AppHub(
                 requestScheme = forwardedProto.ToString();
             }
 
+            // Resolve route before auth so we can avoid reload loop on error page (skip LogoutAsync) and avoid overriding to Auth app
+            var appRouter = new AppRouter(server);
+            var routeResult = appRouter.Resolve(httpContext);
+            var isErrorAppRequest = routeResult.AppId == AppIds.ErrorNotFound || routeResult.NavigationAppId == AppIds.ErrorNotFound;
+
             if (server.AuthProviderType != null)
             {
                 var authProvider = server.ServiceProvider!.GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
@@ -118,17 +123,16 @@ public class AppHub(
                     authSession.AuthToken = null;
                 }
 
-                if (authSession.AuthToken == null && parentId != null)
+                // Don't call LogoutAsync when user is on the error page: nothing to clear and it would send SetAuthCookies(reloadPage: true), causing a reload loop
+                if (authSession.AuthToken == null && parentId != null && !isErrorAppRequest)
                 {
                     await authService.LogoutAsync(Context.ConnectionAborted);
                 }
             }
 
-            var appRouter = new AppRouter(server);
-            var routeResult = appRouter.Resolve(httpContext);
-
-            // Override to Auth app if authentication failed
-            if (server.AuthProviderType != null)
+            // Reuse routeResult and isErrorAppRequest from above
+            // Override to Auth app if authentication failed (unless they requested the error page)
+            if (server.AuthProviderType != null && !isErrorAppRequest)
             {
                 var authService = appServices.BuildServiceProvider().GetService<IAuthService>();
                 if (authService?.GetCurrentToken() == null)
@@ -152,6 +156,10 @@ public class AppHub(
             var machineId = AppRouter.GetMachineId(httpContext);
 
             var appArgs = GetAppArgs(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
+            if (routeResult.ArgsJson != null)
+            {
+                appArgs = new AppContext(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, routeResult.ArgsJson, requestScheme, httpContext.Request.Host.Value!);
+            }
 
             logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
 
@@ -235,7 +243,7 @@ public class AppHub(
             }
             catch (Exception e)
             {
-                var tree = new WidgetTree(new ErrorView(e), contentBuilder, serviceProvider);
+                var tree = new WidgetTree(new ExceptionErrorView(e), contentBuilder, serviceProvider);
                 await tree.BuildAsync();
                 await Clients.Caller.SendAsync("Refresh", new
                 {
@@ -505,22 +513,28 @@ public class AppHub(
 
     public Task Event(string eventName, string widgetId, JsonArray? args)
     {
-        logger.LogDebug("Event: {EventName} {WidgetId} {Args}", eventName, widgetId, args);
+        logger.LogWarning("Event RECEIVED: {EventName} {WidgetId} ConnectionId={ConnectionId}", eventName, widgetId, Context.ConnectionId);
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
             logger.LogWarning("Event: {EventName} {WidgetId} [AppSession Not Found]", eventName, widgetId);
             return Task.CompletedTask;
         }
 
+        if (appSession.EventQueue == null)
+        {
+            logger.LogWarning("Event: {EventName} {WidgetId} [EventQueue is null!]", eventName, widgetId);
+            return Task.CompletedTask;
+        }
+
         // Enqueue async event handling to avoid tying up ThreadPool workers
-        appSession.EventQueue?.Enqueue(async () =>
+        appSession.EventQueue.Enqueue(async () =>
         {
             try
             {
                 appSession.LastInteraction = DateTime.UtcNow;
                 if (!await appSession.WidgetTree.TriggerEventAsync(widgetId, eventName, args ?? new JsonArray()))
                 {
-                    logger.LogDebug("Event '{EventName}' for Widget '{WidgetId}' not found.", eventName, widgetId);
+                    logger.LogWarning("Event '{EventName}' for Widget '{WidgetId}' not found.", eventName, widgetId);
                 }
             }
             catch (Exception e)

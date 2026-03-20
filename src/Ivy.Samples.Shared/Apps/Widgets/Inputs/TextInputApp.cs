@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.TextCursorInput, path: ["Widgets", "Inputs"], searchHints: ["password", "textarea", "search", "email"])]
+[App(icon: Icons.TextCursorInput, group: ["Widgets", "Inputs"], searchHints: ["password", "textarea", "search", "email"])]
 public class TextInputApp : SampleBase
 {
     protected override object? BuildSample()

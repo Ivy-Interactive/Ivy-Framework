@@ -169,11 +169,18 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
     [referenceAreas]
   );
 
+  // When explicit series are configured, only plot those data keys
+  const configuredBarKeys = (bars || []).map(b => b.dataKey).filter(Boolean);
+  const barKeysToPlot =
+    configuredBarKeys.length > 0
+      ? valueKeys.filter(k => configuredBarKeys.includes(k))
+      : valueKeys;
+
   // Memoize series configuration
   const series = useMemo(
     () =>
-      valueKeys.map((key, i) => {
-        const rawBarConfig = bars?.[i];
+      barKeysToPlot.map(key => {
+        const rawBarConfig = bars?.find(b => b.dataKey === key);
         // Apply C# defaults for bar config
         const barConfig = rawBarConfig
           ? applyDefaults(rawBarConfig, BAR_DEFAULTS)
@@ -206,7 +213,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         };
       }),
     [
-      valueKeys,
+      barKeysToPlot,
       data,
       bars,
       barGap,

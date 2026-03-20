@@ -5,6 +5,7 @@ import React, {
   useRef,
   useEffect,
 } from 'react';
+import { useOptimisticValue } from './shared/useOptimisticValue';
 import { useEventHandler } from '@/components/event-handler';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { inputStyles } from '@/lib/styles';
@@ -79,6 +80,8 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
 
+  const [localValue, setLocalValue] = useOptimisticValue(value, open);
+
   const filteredIcons = useMemo(() => {
     if (!search.trim()) return LUCIDE_ICON_NAMES;
     const q = search.toLowerCase().trim();
@@ -87,30 +90,33 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
 
   const handleSelect = useCallback(
     (iconName: string) => {
+      setLocalValue(iconName);
       eventHandler('OnChange', id, [iconName]);
       setOpen(false);
       setSearch('');
     },
-    [eventHandler, id]
+    [eventHandler, id, setLocalValue]
   );
 
   const handleClear = useCallback(() => {
+    setLocalValue(null);
     eventHandler('OnChange', id, [null]);
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, [null]);
-  }, [eventHandler, id, events]);
+  }, [eventHandler, id, events, setLocalValue]);
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) setSearch('');
   }, []);
 
-  const hasValue = value != null && value !== '' && value !== 'None';
+  const hasValue =
+    localValue != null && localValue !== '' && localValue !== 'None';
 
   const valueTextRef = useRef<HTMLSpanElement>(null);
   const [isEllipsed, setIsEllipsed] = useState(false);
 
   useEffect(() => {
-    if (!hasValue || !value) {
+    if (!hasValue || !localValue) {
       requestAnimationFrame(() => setIsEllipsed(false));
       return;
     }
@@ -135,7 +141,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
       clearTimeout(resizeTimeout);
       window.removeEventListener('resize', handleResize);
     };
-  }, [hasValue, value]);
+  }, [hasValue, localValue]);
 
   const valueTextSpan = hasValue ? (
     <span
@@ -145,17 +151,19 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
         iconInputTextVariant({ density })
       )}
     >
-      {value}
+      {localValue}
     </span>
   ) : null;
 
   const wrappedValueText =
-    isEllipsed && value ? (
+    isEllipsed && localValue ? (
       <TooltipProvider>
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>{valueTextSpan}</TooltipTrigger>
           <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-            <div className="whitespace-pre-wrap wrap-break-word">{value}</div>
+            <div className="whitespace-pre-wrap wrap-break-word">
+              {localValue}
+            </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -180,7 +188,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             {hasValue ? (
               <span className="flex items-center gap-2 min-w-0">
                 <Icon
-                  name={value}
+                  name={localValue}
                   className={cn('shrink-0', iconInputIconVariant({ density }))}
                 />
                 {wrappedValueText}
@@ -225,7 +233,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
                 }}
               >
                 {filteredIcons.map(iconName => {
-                  const isSelected = value === iconName;
+                  const isSelected = localValue === iconName;
                   return (
                     <button
                       key={iconName}

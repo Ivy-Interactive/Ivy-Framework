@@ -22,6 +22,7 @@ public class DataTableBuilder<TModel>(
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
     private readonly Dictionary<string, EventHandler<object>> _cellActions = [];
     private RefreshToken? _refreshToken;
+    private FuncViewBuilder? _emptyViewFactory;
 
     private readonly string? _idColumnName =
         idSelector != null ? TypeHelper.GetNameFromMemberExpression(idSelector.Body) : null;
@@ -283,6 +284,12 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+    public DataTableBuilder<TModel> Empty(FuncViewBuilder emptyViewFactory)
+    {
+        _emptyViewFactory = emptyViewFactory;
+        return this;
+    }
+
     public override object? Build()
     {
         var chatClient = UseService<IChatClient?>();
@@ -342,7 +349,7 @@ public class DataTableBuilder<TModel>(
         }
 
         return new DataTableView(queryable1, width, _height, columns, configuration, onCellClick, _onCellActivated,
-            _menuItemRowActions, _onRowAction, idSelectorForView, _refreshToken);
+            _menuItemRowActions, _onRowAction, idSelectorForView, _refreshToken, _emptyViewFactory);
     }
 
     public object[] GetMemoValues()

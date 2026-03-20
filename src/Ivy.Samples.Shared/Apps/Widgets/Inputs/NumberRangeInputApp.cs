@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.GripVertical, path: ["Widgets", "Inputs"], searchHints: ["numeric", "range", "slider", "min", "max", "interval"])]
+[App(icon: Icons.GripVertical, group: ["Widgets", "Inputs"], searchHints: ["numeric", "range", "slider", "min", "max", "interval"])]
 public class NumberRangeInputApp : SampleBase
 {
     protected override object? BuildSample()

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
+import { camelCase } from '@/lib/utils';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
 import {
@@ -69,10 +70,21 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
     [colorScheme, colors]
   );
 
-  const newData = useMemo(
-    () => data.map(d => ({ value: d.measure, name: d.dimension as string })),
-    [data]
-  );
+  const newData = useMemo(() => {
+    // Use dataKey/nameKey from first Pie config, with camelCase conversion for C# property names
+    const pieConfig = pies?.[0];
+    const valueKey = pieConfig?.dataKey
+      ? String(camelCase(pieConfig.dataKey))
+      : 'measure';
+    const labelKey = pieConfig?.nameKey
+      ? String(camelCase(pieConfig.nameKey))
+      : 'dimension';
+
+    return data.map(d => ({
+      value: d[valueKey],
+      name: d[labelKey] as string,
+    }));
+  }, [data, pies]);
 
   // Memoize series configuration
   const series = useMemo(

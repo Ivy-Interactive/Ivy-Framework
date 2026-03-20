@@ -204,3 +204,23 @@ public class NavigationExample : ViewBase
 
 </Body>
 </Details>
+
+## Faq
+
+### Why do Cards inside Layout.Horizontal() stack vertically instead of appearing side-by-side?
+
+`Card` defaults to `Width = Size.Full()` (100% width). When placed in a horizontal layout, each card tries to take the full width, preventing side-by-side rendering. Set explicit fractional widths:
+
+```csharp
+// ❌ Cards stack vertically — each takes full width
+Layout.Horizontal()
+    | new Card("Left").Content(...)
+    | new Card("Right").Content(...)
+
+// ✅ Cards share space equally
+Layout.Horizontal()
+    | new Card("Left").Content(...).Width(Size.Fraction(1))
+    | new Card("Right").Content(...).Width(Size.Fraction(1))
+```
+
+Alternatively, use `Layout.Grid().Columns(2)` for grid-based layouts.

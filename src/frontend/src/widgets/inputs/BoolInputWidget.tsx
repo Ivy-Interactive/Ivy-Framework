@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { useOptimisticValue } from './shared/useOptimisticValue';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Toggle } from '@/components/ui/toggle';
@@ -298,12 +299,18 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   // Normalize undefined to null when nullable
   const normalizedValue = nullable && value === undefined ? null : value;
 
+  const [localValue, setLocalValue] = useOptimisticValue(
+    normalizedValue,
+    false
+  );
+
   const handleChange = useCallback(
     (newValue: boolean | null) => {
       if (disabled || loading) return;
+      setLocalValue(newValue);
       eventHandler('OnChange', id, [newValue]);
     },
-    [disabled, loading, eventHandler, id]
+    [disabled, loading, eventHandler, id, setLocalValue]
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);
@@ -313,7 +320,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       id={id}
       label={label}
       description={description}
-      value={normalizedValue}
+      value={localValue}
       disabled={disabled}
       loading={loading}
       nullable={nullable}

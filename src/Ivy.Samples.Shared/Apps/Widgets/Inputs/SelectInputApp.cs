@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.LassoSelect, path: ["Widgets", "Inputs"], searchHints: ["dropdown", "picker", "options", "choice", "select", "menu"])]
+[App(icon: Icons.LassoSelect, group: ["Widgets", "Inputs"], searchHints: ["dropdown", "picker", "options", "choice", "select", "menu"])]
 public class SelectInputApp : SampleBase
 {
     protected override object? BuildSample()

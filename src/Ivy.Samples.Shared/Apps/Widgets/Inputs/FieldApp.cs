@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.TextSelect, title: "Field Input ", path: ["Widgets", "Inputs"], searchHints: ["label", "wrapper", "form-field", "input", "description", "help"])]
+[App(icon: Icons.TextSelect, title: "Field Input ", group: ["Widgets", "Inputs"], searchHints: ["label", "wrapper", "form-field", "input", "description", "help"])]
 public class FieldApp : SampleBase
 {
     protected override object? BuildSample()

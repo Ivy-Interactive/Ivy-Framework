@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
+import { useOptimisticValue } from './shared/useOptimisticValue';
 import { useEventHandler, EventHandler } from '@/components/event-handler';
 import NumberInput from '@/components/NumberInput';
 import { Slider } from '@/components/ui/slider';
@@ -351,6 +352,11 @@ export const NumberInputWidget = memo(
     const normalizedValue =
       nullable && props.value === undefined ? null : props.value;
 
+    const [localValue, setLocalValue] = useOptimisticValue(
+      normalizedValue,
+      false
+    );
+
     const handleChange = useCallback(
       (newValue: number | null) => {
         // Apply bounds only if value is not null
@@ -370,13 +376,15 @@ export const NumberInputWidget = memo(
             props.targetType
           );
 
+          setLocalValue(validatedValue);
           eventHandler('OnChange', id, [validatedValue]);
         } else {
           // Pass null directly for nullable inputs
+          setLocalValue(newValue);
           eventHandler('OnChange', id, [newValue]);
         }
       },
-      [eventHandler, id, props.min, props.max, props.targetType]
+      [eventHandler, id, props.min, props.max, props.targetType, setLocalValue]
     );
 
     return (
@@ -385,7 +393,7 @@ export const NumberInputWidget = memo(
           <SliderVariant
             id={id}
             {...props}
-            value={normalizedValue}
+            value={localValue}
             onValueChange={handleChange}
           />
         ) : (
@@ -393,7 +401,7 @@ export const NumberInputWidget = memo(
             id={id}
             {...props}
             formatStyle={formatStyle}
-            value={normalizedValue}
+            value={localValue}
             nullable={nullable}
             onValueChange={handleChange}
           />

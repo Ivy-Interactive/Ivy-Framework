@@ -91,6 +91,31 @@ public class FormatDateRangeDemo : ViewBase
 }        
 ```
 
+## Constraints
+
+DateRangeInput supports `Min` and `Max` constraints to restrict the selectable date range. Dates outside the valid range are visually disabled in the picker.
+
+```csharp demo-below
+public class DateRangeConstraintsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var bookingRange = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
+
+        var minDate = new DateOnly(2026, 1, 1);
+        var maxDate = new DateOnly(2026, 12, 31);
+
+        return Layout.Vertical().Gap(4)
+            | Text.P("Select vacation dates for 2026").Small()
+            | bookingRange.ToDateRangeInput()
+                .Min(minDate)
+                .Max(maxDate)
+                .Placeholder("Dates must be within 2026")
+                .Format("MM/dd/yyyy");
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.DateRangeInput" ExtensionTypes="Ivy.DateRangeInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/DateRangeInput.cs"/>
 
 ## Examples
@@ -126,6 +151,8 @@ public class HotelBookingDemo : ViewBase
         return Layout.Vertical().Gap(4)
             | Text.P("Book Your Stay").Large().Bold()
             | bookingRange.ToDateRangeInput()
+                .Min(DateOnly.FromDateTime(DateTime.Today))
+                .Max(DateOnly.FromDateTime(DateTime.Today.AddYears(1)))
                 .Placeholder("Select check-in and check-out dates")
                 .Format("MMM dd, yyyy")
                 .Invalid(errorMessage)

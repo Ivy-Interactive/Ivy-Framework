@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Code, path: ["Widgets", "Inputs"], searchHints: ["editor", "syntax", "programming", "code", "highlighting", "monaco"])]
+[App(icon: Icons.Code, group: ["Widgets", "Inputs"], searchHints: ["editor", "syntax", "programming", "code", "highlighting", "monaco"])]
 public class CodeInputApp : SampleBase
 {
     protected override object? BuildSample()

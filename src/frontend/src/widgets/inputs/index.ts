@@ -11,5 +11,6 @@ export { FeedbackInputWidget } from './FeedbackInputWidget';
 export { AsyncSelectInputWidget } from './AsyncSelectInputWidget';
 export { DateRangeInputWidget } from './DateRangeInputWidget';
 export { FileInputWidget } from './FileInputWidget';
+export { SignatureInputWidget } from './SignatureInputWidget';
 export { FieldWidget } from './FieldWidget';
 export { CodeInputWidget } from './code';

@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Columns3, path: ["Tests"], isVisible: false, searchHints: ["markdown", "html", "rendering", "formatting", "comparison", "preview"])]
+[App(icon: Icons.Columns3, group: ["Tests"], isVisible: false, searchHints: ["markdown", "html", "rendering", "formatting", "comparison", "preview"])]
 public class MarkdownHtmlTestApp : SampleBase
 {
     protected override object? BuildSample()

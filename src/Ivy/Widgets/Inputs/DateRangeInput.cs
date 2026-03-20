@@ -31,6 +31,10 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 
     [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }
 
+    [Prop] public DateOnly? Min { get; set; }
+
+    [Prop] public DateOnly? Max { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
@@ -135,6 +139,16 @@ public static class DateRangeInputExtensions
     public static DateRangeInputBase FirstDayOfWeek(this DateRangeInputBase widget, DayOfWeek day)
     {
         return widget with { FirstDayOfWeek = day };
+    }
+
+    public static DateRangeInputBase Min(this DateRangeInputBase widget, DateOnly min)
+    {
+        return widget with { Min = min };
+    }
+
+    public static DateRangeInputBase Max(this DateRangeInputBase widget, DateOnly max)
+    {
+        return widget with { Max = max };
     }
 
     [OverloadResolutionPriority(1)]

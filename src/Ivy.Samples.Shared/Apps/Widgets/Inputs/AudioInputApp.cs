@@ -2,7 +2,7 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
 
-[App(icon: Icons.Mic, path: ["Widgets", "Inputs"], searchHints: ["microphone", "recording", "voice", "audio", "capture", "sound"])]
+[App(icon: Icons.Mic, group: ["Widgets", "Inputs"], searchHints: ["microphone", "recording", "voice", "audio", "capture", "sound"])]
 
 public class AudioInputApp() : SampleBase
 {
