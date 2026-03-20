@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - sheet
   - sidebar
   - drawer
   - panel

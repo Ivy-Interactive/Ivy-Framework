@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - area chart
   - visualization
   - graph
   - analytics

@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - sankey
   - visualization
   - flow
   - analytics

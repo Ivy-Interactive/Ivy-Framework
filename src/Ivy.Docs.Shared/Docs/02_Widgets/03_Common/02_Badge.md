@@ -2,6 +2,7 @@
 prepare: |
   var client = UseService<IClientProvider>();
 searchHints:
+  - badge
   - tag
   - label
   - chip

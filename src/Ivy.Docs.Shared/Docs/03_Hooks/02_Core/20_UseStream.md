@@ -91,6 +91,38 @@ var stream = Context.UseStream<TextRun>(buffer: false);
 | Progress or log tail that updates in place | Full list updates - [UseState](./03_UseState.md) or [UseQuery](./09_UseQuery.md) |
 | Pushing binary or structured chunks to a single widget | Cross-component events - [UseSignal](./10_UseSignal.md) |
 
+## Faq
+
+### How do I stream IChatClient responses to the UI?
+
+Use `IChatClient.GetStreamingResponseAsync()` with `UseStream<TextRun>`:
+
+```csharp
+var chatClient = UseService<IChatClient>();
+var stream = UseStream<TextRun>();
+
+async Task Generate()
+{
+    stream.Clear();
+    await foreach (var update in chatClient.GetStreamingResponseAsync(messages))
+    {
+        if (update.Text is { } text)
+            stream.Write(new TextRun(text));
+    }
+}
+
+Text.Rich().UseStream(stream);
+```
+
+Register `IChatClient` in Program.cs:
+
+```csharp
+builder.Services.AddSingleton<IChatClient>(sp =>
+    new OpenAIClient(apiKey)
+        .GetChatClient("gpt-4o-mini")
+        .AsIChatClient());
+```
+
 ## See Also
 
 - [RichTextBlock — Streaming](../../../02_Widgets/01_Primitives/24_RichTextBlock.md) — Main use case: streaming `TextRun` with `Text.Rich().UseStream(stream)`

@@ -7,7 +7,7 @@ public record Bar
     public Bar(string dataKey, object? stackId = null, string? name = null)
     {
         DataKey = dataKey;
-        Name = name ?? dataKey;
+        Name = name ?? StringHelper.SplitPascalCase(dataKey);
         StackId = stackId?.ToString();
     }
 

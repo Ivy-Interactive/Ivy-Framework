@@ -228,6 +228,9 @@ public abstract partial class ViewBase
     protected void UseInterval(Action callback, TimeSpan? interval) =>
         this.Context.UseInterval(callback, interval);
 
+    protected Action<string> UseClipboard() =>
+        this.Context.UseClipboard();
+
     protected static EffectTrigger OnMount() =>
         EffectTrigger.OnMount();
 }
