@@ -24,11 +24,6 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    private readonly ConcurrentDictionary<string, Action<string>> _brokeredTokenAddedHandlers = new();
-    private readonly ConcurrentDictionary<string, Action<string>> _brokeredTokenRemovedHandlers = new();
-    private readonly ConcurrentDictionary<string, HashSet<string>> _activeBrokeredRefreshLoops = new();
-    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>> _brokeredRefreshCancellations = new();
-
     private AppContext GetAppArgs(string connectionId, string machineId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
     {
         string? appArgs = null;
@@ -283,9 +278,11 @@ public class AppHub(
                     var authSession = authService.GetAuthSession();
                     var brokeredSessions = authSession.BrokeredSessions.Keys.ToList();
 
-                    // Track active brokered refresh loops and their cancellation tokens for this connection
-                    var activeProviders = _activeBrokeredRefreshLoops.GetOrAdd(connectionId, _ => new HashSet<string>());
-                    var cancellations = _brokeredRefreshCancellations.GetOrAdd(connectionId, _ => new ConcurrentDictionary<string, CancellationTokenSource>());
+                    // Track active brokered refresh loops and their cancellation tokens on the session
+                    var activeProviders = new HashSet<string>();
+                    var cancellations = new ConcurrentDictionary<string, CancellationTokenSource>();
+                    appState.ActiveBrokeredRefreshLoops = activeProviders;
+                    appState.BrokeredRefreshCancellations = cancellations;
 
                     void AddProvider(string provider)
                     {
@@ -334,8 +331,8 @@ public class AppHub(
                         }
                     };
 
-                    _brokeredTokenAddedHandlers[connectionId] = addedHandler;
-                    _brokeredTokenRemovedHandlers[connectionId] = removedHandler;
+                    appState.BrokeredTokenAddedHandler = addedHandler;
+                    appState.BrokeredTokenRemovedHandler = removedHandler;
                     authSession.BrokeredSessionAdded += addedHandler;
                     authSession.BrokeredSessionRemoved += removedHandler;
                 }
@@ -381,60 +378,46 @@ public class AppHub(
             // Cancel all pending HTTP tunnel requests for this connection
             HttpTunnelingController.CancelRequestsForConnection(Context.ConnectionId, "SignalR connection closed");
 
-            // Clean up brokered session event subscriptions
-            if (_brokeredTokenAddedHandlers.TryRemove(Context.ConnectionId, out var addedHandler))
-            {
-                // Get the auth session and unsubscribe
-                if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var tempAppState))
-                {
-                    var authService = tempAppState.AppServices.GetService<IAuthService>();
-                    if (authService != null)
-                    {
-                        var authSession = authService.GetAuthSession();
-                        authSession.BrokeredSessionAdded -= addedHandler;
-                    }
-                }
-            }
-
-            if (_brokeredTokenRemovedHandlers.TryRemove(Context.ConnectionId, out var removedHandler))
-            {
-                // Get the auth session and unsubscribe
-                if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var tempAppState))
-                {
-                    var authService = tempAppState.AppServices.GetService<IAuthService>();
-                    if (authService != null)
-                    {
-                        var authSession = authService.GetAuthSession();
-                        authSession.BrokeredSessionRemoved -= removedHandler;
-                    }
-                }
-            }
-
-            // Cancel and dispose all brokered token refresh loop cancellation tokens
-            if (_brokeredRefreshCancellations.TryRemove(Context.ConnectionId, out var cancellations))
-            {
-                foreach (var kvp in cancellations)
-                {
-                    try
-                    {
-                        kvp.Value.Cancel();
-                        kvp.Value.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogWarning(ex, "Error cancelling brokered token refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, Context.ConnectionId);
-                    }
-                }
-            }
-
-            // Clean up active brokered token refresh loop tracking
-            _activeBrokeredRefreshLoops.TryRemove(Context.ConnectionId, out _);
-
             if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
             {
                 try
                 {
-                    // Dispose app state first (stops EventDispatchQueue, cleans up widget tree)
+                    // Clean up brokered session event subscriptions
+                    if (appState.BrokeredTokenAddedHandler != null || appState.BrokeredTokenRemovedHandler != null)
+                    {
+                        var authService = appState.AppServices.GetService<IAuthService>();
+                        if (authService != null)
+                        {
+                            var authSession = authService.GetAuthSession();
+                            if (appState.BrokeredTokenAddedHandler != null)
+                            {
+                                authSession.BrokeredSessionAdded -= appState.BrokeredTokenAddedHandler;
+                            }
+                            if (appState.BrokeredTokenRemovedHandler != null)
+                            {
+                                authSession.BrokeredSessionRemoved -= appState.BrokeredTokenRemovedHandler;
+                            }
+                        }
+                    }
+
+                    // Cancel and dispose all brokered token refresh loop cancellation tokens
+                    if (appState.BrokeredRefreshCancellations != null)
+                    {
+                        foreach (var kvp in appState.BrokeredRefreshCancellations)
+                        {
+                            try
+                            {
+                                kvp.Value.Cancel();
+                                kvp.Value.Dispose();
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.LogWarning(ex, "Error cancelling brokered token refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, Context.ConnectionId);
+                            }
+                        }
+                    }
+
+                    // Dispose app state (stops EventDispatchQueue, cleans up widget tree)
                     // so in-flight event handlers finish before the sender is torn down.
                     await appState.DisposeAsync();
 
@@ -634,9 +617,14 @@ public class AppHub(
 
     private async Task BrokeredTokenRefreshLoopAsync(string connectionId, string provider, CancellationToken cancellationToken)
     {
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
+        {
+            logger.LogWarning("BrokeredTokenRefreshLoop[{Provider}]: Session not found for {ConnectionId}, exiting loop.", provider, connectionId);
+            return;
+        }
+
         try
         {
-            var session = sessionStore.Sessions[connectionId];
             var handler = server.ServiceProvider!.GetKeyedService<IAuthTokenHandler>(provider);
             if (handler == null)
             {
@@ -694,21 +682,18 @@ public class AppHub(
         finally
         {
             // Clean up: remove provider from active set when loop exits
-            if (_activeBrokeredRefreshLoops.TryGetValue(connectionId, out var activeProviders))
+            if (session.ActiveBrokeredRefreshLoops != null)
             {
-                lock (activeProviders)
+                lock (session.ActiveBrokeredRefreshLoops)
                 {
-                    activeProviders.Remove(provider);
+                    session.ActiveBrokeredRefreshLoops.Remove(provider);
                 }
             }
 
             // Clean up: dispose the cancellation token source
-            if (_brokeredRefreshCancellations.TryGetValue(connectionId, out var cancellations))
+            if (session.BrokeredRefreshCancellations?.TryRemove(provider, out var cts) == true)
             {
-                if (cancellations.TryRemove(provider, out var cts))
-                {
-                    cts.Dispose();
-                }
+                cts.Dispose();
             }
         }
     }

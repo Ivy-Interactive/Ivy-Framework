@@ -150,7 +150,13 @@ public class BrokeredTokenRefreshStrategy : RefreshStrategy
         }
 
         // Then abandon the session (show error view)
-        var session = _sessionStore.Sessions[_connectionId];
+        if (!_sessionStore.Sessions.TryGetValue(_connectionId, out var session))
+        {
+            _logger.LogWarning("BrokeredTokenRefreshLoop[{Provider}]: Session already removed for {ConnectionId}, skipping abandon",
+                _provider, _connectionId);
+            return;
+        }
+
         await SessionHelpers.AbandonSessionAsync(
             session,
             _contentBuilder,
