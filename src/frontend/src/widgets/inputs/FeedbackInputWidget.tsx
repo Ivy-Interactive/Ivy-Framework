@@ -16,6 +16,8 @@ interface FeedbackInputWidgetProps {
   invalid?: string;
   events: string[];
   nullable?: boolean;
+  allowHalf?: boolean;
+  max?: number;
   density?: Densities;
 }
 
@@ -27,6 +29,8 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   invalid,
   events = EMPTY_ARRAY,
   nullable = false,
+  allowHalf = false,
+  max = 5,
   density = Densities.Medium,
 }) => {
   const eventHandler = useEventHandler();
@@ -143,6 +147,8 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
         value={numericValue}
         onRate={handleChange}
         invalid={invalid}
+        allowHalf={allowHalf}
+        totalEmojis={max}
         density={density}
       />
     );
@@ -155,6 +161,8 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
         value={numericValue}
         onRate={handleChange}
         invalid={invalid}
+        allowHalf={allowHalf}
+        totalStars={max}
         density={density}
       />
     );

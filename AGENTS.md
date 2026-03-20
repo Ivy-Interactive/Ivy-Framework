@@ -328,6 +328,10 @@ userNameState.ToTextInput().Required().MaxLength(50).Placeholder("Enter your nam
 - `DbContext` must never be injected directly! Always resolve `IDbContextFactory<T>` via `UseService` and create scoped instances with `CreateDbContextAsync()` inside query/mutation lambdas
 - **Nested layouts MUST use parentheses** — `Layout.Vertical() | (Layout.Horizontal() | child1 | child2)` — without parentheses, C# left-to-right `|` evaluation adds children to the outer layout, not the inner one. See the nested layout example in the Layouts section above.
 
+## CLI Commands
+
+Prefer using `ivy cli explain` for command discovery over MCP server tools as it provides a reliable, built-in structural breakdown.
+
 ## Further Reading
 
 [Forms](https://docs.ivy.app/onboarding/concepts/forms.md)
