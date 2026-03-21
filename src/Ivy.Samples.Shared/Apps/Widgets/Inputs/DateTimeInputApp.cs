@@ -30,6 +30,11 @@ public class DateTimeInputApp : SampleBase
         var constrainedDateState = UseState(DateTime.Now);
         var appointmentState = UseState(DateTime.Now);
         var timeSlotState = UseState(TimeOnly.FromDateTime(DateTime.Now));
+        var constrainedMonthState = UseState(new DateTime(DateTime.Now.Year, 6, 1));
+        var constrainedWeekState = UseState(DateTime.Now);
+        var constrainedYearState = UseState(new DateTime(DateTime.Now.Year, 1, 1));
+        var meetingSlotState = UseState(DateTime.Today.AddHours(10));
+        var lunchTimeState = UseState(new TimeOnly(12, 0));
 
         // FirstDayOfWeek states
         var mondayFirstDate = UseState(DateOnly.FromDateTime(DateTime.Now));
@@ -538,7 +543,16 @@ public class DateTimeInputApp : SampleBase
             | Text.Block($"Nullable DateOnly: {nullableDateOnlyState.Value?.ToString("yyyy-MM-dd") ?? "null"}")
             | Text.Block($"Nullable TimeOnly: {nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null"}")
             | Text.Block($"DateTimeOffset: {dateTimeOffsetState.Value:yyyy-MM-dd HH:mm:ss zzz}")
-            | Text.Block($"Nullable DateTimeOffset: {nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null"}");
+            | Text.Block($"Nullable DateTimeOffset: {nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null"}")
+            | Text.H3("Min/Max/Step sample values")
+            | Text.Block($"Date (today..+90d): {constrainedDateState.Value:yyyy-MM-dd}")
+            | Text.Block($"Business hours DateTime: {appointmentState.Value:yyyy-MM-dd HH:mm}")
+            | Text.Block($"Time slot (15m step): {timeSlotState.Value:HH:mm}")
+            | Text.Block($"Month (in calendar year): {constrainedMonthState.Value:yyyy-MM}")
+            | Text.Block($"Week (±6 months): {constrainedWeekState.Value:yyyy-'W'ww}")
+            | Text.Block($"Year (2020-2035): {constrainedYearState.Value:yyyy}")
+            | Text.Block($"Meeting (30m step, 9-5): {meetingSlotState.Value:yyyy-MM-dd HH:mm}")
+            | Text.Block($"Lunch time (11:30-13:30, 15m): {lunchTimeState.Value:HH:mm}");
 
         // Min/Max/Step examples
         var constraintsGrid = Layout.Grid().Columns(3)
@@ -570,7 +584,54 @@ public class DateTimeInputApp : SampleBase
                 .ToTimeInput()
                 .Step(TimeSpan.FromMinutes(15))
                 .Placeholder("Select time slot")
-                .TestId("datetime-input-time-slots");
+                .TestId("datetime-input-time-slots")
+
+            | Text.Monospaced("Month in year")
+            | Text.Block("Min Jan / max Dec of current calendar year")
+            | constrainedMonthState
+                .ToMonthInput()
+                .Min(new DateTime(DateTime.Now.Year, 1, 1))
+                .Max(new DateTime(DateTime.Now.Year, 12, 1))
+                .Placeholder("Select month")
+                .TestId("datetime-input-constraints-month")
+
+            | Text.Monospaced("Week window")
+            | Text.Block("ISO weeks from 6 months ago to 6 months ahead")
+            | constrainedWeekState
+                .ToWeekInput()
+                .Min(DateTime.Today.AddMonths(-6))
+                .Max(DateTime.Today.AddMonths(6))
+                .Placeholder("Select week")
+                .TestId("datetime-input-constraints-week")
+
+            | Text.Monospaced("Year range")
+            | Text.Block("Years 2020 through 2035")
+            | constrainedYearState
+                .ToYearInput()
+                .Min(new DateTime(2020, 1, 1))
+                .Max(new DateTime(2035, 12, 31))
+                .Placeholder("Select year")
+                .TestId("datetime-input-constraints-year")
+
+            | Text.Monospaced("Meeting slots")
+            | Text.Block("Same calendar day, 9 AM-5 PM, 30-minute steps")
+            | meetingSlotState
+                .ToDateTimeInput()
+                .Min(DateTime.Today.AddHours(9))
+                .Max(DateTime.Today.AddHours(17))
+                .Step(TimeSpan.FromMinutes(30))
+                .Placeholder("Book a slot")
+                .TestId("datetime-input-meeting-slots")
+
+            | Text.Monospaced("Lunch reservation")
+            | Text.Block("11:30 AM-1:30 PM, 15-minute steps")
+            | lunchTimeState
+                .ToTimeInput()
+                .Min(DateTime.Today.AddHours(11).AddMinutes(30))
+                .Max(DateTime.Today.AddHours(13).AddMinutes(30))
+                .Step(TimeSpan.FromMinutes(15))
+                .Placeholder("Pick lunch time")
+                .TestId("datetime-input-lunch-time");
 
         return Layout.Vertical()
             | Text.H1("DateTimeInput")

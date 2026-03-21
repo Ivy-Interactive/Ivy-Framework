@@ -184,7 +184,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     onTimeChange,
   ]);
 
-  const handleTimeBlur = useCallback(() => {
+  const flushTimeInput = useCallback(() => {
     setIsEditingTime(false);
     if (!localTimeValue?.trim()) {
       onTimeChange(localTimeValue ?? '');
@@ -192,6 +192,21 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     }
     commitSnappedTime();
   }, [localTimeValue, onTimeChange, commitSnappedTime]);
+
+  const handleTimeBlur = useCallback(() => {
+    flushTimeInput();
+  }, [flushTimeInput]);
+
+  const handlePopoverOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (!nextOpen && open) {
+        // Dismissal often closes the popover without firing blur on the time field
+        flushTimeInput();
+      }
+      setOpen(nextOpen);
+    },
+    [open, flushTimeInput]
+  );
 
   const handleTimeKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -209,7 +224,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
 
   return (
     <div className="relative w-full select-none">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handlePopoverOpenChange}>
         <PopoverTrigger asChild>
           <Button
             disabled={disabled}
