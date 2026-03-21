@@ -29,13 +29,12 @@ public class BasicFieldDemo : ViewBase
     public override object? Build()
     {
         var name = UseState("");
-        return new Field(
-            new TextInput(name)
-                .Placeholder("Enter your name")
-        )
-        .Label("Name")
-        .Description("Your full name as it appears on official documents")
-        .Required();
+        return name.ToTextInput()
+            .Placeholder("Enter your name")
+            .WithField()
+            .Label("Name")
+            .Description("Your full name as it appears on official documents")
+            .Required();
     }
 }
 ```

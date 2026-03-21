@@ -1,28 +1,28 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Upload, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { getWidth } from '@/lib/styles';
-import { InvalidIcon } from '@/components/InvalidIcon';
-import { Densities } from '@/types/density';
-import { useEventHandler } from '@/components/event-handler';
-import { toast } from '@/hooks/use-toast';
+import React, { useCallback, useState, useRef, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Upload, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { getWidth } from "@/lib/styles";
+import { InvalidIcon } from "@/components/InvalidIcon";
+import { Densities } from "@/types/density";
+import { useEventHandler } from "@/components/event-handler";
+import { toast } from "@/hooks/use-toast";
 import {
   fileInputVariant,
   uploadIconVariant,
   textVariant,
-} from '@/components/ui/input/file-input-variant';
-import { validateSingleFile, validateFileCount } from './file-input-validation';
+} from "@/components/ui/input/file-input-variant";
+import { validateSingleFile, validateFileCount } from "./file-input-validation";
 
 const EMPTY_ARRAY: never[] = [];
 
 enum FileInputStatus {
-  Pending = 'Pending',
-  Aborted = 'Aborted',
-  Loading = 'Loading',
-  Failed = 'Failed',
-  Finished = 'Finished',
+  Pending = "Pending",
+  Aborted = "Aborted",
+  Loading = "Loading",
+  Failed = "Failed",
+  Finished = "Finished",
 }
 
 interface FileInput {
@@ -49,6 +49,7 @@ interface FileInputWidgetProps {
   placeholder?: string;
   uploadUrl?: string;
   density?: Densities;
+  variant?: "Default" | "Drop";
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -66,6 +67,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   placeholder,
   uploadUrl,
   density = Densities.Medium,
+  variant = "Drop",
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
@@ -75,8 +77,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const blurFiredRef = useRef(false);
 
   // Be defensive in case events is undefined at runtime
-  const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
-  const hasBlurHandler = Array.isArray(events) && events.includes('OnBlur');
+  const hasCancelHandler = Array.isArray(events) && events.includes("OnCancel");
+  const hasBlurHandler = Array.isArray(events) && events.includes("OnBlur");
 
   const validateFile = useCallback(
     (file: File): boolean => {
@@ -89,15 +91,15 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
       if (!result.valid) {
         toast({
-          title: result.title || 'Validation Error',
+          title: result.title || "Validation Error",
           description: result.error,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return false;
       }
       return true;
     },
-    [accept, maxFileSize, minFileSize]
+    [accept, maxFileSize, minFileSize],
   );
 
   const uploadFile = useCallback(
@@ -113,7 +115,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       const getUploadUrl = () => {
         const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
         if (ivyHostMeta) {
-          const host = ivyHostMeta.getAttribute('content');
+          const host = ivyHostMeta.getAttribute("content");
           return host + uploadUrl;
         }
         // If no meta tag, use relative URL (should work in production)
@@ -121,11 +123,11 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       };
 
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
       try {
         const response = await fetch(getUploadUrl(), {
-          method: 'POST',
+          method: "POST",
           body: formData,
         });
 
@@ -133,15 +135,15 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           throw new Error(`Upload failed: ${response.statusText}`);
         }
       } catch (error) {
-        console.error('File upload error:', error);
+        console.error("File upload error:", error);
       }
     },
-    [uploadUrl, validateFile]
+    [uploadUrl, validateFile],
   );
 
   const handleBlur = useCallback(() => {
     if (hasBlurHandler) {
-      handleEvent('OnBlur', id, []);
+      handleEvent("OnBlur", id, []);
     }
   }, [hasBlurHandler, handleEvent, id]);
 
@@ -159,24 +161,16 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       filesSelectedInCurrentDialogRef.current = true;
 
       // Check max files limit (including already uploaded files)
-      const currentFileCount = Array.isArray(value)
-        ? value.length
-        : value
-          ? 1
-          : 0;
+      const currentFileCount = Array.isArray(value) ? value.length : value ? 1 : 0;
 
-      const countValidation = validateFileCount(
-        currentFileCount,
-        files.length,
-        maxFiles
-      );
+      const countValidation = validateFileCount(currentFileCount, files.length, maxFiles);
       if (!countValidation.valid) {
         toast({
-          title: countValidation.title || 'Too many files',
+          title: countValidation.title || "Too many files",
           description: countValidation.error,
-          variant: 'destructive',
+          variant: "destructive",
         });
-        e.target.value = '';
+        e.target.value = "";
         return;
       }
 
@@ -187,7 +181,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       }
 
       // Reset the input so selecting the same file again triggers onChange
-      e.target.value = '';
+      e.target.value = "";
 
       // Dialog closed after file selection - trigger blur after upload completes
       // This ensures the server state is updated before blur fires
@@ -197,7 +191,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         handleBlur();
       }
     },
-    [multiple, uploadFile, maxFiles, value, handleBlur]
+    [multiple, uploadFile, maxFiles, value, handleBlur],
   );
 
   // Detect when file dialog closes without selection (cancel case only)
@@ -213,35 +207,49 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           // Check if files were actually selected by looking at the flag
           // If files were selected, blur will be handled by handleChange after upload
           // Only fire blur if no files were selected (cancel case) and we haven't already fired
-          if (
-            !filesSelectedInCurrentDialogRef.current &&
-            !blurFiredRef.current
-          ) {
+          if (!filesSelectedInCurrentDialogRef.current && !blurFiredRef.current) {
             blurFiredRef.current = true;
-            handleEvent('OnBlur', id, []);
+            handleEvent("OnBlur", id, []);
           }
         });
       }
     };
 
-    window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener("focus", handleWindowFocus);
 
     return () => {
-      window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener("focus", handleWindowFocus);
     };
   }, [hasBlurHandler, handleEvent, id]);
 
   const handleCancel = useCallback(
     (fileId: string) => {
       if (hasCancelHandler) {
-        handleEvent('OnCancel', id, [fileId]);
+        handleEvent("OnCancel", id, [fileId]);
       }
       // Also clear file input to allow re-selecting same file
       if (inputRef.current) {
-        inputRef.current.value = '';
+        inputRef.current.value = "";
       }
     },
-    [hasCancelHandler, handleEvent, id]
+    [hasCancelHandler, handleEvent, id],
+  );
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!disabled && !isDragging) {
+        setIsDragging(true);
+      }
+    },
+    [disabled, isDragging],
   );
 
   const handleDragEnter = useCallback(
@@ -252,19 +260,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         setIsDragging(true);
       }
     },
-    [disabled]
+    [disabled],
   );
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
 
   const handleDrop = useCallback(
     async (e: React.DragEvent) => {
@@ -278,22 +275,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       if (files.length === 0) return;
 
       // Check max files limit (including already uploaded files)
-      const currentFileCount = Array.isArray(value)
-        ? value.length
-        : value
-          ? 1
-          : 0;
+      const currentFileCount = Array.isArray(value) ? value.length : value ? 1 : 0;
 
-      const countValidation = validateFileCount(
-        currentFileCount,
-        files.length,
-        maxFiles
-      );
+      const countValidation = validateFileCount(currentFileCount, files.length, maxFiles);
       if (!countValidation.valid) {
         toast({
-          title: countValidation.title || 'Too many files',
+          title: countValidation.title || "Too many files",
           description: countValidation.error,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return;
       }
@@ -304,28 +293,49 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         await uploadFile(files[0]);
       }
     },
-    [multiple, disabled, uploadFile, maxFiles, value]
+    [multiple, disabled, uploadFile, maxFiles, value],
   );
+
+  const openFileDialog = useCallback(() => {
+    if (!disabled && inputRef.current) {
+      if (hasBlurHandler) {
+        dialogWasOpenRef.current = true;
+        filesSelectedInCurrentDialogRef.current = false;
+        blurFiredRef.current = false;
+      }
+      inputRef.current.click();
+    }
+  }, [disabled, hasBlurHandler]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      // Don't trigger file selection if clicking on a file item or button
+      // Don't trigger file selection if clicking on a file item or a non-trigger button
       const target = e.target as HTMLElement;
-      if (target.closest('button') || target.closest('[data-file-item]')) {
+      const button = target.closest("button");
+
+      if (
+        (button && !button.hasAttribute("data-file-input-trigger")) ||
+        target.closest("[data-file-item]")
+      ) {
         return;
       }
 
-      if (!disabled && inputRef.current) {
-        // Track when dialog opens (for cancel detection)
-        if (hasBlurHandler) {
-          dialogWasOpenRef.current = true;
-          filesSelectedInCurrentDialogRef.current = false;
-          blurFiredRef.current = false;
-        }
-        inputRef.current.click();
+      // For Default variant, only the trigger button should open the dialog
+      if (variant === "Default" && !target.closest("[data-file-input-trigger]")) {
+        return;
       }
+
+      openFileDialog();
     },
-    [disabled, hasBlurHandler]
+    [variant, openFileDialog],
+  );
+
+  const handleButtonClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      handleClick(e);
+    },
+    [handleClick],
   );
 
   // Render individual file item for multiple files view
@@ -358,7 +368,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
             variant="ghost"
             size="icon"
             className="h-8 w-8 shrink-0"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               handleCancel(file.id);
             }}
@@ -376,7 +386,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
   return (
     <div
-      className="relative"
+      className="relative w-full"
       style={{ ...getWidth(width) }}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -384,28 +394,24 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       onDrop={handleDrop}
     >
       {/* Invalid icon in top right corner - only for required field validation */}
-      {invalid && (
+      {invalid && variant === "Drop" && (
         <div className="absolute top-2 right-2 z-20 pointer-events-none">
           <InvalidIcon message={invalid} />
         </div>
       )}
+
       <div
         className={cn(
-          fileInputVariant({ density }),
-          isDragging && !disabled
-            ? 'border-primary bg-primary/5'
-            : 'border-muted-foreground/25',
-          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-          hasFiles ? 'overflow-y-auto' : 'flex items-center justify-center',
-          'p-4'
+          fileInputVariant({ variant, density, isDragging }),
+          disabled ? "opacity-50 cursor-not-allowed" : "cursor-default",
         )}
         onClick={handleClick}
         role="button"
         tabIndex={disabled ? -1 : 0}
-        onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === ' ') {
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            handleClick(e as unknown as React.MouseEvent);
+            openFileDialog();
           }
         }}
       >
@@ -420,21 +426,60 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           className="hidden"
         />
 
-        {/* Always show upload icon */}
-        <div className="flex flex-col items-center justify-center text-center w-full">
-          <Upload className={uploadIconVariant({ density })} />
-          {!hasFiles && (
-            <p className={textVariant({ density })}>
-              {placeholder ||
-                `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
-            </p>
-          )}
-        </div>
-
-        {/* Show file list when files are present */}
-        {hasFiles && (
-          <div className="space-y-2 w-full mt-4">
-            {fileList.map(file => renderFileItem(file))}
+        {variant === "Default" ? (
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size={
+                  density === Densities.Small
+                    ? "sm"
+                    : density === Densities.Large
+                      ? "lg"
+                      : "default"
+                }
+                className={cn(
+                  "flex items-center gap-2",
+                  isDragging && "border-primary ring-2 ring-primary",
+                )}
+                disabled={disabled}
+                data-file-input-trigger
+                onClick={handleButtonClick}
+              >
+                <Upload className="h-4 w-4" />
+                {placeholder || `Select ${multiple ? "files" : "file"}`}
+              </Button>
+              {invalid && (
+                <div className="pointer-events-none">
+                  <InvalidIcon message={invalid} />
+                </div>
+              )}
+            </div>
+            {hasFiles && (
+              <div className="space-y-2 w-full">{fileList.map((file) => renderFileItem(file))}</div>
+            )}
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "flex flex-col items-center justify-center text-center w-full",
+              hasFiles ? "p-0" : "p-4",
+            )}
+          >
+            <Upload className={uploadIconVariant({ density })} />
+            {!hasFiles && (
+              <p className={textVariant({ density })}>
+                {placeholder ||
+                  `Drag and drop your ${multiple ? "files" : "file"} here or click to select`}
+              </p>
+            )}
+            {/* Show file list when files are present in Drop variant */}
+            {hasFiles && (
+              <div className="space-y-2 w-full mt-4">
+                {fileList.map((file) => renderFileItem(file))}
+              </div>
+            )}
           </div>
         )}
       </div>

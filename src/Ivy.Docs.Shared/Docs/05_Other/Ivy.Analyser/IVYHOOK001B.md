@@ -67,4 +67,4 @@ public class ItemDownloadView(string item) : ViewBase
 ## See Also
 
 - [Rules of Hooks](../../../03_Hooks/02_RulesOfHooks.md)
-- [UseDownload FAQ](../../../03_Hooks/02_Core/15_UseDownload.md#faq)
+- [UseDownload FAQ](../../../03_Hooks/02_Core/15_UseDownload.md)

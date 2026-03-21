@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Code, path: ["Tests"], isVisible: false, searchHints: ["markdown", "rendering", "spacing", "comparison", "layout", "typography"])]
+[App(icon: Icons.Code, group: ["Tests"], isVisible: false, searchHints: ["markdown", "rendering", "spacing", "comparison", "layout", "typography"])]
 public class TestApp : ViewBase
 {
     public override object? Build()

@@ -1,5 +1,5 @@
-import React from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import React from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface FooterLayoutWidgetProps {
   slots?: {
@@ -8,9 +8,7 @@ interface FooterLayoutWidgetProps {
   };
 }
 
-export const FooterLayoutWidget: React.FC<FooterLayoutWidgetProps> = ({
-  slots,
-}) => {
+export const FooterLayoutWidget: React.FC<FooterLayoutWidgetProps> = ({ slots }) => {
   if (!slots?.Footer || !slots?.Content) {
     return (
       <div className="text-red-500">

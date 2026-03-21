@@ -10,6 +10,9 @@ searchHints:
   - chrome
   - navigation-args
   - route
+  - hyperlink
+  - link
+  - anchor
 ---
 
 # Navigation
@@ -237,24 +240,24 @@ return new Table<Item>(items)
 Navigate based on user permissions or [state](../../03_Hooks/02_Core/03_UseState.md):
 
 ```csharp
-var handleNavigation = UseCallback(() =>
+var handleNavigation = UseMemo(() => (Action)(() =>
 {
     if (user.HasRole("Admin"))
         navigator.Navigate(typeof(AdminPanelApp));
     else
         navigator.Navigate(typeof(UnauthorizedApp));
-}, user);
+}), user);
 ```
 
 ### Memoized Navigation Callbacks
 
-Use [UseCallback](../../03_Hooks/02_Core/06_UseCallback.md) to prevent unnecessary re-renders:
+Use [UseMemo](../../03_Hooks/02_Core/05_UseMemo.md) to memoize navigation callbacks:
 
 ```csharp
-var navigateToUser = UseCallback((int userId) =>
+var navigateToUser = UseMemo(() => (Action<int>)((int userId) =>
 {
     navigator.Navigate(typeof(UserProfileApp), new UserProfileArgs(userId));
-}, navigator);
+}), navigator);
 ```
 
 ## Troubleshooting
@@ -288,7 +291,7 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 
 ## Performance Considerations
 
-- **Memoize Navigation Callbacks**: Use [UseCallback](../../03_Hooks/02_Core/06_UseCallback.md) for navigation handlers to prevent unnecessary re-renders
+- **Memoize Navigation Callbacks**: Use [UseMemo](../../03_Hooks/02_Core/05_UseMemo.md) to memoize navigation handlers
 - **Lazy App Loading**: Apps are loaded on-demand when navigated to
 - **State Cleanup**: Navigation automatically handles cleanup of previous app [state](../../03_Hooks/02_Core/03_UseState.md)
 - **Memory Management**: The [Chrome](./11_Chrome.md) system manages app lifecycle and memory usage
@@ -380,6 +383,33 @@ public class MyApp : ViewBase { }
 - **Use records for arguments** - Pass data with strongly-typed argument objects
 - **Include protocol for external URLs** - Always use `https://` or `mailto:` for external links
 - **Ensure apps have [App](./10_Apps.md) attribute** - Target apps must be decorated with `[App]`
+
+## Faq
+
+### How do I create a hyperlink or link component?
+
+Ivy does not have a dedicated Link widget. Use `Button` with `UseNavigation()` for internal navigation, or open external URLs:
+
+```csharp
+var nav = UseNavigation();
+
+// Internal link
+new Button("Go to Settings").OnClick(() => nav.Navigate(typeof(SettingsApp)));
+
+// External link
+new Button("Visit Docs").OnClick(() => nav.Navigate("https://docs.ivy.app"));
+```
+
+### How do I navigate to a different page?
+
+Use the `UseNavigation()` hook:
+
+```csharp
+var nav = UseNavigation();
+nav.Navigate(typeof(TargetApp));          // type-safe
+nav.Navigate("app://path/to/app");        // URI-based
+nav.Navigate("https://example.com");      // external URL
+```
 
 ## See Also
 

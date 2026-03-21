@@ -3,7 +3,7 @@ export type EmojiEntry = {
 };
 
 export const emojiMap: Record<string, EmojiEntry> = {
-  ':ivy-branded-star:': {
-    src: '/ivy-branded-star.svg',
+  ":ivy-branded-star:": {
+    src: "/ivy-branded-star.svg",
   },
 };

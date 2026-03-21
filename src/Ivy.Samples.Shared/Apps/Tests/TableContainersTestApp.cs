@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Table, path: ["Tests"], isVisible: false, searchHints: ["table", "blade", "sheet", "card", "box", "container", "width"])]
+[App(icon: Icons.Table, group: ["Tests"], isVisible: false, searchHints: ["table", "blade", "sheet", "card", "box", "container", "width"])]
 public class TableContainersTestApp : SampleBase
 {
     protected override object? BuildSample()
@@ -19,7 +19,8 @@ public class BladesTest : ViewBase
 {
     public override object? Build()
     {
-        return UseBlades(() => new BladeContent(), "Tables in Blades");
+        var blades = UseBlades(() => new BladeContent(), "Tables in Blades");
+        return blades;
     }
 }
 

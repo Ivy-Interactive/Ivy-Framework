@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.CodeXml, path: ["Widgets", "Primitives"], searchHints: ["markup", "xml", "data", "format", "structure", "syntax"])]
+[App(icon: Icons.CodeXml, group: ["Widgets", "Primitives"], searchHints: ["markup", "xml", "data", "format", "structure", "syntax"])]
 public class XmlApp : SampleBase
 {
     protected override object? BuildSample()
@@ -25,6 +25,12 @@ public class XmlApp : SampleBase
                 new XElement("phoneNumber", "555-5678")
             )
         );
-        return xml;
+        return Layout.Vertical().Gap(4)
+            | Text.P("Default (collapsed):")
+            | new Xml(xml)
+            | Text.P("Expanded to depth 2:")
+            | new Xml(xml) { Expanded = 2 }
+            | Text.P("Fully expanded:")
+            | new Xml(xml) { Expanded = -1 };
     }
 }

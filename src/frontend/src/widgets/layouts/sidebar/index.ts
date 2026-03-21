@@ -1,2 +1,2 @@
-export { SidebarLayoutWidget, SidebarMenuWidget } from './SidebarLayoutWidget';
-export { sidebarMenuRef } from './sidebar-refs';
+export { SidebarLayoutWidget, SidebarMenuWidget } from "./SidebarLayoutWidget";
+export { sidebarMenuRef } from "./sidebar-refs";

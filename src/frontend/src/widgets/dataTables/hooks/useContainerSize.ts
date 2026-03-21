@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Tracks container dimensions. Uses dvn-scroller.clientHeight for scroll area
@@ -19,7 +19,7 @@ export const useContainerSize = () => {
     if (!containerRef.current) return;
 
     const observeScrollArea = () => {
-      const scroller = containerRef.current?.querySelector('.dvn-scroller');
+      const scroller = containerRef.current?.querySelector(".dvn-scroller");
       if (!scroller || scrollObserverRef.current) return;
 
       const update = () => setScrollAreaHeight(scroller.clientHeight);
@@ -37,7 +37,7 @@ export const useContainerSize = () => {
       requestAnimationFrame(observeScrollArea);
     };
 
-    const resizeObserver = new ResizeObserver(entries => {
+    const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
         const widthChanged = Math.abs(width - lastWidthRef.current) > 1;
@@ -71,7 +71,6 @@ export const useContainerSize = () => {
     containerRef,
     containerWidth,
     containerHeight,
-    scrollContainerHeight:
-      scrollAreaHeight > 0 ? scrollAreaHeight : containerHeight,
+    scrollContainerHeight: scrollAreaHeight > 0 ? scrollAreaHeight : containerHeight,
   };
 };

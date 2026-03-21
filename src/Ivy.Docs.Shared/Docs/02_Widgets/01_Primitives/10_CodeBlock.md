@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - codeblock
   - syntax
   - highlighting
   - code-block

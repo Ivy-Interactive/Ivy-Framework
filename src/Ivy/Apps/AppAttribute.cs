@@ -8,7 +8,7 @@ public class AppAttribute(
     string? title = null,
     Icons icon = Icons.None,
     string? description = null,
-    string[]? path = null!,
+    string[]? group = null!,
     bool isVisible = true,
     int order = 0,
     bool groupExpanded = false,
@@ -25,7 +25,7 @@ public class AppAttribute(
 
     public string? Description { get; set; } = description;
 
-    public string[]? Path { get; set; } = path;
+    public string[]? Group { get; set; } = group;
 
     public bool IsVisible { get; set; } = isVisible;
 

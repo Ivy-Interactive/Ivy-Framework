@@ -1,5 +1,4 @@
 using Ivy;
-using Ivy.Auth.Supabase;
 
 var server = new Server();
 

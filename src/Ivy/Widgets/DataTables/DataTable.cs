@@ -70,6 +70,7 @@ public static class DataTableWidgetExtensions
     public static DataTable OnRowAction(this DataTable table, Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
         => table with { OnRowAction = new(handler) };
 
+
     public static DataTable OnCellClick(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
         => table with { OnCellClick = new(handler) };
 

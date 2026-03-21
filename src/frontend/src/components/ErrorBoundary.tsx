@@ -1,5 +1,5 @@
-import React, { Component, ReactNode } from 'react';
-import { ErrorDisplay } from './ErrorDisplay';
+import React, { Component, ReactNode } from "react";
+import { ErrorDisplay } from "./ErrorDisplay";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -23,7 +23,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     this.setState({ error, errorInfo });
-    console.error('Error caught in ErrorBoundary:', error, errorInfo);
+    console.error("Error caught in ErrorBoundary:", error, errorInfo);
   }
 
   render() {

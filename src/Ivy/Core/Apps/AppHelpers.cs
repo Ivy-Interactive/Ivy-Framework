@@ -25,7 +25,7 @@ public static class AppHelpers
         var appAttribute = type.GetCustomAttribute<AppAttribute>();
         if (appAttribute != null)
         {
-            var path = appAttribute.Path ?? GetPathFromNamespace(type) ?? ["Apps"];
+            var group = appAttribute.Group ?? GetGroupFromNamespace(type) ?? ["Apps"];
 
             string GetId()
             {
@@ -46,7 +46,7 @@ public static class AppHelpers
             {
                 if (type.Name is "_Index" or "_IndexApp")
                 {
-                    return path[^1];
+                    return group[^1];
                 }
                 return global::Ivy.StringHelper.TitleCaseToReadable(type.Name); //DatePickerApp => Date Picker
             }
@@ -58,7 +58,7 @@ public static class AppHelpers
                 Icon = appAttribute.Icon == Icons.None ? null : appAttribute.Icon,
                 Description = appAttribute.Description,
                 Type = type,
-                Path = path,
+                Group = group,
                 IsVisible = !type.Name.StartsWith("_") && appAttribute.IsVisible,
                 IsIndex = type.Name is "_Index" or "_IndexApp",
                 Order = appAttribute.Order,
@@ -70,7 +70,7 @@ public static class AppHelpers
         throw new InvalidOperationException($"Type '{type.FullName}' is missing the [App] attribute.");
     }
 
-    private static string[]? GetPathFromNamespace(Type type)
+    private static string[]? GetGroupFromNamespace(Type type)
     {
         //Check that the namespace is in the form of *.Apps.* and return the parts after Apps
         //Ivy.Apps.Widgets.DatePickerApp => [ "Widgets", "DatePickerApp" ]

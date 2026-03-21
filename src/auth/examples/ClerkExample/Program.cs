@@ -1,5 +1,4 @@
 using Ivy;
-using Ivy.Auth.Clerk;
 
 var server = new Server();
 

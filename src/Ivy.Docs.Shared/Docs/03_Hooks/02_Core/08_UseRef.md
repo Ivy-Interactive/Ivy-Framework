@@ -123,7 +123,6 @@ var total = UseRef(items.Sum()); // Won't update when items change!
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Effects](./04_UseEffect.md) - Side effects and cleanup
 - [Memoization](./05_UseMemo.md) - Performance optimization with UseMemo
-- [Callbacks](./06_UseCallback.md) - Memoized callback functions with UseCallback
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
 
 ## Examples

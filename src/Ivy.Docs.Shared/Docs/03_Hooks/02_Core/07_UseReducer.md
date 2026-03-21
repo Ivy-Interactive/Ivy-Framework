@@ -157,7 +157,6 @@ Choose between `UseReducer` and [`UseState`](./03_UseState.md) based on complexi
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Effects](./04_UseEffect.md) - Side effects and async operations
 - [Memoization](./05_UseMemo.md) - Performance optimization with UseMemo
-- [Callbacks](./06_UseCallback.md) - Memoized callback functions with UseCallback
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
 
 ### Examples

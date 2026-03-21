@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -91,7 +92,7 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumberInput
 {
     [OverloadResolutionPriority(1)]
-    public NumberInput(IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    internal NumberInput(IAnyState state, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
     {
         var typedState = state.As<TNumber>();
@@ -100,21 +101,21 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
     }
 
     [OverloadResolutionPriority(1)]
-    public NumberInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    internal NumberInput(TNumber value, Func<Event<IInput<TNumber>, TNumber>, ValueTask> onChange, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
     {
         OnChange = new(onChange);
         Value = value;
     }
 
-    public NumberInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    internal NumberInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
     {
         OnChange = new(e => { state(e.Value); return ValueTask.CompletedTask; });
         Value = value;
     }
 
-    public NumberInput(string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
+    internal NumberInput(string? placeholder = null, bool disabled = false, NumberInputVariant variant = NumberInputVariant.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
     {
         Placeholder = placeholder;
         Disabled = disabled;
@@ -126,7 +127,7 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
 
     [Prop] public TNumber Value { get; init; } = default!;
 
-    [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
+    [Prop(AlwaysSerialize = true)] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
     [Event] public EventHandler<Event<IInput<TNumber>, TNumber>>? OnChange { get; }
 }
@@ -142,7 +143,8 @@ public static class NumberInputExtensions
     {
         var type = state.GetStateType();
         Type genericType = typeof(NumberInput<>).MakeGenericType(type);
-        NumberInputBase input = (NumberInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant, formatStyle)!;
+        NumberInputBase input = (NumberInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant, formatStyle }, null)!;
+
         input.ScaffoldDefaults(null, type);
         if (min is not null) input = input with { Min = min };
         if (max is not null) input = input with { Max = max };

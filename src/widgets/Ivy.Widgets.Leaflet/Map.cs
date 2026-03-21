@@ -227,10 +227,10 @@ public static class MapExtensions
     public static Map EnableDragging(this Map map, bool enable = true) =>
         map with { Dragging = enable };
 
-    public static Map HandleMapClick(this Map map, Func<Event<Map, MapClickEventArgs>, ValueTask> handler) =>
+    public static Map OnMapClick(this Map map, Func<Event<Map, MapClickEventArgs>, ValueTask> handler) =>
         map with { OnMapClick = handler };
 
-    public static Map HandleMapClick(this Map map, Action<MapClickEventArgs> handler) =>
+    public static Map OnMapClick(this Map map, Action<MapClickEventArgs> handler) =>
         map with
         {
             OnMapClick = e =>
@@ -240,7 +240,7 @@ public static class MapExtensions
             }
         };
 
-    public static Map HandleMapClick(this Map map, Action<LatLng> handler) =>
+    public static Map OnMapClick(this Map map, Action<LatLng> handler) =>
         map with
         {
             OnMapClick = e =>
@@ -250,10 +250,10 @@ public static class MapExtensions
             }
         };
 
-    public static Map HandleMarkerClick(this Map map, Func<Event<Map, MarkerClickEventArgs>, ValueTask> handler) =>
+    public static Map OnMarkerClick(this Map map, Func<Event<Map, MarkerClickEventArgs>, ValueTask> handler) =>
         map with { OnMarkerClick = handler };
 
-    public static Map HandleMarkerClick(this Map map, Action<MarkerClickEventArgs> handler) =>
+    public static Map OnMarkerClick(this Map map, Action<MarkerClickEventArgs> handler) =>
         map with
         {
             OnMarkerClick = e =>
@@ -263,7 +263,7 @@ public static class MapExtensions
             }
         };
 
-    public static Map HandleMarkerClick(this Map map, Action<string> handler) =>
+    public static Map OnMarkerClick(this Map map, Action<string> handler) =>
         map with
         {
             OnMarkerClick = e =>
@@ -273,10 +273,10 @@ public static class MapExtensions
             }
         };
 
-    public static Map HandleMarkerDrag(this Map map, Func<Event<Map, MarkerDragEventArgs>, ValueTask> handler) =>
+    public static Map OnMarkerDrag(this Map map, Func<Event<Map, MarkerDragEventArgs>, ValueTask> handler) =>
         map with { OnMarkerDrag = handler };
 
-    public static Map HandleMarkerDrag(this Map map, Action<MarkerDragEventArgs> handler) =>
+    public static Map OnMarkerDrag(this Map map, Action<MarkerDragEventArgs> handler) =>
         map with
         {
             OnMarkerDrag = e =>
@@ -286,10 +286,10 @@ public static class MapExtensions
             }
         };
 
-    public static Map HandleZoomChange(this Map map, Func<Event<Map, ZoomChangeEventArgs>, ValueTask> handler) =>
+    public static Map OnZoomChange(this Map map, Func<Event<Map, ZoomChangeEventArgs>, ValueTask> handler) =>
         map with { OnZoomChange = handler };
 
-    public static Map HandleZoomChange(this Map map, Action<int> handler) =>
+    public static Map OnZoomChange(this Map map, Action<int> handler) =>
         map with
         {
             OnZoomChange = e =>
@@ -299,10 +299,10 @@ public static class MapExtensions
             }
         };
 
-    public static Map HandleCenterChange(this Map map, Func<Event<Map, CenterChangeEventArgs>, ValueTask> handler) =>
+    public static Map OnCenterChange(this Map map, Func<Event<Map, CenterChangeEventArgs>, ValueTask> handler) =>
         map with { OnCenterChange = handler };
 
-    public static Map HandleCenterChange(this Map map, Action<LatLng> handler) =>
+    public static Map OnCenterChange(this Map map, Action<LatLng> handler) =>
         map with
         {
             OnCenterChange = e =>
@@ -312,10 +312,10 @@ public static class MapExtensions
             }
         };
 
-    public static Map HandleBoundsChange(this Map map, Func<Event<Map, BoundsChangeEventArgs>, ValueTask> handler) =>
+    public static Map OnBoundsChange(this Map map, Func<Event<Map, BoundsChangeEventArgs>, ValueTask> handler) =>
         map with { OnBoundsChange = handler };
 
-    public static Map HandleBoundsChange(this Map map, Action<BoundsChangeEventArgs> handler) =>
+    public static Map OnBoundsChange(this Map map, Action<BoundsChangeEventArgs> handler) =>
         map with
         {
             OnBoundsChange = e =>

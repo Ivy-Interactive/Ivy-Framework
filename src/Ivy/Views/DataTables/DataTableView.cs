@@ -1,3 +1,4 @@
+using System.Linq;
 using Ivy.Core;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +16,8 @@ public class DataTableView(
     MenuItem[]? rowActions = null,
     Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null,
     Func<object, object?>? idSelector = null,
-    RefreshToken? refreshToken = null) : ViewBase, IMemoized
+    RefreshToken? refreshToken = null,
+    FuncViewBuilder? emptyViewFactory = null) : ViewBase, IMemoized
 {
     public override object? Build()
     {
@@ -23,6 +25,16 @@ public class DataTableView(
         if (connection == null)
         {
             return null;
+        }
+
+        // Check if query returned empty results and render empty state if configured
+        if (emptyViewFactory != null)
+        {
+            var isEmpty = queryable.Cast<object>().Count() == 0;
+            if (isEmpty)
+            {
+                return emptyViewFactory(Context);
+            }
         }
 
         var table = new DataTable(connection, width, height, columns, config)

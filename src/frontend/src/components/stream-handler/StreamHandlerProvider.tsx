@@ -1,6 +1,6 @@
-import React from 'react';
-import { StreamSubscriber } from './types';
-import { StreamHandlerContext } from './context';
+import React from "react";
+import { StreamSubscriber } from "./types";
+import { StreamHandlerContext } from "./context";
 
 export const StreamHandlerProvider: React.FC<{
   subscribeToStream: StreamSubscriber;

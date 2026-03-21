@@ -81,8 +81,9 @@ public class State<T> : IState<T>, IRef<T>
     {
         lock (_lock)
         {
+            var subscription = _subject.Subscribe(observer);
             observer.OnNext(_value);
-            return _subject.Subscribe(observer);
+            return subscription;
         }
     }
 

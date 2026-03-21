@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - confetti
   - celebration
   - particles
   - animation

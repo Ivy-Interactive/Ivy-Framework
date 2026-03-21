@@ -394,5 +394,5 @@ flowchart LR
 
 - [State Management](./02_Core/03_UseState.md) - Using UseState hook
 - [Effects](./02_Core/04_UseEffect.md) - Using UseEffect hook
-- [Memoization](./02_Core/05_UseMemo.md) - Using UseMemo and UseCallback
+- [Memoization](./02_Core/05_UseMemo.md) - Using UseMemo
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy Views

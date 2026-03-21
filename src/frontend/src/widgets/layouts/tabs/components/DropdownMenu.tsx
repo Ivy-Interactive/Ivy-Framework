@@ -1,16 +1,16 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import { ChevronDown } from 'lucide-react';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
-import { SortableDropdownMenuItem } from './Sortable';
-import { getTabProps } from '../utils/tabUtils';
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext } from "@dnd-kit/sortable";
+import { SortableDropdownMenuItem } from "./Sortable";
+import { getTabProps } from "../utils/tabUtils";
 
 interface TabsDropdownMenuProps {
   dropdownOpen: boolean;
@@ -20,7 +20,7 @@ interface TabsDropdownMenuProps {
   orderedTabWidgets: React.ReactElement[];
   activeTabId: string | null;
   showClose: boolean;
-  sensors: ReturnType<typeof import('@dnd-kit/core').useSensors>;
+  sensors: ReturnType<typeof import("@dnd-kit/core").useSensors>;
   handleDragEnd: (event: {
     active: { id: string | number };
     over: { id: string | number } | null;
@@ -51,14 +51,10 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
   const menuContent =
     hiddenTabs.length > 0 ? (
       <DropdownMenuContent align="end">
-        <DndContext
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-          sensors={sensors}
-        >
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
           <SortableContext items={tabOrder}>
             <div className="flex flex-col gap-1 w-48">
-              {orderedTabWidgets.map(tabWidget => {
+              {orderedTabWidgets.map((tabWidget) => {
                 if (!React.isValidElement(tabWidget)) return null;
                 const props = getTabProps(tabWidget);
                 if (!props?.id) return null;
@@ -96,10 +92,8 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
           variant="ghost"
           size="icon"
           className={cn(
-            'h-7 w-7 bg-transparent transition-opacity flex-shrink-0 flex items-center justify-center ml-2',
-            hiddenTabs.length > 0
-              ? 'opacity-100'
-              : 'opacity-0 pointer-events-none'
+            "h-7 w-7 bg-transparent transition-opacity flex-shrink-0 flex items-center justify-center ml-2",
+            hiddenTabs.length > 0 ? "opacity-100" : "opacity-0 pointer-events-none",
           )}
           aria-label="Show more tabs"
         >

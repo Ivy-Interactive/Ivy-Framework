@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - spacer
   - spacing
   - gap
   - margin

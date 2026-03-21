@@ -1,19 +1,19 @@
-import { getIvyHost } from '@/lib/utils';
+import { getIvyHost } from "@/lib/utils";
 import {
   Filter,
   SortOrder,
   TableQuery,
   getGrpcTableService,
   ParseFilterResult,
-} from '@/services/grpcTableService';
-import * as arrow from 'apache-arrow';
-import { DataColumn, DataRow, DataTableConnection } from '../types/types';
-import { convertArrowTableToData } from './tableDataMapper';
-import { logger } from '@/lib/logger';
+} from "@/services/grpcTableService";
+import * as arrow from "apache-arrow";
+import { DataColumn, DataRow, DataTableConnection } from "../types/types";
+import { convertArrowTableToData } from "./tableDataMapper";
+import { logger } from "@/lib/logger";
 
 export const parseInvalidQuery = async (
   invalidQuery: string,
-  connection?: DataTableConnection
+  connection?: DataTableConnection,
 ): Promise<ParseFilterResult> => {
   try {
     // Use getIvyHost() which returns the correct backend URL from meta tag or window.location.origin
@@ -25,12 +25,12 @@ export const parseInvalidQuery = async (
         connectionId: connection?.connectionId,
         sourceId: connection?.sourceId,
       },
-      serverUrl
+      serverUrl,
     );
 
     return result;
   } catch (error) {
-    logger.error('Failed to parse invalid query:', error);
+    logger.error("Failed to parse invalid query:", error);
     throw error;
   }
 };
@@ -40,7 +40,7 @@ export const fetchTableData = async (
   startIndex: number,
   count: number,
   filter?: Filter | null,
-  sort?: SortOrder[] | null
+  sort?: SortOrder[] | null,
 ): Promise<{
   columns: DataColumn[];
   rows: DataRow[];
@@ -74,7 +74,7 @@ export const fetchTableData = async (
 
     return { columns: [], rows: [], hasMore: false, arrowTable: null };
   } catch (error) {
-    console.error('Failed to fetch table data:', error);
+    console.error("Failed to fetch table data:", error);
     throw error;
   }
 };

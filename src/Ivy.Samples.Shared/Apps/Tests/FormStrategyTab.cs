@@ -58,7 +58,7 @@ public class DynamicFormStrategyTab : ViewBase
         return Layout.Vertical().Gap(4)
             | Layout.Horizontal()
                 | Text.Block("Submit Strategy:")
-                | new SelectInput<FormSubmitStrategy>(strategy.Value, e => strategy.Set(e.Value), strategyOptions)
+                | strategy.ToSelectInput(strategyOptions)
             | settings.ToForm()
                 .SubmitStrategy(strategy.Value)
                 .Label(m => m.Name, "Display Name")

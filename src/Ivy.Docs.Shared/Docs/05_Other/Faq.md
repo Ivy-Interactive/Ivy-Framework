@@ -98,6 +98,20 @@ server.Services.AddHttpClient<MyService>();
 
 Then access it via `UseService<MyService>()` in your app. Do NOT use `services.AddHttpClient()` directly — use `server.Services`.
 
+## When should I use UseDefaultApp vs UseChrome in Program.cs?
+
+**UseDefaultApp** is for single-app projects where you want to skip the sidebar and go directly to the app:
+```csharp
+server.UseDefaultApp(typeof(MyApp));
+```
+
+**UseChrome** is for multi-app projects where users need sidebar navigation between apps:
+```csharp
+server.UseChrome(new ChromeSettings().DefaultApp<MyApp>().UseTabs(preventDuplicates: true));
+```
+
+For new projects with a single app, prefer `UseDefaultApp` for a cleaner experience. If you later add more apps and need a sidebar, switch to `UseChrome`.
+
 ## How do I get a display name or description from an enum value?
 
 **For dropdowns and selects:** Ivy handles this automatically. When you pass an enum type to a `Select` or `RadioGroup`, `ToOptions()` reads `[Description]` attributes and falls back to splitting PascalCase names. No extra code needed.

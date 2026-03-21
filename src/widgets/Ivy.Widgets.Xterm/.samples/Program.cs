@@ -20,9 +20,9 @@ class TerminalView : ViewBase
 
         return new Terminal()
             .Stream(pty.Stream)
-            .HandleInput(pty.HandleInput)
-            .HandleResize(pty.HandleResize)
-            .HandleLinkClick(url => Console.WriteLine($"Link clicked: {url}"))
+            .OnInput(pty.HandleInput)
+            .OnResize(pty.HandleResize)
+            .OnLinkClick(url => Console.WriteLine($"Link clicked: {url}"))
             .Closed(pty.Closed)
             .WithLayout()
             .Full()

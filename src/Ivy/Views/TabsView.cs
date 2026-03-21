@@ -11,6 +11,7 @@ public class TabView : ViewBase
     private TabsVariant _variant = TabsVariant.Content;
     private bool _removeParentPadding = false;
     private Thickness? _padding = new Thickness(4);
+    private string? _testId = null;
 
     internal TabView(Tab[] cells)
     {
@@ -136,6 +137,12 @@ public class TabView : ViewBase
         return this;
     }
 
+    public TabView TestId(string testId)
+    {
+        _testId = testId;
+        return this;
+    }
+
     public override object? Build()
     {
         var selectedIndex = UseState(0);
@@ -145,8 +152,10 @@ public class TabView : ViewBase
             selectedIndex.Set(@event.Value);
         }
 
-        return new TabsLayout(OnTabSelect, null, null, null, selectedIndex.Value,
+        var tabs = new TabsLayout(OnTabSelect, null, null, null, selectedIndex.Value,
             _tabs.ToArray()
         ).Variant(_variant).Width(_width).Height(_height).RemoveParentPadding(_removeParentPadding).Padding(_padding);
+        if (_testId != null) tabs.TestId = _testId;
+        return tabs;
     }
 }

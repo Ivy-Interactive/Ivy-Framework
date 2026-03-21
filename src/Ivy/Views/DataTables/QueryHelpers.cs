@@ -194,9 +194,10 @@ public static class QueryHelpers
                 if (dateTimeValue >= DateTimeOffset.MinValue.DateTime &&
                     dateTimeValue <= DateTimeOffset.MaxValue.DateTime)
                 {
-                    // If DateTime.Kind is Unspecified, treat as local
+                    // If DateTime.Kind is Unspecified, treat as UTC (not Local)
+                    // This prevents unintended timezone conversions during Arrow serialization
                     if (dateTimeValue.Kind == DateTimeKind.Unspecified)
-                        dateTimeValue = DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Local);
+                        dateTimeValue = DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Utc);
 
                     builder.Append(new DateTimeOffset(dateTimeValue));
                 }

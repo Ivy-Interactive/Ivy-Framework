@@ -1067,11 +1067,8 @@ public class CrudFormExample : ViewBase
                     .Variant(ButtonVariant.Destructive))
             | (Layout.Vertical()
                 | Text.Block("Select a product to edit/delete:")
-                | new SelectInput<ProductModel?>(
-                    selectedProduct.Value,
-                    e => selectedProduct.Set(e.Value),
-                    products.Value.ToOptions()
-                ).Placeholder("Choose a product..."))
+                | selectedProduct.ToSelectInput(products.Value.ToOptions())
+                    .Placeholder("Choose a product..."))
             | products.Value.ToTable()
                 .Width(Size.Full())
                 .Builder(p => p.Name, f => f.Default())

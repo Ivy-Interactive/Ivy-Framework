@@ -35,4 +35,3 @@ public class MainApp : ViewBase
         ).Gap(40).Padding(50).Align(Align.Center).Height(Size.Full());
     }
 }
-

@@ -83,10 +83,13 @@ public static class StringHelper
             input = input[..^3];
         }
 
-        // Check if this is a hook
+        // Hooks (e.g. UseState, UseRefreshToken) should display unsplit
         bool isHook = input.Length >= 4 &&
                       input.StartsWith("Use", StringComparison.Ordinal) &&
                       char.IsUpper(input[3]);
+
+        if (isHook)
+            return input;
 
         StringBuilder sb = new();
 
@@ -94,20 +97,12 @@ public static class StringHelper
         {
             if (char.IsUpper(input[i]) && i > 0)
             {
-                // For hooks, don't add space between "Use" and the next word
-                if (isHook && i == 3)
-                {
-                    // Skip adding space after "Use"
-                }
-                else
-                {
-                    bool prevIsUpper = char.IsUpper(input[i - 1]);
-                    bool nextIsLower = (i + 1 < input.Length) && char.IsLower(input[i + 1]);
+                bool prevIsUpper = char.IsUpper(input[i - 1]);
+                bool nextIsLower = (i + 1 < input.Length) && char.IsLower(input[i + 1]);
 
-                    if (input[i - 1] != ' ' && (!prevIsUpper || nextIsLower))
-                    {
-                        sb.Append(' ');
-                    }
+                if (input[i - 1] != ' ' && (!prevIsUpper || nextIsLower))
+                {
+                    sb.Append(' ');
                 }
             }
 

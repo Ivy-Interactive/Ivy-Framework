@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
-import { tableStyles } from './styles/style';
+import React, { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import { tableStyles } from "./styles/style";
 
 /**
  * Footer component that overlaps the bottom of the DataTableEditor
@@ -11,10 +11,7 @@ export interface DataTableFooterProps {
   className?: string;
 }
 
-export const DataTableFooter: React.FC<DataTableFooterProps> = ({
-  children,
-  className,
-}) => {
+export const DataTableFooter: React.FC<DataTableFooterProps> = ({ children, className }) => {
   return (
     <div className={cn(className)} style={tableStyles.tableEditor.footer}>
       {children}

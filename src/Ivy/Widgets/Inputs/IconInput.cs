@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -28,7 +29,7 @@ public abstract record IconInputBase : WidgetBase<IconInputBase>, IAnyInput
 public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
 {
     [OverloadResolutionPriority(1)]
-    public IconInput(IAnyState state, string? placeholder = null, bool disabled = false)
+    internal IconInput(IAnyState state, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
         var typedState = state.As<TIcon>();
@@ -42,14 +43,14 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
     }
 
     [OverloadResolutionPriority(1)]
-    public IconInput(TIcon value, Func<Event<IInput<TIcon>, TIcon>, ValueTask> onChange, string? placeholder = null, bool disabled = false)
+    internal IconInput(TIcon value, Func<Event<IInput<TIcon>, TIcon>, ValueTask> onChange, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public IconInput(TIcon value, Action<Event<IInput<TIcon>, TIcon>> onChange, string? placeholder = null, bool disabled = false)
+    internal IconInput(TIcon value, Action<Event<IInput<TIcon>, TIcon>> onChange, string? placeholder = null, bool disabled = false)
         : this(placeholder, disabled)
     {
         OnChange = new(e =>
@@ -60,7 +61,7 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
         Value = value;
     }
 
-    public IconInput(string? placeholder = null, bool disabled = false)
+    internal IconInput(string? placeholder = null, bool disabled = false)
     {
         Disabled = disabled;
         Placeholder = placeholder ?? "Select an icon";
@@ -78,9 +79,10 @@ public static class IconInputExtensions
     public static IconInputBase ToIconInput(this IAnyState state, string? placeholder = null, bool disabled = false)
     {
         var type = state.GetStateType();
-        var genericType = typeof(IconInput<>).MakeGenericType(type);
-        var input = (IconInputBase)Activator.CreateInstance(genericType, state, placeholder ?? "Select an icon", disabled)!;
-        input.Nullable = type.IsNullableType();
+        Type genericType = typeof(IconInput<>).MakeGenericType(type);
+        IconInputBase input = (IconInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder ?? "Select an icon", disabled }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
         return input;
     }
 

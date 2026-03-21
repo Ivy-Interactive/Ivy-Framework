@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Advanced;
 
-[App(icon: Icons.Code, path: ["Advanced"])]
+[App(icon: Icons.Code, group: ["Advanced"])]
 public class XamlBuilderApp : ViewBase
 {
     private static readonly Dictionary<string, string> Examples = new()

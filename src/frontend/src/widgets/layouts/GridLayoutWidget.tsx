@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Align,
   getRowGap,
@@ -9,7 +9,7 @@ import {
   convertSizeToGridValue,
   gridCellOverflow,
   getAlignSelf,
-} from '../../lib/styles';
+} from "../../lib/styles";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -19,7 +19,7 @@ interface GridLayoutWidgetProps {
   rowGap?: number;
   columnGap?: number;
   padding: string;
-  autoFlow?: 'Row' | 'Column' | 'RowDense' | 'ColumnDense';
+  autoFlow?: "Row" | "Column" | "RowDense" | "ColumnDense";
   width?: string;
   height?: string;
   columnWidths?: string[];
@@ -79,7 +79,7 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   height,
   rowGap = 4,
   columnGap = 4,
-  padding = '0,0,0,0',
+  padding = "0,0,0,0",
   columnWidths,
   rowHeights,
   childColumn = EMPTY_ARRAY,
@@ -87,17 +87,17 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   childRow = EMPTY_ARRAY,
   childRowSpan = EMPTY_ARRAY,
   childAlignSelf = EMPTY_ARRAY,
-  className = '',
+  className = "",
 }) => {
   const styles: React.CSSProperties = {
-    display: 'grid',
+    display: "grid",
     gridTemplateColumns: columnWidths
-      ? columnWidths.map(convertSizeToGridValue).join(' ')
+      ? columnWidths.map(convertSizeToGridValue).join(" ")
       : `repeat(${columns}, minmax(0, 1fr))`,
     gridTemplateRows: rowHeights
-      ? rowHeights.map(convertSizeToGridValue).join(' ')
+      ? rowHeights.map(convertSizeToGridValue).join(" ")
       : `repeat(${rows}, minmax(0, 1fr))`,
-    gridAutoFlow: autoFlow?.toLowerCase() || 'row',
+    gridAutoFlow: autoFlow?.toLowerCase() || "row",
     ...getPadding(padding),
     ...getRowGap(rowGap),
     ...getColumnGap(columnGap),
@@ -115,9 +115,7 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
           rowSpan={childRowSpan[index]}
           alignSelf={childAlignSelf[index]}
           className={
-            React.isValidElement(child)
-              ? (child.props as { className?: string }).className
-              : ''
+            React.isValidElement(child) ? (child.props as { className?: string }).className : ""
           }
         >
           {child}

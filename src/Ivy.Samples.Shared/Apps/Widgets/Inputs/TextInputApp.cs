@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.TextCursorInput, path: ["Widgets", "Inputs"], searchHints: ["password", "textarea", "search", "email"])]
+[App(icon: Icons.TextCursorInput, group: ["Widgets", "Inputs"], searchHints: ["password", "textarea", "search", "email"])]
 public class TextInputApp : SampleBase
 {
     protected override object? BuildSample()
@@ -12,6 +12,7 @@ public class TextInputApp : SampleBase
 
         var onChangedState = UseState("");
         var onChangeLabel = UseState("");
+        UseEffect(() => { onChangeLabel.Set(string.IsNullOrEmpty(onChangedState.Value) ? "" : "Changed"); }, onChangedState);
         var onBlurState = UseState("");
         var onBlurLabel = UseState("");
 
@@ -92,11 +93,7 @@ public class TextInputApp : SampleBase
                | Text.H2("Events")
                | Text.H3("OnChange")
                | Layout.Horizontal(
-                   new TextInput(onChangedState.Value, e =>
-                   {
-                       onChangedState.Set(e.Value);
-                       onChangeLabel.Set("Changed");
-                   }),
+                   onChangedState.ToTextInput(),
                    onChangeLabel
                 )
                | Text.H3("OnBlur")

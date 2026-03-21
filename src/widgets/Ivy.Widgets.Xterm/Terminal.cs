@@ -66,24 +66,24 @@ public static class TerminalExtensions
     public static Terminal Stream(this Terminal widget, IWriteStream<byte[]> stream) =>
         widget with { Stream = stream };
 
-    public static Terminal HandleInput(this Terminal widget, Func<Event<Terminal, string>, ValueTask> handler) =>
+    public static Terminal OnInput(this Terminal widget, Func<Event<Terminal, string>, ValueTask> handler) =>
         widget with { OnInput = handler };
 
-    public static Terminal HandleInput(this Terminal widget, Action<string> handler) =>
+    public static Terminal OnInput(this Terminal widget, Action<string> handler) =>
         widget with { OnInput = e => { handler(e.Value); return ValueTask.CompletedTask; } };
 
-    public static Terminal HandleResize(this Terminal widget, Func<Event<Terminal, TerminalSize>, ValueTask> handler) =>
+    public static Terminal OnResize(this Terminal widget, Func<Event<Terminal, TerminalSize>, ValueTask> handler) =>
         widget with { OnResize = handler };
 
-    public static Terminal HandleResize(this Terminal widget, Action<TerminalSize> handler) =>
+    public static Terminal OnResize(this Terminal widget, Action<TerminalSize> handler) =>
         widget with { OnResize = e => { handler(e.Value); return ValueTask.CompletedTask; } };
 
-    public static Terminal HandleResize(this Terminal widget, Action<int, int> handler) =>
+    public static Terminal OnResize(this Terminal widget, Action<int, int> handler) =>
         widget with { OnResize = e => { handler(e.Value.Cols, e.Value.Rows); return ValueTask.CompletedTask; } };
 
-    public static Terminal HandleLinkClick(this Terminal widget, Func<Event<Terminal, string>, ValueTask> handler) =>
+    public static Terminal OnLinkClick(this Terminal widget, Func<Event<Terminal, string>, ValueTask> handler) =>
         widget with { OnLinkClick = handler };
 
-    public static Terminal HandleLinkClick(this Terminal widget, Action<string> handler) =>
+    public static Terminal OnLinkClick(this Terminal widget, Action<string> handler) =>
         widget with { OnLinkClick = e => { handler(e.Value); return ValueTask.CompletedTask; } };
 }

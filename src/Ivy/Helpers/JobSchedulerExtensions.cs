@@ -58,9 +58,11 @@ public static class JobSchedulerExtensions
                | job.Display
                | GetError()
                | (job.Children.Any()
-                   ? Layout.Horizontal().Gap(2).Visible(job.State != JobState.Finished)
-                     | new Separator().Orientation(Orientation.Vertical).Width(Size.Units(4))
-                     | (Layout.Vertical() | job.Children.Select(child => child.ToView()))
+                   ? (job.State != JobState.Finished
+                       ? Layout.Horizontal().Gap(2)
+                         | new Separator().Orientation(Orientation.Vertical).Width(Size.Units(4))
+                         | (Layout.Vertical() | job.Children.Select(child => child.ToView()))
+                       : null)
                    : null);
     }
 }

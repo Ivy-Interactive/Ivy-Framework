@@ -2,7 +2,7 @@ using System.Text.Json.Nodes;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Braces, path: ["Widgets", "Primitives"], searchHints: ["data", "format", "json", "syntax", "structure", "object"])]
+[App(icon: Icons.Braces, group: ["Widgets", "Primitives"], searchHints: ["data", "format", "json", "syntax", "structure", "object"])]
 public class JsonApp : SampleBase
 {
     protected override object? BuildSample()
@@ -25,6 +25,16 @@ public class JsonApp : SampleBase
                 "555-5678"
             }
         };
-        return json;
+        var dog = new { Breed = "Poodle", Color = "White", Age = 3 };
+
+        return Layout.Vertical().Gap(4)
+            | Text.P("From JsonNode:")
+            | new Json(json)
+            | Text.P("From object (auto-serialized):")
+            | new Json(dog)
+            | Text.P("Expanded to depth 2:")
+            | new Json(json) { Expanded = 2 }
+            | Text.P("Fully expanded:")
+            | new Json(json) { Expanded = -1 };
     }
 }

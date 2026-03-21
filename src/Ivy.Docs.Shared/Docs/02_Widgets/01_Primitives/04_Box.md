@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - box
   - container
   - div
   - wrapper
@@ -118,6 +119,23 @@ public class SpacingExamplesView : ViewBase
             | new Box("Small Padding").Padding(4)
             | new Box("Large Padding").Padding(10)
             | new Box("With Margin").Margin(8).Padding(8);
+    }
+}
+```
+
+### Aspect Ratio
+
+Set a width and an aspect ratio — the height adjusts automatically. Pass the ratio as a float: `16f / 9f` for widescreen, `1f` for square. Works on any widget since it's defined on `WidgetBase`.
+
+```csharp demo-tabs
+public class AspectRatioExamplesView : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Horizontal().Gap(4)
+            | new Box("16:9").Width(Size.Units(80)).AspectRatio(16f / 9f).Background(Colors.Primary)
+            | new Box("4:3").Width(Size.Units(80)).AspectRatio(4f / 3f).Background(Colors.Secondary)
+            | new Box("1:1").Width(Size.Units(40)).AspectRatio(1f).Background(Colors.Warning);
     }
 }
 ```

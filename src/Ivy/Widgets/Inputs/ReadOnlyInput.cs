@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -14,7 +15,7 @@ public interface IAnyReadOnlyInput : IAnyInput
 public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<TValue>, IAnyReadOnlyInput
 {
     [OverloadResolutionPriority(1)]
-    public ReadOnlyInput(IAnyState state)
+    internal ReadOnlyInput(IAnyState state)
     {
         var typedState = state.As<TValue>();
         Value = typedState.Value;
@@ -22,13 +23,13 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     }
 
     [OverloadResolutionPriority(1)]
-    public ReadOnlyInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange = null)
+    internal ReadOnlyInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange = null)
     {
         OnChange = onChange?.ToEventHandler();
         Value = value;
     }
 
-    public ReadOnlyInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange = null)
+    internal ReadOnlyInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange = null)
     {
         OnChange = onChange == null ? null : new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
@@ -62,20 +63,20 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
 /// </summary>
 public record ReadOnlyInput : ReadOnlyInput<string>
 {
-    public ReadOnlyInput(IAnyState state) : base(state)
+    internal ReadOnlyInput(IAnyState state) : base(state)
     {
     }
 
     [OverloadResolutionPriority(1)]
-    public ReadOnlyInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null) : base(value, onChange)
+    internal ReadOnlyInput(string value, Func<Event<IInput<string>, string>, ValueTask>? onChange = null) : base(value, onChange)
     {
     }
 
-    public ReadOnlyInput(string value, Action<Event<IInput<string>, string>>? onChange = null) : base(value, onChange)
+    internal ReadOnlyInput(string value, Action<Event<IInput<string>, string>>? onChange = null) : base(value, onChange)
     {
     }
 
-    public ReadOnlyInput() : base()
+    internal ReadOnlyInput() : base()
     {
     }
 }
@@ -86,7 +87,7 @@ public static class ReadOnlyInputExtensions
     {
         var type = state.GetStateType();
         Type genericType = typeof(ReadOnlyInput<>).MakeGenericType(type);
-        IAnyReadOnlyInput input = (IAnyReadOnlyInput)Activator.CreateInstance(genericType, state)!;
+        IAnyReadOnlyInput input = (IAnyReadOnlyInput)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state }, null)!;
         return input;
     }
 
