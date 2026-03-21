@@ -2,50 +2,6 @@
 
 ## New Features
 
-### XAML Renderer Widget
-
-Ivy now includes a **XAML renderer** that turns Ivy XAML markup (XML) into live UI. You can define layouts, badges, buttons, cards, charts, and more in XML and have them rendered as normal widgets—ideal for dynamic UIs, generated content, or the Advanced → Xaml Builder sample.
-
-**Reference the package:**
-
-The renderer lives in the `Ivy.XamlBuilder` package. When using the framework from source, the sample app and XamlBuilder are already available; for package-based projects, add:
-
-```bash
-dotnet add package Ivy.XamlBuilder
-```
-
-**Basic usage:**
-
-```csharp
-using Ivy;
-
-var builder = new XamlBuilder();
-var widget = builder.Build(xamlString);
-
-// Use the resulting widget in your view
-return Layout.Vertical()
-    | Text.H2("Preview")
-    | widget;
-```
-
-**Example XAML:**
-
-```xml
-<StackLayout Orientation="Vertical">
-  <Badge Title="Hello" />
-  <Badge Title="World" Variant="Success" />
-</StackLayout>
-```
-
-**What the renderer does:**
-
-- Parses Ivy XAML (XML) and maps element names to widget types (e.g. `StackLayout`, `Badge`, `Button`, `Card`, `LineChart`)
-- Sets properties from attributes (e.g. `Title="Hello"`, `Variant="Success"`)
-- Handles nested layout and property elements (e.g. `LineChart.Lines`, `XAxis`, `Data` with CDATA for chart data)
-- Returns an `AbstractWidget` tree that the framework renders like any other view content
-
-Use this for tooling, agents (e.g. EfQuery generating visualizations), or anywhere you need to build UI from markup instead of C#.
-
 ### Build Desktop Apps with Ivy
 
 You can now run Ivy applications as **native desktop apps** on Windows, macOS, and Linux using the **Ivy.Desktop** package. The same C# and Ivy UI you use for web run in a native window—no Electron, no Chromium; the stack uses [Photino](https://tryphotino.io) for a lightweight, cross-platform desktop host.
