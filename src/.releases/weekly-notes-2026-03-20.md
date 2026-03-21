@@ -733,102 +733,16 @@ This is a simple find-and-replace change in your codebase—search for `path:` i
 
 ## Bug Fixes
 
-### Fixed Race Condition in State<T>.Subscribe
-
-Fixed a race condition in `State<T>.Subscribe` that could cause state updates to be missed in certain timing scenarios. The subscription is now established before sending the initial value, ensuring no updates are lost during the subscription process. This improves the reliability of state subscriptions throughout the framework.
-
-### Fixed VideoPlayer PlaybackRate on Initial Load
-
-Fixed an issue where the `PlaybackRate` setting wasn't applied when videos first loaded. Browsers reset the playback rate to 1.0 during media load, causing the configured playback speed to be ignored initially. The VideoPlayer now correctly sets both `defaultPlaybackRate` and `playbackRate` during initialization and re-applies the speed after the video loads, ensuring your configured playback rate takes effect immediately.
-
-### Fixed DateTime Timezone Shift in DataTables
-
-Fixed a critical issue where DateTime values with unspecified timezone (`DateTimeKind.Unspecified`) were incorrectly treated as local time during Arrow serialization in DataTables. This caused midnight values to shift by the server's UTC offset, breaking date range filters and causing incorrect filtering results. DateTime values with unspecified kind are now correctly treated as UTC, preventing unintended timezone conversions and ensuring date filters work as expected.
-
-### Fixed SignatureInput State Binding
-
-Fixed a critical bug where the `OnChange` event wasn't being wired up for state-bound SignatureInput widgets, preventing signatures from being captured into state. Additionally, resolved base64 encoding issues where the data URL prefix (`data:image/png;base64,`) was causing serialization problems with C#'s `byte[]` deserialization. The widget now correctly strips the prefix when sending to the backend and restores it when displaying, ensuring seamless state binding with the `ToSignatureInput()` extension method.
-
-### Fixed PieChart Ignoring Custom Data Key Configuration
-
-Fixed an issue where the **PieChart** widget ignored custom `dataKey` and `nameKey` properties configured in the `Pie` configuration. The chart was hardcoded to use `measure` and `dimension` properties from the data, making it impossible to use custom property names. The widget now correctly reads and applies the configured `dataKey` and `nameKey` from your Pie configuration, while maintaining backwards compatibility by falling back to `measure`/`dimension` when no custom keys are specified.
-
-### Fixed ScreenshotFeedback Upload Race Condition
-
-Fixed a critical timing issue in the **ScreenshotFeedback** widget where screenshot content wasn't available in the `OnSave` event handler. The widget was firing the event before the upload completed, causing the C# handler to always receive null content. The upload now completes before the event fires, ensuring screenshot data is available when you handle the save event. Also added a visual spinner and disabled state to the Submit button during upload to provide better user feedback.
-
-### Fixed Ghost Variant Select Inputs in Dark Mode
-
-Fixed a visual issue where **SelectInput** and **AsyncSelectInput** widgets using the ghost variant displayed unwanted borders in dark mode. Ghost variants are now correctly borderless and transparent in both light and dark modes, with proper hover state styling maintained across all themes.
-
-### Fixed Double Eye Icon in Password Inputs
-
-Fixed a visual bug where **PasswordInput** widgets displayed two eye icons for toggling password visibility—one from Ivy's custom toggle and one from the browser's native password reveal button. The browser's native reveal controls are now properly suppressed, and the toggle button styling has been corrected to ensure only Ivy's custom eye icon appears. This provides a cleaner, more consistent password input experience across all browsers.
-
-### Fixed X-Axis Label Overlap in Horizontal Bar Charts
-
-Fixed a visual issue where large numbers on the x-axis in horizontal bar charts would overlap and become unreadable. The x-axis now uses the same compact number formatting (K/M/B notation) as the y-axis when displaying numeric values, preventing overlap and improving readability. Category axes (text labels) continue to use string-wrapping for long text.
-
-### Fixed Nullable NumberInput Showing 0 Instead of Empty Field
-
-Fixed a critical bug where nullable `NumberInput<T>` widgets displayed `0` instead of an empty field when the value was `null`. The issue occurred because the `Nullable` property wasn't being serialized to the frontend, causing the default `nullable=false` behavior to convert null values to 0. Number inputs with nullable types now correctly display empty fields when the value is null, providing proper nullable input behavior.
-
-### Fixed Grid Layout Children Lost in Pipe Chains
-
-Fixed a critical layout bug where children piped after a `GridView` inside a `LayoutView` would be lost. When using syntax like `Layout.Vertical() | Layout.Grid().Columns(2) | input1 | input2`, the left-associative pipe operator caused subsequent children to be added to the parent `LayoutView` instead of the `GridView`, resulting in an empty grid with inputs stacked vertically.
-
-The framework now tracks the last-piped `GridView` and automatically routes subsequent non-ViewBase children to the active grid until a new ViewBase child or null resets the context. This fix ensures that intuitive pipe chains work as expected:
-
-```csharp
-// Now works correctly - inputs go into the grid
-return Layout.Vertical()
-    | Text.H2("My Form")
-    | Layout.Grid().Columns(2)
-    | label1 | input1
-    | label2 | input2;
-```
-
-Parenthesized nesting continues to work correctly as before.
-
-### Fixed JsonRenderer Infinite Re-render Loop
-
-Fixed a critical bug in the **JsonRenderer** component that caused infinite re-rendering and browser freezing. The issue occurred when parsing JSON strings because `JSON.parse()` creates new object references on every render, causing the component to continuously detect changes and re-render. The component now uses `useMemo` to cache parsed data and follows React's recommended pattern for adjusting state when props change, preventing unnecessary re-renders. Additionally, the null check was improved to correctly handle valid falsy JSON values like `0`, `false`, and empty strings.
-
-### Fixed Chart Series Auto-Plotting Unwanted Data
-
-Fixed issues where **AreaChart**, **BarChart**, and **LineChart** widgets would auto-plot all numeric fields in your data instead of respecting explicitly configured series. When you configure specific series via `.Line()`, `.Bar()`, or `.Area()` calls, the charts now only render those configured data keys instead of including every numeric property from your data objects.
-
-Additionally fixed **BarChart** legend labels to use proper PascalCase formatting (e.g., "totalRevenue" now displays as "Total Revenue") to match the behavior of LineChart and AreaChart.
-
-**What changed:**
-
-- Charts filter to only plot explicitly configured series when series are defined via `.Line()`, `.Bar()`, or `.Area()` methods
-- Falls back to auto-discovery behavior when no series are configured
-- Fixed case-insensitive dataKey matching for AreaChart series configuration
-- BarChart legends now use `SplitPascalCase` for better readability
-
-This ensures your chart configurations are respected and prevents unwanted data keys from appearing in your visualizations.
-
-### Fixed BladeHeader Content Collapsing
-
-Fixed a layout bug in the **BladeHeader** where content without explicit width would collapse and become invisible. The slot container inside BladeHeader had no flex or grow properties, causing search inputs, titles, and other header content to disappear in certain layouts. The header slot now includes `flex-1 min-w-0` by default, ensuring content fills the available header space properly.
-
-**Before the fix:**
-
-```csharp
-// Header content would collapse without explicit width
-var header = Layout.Horizontal().Gap(1)
-    | filter.ToSearchInput().Placeholder("Search")  // Would be invisible!
-    | Icons.Plus.ToButton(_ => Create()).Ghost();
-```
-
-**After the fix:**
-
-```csharp
-// Header content now renders correctly without needing .Width()
-var header = Layout.Horizontal().Gap(1)
-    | filter.ToSearchInput().Placeholder("Search")  // Now visible!
-    | Icons.Plus.ToButton(_ => Create()).Ghost();
-```
-
-This fix ensures BladeHeader content displays correctly without requiring manual width configuration on every element.
+- **State.Subscribe**: Fixed a race in `State<T>.Subscribe` where updates could be missed; the subscription is established before the initial value is sent, so nothing is lost during setup.
+- **VideoPlayer**: `PlaybackRate` now applies on first load—sets `defaultPlaybackRate` and `playbackRate` on init and reapplies after load (browsers reset speed to 1.0 during media load).
+- **DataTables**: `DateTimeKind.Unspecified` values are no longer treated as local during Arrow serialization (avoids midnight shifting and broken date filters); unspecified kind is handled as UTC.
+- **SignatureInput**: Wired `OnChange` for state-bound widgets; strips/restores the `data:image/png;base64,` prefix for correct `byte[]` round-tripping with `ToSignatureInput()`.
+- **PieChart**: Honors `dataKey` and `nameKey` from `Pie` config instead of hardcoding `measure` / `dimension`; falls back to the old keys when unset.
+- **ScreenshotFeedback**: `OnSave` runs after upload completes so content is non-null; Submit shows a spinner and is disabled while uploading.
+- **SelectInput / AsyncSelectInput**: Ghost variant is borderless and transparent in dark mode (hover styling preserved).
+- **PasswordInput**: Suppresses the browser’s native reveal so only Ivy’s toggle shows (no double eye icons).
+- **BarChart (horizontal)**: X-axis numeric labels use compact K/M/B formatting like the Y-axis to avoid overlap; category axes still wrap text.
+- **NumberInput**: Nullable inputs show empty when the value is `null`—`Nullable` is serialized so the client no longer coerces null to `0`.
+- **Layout / Grid**: Pipe chains such as `Layout.Vertical() | Layout.Grid().Columns(2) | …` now route following children into the grid until reset; parenthesized nesting unchanged.
+- **JsonRenderer**: Stops infinite re-renders by memoizing parsed JSON and aligning state updates with prop changes; falsy JSON (`0`, `false`, `""`) handled correctly.
+- **AreaChart / BarChart / LineChart**: With explicit `.Line()` / `.Bar()` / `.Area()` series, only those keys are plotted; auto-discovery remains when nothing is configured. Case-insensitive `dataKey` matching for AreaChart; BarChart legends use `SplitPascalCase` (e.g. `totalRevenue` → “Total Revenue”) like the other charts.
