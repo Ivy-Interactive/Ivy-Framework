@@ -2,105 +2,26 @@
 
 ## New Features
 
-### VideoPlayer Time Range Control
+### VideoPlayer: time range, events, and playback speed
 
-The **VideoPlayer** widget now supports precise playback control with `StartTime` and `EndTime` properties. Specify which segment of a video to play by setting start and end positions in seconds—perfect for highlighting specific moments, creating video tutorials, or building interactive media experiences.
+The **VideoPlayer** widget now supports **time range** (`StartTime` / `EndTime` in seconds), **playback events** (`HandlePlay`, `HandlePause`, `HandleEnded`, `HandleLoaded`—each with async, sync-with-event, and parameterless overloads), and **playback speed** (`PlaybackRate`, minimum 0.25×). Use time ranges for clips and tutorials, events for analytics and coordinated UI, and speed for review or fast-forward on HTML5 sources.
 
-**Play from a specific start position:**
-
-```csharp
-new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
-    .StartTime(5)  // Start playback at 5 seconds
-```
-
-**Play a specific segment:**
-
-```csharp
-new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
-    .StartTime(2)
-    .EndTime(6)  // Play from 2s to 6s, then pause
-```
-
-**Works with YouTube videos too:**
-
-```csharp
-new VideoPlayer("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-    .StartTime(30)
-    .EndTime(60)  // Play YouTube segment from 30s to 60s
-    .Height(Size.Units(100))
-```
-
-The implementation uses Media Fragments URI for HTML5 videos and embed parameters for YouTube, ensuring broad compatibility across video sources.
-
-### VideoPlayer Event Callbacks
-
-The **VideoPlayer** widget now supports event callbacks for tracking video playback state. React to play, pause, ended, and loaded events to build analytics, sequential video experiences, or coordinate UI updates with video state.
-
-**Available events:**
-
-- `OnPlay` - Triggered when video playback starts
-- `OnPause` - Triggered when video playback pauses
-- `OnEnded` - Triggered when video playback completes
-- `OnLoaded` - Triggered when video metadata loads
-
-**Usage example:**
+**Note:** Time ranges use Media Fragments (HTML5) and embed parameters (YouTube). `PlaybackRate` applies to native HTML5 video only; YouTube embeds do not change speed.
 
 ```csharp
 var playCount = UseState(0);
 var completed = UseState(false);
 
 var video = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
-    .HandlePlay(_ => playCount.Set(playCount.Value + 1))
-    .HandlePause(_ => Console.WriteLine("Video paused"))
-    .HandleEnded(_ => completed.Set(true))
-    .HandleLoaded(_ => Console.WriteLine("Video ready"))
-    .Height(Size.Units(50));
-
-// Display play count and completion status
-return Layout.Vertical()
-    | video
-    | new Badge($"Played {playCount.Value} times")
-    | new Badge(completed.Value ? "Completed" : "In progress");
+    .StartTime(2)  // time range
+    .EndTime(6)  // time range
+    .PlaybackRate(1.5)  // playback speed
+    .HandlePlay(_ => playCount.Set(playCount.Value + 1))  // event: play
+    .HandlePause(_ => Console.WriteLine("Video paused"))  // event: pause
+    .HandleEnded(_ => completed.Set(true))  // event: ended
+    .HandleLoaded(_ => Console.WriteLine("Video ready"))  // event: metadata loaded
+    .Height(Size.Units(50));  // layout
 ```
-
-Each handler method has multiple overloads for convenience:
-
-- `HandlePlay(Func<Event<VideoPlayer>, ValueTask>)` - Async handler with event data
-- `HandlePlay(Action<Event<VideoPlayer>>)` - Sync handler with event data
-- `HandlePlay(Action)` - Simple action without event data
-
-Use these callbacks for video analytics, building sequential content flows, or coordinating UI state with playback events.
-
-### VideoPlayer Playback Speed Control
-
-The **VideoPlayer** widget now supports playback speed control via the `PlaybackRate` property. Adjust video speed from 0.25x (slow motion) to 2x or higher—perfect for tutorial playback, reviewing footage in slow motion, or quickly scrubbing through long recordings.
-
-**Basic usage:**
-
-```csharp
-new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
-    .PlaybackRate(1.5)  // Play at 1.5x speed
-```
-
-**Common use cases:**
-
-```csharp
-// Fast playback for lectures/tutorials
-new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
-    .PlaybackRate(1.5)
-
-// Slow motion review
-new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
-    .PlaybackRate(0.5)
-
-// Quick scrubbing through content
-new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
-    .PlaybackRate(2.0)
-```
-
-The minimum playback rate is 0.25x (enforced with validation). Values are automatically clamped to this minimum. Normal playback speed is 1.0.
-
-**Note:** This feature works for native HTML5 video playback only and does not apply to YouTube embeds.
 
 ### SignatureInput Widget
 
