@@ -92,17 +92,25 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
         setLocalValue(time);
         eventHandler('OnChange', id, [time]);
       } else {
-        // For other variants, create a date with the selected time
-        const [hours, minutes, seconds] = time.split(':').map(Number);
-        const newDateTime = new Date();
-        newDateTime.setHours(hours, minutes, seconds);
-
-        const isoString = newDateTime.toISOString();
+        // DateTime variant: merge time into current date so we don't overwrite with today
+        if (!time?.trim()) return;
+        const parts = time.split(':').map(Number);
+        const [hours, minutes, seconds] =
+          parts.length >= 3 ? [parts[0], parts[1], parts[2]] : [0, 0, 0];
+        let baseDate: Date;
+        if (localValue && typeof localValue === 'string') {
+          const parsed = new Date(localValue);
+          baseDate = !isNaN(parsed.getTime()) ? parsed : new Date();
+        } else {
+          baseDate = new Date();
+        }
+        baseDate.setHours(hours, minutes, seconds);
+        const isoString = baseDate.toISOString();
         setLocalValue(isoString);
         eventHandler('OnChange', id, [isoString]);
       }
     },
-    [disabled, eventHandler, id, variant, setLocalValue]
+    [disabled, eventHandler, id, variant, localValue, setLocalValue]
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);

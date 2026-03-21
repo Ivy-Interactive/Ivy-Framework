@@ -143,6 +143,15 @@ public static class Utils
             return Activator.CreateInstance(t, item1, item2);
         }
 
+        // DateOnly expects "yyyy-MM-dd"; frontend sends ISO datetime. Parse via DateTime first.
+        if ((t == typeof(DateOnly) || valueType == typeof(DateOnly?)) && jsonNode is JsonValue strVal && strVal.TryGetValue(out string? dateStr))
+        {
+            if (string.IsNullOrWhiteSpace(dateStr) && valueType == typeof(DateOnly?))
+                return null;
+            var dt = DateTime.Parse(dateStr, null, System.Globalization.DateTimeStyles.RoundtripKind);
+            return DateOnly.FromDateTime(dt);
+        }
+
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
