@@ -593,24 +593,94 @@ public class DateTimeInputFirstDayOfWeekSamples : ViewBase
 {
     public override object? Build()
     {
-        var mondayFirstDate = UseState(DateOnly.FromDateTime(DateTime.Now));
-        var mondayFirstRange = UseState<(DateOnly, DateOnly)>((DateOnly.FromDateTime(DateTime.Now.AddDays(-7)), DateOnly.FromDateTime(DateTime.Now)));
+        var sundayDate = UseState(DateOnly.FromDateTime(DateTime.Now));
+        var mondayDate = UseState(DateOnly.FromDateTime(DateTime.Now));
+        var saturdayDate = UseState(DateOnly.FromDateTime(DateTime.Now));
+        var sundayDateTime = UseState(DateTime.Now);
+        var mondayDateTime = UseState(DateTime.Now);
+        var saturdayDateTime = UseState(DateTime.Now);
+        var sundayRange = UseState<(DateOnly, DateOnly)>((DateOnly.FromDateTime(DateTime.Now.AddDays(-7)), DateOnly.FromDateTime(DateTime.Now)));
+        var mondayRange = UseState<(DateOnly, DateOnly)>((DateOnly.FromDateTime(DateTime.Now.AddDays(-7)), DateOnly.FromDateTime(DateTime.Now)));
+        var saturdayRange = UseState<(DateOnly, DateOnly)>((DateOnly.FromDateTime(DateTime.Now.AddDays(-7)), DateOnly.FromDateTime(DateTime.Now)));
 
-        var firstDayOfWeekGrid = Layout.Grid().Columns(2)
-            | Text.Monospaced("Monday-first DateInput")
-            | mondayFirstDate
+        var firstDayOfWeekGrid = Layout.Grid().Columns(3)
+            | Text.Monospaced("Sample")
+            | Text.Monospaced("Notes")
+            | Text.Monospaced("Input")
+
+            | Text.Monospaced("Sunday — Date")
+            | Text.Block("Common in US; calendar header starts Sun")
+            | sundayDate
+                .ToDateInput()
+                .FirstDayOfWeek(DayOfWeek.Sunday)
+                .Placeholder("Sunday-first week")
+                .TestId("datetime-input-fdow-sunday-date")
+
+            | Text.Monospaced("Monday — Date")
+            | Text.Block("ISO-style week; common in EU")
+            | mondayDate
                 .ToDateInput()
                 .FirstDayOfWeek(DayOfWeek.Monday)
-                .TestId("datetime-input-monday-first")
-            | Text.Monospaced("Monday-first DateRangeInput")
-            | mondayFirstRange
+                .Placeholder("Monday-first week")
+                .TestId("datetime-input-fdow-monday-date")
+
+            | Text.Monospaced("Saturday — Date")
+            | Text.Block("Used in some Middle Eastern locales")
+            | saturdayDate
+                .ToDateInput()
+                .FirstDayOfWeek(DayOfWeek.Saturday)
+                .Placeholder("Saturday-first week")
+                .TestId("datetime-input-fdow-saturday-date")
+
+            | Text.Monospaced("Sunday — DateTime")
+            | Text.Block("Popover calendar matches Sunday-first rows")
+            | sundayDateTime
+                .ToDateTimeInput()
+                .FirstDayOfWeek(DayOfWeek.Sunday)
+                .Placeholder("Date & time (Sun)")
+                .TestId("datetime-input-fdow-sunday-datetime")
+
+            | Text.Monospaced("Monday — DateTime")
+            | Text.Block("Popover calendar matches Monday-first rows")
+            | mondayDateTime
+                .ToDateTimeInput()
+                .FirstDayOfWeek(DayOfWeek.Monday)
+                .Placeholder("Date & time (Mon)")
+                .TestId("datetime-input-fdow-monday-datetime")
+
+            | Text.Monospaced("Saturday — DateTime")
+            | Text.Block("Saturday-first calendar in combined picker")
+            | saturdayDateTime
+                .ToDateTimeInput()
+                .FirstDayOfWeek(DayOfWeek.Saturday)
+                .Placeholder("Date & time (Sat)")
+                .TestId("datetime-input-fdow-saturday-datetime")
+
+            | Text.Monospaced("Sunday — DateRange")
+            | Text.Block("Range picker with Sun-first grid")
+            | sundayRange
+                .ToDateRangeInput()
+                .FirstDayOfWeek(DayOfWeek.Sunday)
+                .TestId("daterange-input-fdow-sunday")
+
+            | Text.Monospaced("Monday — DateRange")
+            | Text.Block("Range picker with Mon-first grid")
+            | mondayRange
                 .ToDateRangeInput()
                 .FirstDayOfWeek(DayOfWeek.Monday)
-                .TestId("daterange-input-monday-first");
+                .TestId("daterange-input-fdow-monday")
+
+            | Text.Monospaced("Saturday — DateRange")
+            | Text.Block("Range picker with Sat-first grid")
+            | saturdayRange
+                .ToDateRangeInput()
+                .FirstDayOfWeek(DayOfWeek.Saturday)
+                .TestId("daterange-input-fdow-saturday");
 
         return Layout.Vertical()
             | Text.H2("First day of week")
-            | Text.P("Calendar week starts on Monday for date and range pickers.")
+            | Text.P(
+                "DateInput, DateTimeInput, and DateRangeInput pass FirstDayOfWeek into the calendar so week rows start on Sunday, Monday, or Saturday.")
             | firstDayOfWeekGrid;
     }
 }
