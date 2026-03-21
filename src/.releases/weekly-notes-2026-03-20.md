@@ -110,43 +110,13 @@ return Layout.Vertical()
 
 ### UseClipboard Hook
 
-Ivy now includes a **UseClipboard** hook for copying text to the user's clipboard with a simple, intuitive API. The hook follows the standard `UseXxx` pattern and provides a cleaner alternative to manually accessing `IClientProvider.CopyToClipboard()`.
-
-**Basic usage:**
+**UseClipboard** returns **`Action<string>`** — call it with the text to copy. It wraps `IClientProvider.CopyToClipboard()` for a smaller API. **Write-only** (no read-from-clipboard).
 
 ```csharp
-public class CopyExample : ViewBase
-{
-    public override object? Build()
-    {
-        var copyToClipboard = UseClipboard();
+var copyToClipboard = UseClipboard();  // Action<string>
 
-        return new Button("Copy greeting", _ =>
-        {
-            copyToClipboard("Hello, World!");
-        });
-    }
-}
+return new Button("Copy greeting", _ => copyToClipboard("Hello, World!"));
 ```
-
-**Copying generated URLs or content:**
-
-```csharp
-var copyToClipboard = UseClipboard();
-var client = UseService<IClientProvider>();
-
-var shareUrl = $"https://example.com/item/{itemId}";
-copyToClipboard(shareUrl);
-client.Toast("Link copied!");
-```
-
-**What you get:**
-
-- **Simple API** - Returns an `Action<string>` that copies text when invoked
-- **Consistent pattern** - Follows the familiar UseXxx hook convention
-- **Write-only** - Copies to clipboard (no read-from-clipboard support)
-
-Under the hood, this wraps `IClientProvider.CopyToClipboard()`, but provides a more ergonomic API for the common case of copying text.
 
 ### Children() Extension Method for All Widgets
 
