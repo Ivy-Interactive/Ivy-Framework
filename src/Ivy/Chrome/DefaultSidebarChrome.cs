@@ -95,6 +95,15 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
         }, search, appRepository.Reloaded.ToTrigger());
 
+        bool IsErrorApp(string? appId) =>
+            appId != null && appRepository.GetAppOrDefault(appId).Id == AppIds.ErrorNotFound;
+
+        void RedirectToAppIfNotError(NavigateArgs navigateArgs, bool replaceHistory = false, string? tabId = null)
+        {
+            if (IsErrorApp(navigateArgs.AppId)) return;
+            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+        }
+
         void OpenApp(NavigateArgs navigateArgs, bool replaceHistory = false)
         {
             if (settings.Navigation == ChromeNavigation.Pages)
@@ -118,10 +127,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     SetAppTitle(navigateArgs.AppId);
                 }
 
-                // Update browser URL for page navigation
                 if (navigateArgs.HistoryOp is HistoryOp.Push && previousApp != navigateArgs.AppId)
                 {
-                    client.Redirect(navigateArgs.GetUrl(), replaceHistory);
+                    RedirectToAppIfNotError(navigateArgs, replaceHistory);
                 }
             }
             else
@@ -138,10 +146,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                         var tab = tabs.Value[tabIndex];
                         SetAppTitle(tab.AppId);
 
-                        // Update browser URL when switching to existing tab
                         if (navigateArgs.HistoryOp is HistoryOp.Push)
                         {
-                            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tab.Id);
+                            RedirectToAppIfNotError(navigateArgs, replaceHistory, tab.Id);
                         }
                         return;
                     }
@@ -184,10 +191,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                         // Set page title
                         SetAppTitle(appId);
 
-                        // Update browser URL when switching to existing tab
                         if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
                         {
-                            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+                            RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
                         }
                         return;
                     }
@@ -203,8 +209,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     // Set page title
                     SetAppTitle(app.Id);
 
-                    // Update browser URL when new tab is opened
-                    client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+                    RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
                 }
             }
         }
@@ -267,9 +272,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 var tab = tabs.Value[@event.Value];
                 SetAppTitle(tab.AppId);
 
-                // Update browser URL when tab is selected
-                var navigateArgs = new NavigateArgs(tab.AppId);
-                client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
+                RedirectToAppIfNotError(new NavigateArgs(tab.AppId), tabId: tab.Id);
             }
         }
 
@@ -311,8 +314,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     // Set page title
                     SetAppTitle(tab.AppId);
 
-                    var navigateArgs = new NavigateArgs(tab.AppId);
-                    client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
+                    RedirectToAppIfNotError(new NavigateArgs(tab.AppId), tabId: tab.Id);
                 }
                 else
                 {

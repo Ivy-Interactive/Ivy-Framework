@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { ChevronRight, ChevronDown } from 'lucide-react';
+import { useState } from "react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 
 interface XmlRendererProps {
   data: string;
+  initialExpanded?: number | null;
 }
 
 interface XmlNode {
-  type: 'element' | 'text' | 'cdata' | 'comment';
+  type: "element" | "text" | "cdata" | "comment";
   name?: string;
   attributes?: Record<string, string>;
   children?: XmlNode[];
@@ -16,7 +17,7 @@ interface XmlNode {
 const renderAttributes = (attributes: Record<string, string>) => {
   return Object.entries(attributes).map(([key, value]) => (
     <span key={key} className="ml-2">
-      {' '}
+      {" "}
       <span className="text-purple">{key}</span>
       <span className="text-muted-foreground">=</span>
       <span className="text-primary">"{value}"</span>
@@ -37,20 +38,16 @@ const XmlNodeComponent = ({
   expanded,
   toggleNode,
 }: XmlNodeComponentProps): React.ReactElement => {
-  if (node.type === 'text') {
+  if (node.type === "text") {
     return <span className="text-foreground">{node.value}</span>;
   }
 
-  if (node.type === 'comment') {
-    return (
-      <span className="text-muted-foreground">{`<!--${node.value}-->`}</span>
-    );
+  if (node.type === "comment") {
+    return <span className="text-muted-foreground">{`<!--${node.value}-->`}</span>;
   }
 
-  if (node.type === 'cdata') {
-    return (
-      <span className="text-muted-foreground">{`<![CDATA[${node.value}]]>`}</span>
-    );
+  if (node.type === "cdata") {
+    return <span className="text-muted-foreground">{`<![CDATA[${node.value}]]>`}</span>;
   }
 
   const hasChildren = node.children && node.children.length > 0;
@@ -64,26 +61,22 @@ const XmlNodeComponent = ({
           onClick={() => toggleNode(path)}
           role="button"
           tabIndex={0}
-          onKeyDown={e => {
-            if (e.key === 'Enter' || e.key === ' ') {
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               toggleNode(path);
             }
           }}
         >
-          {isExpanded ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-          <span className="text-muted-foreground">{'<'}</span>
+          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          <span className="text-muted-foreground">{"<"}</span>
           <span className="text-cyan">{node.name}</span>
           {node.attributes && renderAttributes(node.attributes)}
-          <span className="text-muted-foreground">{'>'}</span>
+          <span className="text-muted-foreground">{">"}</span>
         </div>
 
         {isExpanded && (
-          <div className="ml-4 border-l border-border">
+          <div className="ml-3 border-l border-border">
             {node.children?.map((child, i) => {
               const childKey = `xml-node-${i}`;
               return (
@@ -102,9 +95,9 @@ const XmlNodeComponent = ({
 
         {isExpanded && (
           <div className="text-muted-foreground ml-1">
-            {'</'}
+            {"</"}
             <span className="text-cyan">{node.name}</span>
-            {'>'}
+            {">"}
           </div>
         )}
       </div>
@@ -114,44 +107,72 @@ const XmlNodeComponent = ({
   return (
     <div>
       <div className="flex items-center px-1" role="presentation">
-        <span className="text-muted-foreground">{'<'}</span>
+        <span className="text-muted-foreground">{"<"}</span>
         <span className="text-cyan">{node.name}</span>
         {node.attributes && renderAttributes(node.attributes)}
-        <span className="text-muted-foreground">{' />'}</span>
+        <span className="text-muted-foreground">{" />"}</span>
       </div>
     </div>
   );
 };
 
-export const XmlRenderer = ({ data }: XmlRendererProps) => {
-  const [expanded, setExpanded] = useState(new Set());
+function collectXmlPaths(
+  node: XmlNode,
+  path: string,
+  maxDepth: number,
+  currentDepth: number,
+): string[] {
+  if (currentDepth >= maxDepth) return [];
+  if (!node.children || node.children.length === 0) return [];
 
+  const paths = [path];
+  node.children.forEach((child, i) => {
+    if (child.type === "element") {
+      paths.push(...collectXmlPaths(child, `${path}.${i}`, maxDepth, currentDepth + 1));
+    }
+  });
+  return paths;
+}
+
+function collectAllXmlPaths(node: XmlNode, path: string): string[] {
+  if (!node.children || node.children.length === 0) return [];
+
+  const paths = [path];
+  node.children.forEach((child, i) => {
+    if (child.type === "element") {
+      paths.push(...collectAllXmlPaths(child, `${path}.${i}`));
+    }
+  });
+  return paths;
+}
+
+export const XmlRenderer = ({ data, initialExpanded }: XmlRendererProps) => {
   const parseXml = (xmlString: string): XmlNode | null => {
     try {
       const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+      const xmlDoc = parser.parseFromString(xmlString, "text/xml");
 
-      if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
-        throw new Error('Invalid XML');
+      if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+        throw new Error("Invalid XML");
       }
 
       const convertDomToNode = (domNode: Node): XmlNode | null => {
         if (domNode.nodeType === Node.TEXT_NODE) {
-          const text = domNode.textContent?.trim() || '';
-          return text ? { type: 'text', value: text } : null;
+          const text = domNode.textContent?.trim() || "";
+          return text ? { type: "text", value: text } : null;
         }
 
         if (domNode.nodeType === Node.COMMENT_NODE) {
           return {
-            type: 'comment',
-            value: domNode.textContent || '',
+            type: "comment",
+            value: domNode.textContent || "",
           };
         }
 
         if (domNode.nodeType === Node.CDATA_SECTION_NODE) {
           return {
-            type: 'cdata',
-            value: domNode.textContent || '',
+            type: "cdata",
+            value: domNode.textContent || "",
           };
         }
 
@@ -159,19 +180,18 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
           const element = domNode as Element;
           const attributes: Record<string, string> = {};
 
-          element.getAttributeNames().forEach(attr => {
-            attributes[attr] = element.getAttribute(attr) || '';
+          element.getAttributeNames().forEach((attr) => {
+            attributes[attr] = element.getAttribute(attr) || "";
           });
 
           const children = Array.from(element.childNodes)
-            .map(child => convertDomToNode(child))
+            .map((child) => convertDomToNode(child))
             .filter((node): node is XmlNode => node !== null);
 
           return {
-            type: 'element',
+            type: "element",
             name: element.tagName,
-            attributes:
-              Object.keys(attributes).length > 0 ? attributes : undefined,
+            attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
             children: children.length > 0 ? children : undefined,
           };
         }
@@ -186,6 +206,18 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     }
   };
 
+  const parsedXml = parseXml(data);
+
+  const getInitialExpanded = () => {
+    if (!parsedXml || initialExpanded === null || initialExpanded === undefined)
+      return new Set<string>();
+    if (initialExpanded === -1) return new Set(collectAllXmlPaths(parsedXml, "root"));
+    if (initialExpanded === 0) return new Set<string>();
+    return new Set(collectXmlPaths(parsedXml, "root", initialExpanded, 0));
+  };
+
+  const [expanded, setExpanded] = useState(getInitialExpanded);
+
   const toggleNode = (path: string) => {
     const newExpanded = new Set(expanded);
     if (newExpanded.has(path)) {
@@ -195,8 +227,6 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     }
     setExpanded(newExpanded);
   };
-
-  const parsedXml = parseXml(data);
 
   if (!parsedXml) {
     return <div className="text-destructive">Invalid XML string</div>;

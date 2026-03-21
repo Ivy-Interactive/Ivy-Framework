@@ -1,36 +1,33 @@
-import React from 'react';
+import React from "react";
 
 interface EmbedErrorFallbackProps {
   url: string;
   platform?: string;
 }
 
-const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({
-  url,
-  platform,
-}) => {
+const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({ url, platform }) => {
   const getErrorTitle = () => {
-    if (platform === 'Unsupported') {
-      return 'Unsupported URL';
+    if (platform === "Unsupported") {
+      return "Unsupported URL";
     }
     if (platform) {
       return `${platform} Embed Error`;
     }
-    return 'Embed Error';
+    return "Embed Error";
   };
 
   const getErrorDescription = () => {
-    if (platform === 'Unsupported') {
-      return 'This URL is not supported for embedding. Please visit the link directly.';
+    if (platform === "Unsupported") {
+      return "This URL is not supported for embedding. Please visit the link directly.";
     }
-    return 'Failed to load embed. Please try again or visit the link directly.';
+    return "Failed to load embed. Please try again or visit the link directly.";
   };
 
   const getLinkText = () => {
-    if (platform === 'Unsupported') {
-      return 'Visit Link';
+    if (platform === "Unsupported") {
+      return "Visit Link";
     }
-    return 'View Original';
+    return "View Original";
   };
 
   return (
@@ -39,18 +36,14 @@ const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({
       <div className="@[30rem]:flex hidden items-center gap-3 p-2">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">
-            <span className="text-destructive-foreground text-sm font-bold">
-              !
-            </span>
+            <span className="text-destructive-foreground text-sm font-bold">!</span>
           </div>
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
             {getErrorTitle()}
           </h3>
-          <p className="text-sm text-muted-foreground line-clamp-1">
-            {getErrorDescription()}
-          </p>
+          <p className="text-sm text-muted-foreground line-clamp-1">{getErrorDescription()}</p>
         </div>
         <div className="flex-shrink-0">
           <a
@@ -73,9 +66,7 @@ const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({
       >
         <div className="flex-shrink-0">
           <div className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center">
-            <span className="text-destructive-foreground text-xs font-bold">
-              !
-            </span>
+            <span className="text-destructive-foreground text-xs font-bold">!</span>
           </div>
         </div>
         <div className="flex-1 min-w-0">

@@ -14,7 +14,7 @@ public class UseEffectTaskAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
         "Avoid Task.ContinueWith inside UseEffect",
-        "Task.ContinueWith() inside UseEffect can cause NullReferenceException when the component is disposed. Use a CancellationTokenSource with proper cleanup instead. See: https://docs.ivy.app/other/ivy-analyser/ivyeffect001.",
+        "Task.ContinueWith() inside UseEffect can cause NullReferenceException when the component is disposed. Use a CancellationTokenSource with proper cleanup instead. See: https://docs.ivy.app/other/ivy/analyser/ivyeffect001.",
         "Usage",
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true,

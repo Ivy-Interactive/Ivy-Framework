@@ -36,10 +36,10 @@ public class ServiceExampleView : ViewBase
     {
         var client = UseService<IClientProvider>();
         var message = UseState("Hello from service!");
-        
+
         return Layout.Vertical()
             | Text.P(message.Value)
-            | new Button("Show Toast", 
+            | new Button("Show Toast",
                 onClick: _ => client.Toast(message.Value, "Service Demo"));
     }
 }
@@ -100,7 +100,7 @@ public interface IDataService
 public class DataService : IDataService
 {
     private readonly ILogger<DataService> _logger;
-    
+
     public DataService(ILogger<DataService> logger)
     {
         _logger = logger;
@@ -201,10 +201,10 @@ public class SimpleServiceView : ViewBase
     {
         var client = UseService<IClientProvider>();
         var count = UseState(0);
-        
+
         return Layout.Vertical()
             | Text.P($"Button clicked {count.Value} times")
-            | new Button("Show Toast", onClick: _ => 
+            | new Button("Show Toast", onClick: _ =>
             {
                 count.Set(count.Value + 1);
                 client.Toast($"Notification #{count.Value}", "Service Demo");
@@ -232,18 +232,18 @@ public class MultiServiceView : ViewBase
         var client = UseService<IClientProvider>();
         var message = UseState("Ready");
         var count = UseState(0);
-        
+
         return Layout.Vertical()
             | Text.P($"Last action: {message.Value}")
             | Text.P($"Total actions: {count.Value}")
             | (Layout.Horizontal()
-                | new Button("Action 1", onClick: _ => 
+                | new Button("Action 1", onClick: _ =>
                 {
                     count.Set(count.Value + 1);
                     client.Toast("Action 1 executed", "Service Demo");
                     message.Set("Action 1 completed");
                 })
-                | new Button("Action 2", onClick: _ => 
+                | new Button("Action 2", onClick: _ =>
                 {
                     count.Set(count.Value + 1);
                     client.Toast("Action 2 executed", "Service Demo");

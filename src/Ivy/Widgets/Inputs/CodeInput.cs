@@ -44,7 +44,7 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 public record CodeInput<TString> : CodeInputBase, IInput<TString>
 {
     [OverloadResolutionPriority(1)]
-    public CodeInput(IAnyState state, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
+    internal CodeInput(IAnyState state, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TString>();
@@ -53,21 +53,21 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
     }
 
     [OverloadResolutionPriority(1)]
-    public CodeInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
+    internal CodeInput(TString value, Func<Event<IInput<TString>, TString>, ValueTask>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange?.ToEventHandler();
         Value = value;
     }
 
-    public CodeInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
+    internal CodeInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange == null ? null : new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
     }
 
-    public CodeInput(string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default) : this()
+    internal CodeInput(string? placeholder = null, bool disabled = false, CodeInputVariant variant = CodeInputVariant.Default) : this()
     {
         Placeholder = placeholder;
         Variant = variant;
@@ -93,8 +93,9 @@ public static class CodeInputExtensions
     {
         var type = state.GetStateType();
         Type genericType = typeof(CodeInput<>).MakeGenericType(type);
-        CodeInputBase input = (CodeInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
-        input.Nullable = type.IsNullableType();
+        CodeInputBase input = (CodeInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, type.IsNullableType());
         return input;
     }
 

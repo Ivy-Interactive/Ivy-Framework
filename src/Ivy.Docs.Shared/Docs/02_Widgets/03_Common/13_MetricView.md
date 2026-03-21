@@ -2,6 +2,7 @@
 prepare: |
   var client = UseService<IClientProvider>();
 searchHints:
+  - metric
   - kpi
   - metrics
   - dashboard

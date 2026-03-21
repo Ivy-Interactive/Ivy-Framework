@@ -1,10 +1,10 @@
-import React from 'react';
-import { parseISO } from 'date-fns';
-import type { CalendarEvent, WidgetNodeChild } from './types';
+import React from "react";
+import { parseISO } from "date-fns";
+import type { CalendarEvent, WidgetNodeChild } from "./types";
 
 export function useCalendarData(
   slots: { default?: React.ReactNode[] } | undefined,
-  widgetNodeChildren?: WidgetNodeChild[]
+  widgetNodeChildren?: WidgetNodeChild[],
 ): CalendarEvent[] {
   return React.useMemo(() => {
     if (!widgetNodeChildren || widgetNodeChildren.length === 0) {
@@ -14,14 +14,15 @@ export function useCalendarData(
     const events: CalendarEvent[] = [];
 
     widgetNodeChildren.forEach((widgetNode, index) => {
-      if (widgetNode.type === 'Ivy.CalendarEvent') {
+      if (widgetNode.type === "Ivy.CalendarEvent") {
         const eventId = (widgetNode.props.eventId as string) || widgetNode.id;
-        const title = (widgetNode.props.title as string) || '';
+        const title = (widgetNode.props.title as string) || "";
         const startStr = widgetNode.props.start as string | undefined;
         const endStr = widgetNode.props.end as string | undefined;
         const color = widgetNode.props.color as string | undefined;
         const allDay = widgetNode.props.allDay as boolean | undefined;
         const widgetId = widgetNode.id;
+        const hasChildren = widgetNode.children && widgetNode.children.length > 0;
 
         if (!startStr) return;
 
@@ -30,9 +31,7 @@ export function useCalendarData(
 
         try {
           start = parseISO(startStr);
-          end = endStr
-            ? parseISO(endStr)
-            : new Date(start.getTime() + 60 * 60 * 1000);
+          end = endStr ? parseISO(endStr) : new Date(start.getTime() + 60 * 60 * 1000);
         } catch {
           return;
         }
@@ -50,7 +49,7 @@ export function useCalendarData(
           color,
           allDay: allDay ?? false,
           widgetId,
-          content: slots?.default?.[index] || null,
+          content: hasChildren ? slots?.default?.[index] || null : null,
         });
       }
     });

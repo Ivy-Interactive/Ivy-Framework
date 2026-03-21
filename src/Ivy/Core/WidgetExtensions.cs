@@ -8,6 +8,15 @@ public static class WidgetExtensions
         return widget;
     }
 
+    /// <summary>
+    /// Replaces all children on the widget with the provided children.
+    /// Use the | pipe operator to append children instead.
+    /// </summary>
+    public static T Children<T>(this T widget, params object[] children) where T : AbstractWidget
+    {
+        return (T)(widget with { Children = children });
+    }
+
     public static T? FindDescendant<T>(this IWidget widget, string? key = null) where T : IWidget
     {
         Type type = typeof(T);

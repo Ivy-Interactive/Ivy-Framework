@@ -174,7 +174,11 @@ public class DataTableApp : SampleBase
                 return ValueTask.CompletedTask;
             });
 
-        return new Fragment([dataTable, new EmployeeEditDialog(editModalOpen, editingEmployee, refreshToken, updated =>
+        var content = Layout.Vertical().Width(Size.Full()).Height(Size.Full())
+            | "This header demonstrates that the DataTable below correctly calculates its height even when placed inside a vertical layout with other elements."
+            | dataTable;
+
+        return new Fragment([content, new EmployeeEditDialog(editModalOpen, editingEmployee, refreshToken, updated =>
         {
             mockService.UpdateEmployee(updated);
         })]);

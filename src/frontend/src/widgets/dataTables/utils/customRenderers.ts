@@ -1,17 +1,13 @@
-import {
-  CustomRenderer,
-  GridCellKind,
-  CustomCell,
-} from '@glideapps/glide-data-grid';
-import { getIconImage, isValidIconName } from './iconRenderer';
+import { CustomRenderer, GridCellKind, CustomCell } from "@glideapps/glide-data-grid";
+import { getIconImage, isValidIconName } from "./iconRenderer";
 
 /**
  * Data structure for icon cells
  */
 export interface IconCellData {
-  kind: 'icon-cell';
+  kind: "icon-cell";
   iconName: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
 }
 
 /**
@@ -23,9 +19,9 @@ export type IconCell = CustomCell<IconCellData>;
  * Data structure for link cells
  */
 export interface LinkCellData {
-  kind: 'link-cell';
+  kind: "link-cell";
   url: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
 }
 
 /**
@@ -41,12 +37,12 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
 
   isMatch: (cell: CustomCell): cell is IconCell =>
     cell.kind === GridCellKind.Custom &&
-    (cell.data as IconCellData | undefined)?.kind === 'icon-cell',
+    (cell.data as IconCellData | undefined)?.kind === "icon-cell",
 
   draw: (args, cell) => {
     const { ctx, rect, theme } = args;
     const iconName = cell.data?.iconName;
-    const align = cell.data?.align || 'left';
+    const align = cell.data?.align || "left";
 
     if (!iconName) return false;
 
@@ -54,14 +50,14 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
     if (!isValidIconName(iconName)) {
       // Draw error indicator for invalid icon
       ctx.fillStyle = theme.textDark;
-      ctx.font = '12px sans-serif';
+      ctx.font = "12px sans-serif";
       const errorX =
-        align === 'center'
+        align === "center"
           ? rect.x + rect.width / 2 - 4
-          : align === 'right'
+          : align === "right"
             ? rect.x + rect.width - 20
             : rect.x + 16;
-      ctx.fillText('?', errorX, rect.y + rect.height / 2 + 4);
+      ctx.fillText("?", errorX, rect.y + rect.height / 2 + 4);
       return true;
     }
 
@@ -79,13 +75,13 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
       let x: number;
 
       switch (align) {
-        case 'center':
+        case "center":
           x = rect.x + (rect.width - iconSize) / 2;
           break;
-        case 'right':
+        case "right":
           x = rect.x + rect.width - iconSize - padding;
           break;
-        case 'left':
+        case "left":
         default:
           x = rect.x + padding;
       }
@@ -100,13 +96,13 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
     let centerX: number;
 
     switch (align) {
-      case 'center':
+      case "center":
         centerX = rect.x + rect.width / 2;
         break;
-      case 'right':
+      case "right":
         centerX = rect.x + rect.width - padding - 10;
         break;
-      case 'left':
+      case "left":
       default:
         centerX = rect.x + padding + 10;
     }
@@ -121,7 +117,7 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
 
   // Support pasting icon names
   onPaste: (value: string, data: IconCellData) => {
-    if (typeof value === 'string' && isValidIconName(value)) {
+    if (typeof value === "string" && isValidIconName(value)) {
       return {
         ...data,
         iconName: value,
@@ -139,36 +135,36 @@ export const linkCellRenderer: CustomRenderer<LinkCell> = {
 
   isMatch: (cell: CustomCell): cell is LinkCell =>
     cell.kind === GridCellKind.Custom &&
-    (cell.data as LinkCellData | undefined)?.kind === 'link-cell',
+    (cell.data as LinkCellData | undefined)?.kind === "link-cell",
 
   draw: (args, cell) => {
     const { ctx, rect, theme } = args;
     const url = cell.data?.url;
-    const align = cell.data?.align || 'left';
+    const align = cell.data?.align || "left";
 
     if (!url) return false;
 
     // Use linkColor from theme (should be blue)
-    const linkColor = theme.linkColor || theme.accentColor || '#2563eb';
+    const linkColor = theme.linkColor || theme.accentColor || "#2563eb";
     const padding = theme.cellHorizontalPadding ?? 8;
 
     ctx.save();
     ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     ctx.fillStyle = linkColor;
-    ctx.textBaseline = 'middle';
+    ctx.textBaseline = "middle";
 
     // Calculate text position based on alignment
     const textMetrics = ctx.measureText(url);
     let textX: number;
 
     switch (align) {
-      case 'center':
+      case "center":
         textX = rect.x + (rect.width - textMetrics.width) / 2;
         break;
-      case 'right':
+      case "right":
         textX = rect.x + rect.width - textMetrics.width - padding;
         break;
-      case 'left':
+      case "left":
       default:
         textX = rect.x + padding;
     }

@@ -179,12 +179,11 @@ public class TextAlignmentMarkdownView : ViewBase
     {
         var content = "Aligned text";
         var longContent = "This paragraph is long enough to wrap across several lines, so justify alignment spreads the text to fill the full width of the container.";
-        return new StackLayout([
-            new Markdown(content),
-            new Markdown(content).Center(),
-            new Markdown(content).Right(),
-            new Markdown(longContent).Justify()
-        ]);
+        return Layout.Vertical()
+            | new Markdown(content)
+            | new Markdown(content).Center()
+            | new Markdown(content).Right()
+            | new Markdown(longContent).Justify();
     }
 }
 ```

@@ -9,12 +9,14 @@ public class ObservableApp : SampleBase
     {
         var progress = UseState(0);
 
-        var timeObservable = UseRef(() => Observable.Interval(TimeSpan.FromSeconds(1)).Select(_ => DateTime.Now.ToString("HH:mm:ss"))).Value;
+        var timeObservableRef = UseRef(() => Observable.Interval(TimeSpan.FromSeconds(1)).Select(_ => DateTime.Now.ToString("HH:mm:ss")));
 
         UseEffect(() =>
         {
             return Observable.Interval(TimeSpan.FromMilliseconds(100)).Take(101).Do(e => progress.Set((int)e)).Subscribe();
         });
+
+        var timeObservable = timeObservableRef.Value;
 
         return Layout.Vertical(
             timeObservable,

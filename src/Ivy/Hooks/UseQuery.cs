@@ -179,7 +179,7 @@ public static class UseQueryExtensions
             return context.UseViewScopedQuery(key, fetcher, opts, initialValue);
         }
 
-        // Server-scoped: 
+        // Server-scoped:
         var subscriberId = context.UseRef(Guid.NewGuid);
         var queryService = (QueryService)context.UseService<IQueryService>();
         var scopedKey = key is not null ? context.UseScopedQueryKey(key, opts) : null;

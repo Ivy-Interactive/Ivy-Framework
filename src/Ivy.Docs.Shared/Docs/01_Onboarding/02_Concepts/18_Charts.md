@@ -170,6 +170,7 @@ All Cartesian charts (Line, Bar, Area) share these methods:
 | Method | Description |
 |--------|-------------|
 | `.CartesianGrid()` | Add grid lines (`.Horizontal()`, `.Vertical()`) |
+| `.Stroke()` | Set custom grid line color (e.g., `.Stroke(Colors.Slate)`) |
 | `.XAxis()` | Configure X-axis (`.Label<XAxis>("text")`) |
 | `.YAxis()` | Configure Y-axis (`.Label<YAxis>("text")`) |
 | `.Legend()` | Show legend (`.Layout()`, `.VerticalAlign()`) |
@@ -271,7 +272,11 @@ public class DomainAxisDemo : ViewBase
 
 ## Faq
 
-### How do I pass data to a chart?
+<Details>
+<Summary>
+How do I pass data to a chart
+</Summary>
+<Body>
 
 Always use the builder pattern extension methods (`.ToLineChart()`, `.ToBarChart()`, `.ToAreaChart()`, `.ToPieChart()`) on your data collection. Do NOT construct charts manually with `List<dynamic>`. Anonymous types work correctly with the builder pattern:
 
@@ -281,4 +286,7 @@ return data.ToLineChart()
     .Dimension("Month", e => e.Month)
     .Measure("Sales", e => e.Sum(f => f.Sales));
 ```
+
+</Body>
+</Details>
 

@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.SquareChevronRight, path: ["Widgets"], searchHints: ["click", "action", "submit", "cta", "interactive", "control"])]
+[App(icon: Icons.SquareChevronRight, group: ["Widgets"], searchHints: ["click", "action", "submit", "cta", "interactive", "control"])]
 public class ButtonApp() : SampleBase
 {
     private static readonly ButtonVariant[] Variants = [
@@ -104,6 +104,11 @@ public class ButtonApp() : SampleBase
                    Icons.MessageSquareX.ToButton(eventHandler),
                    Icons.Heart.ToButton(eventHandler, ButtonVariant.Destructive),
                    Icons.Star.ToButton(eventHandler, ButtonVariant.Outline)
+               )
+               | Layout.Horizontal(
+                   Icons.MessageSquareX.ToButton(eventHandler).Small(),
+                   Icons.Heart.ToButton(eventHandler, ButtonVariant.Destructive).Small(),
+                   Icons.Star.ToButton(eventHandler, ButtonVariant.Outline).Small()
                )
 
                | Text.H2("Buttons with URLs")

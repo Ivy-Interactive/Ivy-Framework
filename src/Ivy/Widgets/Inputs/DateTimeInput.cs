@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Ivy.Core;
 using Ivy.Core.Helpers;
@@ -36,6 +37,8 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 
     [Prop] public string? Invalid { get; set; }
 
+    [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() =>
@@ -53,7 +56,7 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 {
     [OverloadResolutionPriority(1)]
-    public DateTimeInput(IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
+    internal DateTimeInput(IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TDate>();
         Value = typedState.Value;
@@ -61,19 +64,19 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
     }
 
     [OverloadResolutionPriority(1)]
-    public DateTimeInput(TDate value, Func<Event<IInput<TDate>, TDate>, ValueTask> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
+    internal DateTimeInput(TDate value, Func<Event<IInput<TDate>, TDate>, ValueTask> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
     {
         OnChange = onChange.ToEventHandler();
         Value = value;
     }
 
-    public DateTimeInput(TDate value, Action<Event<IInput<TDate>, TDate>> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
+    internal DateTimeInput(TDate value, Action<Event<IInput<TDate>, TDate>> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
     {
         OnChange = new(e => { onChange(e); return ValueTask.CompletedTask; });
         Value = value;
     }
 
-    public DateTimeInput(string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date)
+    internal DateTimeInput(string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date)
     {
         Variant = variant;
         Placeholder = placeholder;
@@ -96,21 +99,14 @@ public static class DateTimeInputExtensions
         var stateType = state.GetStateType();
         var isNullable = stateType.IsNullableType();
 
-        if (isNullable)
-        {
-            var dateValue = ConvertToDateValue<object?>(state);
-            var input = new DateTimeInput<object?>(dateValue, e => SetStateValue(state, e.Value), placeholder, disabled, variant);
-            input.ScaffoldDefaults(null!, stateType);
-            input.Nullable = true;
-            return input;
-        }
-        else
-        {
-            var dateValue = ConvertToDateValue<object>(state);
-            var input = new DateTimeInput<object>(dateValue, e => SetStateValue(state, e.Value), placeholder, disabled, variant);
-            input.ScaffoldDefaults(null!, stateType);
-            return input;
-        }
+        Type genericType = typeof(DateTimeInput<>).MakeGenericType(stateType);
+
+        DateTimeInputBase input = (DateTimeInputBase)Activator.CreateInstance(genericType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { state, placeholder, disabled, variant }, null)!;
+        var nullableProperty = genericType.GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        nullableProperty?.SetValue(input, isNullable);
+
+        input.ScaffoldDefaults(null!, stateType);
+        return input;
     }
 
     public static DateTimeInputBase ToDateInput(this IAnyState state, string? placeholder = null, bool disabled = false,
@@ -242,6 +238,7 @@ public static class DateTimeInputExtensions
     public static DateTimeInputBase Format(this DateTimeInputBase widget, string format) => widget with { Format = format };
 
     public static DateTimeInputBase Invalid(this DateTimeInputBase widget, string? invalid) => widget with { Invalid = invalid };
+    public static DateTimeInputBase FirstDayOfWeek(this DateTimeInputBase widget, DayOfWeek day) => widget with { FirstDayOfWeek = day };
     public static DateTimeInputBase Nullable(this DateTimeInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]

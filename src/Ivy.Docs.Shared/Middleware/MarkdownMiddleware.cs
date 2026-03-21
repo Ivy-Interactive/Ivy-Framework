@@ -92,6 +92,10 @@ public class MarkdownMiddleware
         if (string.IsNullOrEmpty(input))
             return input;
 
+        var hadUnderscore = input.StartsWith('_');
+        if (hadUnderscore)
+            input = input[1..];
+
         var parts = input.Split(['-', '_'], StringSplitOptions.RemoveEmptyEntries);
         var result = new StringBuilder();
 
@@ -104,6 +108,9 @@ public class MarkdownMiddleware
                     result.Append(part[1..]);
             }
         }
+
+        if (hadUnderscore)
+            return "_" + result.ToString();
 
         return result.ToString();
     }

@@ -1,13 +1,8 @@
-import React from 'react';
-import { Densities } from '@/types/density';
-import { getWidth, getHeight } from '@/lib/styles';
-import Icon from '@/components/Icon';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import React from "react";
+import { Densities } from "@/types/density";
+import { getWidth, getHeight } from "@/lib/styles";
+import Icon from "@/components/Icon";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface FieldWidgetProps {
   id: string;
@@ -19,7 +14,7 @@ interface FieldWidgetProps {
   density?: Densities;
   width?: string;
   height?: string;
-  labelPosition?: 'Top' | 'Left' | 0 | 1;
+  labelPosition?: "Top" | "Left" | 0 | 1;
 }
 
 export const FieldWidget: React.FC<FieldWidgetProps> = ({
@@ -34,47 +29,31 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
   labelPosition,
 }) => {
   const labelSizeClass =
-    density === Densities.Small
-      ? 'text-xs'
-      : density === Densities.Large
-        ? 'text-base'
-        : 'text-sm';
+    density === Densities.Small ? "text-xs" : density === Densities.Large ? "text-base" : "text-sm";
   const descriptionSizeClass =
-    density === Densities.Small
-      ? 'text-xs'
-      : density === Densities.Large
-        ? 'text-sm'
-        : 'text-xs';
+    density === Densities.Small ? "text-xs" : density === Densities.Large ? "text-sm" : "text-xs";
 
   const gapClass =
-    density === Densities.Small
-      ? 'gap-1'
-      : density === Densities.Large
-        ? 'gap-3'
-        : 'gap-2';
+    density === Densities.Small ? "gap-1" : density === Densities.Large ? "gap-3" : "gap-2";
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
   };
 
-  const flexClass = width || height ? '' : 'flex-1';
+  const flexClass = width || height ? "" : "flex-1";
 
-  const isLeft = labelPosition === 'Left' || labelPosition === 1;
+  const isLeft = labelPosition === "Left" || labelPosition === 1;
 
   if (isLeft) {
     return (
-      <div
-        className={`flex flex-col sm:flex-row ${gapClass} ${flexClass} min-w-0`}
-        style={styles}
-      >
+      <div className={`flex flex-col sm:flex-row ${gapClass} ${flexClass} min-w-0`} style={styles}>
         {label && (
           <div className="flex items-center gap-1.5 min-w-[120px] w-1/4 sm:w-1/3 pt-2 sm:pt-0 sm:mt-2.5 self-start">
             <label
               className={`${labelSizeClass} font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}
             >
-              {label}{' '}
-              {required && <span className="font-mono text-primary">*</span>}
+              {label} {required && <span className="font-mono text-primary">*</span>}
             </label>
             {help && (
               <TooltipProvider>
@@ -103,9 +82,7 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
         <div className="flex-1 flex flex-col gap-2 min-w-0">
           {children}
           {description && (
-            <p className={`${descriptionSizeClass} text-muted-foreground`}>
-              {description}
-            </p>
+            <p className={`${descriptionSizeClass} text-muted-foreground`}>{description}</p>
           )}
         </div>
       </div>
@@ -113,17 +90,13 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
   }
 
   return (
-    <div
-      className={`flex flex-col ${gapClass} ${flexClass} min-w-0`}
-      style={styles}
-    >
+    <div className={`flex flex-col ${gapClass} ${flexClass} min-w-0`} style={styles}>
       {label && (
         <div className="flex items-center gap-1.5">
           <label
             className={`${labelSizeClass} font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}
           >
-            {label}{' '}
-            {required && <span className="font-mono text-primary">*</span>}
+            {label} {required && <span className="font-mono text-primary">*</span>}
           </label>
           {help && (
             <TooltipProvider>
@@ -151,9 +124,7 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
       )}
       {children}
       {description && (
-        <p className={`${descriptionSizeClass} text-muted-foreground`}>
-          {description}
-        </p>
+        <p className={`${descriptionSizeClass} text-muted-foreground`}>{description}</p>
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - callout
   - alert
   - notice
   - warning

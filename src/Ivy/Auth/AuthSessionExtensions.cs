@@ -8,34 +8,86 @@ namespace Ivy;
 public static class AuthSessionExtensions
 {
 #if DEBUG
+    internal static CheckedAuthTokenHandlerSessionBuilder WithCheckedAccess(this IAuthTokenHandlerSession authSession)
+        => new(authSession);
+
     internal static CheckedAuthSessionBuilder WithCheckedAccess(this IAuthSession authSession)
         => new(authSession);
 #endif
 
-    public static AuthSessionSnapshot TakeSnapshot(this IAuthSession authSession)
+    public static AuthTokenHandlerSessionSnapshot TakeSnapshot(this IAuthTokenHandlerSession authSession)
         => new()
         {
             AuthToken = authSession.AuthToken,
             AuthSessionData = authSession.AuthSessionData,
         };
 
-    public static bool HasChangedSince(this IAuthSession authSession, AuthSessionSnapshot snapshot)
+    public static bool HasChangedSince(this IAuthTokenHandlerSession authSession, AuthTokenHandlerSessionSnapshot snapshot)
         => authSession.AuthToken != snapshot.AuthToken ||
            authSession.AuthSessionData != snapshot.AuthSessionData;
 
-    public static T? GetAuthSessionData<T>(this IAuthSession authSession)
+    public static AuthSessionSnapshot TakeSnapshot(this IAuthSession authSession)
+        => new()
+        {
+            AuthToken = authSession.AuthToken,
+            BrokeredSessions = new Dictionary<string, IAuthTokenHandlerSession>(authSession.BrokeredSessions),
+            AuthSessionData = authSession.AuthSessionData,
+        };
+
+    public static bool HasChangedSince(this IAuthSession authSession, AuthSessionSnapshot snapshot)
+        => authSession.AuthToken != snapshot.AuthToken ||
+           authSession.AuthSessionData != snapshot.AuthSessionData ||
+           !BrokeredSessionsEqual(authSession.BrokeredSessions, snapshot.BrokeredSessions);
+
+    private static bool BrokeredSessionsEqual(
+        IReadOnlyDictionary<string, IAuthTokenHandlerSession> current,
+        IReadOnlyDictionary<string, IAuthTokenHandlerSession> snapshot)
+    {
+        if (current.Count != snapshot.Count) return false;
+
+        foreach (var kvp in current)
+        {
+            if (!snapshot.TryGetValue(kvp.Key, out var snapshotSession))
+            {
+                return false;
+            }
+
+            // Compare the sessions by their auth tokens
+            if (kvp.Value.AuthToken != snapshotSession.AuthToken ||
+                kvp.Value.AuthSessionData != snapshotSession.AuthSessionData)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static T? GetAuthSessionData<T>(this IAuthTokenHandlerSession authSession) where T : class
     {
         if (string.IsNullOrEmpty(authSession.AuthSessionData))
         {
-            return default;
+            return null;
         }
 
-        return typeof(T) == typeof(string)
-            ? (T)(object)authSession.AuthSessionData
-            : JsonSerializer.Deserialize<T>(authSession.AuthSessionData, JsonHelper.DefaultOptions);
+        if (typeof(T) == typeof(string))
+        {
+            return (T)(object)authSession.AuthSessionData;
+        }
+        else
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<T>(authSession.AuthSessionData, JsonHelper.IgnoreNullOptions);
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
+        }
     }
 
-    public static void SetAuthSessionData<T>(this IAuthSession authSession, T? data)
+    public static void SetAuthSessionData<T>(this IAuthTokenHandlerSession authSession, T? data) where T : class
     {
         if (data == null)
         {
@@ -47,7 +99,7 @@ public static class AuthSessionExtensions
         }
         else
         {
-            authSession.AuthSessionData = JsonSerializer.Serialize(data, JsonHelper.DefaultOptions);
+            authSession.AuthSessionData = JsonSerializer.Serialize(data, JsonHelper.IgnoreNullOptions);
         }
     }
 }

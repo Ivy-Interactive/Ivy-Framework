@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Code, path: ["Widgets", "Inputs"], searchHints: ["editor", "syntax", "programming", "code", "highlighting", "monaco"])]
+[App(icon: Icons.Code, group: ["Widgets", "Inputs"], searchHints: ["editor", "syntax", "programming", "code", "highlighting", "monaco"])]
 public class CodeInputApp : SampleBase
 {
     protected override object? BuildSample()
@@ -253,9 +253,12 @@ public class CodeInputDataBindings : ViewBase
 {
     public override object Build()
     {
+        var stringState = UseState("");
+        var stringNullState = UseState((string?)null);
+
         var stringTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
-            ("string", UseState(""), UseState((string?)null))
+            ("string", stringState, stringNullState)
         };
 
         var gridItems = new List<object>

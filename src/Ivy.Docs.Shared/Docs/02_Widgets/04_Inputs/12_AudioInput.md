@@ -77,7 +77,7 @@ Use `MemoryStreamUploadHandler` for complete file uploads (uploads when recordin
 
 ## Audio Format
 
-Specify the audio format using MIME type:
+Specify the audio format using MIME type and optionally the sample rate in Hz (e.g. 16000 for speech, 48000 for high-fidelity). When `SampleRate` is null, the browser uses its default (typically 48000 Hz). Common values: 8000, 11025, 16000, 22050, 24000, 32000, 44100, 48000; other values may be used and the browser will pick the closest supported rate.
 
 ```csharp demo-below
 public class AudioFormatDemo : ViewBase
@@ -95,6 +95,7 @@ public class AudioFormatDemo : ViewBase
         return Layout.Vertical()
                | new AudioInput(upload.Value, "Record WebM", "Recording WebM...")
                    .MimeType("audio/webm")
+                   .SampleRate(24000)
                | (audioFile.Value != null
                    ? Text.P($"Format: {audioFile.Value.ContentType}, Size: {StringHelper.FormatBytes(audioFile.Value.Length)}").Small()
                    : null);

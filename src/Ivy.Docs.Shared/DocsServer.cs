@@ -22,7 +22,7 @@ public static class DocsServer
         });
 
         server.Services.AddHttpClient<IvyDocsQuestionsClient>();
-        server.Services.AddScoped<IIvyDocsQuestionsClient>(sp => sp.GetRequiredService<IvyDocsQuestionsClient>());
+        server.Services.AddTransient<IIvyDocsQuestionsClient>(sp => sp.GetRequiredService<IvyDocsQuestionsClient>());
 
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
         server.SetMetaTitle($"Ivy Docs {version}");

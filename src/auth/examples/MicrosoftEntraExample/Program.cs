@@ -1,5 +1,4 @@
 using Ivy;
-using Ivy.Auth.MicrosoftEntra;
 
 var server = new Server();
 

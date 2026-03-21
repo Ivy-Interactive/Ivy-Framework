@@ -48,11 +48,13 @@ public class TextHelperExample : ViewBase
 {
     public override object? Build()
     {
+        var dynamicXml = UseState("<root><item>dynamic</item></root>");
+
         return Layout.Vertical().Gap(4)
             | Text.P("Here's an example XML configuration:")
             | Text.Xml("<config><setting>value</setting></config>")
             | Text.P("You can also use it with state variables:")
-            | Text.Xml(UseState("<root><item>dynamic</item></root>"));
+            | Text.Xml(dynamicXml);
     }
 }
 ```
@@ -91,6 +93,38 @@ public class XObjectXmlExample : ViewBase
 }
 ```
 
+## Expansion Control
+
+Control how deeply the XML tree is initially expanded:
+
+```csharp demo-tabs
+public class ExpandedXmlExample : ViewBase
+{
+    public override object? Build()
+    {
+        var xml = new System.Xml.Linq.XElement("person",
+            new System.Xml.Linq.XElement("name", "John Doe"),
+            new System.Xml.Linq.XElement("address",
+                new System.Xml.Linq.XElement("street", "123 Main St"),
+                new System.Xml.Linq.XElement("city", "Anytown")
+            ),
+            new System.Xml.Linq.XElement("phoneNumbers",
+                new System.Xml.Linq.XElement("phoneNumber", "555-1234"),
+                new System.Xml.Linq.XElement("phoneNumber", "555-5678")
+            )
+        );
+
+        return Layout.Vertical().Gap(4)
+            | Text.P("Collapsed (default):")
+            | new Xml(xml)
+            | Text.P("Expanded 1 level:")
+            | new Xml(xml) { Expanded = 1 }
+            | Text.P("Fully expanded:")
+            | new Xml(xml) { Expanded = -1 };
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.Xml" ExtensionTypes="Ivy.XmlExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Xml.cs"/>
 
 ## Examples
@@ -121,6 +155,11 @@ public class InteractiveXmlEditor : ViewBase
         
         var isValid = UseState(true);
         var errorMessage = UseState("");
+
+        // Validate on content change
+        UseEffect(() => {
+            ValidateXml();
+        });
         
         void ValidateXml()
         {
@@ -136,11 +175,6 @@ public class InteractiveXmlEditor : ViewBase
                 errorMessage.Value = ex.Message;
             }
         }
-        
-        // Validate on content change
-        UseEffect(() => {
-            ValidateXml();
-        });
         
         return Layout.Vertical().Gap(4)
             | Text.Label("XML Editor")

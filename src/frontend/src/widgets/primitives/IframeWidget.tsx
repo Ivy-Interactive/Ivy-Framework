@@ -1,6 +1,6 @@
-import { getHeight, getWidth } from '@/lib/styles';
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useEventHandler } from '@/components/event-handler';
+import { getHeight, getWidth } from "@/lib/styles";
+import React, { useCallback, useEffect, useRef } from "react";
+import { useEventHandler } from "@/components/event-handler";
 
 const EMPTY_EVENTS: string[] = [];
 
@@ -17,9 +17,9 @@ interface IframeWidgetProps {
 
 export const IframeWidget: React.FC<IframeWidgetProps> = ({
   id,
-  src = '',
-  width = 'Full',
-  height = 'Full',
+  src = "",
+  width = "Full",
+  height = "Full",
   refreshToken,
   events = EMPTY_EVENTS,
   outboundMessageType,
@@ -32,31 +32,29 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    maxWidth: '100%',
+    maxWidth: "100%",
   };
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
-      if (!events.includes('OnMessageReceived')) return;
+      if (!events.includes("OnMessageReceived")) return;
       if (iframeRef.current?.contentWindow !== event.source) return;
 
       const { type, payload } = event.data ?? {};
-      if (typeof type === 'string') {
-        eventHandler('OnMessageReceived', id, [type, payload]);
+      if (typeof type === "string") {
+        eventHandler("OnMessageReceived", id, [type, payload]);
       }
     },
-    [id, events, eventHandler]
+    [id, events, eventHandler],
   );
 
   useEffect(() => {
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, [handleMessage]);
 
   const iframeLoadedRef = useRef(false);
-  const pendingMessageRef = useRef<{ type: string; token: string } | null>(
-    null
-  );
+  const pendingMessageRef = useRef<{ type: string; token: string } | null>(null);
 
   const sendOutboundMessage = useCallback(() => {
     if (!pendingMessageRef.current) return;
@@ -65,7 +63,7 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
         type: pendingMessageRef.current.type,
         token: pendingMessageRef.current.token,
       },
-      '*'
+      "*",
     );
   }, []);
 

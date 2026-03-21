@@ -28,7 +28,7 @@ public class BasicFeedbackDemo : ViewBase
     public override object? Build()
     {
         var rating = UseState(3);
-        return new FeedbackInput<int>(rating);
+        return rating.ToFeedbackInput();
     }
 }
 ```
@@ -52,15 +52,15 @@ public class FeedbackDemo : ViewBase
         var emojiFeedback = UseState(4);
         return Layout.Vertical()
                 | H3 ("Simple movie review")
-                | new FeedbackInput<bool>(thumbsFeedback)
+                | thumbsFeedback.ToFeedbackInput()
                       .Variant(FeedbackInputVariant.Thumbs)
                       .WithField()
                       .Label("Did you like the movie ?")
-                | new FeedbackInput<int>(starFeedback)
+                | starFeedback.ToFeedbackInput()
                       .Variant(FeedbackInputVariant.Stars)
                       .WithField()
                       .Label("How would you like to rate the movie ?")
-                | new FeedbackInput<int>(emojiFeedback)
+                | emojiFeedback.ToFeedbackInput()
                       .Variant(FeedbackInputVariant.Emojis)
                       .WithField()
                       .Label("How do you feel after seeing the movie ?");
@@ -90,8 +90,42 @@ public class FeedbackHandling: ViewBase
             _ => "Invalid rating"
         });
         return Layout.Vertical()
-                | new FeedbackInput<int>(feedbackState)
+                | feedbackState.ToFeedbackInput()
                 | Text.Block(exclamation);
+    }
+}
+```
+
+## Half-value Ratings
+
+The `AllowHalf` property enables users to select half-star or half-emoji ratings by clicking on the left or right side of a rating item. This is particularly useful for star ratings where 3.5 or 4.5 stars provide more granular feedback.
+
+```csharp demo-below
+public class HalfValueFeedbackDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var rating = UseState(3.5m);
+        return rating.ToFeedbackInput().AllowHalf();
+    }
+}
+```
+
+## Custom Maximum Rating
+
+By default, `FeedbackInput` shows 5 rating items (stars, emojis, etc.). You can customize this using the `Max` property.
+
+```csharp demo-below
+public class CustomMaxFeedbackDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var rating = UseState(0);
+        return Layout.Vertical()
+                | Text.Block("Rate out of 3:")
+                | rating.ToFeedbackInput().Max(3)
+                | Text.Block("Rate out of 10:")
+                | rating.ToFeedbackInput().Max(10);
     }
 }
 ```
@@ -107,10 +141,10 @@ public class StyledFeedbackDemo : ViewBase
     {
         var state = UseState(3);
         return Layout.Vertical()
-                | new FeedbackInput<int>(state)
+                | state.ToFeedbackInput()
                       .Disabled()
                       .WithField().Label("Disabled")
-                | new FeedbackInput<int>(state)
+                | state.ToFeedbackInput()
                       .Invalid("Validation error")
                       .WithField().Label("Invalid");
     }

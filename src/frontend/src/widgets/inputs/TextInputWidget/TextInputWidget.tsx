@@ -1,14 +1,10 @@
-import React, { useState, useCallback, useMemo, useRef } from 'react';
-import { useEventHandler } from '@/components/event-handler';
-import { Densities } from '@/types/density';
-import { TextInputWidgetProps, TextInputVariant } from './types';
-import { useSyncServerValue, useShortcutKey } from './hooks';
-import {
-  DefaultVariant,
-  TextareaVariant,
-  PasswordVariant,
-  SearchVariant,
-} from './variants';
+import React, { useState, useCallback, useMemo, useRef } from "react";
+import { useEventHandler } from "@/components/event-handler";
+import { Densities } from "@/types/density";
+import { TextInputWidgetProps, TextInputVariant } from "./types";
+import { useShortcutKey } from "./hooks";
+import { useOptimisticValue } from "../shared/useOptimisticValue";
+import { DefaultVariant, TextareaVariant, PasswordVariant, SearchVariant } from "./variants";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -16,7 +12,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   id,
   placeholder,
   value,
-  variant = 'Text',
+  variant = "Text",
   disabled = false,
   invalid,
   nullable = false,
@@ -29,25 +25,23 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   suffix,
   maxLength,
   minLength,
+  pattern,
   rows,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();
-  // Normalize null/undefined to empty string for display (HTML inputs can't have null values)
-  const [localValue, setLocalValue] = useState(value ?? '');
   const [isFocused, setIsFocused] = useState(false);
-  const [minLengthError, setMinLengthError] = useState<string | undefined>(
-    undefined
-  );
+  const [minLengthError, setMinLengthError] = useState<string | undefined>(undefined);
+  const [patternError, setPatternError] = useState<string | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
-  // Wrapper to normalize null/undefined to empty string for useSyncServerValue
-  const setLocalValueNormalized = useCallback(
-    (val: string | undefined) => setLocalValue(val ?? ''),
-    []
+  // Normalize null/undefined to empty string for display (HTML inputs can't have null values)
+  const serverValue = value ?? "";
+  const [localValue, setLocalValue] = useOptimisticValue(
+    serverValue,
+    isFocused,
+    (a: string, b: string) => a === b,
   );
-
-  useSyncServerValue(value, localValue, isFocused, setLocalValueNormalized);
 
   useShortcutKey({
     shortcutKey,
@@ -66,49 +60,67 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       if (minLength !== undefined && newValue.length >= minLength) {
         setMinLengthError(undefined);
       }
-      if (events.includes('OnChange')) eventHandler('OnChange', id, [newValue]);
+      // Clear the pattern error as soon as the value matches the pattern
+      if (pattern && newValue.length > 0) {
+        try {
+          if (new RegExp(pattern).test(newValue)) {
+            setPatternError(undefined);
+          }
+        } catch {
+          // Invalid regex — ignore
+        }
+      } else if (pattern && newValue.length === 0) {
+        setPatternError(undefined);
+      }
+      if (events.includes("OnChange")) eventHandler("OnChange", id, [newValue]);
     },
-    [eventHandler, id, events, minLength]
+    [eventHandler, id, events, minLength, pattern, setLocalValue],
   );
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
     // Show validation error if value is non-empty but below the minimum length
-    if (
-      minLength !== undefined &&
-      localValue.length > 0 &&
-      localValue.length < minLength
-    ) {
+    if (minLength !== undefined && localValue.length > 0 && localValue.length < minLength) {
       setMinLengthError(`Minimum ${minLength} characters required`);
     }
-    if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
-  }, [eventHandler, id, events, minLength, localValue]);
+    // Show validation error if value is non-empty but doesn't match the pattern
+    if (pattern && localValue.length > 0) {
+      try {
+        if (!new RegExp(pattern).test(localValue)) {
+          setPatternError("Please match the requested format");
+        }
+      } catch {
+        // Invalid regex — ignore
+      }
+    }
+    if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+  }, [eventHandler, id, events, minLength, pattern, localValue]);
 
   const handleSubmit = useCallback(() => {
-    if (events.includes('OnSubmit')) eventHandler('OnSubmit', id, []);
+    if (events.includes("OnSubmit")) eventHandler("OnSubmit", id, []);
   }, [eventHandler, id, events]);
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
-    if (events.includes('OnFocus')) eventHandler('OnFocus', id, []);
+    if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
   }, [eventHandler, id, events]);
 
   const handleClear = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!events.includes('OnChange')) return;
+      if (!events.includes("OnChange")) return;
       if (disabled) return;
       // For nullable inputs, set to null; otherwise set to empty string
-      const clearedValue = nullable ? null : '';
-      setLocalValue(clearedValue ?? '');
-      eventHandler('OnChange', id, [clearedValue]);
+      const clearedValue = nullable ? null : "";
+      setLocalValue(clearedValue ?? "");
+      eventHandler("OnChange", id, [clearedValue]);
     },
-    [eventHandler, id, events, disabled, nullable]
+    [eventHandler, id, events, disabled, nullable, setLocalValue],
   );
 
-  // Server-provided `invalid` takes precedence; fall back to the local minLength error
-  const effectiveInvalid = invalid ?? minLengthError;
+  // Server-provided `invalid` takes precedence; fall back to local validation errors
+  const effectiveInvalid = invalid ?? minLengthError ?? patternError;
 
   const commonProps = useMemo(
     () => ({
@@ -127,8 +139,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       suffix,
       maxLength,
       minLength,
+      pattern,
       rows,
-      'data-testid': dataTestId,
+      "data-testid": dataTestId,
     }),
     [
       id,
@@ -146,9 +159,10 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       suffix,
       maxLength,
       minLength,
+      pattern,
       rows,
       dataTestId,
-    ]
+    ],
   );
 
   switch (variant) {

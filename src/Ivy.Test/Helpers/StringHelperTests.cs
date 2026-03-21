@@ -61,6 +61,9 @@ public class StringHelperTests
     [InlineData("", "")]
     [InlineData("   ", "")]
     [InlineData("DatePickerApp", "Date Picker")]
+    [InlineData("UseStateApp", "UseState")]
+    [InlineData("UseRefreshTokenApp", "UseRefreshToken")]
+    [InlineData("UseContextApp", "UseContext")]
     public void TitleCaseToReadable_ConvertsCorrectly(string input, string expected)
     {
         Assert.Equal(expected, StringHelper.TitleCaseToReadable(input));

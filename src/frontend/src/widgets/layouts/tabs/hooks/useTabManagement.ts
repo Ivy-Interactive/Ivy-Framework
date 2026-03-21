@@ -1,6 +1,6 @@
-import React from 'react';
-import { useEventHandler } from '@/components/event-handler';
-import { getTabProps } from '../utils/tabUtils';
+import React from "react";
+import { useEventHandler } from "@/components/event-handler";
+import { getTabProps } from "../utils/tabUtils";
 
 /**
  * Hook to manage all tab-related state, refs, and synchronization
@@ -10,7 +10,7 @@ export function useTabManagement(
   tabWidgets: React.ReactElement[],
   selectedIndex: number,
   events: string[],
-  id: string
+  id: string,
 ) {
   // ====================
   // State & Refs Setup
@@ -21,22 +21,19 @@ export function useTabManagement(
 
   const initialTabOrder = React.useMemo(
     () =>
-      tabWidgets
-        .map(tab => getTabProps(tab)?.id)
-        .filter((id): id is string => id !== undefined),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [] // Only run on mount
+      tabWidgets.map((tab) => getTabProps(tab)?.id).filter((id): id is string => id !== undefined),
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+    [], // Only run on mount
   );
 
   const [tabOrder, setTabOrder] = React.useState<string[]>(initialTabOrder);
 
   const [activeTabId, setActiveTabId] = React.useState<string | null>(
-    () => initialTabOrder[selectedIndex] ?? initialTabOrder[0] ?? null
+    () => initialTabOrder[selectedIndex] ?? initialTabOrder[0] ?? null,
   );
 
   const [loadedTabs, setLoadedTabs] = React.useState<Set<string>>(() => {
-    const initialActiveTab =
-      initialTabOrder[selectedIndex] ?? initialTabOrder[0] ?? null;
+    const initialActiveTab = initialTabOrder[selectedIndex] ?? initialTabOrder[0] ?? null;
     return initialActiveTab ? new Set([initialActiveTab]) : new Set();
   });
 
@@ -59,19 +56,14 @@ export function useTabManagement(
 
   const safeEvent = React.useCallback(
     (
-      name:
-        | 'OnSelect'
-        | 'OnClose'
-        | 'OnRefresh'
-        | 'OnReorder'
-        | 'OnAddButtonClick',
-      args: unknown[]
+      name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+      args: unknown[],
     ) => {
       if (Array.isArray(events) && events.includes(name)) {
         eventHandler(name, id, args);
       }
     },
-    [events, eventHandler, id]
+    [events, eventHandler, id],
   );
 
   // ====================
@@ -81,7 +73,7 @@ export function useTabManagement(
   // Helper function to efficiently add tab to loaded tabs
   const addToLoadedTabs = React.useCallback(
     (tabId: string) => {
-      setLoadedTabs(prev => {
+      setLoadedTabs((prev) => {
         if (prev.has(tabId)) {
           return prev; // Return the same Set if tab is already loaded
         }
@@ -90,7 +82,7 @@ export function useTabManagement(
         return newSet;
       });
     },
-    [setLoadedTabs]
+    [setLoadedTabs],
   );
 
   // Update refs when they change
@@ -114,10 +106,10 @@ export function useTabManagement(
   React.useEffect(() => {
     const prev = tabOrderRef.current;
     const currentTabIds = tabWidgets
-      .map(tab => getTabProps(tab)?.id)
+      .map((tab) => getTabProps(tab)?.id)
       .filter((id): id is string => id !== undefined);
-    const added = currentTabIds.filter(id => !prev.includes(id));
-    const removed = prev.filter(id => !currentTabIds.includes(id));
+    const added = currentTabIds.filter((id) => !prev.includes(id));
+    const removed = prev.filter((id) => !currentTabIds.includes(id));
 
     if (added.length || removed.length) {
       setTabOrder(currentTabIds);
@@ -129,11 +121,7 @@ export function useTabManagement(
     if (selectedIndex != null && tabOrder[selectedIndex]) {
       const targetTabId = tabOrder[selectedIndex];
       // Only sync if it's not user-initiated OR if the current activeTabId is invalid
-      if (
-        !isUserInitiatedChangeRef.current ||
-        !activeTabId ||
-        !tabOrder.includes(activeTabId)
-      ) {
+      if (!isUserInitiatedChangeRef.current || !activeTabId || !tabOrder.includes(activeTabId)) {
         if (targetTabId !== activeTabId) {
           addToLoadedTabs(targetTabId);
           setActiveTabId(targetTabId);

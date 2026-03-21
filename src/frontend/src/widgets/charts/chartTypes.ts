@@ -1,10 +1,11 @@
-export type ColorScheme = 'Default' | 'Rainbow';
+export type ColorScheme = "Default" | "Rainbow";
 
 export enum ChartType {
-  Bar = 'bar',
-  Line = 'line',
-  Pie = 'pie',
-  Scatter = 'scatter',
+  Bar = "bar",
+  Line = "line",
+  Pie = "pie",
+  Scatter = "scatter",
+  Funnel = "funnel",
 }
 
 export interface ChartData {
@@ -88,13 +89,13 @@ export interface XAxisProps {
   minTickGap?: number;
   mirror?: boolean;
   name?: string | null;
-  orientation?: 'Top' | 'Bottom';
+  orientation?: "Top" | "Bottom";
   reversed?: boolean;
-  scale?: 'Auto' | 'Linear' | 'Log' | 'Time' | 'Ordinal';
+  scale?: "Auto" | "Linear" | "Log" | "Time" | "Ordinal";
   tickCount?: number;
   tickLine?: boolean;
   tickSize?: number;
-  type?: 'Category' | 'Number' | 'Time';
+  type?: "Category" | "Number" | "Time";
   unit?: string | null;
   hideTickLabels?: boolean;
   tickFormatter?: string | null;
@@ -105,6 +106,7 @@ export type CartesianGridProps = {
   fillOpacity: number | null;
   height: number | null;
   horizontal: boolean;
+  stroke: string | null;
   strokeDashArray: string | null;
   vertical: boolean;
   width: number | null;
@@ -113,11 +115,11 @@ export type CartesianGridProps = {
 };
 
 export type LegendProps = {
-  align?: 'Left' | 'Center' | 'Right';
+  align?: "Left" | "Center" | "Right";
   iconSize?: number;
   iconType?: string | null;
-  layout?: 'Horizontal' | 'Vertical';
-  verticalAlign?: 'Top' | 'Middle' | 'Bottom';
+  layout?: "Horizontal" | "Vertical";
+  verticalAlign?: "Top" | "Middle" | "Bottom";
 };
 
 type ToolboxFeatureDataView = {
@@ -140,9 +142,9 @@ export type ToolboxFeatures = {
 
 export type ToolboxProps = {
   enabled?: boolean;
-  orientation?: 'Horizontal' | 'Vertical';
-  align?: 'Left' | 'Center' | 'Right';
-  verticalAlign?: 'Top' | 'Middle' | 'Bottom';
+  orientation?: "Horizontal" | "Vertical";
+  align?: "Left" | "Center" | "Right";
+  verticalAlign?: "Top" | "Middle" | "Bottom";
   saveAsImage?: boolean;
   restore?: boolean;
   dataView?: boolean;
@@ -157,8 +159,8 @@ export interface MarkLine {
   precision?: number;
   label?: {
     show?: boolean;
-    position?: 'start' | 'middle' | 'end';
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    position?: "start" | "middle" | "end";
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     formatter?: string | ((params: any) => string);
     color?: string;
     fontSize?: number;
@@ -167,20 +169,20 @@ export interface MarkLine {
   lineStyle?: {
     color?: string;
     width?: number;
-    type?: 'solid' | 'dashed' | 'dotted';
+    type?: "solid" | "dashed" | "dotted";
     opacity?: number;
   };
   emphasis?: {
     disabled?: boolean;
-    label?: Partial<MarkLine['label']>;
-    lineStyle?: Partial<MarkLine['lineStyle']>;
+    label?: Partial<MarkLine["label"]>;
+    lineStyle?: Partial<MarkLine["lineStyle"]>;
   };
   blur?: {
-    label?: Partial<MarkLine['label']>;
-    lineStyle?: Partial<MarkLine['lineStyle']>;
+    label?: Partial<MarkLine["label"]>;
+    lineStyle?: Partial<MarkLine["lineStyle"]>;
   };
   data: Array<{
-    type?: 'min' | 'max' | 'average';
+    type?: "min" | "max" | "average";
     name?: string;
     xAxis?: number | string;
     yAxis?: number;
@@ -199,19 +201,19 @@ export interface MarkLine {
 }
 
 type LabelPosition =
-  | 'inside'
-  | 'insideTop'
-  | 'insideBottom'
-  | 'insideLeft'
-  | 'insideRight'
-  | 'insideTopLeft'
-  | 'insideTopRight'
-  | 'insideBottomLeft'
-  | 'insideBottomRight'
-  | 'top'
-  | 'bottom'
-  | 'left'
-  | 'right';
+  | "inside"
+  | "insideTop"
+  | "insideBottom"
+  | "insideLeft"
+  | "insideRight"
+  | "insideTopLeft"
+  | "insideTopRight"
+  | "insideBottomLeft"
+  | "insideBottomRight"
+  | "top"
+  | "bottom"
+  | "left"
+  | "right";
 
 export interface MarkArea {
   zlevel?: number;
@@ -228,7 +230,7 @@ export interface MarkArea {
   label?: {
     show?: boolean;
     position?: LabelPosition;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     formatter?: string | ((params: any) => string);
     color?: string;
     fontSize?: number;
@@ -319,16 +321,9 @@ export interface PieLegendProps {
   verticalAlign?: string;
 }
 
-export type ScatterShape =
-  | 'Circle'
-  | 'Square'
-  | 'Cross'
-  | 'Diamond'
-  | 'Star'
-  | 'Triangle'
-  | 'Wye';
+export type ScatterShape = "Circle" | "Square" | "Cross" | "Diamond" | "Star" | "Triangle" | "Wye";
 
-export type ScatterLineType = 'Joint' | 'Fitting';
+export type ScatterLineType = "Joint" | "Fitting";
 
 export interface ZAxisProps {
   dataKey?: string;
@@ -374,7 +369,7 @@ export interface ScatterChartWidgetProps {
   colorScheme: ColorScheme;
 }
 
-export type PolarGridTypes = 'Polygon' | 'Circle';
+export type PolarGridTypes = "Polygon" | "Circle";
 
 export interface PolarGridProps {
   gridType?: PolarGridTypes;
@@ -396,37 +391,160 @@ export interface PolarRadiusAxisProps {
   stroke?: string | null;
 }
 
-export interface RadialBarProps {
-  animated?: boolean;
-  background?: boolean;
+export interface RadarProps {
   dataKey: string;
-  fill?: string | null;
-  labelLists?: string[];
-  legendType?: string;
-  minAngle?: number;
   name?: string | null;
+  filled?: boolean;
+  fill?: string | null;
+  stroke?: string | null;
+  strokeWidth?: number;
+  strokeDashArray?: string | null;
+  showSymbol?: boolean;
+  legendType?: string;
+  labelLists?: string[];
 }
 
-export interface RadialBarChartWidgetProps {
+export interface RadarIndicatorProps {
+  name: string;
+  max?: number;
+  min?: number;
+}
+
+export interface RadarChartWidgetProps {
   id: string;
   data: ChartData[];
   width?: string;
   height?: string;
-  radialBars?: RadialBarProps[];
+  radars?: RadarProps[];
+  indicators?: RadarIndicatorProps[];
   tooltip?: ToolTipProps;
   legend?: LegendProps;
   toolbox?: ToolboxProps;
   colorScheme: ColorScheme;
-  polarAngleAxis?: PolarAngleAxisProps | null;
-  polarRadiusAxis?: PolarRadiusAxisProps | null;
-  polarGrid?: PolarGridProps | null;
-  cx?: number | string | null;
-  cy?: number | string | null;
-  innerRadius?: number | string | null;
-  outerRadius?: number | string | null;
+  shape?: "Polygon" | "Circle";
+  cx?: string | number;
+  cy?: string | number;
+  radius?: string | number;
+  startAngle?: number;
+  splitLine?: boolean;
+  splitArea?: boolean;
+  axisLine?: boolean;
+}
+
+export interface SankeyNode {
+  name: string;
+}
+
+export interface SankeyLink {
+  source: number;
+  target: number;
+  value: number;
+}
+
+export interface SankeyData {
+  nodes: SankeyNode[];
+  links: SankeyLink[];
+}
+
+export type SankeyAlign = "Justify" | "Left";
+
+export interface SankeyChartWidgetProps {
+  id: string;
+  data: SankeyData | null;
+  width?: string;
+  height?: string;
+  colorScheme: ColorScheme;
+  nodeWidth?: number;
+  nodeGap?: number;
+  curvature?: number;
+  layoutIterations?: number;
+  nodeAlign?: SankeyAlign;
+  tooltip?: ToolTipProps;
+  legend?: LegendProps;
+  toolbox?: ToolboxProps;
+}
+
+export interface ChordNode {
+  name: string;
+}
+
+export interface ChordLink {
+  source: number;
+  target: number;
+  value: number;
+}
+
+export interface ChordData {
+  nodes: ChordNode[];
+  links: ChordLink[];
+}
+
+export interface ChordChartWidgetProps {
+  id: string;
+  data: ChordData | null;
+  width?: string;
+  height?: string;
+  colorScheme: ColorScheme;
+  sort?: boolean;
+  sortSubGroups?: boolean;
+  padAngle?: number;
+  tooltip?: ToolTipProps;
+  legend?: LegendProps;
+  toolbox?: ToolboxProps;
+}
+
+export interface FunnelChartWidgetProps {
+  id: string;
+  data: ChartData[];
+  width?: string;
+  height?: string;
+  funnels?: FunnelProps[];
+  tooltip?: ToolTipProps;
+  legend?: PieLegendProps;
+  toolbox?: ToolboxProps;
+  colorScheme: ColorScheme;
+  sort?: "Descending" | "Ascending" | "None";
+  orientation?: "Vertical" | "Horizontal";
+  gap?: number;
+}
+
+export type FunnelProps = {
+  animated?: boolean;
+  dataKey: string;
+  nameKey: string;
+  fill?: string | null;
+  fillOpacity?: number | null;
+  legendType?: string;
+  minSize?: string;
+  maxSize?: string;
+  stroke?: string | null;
+  strokeWidth?: number;
+  labelLists?: string[];
+};
+
+export interface GaugeThresholdProps {
+  value: number;
+  color: string;
+}
+
+export interface GaugePointerProps {
+  style?: "Line" | "Arrow" | "Rounded";
+  width?: number;
+  length?: string;
+}
+
+export interface GaugeChartWidgetProps {
+  id: string;
+  value: number;
+  min?: number;
+  max?: number;
+  label?: string;
   startAngle?: number;
   endAngle?: number;
-  barGap?: number;
-  barCategoryGap?: number | string | null;
-  barSize?: number | null;
+  thresholds?: GaugeThresholdProps[];
+  pointer?: GaugePointerProps;
+  animated?: boolean;
+  colorScheme?: ColorScheme;
+  width?: string;
+  height?: string;
 }

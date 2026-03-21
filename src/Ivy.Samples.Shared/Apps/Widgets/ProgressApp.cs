@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.Gauge, path: ["Widgets"], searchHints: ["loading", "percentage", "bar", "indicator", "status", "completion"])]
+[App(icon: Icons.Gauge, group: ["Widgets"], searchHints: ["loading", "percentage", "bar", "indicator", "status", "completion"])]
 public class ProgressApp : SampleBase
 {
     protected override object? BuildSample()
@@ -10,6 +10,8 @@ public class ProgressApp : SampleBase
         var progress2 = UseState((int?)75);
         var progress3 = UseState((int?)100);
         var progress4 = UseState((int?)25);
+        var indeterminateLoadingState = UseState(true);
+        var indeterminateProgressState = UseState(25);
 
         return Layout.Vertical()
             | Text.H1("Progress")
@@ -51,7 +53,7 @@ public class ProgressApp : SampleBase
             | new Progress(50).Indeterminate().Goal("Syncing (50% before pause)...")
 
             | Text.H2("Toggle Indeterminate Mode")
-            | BuildIndeterminateToggle(UseState(true), UseState(25))
+            | BuildIndeterminateToggle(indeterminateLoadingState, indeterminateProgressState)
         ;
     }
 

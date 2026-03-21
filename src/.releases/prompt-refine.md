@@ -1,4 +1,4 @@
-﻿Read /Users/rorychatt/git/ivy/Ivy-Framework/src/.releases/weekly-notes-2026-03-06.md
+﻿Read /Users/rorychatt/git/ivy/Ivy-Framework/src/.releases/weekly-notes-2026-03-16.md
 
 This is a weekly summary of changes made to the Ivy Framework.
 Ivy is an open source framework for building apps in pure .Net and C#.

@@ -1,14 +1,14 @@
-import CopyToClipboardButton from '@/components/CopyToClipboardButton';
-import { getHeight, getWidth } from '@/lib/styles';
-import React, { CSSProperties, useMemo, memo, lazy, Suspense } from 'react';
+import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import { getHeight, getWidth } from "@/lib/styles";
+import React, { CSSProperties, useMemo, memo, lazy, Suspense } from "react";
 const SyntaxHighlighter = lazy(() =>
-  import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
+  import("react-syntax-highlighter").then((mod) => ({ default: mod.Prism })),
 );
-import { createPrismTheme } from '@/lib/prismTheme';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { Densities } from '@/types/density';
-import { codeCopyButtonVariant } from '@/components/ui/code-variant';
+import { createPrismTheme } from "@/lib/prismTheme";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { Densities } from "@/types/density";
+import { codeCopyButtonVariant } from "@/components/ui/code-variant";
 
 interface CodeWidgetProps {
   id: string;
@@ -25,29 +25,29 @@ interface CodeWidgetProps {
 }
 
 const languageMap: Record<string, string> = {
-  Csharp: 'csharp',
-  Javascript: 'javascript',
-  Typescript: 'typescript',
-  Python: 'python',
-  Sql: 'sql',
-  Html: 'markup',
-  Css: 'css',
-  Json: 'json',
-  Dbml: 'sql',
-  Text: 'text',
-  Xml: 'xml',
-  Yaml: 'yaml',
-  Csv: 'text',
+  Csharp: "csharp",
+  Javascript: "javascript",
+  Typescript: "typescript",
+  Python: "python",
+  Sql: "sql",
+  Html: "markup",
+  Css: "css",
+  Json: "json",
+  Dbml: "sql",
+  Text: "text",
+  Xml: "xml",
+  Yaml: "yaml",
+  Csv: "text",
 };
 
 const mapLanguageToPrism = (language: string): string | undefined => {
   if (!languageMap[language])
     console.warn(
-      `Language ${language} is not specified in the code widget, attempting to use the language name as a fallback.`
+      `Language ${language} is not specified in the code widget, attempting to use the language name as a fallback.`,
     );
 
   const result = languageMap[language] || language.toLowerCase();
-  return result === 'text' ? undefined : result;
+  return result === "text" ? undefined : result;
 };
 
 const MemoizedCopyButton = memo(
@@ -55,21 +55,21 @@ const MemoizedCopyButton = memo(
     <div className={codeCopyButtonVariant({ density })}>
       <CopyToClipboardButton textToCopy={textToCopy} density={density} />
     </div>
-  )
+  ),
 );
 
 const CodeWidget: React.FC<CodeWidgetProps> = memo(
   ({
     id,
-    content = '',
-    language = 'Csharp',
+    content = "",
+    language = "Csharp",
     showCopyButton = true,
     showLineNumbers = false,
     startingLineNumber = 1,
     showBorder = true,
     wrapLines = false,
-    width = 'Full',
-    height = 'MaxContent,,Px:800',
+    width = "Full",
+    height = "MaxContent,,Px:800",
     density = Densities.Medium,
   }) => {
     const scaleStyles: Record<
@@ -84,28 +84,28 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     > = useMemo(
       () => ({
         [Densities.Small]: {
-          fontSize: '0.75rem',
-          padding: '0.5rem',
-          lineHeight: '1.4',
-          lineNumberMinWidth: '1.5rem',
-          lineNumberPaddingRight: '0.5rem',
+          fontSize: "0.75rem",
+          padding: "0.5rem",
+          lineHeight: "1.4",
+          lineNumberMinWidth: "1.5rem",
+          lineNumberPaddingRight: "0.5rem",
         },
         [Densities.Medium]: {
-          fontSize: '0.875rem',
-          padding: '0.75rem',
-          lineHeight: '1.5',
-          lineNumberMinWidth: '2.25rem',
-          lineNumberPaddingRight: '0.75rem',
+          fontSize: "0.875rem",
+          padding: "0.75rem",
+          lineHeight: "1.5",
+          lineNumberMinWidth: "2.25rem",
+          lineNumberPaddingRight: "0.75rem",
         },
         [Densities.Large]: {
-          fontSize: '1rem',
-          padding: '1rem',
-          lineHeight: '1.6',
-          lineNumberMinWidth: '2.5rem',
-          lineNumberPaddingRight: '1rem',
+          fontSize: "1rem",
+          padding: "1rem",
+          lineHeight: "1.6",
+          lineNumberMinWidth: "2.5rem",
+          lineNumberPaddingRight: "1rem",
         },
       }),
-      []
+      [],
     );
 
     const currentScale = scaleStyles[density];
@@ -116,16 +116,16 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         ...getWidth(width),
         ...getHeight(height),
         margin: 0,
-        wordBreak: 'normal',
-        overflowWrap: 'break-word',
+        wordBreak: "normal",
+        overflowWrap: "break-word",
         fontSize: currentScale.fontSize,
         padding: currentScale.padding,
         lineHeight: currentScale.lineHeight,
       };
       if (!showBorder) {
-        style.border = 'none';
-        style.padding = '0';
-        style.borderRadius = '0';
+        style.border = "none";
+        style.padding = "0";
+        style.borderRadius = "0";
       }
       return style;
     }, [width, height, showBorder, currentScale]);
@@ -133,49 +133,47 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     const codeTagStyle = useMemo<CSSProperties>(
       () => ({
         margin: 0,
-        wordBreak: wrapLines ? 'break-word' : 'normal',
-        whiteSpace: wrapLines ? 'pre-wrap' : 'pre',
+        wordBreak: wrapLines ? "break-word" : "normal",
+        whiteSpace: wrapLines ? "pre-wrap" : "pre",
         fontSize: currentScale.fontSize,
         lineHeight: currentScale.lineHeight,
       }),
-      [currentScale, wrapLines]
+      [currentScale, wrapLines],
     );
 
     const highlighterKey = useMemo(
       () =>
         `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}-${wrapLines}`,
-      [id, language, showLineNumbers, showBorder, startingLineNumber, wrapLines]
+      [id, language, showLineNumbers, showBorder, startingLineNumber, wrapLines],
     );
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 
-    const isFull = height?.toLowerCase().startsWith('full');
+    const isFull = height?.toLowerCase().startsWith("full");
     const containerStyles: React.CSSProperties = isFull
       ? {
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
           minHeight: 0,
         }
       : { ...getWidth(width) };
 
     return (
       <div className="relative" style={containerStyles}>
-        {showCopyButton && (
-          <MemoizedCopyButton textToCopy={content} density={density} />
-        )}
+        {showCopyButton && <MemoizedCopyButton textToCopy={content} density={density} />}
         <ScrollArea
           className={cn(
-            'w-full',
-            isFull ? 'flex-1 min-h-0' : 'h-full',
-            showBorder && 'border border-border rounded-md'
+            "w-full",
+            isFull ? "flex-1 min-h-0" : "h-full",
+            showBorder && "border border-border rounded-md",
           )}
         >
           <Suspense
             fallback={
               <pre
-                className={cn('p-4 bg-muted rounded-md font-mono text-sm')}
-                style={isFull ? { ...preStyle, height: 'auto' } : preStyle}
+                className={cn("p-4 bg-muted rounded-md font-mono text-sm")}
+                style={isFull ? { ...preStyle, height: "auto" } : preStyle}
               >
                 {content}
               </pre>
@@ -183,7 +181,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
           >
             <SyntaxHighlighter
               language={mapLanguageToPrism(language)}
-              customStyle={isFull ? { ...preStyle, height: 'auto' } : preStyle}
+              customStyle={isFull ? { ...preStyle, height: "auto" } : preStyle}
               style={dynamicTheme}
               showLineNumbers={showLineNumbers}
               startingLineNumber={startingLineNumber}
@@ -191,20 +189,16 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
               wrapLongLines={wrapLines}
               key={highlighterKey}
               codeTagProps={{ style: codeTagStyle }}
-              lineProps={
-                showLineNumbers
-                  ? { style: { display: 'table-row' } }
-                  : undefined
-              }
+              lineProps={showLineNumbers ? { style: { display: "table-row" } } : undefined}
               lineNumberStyle={
                 showLineNumbers
                   ? {
-                      display: 'table-cell',
+                      display: "table-cell",
                       paddingRight: currentScale.lineNumberPaddingRight,
                       minWidth: currentScale.lineNumberMinWidth,
-                      textAlign: 'right',
-                      userSelect: 'none',
-                      color: 'var(--muted-foreground)',
+                      textAlign: "right",
+                      userSelect: "none",
+                      color: "var(--muted-foreground)",
                       opacity: 0.5,
                     }
                   : undefined
@@ -217,9 +211,9 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         </ScrollArea>
       </div>
     );
-  }
+  },
 );
 
-CodeWidget.displayName = 'CodeWidget';
+CodeWidget.displayName = "CodeWidget";
 
 export default CodeWidget;

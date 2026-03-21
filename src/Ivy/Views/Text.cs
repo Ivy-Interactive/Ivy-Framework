@@ -209,8 +209,10 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _italic;
     private bool _muted;
     private TextAlignment? _textAlignment;
+    private string? _anchor;
 
     private Density? _density;
+    private string? _testId = null;
 
     public override object? Build()
     {
@@ -219,7 +221,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
             case TextVariant.Code:
                 return new CodeBlock(content, codeLanguage);
             case TextVariant.Markdown:
-                return new Markdown(content);
+                return new Markdown(content) { Density = _density };
             case TextVariant.Json:
                 return new Json(content);
             case TextVariant.Xml:
@@ -233,7 +235,9 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
                     var text = new TextBlock(
                         content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted, _textAlignment)
                     {
-                        Density = _density
+                        Density = _density,
+                        TestId = _testId,
+                        Anchor = _anchor
                     };
                     return text;
                 }
@@ -333,6 +337,39 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     public TextBuilder Right() => Align(TextAlignment.Right);
 
     public TextBuilder Justify() => Align(TextAlignment.Justify);
+
+    public TextBuilder TestId(string testId)
+    {
+        _testId = testId;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets an explicit anchor ID for URL hash navigation on heading variants.
+    /// </summary>
+    public TextBuilder Anchor(string anchor)
+    {
+        _anchor = anchor;
+        return this;
+    }
+
+    /// <summary>
+    /// Auto-generates an anchor ID by slugifying the heading text (lowercase, hyphens, strip non-alphanumeric).
+    /// </summary>
+    public TextBuilder Anchor()
+    {
+        _anchor = Slugify(content);
+        return this;
+    }
+
+    private static string Slugify(string text)
+    {
+        var slug = text.ToLowerInvariant();
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\s-]", "");
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[\s]+", "-");
+        slug = slug.Trim('-');
+        return slug;
+    }
 }
 
 

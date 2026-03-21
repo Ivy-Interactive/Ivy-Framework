@@ -18,7 +18,7 @@ public class Record
     public required int Views { get; set; }
 }
 
-[App(icon: Icons.Table, path: ["Widgets"], searchHints: ["grid", "data", "rows", "columns", "cells", "spreadsheet"])]
+[App(icon: Icons.Table, group: ["Widgets"], searchHints: ["grid", "data", "rows", "columns", "cells", "spreadsheet"])]
 public class TableApp : SampleBase
 {
     protected override object? BuildSample()

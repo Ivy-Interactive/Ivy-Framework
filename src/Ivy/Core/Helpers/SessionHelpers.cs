@@ -11,7 +11,6 @@ public static class SessionHelpers
     // This is intended mainly as a safeguard against malicious clients (e.g., those which ignore messages that should trigger a page reload and/or cookie updates).
     // The error page this provides is not very user-friendly, but in practice it should very rarely appear for a legitimate user.
     public static async Task AbandonSessionAsync(
-        AppSessionStore sessionStore,
         AppSession session,
         IContentBuilder contentBuilder,
         bool resetTokenAndReload,
@@ -31,7 +30,7 @@ public static class SessionHelpers
                 authService.SetAuthTokenCookies(reloadPage: true, triggerMachineReload: triggerMachineReload);
             }
 
-            session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);
+            session.WidgetTree = new WidgetTree(new ExceptionErrorView(displayException), contentBuilder, session.AppServices);
             await session.WidgetTree.BuildAsync();
             try
             {

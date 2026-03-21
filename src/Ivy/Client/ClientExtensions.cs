@@ -53,6 +53,7 @@ public static class ClientExtensions
         public required string CookieJarId { get; set; }
         public required bool ReloadPage { get; set; }
         public required bool TriggerMachineReload { get; set; }
+        public required bool TriggerMachineBrokeredRefresh { get; set; }
     }
 
     public class SetRootAppIdMessage
@@ -124,7 +125,7 @@ public static class ClientExtensions
         client.Sender.Send("SetTitle", title);
     }
 
-    public static void SetAuthCookies(this IClientProvider client, CookieJarId cookieJarId, bool reloadPage, bool? triggerMachineReload = null)
+    public static void SetAuthCookies(this IClientProvider client, CookieJarId cookieJarId, bool reloadPage, bool? triggerMachineReload = null, bool triggerMachineBrokeredRefresh = false)
     {
         client.Sender.Send(
             "SetAuthCookies",
@@ -132,13 +133,19 @@ public static class ClientExtensions
             {
                 CookieJarId = cookieJarId.Value,
                 ReloadPage = reloadPage,
-                TriggerMachineReload = triggerMachineReload ?? reloadPage
+                TriggerMachineReload = triggerMachineReload ?? reloadPage,
+                TriggerMachineBrokeredRefresh = triggerMachineBrokeredRefresh
             });
     }
 
     public static void ReloadPage(this IClientProvider client)
     {
         client.Sender.Send("ReloadPage", new { });
+    }
+
+    public static void RefreshAuthFromCookies(this IClientProvider client)
+    {
+        client.Sender.Send("RefreshAuthFromCookies", new { });
     }
 
     public static void SetRootAppId(this IClientProvider client, string rootAppId)

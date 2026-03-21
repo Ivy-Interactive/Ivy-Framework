@@ -1,23 +1,16 @@
-import React from 'react';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import { getWidth, getHeight, inputStyles } from '@/lib/styles';
-import { InvalidIcon } from '@/components/InvalidIcon';
-import { Densities } from '@/types/density';
-import {
-  textareaSizeVariant,
-  xIconVariant,
-} from '@/components/ui/input/text-input-variant';
-import { TextInputWidgetProps } from '../types';
-import {
-  useCursorPosition,
-  usePasteHandler,
-  formatShortcutForDisplay,
-} from '../hooks';
-import { X } from 'lucide-react';
+import React from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { getWidth, getHeight, inputStyles } from "@/lib/styles";
+import { InvalidIcon } from "@/components/InvalidIcon";
+import { Densities } from "@/types/density";
+import { textareaSizeVariant, xIconVariant } from "@/components/ui/input/text-input-variant";
+import { TextInputWidgetProps } from "../types";
+import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
+import { X } from "lucide-react";
 
 interface TextareaVariantProps {
-  props: Omit<TextInputWidgetProps, 'variant'>;
+  props: Omit<TextInputWidgetProps, "variant">;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
@@ -46,7 +39,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
     onChange(e);
   };
 
-  const handlePaste = usePasteHandler(props.maxLength, value => {
+  const handlePaste = usePasteHandler(props.maxLength, (value) => {
     const syntheticEvent = {
       target: { value },
       currentTarget: { value },
@@ -60,7 +53,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
-  const hasValue = props.value && props.value.toString().trim() !== '';
+  const hasValue = props.value && props.value.toString().trim() !== "";
   const showClear = props.nullable && !props.disabled && hasValue;
 
   return (
@@ -84,19 +77,14 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           onPaste={handlePaste}
           className={cn(
             textareaSizeVariant({ density }),
-            'border-0 shadow-none dark:bg-transparent h-full',
+            "border-0 shadow-none dark:bg-transparent h-full",
             props.invalid && inputStyles.invalidInput,
-            (props.invalid || showClear) && 'pr-8',
-            props.shortcutKey &&
-              !isFocused &&
-              !hasValue &&
-              !showClear &&
-              !props.invalid &&
-              'pr-16',
-            showClear && props.invalid && 'pr-16',
-            !hasValue && props.nullable && 'placeholder:text-muted-foreground'
+            (props.invalid || showClear) && "pr-8",
+            props.shortcutKey && !isFocused && !hasValue && !showClear && !props.invalid && "pr-16",
+            showClear && props.invalid && "pr-16",
+            !hasValue && props.nullable && "placeholder:text-muted-foreground",
           )}
-          data-testid={props['data-testid']}
+          data-testid={props["data-testid"]}
         />
       </div>
       <div className="absolute right-2.5 top-2 flex items-start gap-2 pointer-events-none z-10">
@@ -107,7 +95,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
             aria-label="Clear text"
             onClick={onClear}
             className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center"
-            style={{ pointerEvents: 'auto' }}
+            style={{ pointerEvents: "auto" }}
           >
             <X className={xIconVariant({ density })} />
           </button>

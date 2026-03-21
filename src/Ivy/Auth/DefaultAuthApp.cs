@@ -71,41 +71,14 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         var auth = UseService<IAuthService>();
         var client = UseService<IClientProvider>();
 
-        var formBuilder = credentials.ToForm("Login")
-            .Required(m => m.User, m => m.Password)
-            .Label(m => m.User, "User")
-            .Label(m => m.Password, "Password")
-            .Builder(m => m.User, state => state.ToTextInput())
-            .Builder(m => m.Password, state => state.ToPasswordInput());
-
-        var (submitForm, formView, _, submitting) = formBuilder.UseForm(this.Context);
-
-        var isBusy = loading.Value || submitting;
-
-        async ValueTask HandleSubmit()
-        {
-            if (isBusy)
-            {
-                return;
-            }
-
-            var isValid = await submitForm(); // FormBuilder runs validation and updates field errors
-            if (!isValid)
-            {
-                return;
-            }
-
-            await HandleLoginAsync();
-        }
-
-        async ValueTask HandleLoginAsync()
+        async Task HandleLoginAsync(LoginFormModel model)
         {
             try
             {
                 loading.Set(true);
                 errorMessage.Set((string?)null);
 
-                await auth.LoginAsync(credentials.Value.User, credentials.Value.Password);
+                await auth.LoginAsync(model.User, model.Password);
 
                 if (auth.GetCurrentToken() == null)
                 {
@@ -119,6 +92,34 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             finally
             {
                 loading.Set(false);
+            }
+        }
+
+        var formBuilder = credentials.ToForm("Login")
+            .Required(m => m.User, m => m.Password)
+            .Label(m => m.User, "User")
+            .Label(m => m.Password, "Password")
+            .Builder(m => m.User, state => state.ToTextInput())
+            .Builder(m => m.Password, state => state.ToPasswordInput())
+            .SubmitStrategy(FormSubmitStrategy.OnSubmit)
+            .SubmitTitle("Login")
+            .OnSubmit(async model => await HandleLoginAsync(model));
+
+        var (submitForm, formView, _, submitting) = formBuilder.UseForm(this.Context);
+
+        var isBusy = loading.Value || submitting;
+
+        async ValueTask HandleSubmit()
+        {
+            if (isBusy)
+            {
+                return;
+            }
+
+            var isValid = await submitForm(); // FormBuilder runs validation and updates field errors and calls OnSubmit
+            if (!isValid)
+            {
+                return;
             }
         }
 

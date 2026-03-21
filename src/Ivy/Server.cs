@@ -45,6 +45,7 @@ public record ServerArgs
 #else
     public bool FindAvailablePort { get; set; } = false;
 #endif
+    public string? Host { get; set; } = null;
 
     /// <summary>
     /// True when the process is running a CLI-only command (--describe, --describe-connection, --test-connection)
@@ -89,6 +90,11 @@ public class Server
             _args = _args with { Verbose = parsedVerbose };
         }
 
+        if (_args.Host == null && Environment.GetEnvironmentVariable("HOST") is { } host)
+        {
+            _args = _args with { Host = host };
+        }
+
         _args = _args with
         {
             AssetAssembly = _args.AssetAssembly ?? Assembly.GetCallingAssembly(),
@@ -102,7 +108,7 @@ public class Server
 
     private void AddDefaultApps()
     {
-        UseErrorNotFound<NotFoundApp>();
+        UseErrorNotFound<ErrorApp>();
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
@@ -112,7 +118,7 @@ public class Server
             Id = AppIds.Default,
             Title = "Default",
             ViewFunc = viewFactory,
-            Path = ["Apps"],
+            Group = ["Apps"],
             IsVisible = true
         });
         DefaultAppId = AppIds.Default;
@@ -214,7 +220,7 @@ public class Server
             Id = AppIds.Chrome,
             Title = "Chrome",
             ViewFactory = viewFactory ?? (() => new DefaultSidebarChrome(ChromeSettings.Default())),
-            Path = [],
+            Group = [],
             IsVisible = false
         });
         DefaultAppId = AppIds.Chrome;
@@ -231,16 +237,101 @@ public class Server
             return provider;
         });
 
+        DiscoverAndRegisterOAuthTokenHandlers();
+
         AddApp(new AppDescriptor
         {
             Id = AppIds.Auth,
             Title = "Auth",
             ViewFactory = viewFactory ?? (() => new DefaultAuthApp()),
-            Path = [],
+            Group = [],
             IsVisible = false
         });
         AuthProviderType = typeof(T);
         return this;
+    }
+
+    public Server RegisterAuthTokenHandler<T>(string provider) where T : class, IAuthTokenHandler
+    {
+        Services.AddKeyedSingleton<IAuthTokenHandler, T>(provider);
+        return this;
+    }
+
+    private void DiscoverAndRegisterOAuthTokenHandlers()
+    {
+        try
+        {
+            // Load all "Ivy.Auth.*" assemblies eagerly to ensure their handlers are registered in the DI container
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly?.Location != null)
+            {
+                var assemblyDirectory = Path.GetDirectoryName(entryAssembly.Location);
+                if (assemblyDirectory != null)
+                {
+                    var authAssemblyFiles = Directory.GetFiles(assemblyDirectory, "Ivy.Auth.*.dll");
+
+                    foreach (var assemblyFile in authAssemblyFiles)
+                    {
+                        try
+                        {
+                            Assembly.LoadFrom(assemblyFile);
+                        }
+                        catch
+                        {
+                            // Continue if we can't load an assembly
+                        }
+                    }
+                }
+            }
+
+            // Now get all loaded assemblies
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
+            {
+                try
+                {
+                    // Skip system assemblies for performance
+                    var assemblyName = assembly.GetName().Name ?? "";
+                    if (assemblyName.StartsWith("System.") ||
+                        assemblyName.StartsWith("Microsoft.") ||
+                        assemblyName == "netstandard" ||
+                        assemblyName == "mscorlib")
+                    {
+                        continue;
+                    }
+
+                    // Find all types with OAuthTokenHandlerAttribute
+                    var handlerTypes = assembly.GetTypes()
+                        .Where(t => t.IsClass && !t.IsAbstract && typeof(IAuthTokenHandler).IsAssignableFrom(t))
+                        .Where(t => t.GetCustomAttribute<OAuthTokenHandlerAttribute>() != null)
+                        .ToList();
+
+                    foreach (var handlerType in handlerTypes)
+                    {
+                        var attribute = handlerType.GetCustomAttribute<OAuthTokenHandlerAttribute>();
+                        if (attribute == null)
+                            continue;
+
+                        try
+                        {
+                            Services.AddKeyedSingleton(typeof(IAuthTokenHandler), attribute.Provider, handlerType);
+                        }
+                        catch
+                        {
+                            // Continue if we can't register a handler
+                        }
+                    }
+                }
+                catch
+                {
+                    // Continue loading types from an assembly fails
+                }
+            }
+        }
+        catch
+        {
+            // Continue if discovery completely fails, just continue with no handlers
+        }
     }
 
     public Server UseDefaultApp(Type appType)
@@ -261,7 +352,7 @@ public class Server
             Id = AppIds.ErrorNotFound,
             Title = "App Not Found",
             ViewFactory = viewFactory,
-            Path = [],
+            Group = [],
             IsVisible = false
         });
         return this;
@@ -519,8 +610,10 @@ public class Server
         // so use port 0 to avoid conflicts with a running instance.
         // Bind to localhost for local dev (avoids Windows Firewall prompt),
         // but use wildcard in containers so health probes can reach the app.
+        // On Sliplane or other hosted environments, we usually have PORT set and need to listen on 0.0.0.0.
         var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
-        var host = isContainer ? "*" : "localhost";
+        var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
+        var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
         var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://{host}:{_args.Port}";
         builder.WebHost.UseUrls(bindUrl);
 
@@ -749,7 +842,7 @@ public class Server
             {
                 var config = app.Services.GetRequiredService<IConfiguration>();
                 var missing = hasSecrets.GetSecrets()
-                    .Where(s => s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
+                    .Where(s => !s.Optional && s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
                     .Select(s => s.Key)
                     .ToList();
 
@@ -841,7 +934,7 @@ public class Server
         Dictionary<string, List<string>> missingByProvider)
     {
         var missing = provider.GetSecrets()
-            .Where(s => s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
+            .Where(s => !s.Optional && s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
             .Select(s => s.Key)
             .ToList();
 

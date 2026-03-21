@@ -339,7 +339,6 @@ public class ConditionalEffectView : ViewBase
 - [State Management](./03_UseState.md) - Managing component state
 - [Rules of Hooks](../02_RulesOfHooks.md) - Understanding hook rules and best practices
 - [Memoization](./05_UseMemo.md) - Optimizing performance with memoization
-- [UseCallback](./06_UseCallback.md) - Memoizing callback functions
 - [Signals](./10_UseSignal.md) - Reactive state management
 - [Views](../../../01_Onboarding/02_Concepts/02_Views.md) - Understanding Ivy views and components
 

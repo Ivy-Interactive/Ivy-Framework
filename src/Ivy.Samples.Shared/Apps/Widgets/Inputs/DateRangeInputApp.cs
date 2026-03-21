@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.CalendarRange, path: ["Widgets", "Inputs"], searchHints: ["calendar", "date", "picker", "range", "period", "dates"])]
+[App(icon: Icons.CalendarRange, group: ["Widgets", "Inputs"], searchHints: ["calendar", "date", "picker", "range", "period", "dates"])]
 public class DateRangeInputApp : SampleBase
 {
     protected override object? BuildSample()
@@ -15,6 +15,8 @@ public class DateRangeInputApp : SampleBase
         var requiredNullableDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
         var nullableInvalidDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
         var nullableDisabledDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
+        var emptyNullableDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
+        var constrainedRangeState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
 
         // Size examples
         var sizeExamplesGrid = Layout.Grid().Columns(4)
@@ -73,12 +75,33 @@ public class DateRangeInputApp : SampleBase
             | Text.Block($"DateOnly Range: {dateOnlyRangeState.Value.Item1:yyyy-MM-dd} to {dateOnlyRangeState.Value.Item2:yyyy-MM-dd}")
             | Text.Block($"Nullable DateOnly Range: {nullableDateOnlyRangeState.Value.Item1?.ToString("yyyy-MM-dd") ?? "null"} to {nullableDateOnlyRangeState.Value.Item2?.ToString("yyyy-MM-dd") ?? "null"}");
 
+        // Start/End Placeholders
+        var startEndPlaceholderExample = emptyNullableDateOnlyState.ToDateRangeInput()
+            .StartPlaceholder("Check-in")
+            .EndPlaceholder("Check-out")
+            .Format("MM/dd/yyyy")
+            .TestId("daterange-input-start-end-placeholder");
+
+        // Min/Max Constraints Example
+        var minMaxExample = Layout.Vertical().Gap(2)
+            | Text.P("Date range constrained to 2026 only").Small()
+            | constrainedRangeState.ToDateRangeInput()
+                .Min(new DateOnly(2026, 1, 1))
+                .Max(new DateOnly(2026, 12, 31))
+                .Placeholder("Select dates within 2026")
+                .Format("MM/dd/yyyy")
+                .TestId("daterange-input-min-max-example");
+
         return Layout.Vertical()
             | Text.H1("DateRangeInput")
             | Text.H2("Size Examples")
             | sizeExamplesGrid
             | Text.H2("Variants")
             | variantsGrid
+            | Text.H2("Start/End Placeholders")
+            | startEndPlaceholderExample
+            | Text.H2("Min/Max Constraints")
+            | minMaxExample
             | Text.H2("Data Binding")
             | dataBindingGrid
             | currentValues;

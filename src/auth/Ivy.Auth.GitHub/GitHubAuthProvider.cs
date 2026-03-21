@@ -1,8 +1,9 @@
 using System.Text.Json;
-using Ivy.Auth;
 using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
 namespace Ivy.Auth.GitHub;
 
 /// <summary>GitHub OAuth exception</summary>
@@ -14,21 +15,15 @@ public class GitHubOAuthException(string? error, string? errorDescription)
 }
 
 /// <summary>GitHub OAuth 2.0 authentication provider</summary>
-public class GitHubAuthProvider : IAuthProvider
+public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
 {
-    private readonly HttpClient _httpClient;
     private readonly string _clientId;
     private readonly string _clientSecret;
     private readonly string _redirectUri;
 
     /// <summary>Initialize GitHub auth provider</summary>
-    public GitHubAuthProvider(IConfiguration configuration)
+    public GitHubAuthProvider(IConfiguration configuration, ILogger<GitHubAuthTokenHandler>? logger = null) : base(configuration, logger)
     {
-        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "GitHub:UserAgent");
-
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
-
         _clientId = configuration.GetValue<string>("GitHub:ClientId") ?? throw new InvalidOperationException(
             "Missing required configuration: 'GitHub:ClientId'. Please set this value in your environment variables or user secrets. See the README setup steps for instructions.");
         _clientSecret = configuration.GetValue<string>("GitHub:ClientSecret") ?? throw new InvalidOperationException(
@@ -110,119 +105,16 @@ public class GitHubAuthProvider : IAuthProvider
         return Task.CompletedTask;
     }
 
-    /// <summary>No refresh tokens - returns null</summary>
-    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult<AuthToken?>(null);
-    }
-
-    /// <summary>Validate access token via GitHub API</summary>
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        var token = authSession.AuthToken?.AccessToken;
-        if (string.IsNullOrWhiteSpace(token))
-            return false;
-
-        try
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user");
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            request.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-            request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
-
-            var response = await _httpClient.SendAsync(request, cancellationToken);
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-        {
-            return false;
-        }
-    }
-
-    /// <summary>Get user info from GitHub API</summary>
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        var token = authSession.AuthToken?.AccessToken;
-        if (string.IsNullOrWhiteSpace(token))
-            return null;
-
-        try
-        {
-            using var userRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user");
-            userRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            userRequest.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-            userRequest.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
-
-            var userResponse = await _httpClient.SendAsync(userRequest, cancellationToken);
-            if (!userResponse.IsSuccessStatusCode)
-            {
-                return null;
-            }
-
-            var userJson = await userResponse.Content.ReadAsStringAsync(cancellationToken);
-            using var userDoc = JsonDocument.Parse(userJson);
-            var user = userDoc.RootElement;
-
-            var userId = user.GetProperty("id").GetInt64().ToString();
-            var login = user.GetProperty("login").GetString() ?? "";
-            var name = user.TryGetProperty("name", out var nameProp) ? nameProp.GetString() : null;
-            var avatarUrl = user.TryGetProperty("avatar_url", out var avatarProp) ? avatarProp.GetString() : null;
-
-            using var emailRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user/emails");
-            emailRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            emailRequest.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-            emailRequest.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
-
-            var emailResponse = await _httpClient.SendAsync(emailRequest, cancellationToken);
-            string? email = null;
-
-            if (emailResponse.IsSuccessStatusCode)
-            {
-                var emailJson = await emailResponse.Content.ReadAsStringAsync(cancellationToken);
-                using var emailDoc = JsonDocument.Parse(emailJson);
-                var emails = emailDoc.RootElement.EnumerateArray();
-
-                string? primaryEmail = null;
-                string? firstVerifiedEmail = null;
-
-                foreach (var emailObj in emails)
-                {
-                    if (emailObj.TryGetProperty("primary", out var primaryProp) && primaryProp.GetBoolean())
-                    {
-                        primaryEmail = emailObj.GetProperty("email").GetString();
-                        break;
-                    }
-                    else if (firstVerifiedEmail == null && emailObj.TryGetProperty("verified", out var verifiedProp) && verifiedProp.GetBoolean())
-                    {
-                        firstVerifiedEmail = emailObj.GetProperty("email").GetString();
-                    }
-                }
-
-                email = primaryEmail ?? firstVerifiedEmail;
-            }
-
-            email ??= login;
-
-            return new UserInfo(userId, email, name, avatarUrl);
-        }
-        catch (Exception ex) when (ex is JsonException or HttpRequestException or TaskCanceledException)
-        {
-            return null;
-        }
-    }
-
     /// <summary>Get auth options</summary>
     public AuthOption[] GetAuthOptions() => [new AuthOption(AuthFlow.OAuth, "GitHub", "github", Icons.Github)];
-
-    /// <summary>No expiration - returns null</summary>
-    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult<TokenLifetime?>(null);
-    }
 
     /// <summary>Add GitHub auth option</summary>
     [Obsolete("GitHub OAuth is now enabled by default. This method is no longer necessary and will be removed in a future version.")]
     public GitHubAuthProvider UseGitHub() => this;
+
+    /// <summary>Get brokered auth sessions - returns live session references that stay up-to-date</summary>
+    public Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+        => Task.FromResult(BrokeredSessionsResult.Success([]));
 
     private async Task<GitHubTokenResponse?> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken)
     {
@@ -238,7 +130,7 @@ public class GitHubAuthProvider : IAuthProvider
         request.Content = requestBody;
         request.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
 
-        var response = await _httpClient.SendAsync(request, cancellationToken);
+        var response = await HttpClient.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

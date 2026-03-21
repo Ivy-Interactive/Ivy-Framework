@@ -10,7 +10,8 @@ public class DepartmentsApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return UseBlades(() => new DepartmentsListBlade(), "Search", Size.Units(75));
+        var blades = UseBlades(() => new DepartmentsListBlade(), "Search", Size.Units(75));
+        return blades;
     }
 }
 

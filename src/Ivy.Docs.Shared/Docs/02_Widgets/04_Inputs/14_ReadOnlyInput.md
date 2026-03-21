@@ -25,8 +25,8 @@ public class ReadOnlyDemo : ViewBase
 {    
     public override object? Build()
     {    
-        double value = 123.45;
-        var readOnlyInput = new ReadOnlyInput<double>(value);
+        var value = UseState(123.45);
+        var readOnlyInput = value.ToReadOnlyInput();
         return readOnlyInput;
     }    
 }    
@@ -49,14 +49,18 @@ public class ReadOnlyFormDemo : ViewBase
     {
         var price = UseState(100.0);
         var quantity = UseState(5);
-        var total = price.Value * quantity.Value;
+        var total = UseState(price.Value * quantity.Value);
+        
+        UseEffect(() => {
+            total.Set(price.Value * quantity.Value);
+        }, price, quantity);
         
         return Layout.Vertical().Gap(2)
-            | new NumberInput<double>(price)
+            | price.ToNumberInput()
                 .WithField().Label("Price")
-            | new NumberInput<int>(quantity)
+            | quantity.ToNumberInput()
                 .WithField().Label("Quantity")
-            | new ReadOnlyInput<double>(total)
+            | total.ToReadOnlyInput()
                 .WithField().Label("Total");
     }
 }

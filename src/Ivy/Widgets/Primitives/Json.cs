@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Core;
 
@@ -13,6 +14,10 @@ public record Json : WidgetBase<Json>
     {
     }
 
+    public Json(object obj) : this(JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true }))
+    {
+    }
+
     public Json(string content)
     {
         Content = content;
@@ -21,4 +26,5 @@ public record Json : WidgetBase<Json>
     internal Json() { }
 
     [Prop] public string Content { get; set; } = string.Empty;
+    [Prop] public int? Expanded { get; set; }
 }

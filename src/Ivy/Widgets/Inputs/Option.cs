@@ -1,3 +1,5 @@
+using System.Reflection;
+
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
@@ -76,11 +78,10 @@ public static class OptionExtensions
         IAnyOption MakeOption(object e)
         {
             var label = ((Enum)e).GetDescription();
-
             var value = Convert.ChangeType(e, enumType);
 
             // Pass all 6 parameters including optional ones (label, value, group, description, icon, disabled)
-            return (IAnyOption)Activator.CreateInstance(optionType, label, value, null, null, null, false)!;
+            return (IAnyOption)Activator.CreateInstance(optionType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { label, value, null, null, null, false }, null)!;
         }
 
         return Enum.GetValues(enumType).Cast<object>().Select(MakeOption).ToArray();

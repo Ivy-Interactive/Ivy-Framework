@@ -32,7 +32,7 @@ public class SimpleNumericValueDemo : ViewBase
     public override object? Build()
     {
         var value = UseState(0);
-        return new NumberInput<double>(value)
+        return value.ToNumberInput()
                      .Min(-10)
                      .Max(10);
     }
@@ -59,13 +59,13 @@ public class NumberSliderInput : ViewBase
     {        
         var tapes = UseState(1.0);
         var cart = UseState("");
+        
+        UseEffect(() => {
+            cart.Set($"Added {tapes.Value} cm tape to your cart"); 
+        }, tapes);
+        
         return Layout.Vertical()
-                | new NumberInput<double>(
-                      tapes.Value,
-                      e => {
-                             tapes.Set(e);
-                             cart.Set($"Added {tapes} cm tape to your cart"); 
-                     })
+                | tapes.ToNumberInput()
                      .Min(30.0)
                      .Max(500.0)
                      .Precision(2)
@@ -99,16 +99,14 @@ public class MoneyInputDemo : ViewBase
         var euroToUSD = 1.80M;
         var euroToGBP = 0.86M;
         
+        UseEffect(() => {
+            moneyInUSD.Set(moneyInEUR.Value * euroToUSD);
+            moneyInGBP.Set(moneyInEUR.Value * euroToGBP);
+        }, moneyInEUR);
+        
         return Layout.Vertical()
                 | Text.H3("Simple Currency Converter")
-                | new NumberInput<decimal>(
-                    moneyInEUR.Value,
-                    e => {
-                        moneyInEUR.Set(e);
-                        moneyInUSD.Set(e * euroToUSD);
-                        moneyInGBP.Set(e * euroToGBP);
-                    }
-                )
+                | moneyInEUR.ToNumberInput()
                 .FormatStyle(NumberFormatStyle.Currency)
                 .Currency("EUR")
                 .Placeholder("€0.00")
@@ -165,7 +163,7 @@ public class MoneyPrecisionDemo : ViewBase
     {
         var precValue = UseState(0.50M);
         return Layout.Horizontal() 
-                | new NumberInput<decimal>(precValue)
+                | precValue.ToNumberInput()
                      .Min(0.0)
                      .Max(100.0)
                      .Step(0.5)
@@ -243,11 +241,12 @@ The `Prefix` and `Suffix` methods accept either a `string` or an `Icons` value, 
 var onChangedState = UseState(0);
 var onChangeLabel = UseState("");
 
-new NumberInput<int>(onChangedState.Value, e =>
+UseEffect(() =>
 {
-    onChangedState.Set(e);
     onChangeLabel.Set("Changed");
-});
+}, onChangedState);
+
+onChangedState.ToNumberInput();
 ```
 
 <WidgetDocs Type="Ivy.NumberInput" ExtensionTypes="Ivy.NumberInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/NumberInput.cs"/>
@@ -270,6 +269,12 @@ public class GroceryAppDemo : ViewBase
         var breads = UseState(0);
         var eggCost = 3.45M;
         var breadCost = 6.13M;
+        var total = UseState(eggs.Value * eggCost + breadCost * breads.Value);
+        
+        UseEffect(() => {
+            total.Set(eggs.Value * eggCost + breadCost * breads.Value);
+        }, eggs, breads);
+        
         return Layout.Vertical()
                 | (Layout.Horizontal() 
                    | eggs.ToNumberInput()
@@ -288,11 +293,11 @@ public class GroceryAppDemo : ViewBase
                               .WithField()
                               .Label("Bread")
                               .Description("Maximum 5"))
-                | Text.P($"{eggs} eggs and {breads} breads").Large()
+                | Text.P($"{eggs.Value} eggs and {breads.Value} breads").Large()
                 | (Layout.Horizontal()
                    | Text.P("Bill : ").Large()
                    // Since it is disabled, no need to have an onChange event
-                   | new NumberInput<decimal>(eggs.Value * eggCost + breadCost * breads.Value,_ => { })
+                   | total.ToNumberInput()
                                      .Disabled()
                                      .Variant(NumberInputVariant.Number)
                                      .Precision(2)
@@ -355,5 +360,4 @@ Available `NumberFormatStyle` values: `Decimal` (default), `Currency`, `Percent`
 
 </Body>
 </Details>
-For `NumberInput`s that use `NumberFormatStyle.Currency` the recommended type is `decimal`
-like `new NumberInput<decimal>`
+For `NumberInput`s that use `NumberFormatStyle.Currency` the recommended type is `decimal`.
