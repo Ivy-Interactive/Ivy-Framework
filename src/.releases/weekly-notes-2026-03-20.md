@@ -78,87 +78,33 @@ new GaugeChart(67)
 
 ### Native File Dialog Hooks
 
-Ivy now provides **three new hooks for opening native OS file picker dialogs** directly from your code: **UseFileDialog**, **UseSaveDialog**, and **UseFolderDialog**. These hooks follow the same callback-in-show pattern as `UseAlert`, returning a `(dialogView, showDialog)` tuple where the show delegate accepts a callback to handle the user's selection.
+**UseFileDialog** (PathOnly or upload via `IUploadHandler`), **UseSaveDialog** (byte factory + MIME + suggested name), and **UseFolderDialog** each return `(dialogView, show…)` — render every `dialogView` in the tree, then call `show…(callback)` when the user should see the dialog (same pattern as `UseAlert`).
 
-**UseFileDialog - Open File Picker:**
-
-Open files from the user's file system with two modes: `Upload` (default) for file content, or `PathOnly` for just the file path.
+**Note:** PathOnly `UseFileDialog(accept?, multiple?)` — omit `accept` for any file type; filter with `"image/*"` or `".pdf,.txt"`. Upload mode uses `MemoryStreamUploadHandler.Create(state)`. Avoid `accept: "*/*"` on older clients. `UseSaveDialog` callback receives **`SaveDialogResult`**; folder callback receives **`FolderDialogEntry[]`**.
 
 ```csharp
-// Upload mode - returns file content
-var (fileDialog, showFileDialog) = UseFileDialog();
+var summary = UseState<string?>(null);
 
-var selectedFile = UseState<UploadedFile?>(null);
-
-showFileDialog(file =>
-{
-    selectedFile.Set(file);
-    // file.Content contains byte[]
-    // file.FileName, file.ContentType available
-});
+var (fileDialog, showFileDialog) = UseFileDialog();  // PathOnly — FileDialogFileInfo[]; or UseFileDialog(accept: "image/*")
+var (saveDialog, showSaveDialog) = UseSaveDialog(
+    () => Task.FromResult(Encoding.UTF8.GetBytes("Hello")),  // content factory
+    "text/plain",  // MIME
+    "hello.txt");  // suggested file name
+var (folderDialog, showFolderDialog) = UseFolderDialog();  // FolderDialogEntry[]
 
 return Layout.Vertical()
-    | fileDialog
-    | new Button("Select File").OnClick(_ => showFileDialog(...));
-```
-
-**UseSaveDialog - Save File Picker:**
-
-Save files to the user's file system using the native save dialog. Works with the `IDownloadService` pattern.
-
-```csharp
-// Create save dialog for exporting data
-var (saveDialog, showSaveDialog) = UseSaveDialog();
-
-var exportData = UseState<byte[]>(GenerateReport());
-
-showSaveDialog(async () =>
-{
-    // Generate or retrieve file content
-    return new DownloadRequest
-    {
-        Content = exportData.Value,
-        FileName = "report.pdf",
-        MimeType = "application/pdf"
-    };
-});
-
-return Layout.Vertical()
+    | fileDialog  // required in tree (no visible UI)
     | saveDialog
-    | new Button("Export Report").OnClick(_ => showSaveDialog(...));
-```
-
-**UseFolderDialog - Folder Picker:**
-
-Select folders and retrieve their contents (directory entries) using the File System Access API on Chromium browsers.
-
-```csharp
-// Folder picker - returns directory entries
-var (folderDialog, showFolderDialog) = UseFolderDialog();
-
-var selectedFolder = UseState<FolderSelection?>(null);
-
-showFolderDialog(folder =>
-{
-    selectedFolder.Set(folder);
-    // folder.Name contains folder name
-    // folder.Entries contains file/folder entries
-});
-
-return Layout.Vertical()
     | folderDialog
-    | new Button("Select Folder").OnClick(_ => showFolderDialog(...));
+    | new Button("Select file").OnClick(_ => showFileDialog(files =>
+    {
+        var f = files.FirstOrDefault();
+        summary.Set(f != null ? f.FileName : "No file");
+    }))
+    | new Button("Save as…").OnClick(_ => showSaveDialog(r => { /* r.Success, r.FileName */ }))
+    | new Button("Select folder").OnClick(_ => showFolderDialog(entries => { /* Name, Kind, RelativePath */ }))
+    | Text.P(summary.Value ?? "No selection");
 ```
-
-**Features:**
-
-- **Native OS dialogs** - Uses the browser's file picker APIs for a native experience
-- **Smart browser detection** - File System Access API on Chromium, hidden input fallback on Firefox/Safari
-- **File filtering** - Configure accepted file types with MIME types or extensions
-- **Callback pattern** - Consistent with `UseAlert` for predictable async handling
-- **Multiple modes** - Choose between uploading file content or just getting file paths
-
-These hooks make it easy to build file management features, document uploaders, export/import workflows, or any scenario requiring access to the user's file system.
 
 ## API Improvements
 
