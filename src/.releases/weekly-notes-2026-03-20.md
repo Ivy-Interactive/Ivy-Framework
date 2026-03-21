@@ -64,6 +64,7 @@ return Layout.Vertical()
 ```
 
 Each handler method has multiple overloads for convenience:
+
 - `HandlePlay(Func<Event<VideoPlayer>, ValueTask>)` - Async handler with event data
 - `HandlePlay(Action<Event<VideoPlayer>>)` - Sync handler with event data
 - `HandlePlay(Action)` - Simple action without event data
@@ -449,6 +450,7 @@ public class AnalyticsConnection : IHaveSecrets
 ```
 
 This is particularly useful for:
+
 - **Development environments** where certain integrations aren't needed
 - **Graceful degradation** scenarios where features can work with reduced functionality
 - **Third-party integrations** that enhance but aren't critical to your application
@@ -665,6 +667,7 @@ The **IConnection** interface has been updated with two important changes that w
 The `RegisterServices` method signature has changed to provide access to the full server context during service registration.
 
 **Before:**
+
 ```csharp
 public void RegisterServices(IServiceCollection services)
 {
@@ -673,6 +676,7 @@ public void RegisterServices(IServiceCollection services)
 ```
 
 **After:**
+
 ```csharp
 public void RegisterServices(Server server)
 {
@@ -726,44 +730,6 @@ public class CameraInputApp : ViewBase
 ```
 
 This is a simple find-and-replace change in your codebase—search for `path:` in `[App]` attributes and replace with `group:`.
-
-## Performance & UX Improvements
-
-### Optimistic Rendering for All Input Widgets
-
-All input widgets in Ivy now feature **optimistic rendering** for instant, responsive interactions. When you type, select, or adjust any input, the UI updates immediately without waiting for server round-trips. The framework maintains local state during active interaction and syncs server values when you're done, giving you a smooth, lag-free experience.
-
-**Affected widgets:**
-
-This improvement applies to all input widgets including TextInput, CodeInput, NumberInput, DateTimeInput, DateRangeInput, SelectInput, BoolInput, ColorInput, IconInput, FeedbackInput, SignatureInput, and range inputs. You don't need to change any code—the optimization is automatic and transparent.
-
-**What you'll notice:**
-
-- **Instant feedback** - Text appears immediately as you type, toggles respond instantly, sliders move smoothly
-- **No input lag** - UI updates happen in real-time regardless of network latency or server processing time
-- **Automatic sync** - Server state updates are applied when you're not actively interacting, keeping everything in sync
-
-This creates a native-app feel for all Ivy inputs while maintaining the framework's server-driven architecture. The implementation uses a shared `useOptimisticValue` hook that intelligently manages local and server state across all input types.
-
-### Visual Separators in Grouped SelectInput
-
-The **SelectInput** dropdown variant now displays visual separators between option groups, making it easier to distinguish between different groups in the dropdown menu. When you configure grouped options using the `Group` property, a subtle divider line automatically appears between each group, improving readability and visual hierarchy.
-
-**What you'll see:**
-
-- **Clearer group boundaries** - Visual separators make it immediately obvious where one group ends and another begins
-- **Improved readability** - Easier to scan through long lists of grouped options
-- **Automatic** - No code changes needed; separators appear automatically when using grouped options
-
-This improvement applies to SelectInput widgets using the dropdown variant (default) with grouped options. The separators maintain consistent styling with the rest of the select component across all themes.
-
-### Improved Toast Notification Spacing
-
-Multiple simultaneous toast notifications now have tighter, more refined spacing between them. The gap between toasts has been reduced to 4px (from 8px), creating a more compact and polished appearance while still maintaining clear visual separation between individual notifications.
-
-### ScreenshotFeedback Neutral Color Scheme
-
-The **ScreenshotFeedback** widget overlay now uses a neutral gray color scheme instead of the previous green theme. The toolbar, buttons, and overlay background now feature modern gray tones that better complement any application design and work seamlessly across both light and dark modes. This provides a more professional, polished appearance for the feedback capture interface.
 
 ## Bug Fixes
 
@@ -835,6 +801,7 @@ Fixed issues where **AreaChart**, **BarChart**, and **LineChart** widgets would 
 Additionally fixed **BarChart** legend labels to use proper PascalCase formatting (e.g., "totalRevenue" now displays as "Total Revenue") to match the behavior of LineChart and AreaChart.
 
 **What changed:**
+
 - Charts filter to only plot explicitly configured series when series are defined via `.Line()`, `.Bar()`, or `.Area()` methods
 - Falls back to auto-discovery behavior when no series are configured
 - Fixed case-insensitive dataKey matching for AreaChart series configuration
@@ -847,6 +814,7 @@ This ensures your chart configurations are respected and prevents unwanted data 
 Fixed a layout bug in the **BladeHeader** where content without explicit width would collapse and become invisible. The slot container inside BladeHeader had no flex or grow properties, causing search inputs, titles, and other header content to disappear in certain layouts. The header slot now includes `flex-1 min-w-0` by default, ensuring content fills the available header space properly.
 
 **Before the fix:**
+
 ```csharp
 // Header content would collapse without explicit width
 var header = Layout.Horizontal().Gap(1)
@@ -855,6 +823,7 @@ var header = Layout.Horizontal().Gap(1)
 ```
 
 **After the fix:**
+
 ```csharp
 // Header content now renders correctly without needing .Width()
 var header = Layout.Horizontal().Gap(1)
