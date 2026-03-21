@@ -185,7 +185,6 @@ public class SmartSearchView : ViewBase
             : Text.Muted("Type to search or pick a suggestion above.");
 
         var overlayContent = Layout.Vertical().Gap(4)
-            | searchInput
             | overlayListOrPlaceholder;
 
         var footer = new DialogFooter(askButton);
@@ -209,6 +208,7 @@ public class SmartSearchView : ViewBase
             baseSlots.Add(new Slot(
                 "OverlayPanel",
                 new DialogHeader("Search"),
+                (Layout.Vertical().Padding(4) | searchInput),
                 new DialogBody(overlayContent),
                 footer));
             return new SmartSearch(baseSlots.ToArray());

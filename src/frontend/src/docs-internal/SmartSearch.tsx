@@ -303,7 +303,9 @@ export const SmartSearch: React.FC<SmartSearchProps> = ({
             }}
             className={cn("alert-animate-enter", "!top-4 sm:!top-8 !translate-y-0")}
           >
-            <div data-smart-search-list>{overlayPanel}</div>
+            <div data-smart-search-list className="flex flex-col flex-1 min-h-0">
+              {overlayPanel}
+            </div>
           </DialogContent>
         </Dialog>
       )}
