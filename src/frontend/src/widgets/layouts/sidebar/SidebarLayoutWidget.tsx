@@ -386,7 +386,7 @@ const CollapsibleMenuItem: React.FC<{
   if (item.children && item.children.length > 0) {
     return (
       <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
-        <li className="relative" ref={itemRef} data-menu-item={item.tag || item.label}>
+        <li className="relative" ref={itemRef} data-menu-item={item.tag || pathKey}>
           <CollapsibleTrigger asChild>
             <button
               className={cn(
@@ -427,7 +427,7 @@ const CollapsibleMenuItem: React.FC<{
     );
   } else {
     return (
-      <li key={item.label} ref={itemRef} data-menu-item={item.tag || item.label}>
+      <li key={item.label} ref={itemRef} data-menu-item={item.tag || pathKey}>
         <button
           className={cn(
             "flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
