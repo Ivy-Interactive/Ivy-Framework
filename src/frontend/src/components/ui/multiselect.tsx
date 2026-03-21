@@ -333,7 +333,14 @@ const MultipleSelector = React.forwardRef<
                     containerRef.current.scrollLeft = 0;
                   }
                 }}
-                onFocus={() => setOpen(true)}
+                onFocus={() => {
+                  setOpen(true);
+                  requestAnimationFrame(() => {
+                    if (containerRef.current) {
+                      containerRef.current.scrollLeft = 0;
+                    }
+                  });
+                }}
                 placeholder={
                   hidePlaceholderWhenSelected && value.length > 0 ? undefined : placeholder
                 }
