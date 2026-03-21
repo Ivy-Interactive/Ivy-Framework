@@ -25,9 +25,9 @@ var video = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
 
 ### SignatureInput Widget
 
-Ivy now includes a **SignatureInput** widget for capturing handwritten signatures directly in the browser. Perfect for delivery confirmations, contract signing, approval workflows, or any scenario requiring user signatures. The widget provides a canvas-based drawing interface with mouse and touch support, outputting PNG image data as a `byte[]`.
+Ivy now includes **SignatureInput** for handwritten signatures in the browser (delivery confirmations, contracts, approvals). Canvas drawing supports mouse and touch; data is **PNG** as `byte[]`. Use **`.WithField()`** / **`.Label()`** for forms and **`.Pen()`** / **`.PenThickness()`** (and optional background) to match your UI.
 
-**Basic usage:**
+**Note:** A built-in clear control appears once the user has drawn something. Forms can use disabled/invalid states like other inputs.
 
 ```csharp
 public class SignatureDemo : ViewBase
@@ -38,46 +38,17 @@ public class SignatureDemo : ViewBase
 
         return Layout.Vertical()
             | signature.ToSignatureInput()
-                .Placeholder("Draw your signature here")
-                .WithField()
-                .Label("Customer Signature")
+                .Placeholder("Draw your signature here")  // canvas hint
+                .Pen(Colors.Blue)  // pen color (e.g. Colors.Red)
+                .PenThickness(4)  // line width
+                .WithField()  // form integration
+                .Label("Customer Signature")  // field label
             | Text.P(signature.Value != null
                 ? $"Signature captured ({signature.Value.Length} bytes)"
-                : "No signature yet");
+                : "No signature yet");  // status
     }
 }
 ```
-
-**Customize pen appearance:**
-
-Control the pen color and thickness to match your application's style:
-
-```csharp
-var signature = UseState<byte[]?>(null);
-
-// Blue thick pen
-signature.ToSignatureInput()
-    .Pen(Colors.Blue)
-    .PenThickness(4)
-    .Placeholder("Sign here")
-
-// Red thin pen
-signature.ToSignatureInput()
-    .Pen(Colors.Red)
-    .PenThickness(1)
-    .Placeholder("Initial here")
-```
-
-**Features:**
-
-- **Canvas-based drawing** with smooth line rendering for mouse and touch input
-- **Automatic clear button** appears when a signature is present
-- **PNG output** as `byte[]` for easy storage and transmission
-- **State support** with disabled and invalid states for forms
-- **Form integration** works seamlessly with `WithField()` for labels and descriptions
-- **Customizable styling** including pen color, thickness, and background color
-
-The widget includes a built-in eraser/clear button that automatically appears when the user has drawn a signature, making it easy to start over without additional UI.
 
 ### GaugeChart Widget
 
