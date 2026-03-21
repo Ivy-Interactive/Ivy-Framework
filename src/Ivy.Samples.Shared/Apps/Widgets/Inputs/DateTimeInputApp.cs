@@ -6,7 +6,23 @@ public class DateTimeInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        // States for variants
+        return Layout.Vertical()
+            | Text.H1("DateTimeInput")
+            | Layout.Tabs(
+                new Tab("Variants", new DateTimeInputVariantSamples()),
+                new Tab("Size", new DateTimeInputSizeVariants()),
+                new Tab("Data Binding", new DateTimeInputDataBinding()),
+                new Tab("Placeholders", new DateTimeInputPlaceholderSamples()),
+                new Tab("First Day of Week", new DateTimeInputFirstDayOfWeekSamples()),
+                new Tab("Min / Max / Step", new DateTimeInputConstraintSamples())
+            ).Variant(TabsVariant.Content);
+    }
+}
+
+public class DateTimeInputVariantSamples : ViewBase
+{
+    public override object? Build()
+    {
         var dateState = UseState(DateTime.Now);
         var dateTimeState = UseState(DateTime.Now);
         var timeState = UseState(TimeOnly.FromDateTime(DateTime.Now));
@@ -16,155 +32,8 @@ public class DateTimeInputApp : SampleBase
         var nullableDateState = UseState<DateTime?>(() => null);
         var invalidDateState = UseState(DateTime.Now);
         var disabledDateState = UseState(DateTime.Now);
-
-        // States for data binding
-        var dateOnlyState = UseState(DateOnly.FromDateTime(DateTime.Now));
-        var timeOnlyState = UseState(TimeOnly.FromDateTime(DateTime.Now));
-        var stringState = UseState(DateTime.Now.ToString("O"));
         var nullableTimeState = UseState<TimeOnly?>(() => null);
-        var nullableDateOnlyState = UseState<DateOnly?>(() => null);
-        var dateTimeOffsetState = UseState(DateTimeOffset.Now);
-        var nullableDateTimeOffsetState = UseState<DateTimeOffset?>(() => null);
 
-        // Min/Max/Step states
-        var constrainedDateState = UseState(DateTime.Now);
-        var appointmentState = UseState(DateTime.Now);
-        var timeSlotState = UseState(TimeOnly.FromDateTime(DateTime.Now));
-        var constrainedMonthState = UseState(new DateTime(DateTime.Now.Year, 6, 1));
-        var constrainedWeekState = UseState(DateTime.Now);
-        var constrainedYearState = UseState(new DateTime(DateTime.Now.Year, 1, 1));
-        var meetingSlotState = UseState(DateTime.Today.AddHours(10));
-        var lunchTimeState = UseState(new TimeOnly(12, 0));
-
-        // FirstDayOfWeek states
-        var mondayFirstDate = UseState(DateOnly.FromDateTime(DateTime.Now));
-        var mondayFirstRange = UseState<(DateOnly, DateOnly)>((DateOnly.FromDateTime(DateTime.Now.AddDays(-7)), DateOnly.FromDateTime(DateTime.Now)));
-
-        // Size examples
-        var sizeExamplesGrid = Layout.Grid().Columns(7)
-            | Text.Monospaced("Size")
-            | Text.Monospaced("Date Input")
-            | Text.Monospaced("DateTime Input")
-            | Text.Monospaced("Time Input")
-            | Text.Monospaced("Month Input")
-            | Text.Monospaced("Week Input")
-            | Text.Monospaced("Year Input")
-
-            | Text.Monospaced("Small")
-            | dateState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Date)
-                .Small()
-                .Placeholder("Small date")
-                .TestId("datetime-input-date-small")
-            | dateTimeState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.DateTime)
-                .Small()
-                .Placeholder("Small datetime")
-                .TestId("datetime-input-datetime-small")
-            | timeState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Time)
-                .Small()
-                .Placeholder("Small time")
-                .TestId("datetime-input-time-small")
-            | monthState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Month)
-                .Small()
-                .Placeholder("Small month")
-                .TestId("datetime-input-month-small")
-            | weekState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Week)
-                .Small()
-                .Placeholder("Small week")
-                .TestId("datetime-input-week-small")
-            | yearState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Year)
-                .Small()
-                .Placeholder("Small year")
-                .TestId("datetime-input-year-small")
-
-            | Text.Monospaced("Medium")
-            | dateState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Date)
-                .Medium()
-                .Placeholder("Medium date")
-                .TestId("datetime-input-date-medium")
-            | dateTimeState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.DateTime)
-                .Medium()
-                .Placeholder("Medium datetime")
-                .TestId("datetime-input-datetime-medium")
-            | timeState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Time)
-                .Medium()
-                .Placeholder("Medium time")
-                .TestId("datetime-input-time-medium")
-            | monthState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Month)
-                .Medium()
-                .Placeholder("Medium month")
-                .TestId("datetime-input-month-medium")
-            | weekState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Week)
-                .Medium()
-                .Placeholder("Medium week")
-                .TestId("datetime-input-week-medium")
-            | yearState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Year)
-                .Medium()
-                .Placeholder("Medium year")
-                .TestId("datetime-input-year-medium")
-
-            | Text.Monospaced("Large")
-            | dateState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Date)
-                .Large()
-                .Placeholder("Large date")
-                .TestId("datetime-input-date-large")
-            | dateTimeState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.DateTime)
-                .Large()
-                .Placeholder("Large datetime")
-                .TestId("datetime-input-datetime-large")
-            | timeState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Time)
-                .Large()
-                .Placeholder("Large time")
-                .TestId("datetime-input-time-large")
-            | monthState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Month)
-                .Large()
-                .Placeholder("Large month")
-                .TestId("datetime-input-month-large")
-            | weekState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Week)
-                .Large()
-                .Placeholder("Large week")
-                .TestId("datetime-input-week-large")
-            | yearState
-                .ToDateTimeInput()
-                .Variant(DateTimeInputVariant.Year)
-                .Large()
-                .Placeholder("Large year")
-                .TestId("datetime-input-year-large");
-
-        // Variants grid
         var variantsGrid = Layout.Grid().Columns(6)
             | null!
             | Text.Monospaced("Normal")
@@ -353,7 +222,192 @@ public class DateTimeInputApp : SampleBase
                 .Invalid("Nullable invalid year")
                 .TestId("datetime-input-year-nullable-invalid-main");
 
-        // Data binding grid
+        var currentValues = Layout.Vertical()
+            | Text.H3("Current values (this tab)")
+            | Text.Block($"Date: {dateState.Value:yyyy-MM-dd}")
+            | Text.Block($"DateTime: {dateTimeState.Value:yyyy-MM-dd HH:mm:ss}")
+            | Text.Block($"Time: {timeState.Value:HH:mm:ss}")
+            | Text.Block($"Month: {monthState.Value:yyyy-MM}")
+            | Text.Block($"Week: {weekState.Value:yyyy-'W'ww}")
+            | Text.Block($"Year: {yearState.Value:yyyy}")
+            | Text.Block($"Nullable DateTime: {nullableDateState.Value?.ToString("yyyy-MM-dd HH:mm:ss") ?? "null"}");
+
+        return Layout.Vertical()
+            | Text.H2("Variants")
+            | Text.P("Normal, disabled, invalid, nullable, and nullable+invalid for each DateTimeInput variant.")
+            | variantsGrid
+            | currentValues;
+    }
+}
+
+public class DateTimeInputSizeVariants : ViewBase
+{
+    public override object? Build()
+    {
+        var dateState = UseState(DateTime.Now);
+        var dateTimeState = UseState(DateTime.Now);
+        var timeState = UseState(TimeOnly.FromDateTime(DateTime.Now));
+        var monthState = UseState(DateTime.Now);
+        var weekState = UseState(DateTime.Now);
+        var yearState = UseState(DateTime.Now);
+
+        var sizeExamplesGrid = Layout.Grid().Columns(7)
+            | Text.Monospaced("Size")
+            | Text.Monospaced("Date Input")
+            | Text.Monospaced("DateTime Input")
+            | Text.Monospaced("Time Input")
+            | Text.Monospaced("Month Input")
+            | Text.Monospaced("Week Input")
+            | Text.Monospaced("Year Input")
+
+            | Text.Monospaced("Small")
+            | dateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Date)
+                .Small()
+                .Placeholder("Small date")
+                .TestId("datetime-input-date-small")
+            | dateTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.DateTime)
+                .Small()
+                .Placeholder("Small datetime")
+                .TestId("datetime-input-datetime-small")
+            | timeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Time)
+                .Small()
+                .Placeholder("Small time")
+                .TestId("datetime-input-time-small")
+            | monthState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Month)
+                .Small()
+                .Placeholder("Small month")
+                .TestId("datetime-input-month-small")
+            | weekState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Week)
+                .Small()
+                .Placeholder("Small week")
+                .TestId("datetime-input-week-small")
+            | yearState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Year)
+                .Small()
+                .Placeholder("Small year")
+                .TestId("datetime-input-year-small")
+
+            | Text.Monospaced("Medium")
+            | dateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Date)
+                .Medium()
+                .Placeholder("Medium date")
+                .TestId("datetime-input-date-medium")
+            | dateTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.DateTime)
+                .Medium()
+                .Placeholder("Medium datetime")
+                .TestId("datetime-input-datetime-medium")
+            | timeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Time)
+                .Medium()
+                .Placeholder("Medium time")
+                .TestId("datetime-input-time-medium")
+            | monthState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Month)
+                .Medium()
+                .Placeholder("Medium month")
+                .TestId("datetime-input-month-medium")
+            | weekState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Week)
+                .Medium()
+                .Placeholder("Medium week")
+                .TestId("datetime-input-week-medium")
+            | yearState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Year)
+                .Medium()
+                .Placeholder("Medium year")
+                .TestId("datetime-input-year-medium")
+
+            | Text.Monospaced("Large")
+            | dateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Date)
+                .Large()
+                .Placeholder("Large date")
+                .TestId("datetime-input-date-large")
+            | dateTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.DateTime)
+                .Large()
+                .Placeholder("Large datetime")
+                .TestId("datetime-input-datetime-large")
+            | timeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Time)
+                .Large()
+                .Placeholder("Large time")
+                .TestId("datetime-input-time-large")
+            | monthState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Month)
+                .Large()
+                .Placeholder("Large month")
+                .TestId("datetime-input-month-large")
+            | weekState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Week)
+                .Large()
+                .Placeholder("Large week")
+                .TestId("datetime-input-week-large")
+            | yearState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputVariant.Year)
+                .Large()
+                .Placeholder("Large year")
+                .TestId("datetime-input-year-large");
+
+        var currentValues = Layout.Vertical()
+            | Text.H3("Current values (this tab)")
+            | Text.Block($"Date: {dateState.Value:yyyy-MM-dd}")
+            | Text.Block($"DateTime: {dateTimeState.Value:yyyy-MM-dd HH:mm:ss}")
+            | Text.Block($"Time: {timeState.Value:HH:mm:ss}")
+            | Text.Block($"Month: {monthState.Value:yyyy-MM}")
+            | Text.Block($"Week: {weekState.Value:yyyy-'W'ww}")
+            | Text.Block($"Year: {yearState.Value:yyyy}");
+
+        return Layout.Vertical()
+            | Text.H2("Size")
+            | Text.P("Small, Medium, and Large density for each variant.")
+            | sizeExamplesGrid
+            | currentValues;
+    }
+}
+
+public class DateTimeInputDataBinding : ViewBase
+{
+    public override object? Build()
+    {
+        var dateState = UseState(DateTime.Now);
+        var dateOnlyState = UseState(DateOnly.FromDateTime(DateTime.Now));
+        var timeOnlyState = UseState(TimeOnly.FromDateTime(DateTime.Now));
+        var stringState = UseState(DateTime.Now.ToString("O"));
+        var nullableDateState = UseState<DateTime?>(() => null);
+        var nullableTimeState = UseState<TimeOnly?>(() => null);
+        var nullableDateOnlyState = UseState<DateOnly?>(() => null);
+        var dateTimeOffsetState = UseState(DateTimeOffset.Now);
+        var nullableDateTimeOffsetState = UseState<DateTimeOffset?>(() => null);
+        var monthState = UseState(DateTime.Now);
+        var weekState = UseState(DateTime.Now);
+        var yearState = UseState(DateTime.Now);
+
         var dataBindingGrid = Layout.Grid().Columns(3)
             | Text.Monospaced("Type")
             | Text.Monospaced("Input")
@@ -434,10 +488,23 @@ public class DateTimeInputApp : SampleBase
             | yearState
                 .ToDateTimeInput()
                 .Variant(DateTimeInputVariant.Year)
-            .TestId("datetime-input-year-binding")
+                .TestId("datetime-input-year-binding")
             | Text.Monospaced($"{yearState.Value:yyyy}");
 
-        // Placeholder examples
+        return Layout.Vertical()
+            | Text.H2("Data binding")
+            | Text.P("DateTimeInput bound to different CLR types.")
+            | dataBindingGrid;
+    }
+}
+
+public class DateTimeInputPlaceholderSamples : ViewBase
+{
+    public override object? Build()
+    {
+        var nullableDateState = UseState<DateTime?>(() => null);
+        var nullableTimeState = UseState<TimeOnly?>(() => null);
+
         var placeholderExamplesGrid = Layout.Grid().Columns(3)
             | Text.Monospaced("Variant")
             | Text.Monospaced("Placeholder Text")
@@ -515,6 +582,20 @@ public class DateTimeInputApp : SampleBase
                 .Placeholder("Fiscal year")
                 .TestId("datetime-input-placeholder-year");
 
+        return Layout.Vertical()
+            | Text.H2("Placeholders")
+            | Text.P("Placeholder copy per variant.")
+            | placeholderExamplesGrid;
+    }
+}
+
+public class DateTimeInputFirstDayOfWeekSamples : ViewBase
+{
+    public override object? Build()
+    {
+        var mondayFirstDate = UseState(DateOnly.FromDateTime(DateTime.Now));
+        var mondayFirstRange = UseState<(DateOnly, DateOnly)>((DateOnly.FromDateTime(DateTime.Now.AddDays(-7)), DateOnly.FromDateTime(DateTime.Now)));
+
         var firstDayOfWeekGrid = Layout.Grid().Columns(2)
             | Text.Monospaced("Monday-first DateInput")
             | mondayFirstDate
@@ -527,34 +608,26 @@ public class DateTimeInputApp : SampleBase
                 .FirstDayOfWeek(DayOfWeek.Monday)
                 .TestId("daterange-input-monday-first");
 
-        // Current values section
-        var currentValues = Layout.Vertical()
-            | Text.H3("Current Values")
-            | Text.Block($"Date: {dateState.Value:yyyy-MM-dd}")
-            | Text.Block($"DateTime: {dateTimeState.Value:yyyy-MM-dd HH:mm:ss}")
-            | Text.Block($"Time: {timeState.Value:HH:mm:ss}")
-            | Text.Block($"Month: {monthState.Value:yyyy-MM}")
-            | Text.Block($"Week: {weekState.Value:yyyy-'W'ww}")
-            | Text.Block($"Year: {yearState.Value:yyyy}")
-            | Text.Block($"Nullable DateTime: {nullableDateState.Value?.ToString("yyyy-MM-dd HH:mm:ss") ?? "null"}")
-            | Text.Block($"DateOnly: {dateOnlyState.Value:yyyy-MM-dd}")
-            | Text.Block($"TimeOnly: {timeOnlyState.Value:HH:mm:ss}")
-            | Text.Block($"string: {stringState.Value}")
-            | Text.Block($"Nullable DateOnly: {nullableDateOnlyState.Value?.ToString("yyyy-MM-dd") ?? "null"}")
-            | Text.Block($"Nullable TimeOnly: {nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null"}")
-            | Text.Block($"DateTimeOffset: {dateTimeOffsetState.Value:yyyy-MM-dd HH:mm:ss zzz}")
-            | Text.Block($"Nullable DateTimeOffset: {nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null"}")
-            | Text.H3("Min/Max/Step sample values")
-            | Text.Block($"Date (today..+90d): {constrainedDateState.Value:yyyy-MM-dd}")
-            | Text.Block($"Business hours DateTime: {appointmentState.Value:yyyy-MM-dd HH:mm}")
-            | Text.Block($"Time slot (15m step): {timeSlotState.Value:HH:mm}")
-            | Text.Block($"Month (in calendar year): {constrainedMonthState.Value:yyyy-MM}")
-            | Text.Block($"Week (±6 months): {constrainedWeekState.Value:yyyy-'W'ww}")
-            | Text.Block($"Year (2020-2035): {constrainedYearState.Value:yyyy}")
-            | Text.Block($"Meeting (30m step, 9-5): {meetingSlotState.Value:yyyy-MM-dd HH:mm}")
-            | Text.Block($"Lunch time (11:30-13:30, 15m): {lunchTimeState.Value:HH:mm}");
+        return Layout.Vertical()
+            | Text.H2("First day of week")
+            | Text.P("Calendar week starts on Monday for date and range pickers.")
+            | firstDayOfWeekGrid;
+    }
+}
 
-        // Min/Max/Step examples
+public class DateTimeInputConstraintSamples : ViewBase
+{
+    public override object? Build()
+    {
+        var constrainedDateState = UseState(DateTime.Now);
+        var appointmentState = UseState(DateTime.Now);
+        var timeSlotState = UseState(TimeOnly.FromDateTime(DateTime.Now));
+        var constrainedMonthState = UseState(new DateTime(DateTime.Now.Year, 6, 1));
+        var constrainedWeekState = UseState(DateTime.Now);
+        var constrainedYearState = UseState(new DateTime(DateTime.Now.Year, 1, 1));
+        var meetingSlotState = UseState(DateTime.Today.AddHours(10));
+        var lunchTimeState = UseState(new TimeOnly(12, 0));
+
         var constraintsGrid = Layout.Grid().Columns(3)
             | Text.Monospaced("Constraint Type")
             | Text.Monospaced("Configuration")
@@ -633,20 +706,21 @@ public class DateTimeInputApp : SampleBase
                 .Placeholder("Pick lunch time")
                 .TestId("datetime-input-lunch-time");
 
+        var sampleValues = Layout.Vertical()
+            | Text.H3("Current values (this tab)")
+            | Text.Block($"Date (today..+90d): {constrainedDateState.Value:yyyy-MM-dd}")
+            | Text.Block($"Business hours DateTime: {appointmentState.Value:yyyy-MM-dd HH:mm}")
+            | Text.Block($"Time slot (15m step): {timeSlotState.Value:HH:mm}")
+            | Text.Block($"Month (in calendar year): {constrainedMonthState.Value:yyyy-MM}")
+            | Text.Block($"Week (±6 months): {constrainedWeekState.Value:yyyy-'W'ww}")
+            | Text.Block($"Year (2020-2035): {constrainedYearState.Value:yyyy}")
+            | Text.Block($"Meeting (30m step, 9-5): {meetingSlotState.Value:yyyy-MM-dd HH:mm}")
+            | Text.Block($"Lunch time (11:30-13:30, 15m): {lunchTimeState.Value:HH:mm}");
+
         return Layout.Vertical()
-            | Text.H1("DateTimeInput")
-            | Text.H2("Size Examples")
-            | sizeExamplesGrid
-            | Text.H2("Variants")
-            | variantsGrid
-            | Text.H2("Data Binding")
-            | dataBindingGrid
-            | Text.H2("Placeholder Examples")
-            | placeholderExamplesGrid
-            | Text.H2("FirstDayOfWeek")
-            | firstDayOfWeekGrid
-            | Text.H2("Min/Max/Step Constraints")
+            | Text.H2("Min / max / step")
+            | Text.P("Range and stepping constraints across date, time, and calendar variants.")
             | constraintsGrid
-            | currentValues;
+            | sampleValues;
     }
 }
