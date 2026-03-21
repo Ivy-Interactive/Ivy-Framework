@@ -12,6 +12,12 @@ import {
 } from '@/components/ui/input/date-time-input-variant';
 import { TimeVariantProps } from './types';
 import { ClearAndInvalidIcons } from './shared';
+import {
+  formatSecondsToHms,
+  parseLocalTimeToSeconds,
+  parseTimeSpanStepToSeconds,
+  snapLocalTimeSeconds,
+} from './timeStepSnap';
 
 export const TimeVariant: React.FC<TimeVariantProps> = ({
   value,
@@ -74,17 +80,10 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     }
   }, [value, nullable]);
 
-  const timeStepSeconds = useMemo(() => {
-    if (!step) return 1;
-    const parts = step.split(':');
-    if (parts.length >= 3) {
-      const h = parseInt(parts[0], 10) || 0;
-      const m = parseInt(parts[1], 10) || 0;
-      const s = parseFloat(parts[2]) || 0;
-      return h * 3600 + m * 60 + s;
-    }
-    return 1;
-  }, [step]);
+  const timeStepSeconds = useMemo(
+    () => parseTimeSpanStepToSeconds(step),
+    [step]
+  );
 
   const timeMin = useMemo(() => {
     if (!min) return undefined;
@@ -124,19 +123,42 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     []
   );
 
+  const commitSnappedTime = useCallback(() => {
+    const stepSec = parseTimeSpanStepToSeconds(step);
+    if (nullable && localTimeValue.trim() === '') {
+      onTimeChange('');
+      return;
+    }
+    const parsed = parseLocalTimeToSeconds(localTimeValue);
+    if (parsed === null) {
+      onTimeChange(localTimeValue);
+      return;
+    }
+
+    const minSec = timeMin
+      ? (parseLocalTimeToSeconds(timeMin) ?? undefined)
+      : undefined;
+    const maxSec = timeMax
+      ? (parseLocalTimeToSeconds(timeMax) ?? undefined)
+      : undefined;
+    const snapped = snapLocalTimeSeconds(parsed, stepSec, minSec, maxSec);
+    const out = formatSecondsToHms(snapped);
+    setLocalTimeValue(out);
+    onTimeChange(out);
+  }, [step, nullable, localTimeValue, timeMin, timeMax, onTimeChange]);
+
   const handleTimeBlur = useCallback(() => {
-    // When input loses focus, update the parent
-    onTimeChange(localTimeValue);
-  }, [localTimeValue, onTimeChange]);
+    commitSnappedTime();
+  }, [commitSnappedTime]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      // When user presses Enter, update the parent
       if (e.key === 'Enter') {
-        onTimeChange(localTimeValue);
+        e.preventDefault();
+        e.currentTarget.blur();
       }
     },
-    [localTimeValue, onTimeChange]
+    []
   );
 
   return (

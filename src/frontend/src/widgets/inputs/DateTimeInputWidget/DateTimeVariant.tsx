@@ -20,6 +20,12 @@ import {
 } from '@/components/ui/input/date-time-input-variant';
 import { DateTimeVariantProps } from './types';
 import { ClearAndInvalidIcons } from './shared';
+import {
+  formatSecondsToHms,
+  parseLocalTimeToSeconds,
+  parseTimeSpanStepToSeconds,
+  snapLocalTimeSeconds,
+} from './timeStepSnap';
 
 export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   value,
@@ -50,17 +56,32 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     return matchers;
   }, [minDate, maxDate]);
 
-  const timeStepSeconds = useMemo(() => {
-    if (!step) return 1;
-    const parts = step.split(':');
-    if (parts.length >= 3) {
-      const h = parseInt(parts[0], 10) || 0;
-      const m = parseInt(parts[1], 10) || 0;
-      const s = parseFloat(parts[2]) || 0;
-      return h * 3600 + m * 60 + s;
+  const timeStepSeconds = useMemo(
+    () => parseTimeSpanStepToSeconds(step),
+    [step]
+  );
+
+  const timeMin = useMemo(() => {
+    if (!min) return undefined;
+    try {
+      const d = new Date(min);
+      if (!isNaN(d.getTime())) return format(d, 'HH:mm:ss');
+    } catch {
+      /* ignore */
     }
-    return 1;
-  }, [step]);
+    return undefined;
+  }, [min]);
+
+  const timeMax = useMemo(() => {
+    if (!max) return undefined;
+    try {
+      const d = new Date(max);
+      if (!isNaN(d.getTime())) return format(d, 'HH:mm:ss');
+    } catch {
+      /* ignore */
+    }
+    return undefined;
+  }, [max]);
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -123,49 +144,63 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     []
   );
 
-  const handleTimeBlur = useCallback(() => {
-    setIsEditingTime(false);
-    // When time input loses focus, update the parent
-    if (date && localTimeValue) {
-      const [hours, minutes, seconds] = localTimeValue.split(':').map(Number);
+  const commitSnappedTime = useCallback(() => {
+    const trimmed = localTimeValue.trim();
+    const stepSec = parseTimeSpanStepToSeconds(step);
+    const parsed = parseLocalTimeToSeconds(trimmed);
+    if (parsed === null) {
+      onTimeChange(trimmed);
+      return;
+    }
+
+    const minSec = timeMin
+      ? (parseLocalTimeToSeconds(timeMin) ?? undefined)
+      : undefined;
+    const maxSec = timeMax
+      ? (parseLocalTimeToSeconds(timeMax) ?? undefined)
+      : undefined;
+    const snapped = snapLocalTimeSeconds(parsed, stepSec, minSec, maxSec);
+    const out = formatSecondsToHms(snapped);
+    setLocalTimeValue(out);
+
+    const [hours, minutes, seconds] = out.split(':').map(Number);
+    if (date) {
       const newDateTime = new Date(date);
       newDateTime.setHours(hours, minutes, seconds);
       onDateChange(newDateTime);
-    } else if (localTimeValue) {
-      // If no date is selected, create a new date with the selected time
-      const [hours, minutes, seconds] = localTimeValue.split(':').map(Number);
+    } else {
       const newDateTime = new Date();
       newDateTime.setHours(hours, minutes, seconds);
       onDateChange(newDateTime);
     }
-    onTimeChange(localTimeValue);
-  }, [date, localTimeValue, onDateChange, onTimeChange]);
+    onTimeChange(out);
+  }, [
+    localTimeValue,
+    step,
+    timeMin,
+    timeMax,
+    date,
+    onDateChange,
+    onTimeChange,
+  ]);
+
+  const handleTimeBlur = useCallback(() => {
+    setIsEditingTime(false);
+    if (!localTimeValue?.trim()) {
+      onTimeChange(localTimeValue ?? '');
+      return;
+    }
+    commitSnappedTime();
+  }, [localTimeValue, onTimeChange, commitSnappedTime]);
 
   const handleTimeKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      // When user presses Enter, update the parent
       if (e.key === 'Enter') {
-        setIsEditingTime(false);
-        if (date && localTimeValue) {
-          const [hours, minutes, seconds] = localTimeValue
-            .split(':')
-            .map(Number);
-          const newDateTime = new Date(date);
-          newDateTime.setHours(hours, minutes, seconds);
-          onDateChange(newDateTime);
-        } else if (localTimeValue) {
-          // If no date is selected, create a new date with the selected time
-          const [hours, minutes, seconds] = localTimeValue
-            .split(':')
-            .map(Number);
-          const newDateTime = new Date();
-          newDateTime.setHours(hours, minutes, seconds);
-          onDateChange(newDateTime);
-        }
-        onTimeChange(localTimeValue);
+        e.preventDefault();
+        e.currentTarget.blur();
       }
     },
-    [date, localTimeValue, onDateChange, onTimeChange]
+    []
   );
 
   const handleTimeFocus = useCallback(() => {
@@ -240,6 +275,8 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               <Input
                 type="time"
                 step={timeStepSeconds}
+                min={timeMin}
+                max={timeMax}
                 value={localTimeValue}
                 onChange={handleTimeChange}
                 onFocus={handleTimeFocus}
